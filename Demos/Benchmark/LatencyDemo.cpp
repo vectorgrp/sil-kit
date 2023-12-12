@@ -464,14 +464,14 @@ int main(int argc, char** argv)
     catch (const SilKit::ConfigurationError& error)
     {
         std::cerr << "Invalid configuration: " << error.what() << std::endl;
-        std::cout << "Press enter to stop the process..." << std::endl;
+        std::cout << "Press enter to end the process..." << std::endl;
         std::cin.ignore();
         return -2;
     }
     catch (const std::exception& error)
     {
         std::cerr << "Something went wrong: " << error.what() << std::endl;
-        std::cout << "Press enter to stop the process..." << std::endl;
+        std::cout << "Press enter to end the process..." << std::endl;
         std::cin.ignore();
         return -3;
     }

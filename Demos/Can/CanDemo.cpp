@@ -37,8 +37,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/services/can/string_utils.hpp"
 
 
-using namespace SilKit::Services;
+using namespace SilKit::Services::Orchestration;
 using namespace SilKit::Services::Can;
+using namespace SilKit::Services::Logging;
 
 using namespace std::chrono_literals;
 
@@ -53,7 +54,7 @@ std::ostream& operator<<(std::ostream& out, nanoseconds timestamp)
 } // namespace chrono
 } // namespace std
 
-void FrameTransmitHandler(const CanFrameTransmitEvent& ack, Logging::ILogger* logger)
+void FrameTransmitHandler(const CanFrameTransmitEvent& ack, ILogger* logger)
 {
     std::stringstream buffer;
     buffer << ">> " << ack.status
@@ -62,7 +63,7 @@ void FrameTransmitHandler(const CanFrameTransmitEvent& ack, Logging::ILogger* lo
     logger->Info(buffer.str());
 }
 
-void FrameHandler(const CanFrameEvent& frameEvent, Logging::ILogger* logger)
+void FrameHandler(const CanFrameEvent& frameEvent, ILogger* logger)
 {
     std::string payload(frameEvent.frame.dataField.begin(), frameEvent.frame.dataField.end());
     std::stringstream buffer;
@@ -72,7 +73,7 @@ void FrameHandler(const CanFrameEvent& frameEvent, Logging::ILogger* logger)
     logger->Info(buffer.str());
 }
 
-void SendFrame(ICanController* controller, Logging::ILogger* logger)
+void SendFrame(ICanController* controller, ILogger* logger)
 {
     CanFrame canFrame {};
     canFrame.canId = 3;
@@ -173,26 +174,23 @@ int main(int argc, char** argv)
                 FrameHandler(frameEvent, logger);
             });
 
-        auto operationMode = (
-            runSync ? SilKit::Services::Orchestration::OperationMode::Coordinated
-                : SilKit::Services::Orchestration::OperationMode::Autonomous
-        );
+        auto operationMode = (runSync ? OperationMode::Coordinated : OperationMode::Autonomous);
 
         auto* lifecycleService = participant->CreateLifecycleService({operationMode});
 
-        // Set a Stop Handler
+        // Observe state changes
         lifecycleService->SetStopHandler([]() {
             std::cout << "Stop handler called" << std::endl;
         });
-
-        // Set a Shutdown Handler
         lifecycleService->SetShutdownHandler([]() {
             std::cout << "Shutdown handler called" << std::endl;
+        });
+        lifecycleService->SetAbortHandler([](auto lastState) {
+            std::cout << "Abort handler called while in state " << lastState << std::endl;
         });
 
         if (runSync)
         {
-            // Set a CommunicationReady Handler
             lifecycleService->SetCommunicationReadyHandler([canController, &participantName]() {
                 std::cout << "Communication ready for " << participantName << std::endl;
                 canController->SetBaudRate(10'000, 1'000'000, 2'000'000);
@@ -224,32 +222,35 @@ int main(int argc, char** argv)
             auto finalState = finalStateFuture.get();
 
             std::cout << "Simulation stopped. Final State: " << finalState << std::endl;
-            std::cout << "Press enter to stop the process..." << std::endl;
+            std::cout << "Press enter to end the process..." << std::endl;
             std::cin.ignore();
         }
         else
         {
-            bool isStopped = false;
+            std::atomic<bool> isStopRequested = {false};
             std::thread workerThread;
 
             std::promise<void> promiseObj;
             std::future<void> futureObj = promiseObj.get_future();
-            // Set a CommunicationReady Handler
             lifecycleService->SetCommunicationReadyHandler([&]() {
                 std::cout << "Communication ready for " << participantName << std::endl;
                 canController->SetBaudRate(10'000, 1'000'000, 2'000'000);
 
                 workerThread = std::thread{[&]() {
                     futureObj.get();
-                    while (!isStopped)
+                    while (lifecycleService->State() == ParticipantState::ReadyToRun ||
+                           lifecycleService->State() == ParticipantState::Running)
                     {
                         if (participantName == "CanWriter")
                         {
                             SendFrame(canController, logger);
                         }
                         std::this_thread::sleep_for(sleepTimePerTick);
-                   }
-                   lifecycleService->Stop("User requested to Stop");
+                    }
+                    if (!isStopRequested)
+                    {
+                        std::cout << "Press enter to end the process..." << std::endl;
+                    }
                 }};
                 canController->Start();
             });
@@ -258,30 +259,36 @@ int main(int argc, char** argv)
                 promiseObj.set_value();
             });
 
-            auto futureLifecycleState = lifecycleService->StartLifecycle();
-            std::cout << "Press enter to stop the process..." << std::endl;
+            lifecycleService->StartLifecycle();
+            std::cout << "Press enter to leave the simulation..." << std::endl;
             std::cin.ignore();
 
-            isStopped = true;
+            isStopRequested = true;
+            if (lifecycleService->State() == ParticipantState::Running || 
+                lifecycleService->State() == ParticipantState::Paused)
+            {
+                std::cout << "User requested to stop in state " << lifecycleService->State() << std::endl;
+                lifecycleService->Stop("User requested to stop");
+            }
+
             if (workerThread.joinable())
             {
                 workerThread.join();
             }
-            auto finalState = futureLifecycleState.get();
-            std::cout << "Simulation stopped. Final state: " << finalState << std::endl;
+            std::cout << "The participant has shut down and left the simulation" << std::endl;
         }
     }
     catch (const SilKit::ConfigurationError& error)
     {
         std::cerr << "Invalid configuration: " << error.what() << std::endl;
-        std::cout << "Press enter to stop the process..." << std::endl;
+        std::cout << "Press enter to end the process..." << std::endl;
         std::cin.ignore();
         return -2;
     }
     catch (const std::exception& error)
     {
         std::cerr << "Something went wrong: " << error.what() << std::endl;
-        std::cout << "Press enter to stop the process..." << std::endl;
+        std::cout << "Press enter to end the process..." << std::endl;
         std::cin.ignore();
         return -3;
     }

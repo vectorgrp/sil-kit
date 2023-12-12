@@ -33,8 +33,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/services/flexray/all.hpp"
 #include "silkit/services/flexray/string_utils.hpp"
 
-using namespace SilKit::Services;
-using namespace SilKit::Util;
+using namespace SilKit::Services::Orchestration;
+using namespace SilKit::Services::Flexray;
 
 using namespace std::chrono_literals;
 using namespace std::placeholders;
@@ -47,18 +47,18 @@ std::ostream& operator<<(std::ostream& out, std::chrono::nanoseconds timestamp)
 }
 
 template<typename T>
-void ReceiveMessage(Flexray::IFlexrayController* /*controller*/, const T& t)
+void ReceiveMessage(IFlexrayController* /*controller*/, const T& t)
 {
     std::cout << ">> " << t << "\n";
 }
 
 struct FlexrayNode
 {
-    FlexrayNode(Flexray::IFlexrayController* controller, Flexray::FlexrayControllerConfig config)
+    FlexrayNode(IFlexrayController* controller, FlexrayControllerConfig config)
         : controller{controller}
         , controllerConfig{std::move(config)}
     {
-      oldPocStatus.state = Flexray::FlexrayPocState::DefaultConfig;
+      oldPocStatus.state = FlexrayPocState::DefaultConfig;
     }
 
     void SetStartupDelay(std::chrono::nanoseconds delay)
@@ -81,11 +81,11 @@ struct FlexrayNode
             return;
         switch (oldPocStatus.state)
         {
-        case Flexray::FlexrayPocState::DefaultConfig:
+        case FlexrayPocState::DefaultConfig:
             Init();
-        case Flexray::FlexrayPocState::Ready:
+        case FlexrayPocState::Ready:
             return pocReady(now);
-        case Flexray::FlexrayPocState::NormalActive:
+        case FlexrayPocState::NormalActive:
             if (now == 100ms + std::chrono::duration_cast<std::chrono::milliseconds>(_startupDelay))
             {
                 return ReconfigureTxBuffers();
@@ -94,11 +94,11 @@ struct FlexrayNode
             {
                 return txBufferUpdate(now);
             }
-        case Flexray::FlexrayPocState::Config:
-        case Flexray::FlexrayPocState::Startup:
-        case Flexray::FlexrayPocState::Wakeup:
-        case Flexray::FlexrayPocState::NormalPassive:
-        case Flexray::FlexrayPocState::Halt:
+        case FlexrayPocState::Config:
+        case FlexrayPocState::Startup:
+        case FlexrayPocState::Wakeup:
+        case FlexrayPocState::NormalPassive:
+        case FlexrayPocState::Halt:
             return;
         }
     }
@@ -142,7 +142,7 @@ struct FlexrayNode
 
         std::copy(payloadString.begin(), payloadString.end(), payloadBytes.begin());
 
-        Flexray::FlexrayTxBufferUpdate update;
+        FlexrayTxBufferUpdate update;
         update.payload = payloadBytes;
         update.payloadDataValid = true;
         update.txBufferIndex = static_cast<decltype(update.txBufferIndex)>(bufferIdx);
@@ -159,12 +159,12 @@ struct FlexrayNode
             auto&& bufferConfig = controllerConfig.bufferConfigs[idx];
             switch (bufferConfig.channels)
             {
-            case Flexray::FlexrayChannel::A:
-                bufferConfig.channels = Flexray::FlexrayChannel::B;
+            case FlexrayChannel::A:
+                bufferConfig.channels = FlexrayChannel::B;
                 controller->ReconfigureTxBuffer(idx, bufferConfig);
                 break;
-            case Flexray::FlexrayChannel::B:
-                bufferConfig.channels = Flexray::FlexrayChannel::A;
+            case FlexrayChannel::B:
+                bufferConfig.channels = FlexrayChannel::A;
                 controller->ReconfigureTxBuffer(idx, bufferConfig);
                 break;
             default:
@@ -173,7 +173,7 @@ struct FlexrayNode
         }
     }
 
-    void PocStatusHandler(Flexray::IFlexrayController* /*controller*/, const Flexray::FlexrayPocStatusEvent& pocStatus)
+    void PocStatusHandler(IFlexrayController* /*controller*/, const FlexrayPocStatusEvent& pocStatus)
     {
         std::cout << ">> POC=" << pocStatus.state
                   << ", Freeze=" <<  pocStatus.freeze
@@ -182,8 +182,8 @@ struct FlexrayNode
                   << " @t=" << pocStatus.timestamp
                   << std::endl;
 
-        if (oldPocStatus.state == Flexray::FlexrayPocState::Wakeup
-            && pocStatus.state == Flexray::FlexrayPocState::Ready)
+        if (oldPocStatus.state == FlexrayPocState::Wakeup
+            && pocStatus.state == FlexrayPocState::Ready)
         {
             std::cout << "   Wakeup finished..." << std::endl;
             busState = MasterState::WakeupDone;
@@ -192,7 +192,7 @@ struct FlexrayNode
         oldPocStatus = pocStatus;
     }
 
-    void WakeupHandler(Flexray::IFlexrayController* frController, const Flexray::FlexrayWakeupEvent& flexrayWakeupEvent)
+    void WakeupHandler(IFlexrayController* frController, const FlexrayWakeupEvent& flexrayWakeupEvent)
     {
         std::cout << ">> WAKEUP! (" << flexrayWakeupEvent.pattern << ")" << std::endl;
         frController->AllowColdstart();
@@ -200,10 +200,10 @@ struct FlexrayNode
     }
 
 
-    Flexray::IFlexrayController* controller = nullptr;
+    IFlexrayController* controller = nullptr;
 
-    Flexray::FlexrayControllerConfig controllerConfig;
-    Flexray::FlexrayPocStatusEvent oldPocStatus{};
+    FlexrayControllerConfig controllerConfig;
+    FlexrayPocStatusEvent oldPocStatus{};
     bool _configureCalled = false;
     std::chrono::nanoseconds _startupDelay = 0ns;
 
@@ -218,12 +218,12 @@ struct FlexrayNode
 };
 
 
-auto MakeNodeParams(const std::string& participantName) -> SilKit::Services::Flexray::FlexrayNodeParameters
+auto MakeNodeParams(const std::string& participantName) -> FlexrayNodeParameters
 {
-    SilKit::Services::Flexray::FlexrayNodeParameters nodeParams;
+    FlexrayNodeParameters nodeParams;
     nodeParams.pAllowHaltDueToClock = 1;
     nodeParams.pAllowPassiveToActive = 0;
-    nodeParams.pChannels = Flexray::FlexrayChannel::AB;
+    nodeParams.pChannels = FlexrayChannel::AB;
     nodeParams.pClusterDriftDamping = 2;
     nodeParams.pdAcceptedStartupRange = 212;
     nodeParams.pdListenTimeout = 400162;
@@ -239,9 +239,9 @@ auto MakeNodeParams(const std::string& participantName) -> SilKit::Services::Fle
     nodeParams.pOffsetCorrectionOut = 127;
     nodeParams.pOffsetCorrectionStart = 3632;
     nodeParams.pRateCorrectionOut = 81;
-    nodeParams.pWakeupChannel = Flexray::FlexrayChannel::A;
+    nodeParams.pWakeupChannel = FlexrayChannel::A;
     nodeParams.pWakeupPattern = 33;
-    nodeParams.pdMicrotick = Flexray::FlexrayClockPeriod::T25NS;
+    nodeParams.pdMicrotick = FlexrayClockPeriod::T25NS;
     nodeParams.pSamplesPerMicrotick = 2;
 
     if (participantName == "Node0")
@@ -266,7 +266,7 @@ auto MakeNodeParams(const std::string& participantName) -> SilKit::Services::Fle
 
 int main(int argc, char** argv)
 {
-    SilKit::Services::Flexray::FlexrayClusterParameters clusterParams;
+    FlexrayClusterParameters clusterParams;
     clusterParams.gColdstartAttempts = 8;
     clusterParams.gCycleCountMax = 63;
     clusterParams.gdActionPointOffset = 2;
@@ -313,55 +313,55 @@ int main(int argc, char** argv)
         auto participant = SilKit::CreateParticipant(participantConfiguration, participantName, registryUri);
         auto* controller = participant->CreateFlexrayController("FlexRay1", "PowerTrain1");
         auto* lifecycleService =
-            participant->CreateLifecycleService({SilKit::Services::Orchestration::OperationMode::Coordinated});
+            participant->CreateLifecycleService({OperationMode::Coordinated});
         auto* timeSyncService = lifecycleService->CreateTimeSyncService();
 
-        std::vector<Flexray::FlexrayTxBufferConfig> bufferConfigs;
+        std::vector<FlexrayTxBufferConfig> bufferConfigs;
 
         if (participantName == "Node0")
         {
             // initialize bufferConfig to send some FrMessages
-            Flexray::FlexrayTxBufferConfig cfg;
-            cfg.channels = Flexray::FlexrayChannel::AB;
+            FlexrayTxBufferConfig cfg;
+            cfg.channels = FlexrayChannel::AB;
             cfg.slotId = 40;
             cfg.offset = 0;
             cfg.repetition = 1;
             cfg.hasPayloadPreambleIndicator = false;
             cfg.headerCrc = 5;
-            cfg.transmissionMode = Flexray::FlexrayTransmissionMode::SingleShot;
+            cfg.transmissionMode = FlexrayTransmissionMode::SingleShot;
             bufferConfigs.push_back(cfg);
 
-            cfg.channels = Flexray::FlexrayChannel::A;
+            cfg.channels = FlexrayChannel::A;
             cfg.slotId = 41;
             bufferConfigs.push_back(cfg);
 
-            cfg.channels = Flexray::FlexrayChannel::B;
+            cfg.channels = FlexrayChannel::B;
             cfg.slotId = 42;
             bufferConfigs.push_back(cfg);
         }
         else if (participantName == "Node1")
         {
             // initialize bufferConfig to send some FrMessages
-            Flexray::FlexrayTxBufferConfig cfg;
-            cfg.channels = Flexray::FlexrayChannel::AB;
+            FlexrayTxBufferConfig cfg;
+            cfg.channels = FlexrayChannel::AB;
             cfg.slotId = 60;
             cfg.offset = 0;
             cfg.repetition = 1;
             cfg.hasPayloadPreambleIndicator = false;
             cfg.headerCrc = 5;
-            cfg.transmissionMode = Flexray::FlexrayTransmissionMode::SingleShot;
+            cfg.transmissionMode = FlexrayTransmissionMode::SingleShot;
             bufferConfigs.push_back(cfg);
 
-            cfg.channels = Flexray::FlexrayChannel::A;
+            cfg.channels = FlexrayChannel::A;
             cfg.slotId = 61;
             bufferConfigs.push_back(cfg);
 
-            cfg.channels = Flexray::FlexrayChannel::B;
+            cfg.channels = FlexrayChannel::B;
             cfg.slotId = 62;
             bufferConfigs.push_back(cfg);
         }
 
-        Flexray::FlexrayControllerConfig config;
+        FlexrayControllerConfig config;
         config.bufferConfigs = bufferConfigs;
 
         config.clusterParams = clusterParams;
@@ -385,19 +385,19 @@ int main(int argc, char** argv)
             return 1;
         }
 
-        controller->AddPocStatusHandler([&frNode](Flexray::IFlexrayController* linController,
-                                                  const Flexray::FlexrayPocStatusEvent& pocStatusEvent) {
+        controller->AddPocStatusHandler([&frNode](IFlexrayController* linController,
+                                                  const FlexrayPocStatusEvent& pocStatusEvent) {
             frNode.PocStatusHandler(linController, pocStatusEvent);
         });
-        controller->AddFrameHandler(&ReceiveMessage<Flexray::FlexrayFrameEvent>);
-        controller->AddFrameTransmitHandler(&ReceiveMessage<Flexray::FlexrayFrameTransmitEvent>);
-        controller->AddWakeupHandler([&frNode](Flexray::IFlexrayController* linController,
-                                               const Flexray::FlexrayWakeupEvent& wakeupEvent) {
+        controller->AddFrameHandler(&ReceiveMessage<FlexrayFrameEvent>);
+        controller->AddFrameTransmitHandler(&ReceiveMessage<FlexrayFrameTransmitEvent>);
+        controller->AddWakeupHandler([&frNode](IFlexrayController* linController,
+                                               const FlexrayWakeupEvent& wakeupEvent) {
                 frNode.WakeupHandler(linController, wakeupEvent);
         });
-        controller->AddSymbolHandler(&ReceiveMessage<Flexray::FlexraySymbolEvent>);
-        controller->AddSymbolTransmitHandler(&ReceiveMessage<Flexray::FlexraySymbolTransmitEvent>);
-        controller->AddCycleStartHandler(&ReceiveMessage<Flexray::FlexrayCycleStartEvent>);
+        controller->AddSymbolHandler(&ReceiveMessage<FlexraySymbolEvent>);
+        controller->AddSymbolTransmitHandler(&ReceiveMessage<FlexraySymbolTransmitEvent>);
+        controller->AddCycleStartHandler(&ReceiveMessage<FlexrayCycleStartEvent>);
 
         timeSyncService->SetSimulationStepHandler(
             [&frNode](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
@@ -409,24 +409,24 @@ int main(int argc, char** argv)
                 
         }, 1ms);
 
-        auto lifecycleFuture = lifecycleService->StartLifecycle();
-        auto finalState = lifecycleFuture.get();
+        auto finalStateFuture = lifecycleService->StartLifecycle();
+        auto finalState = finalStateFuture.get();
 
         std::cout << "Simulation stopped. Final State: " << finalState << std::endl;
-        std::cout << "Press enter to stop the process..." << std::endl;
+        std::cout << "Press enter to end the process..." << std::endl;
         std::cin.ignore();
     }
     catch (const SilKit::ConfigurationError& error)
     {
         std::cerr << "Invalid configuration: " << error.what() << std::endl;
-        std::cout << "Press enter to stop the process..." << std::endl;
+        std::cout << "Press enter to end the process..." << std::endl;
         std::cin.ignore();
         return -2;
     }
     catch (const std::exception& error)
     {
         std::cerr << "Something went wrong: " << error.what() << std::endl;
-        std::cout << "Press enter to stop the process..." << std::endl;
+        std::cout << "Press enter to end the process..." << std::endl;
         std::cin.ignore();
         return -3;
     }

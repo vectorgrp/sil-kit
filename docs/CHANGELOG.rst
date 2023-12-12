@@ -24,6 +24,15 @@ Changed
 - LIN Demo: Adapted the schedule of the LIN Master and disallowed sending while in wrong controller state.
 
 
+[4.0.42] - UNRELEASED
+---------------------
+
+Fixed
+~~~~~
+
+- Demos did not terminate when simulation is aborted (AbortSimulation)
+
+
 [4.0.41] - 2023-11-28
 ---------------------
 

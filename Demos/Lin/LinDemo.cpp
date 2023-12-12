@@ -30,9 +30,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/services/orchestration/all.hpp"
 #include "silkit/services/orchestration/string_utils.hpp"
 
-using namespace SilKit;
-
-using namespace SilKit::Services;
+using namespace SilKit::Services::Orchestration;
 using namespace SilKit::Services::Lin;
 
 using namespace std::chrono_literals;
@@ -324,7 +322,7 @@ public:
                   << "; Entering normal operation mode." << std::endl;
 
         // No need to set the controller status if we sent the wakeup
-        if (wakeupEvent.direction == TransmitDirection::RX)
+        if (wakeupEvent.direction == SilKit::Services::TransmitDirection::RX)
         {
             linController->WakeupInternal();
         }
@@ -335,7 +333,7 @@ private:
     std::chrono::nanoseconds now{0ns};
 };
 
-void InitLinMaster(SilKit::Services::Lin::ILinController* linController, std::string participantName)
+void InitLinMaster(ILinController* linController, std::string participantName)
 {
     std::cout << "Initializing " << participantName << std::endl;
 
@@ -345,7 +343,7 @@ void InitLinMaster(SilKit::Services::Lin::ILinController* linController, std::st
     linController->Init(config);
 }
 
-void InitLinSlave(SilKit::Services::Lin::ILinController* linController, std::string participantName)
+void InitLinSlave(ILinController* linController, std::string participantName)
 {
     std::cout << "Initializing " << participantName << std::endl;
 
@@ -411,7 +409,7 @@ int main(int argc, char** argv) try
     if (argc < 3)
     {
         std::cerr << "Missing arguments! Start demo with: " << argv[0]
-                  << " <ParticipantConfiguration.yaml|json> <ParticipantName> [RegistryUri]" << std::endl
+                  << " <ParticipantConfiguration.yaml|json> <ParticipantName> [RegistryUri] [--async]" << std::endl
                   << "Use \"LinMaster\" or \"LinSlave\" as <ParticipantName>." << std::endl;
         return -1;
     }
@@ -443,18 +441,20 @@ int main(int argc, char** argv) try
     std::cout << "Creating participant '" << participantName << "' with registry " << registryUri << std::endl;
     auto participant = SilKit::CreateParticipant(participantConfiguration, participantName, registryUri);
 
-    auto operationMode = (runSync ? SilKit::Services::Orchestration::OperationMode::Coordinated
-                          : SilKit::Services::Orchestration::OperationMode::Autonomous);
+    auto operationMode = (runSync ? OperationMode::Coordinated : OperationMode::Autonomous);
     auto* lifecycleService = participant->CreateLifecycleService({operationMode});
     auto* timeSyncService = (runSync ? lifecycleService->CreateTimeSyncService() : nullptr);
     auto* linController = participant->CreateLinController("LIN1", "LIN1");
 
-    // Set a Stop and Shutdown Handler
+    // Observe state changes
     lifecycleService->SetStopHandler([]() {
         std::cout << "Stop handler called" << std::endl;
     });
     lifecycleService->SetShutdownHandler([]() {
         std::cout << "Shutdown handler called" << std::endl;
+    });
+    lifecycleService->SetAbortHandler([](auto lastState) {
+        std::cout << "Abort handler called while in state " << lastState << std::endl;
     });
 
     LinMaster master{linController};
@@ -489,12 +489,12 @@ int main(int argc, char** argv) try
             auto lifecycleFuture = lifecycleService->StartLifecycle();
             auto finalState = lifecycleFuture.get();
             std::cout << "Simulation stopped. Final State: " << finalState << std::endl;
-            std::cout << "Press enter to stop the process..." << std::endl;
+            std::cout << "Press enter to end the process..." << std::endl;
             std::cin.ignore();
         }
         else
         {
-            bool isStopped = false;
+            std::atomic<bool> isStopRequested = {false};
             std::thread workerThread;
             auto now = 0ms;
 
@@ -505,13 +505,17 @@ int main(int argc, char** argv) try
                 InitLinMaster(linController, participantName);
                 workerThread = std::thread{[&]() {
                     startHandlerFuture.get();
-                    while (!isStopped)
+                    while (lifecycleService->State() == ParticipantState::ReadyToRun ||
+                           lifecycleService->State() == ParticipantState::Running)
                     {
                         master.DoAction(now);
                         now += 1ms;
                         std::this_thread::sleep_for(200ms);
                     }
-                    lifecycleService->Stop("User requested to Stop");
+                    if (!isStopRequested)
+                    {
+                        std::cout << "Press enter to end the process..." << std::endl;
+                    }
                 }};
             });
 
@@ -519,17 +523,23 @@ int main(int argc, char** argv) try
                 startHandlerPromise.set_value();
             });
 
-            auto finalStateFuture = lifecycleService->StartLifecycle();
-            std::cout << "Press enter to stop the process..." << std::endl;
+            lifecycleService->StartLifecycle();
+            std::cout << "Press enter to leave the simulation..." << std::endl;
             std::cin.ignore();
 
-            isStopped = true;
+            isStopRequested = true;
+            if (lifecycleService->State() == ParticipantState::Running || 
+                lifecycleService->State() == ParticipantState::Paused)
+            {
+                std::cout << "User requested to stop in state " << lifecycleService->State() << std::endl;
+                lifecycleService->Stop("User requested to stop");
+            }
+
             if (workerThread.joinable())
             {
                 workerThread.join();
             }
-            auto finalState = finalStateFuture.get();
-            std::cout << "Simulation stopped. Final State: " << finalState << std::endl;
+            std::cout << "The participant has shut down and left the simulation" << std::endl;
         }
     }
     else if (participantName == "LinSlave")
@@ -561,16 +571,16 @@ int main(int argc, char** argv) try
                 },
                 1ms);
 
-            auto lifecycleFuture = lifecycleService->StartLifecycle();
-            auto finalState = lifecycleFuture.get();
+            auto finalStateFuture = lifecycleService->StartLifecycle();
+            auto finalState = finalStateFuture.get();
             std::cout << "Simulation stopped. Final State: " << finalState << std::endl;
 
-            std::cout << "Press enter to stop the process..." << std::endl;
+            std::cout << "Press enter to end the process..." << std::endl;
             std::cin.ignore();
         }
         else
         {
-            bool isStopped = false;
+            std::atomic<bool> isStopRequested = {false};
             std::thread workerThread;
             auto now = 0ms;
             std::promise<void> startHandlerPromise;
@@ -580,31 +590,42 @@ int main(int argc, char** argv) try
                 InitLinSlave(linController, participantName);
                 workerThread = std::thread{[&]() {
                     startHandlerFuture.get();
-                    while (!isStopped)
+                    while (lifecycleService->State() == ParticipantState::ReadyToRun ||
+                           lifecycleService->State() == ParticipantState::Running)
                     {
                         slave.DoAction(now);
                         now += 1ms;
                         std::this_thread::sleep_for(200ms);
                     }
-                    lifecycleService->Stop("User requested to Stop");
+                    if (!isStopRequested)
+                    {
+                        std::cout << "Press enter to end the process..." << std::endl;
+                    }
                 }};
             });
 
+            lifecycleService->StartLifecycle();
             lifecycleService->SetStartingHandler([&]() {
                 startHandlerPromise.set_value();
             });
 
-            auto finalStateFuture = lifecycleService->StartLifecycle();
-            std::cout << "Press enter to stop the process..." << std::endl;
+            lifecycleService->StartLifecycle();
+            std::cout << "Press enter to leave the simulation..." << std::endl;
             std::cin.ignore();
 
-            isStopped = true;
+            isStopRequested = true;
+            if (lifecycleService->State() == ParticipantState::Running || 
+                lifecycleService->State() == ParticipantState::Paused)
+            {
+                std::cout << "User requested to stop in state " << lifecycleService->State() << std::endl;
+                lifecycleService->Stop("User requested to stop");
+            }
+
             if (workerThread.joinable())
             {
                 workerThread.join();
             }
-            auto finalState = finalStateFuture.get();
-            std::cout << "Simulation stopped. Final State: " << finalState << std::endl;
+            std::cout << "The participant has shut down and left the simulation" << std::endl;
         }
     }
     else
@@ -620,14 +641,14 @@ int main(int argc, char** argv) try
 catch (const SilKit::ConfigurationError& error)
 {
     std::cerr << "Invalid configuration: " << error.what() << std::endl;
-    std::cout << "Press enter to stop the process..." << std::endl;
+    std::cout << "Press enter to end the process..." << std::endl;
     std::cin.ignore();
     return -2;
 }
 catch (const std::exception& error)
 {
     std::cerr << "Something went wrong: " << error.what() << std::endl;
-    std::cout << "Press enter to stop the process..." << std::endl;
+    std::cout << "Press enter to end the process..." << std::endl;
     std::cin.ignore();
     return -3;
 }

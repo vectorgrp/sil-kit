@@ -33,7 +33,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/util/serdes/Serialization.hpp"
 
 
+using namespace SilKit::Services::Orchestration;
 using namespace SilKit::Services::Rpc;
+
 using namespace std::chrono_literals;
 
 // An incrementing call counter, that is used to identify the calls of the different clients
@@ -173,8 +175,8 @@ int main(int argc, char** argv)
     }
 
     std::string mediaType{SilKit::Util::SerDes::MediaTypeRpc()};
-    SilKit::Services::Rpc::RpcSpec rpcSpecAdd100{"Add100", mediaType};
-    SilKit::Services::Rpc::RpcSpec rpcSpecSort{"Sort", mediaType};
+    RpcSpec rpcSpecAdd100{"Add100", mediaType};
+    RpcSpec rpcSpecSort{"Sort", mediaType};
 
     try
     {
@@ -203,14 +205,18 @@ int main(int argc, char** argv)
         std::cout << "Creating participant '" << participantName << "' with registry " << registryUri << std::endl;
         auto participant = SilKit::CreateParticipant(participantConfiguration, participantName, registryUri);
 
-        auto operationMode = (runSync ? SilKit::Services::Orchestration::OperationMode::Coordinated
-                              : SilKit::Services::Orchestration::OperationMode::Autonomous);
+        auto operationMode = (runSync ? OperationMode::Coordinated : OperationMode::Autonomous);
         auto* lifecycleService = participant->CreateLifecycleService({operationMode});
+
+        // Observe state changes
         lifecycleService->SetStopHandler([]() {
             std::cout << "Stop handler called" << std::endl;
         });
         lifecycleService->SetShutdownHandler([]() {
             std::cout << "Shutdown handler called" << std::endl;
+        });
+        lifecycleService->SetAbortHandler([](auto lastState) {
+            std::cout << "Abort handler called while in state " << lastState << std::endl;
         });
 
         auto isClient = participantName == "Client";
@@ -260,23 +266,24 @@ int main(int argc, char** argv)
                     1s);
             }
 
-            auto lifecycleFuture = lifecycleService->StartLifecycle();
-            auto finalState = lifecycleFuture.get();
+            auto finalStateFuture = lifecycleService->StartLifecycle();
+            auto finalState = finalStateFuture.get();
 
             std::cout << "Simulation stopped. Final State: " << finalState << std::endl;
-            std::cout << "Press enter to stop the process..." << std::endl;
+            std::cout << "Press enter to end the process..." << std::endl;
             std::cin.ignore();
         }
         else
         {
-            bool isStopped = false;
+            std::atomic<bool> isStopRequested = {false};
             std::thread workerThread;
             std::promise<void> startHandlerPromise;
             auto startHandlerFuture = startHandlerPromise.get_future();
             lifecycleService->SetCommunicationReadyHandler([&]() {
                 workerThread = std::thread{[&]() {
                     startHandlerFuture.get();
-                    while (!isStopped)
+                    while (lifecycleService->State() == ParticipantState::ReadyToRun ||
+                           lifecycleService->State() == ParticipantState::Running)
                     {
                         if (clientAdd100)
                           Call(clientAdd100);
@@ -284,7 +291,10 @@ int main(int argc, char** argv)
                           Call(clientSort);
                         std::this_thread::sleep_for(1s);
                     }
-                    lifecycleService->Stop("User requested to Stop");
+                    if (!isStopRequested)
+                    {
+                        std::cout << "Press enter to end the process..." << std::endl;
+                    }
                 }};
             });
 
@@ -292,30 +302,36 @@ int main(int argc, char** argv)
                 startHandlerPromise.set_value();
             });
 
-            auto lifecycleFuture = lifecycleService->StartLifecycle();
-            std::cout << "Press enter to stop the process..." << std::endl;
+            lifecycleService->StartLifecycle();
+            std::cout << "Press enter to stop the simulation..." << std::endl;
             std::cin.ignore();
-            isStopped = true;
+
+            isStopRequested = true;
+            if (lifecycleService->State() == ParticipantState::Running || 
+                lifecycleService->State() == ParticipantState::Paused)
+            {
+                std::cout << "User requested to stop in state " << lifecycleService->State() << std::endl;
+                lifecycleService->Stop("User requested to stop");
+            }
 
             if (workerThread.joinable())
             {
                 workerThread.join();
             }
-            auto finalState = lifecycleFuture.get();
-            std::cout << "Simulation stopped. Final State: " << finalState << std::endl;
+            std::cout << "The participant has shut down and left the simulation" << std::endl;
         }
     }
     catch (const SilKit::ConfigurationError& error)
     {
         std::cerr << "Invalid configuration: " << error.what() << std::endl;
-        std::cout << "Press enter to stop the process..." << std::endl;
+        std::cout << "Press enter to end the process..." << std::endl;
         std::cin.ignore();
         return -2;
     }
     catch (const std::exception& error)
     {
         std::cerr << "Something went wrong: " << error.what() << std::endl;
-        std::cout << "Press enter to stop the process..." << std::endl;
+        std::cout << "Press enter to end the process..." << std::endl;
         std::cin.ignore();
         return -3;
     }

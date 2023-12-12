@@ -41,7 +41,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/services/orchestration/string_utils.hpp"
 
 
-using namespace SilKit::Services;
+using namespace SilKit::Services::Orchestration;
+using namespace SilKit::Services::Ethernet;
 
 using namespace std::chrono_literals;
 
@@ -73,7 +74,7 @@ std::vector<uint8_t> CreateFrame(const EthernetMac& destinationAddress, const Et
     return raw;
 }
 
-std::string GetPayloadStringFromFrame(const Ethernet::EthernetFrame& frame)
+std::string GetPayloadStringFromFrame(const EthernetFrame& frame)
 {
     const size_t FrameHeaderSize = 2 * sizeof(EthernetMac) + sizeof(EtherType);
 
@@ -83,9 +84,9 @@ std::string GetPayloadStringFromFrame(const Ethernet::EthernetFrame& frame)
     return payloadString;
 }
 
-void FrameTransmitHandler(Ethernet::IEthernetController* /*controller*/, const Ethernet::EthernetFrameTransmitEvent& frameTransmitEvent)
+void FrameTransmitHandler(IEthernetController* /*controller*/, const EthernetFrameTransmitEvent& frameTransmitEvent)
 {
-    if (frameTransmitEvent.status == Ethernet::EthernetTransmitStatus::Transmitted)
+    if (frameTransmitEvent.status == EthernetTransmitStatus::Transmitted)
     {
         std::cout << ">> ACK for Ethernet frame with userContext=" << frameTransmitEvent.userContext << std::endl;
     }
@@ -94,18 +95,18 @@ void FrameTransmitHandler(Ethernet::IEthernetController* /*controller*/, const E
         std::cout << ">> NACK for Ethernet frame with userContext=" << frameTransmitEvent.userContext;
         switch (frameTransmitEvent.status)
         {
-        case Ethernet::EthernetTransmitStatus::Transmitted:
+        case EthernetTransmitStatus::Transmitted:
             break;
-        case Ethernet::EthernetTransmitStatus::InvalidFrameFormat:
+        case EthernetTransmitStatus::InvalidFrameFormat:
             std::cout << ": InvalidFrameFormat";
             break;
-        case Ethernet::EthernetTransmitStatus::ControllerInactive:
+        case EthernetTransmitStatus::ControllerInactive:
             std::cout << ": ControllerInactive";
             break;
-        case Ethernet::EthernetTransmitStatus::LinkDown:
+        case EthernetTransmitStatus::LinkDown:
             std::cout << ": LinkDown";
             break;
-        case Ethernet::EthernetTransmitStatus::Dropped:
+        case EthernetTransmitStatus::Dropped:
             std::cout << ": Dropped";
             break;
         }
@@ -114,7 +115,7 @@ void FrameTransmitHandler(Ethernet::IEthernetController* /*controller*/, const E
     }
 }
 
-void FrameHandler(Ethernet::IEthernetController* /*controller*/, const Ethernet::EthernetFrameEvent& frameEvent)
+void FrameHandler(IEthernetController* /*controller*/, const EthernetFrameEvent& frameEvent)
 {
     auto frame = frameEvent.frame;
     auto payload = GetPayloadStringFromFrame(frame);
@@ -123,7 +124,7 @@ void FrameHandler(Ethernet::IEthernetController* /*controller*/, const Ethernet:
               << "\"" << std::endl;
 }
 
-void SendFrame(Ethernet::IEthernetController* controller, const EthernetMac& from, const EthernetMac& to)
+void SendFrame(IEthernetController* controller, const EthernetMac& from, const EthernetMac& to)
 {
     static int frameId = 0;
     std::stringstream stream;
@@ -137,7 +138,7 @@ void SendFrame(Ethernet::IEthernetController* controller, const EthernetMac& fro
     const auto userContext = reinterpret_cast<void *>(static_cast<intptr_t>(frameId));
 
     auto frame = CreateFrame(to, from, payload);
-    controller->SendFrame(Ethernet::EthernetFrame{frame}, userContext);
+    controller->SendFrame(EthernetFrame{frame}, userContext);
     std::cout << "<< ETH Frame sent with userContext=" << userContext << std::endl;
 }
 
@@ -214,18 +215,18 @@ int main(int argc, char** argv)
         ethernetController->AddFrameHandler(&FrameHandler);
         ethernetController->AddFrameTransmitHandler(&FrameTransmitHandler);
 
-        auto operationMode = (runSync ? SilKit::Services::Orchestration::OperationMode::Coordinated
-                              : SilKit::Services::Orchestration::OperationMode::Autonomous);
+        auto operationMode = (runSync ? OperationMode::Coordinated : OperationMode::Autonomous);
         auto* lifecycleService = participant->CreateLifecycleService({operationMode});
 
-        // Set a Stop Handler
+        // Observe state changes
         lifecycleService->SetStopHandler([]() {
             std::cout << "Stop handler called" << std::endl;
         });
-
-        // Set a Shutdown Handler
         lifecycleService->SetShutdownHandler([]() {
             std::cout << "Shutdown handler called" << std::endl;
+        });
+        lifecycleService->SetAbortHandler([](auto lastState) {
+            std::cout << "Abort handler called while in state " << lastState << std::endl;
         });
 
         if (runSync)
@@ -263,21 +264,22 @@ int main(int argc, char** argv)
             auto finalState = finalStateFuture.get();
 
             std::cout << "Simulation stopped. Final State: " << finalState << std::endl;
-            std::cout << "Press enter to stop the process..." << std::endl;
+            std::cout << "Press enter to end the process..." << std::endl;
             std::cin.ignore();
         }
         else
         {
             std::promise<void> startHandlerPromise;
             auto startHandlerFuture = startHandlerPromise.get_future();
-            bool isStopped = false;
+            std::atomic<bool> isStopRequested = {false};
             std::thread workerThread;
-            // Set a CommunicationReady Handler
+
             lifecycleService->SetCommunicationReadyHandler([&]() {
                 std::cout << "Communication ready handler called for " << participantName << std::endl;
                 workerThread = std::thread{[&]() {
                     startHandlerFuture.get();
-                    while (!isStopped)
+                    while (lifecycleService->State() == ParticipantState::ReadyToRun ||
+                           lifecycleService->State() == ParticipantState::Running)
                     {
                         if (participantName == "EthernetWriter")
                         {
@@ -285,40 +287,47 @@ int main(int argc, char** argv)
                         }
                         std::this_thread::sleep_for(1s);
                     }
-                    lifecycleService->Stop("User requested to Stop");
+                    if (!isStopRequested)
+                    {
+                        std::cout << "Press enter to end the process..." << std::endl;
+                    }
                 }};
                 ethernetController->Activate();
             });
-
 
             lifecycleService->SetStartingHandler([&]() {
                 startHandlerPromise.set_value();
             });
 
-            auto finalStateFuture = lifecycleService->StartLifecycle();
-            std::cout << "Press enter to stop the process..." << std::endl;
+            lifecycleService->StartLifecycle();
+            std::cout << "Press enter to leave the simulation..." << std::endl;
             std::cin.ignore();
 
-            isStopped = true;
+            isStopRequested = true;
+            if (lifecycleService->State() == ParticipantState::Running || 
+                lifecycleService->State() == ParticipantState::Paused)
+            {
+                std::cout << "User requested to stop in state " << lifecycleService->State() << std::endl;
+                lifecycleService->Stop("User requested to stop");
+            }
             if (workerThread.joinable())
             {
                 workerThread.join();
             }
-            auto finalState = finalStateFuture.get();
-            std::cout << "Simulation stopped. Final State: " << finalState << std::endl;
+            std::cout << "The participant has shut down and left the simulation" << std::endl;
         }
     }
     catch (const SilKit::ConfigurationError& error)
     {
         std::cerr << "Invalid configuration: " << error.what() << std::endl;
-        std::cout << "Press enter to stop the process..." << std::endl;
+        std::cout << "Press enter to end the process..." << std::endl;
         std::cin.ignore();
         return -2;
     }
     catch (const std::exception& error)
     {
         std::cerr << "Something went wrong: " << error.what() << std::endl;
-        std::cout << "Press enter to stop the process..." << std::endl;
+        std::cout << "Press enter to end the process..." << std::endl;
         std::cin.ignore();
         return -3;
     }

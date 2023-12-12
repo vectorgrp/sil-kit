@@ -32,7 +32,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/util/serdes/Serialization.hpp"
 
 
+using namespace SilKit::Services::Orchestration;
 using namespace SilKit::Services::PubSub;
+
 using namespace std::chrono_literals;
 
 /**************************************************************************************************
@@ -84,8 +86,8 @@ GpsData Deserialize(const std::vector<uint8_t>& data)
     return gpsData;
 }
 
-void PublishData(SilKit::Services::PubSub::IDataPublisher* gpsPublisher,
-                 SilKit::Services::PubSub::IDataPublisher* temperaturePublisher)
+void PublishData(IDataPublisher* gpsPublisher,
+                 IDataPublisher* temperaturePublisher)
 {
     // GPS
     GpsData gpsData;
@@ -155,8 +157,8 @@ int main(int argc, char** argv)
     }
 
     std::string mediaType{SilKit::Util::SerDes::MediaTypeData()};
-    SilKit::Services::PubSub::PubSubSpec dataSpecPubGps{"Gps", mediaType};
-    SilKit::Services::PubSub::PubSubSpec dataSpecPubTemperature{"Temperature", mediaType};
+    PubSubSpec dataSpecPubGps{"Gps", mediaType};
+    PubSubSpec dataSpecPubTemperature{"Temperature", mediaType};
 
     try
     {
@@ -185,15 +187,18 @@ int main(int argc, char** argv)
 
         std::cout << "Creating participant '" << participantName << "' with registry " << registryUri << std::endl;
         auto participant = SilKit::CreateParticipant(participantConfiguration, participantName, registryUri);
-        auto operationMode = (runSync ? SilKit::Services::Orchestration::OperationMode::Coordinated
-                              : SilKit::Services::Orchestration::OperationMode::Autonomous);
+        auto operationMode = (runSync ? OperationMode::Coordinated : OperationMode::Autonomous);
         auto* lifecycleService = participant->CreateLifecycleService({operationMode});
+
+        // Observe state changes
         lifecycleService->SetStopHandler([]() {
             std::cout << "Stop handler called" << std::endl;
         });
-
         lifecycleService->SetShutdownHandler([]() {
             std::cout << "Shutdown handler called" << std::endl;
+        });
+        lifecycleService->SetAbortHandler([](auto lastState) {
+            std::cout << "Abort handler called while in state " << lastState << std::endl;
         });
 
         auto isPublisher = (participantName == "Publisher");
@@ -255,8 +260,8 @@ int main(int argc, char** argv)
                     1s);
             }
 
-            auto lifecycleFuture = lifecycleService->StartLifecycle();
-            auto finalState = lifecycleFuture.get();
+            auto finalStateFuture = lifecycleService->StartLifecycle();
+            auto finalState = finalStateFuture.get();
 
             std::cout << "Simulation stopped. Final State: " << finalState << std::endl;
             std::cout << "Press enter to stop the process..." << std::endl;
@@ -264,7 +269,7 @@ int main(int argc, char** argv)
         }
         else
         {
-            bool isStopped = false;
+            std::atomic<bool> isStopRequested = {false};
             std::thread workerThread;
             std::promise<void> startHandlerPromise;
             auto startHandlerFuture = startHandlerPromise.get_future();
@@ -272,7 +277,8 @@ int main(int argc, char** argv)
                 std::cout << "Communication ready handler called for " << participantName << std::endl;
                 workerThread = std::thread{[&]() {
                     startHandlerFuture.get();
-                    while (!isStopped)
+                    while (lifecycleService->State() == ParticipantState::ReadyToRun ||
+                           lifecycleService->State() == ParticipantState::Running)
                     {
                         if (gpsPublisher && temperaturePublisher)
                         {
@@ -280,7 +286,10 @@ int main(int argc, char** argv)
                         }
                         std::this_thread::sleep_for(1s);
                     }
-                    lifecycleService->Stop("User Requested to Stop");
+                    if (!isStopRequested)
+                    {
+                        std::cout << "Press enter to end the process..." << std::endl;
+                    }
                 }};
             });
 
@@ -288,30 +297,36 @@ int main(int argc, char** argv)
                 startHandlerPromise.set_value();
             });
 
-            auto finalStateFuture = lifecycleService->StartLifecycle();
-            std::cout << "Press enter to stop the process..." << std::endl;
+            lifecycleService->StartLifecycle();
+            std::cout << "Press enter to leave the simulation..." << std::endl;
             std::cin.ignore();
 
-            isStopped = true;
+            isStopRequested = true;
+            if (lifecycleService->State() == ParticipantState::Running || 
+                lifecycleService->State() == ParticipantState::Paused)
+            {
+                std::cout << "User requested to stop in state " << lifecycleService->State() << std::endl;
+                lifecycleService->Stop("User requested to stop");
+            }
+
             if (workerThread.joinable())
             {
                 workerThread.join();
             }
-            auto finalState = finalStateFuture.get();
-            std::cout << "Simulation stopped. Final State: " << finalState << std::endl;
+            std::cout << "The participant has shut down and left the simulation" << std::endl;
         }
     }
     catch (const SilKit::ConfigurationError& error)
     {
         std::cerr << "Invalid configuration: " << error.what() << std::endl;
-        std::cout << "Press enter to stop the process..." << std::endl;
+        std::cout << "Press enter to end the process..." << std::endl;
         std::cin.ignore();
         return -2;
     }
     catch (const std::exception& error)
     {
         std::cerr << "Something went wrong: " << error.what() << std::endl;
-        std::cout << "Press enter to stop the process..." << std::endl;
+        std::cout << "Press enter to end the process..." << std::endl;
         std::cin.ignore();
         return -3;
     }
