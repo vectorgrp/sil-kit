@@ -1499,7 +1499,7 @@ auto Participant<SilKitConnectionT>::CreateController(const SilKitServiceTraitCo
     descriptor.SetNetworkType(config.GetNetworkType());
     descriptor.SetServiceId(localEndpoint);
     descriptor.SetServiceType(serviceType);
-    descriptor.SetSupplementalData(std::move(supplementalData));
+    descriptor.SetSupplementalData(supplementalData);
 
     controller->SetServiceDescriptor(std::move(descriptor));
 
