@@ -6,57 +6,63 @@ set(SILKIT_THIRD_PARTY_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}" CACHE STRING "" 
 
 
 function(include_gtest)
-    silkit_clean_default_compileflags()
+    if(NOT SILKIT_USE_SYSTEM_LIBRARIES)
+        silkit_clean_default_compileflags()
 
-    # Prevent overriding the parent project's compiler/linker settings on Windows
-    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+        # Prevent overriding the parent project's compiler/linker settings on Windows
+        set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 
-    # HACK: Temporarily remove the project version to avoid a warning related to unversioned project definitions
-    set(PROJECT_VERSION)
-    set(PROJECT_VERSION_MAJOR)
-    set(PROJECT_VERSION_MINOR)
-    set(PROJECT_VERSION_PATCH)
+        # HACK: Temporarily remove the project version to avoid a warning related to unversioned project definitions
+        set(PROJECT_VERSION)
+        set(PROJECT_VERSION_MAJOR)
+        set(PROJECT_VERSION_MINOR)
+        set(PROJECT_VERSION_PATCH)
 
-    # Google mock
-    add_compile_definitions(UNIT_TEST)
-    if(MSVC)
-        # Ensure that std::tuple is used instead of std::tr1::tuple
-        add_compile_definitions(
-            GTEST_LANG_CXX11=1
-            _SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING=1
+        # Google mock
+        add_compile_definitions(UNIT_TEST)
+        if(MSVC)
+            # Ensure that std::tuple is used instead of std::tr1::tuple
+            add_compile_definitions(
+                GTEST_LANG_CXX11=1
+                _SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING=1
+            )
+        endif()
+
+        # disable the IPO for GTest due to CMake policy CMP0069 changes
+        if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+            set(CMAKE_INTERPROCEDURAL_OPTIMIZATION OFF)
+        endif()
+
+        #check the submodule tag for the current version.
+        message(STATUS "Add subdirectory ThirdParty/googletest")
+        add_subdirectory(
+            "${SILKIT_THIRD_PARTY_SOURCE_DIR}/googletest"
+            "${SILKIT_THIRD_PARTY_BINARY_DIR}/_tp_googletest"
+            EXCLUDE_FROM_ALL
         )
-    endif()
 
-    # disable the IPO for GTest due to CMake policy CMP0069 changes
-    if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-        set(CMAKE_INTERPROCEDURAL_OPTIMIZATION OFF)
+        if(MSVC)
+            # Ensure that compile definitions are propagated to gmock users
+            target_compile_definitions(gmock
+                PUBLIC
+                GTEST_LANG_CXX11=1
+                _SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING=1
+            )
+            target_compile_definitions(gtest
+                PUBLIC
+                GTEST_LANG_CXX11=1
+                _SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING=1
+            )
+            silkit_target_clean_compileflags(gtest)
+            silkit_target_clean_compileflags(gmock_main)
+        endif()
+        set_property(TARGET gmock_main PROPERTY FOLDER "ThirdParty")
+        set_property(TARGET gtest PROPERTY FOLDER "ThirdParty")
+    else()
+        find_package(GTest REQUIRED)
+        add_library(gtest ALIAS GTest::gtest)
+        add_library(gmock_main ALIAS GTest::gmock_main)
     endif()
-
-    #check the submodule tag for the current version.
-    message(STATUS "Add subdirectory ThirdParty/googletest")
-    add_subdirectory(
-        "${SILKIT_THIRD_PARTY_SOURCE_DIR}/googletest"
-        "${SILKIT_THIRD_PARTY_BINARY_DIR}/_tp_googletest"
-        EXCLUDE_FROM_ALL
-    )
-
-    if(MSVC)
-        # Ensure that compile definitions are propagated to gmock users
-        target_compile_definitions(gmock
-            PUBLIC
-            GTEST_LANG_CXX11=1
-            _SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING=1
-        )
-        target_compile_definitions(gtest
-            PUBLIC
-            GTEST_LANG_CXX11=1
-            _SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING=1
-        )
-        silkit_target_clean_compileflags(gtest)
-        silkit_target_clean_compileflags(gmock_main)
-    endif()
-    set_property(TARGET gmock_main PROPERTY FOLDER "ThirdParty")
-    set_property(TARGET gtest PROPERTY FOLDER "ThirdParty")
 endfunction()
 
 
