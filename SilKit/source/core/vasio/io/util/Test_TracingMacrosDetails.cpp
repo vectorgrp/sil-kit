@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 Vector Informatik GmbH
+//
+// SPDX-License-Identifier: MIT
+
 #include "gtest/gtest.h"
 
 #include "TracingMacros.hpp"

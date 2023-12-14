@@ -1,4 +1,9 @@
 #!/bin/sh
+
+# SPDX-FileCopyrightText: 2023 Vector Informatik GmbH
+#
+# SPDX-License-Identifier: MIT
+
 #Usage: ./performance-diff.sh <name-version-1> <path/to/SilKitDemoBenchmark1> <name-version-1> <path/to/SilKitDemoBenchmark2> <path/to/diff-result.csv>
 
 NAME1=$1

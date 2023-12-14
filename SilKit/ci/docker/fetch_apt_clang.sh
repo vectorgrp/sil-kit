@@ -1,4 +1,9 @@
 #!/bin/sh
+
+# SPDX-FileCopyrightText: 2023 Vector Informatik GmbH
+#
+# SPDX-License-Identifier: MIT
+
 set -e
 set -u
 

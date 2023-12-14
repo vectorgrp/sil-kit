@@ -1,4 +1,9 @@
 #!/usr/bin/env python3
+
+# SPDX-FileCopyrightText: 2023 Vector Informatik GmbH
+#
+# SPDX-License-Identifier: MIT
+
 # This tool packages the final deliverables for SIL Kit releases for a given target (VS2017, Linux etc.)
 # the simplified cpack usage results in separate Debug and Release zip files.
 # this tool is used to combine Debug and Release distribution zipfiles and make some

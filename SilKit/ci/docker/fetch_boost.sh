@@ -1,4 +1,9 @@
 #!/bin/sh
+
+# SPDX-FileCopyrightText: 2023 Vector Informatik GmbH
+#
+# SPDX-License-Identifier: MIT
+
 # fetch prebuilt binary boost 1.67.0 exported from subversion
 # BinLog is linked against this file
 set -u #bail on undefined var

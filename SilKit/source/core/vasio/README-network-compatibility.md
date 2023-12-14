@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2023 Vector Informatik GmbH
+
+SPDX-License-Identifier: MIT
+-->
+
 VAsio Network Protocol Compatibility
 ====================================
 The VAsio protocol requires an initial handshake and a service subscription.

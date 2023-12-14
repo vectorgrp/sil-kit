@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2023 Vector Informatik GmbH
+#
+# SPDX-License-Identifier: MIT
+
 import pandas as pd
 import sys
 pd.set_option('display.max_rows', 500)

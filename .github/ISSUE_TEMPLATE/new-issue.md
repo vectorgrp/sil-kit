@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2023 Vector Informatik GmbH
+
+SPDX-License-Identifier: MIT
+-->
+
 ---
 name: New Issue
 about: Create a report to help us improve

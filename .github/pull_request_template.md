@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2023 Vector Informatik GmbH
+
+SPDX-License-Identifier: MIT
+-->
+
 ## Developer checklist (address before review)
 
 - [ ] Changelog.md updated

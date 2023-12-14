@@ -1,4 +1,9 @@
 #!/bin/sh
+
+# SPDX-FileCopyrightText: 2023 Vector Informatik GmbH
+#
+# SPDX-License-Identifier: MIT
+
 #Usage: ./run-bench-msg-size-scaling.sh <path/to/SilKitDemoBenchmark> <path/to/result.csv> [<path/to/SilKitConfig>]
 
 EXE=$1

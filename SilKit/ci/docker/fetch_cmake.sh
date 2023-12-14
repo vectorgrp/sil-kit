@@ -1,4 +1,9 @@
 #!/bin/sh
+
+# SPDX-FileCopyrightText: 2023 Vector Informatik GmbH
+#
+# SPDX-License-Identifier: MIT
+
 # fetch an appropriate cmake if necessary
 # we need at least cmake 3.11, ubuntu 18.04 LTS has 3.10
 set -u #bail on undefined var

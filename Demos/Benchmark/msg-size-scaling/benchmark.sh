@@ -1,4 +1,9 @@
 #!/bin/sh
+
+# SPDX-FileCopyrightText: 2023 Vector Informatik GmbH
+#
+# SPDX-License-Identifier: MIT
+
 echo 'Cleanup'
 rm ./result-msg-size-scaling.csv
 rm ./result-msg-size-scaling-tcp.csv
