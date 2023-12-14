@@ -294,6 +294,7 @@ TEST_F(ITest_Abort, test_Abort_Communication_Ready_Simulation_Sync)
     EXPECT_CALL(callbacks, AbortHandler(ParticipantState::CommunicationInitialized))
         .Times(Between(0, size));
     EXPECT_CALL(callbacks, AbortHandler(ParticipantState::ReadyToRun)).Times(Between(0, size));
+    EXPECT_CALL(callbacks, AbortHandler(ParticipantState::Running)).Times(Between(0, size));
     EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Shutdown)).Times(size);
     EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Error)).Times(0);
     EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Invalid)).Times(0);
@@ -341,6 +342,9 @@ TEST_F(ITest_Abort, test_Abort_Communication_Ready_Simulation_Sync)
     // Wait for coordinated to end
     JoinParticipantThreads(participantThreads_Sync_Coordinated);
 
+    monitorParticipants.front().i.stopRequested = true;
+    JoinParticipantThreads(participantThreads_Async_Autonomous);
+
     // Expect shutdown state, which should happen after the abort handlers are called.
     for (const auto& participant : monitorParticipants.front().CopyMonitoredParticipantStates())
     {
@@ -349,9 +353,6 @@ TEST_F(ITest_Abort, test_Abort_Communication_Ready_Simulation_Sync)
             EXPECT_EQ(participant.second, ParticipantState::Shutdown);
         }
     }
-
-    monitorParticipants.front().i.stopRequested = true;
-    JoinParticipantThreads(participantThreads_Async_Autonomous);
 
     StopRegistry();
 }
