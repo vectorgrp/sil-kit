@@ -376,7 +376,33 @@ TEST_F(Test_IoContext_AcceptorConnector_PingPong, tcp)
 
     auto acceptor = ioContext->MakeTcpAcceptor("127.0.0.1", 0);
     acceptor->SetListener(acceptorListener);
-    acceptor->AsyncAccept(0ms);
+    acceptor->AsyncAccept(5000ms);
+
+    auto endpoint = acceptor->GetLocalEndpoint();
+    auto uri = Uri::Parse(endpoint);
+
+    ASSERT_EQ(uri.Type(), Uri::UriType::Tcp);
+
+    auto connector = ioContext->MakeTcpConnector(uri.Host(), uri.Port());
+    connector->SetListener(connectorListener);
+    connector->AsyncConnect(0ms);
+
+    ioContext->Run();
+}
+
+TEST_F(Test_IoContext_AcceptorConnector_PingPong, tcp_connect_send_buffer_size)
+{
+    SetupExpectations();
+
+    AsioSocketOptions asioSocketOptions{};
+    asioSocketOptions.tcp.sendBufferSize = 1024;
+
+    auto ioContext = VSilKit::MakeAsioIoContext(asioSocketOptions);
+    ioContext->SetLogger(logger);
+
+    auto acceptor = ioContext->MakeTcpAcceptor("127.0.0.1", 0);
+    acceptor->SetListener(acceptorListener);
+    acceptor->AsyncAccept(5000ms);
 
     auto endpoint = acceptor->GetLocalEndpoint();
     auto uri = Uri::Parse(endpoint);
@@ -399,7 +425,7 @@ TEST_F(Test_IoContext_AcceptorConnector_PingPong, local_domain)
 
     auto acceptor = ioContext->MakeLocalAcceptor(acceptorLocalDomainSocketPath);
     acceptor->SetListener(acceptorListener);
-    acceptor->AsyncAccept(0ms);
+    acceptor->AsyncAccept(5000ms);
 
     auto endpoint = acceptor->GetLocalEndpoint();
     auto uri = Uri::Parse(endpoint);

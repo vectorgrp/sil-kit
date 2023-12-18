@@ -155,7 +155,7 @@ AsioConnector<T>::Op::Op(AsioConnector& connector, const AsioSocketOptions& asio
     , _asioIoContext{connector._asioIoContext}
     , _asioSocketOptions{asioSocketOptions}
     , _remoteEndpoint{remoteEndpoint}
-    , _socket{*connector._asioIoContext}
+    , _socket{*connector._asioIoContext, _remoteEndpoint.protocol()}
     , _timeoutTimer{*connector._asioIoContext}
     , _logger{connector._logger}
 {
