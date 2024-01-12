@@ -5,6 +5,7 @@ Orchestration C API
    :local:
    :depth: 3
 
+.. doxygenfunction:: SilKit_LifecycleService_Create
 .. doxygenfunction:: SilKit_LifecycleService_SetCommunicationReadyHandler
 .. doxygenfunction:: SilKit_LifecycleService_SetStartingHandler
 .. doxygenfunction:: SilKit_LifecycleService_SetStopHandler
@@ -14,6 +15,7 @@ Orchestration C API
 .. doxygenfunction:: SilKit_LifecycleService_Pause
 .. doxygenfunction:: SilKit_LifecycleService_Continue
 
+.. doxygenfunction:: SilKit_TimeSyncService_Create
 .. doxygenfunction:: SilKit_TimeSyncService_SetSimulationStepHandler
 .. doxygenfunction:: SilKit_TimeSyncService_SetSimulationStepHandlerAsync
 .. doxygenfunction:: SilKit_TimeSyncService_CompleteSimulationStep
