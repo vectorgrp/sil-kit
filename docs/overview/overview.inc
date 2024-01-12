@@ -75,10 +75,43 @@ A similar configuration file is available for the |ProductName| Registry as well
 * For getting started developing with the |ProductName|, see the :doc:`Developer Guide <../for-developers/developers>`.
 
 
-
-
 ..
   TODO add links to the corresponding sections once they are revamped
+
+
+.. _sec:overview-ecosystem:
+
+The |ProductName| Ecosystem
+---------------------------
+
+Related Projects
+~~~~~~~~~~~~~~~~
+
+One of the design goals of the |ProductName| is to easily connect different third-party tools,
+such as emulators, virtual machines and simulation tools.
+
+The |ProductName| ecosystem comprises the following turn-key solutions:
+
+* The `SIL Kit Adapters for QEMU <https://github.com/vectorgrp/sil-kit-adapters-qemu>`_
+  integrates with QEMU to support co-simulation with emulated targets.
+
+* The `SIL Kit Adapters for TAP devices <https://github.com/vectorgrp/sil-kit-adapters-tap>`_
+  project provides first-class support for TAP devices of the host operating system.
+
+* The `SIL Kit Adapter for SocketCAN <https://github.com/vectorgrp/sil-kit-adapters-vcan>`_
+  can be used to attach a virtual CAN (Controller Area Network) interface (SocketCAN) to a |ProductName| CAN bus.
+
+* The `SIL Kit FMU Importer <https://github.com/vectorgrp/sil-kit-fmu-importer>`_
+  allows to import Functional Mockup Units (FMUs) as SIL Kit participants.
+
+Related Applications
+~~~~~~~~~~~~~~~~~~~~
+
+The |ProductName| ecosystem also offers the following desktop applications:
+
+* The `SIL Kit Dashboard <https://www.vector.com/SIL-Kit-Dashboard/>`_  collects, persists 
+  and displays information from different SIL Kit systems.
+
 
 .. _sec:overview-guiding-principles:
 
