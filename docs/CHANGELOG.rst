@@ -7,13 +7,18 @@ All notable changes to the Vector SIL Kit project shall be documented in this fi
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
 
-[4.0.44] - UNRELEASED
+[4.0.44] - 2024-01-22
 ---------------------
 
 Fixed
 ~~~~~
 
 - Changing the TCP send and receive buffer size failed on Windows
+
+Added
+~~~~~
+
+- Links to related SIL Kit projects in documentation and github Readme
 
 
 [4.0.43] - 2023-12-12
