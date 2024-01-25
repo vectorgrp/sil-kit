@@ -7,6 +7,16 @@ All notable changes to the Vector SIL Kit project shall be documented in this fi
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
 
+[4.0.45] - UNRELEASED
+---------------------
+
+Fixed
+~~~~~
+
+- Registry failed to start correctly, if the dashboard is enabled, but the registry is letting the
+  system determine the listening port, e.g., when using a URI like ``silkit://localhost:0``.
+
+
 [4.0.44] - 2024-01-22
 ---------------------
 

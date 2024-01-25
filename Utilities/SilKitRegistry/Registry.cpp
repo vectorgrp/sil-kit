@@ -156,6 +156,14 @@ void OverrideFromRegistryConfiguration(std::shared_ptr<SilKit::Config::IParticip
     }
 }
 
+void OverrideRegistryUri(std::shared_ptr<SilKit::Config::IParticipantConfiguration> configuration, const std::string& registryUri)
+{
+    auto config = std::dynamic_pointer_cast<SilKit::Config::ParticipantConfiguration>(configuration);
+    SILKIT_ASSERT(config != nullptr);
+
+    config->middleware.registryUri = registryUri;
+}
+
 void SanitizeConfiguration(std::shared_ptr<SilKit::Config::IParticipantConfiguration> configuration,
                            const std::string& listenUri)
 {
@@ -211,6 +219,8 @@ auto StartRegistry(std::shared_ptr<SilKit::Config::IParticipantConfiguration> co
     const auto chosenListenUri = registry->StartListening(listenUri);
 
     std::cout << "SIL Kit Registry listening on " << chosenListenUri << std::endl;
+
+    OverrideRegistryUri(configuration, chosenListenUri);
 
     if (generatedConfigurationPathOpt.HasValue())
     {
