@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 Vector Informatik GmbH
+#
+# SPDX-License-Identifier: MIT
+
 include(CheckCXXSourceCompiles)
 macro(silkit_check_for_asio)
     check_cxx_source_compiles("

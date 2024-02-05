@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2024 Vector Informatik GmbH
+#
+# SPDX-License-Identifier: MIT
 
 add_library(I_SilKitRegistry_Config INTERFACE)
 

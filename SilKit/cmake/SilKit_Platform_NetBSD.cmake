@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 Vector Informatik GmbH
+#
+# SPDX-License-Identifier: MIT
+
 message(STATUS "SIL Kit Platform: configuring for ${SILKIT_HOST_PLATFORM}")
 
 # fixes asio compilation
