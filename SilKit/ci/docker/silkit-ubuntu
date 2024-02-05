@@ -61,6 +61,7 @@ RUN \
                 python3 \
                 python3-pip \
                 python-is-python3 \
+                licensecheck \
                 ; \
             echo "Ubuntu ${UBUNTU_VERSION}: Installing pipenv via pip" ; \
             python3 -m pip install pipenv ; \

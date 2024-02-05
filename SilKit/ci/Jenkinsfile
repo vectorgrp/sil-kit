@@ -93,6 +93,7 @@ def buildConfigs = [
         DockerBuildArgs: "--build-arg UBUNTU_VERSION=22.04",
         PublishArtifacts: false,
         CmakePreset: "clang14-release",
+        checkLicenses: true,
     ]
     // Sanitizer builds:
     ,[
@@ -339,6 +340,7 @@ def doBuild(Map config) {
         def publishArtifacts = config.getOrDefault("PublishArtifacts", false).toBoolean()
         def buildTestDebug = config.getOrDefault("TestDebug", false) 
         def triggerAbiCheck = config.getOrDefault("TriggerAbiCheck", false)
+        def checkLicenses = config.getOrDefault("checkLicenses", false)
 
         def buildEnv = []
         def scmVars = [:]
@@ -366,6 +368,12 @@ def doBuild(Map config) {
             buildEnv.add("GIT_BRANCH=${scmVars.GIT_BRANCH}")
             buildEnv.add("GIT_COMMIT=${scmVars.GIT_COMMIT}")
             buildEnv.add("GIT_URL=${scmVars.GIT_URL}")
+        }
+
+        if(checkLicenses) {
+            stage("License Check (${buildName})") {
+                run "sh ./SilKit/ci/check_licenses.sh"
+            }
         }
 
         def warningsAsError = config.getOrDefault("WarningAsErrors", false).toBoolean()
