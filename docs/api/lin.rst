@@ -1,4 +1,4 @@
-.. _sec:lin:
+.. _chap:lin-service-api:
 
 ===================
 LIN Service API

@@ -1,4 +1,4 @@
-.. _sec:api-timesync-service:
+.. _chap:timesync-service-api:
 
 ============================
 Time Synchronization Service

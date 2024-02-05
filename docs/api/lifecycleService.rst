@@ -1,4 +1,4 @@
-.. _sec:api-lifecycle-service:
+.. _chap:lifecycle-service-api:
 
 ==================
 Lifecycle Service

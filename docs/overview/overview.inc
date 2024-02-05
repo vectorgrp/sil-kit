@@ -6,21 +6,26 @@ Vector SIL Kit Overview
 .. |NetSim| replace:: Network Simulator
 .. |_| unicode:: 0xA0 
    :trim:
-
+.. |CAN-API| replace:: :ref:`CAN / CAN FD<chap:can-service-api>`
+.. |Ethernet-API| replace:: :ref:`Ethernet<chap:ethernet-service-api>`
+.. |Flexray-API| replace:: :ref:`FlexRay<chap:flexray-service-api>`
+.. |LIN-API| replace:: :ref:`LIN<chap:lin-service-api>`
+.. |Lifecycle-API| replace:: :ref:`lifecycle<chap:lifecycle-service-api>`
+.. |Timesync-API| replace:: :ref:`time synchronization<chap:timesync-service-api>`
+.. |Logging-API| replace:: :ref:`logging<chap:logging-service-api>`
 
 The Vector |ProductName| is an open source library for connecting Software-in-the-Loop Environments.
+It provides:
 
-Vector |ProductName| provides 
+* Communication infrastructure for automotive and non-automotive applications
 
-* communication infrastructure for automotive and non-automotive applications
+* Interoperability between any SIL Kit enabled applications
 
-* interoperability between any SIL Kit enabled applications
+* Cross platform communication
 
-* cross platform communication
+* Implemented in C++ w/o platform dependencies
 
-    * implemented in C++ w/o platform dependencies
-
-    * interoperability between Windows, Linux, and other UNIX derivates​
+* Interoperability between Windows, Linux, and other UNIX derivates​
 
 * Stable API and ABI as well as long-term network layer compatibility
 
@@ -29,13 +34,13 @@ Vector |ProductName| provides
 Supported Services
 ------------------
 
-The currently supported services of the |ProductName| consist of the following categories:
+The services currently supported by the |ProductName| consist of the following categories:
 
-* **Vehicle Network Controllers:** CAN / CAN |_| FD, Ethernet, FlexRay, and LIN
-* **Data Publish/Subscribe:** exchange of arbitrary data
-* **RPC Servers/Clients:** for dynamic remote procedure execution
-* **Orchestration:** for lifecycle and time synchronization control
-* **Logging:** for logging messages into a file, standard output, or to other participants
+* **Vehicle Network Controllers:** |CAN-API|, |Ethernet-API|, |Flexray-API|, and |LIN-API|
+* **Data Publish/Subscribe:** topic-based :ref:`publish/subscribe<chap:pubsub-service-api>` mechanism to exchange arbitrary data
+* **RPC Servers/Clients:** for dynamic :ref:`remote procedure execution<chap:rpc-service-api>`
+* **Orchestration:** for |Lifecycle-API| and |Timesync-API| control
+* **Logging:** for |Logging-API| messages into a file, standard output, or to other participants
 
 Vehicle Networks
 ----------------

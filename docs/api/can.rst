@@ -1,3 +1,5 @@
+.. _chap:can-service-api:
+
 ===================
 CAN Service API
 ===================

@@ -16,6 +16,7 @@
 
 .. |MediaTypeData| replace:: :cpp:func:`MediaTypeData()<SilKit::Util::SerDes::MediaTypeData()>`
 
+.. _chap:pubsub-service-api:
 
 ==========================
 Data Publish/Subscribe API

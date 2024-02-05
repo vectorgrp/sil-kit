@@ -6,7 +6,7 @@ LIN C API
    :depth: 3
 
 The LIN API for the C language provides communication in a LIN bus master/slave-architecture.
-The functionality is analogous to the C++ API described in :ref:`sec:lin`.
+The functionality is analogous to the C++ API described in :ref:`chap:lin-service-api`.
   
 LIN Controller
 ~~~~~~~~~~~~~~

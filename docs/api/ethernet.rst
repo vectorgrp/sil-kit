@@ -1,3 +1,5 @@
+.. _chap:ethernet-service-api:
+
 ====================
 Ethernet Service API
 ====================

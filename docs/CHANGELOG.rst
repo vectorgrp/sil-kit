@@ -6,6 +6,19 @@ All notable changes to the Vector SIL Kit project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
+[4.0.45] - Unreleased
+---------------------
+
+Changed
+~~~~~~~
+
+- Add links to API sections in the documentation overview
+
+
+Added
+~~~~~
+
+- RPC usage example with lifecycle
 
 [4.0.45] - UNRELEASED
 ---------------------

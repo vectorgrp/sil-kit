@@ -30,6 +30,11 @@ Simulation
 .. |SetParticipantConnectedHandler| replace:: :cpp:func:`SetParticipantConnectedHandler()<SilKit::Services::Orchestration::ISystemMonitor::SetParticipantConnectedHandler()>`
 .. |SetParticipantDisconnectedHandler| replace:: :cpp:func:`SetParticipantDisconnectedHandler()<SilKit::Services::Orchestration::ISystemMonitor::SetParticipantDisconnectedHandler()>`
 
+.. |DataPublisher| replace:: :cpp:class:`DataPublisher<SilKit::Services::PubSub::IDataPublisher>`
+.. |DataSubscriber| replace:: :cpp:class:`DataSubscriber<SilKit::Services::PubSub::IDataSubscriber>`
+.. |RpcClient| replace:: :cpp:class:`RpcClient<SilKit::Services::Rpc::IRpcClient>`
+.. |RpcServer| replace:: :cpp:class:`RpcServer<SilKit::Services::Rpc::IRpcServer>`
+
 ..
   Section references 
 .. |LifecycleService| replace:: :ref:`Lifecycle Service<subsubsec:sim-lifecycle-lifecycleService>`
@@ -159,6 +164,8 @@ Each participant has an independent lifecycle that other participants can observ
 
    : |ProductName| participant state machine.
 
+.. _subsubsec:sim-lifecycle-starting-a-simulation:
+
 Starting a Simulation
 ~~~~~~~~~~~~~~~~~~~~~
 
@@ -168,7 +175,7 @@ This will cause the |LifecycleService| to announce its state as :cpp:enumerator:
 A participant that uses the lifecycle service may choose to coordinate its state with other participants by creating the |ILifecycleService| with |OperationMode_Coordinated|.
 In that case, they will align their participant state based on the current system state until they reach :cpp:enumerator:`CommunicationInitialized<SilKit::Services::Orchestration::ParticipantState::CommunicationInitialized>`.
 
-Once the system state also changes to CommunicationInitialized, the communication between all participants via :cpp:class:`DataPublisher<SilKit::Services::PubSub::IDataPublisher>` and :cpp:class:`DataSubscriber<SilKit::Services::PubSub::IDataSubscriber>` is possible.
+Once the system state also changes to CommunicationInitialized, the communication between all participants via PubSub / RPC is possible.
 This information is propagated to the user if they registered the callback via :cpp:func:`SetCommunicationReadyHandler()<SilKit::Services::Orchestration::ILifecycleService::SetCommunicationReadyHandler()>`.
 Once the callback is finished, the participant state changes to :cpp:enumerator:`ReadyToRun<SilKit::Services::Orchestration::ParticipantState::ReadyToRun>`.
 The participant will wait for the system state to change to :cpp:enumerator:`ReadyToRun<SilKit::Services::Orchestration::SystemState::ReadyToRun>` as well and then proceeds to the :cpp:enumerator:`Running<SilKit::Services::Orchestration::ParticipantState::Running>` state.

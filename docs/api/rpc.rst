@@ -25,6 +25,9 @@
 
 .. |MediaTypeRpc| replace:: :cpp:func:`MediaTypeRpc()<SilKit::Util::SerDes::MediaTypeRpc()>`
 
+.. |CoordinatedLifecycle| replace:: :ref:`coordinated lifecycle<subsubsec:sim-lifecycle-starting-a-simulation>`
+
+.. _chap:rpc-service-api:
 
 ===============================
 RPC (Remote Procedure Call) API
@@ -54,7 +57,7 @@ The |IRpcClient| is instantiated from an |IParticipant| instance by calling the 
         }
 
         SilKit::Util::SerDes::Deserializer deserializer{SilKit::Util::ToStdVector(event.resultData)};
-        std::cout << "sum is " << deserializer.Deserialize<uint32_t>() << " with user context " << event.userContext << std::endl;
+        std::cout << "sum is " << deserializer.Deserialize<uint32_t>(32) << " with user context " << event.userContext << std::endl;
     };
 
     SilKit::Services::Rpc::RpcSpec rpcSpec{"Add", SilKit::Util::SerDes::MediaTypeRpc()};
@@ -73,8 +76,8 @@ The callback provides the user context pointer passed to |Call| or |CallWithTime
 
     SilKit::Util::SerDes::Serializer serializer;
     serializer.BeginStruct();
-    serializer.Serialize(uint32_t{31});
-    serializer.Serialize(uint32_t{11});
+    serializer.Serialize(uint32_t{31}, 32);
+    serializer.Serialize(uint32_t{11}, 32);
     serializer.EndStruct();
 
     client->Call(serializer.ReleaseBuffer());
@@ -95,18 +98,18 @@ The |IRpcServer| must submit the answer to the call at a later point in time wit
     auto rpcCallHandler = [](IRpcServer* server, const RpcCallEvent& event) {
         SilKit::Util::SerDes::Deserializer deserializer{SilKit::Util::ToStdVector(event.argumentData)};
         deserializer.BeginStruct();
-        const auto lhs = deserializer.Deserialize<uint32_t>();
-        const auto rhs = deserializer.Deserialize<uint32_t>();
+        const auto lhs = deserializer.Deserialize<uint32_t>(32);
+        const auto rhs = deserializer.Deserialize<uint32_t>(32);
         deserializer.EndStruct();
 
         SilKit::Util::SerDes::Serializer serializer;
-        serializer.Serialize(lhs + rhs);
+        serializer.Serialize(lhs + rhs, 32);
 
         server->SubmitResult(event.callHandle, serializer.ReleaseBuffer());
     };
 
     SilKit::Services::Rpc::RpcSpec rpcSpec{"Add", SilKit::Util::SerDes::MediaTypeRpc()};
-    auto* server = participant->CreateRpcServer("AddServer, rpcSpec, rpcCallHandler);
+    auto* server = participant->CreateRpcServer("AddServer", rpcSpec, rpcCallHandler);
 
 Argument and return data is represented as a byte vector, so the serialization schema can be chosen by the user.
 Nonetheless, it is highly recommended to use SIL Kit's :doc:`Data Serialization/Deserialization API</api/serdes>` to ensure compatibility among all SIL Kit participants.
@@ -118,6 +121,11 @@ Usage Examples
 Example: Simple Calculator
 --------------------------
 
+In this example, the RPC Server offers a simple function for adding two numbers. 
+The example shows the usage of the RPC Server / Client and data (de-)serialization. 
+Note that the availability of the RPC Server is not guaranteed and will depend on the starting order of the two participants.
+The next example shows how a coordinated lifecycle can be set up to guarantee the reception of the RPC client call.
+
 Server - Addition
 ~~~~~~~~~~~~~~~~~
 
@@ -126,18 +134,18 @@ Server - Addition
     auto rpcCallHandler = [](IRpcServer* server, const RpcCallEvent& event) {
         SilKit::Util::SerDes::Deserializer deserializer{SilKit::Util::ToStdVector(event.argumentData)};
         deserializer.BeginStruct();
-        const auto lhs = deserializer.Deserialize<uint32>();
-        const auto rhs = deserializer.Deserialize<uint32>();
+        const auto lhs = deserializer.Deserialize<uint32_t>(32);
+        const auto rhs = deserializer.Deserialize<uint32_t>(32);
         deserializer.EndStruct();
 
         SilKit::Util::SerDes::Serializer serializer;
-        serializer.Serialize(lhs + rhs);
+        serializer.Serialize(lhs + rhs, 32);
 
         server->SubmitResult(event.callHandle, serializer.ReleaseBuffer());
     };
 
     SilKit::Services::Rpc::RpcSpec rpcSpec{"Add", SilKit::Util::SerDes::MediaTypeRpc()};
-    auto* server = participant->CreateRpcServer("AddServer, rpcSpec, rpcCallHandler);
+    auto* server = participant->CreateRpcServer("AddServer", rpcSpec, rpcCallHandler);
 
 Client - Addition
 ~~~~~~~~~~~~~~~~~
@@ -151,19 +159,124 @@ Client - Addition
         }
 
         SilKit::Util::SerDes::Deserializer deserializer{SilKit::Util::ToStdVector(event.resultData)};
-        std::cout << "sum is " << deserializer.Deserialize<uint32_t>() << std::endl;
+        std::cout << "sum is " << deserializer.Deserialize<uint32_t>(32) << std::endl;
     };
 
     SilKit::Services::Rpc::RpcSpec rpcSpec{"Add", SilKit::Util::SerDes::MediaTypeRpc()};
     auto* client = participant->CreateRpcClient("AddClient", rpcSpec, rpcCallResultHandler);
 
+    std::this_thread::sleep_for(1s);
+    
     SilKit::Util::SerDes::Serializer serializer;
     serializer.BeginStruct();
-    serializer.Serialize(uint32_t{31});
-    serializer.Serialize(uint32_t{11});
+    serializer.Serialize(uint32_t{31}, 32);
+    serializer.Serialize(uint32_t{11}, 32);
     serializer.EndStruct();
 
     client->Call(serializer.ReleaseBuffer());
+
+
+Example: RPC with guaranteed call reception
+-------------------------------------------
+
+This example is based on the previous one and includes participant creation and the setup of a |CoordinatedLifecycle|.
+This guarantees that the RPC client and server are validly connected at the time the client makes the call.
+
+Server - Addition
+~~~~~~~~~~~~~~~~~
+
+.. code-block:: cpp
+
+    #include <iostream>
+
+    #include "silkit/SilKit.hpp"
+    #include "silkit/services/rpc/all.hpp"
+    #include "silkit/services/orchestration/all.hpp"
+    #include "silkit/util/serdes/Serialization.hpp"
+
+    using namespace SilKit::Services::Orchestration;
+    using namespace SilKit::Services::Rpc;
+
+    int main(int argc, char** argv)
+    {
+        auto config = SilKit::Config::ParticipantConfigurationFromString("");
+        auto participant = SilKit::CreateParticipant(config, "Server", "silkit://localhost:8500");
+        auto* lifecycleService = participant->CreateLifecycleService({OperationMode::Coordinated});
+
+        auto rpcCallHandler = [](IRpcServer* server, const RpcCallEvent& event) {
+            SilKit::Util::SerDes::Deserializer deserializer{SilKit::Util::ToStdVector(event.argumentData)};
+            deserializer.BeginStruct();
+            const auto lhs = deserializer.Deserialize<uint32_t>(32);
+            const auto rhs = deserializer.Deserialize<uint32_t>(32);
+            deserializer.EndStruct();
+
+            SilKit::Util::SerDes::Serializer serializer;
+            serializer.Serialize(lhs + rhs, 32);
+
+            std::cout << "Server function 'Add' is called with parameters: " << lhs << ", " << rhs << std::endl;
+            server->SubmitResult(event.callHandle, serializer.ReleaseBuffer());
+        };
+
+        SilKit::Services::Rpc::RpcSpec rpcSpec{"Add", SilKit::Util::SerDes::MediaTypeRpc()};
+        auto* server = participant->CreateRpcServer("AddServer", rpcSpec, rpcCallHandler);
+    
+        auto finalStateFuture = lifecycleService->StartLifecycle();
+        finalStateFuture.get();
+
+        return 0;
+    }
+
+Client - Addition
+~~~~~~~~~~~~~~~~~
+
+.. code-block:: cpp
+
+    #include <iostream>
+
+    #include "silkit/SilKit.hpp"
+    #include "silkit/services/rpc/all.hpp"
+    #include "silkit/services/orchestration/all.hpp"
+    #include "silkit/util/serdes/Serialization.hpp"
+
+    using namespace SilKit::Services::Orchestration;
+    using namespace SilKit::Services::Rpc;
+
+    int main(int argc, char** argv)
+    {
+        auto config = SilKit::Config::ParticipantConfigurationFromString("");
+        auto participant = SilKit::CreateParticipant(config, "Client", "silkit://localhost:8500");
+        auto* lifecycleService = participant->CreateLifecycleService({OperationMode::Coordinated});
+
+        auto rpcCallResultHandler = [](IRpcClient*, const RpcCallResultEvent& event) {
+            if (event.callStatus != SilKit::Services::Rpc::RpcCallStatus::Success)
+            {
+                return;
+            }
+
+            SilKit::Util::SerDes::Deserializer deserializer{SilKit::Util::ToStdVector(event.resultData)};
+            std::cout << "Client obtained result: " << deserializer.Deserialize<uint32_t>(32) << std::endl;
+        };
+
+        SilKit::Services::Rpc::RpcSpec rpcSpec{"Add", SilKit::Util::SerDes::MediaTypeRpc()};
+        auto* client = participant->CreateRpcClient("AddClient", rpcSpec, rpcCallResultHandler);
+
+        lifecycleService->SetCommunicationReadyHandler([client]() {
+            SilKit::Util::SerDes::Serializer serializer;
+            serializer.BeginStruct();
+            serializer.Serialize(uint32_t{31}, 32);
+            serializer.Serialize(uint32_t{11}, 32);
+            serializer.EndStruct();
+
+            std::cout << "Client calls: 'Add(31, 11)'" << std::endl;
+            client->Call(serializer.ReleaseBuffer());
+        });
+
+        auto finalStateFuture = lifecycleService->StartLifecycle();
+        finalStateFuture.get();
+
+        return 0;
+    }
+
 
 API and Data Type Reference
 ===========================

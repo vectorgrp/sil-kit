@@ -1,3 +1,5 @@
+.. _chap:flexray-service-api:
+
 ===================
 FlexRay Service API
 ===================

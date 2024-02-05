@@ -1,3 +1,5 @@
+.. _chap:logging-service-api:
+
 ===================
 Logging Service API
 ===================
