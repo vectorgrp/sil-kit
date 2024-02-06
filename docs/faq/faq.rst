@@ -120,3 +120,40 @@ For example, by adding the following configuration:
 This will tell SIL Kit to write all log messages of Level trace and above to a file in the process working directory of the SIL Kit participant.
 The file name will be ``TraceLogFile`` with a time-specific suffix.
 The ``LogName`` field also supports an absolute path, e.g., ``LogName: C:\Temp\SimulationLog``.
+
+How can I use unicode characters with SIL Kit?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+SIL Kit expects strings passed via the C and C++ API to be encoded as UTF-8.
+This is particularly important for paths, e.g., the path to the participant configuration.
+
+This can lead to some confusion when SIL Kit is used on the Windows operating system.
+
+The utility executables (``sil-kit-registry``, ``sil-kit-system-controller``, and ``sil-kit-monitor``), and all demo applications are compiled using a manifest, that automatically activates the UTF-8 codepage.
+This allows the correct handling of paths containing Unicode characters.
+
+Even in modern Windows systems, UTF-8 is usually not used as the default codepage, in order to be compatible with old applications.
+Unfortunately this can lead to strange characters in the command line output of SIL Kit tools, when, e.g., the participant name contains non-ASCII characters.
+
+As an example, when the participant name is set to ``🚗`` (car emoji), if the output codepage is not changed to UTF-8, the output might look like this:
+
+.. figure:: ../_static/faq-example-bad-output-codepage.png
+   :alt: : Mangled output from SIL Kit when the output codepage is not UTF-8, and the participant name contains Unicode characters
+   :align: center
+   :width: 1000
+
+   : Mangled output from SIL Kit when the output codepage is not UTF-8, and the participant name contains Unicode characters
+
+If the output codepage is changed to UTF-8 (see below), the output should look like this:
+
+.. figure:: ../_static/faq-example-good-output-codepage.png
+   :alt: : Correct output from SIL Kit when the output codepage is set to UTF-8, and the participant name contains Unicode characters
+   :align: center
+   :width: 1000
+
+   : Correct output from SIL Kit when the output codepage is set to UTF-8, and the participant name contains Unicode characters
+
+If you use ``cmd.exe``, run the command ``chcp 65001`` before invoking any SIL Kit utilities or demos.
+This command changes the output codepage of the console window to UTF-8, which is required to correctly decode the text output of the executables for presentation in the console window.
+
+If you use PowerShell, run ``[console]::InputEncoding = [console]::OutputEncoding = New-Object System.Text.UTF8Encoding`` before invoking any SIL Kit utilities or demos to achieve the same effect.

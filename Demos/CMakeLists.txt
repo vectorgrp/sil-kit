@@ -100,6 +100,7 @@ endif()
 macro(make_silkit_demo executableName demoSourceFile)
     add_executable(${executableName}
         ${demoSourceFile}
+        $<$<CXX_COMPILER_ID:MSVC>: "${CMAKE_CURRENT_SOURCE_DIR}/../demo.manifest" >
     )
     remove_definitions(-DEXPORT_SilKitAPI)
     

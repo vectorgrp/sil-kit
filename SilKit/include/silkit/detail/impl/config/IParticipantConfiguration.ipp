@@ -45,18 +45,15 @@ auto ParticipantConfigurationFromString(const std::string& text)
     return std::make_shared<Impl::Config::ParticipantConfiguration>(participantConfiguration);
 }
 
-auto ParticipantConfigurationFromFile(const std::string& filename)
+auto ParticipantConfigurationFromFile(const std::string& path)
     -> std::shared_ptr<SilKit::Config::IParticipantConfiguration>
 {
-    std::ifstream fs(filename);
+    SilKit_ParticipantConfiguration* participantConfiguration{nullptr};
 
-    if (!fs.is_open())
-        throw SilKit::ConfigurationError("the file could not be opened");
+    const auto returnCode = SilKit_ParticipantConfiguration_FromFile(&participantConfiguration, path.c_str());
+    Impl::ThrowOnError(returnCode);
 
-    std::stringstream buffer;
-    buffer << fs.rdbuf();
-
-    return ParticipantConfigurationFromString(buffer.str());
+    return std::make_shared<Impl::Config::ParticipantConfiguration>(participantConfiguration);
 }
 
 } // namespace Config

@@ -37,7 +37,7 @@ public:
     /*! \brief Log a message with a specified level
     *
     * \param level The log level for the message
-    * \param msg The message which shall be logged.
+    * \param msg The message which shall be logged (UTF-8).
     */
     virtual void Log(Level level, const std::string& msg) = 0;
 

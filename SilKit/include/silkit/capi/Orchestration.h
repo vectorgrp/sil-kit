@@ -115,9 +115,9 @@ typedef int8_t SilKit_OperationMode;
 typedef struct
 {
     SilKit_StructHeader structHeader;
-    const char* participantName; /*!< Name of the participant. */
+    const char* participantName; /*!< Name of the participant (UTF-8). */
     SilKit_ParticipantState participantState; /*!< The new state of the participant. */
-    const char* enterReason; /*!< The reason for the participant to enter the new state. */
+    const char* enterReason; /*!< The reason for the participant to enter the new state (UTF-8). */
     SilKit_NanosecondsWallclockTime enterTime; /*!< The enter time of the participant. */
     SilKit_NanosecondsWallclockTime refreshTime; /*!< The refresh time. */
 } SilKit_ParticipantStatus;
@@ -365,7 +365,7 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LifecycleService_WaitForLifecycleT
  * report the error message in the SIL Kit system.
  *
  * \param lifecycleService The lifecycle service of the simulation.
- * \param reason A string describing the error.
+ * \param reason A string describing the error (UTF-8).
  */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LifecycleService_ReportError(SilKit_LifecycleService* lifecycleService,
                                                                            const char* reason);
@@ -382,6 +382,9 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LifecycleService_ReportError_t)(Si
  * health monitoring related timeout occurs.
  *
  * Precondition: State() == \ref SilKit_ParticipantState_Running
+ *
+ * \param lifecycleService The lifecycle service of the simulation.
+ * \param reason A string describing the reason why the simulation was paused (UTF-8).
  */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LifecycleService_Pause(SilKit_LifecycleService* lifecycleService,
     const char* reason);
@@ -412,6 +415,9 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LifecycleService_Continue_t)(SilKi
  * cannot participate in the system simulation anymore.
  *
  * Precondition: State() == \ref SilKit_ParticipantState_Running
+ *
+ * \param lifecycleService The lifecycle service of the simulation.
+ * \param reason A string describing why the simulation was stopped (UTF-8).
  */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LifecycleService_Stop(SilKit_LifecycleService* lifecycleService, const char* reason);
 
@@ -548,7 +554,7 @@ SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_SystemMonitor_Create(SilKit_System
 typedef SilKit_ReturnCode(SilKitFPTR* SilKit_SystemMonitor_Create_t)(SilKit_SystemMonitor** outSystemMonitor,
     SilKit_Participant* participant);
 
-/*! \brief Get the current participant state of the participant given by participantName
+/*! \brief Get the current participant state of the participant given by participantName (UTF-8)
  */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_SystemMonitor_GetParticipantStatus(SilKit_ParticipantStatus* outParticipantState,
                                                                       SilKit_SystemMonitor* systemMonitor,
@@ -635,7 +641,7 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_SystemMonitor_RemoveParticipantSta
 typedef struct SilKit_ParticipantConnectionInformation
 {
     SilKit_StructHeader structHeader;
-    /*! \brief Name of the remote participant. */
+    /*! \brief Name of the remote participant (UTF-8). */
     const char* participantName;
 } SilKit_ParticipantConnectionInformation;
 
@@ -680,7 +686,7 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_SystemMonitor_SetParticipantDiscon
 /*! \brief Check if a participant identified by the participantName is present.
  *
  * @param systemMonitor The system monitor obtained via \ref SilKit_SystemMonitor_Create.
- * @param participantName The name of the participant for which presence is queried.
+ * @param participantName The name of the participant for which presence is queried (UTF-8).
  * @param out \ref SilKit_True is written to the pointee if the participant is present, otherwise \ref SilKit_False.
  */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_SystemMonitor_IsParticipantConnected(SilKit_SystemMonitor* systemMonitor,

@@ -104,7 +104,7 @@ typedef void (SilKitFPTR *SilKit_RpcCallResultHandler_t)(void* context, SilKit_R
 /*! \brief Create a RPC server on a simulation participant with the provided properties.
  * \param outServer Pointer to which the resulting RPC server reference will be written.
  * \param participant The simulation participant for which the RPC server should be created.
- * \param controllerName The name of this controller.
+ * \param controllerName The name of this controller (UTF-8).
  * \param rpcSpec A struct containing all matching related information
  * \param callHandlerContext A user provided context pointer that is passed to the callHandler on call.
  * \param callHandler A callback function that is triggered on invocation of the server functionality.
@@ -148,7 +148,7 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_RpcServer_SetCallHandler_t)(SilKit
 /*! \brief Create a RPC client on a simulation participant with the provided properties.
  * \param outClient Pointer to which the resulting RPC client reference will be written.
  * \param participant The simulation participant for which the RPC client should be created.
- * \param controllerName The name of this controller.
+ * \param controllerName The name of this controller (UTF-8).
  * \param rpcSpec The specification of function name, media type and labels.
  * \param resultHandlerContext A user provided context that is reobtained on call result in the resultHandler.
  * \param resultHandler A callback that is called when a call result is received.

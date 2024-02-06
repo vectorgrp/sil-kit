@@ -67,13 +67,17 @@ auto printableName(const std::string& participantName) -> std::string
     std::string safeName;
     for (const auto& ch : participantName)
     {
-        if (std::isalnum(ch))
+        // do not use std::isalnum, as it may sensitive to the current locale
+        const bool isAlphaNumeric{('a' <= ch && ch <= 'z') || ('A' <= ch && ch <= 'Z') || ('0' <= ch && ch <= '9')
+                                  || (ch == '_' || ch == '-' || ch == '.' || ch == '~')};
+
+        if (isAlphaNumeric)
         {
             safeName.push_back(ch);
         }
         else
         {
-            safeName += fmt::format("{:x}", static_cast<unsigned char>(ch));
+            safeName += fmt::format("{:02X}", static_cast<unsigned char>(ch));
         }
     }
     return safeName;

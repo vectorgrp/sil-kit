@@ -49,7 +49,7 @@ namespace Config {
  * Create a configuration data object from settings described by a
  * YAML or JSON formatted string.
  *
- * \param text A string that adheres to our JSON schema.
+ * \param text A string that adheres to our JSON schema (UTF-8).
  * \return The configuration data
  *
  * \throw SilKit::ConfigurationError The input string violates the
@@ -63,7 +63,7 @@ DETAIL_SILKIT_CPP_API auto ParticipantConfigurationFromString(const std::string&
  * Create a configuration data object from settings described by a
  * YAML or JSON file.
  *
- * \param filename Path to the YAML or JSON file.
+ * \param filename Path to the YAML or JSON file (UTF-8).
  * \return The configuration data
  *
  * \throw SilKit::ConfigurationError The file could not be read, or

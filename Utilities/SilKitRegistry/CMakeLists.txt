@@ -40,6 +40,8 @@ add_executable(sil-kit-registry
 
     WindowsServiceMain.hpp
     WindowsServiceMain.cpp
+
+    $<$<CXX_COMPILER_ID:MSVC>: "${CMAKE_CURRENT_SOURCE_DIR}/../utilities.manifest" >
 )
 
 # Group this demo project into a folder

@@ -66,7 +66,7 @@ typedef void (SilKitFPTR *SilKit_DataMessageHandler_t)(void* context, SilKit_Dat
 /*! \brief Create a DataPublisher on the provided simulation participant with the provided properties.
 * \param outPublisher Pointer to which the resulting DataPublisher reference will be written.
 * \param participant The simulation participant for which the DataPublisher should be created.
-* \param controllerName The name of this controller.
+* \param controllerName The name of this controller (UTF-8).
 * \param dataSpec The specification of topic, media type and labels.
 * \param history A number indicating the number of historic values that should be replayed for a new DataSubscriber.
 * Restricted to {0|1}.
@@ -84,7 +84,7 @@ typedef SilKit_ReturnCode(SilKitFPTR* SilKit_DataPublisher_Create_t)(SilKit_Data
 /*! \brief Create a DataSubscriber on the provided simulation participant with the provided properties.
 * \param outSubscriber Pointer to which the resulting DataSubscriber reference will be written.
 * \param participant The simulation participant for which the DataSubscriber should be created.
-* \param controllerName The name of this controller.
+* \param controllerName The name of this controller (UTF-8).
 * \param dataSpec The specification of topic, media type and labels.
 * \param dataHandlerContext A user provided context that is reobtained on data reception in the dataHandler.
 * \param dataHandler The handler that is called on data reception. Can be overwritten by \ref SilKit_DataSubscriber_SetDataMessageHandler.

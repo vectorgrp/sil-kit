@@ -205,8 +205,8 @@ typedef void (SilKitFPTR *SilKit_CanErrorStateChangeHandler_t)(void* context, Si
 /*! \brief Create a CAN controller at this SIL Kit simulation participant.
  * \param outCanController Pointer that refers to the resulting CAN controller (out parameter).
  * \param participant The simulation participant at which the CAN controller should be created.
- * \param name The name of the new CAN controller.
- * \param network The network of the CAN controller to operate in.
+ * \param name The name of the new CAN controller (UTF-8).
+ * \param network The network of the CAN controller to operate in (UTF-8).
  *
  * The lifetime of the resulting CAN controller is directly bound to the lifetime of the simulation participant.
  * There is no further cleanup necessary except for destroying the simulation participant at the end of the 

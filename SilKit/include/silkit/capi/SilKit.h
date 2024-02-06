@@ -40,7 +40,7 @@ SILKIT_BEGIN_DECLS
 
 /*! \brief Get the corresponding static error string for a given return code.
  *
- * \param outString The pointer through which the resulting human readable error string will be returned.
+ * \param outString The pointer through which the resulting human readable error string, encoded in UTF-8, will be returned.
  * \param returnCode The return code for which the string should be obtained.
  *
  * \ref SilKit_GetLastErrorString()
@@ -67,7 +67,7 @@ typedef const char*(SilKitFPTR *SilKit_GetLastErrorString_t)();
  * To destroy the participant configuration, call \ref SilKit_ParticipantConfiguration_Destroy.
  *
  * \param outParticipantConfiguration The pointer through which the participant configuration will be returned (out parameter).
- * \param participantConfigurationString The configuration as a string (e.g., read from a configuration file or a string constant).
+ * \param participantConfigurationString The configuration as a UTF-8 encoded string (e.g., read from a configuration file or a string constant).
  */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_ParticipantConfiguration_FromString(
     SilKit_ParticipantConfiguration** outParticipantConfiguration,
@@ -76,6 +76,22 @@ SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_ParticipantConfiguration_FromStrin
 typedef SilKit_ReturnCode (SilKitFPTR *SilKit_ParticipantConfiguration_FromString_t)(
     SilKit_ParticipantConfiguration** outParticipantConfiguration,
     const char* participantConfigurationString);
+
+
+/*! \brief Create an opaque participant configuration from the contents of the UTF-8 encoded text file.
+ *
+ * To destroy the participant configuration, call \ref SilKit_ParticipantConfiguration_Destroy.
+ *
+ * \param outParticipantConfiguration The pointer through which the participant configuration will be returned (out parameter).
+ * \param participantConfigurationPath The path to the configuration file as a UTF-8 encoded string.
+ */
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_ParticipantConfiguration_FromFile(
+    SilKit_ParticipantConfiguration** outParticipantConfiguration,
+    const char* participantConfigurationPath);
+
+typedef SilKit_ReturnCode (SilKitFPTR *SilKit_ParticipantConfiguration_FromFile_t)(
+    SilKit_ParticipantConfiguration** outParticipantConfiguration,
+    const char* participantConfigurationPath);
 
 
 /*! \brief Destroy a participant configuration.

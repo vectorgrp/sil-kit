@@ -47,7 +47,7 @@ typedef struct SilKit_Logger SilKit_Logger;
  *
  * \param logger The logger to use.
  * \param level The log level for the message.
- * \param message The message which shall be logged.
+ * \param message The message which shall be logged (UTF-8).
  */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Logger_Log(SilKit_Logger* logger, SilKit_LoggingLevel level,
                                                          const char* message);

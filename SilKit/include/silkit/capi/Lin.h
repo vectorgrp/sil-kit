@@ -348,8 +348,8 @@ typedef void (SilKitFPTR* SilKit_Experimental_LinFrameHeaderHandler_t)(
  *
  * \param outLinController Pointer into which the resulting LIN controller will be written (out parameter).
  * \param participant The simulation participant at which the LIN controller should be created.
- * \param name The name of the new LIN controller.
- * \param network The network of the LIN controller to operate in.
+ * \param name The name of the new LIN controller (UTF-8).
+ * \param network The network of the LIN controller to operate in (UTF-8).
  *
  * \return \ref SilKit_ReturnCode
  */

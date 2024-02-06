@@ -293,6 +293,29 @@ TEST_F(ITest_Dashboard, dashboard_no_simulation)
     CheckTestResult(testResult, CreateExpectedTestResult({}, false));
 }
 
+TEST_F(ITest_Dashboard, dashboard_unicode_emoji_coordinated)
+{
+    // the two participants use the car emoji (🚗) in their name, which is escaped for the dashboard
+    const auto participantName1 = "\xf0\x9f\x9a\x97 CanReader";
+    const auto expectedParticipantName1 = "%f0%9f%9a%97%20CanReader";
+    const auto participantName2 = "\xf0\x9f\x9a\x97 CanWriter";
+    const auto expectedParticipantName2 = "%f0%9f%9a%97%20CanWriter";
+    const auto canonicalName = "CanController1";
+    const auto networkName = "CAN1";
+    SetupFromParticipantLists({participantName1, participantName2}, {});
+    auto testResult = SilKit::Dashboard::RunDashboardTest(
+        ParticipantConfigurationFromStringImpl(_dashboardParticipantConfig), _registryUri, _dashboardUri,
+        [this, &participantName1, &participantName2, &canonicalName, &networkName]() {
+          RunCanDemo(participantName1, participantName2, canonicalName, networkName);
+        });
+    _simTestHarness->ResetRegistry();
+    CheckTestResult(testResult,
+                    CreateExpectedTestResult(
+                        {{{expectedParticipantName1, {{6, {"", "cancontroller", canonicalName, networkName, {}}}}},
+                          {expectedParticipantName2, {{6, {"", "cancontroller", canonicalName, networkName, {}}}}}}},
+                        true));
+}
+
 TEST_F(ITest_Dashboard, dashboard_can_coordinated)
 {
     const auto participantName1 = "CanReader";

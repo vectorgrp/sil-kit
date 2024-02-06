@@ -29,6 +29,10 @@ Fixed
 - Registry failed to start correctly, if the dashboard is enabled, but the registry is letting the
   system determine the listening port, e.g., when using a URI like ``silkit://localhost:0``.
 
+- Windows: Utilities and demos are now compiled with a manifest that sets the active codepage to UTF-8.
+  The required commands to change the output codepage of the Windows console in ``cmd`` or PowerShell
+  are documented in a new FAQ entry.
+
 
 [4.0.44] - 2024-01-22
 ---------------------

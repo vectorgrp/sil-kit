@@ -91,7 +91,7 @@ public:
 
     /*! \brief Get the current \ref ParticipantStatus of specific participant
      *
-     * \param participantName The name of the participant for which the status is queried.
+     * \param participantName The name of the participant for which the status is queried (UTF-8).
      * \throw SilKit::SilKitError If the participant name does not
      *        identify a participant that participates in synchronization.
      */
@@ -112,7 +112,7 @@ public:
 
     /*! \brief Check if a participant identified by the participantName is present.
      *
-     * @param participantName The name of the participant for which presence is queried.
+     * @param participantName The name of the participant for which presence is queried (UTF-8).
      * @return true if the participant is present
      */
     virtual auto IsParticipantConnected(const std::string& participantName) const -> bool = 0;

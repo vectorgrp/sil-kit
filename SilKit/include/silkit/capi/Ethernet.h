@@ -148,8 +148,8 @@ typedef void (SilKitFPTR *SilKit_EthernetBitrateChangeHandler_t)(void* context, 
 * 
 * \param outController A pointer to a pointer in which the Ethernet controller will be stored (out parameter).
 * \param participant The simulation participant for which the Ethernet controller should be created.
-* \param name The utf8 encoded name of the new Ethernet controller.
-* \param network The network of the Ethernet controller to operate in.
+* \param name The name of the new Ethernet controller (UTF-8).
+* \param network The network of the Ethernet controller to operate in (UTF-8).
 * \result A return code identifying the success/failure of the call.
 * ! \note The object returned must not be deallocated using free()!
 * 

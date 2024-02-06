@@ -37,7 +37,7 @@ DETAIL_SILKIT_DETAIL_VN_NAMESPACE_BEGIN
  * Become a participant based on the the given configuration options.
  *
  * \param participantConfig Configuration of the participant
- * \param participantName Name of the participant
+ * \param participantName Name of the participant (UTF-8)
  * \return Instance of the communication adapter
  *
  * \throw SilKit::ConfigurationError if the config has errors
@@ -52,7 +52,7 @@ DETAIL_SILKIT_CPP_API auto CreateParticipant(
  * Become a participant based on the the given configuration options.
  *
  * \param participantConfig Configuration of the participant
- * \param participantName Name of the participant
+ * \param participantName Name of the participant (UTF-8)
  * \param registryUri The URI of the registry
  * \return Instance of the communication adapter
  *
