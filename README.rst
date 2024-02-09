@@ -11,9 +11,9 @@ The Vector SIL Kit
 .. image:: https://github.com/vectorgrp/sil-kit/actions/workflows/build-linux-asan.yml/badge.svg
    :target: https://github.com/vectorgrp/sil-kit/actions/workflows/build-linux-asan.yml
 .. image:: https://github.com/vectorgrp/sil-kit/actions/workflows/build-linux-ubsan.yml/badge.svg
-   :target: https://github.com/vectorgrp/sil-kit/actions/workflows/build-linux-tsan.yml
-.. image:: https://github.com/vectorgrp/sil-kit/actions/workflows/build-linux-tsan.yml/badge.svg
    :target: https://github.com/vectorgrp/sil-kit/actions/workflows/build-linux-ubsan.yml
+.. image:: https://github.com/vectorgrp/sil-kit/actions/workflows/build-linux-tsan.yml/badge.svg
+   :target: https://github.com/vectorgrp/sil-kit/actions/workflows/build-linux-tsan.yml
 .. image:: https://github.com/vectorgrp/sil-kit/actions/workflows/build-win.yml/badge.svg
    :target: https://github.com/vectorgrp/sil-kit/actions/workflows/build-win.yml
 
