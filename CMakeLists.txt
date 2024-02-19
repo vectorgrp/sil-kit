@@ -200,6 +200,7 @@ if(SILKIT_INSTALL_SOURCE)
             PATTERN *.txt.in
             PATTERN *.md
             PATTERN *.xml
+            PATTERN *.manifest
         REGEX "/ci/.*" EXCLUDE
         REGEX "/ci$" EXCLUDE
         REGEX "\.git$" EXCLUDE
