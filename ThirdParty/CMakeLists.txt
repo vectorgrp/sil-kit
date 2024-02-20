@@ -96,6 +96,7 @@ function(include_yamlcpp)
 
     if(NOT SILKIT_USE_SYSTEM_LIBRARIES)
         set(YAML_CPP_BUILD_TESTS OFF CACHE BOOL "Disable because of gmock import conflict" FORCE)
+        set(YAML_BUILD_SHARED_LIBS OFF CACHE BOOL "Disable building yaml-cpp as shared library" FORCE)
         silkit_clean_default_compileflags()
 
         # disable the IPO for GTest due to CMake policy CMP0069 changes
@@ -117,6 +118,8 @@ function(include_yamlcpp)
         add_library(YamlInterface INTERFACE)
         target_include_directories(YamlInterface
             INTERFACE $<TARGET_PROPERTY:yaml-cpp,INTERFACE_INCLUDE_DIRECTORIES>)
+        target_compile_definitions(YamlInterface
+            INTERFACE YAML_CPP_STATIC_DEFINE)
         set(SILKIT_THIRD_PARTY_YAML_INTERFACE "YamlInterface" CACHE STRING "Name of the third party yaml interface target")
     else()
         # Find yaml-cpp

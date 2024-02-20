@@ -16,6 +16,8 @@ Fixed
 - Added the ``*.manifest`` files to the source distribution. Building from the ``SilKit-Source``
   directory in the distributed ``.zip`` files was broken.
 
+- Update ``yaml-cpp`` to version 0.8.0 to fix linker errors caused by a missing symbol.
+
 
 [4.0.45] - 2024-02-06
 ---------------------
