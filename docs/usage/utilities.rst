@@ -34,7 +34,7 @@ sil-kit-registry
         -h, --help                           Show the help of the SIL Kit Registry.
         -s, --use-signal-handler             Exit this process when a signal is received. If not set, the process runs infinitely.
         -u, --listen-uri <silkit-uri>        The ``silkit://`` URI the registry should listen on. Defaults to ``silkit://localhost:8500``.
-        -l, --log <level>                    Log to stdout with level ``trace``, ``debug``, ``warn``, ``info``, ``error``, ``critical`` or ``off``. Defaults to ``info``.
+        -l, --log <level>                    Log to stdout with level ``off``, ``critical``, ``error``, ``warn``, ``info``, ``debug``, or ``trace``. Defaults to ``info``.
         -g, --generate-configuration <path>  Path and filename of a participant configuration file to generate containing the URI the registry is using.
         -d, --dashboard-uri <dashboard-uri>  The ``http://`` URI the data should be sent to. Defaults to ``http://localhost:8082``.
         -c, --registry-configuration <path>  Path to the registry configuration file (YAML).
@@ -80,7 +80,8 @@ sil-kit-system-controller
          -h, --help                                   Show the help of ``sil-kit-system-controller``.
          -u, --connect-uri <silkitUri>                The registry's URI to connect to. Defaults to ``silkit://localhost:8500``.
          -n, --name <participantName>                 The participant name used to take part in the simulation. Defaults to ``SystemController``.
-         -c, --configuration <configuration>          Path and filename of the participant configuration YAML file.
+         -l, --log <level>                            Log to stdout with level ``trace``, ``debug``, ``warn``, ``info``, ``error``, ``critical`` or ``off``. Defaults to ``info``. Cannot be used together with ``--configuration``.
+         -c, --configuration <configuration>          Path and filename of the participant configuration YAML file. Cannot be used together with ``--log``.
          -ni, --non-interactive                       Run without awaiting any user interactions at any time.
          
          | **<participantName1>, <participantName2> ...**

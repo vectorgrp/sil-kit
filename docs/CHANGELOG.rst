@@ -18,6 +18,15 @@ Fixed
 
 - Update ``yaml-cpp`` to version 0.8.0 to fix linker errors caused by a missing symbol.
 
+- The system controller utility now logs parts of the command line output using the logger object
+  of the participant.
+
+Added
+~~~~~
+
+- Added a ``--log`` option to the system controller utility which cannot be used together with the
+  ``--configuration`` option. It provides a shortcut to set the log level of the utility.
+
 
 [4.0.45] - 2024-02-06
 ---------------------

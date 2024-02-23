@@ -22,6 +22,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #define _CRT_SECURE_NO_WARNINGS 1
 
 #include <algorithm>
+#include <cctype>
 #include <ctime>
 #include <cstring>
 #include <iostream>
@@ -40,6 +41,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 using namespace SilKit;
 using namespace SilKit::Services::Orchestration;
+using namespace SilKit::Services::Logging;
 
 using namespace std::chrono_literals;
 
@@ -49,6 +51,8 @@ std::ostream& operator<<(std::ostream& out, std::chrono::nanoseconds timestamp)
     out << seconds.count() << "s";
     return out;
 }
+
+namespace {
 
 class SilKitController
 {
@@ -62,6 +66,7 @@ public:
         _controller = SilKit::Experimental::Participant::CreateSystemController(participant);
         _controller->SetWorkflowConfiguration({expectedParticipantNames});
         _monitor = participant->CreateSystemMonitor();
+        _logger = participant->GetLogger();
 
         _lifecycleService =
             participant->CreateLifecycleService({SilKit::Services::Orchestration::OperationMode::Coordinated});
@@ -72,12 +77,12 @@ public:
     {
         if (_monitor->SystemState() == SystemState::Running || _monitor->SystemState() == SystemState::Paused)
         {
-            std::cout << "Stopping the SIL Kit simulation..." << std::endl;
+            LogInfo("Stopping the SIL Kit simulation...");
             _lifecycleService->Stop("Stop via interaction in sil-kit-system-controller");
         }
         else if (_monitor->SystemState() == SystemState::Aborting)
         {
-            std::cout << "SIL Kit simulation is already aborting..." << std::endl;
+            LogWarn("SIL Kit simulation is already aborting...");
             _aborted = true;
         }
         else if (_monitor->SystemState() == SystemState::Shutdown)
@@ -86,7 +91,7 @@ public:
         }
         else
         {
-            std::cout << "SIL Kit SystemState is invalid. Sending AbortSimulation..." << std::endl;
+            LogWarn("SIL Kit SystemState is invalid. Sending AbortSimulation...");
             _controller->AbortSimulation();
             _aborted = true;
         }
@@ -102,32 +107,34 @@ public:
             {
                 if (_aborted)
                 {
-                    std::cout << "SIL Kit simulation shut down after AbortSimulation." << std::endl;
+                    LogWarn("SIL Kit simulation shut down after AbortSimulation.");
                 }
                 else if (_externalShutdown)
                 {
-                    std::cout << "SIL Kit simulation was shut down externally." << std::endl;
+                    LogInfo("SIL Kit simulation was shut down externally.");
                 }
                 else
                 {
-                    std::cout << "SIL Kit simulation shut down." << std::endl;
+                    LogInfo("SIL Kit simulation shut down.");
                 }
                 return;
             }
             else
             {
-                std::cout << "SIL Kit simulation did not shut down in 5s... Retry " << retries << "/" << numRetries << std::endl;
+                std::ostringstream ss;
+                ss << "SIL Kit simulation did not shut down in 5s... Retry " << retries << "/" << numRetries;
+                LogWarn(ss.str());
             }
         }
 
         if (_aborted)
         {
-            std::cout << "SIL Kit simulation did not shut down after AbortSimulation. Terminating." << std::endl;
+            LogWarn("SIL Kit simulation did not shut down after AbortSimulation. Terminating.");
             return;
         }
         else
         {
-            std::cout << "SIL Kit simulation did not shut down after Stop. Sending AbortSimulation..." << std::endl;
+            LogWarn("SIL Kit simulation did not shut down after Stop. Sending AbortSimulation...");
             _aborted = true;
             _controller->AbortSimulation();
             WaitForFinalStateWithRetries();
@@ -139,12 +146,25 @@ public:
         ParticipantState state = _finalStatePromise.get();
         if (state == ParticipantState::Shutdown)
         {
-            std::cout << "SIL Kit simulation was shut down externally." << std::endl;
+            LogInfo("SIL Kit simulation was shut down externally.");
         }
         else
         {
-            std::cerr << "Warning: Exited with an unexpected participant state: " << state << std::endl;
+            std::ostringstream ss;
+            ss << "Warning: Exited with an unexpected participant state: " << state;
+            LogWarn(ss.str());
         }
+    }
+
+private:
+    void LogInfo(const std::string& message)
+    {
+        _logger->Info(message);
+    }
+
+    void LogWarn(const std::string& message)
+    {
+        _logger->Warn(message);
     }
 
 private:
@@ -156,8 +176,31 @@ private:
     SilKit::Experimental::Services::Orchestration::ISystemController* _controller;
     ISystemMonitor* _monitor;
     ILifecycleService* _lifecycleService;
+    ILogger* _logger;
     std::future<ParticipantState> _finalStatePromise;
 };
+
+auto ToLowerCase(std::string s) -> std::string
+{
+    std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) {
+        return (unsigned char)std::tolower(c);
+    });
+    return s;
+}
+
+auto IsValidLogLevel(const std::string& levelStr) -> bool
+{
+    auto logLevel = ToLowerCase(levelStr);
+    return    logLevel == "trace"
+           || logLevel == "debug"
+           || logLevel == "warn"
+           || logLevel == "info"
+           || logLevel == "error"
+           || logLevel == "critical"
+           || logLevel == "off";
+}
+
+} // namespace
 
 int main(int argc, char** argv)
 {
@@ -177,7 +220,12 @@ int main(int argc, char** argv)
     commandlineParser.Add<CommandlineParser::Option>(
         "configuration", "c", "", "[--configuration <configuration>]",
         "-c, --configuration <configuration>: Path and filename of the Participant configuration YAML or JSON file. "
-        "Note that the format was changed in v3.6.11.");
+        "Note that the format was changed in v3.6.11. Cannot be used together with the '--log' option.");
+    commandlineParser.Add<CommandlineParser::Option>(
+        "log", "l", "info", "[--log <level>]",
+        "-l, --log <level>: Log to stdout with level 'trace', 'debug', 'warn', 'info', 'error', 'critical' or 'off'. "
+        "Defaults to 'info' if the '--configuration' option is not specified. Cannot be used together with the "
+        "'--configuration' option.");
     commandlineParser.Add<CommandlineParser::PositionalList>(
         "participantNames", "<participantName1> [<participantName2> ...]",
         "<participantName1>, <participantName2>, ...: Names of participants to wait for before starting simulation.");
@@ -230,17 +278,49 @@ int main(int argc, char** argv)
     }
 
     auto participantName{commandlineParser.Get<CommandlineParser::Option>("name").Value()};
+
+    const bool hasLogOption{commandlineParser.Get<CommandlineParser::Option>("log").HasValue()};
+    const bool hasCfgOption{commandlineParser.Get<CommandlineParser::Option>("configuration").HasValue()};
+    if (hasLogOption && hasCfgOption)
+    {
+        std::cerr << "Error: Options '--log' and '--configuration' cannot be used simultaneously" << std::endl;
+        commandlineParser.PrintUsageInfo(std::cerr, argv[0]);
+        return -1;
+    }
+
     auto configurationFilename{commandlineParser.Get<CommandlineParser::Option>("configuration").Value()};
     auto expectedParticipantNames{
         commandlineParser.Get<CommandlineParser::PositionalList>("participantNames").Values()};
     auto connectUri{commandlineParser.Get<CommandlineParser::Option>("connect-uri").Value()};
 
+    const auto logLevel{commandlineParser.Get<CommandlineParser::Option>("log").Value()};
+    if (!IsValidLogLevel(logLevel))
+    {
+        std::cerr << "Error: Argument of the '--log' option must be one of 'trace', 'debug', 'warn', 'info', 'error', "
+                     "'critical', or 'off'"
+                  << std::endl;
+        return -1;
+    }
+
     std::shared_ptr<SilKit::Config::IParticipantConfiguration> configuration;
     try
     {
-        configuration = !configurationFilename.empty()
-                            ? SilKit::Config::ParticipantConfigurationFromFile(configurationFilename)
-                            : SilKit::Config::ParticipantConfigurationFromString("");
+        if (hasCfgOption)
+        {
+            configuration = SilKit::Config::ParticipantConfigurationFromFile(configurationFilename);
+        }
+        else
+        {
+            std::string configLogLevel{logLevel};
+
+            // due to the validation, we know that the first character is ASCII
+            configLogLevel[0] = static_cast<char>(std::toupper(configLogLevel[0]));
+
+            std::ostringstream ss;
+            ss << R"({"Logging":{"Sinks":[{"Type":"Stdout","Level":")" << configLogLevel << R"("}]}})";
+
+            configuration = SilKit::Config::ParticipantConfigurationFromString(ss.str());
+        }
     }
     catch (const SilKit::ConfigurationError& error)
     {
@@ -261,6 +341,17 @@ int main(int argc, char** argv)
         std::cout << expectedParticipantNames.back() << "'..." << std::endl;
 
         auto participant = SilKit::CreateParticipant(configuration, participantName, connectUri);
+
+        auto* logger{participant->GetLogger()};
+        {
+            std::ostringstream ss;
+            ss << "System controller is expecting " << expectedParticipantNames.size() << " participant"
+               << (expectedParticipantNames.size() > 1 ? "s" : "") << ": '";
+            std::copy(expectedParticipantNames.begin(), std::prev(expectedParticipantNames.end()),
+                      std::ostream_iterator<std::string>(ss, "', '"));
+            ss << expectedParticipantNames.back() << "'";
+            logger->Info(ss.str());
+        }
 
         expectedParticipantNames.push_back(participantName);
         SilKitController controller(participant.get(), configuration, expectedParticipantNames);

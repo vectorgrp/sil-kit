@@ -307,7 +307,7 @@ int main(int argc, char** argv)
         "dashboard-uri", "d", "http://localhost:8082", "[--dashboard-uri <uri>]",
         "-d, --dashboard-uri <dashboard-uri>: The http:// URI the data should be sent to. Defaults to 'http://localhost:8082'.", CliParser::Hidden);
     commandlineParser.Add<CliParser::Option>("log", "l", "info", "[--log <level>]",
-            "-l, --log <level>: Log to stdout with level 'trace', 'debug', 'warn', 'info', 'error', 'critical' or 'off'. Defaults to 'info'.");
+            "-l, --log <level>: Log to stdout with level 'off', 'critical', 'error', 'warn', 'info', 'debug', or 'trace'. Defaults to 'info'.");
     commandlineParser.Add<CliParser::Flag>("enable-dashboard", "Q", "[--enable-dashboard]",
         "-Q, --enable-dashboard: Enable the built-in dashboard REST client (experimental).", CliParser::Hidden);
     commandlineParser.Add<CliParser::Option>("registry-configuration", "c", "", "[--registry-configuration <path>]",
@@ -395,8 +395,8 @@ int main(int argc, char** argv)
 
     if (!isValidLogLevel(logLevel))
     {
-        std::cerr << "Error: Argument '<level>' must be one of 'trace', 'debug',"
-                     " 'warn', 'info', 'error', 'critical', 'off'"
+        std::cerr << "Error: Argument '<level>' must be one of "
+                  << "'off', 'critical', 'error', 'warn', 'info', 'debug', or 'trace'"
                   << std::endl;
         return -1;
     }
