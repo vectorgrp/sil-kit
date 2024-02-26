@@ -20,6 +20,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "CreateDashboard.hpp"
+#include "CreateDashboardInstance.hpp"
 
 
 namespace SilKit {
@@ -49,3 +50,12 @@ auto RunDashboardTest(std::shared_ptr<SilKit::Config::IParticipantConfiguration>
 } // namespace Dashboard
 } // namespace SilKit
 
+
+namespace VSilKit {
+
+auto CreateDashboardInstance() -> std::unique_ptr<IDashboardInstance>
+{
+    throw SilKit::SilKitError("SIL Kit Dashboard support is disabled");
+}
+
+} // namespace VSilKit

@@ -110,7 +110,7 @@ public:
 
 private: // JoinSimulation Helper Functions
     void OpenParticipantAcceptors(const std::string& connectUri);
-    void ConnectParticipantToRegistryAndStartIoWorker(const std::string& connectUri);
+    void ConnectParticipantToRegistryAndStartIoWorker(const std::string& connectUriString);
     void WaitForRegistryHandshakeToComplete(std::chrono::milliseconds timeout);
     void ConnectToKnownParticipants();
     void WaitForAllReplies(std::chrono::milliseconds timeout);
@@ -221,9 +221,6 @@ public: // IVAsioPeerListener
     void OnSocketData(IVAsioPeer* from, SerializedMessage&& buffer) override;
     void OnPeerShutdown(IVAsioPeer* peer) override;
 
-public: //members
-    static constexpr const ParticipantId RegistryParticipantId { 0 };
-
 private: // data types
     template <class MsgT>
     using SilKitLinkMap = std::map<std::string, std::shared_ptr<SilKitLink<MsgT>>>;
@@ -306,8 +303,8 @@ private:
 
     void LogAndPrintNetworkIncompatibility(const RegistryMsgHeader& other, const std::string& otherParticipantName);
 
-    void AssociateParticipantNameAndPeer(const std::string& participantName, IVAsioPeer* peer);
-    auto FindPeerByName(const std::string& name) const -> IVAsioPeer*;
+    void AssociateParticipantNameAndPeer(const std::string& simulationName, const std::string& participantName, IVAsioPeer* peer);
+    auto FindPeerByName(const std::string& simulationName, const std::string& participantName) const -> IVAsioPeer*;
 
     // Subscriptions completed Helper
     void SyncSubscriptionsCompleted();
@@ -515,6 +512,9 @@ private:
     Services::Logging::ILogger* _logger{nullptr};
     Services::Orchestration::ITimeProvider* _timeProvider{nullptr};
 
+    std::string _simulationName;
+    bool _allowAnySimulationName{true};
+
     mutable std::mutex _linksMx;
 
     //! \brief Virtual SIL Kit links by networkName according to SilKitConfig.
@@ -574,11 +574,11 @@ private:
     //We violate the strict layering architecture, so that we can cleanly shutdown without false error messages.
     std::atomic_bool _isShuttingDown{false};
 
-    // Hold mapping from participantName to peer
-    std::unordered_map<std::string, IVAsioPeer*> _participantNameToPeer;
+    // Hold mapping from simulationName to mapping from participantName to peer
+    std::unordered_map<std::string, std::unordered_map<std::string, IVAsioPeer *>> _participantNameToPeer;
 
     // Hold mapping from proxy source to all proxy destinations (used by registry for shutdown information)
-    std::unordered_map<std::string, std::unordered_set<std::string>> _proxySourceToDestinations;
+    std::unordered_map<std::string, std::unordered_map<std::string, std::unordered_set<std::string>>> _proxySourceToDestinations;
 
     // Hold mapping from proxied peer to all proxy peers being served via the key.
     std::unordered_map<IVAsioPeer*, std::unordered_set<IVAsioPeer*>> _peerToProxyPeers;

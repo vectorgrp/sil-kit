@@ -299,6 +299,14 @@ add_silkit_test_to_executable( SilKitIntegrationTests
     S_ITests_STH
 )
 
+add_silkit_test_to_executable(SilKitIntegrationTests
+    SOURCES
+    ITest_MultiSim.cpp
+
+    LIBS
+    S_ITests_STH
+)
+
 if(SILKIT_BUILD_DASHBOARD)
     add_silkit_test_to_executable(SilKitIntegrationTests
         SOURCES
@@ -306,7 +314,7 @@ if(SILKIT_BUILD_DASHBOARD)
 
         LIBS
         S_ITests_STH_Internals
-        S_SilKit_Dashboard
+        O_SilKit_Dashboard
         I_SilKit_Core_Internal
         I_SilKit_Config_TestUtils
         I_SilKit_Services_Ethernet
@@ -318,7 +326,7 @@ if(SILKIT_BUILD_DASHBOARD)
 
         LIBS
         S_ITests_STH_Internals
-        S_SilKit_Dashboard
+        O_SilKit_Dashboard
     )
 
     add_silkit_test_to_executable(SilKitIntegrationTests
@@ -327,6 +335,6 @@ if(SILKIT_BUILD_DASHBOARD)
 
         LIBS
         S_ITests_STH_Internals
-        S_SilKit_Dashboard
+        O_SilKit_Dashboard
     )
 endif()

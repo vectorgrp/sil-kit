@@ -168,6 +168,16 @@ struct DummyVAsioPeerBase : IVAsioPeer
         throw MethodNotImplementedError{};
     }
 
+    void SetSimulationName(const std::string&) final
+    {
+        throw MethodNotImplementedError{};
+    }
+
+    auto GetSimulationName() const -> const std::string& final
+    {
+        throw MethodNotImplementedError{};
+    }
+
     // IServiceEndpoint
 
     void SetServiceDescriptor(const ServiceDescriptor&) override

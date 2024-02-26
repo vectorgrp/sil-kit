@@ -32,6 +32,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "IParticipantInternal.hpp"
 #include "IServiceEndpoint.hpp"
 #include "SynchronizedHandlers.hpp"
+#include "SystemStateTracker.hpp"
 
 namespace SilKit {
 namespace Services {
@@ -108,26 +109,12 @@ public:
 
 private:
     // ----------------------------------------
-    // private methods
-    bool AllRequiredParticipantsInState(std::initializer_list<Orchestration::ParticipantState> acceptedStates) const;
-    void ValidateParticipantStatusUpdate(const Orchestration::ParticipantStatus& newStatus, Orchestration::ParticipantState oldState);
-    void UpdateSystemState(const Orchestration::ParticipantStatus& newStatus);
-    inline void SetSystemState(Orchestration::SystemState newState);
-
-private:
-    // ----------------------------------------
     // private members
     Core::ServiceDescriptor _serviceDescriptor{};
     Services::Logging::ILogger* _logger{nullptr};
     Core::IParticipantInternal* _participant{nullptr};
 
-    std::vector<std::string> _requiredParticipantNames{};
-
-    mutable std::mutex _systemStateMx;
-    mutable std::mutex _participantStatusMx;
-    std::map<std::string, Orchestration::ParticipantStatus> _participantStatus;
-
-    Orchestration::SystemState _systemState{Orchestration::SystemState::Invalid};
+    VSilKit::SystemStateTracker _systemStateTracker;
 
     unsigned int _invalidTransitionCount{0u};
 

@@ -23,13 +23,17 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <string>
 #include <sstream>
 #include <cstdint>
+#include <iosfwd>
 
 #include "Optional.hpp"
+
 // URI encoding of asio endpoint types.
 // NB: Very limited implementation for internal use only -- nothing close to standard RFC 3986
 
+
 namespace SilKit {
 namespace Core {
+
 
 class Uri
 {
@@ -38,8 +42,9 @@ public:
     enum class UriType
     {
         Undefined,
+        SilKit,
         Tcp,
-        Local
+        Local,
     };
 
 public:
@@ -55,6 +60,7 @@ public:
     // public static methods
     static auto Parse(std::string uriStr) -> Uri;
 
+    static auto MakeSilKit(const std::string& host, const uint16_t port, const std::string& simulationName) -> Uri;
     static auto MakeTcp(const std::string& host, const uint16_t port) -> Uri;
 
     static auto UrlEncode(const std::string& name) -> std::string;
@@ -82,6 +88,13 @@ private:
     std::string _path;
     std::string _uriString;
 };
+
+
+using UriType = Uri::UriType;
+
+
+auto operator<<(std::ostream& ostream, UriType uriType) -> std::ostream&;
+
 
 } // namespace Core
 } // namespace SilKit

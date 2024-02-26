@@ -155,7 +155,6 @@ add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_VAsioRegistry.cpp LIB
 
 add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_VAsioSerdes.cpp LIBS S_SilKitImpl)
 add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_SerializedMessage.cpp LIBS S_SilKitImpl)
-add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_Uri.cpp LIBS S_SilKitImpl)
 add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_TransformAcceptorUris.cpp LIBS S_SilKitImpl)
 add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_VAsioCapabilities.cpp LIBS S_SilKitImpl)
 

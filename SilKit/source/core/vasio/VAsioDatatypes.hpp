@@ -73,6 +73,7 @@ struct ParticipantAnnouncement
 {
     RegistryMsgHeader messageHeader;
     SilKit::Core::VAsioPeerInfo peerInfo;
+    std::string simulationName;
 };
 
 struct ParticipantAnnouncementReply

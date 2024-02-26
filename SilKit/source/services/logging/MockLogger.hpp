@@ -38,6 +38,12 @@ class MockLogger : public ::SilKit::Services::Logging::ILogger
     using Level = ::SilKit::Services::Logging::Level;
 
 public:
+    MockLogger()
+    {
+        ON_CALL(*this, GetLogLevel).WillByDefault(testing::Return(Level::Trace));
+    }
+
+public:
     MOCK_METHOD(void, Log, (Level level, const std::string& msg), (override));
 
     void Trace(const std::string& msg) override
@@ -70,10 +76,7 @@ public:
         Log(Level::Critical, msg);
     }
 
-    SilKit::Services::Logging::Level GetLogLevel() const override
-    {
-        return Level::Trace;
-    }
+    MOCK_METHOD(SilKit::Services::Logging::Level, GetLogLevel, (), (const,override));
 };
 
 

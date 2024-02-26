@@ -50,6 +50,8 @@ struct PackedHandshake
     std::array<uint8_t, sizeof("https://example.com:1234") - 1> acceptorUri0;
     uint32_t capabilitiesSize;
     //capabilities empty
+    uint32_t simulationNameSize;
+    std::array<uint8_t, sizeof("test/sim") - 1> simulationName;
 };
 #pragma pack(pop)
 
@@ -62,6 +64,7 @@ TEST(Test_SerializedMessage, packed_handshake_message)
     announcement.peerInfo.participantId = 1234;
     announcement.peerInfo.participantName = "SerdesTest";
     announcement.peerInfo.acceptorUris = {"https://example.com:1234"};
+    announcement.simulationName = "test/sim";
 
     // check that the default-constructed announcement contains the correct preamble
     ASSERT_EQ(announcement.messageHeader.preamble, REGISTRY_MESSAGE_HEADER_PREAMBLE_VALUE);
@@ -94,4 +97,7 @@ TEST(Test_SerializedMessage, packed_handshake_message)
     ASSERT_EQ(ptr->acceptorUrisSize, announcement.peerInfo.acceptorUris.size());
 
     ASSERT_EQ(to_string(ptr->acceptorUri0, ptr->acceptorUri0Size), announcement.peerInfo.acceptorUris.at(0));
+
+    ASSERT_EQ(ptr->simulationNameSize, announcement.simulationName.size());
+    ASSERT_EQ(to_string(ptr->simulationName, ptr->simulationNameSize), announcement.simulationName);
 }

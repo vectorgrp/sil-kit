@@ -97,6 +97,17 @@ auto VAsioPeer::GetLocalAddress() const -> std::string
     return _socket->GetLocalEndpoint();
 }
 
+void VAsioPeer::SetSimulationName(const std::string& simulationName)
+{
+    _simulationName = simulationName;
+    _serviceDescriptor.SetSimulationName(simulationName);
+}
+
+auto VAsioPeer::GetSimulationName() const -> const std::string&
+{
+    return _simulationName;
+}
+
 void VAsioPeer::SendSilKitMsg(SerializedMessage buffer)
 {
     // Prevent sending when shutting down

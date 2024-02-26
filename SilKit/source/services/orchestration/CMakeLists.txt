@@ -66,6 +66,8 @@ add_library(O_SilKit_Services_Orchestration OBJECT
 
     TimeConfiguration.hpp
     TimeConfiguration.cpp
+
+    SystemStateTracker.cpp
 )
 
 target_link_libraries(O_SilKit_Services_Orchestration

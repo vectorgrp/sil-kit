@@ -27,6 +27,8 @@ Added
 - Added a ``--log`` option to the system controller utility which cannot be used together with the
   ``--configuration`` option. It provides a shortcut to set the log level of the utility.
 
+- Utilities: prepare the registry for handling multiple simulations
+
 
 [4.0.45] - 2024-02-06
 ---------------------

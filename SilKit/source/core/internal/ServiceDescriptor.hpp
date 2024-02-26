@@ -94,6 +94,9 @@ public:
     inline bool GetSupplementalDataItem(const std::string& key, std::string& value) const;
     inline void SetSupplementalDataItem(std::string key, std::string val);
 
+    inline auto GetSimulationName() const -> const std::string&;
+    inline void SetSimulationName(const std::string& simulationName);
+
 public: // CTor
     ServiceDescriptor() = default;
     ServiceDescriptor(ServiceDescriptor&&) noexcept = default;
@@ -218,6 +221,25 @@ auto  ServiceDescriptor::GetSupplementalData() const -> SupplementalData
 void ServiceDescriptor::SetSupplementalData(SupplementalData val)
 {
     _supplementalData = std::move(val);
+}
+
+auto ServiceDescriptor::GetSimulationName() const -> const std::string&
+{
+    static const std::string defaultSimulationName;
+    auto it{_supplementalData.find(SilKit::Core::Discovery::simulationName)};
+    if (it == _supplementalData.end())
+    {
+        return defaultSimulationName;
+    }
+    else
+    {
+        return it->second;
+    }
+}
+
+void ServiceDescriptor::SetSimulationName(const std::string& simulationName)
+{
+    _supplementalData[SilKit::Core::Discovery::simulationName] = simulationName;
 }
 
 //Ctors

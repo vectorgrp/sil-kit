@@ -59,15 +59,15 @@ TEST_F(Test_DashboardSilKitEventQueue, ManyProducersAndOneConsumer)
 
         // producers
         SimulationStart simulationStart{"silkit://localhost:8500", 123456};
-        service->Enqueue(SilKitEvent(simulationStart));
+        service->Enqueue(SilKitEvent({}, simulationStart));
         std::vector<std::thread> producers;
         for (int participantIndex = 0; participantIndex < 50; ++participantIndex)
         {
             producers.push_back(std::thread([&service]() {
                 Services::Orchestration::ParticipantConnectionInformation participantConnectionInformation;
-                service->Enqueue(SilKitEvent(participantConnectionInformation));
+                service->Enqueue(SilKitEvent({}, participantConnectionInformation));
                 Services::Orchestration::ParticipantStatus participantStatus;
-                service->Enqueue(SilKitEvent(participantStatus));
+                service->Enqueue(SilKitEvent({}, participantStatus));
             }));
         }
         for (auto& producer : producers)
@@ -75,9 +75,9 @@ TEST_F(Test_DashboardSilKitEventQueue, ManyProducersAndOneConsumer)
             producer.join();
         }
         Services::Orchestration::SystemState systemState{};
-        service->Enqueue(SilKitEvent(systemState));
+        service->Enqueue(SilKitEvent({}, systemState));
         SimulationEnd simulatioEnd{456789};
-        service->Enqueue(SilKitEvent(simulatioEnd));
+        service->Enqueue(SilKitEvent({}, simulatioEnd));
 
         service->Stop();
 

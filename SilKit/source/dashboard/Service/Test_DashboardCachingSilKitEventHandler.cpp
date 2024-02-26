@@ -111,8 +111,8 @@ TEST_F(Test_DashboardCachingSilKitEventHandler, OnParticipantConnected_CreateSim
         .WillOnce(DoAll(WithArgs<0>([&](auto& evts) {
                             SimulationStart simulationStart{"silkit://localhost:8500", 123456};
                             std::vector<SilKitEvent> events;
-                            events.emplace_back(simulationStart);
-                            events.emplace_back(participantConnectionInformation);
+                            events.emplace_back("", simulationStart);
+                            events.emplace_back("", participantConnectionInformation);
                             evts.swap(events);
                         }),
                         Return(true)))
@@ -161,8 +161,8 @@ TEST_F(Test_DashboardCachingSilKitEventHandler, OnParticipantConnected_CreateSim
         .WillOnce(DoAll(WithArgs<0>([&](auto& evts) {
                             SimulationStart simulationStart{"silkit://localhost:8500", 123456};
                             std::vector<SilKitEvent> events;
-                            events.emplace_back(simulationStart);
-                            events.emplace_back(participantConnectionInformation);
+                            events.emplace_back("", simulationStart);
+                            events.emplace_back("", participantConnectionInformation);
                             evts.swap(events);
                         }),
                         Return(true)))

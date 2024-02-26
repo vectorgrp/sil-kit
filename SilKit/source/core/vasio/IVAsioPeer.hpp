@@ -46,6 +46,10 @@ public:
 
     virtual auto GetInfo() const -> const VAsioPeerInfo& = 0;
     virtual void SetInfo(VAsioPeerInfo info) = 0;
+
+    virtual auto GetSimulationName() const -> const std::string& = 0;
+    virtual void SetSimulationName(const std::string& simulationName) = 0;
+
     //! Remote socket endpoint address.
     virtual auto GetRemoteAddress() const -> std::string = 0;
     //! Local socket endpoint address.

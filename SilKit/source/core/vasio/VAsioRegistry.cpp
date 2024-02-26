@@ -26,24 +26,47 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "ILogger.hpp"
 #include "Optional.hpp"
 #include "TransformAcceptorUris.hpp"
+#include "VAsioConstants.hpp"
+
+
+namespace Log = SilKit::Services::Logging;
 
 
 namespace SilKit {
 namespace Core {
 
-VAsioRegistry::VAsioRegistry(std::shared_ptr<SilKit::Config::IParticipantConfiguration> cfg, ProtocolVersion version) :
-    _vasioConfig{ std::dynamic_pointer_cast<SilKit::Config::ParticipantConfiguration>(cfg) },
-    _connection{ nullptr,  *_vasioConfig, "SilKitRegistry", VAsioConnection::RegistryParticipantId, &_timeProvider, version}
+
+VAsioRegistry::VAsioRegistry(std::shared_ptr<SilKit::Config::IParticipantConfiguration> cfg, ProtocolVersion version)
+    : VAsioRegistry(std::move(cfg), nullptr, version)
 {
-    _logger = std::make_unique<Services::Logging::Logger>("SilKitRegistry", _vasioConfig->logging);
+}
+
+VAsioRegistry::VAsioRegistry(std::shared_ptr<SilKit::Config::IParticipantConfiguration> cfg,
+                             IRegistryEventListener* registryEventListener, ProtocolVersion version)
+    : _registryEventListener{registryEventListener}
+    , _vasioConfig{std::dynamic_pointer_cast<SilKit::Config::ParticipantConfiguration>(cfg)}
+    , _connection{nullptr, *_vasioConfig, REGISTRY_PARTICIPANT_NAME, REGISTRY_PARTICIPANT_ID, &_timeProvider, version}
+{
+    _logger = std::make_unique<Services::Logging::Logger>(REGISTRY_PARTICIPANT_NAME, _vasioConfig->logging);
+
+    if (_registryEventListener != nullptr)
+    {
+        _registryEventListener->OnLoggerCreated(_logger.get());
+    }
+
     _connection.SetLogger(_logger.get());
 
-    _connection.RegisterMessageReceiver([this](IVAsioPeer* from, const ParticipantAnnouncement& announcement)
-    {
+    _connection.RegisterMessageReceiver([this](IVAsioPeer* from, const ParticipantAnnouncement& announcement) {
         this->OnParticipantAnnouncement(from, announcement);
     });
 
-    _connection.RegisterPeerShutdownCallback([this](IVAsioPeer* peer) { OnPeerShutdown(peer); });
+    _connection.RegisterPeerShutdownCallback([this](IVAsioPeer* peer) {
+        OnPeerShutdown(peer);
+    });
+
+    _serviceDescriptor.SetParticipantNameAndComputeId(REGISTRY_PARTICIPANT_NAME);
+    _serviceDescriptor.SetParticipantId(REGISTRY_PARTICIPANT_ID);
+    _serviceDescriptor.SetNetworkName("default");
 }
 
 auto VAsioRegistry::StartListening(const std::string& listenUri) -> std::string
@@ -65,11 +88,9 @@ auto VAsioRegistry::StartListening(const std::string& listenUri) -> std::string
     }
     catch (const std::exception& e)
     {
-        Services::Logging::Error(GetLogger(), "SIL Kit Registry failed to create listening socket {}:{} (uri: {}). Reason: {}",
-                       uri.Host(),
-                       uri.Port(),
-                       uri.EncodedString(),
-                       e.what());
+        Services::Logging::Error(GetLogger(),
+                                 "SIL Kit Registry failed to create listening socket {}:{} (uri: {}). Reason: {}",
+                                 uri.Host(), uri.Port(), uri.EncodedString(), e.what());
     }
 
     if (enableDomainSockets)
@@ -90,7 +111,8 @@ auto VAsioRegistry::StartListening(const std::string& listenUri) -> std::string
         }
         catch (const std::exception& e)
         {
-            Services::Logging::Warn(GetLogger(), "SIL Kit Registry failed to create local listening socket: {}", e.what());
+            Services::Logging::Warn(GetLogger(), "SIL Kit Registry failed to create local listening socket: {}",
+                                    e.what());
         }
     }
 
@@ -127,7 +149,14 @@ auto VAsioRegistry::StartListening(const std::string& listenUri) -> std::string
         throw SilKit::StateError{"SIL Kit Registry: Unable to listen on neither TCP, nor Domain sockets"};
     }
 
+    if (_registryEventListener != nullptr)
+    {
+        _registryEventListener->OnRegistryUri(uri.EncodedString());
+    }
+
     _connection.StartIoWorker();
+
+    _connection.RegisterSilKitService(this);
 
     return uri.EncodedString();
 }
@@ -145,13 +174,28 @@ auto VAsioRegistry::GetLogger() -> Services::Logging::ILogger*
     return _logger.get();
 }
 
-auto VAsioRegistry::FindConnectedPeer(const std::string& name) const -> std::vector<ConnectedParticipantInfo>::const_iterator
+auto VAsioRegistry::FindConnectedParticipant(const std::string& participantName,
+                                              const std::string& simulationName) const
+    -> const ConnectedParticipantInfo*
 {
-    return std::find_if(_connectedParticipants.begin(), _connectedParticipants.end(),
-        [&name](const auto& connectedParticipant) { return connectedParticipant.peerInfo.participantName == name; });
+    const auto simulationIt{_connectedParticipants.find(simulationName)};
+    if (simulationIt == _connectedParticipants.end())
+    {
+        return nullptr;
+    }
+
+    const auto& simulationParticipants{simulationIt->second};
+
+    const auto participantIt{simulationParticipants.find(participantName)};
+    if (participantIt == simulationParticipants.end())
+    {
+        return nullptr;
+    }
+
+    return std::addressof(participantIt->second);
 }
 
-void VAsioRegistry::OnParticipantAnnouncement(IVAsioPeer* from, const ParticipantAnnouncement& announcement)
+void VAsioRegistry::OnParticipantAnnouncement(IVAsioPeer* peer, const ParticipantAnnouncement& announcement)
 {
     const auto& peerInfo = announcement.peerInfo;
 
@@ -162,20 +206,25 @@ void VAsioRegistry::OnParticipantAnnouncement(IVAsioPeer* from, const Participan
     // to substitute it here.
 
     // Do not allow multiple participants with identical names
-    if(FindConnectedPeer(peerInfo.participantName) != _connectedParticipants.end())
+    if (FindConnectedParticipant(peerInfo.participantName, announcement.simulationName) != nullptr)
     {
-        Services::Logging::Warn(
-                GetLogger(),
-                "A participant with the same name '{}' already exists", peerInfo.participantName);
-        throw SilKitError{fmt::format("A Participant with the name '{}' already exists!", peerInfo.participantName)};
+        const auto message = fmt::format("A participant with the same name '{}' already exists in the simulation {}",
+                                         peerInfo.participantName, announcement.simulationName);
+        GetLogger()->Warn(message);
+        throw SilKitError{message};
     }
 
-    SendKnownParticipants(from);
+    SendKnownParticipants(peer, announcement.simulationName);
 
-    ConnectedParticipantInfo newParticipantInfo;
-    newParticipantInfo.peer = from;
-    newParticipantInfo.peerInfo = peerInfo;
-    _connectedParticipants.emplace_back(std::move(newParticipantInfo));
+    ConnectedParticipantInfo participantInfo;
+    participantInfo.peer = peer;
+    participantInfo.peerInfo = peerInfo;
+    _connectedParticipants[announcement.simulationName][peerInfo.participantName] = participantInfo;
+
+    if (_registryEventListener != nullptr)
+    {
+        _registryEventListener->OnParticipantConnected(announcement.simulationName, peerInfo.participantName);
+    }
 
     if (AllParticipantsAreConnected())
     {
@@ -185,7 +234,7 @@ void VAsioRegistry::OnParticipantAnnouncement(IVAsioPeer* from, const Participan
     }
 }
 
-void VAsioRegistry::SendKnownParticipants(IVAsioPeer* peer)
+void VAsioRegistry::SendKnownParticipants(IVAsioPeer* peer, const std::string& simulationName)
 {
     Services::Logging::Info(GetLogger(), "Sending known participant message to {}, protocol version {}.{}",
                             peer->GetInfo().participantName, peer->GetProtocolVersion().major,
@@ -194,10 +243,15 @@ void VAsioRegistry::SendKnownParticipants(IVAsioPeer* peer)
     KnownParticipants knownParticipantsMsg;
     knownParticipantsMsg.messageHeader = MakeRegistryMsgHeader(peer->GetProtocolVersion());
 
-    for (const auto& connectedParticipant : _connectedParticipants)
+    const auto& simulationParticipants{_connectedParticipants[simulationName]};
+
+    for (const auto& pPair : simulationParticipants)
     {
+        const auto& connectedParticipant{pPair.second};
+
         // don't advertise the peer to itself
-        if (connectedParticipant.peer == peer) continue;
+        if (connectedParticipant.peer == peer)
+            continue;
 
         auto peerInfo = connectedParticipant.peerInfo;
         peerInfo.acceptorUris = TransformAcceptorUris(GetLogger(), connectedParticipant.peer, peer);
@@ -210,12 +264,28 @@ void VAsioRegistry::SendKnownParticipants(IVAsioPeer* peer)
 
 void VAsioRegistry::OnPeerShutdown(IVAsioPeer* peer)
 {
-    _connectedParticipants.erase(std::remove_if(_connectedParticipants.begin(), _connectedParticipants.end(),
-        [peer](const auto& connectedParticipant) {
-            return connectedParticipant.peer == peer;
-        })
-        , _connectedParticipants.end()
-    );
+    namespace Log = SilKit::Services::Logging;
+
+    const auto& simulationName{peer->GetSimulationName()};
+    const auto& participantName{peer->GetInfo().participantName};
+
+    if (FindConnectedParticipant(participantName, simulationName) == nullptr)
+    {
+        Log::Debug(_logger.get(), "Peer '{}' has shut down, which had no participant information", participantName);
+        return;
+    }
+
+    if (_registryEventListener != nullptr)
+    {
+        _registryEventListener->OnParticipantDisconnected(simulationName, participantName);
+    }
+
+    _connectedParticipants[simulationName].erase(participantName);
+
+    if (_connectedParticipants[simulationName].empty())
+    {
+        _connectedParticipants.erase(simulationName);
+    }
 
     if (_connectedParticipants.empty())
     {
@@ -230,6 +300,58 @@ bool VAsioRegistry::AllParticipantsAreConnected() const
     return false;
 }
 
+void VAsioRegistry::ReceiveMsg(const SilKit::Core::IServiceEndpoint* from,
+                               const SilKit::Services::Orchestration::ParticipantStatus& msg)
+{
+    if (_registryEventListener == nullptr)
+    {
+        return;
+    }
+
+    const auto& serviceDescriptor{from->GetServiceDescriptor()};
+
+    _registryEventListener->OnParticipantStatusUpdate(serviceDescriptor.GetSimulationName(),
+                                                      serviceDescriptor.GetParticipantName(), msg);
+}
+
+void VAsioRegistry::ReceiveMsg(const SilKit::Core::IServiceEndpoint* from,
+                               const SilKit::Services::Orchestration::WorkflowConfiguration& msg)
+{
+    if (_registryEventListener == nullptr)
+    {
+        return;
+    }
+
+    const auto& serviceDescriptor{from->GetServiceDescriptor()};
+
+    _registryEventListener->OnRequiredParticipantsUpdate(
+        serviceDescriptor.GetSimulationName(), serviceDescriptor.GetParticipantName(), msg.requiredParticipantNames);
+}
+
+void VAsioRegistry::ReceiveMsg(const SilKit::Core::IServiceEndpoint* from,
+                               const SilKit::Core::Discovery::ServiceDiscoveryEvent& msg)
+{
+    if (_registryEventListener == nullptr)
+    {
+        return;
+    }
+
+    const auto& serviceDescriptor{from->GetServiceDescriptor()};
+
+    _registryEventListener->OnServiceDiscoveryEvent(serviceDescriptor.GetSimulationName(),
+                                                    serviceDescriptor.GetParticipantName(), msg);
+}
+
+void VAsioRegistry::SetServiceDescriptor(const ServiceDescriptor& serviceDescriptor)
+{
+    _serviceDescriptor = serviceDescriptor;
+}
+
+auto VAsioRegistry::GetServiceDescriptor() const -> const ServiceDescriptor&
+{
+    return _serviceDescriptor;
+}
+
+
 } // namespace Core
 } // namespace SilKit
-

@@ -59,7 +59,7 @@ target_link_libraries(sil-kit-registry
     I_SilKit_Util
 
     S_SilKitImpl
-    S_SilKit_Dashboard
+    O_SilKit_Dashboard
 
     O_SilKitRegistry_Config
 )

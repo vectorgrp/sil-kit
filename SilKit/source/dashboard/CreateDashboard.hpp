@@ -32,12 +32,12 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 namespace SilKit {
 namespace Dashboard {
 
-SilKitAPI auto CreateDashboard(std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig,
+auto CreateDashboard(std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig,
                                const std::string& registryUri, const std::string& dashboardUri)
     -> std::unique_ptr<SilKit::Dashboard::IDashboard>;
 
 //! returns information about simulation, participants and networks
-SilKitAPI auto RunDashboardTest(std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig,
+auto RunDashboardTest(std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig,
                                 const std::string& registryUri, const std::string& dashboardUri,
                                 std::function<void()> testCode, uint64_t expectedSimulationsCount = 1, 
                                 std::chrono::seconds creationTimeout = std::chrono::seconds{0},

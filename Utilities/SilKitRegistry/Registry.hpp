@@ -1,18 +1,23 @@
-// SPDX-FileCopyrightText: 2023 Vector Informatik GmbH
+// SPDX-FileCopyrightText: 2024 Vector Informatik GmbH
 //
 // SPDX-License-Identifier: MIT
 
 #pragma once
-#include <memory>
+
 #include "silkit/vendor/ISilKitRegistry.hpp"
-#include "IDashboard.hpp"
+#include "IDashboardInstance.hpp"
+
+#include <memory>
+
 
 namespace SilKitRegistry {
+
 
 struct RegistryInstance
 {
     std::unique_ptr<SilKit::Vendor::Vector::ISilKitRegistry> _registry;
-    std::unique_ptr<SilKit::Dashboard::IDashboard> _dashboard;
+    std::unique_ptr<VSilKit::IDashboardInstance> _dashboard;
 };
+
 
 } //end SilKitRegistry

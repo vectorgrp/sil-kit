@@ -111,6 +111,16 @@ auto VAsioProxyPeer::GetProtocolVersion() const -> ProtocolVersion
     return _protocolVersion;
 }
 
+void VAsioProxyPeer::SetSimulationName(const std::string &simulationName)
+{
+    _simulationName = simulationName;
+}
+
+auto VAsioProxyPeer::GetSimulationName() const -> const std::string &
+{
+    return _simulationName;
+}
+
 // ================================================================================
 //  IServiceEndpoint via IVAsioConnectionPeer
 // ================================================================================

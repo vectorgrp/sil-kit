@@ -25,6 +25,8 @@ namespace SilKit {
 namespace Core {
 namespace Discovery {
 
+const std::string simulationName = "participant.simulationName";
+
 // controller-specific keys
 const std::string controllerType = "controller.type";
 

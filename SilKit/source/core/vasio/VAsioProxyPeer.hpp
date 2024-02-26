@@ -57,6 +57,8 @@ public: // IVAsioPeer
     void Shutdown() override;
     void SetProtocolVersion(ProtocolVersion v) override;
     auto GetProtocolVersion() const -> ProtocolVersion override;
+    void SetSimulationName(const std::string& simulationName) override;
+    auto GetSimulationName() const -> const std::string& override;
 
 public: // IVAsioPeer (IServiceEndpoint)
     void SetServiceDescriptor(const ServiceDescriptor& serviceDescriptor) override;
@@ -72,6 +74,7 @@ public:
 private:
     IVAsioPeerListener* _listener;
     std::string _participantName;
+    std::string _simulationName;
     IVAsioPeer* _peer;
     VAsioPeerInfo _peerInfo;
     ServiceDescriptor _serviceDescriptor;

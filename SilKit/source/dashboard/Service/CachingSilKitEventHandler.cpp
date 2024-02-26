@@ -131,7 +131,7 @@ void CachingSilKitEventHandler::OnLastParticipantDisconnected()
 {
     if (_simulationRunning)
     {
-        _eventQueue->Enqueue(SilKitEvent(SimulationEnd{GetCurrentTime()}));
+        _eventQueue->Enqueue(SilKitEvent({}, SimulationEnd{GetCurrentTime()}));
         _simulationRunning = false;
     }
 }
@@ -140,14 +140,14 @@ void CachingSilKitEventHandler::OnParticipantConnected(
     const Services::Orchestration::ParticipantConnectionInformation& participantInformation)
 {
     StartSimulationIfNeeded();
-    _eventQueue->Enqueue(SilKitEvent(participantInformation));
+    _eventQueue->Enqueue(SilKitEvent({}, participantInformation));
 }
 
 void CachingSilKitEventHandler::OnSystemStateChanged(Services::Orchestration::SystemState systemState)
 {
     if (_simulationRunning)
     {
-        _eventQueue->Enqueue(SilKitEvent(systemState));
+        _eventQueue->Enqueue(SilKitEvent({}, systemState));
     }
 }
 
@@ -156,7 +156,7 @@ void CachingSilKitEventHandler::OnParticipantStatusChanged(
 {
     if (_simulationRunning)
     {
-        _eventQueue->Enqueue(SilKitEvent(participantStatus));
+        _eventQueue->Enqueue(SilKitEvent({}, participantStatus));
     }
 }
 
@@ -177,7 +177,7 @@ void CachingSilKitEventHandler::OnServiceDiscoveryEvent(Core::Discovery::Service
         {
             return;
         }
-        _eventQueue->Enqueue(SilKitEvent(ServiceData{discoveryType, serviceDescriptor}));
+        _eventQueue->Enqueue(SilKitEvent({}, ServiceData{discoveryType, serviceDescriptor}));
     }
 }
 
@@ -186,7 +186,7 @@ void CachingSilKitEventHandler::StartSimulationIfNeeded()
     bool simulationRunning = false;
     if (_simulationRunning.compare_exchange_strong(simulationRunning, true))
     {
-        _eventQueue->Enqueue(SilKitEvent(SimulationStart{_connectUri, GetCurrentTime()}));
+        _eventQueue->Enqueue(SilKitEvent({}, SimulationStart{_connectUri, GetCurrentTime()}));
     }
 }
 

@@ -117,6 +117,7 @@ inline MessageBuffer& operator<<(MessageBuffer& buffer, const ParticipantAnnounc
         buffer
             << announcement.messageHeader
             << announcement.peerInfo
+            << announcement.simulationName
             ;
     }
 
@@ -135,8 +136,14 @@ inline MessageBuffer& operator>>(MessageBuffer& buffer, ParticipantAnnouncement&
         //  default
         buffer
             >> announcement.messageHeader
-            >> announcement.peerInfo
-            ;
+            >> announcement.peerInfo;
+
+        if (buffer.RemainingBytesLeft() == 0)
+        {
+            return buffer;
+        }
+
+        buffer >> announcement.simulationName;
     }
     return buffer;
 }

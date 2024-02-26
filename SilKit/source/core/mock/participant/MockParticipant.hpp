@@ -51,24 +51,15 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "SynchronizedHandlers.hpp"
 #include "MockTimeProvider.hpp"
 
+#include "MockLogger.hpp"
+
 namespace SilKit {
 namespace Core {
 namespace Tests {
 
 using SilKit::Util::HandlerId;
 
-class MockLogger : public Services::Logging::ILogger
-{
-public:
-    MOCK_METHOD(void, Log, (Services::Logging::Level /*level*/, const std::string& /*msg*/), (override));
-    MOCK_METHOD(void,Trace,(const std::string& /*msg*/), (override));
-    MOCK_METHOD(void,Debug,(const std::string& /*msg*/), (override));
-    MOCK_METHOD(void,Info,(const std::string& /*msg*/), (override));
-    MOCK_METHOD(void,Warn,(const std::string& /*msg*/), (override));
-    MOCK_METHOD(void,Error,(const std::string& /*msg*/), (override));
-    MOCK_METHOD(void,Critical,(const std::string& /*msg*/), (override));
-    MOCK_METHOD(Services::Logging::Level, GetLogLevel, (),  (const, override));
-};
+using SilKit::Services::Logging::MockLogger;
 
 class MockLifecycleService
     : public Services::Orchestration::ILifecycleService

@@ -85,6 +85,7 @@ public:
 
     SilKitEvent(const SilKitEvent& other)
         : _type(other._type)
+        , _simulationName{other._simulationName}
         , _data(other._clone(other._data))
         , _clone(other._clone)
         , _destroy(other._destroy)
@@ -105,8 +106,9 @@ public:
     };
 
     template <typename T>
-    explicit SilKitEvent(const T& value)
+    explicit SilKitEvent(std::string simulationName, const T& value)
         : _type{getTypeId<T>()}
+        , _simulationName{std::move(simulationName)}
         , _data{new T{value}}
         , _clone([](void* otherData) -> void* {
             return new T(*static_cast<T*>(otherData));
@@ -128,6 +130,7 @@ public:
             _destroy(_data);
         }
         _type = other._type;
+        _simulationName = other._simulationName;
         _data = other._clone(other._data);
         _clone = other._clone;
         _destroy = other._destroy;
@@ -145,6 +148,8 @@ public:
     }
 
     auto Type() const -> SilKitEventType { return _type; }
+
+    auto GetSimulationName() const -> const std::string& { return _simulationName; }
 
     auto GetSimulationStart() const -> const SimulationStart& { return Get<SimulationStart>(); }
 
@@ -181,6 +186,7 @@ private:
 
 private:
     SilKitEventType _type{};
+    std::string _simulationName;
     void* _data{nullptr};
     void* (*_clone)(void* otherData){nullptr};
     void (*_destroy)(void* data){nullptr};
@@ -202,6 +208,7 @@ void SilKitEvent::swap(SilKitEvent& other) noexcept
 {
     using std::swap;
     swap(_type, other._type);
+    swap(_simulationName, other._simulationName);
     swap(_data, other._data);
     swap(_clone, other._clone);
     swap(_destroy, other._destroy);

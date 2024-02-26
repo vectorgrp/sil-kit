@@ -41,12 +41,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "Filesystem.hpp"
 #include "FileHelpers.hpp"
 #include "YamlParser.hpp"
-#include "CreateSilKitRegistryImpl.hpp"
 #include "ParticipantConfigurationFromXImpl.hpp"
+#include "CreateSilKitRegistryImpl.hpp"
+#include "CreateSilKitRegistryWithDashboard.hpp"
 
 //dashboard
 #include "CreateDashboard.hpp"
 #include "ValidateAndSanitizeConfig.hpp"
+#include "CreateDashboardInstance.hpp"
 
 using namespace SilKit::Core;
 
@@ -215,7 +217,66 @@ auto StartRegistry(std::shared_ptr<SilKit::Config::IParticipantConfiguration> co
         std::string dashboardUri, bool enableDashboard,
         CommandlineParser::Option generatedConfigurationPathOpt) -> SilKitRegistry::RegistryInstance
 {
-    auto registry = SilKit::Vendor::Vector::CreateSilKitRegistryImpl(configuration);
+    std::unique_ptr<VSilKit::IDashboardInstance> dashboard;
+
+    if (enableDashboard)
+    {
+        try
+        {
+            dashboard = VSilKit::CreateDashboardInstance();
+        }
+        catch (const std::exception& exception)
+        {
+            std::cerr << "error during dashboard instance creation: " << exception.what() << std::endl;
+        }
+        catch (...)
+        {
+            std::cerr << "unknown error during dashboard instance creation" << std::endl;
+        }
+    }
+
+    std::unique_ptr<SilKit::Vendor::Vector::ISilKitRegistry> registry;
+
+    try
+    {
+        if (enableDashboard)
+        {
+            registry = VSilKit::CreateSilKitRegistryWithDashboard(configuration, dashboard->GetRegistryEventListener());
+        }
+        else
+        {
+            registry = SilKit::Vendor::Vector::CreateSilKitRegistryImpl(configuration);
+        }
+    }
+    catch (const std::exception& exception)
+    {
+        std::cerr << "error during registry creation: " << exception.what() << std::endl;
+        throw;
+    }
+    catch (...)
+    {
+        std::cerr << "unknown error during registry creation" << std::endl;
+        throw;
+    }
+
+    try
+    {
+        if (enableDashboard)
+        {
+            dashboard->SetupDashboardConnection(dashboardUri);
+        }
+    }
+    catch (const std::exception& exception)
+    {
+        std::cerr << "error during connection to dashboard backend: " << exception.what() << std::endl;
+        throw;
+    }
+    catch (...)
+    {
+        std::cerr << "unknown error during connection to dashboard backend" << std::endl;
+        throw;
+    }
+
     const auto chosenListenUri = registry->StartListening(listenUri);
 
     std::cout << "SIL Kit Registry listening on " << chosenListenUri << std::endl;
@@ -260,22 +321,6 @@ auto StartRegistry(std::shared_ptr<SilKit::Config::IParticipantConfiguration> co
         const auto newPath = fs::path(generatedConfigurationPathOpt.Value());
 
         fs::rename(tmpPath, newPath);
-    }
-
-    //Try to start a dashboard
-    std::unique_ptr<SilKit::Dashboard::IDashboard> dashboard;
-    if (enableDashboard)
-    {
-        try {
-            dashboard = SilKit::Dashboard::CreateDashboard(configuration, chosenListenUri, dashboardUri);
-        }
-        catch (const std::exception& ex) {
-            std::cout << "Dashboard error: " << ex.what() << std::endl;
-        }
-        catch (...)
-        {
-            std::cout << "Dashboard unknown error" << std::endl;
-        }
     }
 
     SilKitRegistry::RegistryInstance result;

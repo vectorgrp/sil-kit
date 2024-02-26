@@ -78,6 +78,9 @@ public:
     auto GetRemoteAddress() const -> std::string override;
     auto GetLocalAddress() const -> std::string override;
 
+    void SetSimulationName(const std::string& simulationName) override;
+    auto GetSimulationName() const -> const std::string& override;
+
     void StartAsyncRead() override;
 
     // IServiceEndpoint
@@ -110,6 +113,7 @@ private:
     IIoContext* _ioContext{nullptr};
     std::unique_ptr<IRawByteStream> _socket;
     VAsioPeerInfo _info;
+    std::string _simulationName;
 
     Services::Logging::ILogger* _logger;
 

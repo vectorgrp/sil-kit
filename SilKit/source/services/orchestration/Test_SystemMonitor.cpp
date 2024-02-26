@@ -66,6 +66,13 @@ protected:
         syncParticipantNames = {"P1", "P2", "P3"};
         monitor.UpdateRequiredParticipantNames(syncParticipantNames);
         monitor.SetServiceDescriptor(addr);
+
+        ON_CALL(participant.logger, Log)
+            .WillByDefault([](SilKit::Services::Logging::Level level, const std::string& message) {
+                std::ostringstream ss;
+                ss << "[" << to_string(level) << "] " << message << '\n';
+                std::cout << ss.str() << std::flush;
+            });
     }
 
     auto AddSystemStateHandler() -> HandlerId

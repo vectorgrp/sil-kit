@@ -42,7 +42,9 @@ set(GIT_HEAD_FILE "${GIT_DIR}/HEAD")
 set(VERSION_MACROS_HPP ${CMAKE_CURRENT_BINARY_DIR}/version_macros.hpp)
 if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/version_macros.hpp)
     message(STATUS "SILKIT re-using deployed version_macros.hpp")
-    set(VERSION_MACROS_HPP ${CMAKE_CURRENT_LIST_DIR}/version_macros.hpp)
+    set(VERSION_MACROS_HPP ${CMAKE_CURRENT_LIST_DIR}/version_macros.hpp
+        CreateSilKitRegistryWithDashboard.cpp
+        CreateSilKitRegistryWithDashboard.hpp)
 elseif(EXISTS "${GIT_HEAD_FILE}")
     configure_file(
         "MakeVersionMacros.cmake.in"
@@ -111,6 +113,9 @@ target_include_directories(I_SilKit_CreateSilKitRegistryImpl
 add_library(O_SilKit_CreateSilKitRegistryImpl OBJECT
     CreateSilKitRegistryImpl.hpp
     CreateSilKitRegistryImpl.cpp
+
+    CreateSilKitRegistryWithDashboard.hpp
+    CreateSilKitRegistryWithDashboard.cpp
 )
 
 target_link_libraries(O_SilKit_CreateSilKitRegistryImpl

@@ -25,4 +25,4 @@ add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_CommandlineParser.cpp
 add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_SynchronizedHandlers.cpp LIBS I_SilKit_Util)
 add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_Timer.cpp LIBS I_SilKit_Util O_SilKit_Util_SetThreadName)
 add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_Util_FileHelpers.cpp LIBS O_SilKit_Util_FileHelpers)
-
+add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_Uri.cpp)
