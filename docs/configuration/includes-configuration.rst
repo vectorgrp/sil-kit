@@ -17,77 +17,110 @@ Overview
 
 The ``Includes`` section allows to reference other participant configuration files.
 This can be used to share common parts of a participant configuration or to include dynamically generated configurations into a static configuration base.
-The path to the included configuration file must be given relative to the including participant configuration file.
-The ``Includes`` section is only allowed when importing configurations via |ParticipantConfigurationFromFile|, not via |ParticipantConfigurationFromString|.
+
+.. code-block:: yaml
+
+   Includes:
+     Files:
+       - LoggingIncludes.silkit.yaml
+       - generated/MiddlewareInclude.silkit.yaml
+
+To deal with different locations of the included files depending on the execution scenario, a list of search paths pointing to the locations of the included files can be specified in the ``SearchPathHints``:
+
+.. code-block:: yaml
+
+   Includes:
+     SearchPathHints:
+       - ConfigSnippets/Logging     # relative paths are valid (same as ./ConfigSnippets/Logging/) 
+       - /urs/etc/sil-kit-configs/  # absolute paths are valid
+       - C:\Temp\ConfigSnippets     # for Windows, backslash as path separator is valid
+       - C:\Temp\Path with spaces\  # for Windows, paths with spaces are valid
+       - ~/ConfigSnippets           # for POSIX, tilde expansion is valid
+     Files:
+       - LoggingIncludes.silkit.yaml
+       - generated/MiddlewareInclude.silkit.yaml
+
+When using |ParticipantConfigurationFromFile|, the current working directory and the path of the including participant configuration file are considered as additional search paths.
+When using |ParticipantConfigurationFromString|, the default search path is the current working directory.
+
+Merge rules
+===========
+
 The included configurations are merged according to the following rules:
 
-* Properties in the *including* configuration have priority over *included* properties. This means that properties in the *root* configuration always have priority:
+* Properties in the *including* configuration have priority over *included* properties. 
+  This means that properties in the *root* configuration always have priority:
 
   .. code-block:: yaml
 
-     # root.yaml 
+     # root.silkit.yaml 
      Includes:
-        - included.yaml
+        Files:
+           - included.silkit.yaml
      Middleware:
         RegistryUri: silkit://localhost:8500 # Has priority!
   
   .. code-block:: yaml
 
-     # included.yaml 
+     # included.silkit.yaml 
      Middleware:
-        RegistryUri: silkit://0.0.0.0:8501 # Already specified in root.yaml, ignored!
+        RegistryUri: silkit://0.0.0.0:8501 # Already specified in root.silkit.yaml, ignored!
 
 * In case of multiple included files, earlier included files have priority:
 
   .. code-block:: yaml
 
-     # root.yaml 
+     # root.silkit.yaml 
      Includes:
-        - included_1.yaml
-        - included_2.yaml
+        Files:
+           - included_1.silkit.yaml
+           - included_2.silkit.yaml
   
   .. code-block:: yaml
 
-     # included_1.yaml 
+     # included_1.silkit.yaml 
      Middleware:
         RegistryUri: silkit://localhost:8500 # Has priority!
 
   .. code-block:: yaml
 
-     # included_2.yaml 
+     # included_2.silkit.yaml 
      Middleware:
-        RegistryUri: silkit://0.0.0.0:8501 # Already specified in included_1.yaml, ignored!
+        RegistryUri: silkit://0.0.0.0:8501 # Already specified in included_1.silkit.yaml, ignored!
 
 * Multiple inclusions of the same file are automatically prevented.
   This also applies for nested includes of the same file:
   
   .. code-block:: yaml
 
-     # root.yaml 
+     # root.silkit.yaml 
      Includes:
-        - included_1.yaml
-        - included_2.yaml
+        Files:
+           - included_1.silkit.yaml
+           - included_2.silkit.yaml
   
   .. code-block:: yaml
 
-     # included_1.yaml 
+     # included_1.silkit.yaml 
      Includes:
-        - included_2.yaml # Ignored (already appeared in root.yaml)
+        Files:
+           - included_2.silkit.yaml # Ignored (already appeared in root.silkit.yaml)
 
 * List items of top-level properties (e.g. ``CanControllers``, ``DataPublishers``) are combined:
 
   .. code-block:: yaml
 
-     # root.yaml 
+     # root.silkit.yaml 
      Includes:
-        - included.yaml
+        Files:
+           - included.silkit.yaml
      DataPublishers:
      - Name: DataPublisher1 # Will be used
        Topic: SomeTopic
   
   .. code-block:: yaml
 
-     # included.yaml 
+     # included.silkit.yaml 
      DataPublishers:
      - Name: DataPublisher2 # Will also be used
        Topic: SomeTopic
@@ -96,16 +129,17 @@ The included configurations are merged according to the following rules:
 
   .. code-block:: yaml
 
-     # root.yaml 
+     # root.silkit.yaml 
      Includes:
-        - included.yaml
+        Files:
+           - included.silkit.yaml
      CanControllers:
      - Name: CAN1 # Name "CAN1" set here
        Network: CAN1
   
   .. code-block:: yaml
 
-     # included.yaml 
+     # included.silkit.yaml 
      CanControllers:
      - Name: CAN1  # SilKit::ConfigurationError: Conflicting name "CAN1"
        Network: CAN2
@@ -116,19 +150,21 @@ The included configurations are merged according to the following rules:
   * Sinks of ``Type: File`` are combined. 
     However their ``LogName`` must be unique, otherwise a ``SilKit::ConfigurationError`` occurs. 
 
-* List items of the ``SearchPathHints`` in the ``Extensions`` section are merged and all entries are retained.
+* List items of the ``SearchPathHints`` in the sections ``Includes`` or ``Extensions`` are merged and all entries are retained.
   Possible duplicates here are uncritical.
 
 * ``AcceptorUris`` of the ``Middleware`` section cannot be combined. 
   Here, a ``SilKit::ConfigurationError`` occurs if ``AcceptorUris`` are defined multiple times.
+  
+Dynamic port generation
+=======================
 
-An important use-case here is to include a configuration with a dynamically generated ``RegistryUri`` of the ``Middleware`` section:
+An important use-case is to include a configuration with a dynamically generated ``RegistryUri`` of the ``Middleware`` section:
 In a CI environment, it is unfavorable to setup a static port in the ``listen-uri`` of the  :ref:`SIL Kit registry<sec:util-registry>`.
 Instead, a port ``0`` advises the |ProductName| registry to let the operating system choose a random free port.
 This URI then has to be used by the participants in the Middleware property ``RegistryUri``.
 For this purpose, the ``--generate-configuration`` CLI parameter of the |ProductName| registry creates a participant configuration file containing the dynamic ``RegistryUri`` in the Middleware section.
-By referencing this generated participant configuration in the ``Includes`` section of the participant configuration, the static part of the configuration (e.g., network names, logging) can be combined with the dynamic ``RegistryUri``.
-
+By referencing this generated participant configuration in the ``Includes`` section, the static part of the configuration (e.g., network names, logging) can be combined with the dynamic ``RegistryUri``.
 
 Configuration
 =============
@@ -136,8 +172,11 @@ Configuration
 .. code-block:: yaml
 
     Includes:
-      - generated-uri.yaml
-      - ../common-logging.yaml
+       SearchPathHints:
+          - ./ConfigSnippets/Generated/
+       Files:
+          - generated-uri.silkit.yaml
+          - ../common-logging.silkit.yaml
 
 .. list-table:: Includes Configuration
    :widths: 15 85
@@ -145,6 +184,7 @@ Configuration
 
    * - Property Name
      - Description
-   * - <relative/path/to/included.yaml>
-     - Path to the participant configuration file to be included relative to including participant configuration file.
-
+   * - SearchPathHints
+     - A list of paths that are used to search for included configuration files.
+   * - Files
+     - A list of configuration files to be included.

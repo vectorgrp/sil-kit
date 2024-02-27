@@ -155,7 +155,16 @@ int main(int argc, char** argv)
             }
         }
 
-        auto participantConfiguration = SilKit::Config::ParticipantConfigurationFromFile(participantConfigurationFilename);
+        const std::string participantConfigText = R"(
+Description: My participant configuration
+Logging:
+    Sinks:
+    - Type: Stdout
+      Level: Info
+)";
+        auto participantConfiguration = SilKit::Config::ParticipantConfigurationFromString(participantConfigText);
+
+        //auto participantConfiguration = SilKit::Config::ParticipantConfigurationFromFile(participantConfigurationFilename);
         auto sleepTimePerTick = 1000ms;
 
         std::cout << "Creating participant '" << participantName << "' with registry " << registryUri << std::endl;
