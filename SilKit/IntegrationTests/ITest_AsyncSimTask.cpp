@@ -46,7 +46,7 @@ std::mutex mx;
 int cvCounter{};
 std::condition_variable cv;
 
-TEST(ITest_AsyncSimTask, DISABLED_test_async_simtask_lockstep)
+TEST(ITest_AsyncSimTask, test_async_simtask_lockstep)
 {
     // Goal: have a foreign/user thread run in lockstep with the SimulationStepHandler.
     // The completer thread invokes CompleteSimulationStep after being signaled from the SimulationStepHandler.
