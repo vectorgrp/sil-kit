@@ -7,7 +7,7 @@ All notable changes to the Vector SIL Kit project shall be documented in this fi
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
 
-[4.0.46] - UNRELEASED
+[4.0.46] - 2024-02-27
 ---------------------
 
 Fixed
@@ -29,6 +29,7 @@ Added
 
 - Utilities: prepare the registry for handling multiple simulations
 
+- Added a licensecheck to prevent source files without a license header
 
 [4.0.45] - 2024-02-06
 ---------------------
