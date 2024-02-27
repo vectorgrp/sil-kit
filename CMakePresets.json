@@ -11,10 +11,7 @@
             "environment": {
                 "SILKIT_CMAKE_PRESET_NAME": "$env{SILKIT_CMAKE_PRESET_BUILD_PLATFORM}-$env{SILKIT_CMAKE_PRESET_ARCHITECTURE}-$env{SILKIT_CMAKE_PRESET_BUILD_TYPE}"
             },
-          "cacheVariables": {
-            "CMAKE_BUILD_TYPE": "$env{SILKIT_CMAKE_PRESET_BUILD_TYPE}",
-            "SILKIT_BUILD_DOCS": "ON"
-          }
+            "cacheVariables": { "CMAKE_BUILD_TYPE": "$env{SILKIT_CMAKE_PRESET_BUILD_TYPE}" }
         },
         {
             "name": "linux-base",
