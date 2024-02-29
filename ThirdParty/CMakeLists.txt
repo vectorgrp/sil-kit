@@ -109,8 +109,6 @@ function(include_yamlcpp)
             "${SILKIT_THIRD_PARTY_BINARY_DIR}/_tp_yaml-cpp"
             EXCLUDE_FROM_ALL
         )
-        target_compile_options(yaml-cpp
-            PRIVATE "-w")
 
         # yaml-cpp explicitly sets /W3
         silkit_target_clean_compileflags(yaml-cpp)
