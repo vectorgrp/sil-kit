@@ -148,10 +148,12 @@ auto SystemStateTracker::UpdateParticipantStatus(const ParticipantStatus& newPar
 
     if (!ValidateParticipantStateUpdate(oldParticipantState, newParticipantState))
     {
-        Log::Error(
-            _logger,
-            "SystemMonitor detected invalid ParticipantState transition from {} to {} EnterTime={}, EnterReason=\"{}\"",
-            oldParticipantState, newParticipantState, FormatTimePoint(newParticipantStatus.enterTime),
+        const auto logLevel = IsRequiredParticipant(participantName) ? Log::Level::Warn : Log::Level::Debug;
+
+        Log::Log(
+            _logger, logLevel,
+            "SystemMonitor detected invalid ParticipantState transition for {} from {} to {} EnterTime={}, EnterReason=\"{}\"",
+            participantName, oldParticipantState, newParticipantState, FormatTimePoint(newParticipantStatus.enterTime),
             newParticipantStatus.enterReason);
 
         // NB: Failing validation doesn't actually stop the participants state from being changed, it just logs the
