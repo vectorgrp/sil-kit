@@ -42,9 +42,7 @@ set(GIT_HEAD_FILE "${GIT_DIR}/HEAD")
 set(VERSION_MACROS_HPP ${CMAKE_CURRENT_BINARY_DIR}/version_macros.hpp)
 if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/version_macros.hpp)
     message(STATUS "SILKIT re-using deployed version_macros.hpp")
-    set(VERSION_MACROS_HPP ${CMAKE_CURRENT_LIST_DIR}/version_macros.hpp
-        CreateSilKitRegistryWithDashboard.cpp
-        CreateSilKitRegistryWithDashboard.hpp)
+    set(VERSION_MACROS_HPP ${CMAKE_CURRENT_LIST_DIR}/version_macros.hpp)
 elseif(EXISTS "${GIT_HEAD_FILE}")
     configure_file(
         "MakeVersionMacros.cmake.in"
