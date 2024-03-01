@@ -53,3 +53,14 @@ Data Structures
 .. doxygenstruct:: SilKit_CanErrorStateChangeEvent
    :members:
 
+Enumerations and Typedefs
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. doxygentypedef:: SilKit_CanFrameFlag
+.. doxygendefine:: SilKit_CanFrameFlag_ide
+.. doxygendefine:: SilKit_CanFrameFlag_rtr
+.. doxygendefine:: SilKit_CanFrameFlag_fdf
+.. doxygendefine:: SilKit_CanFrameFlag_brs
+.. doxygendefine:: SilKit_CanFrameFlag_esi
+.. doxygendefine:: SilKit_CanFrameFlag_xlf
+.. doxygendefine:: SilKit_CanFrameFlag_sec

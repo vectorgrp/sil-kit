@@ -181,6 +181,7 @@ Enumerations and Typedefs
 
 .. doxygenenum:: SilKit::Services::Can::CanControllerState
 .. doxygenenum:: SilKit::Services::Can::CanErrorState
+.. doxygenenum:: SilKit::Services::Can::CanFrameFlag
 .. doxygenenum:: SilKit::Services::Can::CanTransmitStatus
 
 Usage Examples
