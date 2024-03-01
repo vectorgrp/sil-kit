@@ -604,7 +604,6 @@ int main(int argc, char** argv) try
                 }};
             });
 
-            lifecycleService->StartLifecycle();
             lifecycleService->SetStartingHandler([&]() {
                 startHandlerPromise.set_value();
             });

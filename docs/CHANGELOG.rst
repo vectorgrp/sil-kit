@@ -15,6 +15,8 @@ Fixed
 
 - Fixed building from the packaged sources (``SilKit-Source``).
 
+- LIN Demo: Removed duplicate call to StartLifecyle when run as the LIN slave
+
 
 [4.0.46] - 2024-02-27
 ---------------------
