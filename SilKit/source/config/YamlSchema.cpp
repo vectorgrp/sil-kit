@@ -51,6 +51,13 @@ auto MakeYamlSchema() -> YamlSchemaElem
                                                     {"InputPath"},
                                                     {"Type"},
                                                 });
+
+    YamlSchemaElem metricsSinks{"Sinks",
+                                {
+                                    {"Type"},
+                                    {"Name"},
+                                }};
+
     YamlSchemaElem logging("Logging", {
                                           {"LogFromRemotes"},
                                           {"FlushLevel"},
@@ -195,10 +202,16 @@ auto MakeYamlSchema() -> YamlSchemaElem
              {"ExperimentalRemoteParticipantConnection"},
              {"ConnectTimeoutSeconds"},
          }},
-        {"Experimental", 
-            { {"TimeSynchronization", {{"AnimationFactor"}} }
+        {"Experimental",
+         {
+             {"TimeSynchronization", {{"AnimationFactor"}}},
+             {"Metrics",
+              {
+                  metricsSinks,
+                  {"CollectFromRemote"},
+              }},
          }},
-       };
+    };
     return yamlSchema;
 }
 

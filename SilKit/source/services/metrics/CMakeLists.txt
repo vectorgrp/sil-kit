@@ -1,0 +1,35 @@
+# SPDX-FileCopyrightText: 2023 Vector Informatik GmbH
+#
+# SPDX-License-Identifier: MIT
+
+
+add_library(I_SilKit_Services_Metrics INTERFACE)
+
+target_include_directories(I_SilKit_Services_Metrics
+    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}"
+)
+
+target_link_libraries(I_SilKit_Services_Metrics
+    INTERFACE SilKitInterface
+
+    INTERFACE I_SilKit_Core_Internal
+)
+
+
+add_library(O_SilKit_Services_Metrics OBJECT
+    MetricsDatatypes.cpp
+    MetricsManager.cpp
+    MetricsProcessor.cpp
+    MetricsReceiver.cpp
+    MetricsSender.cpp
+    MetricsSerdes.cpp
+
+    MetricsJsonFileSink.cpp
+    MetricsRemoteSink.cpp
+
+    MetricsTimerThread.cpp
+)
+
+target_link_libraries(O_SilKit_Services_Metrics
+    PUBLIC I_SilKit_Services_Metrics
+)

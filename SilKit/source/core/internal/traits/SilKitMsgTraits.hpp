@@ -126,74 +126,78 @@ struct SilKitMsgTraits
     };
 
 DefineSilKitMsgTrait_TypeName(SilKit::Services::Logging, LogMsg) DefineSilKitMsgTrait_TypeName(
-    SilKit::Services::Orchestration,
-    SystemCommand) DefineSilKitMsgTrait_TypeName(SilKit::Services::Orchestration,
-                                                 ParticipantStatus) DefineSilKitMsgTrait_TypeName(SilKit::Services::
-                                                                                                      Orchestration,
-                                                                                                  WorkflowConfiguration)
-    DefineSilKitMsgTrait_TypeName(SilKit::Services::Orchestration, NextSimTask) DefineSilKitMsgTrait_TypeName(
-        SilKit::Services::PubSub, WireDataMessageEvent) DefineSilKitMsgTrait_TypeName(SilKit::Services::Rpc,
-                                                                                      FunctionCall)
-        DefineSilKitMsgTrait_TypeName(SilKit::Services::Rpc, FunctionCallResponse) DefineSilKitMsgTrait_TypeName(
-            SilKit::Services::Can, WireCanFrameEvent) DefineSilKitMsgTrait_TypeName(SilKit::Services::Can,
-                                                                                    CanFrameTransmitEvent)
-            DefineSilKitMsgTrait_TypeName(SilKit::Services::Can, CanControllerStatus) DefineSilKitMsgTrait_TypeName(
-                SilKit::Services::Can, CanConfigureBaudrate) DefineSilKitMsgTrait_TypeName(SilKit::Services::Can,
-                                                                                           CanSetControllerMode)
-                DefineSilKitMsgTrait_TypeName(
-                    SilKit::Services::Ethernet,
-                    WireEthernetFrameEvent) DefineSilKitMsgTrait_TypeName(SilKit::Services::Ethernet,
-                                                                          EthernetFrameTransmitEvent)
-                    DefineSilKitMsgTrait_TypeName(
+    VSilKit,
+    MetricsRegistration) DefineSilKitMsgTrait_TypeName(VSilKit,
+                                                       MetricsUpdate) DefineSilKitMsgTrait_TypeName(SilKit::Services::
+                                                                                                        Orchestration,
+
+    SystemCommand)DefineSilKitMsgTrait_TypeName(SilKit::Services::Orchestration, ParticipantStatus) DefineSilKitMsgTrait_TypeName(
+        SilKit::Services::Orchestration,
+        WorkflowConfiguration) DefineSilKitMsgTrait_TypeName(SilKit::Services::Orchestration, NextSimTask)
+        DefineSilKitMsgTrait_TypeName(SilKit::Services::PubSub, WireDataMessageEvent) DefineSilKitMsgTrait_TypeName(
+            SilKit::Services::Rpc, FunctionCall) DefineSilKitMsgTrait_TypeName(SilKit::Services::Rpc,
+                                                                               FunctionCallResponse)
+            DefineSilKitMsgTrait_TypeName(SilKit::Services::Can, WireCanFrameEvent) DefineSilKitMsgTrait_TypeName(
+                SilKit::Services::Can, CanFrameTransmitEvent) DefineSilKitMsgTrait_TypeName(SilKit::Services::Can,
+                                                                                            CanControllerStatus)
+                DefineSilKitMsgTrait_TypeName(SilKit::Services::Can, CanConfigureBaudrate) DefineSilKitMsgTrait_TypeName(
+                    SilKit::Services::Can,
+                    CanSetControllerMode) DefineSilKitMsgTrait_TypeName(SilKit::Services::Ethernet,
+
+                    WireEthernetFrameEvent)DefineSilKitMsgTrait_TypeName(
                         SilKit::Services::Ethernet,
-                        EthernetStatus) DefineSilKitMsgTrait_TypeName(SilKit::Services::Ethernet, EthernetSetMode)
-                        DefineSilKitMsgTrait_TypeName(
-                            SilKit::Services::Lin,
-                            LinSendFrameRequest) DefineSilKitMsgTrait_TypeName(SilKit::Services::Lin,
-                                                                               LinSendFrameHeaderRequest)
-                            DefineSilKitMsgTrait_TypeName(
+                        EthernetFrameTransmitEvent) DefineSilKitMsgTrait_TypeName(SilKit::Services::Ethernet,
+
+                        EthernetStatus)DefineSilKitMsgTrait_TypeName(
+                            SilKit::Services::Ethernet,
+                            EthernetSetMode) DefineSilKitMsgTrait_TypeName(SilKit::Services::Lin,
+                            LinSendFrameRequest)DefineSilKitMsgTrait_TypeName(
                                 SilKit::Services::Lin,
-                                LinTransmission) DefineSilKitMsgTrait_TypeName(SilKit::Services::Lin, LinWakeupPulse)
-                                DefineSilKitMsgTrait_TypeName(
+                                LinSendFrameHeaderRequest) DefineSilKitMsgTrait_TypeName(SilKit::Services::Lin,
+
+                                LinTransmission)DefineSilKitMsgTrait_TypeName(
                                     SilKit::Services::Lin,
-                                    WireLinControllerConfig) DefineSilKitMsgTrait_TypeName(SilKit::Services::Lin,
-                                                                                           LinControllerStatusUpdate)
-                                    DefineSilKitMsgTrait_TypeName(
+                                    LinWakeupPulse) DefineSilKitMsgTrait_TypeName(SilKit::Services::Lin,
+
+                                    WireLinControllerConfig)DefineSilKitMsgTrait_TypeName(
                                         SilKit::Services::Lin,
-                                        LinFrameResponseUpdate) DefineSilKitMsgTrait_TypeName(SilKit::Services::Flexray,
-                                                                                              WireFlexrayFrameEvent)
-                                        DefineSilKitMsgTrait_TypeName(SilKit::Services::Flexray,
-                                                                      WireFlexrayFrameTransmitEvent)
-                                            DefineSilKitMsgTrait_TypeName(SilKit::Services::Flexray, FlexraySymbolEvent)
+                                        LinControllerStatusUpdate) DefineSilKitMsgTrait_TypeName(SilKit::Services::Lin,
+
+                                        LinFrameResponseUpdate)DefineSilKitMsgTrait_TypeName(SilKit::Services::Flexray, WireFlexrayFrameEvent)
+                                            DefineSilKitMsgTrait_TypeName(SilKit::Services::Flexray,
+                                                                          WireFlexrayFrameTransmitEvent)
                                                 DefineSilKitMsgTrait_TypeName(SilKit::Services::Flexray,
-                                                                              FlexraySymbolTransmitEvent)
+                                                                              FlexraySymbolEvent)
                                                     DefineSilKitMsgTrait_TypeName(SilKit::Services::Flexray,
-                                                                                  FlexrayCycleStartEvent)
+                                                                                  FlexraySymbolTransmitEvent)
                                                         DefineSilKitMsgTrait_TypeName(SilKit::Services::Flexray,
-                                                                                      FlexrayHostCommand)
+                                                                                      FlexrayCycleStartEvent)
                                                             DefineSilKitMsgTrait_TypeName(SilKit::Services::Flexray,
-                                                                                          FlexrayControllerConfig)
-                                                                DefineSilKitMsgTrait_TypeName(
-                                                                    SilKit::Services::Flexray,
-                                                                    FlexrayTxBufferConfigUpdate)
+                                                                                          FlexrayHostCommand)
+                                                                DefineSilKitMsgTrait_TypeName(SilKit::Services::Flexray,
+                                                                                              FlexrayControllerConfig)
                                                                     DefineSilKitMsgTrait_TypeName(
                                                                         SilKit::Services::Flexray,
-                                                                        WireFlexrayTxBufferUpdate)
+                                                                        FlexrayTxBufferConfigUpdate)
                                                                         DefineSilKitMsgTrait_TypeName(
                                                                             SilKit::Services::Flexray,
-                                                                            FlexrayPocStatusEvent)
+                                                                            WireFlexrayTxBufferUpdate)
                                                                             DefineSilKitMsgTrait_TypeName(
-                                                                                SilKit::Core::Discovery,
-                                                                                ParticipantDiscoveryEvent)
+                                                                                SilKit::Services::Flexray,
+                                                                                FlexrayPocStatusEvent)
                                                                                 DefineSilKitMsgTrait_TypeName(
                                                                                     SilKit::Core::Discovery,
-                                                                                    ServiceDiscoveryEvent)
+                                                                                    ParticipantDiscoveryEvent)
                                                                                     DefineSilKitMsgTrait_TypeName(
-                                                                                        SilKit::Core::RequestReply,
-                                                                                        RequestReplyCall)
+                                                                                        SilKit::Core::Discovery,
+                                                                                        ServiceDiscoveryEvent)
                                                                                         DefineSilKitMsgTrait_TypeName(
                                                                                             SilKit::Core::RequestReply,
-                                                                                            RequestReplyCallReturn)
+                                                                                            RequestReplyCall)
+                                                                                            DefineSilKitMsgTrait_TypeName(
+                                                                                                SilKit::Core::
+                                                                                                    RequestReply,
+                                                                                                RequestReplyCallReturn)
 
     // Messages with history
     DefineSilKitMsgTrait_HistSize(SilKit::Services::Orchestration, ParticipantStatus, 1)
@@ -201,6 +205,7 @@ DefineSilKitMsgTrait_TypeName(SilKit::Services::Logging, LogMsg) DefineSilKitMsg
             DefineSilKitMsgTrait_HistSize(SilKit::Services::PubSub, WireDataMessageEvent, 1)
                 DefineSilKitMsgTrait_HistSize(SilKit::Services::Orchestration, WorkflowConfiguration, 1)
                     DefineSilKitMsgTrait_HistSize(SilKit::Services::Lin, WireLinControllerConfig, 1)
+                        DefineSilKitMsgTrait_HistSize(VSilKit, MetricsRegistration, 1)
 
     // Messages with enforced self delivery
     DefineSilKitMsgTrait_EnforceSelfDelivery(SilKit::Services::Orchestration, ParticipantStatus)

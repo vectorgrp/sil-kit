@@ -34,6 +34,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "ParticipantConfiguration.hpp"
 #include "ReplayScheduler.hpp"
+#include "Metrics.hpp"
+#include "MetricsProcessor.hpp"
+#include "IMetricsTimerThread.hpp"
 
 // Interfaces relying on I_SilKit_Core_Internal
 #include "IMsgForLogMsgSender.hpp"
@@ -63,6 +66,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "IMsgForSystemController.hpp"
 #include "IMsgForLifecycleService.hpp"
 #include "IMsgForTimeSyncService.hpp"
+
+#include "IMsgForMetricsReceiver.hpp"
+#include "IMsgForMetricsSender.hpp"
 
 #include "ITraceMessageSink.hpp"
 #include "ITraceMessageSource.hpp"
@@ -156,6 +162,7 @@ public:
     auto GetServiceDiscovery() -> Discovery::IServiceDiscovery* override;
     auto GetRequestReplyService() -> RequestReply::IRequestReplyService* override;
     auto GetParticipantRepliesProcedure() -> RequestReply::IParticipantReplies* override;
+    auto GetMetricsManager() -> IMetricsManager* override;
 
     auto GetLogger() -> Services::Logging::ILogger* override;
     auto CreateLifecycleService(Services::Orchestration::LifecycleConfiguration startConfiguration)
@@ -212,6 +219,9 @@ public:
 
     void SendMsg(const IServiceEndpoint*, const Services::Logging::LogMsg& msg) override;
     void SendMsg(const IServiceEndpoint*, Services::Logging::LogMsg&& msg) override;
+
+    void SendMsg(const SilKit::Core::IServiceEndpoint* from, const VSilKit::MetricsRegistration& msg) override;
+    void SendMsg(const SilKit::Core::IServiceEndpoint* from, const VSilKit::MetricsUpdate& msg) override;
 
     void SendMsg(const IServiceEndpoint* from, const Services::PubSub::WireDataMessageEvent& msg) override;
     void SendMsg(const IServiceEndpoint* from, const Services::Rpc::FunctionCall& msg) override;
@@ -296,6 +306,11 @@ public:
     void SendMsg(const IServiceEndpoint*, const std::string& targetParticipantName,
                  Services::Logging::LogMsg&& msg) override;
 
+    void SendMsg(const IServiceEndpoint*, const std::string& targetParticipantName,
+                 const VSilKit::MetricsRegistration& msg) override;
+    void SendMsg(const IServiceEndpoint*, const std::string& targetParticipantName,
+                 const VSilKit::MetricsUpdate& msg) override;
+
     void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName,
                  const Services::PubSub::WireDataMessageEvent& msg) override;
 
@@ -347,6 +362,9 @@ public:
     std::string GetServiceDescriptorString(
         SilKit::Experimental::NetworkSimulation::ControllerDescriptor controllerDescriptor) override;
 
+    auto GetMetricsProcessor() -> IMetricsProcessor* override;
+    auto GetMetricsSender() -> IMetricsSender* override;
+
 public:
     // ----------------------------------------
     // Public methods
@@ -391,6 +409,7 @@ private:
     void OnSilKitSimulationJoined();
 
     void SetupRemoteLogging();
+    void SetupMetrics();
 
     void SetTimeProvider(Services::Orchestration::ITimeProvider*);
 
@@ -428,6 +447,12 @@ private:
     template <class ConfigT>
     void AddTraceSinksToSourceInternal(ITraceMessageSource* controller, ConfigT config);
 
+    auto GetOrCreateMetricsSender() -> VSilKit::IMetricsSender*;
+
+    void CreateSystemInformationMetrics();
+
+    auto MakeTimerThread() -> std::unique_ptr<IMetricsTimerThread>;
+
 private:
     // ----------------------------------------
     // private members
@@ -452,18 +477,27 @@ private:
         ControllerMap<Services::Orchestration::IMsgForSystemMonitor>,
         ControllerMap<Services::Orchestration::IMsgForSystemController>,
         ControllerMap<Services::Orchestration::IMsgForTimeSyncService>, ControllerMap<Discovery::ServiceDiscovery>,
-        ControllerMap<RequestReply::RequestReplyService>>
+        ControllerMap<RequestReply::RequestReplyService>, ControllerMap<IMsgForMetricsReceiver>,
+        ControllerMap<IMsgForMetricsSender>>
         _controllers;
 
     std::atomic<EndpointId> _localEndpointId{0};
 
     std::unique_ptr<Experimental::NetworkSimulation::NetworkSimulatorInternal> _networkSimulatorInternal;
 
+    std::unique_ptr<IMetricsProcessor> _metricsProcessor;
+    std::unique_ptr<IMetricsManager> _metricsManager;
+
+    IMetricsSender* _metricsSender{nullptr};
+
     std::tuple<Services::Can::IMsgForCanSimulator*, Services::Ethernet::IMsgForEthSimulator*,
                Services::Flexray::IMsgForFlexrayBusSimulator*, Services::Lin::IMsgForLinSimulator*>
         _simulators{nullptr, nullptr, nullptr, nullptr};
 
     SilKitConnectionT _connection;
+
+    // NB: Must be destroyed before _connection and _metricsManager
+    std::unique_ptr<IMetricsTimerThread> _metricsTimerThread;
 
     // control variables to prevent multiple create accesses by public API
     std::atomic<bool> _isSystemMonitorCreated{false};

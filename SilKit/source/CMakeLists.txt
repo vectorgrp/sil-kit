@@ -183,7 +183,9 @@ list(APPEND SilKitImplObjectLibraries
     O_SilKit_Services_Orchestration
     O_SilKit_Services_PubSub
     O_SilKit_Services_Rpc
+    O_SilKit_Services_Metrics
     O_SilKit_Tracing
+    O_SilKit_Util
     O_SilKit_Util_FileHelpers
     O_SilKit_Util_Filesystem
     O_SilKit_Util_SetThreadName

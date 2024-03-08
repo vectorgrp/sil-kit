@@ -36,6 +36,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "TimeProvider.hpp"
 #include "TimeConfiguration.hpp"
 #include "WatchDog.hpp"
+#include "Metrics.hpp"
 
 namespace SilKit {
 namespace Services {
@@ -131,6 +132,10 @@ private:
     Services::Logging::ILogger* _logger{nullptr};
     ITimeProvider* _timeProvider{nullptr};
     TimeConfiguration _timeConfiguration;
+
+    VSilKit::ICounterMetric* _simStepCounterMetric;
+    VSilKit::IStatisticMetric* _simStepExecutionTimeStatisticMetric;
+    VSilKit::IStatisticMetric* _simStepWaitingTimeStatisticMetric;
 
     mutable std::mutex _timeSyncPolicyMx;
     std::shared_ptr<ITimeSyncPolicy> _timeSyncPolicy{nullptr};
