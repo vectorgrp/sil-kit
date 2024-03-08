@@ -46,6 +46,7 @@ struct SilKitMsgTraitSerdesName
     }
 
 DefineSilKitMsgTrait_SerdesName(SilKit::Services::Logging::LogMsg, "LOGMSG");
+DefineSilKitMsgTrait_SerdesName(VSilKit::MetricsUpdate, "METRICVALUE");
 DefineSilKitMsgTrait_SerdesName(SilKit::Services::Orchestration::SystemCommand, "SYSTEMCOMMAND");
 DefineSilKitMsgTrait_SerdesName(SilKit::Services::Orchestration::ParticipantStatus, "PARTICIPANTSTATUS");
 DefineSilKitMsgTrait_SerdesName(SilKit::Services::Orchestration::WorkflowConfiguration, "WORKFLOWCONFIGURATION");

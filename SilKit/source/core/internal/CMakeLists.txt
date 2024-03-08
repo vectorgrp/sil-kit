@@ -44,6 +44,7 @@ target_link_libraries(I_SilKit_Core_Internal
     INTERFACE I_SilKit_Services_Flexray
     INTERFACE I_SilKit_Services_Ethernet
     INTERFACE I_SilKit_Experimental_NetworkSimulatorInternals
+    INTERFACE I_SilKit_Services_Metrics
 )
 
 

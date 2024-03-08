@@ -34,6 +34,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "RequestReplyDatatypes.hpp"
 #include "OrchestrationDatatypes.hpp"
 #include "LoggingDatatypesInternal.hpp"
+#include "MetricsDatatypes.hpp"
 
 #include "WireCanMessages.hpp"
 #include "WireDataMessages.hpp"
@@ -41,6 +42,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "WireFlexrayMessages.hpp"
 #include "WireLinMessages.hpp"
 #include "WireRpcMessages.hpp"
+#include "Metrics.hpp"
 
 #include "ISimulator.hpp"
 #include "IReplayDataController.hpp"
@@ -49,10 +51,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 // forwards
 namespace SilKit {
 namespace Services {
-namespace Logging{
+namespace Logging {
 struct ILoggerInternal;
 }
-}
+} // namespace Services
 namespace Tracing {
 class ReplayScheduler;
 } // namespace Tracing
@@ -166,6 +168,8 @@ public:
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Logging::LogMsg& msg) = 0;
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, Services::Logging::LogMsg&& msg) = 0;
 
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const VSilKit::MetricsUpdate& msg) = 0;
+
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from,
                          const Discovery::ParticipantDiscoveryEvent& msg) = 0;
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Discovery::ServiceDiscoveryEvent& msg) = 0;
@@ -258,6 +262,9 @@ public:
                          Services::Logging::LogMsg&& msg) = 0;
 
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName,
+                         const VSilKit::MetricsUpdate& msg) = 0;
+
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName,
                          const Discovery::ParticipantDiscoveryEvent& msg) = 0;
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName,
                          const Discovery::ServiceDiscoveryEvent& msg) = 0;
@@ -309,6 +316,8 @@ public:
 
     virtual auto CreateNetworkSimulator() -> Experimental::NetworkSimulation::INetworkSimulator* = 0;
 
+    virtual auto GetMetricsManager() -> IMetricsManager* = 0;
+
     // Register handlers for completion of async service creation
     virtual void AddAsyncSubscriptionsCompletionHandler(std::function<void()> handler) = 0;
 
@@ -329,8 +338,14 @@ public:
                                           const std::string& controllerName,
                                           const SilKit::Config::SimulatedNetwork& simulatedNetwork) = 0;
     virtual bool ParticipantHasCapability(const std::string& participantName, const std::string& capability) const = 0;
-    virtual std::string GetServiceDescriptorString(SilKit::Experimental::NetworkSimulation::ControllerDescriptor controllerDescriptor) = 0;
+
+    virtual std::string GetServiceDescriptorString(
+        SilKit::Experimental::NetworkSimulation::ControllerDescriptor controllerDescriptor) = 0;
+
     virtual auto GetLoggerInternal() -> Services::Logging::ILoggerInternal* = 0;
+
+    virtual auto GetMetricsProcessor() -> IMetricsProcessor* = 0;
+    virtual auto GetMetricsSender() -> IMetricsSender* = 0;
 };
 
 } // namespace Core

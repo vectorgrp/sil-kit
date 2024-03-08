@@ -76,9 +76,18 @@ struct TimeSynchronizationCache
     SilKit::Util::Optional<double> animationFactor;
 };
 
+struct MetricsCache
+{
+    SilKit::Util::Optional<bool> collectFromRemote;
+    std::set<MetricsSink> jsonFileSinks;
+    std::set<std::string> fileNames;
+    SilKit::Util::Optional<MetricsSink> remoteSink;
+};
+
 struct ExperimentalCache
 {
     TimeSynchronizationCache timeSynchronizationCache;
+    MetricsCache metricsCache;
 };
 
 struct ConfigIncludeData
@@ -368,11 +377,65 @@ void CacheTimeSynchronization(const YAML::Node& root, TimeSynchronizationCache& 
     PopulateCacheField(root, "TimeSynchronization", "AnimationFactor", cache.animationFactor);
 }
 
+void CacheMetrics(const YAML::Node& root, MetricsCache& cache)
+{
+    PopulateCacheField(root, "Metrics", "CollectFromRemote", cache.collectFromRemote);
+
+    if (root["Sinks"])
+    {
+        for (const auto& sinkNode : root["Sinks"])
+        {
+            auto sink = parse_as<MetricsSink>(sinkNode);
+            if (sink.type == MetricsSink::Type::JsonFile)
+            {
+                if (cache.fileNames.count(sink.name) == 0)
+                {
+                    cache.jsonFileSinks.insert(sink);
+                    cache.fileNames.insert(sink.name);
+                }
+                else
+                {
+                    std::stringstream error_msg;
+                    error_msg << "JSON file metrics sink " << sink.name << " already exists!";
+                    throw SilKit::ConfigurationError(error_msg.str());
+                }
+            }
+            else if (sink.type == MetricsSink::Type::Remote)
+            {
+                if (!cache.remoteSink.has_value())
+                {
+                    // Replace the already included sink with this one
+                    // since we have not set it yet
+                    cache.remoteSink = sink;
+                }
+                else
+                {
+                    std::stringstream error_msg;
+                    error_msg << "Remote metrics sink already exists!";
+                    throw SilKit::ConfigurationError(error_msg.str());
+                }
+            }
+            else
+            {
+                std::stringstream error_msg;
+                error_msg << "Invalid MetricsSink::Type("
+                          << static_cast<std::underlying_type_t<MetricsSink::Type>>(sink.type) << ")";
+                throw SilKit::ConfigurationError(error_msg.str());
+            }
+        }
+    }
+}
+
 void CacheExperimental(const YAML::Node& root, ExperimentalCache& cache)
 {
     if (root["TimeSynchronization"])
     {
         CacheTimeSynchronization(root, cache.timeSynchronizationCache);
+    }
+
+    if (root["Metrics"])
+    {
+        CacheMetrics(root["Metrics"], cache.metricsCache);
     }
 }
 
@@ -491,9 +554,21 @@ void MergeTimeSynchronizationCache(const TimeSynchronizationCache& cache, TimeSy
     MergeCacheField(cache.animationFactor, timeSynchronization.animationFactor);
 }
 
+void MergeMetricsCache(const MetricsCache& cache, Metrics& metrics)
+{
+    MergeCacheField(cache.collectFromRemote, metrics.collectFromRemote);
+    MergeCacheSet(cache.jsonFileSinks, metrics.sinks);
+
+    if (cache.remoteSink.has_value())
+    {
+        metrics.sinks.push_back(cache.remoteSink.value());
+    }
+}
+
 void MergeExperimentalCache(const ExperimentalCache& cache, Experimental& experimental)
 {
     MergeTimeSynchronizationCache(cache.timeSynchronizationCache, experimental.timeSynchronization);
+    MergeMetricsCache(cache.metricsCache, experimental.metrics);
 }
 
 
@@ -675,6 +750,16 @@ bool operator==(const Tracing& lhs, const Tracing& rhs)
     return lhs.traceSinks == rhs.traceSinks && lhs.traceSources == rhs.traceSources;
 }
 
+bool operator==(const MetricsSink& lhs, const MetricsSink& rhs)
+{
+    return lhs.type == rhs.type && lhs.name == rhs.name;
+}
+
+bool operator==(const Metrics& lhs, const Metrics& rhs)
+{
+    return lhs.sinks == rhs.sinks && lhs.collectFromRemote == rhs.collectFromRemote;
+}
+
 bool operator==(const Extensions& lhs, const Extensions& rhs)
 {
     return lhs.searchPathHints == rhs.searchPathHints;
@@ -706,7 +791,17 @@ bool operator==(const TimeSynchronization& lhs, const TimeSynchronization& rhs)
 
 bool operator==(const Experimental& lhs, const Experimental& rhs)
 {
-    return lhs.timeSynchronization == rhs.timeSynchronization;
+    return lhs.timeSynchronization == rhs.timeSynchronization && lhs.metrics == rhs.metrics;
+}
+
+bool operator<(const MetricsSink& lhs, const MetricsSink& rhs)
+{
+    return std::make_tuple(lhs.type, lhs.name) < std::make_tuple(rhs.type, rhs.name);
+}
+
+bool operator>(const MetricsSink& lhs, const MetricsSink& rhs)
+{
+    return !(lhs < rhs);
 }
 
 } // namespace v1

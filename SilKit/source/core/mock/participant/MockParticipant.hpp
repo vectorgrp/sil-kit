@@ -22,6 +22,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #pragma once
 
 #include <chrono>
+#include <string>
+#include <unordered_map>
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
@@ -174,6 +176,67 @@ public:
     }
 
     void Start() override {}
+};
+
+class MockMetricsManager : public IMetricsManager
+{
+    class MockCounterMetric : public ICounterMetric
+    {
+    public:
+        void Add(uint64_t /* delta */) override {}
+        void Set(uint64_t /* value */) override {}
+    };
+
+    class MockStatisticMetric : public IStatisticMetric
+    {
+    public:
+        void Take(double /* value */) override {}
+    };
+
+    class MockStringListMetric : public IStringListMetric
+    {
+    public:
+        void Clear() override {}
+        void Add(const std::string&) override {}
+    };
+
+public:
+    auto GetCounter(const std::string& name) -> ICounterMetric* override
+    {
+        auto it = _counters.find(name);
+        if (it == _counters.end())
+        {
+            it = _counters.emplace().first;
+        }
+        return &(it->second);
+    }
+
+    auto GetStatistic(const std::string& name) -> IStatisticMetric* override
+    {
+        auto it = _statistics.find(name);
+        if (it == _statistics.end())
+        {
+            it = _statistics.emplace().first;
+        }
+        return &(it->second);
+    }
+
+    auto GetStringList(const std::string& name) -> IStringListMetric* override
+    {
+        auto it = _stringLists.find(name);
+        if (it == _stringLists.end())
+        {
+            it = _stringLists.emplace().first;
+        }
+        return &(it->second);
+    }
+
+    void SubmitUpdates() override {}
+
+private:
+    std::unordered_map<std::string, MockCounterMetric> _counters;
+    std::unordered_map<std::string, MockStatisticMetric> _statistics;
+    std::unordered_map<std::string, MockStringListMetric> _stringLists;
 };
 
 class DummyParticipant : public IParticipantInternal
@@ -358,6 +421,8 @@ public:
     void SendMsg(const IServiceEndpoint* /*from*/, Services::Logging::LogMsg&& /*msg*/) override {}
     void SendMsg(const IServiceEndpoint* /*from*/, const Services::Logging::LogMsg& /*msg*/) override {}
 
+    void SendMsg(const IServiceEndpoint* /*from*/, const VSilKit::MetricsUpdate& /*msg*/) override {}
+
     void SendMsg(const IServiceEndpoint* /*from*/, const Discovery::ParticipantDiscoveryEvent& /*msg*/) override {}
     void SendMsg(const IServiceEndpoint* /*from*/, const Discovery::ServiceDiscoveryEvent& /*msg*/) override {}
 
@@ -523,6 +588,11 @@ public:
     }
 
     void SendMsg(const IServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/,
+                 const VSilKit::MetricsUpdate& /*msg*/) override
+    {
+    }
+
+    void SendMsg(const IServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/,
                  const Discovery::ParticipantDiscoveryEvent& /*msg*/) override
     {
     }
@@ -598,6 +668,10 @@ public:
     {
         return 0;
     };
+    auto GetMetricsManager() -> IMetricsManager* override
+    {
+        return &mockMetricsManager;
+    }
     size_t GetNumberOfRemoteReceivers(const IServiceEndpoint* /*service*/, const std::string& /*msgTypeName*/) override
     {
         return 0;
@@ -632,6 +706,16 @@ public:
         return &logger;
     }
 
+    auto GetMetricsProcessor() -> IMetricsProcessor* override
+    {
+        return nullptr;
+    }
+
+    auto GetMetricsSender() -> IMetricsSender* override
+    {
+        return nullptr;
+    }
+
     const std::string _name = "MockParticipant";
     const std::string _registryUri = "silkit://mock.participant.silkit:0";
     testing::NiceMock<MockLogger> logger;
@@ -644,6 +728,7 @@ public:
     MockRequestReplyService mockRequestReplyService;
     MockParticipantReplies mockParticipantReplies;
     DummyNetworkSimulator mockNetworkSimulator;
+    MockMetricsManager mockMetricsManager;
 };
 
 // ================================================================================

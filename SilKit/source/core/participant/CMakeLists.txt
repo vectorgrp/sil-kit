@@ -39,6 +39,7 @@ target_link_libraries(I_SilKit_Core_Participant
     INTERFACE I_SilKit_Services_PubSub
     INTERFACE I_SilKit_Services_Rpc
     INTERFACE I_SilKit_Tracing
+    INTERFACE I_SilKit_Experimental_NetworkSimulatorInternals
 
     # Due to Participant_impl.hpp being used directly in NullConnectionParticipant and
     # RpcTestUtilities, this interface library must also depend on the headers used by
