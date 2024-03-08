@@ -59,6 +59,8 @@ DefineSilKitServiceTrait_ConfigType(SilKit::Services::Rpc::RpcClient, SilKit::Co
 DefineSilKitServiceTrait_ConfigType(SilKit::Services::Rpc::RpcServer, SilKit::Config::RpcServer);
 DefineSilKitServiceTrait_ConfigType(SilKit::Services::Rpc::RpcServerInternal, SilKit::Config::RpcServer);
 
+DefineSilKitServiceTrait_ConfigType(VSilKit::MetricsReceiver, SilKit::Config::InternalController);
+DefineSilKitServiceTrait_ConfigType(VSilKit::MetricsSender, SilKit::Config::InternalController);
 DefineSilKitServiceTrait_ConfigType(SilKit::Services::Logging::LogMsgReceiver, SilKit::Config::InternalController);
 DefineSilKitServiceTrait_ConfigType(SilKit::Services::Logging::LogMsgSender, SilKit::Config::InternalController);
 DefineSilKitServiceTrait_ConfigType(SilKit::Services::Orchestration::TimeSyncService,
@@ -106,6 +108,8 @@ DefineSilKitServiceTrait_ServiceType(SilKit::Services::Orchestration::TimeSyncSe
                                      SilKit::Core::ServiceType::InternalController);
 DefineSilKitServiceTrait_ServiceType(SilKit::Services::Orchestration::LifecycleService,
                                      SilKit::Core::ServiceType::InternalController);
+DefineSilKitServiceTrait_ServiceType(VSilKit::MetricsReceiver, SilKit::Core::ServiceType::InternalController);
+DefineSilKitServiceTrait_ServiceType(VSilKit::MetricsSender, SilKit::Core::ServiceType::InternalController);
 DefineSilKitServiceTrait_ServiceType(SilKit::Services::Logging::LogMsgReceiver,
                                      SilKit::Core::ServiceType::InternalController);
 DefineSilKitServiceTrait_ServiceType(SilKit::Services::Logging::LogMsgSender,

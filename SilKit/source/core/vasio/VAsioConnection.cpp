@@ -262,9 +262,10 @@ namespace Core {
 
 namespace tt = Util::tuple_tools;
 
-VAsioConnection::VAsioConnection(IParticipantInternal* participant, SilKit::Config::ParticipantConfiguration config,
-                                 std::string participantName, ParticipantId participantId,
-                                 Services::Orchestration::ITimeProvider* timeProvider, ProtocolVersion version)
+VAsioConnection::VAsioConnection(IParticipantInternal* participant, IMetricsManager* metricsManager,
+                                 SilKit::Config::ParticipantConfiguration config, std::string participantName,
+                                 ParticipantId participantId, Services::Orchestration::ITimeProvider* timeProvider,
+                                 ProtocolVersion version)
     : _config{std::move(config)}
     , _participantName{std::move(participantName)}
     , _participantId{participantId}
@@ -274,6 +275,7 @@ VAsioConnection::VAsioConnection(IParticipantInternal* participant, SilKit::Conf
     , _connectKnownParticipants{*_ioContext, *this, *this, MakeConnectKnownParticipantsSettings(_config)}
     , _remoteConnectionManager{*this, MakeRemoteConnectionManagerSettings(_config)}
     , _version{version}
+    , _metricsManager{metricsManager}
     , _participant{participant}
 {
 }
@@ -352,6 +354,9 @@ auto VAsioConnection::PrepareAcceptorEndpointUris(const std::string& connectUri)
 
 void VAsioConnection::OpenTcpAcceptors(const std::vector<std::string>& acceptorEndpointUris)
 {
+    auto metric = _metricsManager->GetStringList("TcpAcceptors");
+    metric->Clear();
+
     for (const auto& uriString : acceptorEndpointUris)
     {
         const auto uri = Uri::Parse(uriString);
@@ -381,6 +386,8 @@ void VAsioConnection::OpenTcpAcceptors(const std::vector<std::string>& acceptorE
                     Services::Logging::Error(_logger, "Unable to accept TCP connections on {}:{}: {}", host, uri.Port(),
                                              exception.what());
                 }
+
+                metric->Add(fmt::format("{}:{}", host, uri.Port()));
             }
         }
         else if (uri.Type() == Uri::UriType::Local && uri.Scheme() == "local")
@@ -396,6 +403,9 @@ void VAsioConnection::OpenTcpAcceptors(const std::vector<std::string>& acceptorE
 
 void VAsioConnection::OpenLocalAcceptors(const std::vector<std::string>& acceptorEndpointUris)
 {
+    auto metric = _metricsManager->GetStringList("LocalAcceptors");
+    metric->Clear();
+
     for (const auto& uriString : acceptorEndpointUris)
     {
         const auto uri = Uri::Parse(uriString);
@@ -424,6 +434,8 @@ void VAsioConnection::OpenLocalAcceptors(const std::vector<std::string>& accepto
                 Services::Logging::Error(_logger, "Unable to accept local domain connections on '{}': {}", uri.Path(),
                                          exception.what());
             }
+
+            metric->Add(fmt::format("{}", uri.Path()));
         }
         else if (uri.Type() == Uri::UriType::Tcp && uri.Scheme() == "tcp")
         {
@@ -1076,8 +1088,19 @@ void VAsioConnection::HandleConnectedPeer(IVAsioPeer* peer)
 void VAsioConnection::AssociateParticipantNameAndPeer(const std::string& simulationName,
                                                       const std::string& participantName, IVAsioPeer* peer)
 {
-    std::lock_guard<decltype(_mutex)> lock{_mutex};
-    _participantNameToPeer[simulationName].insert({participantName, peer});
+    {
+        std::lock_guard<decltype(_mutex)> lock{_mutex};
+        _participantNameToPeer[simulationName].insert({participantName, peer});
+    }
+
+    IStringListMetric* metric;
+    auto metricNameBase = "Peer/" + simulationName + "/" + participantName;
+
+    metric = _metricsManager->GetStringList(metricNameBase + "/LocalEndpoint");
+    metric->Add(peer->GetLocalAddress());
+
+    metric = _metricsManager->GetStringList(metricNameBase + "/RemoteEndpoint");
+    metric->Add(peer->GetRemoteAddress());
 }
 
 auto VAsioConnection::FindPeerByName(const std::string& simulationName,

@@ -924,6 +924,99 @@ bool Converter::decode(const Node& node, TraceSource::Type& obj)
     return true;
 }
 
+// Metrics
+
+template <>
+Node Converter::encode(const MetricsSink::Type& obj)
+{
+    Node node;
+    switch (obj)
+    {
+    case MetricsSink::Type::Undefined:
+        node = "Undefined";
+        break;
+    case MetricsSink::Type::JsonFile:
+        node = "JsonFile";
+        break;
+    case MetricsSink::Type::Remote:
+        node = "Remote";
+        break;
+    default:
+        throw ConfigurationError{"Unknown MetricsSink Type"};
+    }
+    return node;
+}
+
+template <>
+bool Converter::decode(const Node& node, MetricsSink::Type& obj)
+{
+    auto&& str = parse_as<std::string>(node);
+    if (str == "Undefined" || str == "")
+    {
+        obj = MetricsSink::Type::Undefined;
+    }
+    else if (str == "JsonFile")
+    {
+        obj = MetricsSink::Type::JsonFile;
+    }
+    else if (str == "Remote")
+    {
+        obj = MetricsSink::Type::Remote;
+    }
+    else
+    {
+        throw ConversionError{node, "Unknown MetricsSink::Type: " + str + "."};
+    }
+    return true;
+}
+
+template <>
+Node Converter::encode(const MetricsSink& obj)
+{
+    Node node;
+    node["Type"] = obj.type;
+    if (!obj.name.empty())
+    {
+        node["Name"] = obj.name;
+    }
+    if (!obj.path.empty())
+    {
+        node["Path"] = obj.path;
+    }
+    return node;
+}
+
+template <>
+bool Converter::decode(const Node& node, MetricsSink& obj)
+{
+    obj.type = parse_as<decltype(obj.type)>(node["Type"]);
+    optional_decode(obj.name, node, "Name");
+    optional_decode(obj.path, node, "Path");
+    return true;
+}
+
+template <>
+Node Converter::encode(const Metrics& obj)
+{
+    Node node;
+    optional_encode(obj.sinks, node, "Sinks");
+    if (obj.collectFromRemote)
+    {
+        node["CollectFromRemote"] = obj.collectFromRemote;
+    }
+    return node;
+}
+
+template <>
+bool Converter::decode(const Node& node, Metrics& obj)
+{
+    optional_decode(obj.sinks, node, "Sinks");
+    optional_decode(obj.collectFromRemote, node, "CollectFromRemote");
+    return true;
+}
+
+// Extensions
+
 template <>
 Node Converter::encode(const Extensions& obj)
 {
@@ -1004,6 +1097,7 @@ Node Converter::encode(const ParticipantConfiguration& obj)
     non_default_encode(obj.logging, node, "Logging", defaultObj.logging);
     non_default_encode(obj.healthCheck, node, "Extensions", defaultObj.healthCheck);
     non_default_encode(obj.tracing, node, "Extensions", defaultObj.tracing);
+    non_default_encode(obj.metrics, node, "Metrics", defaultObj.metrics);
     non_default_encode(obj.extensions, node, "Extensions", defaultObj.extensions);
     non_default_encode(obj.middleware, node, "Middleware", defaultObj.middleware);
     return node;
@@ -1027,6 +1121,7 @@ bool Converter::decode(const Node& node, ParticipantConfiguration& obj)
     optional_decode(obj.logging, node, "Logging");
     optional_decode(obj.healthCheck, node, "HealthCheck");
     optional_decode(obj.tracing, node, "Tracing");
+    optional_decode(obj.metrics, node, "Metrics");
     optional_decode(obj.extensions, node, "Extensions");
     optional_decode(obj.middleware, node, "Middleware");
     return true;
