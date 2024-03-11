@@ -3,6 +3,9 @@ name: macOS build
 on:
   push:
     branches: [ "main" ]
+  pull_request:
+    types: [opened, reopened]
+    branches: [ "main" ]
 
 jobs:
   build-macos:
@@ -17,4 +20,4 @@ jobs:
     - uses: ./.github/actions/build-cmake-preset
       with:
         preset-name: clang-release
-
+        do-package: true

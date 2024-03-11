@@ -3,6 +3,9 @@ name: Windows build
 on:
   push:
     branches: [ "main" ]
+  pull_request:
+    types: [opened, reopened]
+    branches: [ "main" ]
 
 jobs:
   build-win-x64:
@@ -16,4 +19,4 @@ jobs:
     - uses: ./.github/actions/build-cmake-preset
       with:
         preset-name: vs141-x64-release
-
+        do-package: true

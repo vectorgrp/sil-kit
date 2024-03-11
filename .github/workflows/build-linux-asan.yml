@@ -2,6 +2,9 @@ name: 'Linux + address sanitizer'
 on:
   push:
     branches: [ "main" ]
+  pull_request:
+    types: [opened, reopened]
+    branches: [ "main" ]
 jobs:
   clang12-asan-debug:
     name: Address Sanitizer Tests
@@ -14,3 +17,4 @@ jobs:
     - uses: ./.github/actions/build-cmake-preset
       with:
         preset-name: clang12-asan-debug
+        do-package: true
