@@ -16,6 +16,7 @@
 #include "Client/DashboardSystemApiClient.hpp"
 #include "Service/ISilKitToOatppMapper.hpp"
 #include "SystemStateTracker.hpp"
+#include "DashboardRetryPolicy.hpp"
 
 #include <chrono>
 #include <string>
@@ -76,6 +77,7 @@ private:
     std::unique_ptr<SilKit::Core::Uri> _registryUri;
 
     std::shared_ptr<oatpp::data::mapping::ObjectMapper> _objectMapper;
+    std::shared_ptr<SilKit::Dashboard::DashboardRetryPolicy> _retryPolicy;
     std::shared_ptr<SilKit::Dashboard::DashboardSystemApiClient> _apiClient;
     std::shared_ptr<SilKit::Dashboard::ISilKitToOatppMapper> _silKitToOatppMapper;
     std::shared_ptr<SilKit::Dashboard::ISilKitEventHandler> _silKitEventHandler;
