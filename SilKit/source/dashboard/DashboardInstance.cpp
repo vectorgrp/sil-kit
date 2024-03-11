@@ -63,6 +63,8 @@ DashboardInstance::~DashboardInstance()
         // ignored
     }
 
+    _silKitEventQueue->Stop();
+
     if (_eventQueueWorkerThread.joinable())
     {
         _eventQueueWorkerThread.join();
