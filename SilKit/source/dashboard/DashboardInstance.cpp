@@ -54,7 +54,10 @@ DashboardInstance::DashboardInstance()
 
 DashboardInstance::~DashboardInstance()
 {
-    _retryPolicy->AbortAllRetries();
+    if (_retryPolicy != nullptr)
+    {
+        _retryPolicy->AbortAllRetries();
+    }
 
     try
     {
@@ -65,7 +68,10 @@ DashboardInstance::~DashboardInstance()
         // ignored
     }
 
-    _silKitEventQueue->Stop();
+    if (_silKitEventQueue != nullptr)
+    {
+        _silKitEventQueue->Stop();
+    }
 
     if (_eventQueueWorkerThread.joinable())
     {
