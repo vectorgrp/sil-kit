@@ -146,6 +146,13 @@ struct EventQueueWorkerThread
                     const auto &simulationStart = event.GetSimulationStart();
                     const auto simulationId =
                         eventHandler->OnSimulationStart(simulationStart.connectUri, simulationStart.time);
+
+                    if (simulationId == 0)
+                    {
+                        Log::Warn(logger, "Dashboard: Simulation {} could not be created", event.GetSimulationName());
+                        continue;
+                    }
+
                     simulationNameToId.emplace(event.GetSimulationName(), simulationId);
 
                     continue;
