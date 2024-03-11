@@ -108,6 +108,7 @@ runs:
       with:
         name: "${{ inputs.preset-name }}-test-results"
         path: '_build/**/*gtestresults.xml'
+        retention-days: 14
 
     - name: create cmake package for ${{ inputs.preset-name }}
       if: ${{ inputs.do-package  == 'true' }}
@@ -128,6 +129,7 @@ runs:
         name: ${{ steps.cmake-package.outputs.package-name }}
         path: ${{ steps.cmake-package.outputs.package-path }}
         if-no-files-found: 'error'
+        retention-days: 14
 
     - name: upload symbols package ${{ inputs.preset-name }}
       if: ${{ inputs.do-package-symbols  == 'true' }}
@@ -136,3 +138,4 @@ runs:
         name: ${{ steps.cmake-package.outputs.symbols-package-name }}
         path: ${{ steps.cmake-package.outputs.symbols-package-path}}
         if-no-files-found: 'error'
+        retention-days: 14
