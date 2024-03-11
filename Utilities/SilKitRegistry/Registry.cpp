@@ -350,11 +350,9 @@ int main(int argc, char** argv)
         "registry listens on. ");
     commandlineParser.Add<CliParser::Option>(
         "dashboard-uri", "d", "http://localhost:8082", "[--dashboard-uri <uri>]",
-        "-d, --dashboard-uri <dashboard-uri>: The http:// URI the data should be sent to. Defaults to 'http://localhost:8082'.", CliParser::Hidden);
+        "-d, --dashboard-uri <dashboard-uri>: The http:// URI the data should be sent to.");
     commandlineParser.Add<CliParser::Option>("log", "l", "info", "[--log <level>]",
             "-l, --log <level>: Log to stdout with level 'off', 'critical', 'error', 'warn', 'info', 'debug', or 'trace'. Defaults to 'info'.");
-    commandlineParser.Add<CliParser::Flag>("enable-dashboard", "Q", "[--enable-dashboard]",
-        "-Q, --enable-dashboard: Enable the built-in dashboard REST client (experimental).", CliParser::Hidden);
     commandlineParser.Add<CliParser::Option>("registry-configuration", "c", "", "[--registry-configuration <path>]",
                                              "-c, --registry-configuration: The configuration read from this file "
                                              "overrides the values specified on the command line.");
@@ -362,6 +360,10 @@ int main(int argc, char** argv)
         "directory", "C", "", "[--directory <path>]",
         "-C, --directory <path>: Change the working directory to the specified path before doing anything else.",
         CliParser::Hidden);
+
+    // ignored and deprecated
+    commandlineParser.Add<CliParser::Flag>("enable-dashboard", "Q", "[--enable-dashboard]",
+                                           "-Q, --enable-dashboard: Enable the built-in dashboard REST client (experimental).", CliParser::Hidden);
 
 
     if (SilKitRegistry::HasWindowsServiceSupport())
@@ -433,7 +435,21 @@ int main(int argc, char** argv)
     auto listenUri{ commandlineParser.Get<CliParser::Option>("listen-uri").Value() };
     auto logLevel{ commandlineParser.Get<SilKit::Util::CommandlineParser::Option>("log").Value() };
     auto dashboardUri{commandlineParser.Get<CliParser::Option>("dashboard-uri").Value()};
-    auto enableDashboard{commandlineParser.Get<CliParser::Flag>("enable-dashboard").Value()};
+    auto enableDashboard{commandlineParser.Get<CliParser::Option>("dashboard-uri").HasValue()};
+
+    if (commandlineParser.Get<CliParser::Flag>("enable-dashboard").Value())
+    {
+        if (enableDashboard)
+        {
+            // if the dashboard was already enabled via the command-line, this option does nothing
+        }
+        else
+        {
+            // if the dashboard was already enabled via the command-line, this option will use the default value
+            enableDashboard = true;
+            dashboardUri = commandlineParser.Get<CliParser::Option>("dashboard-uri").DefaultValue();
+        }
+    }
 
     bool windowsService{SilKitRegistry::HasWindowsServiceSupport()
                         && commandlineParser.Get<CliParser::Flag>("windows-service").Value()};
