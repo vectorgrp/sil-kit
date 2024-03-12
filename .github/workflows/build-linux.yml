@@ -1,38 +1,44 @@
-name: Windows build
-
+name: 'Linux Debug Builds'
 on:
   push:
     branches: [ 'main', '*@CI' ]
   pull_request:
-    branches: [ 'main' ]
+    branches: [ '*@CI' ]
 env:
   DO_PACKAGE: ${{ github.event_name == 'push' && true || false }}
   RETENTION_DAYS: ${{ github.event.push.base_ref == 'main' && 90 || 15 }}
+
 jobs:
-  build-win-x64:
-    runs-on: windows-latest
+  clang14-debug:
+    name: Clang 14 Debug Builds for Ubuntu 22.04
     environment: public-github-runners
+    runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v3
       with:
         submodules: true
-
     - uses: ./.github/actions/build-cmake-preset
       with:
-        preset-name: vs141-x64-release
+        preset-name: clang14-debug
         do-package: ${{ env.DO_PACKAGE }}
         retention-days: ${{ env.RETENTION_DAYS }}
 
-  build-win-x32:
-    runs-on: windows-latest
+  gcc8-debug:
     environment: public-github-runners
+    runs-on: ubuntu-latest
+    container:
+      image: vectorgrp/sil-kit:ci-ubuntu-18.04
     steps:
-    - uses: actions/checkout@v3
+    - name: git checkout
+      uses: actions/checkout@v1
       with:
         submodules: true
-
-    - uses: ./.github/actions/build-cmake-preset
+    - name: gcc8-debug build
+      uses: ./.github/actions/build-cmake-preset
+      id: build
       with:
-        preset-name: vs141-x86-release
+        preset-name: gcc8-debug
         do-package: ${{ env.DO_PACKAGE }}
         retention-days: ${{ env.RETENTION_DAYS }}
+        do-package-symbols: ${{ env.DO_PACKAGE }}
+

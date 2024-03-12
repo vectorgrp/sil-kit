@@ -21,6 +21,11 @@ inputs:
     description: "Run `cmake --target package` and upload artifact"
     required: false
     type: boolean
+  retention-days:
+    description: "How long we keep the artifacts"
+    required: false
+    type: number
+    default: 14
   run-tests:
     description: "Run tests"
     required: false
@@ -68,7 +73,7 @@ runs:
 
     - name: Setup host
       if: runner.os == 'Linux'
-      run: sudo apt install -y ninja-build doxygen clang-12 llvm-12
+      run: sudo apt install -y ninja-build doxygen
       id: setup-host-linux
       shell: bash
 
@@ -108,7 +113,7 @@ runs:
       with:
         name: "${{ inputs.preset-name }}-test-results"
         path: '_build/**/*gtestresults.xml'
-        retention-days: 14
+        retention-days: ${{ inputs.retention-days }}
 
     - name: create cmake package for ${{ inputs.preset-name }}
       if: ${{ inputs.do-package  == 'true' }}
@@ -129,7 +134,7 @@ runs:
         name: ${{ steps.cmake-package.outputs.package-name }}
         path: ${{ steps.cmake-package.outputs.package-path }}
         if-no-files-found: 'error'
-        retention-days: 14
+        retention-days: ${{ inputs.retention-days }}
 
     - name: upload symbols package ${{ inputs.preset-name }}
       if: ${{ inputs.do-package-symbols  == 'true' }}
@@ -138,4 +143,4 @@ runs:
         name: ${{ steps.cmake-package.outputs.symbols-package-name }}
         path: ${{ steps.cmake-package.outputs.symbols-package-path}}
         if-no-files-found: 'error'
-        retention-days: 14
+        retention-days: ${{ inputs.retention-days }}

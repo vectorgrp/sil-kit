@@ -1,10 +1,9 @@
 name: 'Linux + thread sanitizer'
 on:
   push:
-    branches: [ "main" ]
+    branches: [ 'main', '*@CI' ]
   pull_request:
-    types: [opened, reopened]
-    branches: [ "main" ]
+    branches: [ 'main' ]
 jobs:
   clang12-tsan-debug:
     name: Thread Sanitizer Tests
@@ -17,4 +16,4 @@ jobs:
     - uses: ./.github/actions/build-cmake-preset
       with:
         preset-name: clang12-tsan-debug
-        do-package: true
+        do-package: false

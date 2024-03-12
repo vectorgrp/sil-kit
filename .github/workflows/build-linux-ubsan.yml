@@ -1,10 +1,9 @@
 name: 'Linux + UB sanitizer'
 on:
   push:
-    branches: [ "main" ]
+    branches: [ 'main', '*@CI' ]
   pull_request:
-    types: [opened, reopened]
-    branches: [ "main" ]
+    branches: [ 'main' ]
 jobs:
   clang12-ubsan-debug:
     name: Undefined Behavior Sanitizer Tests
@@ -18,4 +17,4 @@ jobs:
       with:
         preset-name: clang12-ubsan-debug
         cmake-args: "-D SILKIT_BUILD_DASHBOARD=OFF"
-        do-package: true
+        do-package: false
