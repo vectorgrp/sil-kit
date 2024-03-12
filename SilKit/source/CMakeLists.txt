@@ -252,6 +252,7 @@ elseif(UNIX AND NOT APPLE)
 		    PRIVATE -Wl,--build-id=sha1)
 	    endif()
     endif()
+    target_link_options(SilKit PRIVATE "LINKER:--version-script=${CMAKE_CURRENT_SOURCE_DIR}/silkit.map")
 endif()
 
 if ((CMAKE_CXX_COMPILER_ID STREQUAL GNU OR CMAKE_CXX_COMPILER_ID STREQUAL Clang) AND NOT SILKIT_USE_SYSTEM_LIBRARIES)
