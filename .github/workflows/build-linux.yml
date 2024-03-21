@@ -3,7 +3,7 @@ on:
   push:
     branches: [ 'main', '*@CI' ]
   pull_request:
-    branches: [ '*@CI' ]
+    branches: [ 'main' ]
 env:
   DO_PACKAGE: ${{ github.event_name == 'push' && true || false }}
   RETENTION_DAYS: ${{ github.event.push.base_ref == 'main' && 90 || 15 }}
