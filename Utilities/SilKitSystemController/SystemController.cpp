@@ -68,6 +68,26 @@ public:
         _monitor = participant->CreateSystemMonitor();
         _logger = participant->GetLogger();
 
+        _monitor->SetParticipantConnectedHandler(
+            [this](const ParticipantConnectionInformation& participantInformation) {
+                std::ostringstream ss;
+                ss << "Participant '" << participantInformation.participantName << "' joined the simulation";
+                LogInfo(ss.str());
+            });
+        _monitor->AddSystemStateHandler([&](const SystemState& systemState) {
+            if (systemState == SystemState::Stopping)
+            {
+                if (!_isStopRequested)
+                {
+                    LogInfo("An external event causes the simulation to stop");
+                }
+            }
+            else if (systemState == SystemState::Error)
+            {
+                LogInfo("SIL Kit simulation is in error state");
+            }
+        });
+
         _lifecycleService =
             participant->CreateLifecycleService({SilKit::Services::Orchestration::OperationMode::Coordinated});
         _finalStatePromise = _lifecycleService->StartLifecycle();
@@ -75,9 +95,10 @@ public:
 
     void StopOrAbort()
     {
+        _isStopRequested = true;
         if (_monitor->SystemState() == SystemState::Running || _monitor->SystemState() == SystemState::Paused)
         {
-            LogInfo("Stopping the SIL Kit simulation...");
+            LogInfo("System controller stops the SIL Kit simulation...");
             _lifecycleService->Stop("Stop via interaction in sil-kit-system-controller");
         }
         else if (_monitor->SystemState() == SystemState::Aborting)
@@ -91,7 +112,11 @@ public:
         }
         else
         {
-            LogWarn("SIL Kit SystemState is invalid. Sending AbortSimulation...");
+            {
+                std::ostringstream ss;
+                ss << "SIL Kit simulation is in state " << _monitor->SystemState() << " and cannot be stopped, attempting to abort...";
+                LogInfo(ss.str());
+            }
             _controller->AbortSimulation();
             _aborted = true;
         }
@@ -107,7 +132,7 @@ public:
             {
                 if (_aborted)
                 {
-                    LogWarn("SIL Kit simulation shut down after AbortSimulation.");
+                    LogWarn("SIL Kit simulation was shut down via abort signal");
                 }
                 else if (_externalShutdown)
                 {
@@ -129,12 +154,12 @@ public:
 
         if (_aborted)
         {
-            LogWarn("SIL Kit simulation did not shut down after AbortSimulation. Terminating.");
+            LogWarn("SIL Kit simulation did not shut down via abort signal. Terminating...");
             return;
         }
         else
         {
-            LogWarn("SIL Kit simulation did not shut down after Stop. Sending AbortSimulation...");
+            LogWarn("SIL Kit simulation did not shut down via stop signal. Attempting to abort...");
             _aborted = true;
             _controller->AbortSimulation();
             WaitForFinalStateWithRetries();
@@ -171,6 +196,7 @@ private:
     std::shared_ptr<SilKit::Config::IParticipantConfiguration> _config;
     std::vector<std::string> _expectedParticipantNames;
 
+    std::atomic<bool> _isStopRequested = false;
     bool _aborted = false;
     bool _externalShutdown = false;
     SilKit::Experimental::Services::Orchestration::ISystemController* _controller;
@@ -365,7 +391,7 @@ int main(int argc, char** argv)
         }
         else
         {
-            std::cout << "Press enter to stop the SIL Kit simulation..." << std::endl;
+            std::cout << "Press enter to end the simulation..." << std::endl;
             std::cin.ignore();
 
             controller.StopOrAbort();
@@ -375,7 +401,7 @@ int main(int argc, char** argv)
     catch (const std::exception& error)
     {
         std::cerr << "Something went wrong: " << error.what() << std::endl;
-        std::cout << "Press enter to stop the process..." << std::endl;
+        std::cout << "Press enter to end the process..." << std::endl;
         std::cin.ignore();
 
         return -3;
