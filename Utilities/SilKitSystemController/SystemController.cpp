@@ -84,7 +84,7 @@ public:
             }
             else if (systemState == SystemState::Error)
             {
-                LogInfo("SIL Kit simulation is in error state");
+                LogInfo("Simulation is in error state");
             }
         });
 
@@ -98,12 +98,12 @@ public:
         _isStopRequested = true;
         if (_monitor->SystemState() == SystemState::Running || _monitor->SystemState() == SystemState::Paused)
         {
-            LogInfo("System controller stops the SIL Kit simulation...");
+            LogInfo("System controller stops the simulation...");
             _lifecycleService->Stop("Stop via interaction in sil-kit-system-controller");
         }
         else if (_monitor->SystemState() == SystemState::Aborting)
         {
-            LogWarn("SIL Kit simulation is already aborting...");
+            LogWarn("Simulation is already aborting...");
             _aborted = true;
         }
         else if (_monitor->SystemState() == SystemState::Shutdown)
@@ -114,7 +114,7 @@ public:
         {
             {
                 std::ostringstream ss;
-                ss << "SIL Kit simulation is in state " << _monitor->SystemState() << " and cannot be stopped, attempting to abort...";
+                ss << "Simulation is in state " << _monitor->SystemState() << " and cannot be stopped, attempting to abort...";
                 LogInfo(ss.str());
             }
             _controller->AbortSimulation();
@@ -132,34 +132,34 @@ public:
             {
                 if (_aborted)
                 {
-                    LogWarn("SIL Kit simulation was shut down via abort signal");
+                    LogWarn("Simulation was shut down via abort signal");
                 }
                 else if (_externalShutdown)
                 {
-                    LogInfo("SIL Kit simulation was shut down externally.");
+                    LogInfo("Simulation was shut down externally.");
                 }
                 else
                 {
-                    LogInfo("SIL Kit simulation shut down.");
+                    LogInfo("Simulation shut down.");
                 }
                 return;
             }
             else
             {
                 std::ostringstream ss;
-                ss << "SIL Kit simulation did not shut down in 5s... Retry " << retries << "/" << numRetries;
+                ss << "Simulation did not shut down in 5s... Retry " << retries << "/" << numRetries;
                 LogWarn(ss.str());
             }
         }
 
         if (_aborted)
         {
-            LogWarn("SIL Kit simulation did not shut down via abort signal. Terminating...");
+            LogWarn("Simulation did not shut down via abort signal. Terminating...");
             return;
         }
         else
         {
-            LogWarn("SIL Kit simulation did not shut down via stop signal. Attempting to abort...");
+            LogWarn("Simulation did not shut down via stop signal. Attempting to abort...");
             _aborted = true;
             _controller->AbortSimulation();
             WaitForFinalStateWithRetries();
@@ -171,7 +171,7 @@ public:
         ParticipantState state = _finalStatePromise.get();
         if (state == ParticipantState::Shutdown)
         {
-            LogInfo("SIL Kit simulation was shut down externally.");
+            LogInfo("Simulation was shut down externally.");
         }
         else
         {
