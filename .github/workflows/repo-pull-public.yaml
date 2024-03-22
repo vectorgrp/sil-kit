@@ -8,6 +8,8 @@ jobs:
     name: Pull main branch from public GitHub to local branch
     runs-on: Linux
     environment: repo-sync-action/public-github
+    permissions:
+      contents: write
 
     steps:
       - uses: actions/checkout@v3
