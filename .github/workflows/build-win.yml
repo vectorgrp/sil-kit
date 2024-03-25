@@ -15,8 +15,6 @@ on:
         required: false
         type: number
         default: 14
-  push:
-    branches: [ 'main', '*@CI' ]
 
 jobs:
   build-win-x64:
