@@ -1,4 +1,4 @@
-name: 'Linux Feature Branch Builds'
+name: 'Windows Feature Branch Builds'
 on:
   workflow_dispatch:
     inputs:
@@ -6,18 +6,14 @@ on:
         required: true
         type: boolean
         default: true
-      do_package_symbols:
-        required: true
-        type: boolean
-        default: false
       retention_days:
         required: true
         type: number
         default: 14
 
 jobs:
-  call_linux_build:
-    uses: ./.github/workflows/build-linux.yml
+  call_win_build:
+    uses: ./.github/workflows/build-win.yml
     with:
       do_package: ${{ inputs.do_package }}
       retention_days: ${{ fromJSON(inputs.retention_days) }}

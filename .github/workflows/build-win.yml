@@ -1,13 +1,23 @@
 name: Windows build
 
 on:
+  workflow_call:
+    inputs:
+      do_package:
+        required: false
+        type: boolean
+        default: false
+      do_package_symbols:
+        required: false
+        type: boolean
+        default: false
+      retention_days:
+        required: false
+        type: number
+        default: 14
   push:
     branches: [ 'main', '*@CI' ]
-  pull_request:
-    branches: [ 'main' ]
-env:
-  DO_PACKAGE: ${{ github.event_name == 'push' && true || false }}
-  RETENTION_DAYS: ${{ github.event.push.base_ref == 'main' && 90 || 15 }}
+
 jobs:
   build-win-x64:
     runs-on: windows-latest
@@ -20,8 +30,8 @@ jobs:
     - uses: ./.github/actions/build-cmake-preset
       with:
         preset-name: vs141-x64-release
-        do-package: ${{ env.DO_PACKAGE }}
-        retention-days: ${{ env.RETENTION_DAYS }}
+        do-package: ${{ inputs.do_package }}
+        retention-days: ${{ inputs.retention_days }}
 
   build-win-x32:
     runs-on: windows-latest
@@ -34,5 +44,5 @@ jobs:
     - uses: ./.github/actions/build-cmake-preset
       with:
         preset-name: vs141-x86-release
-        do-package: ${{ env.DO_PACKAGE }}
-        retention-days: ${{ env.RETENTION_DAYS }}
+        do-package: ${{ inputs.do_package }}
+        retention-days: ${{ inputs.retention_days }}
