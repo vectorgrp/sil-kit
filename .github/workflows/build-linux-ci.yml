@@ -1,0 +1,11 @@
+name: 'Linux CI Builds'
+on:
+  pull_request:
+    branches: [ 'main' ]
+
+jobs:
+  call_linux_build:
+    uses: ./.github/workflows/build-linux.yml
+    with:
+      do_package: false
+

@@ -1,12 +1,19 @@
 name: 'Linux Debug Builds'
 on:
-  push:
-    branches: [ 'main', '*@CI' ]
-  pull_request:
-    branches: [ 'main' ]
-env:
-  DO_PACKAGE: ${{ github.event_name == 'push' && true || false }}
-  RETENTION_DAYS: ${{ github.event.push.base_ref == 'main' && 90 || 15 }}
+  workflow_call:
+    inputs:
+      do_package:
+        required: false
+        type: boolean
+        default: false
+      do_package_symbols:
+        required: false
+        type: boolean
+        default: false
+      retention_days:
+        required: false
+        type: number
+        default: 14
 
 jobs:
   clang14-debug:
@@ -20,8 +27,8 @@ jobs:
     - uses: ./.github/actions/build-cmake-preset
       with:
         preset-name: clang14-debug
-        do-package: ${{ env.DO_PACKAGE }}
-        retention-days: ${{ env.RETENTION_DAYS }}
+        do-package: ${{ inputs.do_package }}
+        retention-days: ${{ inputs.retention_days }}
 
   gcc8-debug:
     environment: public-github-runners
@@ -38,7 +45,7 @@ jobs:
       id: build
       with:
         preset-name: gcc8-debug
-        do-package: ${{ env.DO_PACKAGE }}
-        retention-days: ${{ env.RETENTION_DAYS }}
-        do-package-symbols: ${{ env.DO_PACKAGE }}
+        do-package: ${{ inputs.do_package }}
+        retention-days: ${{ env.retention_days }}
+        do-package-symbols: ${{ inputs.do_package }}
 
