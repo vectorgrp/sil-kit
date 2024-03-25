@@ -16,7 +16,7 @@ on:
         default: 14
 
 jobs:
-  clang14-debug:
+  clang14-release:
     name: Clang 14 Debug Builds for Ubuntu 22.04
     environment: public-github-runners
     runs-on: ubuntu-22.04
@@ -26,7 +26,7 @@ jobs:
         submodules: true
     - uses: ./.github/actions/build-cmake-preset
       with:
-        preset-name: clang14-debug
+        preset-name: clang14-release
         do-package: ${{ inputs.do_package }}
         retention-days: ${{ inputs.retention_days }}
 
