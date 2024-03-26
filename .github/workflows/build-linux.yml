@@ -1,4 +1,4 @@
-name: 'Linux Debug Builds'
+name: 'Linux Release Builds'
 on:
   workflow_call:
     inputs:
@@ -17,7 +17,7 @@ on:
 
 jobs:
   clang14-release:
-    name: Clang 14 Debug Builds for Ubuntu 22.04
+    name: Clang 14 release Builds for Ubuntu 22.04
     environment: public-github-runners
     runs-on: ubuntu-22.04
     steps:
@@ -30,7 +30,8 @@ jobs:
         do-package: ${{ inputs.do_package }}
         retention-days: ${{ inputs.retention_days }}
 
-  gcc8-debug:
+  gcc8-release:
+    name: GCC 8 release Builds for Ubuntu 18.04
     environment: public-github-runners
     runs-on: ubuntu-latest
     container:
@@ -44,7 +45,7 @@ jobs:
       uses: ./.github/actions/build-cmake-preset
       id: build
       with:
-        preset-name: gcc8-debug
+        preset-name: gcc8-release
         do-package: ${{ inputs.do_package }}
         retention-days: ${{ env.retention_days }}
         do-package-symbols: ${{ inputs.do_package }}
