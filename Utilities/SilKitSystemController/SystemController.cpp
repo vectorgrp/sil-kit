@@ -54,6 +54,62 @@ std::ostream& operator<<(std::ostream& out, std::chrono::nanoseconds timestamp)
 
 namespace {
 
+std::function<void()> signalInterruptHandler;
+
+#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+
+#include <windows.h>
+
+BOOL WINAPI HandleSignal(_In_ DWORD dwCtrlType)
+{
+    if (dwCtrlType == CTRL_C_EVENT)
+    {
+        signalInterruptHandler();
+    }
+    return FALSE;
+}
+
+void ConfigureSignalInterruptHandler(std::function<void()> handler)
+{
+    signalInterruptHandler = handler;
+
+    if (SetConsoleCtrlHandler(HandleSignal, TRUE) == FALSE)
+    {
+        throw std::runtime_error("Failed to install OS signal handler");
+    }
+}
+
+#elif defined(linux) || defined(__linux) || defined(__linux__) || \
+  defined(macintosh) || defined(__APPLE__) || defined(__APPLE_CC__)
+
+#include <signal.h>
+
+void HandleSignal(int signum)
+{
+    if (signum == SIGINT)
+    {
+        signalHandler();
+    }
+}
+
+void ConfigureSignalInterruptHandler(std::function<void()> handler)
+{
+    signalInterruptHandler = handler;
+
+    struct sigaction action;
+    action.sa_handler = &HandleSignal;
+    sigemptyset(&action.sa_mask);
+    action.sa_flags = 0;
+    if (sigaction(SIGINT, &action, nullptr) != 0)
+    {
+        throw std::runtime_error("Failed to install OS signal handler");
+    }
+}
+
+#else
+#error Unsupported operating system
+#endif
+
 class SilKitController
 {
 public:
@@ -80,6 +136,7 @@ public:
                 if (!_isStopRequested)
                 {
                     LogInfo("An external event causes the simulation to stop");
+                    fclose(stdin);
                 }
             }
             else if (systemState == SystemState::Error)
@@ -96,6 +153,7 @@ public:
     void StopOrAbort()
     {
         _isStopRequested = true;
+        LogInfo("User requested to stop");
         if (_monitor->SystemState() == SystemState::Running || _monitor->SystemState() == SystemState::Paused)
         {
             LogInfo("System controller stops the simulation...");
@@ -132,15 +190,15 @@ public:
             {
                 if (_aborted)
                 {
-                    LogWarn("Simulation was shut down via abort signal");
+                    LogWarn("Simulation was shut down by user request via abort signal");
                 }
                 else if (_externalShutdown)
                 {
-                    LogInfo("Simulation was shut down externally.");
+                    LogInfo("Simulation was shut down externally");
                 }
                 else
                 {
-                    LogInfo("Simulation shut down.");
+                    LogInfo("Simulation was shut down by user request");
                 }
                 return;
             }
@@ -171,7 +229,7 @@ public:
         ParticipantState state = _finalStatePromise.get();
         if (state == ParticipantState::Shutdown)
         {
-            LogInfo("Simulation was shut down externally.");
+            LogInfo("Simulation was shut down externally");
         }
         else
         {
@@ -234,9 +292,6 @@ int main(int argc, char** argv)
     CommandlineParser commandlineParser;
     commandlineParser.Add<CommandlineParser::Flag>("version", "v", "[--version]", "-v, --version: Get version info.");
     commandlineParser.Add<CommandlineParser::Flag>("help", "h", "[--help]", "-h, --help: Get this help.");
-    commandlineParser.Add<CommandlineParser::Flag>(
-        "non-interactive", "ni", "[--non-interactive]",
-        "--non-interactive: Run without awaiting any user interactions at any time.");
     commandlineParser.Add<CommandlineParser::Option>(
         "connect-uri", "u", "silkit://localhost:8500", "[--connect-uri <silkitUri>]",
         "-u, --connect-uri <silkitUri>: The registry URI to connect to. Defaults to 'silkit://localhost:8500'.");
@@ -352,19 +407,13 @@ int main(int argc, char** argv)
     {
         std::cerr << "Error: Failed to load configuration '" << configurationFilename << "', " << error.what()
                   << std::endl;
-        std::cout << "Press enter to stop the process..." << std::endl;
-        std::cin.ignore();
 
         return -2;
     }
 
     try
     {
-        std::cout << "Creating participant '" << participantName << "' with registry " << connectUri
-                  << ", expecting participant" << (expectedParticipantNames.size() > 1 ? "s '" : " '");
-        std::copy(expectedParticipantNames.begin(), std::prev(expectedParticipantNames.end()),
-                  std::ostream_iterator<std::string>(std::cout, "', '"));
-        std::cout << expectedParticipantNames.back() << "'..." << std::endl;
+        std::cout << "Creating participant '" << participantName << "' with registry " << connectUri << std::endl;
 
         auto participant = SilKit::CreateParticipant(configuration, participantName, connectUri);
 
@@ -382,27 +431,17 @@ int main(int argc, char** argv)
         expectedParticipantNames.push_back(participantName);
         SilKitController controller(participant.get(), configuration, expectedParticipantNames);
 
-        bool nonInteractiveMode =
-            (commandlineParser.Get<CommandlineParser::Flag>("non-interactive").Value()) ? true : false;
-
-        if (nonInteractiveMode)
-        {
-            controller.WaitForExternalShutdown();
-        }
-        else
-        {
-            std::cout << "Press enter to end the simulation..." << std::endl;
-            std::cin.ignore();
-
+        std::cout << "Press Ctrl-C to end the simulation..." << std::endl;
+        ConfigureSignalInterruptHandler([&]() {
             controller.StopOrAbort();
             controller.WaitForFinalStateWithRetries();
-        }
+        });
+
+        controller.WaitForExternalShutdown();
     }
     catch (const std::exception& error)
     {
         std::cerr << "Something went wrong: " << error.what() << std::endl;
-        std::cout << "Press enter to end the process..." << std::endl;
-        std::cin.ignore();
 
         return -3;
     }
