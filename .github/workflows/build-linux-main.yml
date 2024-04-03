@@ -1,0 +1,12 @@
+name: 'Linux Main Builds'
+on:
+  push:
+    branches: [ 'main' ]
+
+jobs:
+  call_linux_build:
+    uses: ./.github/workflows/build-linux.yml
+    with:
+      do_package: true
+      retention_days: 90
+

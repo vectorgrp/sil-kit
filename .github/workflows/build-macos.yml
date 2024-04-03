@@ -1,8 +1,20 @@
 name: macOS build
 
 on:
-  push:
-    branches: [ "main" ]
+  workflow_call:
+    inputs:
+      do_package:
+        required: false
+        type: boolean
+        default: false
+      do_package_symbols:
+        required: false
+        type: boolean
+        default: false
+      retention_days:
+        required: false
+        type: number
+        default: 14
 
 jobs:
   build-macos:
@@ -17,4 +29,6 @@ jobs:
     - uses: ./.github/actions/build-cmake-preset
       with:
         preset-name: clang-release
-
+        do_package: ${{ inputs.do_package }}
+        do_package_symbols: ${{ inputs.do_package_symbols }}
+        retention_days: ${{ inputs.retention_days }}
