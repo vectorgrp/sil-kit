@@ -513,7 +513,7 @@ int main(int argc, char** argv)
 
             if (useSignalHandler)
             {
-                using namespace SilKit::registry;
+                using namespace SilKit::Util;
 
                 auto signalValue = signalPromise.get_future();
                 RegisterSignalHandler([](auto sigNum) {

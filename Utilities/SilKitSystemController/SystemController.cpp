@@ -38,6 +38,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/experimental/participant/ParticipantExtensions.hpp"
 
 #include "CommandlineParser.hpp"
+#include "SignalHandler.hpp"
 
 using namespace SilKit;
 using namespace SilKit::Services::Orchestration;
@@ -147,7 +148,8 @@ public:
 
         _lifecycleService =
             participant->CreateLifecycleService({SilKit::Services::Orchestration::OperationMode::Coordinated});
-        _finalStatePromise = _lifecycleService->StartLifecycle();
+        auto finalStatePromise = _lifecycleService->StartLifecycle();
+        _finalStatePromise = finalStatePromise.share();
     }
 
     void StopOrAbort()
@@ -180,6 +182,30 @@ public:
         }
     }
 
+    void RegisterSignalHandler()
+    {
+        SilKit::Util::RegisterSignalHandler([&](auto sigNum) {
+            StopOrAbort();
+            WaitForFinalStateWithRetries();
+        });
+    }
+
+    void WaitForExternalShutdown()
+    {
+        ParticipantState state = _finalStatePromise.get();
+        if (state == ParticipantState::Shutdown)
+        {
+            //LogInfo("Simulation is shut down");
+        }
+        else
+        {
+            std::ostringstream ss;
+            ss << "Warning: Exited with an unexpected participant state: " << state;
+            LogWarn(ss.str());
+        }
+    }
+
+private:
     void WaitForFinalStateWithRetries()
     {
         const int numRetries = 3;
@@ -213,6 +239,7 @@ public:
         if (_aborted)
         {
             LogWarn("Simulation did not shut down via abort signal. Terminating...");
+            _lifecycleService->Stop("Enforced stop after no reaction to abort signal");
             return;
         }
         else
@@ -224,22 +251,6 @@ public:
         }
     }
 
-    void WaitForExternalShutdown()
-    {
-        ParticipantState state = _finalStatePromise.get();
-        if (state == ParticipantState::Shutdown)
-        {
-            LogInfo("Simulation was shut down externally");
-        }
-        else
-        {
-            std::ostringstream ss;
-            ss << "Warning: Exited with an unexpected participant state: " << state;
-            LogWarn(ss.str());
-        }
-    }
-
-private:
     void LogInfo(const std::string& message)
     {
         _logger->Info(message);
@@ -261,7 +272,7 @@ private:
     ISystemMonitor* _monitor;
     ILifecycleService* _lifecycleService;
     ILogger* _logger;
-    std::future<ParticipantState> _finalStatePromise;
+    std::shared_future<ParticipantState> _finalStatePromise;
 };
 
 auto ToLowerCase(std::string s) -> std::string
@@ -432,11 +443,7 @@ int main(int argc, char** argv)
         SilKitController controller(participant.get(), configuration, expectedParticipantNames);
 
         std::cout << "Press Ctrl-C to end the simulation..." << std::endl;
-        ConfigureSignalInterruptHandler([&]() {
-            controller.StopOrAbort();
-            controller.WaitForFinalStateWithRetries();
-        });
-
+        controller.RegisterSignalHandler();
         controller.WaitForExternalShutdown();
     }
     catch (const std::exception& error)

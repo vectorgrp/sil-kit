@@ -524,13 +524,13 @@ void LifecycleService::NewSystemState(SystemState systemState)
         _lifecycleManager.ReadyToRun(ss.str()); 
         break;
     case SystemState::Running: 
-        _logger->Info("Simulation running");
+        _logger->Info("Simulation is now running");
         break; 
     case SystemState::Paused: 
-        _logger->Info("Simulation paused"); 
+        _logger->Info("Simulation is paused"); 
         break; 
     case SystemState::Stopping: 
-        _logger->Info("Simulation stopping");
+        _logger->Info("Simulation is stopping");
         // Only allow external stop signal if we are actually running or paused
         if (_lifecycleManager.GetCurrentState() == _lifecycleManager.GetRunningState() ||
             _lifecycleManager.GetCurrentState() == _lifecycleManager.GetPausedState())
@@ -543,7 +543,7 @@ void LifecycleService::NewSystemState(SystemState systemState)
     case SystemState::ShuttingDown:
         break; 
     case SystemState::Shutdown: 
-        _logger->Info("Simulation has shutdown");
+        _logger->Info("Simulation is shut down");
         break; 
     case SystemState::Aborting: 
         break; 

@@ -21,7 +21,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <functional>
 
 namespace SilKit {
-namespace registry {
+namespace Util {
 
 //! \brief RegisterSignalHandler can be used to portably register a single signal handler.
 // It only relies on async-signal-safe C functions internally, but
@@ -30,5 +30,5 @@ namespace registry {
 using SignalHandler = std::function<void(int)>;
 void RegisterSignalHandler(SignalHandler handler);
 
-} // namespace registry
+} // namespace Util
 } // namespace SilKit

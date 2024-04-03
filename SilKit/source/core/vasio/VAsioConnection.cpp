@@ -668,6 +668,12 @@ void VAsioConnection::ReceiveParticipantAnnouncement(IVAsioPeer* from, Serialize
 {
     SILKIT_TRACE_METHOD_(_logger, "()");
 
+    // ignore new participants after shutdown
+    if (_isShuttingDown)
+    {
+        return;
+    }
+
     const auto remoteHeader = buffer.GetRegistryMessageHeader();
 
     // check if we support the remote peer's protocol version or signal a handshake failure
@@ -1350,7 +1356,7 @@ void VAsioConnection::RemovePeerFromConnection(IVAsioPeer* peer)
 
 void VAsioConnection::NotifyShutdown()
 {
-    _isShuttingDown = true;
+    //_isShuttingDown = true;
 }
 
 void VAsioConnection::OnSocketData(IVAsioPeer* from, SerializedMessage&& buffer)
