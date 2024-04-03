@@ -1,21 +1,22 @@
 ================================
 The Vector SIL Kit
 ================================
-.. image:: https://img.shields.io/github/v/release/vectorgrp/sil-kit.svg
+.. |ReleaseBadge| image:: https://img.shields.io/github/v/release/vectorgrp/sil-kit.svg
    :target: https://github.com/vectorgrp/sil-kit/releases
-.. image:: https://img.shields.io/badge/license-MIT-blue.svg
+.. |LicenseBadge| image:: https://img.shields.io/badge/license-MIT-blue.svg
    :target: https://github.com/vectorgrp/sil-kit/blob/main/LICENSE
-.. image:: https://img.shields.io/badge/documentation-html-blue.svg
+.. |DocsBadge| image:: https://img.shields.io/badge/documentation-html-blue.svg
    :target: https://vectorgrp.github.io/sil-kit-docs
 
-.. image:: https://github.com/vectorgrp/sil-kit/actions/workflows/build-linux-asan.yml/badge.svg
+.. |AsanBadge| image:: https://github.com/vectorgrp/sil-kit/actions/workflows/build-linux-asan.yml/badge.svg
    :target: https://github.com/vectorgrp/sil-kit/actions/workflows/build-linux-asan.yml
-.. image:: https://github.com/vectorgrp/sil-kit/actions/workflows/build-linux-ubsan.yml/badge.svg
+.. |UbsanBadge| image:: https://github.com/vectorgrp/sil-kit/actions/workflows/build-linux-ubsan.yml/badge.svg
    :target: https://github.com/vectorgrp/sil-kit/actions/workflows/build-linux-ubsan.yml
-.. image:: https://github.com/vectorgrp/sil-kit/actions/workflows/build-linux-tsan.yml/badge.svg
+.. |TsanBadge| image:: https://github.com/vectorgrp/sil-kit/actions/workflows/build-linux-tsan.yml/badge.svg
    :target: https://github.com/vectorgrp/sil-kit/actions/workflows/build-linux-tsan.yml
-.. image:: https://github.com/vectorgrp/sil-kit/actions/workflows/build-win.yml/badge.svg
+.. |WinBadge| image:: https://github.com/vectorgrp/sil-kit/actions/workflows/build-win.yml/badge.svg
    :target: https://github.com/vectorgrp/sil-kit/actions/workflows/build-win.yml
+|ReleaseBadge| |LicenseBadge| |DocsBadge| |AsanBadge| |UbsanBadge| |TsanBadge| |WinBadge| 
 
 The Vector SIL Kit is an open-source library for connecting Software-in-the-Loop Environments.
 This README is intended to provide you with quick start on how to build the Vector SIL Kit.
