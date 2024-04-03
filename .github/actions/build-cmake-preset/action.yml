@@ -68,7 +68,7 @@ runs:
 
     - name: Setup host
       if: runner.os == 'Linux'
-      run: sudo apt install -y ninja-build doxygen clang-12 llvm-12
+      run: sudo apt install -y ninja-build doxygen
       id: setup-host-linux
       shell: bash
 
