@@ -496,9 +496,11 @@ TEST_F(ITest_Dashboard, dashboard_netsim_coordinated)
                     }
                 });
                 timeSyncService->SetSimulationStepHandler(
-                    [simParticipant](auto, auto) {
-                        Log() << simParticipant->Name() << ": stopping";
-                        simParticipant->Stop();
+                    [simParticipant](auto currentSimTime, auto duration) {
+                        if(currentSimTime > duration) {
+                            Log() << simParticipant->Name() << ": stopping";
+                            simParticipant->Stop();
+                        }
                     },
                     10ms);
             }
