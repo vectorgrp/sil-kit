@@ -60,6 +60,8 @@ numfig_format = {'figure': 'Figure %s'}
 
 breathe_default_project = "SilKit"
 
+breathe_default_members = ('members', 'undoc-members')
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
