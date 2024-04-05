@@ -10,6 +10,8 @@ jobs:
     environment: repo-sync-action/public-github
     permissions:
       contents: write
+      actions: write
+      deployments: write
 
     steps:
       - uses: actions/checkout@v3
