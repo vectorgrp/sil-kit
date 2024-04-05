@@ -54,6 +54,15 @@
             }
         },
         {
+            "name": "linux-relwithdebinfo",
+            "displayName": "Linux Release with Debug Info",
+            "description": "Target the Windows Subsystem for Linux (WSL) or a remote Linux system.",
+            "inherits": "linux-base",
+            "environment": {
+                "SILKIT_CMAKE_PRESET_BUILD_TYPE": "RelWithDebInfo"
+            }
+        },
+        {
             "name": "windows-base",
             "description": "Target Windows with the Visual Studio development environment.",
             "inherits": "base-env",
@@ -88,10 +97,19 @@
         {
             "name": "x64-release",
             "displayName": "x64 Release",
-            "description": "Target Windows (64-bit) with the Visual Studio development environment. (RelWithDebInfo)",
+            "description": "Target Windows (64-bit) with the Visual Studio development environment. (Release)",
             "inherits": "x64-debug",
             "environment": {
                 "SILKIT_CMAKE_PRESET_BUILD_TYPE": "Release"
+            }
+        },
+        {
+            "name": "x64-relwithdebinfo",
+            "displayName": "x64 Release with Debug Info",
+            "description": "Target Windows (64-bit) with the Visual Studio development environment. (RelWithDebInfo)",
+            "inherits": "x64-debug",
+            "environment": {
+                "SILKIT_CMAKE_PRESET_BUILD_TYPE": "RelWithDebInfo"
             }
         },
         {
@@ -111,10 +129,19 @@
         {
             "name": "x86-release",
             "displayName": "x86 Release",
-            "description": "Target Windows (32-bit) with the Visual Studio development environment. (RelWithDebInfo)",
+            "description": "Target Windows (32-bit) with the Visual Studio development environment. (Release)",
             "inherits": "x86-debug",
             "environment": {
                 "SILKIT_CMAKE_PRESET_BUILD_TYPE": "Release"
+            }
+        },
+        {
+            "name": "x86-relwithdebinfo",
+            "displayName": "x86 Release with Debug Info",
+            "description": "Target Windows (32-bit) with the Visual Studio development environment. (RelWithDebInfo)",
+            "inherits": "x86-debug",
+            "environment": {
+                "SILKIT_CMAKE_PRESET_BUILD_TYPE": "RelWithDebInfo"
             }
         },
 
@@ -379,12 +406,20 @@
             "inherits": [ "mixin-release", "vs140-x86-debug" ]
         },
         {
+            "name": "vs140-x86-relwithdebinfo",
+            "inherits": [ "mixin-relwithdebinfo", "vs140-x86-debug" ]
+        },
+        {
             "name": "vs140-x64-debug",
             "inherits": [ "mixin-arch-x64", "vs140-x86-debug" ]
         },
         {
             "name": "vs140-x64-release",
             "inherits": [ "mixin-release", "vs140-x64-debug" ]
+        },
+        {
+            "name": "vs140-x64-relwithdebinfo",
+            "inherits": [ "mixin-relwithdebinfo", "vs140-x64-debug" ]
         },
 
         {
@@ -396,12 +431,20 @@
             "inherits": [ "mixin-release", "vs141-x86-debug" ]
         },
         {
+            "name": "vs141-x86-relwithdebinfo",
+            "inherits": [ "mixin-relwithdebinfo", "vs141-x86-debug" ]
+        },
+        {
             "name": "vs141-x64-debug",
             "inherits": [ "mixin-arch-x64", "vs141-x86-debug" ]
         },
         {
             "name": "vs141-x64-release",
             "inherits": [ "mixin-release", "vs141-x64-debug" ]
+        },
+        {
+            "name": "vs141-x64-relwithdebinfo",
+            "inherits": [ "mixin-relwithdebinfo", "vs141-x64-debug" ]
         },
 
         {
@@ -425,12 +468,21 @@
         },
 
         {
+            "name": "gcc8-relwithdebinfo",
+            "inherits": [ "mixin-relwithdebinfo", "gcc8-debug", "mixin-build-docs" ]
+        },
+
+        {
             "name": "gcc9-debug",
             "inherits": [ "mixin-posix", "mixin-dirs", "mixin-ninja", "mixin-debug", "mixin-gcc9" ]
         },
         {
             "name": "gcc9-release",
             "inherits": [ "mixin-release", "gcc9-debug", "mixin-build-docs" ]
+        },
+        {
+            "name": "gcc9-relwithdebinfo",
+            "inherits": [ "mixin-relwithdebinfo", "gcc9-debug", "mixin-build-docs" ]
         },
         {
             "name": "clang10-debug",
@@ -449,12 +501,20 @@
             "inherits": [ "mixin-release", "clang12-debug" ]
         },
         {
+            "name": "clang12-relwithdebinfo",
+            "inherits": [ "mixin-relwithdebinfo", "clang12-debug" ]
+        },
+        {
             "name": "clang14-debug",
             "inherits": [ "mixin-clang14", "gcc9-debug" ]
         },
         {
             "name": "clang14-release",
             "inherits": [ "mixin-release", "clang14-debug" ]
+        },
+        {
+            "name": "clang14-relwithdebinfo",
+            "inherits": [ "mixin-relwithdebinfo", "clang14-debug" ]
         },
 
         {
@@ -465,6 +525,10 @@
             "name": "clang15-release",
             "inherits": [ "mixin-release", "clang15-debug" ]
         },
+        {
+            "name": "clang15-relwithdebinfo",
+            "inherits": [ "mixin-relwithdebinfo", "clang15-debug" ]
+        },
 
         {
             "name": "clang-debug",
@@ -473,6 +537,10 @@
         {
             "name": "clang-release",
             "inherits": [ "mixin-release", "clang-debug" ]
+        },
+        {
+            "name": "clang-relwithdebinfo",
+            "inherits": [ "mixin-relwithdebinfo", "clang-debug" ]
         },
 
         {
@@ -630,12 +698,20 @@
             "configurePreset": "gcc8-release"
         },
         {
+            "name": "gcc8-relwithdebinfo",
+            "configurePreset": "gcc8-relwithdebinfo"
+        },
+        {
             "name": "gcc9-debug",
             "configurePreset": "gcc9-debug"
         },
         {
             "name": "gcc9-release",
             "configurePreset": "gcc9-release"
+        },
+        {
+            "name": "gcc9-relwithdebinfo",
+            "configurePreset": "gcc9-relwithdebinfo"
         },
 
         {
@@ -656,6 +732,10 @@
             "name": "clang12-release",
             "configurePreset": "clang12-release"
         },
+        {
+            "name": "clang12-relwithdebinfo",
+            "configurePreset": "clang12-relwithdebinfo"
+        },
 
         {
             "name": "clang14-debug",
@@ -666,6 +746,10 @@
             "configurePreset": "clang14-release"
         },
         {
+            "name": "clang14-relwithdebinfo",
+            "configurePreset": "clang14-relwithdebinfo"
+        },
+        {
             "name": "clang15-debug",
             "configurePreset": "clang15-debug"
         },
@@ -674,12 +758,20 @@
             "configurePreset": "clang15-release"
         },
         {
+            "name": "clang15-relwithdebinfo",
+            "configurePreset": "clang15-relwithdebinfo"
+        },
+        {
             "name": "clang-debug",
             "configurePreset": "clang-debug"
         },
         {
             "name": "clang-release",
             "configurePreset": "clang-release"
+        },
+        {
+            "name": "clang-relwithdebinfo",
+            "configurePreset": "clang-relwithdebinfo"
         },
         {
             "name": "clang12-asan-debug",
@@ -786,12 +878,20 @@
             "configurePreset": "vs140-x86-release"
         },
         {
+            "name": "vs140-x86-relwithdebinfo",
+            "configurePreset": "vs140-x86-relwithdebinfo"
+        },
+        {
             "name": "vs140-x64-debug",
             "configurePreset": "vs140-x64-debug"
         },
         {
             "name": "vs140-x64-release",
             "configurePreset": "vs140-x64-release"
+        },
+        {
+            "name": "vs140-x64-relwithdebinfo",
+            "configurePreset": "vs140-x64-relwithdebinfo"
         },
         {
             "name": "vs141-x86-debug",
@@ -802,12 +902,20 @@
             "configurePreset": "vs141-x86-release"
         },
         {
+            "name": "vs141-x86-relwithdebinfo",
+            "configurePreset": "vs141-x86-relwithdebinfo"
+        },
+        {
             "name": "vs141-x64-debug",
             "configurePreset": "vs141-x64-debug"
         },
         {
             "name": "vs141-x64-release",
             "configurePreset": "vs141-x64-release"
+        },
+        {
+            "name": "vs141-x64-relwithdebinfo",
+            "configurePreset": "vs141-x64-relwithdebinfo"
         },
 
         {
@@ -828,12 +936,20 @@
             "configurePreset": "gcc8-release"
         },
         {
+            "name": "gcc8-relwithdebinfo",
+            "configurePreset": "gcc8-relwithdebinfo"
+        },
+        {
             "name": "gcc9-debug",
             "configurePreset": "gcc9-debug"
         },
         {
             "name": "gcc9-release",
             "configurePreset": "gcc9-release"
+        },
+        {
+            "name": "gcc9-relwithdebinfo",
+            "configurePreset": "gcc9-relwithdebinfo"
         },
 
         {
@@ -854,6 +970,10 @@
             "name": "clang12-release",
             "configurePreset": "clang12-release"
         },
+        {
+            "name": "clang12-relwithdebinfo",
+            "configurePreset": "clang12-relwithdebinfo"
+        },
 
         {
             "name": "clang14-debug",
@@ -862,6 +982,10 @@
         {
             "name": "clang14-release",
             "configurePreset": "clang14-release"
+        },
+        {
+            "name": "clang14-relwithdebinfo",
+            "configurePreset": "clang14-relwithdebinfo"
         },
 
         {
@@ -873,12 +997,20 @@
             "configurePreset": "clang15-release"
         },
         {
+            "name": "clang15-relwithdebinfo",
+            "configurePreset": "clang15-relwithdebinfo"
+        },
+        {
             "name": "clang-debug",
             "configurePreset": "clang-debug"
         },
         {
             "name": "clang-release",
             "configurePreset": "clang-release"
+        },
+        {
+            "name": "clang-relwithdebinfo",
+            "configurePreset": "clang-relwithdebinfo"
         },
         {
             "name": "clang12-asan-debug",

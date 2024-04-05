@@ -1,16 +1,20 @@
 name: 'Linux + address sanitizer'
 on:
   push:
-    branches: [ "main" ]
+    branches: [ 'main' ]
+  pull_request:
+    branches: [ 'main' ]
 jobs:
-  clang12-asan-debug:
+  clang14-asan:
     name: Address Sanitizer Tests
     environment: public-github-runners
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: true
     - uses: ./.github/actions/build-cmake-preset
       with:
-        preset-name: clang12-asan-debug
+        preset-name: clang14-release
+        cmake-args: "-D SILKIT_ENABLE_ASAN=ON -D SILKIT_BUILD_DASHBOARD=OFF"
+        do-package: false
