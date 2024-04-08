@@ -214,7 +214,7 @@ auto OpenTextFile(const std::string& path) -> std::ifstream
         throw SilKit::ConfigurationError{"conversion from UTF-8 to UTF-16 failed"};
     }
 
-    return std::ifstream{widePath};
+    return std::ifstream{widePath.c_str()};
 }
 
 #else
