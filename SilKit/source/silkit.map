@@ -1,0 +1,38 @@
+/*
+ * SPDX-FileCopyrightText: 2024 Vector Informatik GmbH
+ *
+ * SPDX-License-Identifier: MIT
+ */
+
+
+/* This version script does not apply symbol versioning, it only changes symbol visibility! */
+{
+    global:
+        SilKit_*;
+
+        extern "C++" {
+            "SilKit::Config::ParticipantConfigurationFromString(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&)";
+            "SilKit::Config::ParticipantConfigurationFromFile(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&)";
+
+            "SilKit::CreateParticipant(std::shared_ptr<SilKit::Config::IParticipantConfiguration>, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&)";
+            "SilKit::CreateParticipant(std::shared_ptr<SilKit::Config::IParticipantConfiguration>, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&)";
+
+            "SilKit::Experimental::Participant::CreateSystemController(SilKit::IParticipant*)";
+
+            "SilKit::Experimental::Services::Lin::GetSlaveConfiguration(SilKit::Services::Lin::ILinController*)";
+            "SilKit::Experimental::Services::Lin::AddLinSlaveConfigurationHandler(SilKit::Services::Lin::ILinController*, std::function<void (SilKit::Services::Lin::ILinController*, SilKit::Experimental::Services::Lin::LinSlaveConfigurationEvent const&)>)";
+            "SilKit::Experimental::Services::Lin::RemoveLinSlaveConfigurationHandler(SilKit::Services::Lin::ILinController*, SilKit::Util::HandlerId)";
+
+            "SilKit::Vendor::Vector::CreateSilKitRegistry(std::shared_ptr<SilKit::Config::IParticipantConfiguration>)";
+
+            "SilKit::Version::Major()";
+            "SilKit::Version::Minor()";
+            "SilKit::Version::Patch()";
+            "SilKit::Version::BuildNumber()";
+            "SilKit::Version::String()";
+            "SilKit::Version::VersionSuffix()";
+            "SilKit::Version::GitHash()";
+        };
+    local:
+        *;
+};
