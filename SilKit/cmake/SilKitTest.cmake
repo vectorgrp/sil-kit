@@ -64,12 +64,6 @@ function(add_silkit_test_executable SILKIT_TEST_EXECUTABLE_NAME)
     if (MSVC)
         target_compile_options("${SILKIT_TEST_EXECUTABLE_NAME}" PRIVATE "/bigobj")
     endif(MSVC)
-
-    #ensure test execution has the MinGW libraries in PATH
-    if(MINGW)
-        get_filename_component(compilerDir ${CMAKE_CXX_COMPILER} DIRECTORY)
-        set_tests_properties(${SILKIT_TEST_EXECUTABLE_NAME} PROPERTIES ENVIRONMENT "PATH=${compilerDir};")
-    endif()
 endfunction()
 
 function(add_silkit_test_to_executable SILKIT_TEST_EXECUTABLE_NAME)
