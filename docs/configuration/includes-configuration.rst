@@ -48,8 +48,7 @@ Merge rules
 
 The included configurations are merged according to the following rules:
 
-* Properties in the *including* configuration have priority over *included* properties. 
-  This means that properties in the *root* configuration always have priority:
+* All properties of the ``Middleware`` section can only be defined once, otherwise a ``SilKit::ConfigurationError`` occurs:
 
   .. code-block:: yaml
 
@@ -58,35 +57,13 @@ The included configurations are merged according to the following rules:
         Files:
            - included.silkit.yaml
      Middleware:
-        RegistryUri: silkit://localhost:8500 # Has priority!
+        RegistryUri: silkit://localhost:8500 
   
   .. code-block:: yaml
 
      # included.silkit.yaml 
      Middleware:
-        RegistryUri: silkit://0.0.0.0:8501 # Already specified in root.silkit.yaml, ignored!
-
-* In case of multiple included files, earlier included files have priority:
-
-  .. code-block:: yaml
-
-     # root.silkit.yaml 
-     Includes:
-        Files:
-           - included_1.silkit.yaml
-           - included_2.silkit.yaml
-  
-  .. code-block:: yaml
-
-     # included_1.silkit.yaml 
-     Middleware:
-        RegistryUri: silkit://localhost:8500 # Has priority!
-
-  .. code-block:: yaml
-
-     # included_2.silkit.yaml 
-     Middleware:
-        RegistryUri: silkit://0.0.0.0:8501 # Already specified in included_1.silkit.yaml, ignored!
+        RegistryUri: silkit://0.0.0.0:8501 # Already specified in root.silkit.yaml, ConfigurationError!
 
 * Multiple inclusions of the same file are automatically prevented.
   This also applies for nested includes of the same file:
@@ -144,18 +121,20 @@ The included configurations are merged according to the following rules:
      - Name: CAN1  # SilKit::ConfigurationError: Conflicting name "CAN1"
        Network: CAN2
 
+* *Named* items where all properties match (i.e., duplicates of *named* items) are permitted.
+
 * The list items of ``Sinks`` in the ``Logging`` section are merged as follows:
 
-  * Only a single sink of ``Type: Remote`` and ``Type: Stdout`` is valid.
+  * Only a single sink of type ``Type: Stdout`` can be defined, otherwise a ``SilKit::ConfigurationError`` occurs.
+    The same applies to the sink type ``Type: Remote``.
   * Sinks of ``Type: File`` are combined. 
     However their ``LogName`` must be unique, otherwise a ``SilKit::ConfigurationError`` occurs. 
 
 * List items of the ``SearchPathHints`` in the sections ``Includes`` or ``Extensions`` are merged and all entries are retained.
   Possible duplicates here are uncritical.
 
-* ``AcceptorUris`` of the ``Middleware`` section cannot be combined. 
-  Here, a ``SilKit::ConfigurationError`` occurs if ``AcceptorUris`` are defined multiple times.
-  
+* Only a single ``HealthCheck`` section can be defined, otherwise a ``SilKit::ConfigurationError`` occurs. 
+
 Dynamic port generation
 =======================
 
