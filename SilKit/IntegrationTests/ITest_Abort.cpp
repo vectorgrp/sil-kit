@@ -216,10 +216,14 @@ TEST_F(ITest_Abort, test_Abort_Stopped_Simulation_Sync)
     EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::CommunicationInitialized)).Times(size);
     EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::ReadyToRun)).Times(size);
     EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Running)).Times(size);
-    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Aborting)).Times(size);
+    // The system controller stops the simulation and aborts in the stop handler.
+    // However it can happen that a participant is done with the stop before the abort arrives.
+    // Thus we can only expect 1 to N aborts.
+    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Aborting)).Times(Between(1, size));
     EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Stopping)).Times(Between(1, size));
     EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Stopped)).Times(Between(0, size));
-    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::ShuttingDown)).Times(0);
+    // A participant may stop and shut down before the abort arrives. In this case ShuttingDown is reached.
+    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::ShuttingDown)).Times(Between(0, size));
 
     std::list<TestParticipant> monitorParticipants;
     monitorParticipants.push_back({"MonitorParticipant1", TimeMode::Async, OperationMode::Autonomous});
