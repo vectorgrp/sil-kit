@@ -74,6 +74,9 @@ add_compile_definitions(
     ASIO_DISABLE_VISIBILITY=1
 )
 
+if(MINGW AND (CMAKE_CXX_COMPILER_ID MATCHES GNU OR CMAKE_CXX_COMPILER_ID MATCHES Clang))
+    add_compile_options("-Wa,-mbig-obj")
+endif()
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake ${CMAKE_CURRENT_LIST_DIR}/SilKit/cmake)
 include(SilKitInstall)
