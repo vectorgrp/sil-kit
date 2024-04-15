@@ -7,6 +7,28 @@ All notable changes to the Vector SIL Kit project shall be documented in this fi
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
 
+[4.0.48] - 2024-04-15
+---------------------
+
+Changed
+~~~~~~~
+
+- We now use a linker script to limit the exported symbol visibility to the public C API and some legacy C++ symbols. 
+- The ``--enable-dashboard`` CLI parameter for the registry is now a no-op. It is now activated when using ``--dashboard-uri`` or via the registry configuration. 
+
+Fixed
+~~~~~
+
+- Fix MinGW build.
+- Various fixes for dashboard integration.
+
+Added
+~~~~~
+
+- Man pages for linux.
+- All public struct members are now included by default in the documentation.
+
+
 [4.0.47] - 2024-03-01
 ---------------------
 
