@@ -58,7 +58,7 @@ elseif(EXISTS "${GIT_HEAD_FILE}")
         )
     endif()
 else()
-    message(WARNING "Cannot determine hash of current git head!")
+    message(STATUS "SIL Kit git: Cannot determine hash of current git head! git hash will be set to UNKNOWN")
     set(GIT_HEAD_HASH "UNKNOWN")
     configure_file(
         version_macros.hpp.in
