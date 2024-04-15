@@ -19,7 +19,7 @@ buildWarningsAsErrors=true // compiler warnings are treated as errors
 artifactoryServer = Artifactory.server('IntegrationBusArtifactory')
 artifactoryBuildInfo = Artifactory.newBuildInfo()
 
-def gitBranch="main" // overriden in parallel pipeline based on scm vars
+def gitBranch="main-mirror" // overriden in parallel pipeline based on scm vars
 
 def buildConfigs = [
     // Windows builds:
@@ -135,7 +135,7 @@ def buildConfigs = [
 @NonCPS
 def isFullBuildRequired(branchName) {
     // Master and Pull Requests are always full builds
-    if(branchName == 'main' || branchName.startsWith("PR-")) {
+    if(branchName == 'main-mirror' || branchName.startsWith("PR-")) {
         return true;
     }
     // A user requests a fullbuild by adding a "/full" suffix
@@ -156,7 +156,7 @@ def isClangBuild(label) {
 }
 
 def setBuildRetention(bi) {
-    if(gitBranch == 'main' || gitBranch == 'origin/main') {
+    if(gitBranch == 'main-mirror' || gitBranch == 'origin/main-mirror') {
         bi.retention(maxBuilds: 40, deleteBuildArtifacts: true, async: true)
     } else {
         bi.retention(maxBuilds: 2, maxDays: 50, deleteBuildArtifacts: true, async: true)
@@ -355,7 +355,7 @@ def doBuild(Map config) {
             scmVars = checkoutGit()
 
             // For reproducible build set SOURCE_DATE_EPOCH to time of last commit
-            def commitTime = runWithOutput("git log --max-count=1 --format=%ct -r origin/main")
+            def commitTime = runWithOutput("git log --max-count=1 --format=%ct -r origin/main-mirror")
             buildEnv.add("SOURCE_DATE_EPOCH=${commitTime}")
             buildEnv.add("TZ=UTC")
             buildEnv.add("LC_ALL=C.UTF-8")
