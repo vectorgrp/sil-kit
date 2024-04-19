@@ -137,7 +137,6 @@ public:
                 if (!_isStopRequested)
                 {
                     LogInfo("An external event causes the simulation to stop");
-                    fclose(stdin);
                 }
             }
             else if (systemState == SystemState::Error)
@@ -152,10 +151,49 @@ public:
         _finalStatePromise = finalStatePromise.share();
     }
 
+    void RegisterSignalHandler()
+    {
+        SilKit::Util::RegisterSignalHandler([&](auto signalValue) {
+            {
+                std::ostringstream ss;
+                ss << "Signal " << signalValue << " received, attempting to stop simulation...";
+                LogInfo(ss.str());
+            }
+            StopOrAbort();
+            WaitForFinalStateWithRetries();
+        });
+    }
+
+    void WaitForFinalState()
+    {
+        ParticipantState state = _finalStatePromise.get();
+        if (state != ParticipantState::Shutdown)
+        {
+            std::ostringstream ss;
+            ss << "Simulation exited with an unexpected participant state: " << state;
+            LogWarn(ss.str());
+        }
+        else
+        {
+            if (_aborted)
+            {
+                LogWarn("Simulation was shut down by user request via abort signal");
+            }
+            else if (_externalShutdown)
+            {
+                LogInfo("Simulation was shut down externally");
+            }
+            else
+            {
+                LogInfo("Simulation was shut down by user request");
+            }
+        }
+    }
+
+private:
     void StopOrAbort()
     {
         _isStopRequested = true;
-        LogInfo("User requested to stop");
         if (_monitor->SystemState() == SystemState::Running || _monitor->SystemState() == SystemState::Paused)
         {
             LogInfo("System controller stops the simulation...");
@@ -182,30 +220,6 @@ public:
         }
     }
 
-    void RegisterSignalHandler()
-    {
-        SilKit::Util::RegisterSignalHandler([&](auto sigNum) {
-            StopOrAbort();
-            WaitForFinalStateWithRetries();
-        });
-    }
-
-    void WaitForExternalShutdown()
-    {
-        ParticipantState state = _finalStatePromise.get();
-        if (state == ParticipantState::Shutdown)
-        {
-            //LogInfo("Simulation is shut down");
-        }
-        else
-        {
-            std::ostringstream ss;
-            ss << "Warning: Exited with an unexpected participant state: " << state;
-            LogWarn(ss.str());
-        }
-    }
-
-private:
     void WaitForFinalStateWithRetries()
     {
         const int numRetries = 3;
@@ -214,18 +228,6 @@ private:
             auto status = _finalStatePromise.wait_for(5s);
             if (status == std::future_status::ready)
             {
-                if (_aborted)
-                {
-                    LogWarn("Simulation was shut down by user request via abort signal");
-                }
-                else if (_externalShutdown)
-                {
-                    LogInfo("Simulation was shut down externally");
-                }
-                else
-                {
-                    LogInfo("Simulation was shut down by user request");
-                }
                 return;
             }
             else
@@ -239,8 +241,7 @@ private:
         if (_aborted)
         {
             LogWarn("Simulation did not shut down via abort signal. Terminating...");
-            _lifecycleService->Stop("Enforced stop after no reaction to abort signal");
-            return;
+            _lifecycleService->ReportError("Simulation did not shut down via abort signal");  // TODO: Modify API to set the _finalStatePromise for Error state, not currently done.
         }
         else
         {
@@ -259,6 +260,11 @@ private:
     void LogWarn(const std::string& message)
     {
         _logger->Warn(message);
+    }
+
+    void LogDebug(const std::string& message)
+    {
+        _logger->Debug(message);
     }
 
 private:
@@ -303,6 +309,9 @@ int main(int argc, char** argv)
     CommandlineParser commandlineParser;
     commandlineParser.Add<CommandlineParser::Flag>("version", "v", "[--version]", "-v, --version: Get version info.");
     commandlineParser.Add<CommandlineParser::Flag>("help", "h", "[--help]", "-h, --help: Get this help.");
+    commandlineParser.Add<CommandlineParser::Flag>(
+        "non-interactive", "ni", "[--non-interactive]",
+        "--non-interactive: Run without awaiting any user interactions at any time.");
     commandlineParser.Add<CommandlineParser::Option>(
         "connect-uri", "u", "silkit://localhost:8500", "[--connect-uri <silkitUri>]",
         "-u, --connect-uri <silkitUri>: The registry URI to connect to. Defaults to 'silkit://localhost:8500'.");
@@ -394,6 +403,9 @@ int main(int argc, char** argv)
         return -1;
     }
 
+    const bool nonInteractiveMode =
+        (commandlineParser.Get<CommandlineParser::Flag>("non-interactive").Value()) ? true : false;
+
     std::shared_ptr<SilKit::Config::IParticipantConfiguration> configuration;
     try
     {
@@ -442,13 +454,27 @@ int main(int argc, char** argv)
         expectedParticipantNames.push_back(participantName);
         SilKitController controller(participant.get(), configuration, expectedParticipantNames);
 
-        std::cout << "Press Ctrl-C to end the simulation..." << std::endl;
+        if (!nonInteractiveMode)
+        {
+            std::cout << "Press Ctrl-C to end the simulation..." << std::endl;
+        }
         controller.RegisterSignalHandler();
-        controller.WaitForExternalShutdown();
+        controller.WaitForFinalState();
+
+        if (!nonInteractiveMode)
+        {
+            std::cout << "Press enter to end the process..." << std::endl;
+            std::cin.ignore();
+        }
     }
     catch (const std::exception& error)
     {
         std::cerr << "Something went wrong: " << error.what() << std::endl;
+        if (!nonInteractiveMode)
+        {
+                std::cout << "Press enter to end the process..." << std::endl;
+                std::cin.ignore();
+        }
 
         return -3;
     }

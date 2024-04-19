@@ -82,7 +82,6 @@ sil-kit-system-controller
          -n, --name <participantName>                 The participant name used to take part in the simulation. Defaults to ``SystemController``.
          -l, --log <level>                            Log to stdout with level ``trace``, ``debug``, ``warn``, ``info``, ``error``, ``critical`` or ``off``. Defaults to ``info``. Cannot be used together with ``--configuration``.
          -c, --configuration <configuration>          Path and filename of the participant configuration YAML file. Cannot be used together with ``--log``.
-         -ni, --non-interactive                       Run without awaiting any user interactions at any time.
          
          | **<participantName1>, <participantName2> ...**
          |  Names of participants to wait for before starting simulation.

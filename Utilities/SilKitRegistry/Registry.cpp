@@ -523,8 +523,7 @@ int main(int argc, char** argv)
 
                 signalValue.wait();
 
-                std::cout << "Signal " << signalValue.get() << " received!" << std::endl;
-                std::cout << "Exiting..." << std::endl;
+                std::cout << "Signal " << signalValue.get() << " received, exiting..." << std::endl;
             }
             else
             {
