@@ -47,8 +47,9 @@ void ParticipantReplies::CallAfterAllParticipantsReplied(std::function<void()> c
 
         if (_barrierActive)
         {
-            Services::Logging::Debug(_participant->GetLogger(), "Only one barrier can be active at a time, ignoring.");
-            return;
+            Services::Logging::Debug(_participant->GetLogger(),
+                                     "Still waiting at a barrier for replies from participants, starting a new barrier "
+                                     "can lead to unexpected behavior.");
         }
 
         auto remoteReceivers =
