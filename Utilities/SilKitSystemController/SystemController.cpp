@@ -215,7 +215,7 @@ private:
     std::shared_ptr<SilKit::Config::IParticipantConfiguration> _config;
     std::vector<std::string> _expectedParticipantNames;
 
-    std::atomic<bool> _isStopRequested = false;
+    std::atomic<bool> _isStopRequested{false};
     bool _aborted = false;
     bool _externalShutdown = false;
     SilKit::Experimental::Services::Orchestration::ISystemController* _controller;

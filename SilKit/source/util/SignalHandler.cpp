@@ -130,9 +130,10 @@ namespace {
 using namespace SilKit::Util;
 
 //forward
+static inline void setSignalAction(int sigNum, __sighandler_t action);
 void systemHandler(int sigNum);
 
-auto ErrorMessage()
+    auto ErrorMessage()
 {
     return std::string{strerror(errno)};
 }
@@ -204,7 +205,7 @@ private:
     int _signalNumber{-1};
 };
 
-static inline void setSignalAction(int sigNum, const struct sigaction *action)
+static inline void setSignalAction(int sigNum, __sighandler_t action)
 {
     // Check current signal handler action to see if it's set to SIGNAL IGNORE
     struct sigaction oldAction;
@@ -217,10 +218,10 @@ static inline void setSignalAction(int sigNum, const struct sigaction *action)
     // Set new signal handler action to what we want
     struct sigaction newAction;
     newAction.sa_handler = action;
-    auto ret = sigaction(sigNum, newAction, NULL);
+    auto ret = sigaction(sigNum, &newAction, NULL);
     if (ret == -1)
     {
-        throw std::runtime_error("SignalMonitor: Failed to set handler for signal " + sigNum + ": " + ErrorMessage());
+        throw std::runtime_error("SignalMonitor: Failed to set handler for signal " + std::to_string(sigNum) + ": " + ErrorMessage());
     }
 }
 
