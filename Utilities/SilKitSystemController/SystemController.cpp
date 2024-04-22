@@ -55,62 +55,6 @@ std::ostream& operator<<(std::ostream& out, std::chrono::nanoseconds timestamp)
 
 namespace {
 
-std::function<void()> signalInterruptHandler;
-
-#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
-
-#include <windows.h>
-
-BOOL WINAPI HandleSignal(_In_ DWORD dwCtrlType)
-{
-    if (dwCtrlType == CTRL_C_EVENT)
-    {
-        signalInterruptHandler();
-    }
-    return FALSE;
-}
-
-void ConfigureSignalInterruptHandler(std::function<void()> handler)
-{
-    signalInterruptHandler = handler;
-
-    if (SetConsoleCtrlHandler(HandleSignal, TRUE) == FALSE)
-    {
-        throw std::runtime_error("Failed to install OS signal handler");
-    }
-}
-
-#elif defined(linux) || defined(__linux) || defined(__linux__) || \
-  defined(macintosh) || defined(__APPLE__) || defined(__APPLE_CC__)
-
-#include <signal.h>
-
-void HandleSignal(int signum)
-{
-    if (signum == SIGINT)
-    {
-        signalHandler();
-    }
-}
-
-void ConfigureSignalInterruptHandler(std::function<void()> handler)
-{
-    signalInterruptHandler = handler;
-
-    struct sigaction action;
-    action.sa_handler = &HandleSignal;
-    sigemptyset(&action.sa_mask);
-    action.sa_flags = 0;
-    if (sigaction(SIGINT, &action, nullptr) != 0)
-    {
-        throw std::runtime_error("Failed to install OS signal handler");
-    }
-}
-
-#else
-#error Unsupported operating system
-#endif
-
 class SilKitController
 {
 public:
