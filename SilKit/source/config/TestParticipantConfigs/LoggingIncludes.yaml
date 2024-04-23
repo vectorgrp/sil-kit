@@ -1,0 +1,9 @@
+---
+Description: Example include Logging configuration
+Logging:
+  Sinks:
+  - Type: File
+    Level: Critical
+    LogName: MyLog2
+  - Type: Stdout
+    Level: Trace

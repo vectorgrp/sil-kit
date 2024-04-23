@@ -80,5 +80,12 @@ bool remove(const path&);
 //! Rename a file.
 void rename(const path& old_p, const path& new_p);
 
+//! Get parent path
+path parent_path(const path& child);
+
+//! Append paths
+path concatenate_paths(const path& root, const path& child);
+path concatenate_paths(const std::string& root, const std::string& child);
+
 } // namespace Filesystem
 } // namespace SilKit

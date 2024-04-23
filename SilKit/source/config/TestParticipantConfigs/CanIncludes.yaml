@@ -1,0 +1,23 @@
+---
+Description: Example include configuration for CAN Controllers
+Includes:
+  Files:
+    - CanIncludes.yaml
+    - CanInclude2.yaml
+    - CanInclude3.yaml
+CanControllers:
+- Name: CAN1
+  Replay:
+    UseTraceSource: Source1
+    Direction: Both
+    MdfChannel:
+      ChannelName: MyTestChannel1
+      ChannelPath: path/to/myTestChannel1
+      ChannelSource: MyTestChannel
+      GroupName: MyTestGroup
+      GroupPath: path/to/myTestGroup1
+      GroupSource: MyTestGroup
+  UseTraceSinks:
+  - Sink1
+- Name: MyCAN2
+  Network: CAN2

@@ -156,6 +156,8 @@ struct SimulatedNetwork
 };
 
 inline bool operator==(const Sink& lhs, const Sink& rhs);
+inline bool operator<(const Sink& lhs, const Sink& rhs);
+inline bool operator>(const Sink& lhs, const Sink& rhs);
 inline bool operator==(const Logging& lhs, const Logging& rhs);
 inline bool operator==(const TraceSink& lhs, const TraceSink& rhs);
 inline bool operator==(const TraceSource& lhs, const TraceSource& rhs);
@@ -206,6 +208,16 @@ bool operator==(const Sink& lhs, const Sink& rhs)
     return lhs.type == rhs.type
         && lhs.level == rhs.level
         && lhs.logName == rhs.logName;
+}
+
+bool operator<(const Sink& lhs, const Sink& rhs)
+{
+    return lhs.logName.compare(rhs.logName);
+}
+
+bool operator>(const Sink& lhs, const Sink& rhs)
+{
+    return rhs < lhs;
 }
 
 bool operator==(const Logging& lhs, const Logging& rhs)

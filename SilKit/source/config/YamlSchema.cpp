@@ -157,6 +157,11 @@ auto MakeYamlSchema() -> YamlSchemaElem
         {"schemaVersion"}, // should be removed in the future (deprecated)
         {"Description"},
         {"ParticipantName"},
+        {"Includes", {
+                {"SearchPathHints"},
+                {"Files"}
+            }
+        },
         {"CanControllers", {
                 {"Name"},
                 {"Network"},

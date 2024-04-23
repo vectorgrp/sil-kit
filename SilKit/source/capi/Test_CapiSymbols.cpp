@@ -129,6 +129,7 @@ SilKit_HandlerId id;
 (void) SilKit_LifecycleService_StartLifecycle(nullptr);
 (void) SilKit_LifecycleService_WaitForLifecycleToComplete(nullptr, nullptr);
 (void) SilKit_ParticipantConfiguration_FromString(nullptr, "");
+(void) SilKit_ParticipantConfiguration_FromFile(nullptr, "");
 (void) SilKit_ParticipantConfiguration_Destroy(nullptr);
 (void) SilKit_Participant_Create(nullptr, nullptr, "", "");
 (void) SilKit_Participant_Destroy(nullptr);

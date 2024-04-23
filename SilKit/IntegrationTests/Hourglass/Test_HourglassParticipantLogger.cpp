@@ -54,6 +54,8 @@ public:
             .WillByDefault(DoAll(SetArgPointee<0>(mockLogger), Return(SilKit_ReturnCode_SUCCESS)));
         ON_CALL(capi, SilKit_ParticipantConfiguration_FromString(_, _))
             .WillByDefault(DoAll(SetArgPointee<0>(mockConfiguration), Return(SilKit_ReturnCode_SUCCESS)));
+        ON_CALL(capi, SilKit_ParticipantConfiguration_FromFile(_, _))
+            .WillByDefault(DoAll(SetArgPointee<0>(mockConfiguration), Return(SilKit_ReturnCode_SUCCESS)));
     }
 };
 
@@ -64,6 +66,15 @@ TEST_F(Test_HourglassParticipantLogger, SilKit_ParticipantConfiguration_FromStri
     EXPECT_CALL(capi, SilKit_ParticipantConfiguration_FromString(testing::_, testing::StrEq(configString.c_str())))
         .Times(1);
     SilKit::Config::ParticipantConfigurationFromString(configString);
+}
+
+TEST_F(Test_HourglassParticipantLogger, SilKit_ParticipantConfiguration_FromFile)
+{
+    std::string configFilename = "";
+
+    EXPECT_CALL(capi, SilKit_ParticipantConfiguration_FromFile(testing::_, testing::StrEq(configFilename.c_str())))
+        .Times(1);
+    SilKit::Config::ParticipantConfigurationFromFile(configFilename);
 }
 
 TEST_F(Test_HourglassParticipantLogger, SilKit_ParticipantConfiguration_Destroy)

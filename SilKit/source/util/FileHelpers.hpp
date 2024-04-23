@@ -20,12 +20,14 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <string>
+#include <fstream>
 
 
 namespace SilKit {
 namespace Util {
 
-auto ReadTextFile(const std::string& filename) -> std::string;
+auto OpenIFStream(const std::string& path) -> std::ifstream;
+auto ReadTextFile(const std::string& path) -> std::string;
 
 } // namespace Util
 } // namespace SilKit

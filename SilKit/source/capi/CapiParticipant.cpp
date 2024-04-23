@@ -34,17 +34,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <memory>
 #include <map>
 #include <mutex>
-
-#ifdef _WIN32
-#    define NOMINMAX
-#    define WIN32_LEAN_AND_MEAN
-#    include "Windows.h"
-#endif
-
-
-namespace {
-auto OpenTextFile(const std::string& path) -> std::ifstream;
-} // namespace
+#include <fstream>
 
 
 SilKit_ReturnCode SilKitCALL SilKit_Participant_Create(SilKit_Participant** outParticipant,
@@ -148,18 +138,21 @@ try
     ASSERT_VALID_OUT_PARAMETER(outParticipantConfiguration);
     ASSERT_VALID_POINTER_PARAMETER(participantConfigurationPath);
 
-    std::stringstream ss;
-
-    // read the whole configuration file
+    // create the configuration using the C++ API function
+    auto cppSharedParticipantConfiguration = std::dynamic_pointer_cast<SilKit::Config::ParticipantConfiguration>(
+        SilKit::Config::ParticipantConfigurationFromFileImpl(participantConfigurationPath));
+    if (cppSharedParticipantConfiguration == nullptr)
     {
-        const auto fs = OpenTextFile(participantConfigurationPath);
-        ss << fs.rdbuf();
+        SilKit_error_string = "Participant configuration could not be created.";
+        return SilKit_ReturnCode_UNSPECIFIEDERROR;
     }
 
-    const auto string = ss.str();
+    // since it is not possible to release the "raw" pointer from a shared_ptr, we copy it into our own raw pointer
+    auto* cppParticipantConfiguration =
+        new SilKit::Config::ParticipantConfiguration(*cppSharedParticipantConfiguration);
 
-    // dispatch to the function reading the configuration from a string
-    return SilKit_ParticipantConfiguration_FromString(outParticipantConfiguration, string.c_str());
+    *outParticipantConfiguration = reinterpret_cast<SilKit_ParticipantConfiguration*>(cppParticipantConfiguration);
+    return SilKit_ReturnCode_SUCCESS;
 }
 CAPI_CATCH_EXCEPTIONS
 
@@ -183,47 +176,3 @@ try
     return SilKit_ReturnCode_SUCCESS;
 }
 CAPI_CATCH_EXCEPTIONS
-
-
-namespace {
-
-#ifdef _WIN32
-
-auto OpenTextFile(const std::string& path) -> std::ifstream
-{
-    std::wstring widePath;
-
-    constexpr DWORD MB2WC_FLAGS = 0;
-
-    const auto pathSize = static_cast<int>(path.size());
-
-    // determine the size of the required wide-character string
-    const int widePathSize = ::MultiByteToWideChar(CP_UTF8, MB2WC_FLAGS, path.c_str(), pathSize, NULL, 0);
-    if (widePathSize <= 0)
-    {
-        throw SilKit::ConfigurationError{"conversion from UTF-8 to UTF-16 failed"};
-    }
-
-    widePath.resize(static_cast<size_t>(widePathSize));
-
-    // actually convert the path into a wide-character string
-    const int realWidePathSize =
-        ::MultiByteToWideChar(CP_UTF8, MB2WC_FLAGS, path.c_str(), pathSize, &widePath[0], widePathSize);
-    if (realWidePathSize != widePathSize)
-    {
-        throw SilKit::ConfigurationError{"conversion from UTF-8 to UTF-16 failed"};
-    }
-
-    return std::ifstream{widePath.c_str()};
-}
-
-#else
-
-auto OpenTextFile(const std::string& path) -> std::ifstream
-{
-    return std::ifstream{path};
-}
-
-#endif
-
-} // namespace

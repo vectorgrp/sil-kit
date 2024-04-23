@@ -90,5 +90,15 @@ bool operator==(const Optional<T>& lhs, const Optional<T>& rhs)
         && lhs.value() == rhs.value();
 }
 
+template<class T>
+bool operator!=(const Optional<T>& lhs, const Optional<T>& rhs)
+{
+    if (!lhs.has_value() || !rhs.has_value())
+        return lhs.has_value() != rhs.has_value();
+
+    return lhs.has_value() == rhs.has_value()
+        && lhs.value() != rhs.value();
+}
+
 } // namespace Util
 } // namespace SilKit

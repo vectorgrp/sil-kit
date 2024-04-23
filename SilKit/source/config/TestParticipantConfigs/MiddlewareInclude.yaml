@@ -1,0 +1,12 @@
+---
+Description: Example Middleware config include to test YAML Parser
+schemaVersion: 0
+Includes:
+  Files:
+    - MoreMiddlewareIncludes.yaml
+Middleware:
+  RegistryUri: silkit://example.com:1234
+  ConnectAttempts: 12
+  TcpNoDelay: true
+  TcpQuickAck: true
+  EnableDomainSockets: false

@@ -26,10 +26,6 @@
 #include "silkit/detail/impl/ThrowOnError.hpp"
 #include "silkit/detail/impl/config/ParticipantConfiguration.hpp"
 
-#include <sstream>
-#include <fstream>
-
-
 namespace SilKit {
 DETAIL_SILKIT_DETAIL_VN_NAMESPACE_BEGIN
 namespace Config {

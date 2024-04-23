@@ -144,5 +144,38 @@ bool create_directory(const path& where)
         return errno == EEXIST;
     }
 }
+
+path parent_path(const path& child)
+{
+    auto path_string = child.string();
+
+    const auto last_separator = path_string.rfind(SilKit::Filesystem::path::preferred_separator);
+
+    if(last_separator == std::string::npos)
+    {
+        return Filesystem::path();
+    }
+
+    return Filesystem::path(path_string.substr(0, last_separator));
+}
+
+path concatenate_paths(const path& root, const path& child)
+{
+    return concatenate_paths(root.string(), child.string());
+}
+path concatenate_paths(const std::string& root, const std::string& child)
+{
+    path tmpPath;
+    if (!(root.back() == path::preferred_separator) && !(child.front() == path::preferred_separator))
+    {
+        tmpPath =  path(root + path::preferred_separator + child);
+    }
+    else
+    {
+        tmpPath = path(root + child);
+    }
+    return tmpPath;
+}
+
 } // namespace Filesystem
 } // namespace SilKit

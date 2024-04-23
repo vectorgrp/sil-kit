@@ -1,0 +1,6 @@
+---
+Description: Example Middleware config include to test YAML Parser
+schemaVersion: 0
+Middleware:
+  TcpSendBufferSize: 3456
+  TcpReceiveBufferSize: 3456

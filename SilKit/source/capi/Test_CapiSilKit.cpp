@@ -88,6 +88,11 @@ const auto SILKIT_MALFORMED_CONFIG_STRING = R"aw(
         EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
         EXPECT_NE(participantConfiguration, nullptr);
 
+        SilKit_ParticipantConfiguration* participantConfigurationFromFile = nullptr;
+        returnCode = SilKit_ParticipantConfiguration_FromFile(&participantConfigurationFromFile, "ParticipantConfiguration_FullIncludes.yaml");
+        EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
+        EXPECT_NE(participantConfigurationFromFile, nullptr);
+
         SilKit_Participant* participant = nullptr;
         returnCode = SilKit_Participant_Create(&participant, participantConfiguration, "Participant1", "42");
         // since there is no SIL Kit Registry, the call should fail
@@ -100,6 +105,8 @@ const auto SILKIT_MALFORMED_CONFIG_STRING = R"aw(
 
         // destory the participant configuration to satisfy ASAN
         returnCode = SilKit_ParticipantConfiguration_Destroy(participantConfiguration);
+        EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
+        returnCode = SilKit_ParticipantConfiguration_Destroy(participantConfigurationFromFile);
         EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
     }
 
@@ -114,6 +121,14 @@ const auto SILKIT_MALFORMED_CONFIG_STRING = R"aw(
         EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
         EXPECT_NE(participantConfiguration, nullptr);
 
+        SilKit_ParticipantConfiguration* participantConfigurationFromAFile = nullptr;
+        returnCode = SilKit_ParticipantConfiguration_FromFile(&participantConfigurationFromAFile, "ParticipantConfiguration_FullIncludes.yaml");
+        EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
+        EXPECT_NE(participantConfigurationFromAFile, nullptr);
+        returnCode = SilKit_ParticipantConfiguration_Destroy(participantConfigurationFromAFile);
+        EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
+
+
         SilKit_Participant* participant = nullptr;
         returnCode = SilKit_Participant_Create(nullptr, participantConfiguration, "Participant1", "42");
         EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
@@ -122,6 +137,18 @@ const auto SILKIT_MALFORMED_CONFIG_STRING = R"aw(
         returnCode = SilKit_Participant_Create(&participant, participantConfiguration, nullptr, "42");
         EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
         returnCode = SilKit_Participant_Create(&participant, participantConfiguration, "Participant1", nullptr);
+        EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
+
+        // Bad Parameter ParticipantConfiguration_FromString
+        returnCode = SilKit_ParticipantConfiguration_FromString(&participantConfiguration, nullptr);
+        EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
+        returnCode = SilKit_ParticipantConfiguration_FromString(nullptr, SILKIT_CONFIG_STRING);
+        EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
+
+        // Bad Parameter ParticipantConfiguration_FromFile
+        returnCode = SilKit_ParticipantConfiguration_FromFile(&participantConfigurationFromAFile, nullptr);
+        EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
+        returnCode = SilKit_ParticipantConfiguration_FromFile(nullptr, "ParticipantConfiguration_FullIncludes.yaml");
         EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
         returnCode =
@@ -135,8 +162,13 @@ const auto SILKIT_MALFORMED_CONFIG_STRING = R"aw(
         EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
         participantConfiguration = nullptr;
+        participantConfigurationFromAFile = nullptr;
 
         returnCode = SilKit_ParticipantConfiguration_FromString(&participantConfiguration, SILKIT_MALFORMED_CONFIG_STRING);
+        EXPECT_EQ(returnCode, SilKit_ReturnCode_UNSPECIFIEDERROR);
+        EXPECT_EQ(participantConfiguration, nullptr);
+
+        returnCode = SilKit_ParticipantConfiguration_FromFile(&participantConfiguration, "this_file_does_not_exist.yaml");
         EXPECT_EQ(returnCode, SilKit_ReturnCode_UNSPECIFIEDERROR);
         EXPECT_EQ(participantConfiguration, nullptr);
 

@@ -1,0 +1,14 @@
+---
+Description: Example configuration to test a broken configuration with multiple AcceptorURIs
+schemaVersion: 0
+Includes:
+  Files:
+    - MultipleAcceptorUrisInclude.yaml
+Middleware:
+  AcceptorUris:
+    - The/First/Uri/Found
+    - The/Second/Uri/Found
+    - The/Third/Uri/Found
+  RegistryUri: silkit://example.com:1234
+  ConnectAttempts: 9
+  EnableDomainSockets: false
