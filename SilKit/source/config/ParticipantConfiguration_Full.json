@@ -219,6 +219,16 @@
       "path/to/extensions2"
     ]
   },
+  "Includes": {
+    "SearchPathHints": [
+      "/usr/etc/sil-kit-configs",
+      "C:\\Temp\\sil-kit-configs"
+    ],
+    "Files": [
+      "relative/path/to/included.silkit.yaml",
+      "logging.silkit.yaml"
+    ]
+  },
   "Middleware": {
     "RegistryUri": "silkit://example.com:1234",
     "ConnectAttempts": 9,
