@@ -141,9 +141,10 @@ endfunction()
 
 copy_participant_configs(CopyTestConfigs "${ParticipantTestCanConfigs}" "CAN")
 copy_participant_configs(CopyTestConfigs "${ParticipantTestMiddlewareConfigs}" "Middleware")
-add_dependencies(SilKitUnitTests CopyTestConfigs)
 
 if(SILKIT_BUILD_TESTS)
+    add_dependencies(SilKitUnitTests CopyTestConfigs)
+
     add_library(I_SilKit_Config_TestUtils INTERFACE)
 
     target_include_directories(I_SilKit_Config_TestUtils
