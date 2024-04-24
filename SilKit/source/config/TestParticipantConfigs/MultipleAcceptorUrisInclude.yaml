@@ -1,0 +1,7 @@
+---
+Description: Example configuration Middleware with AcceptorURIS
+Middleware:
+  AcceptorUris:
+    - The/Fourth/Uri/Found
+  ConnectAttempts: 9
+  EnableDomainSockets: false

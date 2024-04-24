@@ -1,0 +1,14 @@
+---
+Description: Example Level2 Include for CAN Controllers
+CanControllers:
+- Name: CAN64
+  Replay:
+    UseTraceSource: Source1
+    Direction: Both
+    MdfChannel:
+      ChannelName: MyTestChannel64
+      ChannelPath: path/to/myTestChannel64
+      ChannelSource: MyTestChannel
+      GroupName: MyTestGroup
+      GroupPath: path/to/myTestGroup64
+      GroupSource: MyTestGroup

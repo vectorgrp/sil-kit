@@ -1,0 +1,17 @@
+---
+Description: Example configuration EthernetControllers with name
+schemaVersion: 0
+EthernetControllers:
+- Name: ETH0
+  Replay:
+    UseTraceSource: Source1
+    Direction: Receive
+    MdfChannel:
+      ChannelName: MyTestChannel1
+      ChannelPath: path/to/myTestChannel1
+      ChannelSource: MyTestChannel
+      GroupName: MyTestGroup
+      GroupPath: path/to/myTestGroup1
+      GroupSource: MyTestGroup
+  UseTraceSinks:
+  - MyTraceSink1

@@ -1,0 +1,12 @@
+---
+Description: Additional Subs
+schemaVersion: 0
+DataSubscribers:
+- Name: Subscriber1
+  Topic: Temperature
+  UseTraceSinks:
+  - Sink1
+- Name: Subscriber2
+  Topic: Temperature
+  UseTraceSinks:
+  - Sink2

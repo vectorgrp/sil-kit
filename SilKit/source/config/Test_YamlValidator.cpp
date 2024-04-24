@@ -27,6 +27,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
+#include <fstream>
+
 namespace {
 
 class Test_YamlValidator : public testing::Test

@@ -1,0 +1,8 @@
+---
+Description: Example included configs for Extension
+Extensions:
+  SearchPathHints:
+  - path/to/extensions1
+  - path/to/extensions3
+  - path/to/extensions4
+  - path/to/extensions5

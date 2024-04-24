@@ -422,6 +422,10 @@ public:
                 (SilKit_ParticipantConfiguration * *outParticipantConfiguration,
                  const char* participantConfigurationString));
 
+    MOCK_METHOD(SilKit_ReturnCode, SilKit_ParticipantConfiguration_FromFile,
+                (SilKit_ParticipantConfiguration * *outParticipantConfiguration,
+                 const char* participantConfigurationFilename));
+
     MOCK_METHOD(SilKit_ReturnCode, SilKit_ParticipantConfiguration_Destroy,
                 (SilKit_ParticipantConfiguration * participantConfiguration));
 

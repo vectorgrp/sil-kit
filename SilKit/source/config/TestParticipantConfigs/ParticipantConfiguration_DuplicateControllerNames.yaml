@@ -1,0 +1,20 @@
+---
+Description: Example configuration to test a broken configuration with duplicate Controller Names
+schemaVersion: 0
+Includes:
+  Files:
+    - DuplicateEthernetControllerNames.yaml
+EthernetControllers:
+- Name: ETH0
+  Replay:
+    UseTraceSource: Source2
+    Direction: Send
+    MdfChannel:
+      ChannelName: MyTestChannel1
+      ChannelPath: path/to/myTestChannel1
+      ChannelSource: MyTestChannel
+      GroupName: MyTestGroup
+      GroupPath: path/to/myTestGroup1
+      GroupSource: MyTestGroup
+  UseTraceSinks:
+  - MyTraceSink2

@@ -1,0 +1,160 @@
+---
+Description: Example configuration to test YAML Parser
+schemaVersion: 0
+Includes:
+  SearchPathHints:
+    - ConfigSnippets/CAN
+    - ConfigSnippets/Middleware
+  Files:
+    - CanIncludes.yaml
+    - ExtensionsIncludes.yaml
+    - LoggingIncludes.yaml
+    - MiddlewareInclude.yaml
+ParticipantName: Node0
+LinControllers:
+- Name: SimpleEcu1_LIN1
+  Network: LIN1
+  Replay:
+    UseTraceSource: Source1
+    Direction: Both
+    MdfChannel:
+      ChannelName: MyTestChannel1
+      ChannelPath: path/to/myTestChannel1
+      ChannelSource: MyTestChannel
+      GroupName: MyTestGroup
+      GroupPath: path/to/myTestGroup1
+      GroupSource: MyTestGroup
+  UseTraceSinks:
+  - MyTraceSink1
+EthernetControllers:
+- Name: ETH0
+  Replay:
+    UseTraceSource: Source1
+    Direction: Receive
+    MdfChannel:
+      ChannelName: MyTestChannel1
+      ChannelPath: path/to/myTestChannel1
+      ChannelSource: MyTestChannel
+      GroupName: MyTestGroup
+      GroupPath: path/to/myTestGroup1
+      GroupSource: MyTestGroup
+  UseTraceSinks:
+  - MyTraceSink1
+FlexrayControllers:
+- ClusterParameters:
+    gColdstartAttempts: 8
+    gCycleCountMax: 63
+    gListenNoise: 2
+    gMacroPerCycle: 3636
+    gMaxWithoutClockCorrectionFatal: 2
+    gMaxWithoutClockCorrectionPassive: 2
+    gNumberOfMiniSlots: 291
+    gNumberOfStaticSlots: 70
+    gPayloadLengthStatic: 16
+    gSyncFrameIDCountMax: 15
+    gdActionPointOffset: 2
+    gdDynamicSlotIdlePhase: 1
+    gdMiniSlot: 5
+    gdMiniSlotActionPointOffset: 2
+    gdStaticSlot: 31
+    gdSymbolWindow: 1
+    gdSymbolWindowActionPointOffset: 1
+    gdTSSTransmitter: 9
+    gdWakeupTxActive: 60
+    gdWakeupTxIdle: 180
+  Name: FlexRay1
+  NodeParameters:
+    pAllowHaltDueToClock: 1
+    pAllowPassiveToActive: 0
+    pChannels: AB
+    pClusterDriftDamping: 2
+    pKeySlotId: 10
+    pKeySlotOnlyEnabled: 0
+    pKeySlotUsedForStartup: 1
+    pKeySlotUsedForSync: 0
+    pLatestTx: 249
+    pMacroInitialOffsetA: 3
+    pMacroInitialOffsetB: 3
+    pMicroInitialOffsetA: 6
+    pMicroInitialOffsetB: 6
+    pMicroPerCycle: 200000
+    pOffsetCorrectionOut: 127
+    pOffsetCorrectionStart: 3632
+    pRateCorrectionOut: 81
+    pSamplesPerMicrotick: 2
+    pWakeupChannel: A
+    pWakeupPattern: 33
+    pdAcceptedStartupRange: 212
+    pdListenTimeout: 400162
+    pdMicrotick: 25ns
+  TxBufferConfigurations:
+  - channels: A
+    headerCrc: 0
+    offset: 0
+    PPindicator: false
+    repetition: 0
+    slotId: 0
+    transmissionMode: Continuous
+  Replay:
+    Direction: Send
+    MdfChannel:
+      ChannelName: MyTestChannel1
+      ChannelPath: path/to/myTestChannel1
+      ChannelSource: MyTestChannel
+      GroupName: MyTestGroup
+      GroupPath: path/to/myTestGroup1
+      GroupSource: MyTestGroup
+    UseTraceSource: Source1
+  UseTraceSinks:
+  - Sink1
+DataPublishers:
+- Name: Publisher1
+  Topic: Temperature
+  UseTraceSinks:
+  - Sink1
+DataSubscribers:
+- Name: Subscriber3
+  Topic: Temperature
+  UseTraceSinks:
+  - Sink1
+- Name: Subscriber1
+  Topic: Temperature
+  UseTraceSinks:
+  - Sink1
+- Name: Subscriber2
+  Topic: Temperature
+  UseTraceSinks:
+  - Sink2
+RpcServers:
+- Name: Server1
+  FunctionName: Function1
+  UseTraceSinks:
+  - Sink1
+RpcClients:
+- Name: Client1
+  FunctionName: Function1
+  UseTraceSinks:
+  - Sink1
+Logging:
+  Sinks:
+  - Type: File
+    Level: Critical
+    LogName: MyLog1
+  FlushLevel: Warn
+  LogFromRemotes: false
+HealthCheck:
+  SoftResponseTimeout: 500
+  HardResponseTimeout: 5000
+Tracing:
+  TraceSinks:
+  - Name: Sink1
+    OutputPath: FlexrayDemo_node0.mf4
+    Type: Mdf4File
+  TraceSources:
+  - Name: Source1
+    InputPath: path/to/Source1.mf4
+    Type: Mdf4File
+Extensions:
+  SearchPathHints:
+  - path/to/extensions1
+  - path/to/extensions2

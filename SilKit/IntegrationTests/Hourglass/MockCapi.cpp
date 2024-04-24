@@ -779,6 +779,13 @@ extern "C"
                                                                       participantConfigurationString);
     }
 
+    SilKit_ReturnCode SilKitCALL SilKit_ParticipantConfiguration_FromFile(
+        SilKit_ParticipantConfiguration** outParticipantConfiguration, const char* participantConfigurationFilename)
+    {
+        return globalCapi->SilKit_ParticipantConfiguration_FromFile(outParticipantConfiguration,
+                                                                      participantConfigurationFilename);
+    }
+
     SilKit_ReturnCode SilKitCALL
     SilKit_ParticipantConfiguration_Destroy(SilKit_ParticipantConfiguration* participantConfiguration)
     {
