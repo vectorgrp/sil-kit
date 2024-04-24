@@ -35,7 +35,6 @@ To deal with different locations of the included files depending on the executio
        - /urs/etc/sil-kit-configs/  # absolute paths are valid
        - C:\Temp\ConfigSnippets     # for Windows, backslash as path separator is valid
        - C:\Temp\Path with spaces\  # for Windows, paths with spaces are valid
-       - ~/ConfigSnippets           # for POSIX, tilde expansion is valid
      Files:
        - LoggingIncludes.silkit.yaml
        - generated/MiddlewareInclude.silkit.yaml
@@ -133,7 +132,7 @@ The included configurations are merged according to the following rules:
 * List items of the ``SearchPathHints`` in the sections ``Includes`` or ``Extensions`` are merged and all entries are retained.
   Possible duplicates here are uncritical.
 
-* Only a single ``HealthCheck`` section can be defined, otherwise a ``SilKit::ConfigurationError`` occurs. 
+* All properties of the ``HealthCheck`` section can only be defined once, otherwise a ``SilKit::ConfigurationError`` occurs.
 
 Dynamic port generation
 =======================
