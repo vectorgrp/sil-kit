@@ -130,7 +130,6 @@ void CollectIncludes(const YAML::Node& config, std::vector<std::string>& levelIn
 
 // ================================================================================
 //  Helper functions to find and open config snippets
-//  TODO: Put into the Filesystem Layer?
 // ================================================================================
 std::string GetConfigParentPath(const std::string& configFile)
 {
@@ -277,7 +276,7 @@ void CacheMiddleware(const YAML::Node& root, MiddlewareCache& cache)
     {
         if (cache.acceptorUris.size() > 0)
         {
-            throw SilKit::ConfigurationError{"AccepoorUris already defined!"};
+            throw SilKit::ConfigurationError{"AcceptorUris already defined!"};
         }
         optional_decode(cache.acceptorUris, root, "AcceptorUris");
     }
