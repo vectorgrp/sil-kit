@@ -162,7 +162,6 @@ const auto SILKIT_MALFORMED_CONFIG_STRING = R"aw(
         EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
         participantConfiguration = nullptr;
-        participantConfigurationFromAFile = nullptr;
 
         returnCode = SilKit_ParticipantConfiguration_FromString(&participantConfiguration, SILKIT_MALFORMED_CONFIG_STRING);
         EXPECT_EQ(returnCode, SilKit_ReturnCode_UNSPECIFIEDERROR);

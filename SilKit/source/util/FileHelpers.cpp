@@ -78,7 +78,7 @@ auto ReadTextFile(const std::string& path) -> std::string
     auto fs = OpenIFStream(path);
 
     if (!fs.is_open())
-        throw SilKit::ConfigurationError("the file could not be opened");
+        throw SilKit::ConfigurationError("File '" + path + "' could not be opened");
 
     std::stringstream buffer;
     buffer << fs.rdbuf();

@@ -133,7 +133,6 @@ function(copy_participant_configs CopyTarget Configs ConfigsDir)
     add_custom_command(TARGET ${CopyTarget} POST_BUILD
         COMMAND
             ${CMAKE_COMMAND} -E copy
-            #$<TARGET_PROPERTY:${CopyTarget},TEST_CONFIGS>
             "${TEST_CONFIGS}"
             ${CMAKE_BINARY_DIR}/$<CONFIG>/ConfigSnippets/${ConfigsDir}
         COMMAND_EXPAND_LISTS

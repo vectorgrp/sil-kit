@@ -292,7 +292,7 @@ void CacheMiddleware(const YAML::Node& root, MiddlewareCache& cache)
     PopulateCacheField(root, "Middleware", "RegistryUri", cache.registryUri);
     PopulateCacheField(root, "Middleware", "ExperimentalRemoteParticipantConnection",
                        cache.experimentalRemoteParticipantConnection);
-    PopulateCacheField(root, "Middleware", "connectTimeoutSeconds", cache.connectTimeoutSeconds);
+    PopulateCacheField(root, "Middleware", "ConnectTimeoutSeconds", cache.connectTimeoutSeconds);
 }
 
 void CacheLoggingOptions(const YAML::Node& root, GlobalLogCache& cache)
@@ -338,7 +338,7 @@ void CacheLoggingSinks(const YAML::Node& config, GlobalLogCache& cache)
         }
         else
         {
-            if (cache.fileNames.find(sink.logName) == cache.fileNames.end())
+            if (cache.fileNames.count(sink.logName) == 0)
             {
                 cache.fileSinks.insert(sink);
                 cache.fileNames.insert(sink.logName);

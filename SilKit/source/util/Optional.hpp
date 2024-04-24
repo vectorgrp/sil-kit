@@ -96,8 +96,7 @@ bool operator!=(const Optional<T>& lhs, const Optional<T>& rhs)
     if (!lhs.has_value() || !rhs.has_value())
         return lhs.has_value() != rhs.has_value();
 
-    return lhs.has_value() == rhs.has_value()
-        && lhs.value() != rhs.value();
+    return lhs.value() != rhs.value();
 }
 
 } // namespace Util
