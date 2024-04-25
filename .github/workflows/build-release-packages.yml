@@ -45,6 +45,7 @@ jobs:
         preset-name: gcc8-debug
         do-package: true
         run-tests: false
+        upload-testlog: false
         do-package-symbols: true
 
   gcc8-package:
@@ -100,6 +101,7 @@ jobs:
         do-package: true
         do-package-symbols: true
         run-tests: false
+        upload-testlog: false
         toolset: 14.1
         build-arch: x86
 
@@ -157,6 +159,7 @@ jobs:
         do-package: true
         do-package-symbols: true
         run-tests: false
+        upload-testlog: false
         toolset: 14.1
         build-arch: x64
 
