@@ -80,7 +80,7 @@ public:
             {
                 if (!_isStopRequested)
                 {
-                    LogInfo("An external event causes the simulation to stop");
+                    LogInfo("Another participant causes the simulation to stop");
                 }
             }
             else if (systemState == SystemState::Error)
@@ -114,23 +114,12 @@ public:
         if (state != ParticipantState::Shutdown)
         {
             std::ostringstream ss;
-            ss << "Simulation exited with an unexpected participant state: " << state;
+            ss << "Simulation ended with an unexpected participant state: " << state;
             LogWarn(ss.str());
         }
         else
         {
-            if (_aborted)
-            {
-                LogWarn("Simulation was shut down by user request via abort signal");
-            }
-            else if (_externalShutdown)
-            {
-                LogInfo("Simulation was shut down externally");
-            }
-            else
-            {
-                LogInfo("Simulation was shut down by user request");
-            }
+            LogInfo("Simulation ended, SystemController is shut down.");
         }
     }
 
@@ -148,11 +137,7 @@ private:
             LogWarn("Simulation is already aborting...");
             _aborted = true;
         }
-        else if (_monitor->SystemState() == SystemState::Shutdown)
-        {
-            _externalShutdown = true;
-        }
-        else
+        else if (_monitor->SystemState() != SystemState::Shutdown)
         {
             {
                 std::ostringstream ss;
@@ -185,7 +170,7 @@ private:
         if (_aborted)
         {
             LogWarn("Simulation did not shut down via abort signal. Terminating...");
-            _lifecycleService->ReportError("Simulation did not shut down via abort signal");  // TODO: Modify API to set the _finalStatePromise for Error state, not currently done.
+            _lifecycleService->ReportError("Simulation did not shut down via abort signal");
         }
         else
         {
@@ -217,7 +202,6 @@ private:
 
     std::atomic<bool> _isStopRequested{false};
     bool _aborted = false;
-    bool _externalShutdown = false;
     SilKit::Experimental::Services::Orchestration::ISystemController* _controller;
     ISystemMonitor* _monitor;
     ILifecycleService* _lifecycleService;
