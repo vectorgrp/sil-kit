@@ -14,8 +14,16 @@ The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <
 Changed
 ~~~~~~~
 
-- SystemController utility: Listen for Ctrl-C (SigInt) to end simulation.
+- SystemController utility: 
+  Listens for OS signals to end simulation: Press ``[Ctrl]-[C]`` (SigInt) instead of ``[Enter]`` to end simulation.
   Output messages better report about the system state.
+
+Fixed
+~~~~~
+
+- SystemController utility:
+  Error state ends the simulation.
+- Valid state transition from ``Aborting`` to ``Shutdown`` no longer emits a warning message.
 
 Added
 ~~~~~
