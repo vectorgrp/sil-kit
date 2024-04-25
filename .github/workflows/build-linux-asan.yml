@@ -13,7 +13,7 @@ jobs:
   clang14-asan:
     name: Address Sanitizer Tests
     environment: public-github-runners
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-22.04-8core
     steps:
     - uses: actions/checkout@v4
       with:
