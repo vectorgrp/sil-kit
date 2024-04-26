@@ -40,7 +40,7 @@ jobs:
         submodules: true
     - uses: ./.github/actions/build-cmake-preset
       with:
-        preset-name: clang14-release
+        preset-name: clang14-relwithdebinfo
         cmake-args: "-D SILKIT_ENABLE_THREADSAN=ON -D SILKIT_BUILD_DASHBOARD=OFF"
         do-package: false
 
@@ -55,7 +55,7 @@ jobs:
         submodules: true
     - uses: ./.github/actions/build-cmake-preset
       with:
-        preset-name: clang14-release
+        preset-name: clang14-relwithdebinfo
         cmake-args: "-D SILKIT_ENABLE_UBSAN=ON -D SILKIT_BUILD_DASHBOARD=OFF"
         do-package: false
 
@@ -70,7 +70,7 @@ jobs:
         submodules: true
     - uses: ./.github/actions/build-cmake-preset
       with:
-        preset-name: clang14-release
+        preset-name: clang14-relwithdebinfo
         cmake-args: "-D SILKIT_ENABLE_ASAN=ON -D SILKIT_BUILD_DASHBOARD=OFF"
         do-package: false
 
