@@ -342,6 +342,9 @@ public:
     MOCK_METHOD(SilKit_ReturnCode, SilKit_TimeSyncService_Create,
                 (SilKit_TimeSyncService * *outTimeSyncService, SilKit_LifecycleService* lifecycleService));
 
+    MOCK_METHOD(SilKit_ReturnCode, SilKit_TimeSyncServiceRealTime_Create,
+                (SilKit_TimeSyncService * *outTimeSyncService, SilKit_LifecycleService* lifecycleService));
+
     MOCK_METHOD(SilKit_ReturnCode, SilKit_TimeSyncService_SetSimulationStepHandler,
                 (SilKit_TimeSyncService * timeSyncService, void* context,
                  SilKit_TimeSyncService_SimulationStepHandler_t handler, SilKit_NanosecondsTime initialStepSize));

@@ -138,7 +138,14 @@ auto LifecycleService::StartLifecycle()
     }
     if (_timeSyncActive)
     {
-        _timeSyncService->ConfigureTimeProvider(TimeProviderKind::SyncTime);
+        if (_realtime)
+        {
+            _timeSyncService->ConfigureTimeProvider(TimeProviderKind::WallClock);
+        }
+        else
+        {
+            _timeSyncService->ConfigureTimeProvider(TimeProviderKind::SyncTime);
+        }
     }
     else
     {
@@ -428,6 +435,20 @@ auto LifecycleService::CreateTimeSyncService() -> ITimeSyncService*
     if (!_timeSyncActive)
     {
         _timeSyncActive = true;
+        return _timeSyncService;
+    }
+    else
+    {
+        throw ConfigurationError("You may not create the time synchronization service more than once.");
+    }
+}
+
+auto LifecycleService::CreateTimeSyncServiceRealTime() -> ITimeSyncService*
+{
+    if (!_timeSyncActive)
+    {
+        _timeSyncActive = true;
+        _realtime = true;
         return _timeSyncService;
     }
     else

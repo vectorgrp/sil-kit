@@ -631,6 +631,12 @@ extern "C"
         return globalCapi->SilKit_TimeSyncService_Create(outTimeSyncService, lifecycleService);
     }
 
+    SilKit_ReturnCode SilKitCALL SilKit_TimeSyncServiceRealTime_Create(SilKit_TimeSyncService** outTimeSyncService,
+                                                               SilKit_LifecycleService* lifecycleService)
+    {
+        return globalCapi->SilKit_TimeSyncServiceRealTime_Create(outTimeSyncService, lifecycleService);
+    }
+
     SilKit_ReturnCode SilKitCALL SilKit_TimeSyncService_SetSimulationStepHandler(
         SilKit_TimeSyncService* timeSyncService, void* context, SilKit_TimeSyncService_SimulationStepHandler_t handler,
         SilKit_NanosecondsTime initialStepSize)

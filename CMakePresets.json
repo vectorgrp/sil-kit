@@ -103,15 +103,18 @@
                 "SILKIT_CMAKE_PRESET_BUILD_TYPE": "Release"
             }
         },
-        {
-            "name": "x64-relwithdebinfo",
-            "displayName": "x64 Release with Debug Info",
-            "description": "Target Windows (64-bit) with the Visual Studio development environment. (RelWithDebInfo)",
-            "inherits": "x64-debug",
-            "environment": {
-                "SILKIT_CMAKE_PRESET_BUILD_TYPE": "RelWithDebInfo"
-            }
+      {
+        "name": "x64-relwithdebinfo",
+        "displayName": "x64 Release with Debug Info",
+        "description": "Target Windows (64-bit) with the Visual Studio development environment. (RelWithDebInfo)",
+        "inherits": "x64-debug",
+        "environment": {
+          "SILKIT_CMAKE_PRESET_BUILD_TYPE": "RelWithDebInfo",
         },
+        "cacheVariables": {
+          "SILKIT_PACKAGE_SYMBOLS": "OFF",
+        }
+      },
         {
             "name": "x86-debug",
             "displayName": "x86 Debug",
