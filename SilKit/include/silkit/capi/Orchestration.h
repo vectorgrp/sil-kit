@@ -110,6 +110,16 @@ typedef int8_t SilKit_OperationMode;
 /*! The autonomous operation mode */
 #define SilKit_OperationMode_Autonomous     ((SilKit_OperationMode) 20)
 
+/*! The OperationMode for lifecycle service. */
+typedef int8_t SilKit_SyncMode;
+
+/*! An invalid operation mode */
+#define SilKit_SyncMode_Invalid ((SilKit_OperationMode)0)
+/*! The coordinated operation mode */
+#define SilKit_SyncMode_Virtual ((SilKit_OperationMode)10)
+/*! The autonomous operation mode */
+#define SilKit_SyncMode_Real ((SilKit_OperationMode)20)
+
 
 /*! Details about a status change of a participant. */
 typedef struct
@@ -463,6 +473,20 @@ SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_TimeSyncService_Create(SilKit_Time
 
 typedef SilKit_ReturnCode (SilKitFPTR *SilKit_TimeSyncService_Create_t)(SilKit_TimeSyncService** outTimeSyncService,
     SilKit_Participant* lifecycleService);
+
+
+/*! \brief Create a time sync service at this SIL Kit simulation participant.
+ * \param outTimeSyncService Pointer that refers to the resulting time sync service (out parameter).
+ * \param lifecycleService The lifecyle service at which the time sync service should be created.
+ *
+ * The object returned must not be deallocated using free()!
+ */
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_TimeSyncServiceRealTime_Create(
+    SilKit_TimeSyncService** outTimeSyncService, SilKit_LifecycleService* lifecycleService);
+
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_TimeSyncServiceRealTime_Create_t)(
+    SilKit_TimeSyncService** outTimeSyncService, SilKit_Participant* lifecycleService);
+
 
 /*! \brief The handler to be called if the simulation task is due
  *

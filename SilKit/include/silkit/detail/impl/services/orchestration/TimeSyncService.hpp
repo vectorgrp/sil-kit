@@ -36,7 +36,7 @@ namespace Orchestration {
 class TimeSyncService : public SilKit::Services::Orchestration::ITimeSyncService
 {
 public:
-    inline explicit TimeSyncService(SilKit_LifecycleService* lifecycleService);
+    inline explicit TimeSyncService(SilKit_LifecycleService* lifecycleService, bool isRealTime = false);
 
     inline ~TimeSyncService() override = default;
 
@@ -74,10 +74,18 @@ namespace Impl {
 namespace Services {
 namespace Orchestration {
 
-TimeSyncService::TimeSyncService(SilKit_LifecycleService* lifecycleService)
+TimeSyncService::TimeSyncService(SilKit_LifecycleService* lifecycleService, bool isRealTime)
 {
-    const auto returnCode = SilKit_TimeSyncService_Create(&_timeSyncService, lifecycleService);
-    ThrowOnError(returnCode);
+    if (isRealTime)
+    {
+        const auto returnCode = SilKit_TimeSyncServiceRealTime_Create(&_timeSyncService, lifecycleService);
+        ThrowOnError(returnCode);
+    }
+    else
+    {
+        const auto returnCode = SilKit_TimeSyncService_Create(&_timeSyncService, lifecycleService);
+        ThrowOnError(returnCode);
+    }
 }
 
 void TimeSyncService::SetSimulationStepHandler(SimulationStepHandler task, std::chrono::nanoseconds initialStepSize)

@@ -83,6 +83,7 @@ public:
     MOCK_METHOD(Services::Orchestration::ParticipantStatus&, Status, (), (override, const));
     MOCK_METHOD(Services::Orchestration::ITimeSyncService*, GetTimeSyncService, (), ());
     MOCK_METHOD(Services::Orchestration::ITimeSyncService*, CreateTimeSyncService, (), (override));
+    MOCK_METHOD(Services::Orchestration::ITimeSyncService*, CreateTimeSyncServiceRealTime, (), (override));
     MOCK_METHOD(void, AddAsyncSubscriptionsCompletionHandler, (std::function<void()> /*handler*/));
     MOCK_METHOD(Services::Orchestration::OperationMode, GetOperationMode, (), (const));
 };
@@ -178,6 +179,8 @@ public:
         ON_CALL(mockLifecycleService, GetTimeSyncService)
             .WillByDefault(testing::Return(&mockTimeSyncService));
         ON_CALL(mockLifecycleService, CreateTimeSyncService)
+            .WillByDefault(testing::Return(&mockTimeSyncService));
+        ON_CALL(mockLifecycleService, CreateTimeSyncServiceRealTime)
             .WillByDefault(testing::Return(&mockTimeSyncService));
         ON_CALL(logger, GetLogLevel())
             .WillByDefault(testing::Return(Services::Logging::Level::Debug));

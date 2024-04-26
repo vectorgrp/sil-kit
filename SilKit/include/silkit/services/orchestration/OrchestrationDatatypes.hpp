@@ -131,6 +131,21 @@ struct LifecycleConfiguration
     OperationMode operationMode;
 };
 
+//! \brief Available operation modes of the lifecycle service
+enum class SyncMode : SilKit_SyncMode
+{
+    //! An invalid operation mode
+    Invalid = SilKit_SyncMode_Invalid,
+    VirtualTime = SilKit_SyncMode_Virtual,
+    RealTime = SilKit_SyncMode_Real,
+};
+
+//! The timesync configuration.
+struct TimeSyncConfiguration
+{
+    SyncMode syncMode;
+};
+
 struct ParticipantConnectionInformation
 {
     std::string participantName;

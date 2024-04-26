@@ -209,6 +209,7 @@ public:
     /*! \brief Return the  ITimeSyncService for the current ILifecycleService.
     */
     virtual auto CreateTimeSyncService() -> ITimeSyncService* = 0;
+    virtual auto CreateTimeSyncServiceRealTime() -> ITimeSyncService* = 0;
 };
 
 } // namespace Orchestration
