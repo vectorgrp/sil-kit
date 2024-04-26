@@ -48,8 +48,9 @@ void ParticipantReplies::CallAfterAllParticipantsReplied(std::function<void()> c
         if (_barrierActive)
         {
             Services::Logging::Debug(_participant->GetLogger(),
-                                     "Still waiting at a barrier for replies from participants, starting a new barrier "
-                                     "can lead to unexpected behavior.");
+                                     "Still waiting for replies from participants on a previous call, action when new "
+                                     "call is replied will not be executed. This might lead to unexpected behavior.");
+            return;
         }
 
         auto remoteReceivers =

@@ -708,6 +708,7 @@ void ShutdownState::ShutdownParticipant(std::string reason)
             if (success)
             {
                 _lifecycleManager->NotifyShutdownInConnection();
+                _lifecycleManager->GetService()->SetFinalStatePromise();
             }
             else
             {
@@ -715,7 +716,6 @@ void ShutdownState::ShutdownParticipant(std::string reason)
                               "lifecycle failed to shut down correctly - original shutdown reason was '{}'.",
                               std::move(reason));
             }
-            _lifecycleManager->GetService()->SetFinalStatePromise();
         });
 }
 

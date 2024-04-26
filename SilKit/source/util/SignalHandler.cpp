@@ -191,8 +191,9 @@ private:
         // Blocking read until Notify() was called
         auto ok = ::read(_pipe[0], buf.data(), buf.size());
         if (ok == -1)
+        {
             throw std::runtime_error("SignalMonitor::workerMain: Failed to read from pipe: " + ErrorMessage());
-
+        }
         if (_handler)
         {
             _handler(_signalNumber);
@@ -208,15 +209,15 @@ private:
 static inline void setSignalAction(int sigNum, __sighandler_t action)
 {
     // Check current signal handler action to see if it's set to SIGNAL IGNORE
-    struct sigaction oldAction;
+    struct sigaction oldAction{};
     sigaction(sigNum, NULL, &oldAction);
     if (oldAction.sa_handler == SIG_IGN)
     {
         // A non-job-control shell wants us to ignore this kind of signal
-
+        return;
     }
     // Set new signal handler action to what we want
-    struct sigaction newAction;
+    struct sigaction newAction{};
     newAction.sa_handler = action;
     auto ret = sigaction(sigNum, &newAction, NULL);
     if (ret == -1)

@@ -16,13 +16,11 @@ Changed
 
 - SystemController utility: 
   Listens for OS signals to end simulation: Press ``[Ctrl]-[C]`` (SigInt) instead of ``[Enter]`` to end simulation.
-  Output messages better report about the system state.
+  Better reports about the current system state in case of Error.
 
 Fixed
 ~~~~~
 
-- SystemController utility:
-  Error state ends the simulation.
 - Valid state transition from ``Aborting`` to ``Shutdown`` no longer emits a warning message.
 
 Added
