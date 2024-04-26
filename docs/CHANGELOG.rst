@@ -12,7 +12,9 @@ The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <
 Added
 ~~~~~
 
-- Network Simulation event flow documentation 
+- Synchronize the virtual time with the system clock.
+  Available in a new experimental section within the Participant Configuration.
+- Event flow documentation of for the Network Simulation API.
 
 
 [4.0.50] - 2024-05-15

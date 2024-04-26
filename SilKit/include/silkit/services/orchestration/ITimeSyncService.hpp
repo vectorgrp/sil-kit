@@ -67,6 +67,7 @@ public:
     /*! \brief Get the current simulation time
      */
     virtual auto Now() const -> std::chrono::nanoseconds = 0;
+
 };
 
 } // namespace Orchestration

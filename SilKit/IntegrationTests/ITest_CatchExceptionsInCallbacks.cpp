@@ -66,8 +66,7 @@ protected:
 TEST_F(ITest_CatchExceptionsInCallbacks, please_dont_crash_vasio)
 {
     auto registryUri = MakeTestRegistryUri();
-
-    auto registry =
+auto registry =
         SilKit::Vendor::Vector::CreateSilKitRegistry(SilKit::Config::ParticipantConfigurationFromString(""));
     registry->StartListening(registryUri);
 

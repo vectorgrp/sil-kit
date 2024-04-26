@@ -419,6 +419,9 @@ auto LifecycleService::CreateTimeSyncService() -> ITimeSyncService*
 {
     if (!_timeSyncActive)
     {
+        // TODO bkd: to activate the unneccessary reception of NextTimTask msg, comment out this line and the 
+        // corresponding change in Participant<SilKitConnectionT>::CreateTimeSyncService
+        _participant->RegisterTimeSyncService(_timeSyncService);
         _timeSyncActive = true;
         return _timeSyncService;
     }

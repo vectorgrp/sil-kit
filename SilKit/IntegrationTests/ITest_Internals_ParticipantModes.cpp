@@ -193,7 +193,8 @@ protected:
         }
 
         auto participantInternal = dynamic_cast<SilKit::Core::IParticipantInternal*>(participant.get());
-        Experimental::Services::Orchestration::ISystemController* systemController =
+        
+        SilKit::Experimental::Services::Orchestration::ISystemController* systemController =
             participantInternal->GetSystemController();
 
         auto systemMonitor = participant->CreateSystemMonitor();
@@ -303,7 +304,7 @@ protected:
         }
 
         auto participantInternal = dynamic_cast<SilKit::Core::IParticipantInternal*>(participant.get());
-        Experimental::Services::Orchestration::ISystemController* systemController =
+        SilKit::Experimental::Services::Orchestration::ISystemController* systemController =
             participantInternal->GetSystemController();
         auto systemMonitor = participant->CreateSystemMonitor();
         systemMonitor->AddParticipantStatusHandler([&testParticipant, systemController, logger,
@@ -419,7 +420,7 @@ protected:
             SilKit::CreateParticipantImpl(config, systemControllerParticipantName, registryUri);
 
         auto participantInternal = dynamic_cast<SilKit::Core::IParticipantInternal*>(systemControllerParticipant.get());
-        Experimental::Services::Orchestration::ISystemController* systemController =
+        SilKit::Experimental::Services::Orchestration::ISystemController* systemController =
             participantInternal->GetSystemController();
 
         auto* logger = systemControllerParticipant->GetLogger();

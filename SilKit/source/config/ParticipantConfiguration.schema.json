@@ -732,39 +732,59 @@
       }
     },
     "Middleware": {
+        "type": "object",
+        "description": "Optional configuration of the SIL Kit middleware",
+        "properties": {
+            "RegistryUri": {
+                "type": "string",
+                "default": "silkit://localhost:8500"
+            },
+            "ConnectAttempts": {
+                "type": "integer",
+                "default": "1"
+            },
+            "TcpNoDelay": {
+                "type": "boolean",
+                "default": true
+            },
+            "TcpQuickAck": {
+                "type": "boolean",
+                "default": false
+            },
+            "TcpSendBufferSize": {
+                "type": "integer"
+            },
+            "TcpReceiveBufferSize": {
+                "type": "integer"
+            },
+            "EnableDomainSockets": {
+                "type": "boolean",
+                "default": true
+            },
+            "ConnectTimeoutSeconds": {
+                "type": "number",
+                "minimum": 0.0,
+                "default": 5.0
+            }
+        },
+        "additionalProperties": false
+    },
+    "Experimental": {
       "type": "object",
-      "description": "Optional configuration of the SIL Kit middleware",
+      "description": "Experimental configuration",
       "properties": {
-        "RegistryUri": {
-          "type": "string",
-          "default": "silkit://localhost:8500"
-        },
-        "ConnectAttempts": {
-          "type": "integer",
-          "default": "1"
-        },
-        "TcpNoDelay": {
-          "type": "boolean",
-          "default": true
-        },
-        "TcpQuickAck": {
-          "type": "boolean",
-          "default": false
-        },
-        "TcpSendBufferSize": {
-          "type": "integer"
-        },
-        "TcpReceiveBufferSize": {
-          "type": "integer"
-        },
-        "EnableDomainSockets": {
-          "type": "boolean",
-          "default": true
-        },
-        "ConnectTimeoutSeconds": {
-          "type": "number",
-          "minimum": 0.0,
-          "default": 5.0
+        "TimeSynchronization": {
+          "type": "object",
+          "description": "Configuration related to time synchronization",
+          "properties": {
+            "AnimationFactor": {
+              "type": "number",
+              "description": "Wall clock slow down factor",
+              "minimum": 0.0,
+              "default": 0.0
+            }
+          },
+          "additionalProperties": false
         }
       },
       "additionalProperties": false

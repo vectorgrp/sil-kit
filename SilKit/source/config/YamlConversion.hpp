@@ -82,4 +82,7 @@ DEFINE_SILKIT_CONVERT(Extensions);
 
 DEFINE_SILKIT_CONVERT(ParticipantConfiguration);
 
+DEFINE_SILKIT_CONVERT(Experimental);
+DEFINE_SILKIT_CONVERT(TimeSynchronization);
+
 } // namespace YAML

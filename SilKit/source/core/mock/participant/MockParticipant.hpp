@@ -562,6 +562,7 @@ public:
         return &mockTimeProvider;
     }
     void JoinSilKitSimulation() override {}
+    void RegisterTimeSyncService(SilKit::Services::Orchestration::TimeSyncService*) override {}
 
     auto GetServiceDiscovery() -> Discovery::IServiceDiscovery* override
     {

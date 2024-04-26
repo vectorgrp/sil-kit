@@ -263,6 +263,28 @@ struct Middleware
     double connectTimeoutSeconds{5.0};
 };
 
+
+// ================================================================================
+//  TimeSynchronization
+// ================================================================================
+
+//! \brief Structure that contains experimental TimeSynchronization settings
+struct TimeSynchronization
+{
+    double animationFactor{0.0};
+};
+
+
+// ================================================================================
+//  Experimental
+// ================================================================================
+
+//! \brief Structure that contains experimental settings
+struct Experimental
+{
+    TimeSynchronization timeSynchronization;
+};
+
 // ================================================================================
 //  Root
 // ================================================================================
@@ -301,6 +323,7 @@ struct ParticipantConfiguration : public IParticipantConfiguration
     Tracing tracing;
     Extensions extensions;
     Middleware middleware;
+    Experimental experimental;
 };
 
 bool operator==(const CanController& lhs, const CanController& rhs);
@@ -316,6 +339,7 @@ bool operator==(const Tracing& lhs, const Tracing& rhs);
 bool operator==(const Extensions& lhs, const Extensions& rhs);
 bool operator==(const Middleware& lhs, const Middleware& rhs);
 bool operator==(const ParticipantConfiguration& lhs, const ParticipantConfiguration& rhs);
+bool operator==(const Experimental& lhs, const Experimental& rhs);
 
 } // namespace v1
 } // namespace Config
