@@ -1,0 +1,90 @@
+name: "CI for Pull Requests"
+
+on:
+  pull_request:
+    branches: [ 'main' ]
+  push:
+    branches: [ 'main' ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check-licenses:
+    name: License checks for SIL Kit sources
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: false
+      - name: Install Dependencies
+        id: dep-install
+        run: |
+          sudo apt install licensecheck
+
+      - name: Check Licenses
+        id: license-check
+        run: |
+          sh ./SilKit/ci/check_licenses.sh
+        shell: bash
+
+  clang14-tsan:
+    name: Thread Sanitizer Tests
+    environment: public-github-runners
+    runs-on: ubuntu-22.04
+    needs: check-licenses
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: true
+    - uses: ./.github/actions/build-cmake-preset
+      with:
+        preset-name: clang14-relwithdebinfo
+        cmake-args: "-D SILKIT_ENABLE_THREADSAN=ON -D SILKIT_BUILD_DASHBOARD=OFF"
+        do-package: false
+
+  clang14-ubsan:
+    name: Undefined Behavior Sanitizer Tests
+    environment: public-github-runners
+    runs-on: ubuntu-22.04
+    needs: check-licenses
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: true
+    - uses: ./.github/actions/build-cmake-preset
+      with:
+        preset-name: clang14-relwithdebinfo
+        cmake-args: "-D SILKIT_ENABLE_UBSAN=ON -D SILKIT_BUILD_DASHBOARD=OFF"
+        do-package: false
+
+  clang14-asan:
+    name: Address Sanitizer Tests
+    environment: public-github-runners
+    runs-on: ubuntu-22.04
+    needs: check-licenses
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: true
+    - uses: ./.github/actions/build-cmake-preset
+      with:
+        preset-name: clang14-relwithdebinfo
+        cmake-args: "-D SILKIT_ENABLE_ASAN=ON -D SILKIT_BUILD_DASHBOARD=OFF"
+        do-package: false
+
+  ubuntu-release-builds:
+    uses: ./.github/workflows/build-linux.yml
+    needs: check-licenses
+    with:
+      do_package: ${{ github.event_name == 'push' && true || false }}
+      retention_days: ${{ github.event_name == 'push' && 90 || 14 }}
+
+  windows-release-builds:
+    uses: ./.github/workflows/build-win.yml
+    needs: check-licenses
+    with:
+      do_package: ${{ github.event_name == 'push' && true || false }}
+      retention_days: ${{ github.event_name == 'push' && 90 || 14 }}
+

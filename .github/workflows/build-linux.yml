@@ -15,10 +15,6 @@ on:
         type: number
         default: 14
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
-
 jobs:
   clang14-release:
     name: Clang 14 release Builds for Ubuntu 22.04
