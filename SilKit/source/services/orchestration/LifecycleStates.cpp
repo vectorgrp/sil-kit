@@ -463,12 +463,14 @@ void RunningState::ContinueSimulation(std::string reason)
 
 void RunningState::StopSimulation(std::string reason)
 {
+    _lifecycleManager->StopTime();
     _lifecycleManager->SetStateAndForwardIntent(_lifecycleManager->GetStoppingState(), &ILifecycleState::StopSimulation,
                                                 std::move(reason));
 }
 
 void RunningState::AbortSimulation(std::string reason)
 {
+    _lifecycleManager->StopTime();
     // TODO handle abort during executeSimStep
     // For now, just abort and hope for the best...
     ResolveAbortSimulation(std::move(reason));

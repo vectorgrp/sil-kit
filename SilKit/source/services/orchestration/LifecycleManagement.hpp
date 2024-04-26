@@ -66,8 +66,10 @@ public: //CTors
     // Autonomous lifecycle state initialization
     void StartAutonomous(std::string reason);
 
-    // Send NextSimTask
+    // Check capabilites, potentially start the wall clock coupling thread and send the initial NextSimTask
     void StartTime();
+    // Potentially stop the wall clock coupling thread
+    void StopTime();
 
     // Callback handling
     CallbackResult HandleCommunicationReady();

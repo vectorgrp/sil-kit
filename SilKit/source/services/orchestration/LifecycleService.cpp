@@ -419,6 +419,7 @@ auto LifecycleService::CreateTimeSyncService() -> ITimeSyncService*
 {
     if (!_timeSyncActive)
     {
+        _participant->RegisterTimeSyncService(_timeSyncService);
         _timeSyncActive = true;
         return _timeSyncService;
     }

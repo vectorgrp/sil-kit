@@ -52,7 +52,6 @@ class TimeSyncService
     , public IMsgForTimeSyncService
     , public Core::IServiceEndpoint
 {
-    friend struct DistributedTimeQuantumPolicy;
 
 public:
     // ----------------------------------------
@@ -61,7 +60,9 @@ public:
     // ----------------------------------------
     // Constructors, Destructor, and Assignment
     TimeSyncService(Core::IParticipantInternal* participant, ITimeProvider* timeProvider,
-                    const Config::HealthCheck& healthCheckConfig, LifecycleService* lifecycleService);
+                    const Config::HealthCheck& healthCheckConfig, LifecycleService* lifecycleService, double animationFactor = 0);
+
+    ~TimeSyncService();
 
 public:
     // ----------------------------------------
@@ -85,7 +86,8 @@ public:
     void ResetTime();
     void ConfigureTimeProvider(Orchestration::TimeProviderKind timeProviderKind);
     void StartTime();
-
+    void StopTime();
+    
     // IServiceEndpoint
     inline void SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor) override;
     inline auto GetServiceDescriptor() const -> const Core::ServiceDescriptor& override;
@@ -103,6 +105,9 @@ public:
 
     void RequestNextStep();
 
+    auto IsCoupledToWallClock() const -> bool;
+    auto GetCurrentWallClockSyncPoint() const -> std::chrono::nanoseconds;
+
 private:
     // ----------------------------------------
     // private methods
@@ -112,6 +117,10 @@ private:
     bool SetupTimeSyncPolicy(bool isSynchronizingVirtualTime);
 
     inline auto GetTimeSyncPolicy() const -> ITimeSyncPolicy*;
+    
+    void StopWallClockCouplingThread();
+    void StartWallClockCouplingThread();
+    void HybridWait(std::chrono::nanoseconds targetWaitDuration);
 
 private:
     // ----------------------------------------
@@ -138,6 +147,14 @@ private:
     Util::PerformanceMonitor _execTimeMonitor;
     Util::PerformanceMonitor _waitTimeMonitor;
     WatchDog _watchDog;
+    bool _isCoupledToWallClock{false}; 
+    std::thread _wallClockCouplingThread;
+    mutable std::mutex _mx;
+    std::atomic<std::chrono::nanoseconds::rep> _currentWallClockSyncPointNs{0};
+    double _animationFactor{0};
+    std::atomic<bool> _wallClockCouplingThreadRunning{false};
+    std::atomic<bool> _wallClockReachedBeforeCompletion{false};
+    
 };
 
 // ================================================================================

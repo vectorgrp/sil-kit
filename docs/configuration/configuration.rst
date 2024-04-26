@@ -106,6 +106,8 @@ The outline of a participant configuration file is as follows:
       - ...
     RpcServers: 
       - ...
+    Experimental: 
+      - ...
 
 .. _subsec:participant-config-overview:
 
@@ -176,6 +178,9 @@ Overview
    * - :ref:`RpcClients<sec:cfg-participant-rpc-clients>`
      - Configure RPC clients.
 
+   * - :ref:`Experimental<sec:cfg-participant-experimental>`
+     - Experimental configuration options for the |ProductName|.
+
 Configuration Options
 ~~~~~~~~~~~~~~~~~~~~~
 .. toctree::
@@ -188,6 +193,7 @@ Configuration Options
    tracing-configuration
    extension-configuration
    middleware-configuration
+   experimental-configuration
 
 .. _sec:registry-config:
 

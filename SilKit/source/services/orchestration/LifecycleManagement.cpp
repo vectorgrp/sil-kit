@@ -245,10 +245,14 @@ bool LifecycleManagement::HandleAbort()
     }
 }
 
-
 void LifecycleManagement::StartTime()
 {
     (dynamic_cast<TimeSyncService*>(_lifecycleService->GetTimeSyncService()))->StartTime();
+}
+
+void LifecycleManagement::StopTime()
+{
+    (dynamic_cast<TimeSyncService*>(_lifecycleService->GetTimeSyncService()))->StopTime();
 }
 
 void LifecycleManagement::AddAsyncSubscriptionsCompletionHandler(std::function<void()> handler)
