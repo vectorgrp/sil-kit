@@ -25,7 +25,8 @@
 
 #include <sstream>
 
-#ifdef _WIN32
+// Check if MSVC is used, since MINGW32/64 don't need these workarounds
+#ifdef _MSC_VER
 #    define NOMINMAX
 #    define WIN32_LEAN_AND_MEAN
 #    include "Windows.h"
@@ -34,7 +35,7 @@
 namespace SilKit {
 namespace Util {
 
-#ifdef _WIN32
+#ifdef _MSC_VER
 
 auto OpenIFStream(const std::string& path) -> std::ifstream
 {
