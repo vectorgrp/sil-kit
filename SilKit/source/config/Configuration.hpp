@@ -212,7 +212,7 @@ bool operator==(const Sink& lhs, const Sink& rhs)
 
 bool operator<(const Sink& lhs, const Sink& rhs)
 {
-    return lhs.logName.compare(rhs.logName);
+    return lhs.logName.compare(rhs.logName) < 0;
 }
 
 bool operator>(const Sink& lhs, const Sink& rhs)
