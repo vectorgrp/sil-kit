@@ -8,12 +8,12 @@ The Vector SIL Kit
 .. |DocsBadge| image:: https://img.shields.io/badge/documentation-html-blue.svg
    :target: https://vectorgrp.github.io/sil-kit-docs
 
-.. |AsanBadge| image:: https://github.com/vectorgrp/sil-kit/actions/workflows/build-linux-asan.yml/badge.svg
-   :target: https://github.com/vectorgrp/sil-kit/actions/workflows/build-linux-asan.yml
-.. |UbsanBadge| image:: https://github.com/vectorgrp/sil-kit/actions/workflows/build-linux-ubsan.yml/badge.svg
-   :target: https://github.com/vectorgrp/sil-kit/actions/workflows/build-linux-ubsan.yml
-.. |TsanBadge| image:: https://github.com/vectorgrp/sil-kit/actions/workflows/build-linux-tsan.yml/badge.svg
-   :target: https://github.com/vectorgrp/sil-kit/actions/workflows/build-linux-tsan.yml
+.. |AsanBadge| image:: https://github.com/vectorgrp/sil-kit/actions/workflows/linux-asan.yml/badge.svg
+   :target: https://github.com/vectorgrp/sil-kit/actions/workflows/linux-asan.yml
+.. |UbsanBadge| image:: https://github.com/vectorgrp/sil-kit/actions/workflows/linux-ubsan.yml/badge.svg
+   :target: https://github.com/vectorgrp/sil-kit/actions/workflows/linux-ubsan.yml
+.. |TsanBadge| image:: https://github.com/vectorgrp/sil-kit/actions/workflows/linux-tsan.yml/badge.svg
+   :target: https://github.com/vectorgrp/sil-kit/actions/workflows/linux-tsan.yml
 .. |WinBadge| image:: https://github.com/vectorgrp/sil-kit/actions/workflows/build-win.yml/badge.svg
    :target: https://github.com/vectorgrp/sil-kit/actions/workflows/build-win.yml
 | |ReleaseBadge| |LicenseBadge| |DocsBadge| 
