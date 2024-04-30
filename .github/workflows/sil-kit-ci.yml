@@ -31,48 +31,18 @@ jobs:
 
   clang14-tsan:
     name: Thread Sanitizer Tests
-    environment: public-github-runners
-    runs-on: ubuntu-22.04
     needs: check-licenses
-    steps:
-    - uses: actions/checkout@v4
-      with:
-        submodules: true
-    - uses: ./.github/actions/build-cmake-preset
-      with:
-        preset-name: clang14-relwithdebinfo
-        cmake-args: "-D SILKIT_ENABLE_THREADSAN=ON -D SILKIT_BUILD_DASHBOARD=OFF"
-        do-package: false
+    uses: ./.github/workflows/linux-tsan.yml
 
   clang14-ubsan:
     name: Undefined Behavior Sanitizer Tests
-    environment: public-github-runners
-    runs-on: ubuntu-22.04
     needs: check-licenses
-    steps:
-    - uses: actions/checkout@v4
-      with:
-        submodules: true
-    - uses: ./.github/actions/build-cmake-preset
-      with:
-        preset-name: clang14-relwithdebinfo
-        cmake-args: "-D SILKIT_ENABLE_UBSAN=ON -D SILKIT_BUILD_DASHBOARD=OFF"
-        do-package: false
+    uses: ./.github/workflows/linux-ubsan.yml
 
   clang14-asan:
     name: Address Sanitizer Tests
-    environment: public-github-runners
-    runs-on: ubuntu-22.04
     needs: check-licenses
-    steps:
-    - uses: actions/checkout@v4
-      with:
-        submodules: true
-    - uses: ./.github/actions/build-cmake-preset
-      with:
-        preset-name: clang14-relwithdebinfo
-        cmake-args: "-D SILKIT_ENABLE_ASAN=ON -D SILKIT_BUILD_DASHBOARD=OFF"
-        do-package: false
+    uses: ./.github/workflows/linux-asan.yml
 
   ubuntu-release-builds:
     uses: ./.github/workflows/build-linux.yml
