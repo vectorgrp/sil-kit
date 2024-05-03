@@ -30,14 +30,28 @@ However, the following scenarios are conceivable in which some flexibility is us
 - Developers or users want to temporarily enable debugging features without the need or the ability to recompile the sources, for example logging, tracing, and health checking.
 
 To cover these scenarios, |ProductName| participants can be modified by *participant configuration files*. 
-This is done by creating a participant configuration object from a given file and passing the object as an argument when a participant is created:
+This is done by creating a participant configuration object from a given file in YAML or JSON format and passing the object as an argument when a participant is created:
 
 .. code-block:: c++
 
   auto participantConfiguration = SilKit::Config::ParticipantConfigurationFromFile(participantConfigurationFilename);
   auto participant = SilKit::CreateParticipant(participantConfiguration, participantName, registryUri);
 
-Participant configuration files allow to override a subset of parameters which are configurable via the |ProductName| API.
+Alternatively, the configuration object can be created directly from string:
+
+.. code-block:: c++
+
+  const std::string participantConfigText = R"(
+  Description: My participant configuration
+  Logging:
+      Sinks:
+      - Type: Stdout
+        Level: Info
+  )";
+  auto participantConfiguration = SilKit::Config::ParticipantConfigurationFromString(participantConfigText);
+  auto participant = SilKit::CreateParticipant(participantConfiguration, participantName, registryUri);
+
+Participant configurations allow to override a subset of parameters which are configurable via the |ProductName| API.
 Configuration parameters that are specified within the participant configuration override corresponding programmatically defined values. 
 For example, the ``ParticipantName`` field overrides the participant name that is provided through the API when a participant is created, namely :cpp:func:`CreateParticipant(..., const std::string& participantName, ...)<SilKit::CreateParticipant()>`. 
 This gives users the ability to run a simulation with multiple instances of a participant from a single implementation.
@@ -55,7 +69,7 @@ This gives users the ability to run a simulation with multiple instances of a pa
 
 A participant configuration file is written in YAML syntax according to a specified schema. 
 It starts with the ``SchemaVersion``, the ``Description`` for the configuration and the ``ParticipantName``. 
-This is followed by further sections for ``Middleware``, ``Logging``, ``HealthCheck``, ``Tracing``, ``Extentions`` and sections for the different services of the |ProductName|.
+This is followed by further sections for ``Includes``, ``Middleware``, ``Logging``, ``HealthCheck``, ``Tracing``, ``Extentions`` and sections for the different services of the |ProductName|.
 The outline of a participant configuration file is as follows:
 
 .. code-block:: yaml
@@ -64,6 +78,8 @@ The outline of a participant configuration file is as follows:
     SchemaVersion: 1
     Description: Sample configuration with all root nodes
     ParticipantName: Participant1
+    Includes: 
+      ...
     Middleware: 
       ...
     Logging: 
@@ -72,7 +88,7 @@ The outline of a participant configuration file is as follows:
       ...
     Tracing:
       ...
-    Extensions:
+    Extensions: 
       ...
     CanControllers:
       - ...
@@ -103,11 +119,11 @@ Overview
    * - Setting Name
      - Description
 
-   * - $schema
+   * - ``"$schema"``
      - File path to the participant configuration schema. 
        The ``ParticipantConfiguration.schema.json`` is part of the |ProductName| sources and can be found in the folder ``./SilKit/source/config/``.
 
-   * - schemaVersion
+   * - ``SchemaVersion``
      - The version of the used participant configuration schema. Current version is 1.
 
    * - ``Description``
@@ -116,6 +132,9 @@ Overview
    * - ``ParticipantName``
      - The name of the simulation participant that joins the |ProductName| simulation. 
        Overrides a programmatically defined participant name.
+
+   * - :ref:`Includes<sec:cfg-participant-includes>`
+     - This can be used to include other participant configuration files.
 
    * - :ref:`Logging<sec:cfg-participant-logging>`
      - The logger configuration for this participant.
@@ -163,6 +182,7 @@ Configuration Options
    :maxdepth: 1
 
    services-configuration
+   includes-configuration
    logging-configuration
    healthcheck-configuration
    tracing-configuration
