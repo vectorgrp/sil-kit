@@ -19,6 +19,7 @@
 using namespace std::chrono_literals;
 using namespace SilKit::Services;
 using namespace SilKit::Services::Can;
+using namespace SilKit::Experimental::NetworkSimulation;
 
 int main(int argc, char** argv)
 {

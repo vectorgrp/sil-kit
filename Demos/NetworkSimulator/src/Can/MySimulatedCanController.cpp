@@ -7,6 +7,7 @@
 
 using namespace SilKit;
 using namespace SilKit::Experimental::NetworkSimulation;
+using namespace SilKit::Experimental::NetworkSimulation::Can;
 using namespace std::chrono_literals;
 
 MySimulatedCanController::MySimulatedCanController(MySimulatedNetwork* mySimulatedNetwork,

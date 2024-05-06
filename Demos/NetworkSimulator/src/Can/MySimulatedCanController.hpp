@@ -7,31 +7,28 @@
 #include "silkit/experimental/netsim/all.hpp"
 #include "MySimulatedNetwork.hpp"
 
-using namespace SilKit;
-using namespace SilKit::Experimental::NetworkSimulation;
-using namespace SilKit::Experimental::NetworkSimulation::Can;
-
-class MySimulatedCanController : public ISimulatedCanController
+class MySimulatedCanController : public SilKit::Experimental::NetworkSimulation::Can::ISimulatedCanController
 {
     
 public:
-    MySimulatedCanController(MySimulatedNetwork* mySimulatedNetwork, ControllerDescriptor controllerDescriptor);
+    MySimulatedCanController(MySimulatedNetwork* mySimulatedNetwork,
+                             SilKit::Experimental::NetworkSimulation::ControllerDescriptor controllerDescriptor);
 
     // ISimulatedCanController
 
-    void OnSetBaudrate(const CanConfigureBaudrate& msg) override;
-    void OnFrameRequest(const CanFrameRequest& msg) override;
-    void OnSetControllerMode(const CanControllerMode& msg) override;
+    void OnSetBaudrate(const SilKit::Experimental::NetworkSimulation::Can::CanConfigureBaudrate& msg) override;
+    void OnFrameRequest(const SilKit::Experimental::NetworkSimulation::Can::CanFrameRequest& msg) override;
+    void OnSetControllerMode(const SilKit::Experimental::NetworkSimulation::Can::CanControllerMode& msg) override;
 
 private:
 
     MySimulatedNetwork* _mySimulatedNetwork;
     Scheduler* _scheduler;
 
-    ControllerDescriptor _controllerDescriptor;
+    SilKit::Experimental::NetworkSimulation::ControllerDescriptor _controllerDescriptor;
 
     double _baudRate;
-    Services::Can::CanControllerState _controllerMode;
+    SilKit::Services::Can::CanControllerState _controllerMode;
 
     SilKit::Services::Logging::ILogger* _logger;
 
