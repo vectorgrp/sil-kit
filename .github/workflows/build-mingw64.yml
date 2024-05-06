@@ -28,11 +28,15 @@ jobs:
     if: inputs.run_build == true
     steps:
     - name: setup
-      run: pacman -S mingw-w64-x86_64-gcc mingw-w64-x86_64-cmake mingw-w64-x86_64-ninja git
+      run: |
+        echo "C:\msys64" >> $GITHUB_PATH
+    - name: deps
+      run: pacman -S mingw-w64-x86_64-gcc mingw-w64-x86_64-cmake mingw-w64-x86_64-ninja
+      shell: bash
     - uses: actions/checkout@v4
       with:
         submodules: true
     - name: Build
       id: cmake-build-mingw
       run: cmake --build --preset gcc-release
-      shell: msys2bash
+      shell: bash
