@@ -258,6 +258,15 @@
                 "CMAKE_CXX_COMPILER": "g++-9"
             }
         },
+        {
+            "name": "mixin-gcc",
+            "description": "Target standard system GCC",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "gcc",
+                "CMAKE_CXX_COMPILER": "g++"
+            }
+        },
 
 
         {
@@ -485,6 +494,18 @@
         {
             "name": "gcc9-relwithdebinfo",
             "inherits": [ "mixin-relwithdebinfo", "gcc9-debug", "mixin-build-docs" ]
+        },
+        {
+            "name": "gcc-debug",
+            "inherits": [ "mixin-dirs", "mixin-ninja", "mixin-debug", "mixin-gcc" ]
+        },
+        {
+            "name": "gcc-release",
+            "inherits": [ "mixin-release", "gcc-debug", "mixin-gcc"]
+        },
+        {
+            "name": "gcc-relwithdebinfo",
+            "inherits": [ "mixin-relwithdebinfo", "gcc-debug", "mixin-build-docs" ]
         },
         {
             "name": "clang10-debug",
@@ -719,6 +740,18 @@
         {
             "name": "gcc9-relwithdebinfo",
             "configurePreset": "gcc9-relwithdebinfo"
+        },
+        {
+            "name": "gcc-debug",
+            "configurePreset": "gcc-debug"
+        },
+        {
+            "name": "gcc-release",
+            "configurePreset": "gcc-release"
+        },
+        {
+            "name": "gcc-relwithdebinfo",
+            "configurePreset": "gcc-relwithdebinfo"
         },
 
         {
@@ -962,6 +995,18 @@
         {
             "name": "gcc9-relwithdebinfo",
             "configurePreset": "gcc9-relwithdebinfo"
+        },
+        {
+            "name": "gcc-debug",
+            "configurePreset": "gcc-debug"
+        },
+        {
+            "name": "gcc-release",
+            "configurePreset": "gcc-release"
+        },
+        {
+            "name": "gcc-relwithdebinfo",
+            "configurePreset": "gcc-relwithdebinfo"
         },
 
         {
