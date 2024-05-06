@@ -29,3 +29,5 @@ _build_*/
 # ignore cmake CMakeUserPresets
 CMakeUserPresets.json
 
+#ignore vim swap files
+*.swp

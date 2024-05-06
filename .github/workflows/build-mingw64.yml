@@ -1,0 +1,38 @@
+name: 'mingw64 release Builds'
+on:
+  workflow_call:
+    inputs:
+      do_package:
+        required: false
+        type: boolean
+        default: false
+      do_package_symbols:
+        required: false
+        type: boolean
+        default: false
+      retention_days:
+        required: false
+        type: number
+        default: 14
+      run_build:
+        required: true
+        type: boolean
+
+jobs:
+  gcc13-release:
+    name: GCC 13.2 release Builds for mingw64
+    environment: public-github-runners
+    runs-on: windows-latest
+    defaults:
+      shell: msys2bash
+    if: inputs.run_build == true
+    steps:
+    - name: setup
+      run: pacman -S mingw-w64-x86_64-gcc mingw-w64-x86_64-cmake mingw-w64-x86_64-ninja git
+    - uses: actions/checkout@v4
+      with:
+        submodules: true
+    - name: Build
+      id: cmake-build-mingw
+      run: cmake --build --preset gcc-release
+      shell: msys2bash

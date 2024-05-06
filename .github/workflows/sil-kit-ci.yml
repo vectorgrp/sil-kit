@@ -98,3 +98,11 @@ jobs:
       do_package: ${{ github.event_name == 'push' && true || false }}
       retention_days: ${{ github.event_name == 'push' && 90 || 14 }}
       run_build: ${{ needs.check-run-builds.outputs.run_builds == 'true' }}
+
+  mingw-release-builds:
+    uses: ./.github/workflows/build-mingw64.yml
+    needs: [check-licenses, check-run-builds]
+    with:
+      do_package: ${{ github.event_name == 'push' && true || false }}
+      retention_days: ${{ github.event_name == 'push' && 90 || 14 }}
+      run_build: ${{ needs.check-run-builds.outputs.run_builds == 'true' }}
