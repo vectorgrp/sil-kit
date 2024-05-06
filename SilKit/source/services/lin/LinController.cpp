@@ -87,8 +87,12 @@ void LinController::RegisterServiceDiscovery()
                 if (discoveryType == Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated
                     && IsRelevantNetwork(remoteServiceDescriptor))
                 {
+                    Logging::Info(_logger,
+                                  "Controller '{}' is using the simulated network '{}' and will route all messages to "
+                                  "the network simulator '{}'",
+                                  _config.name, remoteServiceDescriptor.GetNetworkName(),
+                                  remoteServiceDescriptor.GetParticipantName());
                     SetDetailedBehavior(remoteServiceDescriptor);
-
                 }
             }
             else
@@ -97,6 +101,10 @@ void LinController::RegisterServiceDiscovery()
                     && IsRelevantNetwork(remoteServiceDescriptor))
                 
                 {
+                    Logging::Warn(_logger,
+                                  "The network simulator for controller '{}' left the simulation. The controller is no "
+                                  "longer simulated.",
+                                  _config.name);
                     SetTrivialBehavior();
                 }
             }

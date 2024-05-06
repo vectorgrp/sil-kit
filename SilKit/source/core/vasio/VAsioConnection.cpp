@@ -1663,11 +1663,11 @@ void VAsioConnection::ReceiveRegistryMessage(IVAsioPeer* from, SerializedMessage
     }
 }
 
-void VAsioConnection::SetAsyncSubscriptionsCompletionHandler(std::function<void()> handler)
+void VAsioConnection::AddAsyncSubscriptionsCompletionHandler(std::function<void()> handler)
 {
     if (_hasPendingAsyncSubscriptions)
     {
-        _asyncSubscriptionsCompletionHandler = std::move(handler);
+        _asyncSubscriptionsCompletionHandlers.Add(std::move(handler));
     }
     else
     {
@@ -1739,11 +1739,8 @@ void VAsioConnection::SyncSubscriptionsCompleted()
 
 void VAsioConnection::AsyncSubscriptionsCompleted()
 {
-    if (_asyncSubscriptionsCompletionHandler)
-    {
-        _asyncSubscriptionsCompletionHandler();
-        _asyncSubscriptionsCompletionHandler = nullptr;
-    }
+    _asyncSubscriptionsCompletionHandlers.InvokeAll();
+    _asyncSubscriptionsCompletionHandlers.Clear();
     _hasPendingAsyncSubscriptions = false;
 }
 

@@ -67,6 +67,11 @@ void SimParticipant::Stop()
     GetOrCreateLifecycleService()->Stop("Stop");
 }
 
+void SimParticipant::Disconnect()
+{
+    _participant.reset();
+}
+
 auto SimParticipant::GetOrCreateSystemMonitor() -> Services::Orchestration::ISystemMonitor*
 {
     if (!_systemMonitor)
@@ -105,7 +110,16 @@ auto SimParticipant::GetOrCreateTimeSyncService() -> Services::Orchestration::IT
     return _timeSyncService;
 }
 
-auto SimParticipant::GetOrGetLogger() -> Services::Logging::ILogger*
+auto SimParticipant::GetOrCreateNetworkSimulator() -> Experimental::NetworkSimulation::INetworkSimulator*
+{
+    if (!_networkSimulator)
+    {
+        _networkSimulator = SilKit::Experimental::Participant::CreateNetworkSimulator(_participant.get());
+    }
+    return _networkSimulator;
+}
+
+auto SimParticipant::GetLogger() -> Services::Logging::ILogger*
 {
     if (!_logger)
     {
@@ -176,7 +190,12 @@ void SimTestHarness::CreateSystemController()
     }
 }
 
-bool SimTestHarness::Run(std::chrono::nanoseconds testRunTimeout)
+bool SimTestHarness::Run(std::chrono::nanoseconds testRunTimeout) 
+{
+    return Run(testRunTimeout, {});
+}
+
+bool SimTestHarness::Run(std::chrono::nanoseconds testRunTimeout, const std::vector<std::string>& keepAlive)
 {
     auto lock = Lock();
     std::promise<void> simulationFinishedPromise;
@@ -210,6 +229,12 @@ bool SimTestHarness::Run(std::chrono::nanoseconds testRunTimeout)
     //C++17: for (auto& [name, participant] : _simParticipants)
     for (auto& kv : _simParticipants)
     {
+        if (std::find(keepAlive.begin(), keepAlive.end(), kv.first) != keepAlive.end())
+        {
+            // Ignore waiting for participants in keepAlive list
+            continue;
+        }
+
         auto& participant = kv.second;
         if (noTimeout)
         {

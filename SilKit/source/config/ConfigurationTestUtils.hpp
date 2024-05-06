@@ -37,6 +37,9 @@ inline auto MakeEmptyParticipantConfiguration() -> std::shared_ptr<SilKit::Confi
 inline auto MakeParticipantConfigurationWithLogging(Services::Logging::Level logLevel)
     -> std::shared_ptr<SilKit::Config::IParticipantConfiguration>;
 
+inline auto MakeParticipantConfigurationStringWithLogging(Services::Logging::Level logLevel)
+    -> std::string;
+
 inline auto MakeEmptyParticipantConfigurationImpl() -> std::shared_ptr<SilKit::Config::ParticipantConfiguration>;
 
 inline auto MakeParticipantConfigurationWithLoggingImpl(Services::Logging::Level logLevel)
@@ -57,15 +60,21 @@ auto MakeEmptyParticipantConfiguration() -> std::shared_ptr<SilKit::Config::IPar
     return SilKit::Config::ParticipantConfigurationFromString("");
 }
 
-auto MakeParticipantConfigurationWithLogging(Services::Logging::Level logLevel)
-    -> std::shared_ptr<SilKit::Config::IParticipantConfiguration>
+auto MakeParticipantConfigurationStringWithLogging(Services::Logging::Level logLevel) -> std::string
 {
     std::ostringstream ss;
     ss << R"({"Logging": {"Sinks": [{"Type": "Stdout", "Level": ")";
     ss << to_string(logLevel);
     ss << R"("}]}})";
 
-    return SilKit::Config::ParticipantConfigurationFromString(ss.str());
+    return ss.str();
+}
+
+auto MakeParticipantConfigurationWithLogging(Services::Logging::Level logLevel)
+    -> std::shared_ptr<SilKit::Config::IParticipantConfiguration>
+{
+    auto configString = MakeParticipantConfigurationStringWithLogging(logLevel);
+    return SilKit::Config::ParticipantConfigurationFromString(configString);
 }
 
 inline auto MakeEmptyParticipantConfigurationImpl() -> std::shared_ptr<SilKit::Config::ParticipantConfiguration>

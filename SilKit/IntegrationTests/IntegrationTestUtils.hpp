@@ -137,7 +137,7 @@ struct Pipe
         DWORD actualRead = 0;
         buffer_t buf{};
         buf.resize(size);
-        auto ok = ReadFile(handle, buf.data(), buf.size(), &actualRead, nullptr);
+        auto ok = ReadFile(handle, buf.data(), static_cast<DWORD>(buf.size()), &actualRead, nullptr);
 
         if (!ok)
         {

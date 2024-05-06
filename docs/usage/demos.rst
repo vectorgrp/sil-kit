@@ -572,3 +572,61 @@ Latency Demo
          | The demo uses publish/subscribe controllers performing a message roundtrip (ping-pong) to calculate latency and throughput timings.
          |
          | Note that the two participants must use the same parameters for valid measurement and one participant must use the ``--isReceiver`` flag.
+
+
+.. _sec:util-netsim-demo:
+         
+Network Simulator Demo
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. list-table::
+   :widths: 17 205
+   :stub-columns: 1
+
+   *  - Abstract
+      - Demo usage of the Network Simulation API
+   *  - Source location
+      - ./SilKit-Demos/NetworkSimulator
+   *  - Requirements
+      - * :ref:`sil-kit-registry<sec:util-registry>`
+        * :ref:`sil-kit-system-controller<sec:util-system-controller>`
+        * :ref:`sil-kit-monitor<sec:util-monitor>` (optional)
+   *  - Parameters
+      - <ParticipantConfiguration.yaml> 
+          File name of the participant configuration to be used; 
+          use ``DemoNetSim.silkit.yaml`` for an example configuration.
+        <ParticipantName> 
+          The name of the participant within the simulation.
+        [RegistryUri] 
+          The silkit:// URI of the registry to connect to; defaults to silkit://localhost:8500 (optional).
+   *  - Parameter Example
+      - .. parsed-literal:: 
+           
+           # Start the Network Simulator Demo with the given config and participant name
+           |DemoDir|/SilKitDemoNetSim ./SilKit-Demos/NetworkSimulator/DemoNetSim.silkit.silkit.yaml NetworkSimulator
+   *  - System Example
+      - Interplay with CAN Demo:
+
+        .. parsed-literal:: 
+
+            # Registry (if not already running):
+            |Registry|
+            
+            # Monitor (optional):
+            |Monitor|
+
+            # CAN Reader:
+            |DemoDir|/SilKitDemoCan ./SilKit-Demos/Can/DemoCan.silkit.yaml CanReader
+
+            # CAN Writer:
+            |DemoDir|/SilKitDemoCan ./SilKit-Demos/Can/DemoCan.silkit.yaml CanWriter
+
+            # System Controller:
+            |SystemController| CanReader CanWriter NetworkSimulator
+
+            # Network Simulator Demo:
+            |DemoDir|/SilKitDemoNetSim ./SilKit-Demos/NetworkSimulator/DemoNetSim.silkit.silkit.yaml NetworkSimulator
+
+   *  -  Notes
+      -  * The CAN Reader and Writer configure their controller on the network "CAN1", which is simulated by the network simulator demo.
+         * In the simple bus logic of the network simulation demo (see ``Demos\NetworkSimulator\src\Can\MySimulatedCanController.cpp``), the acknowledgement (CanFrameTransmitEvent) is sent directly to the CAN Writer. The frame itself (CanFrameEvent) is sent with a delay of 2ms.

@@ -62,5 +62,10 @@ class IRequestReplyService;
 class IParticipantReplies;
 } // namespace RequestReply
 } // namespace Core
+namespace Experimental {
+namespace NetworkSimulation {
+class INetworkSimulator;
+} // namespace NetworkSimulation
+} // namespace Experimental
 } // namespace SilKit
 

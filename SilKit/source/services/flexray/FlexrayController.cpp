@@ -34,6 +34,7 @@ FlexrayController::FlexrayController(Core::IParticipantInternal* participant, Co
                                      Services::Orchestration::ITimeProvider* /*timeProvider*/)
     : _participant(participant)
     , _config{std::move(config)}
+    , _logger{participant->GetLogger()}
 {
 }
 
@@ -48,16 +49,32 @@ void FlexrayController::RegisterServiceDiscovery()
         [this](Core::Discovery::ServiceDiscoveryEvent::Type discoveryType,
                                   const Core::ServiceDescriptor& remoteServiceDescriptor) {
             // check if discovered service is a network simulator (if none is known)
-            if (!_simulatedLinkDetected)
+        if (!_simulatedLinkDetected)
+        {
+            // check if received descriptor has a matching simulated link
+            if (discoveryType == Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated
+                && IsRelevantNetwork(remoteServiceDescriptor))
             {
-                // check if received descriptor has a matching simulated link
-                if (discoveryType == Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated
-                    && IsRelevantNetwork(remoteServiceDescriptor))
-                {
-                    SetDetailedBehavior(remoteServiceDescriptor);
-                }
+                Logging::Info(_logger,
+                              "Controller '{}' is using the simulated network '{}' and will route all messages to "
+                              "the network simulator '{}'",
+                              _config.name, remoteServiceDescriptor.GetNetworkName(),
+                              remoteServiceDescriptor.GetParticipantName());
+                SetDetailedBehavior(remoteServiceDescriptor);
             }
-        });
+        }
+        else
+        {
+            if (discoveryType == Core::Discovery::ServiceDiscoveryEvent::Type::ServiceRemoved
+                && IsRelevantNetwork(remoteServiceDescriptor))
+            {
+                Logging::Error(_logger,
+                               "The network simulator for controller '{}' left the simulation. FlexRay controllers "
+                               "require a running network simulator to operate.",
+                               _config.name);
+            }
+        }
+    });
 }
 
 auto FlexrayController::AllowReception(const IServiceEndpoint* from) const -> bool

@@ -119,7 +119,7 @@ public:
     void SetLifecycleConfiguration(LifecycleConfiguration startConfiguration);
     void SetWorkflowConfiguration(const WorkflowConfiguration& msg);
 
-    void SetAsyncSubscriptionsCompletionHandler(std::function<void()> handler);
+    void AddAsyncSubscriptionsCompletionHandler(std::function<void()> handler);
     OperationMode GetOperationMode() const;
 
     auto StopRequested() const -> bool;

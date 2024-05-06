@@ -382,8 +382,8 @@ extern "C"
         return globalCapi->SilKit_LinController_Init(controller, config);
     }
 
-    SilKit_ReturnCode SilKitCALL SilKit_Experimental_LinController_InitDynamic(SilKit_LinController* controller,
-                                                           const SilKit_Experimental_LinControllerDynamicConfig* config)
+    SilKit_ReturnCode SilKitCALL SilKit_Experimental_LinController_InitDynamic(
+        SilKit_LinController* controller, const SilKit_Experimental_LinControllerDynamicConfig* config)
     {
         return globalCapi->SilKit_Experimental_LinController_InitDynamic(controller, config);
     }
@@ -515,8 +515,8 @@ extern "C"
         return globalCapi->SilKit_Experimental_LinController_RemoveFrameHeaderHandler(controller, handlerId);
     }
 
-    SilKit_ReturnCode SilKitCALL SilKit_Experimental_LinController_SendDynamicResponse(
-        SilKit_LinController* controller, const SilKit_LinFrame* frame)
+    SilKit_ReturnCode SilKitCALL SilKit_Experimental_LinController_SendDynamicResponse(SilKit_LinController* controller,
+                                                                                       const SilKit_LinFrame* frame)
     {
         return globalCapi->SilKit_Experimental_LinController_SendDynamicResponse(controller, frame);
     }
@@ -878,12 +878,11 @@ extern "C"
     }
 
     SilKit_ReturnCode SilKitCALL SilKit_RpcClient_CallWithTimeout(SilKit_RpcClient* self,
-        const SilKit_ByteVector* argumentData,
-        SilKit_NanosecondsTime timeout,
-        void* userContext)
+                                                                  const SilKit_ByteVector* argumentData,
+                                                                  SilKit_NanosecondsTime timeout, void* userContext)
     {
         return globalCapi->SilKit_RpcClient_CallWithTimeout(self, argumentData, timeout, userContext);
-    } 
+    }
 
     SilKit_ReturnCode SilKitCALL SilKit_RpcClient_SetCallResultHandler(SilKit_RpcClient* self, void* context,
                                                                        SilKit_RpcCallResultHandler_t handler)
@@ -959,5 +958,65 @@ extern "C"
     SilKit_ReturnCode SilKitCALL SilKit_Version_GitHash(const char** outVersionGitHash)
     {
         return globalCapi->SilKit_Version_GitHash(outVersionGitHash);
+    }
+
+    // Network Simulator
+
+    SilKit_ReturnCode SilKitCALL SilKit_Experimental_NetworkSimulator_Create(
+        SilKit_Experimental_NetworkSimulator** outNetworkSimulator, SilKit_Participant* participant)
+    {
+        return globalCapi->SilKit_Experimental_NetworkSimulator_Create(outNetworkSimulator, participant);
+    }
+
+    SilKit_ReturnCode SilKitCALL SilKit_Experimental_NetworkSimulator_SimulateNetwork(
+        SilKit_Experimental_NetworkSimulator* networkSimulator, const char* networkName,
+        SilKit_Experimental_SimulatedNetworkType networkType, void* simulatedNetwork,
+        const SilKit_Experimental_SimulatedNetworkFunctions* simulatedNetworkFunctions)
+    {
+        return globalCapi->SilKit_Experimental_NetworkSimulator_SimulateNetwork(
+            networkSimulator, networkName, networkType, simulatedNetwork, simulatedNetworkFunctions);
+    }
+
+    SilKit_ReturnCode SilKitCALL
+    SilKit_Experimental_NetworkSimulator_Start(SilKit_Experimental_NetworkSimulator* networkSimulator)
+    {
+        return globalCapi->SilKit_Experimental_NetworkSimulator_Start(networkSimulator);
+    }
+
+    // CanEventProducer
+
+    SilKit_ReturnCode SilKitCALL SilKit_Experimental_CanEventProducer_Produce(
+        SilKit_Experimental_CanEventProducer* eventProducer, SilKit_StructHeader* cEvent,
+        const SilKit_Experimental_EventReceivers* receivers)
+    {
+        return globalCapi->SilKit_Experimental_CanEventProducer_Produce(eventProducer, cEvent, receivers);
+    }
+
+    // FlexRayEventProducer
+
+    SilKit_ReturnCode SilKitCALL SilKit_Experimental_FlexRayEventProducer_Produce(
+        SilKit_Experimental_FlexRayEventProducer* eventProducer, SilKit_StructHeader* cEvent,
+        const SilKit_Experimental_EventReceivers* receivers)
+    {
+        return globalCapi->SilKit_Experimental_FlexRayEventProducer_Produce(eventProducer, cEvent, receivers);
+    }
+
+    // EthEventProducer
+
+    SilKit_ReturnCode SilKitCALL SilKit_Experimental_EthernetEventProducer_Produce(
+        SilKit_Experimental_EthernetEventProducer* eventProducer, SilKit_StructHeader* cEvent,
+        const SilKit_Experimental_EventReceivers* receivers)
+    {
+        return globalCapi->SilKit_Experimental_EthernetEventProducer_Produce(eventProducer, cEvent, receivers);
+    }
+
+
+    // LinEventProducer
+
+    SilKit_ReturnCode SilKitCALL SilKit_Experimental_LinEventProducer_Produce(
+        SilKit_Experimental_LinEventProducer* eventProducer, SilKit_StructHeader* cEvent,
+        const SilKit_Experimental_EventReceivers* receivers)
+    {
+        return globalCapi->SilKit_Experimental_LinEventProducer_Produce(eventProducer, cEvent, receivers);
     }
 }

@@ -98,7 +98,7 @@ void DataSubscriberInternal::ReplayMessage(const IReplayMessage* message)
         //Ignore transmit messages
         break;
     default:
-        throw SilKitError("DataSubscriberInternal: replay message has undefined direction");
+        throw SilKitError("DataSubscriber: replay message has undefined direction");
         break;
     }
 }

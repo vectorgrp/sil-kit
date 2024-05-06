@@ -68,6 +68,7 @@ private:
     // ----------------------------------------
     // private methods
     void DispatchSilKitMessage(ReceiverT* to, const IServiceEndpoint* from, const MsgT& msg);
+    void DistributeToSelf(const IServiceEndpoint* from, const MsgT& msg);
 
 private:
     // ----------------------------------------
@@ -161,6 +162,12 @@ void SilKitLink<MsgT>::DistributeLocalSilKitMessage(const IServiceEndpoint* from
     // Otherwise, messages that may be produced during the internal dispatch will be dispatched to remote receivers first.
     // As a result, the messages may be delivered in the wrong order (possibly even reversed)
     DispatchSilKitMessage(&_vasioTransmitter, from, msg);
+    DistributeToSelf(from, msg);
+}
+
+template <class MsgT>
+void SilKitLink<MsgT>::DistributeToSelf(const IServiceEndpoint* from, const MsgT& msg)
+{
     for (auto&& receiver : _localReceivers)
     {
         auto* receiverId = dynamic_cast<const IServiceEndpoint*>(receiver);
@@ -173,7 +180,8 @@ void SilKitLink<MsgT>::DistributeLocalSilKitMessage(const IServiceEndpoint* from
         // C++ 17 -> if constexpr
         if (!SilKitMsgTraits<MsgT>::IsSelfDeliveryEnforced())
         {
-            if (receiverId->GetServiceDescriptor() == from->GetServiceDescriptor()) continue;
+            if (receiverId->GetServiceDescriptor() == from->GetServiceDescriptor())
+                continue;
         }
         // Trace reception of self delivery
         Services::TraceRx(_logger, receiverId, msg, from->GetServiceDescriptor());
@@ -203,7 +211,14 @@ void SilKitLink<MsgT>::DispatchSilKitMessage(ReceiverT* to, const IServiceEndpoi
 template <class MsgT>
 void SilKitLink<MsgT>::DispatchSilKitMessageToTarget(const IServiceEndpoint* from, const std::string& targetParticipantName, const MsgT& msg)
 {
-    _vasioTransmitter.SendMessageToTarget(from, targetParticipantName, msg);
+    if (from->GetServiceDescriptor().GetParticipantName() == targetParticipantName)
+    {
+        DistributeToSelf(from, msg);
+    }
+    else
+    {
+        _vasioTransmitter.SendMessageToTarget(from, targetParticipantName, msg);
+    }
 }
 
 template <class MsgT>

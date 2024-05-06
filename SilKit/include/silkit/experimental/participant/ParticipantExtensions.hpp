@@ -42,6 +42,10 @@ namespace Participant {
 DETAIL_SILKIT_CPP_API auto CreateSystemController(SilKit::IParticipant* participant)
     -> SilKit::Experimental::Services::Orchestration::ISystemController*;
 
+DETAIL_SILKIT_CPP_API auto CreateNetworkSimulator(SilKit::IParticipant* participant)
+    -> SilKit::Experimental::NetworkSimulation::INetworkSimulator*;
+
+
 } // namespace Participant
 } // namespace Experimental
 DETAIL_SILKIT_DETAIL_VN_NAMESPACE_CLOSE

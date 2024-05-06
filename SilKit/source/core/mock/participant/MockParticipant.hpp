@@ -42,6 +42,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/services/pubsub/PubSubDatatypes.hpp"
 #include "silkit/services/rpc/RpcDatatypes.hpp"
 
+#include "silkit/experimental/netsim/INetworkSimulator.hpp"
+
 #include "IParticipantInternal.hpp"
 #include "IServiceDiscovery.hpp"
 #include "IRequestReplyService.hpp"
@@ -81,7 +83,7 @@ public:
     MOCK_METHOD(Services::Orchestration::ParticipantStatus&, Status, (), (override, const));
     MOCK_METHOD(Services::Orchestration::ITimeSyncService*, GetTimeSyncService, (), ());
     MOCK_METHOD(Services::Orchestration::ITimeSyncService*, CreateTimeSyncService, (), (override));
-    MOCK_METHOD(void, SetAsyncSubscriptionsCompletionHandler, (std::function<void()> /*handler*/));
+    MOCK_METHOD(void, AddAsyncSubscriptionsCompletionHandler, (std::function<void()> /*handler*/));
     MOCK_METHOD(Services::Orchestration::OperationMode, GetOperationMode, (), (const));
 };
 
@@ -155,6 +157,17 @@ public:
         // Directly trigger
         completionFunction();
     }
+};
+
+class DummyNetworkSimulator : public Experimental::NetworkSimulation::INetworkSimulator
+{
+public:
+    void SimulateNetwork(const std::string& /*networkName*/, Experimental::NetworkSimulation::SimulatedNetworkType /*networkType*/,
+        std::unique_ptr<Experimental::NetworkSimulation::ISimulatedNetwork> /*simulatedNetwork*/) override
+    {
+    }
+
+    void Start() override {}
 };
 
 class DummyParticipant : public IParticipantInternal
@@ -239,6 +252,11 @@ public:
         return &mockLifecycleService;
     }
 
+    auto CreateNetworkSimulator() -> Experimental::NetworkSimulation::INetworkSimulator* override
+    {
+        return &mockNetworkSimulator;
+    }
+
     MOCK_METHOD(Services::Orchestration::TimeSyncService*, CreateTimeSyncService, (Services::Orchestration::LifecycleService*), (override));
     auto GetSystemMonitor() -> Services::Orchestration::ISystemMonitor* override { return &mockSystemMonitor; }
     auto CreateSystemMonitor() -> Services::Orchestration::ISystemMonitor* override { return &mockSystemMonitor; }
@@ -246,7 +264,9 @@ public:
 
     auto GetLogger() -> Services::Logging::ILogger* override { return &logger; }
 
-    void RegisterSimulator(Core::ISimulator*, const std::vector<Config::SimulatedNetwork>& /*networks*/) override {}
+    void RegisterSimulator(Core::ISimulator*, std::string, Experimental::NetworkSimulation::SimulatedNetworkType) override {}
+
+    void AddTraceSinksToSource(ITraceMessageSource*, SilKit::Config::SimulatedNetwork) override {}
 
     void SendMsg(const IServiceEndpoint* /*from*/, const Services::Can::WireCanFrameEvent& /*msg*/) override {}
     void SendMsg(const IServiceEndpoint* /*from*/, const Services::Can::CanFrameTransmitEvent& /*msg*/) override {}
@@ -370,10 +390,14 @@ public:
     auto GetRequestReplyService() -> RequestReply::IRequestReplyService* override { return &mockRequestReplyService; }
     auto GetParticipantRepliesProcedure() -> RequestReply::IParticipantReplies* override { return &mockParticipantReplies; }
 
-    void SetAsyncSubscriptionsCompletionHandler(std::function<void()> handler) override { handler(); };
+    void AddAsyncSubscriptionsCompletionHandler(std::function<void()> handler) override { handler(); };
     
     void SetIsSystemControllerCreated(bool /*isCreated*/) override{};
     bool GetIsSystemControllerCreated() override { return false; };
+    
+    void SetIsNetworkSimulatorCreated(bool /*isCreated*/) override{};
+    bool GetIsNetworkSimulatorCreated() override { return false; };
+
     size_t GetNumberOfConnectedParticipants() override { return 0; };
     size_t GetNumberOfRemoteReceivers(const IServiceEndpoint* /*service*/, const std::string& /*msgTypeName*/) override
     {
@@ -387,11 +411,20 @@ public:
     }
 
     void NotifyShutdown() override {};
-    void RegisterReplayController(ISimulator*, const SilKit::Core::ServiceDescriptor&, const SilKit::Config::SimulatedNetwork& ) override { }
+    void RegisterReplayController(SilKit::Tracing::IReplayDataController*, const std::string&,
+                                  const SilKit::Config::SimulatedNetwork&) override
+    {
+    }
 
     bool ParticipantHasCapability(const std::string& /*participantName*/, const std::string& /*capability*/) const override
     {
         return true;
+    }
+
+    std::string GetServiceDescriptorString(
+        SilKit::Experimental::NetworkSimulation::ControllerDescriptor /*controllerDescriptor*/) override
+    {
+        return "";
     }
 
     const std::string _name = "MockParticipant";
@@ -405,6 +438,7 @@ public:
     testing::NiceMock<MockServiceDiscovery> mockServiceDiscovery;
     MockRequestReplyService mockRequestReplyService;
     MockParticipantReplies mockParticipantReplies;
+    DummyNetworkSimulator mockNetworkSimulator;
 };
 
 // ================================================================================

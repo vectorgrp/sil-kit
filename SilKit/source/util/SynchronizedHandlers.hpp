@@ -59,6 +59,11 @@ public:
 
         return !_entries.empty();
     }
+    
+    void Clear()
+    {
+        _entries.clear();
+    }
 
     auto Size() -> size_t
     {
@@ -111,6 +116,12 @@ public:
     {
         const auto lock = MakeUniqueLock();
         return _handlers.InvokeAll(std::forward<T>(t)...);
+    }
+
+    void Clear()
+    {
+        const auto lock = MakeUniqueLock();
+        _handlers.Clear();
     }
 
     auto Size() -> size_t { return _handlers.Size(); }

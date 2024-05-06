@@ -12,6 +12,7 @@ Contents
   api/api
   usage/demos
   configuration/configuration
+  netsim/netsim
   usage/utilities
   usage/troubleshooting
   faq/faq

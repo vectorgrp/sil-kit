@@ -116,3 +116,10 @@ add_silkit_test_to_executable(SilKitHourglassTests
     LIBS
         S_Test_Hourglass
 )
+
+add_silkit_test_to_executable(SilKitHourglassTests
+    SOURCES
+        Test_HourglassNetSim.cpp
+    LIBS
+        S_Test_Hourglass
+)

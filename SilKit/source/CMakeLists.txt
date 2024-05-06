@@ -174,6 +174,7 @@ list(APPEND SilKitImplObjectLibraries
     O_SilKit_Core_VAsio
     O_SilKit_Experimental
     O_SilKit_Extensions
+    O_SilKit_Experimental_NetworkSimulatorInternals
     O_SilKit_Services_Can
     O_SilKit_Services_Ethernet
     O_SilKit_Services_Flexray

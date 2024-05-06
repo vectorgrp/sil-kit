@@ -28,6 +28,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "silkit/services/fwd_decl.hpp"
 #include "silkit/services/orchestration/fwd_decl.hpp"
+#include "silkit/experimental/netsim/fwd_decl.hpp"
 
 #include "silkit/services/pubsub/PubSubDatatypes.hpp"
 #include "silkit/services/pubsub/PubSubSpec.hpp"

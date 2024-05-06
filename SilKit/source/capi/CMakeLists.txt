@@ -34,7 +34,7 @@ add_library(O_SilKit_Capi OBJECT
     CapiUtils.cpp
     CapiVendor.cpp
     CapiVersion.cpp
-
+    CapiNetworkSimulator.cpp
     TypeConversion.hpp
 )
 
@@ -48,7 +48,6 @@ target_link_libraries(O_SilKit_Capi
     PRIVATE I_SilKit_Experimental
     PRIVATE I_SilKit_VersionImpl
 )
-
 
 add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_CapiInterfaces.cpp LIBS S_SilKitImpl)
 add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_CapiCan.cpp LIBS O_SilKit_Services_Can S_SilKitImpl I_SilKit_Core_Mock_Participant)
@@ -64,4 +63,5 @@ add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_CapiParticipantStateH
 add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_CapiTimeSync.cpp LIBS S_SilKitImpl I_SilKit_Core_Mock_Participant)
 add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_CapiLin.cpp LIBS S_SilKitImpl I_SilKit_Core_Mock_Participant)
 add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_CapiSymbols.cpp LIBS S_SilKitImpl)
+add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_CapiNetSim.cpp LIBS S_SilKitImpl I_SilKit_Core_Mock_Participant)
 

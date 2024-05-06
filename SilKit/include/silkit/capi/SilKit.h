@@ -35,6 +35,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/capi/Orchestration.h"
 #include "silkit/capi/Vendor.h"
 #include "silkit/capi/Version.h"
+#include "silkit/capi/NetworkSimulator.h"
+#include "silkit/capi/EventProducer.h"
 
 SILKIT_BEGIN_DECLS
 

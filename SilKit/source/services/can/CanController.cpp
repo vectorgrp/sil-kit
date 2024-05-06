@@ -55,6 +55,11 @@ void CanController::RegisterServiceDiscovery()
             if (discoveryType == Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated
                 && IsRelevantNetwork(remoteServiceDescriptor))
             {
+                Logging::Info(_logger,
+                              "Controller '{}' is using the simulated network '{}' and will route all messages to "
+                              "the network simulator '{}'",
+                              _config.name, remoteServiceDescriptor.GetNetworkName(),
+                              remoteServiceDescriptor.GetParticipantName());
                 SetDetailedBehavior(remoteServiceDescriptor);
             }
         }
@@ -63,6 +68,10 @@ void CanController::RegisterServiceDiscovery()
             if (discoveryType == Core::Discovery::ServiceDiscoveryEvent::Type::ServiceRemoved
                 && IsRelevantNetwork(remoteServiceDescriptor))
             {
+                Logging::Warn(_logger,
+                              "The network simulator for controller '{}' left the simulation. The controller is no "
+                              "longer simulated.",
+                              _config.name);
                 SetTrivialBehavior();
             }
         }
@@ -73,11 +82,11 @@ void CanController::SetDetailedBehavior(const Core::ServiceDescriptor& remoteSer
 {
     _simulationBehavior.SetDetailedBehavior(remoteServiceDescriptor);
 }
+
 void CanController::SetTrivialBehavior()
 {
     _simulationBehavior.SetTrivialBehavior();
 }
-
 
 auto CanController::GetState() -> CanControllerState
 {
@@ -156,8 +165,8 @@ void CanController::SendFrame(const CanFrame& frame, void* userContext)
     {
         // do not allow user messages from the public API.
         // ReplaySend will send all frames.
-        Logging::Debug(_logger, _logOnce,
-            "CanController: Ignoring SendFrame API call due to Replay config on {}", _config.name);
+        Logging::Debug(_logger, _logOnce, "CanController: Ignoring SendFrame API call due to Replay config on {}",
+                       _config.name);
         return;
     }
     WireCanFrameEvent wireCanFrameEvent{};
@@ -180,8 +189,8 @@ void CanController::ReceiveMsg(const IServiceEndpoint* from, const WireCanFrameE
 
     if (Tracing::IsReplayEnabledFor(_config.replay, Config::Replay::Direction::Receive))
     {
-        Logging::Debug(_logger, _logOnce,
-            "CanController: Ignoring ReceiveMsg API call due to Replay config on {}", _config.name);
+        Logging::Debug(_logger, _logOnce, "CanController: Ignoring ReceiveMsg API call due to Replay config on {}",
+                       _config.name);
         return;
     }
 
@@ -219,12 +228,12 @@ void CanController::ReceiveMsg(const IServiceEndpoint* from, const CanController
     if (_controllerState != msg.controllerState)
     {
         _controllerState = msg.controllerState;
-        CallHandlers(CanStateChangeEvent{ msg.timestamp, msg.controllerState });
+        CallHandlers(CanStateChangeEvent{msg.timestamp, msg.controllerState});
     }
     if (_errorState != msg.errorState)
     {
         _errorState = msg.errorState;
-        CallHandlers(CanErrorStateChangeEvent{ msg.timestamp, msg.errorState });
+        CallHandlers(CanErrorStateChangeEvent{msg.timestamp, msg.errorState});
     }
 }
 
@@ -279,7 +288,7 @@ void CanController::ReplayReceive(const IReplayMessage* replayMessage)
     msg.frame = std::move(frameEvent.frame);
     msg.direction = TransmitDirection::RX;
     msg.userContext = nullptr;
-   
+
     const auto msgEvent = ToCanFrameEvent(msg);
     _tracer.Trace(msg.direction, msg.timestamp, msgEvent);
     CallHandlers(msgEvent);

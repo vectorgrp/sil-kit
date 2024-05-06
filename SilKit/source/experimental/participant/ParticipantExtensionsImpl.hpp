@@ -43,6 +43,13 @@ class ISystemController;
 } // namespace Experimental
 } // namespace SilKit
 
+namespace SilKit {
+namespace Experimental {
+namespace NetworkSimulation {
+class INetworkSimulator;
+} // namespace NetworkSimulation
+} // namespace Experimental
+} // namespace SilKit
 
 // Function Declarations
 
@@ -52,6 +59,9 @@ namespace Participant {
 
 auto CreateSystemControllerImpl(IParticipant* participant)
     -> SilKit::Experimental::Services::Orchestration::ISystemController*;
+
+auto CreateNetworkSimulatorImpl(IParticipant* participant)
+    -> SilKit::Experimental::NetworkSimulation::INetworkSimulator*;
 
 } // namespace Participant
 } // namespace Experimental

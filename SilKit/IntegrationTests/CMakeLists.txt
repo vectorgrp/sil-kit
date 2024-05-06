@@ -250,6 +250,47 @@ add_silkit_test_to_executable(SilKitIntegrationTests
 )
 
 # ============================================================
+#  Integration Tests for NetworkSimulaton
+# ============================================================
+
+add_silkit_test_to_executable(SilKitIntegrationTests
+    SOURCES
+    ITest_NetSimCan.cpp
+    ITest_NetSim.hpp
+
+    LIBS
+    S_ITests_STH
+)
+
+add_silkit_test_to_executable(SilKitIntegrationTests
+    SOURCES
+    ITest_NetSimEthernet.cpp
+    ITest_NetSim.hpp
+
+    LIBS
+    S_ITests_STH
+)
+
+add_silkit_test_to_executable(SilKitIntegrationTests
+    SOURCES
+    ITest_NetSimLin.cpp
+    ITest_NetSim.hpp
+
+    LIBS
+    S_ITests_STH
+)
+
+add_silkit_test_to_executable(SilKitIntegrationTests
+    SOURCES
+    ITest_NetSimFlexRay.cpp
+    ITest_NetSim.hpp
+
+    LIBS
+    S_ITests_STH
+)
+
+
+# ============================================================
 #  Integration Tests based on Demo Applications
 # ============================================================
 
@@ -291,7 +332,7 @@ add_silkit_test_to_executable(SilKitIntegrationTests
     S_ITests_STH
 )
 
-add_silkit_test_to_executable( SilKitIntegrationTests
+add_silkit_test_to_executable(SilKitIntegrationTests
     SOURCES
     ITest_RequestRemoteParticipantConnect.cpp
 

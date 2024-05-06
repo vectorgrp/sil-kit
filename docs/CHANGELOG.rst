@@ -13,7 +13,8 @@ The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <
 Added
 ~~~~~
 
-- Participant Configuration: support include semantics in participant configuration files/strings
+- Participant Configuration: Support include semantics in participant configuration files/strings.
+- Network Simulation: Experimental API for custom simulation of CAN, LIN, Ethernet and FlexRay networks.
 
 
 [4.0.48] - 2024-04-15

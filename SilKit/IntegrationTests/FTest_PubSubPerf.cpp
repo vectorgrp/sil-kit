@@ -173,7 +173,7 @@ protected:
             auto* subLifecycleService = subscriber->GetOrCreateLifecycleService();
 
             auto CreateSub = [subLifecycleService, &receptionCount, &subscriber, defineSubSpec, numberOfTopics]() {
-                //auto subLogger = subscriber->GetOrGetLogger();
+                //auto subLogger = subscriber->GetLogger();
                 //subLogger->Info(">>> Created Subscriber participant");
 
                 for (auto i = 0; i < numberOfTopics; i++)

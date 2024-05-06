@@ -85,7 +85,7 @@ TEST(ITest_AsyncSimTask, test_async_simtask_lockstep)
             return;
         }
 
-        //wait until counter is evne
+        //wait until counter is even
         std::unique_lock<decltype(mx)> lock(mx);
         cv.wait(lock, [] {
             return cvCounter % 2 == 0;

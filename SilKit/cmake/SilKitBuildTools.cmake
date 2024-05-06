@@ -20,6 +20,7 @@ endmacro()
 
 macro(silkit_package_debugsymbols targetName)
     if(MSVC)
+        message(STATUS "Creating symbol package ${SILKIT_SYMBOLS_DIR_NAME}")
         add_custom_command(
             TARGET "${targetName}"
             POST_BUILD
@@ -37,6 +38,7 @@ macro(silkit_package_debugsymbols targetName)
 
         file(MAKE_DIRECTORY "${SILKIT_SYMBOLS_DIR}")
 
+        message(STATUS "Creating symbol package ${SILKIT_SYMBOLS_DIR_NAME}")
         add_custom_command(
             TARGET "${targetName}"
             POST_BUILD

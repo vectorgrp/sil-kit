@@ -385,15 +385,15 @@ int main(int argc, char** argv)
             return 1;
         }
 
-        controller->AddPocStatusHandler([&frNode](IFlexrayController* linController,
+        controller->AddPocStatusHandler([&frNode](IFlexrayController* frController,
                                                   const FlexrayPocStatusEvent& pocStatusEvent) {
-            frNode.PocStatusHandler(linController, pocStatusEvent);
+            frNode.PocStatusHandler(frController, pocStatusEvent);
         });
         controller->AddFrameHandler(&ReceiveMessage<FlexrayFrameEvent>);
         controller->AddFrameTransmitHandler(&ReceiveMessage<FlexrayFrameTransmitEvent>);
-        controller->AddWakeupHandler([&frNode](IFlexrayController* linController,
+        controller->AddWakeupHandler([&frNode](IFlexrayController* frController,
                                                const FlexrayWakeupEvent& wakeupEvent) {
-                frNode.WakeupHandler(linController, wakeupEvent);
+                frNode.WakeupHandler(frController, wakeupEvent);
         });
         controller->AddSymbolHandler(&ReceiveMessage<FlexraySymbolEvent>);
         controller->AddSymbolTransmitHandler(&ReceiveMessage<FlexraySymbolTransmitEvent>);

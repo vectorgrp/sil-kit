@@ -60,4 +60,23 @@ TEST_F(Test_ParticipantExtensionsImpl, error_on_create_system_controller_twice)
     EXPECT_THROW(SilKit::Experimental::Participant::CreateSystemControllerImpl(participant.get()), SilKit::SilKitError);
 }
 
+TEST_F(Test_ParticipantExtensionsImpl, create_network_simulator_not_null)
+{
+    auto participant =
+        CreateNullConnectionParticipantImpl(SilKit::Config::MakeEmptyParticipantConfigurationImpl(), "TestParticipant");
+
+    auto networkSimulator = SilKit::Experimental::Participant::CreateNetworkSimulatorImpl(participant.get());
+    EXPECT_NE(networkSimulator, nullptr);
+}
+
+TEST_F(Test_ParticipantExtensionsImpl, error_on_create_network_simulator_twice)
+{
+    auto participant =
+        CreateNullConnectionParticipantImpl(SilKit::Config::MakeEmptyParticipantConfigurationImpl(), "TestParticipant");
+
+    auto networkSimulator = SilKit::Experimental::Participant::CreateNetworkSimulatorImpl(participant.get());
+    SILKIT_UNUSED_ARG(networkSimulator);
+    EXPECT_THROW(SilKit::Experimental::Participant::CreateNetworkSimulatorImpl(participant.get()), SilKit::SilKitError);
+}
+
 } // anonymous namespace

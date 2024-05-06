@@ -51,6 +51,7 @@
 
 #include "silkit/detail/impl/experimental/services/orchestration/SystemController.hpp"
 
+#include "silkit/detail/impl/netsim/NetworkSimulator.hpp"
 
 namespace SilKit {
 DETAIL_SILKIT_DETAIL_VN_NAMESPACE_BEGIN
@@ -96,7 +97,9 @@ public:
 
     inline auto GetLogger() -> SilKit::Services::Logging::ILogger* override;
 
-public:
+    inline auto ExperimentalCreateNetworkSimulator()
+        -> SilKit::Experimental::NetworkSimulation::INetworkSimulator*;
+
     inline auto ExperimentalCreateSystemController()
         -> SilKit::Experimental::Services::Orchestration::ISystemController*;
 
@@ -134,6 +137,8 @@ private:
     std::unique_ptr<Impl::Experimental::Services::Orchestration::SystemController> _systemController;
 
     std::unique_ptr<Impl::Services::Logging::Logger> _logger;
+    
+    std::unique_ptr<Impl::Experimental::NetworkSimulation::NetworkSimulator> _networkSimulator;
 };
 
 } // namespace Impl
@@ -241,6 +246,13 @@ auto Participant::ExperimentalCreateSystemController()
     _systemController = std::make_unique<Impl::Experimental::Services::Orchestration::SystemController>(_participant);
 
     return _systemController.get();
+}
+
+auto Participant::ExperimentalCreateNetworkSimulator() -> SilKit::Experimental::NetworkSimulation::INetworkSimulator*
+{
+    _networkSimulator = std::make_unique<Impl::Experimental::NetworkSimulation::NetworkSimulator>(_participant);
+   
+    return _networkSimulator.get();
 }
 
 auto Participant::Get() const -> SilKit_Participant*
