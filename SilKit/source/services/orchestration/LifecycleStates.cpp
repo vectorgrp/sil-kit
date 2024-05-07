@@ -716,7 +716,7 @@ void ShutdownState::ShutdownParticipant(std::string reason)
                               "lifecycle failed to shut down correctly - original shutdown reason was '{}'.",
                               std::move(reason));
             }
-    });
+        });
 }
 
 void ShutdownState::AbortSimulation(std::string /*reason*/)

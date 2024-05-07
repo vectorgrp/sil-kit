@@ -187,6 +187,7 @@ list(APPEND SilKitImplObjectLibraries
     O_SilKit_Util_FileHelpers
     O_SilKit_Util_Filesystem
     O_SilKit_Util_SetThreadName
+    O_SilKit_Util_SignalHandler
     O_SilKit_Util_Uuid
     O_SilKit_Util_Uri
     O_SilKit_Util_LabelMatching

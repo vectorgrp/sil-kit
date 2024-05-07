@@ -38,7 +38,7 @@ static std::unique_ptr<SignalMonitor> gSignalMonitor;
 #include <windows.h>
 
 namespace {
-using namespace SilKit::registry;
+using namespace SilKit::Util;
 
 //forward
 BOOL WINAPI systemHandler(DWORD ctrlType);
@@ -52,11 +52,17 @@ public:
 
         auto ok = CreatePipe(&_readEnd, &_writeEnd, nullptr, 0);
         if (!ok)
-            throw std::runtime_error("CreatePipe failed. Cannot create Signal Handler!");
+        {
+            throw std::runtime_error("SignalMonitor: Failed to create pipe for signal handler.");
+        }
         DWORD nowait = PIPE_NOWAIT;
         ok = SetNamedPipeHandleState(_writeEnd, &nowait, nullptr, nullptr);
         if (!ok)
-            throw std::runtime_error("Set pipe read end to nonblocking failed. Cannot create Signal Handler!");
+        {
+            throw std::runtime_error(
+                "SignalMonitor: Failed to create signal handler, cannot set read end of pipe to non-blocking.");
+        }
+
         SetConsoleCtrlHandler(systemHandler, true);
         _worker = std::thread{std::bind(&SignalMonitor::workerMain, this)};
     }
@@ -70,7 +76,7 @@ public:
     }
     void Notify(int signalNumber)
     {
-        // no allocs, no error handling
+        // No allocs, no error handling
         _signalNumber = signalNumber;
         uint8_t buf{};
         auto ok = WriteFile(_writeEnd, &buf, sizeof(buf), nullptr, nullptr);
@@ -81,10 +87,12 @@ private:
     void workerMain()
     {
         std::vector<uint8_t> buf(1);
-        //blocking read until Notify() was called
+        // Blocking read until Notify() was called
         auto ok = ReadFile(_readEnd, buf.data(), static_cast<DWORD>(buf.size()), nullptr, nullptr);
         if (!ok)
-            throw std::runtime_error("SignalMonitor::workerMain: cannot read from pipe.");
+        {
+            throw std::runtime_error("SignalMonitor::workerMain: Failed to read from pipe.");
+        }
 
         if (_handler)
         {
@@ -119,12 +127,13 @@ BOOL WINAPI systemHandler(DWORD ctrlType)
 
 namespace {
 
-using namespace SilKit::registry;
+using namespace SilKit::Util;
 
 //forward
+static inline void setSignalAction(int sigNum, __sighandler_t action);
 void systemHandler(int sigNum);
 
-auto ErrorMessage()
+    auto ErrorMessage()
 {
     return std::string{strerror(errno)};
 }
@@ -138,20 +147,27 @@ public:
 
         auto ok = ::pipe(_pipe);
         if (ok == -1)
-            throw std::runtime_error("SignalMonitor: pipe() failed! " + ErrorMessage());
+        {
+            throw std::runtime_error("SignalMonitor: Failed to create pipe for signal handler, " + ErrorMessage());
+        }
         ok = fcntl(_pipe[1], F_SETFL, O_NONBLOCK);
         if (ok == -1)
-            throw std::runtime_error("SignalMonitor: cannot set write end of pipe to non blocking: " + ErrorMessage());
+        {
+            throw std::runtime_error(
+                "SignalMonitor: Failed to create signal handler, cannot set read end of pipe to non-blocking: "
+                + ErrorMessage());
+        }
 
-        signal(SIGINT, &systemHandler);
-        signal(SIGTERM, &systemHandler);
+        setSignalAction(SIGINT, &systemHandler);
+        setSignalAction(SIGTERM, &systemHandler);
         _worker = std::thread{std::bind(&SignalMonitor::workerMain, this)};
     }
 
     ~SignalMonitor()
     {
-        signal(SIGINT, SIG_DFL);
-        signal(SIGTERM, SIG_DFL);
+        // Restore default actio0ns
+        setSignalAction(SIGINT, SIG_DFL);
+        setSignalAction(SIGTERM, SIG_DFL);
         Notify(-1);
         _worker.join();
         ::close(_pipe[0]);
@@ -160,7 +176,7 @@ public:
 
     void Notify(int signalNumber)
     {
-        //in signal handler context: no allocs, no error handling
+        // In signal handler context: no allocs, no error handling
         _signalNumber = signalNumber;
         uint8_t buf{};
         auto ok = ::write(_pipe[1], &buf, sizeof(buf));
@@ -168,14 +184,16 @@ public:
     }
 
 private:
+
     void workerMain()
     {
         std::vector<uint8_t> buf(1);
-        //blocking read until Notify() was called
+        // Blocking read until Notify() was called
         auto ok = ::read(_pipe[0], buf.data(), buf.size());
         if (ok == -1)
-            throw std::runtime_error("SignalMonitor::workerMain: cannot read from pipe: " + ErrorMessage());
-
+        {
+            throw std::runtime_error("SignalMonitor::workerMain: Failed to read from pipe: " + ErrorMessage());
+        }
         if (_handler)
         {
             _handler(_signalNumber);
@@ -188,7 +206,27 @@ private:
     int _signalNumber{-1};
 };
 
-void systemHandler(int sigNum)
+static inline void setSignalAction(int sigNum, __sighandler_t action)
+{
+    // Check current signal handler action to see if it's set to SIGNAL IGNORE
+    struct sigaction oldAction{};
+    sigaction(sigNum, NULL, &oldAction);
+    if (oldAction.sa_handler == SIG_IGN)
+    {
+        // A non-job-control shell wants us to ignore this kind of signal
+        return;
+    }
+    // Set new signal handler action to what we want
+    struct sigaction newAction{};
+    newAction.sa_handler = action;
+    auto ret = sigaction(sigNum, &newAction, NULL);
+    if (ret == -1)
+    {
+        throw std::runtime_error("SignalMonitor: Failed to set handler for signal " + std::to_string(sigNum) + ": " + ErrorMessage());
+    }
+}
+
+void systemHandler(const int sigNum)
 {
     if (gSignalMonitor)
     {
@@ -200,12 +238,12 @@ void systemHandler(int sigNum)
 #endif
 
 namespace SilKit {
-namespace registry {
+namespace Util {
 
 void RegisterSignalHandler(SignalHandler handler)
 {
     gSignalMonitor.reset(new SignalMonitor(std::move(handler)));
 }
 
-} // namespace registry
+} // namespace Util
 } // namespace SilKit

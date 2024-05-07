@@ -58,7 +58,7 @@ auto ValidateParticipantStateUpdate(ParticipantState oldParticipantState, Partic
         return OldParticipantStateWas({ParticipantState::Error, ParticipantState::Stopped});
 
     case ParticipantState::Shutdown:
-        return OldParticipantStateWas({ParticipantState::ShuttingDown});
+        return OldParticipantStateWas({ParticipantState::ShuttingDown, ParticipantState::Aborting});
 
     case ParticipantState::Aborting:
     case ParticipantState::Error:

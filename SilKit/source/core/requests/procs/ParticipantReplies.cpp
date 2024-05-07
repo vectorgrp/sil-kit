@@ -47,7 +47,9 @@ void ParticipantReplies::CallAfterAllParticipantsReplied(std::function<void()> c
 
         if (_barrierActive)
         {
-            Services::Logging::Debug(_participant->GetLogger(), "Only one barrier can be active at a time, ignoring.");
+            Services::Logging::Debug(_participant->GetLogger(),
+                                     "Still waiting for replies from participants on a previous call, action when new "
+                                     "call is replied will not be executed. This might lead to unexpected behavior.");
             return;
         }
 

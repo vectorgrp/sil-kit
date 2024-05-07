@@ -66,6 +66,18 @@ target_include_directories(O_SilKit_Util_SetThreadName INTERFACE ${CMAKE_CURRENT
 target_link_libraries(O_SilKit_Util_SetThreadName PUBLIC I_SilKit_Util_SetThreadName)
 
 
+add_library(I_SilKit_Util_SignalHandler INTERFACE)
+target_include_directories(I_SilKit_Util_SignalHandler INTERFACE ${CMAKE_CURRENT_LIST_DIR})
+target_link_libraries(I_SilKit_Util_SignalHandler INTERFACE SilKitInterface)
+
+add_library(O_SilKit_Util_SignalHandler OBJECT
+    SignalHandler.hpp
+    SignalHandler.cpp
+)
+target_include_directories(O_SilKit_Util_SignalHandler INTERFACE ${CMAKE_CURRENT_LIST_DIR})
+target_link_libraries(O_SilKit_Util_SignalHandler PUBLIC I_SilKit_Util_SignalHandler)
+
+
 add_library(I_SilKit_Util_Uuid INTERFACE)
 target_include_directories(I_SilKit_Util_Uuid INTERFACE ${CMAKE_CURRENT_LIST_DIR})
 
