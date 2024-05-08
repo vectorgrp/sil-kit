@@ -17,7 +17,7 @@ def info(fmt, *args):
     log("INFO: " + fmt, *args)
 
 def warn(fmt, *args):
-    log("WARN: " + fmt, *args)
+    log("::warning:: " + fmt, *args)
 
 def die(status, fmt, *args):
     log("ERROR: " + fmt, *args)
