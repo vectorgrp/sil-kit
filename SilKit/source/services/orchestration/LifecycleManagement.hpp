@@ -70,6 +70,7 @@ public: //CTors
 
     // Send NextSimTask
     void StartTime();
+    void StopTime();
 
     // Callback handling
     CallbackResult HandleCommunicationReady();
