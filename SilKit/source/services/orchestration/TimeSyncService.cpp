@@ -86,13 +86,11 @@ public:
 
     void RequestNextStep() override
     {
-        if (_controller.State() == ParticipantState::Running && !_controller.StopRequested()
-            && !_controller
-                    .PauseRequested()) // ensure that calls to Stop()/Pause() in a SimTask won't send out a new step and eventually call the SimTask again
+        // ensure that calls to Stop()/Pause() in a SimTask won't send out a new step and eventually call the SimTask again
+        if (_controller.State() == ParticipantState::Running 
+            && !_controller.StopRequested()
+            && !_controller.PauseRequested())
         {
-            _participant->GetLogger()->Info(
-                "Send NextSimStep=" + std::to_string(int(_configuration->NextSimStep().timePoint.count() * 1e-6))
-                + "ms");
             _controller.SendMsg(_configuration->NextSimStep());
             // Bootstrap checked execution, in case there is no other participant.
             // Else, checked execution is initiated when we receive their NextSimTask messages.
@@ -104,9 +102,6 @@ public:
 
     void ReceiveNextSimTask(const Core::IServiceEndpoint* from, const NextSimTask& task) override
     {
-        _participant->GetLogger()->Info("Receive NextSimStep=" + std::to_string(int(task.timePoint.count() * 1e-6))
-                                        + "ms");
-
         _configuration->OnReceiveNextSimStep(from->GetServiceDescriptor().GetParticipantName(), task);
 
         switch (_controller.State())
@@ -267,7 +262,11 @@ TimeSyncService::TimeSyncService(Core::IParticipantInternal* participant, ITimeP
     , _timeConfiguration{participant->GetLogger()}
     , _watchDog{healthCheckConfig}
 {
+    // TODO bkd:
+    // ---- Hardcoded config ----
     _syncWithLocalRealTime = _participant->GetParticipantName() == "VTP";
+    _animationFactor = 1.0; // 0.5 -> half the speed; 2 -> twice the speed; 0 -> not allowed
+    // --------------------------
 
     _watchDog.SetWarnHandler([logger = _logger](std::chrono::milliseconds timeout) {
         Warn(logger, "SimStep did not finish within soft time limit. Timeout detected after {} ms",
@@ -619,16 +618,22 @@ void TimeSyncService::StartRealTimeSyncThread()
             }
 
             const auto currentRunDuration = std::chrono::steady_clock::now() - startTime;
-            if (currentRunDuration > nextRealTimePoint)
+            if (currentRunDuration * _animationFactor > nextRealTimePoint)
             {
                 {
                     Lock lock{_mx};
                     _currentRealTimePoint = nextRealTimePoint;
                 }
                 nextRealTimePoint += duration;
-                _participant->ExecuteDeferred([this]() {
-                    GetTimeSyncPolicy()->RequestNextStep();
-                });
+                 
+                // Prevent sending the same step twice
+                if (_lastSentNextSimTask != _timeConfiguration.NextSimStep().timePoint)
+                {
+                    _lastSentNextSimTask = _timeConfiguration.NextSimStep().timePoint;
+                    _participant->ExecuteDeferred([this]() {
+                        GetTimeSyncPolicy()->RequestNextStep();
+                    });
+                }
             }
         }
     }};

@@ -153,7 +153,8 @@ private:
     mutable std::mutex _mx;
     using Lock = std::unique_lock<decltype(_mx)>;
     std::chrono::nanoseconds _currentRealTimePoint{0ns};
-    //const std::string _realTimeSyncName = "RealTimeSyncThread";
+    std::chrono::nanoseconds _lastSentNextSimTask{-1ns};
+    double _animationFactor{1};
 };
 
 // ================================================================================

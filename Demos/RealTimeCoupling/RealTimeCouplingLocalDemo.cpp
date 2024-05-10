@@ -61,8 +61,8 @@ std::ostream& operator<<(std::ostream& os, const std::vector<T>& vec)
 
 std::ostream& operator<<(std::ostream& out, std::chrono::duration<double> timestamp)
 {
-    auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(timestamp);
-    out << milliseconds.count() << "ms";
+    auto microseconds = std::chrono::duration_cast<std::chrono::microseconds>(timestamp).count();
+    out << std::fixed << std::setprecision(3) << microseconds / 1000.0 << "ms";
     return out;
 }
 
@@ -89,7 +89,6 @@ int main(int argc, char** argv)
         std::string registryUri = "silkit://localhost:8500";
 
         std::string participantName(argv[2]);
-        bool isRealtime = false;
         const auto stepDuration = 1000ms;
 
         std::vector<std::string> args;
@@ -145,9 +144,9 @@ int main(int argc, char** argv)
                 std::array<uint8_t, 1> dataBytes{1};
                 dataPublisher->Publish(SilKit::Util::MakeSpan(dataBytes));
 
-                auto randDelay = (rand() / double(RAND_MAX)) * 1.5s;
-                std::cout << "randDelay=" << randDelay << std::endl;
-                std::this_thread::sleep_for(randDelay);
+                //auto randDelay = (rand() / double(RAND_MAX)) * 2.5s;
+                //std::cout << "randDelay=" << randDelay << std::endl;
+                //std::this_thread::sleep_for(randDelay);
                 std::cout << "--------------------" << std::endl;
             },
             stepDuration);
@@ -156,8 +155,8 @@ int main(int argc, char** argv)
         auto finalState = finalStateFuture.get();
 
         std::cout << "Simulation stopped. Final State: " << finalState << std::endl;
-        std::cout << "Press enter to stop the process..." << std::endl;
-        std::cin.ignore();
+        //std::cout << "Press enter to stop the process..." << std::endl;
+        //std::cin.ignore();
     }
     catch (const SilKit::ConfigurationError& error)
     {

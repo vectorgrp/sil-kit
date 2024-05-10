@@ -19,28 +19,8 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-
-make_silkit_demo(SilKitDemoRealTimeCoupling RealTimeCouplingDemo.cpp)
-target_sources(SilKitDemoRealTimeCoupling
-    PRIVATE DemoRealTimeCoupling.silkit.yaml
-)
-
-make_silkit_demo(SilKitDemoRealTimeCouplingSystemClock RealTimeCouplingSystemClockDemo.cpp)
-target_sources(SilKitDemoRealTimeCouplingSystemClock
-    PRIVATE DemoRealTimeCoupling.silkit.yaml
-)
-
-make_silkit_demo(SilKitDemoRealTimeCouplingPTP RealTimeCouplingPTPDemo.cpp)
-target_sources(SilKitDemoRealTimeCouplingPTP
-    PRIVATE DemoRealTimeCoupling.silkit.yaml
-)
-
 make_silkit_demo(SilKitDemoRealTimeLocal RealTimeCouplingLocalDemo.cpp)
 target_sources(SilKitDemoRealTimeLocal
     PRIVATE DemoRealTimeCoupling.silkit.yaml
 )
 
-make_silkit_demo(SilKitDemoSingleVTR SingleVTP.cpp)
-target_sources(SilKitDemoSingleVTR
-    PRIVATE DemoRealTimeCoupling.silkit.yaml
-)
