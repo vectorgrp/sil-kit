@@ -85,7 +85,8 @@ public:
     void ResetTime();
     void ConfigureTimeProvider(Orchestration::TimeProviderKind timeProviderKind);
     void StartTime();
-
+    void StopTime();
+    
     // IServiceEndpoint
     inline void SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor) override;
     inline auto GetServiceDescriptor() const -> const Core::ServiceDescriptor& override;
@@ -103,6 +104,9 @@ public:
 
     void RequestNextStep();
 
+    auto IsSyncingWithLocalRealTime() const -> bool;
+    auto GetCurrentRealTimePoint() const -> std::chrono::nanoseconds;
+
 private:
     // ----------------------------------------
     // private methods
@@ -112,6 +116,9 @@ private:
     bool SetupTimeSyncPolicy(bool isSynchronizingVirtualTime);
 
     inline auto GetTimeSyncPolicy() const -> ITimeSyncPolicy *;
+
+    void StopRealTimeSyncThread();
+    void StartRealTimeSyncThread();
 
 private:
     // ----------------------------------------
@@ -139,6 +146,14 @@ private:
     Util::PerformanceMonitor _waitTimeMonitor;
     WatchDog _watchDog;
 
+    bool _syncWithLocalRealTime{false}; 
+    std::thread _realTimeSyncThread;
+    std::promise<void> _realTimeSyncThreadStopPromise;
+    std::future<void> _stopFuture;
+    mutable std::mutex _mx;
+    using Lock = std::unique_lock<decltype(_mx)>;
+    std::chrono::nanoseconds _currentRealTimePoint{0ns};
+    //const std::string _realTimeSyncName = "RealTimeSyncThread";
 };
 
 // ================================================================================

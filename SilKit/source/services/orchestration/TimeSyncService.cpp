@@ -22,6 +22,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <future>
 #include <functional>
 #include <atomic>
+#include <mutex>
 
 #include "silkit/services/orchestration/string_utils.hpp"
 #include "silkit/services/orchestration/ISystemMonitor.hpp"
@@ -85,10 +86,13 @@ public:
 
     void RequestNextStep() override
     {
-        if (_controller.State() == ParticipantState::Running
-            && !_controller.StopRequested()
-            && !_controller.PauseRequested()) // ensure that calls to Stop()/Pause() in a SimTask won't send out a new step and eventually call the SimTask again
+        if (_controller.State() == ParticipantState::Running && !_controller.StopRequested()
+            && !_controller
+                    .PauseRequested()) // ensure that calls to Stop()/Pause() in a SimTask won't send out a new step and eventually call the SimTask again
         {
+            _participant->GetLogger()->Info(
+                "Send NextSimStep=" + std::to_string(int(_configuration->NextSimStep().timePoint.count() * 1e-6))
+                + "ms");
             _controller.SendMsg(_configuration->NextSimStep());
             // Bootstrap checked execution, in case there is no other participant.
             // Else, checked execution is initiated when we receive their NextSimTask messages.
@@ -100,6 +104,9 @@ public:
 
     void ReceiveNextSimTask(const Core::IServiceEndpoint* from, const NextSimTask& task) override
     {
+        _participant->GetLogger()->Info("Receive NextSimStep=" + std::to_string(int(task.timePoint.count() * 1e-6))
+                                        + "ms");
+
         _configuration->OnReceiveNextSimStep(from->GetServiceDescriptor().GetParticipantName(), task);
 
         switch (_controller.State())
@@ -175,6 +182,15 @@ private:
             return false;
         }
 
+        // With real-time sync, the time advance is not possible if less then current real-time.
+        if (_controller.IsSyncingWithLocalRealTime())
+        {
+            if (_configuration->NextSimStep().timePoint > _controller.GetCurrentRealTimePoint())
+            {
+                return false;
+            }
+        }
+
         // No other participant has a lower time point: It is our turn
         return true;
     }
@@ -186,8 +202,12 @@ private:
         // If paused, don't request the next sim step. This happens in LifecycleService::Continue()
         if (!_controller.PauseRequested())
         {
-            // The synchronous SimStep API creates the nextSimTask message automatically after the callback
-            RequestNextStep();
+            // With real-time sync, the participant must sigal his readiness for the next step only if the real-time has actually passed.
+            if (!_controller.IsSyncingWithLocalRealTime())
+            {
+                // The synchronous SimStep API creates the nextSimTask message automatically after the callback.
+                RequestNextStep();
+            }
         }
     }
 
@@ -225,6 +245,7 @@ private:
 
             // update the current and next sim. step timestamps
             _configuration->AdvanceTimeStep();
+
             // Execute the simulation step callback with the current simulation time
             auto currentStep = _configuration->CurrentSimStep();
             _controller.ExecuteSimStep(currentStep.timePoint, currentStep.duration);
@@ -246,6 +267,8 @@ TimeSyncService::TimeSyncService(Core::IParticipantInternal* participant, ITimeP
     , _timeConfiguration{participant->GetLogger()}
     , _watchDog{healthCheckConfig}
 {
+    _syncWithLocalRealTime = _participant->GetParticipantName() == "VTP";
+
     _watchDog.SetWarnHandler([logger = _logger](std::chrono::milliseconds timeout) {
         Warn(logger, "SimStep did not finish within soft time limit. Timeout detected after {} ms",
                      std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(timeout).count());
@@ -347,6 +370,11 @@ auto TimeSyncService::PauseRequested() const -> bool
     return _lifecycleService->PauseRequested();
 }
 
+auto TimeSyncService::IsSyncingWithLocalRealTime() const -> bool
+{   
+    return _syncWithLocalRealTime;
+}
+
 void TimeSyncService::RequestNextStep() 
 {
     _participant->ExecuteDeferred([this] {
@@ -436,7 +464,12 @@ void TimeSyncService::CompleteSimulationStep()
     _logger->Debug("CompleteSimulationStep: calling _timeSyncPolicy->RequestNextStep");
     _participant->ExecuteDeferred([this] {
         GetTimeSyncPolicy()->SetSimStepCompleted();
-        GetTimeSyncPolicy()->RequestNextStep();
+        
+        // With real-time sync, the participant must sigal his readiness for the next step only if the real-time has actually passed.
+        if (!_syncWithLocalRealTime) 
+        {
+            GetTimeSyncPolicy()->RequestNextStep();
+        }
     });
 }
 
@@ -497,8 +530,22 @@ void TimeSyncService::StartTime()
                 _participant->GetSystemController()->AbortSimulation();
             }
         }
+
+        if (_syncWithLocalRealTime)
+        {
+            StartRealTimeSyncThread();
+        }
+
         // Start the distributed time algorithm by sending our NextSimStep
         GetTimeSyncPolicy()->RequestNextStep();
+    }
+}
+
+void TimeSyncService::StopTime() 
+{
+    if (_syncWithLocalRealTime)
+    {
+        StopRealTimeSyncThread();
     }
 }
 
@@ -544,6 +591,60 @@ bool TimeSyncService::AbortHopOnForCoordinatedParticipants() const
     }
     return false;
 }
+
+
+auto TimeSyncService::GetCurrentRealTimePoint() const -> std::chrono::nanoseconds
+{
+    Lock lock{_mx};
+    return _currentRealTimePoint;
+}
+
+void TimeSyncService::StartRealTimeSyncThread()
+{
+    _stopFuture = _realTimeSyncThreadStopPromise.get_future();
+
+    _realTimeSyncThread = std::thread{[&]() {
+        auto startTime = std::chrono::steady_clock::now();
+        const auto duration = _timeConfiguration.NextSimStep().duration; 
+        auto nextRealTimePoint = duration;
+
+        while (true)
+        {
+            auto futureStatus = _stopFuture.wait_for(1ms); // Resolution
+
+            if (futureStatus == std::future_status::ready)
+            {
+                // stop was signaled; stopping thread;
+                return;
+            }
+
+            const auto currentRunDuration = std::chrono::steady_clock::now() - startTime;
+            if (currentRunDuration > nextRealTimePoint)
+            {
+                {
+                    Lock lock{_mx};
+                    _currentRealTimePoint = nextRealTimePoint;
+                }
+                nextRealTimePoint += duration;
+                _participant->ExecuteDeferred([this]() {
+                    GetTimeSyncPolicy()->RequestNextStep();
+                });
+            }
+        }
+    }};
+}
+
+void TimeSyncService::StopRealTimeSyncThread()
+{
+    _realTimeSyncThreadStopPromise.set_value();
+    if (_realTimeSyncThread.joinable())
+    {
+        _realTimeSyncThread.join();
+    }
+}
+
+
+
 } // namespace Orchestration
 } // namespace Services
 } // namespace SilKit

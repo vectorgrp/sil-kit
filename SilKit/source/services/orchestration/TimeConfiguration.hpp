@@ -23,6 +23,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <chrono>
 #include <map>
 #include <mutex>
+#include <future>
 
 #include "OrchestrationDatatypes.hpp"
 #include "silkit/services/logging/ILogger.hpp"
@@ -52,10 +53,9 @@ public: //Methods
     void Initialize();
     bool IsBlocking() const;
 
-    bool ShouldResendNextSimStep();
-
     // Returns true (only once) in the step the actual hop-on happened
     bool HandleHopOn();
+
 
 private: //Members
     mutable std::mutex _mx;
@@ -67,6 +67,7 @@ private: //Members
 
     bool _hoppedOn = false;
     Logging::ILogger* _logger;
+
 };
 
 } // namespace Orchestration

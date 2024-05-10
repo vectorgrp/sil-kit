@@ -1,0 +1,5 @@
+Description: Sample Configuration for Data Publish/Subscribe
+Logging:
+  Sinks:
+    - Level: Info
+      Type: Stdout
