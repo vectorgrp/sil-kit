@@ -104,21 +104,6 @@ try
 }
 CAPI_CATCH_EXCEPTIONS
 
-SilKit_ReturnCode SilKitCALL SilKit_TimeSyncServiceRealTime_Create(SilKit_TimeSyncService** outTimeSyncService,
-                                                           SilKit_LifecycleService* lifecycleService)
-try
-{
-    ASSERT_VALID_OUT_PARAMETER(outTimeSyncService);
-    ASSERT_VALID_POINTER_PARAMETER(lifecycleService);
-
-    auto cppLifecycleService = reinterpret_cast<SilKit::Services::Orchestration::ILifecycleService*>(lifecycleService);
-    auto cppTimeSyncService = cppLifecycleService->CreateTimeSyncServiceRealTime();
-
-    *outTimeSyncService = reinterpret_cast<SilKit_TimeSyncService*>(cppTimeSyncService);
-
-    return SilKit_ReturnCode_SUCCESS;
-}
-CAPI_CATCH_EXCEPTIONS
 
 SilKit_ReturnCode SilKitCALL SilKit_LifecycleService_SetCommunicationReadyHandler(SilKit_LifecycleService* lifecycleService, void* context,
                                                           SilKit_LifecycleService_CommunicationReadyHandler_t handler)

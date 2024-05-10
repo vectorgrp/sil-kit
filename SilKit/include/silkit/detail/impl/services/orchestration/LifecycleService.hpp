@@ -81,8 +81,6 @@ public:
 
     inline auto CreateTimeSyncService() -> SilKit::Services::Orchestration::ITimeSyncService * override;
 
-    inline auto CreateTimeSyncServiceRealTime() -> SilKit::Services::Orchestration::ITimeSyncService * override;
-
 private:
     SilKit_LifecycleService *_lifecycleService{nullptr};
 
@@ -345,13 +343,6 @@ auto LifecycleService::CreateTimeSyncService()
     -> SilKit::Services::Orchestration::ITimeSyncService *
 {
     _timeSyncService = std::make_unique<TimeSyncService>(_lifecycleService);
-
-    return _timeSyncService.get();
-}
-
-auto LifecycleService::CreateTimeSyncServiceRealTime() -> SilKit::Services::Orchestration::ITimeSyncService *
-{
-    _timeSyncService = std::make_unique<TimeSyncService>(_lifecycleService, true);
 
     return _timeSyncService.get();
 }

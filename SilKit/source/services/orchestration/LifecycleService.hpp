@@ -71,7 +71,6 @@ public:
     void SetAbortHandler(AbortHandler handler) override;
 
     auto CreateTimeSyncService() -> ITimeSyncService* override;
-    auto CreateTimeSyncServiceRealTime() -> ITimeSyncService* override;
     auto GetTimeSyncService() -> ITimeSyncService*;
 
     auto StartLifecycle()
@@ -164,7 +163,6 @@ private:
     
     LifecycleManagement _lifecycleManager;
     std::atomic<bool> _timeSyncActive{false};
-    std::atomic<bool> _realtime{false};
 
     // Final State Handling
     std::mutex _finalStatePromiseMutex;
