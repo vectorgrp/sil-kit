@@ -2,6 +2,9 @@ name: 'Linux + UB Sanitizer'
 on:
   workflow_call:
 
+  push:
+    branches: [ 'main' ]
+
 jobs:
   clang14-ubsan:
     name: Undefined Behavior Sanitizer Tests
