@@ -191,6 +191,7 @@ if(SILKIT_INSTALL_SOURCE)
             PATTERN *.cxx
             PATTERN *.c
             PATTERN *.rc
+            PATTERN *.map
             PATTERN *.h
             PATTERN *.hpp
             PATTERN *.hpp.in
