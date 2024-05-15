@@ -7,9 +7,20 @@ All notable changes to the Vector SIL Kit project shall be documented in this fi
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
 
-[4.0.49] - 2024-05-08
+[4.0.50] - 2024-05-15
 ---------------------
 
+This is a Quality Assured Release.
+
+Fixed
+~~~~~
+
+- Fixed crash in ``sil-kit-system-controller`` utility.
+- Fixed source directory contents in ``.zip`` release archives.
+
+
+[4.0.49] - 2024-05-08
+---------------------
 
 Changed
 ~~~~~~~
