@@ -45,6 +45,8 @@ BOOL WINAPI systemHandler(DWORD ctrlType);
 
 class SignalMonitor
 {
+    static constexpr int INVALID_SIGNAL_NUMBER = -1;
+
 public:
     SignalMonitor(SignalHandler handler)
     {
@@ -69,7 +71,7 @@ public:
     ~SignalMonitor()
     {
         SetConsoleCtrlHandler(systemHandler, false);
-        Notify(-1);
+        Notify(INVALID_SIGNAL_NUMBER);
         _worker.join();
         CloseHandle(_writeEnd);
         CloseHandle(_readEnd);
@@ -94,15 +96,16 @@ private:
             throw std::runtime_error("SignalMonitor::workerMain: Failed to read from pipe.");
         }
 
-        if (_handler)
+        if ((_signalNumber != INVALID_SIGNAL_NUMBER) && _handler)
         {
             _handler(_signalNumber);
         }
     }
+
     HANDLE _readEnd{INVALID_HANDLE_VALUE}, _writeEnd{INVALID_HANDLE_VALUE};
     SignalHandler _handler;
     std::thread _worker;
-    int _signalNumber{-1};
+    int _signalNumber{INVALID_SIGNAL_NUMBER};
 };
 
 BOOL WINAPI systemHandler(DWORD ctrlType)
@@ -140,6 +143,8 @@ void systemHandler(int sigNum);
 
 class SignalMonitor
 {
+    static constexpr int INVALID_SIGNAL_NUMBER = -1;
+
 public:
     SignalMonitor(SignalHandler handler)
     {
@@ -168,7 +173,7 @@ public:
         // Restore default actio0ns
         setSignalAction(SIGINT, SIG_DFL);
         setSignalAction(SIGTERM, SIG_DFL);
-        Notify(-1);
+        Notify(INVALID_SIGNAL_NUMBER);
         _worker.join();
         ::close(_pipe[0]);
         ::close(_pipe[1]);
@@ -194,7 +199,7 @@ private:
         {
             throw std::runtime_error("SignalMonitor::workerMain: Failed to read from pipe: " + ErrorMessage());
         }
-        if (_handler)
+        if ((_signalNumber != INVALID_SIGNAL_NUMBER) && _handler)
         {
             _handler(_signalNumber);
         }
@@ -203,7 +208,7 @@ private:
     int _pipe[2];
     SignalHandler _handler;
     std::thread _worker;
-    int _signalNumber{-1};
+    int _signalNumber{INVALID_SIGNAL_NUMBER};
 };
 
 static inline void setSignalAction(int sigNum, __sighandler_t action)
