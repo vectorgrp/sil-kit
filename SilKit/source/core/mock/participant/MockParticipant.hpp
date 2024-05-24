@@ -95,6 +95,7 @@ public:
                 (override));
     MOCK_METHOD(void, CompleteSimulationStep, (), (override));
     MOCK_METHOD(std::chrono::nanoseconds, Now, (), (override, const));
+    MOCK_METHOD(void, SetAnimationFactor, (double animationFactor), (override));
 };
 
 class MockSystemMonitor : public Services::Orchestration::ISystemMonitor {
@@ -385,6 +386,7 @@ public:
 
     virtual auto GetTimeProvider() -> Services::Orchestration::ITimeProvider* { return &mockTimeProvider; }
     void JoinSilKitSimulation() override {}
+    void RegisterTimeSyncService(SilKit::Services::Orchestration::TimeSyncService*) override {}
 
     auto GetServiceDiscovery() -> Discovery::IServiceDiscovery* override { return &mockServiceDiscovery; }
     auto GetRequestReplyService() -> RequestReply::IRequestReplyService* override { return &mockRequestReplyService; }

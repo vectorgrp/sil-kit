@@ -81,18 +81,21 @@
             }
         },
         {
-            "name": "x64-debug",
-            "displayName": "x64 Debug",
-            "description": "Target Windows (64-bit) with the Visual Studio development environment. (Debug)",
-            "inherits": "windows-base",
-            "architecture": {
-                "value": "x64",
-                "strategy": "external"
-            },
-            "environment": {
-                "SILKIT_CMAKE_PRESET_BUILD_TYPE": "Debug",
-                "SILKIT_CMAKE_PRESET_ARCHITECTURE": "x64"
-            }
+          "name": "x64-debug",
+          "displayName": "x64 Debug",
+          "description": "Target Windows (64-bit) with the Visual Studio development environment. (Debug)",
+          "inherits": "windows-base",
+          "architecture": {
+            "value": "x64",
+            "strategy": "external"
+          },
+          "environment": {
+            "SILKIT_CMAKE_PRESET_BUILD_TYPE": "Debug",
+            "SILKIT_CMAKE_PRESET_ARCHITECTURE": "x64"
+          },
+          "cacheVariables": {
+            "SILKIT_PACKAGE_SYMBOLS": "ON"
+          }
         },
         {
             "name": "x64-release",

@@ -259,8 +259,8 @@ int main(int argc, char** argv)
         "participantNames", "<participantName1> [<participantName2> ...]",
         "<participantName1>, <participantName2>, ...: Names of participants to wait for before starting simulation.");
 
-    std::cout << "Vector SIL Kit -- System Controller, SIL Kit version: " << SilKit::Version::String() << std::endl
-              << std::endl;
+    //std::cout << "Vector SIL Kit -- System Controller, SIL Kit version: " << SilKit::Version::String() << std::endl
+    //          << std::endl;
 
     try
     {
@@ -364,7 +364,7 @@ int main(int argc, char** argv)
 
     try
     {
-        std::cout << "Creating participant '" << participantName << "' with registry " << connectUri << std::endl;
+        //std::cout << "Creating participant '" << participantName << "' with registry " << connectUri << std::endl;
 
         auto participant = SilKit::CreateParticipant(configuration, participantName, connectUri);
 

@@ -24,3 +24,8 @@ target_sources(SilKitDemoRealTimeLocal
     PRIVATE DemoRealTimeCoupling.silkit.yaml
 )
 
+make_silkit_demo(SilKitDemoTrafficPressure TrafficPressureDemo.cpp)
+target_sources(SilKitDemoTrafficPressure
+    PRIVATE DemoRealTimeCoupling.silkit.yaml
+)
+

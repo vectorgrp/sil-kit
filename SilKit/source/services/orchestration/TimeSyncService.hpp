@@ -52,7 +52,6 @@ class TimeSyncService
     , public IMsgForTimeSyncService
     , public Core::IServiceEndpoint
 {
-    friend struct DistributedTimeQuantumPolicy;
 
 public:
     // ----------------------------------------
@@ -62,6 +61,8 @@ public:
     // Constructors, Destructor, and Assignment
     TimeSyncService(Core::IParticipantInternal* participant, ITimeProvider* timeProvider,
                     const Config::HealthCheck& healthCheckConfig, LifecycleService* lifecycleService);
+
+    ~TimeSyncService();
 
 public:
     // ----------------------------------------
@@ -74,6 +75,7 @@ public:
     void SetPeriod(std::chrono::nanoseconds period);
     void ReceiveMsg(const IServiceEndpoint* from, const NextSimTask& task) override;
     auto Now() const -> std::chrono::nanoseconds override;
+    void SetAnimationFactor(double animationFactor) override;
 
     // Used by Policies
     template <class MsgT>
@@ -153,8 +155,11 @@ private:
     mutable std::mutex _mx;
     using Lock = std::unique_lock<decltype(_mx)>;
     std::chrono::nanoseconds _currentRealTimePoint{0ns};
-    std::chrono::nanoseconds _lastSentNextSimTask{-1ns};
-    double _animationFactor{1};
+    double _currentSpeedup{1};
+    double _animationFactor{0};
+    std::atomic<bool> _realTimeSyncThreadRunning{false};
+    std::atomic<bool> _realTimePointReachedBeforeCompletion{false};
+    
 };
 
 // ================================================================================

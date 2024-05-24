@@ -130,6 +130,8 @@ int main(int argc, char** argv)
         SilKit::Services::Orchestration::ITimeSyncService* timeSyncService{nullptr};
         timeSyncService = lifecycleService->CreateTimeSyncService();
 
+        timeSyncService->SetAnimationFactor(1.0);
+
         timeSyncService->SetSimulationStepHandler(
             [stepDuration, dataPublisher](
                 std::chrono::nanoseconds nowVT, std::chrono::nanoseconds /*duration*/) {
@@ -144,9 +146,9 @@ int main(int argc, char** argv)
                 std::array<uint8_t, 1> dataBytes{1};
                 dataPublisher->Publish(SilKit::Util::MakeSpan(dataBytes));
 
-                //auto randDelay = (rand() / double(RAND_MAX)) * 2.5s;
-                //std::cout << "randDelay=" << randDelay << std::endl;
-                //std::this_thread::sleep_for(randDelay);
+                auto randDelay = (rand() / double(RAND_MAX)) * 0.5s;
+                std::cout << "randDelay=" << randDelay << std::endl;
+                std::this_thread::sleep_for(randDelay);
                 std::cout << "--------------------" << std::endl;
             },
             stepDuration);

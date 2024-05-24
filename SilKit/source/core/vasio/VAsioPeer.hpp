@@ -124,12 +124,14 @@ private:
     std::vector<uint8_t> _msgBuffer;
     size_t _wPos{0};
     MutableBuffer _currentReceivingBuffer;
+    size_t _totalBytesReceived{0};
 
     // sending
     mutable std::mutex _sendingQueueMutex;
     std::deque<std::vector<uint8_t>> _sendingQueue;
     ConstBuffer _currentSendingBuffer;
     std::vector<uint8_t> _currentSendingBufferData;
+    size_t _totalBytesSent{0};
 
     std::atomic_bool _sending{false};
     Core::ServiceDescriptor _serviceDescriptor;

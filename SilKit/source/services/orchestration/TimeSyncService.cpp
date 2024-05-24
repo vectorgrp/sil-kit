@@ -46,6 +46,7 @@ public:
     virtual void Initialize() = 0;
     virtual void RequestNextStep() = 0;
     virtual void SetSimStepCompleted() = 0;
+    virtual auto IsExecutingSimStep() -> bool = 0;
     virtual void ReceiveNextSimTask(const Core::IServiceEndpoint* from, const NextSimTask& task) = 0;
     virtual void ProcessSimulationTimeUpdate() = 0;
 };
@@ -58,6 +59,10 @@ public:
     void Initialize() override {}
     void RequestNextStep() override {}
     void SetSimStepCompleted() override {}
+    auto IsExecutingSimStep() -> bool override
+    {
+        return false;
+    }
     void ReceiveNextSimTask(const Core::IServiceEndpoint* /*from*/, const NextSimTask& /*task*/) override {}
     void ProcessSimulationTimeUpdate() override {};
 };
@@ -84,6 +89,11 @@ public:
         _isExecutingSimStep = false;
     }
 
+    auto IsExecutingSimStep() -> bool override 
+    {
+        return _isExecutingSimStep;
+    }
+
     void RequestNextStep() override
     {
         // ensure that calls to Stop()/Pause() in a SimTask won't send out a new step and eventually call the SimTask again
@@ -91,7 +101,11 @@ public:
             && !_controller.StopRequested()
             && !_controller.PauseRequested())
         {
-            _controller.SendMsg(_configuration->NextSimStep());
+            if (_lastSentNextSimTask != _configuration->NextSimStep().timePoint) // Prevent sending same step more than once
+            {
+                _lastSentNextSimTask = _configuration->NextSimStep().timePoint;
+                _controller.SendMsg(_configuration->NextSimStep());
+            }
             // Bootstrap checked execution, in case there is no other participant.
             // Else, checked execution is initiated when we receive their NextSimTask messages.
             _participant->ExecuteDeferred([this]() {
@@ -249,6 +263,7 @@ private:
 
     std::atomic<bool> _isExecutingSimStep{false};
     TimeSyncService& _controller;
+    std::chrono::nanoseconds _lastSentNextSimTask{-1ns};
     Core::IParticipantInternal* _participant;
     TimeConfiguration* _configuration;
 };
@@ -264,8 +279,17 @@ TimeSyncService::TimeSyncService(Core::IParticipantInternal* participant, ITimeP
 {
     // TODO bkd:
     // ---- Hardcoded config ----
-    _syncWithLocalRealTime = _participant->GetParticipantName() == "VTP";
-    _animationFactor = 1.0; // 0.5 -> half the speed; 2 -> twice the speed; 0 -> not allowed
+
+    //if (_participant->GetParticipantName() == "CANoe")
+    //{
+    //    _animationFactor = 1.0; // 1.0 -> realtime; 0.5 -> double speed; 2 -> half the speed; 0 -> no sync with realtime
+    //}
+    //else
+    //{
+    //    _animationFactor = 0.0;
+    //}
+    //_syncWithLocalRealTime = _animationFactor != 0.0;
+
     // --------------------------
 
     _watchDog.SetWarnHandler([logger = _logger](std::chrono::milliseconds timeout) {
@@ -350,6 +374,11 @@ TimeSyncService::TimeSyncService(Core::IParticipantInternal* participant, ITimeP
         });
 }
 
+TimeSyncService::~TimeSyncService()
+{
+    StopRealTimeSyncThread();
+}
+
 bool TimeSyncService::IsSynchronizingVirtualTime()
 {
     return _isSynchronizingVirtualTime;
@@ -393,6 +422,12 @@ void TimeSyncService::SetSimulationStepHandlerAsync(SimulationStepHandler task, 
     _simTask = std::move(task);
     _timeConfiguration.SetBlockingMode(false);
     _timeConfiguration.SetStepDuration(initialStepSize);
+}
+
+void TimeSyncService::SetAnimationFactor(double animationFactor)
+{
+    _animationFactor = animationFactor;
+    _syncWithLocalRealTime = _animationFactor != 0.0;
 }
 
 void TimeSyncService::SetPeriod(std::chrono::nanoseconds period)
@@ -464,9 +499,10 @@ void TimeSyncService::CompleteSimulationStep()
     _participant->ExecuteDeferred([this] {
         GetTimeSyncPolicy()->SetSimStepCompleted();
         
-        // With real-time sync, the participant must sigal his readiness for the next step only if the real-time has actually passed.
-        if (!_syncWithLocalRealTime) 
+        // With real-time sync, the next step is requested in the real-time thread. If lagging behind, request also here to catch up.
+        if (!_syncWithLocalRealTime || _realTimePointReachedBeforeCompletion) 
         {
+            _realTimePointReachedBeforeCompletion = false;
             GetTimeSyncPolicy()->RequestNextStep();
         }
     });
@@ -600,6 +636,7 @@ auto TimeSyncService::GetCurrentRealTimePoint() const -> std::chrono::nanosecond
 
 void TimeSyncService::StartRealTimeSyncThread()
 {
+    _realTimeSyncThreadRunning = true;
     _stopFuture = _realTimeSyncThreadStopPromise.get_future();
 
     _realTimeSyncThread = std::thread{[&]() {
@@ -618,18 +655,32 @@ void TimeSyncService::StartRealTimeSyncThread()
             }
 
             const auto currentRunDuration = std::chrono::steady_clock::now() - startTime;
-            if (currentRunDuration * _animationFactor > nextRealTimePoint)
+            const auto currentVirtualTime = Now();
+            if (currentRunDuration > 0ns)
+            {
+                _currentSpeedup = static_cast<double>(currentVirtualTime.count()) / static_cast<double>(currentRunDuration.count());
+            }
+            else
+            {
+                _currentSpeedup = 1.0;
+            }
+
+            if (_syncWithLocalRealTime && currentRunDuration / _animationFactor > nextRealTimePoint)
             {
                 {
                     Lock lock{_mx};
                     _currentRealTimePoint = nextRealTimePoint;
                 }
                 nextRealTimePoint += duration;
-                 
-                // Prevent sending the same step twice
-                if (_lastSentNextSimTask != _timeConfiguration.NextSimStep().timePoint)
+                
+                if (GetTimeSyncPolicy()->IsExecutingSimStep()) 
                 {
-                    _lastSentNextSimTask = _timeConfiguration.NextSimStep().timePoint;
+                    // AsyncSimStepHandler not completed? Execution is lagging behind. Don't send the NextSimStep now, but after completion.
+                    _logger->Warn("Simulation step was not completed before next real-time point.");
+                    _realTimePointReachedBeforeCompletion = true;
+                }
+                else
+                {
                     _participant->ExecuteDeferred([this]() {
                         GetTimeSyncPolicy()->RequestNextStep();
                     });
@@ -641,10 +692,14 @@ void TimeSyncService::StartRealTimeSyncThread()
 
 void TimeSyncService::StopRealTimeSyncThread()
 {
-    _realTimeSyncThreadStopPromise.set_value();
-    if (_realTimeSyncThread.joinable())
+    if (_realTimeSyncThreadRunning)
     {
-        _realTimeSyncThread.join();
+        _realTimeSyncThreadRunning = false;
+        _realTimeSyncThreadStopPromise.set_value();
+        if (_realTimeSyncThread.joinable())
+        {
+            _realTimeSyncThread.join();
+        }
     }
 }
 

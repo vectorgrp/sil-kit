@@ -356,6 +356,9 @@ public:
     MOCK_METHOD(SilKit_ReturnCode, SilKit_TimeSyncService_Now,
                 (SilKit_TimeSyncService * timeSyncService, SilKit_NanosecondsTime* outNanosecondsTime));
 
+    MOCK_METHOD(SilKit_ReturnCode, SilKit_TimeSyncService_SetAnimationFactor,
+                (SilKit_TimeSyncService * timeSyncService, double animationFactor));
+
     // SystemMonitor
 
     MOCK_METHOD(SilKit_ReturnCode, SilKit_SystemMonitor_Create,

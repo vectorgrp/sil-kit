@@ -658,6 +658,13 @@ extern "C"
         return globalCapi->SilKit_TimeSyncService_Now(timeSyncService, outNanosecondsTime);
     }
 
+    
+    SilKit_ReturnCode SilKitCALL SilKit_TimeSyncService_SetAnimationFactor(SilKit_TimeSyncService* timeSyncService,
+                                                            double animationFactor)
+    {
+        return globalCapi->SilKit_TimeSyncService_SetAnimationFactor(timeSyncService, animationFactor);
+    }
+
     // SystemMonitor
 
     SilKit_ReturnCode SilKitCALL SilKit_SystemMonitor_Create(SilKit_SystemMonitor** outSystemMonitor,
