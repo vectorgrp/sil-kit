@@ -210,6 +210,48 @@ The following aspects have to be considered that the |Netsim| is guaranteed to r
 - The participants must not trigger any bus message before their lifecycle state reaches :cpp:enumerator:`CommunicationReady<SilKit::Services::Orchestration::ParticipantState::CommunicationReady>`.
   Read the documentation on :ref:`Lifecycle Management<sec:sim-lifecycle-management>` for further details.
 
+
+.. _sec:sil-kit-netsim-event-flow:
+
+Event flow
+----------
+
+During the simulation, the |Netsim| is notified about all relevant calls of the controllers in the ``On...()`` callbacks.
+The |Produce| methods of the |Netsim| then trigger one or more handlers on the controller.
+The following diagrams show the connection between this event flow for the various bus systems.
+
+.. _label:netsim-api-can-event-flow:
+.. figure:: ../_static/netsim-api-can-event-flow.svg
+   :alt: : CAN event flow
+   :align: center
+   :width: 600
+
+   : CAN event flow.
+
+.. _label:netsim-api-ethernet-event-flow:
+.. figure:: ../_static/netsim-api-ethernet-event-flow.svg
+   :alt: : Ethernet event flow
+   :align: center
+   :width: 600
+
+   : Ethernet event flow.
+
+.. _label:netsim-api-lin-event-flow:
+.. figure:: ../_static/netsim-api-lin-event-flow.svg
+   :alt: : LIN event flow
+   :align: center
+   :width: 600
+
+   : LIN event flow.
+
+.. _label:netsim-api-flexray-event-flow:
+.. figure:: ../_static/netsim-api-flexray-event-flow.svg
+   :alt: : FlexRay event flow
+   :align: center
+   :width: 600
+
+   : FlexRay event flow.
+
 API and Data Type Reference
 ===========================
 
