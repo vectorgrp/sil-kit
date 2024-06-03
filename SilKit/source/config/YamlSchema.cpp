@@ -30,38 +30,42 @@ auto MakeYamlSchema() -> YamlSchemaElem
 {
     // Note: Keep these definitions in sync with ParticipantConfiguration.schema.json,
     //       which is currently the main reference for valid configuration files.
-    YamlSchemaElem replay("Replay", {{"UseTraceSource"},
-                                     {"Direction"},
-                                     {"MdfChannel",
-                                      {
-                                          {"ChannelName"},
-                                          {"ChannelSource"},
-                                          {"ChannelPath"},
-                                          {"GroupName"},
-                                          {"GroupSource"},
-                                          {"GroupPath"},
-                                      }}});
-    YamlSchemaElem traceSinks("TraceSinks", {
-                                                {"Name"},
-                                                {"OutputPath"},
-                                                {"Type"},
-                                            });
-    YamlSchemaElem traceSources("TraceSources", {
-                                                    {"Name"},
-                                                    {"InputPath"},
-                                                    {"Type"},
-                                                });
-    YamlSchemaElem logging("Logging", {
-                                          {"LogFromRemotes"},
-                                          {"FlushLevel"},
-                                          {
-                                              "Sinks",
-                                              {
-                                                  {"Type"},
-                                                  {"Level"},
-                                                  {"LogName"},
-                                              },
-                                          },
+    YamlSchemaElem replay("Replay",
+        {
+            {"UseTraceSource"},
+            {"Direction"},
+            {"MdfChannel", {
+                {"ChannelName"}, {"ChannelSource"}, {"ChannelPath"},
+                {"GroupName"}, {"GroupSource"}, {"GroupPath"},
+                }
+            }
+        }
+    );
+    YamlSchemaElem traceSinks("TraceSinks",
+        {
+            {"Name"},
+            {"OutputPath"},
+            {"Type"},
+        }
+    );
+    YamlSchemaElem traceSources("TraceSources",
+        {
+            {"Name"},
+            {"InputPath"},
+            {"Type"},
+        }
+    );
+    YamlSchemaElem logging("Logging",
+        {
+            {"LogFromRemotes"},
+            {"FlushLevel"},
+            {"Sinks", {
+                    {"Type"},
+                    {"Format"},
+                    {"Level"},
+                    {"LogName"},
+                },
+            },
 
                                       });
     YamlSchemaElem clusterParameters("ClusterParameters", {

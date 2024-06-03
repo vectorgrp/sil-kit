@@ -112,6 +112,7 @@ bool Converter::decode(const Node& node, Sink& obj)
 {
     optional_decode(obj.type, node, "Type");
     optional_decode(obj.level, node, "Level");
+    optional_decode(obj.format, node, "Format");
 
     if (obj.type == Sink::Type::File)
     {
@@ -124,7 +125,8 @@ bool Converter::decode(const Node& node, Sink& obj)
     return true;
 }
 
-template <>
+
+template<>
 Node Converter::encode(const Sink::Type& obj)
 {
     Node node;

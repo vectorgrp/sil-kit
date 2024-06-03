@@ -69,8 +69,20 @@ struct Sink
         File
     };
 
+<<<<<<< HEAD
     Type type{Type::Remote};
     Services::Logging::Level level{Services::Logging::Level::Info};
+=======
+    enum class Format : uint8_t
+    {
+        String,
+        Json
+    };
+
+    Format format{Format::String};
+    Type type{ Type::Remote };
+    Services::Logging::Level level{ Services::Logging::Level::Info };
+>>>>>>> a7cc89c66 (SILKIT-1535 Logger: Add configuration option for JSON logging)
     std::string logName;
 };
 
@@ -215,7 +227,10 @@ auto to_string(NetworkType networkType) -> std::string
 
 bool operator==(const Sink& lhs, const Sink& rhs)
 {
-    return lhs.type == rhs.type && lhs.level == rhs.level && lhs.logName == rhs.logName;
+    return lhs.type == rhs.type
+        && lhs.level == rhs.level
+        && lhs.format == rhs.format
+        && lhs.logName == rhs.logName;
 }
 
 bool operator<(const Sink& lhs, const Sink& rhs)
