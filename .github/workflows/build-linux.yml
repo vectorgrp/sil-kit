@@ -14,21 +14,25 @@ on:
         required: false
         type: number
         default: 14
+      run_build:
+        required: true
+        type: boolean
 
 jobs:
   clang14-release:
     name: Clang 14 release Builds for Ubuntu 22.04
     environment: public-github-runners
     runs-on: ubuntu-22.04
+    if: inputs.run_build == true
     steps:
-    - uses: actions/checkout@v4
-      with:
-        submodules: true
-    - uses: ./.github/actions/build-cmake-preset
-      with:
-        preset-name: clang14-release
-        do-package: ${{ inputs.do_package }}
-        retention-days: ${{ inputs.retention_days }}
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - uses: ./.github/actions/build-cmake-preset
+        with:
+          preset-name: clang14-release
+          do-package: ${{ inputs.do_package }}
+          retention-days: ${{ inputs.retention_days }}
 
   gcc8-release:
     name: GCC 8 release Builds for Ubuntu 18.04
@@ -36,16 +40,17 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/mariusbgm/sil-kit-ci-ubuntu-18.04:main
+    if: inputs.run_build == true
     steps:
-    - name: git checkout
-      uses: actions/checkout@v1
-      with:
-        submodules: true
-    - name: gcc8-release build
-      uses: ./.github/actions/build-cmake-preset
-      id: build
-      with:
-        preset-name: gcc8-release
-        do-package: ${{ inputs.do_package }}
-        retention-days: ${{ env.retention_days }}
+      - name: git checkout
+        uses: actions/checkout@v1
+        with:
+          submodules: true
+      - name: gcc8-release build
+        uses: ./.github/actions/build-cmake-preset
+        id: build
+        with:
+          preset-name: gcc8-release
+          do-package: ${{ inputs.do_package }}
+          retention-days: ${{ env.retention_days }}
 

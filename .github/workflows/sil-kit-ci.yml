@@ -27,32 +27,52 @@ jobs:
           sh ./SilKit/ci/check_licenses.sh
         shell: bash
 
+  check-files-changed:
+    runs-on: ubuntu-22.04
+    outputs:
+      run_builds: ${{ steps.files_check.outputs.run_builds }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: false
+      - name: Check changed files
+        id: files_check
+        run: |
+          python3 ./SilKit/ci/check_files_changed.py ${{ github.repository }} ${{ github.event.number }}
+
   clang14-tsan:
     name: Thread Sanitizer Tests
-    needs: check-licenses
+    needs: [check-licenses, check-files-changed]
     uses: ./.github/workflows/linux-tsan.yml
+    with:
+      run_build: ${{ needs.check-files-changed.outputs.run_builds == 'true' }}
 
   clang14-ubsan:
     name: Undefined Behavior Sanitizer Tests
-    needs: check-licenses
+    needs: [check-licenses, check-files-changed]
     uses: ./.github/workflows/linux-ubsan.yml
+    with:
+      run_build: ${{ needs.check-files-changed.outputs.run_builds == 'true' }}
 
   clang14-asan:
     name: Address Sanitizer Tests
-    needs: check-licenses
+    needs: [check-licenses, check-files-changed]
     uses: ./.github/workflows/linux-asan.yml
+    with:
+      run_build: ${{ needs.check-files-changed.outputs.run_builds == 'true' }}
 
   ubuntu-release-builds:
     uses: ./.github/workflows/build-linux.yml
-    needs: check-licenses
+    needs: [check-licenses, check-files-changed]
     with:
       do_package: ${{ github.event_name == 'push' && true || false }}
       retention_days: ${{ github.event_name == 'push' && 90 || 14 }}
+      run_build: ${{ needs.check-files-changed.outputs.run_builds == 'true' }}
 
   windows-release-builds:
     uses: ./.github/workflows/build-win.yml
-    needs: check-licenses
+    needs: [check-licenses, check-files-changed]
     with:
       do_package: ${{ github.event_name == 'push' && true || false }}
       retention_days: ${{ github.event_name == 'push' && 90 || 14 }}
-
+      run_build: ${{ needs.check-files-changed.outputs.run_builds == 'true' }}

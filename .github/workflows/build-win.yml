@@ -15,6 +15,9 @@ on:
         required: false
         type: number
         default: 14
+      run_build:
+        required: true
+        type: boolean
 
   push:
     branches: [ 'main' ]
@@ -27,6 +30,7 @@ jobs:
   build-win-x64:
     runs-on: windows-2019
     environment: public-github-runners
+    if: inputs.run_build == true
     steps:
     - uses: actions/checkout@v4
       with:
@@ -41,6 +45,7 @@ jobs:
   build-win-x32:
     runs-on: windows-2019
     environment: public-github-runners
+    if: inputs.run_build == true
     steps:
     - uses: actions/checkout@v4
       with:

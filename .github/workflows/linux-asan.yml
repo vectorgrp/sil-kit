@@ -1,6 +1,10 @@
 name: 'Linux + Address Sanitizer'
 on:
   workflow_call:
+    inputs:
+      run_build:
+        required: true
+        type: boolean
 
   push:
     branches: [ 'main' ]
@@ -9,12 +13,13 @@ jobs:
   clang14-asan:
     environment: public-github-runners
     runs-on: ubuntu-22.04
+    if: inputs.run_build == true
     steps:
-    - uses: actions/checkout@v4
-      with:
-        submodules: true
-    - uses: ./.github/actions/build-cmake-preset
-      with:
-        preset-name: clang14-relwithdebinfo
-        cmake-args: "-D SILKIT_ENABLE_ASAN=ON -D SILKIT_BUILD_DASHBOARD=OFF"
-        do-package: false
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - uses: ./.github/actions/build-cmake-preset
+        with:
+          preset-name: clang14-relwithdebinfo
+          cmake-args: "-D SILKIT_ENABLE_ASAN=ON -D SILKIT_BUILD_DASHBOARD=OFF"
+          do-package: false
