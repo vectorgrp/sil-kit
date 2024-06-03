@@ -34,7 +34,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-#include "ILogger.hpp"
+#include "ILoggerInternal.hpp"
 
 namespace SilKit {
 namespace Services {

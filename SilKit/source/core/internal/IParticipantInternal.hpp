@@ -48,6 +48,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 // forwards
 namespace SilKit {
+namespace Services {
+namespace Logging{
+struct ILoggerInternal;
+}
+}
 namespace Tracing {
 class ReplayScheduler;
 } // namespace Tracing
@@ -324,6 +329,7 @@ public:
 
     virtual std::string GetServiceDescriptorString(
         SilKit::Experimental::NetworkSimulation::ControllerDescriptor controllerDescriptor) = 0;
+    virtual auto GetLoggerInternal() -> Services::Logging::ILoggerInternal* = 0;
 };
 
 } // namespace Core

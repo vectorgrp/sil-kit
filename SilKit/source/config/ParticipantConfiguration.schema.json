@@ -436,6 +436,10 @@
                 "type": "string",
                 "enum": [ "Remote", "File", "Stdout" ]
               },
+              "Format": {
+                "type": "string",
+                "enum": [ "Simple", "Json" ]
+              },
               "Level": {
                 "type": "string",
                 "enum": [

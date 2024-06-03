@@ -23,7 +23,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "silkit/SilKit.hpp"
 #include "silkit/config/IParticipantConfiguration.hpp"
-#include "ILogger.hpp"
+#include "ILoggerInternal.hpp"
 #include "IParticipantInternal.hpp"
 #include "IServiceDiscovery.hpp"
 

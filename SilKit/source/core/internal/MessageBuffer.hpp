@@ -30,6 +30,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <cstring>
 #include <stdexcept>
 #include <map>
+#include <unordered_map>
 
 #include "silkit/util/Span.hpp"
 
@@ -247,6 +248,9 @@ public:
     inline MessageBuffer& operator<<(const std::map<std::string, std::string>& msg);
     inline MessageBuffer& operator>>(std::map<std::string, std::string>& updatedMsg);
 
+    // std::unordered_map<string,string>
+    inline MessageBuffer& operator<<(const std::unordered_map<std::string, std::string>& msg);
+    inline MessageBuffer& operator>>(std::unordered_map<std::string, std::string>& updatedMsg);
     // --------------------------------------------------------------------------------
     // Uuid
     inline MessageBuffer& operator<<(const Util::Uuid& uuid);
@@ -591,6 +595,38 @@ inline MessageBuffer& MessageBuffer::operator>>(std::map<std::string, std::strin
     if (numElements != tmp.size())
     {
         throw SilKitError("MessageBuffer unable to deserialize std::map<std::string, std::string>");
+    }
+    updatedMsg = std::move(tmp);
+    return *this;
+}
+
+
+inline MessageBuffer& MessageBuffer::operator<<(const std::unordered_map<std::string, std::string>& msg)
+{
+    *this << static_cast<uint32_t>(msg.size());
+    for (auto&& kv : msg)
+    {
+        *this << kv.first << kv.second;
+    }
+    return *this;
+}
+
+inline MessageBuffer& MessageBuffer::operator>>(std::unordered_map<std::string, std::string>& updatedMsg)
+{
+    std::unordered_map<std::string, std::string> tmp; // do not modify updatedMsg until we validated the input
+    uint32_t numElements{0};
+    *this >> numElements;
+
+    for (auto i = 0u; i < numElements; i++)
+    {
+        std::string key;
+        std::string value;
+        *this >> key >> value;
+        tmp[key] = std::move(value);
+    }
+    if (numElements != tmp.size())
+    {
+        throw SilKitError("MessageBuffer unable to deserialize std::unordered_map<std::string, std::string>");
     }
     updatedMsg = std::move(tmp);
     return *this;

@@ -58,7 +58,8 @@ auto MakeYamlSchema() -> YamlSchemaElem
                                               "Sinks",
                                               {
                                                   {"Type"},
-                                                  {"Level"},
+                                                  {"Format"},
+                    {"Level"},
                                                   {"LogName"},
                                               },
                                           },

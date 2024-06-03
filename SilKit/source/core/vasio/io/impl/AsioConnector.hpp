@@ -17,7 +17,7 @@
 #include "util/Exceptions.hpp"
 #include "util/TracingMacros.hpp"
 
-#include "ILogger.hpp"
+#include "ILoggerInternal.hpp"
 
 #include <memory>
 #include <mutex>

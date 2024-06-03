@@ -31,7 +31,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "Pcap.hpp"
 #include "detail/NamedPipe.hpp"
 
-#include "ILogger.hpp"
+#include "ILoggerInternal.hpp"
 
 namespace SilKit {
 namespace Tracing {

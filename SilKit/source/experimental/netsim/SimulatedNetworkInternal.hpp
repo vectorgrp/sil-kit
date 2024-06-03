@@ -6,7 +6,7 @@
 
 #include <unordered_map>
 
-#include "ILogger.hpp"
+#include "ILoggerInternal.hpp"
 #include "SimulatedNetworkRouter.hpp"
 #include "silkit/experimental/netsim/all.hpp"
 

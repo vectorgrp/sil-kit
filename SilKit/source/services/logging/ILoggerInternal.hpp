@@ -27,10 +27,110 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "SilKitFmtFormatters.hpp"
 #include "fmt/format.h"
+#include <unordered_map>
+#include <string>
+
+
+
 
 namespace SilKit {
 namespace Services {
 namespace Logging {
+
+class LoggerMessage;
+
+
+struct ILoggerInternal : ILogger
+{
+    virtual void Log(const LoggerMessage& msg) = 0;
+    virtual void Log(const LogMsg& msg) = 0;
+};
+
+
+
+template <typename... Args>
+void Log(ILogger* logger, Level level, const char* fmt, const Args&... args);
+
+
+class LoggerMessage
+{
+public:
+    LoggerMessage(ILoggerInternal* logger, Level level)
+        : _logger(logger)
+        , _level(level)
+        , _minlevel(logger->GetLogLevel())
+    {}
+
+    LoggerMessage(ILoggerInternal* logger)
+        : _logger(logger)
+        , _level(Level::Trace)
+        , _minlevel(logger->GetLogLevel())
+    {}
+
+    LoggerMessage(ILoggerInternal* logger, const LogMsg& msg)
+        : _logger(logger)
+        ,  _level(msg.level)
+        , _msg(msg.payload)
+        , _keyValues(msg.keyValues)
+    {}
+
+    template <typename... Args>
+    void SetMessage(const char* fmt, const Args&... args)
+    {
+        _msg = fmt::format(fmt, args...);
+    }
+
+    void SetMessage(std::string newMsg)
+    {
+        _msg = newMsg;
+    }
+
+    void AddKeyValue(std::string key, std::string value)
+    {       
+        _keyValues[key] = value;
+    }
+
+    Level GetLevel() const
+    {
+        return _level;
+    }
+
+    std::unordered_map<std::string, std::string> GetKeyValues() const
+    {
+        return _keyValues;
+    }
+
+    bool HasKeyValues() const
+    {
+        return _keyValues.size() > 0 ? true : false;
+    }
+
+    std::string GetMsgString() const
+    {
+        return _msg;
+    }
+
+    ILoggerInternal* GetLogger() const
+    {
+        return _logger;
+    }
+
+    void Dispatch()
+    {
+        if ((_minlevel <= _level))
+        {
+            _logger->Log(*this);
+        }
+    }
+
+
+private:
+    ILoggerInternal* _logger;
+    std::unordered_map<std::string, std::string> _keyValues;
+    Level _level;
+    Level _minlevel;
+    std::string _msg;
+};
 
 
 class LogOnceFlag
