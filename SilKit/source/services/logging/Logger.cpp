@@ -101,6 +101,11 @@ Logger::Logger(const std::string& participantName, Config::Logging config)
     localtime_r(&timeNow, &tmBuffer);
 #endif
 
+    // Defined JSON pattern for the logger output
+    std::string jsonpattern = {"{\"ts\": \"T%H:%M:%S.%f%z\", \"log\": \"%n\", \"lvl\": "
+                    "\"%^%l%$\", \"msg\": \"%v\"},"};
+
+
     for (auto sink : _config.sinks)
     {
         auto log_level = to_spdlog(sink.level);
@@ -121,15 +126,25 @@ Logger::Logger(const std::string& participantName, Config::Logging config)
 #else
             auto stdoutSink = std::make_shared<spdlog::sinks::ansicolor_stdout_sink_mt>();
 #endif
+
+            if (sink.format == Config::Sink::Format::Json)
+            {
+                stdoutSink->set_pattern(jsonpattern);
+            }
             stdoutSink->set_level(log_level);
             _logger->sinks().emplace_back(std::move(stdoutSink));
             break;
         }
         case Config::Sink::Type::File:
         {
-            //
             auto filename = fmt::format("{}_{:%FT%H-%M-%S}.txt", sink.logName, tmBuffer);
             auto fileSink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(filename);
+
+            if (sink.format == Config::Sink::Format::Json)
+            {
+                fileSink->set_pattern(jsonpattern);
+            }
+
             fileSink->set_level(log_level);
             _logger->sinks().push_back(fileSink);
         }
@@ -143,6 +158,8 @@ void Logger::Log(Level level, const std::string& msg)
 {
     _logger->log(to_spdlog(level), msg);
 }
+
+
 
 void Logger::Trace(const std::string& msg)
 {

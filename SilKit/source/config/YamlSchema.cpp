@@ -61,6 +61,7 @@ auto MakeYamlSchema() -> YamlSchemaElem
             {"FlushLevel"},
             {"Sinks", {
                     {"Type"},
+                    {"Format"},
                     {"Level"},
                     {"LogName"},
                 },

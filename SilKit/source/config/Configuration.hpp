@@ -68,6 +68,13 @@ struct Sink
         File
     };
 
+    enum class Format : uint8_t
+    {
+        String,
+        Json
+    };
+
+    Format format{Format::String};
     Type type{ Type::Remote };
     Services::Logging::Level level{ Services::Logging::Level::Info };
     std::string logName;
@@ -207,6 +214,7 @@ bool operator==(const Sink& lhs, const Sink& rhs)
 {
     return lhs.type == rhs.type
         && lhs.level == rhs.level
+        && lhs.format == rhs.format
         && lhs.logName == rhs.logName;
 }
 
