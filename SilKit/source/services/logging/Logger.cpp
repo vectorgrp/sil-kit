@@ -103,7 +103,7 @@ Logger::Logger(const std::string& participantName, Config::Logging config)
 
     // Defined JSON pattern for the logger output
     std::string jsonpattern = {"{\"ts\": \"T%H:%M:%S.%f%z\", \"log\": \"%n\", \"lvl\": "
-                    "\"%^%l%$\", \"msg\": \"%v\"},"};
+                    "\"%^%l%$\", \"msg\": \"%v\"}"};
 
 
     for (auto sink : _config.sinks)
