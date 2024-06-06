@@ -24,40 +24,37 @@ jobs:
     environment: public-github-runners
     runs-on: windows-latest
     if: inputs.run_build == true
-    defaults:
-      shell: msys2bash
-
     steps:
-    - name: setup
-      run: |
-        echo "C:\msys64" >> $GITHUB_PATH
-        echo "C:\msys64\mingw64\bin\" >> $GITHUB_PATH
-    - name: Install Dependencies
-      shell:  C:\shells\msys2bash.cmd {0}
-      run: |
-        pacman -S mingw-w64-x86_64-gcc mingw-w64-x86_64-cmake mingw-w64-x86_64-ninja --noconfirm
-        export PATH="/mingw64/bin/:$PATH"
-    - uses: actions/checkout@v4
-      with:
-        submodules: true
-    - name: Configure
-      id: cmake-configure-mingw64
-      run: |
-        export PATH="/mingw64/bin/:$PATH"
-        echo "PATH: $PATH"
-        cmake --preset gcc-release
-      shell:  C:\shells\msys2bash.cmd {0}
-    - name: Build
-      id: cmake-build-mingw64
-      run: |
-        export PATH="/mingw64/bin/:$PATH"
-        echo "PATH: $PATH"
-        cmake --build --preset gcc-release
-      shell:  C:\shells\msys2bash.cmd {0}
-    - name: Test
-      id: cmake-test-mingw64
-      run: |
-        export PATH="/mingw64/bin/:$PATH"
-        echo "PATH: $PATH"
-        ctest --preset gcc-release --output-on-failure
-      shell:  C:\shells\msys2bash.cmd {0}
+      - name: setup
+        run: |
+          echo "C:\msys64" >> $GITHUB_PATH
+          echo "C:\msys64\mingw64\bin\" >> $GITHUB_PATH
+      - name: Install Dependencies
+        shell:  C:\shells\msys2bash.cmd {0}
+        run: |
+          pacman -S mingw-w64-x86_64-gcc mingw-w64-x86_64-cmake mingw-w64-x86_64-ninja --noconfirm
+          export PATH="/mingw64/bin/:$PATH"
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: Configure
+        id: cmake-configure-mingw64
+        run: |
+          export PATH="/mingw64/bin/:$PATH"
+          echo "PATH: $PATH"
+          cmake --preset gcc-release
+        shell:  C:\shells\msys2bash.cmd {0}
+      - name: Build
+        id: cmake-build-mingw64
+        run: |
+          export PATH="/mingw64/bin/:$PATH"
+          echo "PATH: $PATH"
+          cmake --build --preset gcc-release
+        shell:  C:\shells\msys2bash.cmd {0}
+      - name: Test
+        id: cmake-test-mingw64
+        run: |
+          export PATH="/mingw64/bin/:$PATH"
+          echo "PATH: $PATH"
+          ctest --preset gcc-release --output-on-failure
+        shell:  C:\shells\msys2bash.cmd {0}
