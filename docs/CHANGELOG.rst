@@ -13,7 +13,7 @@ Added
 ~~~~~
 
 - Network Simulation event flow documentation 
-
+- Configuration option for structured logging in JSON format
 
 [4.0.50] - 2024-05-15
 ---------------------
