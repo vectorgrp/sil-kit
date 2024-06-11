@@ -50,6 +50,9 @@ The SIL Kit ecosystem comprises the following turn-key solutions:
 * The `SIL Kit FMU Importer <https://github.com/vectorgrp/sil-kit-fmu-importer>`_
   allows to import Functional Mockup Units (FMUs) as SIL Kit participants.
 
+* The `Vector SIL Kit Adapter for Generic Linux IO <https://github.com/vectorgrp/sil-kit-adapters-generic-linux-io>`_
+  allows to attach SIL Kit to a generic Linux IO device, such as character devices or GPIOs.
+
 Related Applications
 --------------------
 
