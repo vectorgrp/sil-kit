@@ -52,7 +52,6 @@ class TimeSyncService
     , public IMsgForTimeSyncService
     , public Core::IServiceEndpoint
 {
-    friend struct DistributedTimeQuantumPolicy;
 
 public:
     // ----------------------------------------
@@ -62,6 +61,8 @@ public:
     // Constructors, Destructor, and Assignment
     TimeSyncService(Core::IParticipantInternal* participant, ITimeProvider* timeProvider,
                     const Config::HealthCheck& healthCheckConfig, LifecycleService* lifecycleService);
+
+    ~TimeSyncService();
 
 public:
     // ----------------------------------------
@@ -74,6 +75,7 @@ public:
     void SetPeriod(std::chrono::nanoseconds period);
     void ReceiveMsg(const IServiceEndpoint* from, const NextSimTask& task) override;
     auto Now() const -> std::chrono::nanoseconds override;
+    void SetAnimationFactor(double animationFactor) override;
 
     // Used by Policies
     template <class MsgT>
@@ -85,7 +87,8 @@ public:
     void ResetTime();
     void ConfigureTimeProvider(Orchestration::TimeProviderKind timeProviderKind);
     void StartTime();
-
+    void StopTime();
+    
     // IServiceEndpoint
     inline void SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor) override;
     inline auto GetServiceDescriptor() const -> const Core::ServiceDescriptor& override;
@@ -103,6 +106,9 @@ public:
 
     void RequestNextStep();
 
+    auto IsSyncingWithLocalRealTime() const -> bool;
+    auto GetCurrentRealTimePoint() const -> std::chrono::nanoseconds;
+
 private:
     // ----------------------------------------
     // private methods
@@ -112,6 +118,9 @@ private:
     bool SetupTimeSyncPolicy(bool isSynchronizingVirtualTime);
 
     inline auto GetTimeSyncPolicy() const -> ITimeSyncPolicy *;
+
+    void StopRealTimeSyncThread();
+    void StartRealTimeSyncThread();
 
 private:
     // ----------------------------------------
@@ -139,6 +148,17 @@ private:
     Util::PerformanceMonitor _waitTimeMonitor;
     WatchDog _watchDog;
 
+    bool _syncWithLocalRealTime{false}; 
+    std::thread _realTimeSyncThread;
+    std::promise<void> _realTimeSyncThreadStopPromise;
+    std::future<void> _stopFuture;
+    mutable std::mutex _mx;
+    using Lock = std::unique_lock<decltype(_mx)>;
+    std::chrono::nanoseconds _currentRealTimePoint{0ns};
+    double _animationFactor{0};
+    std::atomic<bool> _realTimeSyncThreadRunning{false};
+    std::atomic<bool> _realTimePointReachedBeforeCompletion{false};
+    
 };
 
 // ================================================================================

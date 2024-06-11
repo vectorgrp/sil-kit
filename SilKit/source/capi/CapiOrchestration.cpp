@@ -450,6 +450,19 @@ try
 CAPI_CATCH_EXCEPTIONS
 
 
+SilKit_ReturnCode SilKitCALL SilKit_TimeSyncService_SetAnimationFactor(SilKit_TimeSyncService* cTimeSyncService,
+                                                        double animationFactor)
+try
+{
+    ASSERT_VALID_POINTER_PARAMETER(cTimeSyncService);
+
+    auto* timeSyncService = reinterpret_cast<SilKit::Services::Orchestration::ITimeSyncService*>(cTimeSyncService);
+    timeSyncService->SetAnimationFactor(animationFactor);
+    return SilKit_ReturnCode_SUCCESS;
+}
+CAPI_CATCH_EXCEPTIONS
+
+
 SilKit_ReturnCode SilKitCALL SilKit_LifecycleService_Pause(SilKit_LifecycleService* clifecycleService, const char* reason)
 try
 {

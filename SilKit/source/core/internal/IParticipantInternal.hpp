@@ -78,6 +78,8 @@ public:
     */
     virtual void JoinSilKitSimulation() = 0;
 
+    virtual void RegisterTimeSyncService(SilKit::Services::Orchestration::TimeSyncService* controllerPtr) = 0;
+
     // For NetworkSimulator integration:
     virtual void RegisterSimulator(ISimulator* busSim, std::string networkName,
                                    SilKit::Experimental::NetworkSimulation::SimulatedNetworkType networkType) = 0;

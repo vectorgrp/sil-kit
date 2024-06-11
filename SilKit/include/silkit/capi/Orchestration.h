@@ -534,6 +534,16 @@ SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_TimeSyncService_Now(SilKit_TimeSyn
 typedef SilKit_ReturnCode (SilKitFPTR *SilKit_TimeSyncService_Now_t)(SilKit_TimeSyncService* timeSyncService,
     SilKit_NanosecondsTime* outNanosecondsTime);
 
+/*! \brief Set the animation factor for coupling virtual time synchronization to real-time
+ *
+ * \param timeSyncService The time sync service obtained via \ref SilKit_TimeSyncService_Create.
+ * \param animationFactor The real-time factor
+ */
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_TimeSyncService_SetAnimationFactor(
+    SilKit_TimeSyncService* timeSyncService, double animationFactor);
+
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_TimeSyncService_SetAnimationFactor_t)(
+    SilKit_TimeSyncService* timeSyncService, double animationFactor);
 
 /*
  *

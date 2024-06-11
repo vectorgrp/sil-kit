@@ -48,6 +48,8 @@ public:
 
     inline auto Now() const -> std::chrono::nanoseconds override;
 
+    inline void SetAnimationFactor(double animationFactor) override;
+
 private:
     SilKit_TimeSyncService* _timeSyncService{nullptr};
 
@@ -134,6 +136,12 @@ auto TimeSyncService::Now() const -> std::chrono::nanoseconds
     ThrowOnError(returnCode);
 
     return std::chrono::nanoseconds{nanosecondsTime};
+}
+
+void TimeSyncService::SetAnimationFactor(double animationFactor)
+{
+    const auto returnCode = SilKit_TimeSyncService_SetAnimationFactor(_timeSyncService, animationFactor);
+    ThrowOnError(returnCode);
 }
 
 } // namespace Orchestration

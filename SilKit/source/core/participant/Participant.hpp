@@ -355,16 +355,21 @@ private:
 
     //!< Internal controller creation, explicit network argument for ConfigT without network
     template <class ControllerT, typename... Arg>
-    auto CreateController(const SilKitServiceTraitConfigType_t<ControllerT>& config,
-        const std::string& network, const Core::SupplementalData& supplementalData, bool publishService, Arg&&... arg)
+    auto CreateController(const SilKitServiceTraitConfigType_t<ControllerT>& config, const std::string& network,
+                          const Core::SupplementalData& supplementalData, bool publishServiceDiscovery,
+                          bool registerSilKitService, Arg&&... arg)
         -> ControllerT*;
 
     //!< Internal controller creation, expects config.network
     template <class ControllerT, typename... Arg>
     auto CreateController(const SilKitServiceTraitConfigType_t<ControllerT>& config,
-                          const Core::SupplementalData& supplementalData, bool publishService, Arg&&... arg)
+                          const Core::SupplementalData& supplementalData, bool publishServiceDiscovery,
+                          bool registerSilKitService, Arg&&... arg)
         -> ControllerT*;
 
+    //!< Internal late controller registration. Used for TimeSyncService to create the controller 
+    //! and only register message reception later if really needed.
+    void RegisterTimeSyncService(SilKit::Services::Orchestration::TimeSyncService* controllerPtr) override;
 
     void RegisterSimulator(ISimulator* busSim, std::string networkName,
                            Experimental::NetworkSimulation::SimulatedNetworkType networkType) override;

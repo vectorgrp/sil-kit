@@ -66,6 +66,13 @@ public:
     /*! \brief Get the current simulation time
      */
     virtual auto Now() const -> std::chrono::nanoseconds = 0;
+
+     /*! \brief Couples the progress of the virtual time to the local real-time of the participant.
+      * 
+      * \param animationFactor Slowdown factor of the real-time coupling. A value of e.g. 2.0 means half as fast as real-time, 0.5 means twice as fast.
+      * 
+      */
+    virtual void SetAnimationFactor(double animationFactor) = 0;
 };
 
 } // namespace Orchestration
