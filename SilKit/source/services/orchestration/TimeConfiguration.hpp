@@ -23,7 +23,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <chrono>
 #include <map>
 #include <mutex>
-#include <future>
 
 #include "OrchestrationDatatypes.hpp"
 #include "silkit/services/logging/ILogger.hpp"
@@ -53,11 +52,10 @@ public: //Methods
     void Initialize();
     bool IsBlocking() const;
 
+    bool ShouldResendNextSimStep();
+
     // Returns true (only once) in the step the actual hop-on happened
     bool HandleHopOn();
-
-private:
-    void CalculateRemoteSpeedup(const std::string& participantName);
 
 private: //Members
     mutable std::mutex _mx;
@@ -65,13 +63,10 @@ private: //Members
     NextSimTask _currentTask;
     NextSimTask _myNextTask;
     std::map<std::string, NextSimTask> _otherNextTasks;
-    std::map<std::string, std::chrono::nanoseconds> _nextSimTastReceptionTimes;
-    std::map<std::string, double> _speedups;
     bool _blocking;
 
     bool _hoppedOn = false;
     Logging::ILogger* _logger;
-
 };
 
 } // namespace Orchestration

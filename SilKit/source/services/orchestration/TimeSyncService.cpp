@@ -656,14 +656,6 @@ void TimeSyncService::StartRealTimeSyncThread()
 
             const auto currentRunDuration = std::chrono::steady_clock::now() - startTime;
             const auto currentVirtualTime = Now();
-            if (currentRunDuration > 0ns)
-            {
-                _currentSpeedup = static_cast<double>(currentVirtualTime.count()) / static_cast<double>(currentRunDuration.count());
-            }
-            else
-            {
-                _currentSpeedup = 1.0;
-            }
 
             if (_syncWithLocalRealTime && currentRunDuration / _animationFactor > nextRealTimePoint)
             {

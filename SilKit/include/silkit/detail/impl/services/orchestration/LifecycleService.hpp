@@ -339,8 +339,7 @@ auto LifecycleService::Status() const -> SilKit::Services::Orchestration::Partic
     return _lastParticipantStatus;
 }
 
-auto LifecycleService::CreateTimeSyncService()
-    -> SilKit::Services::Orchestration::ITimeSyncService *
+auto LifecycleService::CreateTimeSyncService() -> SilKit::Services::Orchestration::ITimeSyncService *
 {
     _timeSyncService = std::make_unique<TimeSyncService>(_lifecycleService);
 

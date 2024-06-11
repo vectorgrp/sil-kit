@@ -155,7 +155,6 @@ private:
     mutable std::mutex _mx;
     using Lock = std::unique_lock<decltype(_mx)>;
     std::chrono::nanoseconds _currentRealTimePoint{0ns};
-    double _currentSpeedup{1};
     double _animationFactor{0};
     std::atomic<bool> _realTimeSyncThreadRunning{false};
     std::atomic<bool> _realTimePointReachedBeforeCompletion{false};

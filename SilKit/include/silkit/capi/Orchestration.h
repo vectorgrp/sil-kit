@@ -110,16 +110,6 @@ typedef int8_t SilKit_OperationMode;
 /*! The autonomous operation mode */
 #define SilKit_OperationMode_Autonomous     ((SilKit_OperationMode) 20)
 
-/*! The OperationMode for lifecycle service. */
-typedef int8_t SilKit_SyncMode;
-
-/*! An invalid operation mode */
-#define SilKit_SyncMode_Invalid ((SilKit_OperationMode)0)
-/*! The coordinated operation mode */
-#define SilKit_SyncMode_Virtual ((SilKit_OperationMode)10)
-/*! The autonomous operation mode */
-#define SilKit_SyncMode_Real ((SilKit_OperationMode)20)
-
 
 /*! Details about a status change of a participant. */
 typedef struct

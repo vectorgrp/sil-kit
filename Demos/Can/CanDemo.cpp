@@ -206,16 +206,16 @@ int main(int argc, char** argv)
                                                               std::chrono::nanoseconds duration) {
                         std::cout << "now=" << now << ", duration=" << duration << std::endl;
                         SendFrame(canController, logger);
-                        //std::this_thread::sleep_for(sleepTimePerTick);
-                    }, 100ms);
+                        std::this_thread::sleep_for(sleepTimePerTick);
+                    }, 5ms);
             }
             else
             {
                 timeSyncService->SetSimulationStepHandler(
                     [sleepTimePerTick](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {
                         std::cout << "now=" << now << ", duration=" << duration << std::endl;
-                        //std::this_thread::sleep_for(sleepTimePerTick);
-                    }, 100ms);
+                        std::this_thread::sleep_for(sleepTimePerTick);
+                    }, 5ms);
             }
 
             auto finalStateFuture = lifecycleService->StartLifecycle();

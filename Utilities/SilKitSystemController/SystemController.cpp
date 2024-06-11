@@ -38,7 +38,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/experimental/participant/ParticipantExtensions.hpp"
 
 #include "CommandlineParser.hpp"
-#include "SignalHandler.hpp"
 
 using namespace SilKit;
 using namespace SilKit::Services::Orchestration;
@@ -69,81 +68,30 @@ public:
         _monitor = participant->CreateSystemMonitor();
         _logger = participant->GetLogger();
 
-        _monitor->SetParticipantConnectedHandler(
-            [this](const ParticipantConnectionInformation& participantInformation) {
-                std::ostringstream ss;
-                ss << "Participant '" << participantInformation.participantName << "' joined the simulation";
-                LogInfo(ss.str());
-            });
-        _monitor->AddSystemStateHandler([&](const SystemState& systemState) {
-            if (systemState == SystemState::Stopping)
-            {
-                if (!_isStopRequested)
-                {
-                    LogInfo("Another participant causes the simulation to stop");
-                }
-            }
-            else if (systemState == SystemState::Error)
-            {
-                LogInfo("Simulation is in error state");
-            }
-        });
-
         _lifecycleService =
             participant->CreateLifecycleService({SilKit::Services::Orchestration::OperationMode::Coordinated});
-        auto finalStatePromise = _lifecycleService->StartLifecycle();
-        _finalStatePromise = finalStatePromise.share();
+        _finalStatePromise = _lifecycleService->StartLifecycle();
     }
 
-    void RegisterSignalHandler()
-    {
-        SilKit::Util::RegisterSignalHandler([&](auto signalValue) {
-            {
-                std::ostringstream ss;
-                ss << "Signal " << signalValue << " received, attempting to stop simulation...";
-                LogInfo(ss.str());
-            }
-            StopOrAbort();
-            WaitForFinalStateWithRetries();
-        });
-    }
-
-    void WaitForFinalState()
-    {
-        ParticipantState state = _finalStatePromise.get();
-        if (state != ParticipantState::Shutdown)
-        {
-            std::ostringstream ss;
-            ss << "Simulation ended with an unexpected participant state: " << state;
-            LogWarn(ss.str());
-        }
-        else
-        {
-            LogInfo("Simulation ended, SystemController is shut down.");
-        }
-    }
-
-private:
     void StopOrAbort()
     {
-        _isStopRequested = true;
         if (_monitor->SystemState() == SystemState::Running || _monitor->SystemState() == SystemState::Paused)
         {
-            LogInfo("System controller stops the simulation...");
+            LogInfo("Stopping the SIL Kit simulation...");
             _lifecycleService->Stop("Stop via interaction in sil-kit-system-controller");
         }
         else if (_monitor->SystemState() == SystemState::Aborting)
         {
-            LogWarn("Simulation is already aborting...");
+            LogWarn("SIL Kit simulation is already aborting...");
             _aborted = true;
         }
-        else if (_monitor->SystemState() != SystemState::Shutdown)
+        else if (_monitor->SystemState() == SystemState::Shutdown)
         {
-            {
-                std::ostringstream ss;
-                ss << "Simulation is in state " << _monitor->SystemState() << " and cannot be stopped, attempting to abort...";
-                LogInfo(ss.str());
-            }
+            _externalShutdown = true;
+        }
+        else
+        {
+            LogWarn("SIL Kit SystemState is invalid. Sending AbortSimulation...");
             _controller->AbortSimulation();
             _aborted = true;
         }
@@ -157,30 +105,58 @@ private:
             auto status = _finalStatePromise.wait_for(5s);
             if (status == std::future_status::ready)
             {
+                if (_aborted)
+                {
+                    LogWarn("SIL Kit simulation shut down after AbortSimulation.");
+                }
+                else if (_externalShutdown)
+                {
+                    LogInfo("SIL Kit simulation was shut down externally.");
+                }
+                else
+                {
+                    LogInfo("SIL Kit simulation shut down.");
+                }
                 return;
             }
             else
             {
                 std::ostringstream ss;
-                ss << "Simulation did not shut down in 5s... Retry " << retries << "/" << numRetries;
+                ss << "SIL Kit simulation did not shut down in 5s... Retry " << retries << "/" << numRetries;
                 LogWarn(ss.str());
             }
         }
 
         if (_aborted)
         {
-            LogWarn("Simulation did not shut down via abort signal. Terminating...");
-            _lifecycleService->ReportError("Simulation did not shut down via abort signal");
+            LogWarn("SIL Kit simulation did not shut down after AbortSimulation. Terminating.");
+            return;
         }
         else
         {
-            LogWarn("Simulation did not shut down via stop signal. Attempting to abort...");
+            LogWarn("SIL Kit simulation did not shut down after Stop. Sending AbortSimulation...");
             _aborted = true;
             _controller->AbortSimulation();
             WaitForFinalStateWithRetries();
         }
     }
 
+    void WaitForExternalShutdown()
+    {
+        ParticipantState state = _finalStatePromise.get();
+        if (state == ParticipantState::Shutdown)
+        {
+            LogInfo("SIL Kit simulation was shut down externally.");
+        }
+        else
+        {
+            std::ostringstream ss;
+            ss << "Warning: Exited with an unexpected participant state: " << state;
+            LogWarn(ss.str());
+        }
+    }
+
+private:
     void LogInfo(const std::string& message)
     {
         _logger->Info(message);
@@ -191,22 +167,17 @@ private:
         _logger->Warn(message);
     }
 
-    void LogDebug(const std::string& message)
-    {
-        _logger->Debug(message);
-    }
-
 private:
     std::shared_ptr<SilKit::Config::IParticipantConfiguration> _config;
     std::vector<std::string> _expectedParticipantNames;
 
-    std::atomic<bool> _isStopRequested{false};
     bool _aborted = false;
+    bool _externalShutdown = false;
     SilKit::Experimental::Services::Orchestration::ISystemController* _controller;
     ISystemMonitor* _monitor;
     ILifecycleService* _lifecycleService;
     ILogger* _logger;
-    std::shared_future<ParticipantState> _finalStatePromise;
+    std::future<ParticipantState> _finalStatePromise;
 };
 
 auto ToLowerCase(std::string s) -> std::string
@@ -259,8 +230,8 @@ int main(int argc, char** argv)
         "participantNames", "<participantName1> [<participantName2> ...]",
         "<participantName1>, <participantName2>, ...: Names of participants to wait for before starting simulation.");
 
-    //std::cout << "Vector SIL Kit -- System Controller, SIL Kit version: " << SilKit::Version::String() << std::endl
-    //          << std::endl;
+    std::cout << "Vector SIL Kit -- System Controller, SIL Kit version: " << SilKit::Version::String() << std::endl
+              << std::endl;
 
     try
     {
@@ -331,9 +302,6 @@ int main(int argc, char** argv)
         return -1;
     }
 
-    const bool nonInteractiveMode =
-        (commandlineParser.Get<CommandlineParser::Flag>("non-interactive").Value()) ? true : false;
-
     std::shared_ptr<SilKit::Config::IParticipantConfiguration> configuration;
     try
     {
@@ -358,13 +326,19 @@ int main(int argc, char** argv)
     {
         std::cerr << "Error: Failed to load configuration '" << configurationFilename << "', " << error.what()
                   << std::endl;
+        std::cout << "Press enter to stop the process..." << std::endl;
+        std::cin.ignore();
 
         return -2;
     }
 
     try
     {
-        //std::cout << "Creating participant '" << participantName << "' with registry " << connectUri << std::endl;
+        std::cout << "Creating participant '" << participantName << "' with registry " << connectUri
+                  << ", expecting participant" << (expectedParticipantNames.size() > 1 ? "s '" : " '");
+        std::copy(expectedParticipantNames.begin(), std::prev(expectedParticipantNames.end()),
+                  std::ostream_iterator<std::string>(std::cout, "', '"));
+        std::cout << expectedParticipantNames.back() << "'..." << std::endl;
 
         auto participant = SilKit::CreateParticipant(configuration, participantName, connectUri);
 
@@ -382,27 +356,27 @@ int main(int argc, char** argv)
         expectedParticipantNames.push_back(participantName);
         SilKitController controller(participant.get(), configuration, expectedParticipantNames);
 
-        if (!nonInteractiveMode)
-        {
-            std::cout << "Press Ctrl-C to end the simulation..." << std::endl;
-        }
-        controller.RegisterSignalHandler();
-        controller.WaitForFinalState();
+        bool nonInteractiveMode =
+            (commandlineParser.Get<CommandlineParser::Flag>("non-interactive").Value()) ? true : false;
 
-        if (!nonInteractiveMode)
+        if (nonInteractiveMode)
         {
-            std::cout << "Press enter to end the process..." << std::endl;
+            controller.WaitForExternalShutdown();
+        }
+        else
+        {
+            std::cout << "Press enter to stop the SIL Kit simulation..." << std::endl;
             std::cin.ignore();
+
+            controller.StopOrAbort();
+            controller.WaitForFinalStateWithRetries();
         }
     }
     catch (const std::exception& error)
     {
         std::cerr << "Something went wrong: " << error.what() << std::endl;
-        if (!nonInteractiveMode)
-        {
-                std::cout << "Press enter to end the process..." << std::endl;
-                std::cin.ignore();
-        }
+        std::cout << "Press enter to stop the process..." << std::endl;
+        std::cin.ignore();
 
         return -3;
     }

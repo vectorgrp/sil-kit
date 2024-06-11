@@ -97,30 +97,9 @@ void TimeConfiguration::OnReceiveNextSimStep(const std::string& participantName,
                        participantName, nextStep.timePoint.count(), itOtherNextTask->second.timePoint.count());
     }
 
-    //CalculateRemoteSpeedup(participantName);
-
     _otherNextTasks.at(participantName) = std::move(nextStep);
     Logging::Debug(_logger, "Updated _otherNextTasks for participant {} with time {}", participantName,
                    nextStep.timePoint.count());
-}
-
-void TimeConfiguration::CalculateRemoteSpeedup(const std::string& participantName)
-{
-    const auto nowRT = std::chrono::steady_clock::now();
-    auto&& itReceptionTime = _nextSimTastReceptionTimes.find(participantName);
-    if (itReceptionTime == _nextSimTastReceptionTimes.end())
-    {
-        _nextSimTastReceptionTimes[participantName] = nowRT.time_since_epoch();
-        _speedups[participantName] = 1.0;
-    }
-    else
-    {
-        const auto durationBetweenSimTaskReception = nowRT - _nextSimTastReceptionTimes[participantName];
-        _speedups[participantName] = static_cast<double>(_otherNextTasks[participantName].duration.count())
-                                     / static_cast<double>(durationBetweenSimTaskReception.time_since_epoch().count());
-        _nextSimTastReceptionTimes[participantName] = nowRT.time_since_epoch();
-        Logging::Info(_logger, "Speedup for {}: {:.2f}", participantName, _speedups[participantName]);
-    }
 }
 
 void TimeConfiguration::SynchronizedParticipantRemoved(const std::string& otherParticipantName)
