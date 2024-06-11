@@ -41,7 +41,7 @@ set(GIT_DIR "${PROJECT_SOURCE_DIR}/../.git")
 set(GIT_HEAD_FILE "${GIT_DIR}/HEAD")
 set(VERSION_MACROS_HPP ${CMAKE_CURRENT_BINARY_DIR}/version_macros.hpp)
 if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/version_macros.hpp)
-    message(STATUS "SILKIT re-using deployed version_macros.hpp")
+    message(STATUS "SILKIT: using deployed version_macros.hpp")
     set(VERSION_MACROS_HPP ${CMAKE_CURRENT_LIST_DIR}/version_macros.hpp)
 elseif(EXISTS "${GIT_HEAD_FILE}")
     configure_file(
@@ -58,7 +58,7 @@ elseif(EXISTS "${GIT_HEAD_FILE}")
         )
     endif()
 else()
-    message(WARNING "Cannot determine hash of current git head!")
+    message(STATUS "SILKIT: Cannot determine hash of current git head! GIT_HEAD_HASH will be set to UNKNOWN")
     set(GIT_HEAD_HASH "UNKNOWN")
     configure_file(
         version_macros.hpp.in
