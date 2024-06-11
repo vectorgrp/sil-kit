@@ -254,18 +254,6 @@ void VAsioPeer::OnAsyncReadSomeDone(IRawByteStream& stream, size_t bytesTransfer
     SILKIT_UNUSED_ARG(stream);
     SILKIT_TRACE_METHOD_(_logger, "({}, {})", static_cast<const void*>(&stream), bytesTransferred);
 
-    //// TODO bkd ------------------
-    //const static auto firstReceive = std::chrono::steady_clock::now();
-    //_totalBytesReceived += bytesTransferred;
-    //const std::chrono::nanoseconds runtime = std::chrono::steady_clock::now() - firstReceive;
-    //const auto bandwidth = _totalBytesReceived / 1e6 / runtime.count() * 1e9; // MB/s
-
-    //std::stringstream ss;
-    //ss << "bytes received (MB) = " << std::left << std::setw(10) << _totalBytesReceived / 1e6
-    //   << " bandwidth (MB/s) = " << std::left << std::setw(10) << bandwidth;
-    //_logger->Debug(ss.str());
-    //// --------------------------
-
     _wPos += bytesTransferred;
     DispatchBuffer();
 }
@@ -275,18 +263,6 @@ void VAsioPeer::OnAsyncWriteSomeDone(IRawByteStream& stream, size_t bytesTransfe
 {
     SILKIT_UNUSED_ARG(stream);
     SILKIT_TRACE_METHOD_(_logger, "({}, {})", static_cast<const void*>(&stream), bytesTransferred);
-
-    //// TODO bkd ------------------
-    //static const auto firstSend = std::chrono::steady_clock::now();
-    //_totalBytesSent += bytesTransferred;
-    //const std::chrono::nanoseconds runtime = std::chrono::steady_clock::now() - firstSend;
-    //const auto bandwidth = _totalBytesSent / 1e6 / runtime.count() * 1e9; // MB/s
-
-    //std::stringstream ss;
-    //ss << "bytes sent (MB) = " << std::left << std::setw(10) << _totalBytesSent / 1e6
-    //          << " bandwidth (MB/s) = " << std::left << std::setw(10) << bandwidth;
-    //_logger->Debug(ss.str());
-    //// --------------------------
 
     if (bytesTransferred < _currentSendingBuffer.GetSize())
     {
