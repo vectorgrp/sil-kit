@@ -92,6 +92,8 @@ constexpr uint32_t BuildinfoCompiler()
 #   if defined(_WIN32) && defined(__GNUC__)
     //MinGW
     return 0;
+#   elif defined( __clang__)
+    return __clang_major__;
 #   elif defined( __GNUC__)
     // the major version of a GNU compiler, the C++ macro _GLIBCXX_RELEASE defaults to this
     return __GNUC__;
