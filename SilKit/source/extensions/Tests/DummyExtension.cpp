@@ -26,10 +26,5 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 // Define shared library extension for linking
 
-SILKIT_DECLARE_EXTENSION(
-    DummyExtension,
-    "Vector",
-    SilKit::Version::Major(),
-    SilKit::Version::Minor(),
-    SilKit::Version::Patch()
-)
+SILKIT_DECLARE_EXTENSION(DummyExtension, "Vector", SilKit::Version::Major(), SilKit::Version::Minor(),
+                         SilKit::Version::Patch())

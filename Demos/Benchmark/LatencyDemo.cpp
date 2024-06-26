@@ -85,12 +85,8 @@ bool Parse(int argc, char** argv, BenchmarkConfig& config)
     std::vector<std::string> args;
     std::copy((argv + 1), (argv + argc), std::back_inserter(args));
 
-    auto asNum = [](const auto& str) {
-        return static_cast<uint32_t>(std::stoul(str));
-    };
-    auto asStr = [](auto& a) {
-        return std::string{a};
-    };
+    auto asNum = [](const auto& str) { return static_cast<uint32_t>(std::stoul(str)); };
+    auto asStr = [](auto& a) { return std::string{a}; };
 
     // test and remove the flag from args, returns true if flag was present
     auto consumeFlag = [&args](const auto& namedOption) {
@@ -188,7 +184,9 @@ bool Parse(int argc, char** argv, BenchmarkConfig& config)
         case 2:
             config.messageSizeInBytes = asNum(args.at(1));
             // [[fallthrough]]
-        case 1: config.messageCount = asNum(args.at(0)); break;
+        case 1:
+            config.messageCount = asNum(args.at(0));
+            break;
         default:
             if (haveUserOptions)
             {
@@ -245,7 +243,8 @@ void PrintParameters(BenchmarkConfig benchmark)
               << std::endl
               << "Running simulations with the following parameters:" << std::endl
               << std::endl
-              << std::left << std::setw(38) << "- Is Receiver: " << (benchmark.isReceiver ? "True" : "False") << std::endl
+              << std::left << std::setw(38) << "- Is Receiver: " << (benchmark.isReceiver ? "True" : "False")
+              << std::endl
               << std::left << std::setw(38) << "- Total message count: " << benchmark.messageCount << std::endl
               << std::left << std::setw(38) << "- Message size (bytes): " << benchmark.messageSizeInBytes << std::endl
               << std::left << std::setw(38) << "- Registry URI: " << benchmark.registryUri << std::endl
@@ -315,38 +314,39 @@ int main(int argc, char** argv)
         std::string topicPub = benchmark.isReceiver ? "Pong" : "Ping";
         std::string topicSub = benchmark.isReceiver ? "Ping" : "Pong";
         auto publisher = participant->CreateDataPublisher("PubCtrl1", {topicPub, {}}, 1);
-        participant->CreateDataSubscriber(
-            "SubCtrl1", {topicSub, {}},
-            [data, publisher, benchmark, &sendCount, &allSent, &allSentPromise,
+        participant->CreateDataSubscriber("SubCtrl1", {topicSub, {}},
+                                          [data, publisher, benchmark, &sendCount, &allSent, &allSentPromise,
 
-             &measuredRoundtrips, &sendTime, &startTimestamp](auto*, auto&) {
-                if (!allSent)
+                                           &measuredRoundtrips, &sendTime, &startTimestamp](auto*, auto&) {
+            if (!allSent)
+            {
+                if (!benchmark.isReceiver)
                 {
-                    if (!benchmark.isReceiver)
+                    if (sendCount == 0)
                     {
-                        if (sendCount == 0)
-                        {
-                            startTimestamp = std::chrono::high_resolution_clock::now(); // Initial receive: Start runtime measurement
-                        }
-                        else
-                        {
-                            measuredRoundtrips.push_back(std::chrono::high_resolution_clock::now() - sendTime);
-                        }
-                        sendTime = std::chrono::high_resolution_clock::now();
+                        startTimestamp =
+                            std::chrono::high_resolution_clock::now(); // Initial receive: Start runtime measurement
                     }
-                    publisher->Publish(data);
-                    sendCount++;
-                    if (benchmark.isReceiver && (benchmark.messageCount <= 20 || sendCount % (benchmark.messageCount / 20) == 0))
+                    else
                     {
-                        std::cout << ".";
+                        measuredRoundtrips.push_back(std::chrono::high_resolution_clock::now() - sendTime);
                     }
-                    if (sendCount >= benchmark.messageCount+1) // Initial publish has no timing, use +1
-                    {
-                        allSentPromise.set_value();
-                        allSent = true;
-                    }
+                    sendTime = std::chrono::high_resolution_clock::now();
                 }
-            });
+                publisher->Publish(data);
+                sendCount++;
+                if (benchmark.isReceiver
+                    && (benchmark.messageCount <= 20 || sendCount % (benchmark.messageCount / 20) == 0))
+                {
+                    std::cout << ".";
+                }
+                if (sendCount >= benchmark.messageCount + 1) // Initial publish has no timing, use +1
+                {
+                    allSentPromise.set_value();
+                    allSent = true;
+                }
+            }
+        });
 
         if (!benchmark.isReceiver) // Initial publish without timing
         {
@@ -371,13 +371,13 @@ int main(int argc, char** argv)
             allDonePublisher->Publish(std::vector<uint8_t>{0});
         }
         participant->CreateDataSubscriber("SubCtrl2", {topicSubAllDone, {}},
-            [&syncParticipants, benchmark, allDonePublisher](auto*, auto&) {
-                if (!benchmark.isReceiver)
-                {
-                    allDonePublisher->Publish(std::vector<uint8_t>{0});
-                }
-                syncParticipants.set_value();
-            });
+                                          [&syncParticipants, benchmark, allDonePublisher](auto*, auto&) {
+            if (!benchmark.isReceiver)
+            {
+                allDonePublisher->Publish(std::vector<uint8_t>{0});
+            }
+            syncParticipants.set_value();
+        });
         auto syncParticipantsFuture = syncParticipants.get_future();
         syncParticipantsFuture.wait();
         std::cout << "... done." << std::endl;
@@ -394,8 +394,9 @@ int main(int argc, char** argv)
         std::vector<double> measuredLatencySeconds(measuredRoundtrips.size());
         std::transform(measuredRoundtrips.begin(), measuredRoundtrips.end(), measuredLatencySeconds.begin(),
                        [](auto d) {
-                           return static_cast<double>(d.count() / 1.e3 * 0.5); // Convert to microseconds, factor 0.5 for latency from roundtrip
-                       });
+            return static_cast<double>(d.count() / 1.e3
+                                       * 0.5); // Convert to microseconds, factor 0.5 for latency from roundtrip
+        });
 
         const auto averageLatency = mean_and_error(measuredLatencySeconds);
         std::ostringstream averageLatencyWithUnit;
@@ -417,16 +418,20 @@ int main(int argc, char** argv)
         durationWithUnit.precision(3);
         durationWithUnit << durationSeconds << " s";
 
-        std::cout << std::setw(38) << "- Realtime duration (runtime): "     << std::setw(6) << durationWithUnit.str() << std::endl
-                  << std::setw(38) << "- Throughput (data size/runtime): " << std::setw(6) << throughputWithUnit.str() << std::endl
-                  << std::setw(38) << "- Latency: "                         << std::setw(6) << averageLatencyWithUnit.str() << " +/- " << averageLatency.second << std::endl
+        std::cout << std::setw(38) << "- Realtime duration (runtime): " << std::setw(6) << durationWithUnit.str()
+                  << std::endl
+                  << std::setw(38) << "- Throughput (data size/runtime): " << std::setw(6) << throughputWithUnit.str()
+                  << std::endl
+                  << std::setw(38) << "- Latency: " << std::setw(6) << averageLatencyWithUnit.str() << " +/- "
+                  << averageLatency.second << std::endl
                   << std::endl;
 
         if (benchmark.writeCsv != "")
         {
             std::stringstream csvHeader;
             csvHeader << "# SilKitBenchmarkDemo, SIL Kit Version " << SilKit::Version::String();
-            const auto csvColumns = "messageSize; messageCount; runtime(s); throughput(MiB/s); latency(us); latency_err";
+            const auto csvColumns =
+                "messageSize; messageCount; runtime(s); throughput(MiB/s); latency(us); latency_err";
             std::fstream csvFile;
             csvFile.open(benchmark.writeCsv, std::ios_base::in | std::ios_base::out); // Try to open
             bool csvValid{true};
@@ -453,10 +458,9 @@ int main(int argc, char** argv)
             {
                 // Append data
                 csvFile.seekp(0, std::ios_base::end);
-                csvFile << benchmark.messageSizeInBytes << ";" << benchmark.messageCount << ";" 
-                        << durationSeconds << ";"
-                        << throughput << ";"
-                        << averageLatency.first << ";" << averageLatency.second << std::endl;
+                csvFile << benchmark.messageSizeInBytes << ";" << benchmark.messageCount << ";" << durationSeconds
+                        << ";" << throughput << ";" << averageLatency.first << ";" << averageLatency.second
+                        << std::endl;
             }
             csvFile.close();
         }

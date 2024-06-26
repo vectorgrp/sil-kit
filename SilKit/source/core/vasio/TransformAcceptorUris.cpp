@@ -124,7 +124,8 @@ auto TransformAcceptorUris(SilKit::Services::Logging::ILogger* logger, IVAsioPee
 
     if (dst.Type() != Uri::UriType::Local && dst.Type() != Uri::UriType::Tcp)
     {
-        throw SilKitError{"SIL Kit Registry: TransformAcceptorUris: Local address of audience peer has invalid UriType"};
+        throw SilKitError{
+            "SIL Kit Registry: TransformAcceptorUris: Local address of audience peer has invalid UriType"};
     }
 
     // URI transformation

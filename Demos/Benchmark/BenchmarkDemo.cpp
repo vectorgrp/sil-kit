@@ -79,7 +79,7 @@ void PrintUsage(const std::string& executableName)
 struct BenchmarkConfig
 {
     uint32_t numberOfSimulationRuns = 4;
-    std::chrono::seconds simulationDuration = 1s;    
+    std::chrono::seconds simulationDuration = 1s;
     uint32_t numberOfParticipants = 2;
     uint32_t messageCount = 50;
     uint32_t messageSizeInBytes = 1000;
@@ -94,12 +94,8 @@ bool Parse(int argc, char** argv, BenchmarkConfig& config)
     std::vector<std::string> args;
     std::copy((argv + 1), (argv + argc), std::back_inserter(args));
 
-    auto asNum = [](const auto& str) {
-        return static_cast<uint32_t>(std::stoul(str));
-    };
-    auto asStr = [](auto& a) {
-        return std::string{a};
-    };
+    auto asNum = [](const auto& str) { return static_cast<uint32_t>(std::stoul(str)); };
+    auto asStr = [](auto& a) { return std::string{a}; };
 
     // test and remove the flag from args, returns true if flag was present
     auto consumeFlag = [&args](const auto& namedOption) {
@@ -204,7 +200,9 @@ bool Parse(int argc, char** argv, BenchmarkConfig& config)
         case 2:
             config.simulationDuration = std::chrono::seconds(asNum(args.at(1)));
             // [[fallthrough]]
-        case 1: config.numberOfSimulationRuns = asNum(args.at(0)); break;
+        case 1:
+            config.numberOfSimulationRuns = asNum(args.at(0));
+            break;
         default:
             if (haveUserOptions)
             {
@@ -263,7 +261,7 @@ uint32_t relateParticipant(uint32_t idx, uint32_t numberOfParticipants)
     }
     else
     {
-        return idx+1;
+        return idx + 1;
     }
 }
 
@@ -293,7 +291,7 @@ void ParticipantsThread(std::shared_ptr<SilKit::Config::IParticipantConfiguratio
     const std::string topicSub =
         "Topic" + std::to_string(relateParticipant(participantIndex, benchmark.numberOfParticipants));
     SilKit::Services::PubSub::PubSubSpec dataSpec{topicPub, {}};
-    SilKit::Services::PubSub::PubSubSpec matchingDataSpec{topicSub, {}};    
+    SilKit::Services::PubSub::PubSubSpec matchingDataSpec{topicSub, {}};
     auto publisher = participant->CreateDataPublisher("PubCtrl1", dataSpec, 0);
     participant->CreateDataSubscriber("SubCtrl1", matchingDataSpec, [&messageCounter](auto*, auto&) {
         // this is handled in I/O thread, so no data races on counter.
@@ -301,27 +299,25 @@ void ParticipantsThread(std::shared_ptr<SilKit::Config::IParticipantConfiguratio
     });
 
     const auto isVerbose = participantIndex == 0;
-    timeSyncService->SetSimulationStepHandler(
-        [=, &publisher](std::chrono::nanoseconds now, const auto /*duration*/) {
-            if (now > benchmark.simulationDuration)
-            {
-                lifecycleService->Stop("Simulation done");
-            }
+    timeSyncService->SetSimulationStepHandler([=, &publisher](std::chrono::nanoseconds now, const auto /*duration*/) {
+        if (now > benchmark.simulationDuration)
+        {
+            lifecycleService->Stop("Simulation done");
+        }
 
-            if (isVerbose)
-            {
-                const auto simulationDurationInNs =
-                    std::chrono::duration_cast<std::chrono::nanoseconds>(benchmark.simulationDuration);
-                const auto durationOfOneSimulationPercentile = simulationDurationInNs / 20;
+        if (isVerbose)
+        {
+            const auto simulationDurationInNs =
+                std::chrono::duration_cast<std::chrono::nanoseconds>(benchmark.simulationDuration);
+            const auto durationOfOneSimulationPercentile = simulationDurationInNs / 20;
 
-                if (now % durationOfOneSimulationPercentile < stepSize)
-                {
-                    std::cout << ".";
-                }
+            if (now % durationOfOneSimulationPercentile < stepSize)
+            {
+                std::cout << ".";
             }
-            PublishMessages(publisher, benchmark.messageCount, benchmark.messageSizeInBytes);
-        },
-        stepSize);
+        }
+        PublishMessages(publisher, benchmark.messageCount, benchmark.messageSizeInBytes);
+    }, stepSize);
 
     auto lifecycleFuture = lifecycleService->StartLifecycle();
     lifecycleFuture.get();
@@ -408,7 +404,7 @@ int main(int argc, char** argv)
         registry->StartListening(benchmark.registryUri);
 
         std::vector<size_t> messageCounts;
-        std::vector<std::chrono::nanoseconds> measuredRealDurations;        
+        std::vector<std::chrono::nanoseconds> measuredRealDurations;
 
         for (uint32_t simulationRun = 1; simulationRun <= benchmark.numberOfSimulationRuns; simulationRun++)
         {
@@ -451,15 +447,13 @@ int main(int argc, char** argv)
             auto endTimestamp = std::chrono::high_resolution_clock::now();
             measuredRealDurations.emplace_back(endTimestamp - startTimestamp);
             auto totalCount = std::accumulate(counters.begin(), counters.end(), size_t{0});
-            messageCounts.emplace_back(totalCount);          
+            messageCounts.emplace_back(totalCount);
             std::cout << " " << measuredRealDurations.back() << std::endl;
         }
 
         std::vector<double> measuredRealDurationsSeconds(measuredRealDurations.size());
         std::transform(measuredRealDurations.begin(), measuredRealDurations.end(), measuredRealDurationsSeconds.begin(),
-                       [](auto d) {
-                           return static_cast<double>(d.count() / 1e9);
-                       });
+                       [](auto d) { return static_cast<double>(d.count() / 1e9); });
 
         const auto averageDuration = mean_and_error(measuredRealDurationsSeconds);
 

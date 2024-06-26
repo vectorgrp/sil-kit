@@ -49,4 +49,3 @@ std::ostream& operator<<(std::ostream& out, SimulatedNetworkType type)
 } // namespace NetworkSimulation
 } // namespace Experimental
 } // namespace SilKit
-

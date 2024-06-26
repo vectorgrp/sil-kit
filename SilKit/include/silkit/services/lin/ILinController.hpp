@@ -52,7 +52,6 @@ namespace Lin {
 class ILinController
 {
 public:
-
     /*! \brief Generic LIN callback method
     */
     template <typename MsgT>
@@ -240,5 +239,3 @@ public:
 } // namespace Lin
 } // namespace Services
 } // namespace SilKit
-
-

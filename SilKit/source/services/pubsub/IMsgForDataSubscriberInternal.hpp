@@ -41,4 +41,3 @@ class IMsgForDataSubscriberInternal
 } // namespace PubSub
 } // namespace Services
 } // namespace SilKit
-

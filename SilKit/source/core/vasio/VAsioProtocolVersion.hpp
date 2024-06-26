@@ -65,19 +65,19 @@ auto MapVersionToRelease(const SilKit::Core::RegistryMsgHeader& registryMsgHeade
     {
         return {"< v2.0.0"};
     }
-    else if (version == ProtocolVersion{2,0})
+    else if (version == ProtocolVersion{2, 0})
     {
         return {"v2.0.0 - v3.4.0"};
     }
-    else if (version == ProtocolVersion{2,1})
+    else if (version == ProtocolVersion{2, 1})
     {
         return {"v3.4.1 - v3.99.21"};
     }
-    else if (version == ProtocolVersion{3,0})
+    else if (version == ProtocolVersion{3, 0})
     {
         return {"v3.99.22"};
     }
-    else if (version == ProtocolVersion{3,1})
+    else if (version == ProtocolVersion{3, 1})
     {
         return {"v3.99.23 - current"};
     }
@@ -88,12 +88,12 @@ auto MapVersionToRelease(const SilKit::Core::RegistryMsgHeader& registryMsgHeade
 bool ProtocolVersionSupported(const RegistryMsgHeader& header)
 {
     const auto version = ExtractProtocolVersion(header);
-    if(version == ProtocolVersion{3, 0})
+    if (version == ProtocolVersion{3, 0})
     {
         //3.99.21: bumped version to be explicitly incompatible with prior releases (MVP3, CANoe16)
         return true;
     }
-    else if (version == ProtocolVersion{3,1})
+    else if (version == ProtocolVersion{3, 1})
     {
         //3.99.23: bumped version to test backwards compatibility with removed VAsioPeerUri in ParticipantAnnouncement
         return true;
@@ -101,7 +101,7 @@ bool ProtocolVersionSupported(const RegistryMsgHeader& header)
     // NB: Add your explicit backward compatibility here, ensure that Serialize/Deserialize can handle the ProtocolVersion transparently.
 
     return false;
- }
+}
 
 inline auto operator<<(std::ostream& out, const ProtocolVersion& header) -> std::ostream&
 {

@@ -15,22 +15,22 @@ CanEventProducer::CanEventProducer(SimulatedNetworkRouter* simulatedNetworkRoute
 }
 
 void CanEventProducer::Produce(const SilKit::Services::Can::CanFrameEvent& msg,
-                                         const SilKit::Util::Span<const ControllerDescriptor>& receivers)
+                               const SilKit::Util::Span<const ControllerDescriptor>& receivers)
 {
     _simulatedNetworkRouter->SendMsg(SilKit::Services::Can::MakeWireCanFrameEvent(msg), receivers);
 }
 
 void CanEventProducer::Produce(const SilKit::Services::Can::CanFrameTransmitEvent& msg,
-                                                 const SilKit::Util::Span<const ControllerDescriptor>& receivers)
+                               const SilKit::Util::Span<const ControllerDescriptor>& receivers)
 {
     _simulatedNetworkRouter->SendMsg(msg, receivers);
 }
 
 void CanEventProducer::Produce(const SilKit::Services::Can::CanStateChangeEvent& msg,
-                                               const SilKit::Util::Span<const ControllerDescriptor>& receivers)
+                               const SilKit::Util::Span<const ControllerDescriptor>& receivers)
 {
     SilKit::Services::Can::CanControllerStatus controllerStatus{};
-    
+
     // Transport the last used value that the receiving controller doesn't fire the corresponding handler
     controllerStatus.errorState = _errorState;
     _controllerState = msg.state;
@@ -41,12 +41,12 @@ void CanEventProducer::Produce(const SilKit::Services::Can::CanStateChangeEvent&
 }
 
 void CanEventProducer::Produce(const SilKit::Services::Can::CanErrorStateChangeEvent& msg,
-                                                    const SilKit::Util::Span<const ControllerDescriptor>& receivers)
+                               const SilKit::Util::Span<const ControllerDescriptor>& receivers)
 {
     SilKit::Services::Can::CanControllerStatus controllerStatus{};
 
     // Transport the last used value that the receiving controller doesn't fire the corresponding handler
-    controllerStatus.controllerState = _controllerState; 
+    controllerStatus.controllerState = _controllerState;
     _errorState = msg.errorState;
 
     controllerStatus.errorState = msg.errorState;

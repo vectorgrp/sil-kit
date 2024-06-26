@@ -61,7 +61,8 @@ struct VAsioMsgSubscriber
 
 struct SubscriptionAcknowledge
 {
-    enum class Status : uint8_t {
+    enum class Status : uint8_t
+    {
         Failed = 0,
         Success = 1
     };
@@ -79,7 +80,8 @@ struct ParticipantAnnouncement
 struct ParticipantAnnouncementReply
 {
     RegistryMsgHeader remoteHeader;
-    enum class Status : uint8_t {
+    enum class Status : uint8_t
+    {
         Failed = 0,
         Success = 1
     };
@@ -150,26 +152,18 @@ struct ProxyMessage
 // ================================================================================
 inline bool operator!=(const RegistryMsgHeader& lhs, const RegistryMsgHeader& rhs)
 {
-    return lhs.preamble != rhs.preamble
-        || lhs.versionHigh != rhs.versionHigh
-        || lhs.versionLow != rhs.versionLow
-        ;
+    return lhs.preamble != rhs.preamble || lhs.versionHigh != rhs.versionHigh || lhs.versionLow != rhs.versionLow;
 }
 
 inline bool operator==(const RegistryMsgHeader& lhs, const RegistryMsgHeader& rhs)
 {
-    return lhs.preamble == rhs.preamble
-        && lhs.versionHigh == rhs.versionHigh
-        && lhs.versionLow == rhs.versionLow
-        ;
+    return lhs.preamble == rhs.preamble && lhs.versionHigh == rhs.versionHigh && lhs.versionLow == rhs.versionLow;
 }
 
 inline bool operator==(const VAsioMsgSubscriber& lhs, const VAsioMsgSubscriber& rhs)
 {
-    return lhs.receiverIdx == rhs.receiverIdx 
-        && lhs.networkName == rhs.networkName
-        && lhs.msgTypeName == rhs.msgTypeName
-        ;
+    return lhs.receiverIdx == rhs.receiverIdx && lhs.networkName == rhs.networkName
+           && lhs.msgTypeName == rhs.msgTypeName;
 }
 
 } // namespace Core

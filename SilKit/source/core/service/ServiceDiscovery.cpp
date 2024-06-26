@@ -214,7 +214,8 @@ void ServiceDiscovery::OnServiceRemoval(const ServiceDescriptor& serviceDescript
     CallHandlers(ServiceDiscoveryEvent::Type::ServiceRemoved, serviceDescriptor);
 }
 
-void ServiceDiscovery::CallHandlers(ServiceDiscoveryEvent::Type eventType, const ServiceDescriptor& serviceDescriptor) const
+void ServiceDiscovery::CallHandlers(ServiceDiscoveryEvent::Type eventType,
+                                    const ServiceDescriptor& serviceDescriptor) const
 {
     // CallHandlers must be used with a lock on _discoveryMx
     for (auto&& handler : _handlers)

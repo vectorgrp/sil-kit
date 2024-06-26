@@ -71,7 +71,8 @@ void PcapSink::Open(SinkType outputType, const std::string& outputPath)
         _headerWritten = false;
         _outputPath = outputPath;
         break;
-    default: throw SilKitError("PcapSink::Open: specified SinkType not implemented");
+    default:
+        throw SilKitError("PcapSink::Open: specified SinkType not implemented");
     }
 }
 

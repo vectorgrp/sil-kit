@@ -92,7 +92,8 @@ typedef uint8_t SilKit_LinId;
  * This type is used to specify the Checksum model to be used for the LIN \ref SilKit_LinFrame.
  */
 typedef uint8_t SilKit_LinChecksumModel;
-#define SilKit_LinChecksumModel_Unknown ((SilKit_LinChecksumModel)0) //!< Unknown checksum model. If configured with this value, the checksum model of the first reception will be used.
+#define SilKit_LinChecksumModel_Unknown \
+    ((SilKit_LinChecksumModel)0) //!< Unknown checksum model. If configured with this value, the checksum model of the first reception will be used.
 #define SilKit_LinChecksumModel_Enhanced ((SilKit_LinChecksumModel)1) //!< Enhanced checksum model
 #define SilKit_LinChecksumModel_Classic ((SilKit_LinChecksumModel)2) //!< Classic checksum model
 
@@ -127,19 +128,19 @@ typedef uint8_t SilKit_LinFrameResponseType;
 typedef uint8_t SilKit_LinFrameStatus;
 
 /*! (currently not in use) */
-#define SilKit_LinFrameStatus_NOT_OK              ((SilKit_LinFrameStatus)0)
+#define SilKit_LinFrameStatus_NOT_OK ((SilKit_LinFrameStatus)0)
 /*! The controller successfully transmitted a frame response. */
-#define SilKit_LinFrameStatus_LIN_TX_OK           ((SilKit_LinFrameStatus)1)
+#define SilKit_LinFrameStatus_LIN_TX_OK ((SilKit_LinFrameStatus)1)
 /*! (currently not in use) */
-#define SilKit_LinFrameStatus_LIN_TX_BUSY         ((SilKit_LinFrameStatus)2)
+#define SilKit_LinFrameStatus_LIN_TX_BUSY ((SilKit_LinFrameStatus)2)
 /*! (currently not in use) */
 #define SilKit_LinFrameStatus_LIN_TX_HEADER_ERROR ((SilKit_LinFrameStatus)3)
 /*! (currently not in use) */
-#define SilKit_LinFrameStatus_LIN_TX_ERROR        ((SilKit_LinFrameStatus)4)
+#define SilKit_LinFrameStatus_LIN_TX_ERROR ((SilKit_LinFrameStatus)4)
 /*! The controller received a correct frame response. */
-#define SilKit_LinFrameStatus_LIN_RX_OK           ((SilKit_LinFrameStatus)5)
+#define SilKit_LinFrameStatus_LIN_RX_OK ((SilKit_LinFrameStatus)5)
 /*! (currently not in use) */
-#define SilKit_LinFrameStatus_LIN_RX_BUSY         ((SilKit_LinFrameStatus)6)
+#define SilKit_LinFrameStatus_LIN_RX_BUSY ((SilKit_LinFrameStatus)6)
 /*! The reception of a response failed.
  *
  * Indicates a mismatch in expected and received data length or a checksum
@@ -147,9 +148,9 @@ typedef uint8_t SilKit_LinFrameStatus;
  * transmit the same frame or when the sender and receiver use different
  * checksum models.
  */
-#define SilKit_LinFrameStatus_LIN_RX_ERROR        ((SilKit_LinFrameStatus)7)
+#define SilKit_LinFrameStatus_LIN_RX_ERROR ((SilKit_LinFrameStatus)7)
 /*! No LIN controller did provide a response to the frame header. */
-#define SilKit_LinFrameStatus_LIN_RX_NO_RESPONSE  ((SilKit_LinFrameStatus)8)
+#define SilKit_LinFrameStatus_LIN_RX_NO_RESPONSE ((SilKit_LinFrameStatus)8)
 
 /*! \brief The data length of a LIN \ref SilKit_LinFrame in bytes
  *
@@ -170,11 +171,11 @@ const SilKit_LinDataLength SilKit_LinDataLengthUnknown = 255u;
  */
 struct SilKit_LinFrame
 {
-    SilKit_StructHeader structHeader;   //!< The interface id specifying which version of this struct was obtained
-    SilKit_LinId               id;            //!< LIN Identifier
-    SilKit_LinChecksumModel    checksumModel; //!< Checksum Model
-    SilKit_LinDataLength       dataLength;    //!< Data length
-    uint8_t                    data[8];       //!< The actual payload
+    SilKit_StructHeader structHeader; //!< The interface id specifying which version of this struct was obtained
+    SilKit_LinId id; //!< LIN Identifier
+    SilKit_LinChecksumModel checksumModel; //!< Checksum Model
+    SilKit_LinDataLength dataLength; //!< Data length
+    uint8_t data[8]; //!< The actual payload
 };
 typedef struct SilKit_LinFrame SilKit_LinFrame;
 
@@ -244,7 +245,7 @@ struct SilKit_LinControllerConfig
 
     size_t numFrameResponses;
     /*! LinFrameResponse configuration. */
-    SilKit_LinFrameResponse*  frameResponses;
+    SilKit_LinFrameResponse* frameResponses;
 };
 typedef struct SilKit_LinControllerConfig SilKit_LinControllerConfig;
 
@@ -277,9 +278,9 @@ typedef struct SilKit_Experimental_LinSlaveConfiguration SilKit_Experimental_Lin
 /*! \brief A LIN frame header event delivered in the \ref SilKit_Experimental_LinFrameHeaderHandler_t. */
 struct SilKit_Experimental_LinFrameHeaderEvent
 {
-    SilKit_StructHeader    structHeader; //!< The interface id specifying which version of this struct was obtained
-    SilKit_NanosecondsTime timestamp;    //!< Time of the event.
-    SilKit_LinId           id;           //!< LIN Identifier
+    SilKit_StructHeader structHeader; //!< The interface id specifying which version of this struct was obtained
+    SilKit_NanosecondsTime timestamp; //!< Time of the event.
+    SilKit_LinId id; //!< LIN Identifier
 };
 typedef struct SilKit_Experimental_LinFrameHeaderEvent SilKit_Experimental_LinFrameHeaderEvent;
 
@@ -318,33 +319,34 @@ typedef struct SilKit_LinController SilKit_LinController;
  * \param controller The LIN controller that received the acknowledge.
  * \param frameStatusEvent The event containing a timestamp, the corresponding frame and the new status.
  */
-typedef void (SilKitFPTR *SilKit_LinFrameStatusHandler_t)(void* context, SilKit_LinController* controller,
-                                            const SilKit_LinFrameStatusEvent* frameStatusEvent);
+typedef void(SilKitFPTR* SilKit_LinFrameStatusHandler_t)(void* context, SilKit_LinController* controller,
+                                                         const SilKit_LinFrameStatusEvent* frameStatusEvent);
 
 /*! Callback type to indicate that a go-to-sleep frame has been received.
  *  Cf., \ref SilKit_LinController_AddGoToSleepHandler();
  */
-typedef void (SilKitFPTR *SilKit_LinGoToSleepHandler_t)(void* context, SilKit_LinController* controller,
-                                          const SilKit_LinGoToSleepEvent* goToSleepEvent);
+typedef void(SilKitFPTR* SilKit_LinGoToSleepHandler_t)(void* context, SilKit_LinController* controller,
+                                                       const SilKit_LinGoToSleepEvent* goToSleepEvent);
 
 /*! Callback type to indicate that a wakeup pulse has been received.
  *  Cf., \ref SilKit_LinController_AddWakeupHandler;
  */
-typedef void (SilKitFPTR *SilKit_LinWakeupHandler_t)(void* context, SilKit_LinController* controller,
-                                       const SilKit_LinWakeupEvent* wakeUpEvent);
+typedef void(SilKitFPTR* SilKit_LinWakeupHandler_t)(void* context, SilKit_LinController* controller,
+                                                    const SilKit_LinWakeupEvent* wakeUpEvent);
 
 /*! Callback type to indicate that a LIN Slave configuration has been received.
  *  Cf., \ref SilKit_Experimental_LinController_AddLinSlaveConfigurationHandler;
  */
-typedef void (SilKitFPTR *SilKit_Experimental_LinSlaveConfigurationHandler_t)(void* context, SilKit_LinController* controller,
-                                          const SilKit_Experimental_LinSlaveConfigurationEvent* slaveConfigurationEvent);
+typedef void(SilKitFPTR* SilKit_Experimental_LinSlaveConfigurationHandler_t)(
+    void* context, SilKit_LinController* controller,
+    const SilKit_Experimental_LinSlaveConfigurationEvent* slaveConfigurationEvent);
 
 /*! Callback type to indicate the reception of a LIN frame header.
  * \param context The context provided by the user on registration.
  * \param controller The LIN controller that received the acknowledge.
  * \param frameHeaderEvent The event containing information about the frame header.
  */
-typedef void (SilKitFPTR* SilKit_Experimental_LinFrameHeaderHandler_t)(
+typedef void(SilKitFPTR* SilKit_Experimental_LinFrameHeaderHandler_t)(
     void* context, SilKit_LinController* controller, const SilKit_Experimental_LinFrameHeaderEvent* frameHeaderEvent);
 
 
@@ -361,17 +363,13 @@ typedef void (SilKitFPTR* SilKit_Experimental_LinFrameHeaderHandler_t)(
  *
  * \return \ref SilKit_ReturnCode
  */
-SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LinController_Create(
-  SilKit_LinController** outLinController,
-  SilKit_Participant *participant,
-  const char* name,
-  const char* network);
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LinController_Create(SilKit_LinController** outLinController,
+                                                                   SilKit_Participant* participant, const char* name,
+                                                                   const char* network);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LinController_Create_t)(
-  SilKit_LinController** outLinController,
-  SilKit_Participant* participant, 
-  const char* name,
-  const char* network);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_LinController_Create_t)(SilKit_LinController** outLinController,
+                                                                     SilKit_Participant* participant, const char* name,
+                                                                     const char* network);
 
 /*! \brief Initialize the LIN controller defining its role and RX/TX configuration. 
  * 
@@ -390,8 +388,10 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LinController_Create_t)(
  * 
  * \return \ref SilKit_ReturnCode
  */
-SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LinController_Init(SilKit_LinController* controller, const SilKit_LinControllerConfig* config);
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LinController_Init_t)(SilKit_LinController* controller, const SilKit_LinControllerConfig* config);
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LinController_Init(SilKit_LinController* controller,
+                                                                 const SilKit_LinControllerConfig* config);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_LinController_Init_t)(SilKit_LinController* controller,
+                                                                   const SilKit_LinControllerConfig* config);
 
 
 /*! \brief Initialize the LIN controller in dynamic response mode.
@@ -407,7 +407,7 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LinController_Init_t)(SilKit_LinCo
  */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Experimental_LinController_InitDynamic(
     SilKit_LinController* controller, const SilKit_Experimental_LinControllerDynamicConfig* config);
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_Experimental_LinController_InitDynamic_t)(
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_Experimental_LinController_InitDynamic_t)(
     SilKit_LinController* controller, const SilKit_Experimental_LinControllerDynamicConfig* config);
 
 /*! \brief Set a RX/TX configuration during operation.
@@ -431,9 +431,9 @@ typedef SilKit_ReturnCode(SilKitFPTR* SilKit_LinController_SetFrameResponse_t)(S
  * \throws SilKit::StateError if the LIN controller was not initialized into dynamic response mode using \ref SilKit_Experimental_LinController_InitDynamic().
  * 
  */
-SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Experimental_LinController_SendDynamicResponse(
-    SilKit_LinController* controller, const SilKit_LinFrame* frame);
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_Experimental_LinController_SendDynamicResponse_t)(
+SilKitAPI SilKit_ReturnCode SilKitCALL
+SilKit_Experimental_LinController_SendDynamicResponse(SilKit_LinController* controller, const SilKit_LinFrame* frame);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_Experimental_LinController_SendDynamicResponse_t)(
     SilKit_LinController* controller, const SilKit_LinFrame* frame);
 
 /*! \brief Get the current status of the LIN Controller, i.e., Operational or Sleep.
@@ -443,8 +443,10 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_Experimental_LinController_SendDyn
  *
  * \return \ref SilKit_ReturnCode
  */
-SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LinController_Status(SilKit_LinController* controller, SilKit_LinControllerStatus* outStatus);
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LinController_Status_t)(SilKit_LinController* controller, SilKit_LinControllerStatus* outStatus);
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LinController_Status(SilKit_LinController* controller,
+                                                                   SilKit_LinControllerStatus* outStatus);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_LinController_Status_t)(SilKit_LinController* controller,
+                                                                     SilKit_LinControllerStatus* outStatus);
 
 /*! \brief Initiate a LIN data transfer of a given LinFrameResponseType (AUTOSAR LIN master interface)
  *
@@ -463,10 +465,12 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LinController_Status_t)(SilKit_Lin
  * 
  * \return \ref SilKit_ReturnCode
  */
-SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LinController_SendFrame(SilKit_LinController* controller, const SilKit_LinFrame* frame,
-                                                            SilKit_LinFrameResponseType responseType);
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LinController_SendFrame_t)(SilKit_LinController* controller, const SilKit_LinFrame* frame,
-                                                      SilKit_LinFrameResponseType responseType);
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LinController_SendFrame(SilKit_LinController* controller,
+                                                                      const SilKit_LinFrame* frame,
+                                                                      SilKit_LinFrameResponseType responseType);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_LinController_SendFrame_t)(SilKit_LinController* controller,
+                                                                        const SilKit_LinFrame* frame,
+                                                                        SilKit_LinFrameResponseType responseType);
 
 
 /*! \brief Initiate a LIN data transfer by sending a LIN header (AUTOSAR LIN master interface)
@@ -477,8 +481,10 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LinController_SendFrame_t)(SilKit_
  *
  * \throws SilKit::StateError if the LIN Controller is not initialized or not a master node.
  */
-SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LinController_SendFrameHeader(SilKit_LinController* controller, SilKit_LinId linId);
-typedef SilKit_ReturnCode(SilKitFPTR *SilKit_LinController_SendFrameHeader_t)(SilKit_LinController* controller, SilKit_LinId linId);
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LinController_SendFrameHeader(SilKit_LinController* controller,
+                                                                            SilKit_LinId linId);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_LinController_SendFrameHeader_t)(SilKit_LinController* controller,
+                                                                              SilKit_LinId linId);
 
 /*! Update the response data. The LIN controller needs to be configured with TxUnconditional on this ID. 
  * 
@@ -489,9 +495,9 @@ typedef SilKit_ReturnCode(SilKitFPTR *SilKit_LinController_SendFrameHeader_t)(Si
  * \return \ref SilKit_ReturnCode
  */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LinController_UpdateTxBuffer(SilKit_LinController* controller,
-                                                                   const SilKit_LinFrame* frame);
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LinController_UpdateTxBuffer_t)(SilKit_LinController* controller,
-                                                                     const SilKit_LinFrame* frame);
+                                                                           const SilKit_LinFrame* frame);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_LinController_UpdateTxBuffer_t)(SilKit_LinController* controller,
+                                                                             const SilKit_LinFrame* frame);
 
 /*! \brief Transmit a go-to-sleep-command and set SilKit_LinControllerStatus_Sleep and enable wake-up
  *
@@ -502,7 +508,7 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LinController_UpdateTxBuffer_t)(Si
  * \return SilKit_ReturnCode_SUCCESS or SilKit_ReturnCode_WRONGSTATE if issued with wrong \ref SilKit_LinControllerMode
  */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LinController_GoToSleep(SilKit_LinController* controller);
-typedef SilKit_ReturnCode(SilKitFPTR *SilKit_LinController_GoToSleep_t)(SilKit_LinController* controller);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_LinController_GoToSleep_t)(SilKit_LinController* controller);
 
 /*! \brief Set SilKit_LinControllerStatus_Sleep without sending a go-to-sleep command.
  *
@@ -513,7 +519,7 @@ typedef SilKit_ReturnCode(SilKitFPTR *SilKit_LinController_GoToSleep_t)(SilKit_L
  * \return SilKit_ReturnCode_SUCCESS or SilKit_ReturnCode_WRONGSTATE if issued with wrong \ref SilKit_LinControllerMode
  */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LinController_GoToSleepInternal(SilKit_LinController* controller);
-typedef SilKit_ReturnCode(SilKitFPTR *SilKit_LinController_GoToSleepInternal_t)(SilKit_LinController* controller);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_LinController_GoToSleepInternal_t)(SilKit_LinController* controller);
 
 /*! \brief Generate a wake up pulse and set SilKit_LinControllerStatus_Operational.
  *
@@ -524,7 +530,7 @@ typedef SilKit_ReturnCode(SilKitFPTR *SilKit_LinController_GoToSleepInternal_t)(
  * \return SilKit_ReturnCode_SUCCESS or SilKit_ReturnCode_WRONGSTATE if issued with wrong \ref SilKit_LinControllerMode
  */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LinController_Wakeup(SilKit_LinController* controller);
-typedef SilKit_ReturnCode(SilKitFPTR *SilKit_LinController_Wakeup_t)(SilKit_LinController* controller);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_LinController_Wakeup_t)(SilKit_LinController* controller);
 
 /*! Set SilKit_LinControllerStatus_Operational without generating a wake up pulse.
  *
@@ -535,7 +541,7 @@ typedef SilKit_ReturnCode(SilKitFPTR *SilKit_LinController_Wakeup_t)(SilKit_LinC
  * \return SilKit_ReturnCode_SUCCESS or SilKit_ReturnCode_WRONGSTATE if issued with wrong \ref SilKit_LinControllerMode
  */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LinController_WakeupInternal(SilKit_LinController* controller);
-typedef SilKit_ReturnCode(SilKitFPTR *SilKit_LinController_WakeupInternal_t)(SilKit_LinController* controller);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_LinController_WakeupInternal_t)(SilKit_LinController* controller);
 
 /*! \brief Get the aggregated configuration of all LIN slaves in the network.
  *
@@ -548,7 +554,7 @@ typedef SilKit_ReturnCode(SilKitFPTR *SilKit_LinController_WakeupInternal_t)(Sil
  */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Experimental_LinController_GetSlaveConfiguration(
     SilKit_LinController* controller, SilKit_Experimental_LinSlaveConfiguration* outLinSlaveConfiguration);
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_Experimental_LinController_GetSlaveConfiguration_t)(
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_Experimental_LinController_GetSlaveConfiguration_t)(
     SilKit_LinController* controller, SilKit_Experimental_LinSlaveConfiguration* outLinSlaveConfiguration);
 
 /*! \brief Reports the SilKit_LinFrameStatus of a SilKit_LinFrame and provides the transmitted frame.
@@ -564,13 +570,13 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_Experimental_LinController_GetSlav
  *
  * \return \ref SilKit_ReturnCode
  */
-SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LinController_AddFrameStatusHandler(SilKit_LinController* controller, void* context,
-                                                                        SilKit_LinFrameStatusHandler_t handler,
-                                                                        SilKit_HandlerId* outHandlerId);
+SilKitAPI SilKit_ReturnCode SilKitCALL
+SilKit_LinController_AddFrameStatusHandler(SilKit_LinController* controller, void* context,
+                                           SilKit_LinFrameStatusHandler_t handler, SilKit_HandlerId* outHandlerId);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LinController_AddFrameStatusHandler_t)(SilKit_LinController* controller, void* context,
-                                                                   SilKit_LinFrameStatusHandler_t handler,
-                                                                   SilKit_HandlerId* outHandlerId);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_LinController_AddFrameStatusHandler_t)(
+    SilKit_LinController* controller, void* context, SilKit_LinFrameStatusHandler_t handler,
+    SilKit_HandlerId* outHandlerId);
 
 /*! \brief  Remove a \ref SilKit_LinFrameStatusHandler_t by SilKit_HandlerId on this controller 
  *
@@ -580,10 +586,10 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LinController_AddFrameStatusHandle
  * \return \ref SilKit_ReturnCode
  */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LinController_RemoveFrameStatusHandler(SilKit_LinController* controller,
-                                                                           SilKit_HandlerId handlerId);
+                                                                                     SilKit_HandlerId handlerId);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LinController_RemoveFrameStatusHandler_t)(SilKit_LinController* controller,
-                                                                      SilKit_HandlerId handlerId);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_LinController_RemoveFrameStatusHandler_t)(SilKit_LinController* controller,
+                                                                                       SilKit_HandlerId handlerId);
 
 /*! \brief The GoToSleepHandler is called whenever a go-to-sleep frame
  * was received.
@@ -606,13 +612,15 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LinController_RemoveFrameStatusHan
  * 
  * \return \ref SilKit_ReturnCode
  */
-SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LinController_AddGoToSleepHandler(SilKit_LinController* controller, void* context,
-                                                                      SilKit_LinGoToSleepHandler_t handler,
-                                                                      SilKit_HandlerId* outHandlerId);
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LinController_AddGoToSleepHandler(SilKit_LinController* controller,
+                                                                                void* context,
+                                                                                SilKit_LinGoToSleepHandler_t handler,
+                                                                                SilKit_HandlerId* outHandlerId);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LinController_AddGoToSleepHandler_t)(SilKit_LinController* controller, void* context,
-                                                                 SilKit_LinGoToSleepHandler_t handler,
-                                                                 SilKit_HandlerId* outHandlerId);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_LinController_AddGoToSleepHandler_t)(SilKit_LinController* controller,
+                                                                                  void* context,
+                                                                                  SilKit_LinGoToSleepHandler_t handler,
+                                                                                  SilKit_HandlerId* outHandlerId);
 
 /*! \brief  Remove a \ref SilKit_LinGoToSleepHandler_t by SilKit_HandlerId on this controller 
  *
@@ -622,10 +630,10 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LinController_AddGoToSleepHandler_
  * \return \ref SilKit_ReturnCode
  */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LinController_RemoveGoToSleepHandler(SilKit_LinController* controller,
-                                                                         SilKit_HandlerId handlerId);
+                                                                                   SilKit_HandlerId handlerId);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LinController_RemoveGoToSleepHandler_t)(SilKit_LinController* controller,
-                                                                    SilKit_HandlerId handlerId);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_LinController_RemoveGoToSleepHandler_t)(SilKit_LinController* controller,
+                                                                                     SilKit_HandlerId handlerId);
 
 /*! \brief The WakeupHandler is called whenever a wake up pulse is received
  *
@@ -640,13 +648,15 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LinController_RemoveGoToSleepHandl
  *
  * \return \ref SilKit_ReturnCode
  */
-SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LinController_AddWakeupHandler(SilKit_LinController* controller, void* context,
-                                                                   SilKit_LinWakeupHandler_t handler,
-                                                                   SilKit_HandlerId* outHandlerId);
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LinController_AddWakeupHandler(SilKit_LinController* controller,
+                                                                             void* context,
+                                                                             SilKit_LinWakeupHandler_t handler,
+                                                                             SilKit_HandlerId* outHandlerId);
 
-typedef SilKit_ReturnCode(SilKitFPTR *SilKit_LinController_AddWakeupHandler_t)(SilKit_LinController* controller, void* context,
-                                                             SilKit_LinWakeupHandler_t handler,
-                                                             SilKit_HandlerId* outHandlerId);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_LinController_AddWakeupHandler_t)(SilKit_LinController* controller,
+                                                                               void* context,
+                                                                               SilKit_LinWakeupHandler_t handler,
+                                                                               SilKit_HandlerId* outHandlerId);
 
 /*! \brief  Remove a \ref SilKit_LinWakeupHandler_t by SilKit_HandlerId on this controller 
 *
@@ -654,9 +664,10 @@ typedef SilKit_ReturnCode(SilKitFPTR *SilKit_LinController_AddWakeupHandler_t)(S
 * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
 */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LinController_RemoveWakeupHandler(SilKit_LinController* controller,
-                                                                      SilKit_HandlerId handlerId);
+                                                                                SilKit_HandlerId handlerId);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LinController_RemoveWakeupHandler_t)(SilKit_LinController* controller, SilKit_HandlerId handlerId);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_LinController_RemoveWakeupHandler_t)(SilKit_LinController* controller,
+                                                                                  SilKit_HandlerId handlerId);
 
 
 /*! \brief The LinSlaveConfigurationHandler is called whenever a remote LIN Slave is configured via SilKit_LinController_Init
@@ -674,13 +685,13 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LinController_RemoveWakeupHandler_
  *
  * \return \ref SilKit_ReturnCode
  */
-SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Experimental_LinController_AddLinSlaveConfigurationHandler(SilKit_LinController* controller, void* context,
-                                                                  SilKit_Experimental_LinSlaveConfigurationHandler_t handler,
-                                                                  SilKit_HandlerId* outHandlerId);
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Experimental_LinController_AddLinSlaveConfigurationHandler(
+    SilKit_LinController* controller, void* context, SilKit_Experimental_LinSlaveConfigurationHandler_t handler,
+    SilKit_HandlerId* outHandlerId);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_Experimental_LinController_AddLinSlaveConfigurationHandler_t)(SilKit_LinController* controller, void* context,
-                                                                     SilKit_Experimental_LinSlaveConfigurationHandler_t handler,
-                                                                     SilKit_HandlerId* outHandlerId);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_Experimental_LinController_AddLinSlaveConfigurationHandler_t)(
+    SilKit_LinController* controller, void* context, SilKit_Experimental_LinSlaveConfigurationHandler_t handler,
+    SilKit_HandlerId* outHandlerId);
 
 /*! \brief  Remove a \ref SilKit_Experimental_LinSlaveConfigurationHandler_t by SilKit_HandlerId on this controller
  *
@@ -689,11 +700,11 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_Experimental_LinController_AddLinS
  *
  * \return \ref SilKit_ReturnCode
  */
-SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Experimental_LinController_RemoveLinSlaveConfigurationHandler(SilKit_LinController* controller,
-                                                                     SilKit_HandlerId handlerId);
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Experimental_LinController_RemoveLinSlaveConfigurationHandler(
+    SilKit_LinController* controller, SilKit_HandlerId handlerId);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_Experimental_LinController_RemoveLinSlaveConfigurationHandler_t)(SilKit_LinController* controller,
-                                                                        SilKit_HandlerId handlerId);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_Experimental_LinController_RemoveLinSlaveConfigurationHandler_t)(
+    SilKit_LinController* controller, SilKit_HandlerId handlerId);
 
 
 /*! \brief The LinFrameHeaderHandler is called whenever the master sends a LIN header.
@@ -711,14 +722,14 @@ SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Experimental_LinController_AddFram
     SilKit_LinController* controller, void* context, SilKit_Experimental_LinFrameHeaderHandler_t handler,
     SilKit_HandlerId* outHandlerId);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_Experimental_LinController_AddFrameHeaderHandler_t)(
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_Experimental_LinController_AddFrameHeaderHandler_t)(
     SilKit_LinController* controller, void* context, SilKit_Experimental_LinFrameHeaderHandler_t handler,
     SilKit_HandlerId* outHandlerId);
 
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Experimental_LinController_RemoveFrameHeaderHandler(
     SilKit_LinController* controller, SilKit_HandlerId handlerId);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_Experimental_LinController_RemoveFrameHeaderHandler_t)(
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_Experimental_LinController_RemoveFrameHeaderHandler_t)(
     SilKit_LinController* controller, SilKit_HandlerId handlerId);
 
 

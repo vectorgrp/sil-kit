@@ -86,8 +86,10 @@ struct MockSilKitMessageReceiver
         ON_CALL(*this, GetServiceDescriptor()).WillByDefault(ReturnRef(_serviceDescriptor));
     }
     // IMessageReceiver<T>
-    MOCK_METHOD(void, ReceiveMsg, (const SilKit::Core::IServiceEndpoint*, const Tests::Version1::TestMessage&), (override));
-    MOCK_METHOD(void, ReceiveMsg, (const SilKit::Core::IServiceEndpoint*, const Tests::Version2::TestMessage&), (override));
+    MOCK_METHOD(void, ReceiveMsg, (const SilKit::Core::IServiceEndpoint*, const Tests::Version1::TestMessage&),
+                (override));
+    MOCK_METHOD(void, ReceiveMsg, (const SilKit::Core::IServiceEndpoint*, const Tests::Version2::TestMessage&),
+                (override));
     MOCK_METHOD(void, ReceiveMsg, (const SilKit::Core::IServiceEndpoint*, const Tests::TestFrameEvent&), (override));
 
     // IServiceEndpoint
@@ -96,8 +98,7 @@ struct MockSilKitMessageReceiver
 };
 
 
-struct MockVAsioPeer
-    : public IVAsioPeer
+struct MockVAsioPeer : public IVAsioPeer
 {
     VAsioPeerInfo _peerInfo;
     ServiceDescriptor _serviceDescriptor;
@@ -146,7 +147,7 @@ struct MockVAsioPeer
 // Matchers
 //////////////////////////////////////////////////////////////////////
 MATCHER_P(AnnouncementReplyMatcher, validator,
-    "Deserialize the MessageBuffer from the SerializedMessage and check the announcement's reply")
+          "Deserialize the MessageBuffer from the SerializedMessage and check the announcement's reply")
 {
     SerializedMessage message = arg;
     auto reply = message.Deserialize<ParticipantAnnouncementReply>();
@@ -154,13 +155,11 @@ MATCHER_P(AnnouncementReplyMatcher, validator,
 }
 
 MATCHER_P(SubscriptionAcknowledgeMatcher, subscriber,
-    "Deserialize the MessageBuffer from the SerializedMessage and check the subscriptions's ack")
+          "Deserialize the MessageBuffer from the SerializedMessage and check the subscriptions's ack")
 {
     SerializedMessage message = arg;
     auto reply = message.Deserialize<SubscriptionAcknowledge>();
-    return reply.status == SubscriptionAcknowledge::Status::Success
-        && reply.subscriber == subscriber
-        ;
+    return reply.status == SubscriptionAcknowledge::Status::Success && reply.subscriber == subscriber;
 }
 
 } // namespace
@@ -188,7 +187,7 @@ protected:
 
     //we are a friend class
     // - allow selected access to private member
-    template<typename MessageT, typename ServiceT>
+    template <typename MessageT, typename ServiceT>
     void RegisterSilKitMsgReceiver(SilKit::Core::IMessageReceiver<MessageT>* receiver)
     {
         _connection.RegisterSilKitMsgReceiver<MessageT, ServiceT>(receiver);
@@ -210,8 +209,7 @@ TEST_F(Test_VAsioConnection, unsupported_version_connect)
 
     SerializedMessage message(announcement);
 
-    auto validator = [](const ParticipantAnnouncementReply& reply)
-    {
+    auto validator = [](const ParticipantAnnouncementReply& reply) {
         return reply.status == ParticipantAnnouncementReply::Status::Failed;
     };
     EXPECT_CALL(_from, SendSilKitMsg(AnnouncementReplyMatcher(validator))).Times(1);
@@ -229,9 +227,7 @@ TEST_F(Test_VAsioConnection, unsupported_version_reply_from_registry_should_thro
     _from._peerInfo.participantId = REGISTRY_PARTICIPANT_ID;
 
     SerializedMessage message(reply);
-    EXPECT_THROW(
-        _connection.OnSocketData(&_from, std::move(message)),
-        SilKit::ProtocolError);
+    EXPECT_THROW(_connection.OnSocketData(&_from, std::move(message)), SilKit::ProtocolError);
 }
 
 TEST_F(Test_VAsioConnection, supported_version_reply_from_registry_must_not_throw)
@@ -242,9 +238,7 @@ TEST_F(Test_VAsioConnection, supported_version_reply_from_registry_must_not_thro
     _from._peerInfo.participantId = REGISTRY_PARTICIPANT_ID;
 
     SerializedMessage message(reply);
-    EXPECT_NO_THROW(
-        _connection.OnSocketData(&_from, std::move(message))
-    );
+    EXPECT_NO_THROW(_connection.OnSocketData(&_from, std::move(message)));
 }
 
 TEST_F(Test_VAsioConnection, current_version_connect)
@@ -254,8 +248,7 @@ TEST_F(Test_VAsioConnection, current_version_connect)
 
     SerializedMessage message(announcement);
 
-    auto validator = [](const ParticipantAnnouncementReply& reply)
-    {
+    auto validator = [](const ParticipantAnnouncementReply& reply) {
         return reply.status == ParticipantAnnouncementReply::Status::Success;
     };
     EXPECT_CALL(_from, SendSilKitMsg(AnnouncementReplyMatcher(validator))).Times(1);
@@ -271,10 +264,10 @@ TEST_F(Test_VAsioConnection, current_version_connect)
 // the different version used for transmission, this is a work in progress.
 TEST_F(Test_VAsioConnection, DISABLED_versioned_send_testmessage)
 {
-    // We send a 'version1', but expect to receive a 'version2' 
+    // We send a 'version1', but expect to receive a 'version2'
     Tests::Version1::TestMessage message;
     message.integer = 1234;
-    message.str ="1234";
+    message.str = "1234";
 
     // Setup subscriptions for transmisison
     using MessageTrait = SilKit::Core::SilKitMsgTraits<decltype(message)>;
@@ -293,11 +286,10 @@ TEST_F(Test_VAsioConnection, DISABLED_versioned_send_testmessage)
 
     // Create a receiver with index 0 and a different TestMessage _version_
     MockSilKitMessageReceiver mockReceiver;
-    RegisterSilKitMsgReceiver<Tests::Version2::TestMessage,MockSilKitMessageReceiver>(&mockReceiver);
+    RegisterSilKitMsgReceiver<Tests::Version2::TestMessage, MockSilKitMessageReceiver>(&mockReceiver);
 
     // the actual message
-    auto buffer = SerializedMessage(message, _from.GetServiceDescriptor().to_endpointAddress(),
-        subscriber.receiverIdx);
+    auto buffer = SerializedMessage(message, _from.GetServiceDescriptor().to_endpointAddress(), subscriber.receiverIdx);
 
     _connection.OnSocketData(&_from, std::move(buffer));
 }

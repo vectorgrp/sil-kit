@@ -35,7 +35,8 @@ namespace Lin {
 
 inline std::string to_string(const Experimental::Services::Lin::LinSlaveConfiguration& linSlaveConfiguration);
 
-inline std::ostream& operator<<(std::ostream& out, const Experimental::Services::Lin::LinSlaveConfiguration& linSlaveConfiguration);
+inline std::ostream& operator<<(std::ostream& out,
+                                const Experimental::Services::Lin::LinSlaveConfiguration& linSlaveConfiguration);
 
 // ================================================================================
 //  Inline Implementations
@@ -65,7 +66,7 @@ std::ostream& operator<<(std::ostream& out,
     out << "]}";
     return out;
 }
-    
+
 } // namespace Lin
 } // namespace Services
 } // namespace Experimental

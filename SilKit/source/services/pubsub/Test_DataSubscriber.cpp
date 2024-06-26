@@ -69,9 +69,10 @@ protected:
     Test_DataSubscriber()
         : subscriber{&participant,
                      {},
-                     participant.GetTimeProvider(), matchingDataSpec,
+                     participant.GetTimeProvider(),
+                     matchingDataSpec,
                      SilKit::Util::bind_method(&callbacks, &Callbacks::ReceiveDataDefault)}
-        , publisher{ &participant, participant.GetTimeProvider(), dataSpec, publisherUuid,{} }
+        , publisher{&participant, participant.GetTimeProvider(), dataSpec, publisherUuid, {}}
     {
         subscriber.SetServiceDescriptor(subscriberDescriptor);
         SetupPublisherServiceDescriptor(publisher, publisherUuid);
@@ -82,8 +83,7 @@ private:
     {
         publisherDescriptor.SetSupplementalDataItem(Core::Discovery::supplKeyDataPublisherTopic, topic);
         publisherDescriptor.SetSupplementalDataItem(Core::Discovery::supplKeyDataPublisherMediaType, mediaType);
-        publisherDescriptor.SetSupplementalDataItem(Core::Discovery::supplKeyDataPublisherPubLabels,
-                                                           labelsSerialized);
+        publisherDescriptor.SetSupplementalDataItem(Core::Discovery::supplKeyDataPublisherPubLabels, labelsSerialized);
         publisherDescriptor.SetSupplementalDataItem(Core::Discovery::supplKeyDataPublisherPubUUID, uuid);
         dataPublisher.SetServiceDescriptor(publisherDescriptor);
     }

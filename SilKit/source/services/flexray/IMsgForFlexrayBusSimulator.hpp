@@ -44,7 +44,6 @@ class IMsgForFlexraySimulator
 {
 public:
     ~IMsgForFlexraySimulator() = default;
-
 };
 
 } // namespace Flexray

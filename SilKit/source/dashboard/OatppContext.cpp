@@ -32,7 +32,7 @@ namespace SilKit {
 namespace Dashboard {
 
 OatppContext::OatppContext(std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig,
-                     const std::string& registryUri, const std::string& dashboardUri)
+                           const std::string& registryUri, const std::string& dashboardUri)
 {
     oatpp::base::Environment::init();
     auto uri = SilKit::Core::Uri::Parse(dashboardUri);

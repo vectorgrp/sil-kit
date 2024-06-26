@@ -50,6 +50,6 @@ public:
 };
 
 
-}//end namespace Vector
-}//end namespace Vendor
-}//end namespace SilKit
+} //end namespace Vector
+} //end namespace Vendor
+} //end namespace SilKit

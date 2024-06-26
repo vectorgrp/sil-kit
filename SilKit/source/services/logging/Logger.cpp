@@ -43,8 +43,7 @@ namespace Services {
 namespace Logging {
 
 namespace {
-class SilKitRemoteSink
-    : public spdlog::sinks::base_sink<spdlog::details::null_mutex>
+class SilKitRemoteSink : public spdlog::sinks::base_sink<spdlog::details::null_mutex>
 {
 public:
     SilKitRemoteSink() = delete;
@@ -62,7 +61,8 @@ protected:
     void sink_it_(const spdlog::details::log_msg& msg) override
     {
         // ignore recursive calls to the remote logger or when explicitly disabled
-        if (_is_disabled) return;
+        if (_is_disabled)
+            return;
 
         _is_disabled = true;
         _logMsgHandler(from_spdlog(msg));
@@ -88,7 +88,7 @@ Logger::Logger(const std::string& participantName, Config::Logging config)
     // NB: logger gets dropped from registry immediately after creating so that two participant with the same
     // participantName won't lead to a spdlog exception because a logger with this name does already exist.
     spdlog::drop(participantName);
-    
+
     // set_default_logger should not be used here, as there can only be one default logger and if another participant
     // gets created, the first default logger will be dropped from the registry as well.
 
@@ -177,10 +177,7 @@ void Logger::Critical(const std::string& msg)
 void Logger::RegisterRemoteLogging(const LogMsgHandler& handler)
 {
     auto remoteSinkRef = std::find_if(_config.sinks.begin(), _config.sinks.end(),
-        [](const Config::Sink& sink) 
-        { 
-            return sink.type == Config::Sink::Type::Remote;
-        });
+                                      [](const Config::Sink& sink) { return sink.type == Config::Sink::Type::Remote; });
 
     if (remoteSinkRef != _config.sinks.end())
     {

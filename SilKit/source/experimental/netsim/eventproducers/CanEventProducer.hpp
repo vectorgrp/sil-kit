@@ -31,7 +31,7 @@ public:
 
 private:
     SimulatedNetworkRouter* _simulatedNetworkRouter;
-    
+
     // Track the controller state and error state because the msg on wire (CanControllerStatus) contains both.
     SilKit::Services::Can::CanControllerState _controllerState = SilKit::Services::Can::CanControllerState::Uninit;
     SilKit::Services::Can::CanErrorState _errorState = SilKit::Services::Can::CanErrorState::NotAvailable;

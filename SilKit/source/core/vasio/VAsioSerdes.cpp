@@ -35,71 +35,49 @@ namespace Core {
 
 inline MessageBuffer& operator<<(MessageBuffer& buffer, const RegistryMsgHeader& header)
 {
-    buffer << header.preamble
-           << header.versionHigh
-           << header.versionLow;
+    buffer << header.preamble << header.versionHigh << header.versionLow;
     return buffer;
 }
 inline MessageBuffer& operator>>(MessageBuffer& buffer, RegistryMsgHeader& header)
 {
-    buffer >> header.preamble
-           >> header.versionHigh
-           >> header.versionLow;
+    buffer >> header.preamble >> header.versionHigh >> header.versionLow;
     return buffer;
 }
 
 
 inline MessageBuffer& operator<<(MessageBuffer& buffer, const VAsioPeerInfo& peerInfo)
 {
-    buffer << peerInfo.participantName
-           << peerInfo.participantId
-           << peerInfo.acceptorUris
-           << peerInfo.capabilities
-           ;
+    buffer << peerInfo.participantName << peerInfo.participantId << peerInfo.acceptorUris << peerInfo.capabilities;
     return buffer;
 }
 
 inline MessageBuffer& operator>>(MessageBuffer& buffer, VAsioPeerInfo& peerInfo)
 {
-    buffer >> peerInfo.participantName
-           >> peerInfo.participantId
-           >> peerInfo.acceptorUris
-           >> peerInfo.capabilities
-        ;
+    buffer >> peerInfo.participantName >> peerInfo.participantId >> peerInfo.acceptorUris >> peerInfo.capabilities;
     return buffer;
 }
 
 inline MessageBuffer& operator<<(MessageBuffer& buffer, const VAsioMsgSubscriber& subscriber)
 {
-    buffer << subscriber.receiverIdx
-           << subscriber.networkName
-           << subscriber.msgTypeName
-           << subscriber.version
-        ;
+    buffer << subscriber.receiverIdx << subscriber.networkName << subscriber.msgTypeName << subscriber.version;
     return buffer;
 }
 
 inline MessageBuffer& operator>>(MessageBuffer& buffer, VAsioMsgSubscriber& subscriber)
 {
-    buffer >> subscriber.receiverIdx
-           >> subscriber.networkName
-           >> subscriber.msgTypeName
-           >> subscriber.version
-        ;
+    buffer >> subscriber.receiverIdx >> subscriber.networkName >> subscriber.msgTypeName >> subscriber.version;
     return buffer;
 }
 
 inline MessageBuffer& operator<<(MessageBuffer& buffer, const SubscriptionAcknowledge& ack)
 {
-    buffer << ack.status
-           << ack.subscriber;
+    buffer << ack.status << ack.subscriber;
     return buffer;
 }
 
 inline MessageBuffer& operator>>(MessageBuffer& buffer, SubscriptionAcknowledge& ack)
 {
-    buffer >> ack.status
-           >> ack.subscriber;
+    buffer >> ack.status >> ack.subscriber;
     return buffer;
 }
 
@@ -108,17 +86,13 @@ inline MessageBuffer& operator<<(MessageBuffer& buffer, const ParticipantAnnounc
     // ParticipantAnnouncement is the first message sent during a handshake.
     // so we need to extract its version information for ser/des here.
     buffer.SetProtocolVersion(ExtractProtocolVersion(announcement.messageHeader));
-    if (buffer.GetProtocolVersion() == ProtocolVersion{3,0})
+    if (buffer.GetProtocolVersion() == ProtocolVersion{3, 0})
     {
         SerializeV30(buffer, announcement);
     }
     else
     {
-        buffer
-            << announcement.messageHeader
-            << announcement.peerInfo
-            << announcement.simulationName
-            ;
+        buffer << announcement.messageHeader << announcement.peerInfo << announcement.simulationName;
     }
 
     return buffer;
@@ -127,16 +101,14 @@ inline MessageBuffer& operator<<(MessageBuffer& buffer, const ParticipantAnnounc
 inline MessageBuffer& operator>>(MessageBuffer& buffer, ParticipantAnnouncement& announcement)
 {
     //Backward compatibility
-    if (buffer.GetProtocolVersion() == ProtocolVersion{3,0})
+    if (buffer.GetProtocolVersion() == ProtocolVersion{3, 0})
     {
         DeserializeV30(buffer, announcement);
     }
     else
     {
         //  default
-        buffer
-            >> announcement.messageHeader
-            >> announcement.peerInfo;
+        buffer >> announcement.messageHeader >> announcement.peerInfo;
 
         if (buffer.RemainingBytesLeft() == 0)
         {
@@ -151,34 +123,29 @@ inline MessageBuffer& operator>>(MessageBuffer& buffer, ParticipantAnnouncement&
 inline MessageBuffer& operator<<(MessageBuffer& buffer, const ParticipantAnnouncementReply& reply)
 {
     //Backward compatibility
-    if (buffer.GetProtocolVersion() == ProtocolVersion{3,0})
+    if (buffer.GetProtocolVersion() == ProtocolVersion{3, 0})
     {
         SerializeV30(buffer, reply);
     }
     else
     {
-        buffer  
-            << reply.remoteHeader
-            << reply.status
-            << reply.subscribers
-            // Added in 4.0.8.
-            << reply.diagnostic;
+        buffer << reply.remoteHeader << reply.status
+               << reply.subscribers
+               // Added in 4.0.8.
+               << reply.diagnostic;
     }
     return buffer;
 }
 inline MessageBuffer& operator>>(MessageBuffer& buffer, ParticipantAnnouncementReply& reply)
 {
     //Backward compatibility
-    if (buffer.GetProtocolVersion() == ProtocolVersion{3,0})
+    if (buffer.GetProtocolVersion() == ProtocolVersion{3, 0})
     {
         DeserializeV30(buffer, reply);
     }
     else
     {
-        buffer 
-            >> reply.remoteHeader
-            >> reply.status
-            >> reply.subscribers;
+        buffer >> reply.remoteHeader >> reply.status >> reply.subscribers;
 
         // Added in 4.0.8.
         if (buffer.RemainingBytesLeft() > 0)
@@ -198,24 +165,20 @@ inline MessageBuffer& operator<<(MessageBuffer& buffer, const KnownParticipants&
     }
     else
     {
-        buffer << participants.messageHeader
-            << participants.peerInfos
-            ;
+        buffer << participants.messageHeader << participants.peerInfos;
     }
     return buffer;
 }
 inline MessageBuffer& operator>>(MessageBuffer& buffer, KnownParticipants& participants)
 {
     //Backward compatibility with legacy peers
-    if (buffer.GetProtocolVersion() == ProtocolVersion{3,0})
+    if (buffer.GetProtocolVersion() == ProtocolVersion{3, 0})
     {
         DeserializeV30(buffer, participants);
     }
     else
     {
-        buffer >> participants.messageHeader
-            >> participants.peerInfos
-            ;
+        buffer >> participants.messageHeader >> participants.peerInfos;
     }
     return buffer;
 }
@@ -223,30 +186,26 @@ inline MessageBuffer& operator>>(MessageBuffer& buffer, KnownParticipants& parti
 inline MessageBuffer& operator<<(MessageBuffer& buffer, const ProxyMessageHeader& msg)
 {
     //Backward compatibility with legacy peers
-    if (buffer.GetProtocolVersion() < ProtocolVersion{3,1})
+    if (buffer.GetProtocolVersion() < ProtocolVersion{3, 1})
     {
         throw SilKit::ProtocolError{"ProxyMessage is not supported in protocol versions < 3.1"};
     }
     else
     {
-        buffer
-            << msg.version
-            ;
+        buffer << msg.version;
     }
     return buffer;
 }
 inline MessageBuffer& operator>>(MessageBuffer& buffer, ProxyMessageHeader& out)
 {
     //Backward compatibility with legacy peers
-    if (buffer.GetProtocolVersion() < ProtocolVersion{3,1})
+    if (buffer.GetProtocolVersion() < ProtocolVersion{3, 1})
     {
         throw SilKit::ProtocolError{"ProxyMessage is not supported in protocol versions < 3.1"};
     }
     else
     {
-        buffer
-            >> out.version
-            ;
+        buffer >> out.version;
     }
     return buffer;
 }
@@ -254,36 +213,26 @@ inline MessageBuffer& operator>>(MessageBuffer& buffer, ProxyMessageHeader& out)
 inline MessageBuffer& operator<<(MessageBuffer& buffer, const ProxyMessage& msg)
 {
     //Backward compatibility with legacy peers
-    if (buffer.GetProtocolVersion() < ProtocolVersion{3,1})
+    if (buffer.GetProtocolVersion() < ProtocolVersion{3, 1})
     {
         throw SilKit::ProtocolError{"ProxyMessage is not supported in protocol versions < 3.1"};
     }
     else
     {
-        buffer
-            << msg.header
-            << msg.source
-            << msg.destination
-            << msg.payload
-            ;
+        buffer << msg.header << msg.source << msg.destination << msg.payload;
     }
     return buffer;
 }
 inline MessageBuffer& operator>>(MessageBuffer& buffer, ProxyMessage& out)
 {
     //Backward compatibility with legacy peers
-    if (buffer.GetProtocolVersion() < ProtocolVersion{3,1})
+    if (buffer.GetProtocolVersion() < ProtocolVersion{3, 1})
     {
         throw SilKit::ProtocolError{"ProxyMessage is not supported in protocol versions < 3.1"};
     }
     else
     {
-        buffer
-            >> out.header
-            >> out.source
-            >> out.destination
-            >> out.payload
-            ;
+        buffer >> out.header >> out.source >> out.destination >> out.payload;
     }
     return buffer;
 }
@@ -291,20 +240,12 @@ inline MessageBuffer& operator>>(MessageBuffer& buffer, ProxyMessage& out)
 
 inline MessageBuffer& operator<<(MessageBuffer& buffer, const RemoteParticipantConnectRequest& msg)
 {
-	buffer
-        << msg.messageHeader
-		<< msg.requestOrigin
-        << msg.requestTarget
-        << msg.status;
+    buffer << msg.messageHeader << msg.requestOrigin << msg.requestTarget << msg.status;
     return buffer;
 }
 inline MessageBuffer& operator>>(MessageBuffer& buffer, RemoteParticipantConnectRequest& out)
 {
-	buffer
-        >> out.messageHeader
-		>> out.requestOrigin
-        >> out.requestTarget
-        >> out.status;
+    buffer >> out.messageHeader >> out.requestOrigin >> out.requestTarget >> out.status;
     return buffer;
 }
 
@@ -382,7 +323,7 @@ void Serialize(MessageBuffer& buffer, const ParticipantAnnouncementReply& msg)
 {
     buffer << msg;
 }
-void Deserialize(MessageBuffer& buffer,ParticipantAnnouncementReply& out)
+void Deserialize(MessageBuffer& buffer, ParticipantAnnouncementReply& out)
 {
     buffer >> out;
 }
@@ -396,7 +337,7 @@ void Deserialize(MessageBuffer& buffer, ParticipantAnnouncement& out)
     buffer >> out;
 }
 
- void Serialize(MessageBuffer& buffer, const VAsioMsgSubscriber& msg)
+void Serialize(MessageBuffer& buffer, const VAsioMsgSubscriber& msg)
 {
     buffer << msg;
 }
@@ -406,9 +347,9 @@ void Deserialize(MessageBuffer& buffer, VAsioMsgSubscriber& out)
     buffer >> out;
 }
 
- void Serialize(MessageBuffer& buffer, const SubscriptionAcknowledge& msg)
+void Serialize(MessageBuffer& buffer, const SubscriptionAcknowledge& msg)
 {
-    buffer<< msg;
+    buffer << msg;
 }
 void Deserialize(MessageBuffer& buffer, SubscriptionAcknowledge& out)
 {
@@ -419,7 +360,7 @@ void Serialize(MessageBuffer& buffer, const KnownParticipants& msg)
 {
     buffer << msg;
 }
-void Deserialize(MessageBuffer& buffer,KnownParticipants& out)
+void Deserialize(MessageBuffer& buffer, KnownParticipants& out)
 {
     buffer >> out;
 }

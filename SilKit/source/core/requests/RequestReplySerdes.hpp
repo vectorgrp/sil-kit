@@ -34,6 +34,6 @@ void Serialize(SilKit::Core::MessageBuffer& buffer, const RequestReplyCallReturn
 void Deserialize(MessageBuffer& buffer, RequestReplyCall& out);
 void Deserialize(MessageBuffer& buffer, RequestReplyCallReturn& out);
 
-} // namespace RequestReply    
+} // namespace RequestReply
 } // namespace Core
 } // namespace SilKit

@@ -48,7 +48,7 @@ TEST(ITest_Internals_TargetedMessaging, targeted_messaging)
 {
     auto registryUri = MakeTestRegistryUri();
 
-    std::vector<std::string> syncParticipantNames{ "Sender", "TargetReceiver" , "OtherReceiver" };
+    std::vector<std::string> syncParticipantNames{"Sender", "TargetReceiver", "OtherReceiver"};
 
     auto receiveCount = 0;
 
@@ -69,9 +69,9 @@ TEST(ITest_Internals_TargetedMessaging, targeted_messaging)
     senderTimeSyncService->SetSimulationStepHandler(
         [&senderLifecycleService, &senderCan, &senderCom](std::chrono::nanoseconds now,
                                                           std::chrono::nanoseconds /*duration*/) {
-            auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
-            std::cout << "Sender: Current time=" << nowMs.count() << "ms" << std::endl;
-            if (now == 0ms)
+        auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
+        std::cout << "Sender: Current time=" << nowMs.count() << "ms" << std::endl;
+        if (now == 0ms)
         {
             SilKit::Services::Can::WireCanFrameEvent msg{};
             msg.direction = SilKit::Services::TransmitDirection::RX;
@@ -83,31 +83,30 @@ TEST(ITest_Internals_TargetedMessaging, targeted_messaging)
         {
             senderLifecycleService->Stop("Test");
         }
-        }, 1ms);
+    },
+        1ms);
 
-    
+
     auto* receiverComSimPart = testHarness.GetParticipant("TargetReceiver");
     auto* receiverCom = &SilKit::Tests::ToParticipantInternal(*receiverComSimPart->Participant());
     auto* receiverTimeSyncService = receiverComSimPart->GetOrCreateTimeSyncService();
 
     receiverTimeSyncService->SetSimulationStepHandler(
-        [](std::chrono::nanoseconds /*now*/, std::chrono::nanoseconds /*duration*/) {
-    }, 1ms);
+        [](std::chrono::nanoseconds /*now*/, std::chrono::nanoseconds /*duration*/) {}, 1ms);
 
     auto* receiverCan = receiverCom->CreateCanController("CAN1", "CAN1");
 
-    receiverCan->AddFrameHandler(
-        [&receiveCount](SilKit::Services::Can::ICanController* controller, auto msg) {
-            std::cout << "'TargetReceiver' received a message from controller '" << controller
-                      << "' with canId=" << msg.frame.canId << std::endl;
-            ASSERT_TRUE(msg.frame.canId == 42) << "The received canId is wrong. expected=42; received=" << msg.frame.canId;
-            receiveCount++;
-        });
+    receiverCan->AddFrameHandler([&receiveCount](SilKit::Services::Can::ICanController* controller, auto msg) {
+        std::cout << "'TargetReceiver' received a message from controller '" << controller
+                  << "' with canId=" << msg.frame.canId << std::endl;
+        ASSERT_TRUE(msg.frame.canId == 42) << "The received canId is wrong. expected=42; received=" << msg.frame.canId;
+        receiveCount++;
+    });
 
     auto* otherReceiverComSimPart = testHarness.GetParticipant("OtherReceiver");
     auto* otherReceiverCom = &SilKit::Tests::ToParticipantInternal(*otherReceiverComSimPart->Participant());
     auto* otherTimeSyncService = otherReceiverComSimPart->GetOrCreateTimeSyncService();
-    
+
     otherTimeSyncService->SetSimulationStepHandler(
         [](std::chrono::nanoseconds /*now*/, std::chrono::nanoseconds /*duration*/) {}, 1ms);
 

@@ -27,7 +27,7 @@ namespace Services {
 namespace Ethernet {
 
 SimBehaviorDetailed::SimBehaviorDetailed(Core::IParticipantInternal* participant, EthController* ethController,
-                                       const Core::ServiceDescriptor& serviceDescriptor)
+                                         const Core::ServiceDescriptor& serviceDescriptor)
     : _participant{participant}
     , _parentServiceEndpoint{dynamic_cast<Core::IServiceEndpoint*>(ethController)}
     , _parentServiceDescriptor{&serviceDescriptor}
@@ -50,9 +50,7 @@ void SimBehaviorDetailed::SendMsg(EthernetSetMode&& msg)
     SendMsgImpl(msg);
 }
 
-void SimBehaviorDetailed::OnReceiveAck(const EthernetFrameTransmitEvent&)
-{
-}
+void SimBehaviorDetailed::OnReceiveAck(const EthernetFrameTransmitEvent&) {}
 
 auto SimBehaviorDetailed::AllowReception(const Core::IServiceEndpoint* from) const -> bool
 {

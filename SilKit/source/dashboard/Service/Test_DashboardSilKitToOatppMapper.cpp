@@ -33,9 +33,7 @@ namespace Dashboard {
 class Test_DashboardSilKitToOatppMapper : public testing::Test
 {
 public:
-    void SetUp() override
-    {
-    }
+    void SetUp() override {}
 
     static std::shared_ptr<ISilKitToOatppMapper> CreateService()
     {
@@ -49,7 +47,7 @@ TEST_F(Test_DashboardSilKitToOatppMapper, CreateSimulationCreationRequestDto_Map
     const std::string endpoint("silkit://myhost:1234");
     const auto now = std::chrono::system_clock::now().time_since_epoch();
     const uint64_t expectedStartTime = std::chrono::duration_cast<std::chrono::milliseconds>(now).count();
-        
+
     // Act
     const auto dataMapper = CreateService();
     const auto dto = dataMapper->CreateSimulationCreationRequestDto(endpoint, expectedStartTime);
@@ -89,7 +87,8 @@ TEST_F(Test_DashboardSilKitToOatppMapper, CreateParticipantStatusDto_MapReasonAn
     // Arrange
     const std::string expectedReason("myReason");
     const auto now = std::chrono::system_clock::now();
-    const auto expectedEnterTime = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
+    const auto expectedEnterTime =
+        std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
 
     orchestration::ParticipantStatus participant_status;
     participant_status.participantName = "";
@@ -146,8 +145,7 @@ TEST_F(Test_DashboardSilKitToOatppMapper, CreateDataPublisherDto_MapNameAndNetwo
     expectedLabel.value = "myValue";
     expectedLabel.kind = Services::MatchingLabel::Kind::Mandatory;
     auto labels = std::vector<Services::MatchingLabel>{expectedLabel};
-    descriptor.SetSupplementalDataItem(Core::Discovery::supplKeyDataPublisherPubLabels,
-                                       Config::Serialize(labels));
+    descriptor.SetSupplementalDataItem(Core::Discovery::supplKeyDataPublisherPubLabels, Config::Serialize(labels));
 
     // Act
     const auto dataMapper = CreateService();
@@ -198,7 +196,7 @@ TEST_F(Test_DashboardSilKitToOatppMapper, CreateDataSubscriberDto_MapNetworkName
 
 TEST_F(Test_DashboardSilKitToOatppMapper, CreateRpcClientDto_MapNetworkNameAndFunctionNameAndMediaTypeAndLabel)
 {
-    // Arrange 
+    // Arrange
     Core::ServiceDescriptor descriptor;
     const std::string expectedName("myService");
     const std::string expectedNetwork("myNetwork");
@@ -216,8 +214,7 @@ TEST_F(Test_DashboardSilKitToOatppMapper, CreateRpcClientDto_MapNetworkNameAndFu
     expectedLabel.value = "myValue";
     expectedLabel.kind = Services::MatchingLabel::Kind::Mandatory;
     auto labels = std::vector<Services::MatchingLabel>{expectedLabel};
-    descriptor.SetSupplementalDataItem(Core::Discovery::supplKeyRpcClientLabels,
-                                       Config::Serialize(labels));
+    descriptor.SetSupplementalDataItem(Core::Discovery::supplKeyRpcClientLabels, Config::Serialize(labels));
 
     // Act
     const auto dataMapper = CreateService();
@@ -267,7 +264,7 @@ TEST_F(Test_DashboardSilKitToOatppMapper, CreateRpcServerDto_MapNetworkNameAndFu
 
 TEST_F(Test_DashboardSilKitToOatppMapper, CreateSimulationEndDto)
 {
-    // Arrange 
+    // Arrange
     const auto now = std::chrono::system_clock::now().time_since_epoch();
     const uint64_t expectedStopTime = std::chrono::duration_cast<std::chrono::milliseconds>(now).count();
 

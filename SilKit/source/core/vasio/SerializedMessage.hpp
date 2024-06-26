@@ -42,13 +42,13 @@ namespace SilKit {
 namespace Core {
 
 // Helper to allow calling Deserialize(MessageBuffer&, T&) inside of template method SerializedMessage::Deserialize<T>
-template<typename... Args>
+template <typename... Args>
 auto AdlDeserialize(Args&&... args) -> decltype(auto)
 {
-	return Deserialize(std::forward<Args>(args)...);
+    return Deserialize(std::forward<Args>(args)...);
 }
 
-template<typename T>
+template <typename T>
 struct SerializedSize
 {
     size_t _size{};
@@ -68,54 +68,54 @@ struct SerializedSize
 class SerializedMessage
 {
 public: //defaulted CTors
-	SerializedMessage(SerializedMessage&&) = default;
-	SerializedMessage& operator=(SerializedMessage&&) = default;
-	SerializedMessage(const SerializedMessage&) = default;
-	SerializedMessage& operator=(const SerializedMessage&) = default;
+    SerializedMessage(SerializedMessage&&) = default;
+    SerializedMessage& operator=(SerializedMessage&&) = default;
+    SerializedMessage(const SerializedMessage&) = default;
+    SerializedMessage& operator=(const SerializedMessage&) = default;
 
 public: // Sending a SerializedMessage: from T to binary blob
-	template<typename MessageT>
+    template <typename MessageT>
     explicit SerializedMessage(const MessageT& message);
-	// Sim messages have additional parameters:
-	template<typename MessageT>
-	explicit SerializedMessage(const MessageT& message , EndpointAddress endpointAddress, EndpointId remoteIndex);
-	template<typename MessageT>
-	explicit SerializedMessage(ProtocolVersion version, const MessageT& message);
+    // Sim messages have additional parameters:
+    template <typename MessageT>
+    explicit SerializedMessage(const MessageT& message, EndpointAddress endpointAddress, EndpointId remoteIndex);
+    template <typename MessageT>
+    explicit SerializedMessage(ProtocolVersion version, const MessageT& message);
 
-	auto ReleaseStorage() -> std::vector<uint8_t>;
+    auto ReleaseStorage() -> std::vector<uint8_t>;
 
 public: // Receiving a SerializedMessage: from binary blob to SilKitMessage<T>
-	explicit SerializedMessage(std::vector<uint8_t>&& blob);
+    explicit SerializedMessage(std::vector<uint8_t>&& blob);
 
-	template<typename ApiMessageT>
-	auto Deserialize() -> ApiMessageT;
-	template<typename ApiMessageT>
-	auto Deserialize() const -> ApiMessageT;
+    template <typename ApiMessageT>
+    auto Deserialize() -> ApiMessageT;
+    template <typename ApiMessageT>
+    auto Deserialize() const -> ApiMessageT;
 
-	auto GetMessageKind() const -> VAsioMsgKind;
-	auto GetRegistryKind() const -> RegistryMessageKind;
-	auto GetRemoteIndex() const -> EndpointId;
-	auto GetEndpointAddress() const -> EndpointAddress;
-	void SetProtocolVersion(ProtocolVersion version);
+    auto GetMessageKind() const -> VAsioMsgKind;
+    auto GetRegistryKind() const -> RegistryMessageKind;
+    auto GetRemoteIndex() const -> EndpointId;
+    auto GetEndpointAddress() const -> EndpointAddress;
+    void SetProtocolVersion(ProtocolVersion version);
     auto GetProxyMessageHeader() const -> ProxyMessageHeader;
-	auto GetRegistryMessageHeader() const -> RegistryMsgHeader;
+    auto GetRegistryMessageHeader() const -> RegistryMsgHeader;
 
 private:
-	void WriteNetworkHeaders();
-	void ReadNetworkHeaders();
-	// network headers, some members are optional depending on messageKind
-	uint32_t _messageSize{0};
-	VAsioMsgKind _messageKind{VAsioMsgKind::Invalid};
-	RegistryMessageKind _registryKind{RegistryMessageKind::Invalid};
-	// For simMsg
-	EndpointAddress _endpointAddress{};
-	EndpointId _remoteIndex{0};
-	// For registry messages
-	RegistryMsgHeader _registryMessageHeader;
+    void WriteNetworkHeaders();
+    void ReadNetworkHeaders();
+    // network headers, some members are optional depending on messageKind
+    uint32_t _messageSize{0};
+    VAsioMsgKind _messageKind{VAsioMsgKind::Invalid};
+    RegistryMessageKind _registryKind{RegistryMessageKind::Invalid};
+    // For simMsg
+    EndpointAddress _endpointAddress{};
+    EndpointId _remoteIndex{0};
+    // For registry messages
+    RegistryMsgHeader _registryMessageHeader;
     // For proxy messages
     ProxyMessageHeader _proxyMessageHeader;
 
-	MessageBuffer _buffer;
+    MessageBuffer _buffer;
 };
 
 //////////////////////////////////////////////////////////////////////

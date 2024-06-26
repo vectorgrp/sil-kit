@@ -71,8 +71,7 @@ public:
         }
     }
 
-    void WithPeriod(std::chrono::nanoseconds period,
-        std::function<void(std::chrono::nanoseconds)> callback)
+    void WithPeriod(std::chrono::nanoseconds period, std::function<void(std::chrono::nanoseconds)> callback)
     {
         _m.period = period;
         if (_m.period <= std::chrono::nanoseconds{0})
@@ -99,7 +98,7 @@ public:
 
     bool IsActive() const
     {
-        return  _isRunning;
+        return _isRunning;
     }
 
 private:

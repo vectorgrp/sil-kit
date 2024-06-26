@@ -43,7 +43,8 @@ TEST(ITest_SameParticipants, test_participants_with_unique_name)
 
     // start registry
     auto registryUri = MakeTestRegistryUri();
-    auto registry = SilKit::Vendor::Vector::CreateSilKitRegistry(SilKit::Config::ParticipantConfigurationFromString(""));
+    auto registry =
+        SilKit::Vendor::Vector::CreateSilKitRegistry(SilKit::Config::ParticipantConfigurationFromString(""));
     registry->StartListening(registryUri);
 
     auto pCfg = SilKit::Config::ParticipantConfigurationFromString("");
@@ -60,7 +61,8 @@ TEST(ITest_SameParticipants, test_participants_with_same_name)
 
     // start registry
     auto registryUri = MakeTestRegistryUri();
-    auto registry = SilKit::Vendor::Vector::CreateSilKitRegistry(SilKit::Config::ParticipantConfigurationFromString(""));
+    auto registry =
+        SilKit::Vendor::Vector::CreateSilKitRegistry(SilKit::Config::ParticipantConfigurationFromString(""));
     registry->StartListening(registryUri);
 
     auto pCfg = SilKit::Config::ParticipantConfigurationFromString("");
@@ -68,4 +70,4 @@ TEST(ITest_SameParticipants, test_participants_with_same_name)
     EXPECT_THROW(participant2 = SilKit::CreateParticipant(pCfg, "Participant", registryUri), SilKit::SilKitError);
 }
 
-}  /* anonymous namespace */
+} /* anonymous namespace */

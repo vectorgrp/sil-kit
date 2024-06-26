@@ -62,8 +62,8 @@ protected:
     }
 
 protected:
-    const ServiceDescriptor endpointAddress{ "P1", "N1", "C1" , 5};
-    const ServiceDescriptor otherEndpointAddress{ "P2", "N1", "C3", 7 };
+    const ServiceDescriptor endpointAddress{"P1", "N1", "C1", 5};
+    const ServiceDescriptor otherEndpointAddress{"P2", "N1", "C3", 7};
 
     SilKit::Core::Tests::DummyParticipant participant;
     Callbacks callbacks;

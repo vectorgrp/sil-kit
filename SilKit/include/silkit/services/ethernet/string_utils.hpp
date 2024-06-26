@@ -56,15 +56,15 @@ std::string to_string(EthernetTransmitStatus value)
 {
     switch (value)
     {
-    case  EthernetTransmitStatus::Transmitted:
+    case EthernetTransmitStatus::Transmitted:
         return "Transmitted";
-    case  EthernetTransmitStatus::ControllerInactive:
+    case EthernetTransmitStatus::ControllerInactive:
         return "ControllerInactive";
-    case  EthernetTransmitStatus::LinkDown:
+    case EthernetTransmitStatus::LinkDown:
         return "LinkDown";
-    case  EthernetTransmitStatus::Dropped:
+    case EthernetTransmitStatus::Dropped:
         return "Dropped";
-    case  EthernetTransmitStatus::InvalidFrameFormat:
+    case EthernetTransmitStatus::InvalidFrameFormat:
         return "InvalidFrameFormat";
     };
     throw SilKit::TypeConversionError{};
@@ -119,8 +119,7 @@ std::ostream& operator<<(std::ostream& out, const EthernetFrame& msg)
 {
     if (msg.raw.size() == 0)
     {
-        return out
-            << "EthernetFrame{size=0}";
+        return out << "EthernetFrame{size=0}";
     }
     else
     {
@@ -131,40 +130,30 @@ std::ostream& operator<<(std::ostream& out, const EthernetFrame& msg)
         {
             EthernetMac destinationMac;
             EthernetMac sourceMac;
-            std::copy(
-                msg.raw.begin(),
-                msg.raw.begin() + sizeof(EthernetMac), destinationMac.begin());
-            std::copy(
-                msg.raw.begin() + sizeof(EthernetMac),
-                msg.raw.begin() + 2 * sizeof(EthernetMac), sourceMac.begin());
+            std::copy(msg.raw.begin(), msg.raw.begin() + sizeof(EthernetMac), destinationMac.begin());
+            std::copy(msg.raw.begin() + sizeof(EthernetMac), msg.raw.begin() + 2 * sizeof(EthernetMac),
+                      sourceMac.begin());
 
             out << ", src = " << Util::AsHexString(sourceMac).WithSeparator(":")
                 << ", dst=" << Util::AsHexString(destinationMac).WithSeparator(":");
         }
-        return out
-            << ", data=[" << Util::AsHexString(msg.raw).WithSeparator(" ").WithMaxLength(8)
-            << "]}";
+        return out << ", data=[" << Util::AsHexString(msg.raw).WithSeparator(" ").WithMaxLength(8) << "]}";
     }
 }
 
 std::ostream& operator<<(std::ostream& out, const EthernetFrameEvent& msg)
 {
     auto timestamp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(msg.timestamp);
-    return out
-        << "EthernetFrameEvent{" << msg.frame
-        << ", direction=" << msg.direction
-        << ", userContext=" << msg.userContext
-        << " @" << timestamp.count() << "ms"
-        << "}";
+    return out << "EthernetFrameEvent{" << msg.frame << ", direction=" << msg.direction
+               << ", userContext=" << msg.userContext << " @" << timestamp.count() << "ms"
+               << "}";
 }
 
 std::ostream& operator<<(std::ostream& out, const EthernetFrameTransmitEvent& msg)
 {
     auto timestamp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(msg.timestamp);
-    out
-        << "EthernetFrameTransmitEvent{status=" << msg.status
-        << ", userContext=" << msg.userContext
-        << " @" << timestamp.count() << "ms"
+    out << "EthernetFrameTransmitEvent{status=" << msg.status << ", userContext=" << msg.userContext << " @"
+        << timestamp.count() << "ms"
         << "}";
 
     return out;

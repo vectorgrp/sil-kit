@@ -22,9 +22,9 @@
 
 
 #if SILKIT_ENABLE_TRACING_INSTRUMENTATION_AsioIoContext
-#    define SILKIT_TRACE_METHOD_(logger, ...) SILKIT_TRACE_METHOD(logger, __VA_ARGS__)
+#define SILKIT_TRACE_METHOD_(logger, ...) SILKIT_TRACE_METHOD(logger, __VA_ARGS__)
 #else
-#    define SILKIT_TRACE_METHOD_(...)
+#define SILKIT_TRACE_METHOD_(...)
 #endif
 
 
@@ -58,7 +58,7 @@ void SetConnectOptions(SilKit::Services::Logging::ILogger*, SocketT&)
 // platform specific definitions of utilities
 #if defined(_WIN32)
 
-#    include <mstcpip.h>
+#include <mstcpip.h>
 
 template <>
 void SetPlatformOptions(asio::ip::tcp::acceptor& acceptor)
@@ -67,7 +67,7 @@ void SetPlatformOptions(asio::ip::tcp::acceptor& acceptor)
     acceptor.set_option(exclusive_addruse{true});
 }
 
-#    if !defined(__MINGW32__)
+#if !defined(__MINGW32__)
 
 template <>
 void SetListenOptions(SilKit::Services::Logging::ILogger* logger, asio::ip::tcp::acceptor& acceptor)
@@ -103,7 +103,7 @@ void SetConnectOptions(SilKit::Services::Logging::ILogger* logger, asio::ip::tcp
     }
 }
 
-#    endif // !__MINGW32__
+#endif // !__MINGW32__
 
 #else
 

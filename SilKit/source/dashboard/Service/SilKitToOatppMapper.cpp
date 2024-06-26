@@ -48,20 +48,34 @@ SystemState MapSystemState(Services::Orchestration::SystemState systemState)
 {
     switch (systemState)
     {
-    case Services::Orchestration::SystemState::Invalid: return SystemState::Invalid;
-    case Services::Orchestration::SystemState::ServicesCreated: return SystemState::ServicesCreated;
-    case Services::Orchestration::SystemState::CommunicationInitializing: return SystemState::CommunicationInitializing;
-    case Services::Orchestration::SystemState::CommunicationInitialized: return SystemState::CommunicationInitialized;
-    case Services::Orchestration::SystemState::ReadyToRun: return SystemState::ReadyToRun;
-    case Services::Orchestration::SystemState::Running: return SystemState::Running;
-    case Services::Orchestration::SystemState::Paused: return SystemState::Paused;
-    case Services::Orchestration::SystemState::Stopping: return SystemState::Stopping;
-    case Services::Orchestration::SystemState::Stopped: return SystemState::Stopped;
-    case Services::Orchestration::SystemState::Error: return SystemState::Error;
-    case Services::Orchestration::SystemState::ShuttingDown: return SystemState::ShuttingDown;
-    case Services::Orchestration::SystemState::Shutdown: return SystemState::Shutdown;
-    case Services::Orchestration::SystemState::Aborting: return SystemState::Aborting;
-    default: throw SilKitError{"Incomplete system state mapping"};
+    case Services::Orchestration::SystemState::Invalid:
+        return SystemState::Invalid;
+    case Services::Orchestration::SystemState::ServicesCreated:
+        return SystemState::ServicesCreated;
+    case Services::Orchestration::SystemState::CommunicationInitializing:
+        return SystemState::CommunicationInitializing;
+    case Services::Orchestration::SystemState::CommunicationInitialized:
+        return SystemState::CommunicationInitialized;
+    case Services::Orchestration::SystemState::ReadyToRun:
+        return SystemState::ReadyToRun;
+    case Services::Orchestration::SystemState::Running:
+        return SystemState::Running;
+    case Services::Orchestration::SystemState::Paused:
+        return SystemState::Paused;
+    case Services::Orchestration::SystemState::Stopping:
+        return SystemState::Stopping;
+    case Services::Orchestration::SystemState::Stopped:
+        return SystemState::Stopped;
+    case Services::Orchestration::SystemState::Error:
+        return SystemState::Error;
+    case Services::Orchestration::SystemState::ShuttingDown:
+        return SystemState::ShuttingDown;
+    case Services::Orchestration::SystemState::Shutdown:
+        return SystemState::Shutdown;
+    case Services::Orchestration::SystemState::Aborting:
+        return SystemState::Aborting;
+    default:
+        throw SilKitError{"Incomplete system state mapping"};
     }
 }
 
@@ -77,22 +91,34 @@ ParticipantState MapParticipantState(Services::Orchestration::ParticipantState s
 {
     switch (state)
     {
-    case Services::Orchestration::ParticipantState::Invalid: return ParticipantState::Invalid;
-    case Services::Orchestration::ParticipantState::ServicesCreated: return ParticipantState::ServicesCreated;
+    case Services::Orchestration::ParticipantState::Invalid:
+        return ParticipantState::Invalid;
+    case Services::Orchestration::ParticipantState::ServicesCreated:
+        return ParticipantState::ServicesCreated;
     case Services::Orchestration::ParticipantState::CommunicationInitializing:
         return ParticipantState::CommunicationInitializing;
     case Services::Orchestration::ParticipantState::CommunicationInitialized:
         return ParticipantState::CommunicationInitialized;
-    case Services::Orchestration::ParticipantState::ReadyToRun: return ParticipantState::ReadyToRun;
-    case Services::Orchestration::ParticipantState::Running: return ParticipantState::Running;
-    case Services::Orchestration::ParticipantState::Paused: return ParticipantState::Paused;
-    case Services::Orchestration::ParticipantState::Stopping: return ParticipantState::Stopping;
-    case Services::Orchestration::ParticipantState::Stopped: return ParticipantState::Stopped;
-    case Services::Orchestration::ParticipantState::Error: return ParticipantState::Error;
-    case Services::Orchestration::ParticipantState::ShuttingDown: return ParticipantState::ShuttingDown;
-    case Services::Orchestration::ParticipantState::Shutdown: return ParticipantState::Shutdown;
-    case Services::Orchestration::ParticipantState::Aborting: return ParticipantState::Aborting;
-    default: throw SilKitError{"Incomplete participant state mapping"};
+    case Services::Orchestration::ParticipantState::ReadyToRun:
+        return ParticipantState::ReadyToRun;
+    case Services::Orchestration::ParticipantState::Running:
+        return ParticipantState::Running;
+    case Services::Orchestration::ParticipantState::Paused:
+        return ParticipantState::Paused;
+    case Services::Orchestration::ParticipantState::Stopping:
+        return ParticipantState::Stopping;
+    case Services::Orchestration::ParticipantState::Stopped:
+        return ParticipantState::Stopped;
+    case Services::Orchestration::ParticipantState::Error:
+        return ParticipantState::Error;
+    case Services::Orchestration::ParticipantState::ShuttingDown:
+        return ParticipantState::ShuttingDown;
+    case Services::Orchestration::ParticipantState::Shutdown:
+        return ParticipantState::Shutdown;
+    case Services::Orchestration::ParticipantState::Aborting:
+        return ParticipantState::Aborting;
+    default:
+        throw SilKitError{"Incomplete participant state mapping"};
     }
 }
 
@@ -111,9 +137,12 @@ LabelKind MapLabelKind(Services::MatchingLabel::Kind labelKind)
 {
     switch (labelKind)
     {
-    case Services::MatchingLabel::Kind::Optional: return LabelKind::Optional;
-    case Services::MatchingLabel::Kind::Mandatory: return LabelKind::Mandatory;
-    default: throw SilKitError{"Incomplete mapping"};
+    case Services::MatchingLabel::Kind::Optional:
+        return LabelKind::Optional;
+    case Services::MatchingLabel::Kind::Mandatory:
+        return LabelKind::Mandatory;
+    default:
+        throw SilKitError{"Incomplete mapping"};
     }
 }
 

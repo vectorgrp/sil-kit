@@ -42,17 +42,17 @@ using FlexrayMicroTick = SilKit_FlexrayMicroTick; //!< FlexRay micro tick
 enum class FlexrayChannel : SilKit_FlexrayChannel
 {
     None = SilKit_FlexrayChannel_None, //!< Invalid Channel
-    A    = SilKit_FlexrayChannel_A,    //!< Channel A
-    B    = SilKit_FlexrayChannel_B,    //!< Channel B
-    AB   = SilKit_FlexrayChannel_AB,   //!< Channel AB
+    A = SilKit_FlexrayChannel_A, //!< Channel A
+    B = SilKit_FlexrayChannel_B, //!< Channel B
+    AB = SilKit_FlexrayChannel_AB, //!< Channel AB
 };
 
 //! \brief Period of the clock (used for micro tick period and sample clock period).
 enum class FlexrayClockPeriod : SilKit_FlexrayClockPeriod
 {
     T12_5NS = SilKit_FlexrayClockPeriod_T12_5NS, //!< 12.5ns / 80MHz
-    T25NS   = SilKit_FlexrayClockPeriod_T25NS,   //!< 25ns   / 40MHz
-    T50NS   = SilKit_FlexrayClockPeriod_T50NS,   //!< 50ns   / 20MHz
+    T25NS = SilKit_FlexrayClockPeriod_T25NS, //!< 25ns   / 40MHz
+    T50NS = SilKit_FlexrayClockPeriod_T50NS, //!< 50ns   / 20MHz
 };
 
 /*!
@@ -72,7 +72,7 @@ struct FlexrayClusterParameters
     uint16_t gdActionPointOffset;
 
     ////! Not used by network simulator
-    //gdCASRxLowMax   
+    //gdCASRxLowMax
 
     //! Duration of the idle phase within a dynamic slot in gdMiniSlots (range 0-2).
     uint16_t gdDynamicSlotIdlePhase;
@@ -198,7 +198,7 @@ struct FlexrayNodeParameters
 
     //! Key slot is used for startup (range 0, 1).
     uint8_t pKeySlotUsedForStartup;
-    
+
     //! Key slot is used for sync (range 0, 1).
     uint8_t pKeySlotUsedForSync;
 
@@ -239,7 +239,7 @@ struct FlexrayNodeParameters
     FlexrayChannel pWakeupChannel;
 
     //! Number of repetitions of the wakeup symbol (range 0-63, value 0 or 1 prevents sending of WUP).
-    uint8_t pWakeupPattern; 
+    uint8_t pWakeupPattern;
 
     // ----------------------------------------------------------------------
     // Parameters according to B.3.2.2
@@ -373,9 +373,10 @@ struct FlexrayFrameTransmitEvent
  */
 enum class FlexraySymbolPattern : SilKit_FlexraySymbolPattern
 {
-    CasMts = SilKit_FlexraySymbolPattern_CasMts, //!< Collision avoidance symbol (CAS) OR media access test symbol (MTS).
-    Wus = SilKit_FlexraySymbolPattern_Wus,       //!< Wakeup symbol (WUS).
-    Wudop = SilKit_FlexraySymbolPattern_Wudop,   //!< Wakeup During Operation Pattern (WUDOP).
+    CasMts =
+        SilKit_FlexraySymbolPattern_CasMts, //!< Collision avoidance symbol (CAS) OR media access test symbol (MTS).
+    Wus = SilKit_FlexraySymbolPattern_Wus, //!< Wakeup symbol (WUS).
+    Wudop = SilKit_FlexraySymbolPattern_Wudop, //!< Wakeup During Operation Pattern (WUDOP).
 };
 
 /*!
@@ -422,13 +423,14 @@ struct FlexrayCycleStartEvent
 enum class FlexrayPocState : SilKit_FlexrayPocState
 {
     DefaultConfig = SilKit_FlexrayPocState_DefaultConfig, //!< CC expects configuration. Initial state after reset.
-    Config        = SilKit_FlexrayPocState_Config,        //!< CC is in configuration mode for setting communication parameters
-    Ready         = SilKit_FlexrayPocState_Ready,         //!< intermediate state for initialization process (after Config).
-    Startup       = SilKit_FlexrayPocState_Startup,       //!< FlexRay startup phase
-    Wakeup        = SilKit_FlexrayPocState_Wakeup,        //!< FlexRay wakeup phase
-    NormalActive  = SilKit_FlexrayPocState_NormalActive,  //!< Normal operating mode
+    Config = SilKit_FlexrayPocState_Config, //!< CC is in configuration mode for setting communication parameters
+    Ready = SilKit_FlexrayPocState_Ready, //!< intermediate state for initialization process (after Config).
+    Startup = SilKit_FlexrayPocState_Startup, //!< FlexRay startup phase
+    Wakeup = SilKit_FlexrayPocState_Wakeup, //!< FlexRay wakeup phase
+    NormalActive = SilKit_FlexrayPocState_NormalActive, //!< Normal operating mode
     NormalPassive = SilKit_FlexrayPocState_NormalPassive, //!< Operating mode with transient or tolerable errors
-    Halt          = SilKit_FlexrayPocState_Halt,          //!< CC is halted (caused by the application (FlexrayChiCommand::DEFERRED_HALT) or by a fatal error).
+    Halt =
+        SilKit_FlexrayPocState_Halt, //!< CC is halted (caused by the application (FlexrayChiCommand::DEFERRED_HALT) or by a fatal error).
 };
 
 /*!
@@ -503,9 +505,10 @@ struct FlexrayPocStatusEvent
 
     FlexrayPocState state; //!< Status of the Protocol Operation Control (POC).
     bool chiHaltRequest; //!< indicates whether a halt request was received from the CHI
-    bool coldstartNoise; //!< indicates noisy channel conditions during coldstart 
+    bool coldstartNoise; //!< indicates noisy channel conditions during coldstart
     bool freeze; //!< indicates that the POC entered a halt state due to an error condition requiring immediate halt.
-    bool chiReadyRequest; //!< indicates that the CHI requested to enter ready state at the end of the communication cycle.
+    bool
+        chiReadyRequest; //!< indicates that the CHI requested to enter ready state at the end of the communication cycle.
     FlexrayErrorModeType errorMode; //!< indicates the error mode of the POC
     FlexraySlotModeType slotMode; //!< indicates the slot mode of the POC
     FlexrayStartupStateType startupState; //!< indicates states within the STARTUP mechanism
@@ -518,64 +521,47 @@ struct FlexrayPocStatusEvent
 
 inline bool operator==(const FlexrayClusterParameters& lhs, const FlexrayClusterParameters& rhs)
 {
-    return lhs.gColdstartAttempts == rhs.gColdstartAttempts
-        && lhs.gCycleCountMax == rhs.gCycleCountMax
-        && lhs.gdActionPointOffset == rhs.gdActionPointOffset
-        && lhs.gdDynamicSlotIdlePhase == rhs.gdDynamicSlotIdlePhase
-        && lhs.gdMiniSlot == rhs.gdMiniSlot
-        && lhs.gdMiniSlotActionPointOffset == rhs.gdMiniSlotActionPointOffset
-        && lhs.gdStaticSlot == rhs.gdStaticSlot
-        && lhs.gdSymbolWindow == rhs.gdSymbolWindow
-        && lhs.gdSymbolWindowActionPointOffset == rhs.gdSymbolWindowActionPointOffset
-        && lhs.gdTSSTransmitter == rhs.gdTSSTransmitter
-        && lhs.gdWakeupTxActive == rhs.gdWakeupTxActive
-        && lhs.gdWakeupTxIdle == rhs.gdWakeupTxIdle
-        && lhs.gListenNoise == rhs.gListenNoise
-        && lhs.gMacroPerCycle == rhs.gMacroPerCycle
-        && lhs.gMaxWithoutClockCorrectionFatal == rhs.gMaxWithoutClockCorrectionFatal
-        && lhs.gMaxWithoutClockCorrectionPassive == rhs.gMaxWithoutClockCorrectionPassive
-        && lhs.gNumberOfMiniSlots == rhs.gNumberOfMiniSlots
-        && lhs.gNumberOfStaticSlots == rhs.gNumberOfStaticSlots
-        && lhs.gPayloadLengthStatic == rhs.gPayloadLengthStatic
-        && lhs.gSyncFrameIDCountMax == rhs.gSyncFrameIDCountMax;
+    return lhs.gColdstartAttempts == rhs.gColdstartAttempts && lhs.gCycleCountMax == rhs.gCycleCountMax
+           && lhs.gdActionPointOffset == rhs.gdActionPointOffset
+           && lhs.gdDynamicSlotIdlePhase == rhs.gdDynamicSlotIdlePhase && lhs.gdMiniSlot == rhs.gdMiniSlot
+           && lhs.gdMiniSlotActionPointOffset == rhs.gdMiniSlotActionPointOffset && lhs.gdStaticSlot == rhs.gdStaticSlot
+           && lhs.gdSymbolWindow == rhs.gdSymbolWindow
+           && lhs.gdSymbolWindowActionPointOffset == rhs.gdSymbolWindowActionPointOffset
+           && lhs.gdTSSTransmitter == rhs.gdTSSTransmitter && lhs.gdWakeupTxActive == rhs.gdWakeupTxActive
+           && lhs.gdWakeupTxIdle == rhs.gdWakeupTxIdle && lhs.gListenNoise == rhs.gListenNoise
+           && lhs.gMacroPerCycle == rhs.gMacroPerCycle
+           && lhs.gMaxWithoutClockCorrectionFatal == rhs.gMaxWithoutClockCorrectionFatal
+           && lhs.gMaxWithoutClockCorrectionPassive == rhs.gMaxWithoutClockCorrectionPassive
+           && lhs.gNumberOfMiniSlots == rhs.gNumberOfMiniSlots && lhs.gNumberOfStaticSlots == rhs.gNumberOfStaticSlots
+           && lhs.gPayloadLengthStatic == rhs.gPayloadLengthStatic
+           && lhs.gSyncFrameIDCountMax == rhs.gSyncFrameIDCountMax;
 }
 
 inline bool operator==(const FlexrayNodeParameters& lhs, const FlexrayNodeParameters& rhs)
 {
     return lhs.pAllowHaltDueToClock == rhs.pAllowHaltDueToClock
-        && lhs.pAllowPassiveToActive == rhs.pAllowPassiveToActive
-        && lhs.pChannels == rhs.pChannels
-        && lhs.pClusterDriftDamping == rhs.pClusterDriftDamping
-        && lhs.pdAcceptedStartupRange == rhs.pdAcceptedStartupRange
-        && lhs.pdListenTimeout == rhs.pdListenTimeout
-        && lhs.pKeySlotId == rhs.pKeySlotId
-        && lhs.pKeySlotOnlyEnabled == rhs.pKeySlotOnlyEnabled
-        && lhs.pKeySlotUsedForStartup == rhs.pKeySlotUsedForStartup
-        && lhs.pKeySlotUsedForSync == rhs.pKeySlotUsedForSync
-        && lhs.pLatestTx == rhs.pLatestTx
-        && lhs.pMacroInitialOffsetA == rhs.pMacroInitialOffsetA
-        && lhs.pMacroInitialOffsetB == rhs.pMacroInitialOffsetB
-        && lhs.pMicroInitialOffsetA == rhs.pMicroInitialOffsetA
-        && lhs.pMicroInitialOffsetB == rhs.pMicroInitialOffsetB
-        && lhs.pMicroPerCycle == rhs.pMicroPerCycle
-        && lhs.pOffsetCorrectionOut == rhs.pOffsetCorrectionOut
-        && lhs.pOffsetCorrectionStart == rhs.pOffsetCorrectionStart
-        && lhs.pRateCorrectionOut == rhs.pRateCorrectionOut
-        && lhs.pWakeupChannel == rhs.pWakeupChannel
-        && lhs.pWakeupPattern == rhs.pWakeupPattern
-        && lhs.pdMicrotick == rhs.pdMicrotick
-        && lhs.pSamplesPerMicrotick == rhs.pSamplesPerMicrotick;
+           && lhs.pAllowPassiveToActive == rhs.pAllowPassiveToActive && lhs.pChannels == rhs.pChannels
+           && lhs.pClusterDriftDamping == rhs.pClusterDriftDamping
+           && lhs.pdAcceptedStartupRange == rhs.pdAcceptedStartupRange && lhs.pdListenTimeout == rhs.pdListenTimeout
+           && lhs.pKeySlotId == rhs.pKeySlotId && lhs.pKeySlotOnlyEnabled == rhs.pKeySlotOnlyEnabled
+           && lhs.pKeySlotUsedForStartup == rhs.pKeySlotUsedForStartup
+           && lhs.pKeySlotUsedForSync == rhs.pKeySlotUsedForSync && lhs.pLatestTx == rhs.pLatestTx
+           && lhs.pMacroInitialOffsetA == rhs.pMacroInitialOffsetA
+           && lhs.pMacroInitialOffsetB == rhs.pMacroInitialOffsetB
+           && lhs.pMicroInitialOffsetA == rhs.pMicroInitialOffsetA
+           && lhs.pMicroInitialOffsetB == rhs.pMicroInitialOffsetB && lhs.pMicroPerCycle == rhs.pMicroPerCycle
+           && lhs.pOffsetCorrectionOut == rhs.pOffsetCorrectionOut
+           && lhs.pOffsetCorrectionStart == rhs.pOffsetCorrectionStart
+           && lhs.pRateCorrectionOut == rhs.pRateCorrectionOut && lhs.pWakeupChannel == rhs.pWakeupChannel
+           && lhs.pWakeupPattern == rhs.pWakeupPattern && lhs.pdMicrotick == rhs.pdMicrotick
+           && lhs.pSamplesPerMicrotick == rhs.pSamplesPerMicrotick;
 }
 
 inline bool operator==(const FlexrayTxBufferConfig& lhs, const FlexrayTxBufferConfig& rhs)
 {
-    return lhs.channels == rhs.channels
-        && lhs.slotId == rhs.slotId
-        && lhs.offset == rhs.offset
-        && lhs.repetition == rhs.repetition
-        && lhs.hasPayloadPreambleIndicator == rhs.hasPayloadPreambleIndicator
-        && lhs.headerCrc == rhs.headerCrc
-        && lhs.transmissionMode == rhs.transmissionMode;
+    return lhs.channels == rhs.channels && lhs.slotId == rhs.slotId && lhs.offset == rhs.offset
+           && lhs.repetition == rhs.repetition && lhs.hasPayloadPreambleIndicator == rhs.hasPayloadPreambleIndicator
+           && lhs.headerCrc == rhs.headerCrc && lhs.transmissionMode == rhs.transmissionMode;
 }
 
 inline FlexrayWakeupEvent::FlexrayWakeupEvent(const FlexraySymbolEvent& flexraySymbolEvent)

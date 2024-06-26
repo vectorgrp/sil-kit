@@ -75,7 +75,7 @@ public:
 
 private:
     void TriggerCall(Util::Span<const uint8_t> data, bool hasTimeout, std::chrono::nanoseconds timeout,
-                         void* userContext);
+                     void* userContext);
     void TimeHandler(std::chrono::nanoseconds now, std::chrono::nanoseconds duration);
 
     class RpcCallInfo
@@ -87,9 +87,15 @@ private:
         {
         }
 
-        auto DecrementRemainingReturnCount() -> int32_t { return --_remainingReturnCount; }
+        auto DecrementRemainingReturnCount() -> int32_t
+        {
+            return --_remainingReturnCount;
+        }
 
-        auto GetUserContext() const -> void* { return _userContext; }
+        auto GetUserContext() const -> void*
+        {
+            return _userContext;
+        }
 
     private:
         int32_t _remainingReturnCount = 0;
@@ -122,7 +128,7 @@ private:
     std::vector<TimeoutEntry> _timeoutEntries{};
     std::function<void(std::chrono::nanoseconds now, std::chrono::nanoseconds duration)> _timeoutHandler{};
     Services::HandlerId _timeoutHandlerId{};
-    std::atomic<bool> _isTimeoutHandlerSet{ false };
+    std::atomic<bool> _isTimeoutHandlerSet{false};
 };
 
 // ================================================================================

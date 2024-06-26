@@ -50,7 +50,8 @@ SILKIT_BEGIN_DECLS
  */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_ReturnCodeToString(const char** outString, SilKit_ReturnCode returnCode);
 
-typedef  SilKit_ReturnCode (SilKitFPTR *SilKit_ReturnCodeToString_t)(const char** outString, SilKit_ReturnCode returnCode);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_ReturnCodeToString_t)(const char** outString,
+                                                                   SilKit_ReturnCode returnCode);
 
 /*! \brief Get a human readable error description of the last error on the current thread.
  *
@@ -62,7 +63,7 @@ typedef  SilKit_ReturnCode (SilKitFPTR *SilKit_ReturnCodeToString_t)(const char*
  */
 SilKitAPI const char* SilKitCALL SilKit_GetLastErrorString();
 
-typedef const char*(SilKitFPTR *SilKit_GetLastErrorString_t)();
+typedef const char*(SilKitFPTR* SilKit_GetLastErrorString_t)();
 
 /*! \brief Create an opaque participant configuration from the configuration text.
  *
@@ -72,12 +73,10 @@ typedef const char*(SilKitFPTR *SilKit_GetLastErrorString_t)();
  * \param participantConfigurationString The configuration as a UTF-8 encoded string (e.g., read from a configuration file or a string constant).
  */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_ParticipantConfiguration_FromString(
-    SilKit_ParticipantConfiguration** outParticipantConfiguration,
-    const char* participantConfigurationString);
+    SilKit_ParticipantConfiguration** outParticipantConfiguration, const char* participantConfigurationString);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_ParticipantConfiguration_FromString_t)(
-    SilKit_ParticipantConfiguration** outParticipantConfiguration,
-    const char* participantConfigurationString);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_ParticipantConfiguration_FromString_t)(
+    SilKit_ParticipantConfiguration** outParticipantConfiguration, const char* participantConfigurationString);
 
 
 /*! \brief Create an opaque participant configuration from the contents of the UTF-8 encoded text file.
@@ -88,22 +87,20 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_ParticipantConfiguration_FromStrin
  * \param participantConfigurationPath The path to the configuration file as a UTF-8 encoded string.
  */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_ParticipantConfiguration_FromFile(
-    SilKit_ParticipantConfiguration** outParticipantConfiguration,
-    const char* participantConfigurationPath);
+    SilKit_ParticipantConfiguration** outParticipantConfiguration, const char* participantConfigurationPath);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_ParticipantConfiguration_FromFile_t)(
-    SilKit_ParticipantConfiguration** outParticipantConfiguration,
-    const char* participantConfigurationPath);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_ParticipantConfiguration_FromFile_t)(
+    SilKit_ParticipantConfiguration** outParticipantConfiguration, const char* participantConfigurationPath);
 
 
 /*! \brief Destroy a participant configuration.
  *
  * \param participantConfiguration The participant configuration to be destroyed.
  */
-SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_ParticipantConfiguration_Destroy(
-    SilKit_ParticipantConfiguration* participantConfiguration);
+SilKitAPI SilKit_ReturnCode SilKitCALL
+SilKit_ParticipantConfiguration_Destroy(SilKit_ParticipantConfiguration* participantConfiguration);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_ParticipantConfiguration_Destroy_t)(
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_ParticipantConfiguration_Destroy_t)(
     SilKit_ParticipantConfiguration* participantConfiguration);
 
 

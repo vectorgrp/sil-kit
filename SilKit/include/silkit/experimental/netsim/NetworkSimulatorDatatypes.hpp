@@ -50,7 +50,8 @@ struct CanConfigureBaudrate
 };
 struct CanControllerMode
 {
-    SilKit_Experimental_NetSim_CanControllerModeFlags canControllerModeFlags; //!< Flag for resetting the error handling and/or canceling all outstanding transmit requests
+    SilKit_Experimental_NetSim_CanControllerModeFlags
+        canControllerModeFlags; //!< Flag for resetting the error handling and/or canceling all outstanding transmit requests
     SilKit::Services::Can::CanControllerState state; //!< State that the CAN controller should reach.
 };
 
@@ -138,8 +139,10 @@ namespace Lin {
 
 struct LinFrameRequest
 {
-    SilKit::Services::Lin::LinFrame frame; //!< Provide the LIN ID, checksum model, expected data length and optional data.
-    SilKit::Services::Lin::LinFrameResponseType responseType; //!< Determines whether to provide a frame response or not.
+    SilKit::Services::Lin::LinFrame
+        frame; //!< Provide the LIN ID, checksum model, expected data length and optional data.
+    SilKit::Services::Lin::LinFrameResponseType
+        responseType; //!< Determines whether to provide a frame response or not.
 };
 
 struct LinFrameHeaderRequest

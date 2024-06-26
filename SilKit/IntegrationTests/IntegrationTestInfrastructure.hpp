@@ -35,7 +35,6 @@ using namespace SilKit::Config;
 
 class TestInfrastructure
 {
-
 public:
     TestInfrastructure() {}
 
@@ -46,8 +45,9 @@ public:
         _systemMaster.systemController->AbortSimulation();
         FAIL() << ss.str();
     }
-    
-    void SetupRegistryAndSystemMaster(const std::string& registryUri, bool sync, std::vector<std::string> requiredParticipantNames)
+
+    void SetupRegistryAndSystemMaster(const std::string& registryUri, bool sync,
+                                      std::vector<std::string> requiredParticipantNames)
     {
         try
         {
@@ -77,7 +77,6 @@ public:
     }
 
 private:
-
     void RunRegistry(const std::string& registryUri)
     {
         _registry = SilKit::Vendor::Vector::CreateSilKitRegistry(SilKit::Config::MakeEmptyParticipantConfiguration());
@@ -96,11 +95,9 @@ private:
         _systemMaster.lifecycleService =
             _systemMaster.participant->CreateLifecycleService({OperationMode::Coordinated});
 
-        ITimeSyncService * timeSyncService = _systemMaster.lifecycleService->CreateTimeSyncService();
+        ITimeSyncService* timeSyncService = _systemMaster.lifecycleService->CreateTimeSyncService();
         timeSyncService->SetSimulationStepHandler(
-            [](std::chrono::nanoseconds /*now*/, std::chrono::nanoseconds /*duration*/) {
-            },
-            std::chrono::seconds{1});
+            [](std::chrono::nanoseconds /*now*/, std::chrono::nanoseconds /*duration*/) {}, std::chrono::seconds{1});
 
         requiredParticipantNames.push_back(systemMasterName);
         _systemMaster.systemController->SetWorkflowConfiguration({requiredParticipantNames});
@@ -116,15 +113,19 @@ private:
             case SystemState::Running:
                 _systemMaster.systemStateRunningPromise.set_value();
                 break;
-            default: break;
+            default:
+                break;
             }
         });
 
         _systemMaster.systemMonitor->AddParticipantStatusHandler([this](const ParticipantStatus& newStatus) {
             switch (newStatus.state)
             {
-            case ParticipantState::Error: _systemMaster.systemController->AbortSimulation(); break;
-            default: break;
+            case ParticipantState::Error:
+                _systemMaster.systemController->AbortSimulation();
+                break;
+            default:
+                break;
             }
         });
 
@@ -146,5 +147,4 @@ private:
     };
 
     SystemMaster _systemMaster;
-
 };

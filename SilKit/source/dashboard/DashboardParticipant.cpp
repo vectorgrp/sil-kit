@@ -57,18 +57,14 @@ DashboardParticipant::DashboardParticipant(std::shared_ptr<SilKit::Config::IPart
     auto eventQueue = std::make_shared<SilKitEventQueue>();
     _cachingEventHandler = std::make_unique<CachingSilKitEventHandler>(registryUri, _logger, eventHandler, eventQueue);
 
-    _systemMonitor->SetParticipantConnectedHandler([this](auto&& participantInformation) {
-        OnParticipantConnected(participantInformation);
-    });
-    _systemMonitor->SetParticipantDisconnectedHandler([this](auto&& participantInformation) {
-        OnParticipantDisconnected(participantInformation);
-    });
-    _participantStatusHandlerId = _systemMonitor->AddParticipantStatusHandler([this](auto&& participantStatus) {
-        OnParticipantStatusChanged(participantStatus);
-    });
-    _systemStateHandlerId = _systemMonitor->AddSystemStateHandler([this](auto&& systemState) {
-        OnSystemStateChanged(systemState);
-    });
+    _systemMonitor->SetParticipantConnectedHandler(
+        [this](auto&& participantInformation) { OnParticipantConnected(participantInformation); });
+    _systemMonitor->SetParticipantDisconnectedHandler(
+        [this](auto&& participantInformation) { OnParticipantDisconnected(participantInformation); });
+    _participantStatusHandlerId = _systemMonitor->AddParticipantStatusHandler(
+        [this](auto&& participantStatus) { OnParticipantStatusChanged(participantStatus); });
+    _systemStateHandlerId =
+        _systemMonitor->AddSystemStateHandler([this](auto&& systemState) { OnSystemStateChanged(systemState); });
     _serviceDiscovery->RegisterServiceDiscoveryHandler([this](auto&& discoveryType, auto&& serviceDescriptor) {
         OnServiceDiscoveryEvent(discoveryType, serviceDescriptor);
     });

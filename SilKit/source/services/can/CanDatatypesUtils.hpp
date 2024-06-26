@@ -35,7 +35,7 @@ bool operator==(const CanFrameTransmitEvent& lhs, const CanFrameTransmitEvent& r
 bool operator==(const CanStateChangeEvent& lhs, const CanStateChangeEvent& rhs);
 bool operator==(const CanErrorStateChangeEvent& lhs, const CanErrorStateChangeEvent& rhs);
 
-bool operator==(const WireCanFrameEvent& lhs, const WireCanFrameEvent&rhs);
+bool operator==(const WireCanFrameEvent& lhs, const WireCanFrameEvent& rhs);
 
 bool operator==(const CanSetControllerMode& lhs, const CanSetControllerMode& rhs);
 bool operator==(const CanConfigureBaudrate& lhs, const CanConfigureBaudrate& rhs);

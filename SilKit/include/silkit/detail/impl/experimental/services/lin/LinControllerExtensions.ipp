@@ -33,7 +33,7 @@ namespace Services {
 namespace Lin {
 
 auto AddLinSlaveConfigurationHandler(SilKit::Services::Lin::ILinController* cppILinController,
-                                            SilKit::Experimental::Services::Lin::LinSlaveConfigurationHandler handler)
+                                     SilKit::Experimental::Services::Lin::LinSlaveConfigurationHandler handler)
     -> SilKit::Util::HandlerId
 {
     auto& cppLinController = dynamic_cast<Impl::Services::Lin::LinController&>(*cppILinController);
@@ -42,7 +42,7 @@ auto AddLinSlaveConfigurationHandler(SilKit::Services::Lin::ILinController* cppI
 }
 
 void RemoveLinSlaveConfigurationHandler(SilKit::Services::Lin::ILinController* cppILinController,
-                                               SilKit::Util::HandlerId handlerId)
+                                        SilKit::Util::HandlerId handlerId)
 {
     auto& cppLinController = dynamic_cast<Impl::Services::Lin::LinController&>(*cppILinController);
 
@@ -57,28 +57,33 @@ auto GetSlaveConfiguration(SilKit::Services::Lin::ILinController* cppILinControl
     return cppLinController.ExperimentalGetSlaveConfiguration();
 }
 
-void InitDynamic(SilKit::Services::Lin::ILinController* linController, const SilKit::Experimental::Services::Lin::LinControllerDynamicConfig& dynamicConfig)
+void InitDynamic(SilKit::Services::Lin::ILinController* linController,
+                 const SilKit::Experimental::Services::Lin::LinControllerDynamicConfig& dynamicConfig)
 {
     auto& cppLinController = dynamic_cast<Impl::Services::Lin::LinController&>(*linController);
 
     cppLinController.ExperimentalInitDynamic(dynamicConfig);
 }
 
-auto AddFrameHeaderHandler(SilKit::Services::Lin::ILinController* linController, SilKit::Experimental::Services::Lin::LinFrameHeaderHandler handler) -> SilKit::Services::HandlerId
+auto AddFrameHeaderHandler(SilKit::Services::Lin::ILinController* linController,
+                           SilKit::Experimental::Services::Lin::LinFrameHeaderHandler handler)
+    -> SilKit::Services::HandlerId
 {
     auto& cppLinController = dynamic_cast<Impl::Services::Lin::LinController&>(*linController);
 
     return cppLinController.ExperimentalAddFrameHeaderHandler(std::move(handler));
 }
 
-void RemoveFrameHeaderHandler(SilKit::Services::Lin::ILinController* linController, SilKit::Services::HandlerId handlerId)
+void RemoveFrameHeaderHandler(SilKit::Services::Lin::ILinController* linController,
+                              SilKit::Services::HandlerId handlerId)
 {
     auto& cppLinController = dynamic_cast<Impl::Services::Lin::LinController&>(*linController);
 
     cppLinController.ExperimentalRemoveFrameHeaderHandler(handlerId);
 }
 
-void SendDynamicResponse(SilKit::Services::Lin::ILinController* linController, const SilKit::Services::Lin::LinFrame& linFrame)
+void SendDynamicResponse(SilKit::Services::Lin::ILinController* linController,
+                         const SilKit::Services::Lin::LinFrame& linFrame)
 {
     auto& cppLinController = dynamic_cast<Impl::Services::Lin::LinController&>(*linController);
 

@@ -28,7 +28,8 @@ namespace SilKit {
 namespace Services {
 namespace PubSub {
 
-DataSubscriberInternal::DataSubscriberInternal(Core::IParticipantInternal* participant, Services::Orchestration::ITimeProvider* timeProvider,
+DataSubscriberInternal::DataSubscriberInternal(Core::IParticipantInternal* participant,
+                                               Services::Orchestration::ITimeProvider* timeProvider,
                                                const std::string& topic, const std::string& mediaType,
                                                const std::vector<SilKit::Services::MatchingLabel>& labels,
                                                DataMessageHandler defaultHandler, IDataSubscriber* parent)
@@ -65,7 +66,6 @@ void DataSubscriberInternal::ReceiveMsg(const IServiceEndpoint* /*from*/, const 
 
 void DataSubscriberInternal::ReceiveInternal(const WireDataMessageEvent& dataMessageEvent)
 {
-
     if (_defaultHandler)
     {
         _defaultHandler(_parent, ToDataMessageEvent(dataMessageEvent));
@@ -73,7 +73,8 @@ void DataSubscriberInternal::ReceiveInternal(const WireDataMessageEvent& dataMes
 
     if (!_defaultHandler)
     {
-        _participant->GetLogger()->Warn("DataSubscriber on topic " + _topic + " received data, but has no default handler assigned");
+        _participant->GetLogger()->Warn("DataSubscriber on topic " + _topic
+                                        + " received data, but has no default handler assigned");
     }
 }
 

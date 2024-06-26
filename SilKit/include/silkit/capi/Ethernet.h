@@ -33,21 +33,21 @@ SILKIT_BEGIN_DECLS
 typedef uint32_t SilKit_EthernetTransmitStatus;
 
 //! The message was successfully transmitted on the CAN bus.
-#define SilKit_EthernetTransmitStatus_Transmitted ((SilKit_EthernetTransmitStatus) BIT(0))
+#define SilKit_EthernetTransmitStatus_Transmitted ((SilKit_EthernetTransmitStatus)BIT(0))
 
 //! The transmit request was rejected, because the Ethernet controller is not active.
-#define SilKit_EthernetTransmitStatus_ControllerInactive ((SilKit_EthernetTransmitStatus) BIT(1))
+#define SilKit_EthernetTransmitStatus_ControllerInactive ((SilKit_EthernetTransmitStatus)BIT(1))
 
 //! The transmit request was rejected, because the Ethernet link is down.
-#define SilKit_EthernetTransmitStatus_LinkDown ((SilKit_EthernetTransmitStatus) BIT(2))
+#define SilKit_EthernetTransmitStatus_LinkDown ((SilKit_EthernetTransmitStatus)BIT(2))
 
 //! The transmit request was dropped, because the transmit queue is full.
-#define SilKit_EthernetTransmitStatus_Dropped ((SilKit_EthernetTransmitStatus) BIT(3))
+#define SilKit_EthernetTransmitStatus_Dropped ((SilKit_EthernetTransmitStatus)BIT(3))
 
 /* (SilKit_EthernetTransmitStatus) BIT(4) is RESERVED (used to be SilKit_EthernetTransmitStatus_DuplicatedTransmitId) */
 
 //! The given raw Ethernet frame is ill formated (e.g. frame length is too small or too large, etc.).
-#define SilKit_EthernetTransmitStatus_InvalidFrameFormat ((SilKit_EthernetTransmitStatus) BIT(5))
+#define SilKit_EthernetTransmitStatus_InvalidFrameFormat ((SilKit_EthernetTransmitStatus)BIT(5))
 
 //! Combines all available transmit statuses.
 #define SilKit_EthernetTransmitStatus_DefaultMask \
@@ -59,13 +59,13 @@ typedef uint32_t SilKit_EthernetTransmitStatus;
 typedef uint32_t SilKit_EthernetState;
 
 //! The Ethernet controller is switched off (default after reset).
-#define SilKit_EthernetState_Inactive ((SilKit_EthernetState) 0)
+#define SilKit_EthernetState_Inactive ((SilKit_EthernetState)0)
 
 //! The Ethernet controller is active, but a link to another Ethernet controller in not yet established.
-#define SilKit_EthernetState_LinkDown ((SilKit_EthernetState) 1)
+#define SilKit_EthernetState_LinkDown ((SilKit_EthernetState)1)
 
 //! The Ethernet controller is active and the link to another Ethernet controller is established.
-#define SilKit_EthernetState_LinkUp ((SilKit_EthernetState) 2)
+#define SilKit_EthernetState_LinkUp ((SilKit_EthernetState)2)
 
 
 typedef struct
@@ -92,7 +92,7 @@ typedef struct
 } SilKit_EthernetFrame;
 
 
-typedef struct 
+typedef struct
 {
     SilKit_StructHeader structHeader; //!< The interface id that specifies which version of this struct was obtained
     SilKit_NanosecondsTime timestamp; //!< Send time
@@ -117,32 +117,32 @@ typedef struct SilKit_EthernetController SilKit_EthernetController;
 * \param controller The Ethernet controller that received the message.
 * \param frameEvent Contains the raw frame and the timestamp of the event.
 */
-typedef void (SilKitFPTR *SilKit_EthernetFrameHandler_t)(void* context, SilKit_EthernetController* controller,
-  SilKit_EthernetFrameEvent* frameEvent);
-    
+typedef void(SilKitFPTR* SilKit_EthernetFrameHandler_t)(void* context, SilKit_EthernetController* controller,
+                                                        SilKit_EthernetFrameEvent* frameEvent);
+
 /*! Callback type to indicate that a EthernetFrame has been sent.
 * \param context The by the user provided context on registration.
 * \param controller The Ethernet controller that received the acknowledge.
 * \param frameTransmitEvent Contains the transmit status and the timestamp of the event.
 */
-typedef void (SilKitFPTR *SilKit_EthernetFrameTransmitHandler_t)(void* context, SilKit_EthernetController* controller,
-  SilKit_EthernetFrameTransmitEvent* frameTransmitEvent);
-    
+typedef void(SilKitFPTR* SilKit_EthernetFrameTransmitHandler_t)(void* context, SilKit_EthernetController* controller,
+                                                                SilKit_EthernetFrameTransmitEvent* frameTransmitEvent);
+
 /*! Callback type to indicate that the Ethernet controller state has changed.
 * \param context The by the user provided context on registration.
 * \param controller The Ethernet controller whose state did change.
 * \param stateChangeEvent Contains the new state and the timestamp of the event.
 */
-typedef void (SilKitFPTR *SilKit_EthernetStateChangeHandler_t)(void* context, SilKit_EthernetController* controller,
-  SilKit_EthernetStateChangeEvent* stateChangeEvent);
+typedef void(SilKitFPTR* SilKit_EthernetStateChangeHandler_t)(void* context, SilKit_EthernetController* controller,
+                                                              SilKit_EthernetStateChangeEvent* stateChangeEvent);
 
 /*! Callback type to indicate that the link bit rate has changed.
 * \param context Context pointer provided by the user on registration.
 * \param controller The Ethernet controller that is affected.
 * \param bitrateChangeEvent Contains the new bitrate and the timestamp of the event.
 */
-typedef void (SilKitFPTR *SilKit_EthernetBitrateChangeHandler_t)(void* context, SilKit_EthernetController* controller,
-  SilKit_EthernetBitrateChangeEvent* bitrateChangeEvent);
+typedef void(SilKitFPTR* SilKit_EthernetBitrateChangeHandler_t)(void* context, SilKit_EthernetController* controller,
+                                                                SilKit_EthernetBitrateChangeEvent* bitrateChangeEvent);
 
 /*! \brief Create an Ethernet controller at this SIL Kit simulation participant.
 * 
@@ -154,15 +154,13 @@ typedef void (SilKitFPTR *SilKit_EthernetBitrateChangeHandler_t)(void* context, 
 * ! \note The object returned must not be deallocated using free()!
 * 
 */
-SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_EthernetController_Create(
-  SilKit_EthernetController** outController,
-  SilKit_Participant* participant, const char* name, const char* network);
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_EthernetController_Create(SilKit_EthernetController** outController,
+                                                                        SilKit_Participant* participant,
+                                                                        const char* name, const char* network);
 
-typedef SilKit_ReturnCode(SilKitFPTR *SilKit_EthernetController_Create_t)(
-  SilKit_EthernetController** outController,
-  SilKit_Participant* participant, 
-  const char* name,
-  const char* network);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_EthernetController_Create_t)(SilKit_EthernetController** outController,
+                                                                          SilKit_Participant* participant,
+                                                                          const char* name, const char* network);
 
 /*! \brief Activates the Ethernet controller
 *
@@ -176,7 +174,7 @@ typedef SilKit_ReturnCode(SilKitFPTR *SilKit_EthernetController_Create_t)(
 */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_EthernetController_Activate(SilKit_EthernetController* controller);
 
-typedef SilKit_ReturnCode(SilKitFPTR *SilKit_EthernetController_Activate_t)(SilKit_EthernetController* controller);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_EthernetController_Activate_t)(SilKit_EthernetController* controller);
 
 /*! \brief Deactivate the Ethernet controller
 *
@@ -190,7 +188,7 @@ typedef SilKit_ReturnCode(SilKitFPTR *SilKit_EthernetController_Activate_t)(SilK
 */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_EthernetController_Deactivate(SilKit_EthernetController* controller);
 
-typedef SilKit_ReturnCode(SilKitFPTR *SilKit_EthernetController_Deactivate_t)(SilKit_EthernetController* controller);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_EthernetController_Deactivate_t)(SilKit_EthernetController* controller);
 
 /*! \brief Register a callback for Ethernet message reception
 *
@@ -206,27 +204,25 @@ typedef SilKit_ReturnCode(SilKitFPTR *SilKit_EthernetController_Deactivate_t)(Si
 * 
 */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_EthernetController_AddFrameHandler(SilKit_EthernetController* controller,
-                                                                      void* context,
-                                                                      SilKit_EthernetFrameHandler_t handler,
-                                                                      SilKit_Direction directionMask,
-                                                                      SilKit_HandlerId* outHandlerId);
+                                                                                 void* context,
+                                                                                 SilKit_EthernetFrameHandler_t handler,
+                                                                                 SilKit_Direction directionMask,
+                                                                                 SilKit_HandlerId* outHandlerId);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_EthernetController_AddFrameHandler_t)(SilKit_EthernetController* controller,
-                                                                         void* context,
-                                                                         SilKit_EthernetFrameHandler_t handler,
-                                                                         SilKit_Direction directionMask,
-                                                                         SilKit_HandlerId* outHandlerId);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_EthernetController_AddFrameHandler_t)(
+    SilKit_EthernetController* controller, void* context, SilKit_EthernetFrameHandler_t handler,
+    SilKit_Direction directionMask, SilKit_HandlerId* outHandlerId);
 
 /*! \brief  Remove a \ref SilKit_EthernetFrameHandler_t by SilKit_HandlerId on this controller 
 *
 * \param controller The Ethernet controller for which the callback should be removed.
 * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
 */
-SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_EthernetController_RemoveFrameHandler(SilKit_EthernetController* controller,
-                                                                          SilKit_HandlerId handlerId);
+SilKitAPI SilKit_ReturnCode SilKitCALL
+SilKit_EthernetController_RemoveFrameHandler(SilKit_EthernetController* controller, SilKit_HandlerId handlerId);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_EthernetController_RemoveFrameHandler_t)(SilKit_EthernetController* controller,
-                                                                     SilKit_HandlerId handlerId);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_EthernetController_RemoveFrameHandler_t)(
+    SilKit_EthernetController* controller, SilKit_HandlerId handlerId);
 
 /*! \brief Register a callback for Ethernet transmit acknowledgments
 *
@@ -246,14 +242,11 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_EthernetController_RemoveFrameHand
 * \result A return code identifying the success/failure of the call.
 * 
 */
-SilKitAPI SilKit_ReturnCode
-    SilKitCALL SilKit_EthernetController_AddFrameTransmitHandler(SilKit_EthernetController* controller,
-                                                  void* context,
-                                                  SilKit_EthernetFrameTransmitHandler_t handler,
-                                                  SilKit_EthernetTransmitStatus transmitStatusMask,
-                                                  SilKit_HandlerId* outHandlerId);
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_EthernetController_AddFrameTransmitHandler(
+    SilKit_EthernetController* controller, void* context, SilKit_EthernetFrameTransmitHandler_t handler,
+    SilKit_EthernetTransmitStatus transmitStatusMask, SilKit_HandlerId* outHandlerId);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_EthernetController_AddFrameTransmitHandler_t)(
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_EthernetController_AddFrameTransmitHandler_t)(
     SilKit_EthernetController* controller, void* context, SilKit_EthernetFrameTransmitHandler_t handler,
     SilKit_EthernetTransmitStatus transmitStatusMask, SilKit_HandlerId* outHandlerId);
 
@@ -262,11 +255,11 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_EthernetController_AddFrameTransmi
 * \param controller The Ethernet controller for which the callback should be removed.
 * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
 */
-SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_EthernetController_RemoveFrameTransmitHandler(SilKit_EthernetController* controller,
-                                                                                  SilKit_HandlerId handlerId);
+SilKitAPI SilKit_ReturnCode SilKitCALL
+SilKit_EthernetController_RemoveFrameTransmitHandler(SilKit_EthernetController* controller, SilKit_HandlerId handlerId);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_EthernetController_RemoveFrameTransmitHandler_t)(SilKit_EthernetController* controller,
-                                                                             SilKit_HandlerId handlerId);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_EthernetController_RemoveFrameTransmitHandler_t)(
+    SilKit_EthernetController* controller, SilKit_HandlerId handlerId);
 
 /*! \brief Register a callback for changes of the controller state
 *
@@ -284,26 +277,24 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_EthernetController_RemoveFrameTran
 * \result A return code identifying the success/failure of the call.
 * 
 */
-SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_EthernetController_AddStateChangeHandler(SilKit_EthernetController* controller,
-                                                                             void* context,
-                                                                             SilKit_EthernetStateChangeHandler_t handler,
-                                                                             SilKit_HandlerId* outHandlerId);
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_EthernetController_AddStateChangeHandler(
+    SilKit_EthernetController* controller, void* context, SilKit_EthernetStateChangeHandler_t handler,
+    SilKit_HandlerId* outHandlerId);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_EthernetController_AddStateChangeHandler_t)(SilKit_EthernetController* controller,
-                                                                        void* context,
-                                                                        SilKit_EthernetStateChangeHandler_t handler,
-                                                                        SilKit_HandlerId* outHandlerId);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_EthernetController_AddStateChangeHandler_t)(
+    SilKit_EthernetController* controller, void* context, SilKit_EthernetStateChangeHandler_t handler,
+    SilKit_HandlerId* outHandlerId);
 
 /*! \brief  Remove a \ref SilKit_EthernetStateChangeHandler_t by SilKit_HandlerId on this controller 
 *
 * \param controller The Ethernet controller for which the callback should be removed.
 * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
 */
-SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_EthernetController_RemoveStateChangeHandler(SilKit_EthernetController* controller,
-                                                                                SilKit_HandlerId handlerId);
+SilKitAPI SilKit_ReturnCode SilKitCALL
+SilKit_EthernetController_RemoveStateChangeHandler(SilKit_EthernetController* controller, SilKit_HandlerId handlerId);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_EthernetController_RemoveStateChangeHandler_t)(SilKit_EthernetController* controller,
-                                                                           SilKit_HandlerId handlerId);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_EthernetController_RemoveStateChangeHandler_t)(
+    SilKit_EthernetController* controller, SilKit_HandlerId handlerId);
 
 
 /*! \brief Register a callback for changes of the link bit rate
@@ -319,24 +310,23 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_EthernetController_RemoveStateChan
 * \result A return code identifying the success/failure of the call.
 * 
 */
-SilKitAPI SilKit_ReturnCode
-SilKitCALL SilKit_EthernetController_AddBitrateChangeHandler(SilKit_EthernetController* controller, void* context,
-                                               SilKit_EthernetBitrateChangeHandler_t handler, SilKit_HandlerId* outHandlerId);
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_EthernetController_AddBitrateChangeHandler(
+    SilKit_EthernetController* controller, void* context, SilKit_EthernetBitrateChangeHandler_t handler,
+    SilKit_HandlerId* outHandlerId);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_EthernetController_AddBitrateChangeHandler_t)(SilKit_EthernetController* controller,
-                                                                          void* context,
-                                                                          SilKit_EthernetBitrateChangeHandler_t handler,
-                                                                          SilKit_HandlerId* outHandlerId);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_EthernetController_AddBitrateChangeHandler_t)(
+    SilKit_EthernetController* controller, void* context, SilKit_EthernetBitrateChangeHandler_t handler,
+    SilKit_HandlerId* outHandlerId);
 /*! \brief  Remove a \ref SilKit_EthernetBitrateChangeHandler_t by SilKit_HandlerId on this controller 
 *
 * \param controller The Ethernet controller for which the callback should be removed.
 * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
 */
-SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_EthernetController_RemoveBitrateChangeHandler(SilKit_EthernetController* controller,
-                                                                                  SilKit_HandlerId handlerId);
+SilKitAPI SilKit_ReturnCode SilKitCALL
+SilKit_EthernetController_RemoveBitrateChangeHandler(SilKit_EthernetController* controller, SilKit_HandlerId handlerId);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_EthernetController_RemoveBitrateChangeHandler_t)(SilKit_EthernetController* controller,
-                                                                             SilKit_HandlerId handlerId);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_EthernetController_RemoveBitrateChangeHandler_t)(
+    SilKit_EthernetController* controller, SilKit_HandlerId handlerId);
 
 /*! \brief Send an Ethernet frame
  *
@@ -358,15 +348,13 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_EthernetController_RemoveBitrateCh
  *                    the frame ack handler
  * \result A return code identifying the success/failure of the call.
  */
-SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_EthernetController_SendFrame(
-  SilKit_EthernetController* controller,
-  SilKit_EthernetFrame* frame,
-  void* userContext);
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_EthernetController_SendFrame(SilKit_EthernetController* controller,
+                                                                           SilKit_EthernetFrame* frame,
+                                                                           void* userContext);
 
-typedef SilKit_ReturnCode(SilKitFPTR *SilKit_EthernetController_SendFrame_t)(
-  SilKit_EthernetController* controller,
-  SilKit_EthernetFrame* frame,
-  void* userContext);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_EthernetController_SendFrame_t)(SilKit_EthernetController* controller,
+                                                                             SilKit_EthernetFrame* frame,
+                                                                             void* userContext);
 
 SILKIT_END_DECLS
 

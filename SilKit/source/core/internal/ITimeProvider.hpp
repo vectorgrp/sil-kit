@@ -50,8 +50,7 @@ public:
     //! \brief Name of the time provider, for debugging purposes.
     virtual auto TimeProviderName() const -> const std::string& = 0;
 
-    using NextSimStepHandler = std::function<void(std::chrono::nanoseconds now,
-        std::chrono::nanoseconds duration)>;
+    using NextSimStepHandler = std::function<void(std::chrono::nanoseconds now, std::chrono::nanoseconds duration)>;
 
     /*! \brief Register a handler that is executed when the next simulation step is started.
      *

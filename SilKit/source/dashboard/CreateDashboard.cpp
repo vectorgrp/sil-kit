@@ -34,8 +34,8 @@ namespace SilKit {
 namespace Dashboard {
 
 auto CreateDashboard(std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig,
-                     const std::string& registryUri, const std::string& dashboardUri)
-    -> std::unique_ptr<SilKit::Dashboard::IDashboard>
+                     const std::string& registryUri,
+                     const std::string& dashboardUri) -> std::unique_ptr<SilKit::Dashboard::IDashboard>
 {
     return std::make_unique<SilKit::Dashboard::OatppContext>(participantConfig, registryUri, dashboardUri);
 }
@@ -56,15 +56,13 @@ auto RunDashboardTest(std::shared_ptr<SilKit::Config::IParticipantConfiguration>
                                                                                         creationTimeout, updateTimeout);
         runner.addController(controller);
 
-        runner.run(
-            [testCode = std::move(testCode), participantConfig, &registryUri, controller]() {
-                auto dashboard = std::make_unique<Dashboard>(participantConfig, registryUri);
-                SILKIT_UNUSED_ARG(dashboard);
+        runner.run([testCode = std::move(testCode), participantConfig, &registryUri, controller]() {
+            auto dashboard = std::make_unique<Dashboard>(participantConfig, registryUri);
+            SILKIT_UNUSED_ARG(dashboard);
 
-                testCode();
-                controller->WaitSimulationsFinished();
-            },
-            std::chrono::seconds(30));
+            testCode();
+            controller->WaitSimulationsFinished();
+        }, std::chrono::seconds(30));
 
         testResult.dataBySimulation = controller->GetData();
         testResult.allSimulationsFinished = controller->AllSimulationsFinished();

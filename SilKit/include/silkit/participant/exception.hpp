@@ -27,19 +27,19 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 namespace SilKit {
 
 //! \brief Base class of all SilKit exceptions
-class SilKitError: public std::exception
+class SilKitError : public std::exception
 {
 protected:
     std::string _what;
-public:
 
+public:
     SilKitError(std::string message)
-        :_what{std::move(message)}
+        : _what{std::move(message)}
     {
     }
 
     SilKitError(const char* message)
-        :_what{message}
+        : _what{message}
     {
     }
 
@@ -54,7 +54,10 @@ class TypeConversionError : public SilKitError
 public:
     using SilKitError::SilKitError;
 
-    TypeConversionError() : SilKitError("SilKit: Invalid type conversion.") { }
+    TypeConversionError()
+        : SilKitError("SilKit: Invalid type conversion.")
+    {
+    }
 };
 
 class ConfigurationError : public SilKitError
@@ -62,7 +65,10 @@ class ConfigurationError : public SilKitError
 public:
     using SilKitError::SilKitError;
 
-    ConfigurationError() : ConfigurationError("SilKit: Configuration has syntactical or semantical errors.") { }
+    ConfigurationError()
+        : ConfigurationError("SilKit: Configuration has syntactical or semantical errors.")
+    {
+    }
 };
 
 class StateError : public SilKitError
@@ -78,12 +84,12 @@ public:
 };
 
 //! \brief Error thrown as a replacement for cassert's assert.
-class AssertionError: public SilKitError
+class AssertionError : public SilKitError
 {
 public:
     using SilKitError::SilKitError;
 };
- 
+
 //! \brief Error thrown when an extension could not be loaded.
 class ExtensionError : public SilKitError
 {

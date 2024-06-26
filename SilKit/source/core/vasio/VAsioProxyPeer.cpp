@@ -107,7 +107,8 @@ void VAsioProxyPeer::SetProtocolVersion(ProtocolVersion v)
 
 auto VAsioProxyPeer::GetProtocolVersion() const -> ProtocolVersion
 {
-    Log::Trace(_logger, "VAsioProxyPeer ({}): GetProtocolVersion: {}.{}", _peerInfo.participantName, _protocolVersion.major, _protocolVersion.minor);
+    Log::Trace(_logger, "VAsioProxyPeer ({}): GetProtocolVersion: {}.{}", _peerInfo.participantName,
+               _protocolVersion.major, _protocolVersion.minor);
     return _protocolVersion;
 }
 

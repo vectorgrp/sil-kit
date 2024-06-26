@@ -36,12 +36,12 @@ class IRequestReplyService;
 class IRequestReplyProcedure
 {
 public:
-
     virtual ~IRequestReplyProcedure() = default;
 
-    virtual void ReceiveCall(IRequestReplyService* requestReplyService, Util::Uuid callUuid, std::vector<uint8_t> callData) = 0;
-    virtual void ReceiveCallReturn(std::string fromParticipant, Util::Uuid callUuid, std::vector<uint8_t> callReturnData,
-                                   CallReturnStatus callReturnStatus) = 0;
+    virtual void ReceiveCall(IRequestReplyService* requestReplyService, Util::Uuid callUuid,
+                             std::vector<uint8_t> callData) = 0;
+    virtual void ReceiveCallReturn(std::string fromParticipant, Util::Uuid callUuid,
+                                   std::vector<uint8_t> callReturnData, CallReturnStatus callReturnStatus) = 0;
     virtual void SetRequestReplyServiceEndpoint(IServiceEndpoint* requestReplyServiceEndpoint) = 0;
 };
 

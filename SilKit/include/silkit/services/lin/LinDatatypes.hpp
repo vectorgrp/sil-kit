@@ -95,15 +95,15 @@ inline auto GoToSleepFrame() -> LinFrame;
  * from a slave.
  *
  * *AUTOSAR Name:* Lin_FrameResponseType
- */ 
+ */
 enum class LinFrameResponseType : SilKit_LinFrameResponseType
 {
-    //! Response is generated from this master node 
+    //! Response is generated from this master node
     MasterResponse = SilKit_LinFrameResponseType_MasterResponse,
-    
+
     //! Response is generated from a remote slave node
     SlaveResponse = SilKit_LinFrameResponseType_SlaveResponse,
-    
+
     /*! Response is generated from one slave to and received by
      *  another slave, for the master the response will be anonymous,
      *  it does not have to receive the response.
@@ -135,7 +135,7 @@ struct LinFrameResponse
      * If responseMode is LinFrameResponseMode::TxUnconditional, the frame data is used for the transaction.
      */
     LinFrame frame;
-    //! Determines if the LinFrameResponse is used for transmission (TxUnconditional), reception (Rx) or 
+    //! Determines if the LinFrameResponse is used for transmission (TxUnconditional), reception (Rx) or
     //! ignored (Unused).
     LinFrameResponseMode responseMode{LinFrameResponseMode::Unused};
 };
@@ -264,7 +264,6 @@ struct LinControllerConfig
      * ILinController::SetFrameResponses().
      */
     std::vector<LinFrameResponse> frameResponses;
-
 };
 
 /*! The operational state of the controller, i.e., operational or
@@ -335,23 +334,19 @@ inline auto GoToSleepFrame() -> LinFrame
 //! \brief Comparison operator for LinFrame
 inline bool operator==(const LinFrame& lhs, const LinFrame& rhs)
 {
-    return lhs.id == rhs.id
-        && lhs.checksumModel == rhs.checksumModel
-        && lhs.dataLength == rhs.dataLength
-        && lhs.data == rhs.data;
+    return lhs.id == rhs.id && lhs.checksumModel == rhs.checksumModel && lhs.dataLength == rhs.dataLength
+           && lhs.data == rhs.data;
 }
 //! \brief Comparison operator for LinFrameResponse
 inline bool operator==(const LinFrameResponse& lhs, const LinFrameResponse& rhs)
 {
-    return lhs.frame == rhs.frame
-        && lhs.responseMode == rhs.responseMode;
+    return lhs.frame == rhs.frame && lhs.responseMode == rhs.responseMode;
 }
 //! \brief Comparison operator for LinControllerConfig
 inline bool operator==(const LinControllerConfig& lhs, const LinControllerConfig& rhs)
 {
-    return lhs.controllerMode == rhs.controllerMode
-        && lhs.baudRate == rhs.baudRate
-        && lhs.frameResponses == rhs.frameResponses;
+    return lhs.controllerMode == rhs.controllerMode && lhs.baudRate == rhs.baudRate
+           && lhs.frameResponses == rhs.frameResponses;
 }
 
 } // namespace Lin

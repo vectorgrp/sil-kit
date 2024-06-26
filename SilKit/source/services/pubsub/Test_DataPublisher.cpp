@@ -53,13 +53,13 @@ class Test_DataPublisher : public ::testing::Test
 {
 protected:
     Test_DataPublisher()
-        : publisher{ &participant, participant.GetTimeProvider(), testDataNodeSpec, "pubUUID", {} }
+        : publisher{&participant, participant.GetTimeProvider(), testDataNodeSpec, "pubUUID", {}}
     {
         publisher.SetServiceDescriptor(portAddress);
     }
 
 protected:
-    const ServiceDescriptor portAddress{ "P1", "N1", "C1", 5};
+    const ServiceDescriptor portAddress{"P1", "N1", "C1", 5};
     const std::vector<uint8_t> sampleData{0u, 1u, 2u, 3u, 4u, 5u, 6u, 7u};
 
     MockParticipant participant;
@@ -70,8 +70,7 @@ TEST_F(Test_DataPublisher, publish)
 {
     WireDataMessageEvent msg{0ns, sampleData};
 
-    EXPECT_CALL(participant, SendMsg(&publisher, msg))
-        .Times(1);
+    EXPECT_CALL(participant, SendMsg(&publisher, msg)).Times(1);
 
     publisher.Publish(sampleData);
 }

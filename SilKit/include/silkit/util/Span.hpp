@@ -309,7 +309,7 @@ auto Span<T>::size() const -> size_t
 template <typename T>
 void Span<T>::trim_front(size_t len)
 {
-    if(!(len <= _size))
+    if (!(len <= _size))
     {
         throw AssertionError("Span::trim_front assertion 'len <= _size' failed");
     }
@@ -320,7 +320,7 @@ void Span<T>::trim_front(size_t len)
 template <typename T>
 void Span<T>::trim_back(size_t len)
 {
-    if(!(len <= _size))
+    if (!(len <= _size))
     {
         throw AssertionError("Span::trim_back assertion 'len <= _size' failed");
     }

@@ -62,7 +62,7 @@ public:
     LinController(const LinController&) = delete;
     LinController(LinController&&) = delete;
     LinController(Core::IParticipantInternal* participant, Config::LinController config,
-                   Services::Orchestration::ITimeProvider* timeProvider);
+                  Services::Orchestration::ITimeProvider* timeProvider);
 
 public:
     // ----------------------------------------
@@ -76,9 +76,10 @@ public:
     //
     // ILinController
     void Init(LinControllerConfig config) override;
-    void InitDynamic(const SilKit::Experimental::Services::Lin::LinControllerDynamicConfig& config) override; // Experimental
+    void InitDynamic(
+        const SilKit::Experimental::Services::Lin::LinControllerDynamicConfig& config) override; // Experimental
 
-    auto Status() const noexcept->LinControllerStatus override;
+    auto Status() const noexcept -> LinControllerStatus override;
 
     void SendFrame(LinFrame frame, LinFrameResponseType responseType) override;
     void SendFrameHeader(LinId linId) override;
@@ -98,7 +99,8 @@ public:
         Experimental::Services::Lin::LinSlaveConfigurationHandler handler) override; // Exprimental
     void RemoveLinSlaveConfigurationHandler(HandlerId handlerId) override; // Exprimental
 
-    auto AddFrameHeaderHandler(SilKit::Experimental::Services::Lin::LinFrameHeaderHandler handler) -> HandlerId override; // Experimental
+    auto AddFrameHeaderHandler(SilKit::Experimental::Services::Lin::LinFrameHeaderHandler handler)
+        -> HandlerId override; // Experimental
     void RemoveFrameHeaderHandler(HandlerId handlerId) override; // Experimental
 
     HandlerId AddFrameStatusHandler(FrameStatusHandler handler) override;
@@ -146,7 +148,6 @@ public:
 
         void UpdateResponses(std::vector<LinFrameResponse> responsesToUpdate, Services::Logging::ILogger* logger);
         void UpdateTxBuffer(LinId linId, std::array<uint8_t, 8> data, Services::Logging::ILogger* logger);
-
     };
     auto GetResponse(LinId id) -> std::pair<int, LinFrame>;
     auto GetThisLinNode() -> LinNode&;
@@ -168,6 +169,7 @@ public:
 
     // for ITraceMessageSource
     inline auto GetTracer() -> Tracer*;
+
 private:
     // ----------------------------------------
     // private methods
@@ -208,7 +210,7 @@ private:
     void WarnOnResponseModeReconfiguration(LinId id, LinFrameResponseMode currentResponseMode) const;
     void WarnOnUnconfiguredSlaveResponse(LinId id) const;
     void WarnOnSendFrameSlaveResponseWithMasterTx(LinId id) const;
-    
+
     void UpdateLinIdsRespondedBySlaves(const std::vector<LinFrameResponse>& responsesUpdate);
     void HandleResponsesUpdate(const IServiceEndpoint* from, const std::vector<LinFrameResponse>& responsesToUpdate);
     void UpdateFrameResponse(LinFrameResponse response);
@@ -229,19 +231,16 @@ private:
     SimBehavior _simulationBehavior;
     ::SilKit::Core::ServiceDescriptor _serviceDescriptor;
 
-    LinControllerMode   _controllerMode{LinControllerMode::Inactive};
+    LinControllerMode _controllerMode{LinControllerMode::Inactive};
     LinControllerStatus _controllerStatus{LinControllerStatus::Unknown};
 
     template <typename MsgT>
     using CallbacksT = Util::SynchronizedHandlers<CallbackT<MsgT>>;
 
-    std::tuple<
-        CallbacksT<LinFrameStatusEvent>,
-        CallbacksT<LinGoToSleepEvent>,
-        CallbacksT<LinWakeupEvent>,
-        CallbacksT<Experimental::Services::Lin::LinSlaveConfigurationEvent>,
-        CallbacksT<SilKit::Experimental::Services::Lin::LinFrameHeaderEvent>
-    > _callbacks;
+    std::tuple<CallbacksT<LinFrameStatusEvent>, CallbacksT<LinGoToSleepEvent>, CallbacksT<LinWakeupEvent>,
+               CallbacksT<Experimental::Services::Lin::LinSlaveConfigurationEvent>,
+               CallbacksT<SilKit::Experimental::Services::Lin::LinFrameHeaderEvent>>
+        _callbacks;
 
     Services::Orchestration::ITimeProvider* _timeProvider{nullptr};
     bool _replayActive{false};

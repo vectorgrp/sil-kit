@@ -136,7 +136,7 @@ using namespace SilKit::Util;
 static inline void setSignalAction(int sigNum, __sighandler_t action);
 void systemHandler(int sigNum);
 
-    auto ErrorMessage()
+auto ErrorMessage()
 {
     return std::string{strerror(errno)};
 }
@@ -189,7 +189,6 @@ public:
     }
 
 private:
-
     void workerMain()
     {
         std::vector<uint8_t> buf(1);
@@ -214,7 +213,9 @@ private:
 static inline void setSignalAction(int sigNum, __sighandler_t action)
 {
     // Check current signal handler action to see if it's set to SIGNAL IGNORE
-    struct sigaction oldAction{};
+    struct sigaction oldAction
+    {
+    };
     sigaction(sigNum, NULL, &oldAction);
     if (oldAction.sa_handler == SIG_IGN)
     {
@@ -222,12 +223,15 @@ static inline void setSignalAction(int sigNum, __sighandler_t action)
         return;
     }
     // Set new signal handler action to what we want
-    struct sigaction newAction{};
+    struct sigaction newAction
+    {
+    };
     newAction.sa_handler = action;
     auto ret = sigaction(sigNum, &newAction, NULL);
     if (ret == -1)
     {
-        throw std::runtime_error("SignalMonitor: Failed to set handler for signal " + std::to_string(sigNum) + ": " + ErrorMessage());
+        throw std::runtime_error("SignalMonitor: Failed to set handler for signal " + std::to_string(sigNum) + ": "
+                                 + ErrorMessage());
     }
 }
 

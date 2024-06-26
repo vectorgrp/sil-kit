@@ -33,13 +33,13 @@ SILKIT_BEGIN_DECLS
 /*! \brief Information level of log messages
 */
 typedef uint32_t SilKit_LoggingLevel;
-#define SilKit_LoggingLevel_Trace ((uint32_t) 0) //!< Detailed debug-level messages
-#define SilKit_LoggingLevel_Debug ((uint32_t) 1) //!< Normal debug-level messages
-#define SilKit_LoggingLevel_Info ((uint32_t) 2) //!< Informational content
-#define SilKit_LoggingLevel_Warn ((uint32_t) 3) //!< Warnings
-#define SilKit_LoggingLevel_Error ((uint32_t) 4) //!< Non-critical errors
-#define SilKit_LoggingLevel_Critical ((uint32_t) 5) //!< Critical errors
-#define SilKit_LoggingLevel_Off ((uint32_t) 0xffffffff) //!< Logging is disabled
+#define SilKit_LoggingLevel_Trace ((uint32_t)0) //!< Detailed debug-level messages
+#define SilKit_LoggingLevel_Debug ((uint32_t)1) //!< Normal debug-level messages
+#define SilKit_LoggingLevel_Info ((uint32_t)2) //!< Informational content
+#define SilKit_LoggingLevel_Warn ((uint32_t)3) //!< Warnings
+#define SilKit_LoggingLevel_Error ((uint32_t)4) //!< Non-critical errors
+#define SilKit_LoggingLevel_Critical ((uint32_t)5) //!< Critical errors
+#define SilKit_LoggingLevel_Off ((uint32_t)0xffffffff) //!< Logging is disabled
 
 typedef struct SilKit_Logger SilKit_Logger;
 

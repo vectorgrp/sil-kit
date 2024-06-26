@@ -43,8 +43,8 @@ namespace Tests {
 
 struct MockConnection
 {
-    MockConnection(SilKit::Core::IParticipantInternal*, SilKit::Config::ParticipantConfiguration /*config*/, std::string /*participantName*/,
-                   SilKit::Core::ParticipantId /*participantId*/,
+    MockConnection(SilKit::Core::IParticipantInternal*, SilKit::Config::ParticipantConfiguration /*config*/,
+                   std::string /*participantName*/, SilKit::Core::ParticipantId /*participantId*/,
                    SilKit::Services::Orchestration::ITimeProvider* /*timeProvider*/, SilKit::Core::ProtocolVersion)
     {
     }
@@ -104,7 +104,8 @@ struct MockConnection
     MOCK_METHOD(void, Mock_SendMsg, (const SilKit::Core::IServiceEndpoint* /*from*/, FunctionCallResponse /*msg*/));
 
     template <typename SilKitMessageT>
-    void SendMsg(const SilKit::Core::IServiceEndpoint* /*from*/, const std::string& /*target*/, SilKitMessageT&& /*msg*/)
+    void SendMsg(const SilKit::Core::IServiceEndpoint* /*from*/, const std::string& /*target*/,
+                 SilKitMessageT&& /*msg*/)
     {
     }
 
@@ -140,7 +141,10 @@ struct MockConnection
         }
     }
 
-    size_t GetNumberOfConnectedParticipants() { return 0; }
+    size_t GetNumberOfConnectedParticipants()
+    {
+        return 0;
+    }
 
     size_t GetNumberOfRemoteReceivers(const SilKit::Core::IServiceEndpoint* /*service*/,
                                       const std::string& /*msgTypeName*/)
@@ -154,8 +158,7 @@ struct MockConnection
         return {};
     };
 
-    bool ParticipantHasCapability(const std::string& /*participantName*/,
-        const std::string& /*capability*/) const
+    bool ParticipantHasCapability(const std::string& /*participantName*/, const std::string& /*capability*/) const
     {
         return true;
     }
@@ -207,8 +210,7 @@ public:
         if (_rpcServer == nullptr)
         {
             SilKit::Services::Rpc::RpcSpec dataSpec{"FunctionA", "application/octet-stream"};
-            _rpcServer =
-                participant->CreateRpcServer("RpcServer", dataSpec, nullptr);
+            _rpcServer = participant->CreateRpcServer("RpcServer", dataSpec, nullptr);
         }
         return _rpcServer;
     }
@@ -216,7 +218,8 @@ public:
 private:
     static auto MakeParticipantConfiguration() -> std::shared_ptr<SilKit::Config::ParticipantConfiguration>
     {
-        auto configuration = std::make_shared<SilKit::Config::ParticipantConfiguration>(SilKit::Config::ParticipantConfiguration());
+        auto configuration =
+            std::make_shared<SilKit::Config::ParticipantConfiguration>(SilKit::Config::ParticipantConfiguration());
 
         SilKit::Config::RpcClient rpcClientConfig;
         rpcClientConfig.name = "RpcClient";

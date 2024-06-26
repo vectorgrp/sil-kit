@@ -37,8 +37,10 @@ auto ToRpcCallStatus(const FunctionCallResponse::Status status) -> RpcCallStatus
 {
     switch (status)
     {
-    case FunctionCallResponse::Status::Success: return RpcCallStatus::Success;
-    case FunctionCallResponse::Status::InternalError: return RpcCallStatus::InternalServerError;
+    case FunctionCallResponse::Status::Success:
+        return RpcCallStatus::Success;
+    case FunctionCallResponse::Status::InternalError:
+        return RpcCallStatus::InternalServerError;
     }
 
     return RpcCallStatus::UndefinedError;
@@ -153,7 +155,8 @@ void RpcClient::TimeHandler(std::chrono::nanoseconds now, std::chrono::nanosecon
 }
 
 
-void RpcClient::TriggerCall(Util::Span<const uint8_t> data, bool hasTimeout, std::chrono::nanoseconds timeout, void* userContext)
+void RpcClient::TriggerCall(Util::Span<const uint8_t> data, bool hasTimeout, std::chrono::nanoseconds timeout,
+                            void* userContext)
 {
     if (_numCounterparts == 0)
     {
@@ -186,8 +189,8 @@ void RpcClient::TriggerCall(Util::Span<const uint8_t> data, bool hasTimeout, std
                 {
                     _timeoutHandlerId = _timeProvider->AddNextSimStepHandler(
                         [this](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {
-                            this->TimeHandler(now, duration);
-                        });
+                        this->TimeHandler(now, duration);
+                    });
                     _isTimeoutHandlerSet = true;
                 }
             }
@@ -217,7 +220,8 @@ void RpcClient::ReceiveMessage(const FunctionCallResponse& msg)
 
         if (it == _activeCalls.end())
         {
-            std::string warningMsg{"RpcClient: Received function call response with an unknown/deleted uuid. Might be a call reply that ran into a timeout."};
+            std::string warningMsg{"RpcClient: Received function call response with an unknown/deleted uuid. Might be "
+                                   "a call reply that ran into a timeout."};
             _logger->Warn(warningMsg);
             return;
         }

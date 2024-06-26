@@ -54,8 +54,8 @@ protected:
         MOCK_METHOD1(SystemStateHandler, void(SystemState));
         MOCK_METHOD1(ParticipantStatusHandler, void(ParticipantStatus));
 
-        MOCK_METHOD(void, ParticipantConnectedHandler, (const ParticipantConnectionInformation &), (const));
-        MOCK_METHOD(void, ParticipantDisconnectedHandler, (const ParticipantConnectionInformation &), (const));
+        MOCK_METHOD(void, ParticipantConnectedHandler, (const ParticipantConnectionInformation&), (const));
+        MOCK_METHOD(void, ParticipantDisconnectedHandler, (const ParticipantConnectionInformation&), (const));
     };
 
 protected:
@@ -69,10 +69,10 @@ protected:
 
         ON_CALL(participant.logger, Log)
             .WillByDefault([](SilKit::Services::Logging::Level level, const std::string& message) {
-                std::ostringstream ss;
-                ss << "[" << to_string(level) << "] " << message << '\n';
-                std::cout << ss.str() << std::flush;
-            });
+            std::ostringstream ss;
+            ss << "[" << to_string(level) << "] " << message << '\n';
+            std::cout << ss.str() << std::flush;
+        });
     }
 
     auto AddSystemStateHandler() -> HandlerId
@@ -80,14 +80,20 @@ protected:
         return monitor.AddSystemStateHandler(bind_method(&callbacks, &Callbacks::SystemStateHandler));
     }
 
-    void RemoveSystemStateHandler(HandlerId handlerId) { monitor.RemoveSystemStateHandler(handlerId); }
+    void RemoveSystemStateHandler(HandlerId handlerId)
+    {
+        monitor.RemoveSystemStateHandler(handlerId);
+    }
 
     auto AddParticipantStatusHandler() -> HandlerId
     {
         return monitor.AddParticipantStatusHandler(bind_method(&callbacks, &Callbacks::ParticipantStatusHandler));
     }
 
-    void RemoveParticipantStatusHandler(HandlerId handlerId) { monitor.RemoveParticipantStatusHandler(handlerId); }
+    void RemoveParticipantStatusHandler(HandlerId handlerId)
+    {
+        monitor.RemoveParticipantStatusHandler(handlerId);
+    }
 
     void SetParticipantStatus(ParticipantId participantId, ParticipantState state, std::string reason = std::string{})
     {
@@ -97,7 +103,7 @@ protected:
         status.participantName = syncParticipantNames.at(static_cast<size_t>(id));
         status.enterReason = reason;
 
-        ServiceDescriptor from{ "P1", "N1", "C2" , 1024};
+        ServiceDescriptor from{"P1", "N1", "C2", 1024};
 
         monitorFrom.SetServiceDescriptor(from);
 
@@ -120,7 +126,7 @@ protected:
 protected:
     // ----------------------------------------
     // Members
-    ServiceDescriptor addr{ "P1", "N1", "C1", 1025};
+    ServiceDescriptor addr{"P1", "N1", "C1", 1025};
 
     std::vector<std::string> syncParticipantNames;
 
@@ -161,8 +167,7 @@ TEST_F(Test_SystemMonitor, detect_system_communication_initializing)
 
     AddSystemStateHandler();
 
-    EXPECT_CALL(callbacks, SystemStateHandler(SystemState::CommunicationInitializing))
-        .Times(1);
+    EXPECT_CALL(callbacks, SystemStateHandler(SystemState::CommunicationInitializing)).Times(1);
     SetParticipantStatus(1, ParticipantState::CommunicationInitializing);
     EXPECT_EQ(monitor.ParticipantStatus("P1").state, ParticipantState::CommunicationInitializing);
     EXPECT_EQ(monitor.SystemState(), SystemState::ServicesCreated);
@@ -184,8 +189,7 @@ TEST_F(Test_SystemMonitor, detect_system_communication_initialized)
 
     AddSystemStateHandler();
 
-    EXPECT_CALL(callbacks, SystemStateHandler(SystemState::CommunicationInitialized))
-        .Times(1);
+    EXPECT_CALL(callbacks, SystemStateHandler(SystemState::CommunicationInitialized)).Times(1);
     SetParticipantStatus(1, ParticipantState::CommunicationInitialized);
     EXPECT_EQ(monitor.ParticipantStatus("P1").state, ParticipantState::CommunicationInitialized);
     EXPECT_EQ(monitor.SystemState(), SystemState::CommunicationInitializing);
@@ -261,8 +265,7 @@ TEST_F(Test_SystemMonitor, detect_system_pause)
     AddSystemStateHandler();
     EXPECT_CALL(callbacks, SystemStateHandler(SystemState::Paused)).Times(1);
 
-    EXPECT_CALL(callbacks, SystemStateHandler(SystemState::Running))
-        .Times(1);
+    EXPECT_CALL(callbacks, SystemStateHandler(SystemState::Running)).Times(1);
 
     SetParticipantStatus(1, ParticipantState::Paused);
     EXPECT_EQ(monitor.ParticipantStatus("P1").state, ParticipantState::Paused);
@@ -286,8 +289,7 @@ TEST_F(Test_SystemMonitor, detect_multiple_paused_clients)
     AddSystemStateHandler();
     EXPECT_CALL(callbacks, SystemStateHandler(SystemState::Paused)).Times(1);
 
-    EXPECT_CALL(callbacks, SystemStateHandler(SystemState::Running))
-        .Times(1);
+    EXPECT_CALL(callbacks, SystemStateHandler(SystemState::Running)).Times(1);
 
     SetParticipantStatus(1, ParticipantState::Paused);
     EXPECT_EQ(monitor.ParticipantStatus("P1").state, ParticipantState::Paused);

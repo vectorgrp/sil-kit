@@ -52,17 +52,16 @@ bool LabelMatchesLabelList(MatchingLabel label, const std::vector<MatchingLabel>
         }
         // Optional labels that do not exist are ignored
     }
-    else if (label.value != foundLabel.value().value) 
+    else if (label.value != foundLabel.value().value)
     {
-       // Key found and value does not match -> no match
-       return false;
+        // Key found and value does not match -> no match
+        return false;
     }
 
     return true;
 }
 
-bool MatchLabels(const std::vector<MatchingLabel>& labels1,
-                 const std::vector<MatchingLabel>& labels2)
+bool MatchLabels(const std::vector<MatchingLabel>& labels1, const std::vector<MatchingLabel>& labels2)
 {
     // Check each labels1 against labels2 and bailout on negative match
     for (auto&& label : labels1)

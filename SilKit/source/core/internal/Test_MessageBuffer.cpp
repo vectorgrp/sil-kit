@@ -33,7 +33,7 @@ TEST(Test_MessageBuffer, integral_types)
 
     int32_t in{7};
     int32_t out{1};
-    
+
     buffer << in;
     buffer >> out;
 
@@ -45,7 +45,7 @@ TEST(Test_MessageBuffer, integral_types_multiple)
 {
     SilKit::Core::MessageBuffer buffer;
 
-    std::vector<int32_t> in{1,2,3,4,5,6,7};
+    std::vector<int32_t> in{1, 2, 3, 4, 5, 6, 7};
     std::vector<int32_t> out(in.size(), -1);
 
     for (auto i : in)
@@ -53,7 +53,7 @@ TEST(Test_MessageBuffer, integral_types_multiple)
 
     for (auto& o : out)
         buffer >> o;
-    
+
     EXPECT_EQ(in, out);
 }
 
@@ -74,7 +74,7 @@ TEST(Test_MessageBuffer, floating_types_multiple)
 {
     SilKit::Core::MessageBuffer buffer;
 
-    std::vector<double> in{1,2,3,4,5,6,7};
+    std::vector<double> in{1, 2, 3, 4, 5, 6, 7};
     std::vector<double> out(in.size(), -1);
 
     for (auto i : in)
@@ -154,7 +154,7 @@ TEST(Test_MessageBuffer, std_array_uint8_t)
 {
     SilKit::Core::MessageBuffer buffer;
 
-    std::array<uint8_t, 8> in{ 'A', 2, 3, 4, '.'};
+    std::array<uint8_t, 8> in{'A', 2, 3, 4, '.'};
     std::array<uint8_t, 8> out;
 
     buffer << in;
@@ -195,7 +195,8 @@ TEST(Test_MessageBuffer, std_chrono_system_time)
 
     auto now = std::chrono::system_clock::now();
 
-    decltype(now) in = std::chrono::system_clock::time_point{std::chrono::duration_cast<std::chrono::microseconds>(now.time_since_epoch())};
+    decltype(now) in = std::chrono::system_clock::time_point{
+        std::chrono::duration_cast<std::chrono::microseconds>(now.time_since_epoch())};
     decltype(in) out;
 
     buffer << in;
@@ -205,7 +206,8 @@ TEST(Test_MessageBuffer, std_chrono_system_time)
 }
 
 namespace {
-struct TestData {
+struct TestData
+{
     double doub;
     uint32_t ui32;
     int16_t i16;
@@ -216,13 +218,10 @@ struct TestData {
 
 bool operator==(const TestData& lhs, const TestData& rhs)
 {
-    return lhs.ui32 == rhs.ui32
-        && lhs.i16 == rhs.i16
-        && lhs.e == rhs.e
-        && lhs.duration == rhs.duration
-        && lhs.str == rhs.str;
+    return lhs.ui32 == rhs.ui32 && lhs.i16 == rhs.i16 && lhs.e == rhs.e && lhs.duration == rhs.duration
+           && lhs.str == rhs.str;
 }
-}
+} // namespace
 
 TEST(Test_MessageBuffer, mixed_types)
 {

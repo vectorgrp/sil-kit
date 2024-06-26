@@ -44,7 +44,8 @@ public:
 
     inline auto WithMaxLength(int64_t length) -> PrintableHexString<IterableT>&
     {
-        _maxLength = std::min<difference_type>(static_cast<difference_type>(length),_iterable.end() - _iterable.begin());
+        _maxLength =
+            std::min<difference_type>(static_cast<difference_type>(length), _iterable.end() - _iterable.begin());
         return *this;
     }
 
@@ -65,18 +66,12 @@ public:
         //NB, we use a temporary stream because we don't want to modify the internal format state of out
         std::ostringstream oss;
 
-        oss << std::hex << std::setfill('0')
-            << std::setw(2) << static_cast<uint16_t>(*begin);
+        oss << std::hex << std::setfill('0') << std::setw(2) << static_cast<uint16_t>(*begin);
 
         if (_maxLength > 1)
         {
-            std::for_each(begin + 1,
-                end,
-                [&oss, this](auto chr)
-                {
-                    oss << _separator << std::setw(2) << static_cast<uint16_t>(chr);
-                }
-            );
+            std::for_each(begin + 1, end,
+                          [&oss, this](auto chr) { oss << _separator << std::setw(2) << static_cast<uint16_t>(chr); });
         }
         if (_maxLength < _iterable.end() - _iterable.begin())
         {
@@ -86,8 +81,7 @@ public:
     }
 
 private:
-    using difference_type = decltype(std::declval<IterableT>().end()
-            - std::declval<IterableT>().begin());
+    using difference_type = decltype(std::declval<IterableT>().end() - std::declval<IterableT>().begin());
 
     const IterableT& _iterable;
     difference_type _maxLength = (std::numeric_limits<difference_type>::max)();

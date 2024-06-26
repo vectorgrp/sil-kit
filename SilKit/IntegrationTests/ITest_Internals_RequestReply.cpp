@@ -47,10 +47,7 @@ using namespace SilKit::Core;
 class ITest_Internals_RequestReply : public testing::Test
 {
 protected:
-    ITest_Internals_RequestReply()
-    {
-    }
-
+    ITest_Internals_RequestReply() {}
 };
 
 TEST_F(ITest_Internals_RequestReply, participant_replies)
@@ -62,38 +59,28 @@ TEST_F(ITest_Internals_RequestReply, participant_replies)
 
     // Create participants
     auto&& p1 =
-        SilKit::CreateParticipantImpl(SilKit::Config::MakeEmptyParticipantConfigurationImpl(), "P1",
-        registryUri);
+        SilKit::CreateParticipantImpl(SilKit::Config::MakeEmptyParticipantConfigurationImpl(), "P1", registryUri);
 
     auto&& p2 =
-        SilKit::CreateParticipantImpl(SilKit::Config::MakeEmptyParticipantConfigurationImpl(), "P2",
-        registryUri);
+        SilKit::CreateParticipantImpl(SilKit::Config::MakeEmptyParticipantConfigurationImpl(), "P2", registryUri);
 
     auto&& p3 =
-        SilKit::CreateParticipantImpl(SilKit::Config::MakeEmptyParticipantConfigurationImpl(), "P3",
-        registryUri);
+        SilKit::CreateParticipantImpl(SilKit::Config::MakeEmptyParticipantConfigurationImpl(), "P3", registryUri);
 
     auto participantReplies_p1 = dynamic_cast<IParticipantInternal*>(p1.get())->GetParticipantRepliesProcedure();
     auto participantReplies_p2 = dynamic_cast<IParticipantInternal*>(p2.get())->GetParticipantRepliesProcedure();
     auto participantReplies_p3 = dynamic_cast<IParticipantInternal*>(p3.get())->GetParticipantRepliesProcedure();
-    
+
     std::promise<void> receivedReplies_p1{};
-    participantReplies_p1->CallAfterAllParticipantsReplied([&receivedReplies_p1]() {
-        receivedReplies_p1.set_value();
-    });
+    participantReplies_p1->CallAfterAllParticipantsReplied([&receivedReplies_p1]() { receivedReplies_p1.set_value(); });
     std::promise<void> receivedReplies_p2{};
-    participantReplies_p2->CallAfterAllParticipantsReplied([&receivedReplies_p2]() {
-        receivedReplies_p2.set_value();
-    });
+    participantReplies_p2->CallAfterAllParticipantsReplied([&receivedReplies_p2]() { receivedReplies_p2.set_value(); });
     std::promise<void> receivedReplies_p3{};
-    participantReplies_p3->CallAfterAllParticipantsReplied([&receivedReplies_p3]() {
-        receivedReplies_p3.set_value();
-    });
+    participantReplies_p3->CallAfterAllParticipantsReplied([&receivedReplies_p3]() { receivedReplies_p3.set_value(); });
 
     receivedReplies_p1.get_future().wait();
     receivedReplies_p2.get_future().wait();
     receivedReplies_p3.get_future().wait();
-
 }
 
 } // anonymous namespace

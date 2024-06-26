@@ -27,13 +27,21 @@ namespace Core {
 
 // the silkit messages type traits
 using VersionT = uint32_t;
-template <class MsgT> struct SilKitMsgTraitVersion { static constexpr VersionT Version(); };
+template <class MsgT>
+struct SilKitMsgTraitVersion
+{
+    static constexpr VersionT Version();
+};
 
 //helper to reduce boilerplate
 #define DefineSilKitMsgTrait_Version(TYPE_NAME, VERSION) \
-    template<> \
-    struct SilKitMsgTraitVersion<TYPE_NAME> {\
-        static constexpr VersionT Version() { return VERSION; }\
+    template <> \
+    struct SilKitMsgTraitVersion<TYPE_NAME> \
+    { \
+        static constexpr VersionT Version() \
+        { \
+            return VERSION; \
+        } \
     }
 
 DefineSilKitMsgTrait_Version(SilKit::Services::Logging::LogMsg, 1);

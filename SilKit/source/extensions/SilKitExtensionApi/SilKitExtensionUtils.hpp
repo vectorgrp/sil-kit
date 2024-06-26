@@ -24,10 +24,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <cstdint>
 
 #if !defined(SILKIT_EXTENSION_OS)
-#   error  "SILKIT_EXTENSION_OS must be defined for the compiler via CMake for the target platform"
+#error "SILKIT_EXTENSION_OS must be defined for the compiler via CMake for the target platform"
 #endif
 
-namespace SilKit { 
+namespace SilKit {
 //! \brief Fields of the BuildInfo array
 enum class BuildInfoField
 {
@@ -52,7 +52,7 @@ constexpr const char* BuildinfoSystem()
 }
 
 //! \brief Encodes the C++ language standard version.
-// This value is used to make sure that the C++ runtime libraries and STL are 
+// This value is used to make sure that the C++ runtime libraries and STL are
 // compatible.
 // Returns an unsigned integer encoding the C++ standard version, e.g. 201402L.
 constexpr uint32_t BuildinfoCPlusPlus()
@@ -66,7 +66,7 @@ constexpr uint32_t BuildinfoCPlusPlus()
     return _MSVC_LANG;
 #else
     //GCC and clang always set __cplusplus to current standard version.
-    return __cplusplus; 
+    return __cplusplus;
 #endif
 }
 
@@ -80,26 +80,26 @@ constexpr uint32_t BuildinfoCPlusPlus()
 constexpr uint32_t BuildinfoCompiler()
 {
 #if defined(_MSC_VER)
-#   if defined(SILKIT_MSVC_TOOLSET_VERSION)
+#if defined(SILKIT_MSVC_TOOLSET_VERSION)
     // We rely on CMake to provide proper toolset version.
     return SILKIT_MSVC_TOOLSET_VERSION;
-#   elif defined(_MSVC_STL_VERSION)
+#elif defined(_MSVC_STL_VERSION)
     // In case newer, future toolset is not recognized by CMake:
     // On VS2015/17/19 _MSVC_STL_VERSION contains the toolset number, e.g. 141, 142 etc.
     return _MSVC_STL_VERSION;
-#   endif
+#endif
 #else
-#   if defined(_WIN32) && defined(__GNUC__)
+#if defined(_WIN32) && defined(__GNUC__)
     //MinGW
     return 0;
-#   elif defined( __clang__)
+#elif defined(__clang__)
     return __clang_major__;
-#   elif defined( __GNUC__)
+#elif defined(__GNUC__)
     // the major version of a GNU compiler, the C++ macro _GLIBCXX_RELEASE defaults to this
     return __GNUC__;
-#   else
-    #error Platform has no Extension support
-#   endif
+#else
+#error Platform has no Extension support
+#endif
 #endif
 }
 
@@ -114,7 +114,7 @@ constexpr uint32_t BuildinfoMultithread()
 #ifdef _MT
     // MSVC defines _MT.
     return 1;
-#elif  defined(_REENTRANT)
+#elif defined(_REENTRANT)
     return 1;
 #else
     return 0;
@@ -136,4 +136,4 @@ constexpr uint32_t BuildinfoDebug()
 }
 
 
-}//end namespace SilKit
+} //end namespace SilKit

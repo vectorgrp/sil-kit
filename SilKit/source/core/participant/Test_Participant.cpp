@@ -38,9 +38,7 @@ using namespace SilKit::Config;
 class Test_Participant : public testing::Test
 {
 protected:
-    Test_Participant()
-    {
-    }
+    Test_Participant() {}
 };
 
 TEST_F(Test_Participant, throw_on_empty_participant_name)
@@ -63,8 +61,7 @@ TEST_F(Test_Participant, use_configured_name_on_participant_name_mismatch)
     mockConfig->participantName = configuredParticipantName;
 
 
-    auto participant =
-        CreateNullConnectionParticipantImpl(mockConfig, "TestParticipant");
+    auto participant = CreateNullConnectionParticipantImpl(mockConfig, "TestParticipant");
     auto comParticipantName = participant->GetParticipantName();
     EXPECT_EQ(participant->GetParticipantName(), configuredParticipantName);
 }

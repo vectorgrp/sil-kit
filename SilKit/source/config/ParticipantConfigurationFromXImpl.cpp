@@ -109,7 +109,6 @@ void Validate(const std::string& text)
 
 auto Parse(const YAML::Node& doc) -> SilKit::Config::ParticipantConfiguration
 {
-
     auto configuration = !doc.IsNull() ? SilKit::Config::from_yaml<SilKit::Config::v1::ParticipantConfiguration>(doc)
                                        : SilKit::Config::v1::ParticipantConfiguration{};
     configuration.configurationFilePath.clear();
@@ -118,8 +117,7 @@ auto Parse(const YAML::Node& doc) -> SilKit::Config::ParticipantConfiguration
 
 void CollectIncludes(const YAML::Node& config, std::vector<std::string>& levelIncludes)
 {
-
-    if(config["Includes"])
+    if (config["Includes"])
     {
         for (const auto& include : config["Includes"]["Files"])
         {
@@ -138,15 +136,15 @@ std::string GetConfigParentPath(const std::string& configFile)
     return fs::parent_path(filePath).string();
 }
 
-void AppendToSearchPaths(const YAML::Node& doc, ConfigIncludeData &configData)
+void AppendToSearchPaths(const YAML::Node& doc, ConfigIncludeData& configData)
 {
-    if(doc["Includes"])
+    if (doc["Includes"])
     {
-        for(auto& searchPath : doc["Includes"]["SearchPathHints"])
+        for (auto& searchPath : doc["Includes"]["SearchPathHints"])
         {
             auto tmpString = searchPath.as<std::string>();
 
-            if(tmpString.empty())
+            if (tmpString.empty())
             {
                 std::cout << "Warning: Got empty SearchPathHint!";
                 continue;
@@ -165,26 +163,26 @@ void AppendToSearchPaths(const YAML::Node& doc, ConfigIncludeData &configData)
     }
 }
 
-std::string OpenFileWithSearchHints(const std::string& configFile, const std::set<std::string> &searchPathHints)
+std::string OpenFileWithSearchHints(const std::string& configFile, const std::set<std::string>& searchPathHints)
 {
     std::stringstream buffer;
     std::string text;
 
     auto ifs = Util::OpenIFStream(configFile);
     // Try cwd first
-    if(ifs.is_open())
+    if (ifs.is_open())
     {
         buffer << ifs.rdbuf();
         return buffer.str();
     }
 
-    for(auto& searchPathHint : searchPathHints)
+    for (auto& searchPathHint : searchPathHints)
     {
         auto completePath = searchPathHint + configFile;
 
         ifs = Util::OpenIFStream(completePath);
 
-        if(ifs.is_open())
+        if (ifs.is_open())
         {
             buffer << ifs.rdbuf();
             return buffer.str();
@@ -231,7 +229,8 @@ void MergeNamedVector(const std::vector<ConfigT>& child, const std::string& fiel
             else
             {
                 std::stringstream error_msg;
-                error_msg << "Config element " << field_name << " with name " << element.name << " but different config already exists!";
+                error_msg << "Config element " << field_name << " with name " << element.name
+                          << " but different config already exists!";
                 throw SilKit::ConfigurationError(error_msg.str());
             }
         }
@@ -241,7 +240,7 @@ void MergeNamedVector(const std::vector<ConfigT>& child, const std::string& fiel
 template <typename T>
 void MergeCacheSet(const std::set<T>& cache, std::vector<T>& root)
 {
-    for(auto& element: cache)
+    for (auto& element : cache)
     {
         root.push_back(element);
     }
@@ -459,10 +458,12 @@ auto MergeConfigs(ConfigIncludeData& configIncludeData) -> SilKit::Config::Parti
                                                             config.canControllers, configIncludeData.canCache);
         MergeNamedVector<SilKit::Config::v1::LinController>(include.second.linControllers, "LinController",
                                                             config.linControllers, configIncludeData.linCache);
-        MergeNamedVector<SilKit::Config::v1::EthernetController>(include.second.ethernetControllers, "EthernetController",
-                                                                 config.ethernetControllers, configIncludeData.ethCache);
+        MergeNamedVector<SilKit::Config::v1::EthernetController>(include.second.ethernetControllers,
+                                                                 "EthernetController", config.ethernetControllers,
+                                                                 configIncludeData.ethCache);
         MergeNamedVector<SilKit::Config::v1::FlexrayController>(include.second.flexrayControllers, "FlexRayController",
-                                                                config.flexrayControllers, configIncludeData.flexrayCache);
+                                                                config.flexrayControllers,
+                                                                configIncludeData.flexrayCache);
         MergeNamedVector<SilKit::Config::v1::DataSubscriber>(include.second.dataSubscribers, "DataSubscriber",
                                                              config.dataSubscribers, configIncludeData.subCache);
         MergeNamedVector<SilKit::Config::v1::DataPublisher>(include.second.dataPublishers, "DataPublisher",
@@ -475,7 +476,8 @@ auto MergeConfigs(ConfigIncludeData& configIncludeData) -> SilKit::Config::Parti
         MergeNamedVector<SilKit::Config::v1::TraceSink>(include.second.tracing.traceSinks, "TraceSink",
                                                         config.tracing.traceSinks, configIncludeData.traceSinkCache);
         MergeNamedVector<SilKit::Config::v1::TraceSource>(include.second.tracing.traceSources, "TraceSource",
-                                                          config.tracing.traceSources, configIncludeData.traceSourceCache);
+                                                          config.tracing.traceSources,
+                                                          configIncludeData.traceSourceCache);
 
         // Merge "scalar" config fields
         MergeExtensions(include.second.extensions, config.extensions);
@@ -503,7 +505,7 @@ void ProcessIncludes(const YAML::Node& config, ConfigIncludeData& configData)
     // and then use the collected includes as the "next level"
     const auto upperbound = 127u;
 
-    for(auto i = 0u; i < upperbound; ++i)
+    for (auto i = 0u; i < upperbound; ++i)
     {
         std::vector<std::string> tmpIncludes;
         for (const auto& include : levelIncludes)
@@ -515,7 +517,7 @@ void ProcessIncludes(const YAML::Node& config, ConfigIncludeData& configData)
             }
 
             // Get the next Include to be processed within this tree level
-            auto nextConfig= SilKit::Config::OpenFileWithSearchHints(include, configData.searchPaths);
+            auto nextConfig = SilKit::Config::OpenFileWithSearchHints(include, configData.searchPaths);
             SilKit::Config::Validate(nextConfig);
 
             // Load and Parse the file as Yaml
@@ -534,15 +536,15 @@ void ProcessIncludes(const YAML::Node& config, ConfigIncludeData& configData)
         // Goto next Level
         levelIncludes = tmpIncludes;
 
-        if(levelIncludes.size() == 0)
+        if (levelIncludes.size() == 0)
         {
             break;
         }
     }
 }
 
-auto ParticipantConfigurationFromXImpl(const std::string& text, struct ConfigIncludeData& configData)
-    -> SilKit::Config::ParticipantConfiguration
+auto ParticipantConfigurationFromXImpl(const std::string& text,
+                                       struct ConfigIncludeData& configData) -> SilKit::Config::ParticipantConfiguration
 {
     SilKit::Config::Validate(text);
     YAML::Node doc = YAML::Load(text);
@@ -551,7 +553,7 @@ auto ParticipantConfigurationFromXImpl(const std::string& text, struct ConfigInc
     configData.configBuffer.push_back(ConfigInclude("root", configuration));
 
     // Check search Paths
-    if(doc["Includes"])
+    if (doc["Includes"])
     {
         AppendToSearchPaths(doc, configData);
     }
@@ -561,7 +563,6 @@ auto ParticipantConfigurationFromXImpl(const std::string& text, struct ConfigInc
     // Merge the root and included configs
     return MergeConfigs(configData);
 }
-
 
 
 } // anonymous namespace
@@ -640,29 +641,22 @@ bool operator==(const Middleware& lhs, const Middleware& rhs)
 
 bool operator==(const ParticipantConfiguration& lhs, const ParticipantConfiguration& rhs)
 {
-    return lhs.participantName == rhs.participantName
-           && lhs.canControllers == rhs.canControllers
-           && lhs.linControllers == rhs.linControllers
-           && lhs.ethernetControllers == rhs.ethernetControllers
-           && lhs.flexrayControllers == rhs.flexrayControllers
-           && lhs.dataPublishers == rhs.dataPublishers
-           && lhs.dataSubscribers == rhs.dataSubscribers
-           && lhs.rpcClients == rhs.rpcClients
-           && lhs.rpcServers == rhs.rpcServers
-           && lhs.logging == rhs.logging
-           && lhs.healthCheck == rhs.healthCheck
-           && lhs.tracing == rhs.tracing
-           && lhs.extensions == rhs.extensions;
+    return lhs.participantName == rhs.participantName && lhs.canControllers == rhs.canControllers
+           && lhs.linControllers == rhs.linControllers && lhs.ethernetControllers == rhs.ethernetControllers
+           && lhs.flexrayControllers == rhs.flexrayControllers && lhs.dataPublishers == rhs.dataPublishers
+           && lhs.dataSubscribers == rhs.dataSubscribers && lhs.rpcClients == rhs.rpcClients
+           && lhs.rpcServers == rhs.rpcServers && lhs.logging == rhs.logging && lhs.healthCheck == rhs.healthCheck
+           && lhs.tracing == rhs.tracing && lhs.extensions == rhs.extensions;
 }
 
-} // inline namespace v1
+} // namespace v1
 
 
 // ============================================================================
 // Interface Layer functions
 // ============================================================================
 auto ParticipantConfigurationFromStringImpl(const std::string& text)
--> std::shared_ptr<SilKit::Config::IParticipantConfiguration>
+    -> std::shared_ptr<SilKit::Config::IParticipantConfiguration>
 {
     auto configData = ConfigIncludeData();
     auto configuration = SilKit::Config::ParticipantConfigurationFromXImpl(text, configData);
@@ -670,7 +664,7 @@ auto ParticipantConfigurationFromStringImpl(const std::string& text)
 }
 
 auto ParticipantConfigurationFromFileImpl(const std::string& filename)
--> std::shared_ptr<SilKit::Config::IParticipantConfiguration>
+    -> std::shared_ptr<SilKit::Config::IParticipantConfiguration>
 {
     auto configData = ConfigIncludeData();
     configData.searchPaths.insert(SilKit::Config::GetConfigParentPath(filename));
@@ -680,7 +674,8 @@ auto ParticipantConfigurationFromFileImpl(const std::string& filename)
     try
     {
         text = SilKit::Config::OpenFileWithSearchHints(filename, configData.searchPaths);
-    } catch ( ... )
+    }
+    catch (...)
     {
         throw;
     }

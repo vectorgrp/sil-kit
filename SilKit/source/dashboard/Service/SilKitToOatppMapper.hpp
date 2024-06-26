@@ -29,7 +29,8 @@ namespace Dashboard {
 class SilKitToOatppMapper : public ISilKitToOatppMapper
 {
 public:
-    oatpp::Object<SimulationCreationRequestDto> CreateSimulationCreationRequestDto(const std::string& connectUri, uint64_t start) override;
+    oatpp::Object<SimulationCreationRequestDto> CreateSimulationCreationRequestDto(const std::string& connectUri,
+                                                                                   uint64_t start) override;
     oatpp::Object<SystemStatusDto> CreateSystemStatusDto(Services::Orchestration::SystemState systemState) override;
     oatpp::Object<ParticipantStatusDto> CreateParticipantStatusDto(
         const Services::Orchestration::ParticipantStatus& participantStatus) override;

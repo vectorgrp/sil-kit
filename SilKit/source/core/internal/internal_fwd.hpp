@@ -68,4 +68,3 @@ class INetworkSimulator;
 } // namespace NetworkSimulation
 } // namespace Experimental
 } // namespace SilKit
-

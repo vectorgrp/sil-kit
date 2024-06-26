@@ -77,7 +77,8 @@ auto CreateTraceMessageSinks(Services::Logging::ILogger* logger,
     {
         if (!sinkInUse(sinkCfg.name))
         {
-            Services::Logging::Warn(logger,
+            Services::Logging::Warn(
+                logger,
                 "Tracing: the trace sink '{}' on participant '{}' is not referenced in the config, creating anyway!",
                 sinkCfg.name, participantConfig.participantName);
         }
@@ -107,7 +108,8 @@ auto CreateTraceMessageSinks(Services::Logging::ILogger* logger,
             newSinks.emplace_back(std::move(sink));
             break;
         }
-        default: throw SilKitError("Unknown Sink Type");
+        default:
+            throw SilKitError("Unknown Sink Type");
         }
     }
 
@@ -137,7 +139,8 @@ auto CreateReplayFiles(Services::Logging::ILogger* logger, const Config::Partici
             break;
         }
         case Config::TraceSource::Type::Undefined: //[[fallthrough]]
-        default: throw SilKitError("CreateReplayFiles: unknown TraceSource::Type!");
+        default:
+            throw SilKitError("CreateReplayFiles: unknown TraceSource::Type!");
         }
     }
 

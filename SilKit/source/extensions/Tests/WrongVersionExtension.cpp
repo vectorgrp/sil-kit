@@ -28,11 +28,4 @@ struct WrongVersionExtension : public SilKit::SilKitExtensionBase
     using SilKitExtensionBase::SilKitExtensionBase;
 };
 
-SILKIT_DECLARE_EXTENSION(
-    WrongVersionExtension,
-    "Vector",
-    1,
-    2,
-    3
-)
-
+SILKIT_DECLARE_EXTENSION(WrongVersionExtension, "Vector", 1, 2, 3)

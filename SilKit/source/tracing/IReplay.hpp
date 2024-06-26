@@ -49,9 +49,8 @@ public:
     virtual ~IReplayDataProvider() = default;
     //!< Pass the config (containing search path hints), the actual file to open
     //   and a logger to the extension.
-    virtual auto OpenFile(const SilKit::Config::ParticipantConfiguration& config,
-                          const std::string& filePath, SilKit::Services::Logging::ILogger* logger)
-        -> std::shared_ptr<IReplayFile> = 0;
+    virtual auto OpenFile(const SilKit::Config::ParticipantConfiguration& config, const std::string& filePath,
+                          SilKit::Services::Logging::ILogger* logger) -> std::shared_ptr<IReplayFile> = 0;
 };
 
 class IReplayFile

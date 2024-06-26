@@ -26,9 +26,9 @@
 
 
 #if SILKIT_ENABLE_TRACING_INSTRUMENTATION_AsioConnector
-#    define SILKIT_TRACE_METHOD_(logger, ...) SILKIT_TRACE_METHOD(logger, __VA_ARGS__)
+#define SILKIT_TRACE_METHOD_(logger, ...) SILKIT_TRACE_METHOD(logger, __VA_ARGS__)
 #else
-#    define SILKIT_TRACE_METHOD_(...)
+#define SILKIT_TRACE_METHOD_(...)
 #endif
 
 
@@ -187,17 +187,15 @@ void AsioConnector<T>::Op::Initiate(std::chrono::milliseconds timeout)
         return;
     }
 
-    auto connectCompletionHandler =
-        asio::bind_cancellation_slot(_connectCancelSignal.slot(), [self = this->shared_from_this()](const auto& e) {
-            self->OnAsioAsyncConnectComplete(e);
-        });
+    auto connectCompletionHandler = asio::bind_cancellation_slot(
+        _connectCancelSignal.slot(),
+        [self = this->shared_from_this()](const auto& e) { self->OnAsioAsyncConnectComplete(e); });
 
     if (timeout.count() > 0)
     {
-        auto timeoutCompletionHandler =
-            asio::bind_cancellation_slot(_timeoutCancelSignal.slot(), [self = this->shared_from_this()](const auto& e) {
-                self->OnAsioAsyncWaitComplete(e);
-            });
+        auto timeoutCompletionHandler = asio::bind_cancellation_slot(
+            _timeoutCancelSignal.slot(),
+            [self = this->shared_from_this()](const auto& e) { self->OnAsioAsyncWaitComplete(e); });
 
         _timeoutTimer.expires_after(timeout);
         _timeoutTimer.async_wait(timeoutCompletionHandler);

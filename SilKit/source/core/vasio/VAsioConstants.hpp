@@ -9,7 +9,7 @@
 namespace VSilKit {
 
 constexpr const SilKit::Core::ParticipantId REGISTRY_PARTICIPANT_ID{0};
-constexpr const char * REGISTRY_PARTICIPANT_NAME{"SilKitRegistry"};
+constexpr const char* REGISTRY_PARTICIPANT_NAME{"SilKitRegistry"};
 
 } // namespace VSilKit
 

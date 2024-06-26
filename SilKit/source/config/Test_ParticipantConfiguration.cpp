@@ -61,8 +61,9 @@ protected:
 
 TEST_F(Test_ParticipantConfiguration, throw_if_logging_is_configured_without_filename)
 {
-    EXPECT_THROW(SilKit::Config::ParticipantConfigurationFromFileImpl("ParticipantConfiguration_Logging_Without_File.json"),
-                 SilKit::ConfigurationError);
+    EXPECT_THROW(
+        SilKit::Config::ParticipantConfigurationFromFileImpl("ParticipantConfiguration_Logging_Without_File.json"),
+        SilKit::ConfigurationError);
 }
 
 TEST_F(Test_ParticipantConfiguration, minimal_configuration_file)
@@ -80,7 +81,8 @@ TEST_F(Test_ParticipantConfiguration, full_configuration_file)
 TEST_F(Test_ParticipantConfiguration, full_configuration_file_with_includes)
 {
     auto cfg = SilKit::Config::ParticipantConfigurationFromFileImpl("ParticipantConfiguration_FullIncludes.yaml");
-    auto ref_cfg = SilKit::Config::ParticipantConfigurationFromFileImpl("ParticipantConfiguration_FullIncludes_Reference.yaml");
+    auto ref_cfg =
+        SilKit::Config::ParticipantConfigurationFromFileImpl("ParticipantConfiguration_FullIncludes_Reference.yaml");
 
     // cast to ParticipantConfiguration to use right equal operator
     auto participantConfig = *std::dynamic_pointer_cast<ParticipantConfiguration>(cfg);
@@ -91,14 +93,16 @@ TEST_F(Test_ParticipantConfiguration, full_configuration_file_with_includes)
 
 TEST_F(Test_ParticipantConfiguration, participant_config_multiple_acceptor_uris)
 {
-    EXPECT_THROW(SilKit::Config::ParticipantConfigurationFromFileImpl("ParticipantConfiguration_MultipleAcceptorUris.yaml"),
-                SilKit::ConfigurationError);
+    EXPECT_THROW(
+        SilKit::Config::ParticipantConfigurationFromFileImpl("ParticipantConfiguration_MultipleAcceptorUris.yaml"),
+        SilKit::ConfigurationError);
 }
 
 TEST_F(Test_ParticipantConfiguration, participant_config_duplicate_controller_names)
 {
-    EXPECT_THROW(SilKit::Config::ParticipantConfigurationFromFileImpl("ParticipantConfiguration_DuplicateControllerNames.yaml"),
-                SilKit::ConfigurationError);
+    EXPECT_THROW(
+        SilKit::Config::ParticipantConfigurationFromFileImpl("ParticipantConfiguration_DuplicateControllerNames.yaml"),
+        SilKit::ConfigurationError);
 }
 
 TEST_F(Test_ParticipantConfiguration, participant_config_from_string)
@@ -125,14 +129,14 @@ CanControllers:
     )raw";
 
     auto cfg = SilKit::Config::ParticipantConfigurationFromStringImpl(configString);
-    auto ref_cfg = SilKit::Config::ParticipantConfigurationFromFileImpl("ParticipantConfiguration_FromString_Reference.yaml");
+    auto ref_cfg =
+        SilKit::Config::ParticipantConfigurationFromFileImpl("ParticipantConfiguration_FromString_Reference.yaml");
 
     // cast to ParticipantConfiguration to use right equal operator
     auto participantConfig = *std::dynamic_pointer_cast<ParticipantConfiguration>(cfg);
     auto participantConfigRef = *std::dynamic_pointer_cast<ParticipantConfiguration>(ref_cfg);
 
     ASSERT_TRUE(participantConfig == participantConfigRef);
-
 }
 TEST_F(Test_ParticipantConfiguration, participant_config_from_string_includes)
 {

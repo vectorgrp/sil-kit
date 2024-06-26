@@ -27,7 +27,7 @@ namespace Config {
 inline namespace v1 {
 
 
-} // inline namespace v1
+} // namespace v1
 
 } // namespace Config
 } // namespace SilKit

@@ -50,7 +50,7 @@ struct ThreadSafeLogger
     ThreadSafeLogger(ThreadSafeLogger&&) = default;
     ThreadSafeLogger& operator=(ThreadSafeLogger&&) = default;
 
-    template<typename T>
+    template <typename T>
     auto operator<<(T&& arg) -> ThreadSafeLogger&
     {
         buf << std::forward<T>(arg);

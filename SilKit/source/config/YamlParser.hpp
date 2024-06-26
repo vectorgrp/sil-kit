@@ -41,7 +41,7 @@ namespace Config {
 //! Helper to print the YAML position in line and column format.
 std::ostream& operator<<(std::ostream& out, const YAML::Mark& mark);
 
-template<typename SilKitConfigT>
+template <typename SilKitConfigT>
 auto to_yaml(const SilKitConfigT& silkitValue) -> YAML::Node
 {
     YAML::Node node;
@@ -53,12 +53,11 @@ auto to_yaml(const SilKitConfigT& silkitValue) -> YAML::Node
     catch (const YAML::Exception& ex)
     {
         std::stringstream ss;
-        ss << "YAML Error @ " << ex.mark
-            << ": " << ex.msg;
-        throw ConfigurationError{ ss.str() };
+        ss << "YAML Error @ " << ex.mark << ": " << ex.msg;
+        throw ConfigurationError{ss.str()};
     }
 }
-template<typename SilKitConfigT>
+template <typename SilKitConfigT>
 auto from_yaml(const YAML::Node& node) -> SilKitConfigT
 {
     try
@@ -68,9 +67,8 @@ auto from_yaml(const YAML::Node& node) -> SilKitConfigT
     catch (const YAML::Exception& ex)
     {
         std::stringstream ss;
-        ss << "YAML Error @ " << ex.mark
-            << ": " << ex.msg;
-        throw ConfigurationError{ ss.str() };
+        ss << "YAML Error @ " << ex.mark << ": " << ex.msg;
+        throw ConfigurationError{ss.str()};
     }
 }
 

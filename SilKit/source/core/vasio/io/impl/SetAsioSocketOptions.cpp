@@ -16,7 +16,7 @@ namespace VSilKit {
 
 
 void SetAsioSocketOptions(SilKit::Services::Logging::ILogger* logger, asio::ip::tcp::socket& socket,
-                      const AsioSocketOptions& socketOptions, std::error_code& errorCode)
+                          const AsioSocketOptions& socketOptions, std::error_code& errorCode)
 {
     if (socketOptions.tcp.noDelay)
     {
@@ -53,7 +53,7 @@ void SetAsioSocketOptions(SilKit::Services::Logging::ILogger* logger, asio::ip::
 
 
 void SetAsioSocketOptions(SilKit::Services::Logging::ILogger*, asio::local::stream_protocol::socket&,
-                      const AsioSocketOptions&, std::error_code&)
+                          const AsioSocketOptions&, std::error_code&)
 {
     // no local-domain specific options
 }

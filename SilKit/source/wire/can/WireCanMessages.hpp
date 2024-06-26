@@ -113,8 +113,13 @@ inline std::ostream& operator<<(std::ostream& out, const CanSetControllerMode& m
 
 auto ToCanFrame(const WireCanFrame& wireCanFrame) -> CanFrame
 {
-    return {wireCanFrame.canId, wireCanFrame.flags, wireCanFrame.dlc, wireCanFrame.sdt, wireCanFrame.vcid,
-            wireCanFrame.af, wireCanFrame.dataField.AsSpan()};
+    return {wireCanFrame.canId,
+            wireCanFrame.flags,
+            wireCanFrame.dlc,
+            wireCanFrame.sdt,
+            wireCanFrame.vcid,
+            wireCanFrame.af,
+            wireCanFrame.dataField.AsSpan()};
 }
 
 auto MakeWireCanFrame(const CanFrame& canFrame) -> WireCanFrame

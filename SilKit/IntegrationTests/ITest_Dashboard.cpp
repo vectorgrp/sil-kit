@@ -66,9 +66,8 @@ protected:
             (void)participant->CreateCanController(canonicalName, networkName);
             auto&& lifecycleService = simParticipant->GetOrCreateLifecycleService();
             auto&& timeSyncService = simParticipant->GetOrCreateTimeSyncService();
-            timeSyncService->SetSimulationStepHandler(
-                CreateSimulationStepHandler(participantName1, lifecycleService),
-                10ms);
+            timeSyncService->SetSimulationStepHandler(CreateSimulationStepHandler(participantName1, lifecycleService),
+                                                      10ms);
         }
         {
             auto&& simParticipant = _simTestHarness->GetParticipant(participantName2);
@@ -146,8 +145,8 @@ protected:
 void CheckStates(std::set<std::string> actual, std::set<std::string> expected, const std::string& participantName,
                  uint64_t simulationId)
 {
-    ASSERT_GE(actual.size(), expected.size()) << "Wrong number of states for " << participantName << " of simulation "
-                                              << simulationId << "!";
+    ASSERT_GE(actual.size(), expected.size())
+        << "Wrong number of states for " << participantName << " of simulation " << simulationId << "!";
     for (auto&& state : expected)
     {
         ASSERT_TRUE(actual.find(state) != actual.end())
@@ -283,12 +282,10 @@ TEST_F(ITest_Dashboard, dashboard_no_simulation)
 {
     SetupFromParticipantLists({}, {});
     auto testResult = SilKit::Dashboard::RunDashboardTest(
-        ParticipantConfigurationFromStringImpl(_dashboardParticipantConfig), _registryUri, _dashboardUri,
-        [this]() {
-            auto ok = _simTestHarness->Run(5s);
-            ASSERT_TRUE(ok) << "SimTestHarness should terminate without timeout";
-        },
-        0);
+        ParticipantConfigurationFromStringImpl(_dashboardParticipantConfig), _registryUri, _dashboardUri, [this]() {
+        auto ok = _simTestHarness->Run(5s);
+        ASSERT_TRUE(ok) << "SimTestHarness should terminate without timeout";
+    }, 0);
     _simTestHarness->ResetRegistry();
     CheckTestResult(testResult, CreateExpectedTestResult({}, false));
 }
@@ -306,8 +303,8 @@ TEST_F(ITest_Dashboard, dashboard_unicode_emoji_coordinated)
     auto testResult = SilKit::Dashboard::RunDashboardTest(
         ParticipantConfigurationFromStringImpl(_dashboardParticipantConfig), _registryUri, _dashboardUri,
         [this, &participantName1, &participantName2, &canonicalName, &networkName]() {
-          RunCanDemo(participantName1, participantName2, canonicalName, networkName);
-        });
+        RunCanDemo(participantName1, participantName2, canonicalName, networkName);
+    });
     _simTestHarness->ResetRegistry();
     CheckTestResult(testResult,
                     CreateExpectedTestResult(
@@ -326,8 +323,8 @@ TEST_F(ITest_Dashboard, dashboard_can_coordinated)
     auto testResult = SilKit::Dashboard::RunDashboardTest(
         ParticipantConfigurationFromStringImpl(_dashboardParticipantConfig), _registryUri, _dashboardUri,
         [this, &participantName1, &participantName2, &canonicalName, &networkName]() {
-            RunCanDemo(participantName1, participantName2, canonicalName, networkName);
-        });
+        RunCanDemo(participantName1, participantName2, canonicalName, networkName);
+    });
     _simTestHarness->ResetRegistry();
     CheckTestResult(
         testResult,
@@ -346,10 +343,9 @@ TEST_F(ITest_Dashboard, dashboard_can_repeat)
     auto testResult = SilKit::Dashboard::RunDashboardTest(
         ParticipantConfigurationFromStringImpl(_dashboardParticipantConfig), _registryUri, _dashboardUri,
         [this, &participantName1, &participantName2, &canonicalName, &networkName]() {
-            RunCanDemo(participantName1, participantName2, canonicalName, networkName);
-            RunCanDemo(participantName1, participantName2, canonicalName, networkName);
-        },
-        2);
+        RunCanDemo(participantName1, participantName2, canonicalName, networkName);
+        RunCanDemo(participantName1, participantName2, canonicalName, networkName);
+    }, 2);
     _simTestHarness->ResetRegistry();
     std::map<std::string, std::map<uint64_t, SilKit::Dashboard::Service>> simulation{
         {participantName1, {{6, {"", "cancontroller", canonicalName, networkName, {}}}}},
@@ -375,30 +371,29 @@ TEST_F(ITest_Dashboard, dashboard_pubsub_mix)
     auto testResult = SilKit::Dashboard::RunDashboardTest(
         ParticipantConfigurationFromStringImpl(_dashboardParticipantConfig), _registryUri, _dashboardUri,
         [this, &participantName1, &canonicalName1, &spec1, &participantName2, &canonicalName2, &spec2]() {
-            _simTestHarness->CreateSystemController();
-            {
-                auto&& simParticipant = _simTestHarness->GetParticipant(participantName1);
-                auto&& participant = simParticipant->Participant();
-                (void)participant->CreateDataPublisher(canonicalName1, spec1);
-                auto&& lifecycleService = simParticipant->GetOrCreateLifecycleService();
-                auto&& timeSyncService = simParticipant->GetOrCreateTimeSyncService();
-                timeSyncService->SetSimulationStepHandler(
-                    CreateSimulationStepHandler(participantName1, lifecycleService), 10ms);
-            }
-            {
-                auto&& simParticipant = _simTestHarness->GetParticipant(participantName2);
-                auto&& participant = simParticipant->Participant();
-                (void)participant->CreateDataSubscriber(canonicalName2, spec2, [](auto, const auto&) {
-                });
-                auto&& lifecycleService = simParticipant->GetOrCreateLifecycleService();
-                auto&& systemMonitor = simParticipant->GetOrCreateSystemMonitor();
-                (void)systemMonitor->AddParticipantStatusHandler(
-                    CreateAutonomousParticipantStatusHandler(participantName2, lifecycleService));
-            }
-            auto ok = _simTestHarness->Run(5s);
-            ASSERT_TRUE(ok) << "SimTestHarness should terminate without timeout";
-            _simTestHarness->ResetParticipants();
-        });
+        _simTestHarness->CreateSystemController();
+        {
+            auto&& simParticipant = _simTestHarness->GetParticipant(participantName1);
+            auto&& participant = simParticipant->Participant();
+            (void)participant->CreateDataPublisher(canonicalName1, spec1);
+            auto&& lifecycleService = simParticipant->GetOrCreateLifecycleService();
+            auto&& timeSyncService = simParticipant->GetOrCreateTimeSyncService();
+            timeSyncService->SetSimulationStepHandler(CreateSimulationStepHandler(participantName1, lifecycleService),
+                                                      10ms);
+        }
+        {
+            auto&& simParticipant = _simTestHarness->GetParticipant(participantName2);
+            auto&& participant = simParticipant->Participant();
+            (void)participant->CreateDataSubscriber(canonicalName2, spec2, [](auto, const auto&) {});
+            auto&& lifecycleService = simParticipant->GetOrCreateLifecycleService();
+            auto&& systemMonitor = simParticipant->GetOrCreateSystemMonitor();
+            (void)systemMonitor->AddParticipantStatusHandler(
+                CreateAutonomousParticipantStatusHandler(participantName2, lifecycleService));
+        }
+        auto ok = _simTestHarness->Run(5s);
+        ASSERT_TRUE(ok) << "SimTestHarness should terminate without timeout";
+        _simTestHarness->ResetParticipants();
+    });
     _simTestHarness->ResetRegistry();
     CheckTestResult(
         testResult,
@@ -429,30 +424,28 @@ TEST_F(ITest_Dashboard, dashboard_rpc_autonomous)
     auto testResult = SilKit::Dashboard::RunDashboardTest(
         ParticipantConfigurationFromStringImpl(_dashboardParticipantConfig), _registryUri, _dashboardUri,
         [this, &participantName1, &canonicalName1, &spec1, &participantName2, &canonicalName2, &spec2]() {
-            {
-                auto&& simParticipant = _simTestHarness->GetParticipant(participantName1);
-                auto&& participant = simParticipant->Participant();
-                (void)participant->CreateRpcClient(canonicalName1, spec1, [](auto*, const auto&) {
-                });
-                auto&& lifecycleService = simParticipant->GetOrCreateLifecycleService();
-                auto&& systemMonitor = simParticipant->GetOrCreateSystemMonitor();
-                (void)systemMonitor->AddParticipantStatusHandler(
-                    CreateAutonomousParticipantStatusHandler(participantName1, lifecycleService));
-            }
-            {
-                auto&& simParticipant = _simTestHarness->GetParticipant(participantName2);
-                auto&& participant = simParticipant->Participant();
-                (void)participant->CreateRpcServer(canonicalName2, spec2, [](auto*, const auto&) {
-                });
-                auto&& lifecycleService = simParticipant->GetOrCreateLifecycleService();
-                auto&& systemMonitor = simParticipant->GetOrCreateSystemMonitor();
-                (void)systemMonitor->AddParticipantStatusHandler(
-                    CreateAutonomousParticipantStatusHandler(participantName2, lifecycleService));
-            }
-            auto ok = _simTestHarness->Run(5s);
-            ASSERT_TRUE(ok) << "SimTestHarness should terminate without timeout";
-            _simTestHarness->ResetParticipants();
-        });
+        {
+            auto&& simParticipant = _simTestHarness->GetParticipant(participantName1);
+            auto&& participant = simParticipant->Participant();
+            (void)participant->CreateRpcClient(canonicalName1, spec1, [](auto*, const auto&) {});
+            auto&& lifecycleService = simParticipant->GetOrCreateLifecycleService();
+            auto&& systemMonitor = simParticipant->GetOrCreateSystemMonitor();
+            (void)systemMonitor->AddParticipantStatusHandler(
+                CreateAutonomousParticipantStatusHandler(participantName1, lifecycleService));
+        }
+        {
+            auto&& simParticipant = _simTestHarness->GetParticipant(participantName2);
+            auto&& participant = simParticipant->Participant();
+            (void)participant->CreateRpcServer(canonicalName2, spec2, [](auto*, const auto&) {});
+            auto&& lifecycleService = simParticipant->GetOrCreateLifecycleService();
+            auto&& systemMonitor = simParticipant->GetOrCreateSystemMonitor();
+            (void)systemMonitor->AddParticipantStatusHandler(
+                CreateAutonomousParticipantStatusHandler(participantName2, lifecycleService));
+        }
+        auto ok = _simTestHarness->Run(5s);
+        ASSERT_TRUE(ok) << "SimTestHarness should terminate without timeout";
+        _simTestHarness->ResetParticipants();
+    });
     _simTestHarness->ResetRegistry();
     CheckTestResult(
         testResult,
@@ -469,45 +462,44 @@ TEST_F(ITest_Dashboard, dashboard_netsim_coordinated)
 {
     const auto participantName = "NetSim";
     SetupFromParticipantLists({participantName}, {});
-    auto testResult = SilKit::Dashboard::RunDashboardTest(
-        ParticipantConfigurationFromStringImpl(_dashboardParticipantConfig), _registryUri, _dashboardUri,
-        [this, &participantName]() {
-            _simTestHarness->CreateSystemController();
-            {
-                auto&& simParticipant = _simTestHarness->GetParticipant(participantName, _participantConfig);
-                auto&& participant = simParticipant->Participant();
-                auto&& lifecycleService = simParticipant->GetOrCreateLifecycleService();
-                auto&& timeSyncService = simParticipant->GetOrCreateTimeSyncService();
-                auto&& participantInternal = &SilKit::Tests::ToParticipantInternal(*participant);
-                auto&& serviceDiscovery = participantInternal->GetServiceDiscovery();
+    auto testResult =
+        SilKit::Dashboard::RunDashboardTest(ParticipantConfigurationFromStringImpl(_dashboardParticipantConfig),
+                                            _registryUri, _dashboardUri, [this, &participantName]() {
+        _simTestHarness->CreateSystemController();
+        {
+            auto&& simParticipant = _simTestHarness->GetParticipant(participantName, _participantConfig);
+            auto&& participant = simParticipant->Participant();
+            auto&& lifecycleService = simParticipant->GetOrCreateLifecycleService();
+            auto&& timeSyncService = simParticipant->GetOrCreateTimeSyncService();
+            auto&& participantInternal = &SilKit::Tests::ToParticipantInternal(*participant);
+            auto&& serviceDiscovery = participantInternal->GetServiceDiscovery();
 
-                lifecycleService->SetCommunicationReadyHandler([participantName, serviceDiscovery]() {
-                    ServiceDescriptor linkDescriptor{};
-                    linkDescriptor.SetServiceType(ServiceType::Link);
-                    linkDescriptor.SetParticipantNameAndComputeId(participantName);
-                    for (auto cfg :
-                         {std::make_pair(NetworkType::CAN, "CAN1"), std::make_pair(NetworkType::Ethernet, "ETH1"),
-                          std::make_pair(NetworkType::FlexRay, "FR1"), std::make_pair(NetworkType::LIN, "LIN1")})
-                    {
-                        linkDescriptor.SetNetworkType(cfg.first);
-                        linkDescriptor.SetNetworkName(cfg.second);
-                        linkDescriptor.SetServiceName(cfg.second);
-                        serviceDiscovery->NotifyServiceCreated(std::move(linkDescriptor));
-                    }
-                });
-                timeSyncService->SetSimulationStepHandler(
-                    [simParticipant](auto currentSimTime, auto duration) {
-                        if(currentSimTime > duration) {
-                            Log() << simParticipant->Name() << ": stopping";
-                            simParticipant->Stop();
-                        }
-                    },
-                    10ms);
-            }
-            auto ok = _simTestHarness->Run(5s);
-            ASSERT_TRUE(ok) << "SimTestHarness should terminate without timeout";
-            _simTestHarness->ResetParticipants();
-        });
+            lifecycleService->SetCommunicationReadyHandler([participantName, serviceDiscovery]() {
+                ServiceDescriptor linkDescriptor{};
+                linkDescriptor.SetServiceType(ServiceType::Link);
+                linkDescriptor.SetParticipantNameAndComputeId(participantName);
+                for (auto cfg :
+                     {std::make_pair(NetworkType::CAN, "CAN1"), std::make_pair(NetworkType::Ethernet, "ETH1"),
+                      std::make_pair(NetworkType::FlexRay, "FR1"), std::make_pair(NetworkType::LIN, "LIN1")})
+                {
+                    linkDescriptor.SetNetworkType(cfg.first);
+                    linkDescriptor.SetNetworkName(cfg.second);
+                    linkDescriptor.SetServiceName(cfg.second);
+                    serviceDiscovery->NotifyServiceCreated(std::move(linkDescriptor));
+                }
+            });
+            timeSyncService->SetSimulationStepHandler([simParticipant](auto currentSimTime, auto duration) {
+                if (currentSimTime > duration)
+                {
+                    Log() << simParticipant->Name() << ": stopping";
+                    simParticipant->Stop();
+                }
+            }, 10ms);
+        }
+        auto ok = _simTestHarness->Run(5s);
+        ASSERT_TRUE(ok) << "SimTestHarness should terminate without timeout";
+        _simTestHarness->ResetParticipants();
+    });
     _simTestHarness->ResetRegistry();
     auto expected = ITest_Dashboard::CreateExpectedTestResult({{{participantName, {}}}}, true);
     expected.dataBySimulation[1].linksByParticipant = {

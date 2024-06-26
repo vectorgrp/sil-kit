@@ -261,7 +261,7 @@ struct CallCounts
     CallCountsSilKitSentMsgLin silKitSentMsgLin{};
     CallCountsSilKitHandlersLin silKitHandlersLinSimulated{};
     CallCountsSilKitHandlersLin silKitHandlersLinTrivial{};
-    
+
     // FlexRay
     CallCountsNetSimFlexray netSimFlexray{};
     CallCountsSilKitSentMsgFlexray silKitSentMsgFlexray{};
@@ -422,7 +422,6 @@ public:
     {
         return SilKit::Util::ToSpan(_controllerDescriptors);
     }
-
 };
 
 // ISimulatedNetwork

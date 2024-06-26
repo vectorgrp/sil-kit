@@ -197,31 +197,31 @@ protected:
             participantInternal->GetSystemController();
 
         auto systemMonitor = participant->CreateSystemMonitor();
-        systemMonitor->AddParticipantStatusHandler(
-            [&testParticipant, systemController, logger, this](const Services::Orchestration::ParticipantStatus& status) {
-                if (status.participantName == testParticipant.name)
+        systemMonitor->AddParticipantStatusHandler([&testParticipant, systemController, logger,
+                                                    this](const Services::Orchestration::ParticipantStatus& status) {
+            if (status.participantName == testParticipant.name)
+            {
+                if (status.state == ParticipantState::Error && !testParticipant.i.errorStateReached)
                 {
-                    if (status.state == ParticipantState::Error && !testParticipant.i.errorStateReached)
-                    {
-                        testParticipant.i.errorStateReached = true;
-                        testParticipant.errorStatePromise.set_value();
+                    testParticipant.i.errorStateReached = true;
+                    testParticipant.errorStatePromise.set_value();
 
-                        if (logging)
-                        {
-                            std::stringstream ss;
-                            ss << "AbortSimulation due to ErrorState of participant \'" << testParticipant.name << "\'";
-                            logger->Info(ss.str());
-                        }
-            
-                        systemController->AbortSimulation();
-                    }
-                    else if (status.state == ParticipantState::Running && !testParticipant.i.runningStateReached)
+                    if (logging)
                     {
-                        testParticipant.i.runningStateReached = true;
-                        testParticipant.runningStatePromise.set_value();
+                        std::stringstream ss;
+                        ss << "AbortSimulation due to ErrorState of participant \'" << testParticipant.name << "\'";
+                        logger->Info(ss.str());
                     }
+
+                    systemController->AbortSimulation();
                 }
-            });
+                else if (status.state == ParticipantState::Running && !testParticipant.i.runningStateReached)
+                {
+                    testParticipant.i.runningStateReached = true;
+                    testParticipant.runningStatePromise.set_value();
+                }
+            }
+        });
 
 
         ITimeSyncService* timeSyncService{};
@@ -237,40 +237,40 @@ protected:
         participant->CreateDataSubscriber(
             "TestSubscriber", matchingDataSpec,
             [&testParticipant](IDataSubscriber* /*subscriber*/, const DataMessageEvent& dataMessageEvent) {
-                if (!testParticipant.i.allReceived)
+            if (!testParticipant.i.allReceived)
+            {
+                auto participantId = dataMessageEvent.data[0];
+                if (participantId != testParticipant.id)
                 {
-                    auto participantId = dataMessageEvent.data[0];
-                    if (participantId != testParticipant.id)
+                    testParticipant.receivedIds.insert(dataMessageEvent.data[0]);
+                    // No self delivery: Expect expectedReceptions-1 receptions
+                    if (testParticipant.receivedIds.size() == expectedReceptions - 1)
                     {
-                        testParticipant.receivedIds.insert(dataMessageEvent.data[0]);
-                        // No self delivery: Expect expectedReceptions-1 receptions
-                        if (testParticipant.receivedIds.size() == expectedReceptions - 1)
-                        {
-                            testParticipant.i.allReceived = true;
-                            testParticipant.allReceivedPromise.set_value();
-                        }
+                        testParticipant.i.allReceived = true;
+                        testParticipant.allReceivedPromise.set_value();
                     }
                 }
-            });
+            }
+        });
 
         timeSyncService->SetSimulationStepHandler(
             [lifecycleService, logger, &testParticipant, publisher, this](std::chrono::nanoseconds now,
-                                                                        std::chrono::nanoseconds /*duration*/) {
-                publisher->Publish(std::vector<uint8_t>{testParticipant.id});
-                std::stringstream ss;
-                ss << "now=" << now.count() / 1e9 << "s";
-                logger->Info(ss.str());
-                if (!testParticipant.simtimePassed && now > simtimeToPass)
-                {
-                    testParticipant.simtimePassed = true;
-                    testParticipant.simtimePassedPromise.set_value();
-                }
-                if (testParticipant.i.stopRequested)
-                {
-                    testParticipant.i.stopRequested = false;
-                    lifecycleService->Stop("End Test");
-                }
-            },
+                                                                          std::chrono::nanoseconds /*duration*/) {
+            publisher->Publish(std::vector<uint8_t>{testParticipant.id});
+            std::stringstream ss;
+            ss << "now=" << now.count() / 1e9 << "s";
+            logger->Info(ss.str());
+            if (!testParticipant.simtimePassed && now > simtimeToPass)
+            {
+                testParticipant.simtimePassed = true;
+                testParticipant.simtimePassedPromise.set_value();
+            }
+            if (testParticipant.i.stopRequested)
+            {
+                testParticipant.i.stopRequested = false;
+                lifecycleService->Stop("End Test");
+            }
+        },
             1s);
 
         if (testParticipant.lifeCycleOperationMode != OperationMode::Invalid)
@@ -278,7 +278,6 @@ protected:
             auto finalStateFuture = lifecycleService->StartLifecycle();
             finalStateFuture.get();
         }
-        
     }
 
     void AsyncParticipantThread(TestParticipant& testParticipant)
@@ -307,32 +306,32 @@ protected:
         Experimental::Services::Orchestration::ISystemController* systemController =
             participantInternal->GetSystemController();
         auto systemMonitor = participant->CreateSystemMonitor();
-        systemMonitor->AddParticipantStatusHandler(
-            [&testParticipant, systemController, logger, this](const Services::Orchestration::ParticipantStatus& status) {
-                if (status.participantName == testParticipant.name)
+        systemMonitor->AddParticipantStatusHandler([&testParticipant, systemController, logger,
+                                                    this](const Services::Orchestration::ParticipantStatus& status) {
+            if (status.participantName == testParticipant.name)
+            {
+                if (status.state == ParticipantState::Error && !testParticipant.i.errorStateReached)
                 {
-                    if (status.state == ParticipantState::Error && !testParticipant.i.errorStateReached)
-                    {
-                        // We also set the runningStatePromise to skip waiting for this
-                        testParticipant.runningStatePromise.set_value();
+                    // We also set the runningStatePromise to skip waiting for this
+                    testParticipant.runningStatePromise.set_value();
 
-                        testParticipant.i.errorStateReached = true;
-                        testParticipant.errorStatePromise.set_value();
-                        if (logging)
-                        {
-                            std::stringstream ss;
-                            ss << "AbortSimulation due to ErrorState of participant \'" << testParticipant.name << "\'";
-                            logger->Info(ss.str());
-                        }
-                        systemController->AbortSimulation();
-                    }
-                    else if (status.state == ParticipantState::Running && !testParticipant.i.runningStateReached)
+                    testParticipant.i.errorStateReached = true;
+                    testParticipant.errorStatePromise.set_value();
+                    if (logging)
                     {
-                        testParticipant.i.runningStateReached = true;
-                        testParticipant.runningStatePromise.set_value();
+                        std::stringstream ss;
+                        ss << "AbortSimulation due to ErrorState of participant \'" << testParticipant.name << "\'";
+                        logger->Info(ss.str());
                     }
+                    systemController->AbortSimulation();
                 }
-            });
+                else if (status.state == ParticipantState::Running && !testParticipant.i.runningStateReached)
+                {
+                    testParticipant.i.runningStateReached = true;
+                    testParticipant.runningStatePromise.set_value();
+                }
+            }
+        });
 
         SilKit::Services::PubSub::PubSubSpec dataSpec{topic, mediaType};
         SilKit::Services::PubSub::PubSubSpec matchingDataSpec{topic, mediaType};
@@ -340,21 +339,21 @@ protected:
         participant->CreateDataSubscriber(
             "TestSubscriber", matchingDataSpec,
             [&testParticipant](IDataSubscriber* /*subscriber*/, const DataMessageEvent& dataMessageEvent) {
-                if (!testParticipant.i.allReceived)
+            if (!testParticipant.i.allReceived)
+            {
+                auto participantId = dataMessageEvent.data[0];
+                if (participantId != testParticipant.id)
                 {
-                    auto participantId = dataMessageEvent.data[0];
-                    if (participantId != testParticipant.id)
+                    testParticipant.receivedIds.insert(dataMessageEvent.data[0]);
+                    // No self delivery: Expect expectedReceptions-1 receptions
+                    if (testParticipant.receivedIds.size() == expectedReceptions - 1)
                     {
-                        testParticipant.receivedIds.insert(dataMessageEvent.data[0]);
-                        // No self delivery: Expect expectedReceptions-1 receptions
-                        if (testParticipant.receivedIds.size() == expectedReceptions - 1)
-                        {
-                            testParticipant.i.allReceived = true;
-                            testParticipant.allReceivedPromise.set_value();
-                        }
+                        testParticipant.i.allReceived = true;
+                        testParticipant.allReceivedPromise.set_value();
                     }
                 }
-            });
+            }
+        });
 
         auto runTask = [&testParticipant, publisher]() {
             while (!testParticipant.i.stopRequested)
@@ -387,7 +386,7 @@ protected:
             // Wait for task to have received a stop request
             auto simTaskFinishedFuture = testParticipant.simTaskFinishedPromise.get_future();
             simTaskFinishedFuture.get();
-            
+
             // Stop the lifecycle
             lifecycleService->Stop("End Test");
 
@@ -402,7 +401,6 @@ protected:
         {
             runTask();
         }
-
     }
 
     void SystemControllerParticipantThread(const std::vector<std::string>& required)
@@ -459,9 +457,11 @@ protected:
                 systemController->AbortSimulation();
                 break;
 
-            case SystemState::Running: break;
+            case SystemState::Running:
+                break;
 
-            default: break;
+            default:
+                break;
             }
         });
 
@@ -478,7 +478,7 @@ protected:
             {
                 std::this_thread::sleep_for(1ms);
             }
-            
+
             if (logging)
             {
                 logger->Info("AbortSimulation requested");
@@ -509,9 +509,8 @@ protected:
             }
             required.push_back(systemControllerParticipantName);
 
-            participantThread_SystemController = ParticipantThread{[this, required] {
-                SystemControllerParticipantThread(required);
-            }};
+            participantThread_SystemController =
+                ParticipantThread{[this, required] { SystemControllerParticipantThread(required); }};
         }
     }
 
@@ -533,7 +532,10 @@ protected:
         registry->StartListening(registryUri);
     }
 
-    void StopRegistry() { registry.reset(); }
+    void StopRegistry()
+    {
+        registry.reset();
+    }
 
     void RunParticipants(std::list<TestParticipant>& participants)
     {
@@ -543,42 +545,30 @@ protected:
             {
                 if (p.lifeCycleOperationMode == OperationMode::Invalid)
                 {
-                    participantThreads_Async_Invalid.emplace_back([this, &p] {
-                        AsyncParticipantThread(p);
-                    });
+                    participantThreads_Async_Invalid.emplace_back([this, &p] { AsyncParticipantThread(p); });
                 }
                 else if (p.lifeCycleOperationMode == OperationMode::Autonomous)
                 {
-                    participantThreads_Async_Autonomous.emplace_back([this, &p] {
-                        AsyncParticipantThread(p);
-                    });
+                    participantThreads_Async_Autonomous.emplace_back([this, &p] { AsyncParticipantThread(p); });
                 }
                 else if (p.lifeCycleOperationMode == OperationMode::Coordinated)
                 {
-                    participantThreads_Async_Coordinated.emplace_back([this, &p] {
-                        AsyncParticipantThread(p);
-                    });
+                    participantThreads_Async_Coordinated.emplace_back([this, &p] { AsyncParticipantThread(p); });
                 }
             }
             else if (p.timeMode == TimeMode::Sync)
             {
                 if (p.lifeCycleOperationMode == OperationMode::Invalid)
                 {
-                    participantThreads_Sync_Invalid.emplace_back([this, &p] {
-                        SyncParticipantThread(p);
-                    });
+                    participantThreads_Sync_Invalid.emplace_back([this, &p] { SyncParticipantThread(p); });
                 }
                 else if (p.lifeCycleOperationMode == OperationMode::Autonomous)
                 {
-                    participantThreads_Sync_Autonomous.emplace_back([this, &p] {
-                        SyncParticipantThread(p);
-                    });
+                    participantThreads_Sync_Autonomous.emplace_back([this, &p] { SyncParticipantThread(p); });
                 }
                 else if (p.lifeCycleOperationMode == OperationMode::Coordinated)
                 {
-                    participantThreads_Sync_Coordinated.emplace_back([this, &p] {
-                        SyncParticipantThread(p);
-                    });
+                    participantThreads_Sync_Coordinated.emplace_back([this, &p] { SyncParticipantThread(p); });
                 }
             }
         }
@@ -706,7 +696,7 @@ TEST_F(ITest_Internals_ParticipantModes, test_AsyncCoordinatedNonReq_disallowed)
     // Participants
     std::list<TestParticipant> testParticipants;
     testParticipants.push_back({"AsyncCoordinated1", TimeMode::Async, OperationMode::Coordinated});
-    
+
     // Workflow configuration without "AsyncCoordinated1"
     RunSystemController({"NoSuchParticipant"});
 
@@ -986,7 +976,7 @@ TEST_F(ITest_Internals_ParticipantModes, test_SyncAutonomousReq)
 
     // Shutdown
     JoinParticipantThreads(participantThreads_Sync_Autonomous);
-    
+
     AbortSystemController();
     StopRegistry();
 }
@@ -1159,7 +1149,8 @@ TEST_F(ITest_Internals_ParticipantModes, test_Combinations)
                         || (p2_timeMode == TimeMode::Sync && p2_operationMode == OperationMode::Autonomous
                             && p1_timeMode == TimeMode::Sync && p1_operationMode == OperationMode::Coordinated))
                     {
-                        std::cout << " -> Invalid combination (Sync+Autonomous with Sync+Coordinated), skip" << std::endl;
+                        std::cout << " -> Invalid combination (Sync+Autonomous with Sync+Coordinated), skip"
+                                  << std::endl;
                         continue;
                     }
 

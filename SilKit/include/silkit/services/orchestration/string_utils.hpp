@@ -83,7 +83,7 @@ std::string to_string(ParticipantState state)
     }
     throw SilKit::TypeConversionError{};
 }
-    
+
 std::string to_string(SystemState state)
 {
     switch (state)
@@ -159,11 +159,8 @@ std::ostream& operator<<(std::ostream& out, const ParticipantStatus& status)
     localtime_r(&enterTime, &tmBuffer);
 #endif
 
-    out << "Orchestration::ParticipantStatus{" << status.participantName
-        << ", State=" << status.state
-        << ", Reason=" << status.enterReason
-        << ", Time=" << std::put_time(&tmBuffer, "%FT%T")
-        << "}";
+    out << "Orchestration::ParticipantStatus{" << status.participantName << ", State=" << status.state
+        << ", Reason=" << status.enterReason << ", Time=" << std::put_time(&tmBuffer, "%FT%T") << "}";
 
     return out;
 }
@@ -181,7 +178,8 @@ std::ostream& operator<<(std::ostream& out, const WorkflowConfiguration& workflo
     bool first = true;
     for (auto&& p : workflowConfiguration.requiredParticipantNames)
     {
-        if (!first) out << ", ";
+        if (!first)
+            out << ", ";
         out << p;
         first = false;
     }

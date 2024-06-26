@@ -82,7 +82,8 @@ class Schedule
 {
 public:
     Schedule() = default;
-    Schedule(std::initializer_list<std::pair<std::chrono::nanoseconds, std::function<void(std::chrono::nanoseconds)>>> tasks)
+    Schedule(
+        std::initializer_list<std::pair<std::chrono::nanoseconds, std::function<void(std::chrono::nanoseconds)>>> tasks)
     {
         for (auto&& task : tasks)
         {
@@ -118,8 +119,13 @@ private:
         _timer.Set(_now + currentTask->delay, currentTask->action);
     }
 
-    struct Task {
-        Task(std::chrono::nanoseconds delay, std::function<void(std::chrono::nanoseconds)> action) : delay{delay}, action{action} {}
+    struct Task
+    {
+        Task(std::chrono::nanoseconds delay, std::function<void(std::chrono::nanoseconds)> action)
+            : delay{delay}
+            , action{action}
+        {
+        }
 
         std::chrono::nanoseconds delay;
         std::function<void(std::chrono::nanoseconds)> action;
@@ -127,7 +133,7 @@ private:
 
     Timer _timer;
     std::vector<Task> _schedule;
-    std::vector<Task>::iterator _nextTask;  
+    std::vector<Task>::iterator _nextTask;
     std::chrono::nanoseconds _now = 0ns;
 };
 
@@ -137,14 +143,12 @@ public:
     LinMaster(ILinController* controller)
         : controller{controller}
     {
-        schedule = {
-            {10ms, [this](std::chrono::nanoseconds now) { SendFrame_16(now); }},
-            {20ms, [this](std::chrono::nanoseconds now) { SendFrame_17(now); }},
-            {10ms, [this](std::chrono::nanoseconds now) { SendFrame_18(now); }},
-            {10ms, [this](std::chrono::nanoseconds now) { SendFrame_19(now); }},
-            {10ms, [this](std::chrono::nanoseconds now) { SendFrame_34(now); }},
-            {10ms, [this](std::chrono::nanoseconds /*now*/) { GoToSleep(); }}
-        };
+        schedule = {{10ms, [this](std::chrono::nanoseconds now) { SendFrame_16(now); }},
+                    {20ms, [this](std::chrono::nanoseconds now) { SendFrame_17(now); }},
+                    {10ms, [this](std::chrono::nanoseconds now) { SendFrame_18(now); }},
+                    {10ms, [this](std::chrono::nanoseconds now) { SendFrame_19(now); }},
+                    {10ms, [this](std::chrono::nanoseconds now) { SendFrame_34(now); }},
+                    {10ms, [this](std::chrono::nanoseconds /*now*/) { GoToSleep(); }}};
     }
 
     void DoAction(std::chrono::nanoseconds now)
@@ -169,7 +173,7 @@ public:
         frame.id = 17;
         frame.checksumModel = LinChecksumModel::Classic;
         frame.dataLength = 6;
-        frame.data = std::array<uint8_t, 8>{1,7,1,7,1,7,1,7};
+        frame.data = std::array<uint8_t, 8>{1, 7, 1, 7, 1, 7, 1, 7};
 
         SendFrameIfOperational(frame, LinFrameResponseType::MasterResponse);
     }
@@ -217,8 +221,10 @@ public:
     {
         switch (frameStatusEvent.status)
         {
-        case LinFrameStatus::LIN_RX_OK: break; // good case, no need to warn
-        case LinFrameStatus::LIN_TX_OK: break; // good case, no need to warn
+        case LinFrameStatus::LIN_RX_OK:
+            break; // good case, no need to warn
+        case LinFrameStatus::LIN_TX_OK:
+            break; // good case, no need to warn
         default:
             std::cout << "WARNING: LIN transmission failed!" << std::endl;
         }
@@ -268,7 +274,6 @@ private:
 };
 
 
-
 class LinSlave
 {
 public:
@@ -298,21 +303,18 @@ public:
             UpdateTxBuffer_LinId34(linController);
         }
 
-        std::cout << ">> " << frameStatusEvent.frame
-                  << " status=" << frameStatusEvent.status
-                  << " timestamp=" << frameStatusEvent.timestamp
-                  << std::endl;
+        std::cout << ">> " << frameStatusEvent.frame << " status=" << frameStatusEvent.status
+                  << " timestamp=" << frameStatusEvent.timestamp << std::endl;
     }
 
     void GoToSleepHandler(ILinController* linController, const LinGoToSleepEvent& /*goToSleepEvent*/)
     {
         std::cout << "LIN Slave received go-to-sleep command; entering sleep mode." << std::endl;
         // wakeup in 15 ms
-        timer.Set(now + 15ms,
-            [linController](std::chrono::nanoseconds tnow) {
-                std::cout << "<< Wakeup pulse @" << tnow << std::endl;
-                linController->Wakeup();
-            });
+        timer.Set(now + 15ms, [linController](std::chrono::nanoseconds tnow) {
+            std::cout << "<< Wakeup pulse @" << tnow << std::endl;
+            linController->Wakeup();
+        });
         linController->GoToSleepInternal();
     }
 
@@ -404,7 +406,8 @@ void InitLinSlave(ILinController* linController, std::string participantName)
  * Main Function
  **************************************************************************************************/
 
-int main(int argc, char** argv) try 
+int main(int argc, char** argv)
+try
 {
     if (argc < 3)
     {
@@ -447,15 +450,10 @@ int main(int argc, char** argv) try
     auto* linController = participant->CreateLinController("LIN1", "LIN1");
 
     // Observe state changes
-    lifecycleService->SetStopHandler([]() {
-        std::cout << "Stop handler called" << std::endl;
-    });
-    lifecycleService->SetShutdownHandler([]() {
-        std::cout << "Shutdown handler called" << std::endl;
-    });
-    lifecycleService->SetAbortHandler([](auto lastState) {
-        std::cout << "Abort handler called while in state " << lastState << std::endl;
-    });
+    lifecycleService->SetStopHandler([]() { std::cout << "Stop handler called" << std::endl; });
+    lifecycleService->SetShutdownHandler([]() { std::cout << "Shutdown handler called" << std::endl; });
+    lifecycleService->SetAbortHandler(
+        [](auto lastState) { std::cout << "Abort handler called while in state " << lastState << std::endl; });
 
     LinMaster master{linController};
     LinSlave slave;
@@ -464,27 +462,25 @@ int main(int argc, char** argv) try
     {
         linController->AddFrameStatusHandler(
             [&master](ILinController* linController, const LinFrameStatusEvent& frameStatusEvent) {
-                master.FrameStatusHandler(linController, frameStatusEvent);
-            });
+            master.FrameStatusHandler(linController, frameStatusEvent);
+        });
         linController->AddWakeupHandler([&master](ILinController* linController, const LinWakeupEvent& wakeupEvent) {
-                master.WakeupHandler(linController, wakeupEvent);
-            });
+            master.WakeupHandler(linController, wakeupEvent);
+        });
 
         if (runSync)
         {
-            lifecycleService->SetCommunicationReadyHandler([&participantName, linController]() {
-                InitLinMaster(linController, participantName);
-            });
+            lifecycleService->SetCommunicationReadyHandler(
+                [&participantName, linController]() { InitLinMaster(linController, participantName); });
             timeSyncService->SetSimulationStepHandler(
                 [&master](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
-                    auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
-                    std::cout << "now=" << nowMs.count() << "ms" << std::endl;
+                auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
+                std::cout << "now=" << nowMs.count() << "ms" << std::endl;
 
-                    master.DoAction(now);
+                master.DoAction(now);
 
-                    std::this_thread::sleep_for(100ms);
-                },
-                1ms);
+                std::this_thread::sleep_for(100ms);
+            }, 1ms);
 
             auto lifecycleFuture = lifecycleService->StartLifecycle();
             auto finalState = lifecycleFuture.get();
@@ -505,8 +501,8 @@ int main(int argc, char** argv) try
                 InitLinMaster(linController, participantName);
                 workerThread = std::thread{[&]() {
                     startHandlerFuture.get();
-                    while (lifecycleService->State() == ParticipantState::ReadyToRun ||
-                           lifecycleService->State() == ParticipantState::Running)
+                    while (lifecycleService->State() == ParticipantState::ReadyToRun
+                           || lifecycleService->State() == ParticipantState::Running)
                     {
                         master.DoAction(now);
                         now += 1ms;
@@ -519,17 +515,15 @@ int main(int argc, char** argv) try
                 }};
             });
 
-            lifecycleService->SetStartingHandler([&]() {
-                startHandlerPromise.set_value();
-            });
+            lifecycleService->SetStartingHandler([&]() { startHandlerPromise.set_value(); });
 
             lifecycleService->StartLifecycle();
             std::cout << "Press enter to leave the simulation..." << std::endl;
             std::cin.ignore();
 
             isStopRequested = true;
-            if (lifecycleService->State() == ParticipantState::Running || 
-                lifecycleService->State() == ParticipantState::Paused)
+            if (lifecycleService->State() == ParticipantState::Running
+                || lifecycleService->State() == ParticipantState::Paused)
             {
                 std::cout << "User requested to stop in state " << lifecycleService->State() << std::endl;
                 lifecycleService->Stop("User requested to stop");
@@ -546,30 +540,28 @@ int main(int argc, char** argv) try
     {
         linController->AddFrameStatusHandler(
             [&slave](ILinController* linController, const LinFrameStatusEvent& frameStatusEvent) {
-                slave.FrameStatusHandler(linController, frameStatusEvent);
-            });
+            slave.FrameStatusHandler(linController, frameStatusEvent);
+        });
         linController->AddGoToSleepHandler(
             [&slave](ILinController* linController, const LinGoToSleepEvent& goToSleepEvent) {
-                slave.GoToSleepHandler(linController, goToSleepEvent);
-            });
+            slave.GoToSleepHandler(linController, goToSleepEvent);
+        });
         linController->AddWakeupHandler([&slave](ILinController* linController, const LinWakeupEvent& wakeupEvent) {
-                slave.WakeupHandler(linController, wakeupEvent);
-            });
+            slave.WakeupHandler(linController, wakeupEvent);
+        });
 
         if (runSync)
         {
-            lifecycleService->SetCommunicationReadyHandler([&participantName, linController]() {
-                InitLinSlave(linController, participantName);
-            });
+            lifecycleService->SetCommunicationReadyHandler(
+                [&participantName, linController]() { InitLinSlave(linController, participantName); });
             timeSyncService->SetSimulationStepHandler(
                 [&slave](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
-                    std::cout << "now=" << std::chrono::duration_cast<std::chrono::milliseconds>(now).count() << "ms"
-                              << std::endl;
-                    slave.DoAction(now);
+                std::cout << "now=" << std::chrono::duration_cast<std::chrono::milliseconds>(now).count() << "ms"
+                          << std::endl;
+                slave.DoAction(now);
 
-                    std::this_thread::sleep_for(100ms);
-                },
-                1ms);
+                std::this_thread::sleep_for(100ms);
+            }, 1ms);
 
             auto finalStateFuture = lifecycleService->StartLifecycle();
             auto finalState = finalStateFuture.get();
@@ -590,8 +582,8 @@ int main(int argc, char** argv) try
                 InitLinSlave(linController, participantName);
                 workerThread = std::thread{[&]() {
                     startHandlerFuture.get();
-                    while (lifecycleService->State() == ParticipantState::ReadyToRun ||
-                           lifecycleService->State() == ParticipantState::Running)
+                    while (lifecycleService->State() == ParticipantState::ReadyToRun
+                           || lifecycleService->State() == ParticipantState::Running)
                     {
                         slave.DoAction(now);
                         now += 1ms;
@@ -604,17 +596,15 @@ int main(int argc, char** argv) try
                 }};
             });
 
-            lifecycleService->SetStartingHandler([&]() {
-                startHandlerPromise.set_value();
-            });
+            lifecycleService->SetStartingHandler([&]() { startHandlerPromise.set_value(); });
 
             lifecycleService->StartLifecycle();
             std::cout << "Press enter to leave the simulation..." << std::endl;
             std::cin.ignore();
 
             isStopRequested = true;
-            if (lifecycleService->State() == ParticipantState::Running || 
-                lifecycleService->State() == ParticipantState::Paused)
+            if (lifecycleService->State() == ParticipantState::Running
+                || lifecycleService->State() == ParticipantState::Paused)
             {
                 std::cout << "User requested to stop in state " << lifecycleService->State() << std::endl;
                 lifecycleService->Stop("User requested to stop");
@@ -629,8 +619,7 @@ int main(int argc, char** argv) try
     }
     else
     {
-        std::cout << "Wrong participant name provided. Use either \"LinMaster\" or \"LinSlave\"."
-                  << std::endl;
+        std::cout << "Wrong participant name provided. Use either \"LinMaster\" or \"LinSlave\"." << std::endl;
         return 1;
     }
 

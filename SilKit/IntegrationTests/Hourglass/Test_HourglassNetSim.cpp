@@ -39,7 +39,8 @@ using namespace SilKit::Experimental::NetworkSimulation;
 
 MATCHER_P(ReceiverMatcher, controlReceivers, "")
 {
-    *result_listener << "Matches SilKit_Experimental_EventReceivers (arg, C-API) to EventReceivers (controlFrame Cpp API)";
+    *result_listener
+        << "Matches SilKit_Experimental_EventReceivers (arg, C-API) to EventReceivers (controlFrame Cpp API)";
     const SilKit::Util::Span<ControllerDescriptor> cppReceivers = controlReceivers;
     const SilKit_Experimental_EventReceivers* cReceivers = arg;
     if (cppReceivers.size() != cReceivers->numReceivers)
@@ -64,8 +65,7 @@ bool CompareCanFrame(const SilKit::Services::Can::CanFrame& cppFrame, const SilK
 {
     using namespace SilKit::Services::Can;
 
-    if (cppFrame.canId != cFrame->id || cppFrame.dlc != cFrame->dlc
-        || cppFrame.dataField.size() != cFrame->data.size)
+    if (cppFrame.canId != cFrame->id || cppFrame.dlc != cFrame->dlc || cppFrame.dataField.size() != cFrame->data.size)
     {
         return false;
     }
@@ -76,8 +76,7 @@ bool CompareCanFrame(const SilKit::Services::Can::CanFrame& cppFrame, const SilK
             return false;
         }
     }
-    if (cppFrame.sdt != cFrame->sdt || cppFrame.vcid != cFrame->vcid
-        || cppFrame.af != cFrame->af)
+    if (cppFrame.sdt != cFrame->sdt || cppFrame.vcid != cFrame->vcid || cppFrame.af != cFrame->af)
     {
         return false;
     }
@@ -156,7 +155,8 @@ MATCHER_P(NetSimCanConfigureBaudrateMatcher, controlMsg, "")
 {
     *result_listener << "Matches SilKit_Experimental_NetSim_CanConfigureBaudrate (arg, C-API) to "
                         "SilKit::Experimental::NetworkSimulation::CanConfigureBaudrate (controlMsg Cpp API)";
-    SilKit_Experimental_NetSim_CanConfigureBaudrate cCanConfigureBaudrate = (SilKit_Experimental_NetSim_CanConfigureBaudrate)controlMsg;
+    SilKit_Experimental_NetSim_CanConfigureBaudrate cCanConfigureBaudrate =
+        (SilKit_Experimental_NetSim_CanConfigureBaudrate)controlMsg;
     SilKit::Experimental::NetworkSimulation::Can::CanConfigureBaudrate cppCanConfigureBaudrate =
         (SilKit::Experimental::NetworkSimulation::Can::CanConfigureBaudrate)arg;
 
@@ -175,7 +175,8 @@ MATCHER_P(NetSimCanControllerModeMatcher, controlMsg, "")
 {
     *result_listener << "Matches SilKit_Experimental_NetSim_CanControllerMode (arg, C-API) to "
                         "SilKit::Experimental::NetworkSimulation::CanControllerMode (controlMsg Cpp API)";
-    SilKit_Experimental_NetSim_CanControllerMode cCanControllerMode = (SilKit_Experimental_NetSim_CanControllerMode)controlMsg;
+    SilKit_Experimental_NetSim_CanControllerMode cCanControllerMode =
+        (SilKit_Experimental_NetSim_CanControllerMode)controlMsg;
     SilKit::Experimental::NetworkSimulation::Can::CanControllerMode cppCanControllerMode =
         (SilKit::Experimental::NetworkSimulation::Can::CanControllerMode)arg;
 
@@ -231,7 +232,8 @@ MATCHER_P(NetSimEthernetFrameRequestMatcher, controlMsg, "")
 {
     *result_listener << "Matches SilKit_Experimental_NetSim_EthernetFrameRequest (arg, C-API) to "
                         "SilKit::Experimental::NetworkSimulation::EthernetFrameRequest (controlMsg Cpp API)";
-    SilKit_Experimental_NetSim_EthernetFrameRequest cFrameRequest = (SilKit_Experimental_NetSim_EthernetFrameRequest)controlMsg;
+    SilKit_Experimental_NetSim_EthernetFrameRequest cFrameRequest =
+        (SilKit_Experimental_NetSim_EthernetFrameRequest)controlMsg;
     SilKit::Experimental::NetworkSimulation::Ethernet::EthernetFrameRequest cppFrameRequest =
         (SilKit::Experimental::NetworkSimulation::Ethernet::EthernetFrameRequest)arg;
 
@@ -247,7 +249,8 @@ MATCHER_P(NetSimEthernetControllerModeMatcher, controlMsg, "")
 {
     *result_listener << "Matches SilKit_Experimental_NetSim_EthernetControllerMode (arg, C-API) to "
                         "SilKit::Experimental::NetworkSimulation::EthernetControllerMode (controlMsg Cpp API)";
-    SilKit_Experimental_NetSim_EthernetControllerMode cControllerMode = (SilKit_Experimental_NetSim_EthernetControllerMode)controlMsg;
+    SilKit_Experimental_NetSim_EthernetControllerMode cControllerMode =
+        (SilKit_Experimental_NetSim_EthernetControllerMode)controlMsg;
     SilKit::Experimental::NetworkSimulation::Ethernet::EthernetControllerMode cppControllerMode =
         (SilKit::Experimental::NetworkSimulation::Ethernet::EthernetControllerMode)arg;
 
@@ -265,10 +268,8 @@ MATCHER_P(NetSimEthernetControllerModeMatcher, controlMsg, "")
 
 bool CompareFlexrayFrame(const SilKit::Services::Flexray::FlexrayFrame& cppFrame, const SilKit_FlexrayFrame* cFrame)
 {
-    if (cppFrame.header.cycleCount != cFrame->header->cycleCount
-        || cppFrame.header.flags != cFrame->header->flags
-        || cppFrame.header.frameId != cFrame->header->frameId
-        || cppFrame.header.headerCrc != cFrame->header->headerCrc
+    if (cppFrame.header.cycleCount != cFrame->header->cycleCount || cppFrame.header.flags != cFrame->header->flags
+        || cppFrame.header.frameId != cFrame->header->frameId || cppFrame.header.headerCrc != cFrame->header->headerCrc
         || cppFrame.header.payloadLength != cFrame->header->payloadLength)
     {
         return false;
@@ -323,8 +324,9 @@ MATCHER_P(FlexrayFrameEventMatcher, controlFrame, "")
 MATCHER_P(NetSimFlexrayHostCommandMatcher, controlMsg, "")
 {
     *result_listener << "Matches SilKit_Experimental_NetSim_FlexrayHostCommand (arg, C-API) to "
-        "SilKit::Experimental::NetworkSimulation::Flexray::FlexrayHostCommand (controlMsg Cpp API)";
-    SilKit_Experimental_NetSim_FlexrayHostCommand cHostCommand = (SilKit_Experimental_NetSim_FlexrayHostCommand)controlMsg;
+                        "SilKit::Experimental::NetworkSimulation::Flexray::FlexrayHostCommand (controlMsg Cpp API)";
+    SilKit_Experimental_NetSim_FlexrayHostCommand cHostCommand =
+        (SilKit_Experimental_NetSim_FlexrayHostCommand)controlMsg;
     SilKit::Experimental::NetworkSimulation::Flexray::FlexrayHostCommand cppHostCommand =
         (SilKit::Experimental::NetworkSimulation::Flexray::FlexrayHostCommand)arg;
 
@@ -338,9 +340,11 @@ MATCHER_P(NetSimFlexrayHostCommandMatcher, controlMsg, "")
 
 MATCHER_P(NetSimFlexrayControllerConfigMatcher, controlMsg, "")
 {
-    *result_listener << "Matches SilKit_Experimental_NetSim_FlexrayControllerConfig (arg, C-API) to "
-        "SilKit::Experimental::NetworkSimulation::Flexray::FlexrayControllerConfig (controlMsg Cpp API)";
-    SilKit_Experimental_NetSim_FlexrayControllerConfig cControllerConfig = (SilKit_Experimental_NetSim_FlexrayControllerConfig)controlMsg;
+    *result_listener
+        << "Matches SilKit_Experimental_NetSim_FlexrayControllerConfig (arg, C-API) to "
+           "SilKit::Experimental::NetworkSimulation::Flexray::FlexrayControllerConfig (controlMsg Cpp API)";
+    SilKit_Experimental_NetSim_FlexrayControllerConfig cControllerConfig =
+        (SilKit_Experimental_NetSim_FlexrayControllerConfig)controlMsg;
     SilKit::Experimental::NetworkSimulation::Flexray::FlexrayControllerConfig cppControllerConfig =
         (SilKit::Experimental::NetworkSimulation::Flexray::FlexrayControllerConfig)arg;
 
@@ -422,8 +426,9 @@ MATCHER_P(NetSimFlexrayControllerConfigMatcher, controlMsg, "")
 
 MATCHER_P(NetSimFlexrayTxBufferConfigUpdateMatcher, controlMsg, "")
 {
-    *result_listener << "Matches SilKit_Experimental_NetSim_FlexrayTxBufferConfigUpdate (arg, C-API) to "
-                        "SilKit::Experimental::NetworkSimulation::Flexray::FlexrayTxBufferConfigUpdate (controlMsg Cpp API)";
+    *result_listener
+        << "Matches SilKit_Experimental_NetSim_FlexrayTxBufferConfigUpdate (arg, C-API) to "
+           "SilKit::Experimental::NetworkSimulation::Flexray::FlexrayTxBufferConfigUpdate (controlMsg Cpp API)";
     SilKit_Experimental_NetSim_FlexrayTxBufferConfigUpdate cTxBufferConfigUpdate =
         (SilKit_Experimental_NetSim_FlexrayTxBufferConfigUpdate)controlMsg;
     SilKit::Experimental::NetworkSimulation::Flexray::FlexrayTxBufferConfigUpdate cppTxBufferConfigUpdate =
@@ -433,7 +438,7 @@ MATCHER_P(NetSimFlexrayTxBufferConfigUpdateMatcher, controlMsg, "")
     {
         return false;
     }
-    
+
     return CompareFlexrayTxBufferConfig(cppTxBufferConfigUpdate.txBufferConfig, cTxBufferConfigUpdate.txBufferConfig);
 }
 
@@ -441,7 +446,8 @@ MATCHER_P(NetSimFlexrayTxBufferUpdateMatcher, controlMsg, "")
 {
     *result_listener << "Matches SilKit_Experimental_NetSim_FlexrayTxBufferUpdate (arg, C-API) to "
                         "SilKit::Experimental::NetworkSimulation::Flexray::FlexrayTxBufferUpdate (controlMsg Cpp API)";
-    SilKit_Experimental_NetSim_FlexrayTxBufferUpdate cTxBufferUpdate = (SilKit_Experimental_NetSim_FlexrayTxBufferUpdate)controlMsg;
+    SilKit_Experimental_NetSim_FlexrayTxBufferUpdate cTxBufferUpdate =
+        (SilKit_Experimental_NetSim_FlexrayTxBufferUpdate)controlMsg;
     SilKit::Experimental::NetworkSimulation::Flexray::FlexrayTxBufferUpdate cppTxBufferUpdate =
         (SilKit::Experimental::NetworkSimulation::Flexray::FlexrayTxBufferUpdate)arg;
 
@@ -498,7 +504,7 @@ MATCHER_P(LinFrameStatusEventMatcher, controlFrame, "")
     {
         return false;
     }
-    
+
     return CompareLinFrame(cppFrameEvent.frame, cFrameEvent->frame);
 }
 
@@ -524,7 +530,8 @@ MATCHER_P(NetSimLinFrameHeaderRequestMatcher, controlMsg, "")
 {
     *result_listener << "Matches SilKit_Experimental_NetSim_LinFrameHeaderRequest (arg, C-API) to "
                         "SilKit::Experimental::NetworkSimulation::LinFrameHeaderRequest (controlMsg Cpp API)";
-    SilKit_Experimental_NetSim_LinFrameHeaderRequest cFrameHeaderRequest = (SilKit_Experimental_NetSim_LinFrameHeaderRequest)controlMsg;
+    SilKit_Experimental_NetSim_LinFrameHeaderRequest cFrameHeaderRequest =
+        (SilKit_Experimental_NetSim_LinFrameHeaderRequest)controlMsg;
     SilKit::Experimental::NetworkSimulation::Lin::LinFrameHeaderRequest cppFrameHeaderRequest =
         (SilKit::Experimental::NetworkSimulation::Lin::LinFrameHeaderRequest)arg;
 
@@ -556,7 +563,8 @@ MATCHER_P(NetSimLinControllerConfigMatcher, controlMsg, "")
 {
     *result_listener << "Matches SilKit_Experimental_NetSim_LinControllerConfig (arg, C-API) to "
                         "SilKit::Experimental::NetworkSimulation::LinControllerConfig (controlMsg Cpp API)";
-    SilKit_Experimental_NetSim_LinControllerConfig cControllerConfig = (SilKit_Experimental_NetSim_LinControllerConfig)controlMsg;
+    SilKit_Experimental_NetSim_LinControllerConfig cControllerConfig =
+        (SilKit_Experimental_NetSim_LinControllerConfig)controlMsg;
     SilKit::Experimental::NetworkSimulation::Lin::LinControllerConfig cppControllerConfig =
         (SilKit::Experimental::NetworkSimulation::Lin::LinControllerConfig)arg;
 
@@ -574,7 +582,8 @@ MATCHER_P(NetSimLinControllerConfigMatcher, controlMsg, "")
 
     for (size_t i = 0; i < cppControllerConfig.frameResponses.size(); i++)
     {
-        if ((SilKit_LinFrameResponseMode)cppControllerConfig.frameResponses[i].responseMode != cControllerConfig.frameResponses[i].responseMode)
+        if ((SilKit_LinFrameResponseMode)cppControllerConfig.frameResponses[i].responseMode
+            != cControllerConfig.frameResponses[i].responseMode)
         {
             return false;
         }
@@ -592,10 +601,11 @@ MATCHER_P(NetSimLinFrameResponseUpdateMatcher, controlMsg, "")
 {
     *result_listener << "Matches SilKit_Experimental_NetSim_LinFrameResponseUpdate (arg, C-API) to "
                         "SilKit::Experimental::NetworkSimulation::LinFrameResponseUpdate (controlMsg Cpp API)";
-    SilKit_Experimental_NetSim_LinFrameResponseUpdate cFrameResponseUpdate = (SilKit_Experimental_NetSim_LinFrameResponseUpdate)controlMsg;
+    SilKit_Experimental_NetSim_LinFrameResponseUpdate cFrameResponseUpdate =
+        (SilKit_Experimental_NetSim_LinFrameResponseUpdate)controlMsg;
     SilKit::Experimental::NetworkSimulation::Lin::LinFrameResponseUpdate cppFrameResponseUpdate =
         (SilKit::Experimental::NetworkSimulation::Lin::LinFrameResponseUpdate)arg;
-    
+
     for (size_t i = 0; i < cppFrameResponseUpdate.frameResponses.size(); i++)
     {
         if ((SilKit_LinFrameResponseMode)cppFrameResponseUpdate.frameResponses[i].responseMode
@@ -641,8 +651,10 @@ MATCHER_P(NetSimLinControllerStatusUpdateMatcher, controlMsg, "")
 class Test_HourglassNetSim : public SilKitHourglassTests::MockCapiTest
 {
 public:
-    SilKit_Experimental_NetworkSimulator* mockNetSim{reinterpret_cast<SilKit_Experimental_NetworkSimulator*>(uintptr_t(0x12345678))};
-    SilKit_Experimental_CanEventProducer* mockCanEventProducer{reinterpret_cast<SilKit_Experimental_CanEventProducer*>(uintptr_t(0x12345678))};
+    SilKit_Experimental_NetworkSimulator* mockNetSim{
+        reinterpret_cast<SilKit_Experimental_NetworkSimulator*>(uintptr_t(0x12345678))};
+    SilKit_Experimental_CanEventProducer* mockCanEventProducer{
+        reinterpret_cast<SilKit_Experimental_CanEventProducer*>(uintptr_t(0x12345678))};
 
     Test_HourglassNetSim()
     {
@@ -656,12 +668,14 @@ TEST_F(Test_HourglassNetSim, SilKit_Experimental_NetworkSimulator_Create)
 {
     SilKit_Participant* participant{(SilKit_Participant*)123456};
     EXPECT_CALL(capi, SilKit_Experimental_NetworkSimulator_Create(testing::_, participant)).Times(1);
-    SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME:: Impl::Experimental::NetworkSimulation::NetworkSimulator netSim(participant);
+    SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Experimental::NetworkSimulation::NetworkSimulator netSim(
+        participant);
 }
 
 TEST_F(Test_HourglassNetSim, SilKit_Experimental_NetworkSimulator_Start)
 {
-    SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME:: Impl::Experimental::NetworkSimulation::NetworkSimulator netSim(nullptr);
+    SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Experimental::NetworkSimulation::NetworkSimulator netSim(
+        nullptr);
     EXPECT_CALL(capi, SilKit_Experimental_NetworkSimulator_Start(mockNetSim)).Times(1);
     netSim.Start();
 }
@@ -669,67 +683,76 @@ TEST_F(Test_HourglassNetSim, SilKit_Experimental_NetworkSimulator_Start)
 class MockSimulatedCanController : public SilKit::Experimental::NetworkSimulation::Can::ISimulatedCanController
 {
 public:
-
-    MOCK_METHOD(void, OnSetBaudrate, (const SilKit::Experimental::NetworkSimulation::Can::CanConfigureBaudrate& msg), (override));
-    MOCK_METHOD(void, OnFrameRequest, (const SilKit::Experimental::NetworkSimulation::Can::CanFrameRequest& msg), (override));
+    MOCK_METHOD(void, OnSetBaudrate, (const SilKit::Experimental::NetworkSimulation::Can::CanConfigureBaudrate& msg),
+                (override));
+    MOCK_METHOD(void, OnFrameRequest, (const SilKit::Experimental::NetworkSimulation::Can::CanFrameRequest& msg),
+                (override));
     MOCK_METHOD(void, OnSetControllerMode, (const SilKit::Experimental::NetworkSimulation::Can::CanControllerMode& msg),
                 (override));
 };
 
-class MockSimulatedEthernetController : public SilKit::Experimental::NetworkSimulation::Ethernet::ISimulatedEthernetController
+class MockSimulatedEthernetController
+    : public SilKit::Experimental::NetworkSimulation::Ethernet::ISimulatedEthernetController
 {
 public:
-    MOCK_METHOD(void, OnFrameRequest, (const SilKit::Experimental::NetworkSimulation::Ethernet::EthernetFrameRequest& msg),
-                (override));
-    MOCK_METHOD(void, OnSetControllerMode, (const SilKit::Experimental::NetworkSimulation::Ethernet::EthernetControllerMode& msg),
-                (override));
+    MOCK_METHOD(void, OnFrameRequest,
+                (const SilKit::Experimental::NetworkSimulation::Ethernet::EthernetFrameRequest& msg), (override));
+    MOCK_METHOD(void, OnSetControllerMode,
+                (const SilKit::Experimental::NetworkSimulation::Ethernet::EthernetControllerMode& msg), (override));
 };
 
 class MockSimulatedLinController : public SilKit::Experimental::NetworkSimulation::Lin::ISimulatedLinController
 {
 public:
-    MOCK_METHOD(void, OnFrameRequest, (const SilKit::Experimental::NetworkSimulation::Lin::LinFrameRequest& msg), (override));
-    MOCK_METHOD(void, OnFrameHeaderRequest, (const SilKit::Experimental::NetworkSimulation::Lin::LinFrameHeaderRequest& msg),
+    MOCK_METHOD(void, OnFrameRequest, (const SilKit::Experimental::NetworkSimulation::Lin::LinFrameRequest& msg),
                 (override));
-    MOCK_METHOD(void, OnWakeupPulse, (const SilKit::Experimental::NetworkSimulation::Lin::LinWakeupPulse& msg), (override));
-    MOCK_METHOD(void, OnControllerConfig, (const SilKit::Experimental::NetworkSimulation::Lin::LinControllerConfig& msg), (override));
-    MOCK_METHOD(void, OnFrameResponseUpdate, (const SilKit::Experimental::NetworkSimulation::Lin::LinFrameResponseUpdate& msg),
+    MOCK_METHOD(void, OnFrameHeaderRequest,
+                (const SilKit::Experimental::NetworkSimulation::Lin::LinFrameHeaderRequest& msg), (override));
+    MOCK_METHOD(void, OnWakeupPulse, (const SilKit::Experimental::NetworkSimulation::Lin::LinWakeupPulse& msg),
                 (override));
-    MOCK_METHOD(void, OnControllerStatusUpdate, (const SilKit::Experimental::NetworkSimulation::Lin::LinControllerStatusUpdate& msg),
-                (override));
+    MOCK_METHOD(void, OnControllerConfig,
+                (const SilKit::Experimental::NetworkSimulation::Lin::LinControllerConfig& msg), (override));
+    MOCK_METHOD(void, OnFrameResponseUpdate,
+                (const SilKit::Experimental::NetworkSimulation::Lin::LinFrameResponseUpdate& msg), (override));
+    MOCK_METHOD(void, OnControllerStatusUpdate,
+                (const SilKit::Experimental::NetworkSimulation::Lin::LinControllerStatusUpdate& msg), (override));
 };
 
-class MockSimulatedFlexRayController : public SilKit::Experimental::NetworkSimulation::Flexray::ISimulatedFlexRayController
+class MockSimulatedFlexRayController
+    : public SilKit::Experimental::NetworkSimulation::Flexray::ISimulatedFlexRayController
 {
 public:
-    MOCK_METHOD(void, OnHostCommand,(const SilKit::Experimental::NetworkSimulation::Flexray::FlexrayHostCommand& msg), (override));
-    MOCK_METHOD(void, OnControllerConfig,(const SilKit::Experimental::NetworkSimulation::Flexray::FlexrayControllerConfig& msg),
+    MOCK_METHOD(void, OnHostCommand, (const SilKit::Experimental::NetworkSimulation::Flexray::FlexrayHostCommand& msg),
                 (override));
-    MOCK_METHOD(void,
-                OnTxBufferConfigUpdate,(const SilKit::Experimental::NetworkSimulation::Flexray::FlexrayTxBufferConfigUpdate& msg),
-                (override));
-    MOCK_METHOD(void, OnTxBufferUpdate,(const SilKit::Experimental::NetworkSimulation::Flexray::FlexrayTxBufferUpdate& msg),
-                (override));
+    MOCK_METHOD(void, OnControllerConfig,
+                (const SilKit::Experimental::NetworkSimulation::Flexray::FlexrayControllerConfig& msg), (override));
+    MOCK_METHOD(void, OnTxBufferConfigUpdate,
+                (const SilKit::Experimental::NetworkSimulation::Flexray::FlexrayTxBufferConfigUpdate& msg), (override));
+    MOCK_METHOD(void, OnTxBufferUpdate,
+                (const SilKit::Experimental::NetworkSimulation::Flexray::FlexrayTxBufferUpdate& msg), (override));
 };
 
 
-template<typename ControllerType>
+template <typename ControllerType>
 class TestSimulatedNetwork : public SilKit::Experimental::NetworkSimulation::ISimulatedNetwork
 {
 public:
     ControllerType testSimulatedController;
 
-    auto ProvideSimulatedController(SilKit::Experimental::NetworkSimulation::ControllerDescriptor /*controllerDescriptor*/)
+    auto ProvideSimulatedController(
+        SilKit::Experimental::NetworkSimulation::ControllerDescriptor /*controllerDescriptor*/)
         -> SilKit::Experimental::NetworkSimulation::ISimulatedController* override
     {
         return &testSimulatedController;
     }
 
-    void SimulatedControllerRemoved(SilKit::Experimental::NetworkSimulation::ControllerDescriptor /*controllerDescriptor*/) override 
+    void SimulatedControllerRemoved(
+        SilKit::Experimental::NetworkSimulation::ControllerDescriptor /*controllerDescriptor*/) override
     {
     }
 
-    void SetEventProducer(std::unique_ptr<SilKit::Experimental::NetworkSimulation::IEventProducer> /*eventProducer*/) override 
+    void SetEventProducer(
+        std::unique_ptr<SilKit::Experimental::NetworkSimulation::IEventProducer> /*eventProducer*/) override
     {
     }
 };
@@ -738,7 +761,7 @@ public:
 // Test reception callbacks
 // --------------------------
 
-TEST_F(Test_HourglassNetSim, SilKit_Experimental_SimulatedCanControllerFunctions) 
+TEST_F(Test_HourglassNetSim, SilKit_Experimental_SimulatedCanControllerFunctions)
 {
     // This implements the cpp interfaces and provides a simulated can controller
     TestSimulatedNetwork<MockSimulatedCanController> testSimulatedNetwork;
@@ -747,8 +770,8 @@ TEST_F(Test_HourglassNetSim, SilKit_Experimental_SimulatedCanControllerFunctions
     void* simulatedController{nullptr};
     const void* simulatedControllerFunctions{nullptr};
     SilKit_Experimental_ControllerDescriptor controllerDescriptor{34};
-    auto simulatedNetworkFunctions =
-        SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME:: Impl::Experimental::NetworkSimulation::MakeSimulatedNetworkFunctions(SimulatedNetworkType::CAN);
+    auto simulatedNetworkFunctions = SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Experimental::
+        NetworkSimulation::MakeSimulatedNetworkFunctions(SimulatedNetworkType::CAN);
     simulatedNetworkFunctions.ProvideSimulatedController(&simulatedController, &simulatedControllerFunctions,
                                                          controllerDescriptor, (void*)(&testSimulatedNetwork));
 
@@ -780,7 +803,7 @@ TEST_F(Test_HourglassNetSim, SilKit_Experimental_SimulatedCanControllerFunctions
                 OnFrameRequest(NetSimCanFrameRequestMatcher(cCanFrameRequest)))
         .Times(1);
     functions->OnFrameRequest(simulatedController, &cCanFrameRequest);
-    
+
     // ----------------------------
     // OnSetBaudrate
     // --------------------------
@@ -803,7 +826,7 @@ TEST_F(Test_HourglassNetSim, SilKit_Experimental_SimulatedCanControllerFunctions
     SilKit_Experimental_NetSim_CanControllerMode cCanControllerMode;
     SilKit_Struct_Init(SilKit_Experimental_NetSim_CanControllerMode, cCanControllerMode);
     cCanControllerMode.canControllerModeFlags = SilKit_Experimental_NetSim_CanControllerModeFlags_CancelTransmitRequests
-                               | SilKit_Experimental_NetSim_CanControllerModeFlags_ResetErrorHandling;
+                                                | SilKit_Experimental_NetSim_CanControllerModeFlags_ResetErrorHandling;
     cCanControllerMode.state = SilKit_CanControllerState_Started;
 
     EXPECT_CALL(testSimulatedNetwork.testSimulatedController,
@@ -822,9 +845,8 @@ TEST_F(Test_HourglassNetSim, SilKit_Experimental_SimulatedEthernetControllerFunc
     void* simulatedController{nullptr};
     const void* simulatedControllerFunctions{nullptr};
     SilKit_Experimental_ControllerDescriptor controllerDescriptor{34};
-    auto simulatedNetworkFunctions =
-        SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME:: Impl::Experimental::NetworkSimulation::MakeSimulatedNetworkFunctions(
-            SimulatedNetworkType::Ethernet);
+    auto simulatedNetworkFunctions = SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Experimental::
+        NetworkSimulation::MakeSimulatedNetworkFunctions(SimulatedNetworkType::Ethernet);
     simulatedNetworkFunctions.ProvideSimulatedController(&simulatedController, &simulatedControllerFunctions,
                                                          controllerDescriptor, (void*)(&testSimulatedNetwork));
 
@@ -873,9 +895,8 @@ TEST_F(Test_HourglassNetSim, SilKit_Experimental_SimulatedFlexRayControllerFunct
     void* simulatedController{nullptr};
     const void* simulatedControllerFunctions{nullptr};
     SilKit_Experimental_ControllerDescriptor controllerDescriptor{34};
-    auto simulatedNetworkFunctions =
-        SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME:: Impl::Experimental::NetworkSimulation::MakeSimulatedNetworkFunctions(
-            SimulatedNetworkType::FlexRay);
+    auto simulatedNetworkFunctions = SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Experimental::
+        NetworkSimulation::MakeSimulatedNetworkFunctions(SimulatedNetworkType::FlexRay);
     simulatedNetworkFunctions.ProvideSimulatedController(&simulatedController, &simulatedControllerFunctions,
                                                          controllerDescriptor, (void*)(&testSimulatedNetwork));
 
@@ -999,7 +1020,7 @@ TEST_F(Test_HourglassNetSim, SilKit_Experimental_SimulatedFlexRayControllerFunct
     // ----------------------------
     // OnTxBufferUpdate
     // ----------------------------
-    
+
     SilKit_Experimental_NetSim_FlexrayTxBufferUpdate cFlexrayTxBufferUpdate;
     SilKit_Struct_Init(SilKit_Experimental_NetSim_FlexrayTxBufferUpdate, cFlexrayTxBufferUpdate);
     std::vector<uint8_t> payload{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
@@ -1011,7 +1032,6 @@ TEST_F(Test_HourglassNetSim, SilKit_Experimental_SimulatedFlexRayControllerFunct
                 OnTxBufferUpdate(NetSimFlexrayTxBufferUpdateMatcher(cFlexrayTxBufferUpdate)))
         .Times(1);
     functions->OnTxBufferUpdate(simulatedController, &cFlexrayTxBufferUpdate);
-
 }
 
 TEST_F(Test_HourglassNetSim, SilKit_Experimental_SimulatedLinControllerFunctions)
@@ -1023,9 +1043,8 @@ TEST_F(Test_HourglassNetSim, SilKit_Experimental_SimulatedLinControllerFunctions
     void* simulatedController{nullptr};
     const void* simulatedControllerFunctions{nullptr};
     SilKit_Experimental_ControllerDescriptor controllerDescriptor{34};
-    auto simulatedNetworkFunctions =
-        SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME:: Impl::Experimental::NetworkSimulation::MakeSimulatedNetworkFunctions(
-            SimulatedNetworkType::LIN);
+    auto simulatedNetworkFunctions = SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Experimental::
+        NetworkSimulation::MakeSimulatedNetworkFunctions(SimulatedNetworkType::LIN);
     simulatedNetworkFunctions.ProvideSimulatedController(&simulatedController, &simulatedControllerFunctions,
                                                          controllerDescriptor, (void*)(&testSimulatedNetwork));
 
@@ -1084,8 +1103,8 @@ TEST_F(Test_HourglassNetSim, SilKit_Experimental_SimulatedLinControllerFunctions
     SilKit_Struct_Init(SilKit_Experimental_NetSim_LinWakeupPulse, cLinWakeupPulse);
     cLinWakeupPulse.timestamp = 12353543;
 
-        EXPECT_CALL(testSimulatedNetwork.testSimulatedController,
-                    OnWakeupPulse(NetSimLinWakeupPulseMatcher(cLinWakeupPulse)))
+    EXPECT_CALL(testSimulatedNetwork.testSimulatedController,
+                OnWakeupPulse(NetSimLinWakeupPulseMatcher(cLinWakeupPulse)))
         .Times(1);
     functions->OnWakeupPulse(simulatedController, &cLinWakeupPulse);
 
@@ -1112,8 +1131,8 @@ TEST_F(Test_HourglassNetSim, SilKit_Experimental_SimulatedLinControllerFunctions
     cLinControllerConfig.numFrameResponses = frameResponses.size();
     cLinControllerConfig.simulationMode = SilKit_Experimental_NetSim_LinSimulationMode_Dynamic;
 
-        EXPECT_CALL(testSimulatedNetwork.testSimulatedController,
-                    OnControllerConfig(NetSimLinControllerConfigMatcher(cLinControllerConfig)))
+    EXPECT_CALL(testSimulatedNetwork.testSimulatedController,
+                OnControllerConfig(NetSimLinControllerConfigMatcher(cLinControllerConfig)))
         .Times(1);
     functions->OnControllerConfig(simulatedController, &cLinControllerConfig);
 
@@ -1127,8 +1146,8 @@ TEST_F(Test_HourglassNetSim, SilKit_Experimental_SimulatedLinControllerFunctions
     cLinFrameResponseUpdate.frameResponses = frameResponses.data();
     cLinFrameResponseUpdate.numFrameResponses = frameResponses.size();
 
-        EXPECT_CALL(testSimulatedNetwork.testSimulatedController,
-                    OnFrameResponseUpdate(NetSimLinFrameResponseUpdateMatcher(cLinFrameResponseUpdate)))
+    EXPECT_CALL(testSimulatedNetwork.testSimulatedController,
+                OnFrameResponseUpdate(NetSimLinFrameResponseUpdateMatcher(cLinFrameResponseUpdate)))
         .Times(1);
     functions->OnFrameResponseUpdate(simulatedController, &cLinFrameResponseUpdate);
 
@@ -1142,8 +1161,8 @@ TEST_F(Test_HourglassNetSim, SilKit_Experimental_SimulatedLinControllerFunctions
     cLinControllerStatusUpdate.status = SilKit_LinControllerStatus_Operational;
     cLinControllerStatusUpdate.timestamp = 4328974;
 
-        EXPECT_CALL(testSimulatedNetwork.testSimulatedController,
-                    OnControllerStatusUpdate(NetSimLinControllerStatusUpdateMatcher(cLinControllerStatusUpdate)))
+    EXPECT_CALL(testSimulatedNetwork.testSimulatedController,
+                OnControllerStatusUpdate(NetSimLinControllerStatusUpdateMatcher(cLinControllerStatusUpdate)))
         .Times(1);
     functions->OnControllerStatusUpdate(simulatedController, &cLinControllerStatusUpdate);
 }
@@ -1177,12 +1196,12 @@ TEST_F(Test_HourglassNetSim, SilKit_Experimental_CanEventProducer_Produce)
     std::array<ControllerDescriptor, 3> receiverArray{1, 2, 3};
     auto receivers = SilKit::Util::MakeSpan(receiverArray);
 
-    EXPECT_CALL(capi, SilKit_Experimental_CanEventProducer_Produce(cCanEventProducer, CanFrameEventMatcher(canFrameEvent),
-                                                      ReceiverMatcher(receivers)))
+    EXPECT_CALL(capi, SilKit_Experimental_CanEventProducer_Produce(
+                          cCanEventProducer, CanFrameEventMatcher(canFrameEvent), ReceiverMatcher(receivers)))
         .Times(1);
 
-    SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME:: Impl::Experimental::NetworkSimulation::CanEventProducer canEventProducer(
-        cCanEventProducer);
+    SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Experimental::NetworkSimulation::CanEventProducer
+        canEventProducer(cCanEventProducer);
     canEventProducer.Produce(canFrameEvent, receivers);
 }
 
@@ -1190,7 +1209,8 @@ TEST_F(Test_HourglassNetSim, SilKit_Experimental_CanEventProducer_Produce)
 TEST_F(Test_HourglassNetSim, SilKit_Experimental_EthernetEventProducer_Produce)
 {
     using namespace SilKit::Services::Ethernet;
-    SilKit_Experimental_EthernetEventProducer* cEthernetEventProducer{(SilKit_Experimental_EthernetEventProducer*)123456};
+    SilKit_Experimental_EthernetEventProducer* cEthernetEventProducer{
+        (SilKit_Experimental_EthernetEventProducer*)123456};
     // C++ event
     EthernetFrame ethernetFrame{};
     std::array<uint8_t, 10> payload{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
@@ -1205,12 +1225,13 @@ TEST_F(Test_HourglassNetSim, SilKit_Experimental_EthernetEventProducer_Produce)
     std::array<ControllerDescriptor, 3> receiverArray{1, 2, 3};
     auto receivers = SilKit::Util::MakeSpan(receiverArray);
 
-    EXPECT_CALL(capi, SilKit_Experimental_EthernetEventProducer_Produce(cEthernetEventProducer, EthernetFrameEventMatcher(ethernetFrameEvent),
-                                                      ReceiverMatcher(receivers)))
+    EXPECT_CALL(capi,
+                SilKit_Experimental_EthernetEventProducer_Produce(
+                    cEthernetEventProducer, EthernetFrameEventMatcher(ethernetFrameEvent), ReceiverMatcher(receivers)))
         .Times(1);
 
-    SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME:: Impl::Experimental::NetworkSimulation::EthernetEventProducer ethernetEventProducer(
-        cEthernetEventProducer);
+    SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Experimental::NetworkSimulation::EthernetEventProducer
+        ethernetEventProducer(cEthernetEventProducer);
     ethernetEventProducer.Produce(ethernetFrameEvent, receivers);
 }
 
@@ -1218,7 +1239,7 @@ TEST_F(Test_HourglassNetSim, SilKit_Experimental_FlexRayEventProducer_Produce)
 {
     using namespace SilKit::Services::Flexray;
     SilKit_Experimental_FlexRayEventProducer* cFlexRayEventProducer{(SilKit_Experimental_FlexRayEventProducer*)123456};
-    
+
     // C++ event
     const uint8_t payloadLength = 3;
     FlexrayHeader header;
@@ -1242,12 +1263,12 @@ TEST_F(Test_HourglassNetSim, SilKit_Experimental_FlexRayEventProducer_Produce)
     auto receivers = SilKit::Util::MakeSpan(receiverArray);
 
     EXPECT_CALL(capi,
-                SilKit_Experimental_FlexRayEventProducer_Produce(cFlexRayEventProducer, FlexrayFrameEventMatcher(flexrayFrameEvent),
-                                                    ReceiverMatcher(receivers)))
+                SilKit_Experimental_FlexRayEventProducer_Produce(
+                    cFlexRayEventProducer, FlexrayFrameEventMatcher(flexrayFrameEvent), ReceiverMatcher(receivers)))
         .Times(1);
 
-    SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME:: Impl::Experimental::NetworkSimulation::FlexRayEventProducer flexrayEventProducer(
-        cFlexRayEventProducer);
+    SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Experimental::NetworkSimulation::FlexRayEventProducer
+        flexrayEventProducer(cFlexRayEventProducer);
     flexrayEventProducer.Produce(flexrayFrameEvent, receivers);
 }
 
@@ -1272,12 +1293,12 @@ TEST_F(Test_HourglassNetSim, SilKit_Experimental_LinEventProducer_Produce)
     auto receivers = SilKit::Util::MakeSpan(receiverArray);
 
     EXPECT_CALL(capi,
-                SilKit_Experimental_LinEventProducer_Produce(cLinEventProducer, LinFrameStatusEventMatcher(linFrameStatusEvent),
-                                                      ReceiverMatcher(receivers)))
+                SilKit_Experimental_LinEventProducer_Produce(
+                    cLinEventProducer, LinFrameStatusEventMatcher(linFrameStatusEvent), ReceiverMatcher(receivers)))
         .Times(1);
 
-    SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME:: Impl::Experimental::NetworkSimulation::LinEventProducer linEventProducer(
-        cLinEventProducer);
+    SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Experimental::NetworkSimulation::LinEventProducer
+        linEventProducer(cLinEventProducer);
     linEventProducer.Produce(linFrameStatusEvent, receivers);
 }
 

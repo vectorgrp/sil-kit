@@ -32,11 +32,14 @@ class SimulationConfigurationDto : public oatpp::DTO
 {
     DTO_INIT(SimulationConfigurationDto, DTO)
 
-    DTO_FIELD_INFO(connectUri) { info->description = "Connect URI"; }
+    DTO_FIELD_INFO(connectUri)
+    {
+        info->description = "Connect URI";
+    }
     DTO_FIELD(String, connectUri);
 };
 
-} // namespace Dashboard}
+} // namespace Dashboard
 } // namespace SilKit
 
 #include OATPP_CODEGEN_END(DTO)

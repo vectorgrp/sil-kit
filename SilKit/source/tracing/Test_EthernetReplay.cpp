@@ -103,16 +103,31 @@ struct Callbacks
 
 struct MockReplayMessage : public IReplayMessage
 {
-    auto Timestamp() const -> std::chrono::nanoseconds override { return _timestamp; }
-    auto GetDirection() const -> SilKit::Services::TransmitDirection override { return _direction; }
-    auto ServiceDescriptorStr() const -> std::string override { return _serviceDescriptorStr; }
-    auto EndpointAddress() const -> SilKit::Core::EndpointAddress override { return _endpointAddress; }
-    auto Type() const -> TraceMessageType override { return _type; }
+    auto Timestamp() const -> std::chrono::nanoseconds override
+    {
+        return _timestamp;
+    }
+    auto GetDirection() const -> SilKit::Services::TransmitDirection override
+    {
+        return _direction;
+    }
+    auto ServiceDescriptorStr() const -> std::string override
+    {
+        return _serviceDescriptorStr;
+    }
+    auto EndpointAddress() const -> SilKit::Core::EndpointAddress override
+    {
+        return _endpointAddress;
+    }
+    auto Type() const -> TraceMessageType override
+    {
+        return _type;
+    }
 
     std::chrono::nanoseconds _timestamp{0};
     SilKit::Services::TransmitDirection _direction{SilKit::Services::TransmitDirection::RX};
     TraceMessageType _type{TraceMessageType::InvalidReplayData};
-    std::string _serviceDescriptorStr{ "ServiceDescriptorString" };
+    std::string _serviceDescriptorStr{"ServiceDescriptorString"};
     SilKit::Core::EndpointAddress _endpointAddress; //! Deprecated
 };
 
@@ -135,8 +150,8 @@ struct MockEthFrame
 };
 struct Test_EthernetReplay : public testing::Test
 {
-    ServiceDescriptor _serviceDescriptor{ "EthernetReplay", "Eth0", "EthController0", 2};
-    ServiceDescriptor _otherServiceDescriptor{ "EthernetReplay2", "Eth1", "EthController2", 4 };
+    ServiceDescriptor _serviceDescriptor{"EthernetReplay", "Eth0", "EthController0", 2};
+    ServiceDescriptor _otherServiceDescriptor{"EthernetReplay2", "Eth1", "EthController2", 4};
 };
 
 TEST_F(Test_EthernetReplay, ethcontroller_replay_config_send)
@@ -204,9 +219,9 @@ TEST_F(Test_EthernetReplay, ethcontroller_replay_config_receive)
 
     ON_CALL(callbacks, ReceiveMessage(A<IEthernetController*>(), A<const EthernetFrameEvent&>()))
         .WillByDefault([](IEthernetController* controller, const EthernetFrameEvent& ethernetFrameEvent) {
-            SILKIT_UNUSED_ARG(controller);
-            SILKIT_UNUSED_ARG(ethernetFrameEvent);
-        });
+        SILKIT_UNUSED_ARG(controller);
+        SILKIT_UNUSED_ARG(ethernetFrameEvent);
+    });
 
     Config::EthernetController cfg{};
     cfg.replay.useTraceSource = "ReplayTest.TraceSource";
@@ -220,7 +235,7 @@ TEST_F(Test_EthernetReplay, ethcontroller_replay_config_receive)
         cfg.replay.direction = Config::Replay::Direction::Receive;
 
         EthController controller{&participant, cfg, participant.GetTimeProvider()};
-        controller.SetServiceDescriptor({ "p1","n1", "c1", 4 });
+        controller.SetServiceDescriptor({"p1", "n1", "c1", 4});
         controller.AddFrameHandler(SilKit::Util::bind_method(&callbacks, &Callbacks::ReceiveMessage));
 
         EXPECT_CALL(callbacks, ReceiveMessage(A<IEthernetController*>(), AnEthernetFrameEvent(msg))).Times(1);

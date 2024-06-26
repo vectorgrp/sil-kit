@@ -55,7 +55,8 @@ public:
      * Throwing an error inside the handler will cause a call to
      * ReportError().
      */
-    virtual void SetSimulationStepHandlerAsync(SimulationStepHandler task, std::chrono::nanoseconds initialStepSize) = 0;
+    virtual void SetSimulationStepHandlerAsync(SimulationStepHandler task,
+                                               std::chrono::nanoseconds initialStepSize) = 0;
     /*! \brief Signal that the current simulation task is finished and the next simulation step can be processed.
      *
      * This method should only be used after calling SetSimulationStepHandlerAsync.

@@ -52,7 +52,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "IServiceEndpoint.hpp" // for operator<<(... ServiceDescriptor)
 
 
-#define MAKE_FORMATTER(TYPE) template<> struct fmt::formatter<TYPE> : ostream_formatter {}
+#define MAKE_FORMATTER(TYPE) \
+    template <> \
+    struct fmt::formatter<TYPE> : ostream_formatter \
+    { \
+    }
 
 
 MAKE_FORMATTER(SilKit::Services::Can::CanConfigureBaudrate);

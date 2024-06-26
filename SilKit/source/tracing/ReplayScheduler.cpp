@@ -47,12 +47,18 @@ TraceMessageType ToTraceMessageType(Config::NetworkType networkType)
 {
     switch (networkType)
     {
-    case Config::NetworkType::Ethernet: return TraceMessageType::EthernetFrame;
-    case Config::NetworkType::CAN: return TraceMessageType::CanFrameEvent;
-    case Config::NetworkType::LIN: return TraceMessageType::LinFrame;
-    case Config::NetworkType::FlexRay: return TraceMessageType::FlexrayFrameEvent;
-    case Config::NetworkType::Data: return TraceMessageType::DataMessageEvent;
-    default: throw SilKitError("Unknown channel Type");
+    case Config::NetworkType::Ethernet:
+        return TraceMessageType::EthernetFrame;
+    case Config::NetworkType::CAN:
+        return TraceMessageType::CanFrameEvent;
+    case Config::NetworkType::LIN:
+        return TraceMessageType::LinFrame;
+    case Config::NetworkType::FlexRay:
+        return TraceMessageType::FlexrayFrameEvent;
+    case Config::NetworkType::Data:
+        return TraceMessageType::DataMessageEvent;
+    default:
+        throw SilKitError("Unknown channel Type");
     }
 }
 
@@ -81,17 +87,35 @@ public:
     }
 
     // Meta data uses fixed terms from the MDF spec, see Config.hpp:MdfChannel and SilKitExtension_Mdf
-    value ChannelName() const { return Get("mdf/channel_name"); }
+    value ChannelName() const
+    {
+        return Get("mdf/channel_name");
+    }
 
-    value ChannelSource() const { return Get("mdf/source_info_name"); }
+    value ChannelSource() const
+    {
+        return Get("mdf/source_info_name");
+    }
 
-    value ChannelPath() const { return Get("mdf/source_info_path"); }
+    value ChannelPath() const
+    {
+        return Get("mdf/source_info_path");
+    }
 
-    value GroupPath() const { return Get("mdf/channel_group_path"); }
+    value GroupPath() const
+    {
+        return Get("mdf/channel_group_path");
+    }
 
-    value GroupSource() const { return Get("mdf/channel_group_name"); }
+    value GroupSource() const
+    {
+        return Get("mdf/channel_group_name");
+    }
 
-    value GroupName() const { return Get("mdf/channel_group_acquisition_name"); }
+    value GroupName() const
+    {
+        return Get("mdf/channel_group_acquisition_name");
+    }
 
     value Separator() const
     {
@@ -116,14 +140,26 @@ public:
         return std::chrono::nanoseconds{0};
     }
 
-    value VirtualBusNumber() const { return Get("mdf/virtual_bus_number"); }
+    value VirtualBusNumber() const
+    {
+        return Get("mdf/virtual_bus_number");
+    }
 
-    value PcapVersion() const { return Get("pcap/version"); }
+    value PcapVersion() const
+    {
+        return Get("pcap/version");
+    }
 
-    value PcapGmtToLocal() const { return Get("pcap/gmt_to_local"); }
+    value PcapGmtToLocal() const
+    {
+        return Get("pcap/gmt_to_local");
+    }
 
 private:
-    value Get(const std::string& name) const { return _metaInfos.at(name); }
+    value Get(const std::string& name) const
+    {
+        return _metaInfos.at(name);
+    }
 
 private:
     const std::map<std::string, std::string>& _metaInfos;
@@ -208,7 +244,6 @@ auto FindReplayChannel(SilKit::Services::Logging::ILogger* log, IReplayFile* rep
                        const std::string& participantName, const std::string& networkName,
                        const Config::NetworkType networkType) -> std::shared_ptr<IReplayChannel>
 {
-
     std::vector<std::shared_ptr<IReplayChannel>> channelList;
 
     const auto type = ToTraceMessageType(networkType);
@@ -241,10 +276,9 @@ auto FindReplayChannel(SilKit::Services::Logging::ILogger* log, IReplayFile* rep
             }
             if (MatchSilKitChannel(channel, networkName, participantName, controllerName))
             {
-                Services::Logging::Debug(log, "Replay: found channel '{}' from file '{}' for type {}",
-                    channel->Name(), replayFile->FilePath(), to_string(channel->Type()));
+                Services::Logging::Debug(log, "Replay: found channel '{}' from file '{}' for type {}", channel->Name(),
+                                         replayFile->FilePath(), to_string(channel->Type()));
                 channelList.emplace_back(std::move(channel));
-
             }
         }
     }
@@ -285,9 +319,7 @@ void ReplayScheduler::ConfigureTimeProvider(Services::Orchestration::ITimeProvid
 
     _timeProvider = timeProvider;
 
-    _timeProvider->AddNextSimStepHandler([this](auto now, auto duration) {
-        ReplayMessages(now, duration);
-    });
+    _timeProvider->AddNextSimStepHandler([this](auto now, auto duration) { ReplayMessages(now, duration); });
 }
 
 void ReplayScheduler::ConfigureController(const std::string& controllerName, IReplayDataController* replayController,

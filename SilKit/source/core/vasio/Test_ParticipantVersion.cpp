@@ -42,8 +42,8 @@ namespace {
 
 using namespace SilKit::Core;
 
-auto MakeParticipant(std::string participantName, std::string registryUri, ProtocolVersion version)
-    -> std::shared_ptr<IParticipantInternal>
+auto MakeParticipant(std::string participantName, std::string registryUri,
+                     ProtocolVersion version) -> std::shared_ptr<IParticipantInternal>
 {
     auto cfg = SilKit::Config::ParticipantConfiguration{};
     cfg.participantName = std::move(participantName);

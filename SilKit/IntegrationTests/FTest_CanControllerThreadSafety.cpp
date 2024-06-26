@@ -52,11 +52,8 @@ const int stopAfterReceptions = 100;
 
 class FTest_CanControllerThreadSafety : public testing::Test
 {
-
 protected:
-    FTest_CanControllerThreadSafety()
-    {
-    }
+    FTest_CanControllerThreadSafety() {}
 
     struct TestParticipant
     {
@@ -64,11 +61,11 @@ protected:
         {
             name = newName;
         }
-        std::string                  name;
+        std::string name;
         std::unique_ptr<IParticipant> participant;
         ICanController* canController;
         uint64_t numReceptions = 0;
-        bool allReceived{ false };
+        bool allReceived{false};
         std::promise<void> allReceivedPromise;
 
         void AwaitCommunication()
@@ -98,7 +95,6 @@ protected:
                 frame.canId = increasingCanId++;
                 participant.canController->SendFrame(frame);
             }
-
         }
         catch (const SilKit::ConfigurationError& error)
         {
@@ -194,9 +190,8 @@ protected:
 
         try
         {
-            asyncParticipantThreads.emplace_back([this, &participant, registryUri] {
-                AsyncCanWriterThread(participant, registryUri);
-            });
+            asyncParticipantThreads.emplace_back(
+                [this, &participant, registryUri] { AsyncCanWriterThread(participant, registryUri); });
         }
         catch (const SilKit::ConfigurationError& error)
         {
@@ -218,9 +213,8 @@ protected:
 
         try
         {
-            asyncParticipantThreads.emplace_back([this, &participant, registryUri] {
-                AsyncCanReaderThread(participant, registryUri);
-            });
+            asyncParticipantThreads.emplace_back(
+                [this, &participant, registryUri] { AsyncCanReaderThread(participant, registryUri); });
         }
         catch (const SilKit::ConfigurationError& error)
         {
@@ -261,7 +255,7 @@ protected:
 protected:
     std::unique_ptr<SilKit::Vendor::Vector::ISilKitRegistry> registry;
     std::vector<std::thread> asyncParticipantThreads;
-    bool runAsync{ true };
+    bool runAsync{true};
 };
 
 
@@ -270,8 +264,8 @@ TEST_F(FTest_CanControllerThreadSafety, DISABLED_add_remove_handler_during_recep
     numParticipants = 0;
     auto registryUri = MakeTestRegistryUri();
 
-    TestParticipant canWriterParticipant{ "CanWriterParticipant" };
-    TestParticipant canReaderParticipant{ "CanReaderParticipant" };
+    TestParticipant canWriterParticipant{"CanWriterParticipant"};
+    TestParticipant canReaderParticipant{"CanReaderParticipant"};
 
     RunRegistry(registryUri);
 

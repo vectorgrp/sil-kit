@@ -28,7 +28,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 using namespace std::chrono_literals;
 
-TEST(Test_FlexraySerdes, SimFlexray_FlexrayFrameEvent){
+TEST(Test_FlexraySerdes, SimFlexray_FlexrayFrameEvent)
+{
     using namespace SilKit::Services::Flexray;
     SilKit::Core::MessageBuffer buffer;
 
@@ -51,8 +52,8 @@ TEST(Test_FlexraySerdes, SimFlexray_FlexrayFrameEvent){
     std::string message{"Hello from flexray!  msgId = 1 -------------"};
     in.frame.payload = std::vector<uint8_t>{message.begin(), message.end()};
 
-    Serialize(buffer , in);
-    Deserialize(buffer , out);
+    Serialize(buffer, in);
+    Deserialize(buffer, out);
 
     EXPECT_EQ(in.timestamp, out.timestamp);
     EXPECT_EQ(in.channel, out.channel);
@@ -66,7 +67,8 @@ TEST(Test_FlexraySerdes, SimFlexray_FlexrayFrameEvent){
     EXPECT_TRUE(SilKit::Util::ItemsAreEqual(in.frame.payload, out.frame.payload));
 }
 
-TEST(Test_FlexraySerdes, SimFlexray_FlexrayFrameTransmitEvent) {
+TEST(Test_FlexraySerdes, SimFlexray_FlexrayFrameTransmitEvent)
+{
     using namespace SilKit::Services::Flexray;
     SilKit::Core::MessageBuffer buffer;
 
@@ -90,8 +92,8 @@ TEST(Test_FlexraySerdes, SimFlexray_FlexrayFrameTransmitEvent) {
     std::string message{"Hello acknowledgement sent!"};
     in.frame.payload = std::vector<uint8_t>{message.begin(), message.end()};
 
-    Serialize(buffer , in);
-    Deserialize(buffer , out);
+    Serialize(buffer, in);
+    Deserialize(buffer, out);
 
     EXPECT_EQ(in.timestamp, out.timestamp);
     EXPECT_EQ(in.txBufferIndex, out.txBufferIndex);
@@ -106,7 +108,8 @@ TEST(Test_FlexraySerdes, SimFlexray_FlexrayFrameTransmitEvent) {
     EXPECT_TRUE(SilKit::Util::ItemsAreEqual(in.frame.payload, out.frame.payload));
 }
 
-TEST(Test_FlexraySerdes, SimFlexray_FlexraySymbolEvent) {
+TEST(Test_FlexraySerdes, SimFlexray_FlexraySymbolEvent)
+{
     using namespace SilKit::Services::Flexray;
     SilKit::Core::MessageBuffer buffer;
 
@@ -117,15 +120,16 @@ TEST(Test_FlexraySerdes, SimFlexray_FlexraySymbolEvent) {
     in.channel = FlexrayChannel::B;
     in.pattern = FlexraySymbolPattern::Wus;
 
-    Serialize(buffer , in);
-    Deserialize(buffer , out);
+    Serialize(buffer, in);
+    Deserialize(buffer, out);
 
     EXPECT_EQ(in.timestamp, out.timestamp);
     EXPECT_EQ(in.channel, out.channel);
     EXPECT_EQ(in.pattern, out.pattern);
 }
 
-TEST(Test_FlexraySerdes, SimFlexray_FlexraySymbolTransmitEvent) {
+TEST(Test_FlexraySerdes, SimFlexray_FlexraySymbolTransmitEvent)
+{
     using namespace SilKit::Services::Flexray;
     SilKit::Core::MessageBuffer buffer;
 
@@ -136,15 +140,16 @@ TEST(Test_FlexraySerdes, SimFlexray_FlexraySymbolTransmitEvent) {
     in.channel = FlexrayChannel::A;
     in.pattern = FlexraySymbolPattern::Wudop;
 
-    Serialize(buffer , in);
-    Deserialize(buffer , out);
+    Serialize(buffer, in);
+    Deserialize(buffer, out);
 
     EXPECT_EQ(in.timestamp, out.timestamp);
     EXPECT_EQ(in.channel, out.channel);
     EXPECT_EQ(in.pattern, out.pattern);
 }
 
-TEST(Test_FlexraySerdes, SimFlexray_FlexrayCycleStartEvent) {
+TEST(Test_FlexraySerdes, SimFlexray_FlexrayCycleStartEvent)
+{
     using namespace SilKit::Services::Flexray;
     SilKit::Core::MessageBuffer buffer;
 
@@ -154,14 +159,15 @@ TEST(Test_FlexraySerdes, SimFlexray_FlexrayCycleStartEvent) {
     in.timestamp = 1ns;
     in.cycleCounter = 32;
 
-    Serialize(buffer , in);
-    Deserialize(buffer , out);
+    Serialize(buffer, in);
+    Deserialize(buffer, out);
 
     EXPECT_EQ(in.timestamp, out.timestamp);
     EXPECT_EQ(in.cycleCounter, out.cycleCounter);
 }
 
-TEST(Test_FlexraySerdes, SimFlexray_FlexrayHostCommand) {
+TEST(Test_FlexraySerdes, SimFlexray_FlexrayHostCommand)
+{
     using namespace SilKit::Services::Flexray;
     SilKit::Core::MessageBuffer buffer;
 
@@ -170,13 +176,14 @@ TEST(Test_FlexraySerdes, SimFlexray_FlexrayHostCommand) {
 
     in.command = FlexrayChiCommand::DEFERRED_HALT;
 
-    Serialize(buffer , in);
-    Deserialize(buffer , out);
+    Serialize(buffer, in);
+    Deserialize(buffer, out);
 
     EXPECT_EQ(in.command, out.command);
 }
 
-TEST(Test_FlexraySerdes, SimFlexray_FlexrayControllerConfig) {
+TEST(Test_FlexraySerdes, SimFlexray_FlexrayControllerConfig)
+{
     using namespace SilKit::Services::Flexray;
     SilKit::Core::MessageBuffer buffer;
 
@@ -239,8 +246,8 @@ TEST(Test_FlexraySerdes, SimFlexray_FlexrayControllerConfig) {
 
     in.bufferConfigs = std::vector<FlexrayTxBufferConfig>{conf1};
 
-    Serialize(buffer , in);
-    Deserialize(buffer , out);
+    Serialize(buffer, in);
+    Deserialize(buffer, out);
 
     EXPECT_EQ(in.clusterParams.gColdstartAttempts, out.clusterParams.gColdstartAttempts);
     EXPECT_EQ(in.clusterParams.gCycleCountMax, out.clusterParams.gCycleCountMax);
@@ -301,7 +308,8 @@ TEST(Test_FlexraySerdes, SimFlexray_FlexrayControllerConfig) {
     }
 }
 
-TEST(Test_FlexraySerdes, SimFlexray_FlexrayTxBufferConfigUpdate) {
+TEST(Test_FlexraySerdes, SimFlexray_FlexrayTxBufferConfigUpdate)
+{
     using namespace SilKit::Services::Flexray;
     SilKit::Core::MessageBuffer buffer;
 
@@ -317,14 +325,15 @@ TEST(Test_FlexraySerdes, SimFlexray_FlexrayTxBufferConfigUpdate) {
     in.txBufferConfig.slotId = 7;
     in.txBufferConfig.transmissionMode = FlexrayTransmissionMode::Continuous;
 
-    Serialize(buffer , in);
-    Deserialize(buffer , out);
+    Serialize(buffer, in);
+    Deserialize(buffer, out);
 
     EXPECT_EQ(in.txBufferIndex, out.txBufferIndex);
     EXPECT_EQ(in.txBufferConfig, out.txBufferConfig);
 }
 
-TEST(Test_FlexraySerdes, SimFlexray_FlexrayTxBufferUpdate) {
+TEST(Test_FlexraySerdes, SimFlexray_FlexrayTxBufferUpdate)
+{
     using namespace SilKit::Services::Flexray;
     SilKit::Core::MessageBuffer buffer;
 
@@ -335,15 +344,16 @@ TEST(Test_FlexraySerdes, SimFlexray_FlexrayTxBufferUpdate) {
     in.payloadDataValid = true;
     in.payload = std::vector<uint8_t>{1, 2, 3};
 
-    Serialize(buffer , in);
-    Deserialize(buffer , out);
+    Serialize(buffer, in);
+    Deserialize(buffer, out);
 
     EXPECT_EQ(in.txBufferIndex, out.txBufferIndex);
     EXPECT_EQ(in.payloadDataValid, out.payloadDataValid);
     EXPECT_TRUE(SilKit::Util::ItemsAreEqual(in.payload, out.payload));
 }
 
-TEST(Test_FlexraySerdes, SimFlexray_FlexrayPocStatusEvent) {
+TEST(Test_FlexraySerdes, SimFlexray_FlexrayPocStatusEvent)
+{
     using namespace SilKit::Services::Flexray;
     SilKit::Core::MessageBuffer buffer;
 
@@ -361,8 +371,8 @@ TEST(Test_FlexraySerdes, SimFlexray_FlexrayPocStatusEvent) {
     in.coldstartNoise = true;
     in.wakeupStatus = FlexrayWakeupStatusType::ReceivedHeader;
 
-    Serialize(buffer , in);
-    Deserialize(buffer , out);
+    Serialize(buffer, in);
+    Deserialize(buffer, out);
 
     EXPECT_EQ(in.timestamp, out.timestamp);
     EXPECT_EQ(in.state, out.state);

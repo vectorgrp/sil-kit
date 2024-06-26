@@ -184,7 +184,7 @@ std::ostream& operator<<(std::ostream& out, LinChecksumModel model)
 }
 
 std::ostream& operator<<(std::ostream& out, LinFrameResponseType responseType)
-    {
+{
     try
     {
         return out << to_string(responseType);
@@ -196,7 +196,7 @@ std::ostream& operator<<(std::ostream& out, LinFrameResponseType responseType)
 }
 
 std::ostream& operator<<(std::ostream& out, LinFrameResponseMode responseMode)
-    {
+{
     try
     {
         return out << to_string(responseMode);
@@ -247,19 +247,15 @@ std::ostream& operator<<(std::ostream& out, const LinFrame& frame)
 {
     //instead of ios::copyfmt (which set badbit) we use a temporary stream
     std::stringstream buf;
-    buf
-        << "Lin::LinFrame{id=" << static_cast<uint16_t>(frame.id)
-        << ", cs=" << to_string(frame.checksumModel)
-        << ", dl=" << static_cast<uint16_t>(frame.dataLength)
-        << ", d={" << Util::AsHexString(frame.data).WithSeparator(" ")
-        << "}}";
+    buf << "Lin::LinFrame{id=" << static_cast<uint16_t>(frame.id) << ", cs=" << to_string(frame.checksumModel)
+        << ", dl=" << static_cast<uint16_t>(frame.dataLength) << ", d={"
+        << Util::AsHexString(frame.data).WithSeparator(" ") << "}}";
     return out << buf.str();
 }
 
 std::ostream& operator<<(std::ostream& out, const LinControllerConfig& controllerConfig)
 {
-    out << "Lin::LinControllerConfig{br=" << controllerConfig.baudRate
-        << ", mode=" << controllerConfig.controllerMode
+    out << "Lin::LinControllerConfig{br=" << controllerConfig.baudRate << ", mode=" << controllerConfig.controllerMode
         << ", responses=[";
     if (controllerConfig.frameResponses.size() > 0)
     {

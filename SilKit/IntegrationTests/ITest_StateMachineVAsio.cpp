@@ -58,7 +58,8 @@ protected:
         MOCK_METHOD0(CommunicationReadyHandler, void());
         MOCK_METHOD0(StopHandler, void());
         MOCK_METHOD0(ShutdownHandler, void());
-        MOCK_METHOD1(ParticipantStateHandler, void(ParticipantState)); // Helper to only check for status.state; no longer part of the API
+        MOCK_METHOD1(ParticipantStateHandler,
+                     void(ParticipantState)); // Helper to only check for status.state; no longer part of the API
     };
 
 protected:
@@ -69,10 +70,10 @@ protected:
         _targetState = state;
         _targetStatePromise = std::promise<void>{};
         auto future = _targetStatePromise.get_future();
-        if (_currentState == state) 
+        if (_currentState == state)
         {
             // If we are already in the correct state, we have to set the promise immediately.
-            // This happens if the ParticipantStateHandler is triggered before setting up the 
+            // This happens if the ParticipantStateHandler is triggered before setting up the
             // expectation here.
             _targetStatePromise.set_value();
         }
@@ -102,7 +103,8 @@ TEST_F(ITest_StateMachineVAsio, DISABLED_vasio_state_machine)
     auto registryUri = MakeTestRegistryUri();
     std::vector<std::string> syncParticipantNames{"TestUnit"};
 
-    auto registry = SilKit::Vendor::Vector::CreateSilKitRegistry(SilKit::Config::ParticipantConfigurationFromString(""));
+    auto registry =
+        SilKit::Vendor::Vector::CreateSilKitRegistry(SilKit::Config::ParticipantConfigurationFromString(""));
     registry->StartListening(registryUri);
 
     // Setup Participant for TestController
@@ -113,9 +115,8 @@ TEST_F(ITest_StateMachineVAsio, DISABLED_vasio_state_machine)
     systemController->SetWorkflowConfiguration({syncParticipantNames});
 
     auto monitor = participant->CreateSystemMonitor();
-    monitor->AddParticipantStatusHandler([this](ParticipantStatus status) {
-        this->ParticipantStateHandler(status.state);
-    });
+    monitor->AddParticipantStatusHandler(
+        [this](ParticipantStatus status) { this->ParticipantStateHandler(status.state); });
 
     // Setup Participant for Test Unit
     auto participantTestUnit =
@@ -124,18 +125,12 @@ TEST_F(ITest_StateMachineVAsio, DISABLED_vasio_state_machine)
         participantTestUnit->CreateLifecycleService({SilKit::Services::Orchestration::OperationMode::Coordinated});
     auto* timeSyncService = lifecycleService->CreateTimeSyncService();
 
-    lifecycleService->SetCommunicationReadyHandler([&callbacks = callbacks]() {
-        callbacks.CommunicationReadyHandler();
-    });
-    timeSyncService->SetSimulationStepHandler([](auto /*now*/, auto /*duration*/) {
-    }, 1ms);
+    lifecycleService->SetCommunicationReadyHandler(
+        [&callbacks = callbacks]() { callbacks.CommunicationReadyHandler(); });
+    timeSyncService->SetSimulationStepHandler([](auto /*now*/, auto /*duration*/) {}, 1ms);
 
-    lifecycleService->SetStopHandler([&callbacks = callbacks]() {
-        callbacks.StopHandler();
-    });
-    lifecycleService->SetShutdownHandler([&callbacks = callbacks]() {
-        callbacks.ShutdownHandler();
-    });
+    lifecycleService->SetStopHandler([&callbacks = callbacks]() { callbacks.StopHandler(); });
+    lifecycleService->SetShutdownHandler([&callbacks = callbacks]() { callbacks.ShutdownHandler(); });
 
     std::string participantName = "TestUnit";
 

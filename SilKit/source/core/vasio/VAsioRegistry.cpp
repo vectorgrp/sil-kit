@@ -60,9 +60,7 @@ VAsioRegistry::VAsioRegistry(std::shared_ptr<SilKit::Config::IParticipantConfigu
         this->OnParticipantAnnouncement(from, announcement);
     });
 
-    _connection.RegisterPeerShutdownCallback([this](IVAsioPeer* peer) {
-        OnPeerShutdown(peer);
-    });
+    _connection.RegisterPeerShutdownCallback([this](IVAsioPeer* peer) { OnPeerShutdown(peer); });
 
     _serviceDescriptor.SetParticipantNameAndComputeId(REGISTRY_PARTICIPANT_NAME);
     _serviceDescriptor.SetParticipantId(REGISTRY_PARTICIPANT_ID);
@@ -175,8 +173,7 @@ auto VAsioRegistry::GetLogger() -> Services::Logging::ILogger*
 }
 
 auto VAsioRegistry::FindConnectedParticipant(const std::string& participantName,
-                                              const std::string& simulationName) const
-    -> const ConnectedParticipantInfo*
+                                             const std::string& simulationName) const -> const ConnectedParticipantInfo*
 {
     const auto simulationIt{_connectedParticipants.find(simulationName)};
     if (simulationIt == _connectedParticipants.end())

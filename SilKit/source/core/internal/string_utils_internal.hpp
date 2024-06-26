@@ -46,9 +46,7 @@ std::string to_string(const SilKit::Core::EndpointAddress& address)
 
 std::ostream& operator<<(std::ostream& out, const SilKit::Core::EndpointAddress& address)
 {
-    out << "Addr{" << address.participant
-        << ", " << address.endpoint
-        << "}";
+    out << "Addr{" << address.participant << ", " << address.endpoint << "}";
     return out;
 }
 

@@ -62,8 +62,8 @@ public:
      * \param userContext An optional user provided pointer that is
      * reobtained when receiving the call result.
      */
-    virtual void CallWithTimeout(Util::Span<const uint8_t> data,
-                                 std::chrono::nanoseconds timeout, void* userContext = nullptr) = 0;
+    virtual void CallWithTimeout(Util::Span<const uint8_t> data, std::chrono::nanoseconds timeout,
+                                 void* userContext = nullptr) = 0;
 };
 
 } // namespace Rpc

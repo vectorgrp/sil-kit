@@ -32,8 +32,14 @@ protected:
     MockCapi capi;
 
 protected:
-    void SetUp() override { capi.SetUpGlobalCapi(); }
-    void TearDown() override { capi.TearDownGlobalCapi(); }
+    void SetUp() override
+    {
+        capi.SetUpGlobalCapi();
+    }
+    void TearDown() override
+    {
+        capi.TearDownGlobalCapi();
+    }
 };
 
 } // namespace SilKitHourglassTests

@@ -44,7 +44,6 @@ void ParticipantReplies::CallAfterAllParticipantsReplied(std::function<void()> c
 {
     // Execute deferred to prevent additional participants to join between GetNumberOfRemoteReceivers and actual SendMsg in GetRequestReplyService()->Call()
     _participant->ExecuteDeferred([this, completionFunction = std::move(completionFunction)]() mutable {
-
         if (_barrierActive)
         {
             Services::Logging::Debug(_participant->GetLogger(),
@@ -86,7 +85,9 @@ void ParticipantReplies::ReceiveCall(IRequestReplyService* requestReplyService, 
     requestReplyService->SubmitCallReturn(callUuid, _functionType, {}, CallReturnStatus::Success);
 }
 
-void ParticipantReplies::ReceiveCallReturn(std::string fromParticipant, Util::Uuid callUuid, std::vector<uint8_t> /*callReturnData*/, CallReturnStatus /*callReturnStatus*/)
+void ParticipantReplies::ReceiveCallReturn(std::string fromParticipant, Util::Uuid callUuid,
+                                           std::vector<uint8_t> /*callReturnData*/,
+                                           CallReturnStatus /*callReturnStatus*/)
 {
     // All values of callReturnStatus are ok to complete the request.
     // If we know the callUuid, collect call returns and call the completion function
@@ -108,4 +109,3 @@ void ParticipantReplies::ReceiveCallReturn(std::string fromParticipant, Util::Uu
 } // namespace RequestReply
 } // namespace Core
 } // namespace SilKit
-

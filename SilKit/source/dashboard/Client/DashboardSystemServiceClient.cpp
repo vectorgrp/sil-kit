@@ -39,9 +39,7 @@ DashboardSystemServiceClient::DashboardSystemServiceClient(
 {
 }
 
-DashboardSystemServiceClient::~DashboardSystemServiceClient()
-{
-}
+DashboardSystemServiceClient::~DashboardSystemServiceClient() {}
 
 oatpp::Object<SimulationCreationResponseDto> DashboardSystemServiceClient::CreateSimulation(
     oatpp::Object<SimulationCreationRequestDto> simulation)
@@ -210,7 +208,8 @@ void DashboardSystemServiceClient::SetSimulationEnd(oatpp::UInt64 simulationId,
     Log(response, "setting simulation end");
 }
 
-void DashboardSystemServiceClient::Log(std::shared_ptr<oatpp::web::client::RequestExecutor::Response> response, const std::string& message)
+void DashboardSystemServiceClient::Log(std::shared_ptr<oatpp::web::client::RequestExecutor::Response> response,
+                                       const std::string& message)
 {
     if (!response)
     {

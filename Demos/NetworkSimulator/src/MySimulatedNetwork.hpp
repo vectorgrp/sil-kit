@@ -16,7 +16,6 @@
 class MySimulatedNetwork : public SilKit::Experimental::NetworkSimulation::ISimulatedNetwork
 {
 public:
-
     MySimulatedNetwork(SilKit::IParticipant* participant, Scheduler* scheduler,
                        SilKit::Experimental::NetworkSimulation::SimulatedNetworkType networkType,
                        std::string networkName);
@@ -59,7 +58,6 @@ public:
     }
 
 private:
-
     // On construction
     SilKit::IParticipant* _participant;
     SilKit::Services::Logging::ILogger* _logger;

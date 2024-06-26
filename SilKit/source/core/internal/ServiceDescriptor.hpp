@@ -48,12 +48,18 @@ inline std::string to_string(const ServiceType& serviceType)
 {
     switch (serviceType)
     {
-    default: return "Unknown";
-    case ServiceType::Undefined: return "Undefined";
-    case ServiceType::Link: return "Link";
-    case ServiceType::Controller: return "Controller";
-    case ServiceType::SimulatedController: return "SimulatedController";
-    case ServiceType::InternalController: return "InternalController";
+    default:
+        return "Unknown";
+    case ServiceType::Undefined:
+        return "Undefined";
+    case ServiceType::Link:
+        return "Link";
+    case ServiceType::Controller:
+        return "Controller";
+    case ServiceType::SimulatedController:
+        return "SimulatedController";
+    case ServiceType::InternalController:
+        return "InternalController";
     }
 }
 
@@ -104,13 +110,16 @@ public: // CTor
     ServiceDescriptor& operator=(ServiceDescriptor&&) = default;
     ServiceDescriptor& operator=(const ServiceDescriptor&) = default;
     // for unit tests
-    inline ServiceDescriptor(std::string participantName, std::string networkName, std::string serviceName, EndpointId serviceId);
+    inline ServiceDescriptor(std::string participantName, std::string networkName, std::string serviceName,
+                             EndpointId serviceId);
+
 private:
     // Ser/Des
     friend auto operator<<(SilKit::Core::MessageBuffer& buffer,
-            const SilKit::Core::ServiceDescriptor& msg) -> SilKit::Core::MessageBuffer&;
+                           const SilKit::Core::ServiceDescriptor& msg) -> SilKit::Core::MessageBuffer&;
     friend auto operator>>(SilKit::Core::MessageBuffer& buffer,
-            SilKit::Core::ServiceDescriptor& updatedMsg) -> SilKit::Core::MessageBuffer&;
+                           SilKit::Core::ServiceDescriptor& updatedMsg) -> SilKit::Core::MessageBuffer&;
+
 private:
     std::string _participantName; //!< name of the participant
     ParticipantId _participantId{0};
@@ -125,8 +134,8 @@ private:
 //////////////////////////////////////////////////////////////////////
 // Inline Implementations
 //////////////////////////////////////////////////////////////////////
- 
-bool ServiceDescriptor::GetSupplementalDataItem(const std::string& key, std::string& value) const 
+
+bool ServiceDescriptor::GetSupplementalDataItem(const std::string& key, std::string& value) const
 {
     auto valueIter = _supplementalData.find(key);
     if (valueIter == _supplementalData.end())
@@ -139,7 +148,7 @@ bool ServiceDescriptor::GetSupplementalDataItem(const std::string& key, std::str
 
 void ServiceDescriptor::SetSupplementalDataItem(std::string key, std::string val)
 {
-    _supplementalData[key] = std::move(val); 
+    _supplementalData[key] = std::move(val);
 }
 
 auto ServiceDescriptor::GetParticipantId() const -> ParticipantId
@@ -213,7 +222,7 @@ void ServiceDescriptor::SetServiceId(SilKit::Core::EndpointId val)
     _serviceId = std::move(val);
 }
 
-auto  ServiceDescriptor::GetSupplementalData() const -> SupplementalData
+auto ServiceDescriptor::GetSupplementalData() const -> SupplementalData
 {
     return _supplementalData;
 }
@@ -244,7 +253,7 @@ void ServiceDescriptor::SetSimulationName(const std::string& simulationName)
 
 //Ctors
 ServiceDescriptor::ServiceDescriptor(std::string participantName, std::string networkName, std::string serviceName,
-    EndpointId serviceId)
+                                     EndpointId serviceId)
 {
     SetParticipantNameAndComputeId(std::move(participantName));
     SetNetworkName(std::move(networkName));
@@ -255,12 +264,8 @@ ServiceDescriptor::ServiceDescriptor(std::string participantName, std::string ne
 // operators
 inline bool ServiceDescriptor::operator==(const ServiceDescriptor& rhs) const
 {
-    return 
-        GetParticipantId() == rhs.GetParticipantId()
-        && GetNetworkName() == rhs.GetNetworkName() 
-        && GetServiceType() == rhs.GetServiceType() 
-        && GetServiceId() == rhs.GetServiceId()
-        ;
+    return GetParticipantId() == rhs.GetParticipantId() && GetNetworkName() == rhs.GetNetworkName()
+           && GetServiceType() == rhs.GetServiceType() && GetServiceId() == rhs.GetServiceId();
 }
 
 inline bool ServiceDescriptor::operator!=(const ServiceDescriptor& rhs) const
@@ -270,24 +275,15 @@ inline bool ServiceDescriptor::operator!=(const ServiceDescriptor& rhs) const
 
 std::string ServiceDescriptor::to_string() const
 {
-    const std::string separator{ "/" };
+    const std::string separator{"/"};
     std::string controllerTypeName;
     // common
     std::stringstream ss;
-    ss
-        << GetParticipantName()
-        << separator
-        << SilKit::Core::to_string(GetServiceType())
-        ;
+    ss << GetParticipantName() << separator << SilKit::Core::to_string(GetServiceType());
     switch (GetServiceType())
     {
     case ServiceType::Link:
-        ss
-            << separator
-            << Config::to_string(GetNetworkType())
-            << separator
-            << GetNetworkName()
-            ;
+        ss << separator << Config::to_string(GetNetworkType()) << separator << GetNetworkName();
         break;
     case ServiceType::Controller:
     case ServiceType::SimulatedController:
@@ -296,29 +292,14 @@ std::string ServiceDescriptor::to_string() const
             throw LogicError("supplementalData.size() > 0");
         }
 
-        ss
-            << separator
-            << controllerTypeName
-            << separator
-            << GetNetworkName()
-            << separator
-            << GetServiceName()
-            ;
+        ss << separator << controllerTypeName << separator << GetNetworkName() << separator << GetServiceName();
         break;
     case ServiceType::InternalController:
-        ss
-            << separator
-            << GetServiceName()
-            ;
+        ss << separator << GetServiceName();
         break;
     case ServiceType::Undefined:
-        ss
-            << separator
-            << GetNetworkName()
-            << separator
-            << GetServiceName()
-            ;
-      break;
+        ss << separator << GetNetworkName() << separator << GetServiceName();
+        break;
     }
     return ss.str();
 }

@@ -32,11 +32,14 @@ class SimulationCreationResponseDto : public oatpp::DTO
 {
     DTO_INIT(SimulationCreationResponseDto, DTO)
 
-    DTO_FIELD_INFO(id) { info->description = "Id"; }
+    DTO_FIELD_INFO(id)
+    {
+        info->description = "Id";
+    }
     DTO_FIELD(UInt64, id);
 };
 
-} // namespace Dashboard}
+} // namespace Dashboard
 } // namespace SilKit
 
 #include OATPP_CODEGEN_END(DTO)

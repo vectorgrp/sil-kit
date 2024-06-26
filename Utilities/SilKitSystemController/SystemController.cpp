@@ -71,10 +71,10 @@ public:
 
         _monitor->SetParticipantConnectedHandler(
             [this](const ParticipantConnectionInformation& participantInformation) {
-                std::ostringstream ss;
-                ss << "Participant '" << participantInformation.participantName << "' joined the simulation";
-                LogInfo(ss.str());
-            });
+            std::ostringstream ss;
+            ss << "Participant '" << participantInformation.participantName << "' joined the simulation";
+            LogInfo(ss.str());
+        });
         _monitor->AddSystemStateHandler([&](const SystemState& systemState) {
             if (systemState == SystemState::Stopping)
             {
@@ -141,7 +141,8 @@ private:
         {
             {
                 std::ostringstream ss;
-                ss << "Simulation is in state " << _monitor->SystemState() << " and cannot be stopped, attempting to abort...";
+                ss << "Simulation is in state " << _monitor->SystemState()
+                   << " and cannot be stopped, attempting to abort...";
                 LogInfo(ss.str());
             }
             _controller->AbortSimulation();
@@ -211,22 +212,15 @@ private:
 
 auto ToLowerCase(std::string s) -> std::string
 {
-    std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) {
-        return (unsigned char)std::tolower(c);
-    });
+    std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) { return (unsigned char)std::tolower(c); });
     return s;
 }
 
 auto IsValidLogLevel(const std::string& levelStr) -> bool
 {
     auto logLevel = ToLowerCase(levelStr);
-    return    logLevel == "trace"
-           || logLevel == "debug"
-           || logLevel == "warn"
-           || logLevel == "info"
-           || logLevel == "error"
-           || logLevel == "critical"
-           || logLevel == "off";
+    return logLevel == "trace" || logLevel == "debug" || logLevel == "warn" || logLevel == "info" || logLevel == "error"
+           || logLevel == "critical" || logLevel == "off";
 }
 
 } // namespace
@@ -400,8 +394,8 @@ int main(int argc, char** argv)
         std::cerr << "Something went wrong: " << error.what() << std::endl;
         if (!nonInteractiveMode)
         {
-                std::cout << "Press enter to end the process..." << std::endl;
-                std::cin.ignore();
+            std::cout << "Press enter to end the process..." << std::endl;
+            std::cin.ignore();
         }
 
         return -3;

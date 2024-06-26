@@ -30,7 +30,7 @@ namespace Dashboard {
 
 class DashboardRetryPolicy;
 
-class Dashboard 
+class Dashboard
 {
 public:
     Dashboard(std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig,

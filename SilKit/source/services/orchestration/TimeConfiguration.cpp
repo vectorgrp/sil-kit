@@ -26,7 +26,7 @@ namespace SilKit {
 namespace Services {
 namespace Orchestration {
 
-TimeConfiguration::TimeConfiguration(Logging::ILogger* logger) 
+TimeConfiguration::TimeConfiguration(Logging::ILogger* logger)
     : _blocking(false)
     , _logger(logger)
 
@@ -91,10 +91,11 @@ void TimeConfiguration::OnReceiveNextSimStep(const std::string& participantName,
 
     if (nextStep.timePoint < itOtherNextTask->second.timePoint)
     {
-        Logging::Error(_logger,
-                       "Chonology error: Received NextSimTask from participant \'{}\' with lower timePoint {} than last "
-                       "known timePoint {}",
-                       participantName, nextStep.timePoint.count(), itOtherNextTask->second.timePoint.count());
+        Logging::Error(
+            _logger,
+            "Chonology error: Received NextSimTask from participant \'{}\' with lower timePoint {} than last "
+            "known timePoint {}",
+            participantName, nextStep.timePoint.count(), itOtherNextTask->second.timePoint.count());
     }
 
     _otherNextTasks.at(participantName) = std::move(nextStep);

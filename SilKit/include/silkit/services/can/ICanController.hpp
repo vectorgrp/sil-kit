@@ -36,7 +36,7 @@ class ICanController
 public:
     /*! \brief Generic CAN callback method
     */
-    template<typename MsgT>
+    template <typename MsgT>
     using CallbackT = std::function<void(ICanController* controller, const MsgT& msg)>;
 
     /*! Callback type to indicate that a CanFrameEvent has been received.
@@ -131,7 +131,7 @@ public:
      * \return Returns a \ref SilKit::Util::HandlerId that can be used to remove the callback.
      */
     virtual auto AddFrameHandler(FrameHandler handler,
-                                      DirectionMask directionMask = (DirectionMask)TransmitDirection::RX) -> HandlerId = 0;
+                                 DirectionMask directionMask = (DirectionMask)TransmitDirection::RX) -> HandlerId = 0;
 
     /*! \brief Remove a FrameHandler by \ref SilKit::Util::HandlerId on this controller
      *

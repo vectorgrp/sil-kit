@@ -29,7 +29,6 @@ namespace Dashboard {
 
 class ISilKitEventQueue
 {
-
 public:
     virtual ~ISilKitEventQueue() = default;
     virtual void Enqueue(const SilKitEvent& obj) = 0;

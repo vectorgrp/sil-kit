@@ -86,8 +86,7 @@ GpsData Deserialize(const std::vector<uint8_t>& data)
     return gpsData;
 }
 
-void PublishData(IDataPublisher* gpsPublisher,
-                 IDataPublisher* temperaturePublisher)
+void PublishData(IDataPublisher* gpsPublisher, IDataPublisher* temperaturePublisher)
 {
     // GPS
     GpsData gpsData;
@@ -151,8 +150,7 @@ int main(int argc, char** argv)
 
     if (participantName != "Publisher" && participantName != "Subscriber")
     {
-        std::cout << "Wrong participant name provided. Use either \"Publisher\" or \"Subscriber\"."
-                  << std::endl;
+        std::cout << "Wrong participant name provided. Use either \"Publisher\" or \"Subscriber\"." << std::endl;
         return 1;
     }
 
@@ -183,7 +181,8 @@ int main(int argc, char** argv)
             }
         }
 
-        auto participantConfiguration = SilKit::Config::ParticipantConfigurationFromFile(participantConfigurationFilename);
+        auto participantConfiguration =
+            SilKit::Config::ParticipantConfigurationFromFile(participantConfigurationFilename);
 
         std::cout << "Creating participant '" << participantName << "' with registry " << registryUri << std::endl;
         auto participant = SilKit::CreateParticipant(participantConfiguration, participantName, registryUri);
@@ -191,36 +190,25 @@ int main(int argc, char** argv)
         auto* lifecycleService = participant->CreateLifecycleService({operationMode});
 
         // Observe state changes
-        lifecycleService->SetStopHandler([]() {
-            std::cout << "Stop handler called" << std::endl;
-        });
-        lifecycleService->SetShutdownHandler([]() {
-            std::cout << "Shutdown handler called" << std::endl;
-        });
-        lifecycleService->SetAbortHandler([](auto lastState) {
-            std::cout << "Abort handler called while in state " << lastState << std::endl;
-        });
+        lifecycleService->SetStopHandler([]() { std::cout << "Stop handler called" << std::endl; });
+        lifecycleService->SetShutdownHandler([]() { std::cout << "Shutdown handler called" << std::endl; });
+        lifecycleService->SetAbortHandler(
+            [](auto lastState) { std::cout << "Abort handler called while in state " << lastState << std::endl; });
 
         auto isPublisher = (participantName == "Publisher");
 
         // Create a data publisher for GPS data
-        auto* gpsPublisher = (isPublisher
-                              ? participant->CreateDataPublisher("GpsPublisher", dataSpecPubGps, 0)
-                              : nullptr);
+        auto* gpsPublisher =
+            (isPublisher ? participant->CreateDataPublisher("GpsPublisher", dataSpecPubGps, 0) : nullptr);
         // Create a data publisher for temperature data
-        auto* temperaturePublisher = (
-            isPublisher
-            ? participant->CreateDataPublisher("TemperaturePublisher", dataSpecPubTemperature, 0)
-            : nullptr);
+        auto* temperaturePublisher =
+            (isPublisher ? participant->CreateDataPublisher("TemperaturePublisher", dataSpecPubTemperature, 0)
+                         : nullptr);
 
         if (!isPublisher)
         {
-            participant->CreateDataSubscriber(
-                "GpsSubscriber", dataSpecPubGps,
-                &ReceiveGpsData);
-            participant->CreateDataSubscriber(
-                "TemperatureSubscriber", dataSpecPubTemperature,
-                &ReceiveTemperatureData);
+            participant->CreateDataSubscriber("GpsSubscriber", dataSpecPubGps, &ReceiveGpsData);
+            participant->CreateDataSubscriber("TemperatureSubscriber", dataSpecPubTemperature, &ReceiveTemperatureData);
         }
 
         if (runSync)
@@ -236,28 +224,25 @@ int main(int argc, char** argv)
                 timeSyncService->SetSimulationStepHandler(
                     [gpsPublisher, temperaturePublisher](std::chrono::nanoseconds now,
                                                          std::chrono::nanoseconds /*duration*/) {
-                        auto nowMs = 
-                            std::chrono::duration_cast<std::chrono::milliseconds>(now);
-                        std::cout << "now=" << nowMs.count() << "ms" << std::endl;
+                    auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
+                    std::cout << "now=" << nowMs.count() << "ms" << std::endl;
 
-                        if (gpsPublisher && temperaturePublisher)
-                        {
-                            PublishData(gpsPublisher, temperaturePublisher);
-                        }
-                        std::this_thread::sleep_for(1s);
-                    },
+                    if (gpsPublisher && temperaturePublisher)
+                    {
+                        PublishData(gpsPublisher, temperaturePublisher);
+                    }
+                    std::this_thread::sleep_for(1s);
+                },
                     1s);
             }
             else
             {
                 timeSyncService->SetSimulationStepHandler(
                     [](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
-                        auto nowMs = 
-                            std::chrono::duration_cast<std::chrono::milliseconds>(now);
-                        std::cout << "now=" << nowMs.count() << "ms" << std::endl;
-                        std::this_thread::sleep_for(1s);
-                    },
-                    1s);
+                    auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
+                    std::cout << "now=" << nowMs.count() << "ms" << std::endl;
+                    std::this_thread::sleep_for(1s);
+                }, 1s);
             }
 
             auto finalStateFuture = lifecycleService->StartLifecycle();
@@ -277,8 +262,8 @@ int main(int argc, char** argv)
                 std::cout << "Communication ready handler called for " << participantName << std::endl;
                 workerThread = std::thread{[&]() {
                     startHandlerFuture.get();
-                    while (lifecycleService->State() == ParticipantState::ReadyToRun ||
-                           lifecycleService->State() == ParticipantState::Running)
+                    while (lifecycleService->State() == ParticipantState::ReadyToRun
+                           || lifecycleService->State() == ParticipantState::Running)
                     {
                         if (gpsPublisher && temperaturePublisher)
                         {
@@ -293,17 +278,15 @@ int main(int argc, char** argv)
                 }};
             });
 
-            lifecycleService->SetStartingHandler([&]() {
-                startHandlerPromise.set_value();
-            });
+            lifecycleService->SetStartingHandler([&]() { startHandlerPromise.set_value(); });
 
             lifecycleService->StartLifecycle();
             std::cout << "Press enter to leave the simulation..." << std::endl;
             std::cin.ignore();
 
             isStopRequested = true;
-            if (lifecycleService->State() == ParticipantState::Running || 
-                lifecycleService->State() == ParticipantState::Paused)
+            if (lifecycleService->State() == ParticipantState::Running
+                || lifecycleService->State() == ParticipantState::Paused)
             {
                 std::cout << "User requested to stop in state " << lifecycleService->State() << std::endl;
                 lifecycleService->Stop("User requested to stop");

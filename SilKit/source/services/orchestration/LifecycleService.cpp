@@ -47,9 +47,7 @@ LifecycleService::LifecycleService(Core::IParticipantInternal* participant)
     _timeSyncService = _participant->CreateTimeSyncService(this);
 }
 
- LifecycleService::~LifecycleService()
-{
-}
+LifecycleService::~LifecycleService() {}
 
 void LifecycleService::SetCommunicationReadyHandler(CommunicationReadyHandler handler)
 {
@@ -67,9 +65,10 @@ void LifecycleService::CompleteCommunicationReadyHandlerAsync()
 {
     _logger->Debug("LifecycleService::CompleteCommunicationReadyHandler: enter");
     // async handler is finished, now continue to the Running state without triggering the CommunicationReadyHandler again
-    if(!_commReadyHandlerInvoked)
+    if (!_commReadyHandlerInvoked)
     {
-        _logger->Debug("LifecycleService::CompleteCommunicationReadyHandler was called without invoking the CommunicationReadyHandler, ignoring.");
+        _logger->Debug("LifecycleService::CompleteCommunicationReadyHandler was called without invoking the "
+                       "CommunicationReadyHandler, ignoring.");
         return;
     }
     if (_commReadyHandlerCompleted)
@@ -105,15 +104,14 @@ void LifecycleService::SetAbortHandler(AbortHandler handler)
     _abortHandler = std::move(handler);
 }
 
-auto LifecycleService::StartLifecycle()
-    -> std::future<ParticipantState>
+auto LifecycleService::StartLifecycle() -> std::future<ParticipantState>
 {
     std::stringstream ss;
     ss << "Lifecycle of participant " << _participant->GetParticipantName() << " started";
     _logger->Debug(ss.str());
 
-	  _isLifecycleStarted = true;
-	
+    _isLifecycleStarted = true;
+
     if (_finalStatePromise == nullptr)
     {
         throw LogicError{"LifecycleService::StartLifecycle must not be called twice"};
@@ -155,27 +153,26 @@ auto LifecycleService::StartLifecycle()
     serviceDiscovery->NotifyServiceCreated(_serviceDescriptor);
     serviceDiscovery->NotifyServiceCreated(_timeSyncService->GetServiceDescriptor());
 
-    _participant->GetSystemMonitor()->AddSystemStateHandler([&](auto systemState) {
-        this->NewSystemState(systemState);
-    });
+    _participant->GetSystemMonitor()->AddSystemStateHandler(
+        [&](auto systemState) { this->NewSystemState(systemState); });
 
-    // Initialize switches to ServicesCreated. In parallel, the reception of an invalid WorkflowConfiguration could 
+    // Initialize switches to ServicesCreated. In parallel, the reception of an invalid WorkflowConfiguration could
     // lead to ErrorState, so we need to defer this to the IO-Worker Thread
-    _participant->ExecuteDeferred([this] {
-        _lifecycleManager.Initialize("LifecycleService::StartLifecycle was called.");
-    });
+    _participant->ExecuteDeferred(
+        [this] { _lifecycleManager.Initialize("LifecycleService::StartLifecycle was called."); });
 
     switch (_operationMode)
     {
-    case OperationMode::Invalid: 
+    case OperationMode::Invalid:
         throw ConfigurationError("OperationMode was not set. This is mandatory.");
-    case OperationMode::Coordinated: 
+    case OperationMode::Coordinated:
         // ServicesCreated is triggered by SystemState
         break;
     case OperationMode::Autonomous:
         // Autonomous start direcly, coordinated wait for SystemState Change
-        _participant->ExecuteDeferred([this]{
-            _lifecycleManager.StartAutonomous("LifecycleService::StartLifecycle was called without start coordination.");
+        _participant->ExecuteDeferred([this] {
+            _lifecycleManager.StartAutonomous(
+                "LifecycleService::StartLifecycle was called without start coordination.");
         });
 
         break;
@@ -186,7 +183,6 @@ auto LifecycleService::StartLifecycle()
 void LifecycleService::ReportError(std::string errorMsg)
 {
     _participant->ExecuteDeferred([errorMsg, this] {
-
         _logger->Error(errorMsg);
 
         if (!_isLifecycleStarted)
@@ -242,9 +238,7 @@ void LifecycleService::Continue()
 void LifecycleService::Stop(std::string reason)
 {
     _stopRequested = true;
-    _participant->ExecuteDeferred([this, reason] {
-        _lifecycleManager.Stop(reason);
-    });
+    _participant->ExecuteDeferred([this, reason] { _lifecycleManager.Stop(reason); });
 }
 
 void LifecycleService::Restart(std::string /*reason*/)
@@ -264,11 +258,11 @@ OperationMode LifecycleService::GetOperationMode() const
 
 bool LifecycleService::TriggerCommunicationReadyHandler()
 {
-    if(_commReadyHandler)
+    if (_commReadyHandler)
     {
-        if(_commReadyHandlerIsAsync)
+        if (_commReadyHandlerIsAsync)
         {
-            if(!_commReadyHandlerInvoked)
+            if (!_commReadyHandlerInvoked)
             {
                 _commReadyHandlerInvoked = true;
                 _commReadyHandlerCompleted = false;
@@ -330,9 +324,7 @@ void LifecycleService::AbortSimulation(std::string reason)
         _abortedBeforeLifecycleStart = true;
         return;
     }
-    _participant->ExecuteDeferred([this, reason] {
-        _lifecycleManager.AbortSimulation(reason);
-    });
+    _participant->ExecuteDeferred([this, reason] { _lifecycleManager.AbortSimulation(reason); });
 }
 
 bool LifecycleService::CheckForValidConfiguration()
@@ -352,9 +344,9 @@ bool LifecycleService::CheckForValidConfiguration()
             std::stringstream ss;
 
             ss << _participant->GetParticipantName()
-                << ": This participant is in OperationMode::Coordinated but it is not part of the "
-                    "set of \"required\" participants declared by the system controller. ";
-            
+               << ": This participant is in OperationMode::Coordinated but it is not part of the "
+                  "set of \"required\" participants declared by the system controller. ";
+
             ReportError(ss.str());
 
             return false;
@@ -440,12 +432,14 @@ void LifecycleService::ReceiveMsg(const IServiceEndpoint*, const SystemCommand& 
 {
     switch (command.kind)
     {
-    case SystemCommand::Kind::Invalid: break;
+    case SystemCommand::Kind::Invalid:
+        break;
 
     case SystemCommand::Kind::AbortSimulation:
         AbortSimulation("Received SystemCommand::AbortSimulation");
         return;
-    default: break;
+    default:
+        break;
     }
 
     // We should not reach this point in normal operation.
@@ -494,10 +488,10 @@ void LifecycleService::NewSystemState(SystemState systemState)
 {
     switch (_operationMode)
     {
-    case OperationMode::Invalid: 
+    case OperationMode::Invalid:
         // ignore
         return;
-    case OperationMode::Coordinated: 
+    case OperationMode::Coordinated:
         break;
     case OperationMode::Autonomous:
         // autonomous participants do not react to system states changes!
@@ -510,30 +504,30 @@ void LifecycleService::NewSystemState(SystemState systemState)
 
     switch (systemState)
     {
-    case SystemState::Invalid: 
-        break; 
-    case SystemState::ServicesCreated: 
+    case SystemState::Invalid:
+        break;
+    case SystemState::ServicesCreated:
         _lifecycleManager.ServicesCreated(ss.str());
         break;
-    case SystemState::CommunicationInitializing: 
-        break; 
-    case SystemState::CommunicationInitialized: 
+    case SystemState::CommunicationInitializing:
+        break;
+    case SystemState::CommunicationInitialized:
         _lifecycleManager.CommunicationInitialized(ss.str());
         break;
-    case SystemState::ReadyToRun: 
-        _lifecycleManager.ReadyToRun(ss.str()); 
+    case SystemState::ReadyToRun:
+        _lifecycleManager.ReadyToRun(ss.str());
         break;
-    case SystemState::Running: 
+    case SystemState::Running:
         _logger->Info("Simulation is now running");
-        break; 
-    case SystemState::Paused: 
-        _logger->Info("Simulation is paused"); 
-        break; 
-    case SystemState::Stopping: 
+        break;
+    case SystemState::Paused:
+        _logger->Info("Simulation is paused");
+        break;
+    case SystemState::Stopping:
         _logger->Info("Simulation is stopping");
         // Only allow external stop signal if we are actually running or paused
-        if (_lifecycleManager.GetCurrentState() == _lifecycleManager.GetRunningState() ||
-            _lifecycleManager.GetCurrentState() == _lifecycleManager.GetPausedState())
+        if (_lifecycleManager.GetCurrentState() == _lifecycleManager.GetRunningState()
+            || _lifecycleManager.GetCurrentState() == _lifecycleManager.GetPausedState())
         {
             _lifecycleManager.Stop(ss.str());
         }
@@ -541,13 +535,13 @@ void LifecycleService::NewSystemState(SystemState systemState)
     case SystemState::Stopped:
         break;
     case SystemState::ShuttingDown:
-        break; 
-    case SystemState::Shutdown: 
+        break;
+    case SystemState::Shutdown:
         _logger->Info("Simulation is shut down");
-        break; 
-    case SystemState::Aborting: 
-        break; 
-    case SystemState::Error: 
+        break;
+    case SystemState::Aborting:
+        break;
+    case SystemState::Error:
         break;
     }
 }

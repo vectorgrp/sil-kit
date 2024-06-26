@@ -26,60 +26,57 @@ namespace SilKit {
 namespace Services {
 namespace Orchestration {
 
-inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const SilKit::Services::Orchestration::NextSimTask& task)
+inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer,
+                                               const SilKit::Services::Orchestration::NextSimTask& task)
 {
-    buffer << task.timePoint
-           << task.duration;
+    buffer << task.timePoint << task.duration;
     return buffer;
 }
-inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, SilKit::Services::Orchestration::NextSimTask& task)
+inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer,
+                                               SilKit::Services::Orchestration::NextSimTask& task)
 {
-    buffer >> task.timePoint
-           >> task.duration;
+    buffer >> task.timePoint >> task.duration;
     return buffer;
 }
 
-    
-inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const SilKit::Services::Orchestration::SystemCommand& cmd)
+
+inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer,
+                                               const SilKit::Services::Orchestration::SystemCommand& cmd)
 {
     buffer << cmd.kind;
     return buffer;
 }
-inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, SilKit::Services::Orchestration::SystemCommand& cmd)
+inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer,
+                                               SilKit::Services::Orchestration::SystemCommand& cmd)
 {
     buffer >> cmd.kind;
     return buffer;
 }
 
 
-inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const SilKit::Services::Orchestration::ParticipantStatus& status)
+inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer,
+                                               const SilKit::Services::Orchestration::ParticipantStatus& status)
 {
-    buffer << status.participantName
-           << status.state
-           << status.enterReason
-           << status.enterTime
-           << status.refreshTime;
+    buffer << status.participantName << status.state << status.enterReason << status.enterTime << status.refreshTime;
     return buffer;
 }
-inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, SilKit::Services::Orchestration::ParticipantStatus& status)
+inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer,
+                                               SilKit::Services::Orchestration::ParticipantStatus& status)
 {
-    buffer >> status.participantName
-           >> status.state
-           >> status.enterReason
-           >> status.enterTime
-           >> status.refreshTime;
+    buffer >> status.participantName >> status.state >> status.enterReason >> status.enterTime >> status.refreshTime;
     return buffer;
 }
 
-inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer,
-                                         const SilKit::Services::Orchestration::WorkflowConfiguration& workflowConfiguration)
+inline SilKit::Core::MessageBuffer& operator<<(
+    SilKit::Core::MessageBuffer& buffer,
+    const SilKit::Services::Orchestration::WorkflowConfiguration& workflowConfiguration)
 {
     buffer << workflowConfiguration.requiredParticipantNames;
     return buffer;
 }
 
-inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer,
-                                         SilKit::Services::Orchestration::WorkflowConfiguration& workflowConfiguration)
+inline SilKit::Core::MessageBuffer& operator>>(
+    SilKit::Core::MessageBuffer& buffer, SilKit::Services::Orchestration::WorkflowConfiguration& workflowConfiguration)
 {
     buffer >> workflowConfiguration.requiredParticipantNames;
     return buffer;
@@ -123,6 +120,6 @@ void Deserialize(SilKit::Core::MessageBuffer& buffer, NextSimTask& out)
     buffer >> out;
 }
 
-} // namespace Orchestration    
+} // namespace Orchestration
 } // namespace Services
 } // namespace SilKit

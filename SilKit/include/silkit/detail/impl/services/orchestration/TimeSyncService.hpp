@@ -42,7 +42,8 @@ public:
 
     inline void SetSimulationStepHandler(SimulationStepHandler task, std::chrono::nanoseconds initialStepSize) override;
 
-    inline void SetSimulationStepHandlerAsync(SimulationStepHandler task, std::chrono::nanoseconds initialStepSize) override;
+    inline void SetSimulationStepHandlerAsync(SimulationStepHandler task,
+                                              std::chrono::nanoseconds initialStepSize) override;
 
     inline void CompleteSimulationStep() override;
 

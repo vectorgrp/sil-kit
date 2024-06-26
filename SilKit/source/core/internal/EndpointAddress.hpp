@@ -59,20 +59,17 @@ inline bool operator<(SilKit::Core::EndpointAddress lhs, SilKit::Core::EndpointA
 // ================================================================================
 bool operator==(SilKit::Core::EndpointAddress lhs, SilKit::Core::EndpointAddress rhs)
 {
-    return lhs.participant == rhs.participant
-        && lhs.endpoint == rhs.endpoint;
+    return lhs.participant == rhs.participant && lhs.endpoint == rhs.endpoint;
 }
 
 bool operator!=(SilKit::Core::EndpointAddress lhs, SilKit::Core::EndpointAddress rhs)
 {
-    return lhs.participant != rhs.participant
-        || lhs.endpoint != rhs.endpoint;
+    return lhs.participant != rhs.participant || lhs.endpoint != rhs.endpoint;
 }
 
 bool operator<(SilKit::Core::EndpointAddress lhs, SilKit::Core::EndpointAddress rhs)
 {
-    return lhs.participant < rhs.participant
-        || (lhs.participant == rhs.participant && lhs.endpoint < rhs.endpoint);
+    return lhs.participant < rhs.participant || (lhs.participant == rhs.participant && lhs.endpoint < rhs.endpoint);
 }
 
 } // namespace Core

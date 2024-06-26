@@ -68,7 +68,6 @@ public:
     virtual ~ILifecycleService() = default;
 
 public:
-
     /*! \brief Register a callback that is executed once all communication channels between participants
      *          with a lifecycle have been set up and are ready for communication.
      *
@@ -87,7 +86,7 @@ public:
     * CompleteCommunicationReadyHandlerAsync() method is called. Only then will the participant switch to the ParticipantState::ReadyToRun.
     * Note that CompleteCommunicationReadyHandlerAsync may not be called from within any CommunicationReadyHandler.
     * The CommunicationReadyHandler is executed in an internal thread and must not be blocked by the user.
-    */ 
+    */
     virtual void SetCommunicationReadyHandlerAsync(CommunicationReadyHandler handler) = 0;
 
     /*! \brief Notify that the async CommunicationReadyHandler is completed.

@@ -13,7 +13,7 @@
 #include "Registry.hpp"
 
 #if defined(_WIN32) && defined(_MSC_VER)
-#    define HAS_SILKIT_REGISTRY_WINDOWS_SERVICE 1
+#define HAS_SILKIT_REGISTRY_WINDOWS_SERVICE 1
 #endif
 
 namespace SilKitRegistry {

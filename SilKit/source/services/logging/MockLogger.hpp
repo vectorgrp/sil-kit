@@ -76,7 +76,7 @@ public:
         Log(Level::Critical, msg);
     }
 
-    MOCK_METHOD(SilKit::Services::Logging::Level, GetLogLevel, (), (const,override));
+    MOCK_METHOD(SilKit::Services::Logging::Level, GetLogLevel, (), (const, override));
 };
 
 

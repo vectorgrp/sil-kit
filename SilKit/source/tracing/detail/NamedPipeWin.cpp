@@ -35,15 +35,14 @@ static std::string GetPipeError()
 {
     LPVOID lpMsgBuf;
 
-    auto msgSize = FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
-        NULL, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-        (LPTSTR)& lpMsgBuf, 0, NULL);
+    auto msgSize = FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, NULL, GetLastError(),
+                                  MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR)&lpMsgBuf, 0, NULL);
 
     if (msgSize == 0)
     {
         return "FromMessageA failed!";
     }
-    std::string rv(reinterpret_cast<char *>(lpMsgBuf));
+    std::string rv(reinterpret_cast<char*>(lpMsgBuf));
     LocalFree(lpMsgBuf);
     return rv;
 }
@@ -53,18 +52,15 @@ NamedPipeWin::NamedPipeWin(const std::string& name)
     std::stringstream ss;
     ss << "\\\\.\\pipe\\" << name;
 
-    _pipeHandle = CreateNamedPipe(
-        ss.str().c_str(),
-        PIPE_ACCESS_OUTBOUND,
-        //we use message buffering, in a blocking manner
-        PIPE_TYPE_MESSAGE | PIPE_WAIT,
-        //single instance only
-        1,
-        //allow for very large messages
-        65536, 65536,
-        //raise the default 50ms timeout, just in case
-        300,
-        NULL);
+    _pipeHandle = CreateNamedPipe(ss.str().c_str(), PIPE_ACCESS_OUTBOUND,
+                                  //we use message buffering, in a blocking manner
+                                  PIPE_TYPE_MESSAGE | PIPE_WAIT,
+                                  //single instance only
+                                  1,
+                                  //allow for very large messages
+                                  65536, 65536,
+                                  //raise the default 50ms timeout, just in case
+                                  300, NULL);
     if (!isValid())
     {
         throw SilKitError(GetPipeError());
@@ -74,7 +70,8 @@ NamedPipeWin::NamedPipeWin(const std::string& name)
 
 NamedPipeWin::~NamedPipeWin()
 {
-    try {
+    try
+    {
         Close();
     }
     catch (...)
@@ -98,7 +95,8 @@ bool NamedPipeWin::Write(const char* buffer, size_t size)
     }
 
     DWORD cbWritten = 0;
-    if (size == 0) return false;
+    if (size == 0)
+        return false;
     if (isValid())
     {
         auto ok = WriteFile(_pipeHandle, buffer, static_cast<DWORD>(size), &cbWritten, NULL);

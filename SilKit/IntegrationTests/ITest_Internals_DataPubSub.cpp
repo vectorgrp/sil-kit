@@ -40,8 +40,8 @@ TEST_F(ITest_Internals_DataPubSub, test_1pub_1sub_sync)
     const uint32_t numMsgToReceive = numMsgToPublish;
 
     std::vector<PubSubParticipant> pubsubs;
-    pubsubs.push_back({ "Pub1", {{ "PubCtrl1", "TopicA",  {"A"}, {}, 0, defaultMsgSize, numMsgToPublish}}, {} });
-    pubsubs.push_back({ "Sub1", {}, {{"SubCtrl1", "TopicA",  {"A"}, {}, defaultMsgSize, numMsgToReceive, 1 }} });
+    pubsubs.push_back({"Pub1", {{"PubCtrl1", "TopicA", {"A"}, {}, 0, defaultMsgSize, numMsgToPublish}}, {}});
+    pubsubs.push_back({"Sub1", {}, {{"SubCtrl1", "TopicA", {"A"}, {}, defaultMsgSize, numMsgToReceive, 1}}});
 
     RunSyncTest(pubsubs);
 }
@@ -115,25 +115,47 @@ DataSubscribers:
     auto configPubSub2 = SilKit::Config::ParticipantConfigurationFromStringImpl(configStringPubSub2);
 
     std::vector<PubSubParticipant> pubsubs;
-    pubsubs.push_back({
-        "PubSub1",
-        {
-            {"PubCtrl1", "ShouldBeOverwritten", "A", {}, 0, defaultMsgSize, numMsgToPublish}, // Publishes for PubSub2->SubCtrl1
-            {"PubCtrl2", "TopicC", "A", {}, 0, defaultMsgSize, numMsgToPublish} // Has no topic configured.
-        }, 
-        {{"SubCtrl1", "ShouldBeOverwritten", "A", {}, defaultMsgSize, numMsgToReceive, 6}},  // Receives by PubSub2->PubCtrl1
-        configPubSub1
-    });
-
-    pubsubs.push_back({
-        "PubSub2",
-         {{"PubCtrl1", "ShouldBeOverwritten", {"A"}, {}, 0, defaultMsgSize, numMsgToPublish}}, // Publishes for PubSub1->SubCtrl1
+    pubsubs.push_back(
+        {"PubSub1",
          {
-             {"SubCtrl1", "ShouldBeOverwritten", {"A"}, {}, defaultMsgSize, numMsgToReceive, 6}, // Receives by PubSub1->PubCtrl1
+             {"PubCtrl1",
+              "ShouldBeOverwritten",
+              "A",
+              {},
+              0,
+              defaultMsgSize,
+              numMsgToPublish}, // Publishes for PubSub2->SubCtrl1
+             {"PubCtrl2", "TopicC", "A", {}, 0, defaultMsgSize, numMsgToPublish} // Has no topic configured.
+         },
+         {{"SubCtrl1",
+           "ShouldBeOverwritten",
+           "A",
+           {},
+           defaultMsgSize,
+           numMsgToReceive,
+           6}}, // Receives by PubSub2->PubCtrl1
+         configPubSub1});
+
+    pubsubs.push_back(
+        {"PubSub2",
+         {{"PubCtrl1",
+           "ShouldBeOverwritten",
+           {"A"},
+           {},
+           0,
+           defaultMsgSize,
+           numMsgToPublish}}, // Publishes for PubSub1->SubCtrl1
+         {
+             {"SubCtrl1",
+              "ShouldBeOverwritten",
+              {"A"},
+              {},
+              defaultMsgSize,
+              numMsgToReceive,
+              6}, // Receives by PubSub1->PubCtrl1
              {"SubCtrl2", "TopicC", {"A"}, {}, defaultMsgSize, numMsgToReceive, 6}, // Has no topic configured.
          },
-        configPubSub2
-    });
+         configPubSub2});
 
     RunSyncTest(pubsubs);
 }
@@ -143,11 +165,11 @@ TEST_F(ITest_Internals_DataPubSub, test_1pub_1sub_sync_largemsg)
 {
     const uint32_t numMsgToPublish = defaultNumMsgToPublish;
     const uint32_t numMsgToReceive = numMsgToPublish;
-    const size_t   messageSize = 250000;
+    const size_t messageSize = 250000;
 
     std::vector<PubSubParticipant> pubsubs;
-    pubsubs.push_back({ "Pub1", {{"PubCtrl1", "TopicA",  {"A"}, {}, 0, messageSize, numMsgToPublish}}, {} });
-    pubsubs.push_back({ "Sub1", {},  {{"SubCtrl1", "TopicA",  {"A"}, {}, messageSize, numMsgToReceive, 1}} });
+    pubsubs.push_back({"Pub1", {{"PubCtrl1", "TopicA", {"A"}, {}, 0, messageSize, numMsgToPublish}}, {}});
+    pubsubs.push_back({"Sub1", {}, {{"SubCtrl1", "TopicA", {"A"}, {}, messageSize, numMsgToReceive, 1}}});
 
     RunSyncTest(pubsubs);
 }
@@ -157,19 +179,19 @@ TEST_F(ITest_Internals_DataPubSub, test_1pub_1sub_sync_100topics)
 {
     const uint32_t numMsgToPublish = 1;
     const uint32_t numMsgToReceive = numMsgToPublish;
-    const int      numTopics = 100;
+    const int numTopics = 100;
 
     std::vector<PubSubParticipant> pubsubs;
-    
-    pubsubs.push_back({ "Pub1" });
-    pubsubs.push_back({ "Sub1" });
+
+    pubsubs.push_back({"Pub1"});
+    pubsubs.push_back({"Sub1"});
     for (int i = 0; i < numTopics; i++)
     {
         std::string topic = std::to_string(i);
         std::string pubControllerName = "PubCtrl" + std::to_string(i);
         std::string subControllerName = "SubCtrl" + std::to_string(i);
-        DataPublisherInfo  pInfo{ pubControllerName, topic,  {"A"}, {}, 1, defaultMsgSize, numMsgToPublish };
-        DataSubscriberInfo sInfo{ subControllerName, topic,  {"A"}, {},    defaultMsgSize, numMsgToReceive, 1};
+        DataPublisherInfo pInfo{pubControllerName, topic, {"A"}, {}, 1, defaultMsgSize, numMsgToPublish};
+        DataSubscriberInfo sInfo{subControllerName, topic, {"A"}, {}, defaultMsgSize, numMsgToReceive, 1};
         pubsubs[0].dataPublishers.push_back(std::move(pInfo));
         pubsubs[1].dataSubscribers.push_back(std::move(sInfo));
     }
@@ -184,9 +206,9 @@ TEST_F(ITest_Internals_DataPubSub, test_1pub_2sub_sync)
     const uint32_t numMsgToReceive = numMsgToPublish;
 
     std::vector<PubSubParticipant> pubsubs;
-    pubsubs.push_back({"Pub1", {{"PubCtrl1", "TopicA",  {"A"}, {}, 0, defaultMsgSize, numMsgToPublish}},{}});
-    pubsubs.push_back({"Sub1", {}, {{"SubCtrl1", "TopicA",  {"A"}, {}, defaultMsgSize, numMsgToReceive, 1}}});
-    pubsubs.push_back({"Sub2", {}, {{"SubCtrl1", "TopicA",  {"A"}, {}, defaultMsgSize, numMsgToReceive, 1}}});
+    pubsubs.push_back({"Pub1", {{"PubCtrl1", "TopicA", {"A"}, {}, 0, defaultMsgSize, numMsgToPublish}}, {}});
+    pubsubs.push_back({"Sub1", {}, {{"SubCtrl1", "TopicA", {"A"}, {}, defaultMsgSize, numMsgToReceive, 1}}});
+    pubsubs.push_back({"Sub2", {}, {{"SubCtrl1", "TopicA", {"A"}, {}, defaultMsgSize, numMsgToReceive, 1}}});
 
     RunSyncTest(pubsubs);
 }
@@ -198,11 +220,11 @@ TEST_F(ITest_Internals_DataPubSub, test_2pub_1sub_sync)
     const uint32_t numMsgToReceive = numMsgToPublish * 2;
     // PubCtrl1 and PubCtrl2 have the same Topic, mediatype and labels,
     // so only one call of the newSourceDiscoveryHandler is expected
-    const uint32_t numNewSouceDiscoveries = 1; 
+    const uint32_t numNewSouceDiscoveries = 1;
 
     std::vector<PubSubParticipant> pubsubs;
-    pubsubs.push_back({"Pub1", {{"PubCtrl1", "TopicA",  {"A"}, {}, 0, defaultMsgSize, numMsgToPublish}}, {}});
-    pubsubs.push_back({"Pub2", {{"PubCtrl2", "TopicA",  {"A"}, {}, 0, defaultMsgSize, numMsgToPublish}}, {}});
+    pubsubs.push_back({"Pub1", {{"PubCtrl1", "TopicA", {"A"}, {}, 0, defaultMsgSize, numMsgToPublish}}, {}});
+    pubsubs.push_back({"Pub2", {{"PubCtrl2", "TopicA", {"A"}, {}, 0, defaultMsgSize, numMsgToPublish}}, {}});
     std::vector<std::vector<uint8_t>> expectedDataUnordered;
     for (uint8_t d = 0; d < numMsgToPublish; d++)
     {
@@ -274,13 +296,22 @@ TEST_F(ITest_Internals_DataPubSub, test_3pub_4sub_sync_4topics)
     const uint32_t numMsgToReceive = numMsgToPublish;
     // PubCtrl1 on Pub1,2,3 have the same Topic, mediatype and labels,
     // so only one call of the newSourceDiscoveryHandler is expected
-    const uint32_t numNewSouceDiscoveries = 1; 
+    const uint32_t numNewSouceDiscoveries = 1;
 
     std::vector<PubSubParticipant> pubsubs;
-    
-    pubsubs.push_back({ "Pub1",  {{"PubCtrl1", "TopicA",  {"A"}, {}, 0, defaultMsgSize, numMsgToPublish}, {"PubCtrl2", "TopicB", "B", {}, 0, defaultMsgSize, numMsgToPublish}}, {} });
-    pubsubs.push_back({ "Pub2",  {{"PubCtrl1", "TopicA",  {"A"}, {}, 0, defaultMsgSize, numMsgToPublish}, {"PubCtrl2", "TopicC", "C", {}, 0, defaultMsgSize, numMsgToPublish}}, {} });
-    pubsubs.push_back({ "Pub3",  {{"PubCtrl1", "TopicA",  {"A"}, {}, 0, defaultMsgSize, numMsgToPublish}, {"PubCtrl2", "TopicD", "D", {}, 0, defaultMsgSize, numMsgToPublish}}, {}});
+
+    pubsubs.push_back({"Pub1",
+                       {{"PubCtrl1", "TopicA", {"A"}, {}, 0, defaultMsgSize, numMsgToPublish},
+                        {"PubCtrl2", "TopicB", "B", {}, 0, defaultMsgSize, numMsgToPublish}},
+                       {}});
+    pubsubs.push_back({"Pub2",
+                       {{"PubCtrl1", "TopicA", {"A"}, {}, 0, defaultMsgSize, numMsgToPublish},
+                        {"PubCtrl2", "TopicC", "C", {}, 0, defaultMsgSize, numMsgToPublish}},
+                       {}});
+    pubsubs.push_back({"Pub3",
+                       {{"PubCtrl1", "TopicA", {"A"}, {}, 0, defaultMsgSize, numMsgToPublish},
+                        {"PubCtrl2", "TopicD", "D", {}, 0, defaultMsgSize, numMsgToPublish}},
+                       {}});
 
     std::vector<std::vector<uint8_t>> expectedDataUnordered;
     for (uint8_t d = 0; d < numMsgToPublish; d++)
@@ -601,7 +632,7 @@ TEST_F(ITest_Internals_DataPubSub, test_1pub_1sub_sync_missing_mandatory_label_s
 }
 
 //--------------------
-// Self-delivery 
+// Self-delivery
 
 // 1 pub, 1 sub on a single participant
 TEST_F(ITest_Internals_DataPubSub, test_1_participant_selfdelivery)
@@ -624,7 +655,7 @@ TEST_F(ITest_Internals_DataPubSub, test_1_participant_selfdelivery_same_topic)
     const uint32_t numMsgToReceive = numMsgToPublish;
     // PubCtrl1 and PubCtrl2 have the same Topic, mediatype and labels,
     // so only one call of the newSourceDiscoveryHandler is expected
-    const uint32_t numNewSouceDiscoveries = 1; 
+    const uint32_t numNewSouceDiscoveries = 1;
 
     std::vector<PubSubParticipant> pubsubs;
     std::vector<std::vector<uint8_t>> expectedDataUnordered;
@@ -643,8 +674,7 @@ TEST_F(ITest_Internals_DataPubSub, test_1_participant_selfdelivery_same_topic)
                          defaultMsgSize,
                          numMsgToReceive,
                          numNewSouceDiscoveries,
-                         expectedDataUnordered
-                         },
+                         expectedDataUnordered},
                         {"SubCtrl2",
                          "TopicA",
                          {"A"},
@@ -652,8 +682,7 @@ TEST_F(ITest_Internals_DataPubSub, test_1_participant_selfdelivery_same_topic)
                          defaultMsgSize,
                          numMsgToReceive,
                          numNewSouceDiscoveries,
-                         expectedDataUnordered
-                         }}});
+                         expectedDataUnordered}}});
 
     RunSyncTest(pubsubs);
 }
@@ -683,7 +712,7 @@ TEST_F(ITest_Internals_DataPubSub, test_1pub_1sub_async_rejoin)
     const uint32_t numMsgToPublish = 1;
     const uint32_t numRejoins = 10;
     const uint32_t numMsgToReceive = 1 * numMsgToPublish;
-    
+
     std::vector<PubSubParticipant> publishers;
     publishers.push_back({"Pub1", {{"PubCtrl1", "TopicA", {"A"}, {}, 1, defaultMsgSize, numMsgToPublish}}, {}});
 
@@ -697,16 +726,17 @@ TEST_F(ITest_Internals_DataPubSub, test_1pub_1sub_async_rejoin)
     }
     subscribers.push_back({"Sub1",
                            {},
-                           {{"SubCtrl1",
-                             "TopicA",
-                             {"A"},
-                             {},
-                             defaultMsgSize,
-                             numMsgToReceive,
-                             1,
-                             expectedDataUnordered,
-                             }}});
-    
+                           {{
+                               "SubCtrl1",
+                               "TopicA",
+                               {"A"},
+                               {},
+                               defaultMsgSize,
+                               numMsgToReceive,
+                               1,
+                               expectedDataUnordered,
+                           }}});
+
     auto registryUri = MakeTestRegistryUri();
 
     _testSystem.SetupRegistryAndSystemMaster(registryUri, false, {});

@@ -27,7 +27,7 @@ namespace Services {
 namespace Lin {
 
 SimBehaviorDetailed::SimBehaviorDetailed(Core::IParticipantInternal* participant, LinController* linController,
-                                       const Core::ServiceDescriptor& serviceDescriptor)
+                                         const Core::ServiceDescriptor& serviceDescriptor)
     : _participant{participant}
     , _parentController{linController}
     , _parentServiceEndpoint{dynamic_cast<Core::IServiceEndpoint*>(linController)}
@@ -105,8 +105,8 @@ void SimBehaviorDetailed::Wakeup()
     _parentController->WakeupInternal();
 }
 
-auto SimBehaviorDetailed::CalcFrameStatus(const LinTransmission& linTransmission, bool isGoToSleepFrame)
-    -> LinFrameStatus
+auto SimBehaviorDetailed::CalcFrameStatus(const LinTransmission& linTransmission,
+                                          bool isGoToSleepFrame) -> LinFrameStatus
 {
     // dynamic controllers report every transmission as it was received
     if (_parentController->GetThisLinNode().simulationMode == WireLinControllerConfig::SimulationMode::Dynamic)
@@ -128,7 +128,7 @@ auto SimBehaviorDetailed::CalcFrameStatus(const LinTransmission& linTransmission
     return linTransmission.status;
 }
 
-auto SimBehaviorDetailed::AllowReception(const Core::IServiceEndpoint* from) const -> bool 
+auto SimBehaviorDetailed::AllowReception(const Core::IServiceEndpoint* from) const -> bool
 {
     // If simulated, only allow reception from NetSim.
     // NetSim internally sets the ServiceId of this controller and sends messages with it,

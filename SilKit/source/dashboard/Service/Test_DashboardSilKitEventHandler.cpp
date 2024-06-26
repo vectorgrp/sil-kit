@@ -127,9 +127,9 @@ TEST_F(Test_DashboardSilKitEventHandler, OnParticipantConnected_AddParticipantRe
     oatpp::String actualParticipantName;
     EXPECT_CALL(*_mockDashboardSystemServiceClient, AddParticipantToSimulation)
         .WillOnce(WithArgs<0, 1>([&](auto simulationId, auto participantName) {
-            actualSimulationId = simulationId;
-            actualParticipantName = participantName;
-        }));
+        actualSimulationId = simulationId;
+        actualParticipantName = participantName;
+    }));
 
     // Act
     const connectionInfo info{"my Participant"};
@@ -154,9 +154,9 @@ TEST_F(Test_DashboardSilKitEventHandler, OnSystemStateChanged_UpdateSystemStatus
     SilKit::Dashboard::SystemState actualSystemState;
     EXPECT_CALL(*_mockDashboardSystemServiceClient, UpdateSystemStatusForSimulation)
         .WillOnce(WithArgs<0, 1>([&](auto simulationId, auto systemStatus) {
-            actualSimulationId = simulationId;
-            actualSystemState = systemStatus->state;
-        }));
+        actualSimulationId = simulationId;
+        actualSystemState = systemStatus->state;
+    }));
 
     // Act
     service->OnSystemStateChanged(expectedSimulationId, Services::Orchestration::SystemState::Running);
@@ -184,10 +184,10 @@ TEST_F(Test_DashboardSilKitEventHandler, OnParticipantStatusChanged_AddParticipa
     SilKit::Dashboard::ParticipantState actualParticipantState;
     EXPECT_CALL(*_mockDashboardSystemServiceClient, AddParticipantStatusForSimulation)
         .WillOnce(WithArgs<0, 1, 2>([&](auto simulationId, auto participantName, auto participantStatus) {
-            actualSimulationId = simulationId;
-            actualParticipantName = participantName;
-            actualParticipantState = participantStatus->state;
-        }));
+        actualSimulationId = simulationId;
+        actualParticipantName = participantName;
+        actualParticipantState = participantStatus->state;
+    }));
 
     // Act
     participantStatus status;
@@ -227,10 +227,10 @@ TEST_F(Test_DashboardSilKitEventHandler, OnServiceDiscoveryEvent_CanControllerCr
     oatpp::UInt64 actualServiceId;
     EXPECT_CALL(*_mockDashboardSystemServiceClient, AddCanControllerForParticipantOfSimulation)
         .WillOnce(WithArgs<0, 1, 2>([&](auto simulationId, auto participantName, auto serviceId) {
-            actualSimulationId = simulationId;
-            actualParticipantName = participantName;
-            actualServiceId = serviceId;
-        }));
+        actualSimulationId = simulationId;
+        actualParticipantName = participantName;
+        actualServiceId = serviceId;
+    }));
 
     // Act
     service->OnServiceDiscoveryEvent(expectedSimulationId, Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated,
@@ -259,10 +259,10 @@ TEST_F(Test_DashboardSilKitEventHandler,
     oatpp::UInt64 actualServiceId;
     EXPECT_CALL(*_mockDashboardSystemServiceClient, AddEthernetControllerForParticipantOfSimulation)
         .WillOnce(WithArgs<0, 1, 2>([&](auto simulationId, auto participantName, auto serviceId) {
-            actualSimulationId = simulationId;
-            actualParticipantName = participantName;
-            actualServiceId = serviceId;
-        }));
+        actualSimulationId = simulationId;
+        actualParticipantName = participantName;
+        actualServiceId = serviceId;
+    }));
 
     // Act
     service->OnServiceDiscoveryEvent(expectedSimulationId, Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated,
@@ -291,10 +291,10 @@ TEST_F(Test_DashboardSilKitEventHandler,
     oatpp::UInt64 actualServiceId;
     EXPECT_CALL(*_mockDashboardSystemServiceClient, AddFlexrayControllerForParticipantOfSimulation)
         .WillOnce(WithArgs<0, 1, 2>([&](auto simulationId, auto participantName, auto serviceId) {
-            actualSimulationId = simulationId;
-            actualParticipantName = participantName;
-            actualServiceId = serviceId;
-        }));
+        actualSimulationId = simulationId;
+        actualParticipantName = participantName;
+        actualServiceId = serviceId;
+    }));
 
     // Act
     service->OnServiceDiscoveryEvent(expectedSimulationId, Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated,
@@ -322,10 +322,10 @@ TEST_F(Test_DashboardSilKitEventHandler, OnServiceDiscoveryEvent_LinControllerCr
     oatpp::UInt64 actualServiceId;
     EXPECT_CALL(*_mockDashboardSystemServiceClient, AddLinControllerForParticipantOfSimulation)
         .WillOnce(WithArgs<0, 1, 2>([&](auto simulationId, auto participantName, auto serviceId) {
-            actualSimulationId = simulationId;
-            actualParticipantName = participantName;
-            actualServiceId = serviceId;
-        }));
+        actualSimulationId = simulationId;
+        actualParticipantName = participantName;
+        actualServiceId = serviceId;
+    }));
 
     // Act
     service->OnServiceDiscoveryEvent(expectedSimulationId, Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated,
@@ -355,10 +355,10 @@ TEST_F(Test_DashboardSilKitEventHandler, OnServiceDiscoveryEvent_DataPublisherCr
     oatpp::UInt64 actualServiceId;
     EXPECT_CALL(*_mockDashboardSystemServiceClient, AddDataPublisherForParticipantOfSimulation)
         .WillOnce(WithArgs<0, 1, 2>([&](auto simulationId, auto participantName, auto serviceId) {
-            actualSimulationId = simulationId;
-            actualParticipantName = participantName;
-            actualServiceId = serviceId;
-        }));
+        actualSimulationId = simulationId;
+        actualParticipantName = participantName;
+        actualServiceId = serviceId;
+    }));
 
     // Act
     service->OnServiceDiscoveryEvent(expectedSimulationId, Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated,
@@ -388,10 +388,10 @@ TEST_F(Test_DashboardSilKitEventHandler, OnServiceDiscoveryEvent_DataSubscriberC
     oatpp::UInt64 actualServiceId;
     EXPECT_CALL(*_mockDashboardSystemServiceClient, AddDataSubscriberForParticipantOfSimulation)
         .WillOnce(WithArgs<0, 1, 2>([&](auto simulationId, auto participantName, auto serviceId) {
-            actualSimulationId = simulationId;
-            actualParticipantName = participantName;
-            actualServiceId = serviceId;
-        }));
+        actualSimulationId = simulationId;
+        actualParticipantName = participantName;
+        actualServiceId = serviceId;
+    }));
 
     // Act
     service->OnServiceDiscoveryEvent(expectedSimulationId, Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated,
@@ -427,11 +427,11 @@ TEST_F(Test_DashboardSilKitEventHandler,
     EXPECT_CALL(*_mockDashboardSystemServiceClient, AddDataSubscriberInternalForParticipantOfSimulation)
         .WillOnce(
             WithArgs<0, 1, 2, 3>([&](auto simulationId, auto participantName, auto parentServiceId, auto serviceId) {
-                actualSimulationId = simulationId;
-                actualParticipantName = participantName;
-                actualParentServiceId = parentServiceId;
-                actualServiceId = serviceId;
-            }));
+        actualSimulationId = simulationId;
+        actualParticipantName = participantName;
+        actualParentServiceId = parentServiceId;
+        actualServiceId = serviceId;
+    }));
 
     // Act
     service->OnServiceDiscoveryEvent(expectedSimulationId, Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated,
@@ -461,10 +461,10 @@ TEST_F(Test_DashboardSilKitEventHandler, OnServiceDiscoveryEvent_RpcClientCreate
     oatpp::UInt64 actualServiceId;
     EXPECT_CALL(*_mockDashboardSystemServiceClient, AddRpcClientForParticipantOfSimulation)
         .WillOnce(WithArgs<0, 1, 2>([&](auto simulationId, auto participantName, auto serviceId) {
-            actualSimulationId = simulationId;
-            actualParticipantName = participantName;
-            actualServiceId = serviceId;
-        }));
+        actualSimulationId = simulationId;
+        actualParticipantName = participantName;
+        actualServiceId = serviceId;
+    }));
 
     // Act
     service->OnServiceDiscoveryEvent(expectedSimulationId, Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated,
@@ -493,10 +493,10 @@ TEST_F(Test_DashboardSilKitEventHandler, OnServiceDiscoveryEvent_RpcServerCreate
     oatpp::UInt64 actualServiceId;
     EXPECT_CALL(*_mockDashboardSystemServiceClient, AddRpcServerForParticipantOfSimulation)
         .WillOnce(WithArgs<0, 1, 2>([&](auto simulationId, auto participantName, auto serviceId) {
-            actualSimulationId = simulationId;
-            actualParticipantName = participantName;
-            actualServiceId = serviceId;
-        }));
+        actualSimulationId = simulationId;
+        actualParticipantName = participantName;
+        actualServiceId = serviceId;
+    }));
 
     // Act
     service->OnServiceDiscoveryEvent(expectedSimulationId, Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated,
@@ -532,11 +532,11 @@ TEST_F(Test_DashboardSilKitEventHandler,
     EXPECT_CALL(*_mockDashboardSystemServiceClient, AddRpcServerInternalForParticipantOfSimulation)
         .WillOnce(
             WithArgs<0, 1, 2, 3>([&](auto simulationId, auto participantName, auto parentServiceId, auto serviceId) {
-                actualSimulationId = simulationId;
-                actualParticipantName = participantName;
-                actualParentServiceId = parentServiceId;
-                actualServiceId = serviceId;
-            }));
+        actualSimulationId = simulationId;
+        actualParticipantName = participantName;
+        actualParentServiceId = parentServiceId;
+        actualServiceId = serviceId;
+    }));
 
     // Act
     service->OnServiceDiscoveryEvent(expectedSimulationId, Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated,
@@ -566,10 +566,10 @@ TEST_F(Test_DashboardSilKitEventHandler, OnServiceDiscoveryEvent_CanLinkCreated_
     oatpp::String actualNetworkName;
     EXPECT_CALL(*_mockDashboardSystemServiceClient, AddCanNetworkToSimulation)
         .WillOnce(WithArgs<0, 1, 2>([&](auto simulationId, auto participantName, auto networkName) {
-            actualSimulationId = simulationId;
-            actualParticipantName = participantName;
-            actualNetworkName = networkName;
-        }));
+        actualSimulationId = simulationId;
+        actualParticipantName = participantName;
+        actualNetworkName = networkName;
+    }));
 
     // Act
     service->OnServiceDiscoveryEvent(expectedSimulationId, Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated,
@@ -599,10 +599,10 @@ TEST_F(Test_DashboardSilKitEventHandler,
     oatpp::String actualNetworkName;
     EXPECT_CALL(*_mockDashboardSystemServiceClient, AddEthernetNetworkToSimulation)
         .WillOnce(WithArgs<0, 1, 2>([&](auto simulationId, auto participantName, auto networkName) {
-            actualSimulationId = simulationId;
-            actualParticipantName = participantName;
-            actualNetworkName = networkName;
-        }));
+        actualSimulationId = simulationId;
+        actualParticipantName = participantName;
+        actualNetworkName = networkName;
+    }));
 
     // Act
     service->OnServiceDiscoveryEvent(expectedSimulationId, Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated,
@@ -632,10 +632,10 @@ TEST_F(Test_DashboardSilKitEventHandler,
     oatpp::String actualNetworkName;
     EXPECT_CALL(*_mockDashboardSystemServiceClient, AddFlexrayNetworkToSimulation)
         .WillOnce(WithArgs<0, 1, 2>([&](auto simulationId, auto participantName, auto networkName) {
-            actualSimulationId = simulationId;
-            actualParticipantName = participantName;
-            actualNetworkName = networkName;
-        }));
+        actualSimulationId = simulationId;
+        actualParticipantName = participantName;
+        actualNetworkName = networkName;
+    }));
 
     // Act
     service->OnServiceDiscoveryEvent(expectedSimulationId, Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated,
@@ -664,10 +664,10 @@ TEST_F(Test_DashboardSilKitEventHandler, OnServiceDiscoveryEvent_LinLinkCreated_
     oatpp::String actualNetworkName;
     EXPECT_CALL(*_mockDashboardSystemServiceClient, AddLinNetworkToSimulation)
         .WillOnce(WithArgs<0, 1, 2>([&](auto simulationId, auto participantName, auto networkName) {
-            actualSimulationId = simulationId;
-            actualParticipantName = participantName;
-            actualNetworkName = networkName;
-        }));
+        actualSimulationId = simulationId;
+        actualParticipantName = participantName;
+        actualNetworkName = networkName;
+    }));
 
     // Act
     service->OnServiceDiscoveryEvent(expectedSimulationId, Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated,

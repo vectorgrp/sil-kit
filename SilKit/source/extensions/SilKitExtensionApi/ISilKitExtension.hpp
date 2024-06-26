@@ -21,7 +21,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #pragma once
 
-namespace SilKit { 
+namespace SilKit {
 
 //! \brief The interface for all SIL Kit extensions.
 
@@ -31,9 +31,8 @@ public:
     virtual ~ISilKitExtension() = default;
     virtual const char* GetExtensionName() const = 0;
     virtual const char* GetVendorName() const = 0;
-    virtual void GetVersion(uint32_t& major,
-                    uint32_t& minor, uint32_t& patch) const = 0;
-};  
+    virtual void GetVersion(uint32_t& major, uint32_t& minor, uint32_t& patch) const = 0;
+};
 
 
-}//end namespace SilKit
+} //end namespace SilKit

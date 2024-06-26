@@ -115,20 +115,18 @@ void TestDirectConnectionNotPossible(std::vector<std::string> participantConfigs
     });
 
     auto publisher1 = pubParticipant->Participant()->CreateDataPublisher("test", pubSubSpec);
-    pubParticipant->GetOrCreateTimeSyncService()->SetSimulationStepHandler(
-        [&](auto&&, auto&&) {
-            std::unique_lock<decltype(mx)> lock{mx};
-            if (numDataReceived >= 2)
-            {
-                pubParticipant->Stop();
-            }
-            else
-            {
-                std::cout << "<---- published" << std::endl;
-                publisher1->Publish(testData);
-            }
-        },
-        1ms);
+    pubParticipant->GetOrCreateTimeSyncService()->SetSimulationStepHandler([&](auto&&, auto&&) {
+        std::unique_lock<decltype(mx)> lock{mx};
+        if (numDataReceived >= 2)
+        {
+            pubParticipant->Stop();
+        }
+        else
+        {
+            std::cout << "<---- published" << std::endl;
+            publisher1->Publish(testData);
+        }
+    }, 1ms);
 
     ASSERT_TRUE(testSetup.Run(4s));
     ASSERT_GE(numDataReceived, 2);

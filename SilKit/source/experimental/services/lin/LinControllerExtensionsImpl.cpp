@@ -46,14 +46,14 @@ namespace Services {
 namespace Lin {
 
 auto AddLinSlaveConfigurationHandlerImpl(SilKit::Services::Lin::ILinController* linController,
-                                     SilKit::Experimental::Services::Lin::LinSlaveConfigurationHandler handler)
+                                         SilKit::Experimental::Services::Lin::LinSlaveConfigurationHandler handler)
     -> SilKit::Util::HandlerId
 {
     return GetLinController(linController)->AddLinSlaveConfigurationHandler(handler);
 }
 
 void RemoveLinSlaveConfigurationHandlerImpl(SilKit::Services::Lin::ILinController* linController,
-                                                      SilKit::Util::HandlerId handlerId)
+                                            SilKit::Util::HandlerId handlerId)
 {
     return GetLinController(linController)->RemoveLinSlaveConfigurationHandler(handlerId);
 }
@@ -65,27 +65,27 @@ auto GetSlaveConfigurationImpl(SilKit::Services::Lin::ILinController* linControl
 }
 
 void InitDynamicImpl(SilKit::Services::Lin::ILinController* linController,
-    const SilKit::Experimental::Services::Lin::LinControllerDynamicConfig& dynamicConfig)
+                     const SilKit::Experimental::Services::Lin::LinControllerDynamicConfig& dynamicConfig)
 {
     return GetLinController(linController)->InitDynamic(dynamicConfig);
 }
 
 auto AddFrameHeaderHandlerImpl(SilKit::Services::Lin::ILinController* linController,
-    std::function<void(SilKit::Services::Lin::ILinController*,
-        const SilKit::Experimental::Services::Lin::LinFrameHeaderEvent& msg)>
-    handler) -> SilKit::Util::HandlerId
+                               std::function<void(SilKit::Services::Lin::ILinController*,
+                                                  const SilKit::Experimental::Services::Lin::LinFrameHeaderEvent& msg)>
+                                   handler) -> SilKit::Util::HandlerId
 {
     return GetLinController(linController)->AddFrameHeaderHandler(handler);
 }
 
 void RemoveFrameHeaderHandlerImpl(SilKit::Services::Lin::ILinController* linController,
-    SilKit::Util::HandlerId handlerId)
+                                  SilKit::Util::HandlerId handlerId)
 {
     return GetLinController(linController)->RemoveFrameHeaderHandler(handlerId);
 }
 
 void SendDynamicResponseImpl(SilKit::Services::Lin::ILinController* linController,
-    const SilKit::Services::Lin::LinFrame& frame)
+                             const SilKit::Services::Lin::LinFrame& frame)
 {
     return GetLinController(linController)->SendDynamicResponse(frame);
 }

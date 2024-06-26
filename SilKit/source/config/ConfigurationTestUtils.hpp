@@ -37,8 +37,7 @@ inline auto MakeEmptyParticipantConfiguration() -> std::shared_ptr<SilKit::Confi
 inline auto MakeParticipantConfigurationWithLogging(Services::Logging::Level logLevel)
     -> std::shared_ptr<SilKit::Config::IParticipantConfiguration>;
 
-inline auto MakeParticipantConfigurationStringWithLogging(Services::Logging::Level logLevel)
-    -> std::string;
+inline auto MakeParticipantConfigurationStringWithLogging(Services::Logging::Level logLevel) -> std::string;
 
 inline auto MakeEmptyParticipantConfigurationImpl() -> std::shared_ptr<SilKit::Config::ParticipantConfiguration>;
 

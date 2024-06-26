@@ -62,7 +62,8 @@ bool CheckUserContextContainsFrameCounter(void* userContext, uint16_t frameCount
     return (reinterpret_cast<uintptr_t>(userContext) & 0xFFFF) == frameCounter;
 }
 
-MATCHER_P(UserContextContainsFrameCounter, frameCounter, "") {
+MATCHER_P(UserContextContainsFrameCounter, frameCounter, "")
+{
     if (CheckUserContextContainsFrameCounter(arg, frameCounter))
     {
         return true;
@@ -72,13 +73,12 @@ MATCHER_P(UserContextContainsFrameCounter, frameCounter, "") {
     return false;
 }
 
-auto AnAckWithCanIdAndFrameCounter(uint32_t canId, uint16_t frameCounter) -> testing::Matcher<const CanFrameTransmitEvent&>
+auto AnAckWithCanIdAndFrameCounter(uint32_t canId,
+                                   uint16_t frameCounter) -> testing::Matcher<const CanFrameTransmitEvent&>
 {
     using namespace testing;
-    return AllOf(
-        Field(&CanFrameTransmitEvent::canId, canId),
-        Field(&CanFrameTransmitEvent::userContext, UserContextContainsFrameCounter(frameCounter))
-    );
+    return AllOf(Field(&CanFrameTransmitEvent::canId, canId),
+                 Field(&CanFrameTransmitEvent::userContext, UserContextContainsFrameCounter(frameCounter)));
 }
 
 class ITest_ThreeCanController : public testing::Test
@@ -100,75 +100,63 @@ protected:
             testMessages[index].expectedData = messageBuilder.str();
         }
 
-        syncParticipantNames = { "CanWriter", "CanReader1", "CanReader2" };
+        syncParticipantNames = {"CanWriter", "CanReader1", "CanReader2"};
     }
 
     void SetupWriter(SilKit::Tests::SimParticipant* writer)
     {
-
         auto* controller = writer->Participant()->CreateCanController("CAN1", "CAN1");
         controllerToId.emplace(controller, static_cast<uint16_t>(controllerToId.size()));
         ASSERT_LT(controllerToId[controller], std::numeric_limits<uint16_t>::max());
 
-        controller->AddFrameTransmitHandler(
-            [this](ICanController* ctrl, const CanFrameTransmitEvent& ack) {
+        controller->AddFrameTransmitHandler([this](ICanController* ctrl, const CanFrameTransmitEvent& ack) {
             callbacks.AckHandler(ack);
             EXPECT_TRUE(CheckUserContextContainsControllerId(ack.userContext, controllerToId[ctrl]));
         });
 
         auto* lifecycleService = writer->GetOrCreateLifecycleService();
 
-        lifecycleService->SetCommunicationReadyHandler([controller]() {
-            controller->Start();
-        });
+        lifecycleService->SetCommunicationReadyHandler([controller]() { controller->Start(); });
 
         auto name = writer->Name();
-        lifecycleService->SetStopHandler([name]() {
-            std::cout << "Stop received by participant " << name << std::endl;
-        });
-        lifecycleService->SetShutdownHandler([name]() {
-            std::cout << "Shutdown received by participant " << name << std::endl;
-        });
+        lifecycleService->SetStopHandler(
+            [name]() { std::cout << "Stop received by participant " << name << std::endl; });
+        lifecycleService->SetShutdownHandler(
+            [name]() { std::cout << "Shutdown received by participant " << name << std::endl; });
 
         auto* timeSyncService = writer->GetOrCreateTimeSyncService();
-        timeSyncService->SetSimulationStepHandler(
-            [this, controller](auto, auto)
+        timeSyncService->SetSimulationStepHandler([this, controller](auto, auto) {
+            if (numSent < testMessages.size())
             {
-                if (numSent < testMessages.size())
-                {
-                    const auto& message = testMessages.at(numSent);
+                const auto& message = testMessages.at(numSent);
 
-                    std::vector<uint8_t> expectedData;
-                    expectedData.resize(message.expectedData.size());
-                    std::copy(message.expectedData.begin(), message.expectedData.end(), expectedData.begin());
+                std::vector<uint8_t> expectedData;
+                expectedData.resize(message.expectedData.size());
+                std::copy(message.expectedData.begin(), message.expectedData.end(), expectedData.begin());
 
-                    CanFrame msg;
-                    msg.canId = 1;
-                    msg.dataField = expectedData;
-                    msg.dlc = static_cast<uint16_t>(msg.dataField.size());
+                CanFrame msg;
+                msg.canId = 1;
+                msg.dataField = expectedData;
+                msg.dlc = static_cast<uint16_t>(msg.dataField.size());
 
-                    const auto frameCounter = numSent + 1;
-                    ASSERT_LT(numSent + 1, std::numeric_limits<uint16_t>::max());
+                const auto frameCounter = numSent + 1;
+                ASSERT_LT(numSent + 1, std::numeric_limits<uint16_t>::max());
 
-                    controller->SendFrame(msg, MakeUserContext(controllerToId[controller], static_cast<uint16_t>(frameCounter)));
-                    numSent++;
-                }
+                controller->SendFrame(msg,
+                                      MakeUserContext(controllerToId[controller], static_cast<uint16_t>(frameCounter)));
+                numSent++;
+            }
         }, 1ms);
     }
 
     void SetupReader(SilKit::Tests::SimParticipant* reader)
     {
-
         auto* controller = reader->Participant()->CreateCanController("CAN1", "CAN1");
         controller->AddFrameTransmitHandler(
-            [this](ICanController* /*ctrl*/, const CanFrameTransmitEvent& ack) {
-            callbacks.AckHandler(ack);
-        });
+            [this](ICanController* /*ctrl*/, const CanFrameTransmitEvent& ack) { callbacks.AckHandler(ack); });
 
-        controller->AddFrameHandler(
-            [this, reader](ICanController*, const CanFrameEvent& msg) {
-
-            if ( reader->Name() == "CanReader1")
+        controller->AddFrameHandler([this, reader](ICanController*, const CanFrameEvent& msg) {
+            if (reader->Name() == "CanReader1")
             {
                 std::string message(msg.frame.dataField.begin(), msg.frame.dataField.end());
                 testMessages.at(numReceived++).receivedData = message;
@@ -185,17 +173,13 @@ protected:
 
         auto* lifecycleService = reader->GetOrCreateLifecycleService();
 
-        lifecycleService->SetCommunicationReadyHandler([controller]() {
-            controller->Start();
-        });
+        lifecycleService->SetCommunicationReadyHandler([controller]() { controller->Start(); });
 
         auto name = reader->Name();
-        lifecycleService->SetStopHandler([name]() {
-            std::cout << "Stop received by participant " << name << std::endl;
-        });
-        lifecycleService->SetShutdownHandler([name]() {
-            std::cout << "Shutdown received by participant " << name << std::endl;
-        });
+        lifecycleService->SetStopHandler(
+            [name]() { std::cout << "Stop received by participant " << name << std::endl; });
+        lifecycleService->SetShutdownHandler(
+            [name]() { std::cout << "Shutdown received by participant " << name << std::endl; });
     }
 
     void ExecuteTest()
@@ -221,10 +205,7 @@ protected:
 
         EXPECT_TRUE(testHarness.Run(30s))
             << "TestHarness timeout occurred!"
-            << " numSent=" << numSent
-            << " numReceived=" << numReceived
-            << " numReceived2=" << numReceived2
-            ;
+            << " numSent=" << numSent << " numReceived=" << numReceived << " numReceived2=" << numReceived2;
 
         for (auto&& message : testMessages)
         {
@@ -245,11 +226,9 @@ protected:
 
     std::vector<TestMessage> testMessages;
 
-    std::unordered_map<ICanController *, uint16_t> controllerToId;
+    std::unordered_map<ICanController*, uint16_t> controllerToId;
 
-    unsigned numSent{0},
-        numReceived{0},
-        numReceived2{0};
+    unsigned numSent{0}, numReceived{0}, numReceived2{0};
 
     Callbacks callbacks;
 };

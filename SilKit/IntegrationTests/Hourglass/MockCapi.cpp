@@ -783,7 +783,7 @@ extern "C"
         SilKit_ParticipantConfiguration** outParticipantConfiguration, const char* participantConfigurationFilename)
     {
         return globalCapi->SilKit_ParticipantConfiguration_FromFile(outParticipantConfiguration,
-                                                                      participantConfigurationFilename);
+                                                                    participantConfigurationFilename);
     }
 
     SilKit_ReturnCode SilKitCALL

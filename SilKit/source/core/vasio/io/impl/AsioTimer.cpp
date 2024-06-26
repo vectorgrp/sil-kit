@@ -54,9 +54,8 @@ AsioTimer::Op::Op(VSilKit::AsioTimer& parent)
 void AsioTimer::Op::Initiate(std::chrono::nanoseconds duration)
 {
     _timer.expires_after(duration);
-    _timer.async_wait([self = this->shared_from_this()](const asio::error_code& e) {
-        self->OnAsioAsyncWaitComplete(e);
-    });
+    _timer.async_wait(
+        [self = this->shared_from_this()](const asio::error_code& e) { self->OnAsioAsyncWaitComplete(e); });
 }
 
 

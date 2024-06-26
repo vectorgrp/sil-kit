@@ -86,9 +86,7 @@ TEST_F(Test_ConnectPeer, tcp_hosts_are_resolved_and_tried_in_order_with_specifie
     static constexpr bool DOMAIN_SOCKETS_ENABLED{true};
     static constexpr auto TIMEOUT{4321ms};
 
-    auto MakeConnector{[this] {
-        return MakeConnectorThatFails(TIMEOUT);
-    }};
+    auto MakeConnector{[this] { return MakeConnectorThatFails(TIMEOUT); }};
 
     // Arrange
 
@@ -126,9 +124,7 @@ TEST_F(Test_ConnectPeer, local_is_tried_before_tcp_but_order_is_stable)
     static constexpr bool DOMAIN_SOCKETS_ENABLED{true};
     static constexpr auto TIMEOUT{4321ms};
 
-    auto MakeConnector{[this] {
-        return MakeConnectorThatFails(TIMEOUT);
-    }};
+    auto MakeConnector{[this] { return MakeConnectorThatFails(TIMEOUT); }};
 
     // Arrange
 
@@ -175,9 +171,7 @@ TEST_F(Test_ConnectPeer, retry_count_is_honored)
     static constexpr size_t RETRY_COUNT{3};
     static constexpr auto TIMEOUT{4321ms};
 
-    auto MakeConnector{[this] {
-        return MakeConnectorThatFails(TIMEOUT);
-    }};
+    auto MakeConnector{[this] { return MakeConnectorThatFails(TIMEOUT); }};
 
     // Arrange
 
@@ -216,9 +210,7 @@ TEST_F(Test_ConnectPeer, each_retry_tries_each_uri)
     static constexpr size_t RETRY_COUNT{2};
     static constexpr auto TIMEOUT{4321ms};
 
-    auto MakeConnector{[this] {
-        return MakeConnectorThatFails(TIMEOUT);
-    }};
+    auto MakeConnector{[this] { return MakeConnectorThatFails(TIMEOUT); }};
 
     // Arrange
 
@@ -255,9 +247,7 @@ TEST_F(Test_ConnectPeer, disabling_local_domain_ignores_local_uris)
     static constexpr bool DOMAIN_SOCKETS_ENABLED{false};
     static constexpr auto TIMEOUT{4321ms};
 
-    auto MakeConnector{[this] {
-        return MakeConnectorThatFails(TIMEOUT);
-    }};
+    auto MakeConnector{[this] { return MakeConnectorThatFails(TIMEOUT); }};
 
     // Arrange
 
@@ -293,15 +283,11 @@ TEST_F(Test_ConnectPeer, successful_connection_skips_remainder)
     static constexpr bool DOMAIN_SOCKETS_ENABLED{true};
     static constexpr auto TIMEOUT{4321ms};
 
-    auto MakeFailingConnector{[this] {
-        return MakeConnectorThatFails(TIMEOUT);
-    }};
+    auto MakeFailingConnector{[this] { return MakeConnectorThatFails(TIMEOUT); }};
 
     auto MakeSucceedingConnector{[this] {
         auto connector{MakeConnectorThatSucceeds(TIMEOUT)};
-        EXPECT_CALL(*connector, MakeRawByteStream).WillOnce([] {
-            return std::make_unique<MockRawByteStream>();
-        });
+        EXPECT_CALL(*connector, MakeRawByteStream).WillOnce([] { return std::make_unique<MockRawByteStream>(); });
         return connector;
     }};
 

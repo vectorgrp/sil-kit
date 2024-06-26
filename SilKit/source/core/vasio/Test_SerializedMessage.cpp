@@ -86,9 +86,7 @@ TEST(Test_SerializedMessage, packed_handshake_message)
 
     ASSERT_EQ(ptr->participantNameSize, announcement.peerInfo.participantName.size());
 
-    auto to_string = [](const auto& data, auto size) {
-        return std::string{(const char*)data.data(), size};
-    };
+    auto to_string = [](const auto& data, auto size) { return std::string{(const char*)data.data(), size}; };
 
     ASSERT_EQ(to_string(ptr->participantName, ptr->participantNameSize), announcement.peerInfo.participantName);
 

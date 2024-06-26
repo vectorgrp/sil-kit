@@ -74,7 +74,8 @@ void RpcServer::RegisterServiceDiscovery()
 
     // How this controller is discovered by RpcClient
     const std::string discoveryLookupKey = Core::Discovery::controllerTypeRpcClient + "/"
-                          + Core::Discovery::supplKeyRpcClientFunctionName + "/" + _dataSpec.FunctionName();
+                                           + Core::Discovery::supplKeyRpcClientFunctionName + "/"
+                                           + _dataSpec.FunctionName();
 
     // RpcServer discovers RpcClient and adds RpcServerInternal on a matching connection
     _participant->GetServiceDiscovery()->RegisterSpecificServiceDiscoveryHandler(

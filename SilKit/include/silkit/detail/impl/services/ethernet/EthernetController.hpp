@@ -46,8 +46,8 @@ public:
 
     inline void Deactivate() override;
 
-    inline auto AddFrameHandler(FrameHandler handler, SilKit::Services::DirectionMask directionMask)
-        -> Util::HandlerId override;
+    inline auto AddFrameHandler(FrameHandler handler,
+                                SilKit::Services::DirectionMask directionMask) -> Util::HandlerId override;
 
     inline void RemoveFrameHandler(Util::HandlerId handlerId) override;
 
@@ -127,8 +127,8 @@ void EthernetController::Deactivate()
     ThrowOnError(returnCode);
 }
 
-auto EthernetController::AddFrameHandler(FrameHandler handler, SilKit::Services::DirectionMask directionMask)
-    -> Util::HandlerId
+auto EthernetController::AddFrameHandler(FrameHandler handler,
+                                         SilKit::Services::DirectionMask directionMask) -> Util::HandlerId
 {
     const auto cHandler = [](void *context, SilKit_EthernetController *controller,
                              SilKit_EthernetFrameEvent *frameEvent) {
@@ -169,8 +169,8 @@ void EthernetController::RemoveFrameHandler(Util::HandlerId handlerId)
 }
 
 auto EthernetController::AddFrameTransmitHandler(
-    FrameTransmitHandler handler, SilKit::Services::Ethernet::EthernetTransmitStatusMask transmitStatusMask)
-    -> Util::HandlerId
+    FrameTransmitHandler handler,
+    SilKit::Services::Ethernet::EthernetTransmitStatusMask transmitStatusMask) -> Util::HandlerId
 {
     const auto cHandler = [](void *context, SilKit_EthernetController *controller,
                              SilKit_EthernetFrameTransmitEvent *frameTransmitEvent) {

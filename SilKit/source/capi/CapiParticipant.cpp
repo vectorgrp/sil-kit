@@ -38,8 +38,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 
 SilKit_ReturnCode SilKitCALL SilKit_Participant_Create(SilKit_Participant** outParticipant,
-                                            SilKit_ParticipantConfiguration *participantConfiguration,
-                                            const char* participantName, const char* registryUri)
+                                                       SilKit_ParticipantConfiguration* participantConfiguration,
+                                                       const char* participantName, const char* registryUri)
 try
 {
     ASSERT_VALID_OUT_PARAMETER(outParticipant);
@@ -104,8 +104,7 @@ CAPI_CATCH_EXCEPTIONS
 
 
 SilKit_ReturnCode SilKitCALL SilKit_ParticipantConfiguration_FromString(
-    SilKit_ParticipantConfiguration** outParticipantConfiguration,
-    const char* participantConfigurationString)
+    SilKit_ParticipantConfiguration** outParticipantConfiguration, const char* participantConfigurationString)
 try
 {
     ASSERT_VALID_OUT_PARAMETER(outParticipantConfiguration);
@@ -131,8 +130,7 @@ CAPI_CATCH_EXCEPTIONS
 
 
 SilKit_ReturnCode SilKitCALL SilKit_ParticipantConfiguration_FromFile(
-    SilKit_ParticipantConfiguration** outParticipantConfiguration,
-    const char* participantConfigurationPath)
+    SilKit_ParticipantConfiguration** outParticipantConfiguration, const char* participantConfigurationPath)
 try
 {
     ASSERT_VALID_OUT_PARAMETER(outParticipantConfiguration);
@@ -157,8 +155,8 @@ try
 CAPI_CATCH_EXCEPTIONS
 
 
-SilKit_ReturnCode SilKitCALL SilKit_ParticipantConfiguration_Destroy(
-    SilKit_ParticipantConfiguration* participantConfiguration)
+SilKit_ReturnCode SilKitCALL
+SilKit_ParticipantConfiguration_Destroy(SilKit_ParticipantConfiguration* participantConfiguration)
 try
 {
     ASSERT_VALID_POINTER_PARAMETER(participantConfiguration);

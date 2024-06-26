@@ -33,17 +33,17 @@ struct RpcClient;
 struct RpcServer;
 struct DataPublisher;
 struct DataSubscriber;
-} //v1
-}//Config
+} // namespace v1
+} // namespace Config
 
 namespace Core {
 namespace Discovery {
 class ServiceDiscovery;
-}//Discovery
+} // namespace Discovery
 namespace RequestReply {
 class RequestReplyService;
-} //RequestReply
-}//Core
+} // namespace RequestReply
+} // namespace Core
 
 namespace Services {
 namespace Orchestration {
@@ -51,34 +51,34 @@ class TimeSyncService;
 class LifecycleService;
 class SystemMonitor;
 class SystemController;
-}//Orchestration
+} // namespace Orchestration
 namespace Logging {
 class LogMsgReceiver;
 class LogMsgSender;
-} //Logging
+} // namespace Logging
 namespace Ethernet {
 class EthController;
-} //Can
+} // namespace Ethernet
 namespace Can {
 class CanController;
-} //Can
+} // namespace Can
 namespace Lin {
 class LinController;
-} //Lin
+} // namespace Lin
 namespace Flexray {
 class FlexrayController;
-} //Flexray
+} // namespace Flexray
 
 namespace PubSub {
 class DataPublisher;
-class DataSubscriber  ;
+class DataSubscriber;
 class DataSubscriberInternal;
-} //PubSub
+} // namespace PubSub
 namespace Rpc {
 class RpcServer;
-class RpcClient  ;
+class RpcClient;
 class RpcServerInternal;
-} //Rpc
+} // namespace Rpc
 
-} //Services
+} // namespace Services
 } // namespace SilKit

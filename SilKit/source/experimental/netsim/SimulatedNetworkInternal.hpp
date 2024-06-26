@@ -24,21 +24,20 @@ public:
     void AddSimulatedController(const SilKit::Core::ServiceDescriptor& serviceDescriptor,
                                 ControllerDescriptor controllerDescriptor);
     void RemoveSimulatedController(const std::string& fromParticipantName, Core::EndpointId serviceId);
-    
+
     bool HasEventProducer()
     {
         return _eventProducer != nullptr;
     }
 
 private:
-
-    auto LookupControllerDescriptor(const std::string& fromParticipantName, Core::EndpointId serviceId)
-        -> std::pair<bool, ControllerDescriptor>;
+    auto LookupControllerDescriptor(const std::string& fromParticipantName,
+                                    Core::EndpointId serviceId) -> std::pair<bool, ControllerDescriptor>;
     void RemoveControllerDescriptor(const std::string& fromParticipantName, Core::EndpointId serviceId);
 
     Core::IParticipantInternal* _participant = nullptr;
     SilKit::Services::Logging::ILogger* _logger;
-    
+
     std::string _networkName;
     SimulatedNetworkType _networkType;
 

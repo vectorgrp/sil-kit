@@ -89,8 +89,9 @@ public:
     // Constructors and Destructor
     VAsioConnection(const VAsioConnection&) = delete;
     VAsioConnection(VAsioConnection&&) = delete;
-    VAsioConnection(IParticipantInternal* participant, SilKit::Config::ParticipantConfiguration config, std::string participantName,
-                    ParticipantId participantId, Services::Orchestration::ITimeProvider* timeProvider,
+    VAsioConnection(IParticipantInternal* participant, SilKit::Config::ParticipantConfiguration config,
+                    std::string participantName, ParticipantId participantId,
+                    Services::Orchestration::ITimeProvider* timeProvider,
                     ProtocolVersion version = CurrentProtocolVersion());
     ~VAsioConnection() override;
 
@@ -131,15 +132,15 @@ public:
             _hasPendingAsyncSubscriptions = true;
         }
 
-        _ioContext->Post([this, service]() {
-            this->RegisterSilKitServiceImpl<SilKitServiceT>(service);
-        });
+        _ioContext->Post([this, service]() { this->RegisterSilKitServiceImpl<SilKitServiceT>(service); });
 
         if (!SilKitServiceTraits<SilKitServiceT>::UseAsyncRegistration())
         {
-            Trace(_logger, "SIL Kit waiting for subscription acknowledges for SilKitService {}.", typeid(*service).name());
+            Trace(_logger, "SIL Kit waiting for subscription acknowledges for SilKitService {}.",
+                  typeid(*service).name());
             allAcked.wait();
-            Trace(_logger, "SIL Kit received all subscription acknowledges for SilKitService {}.", typeid(*service).name());
+            Trace(_logger, "SIL Kit received all subscription acknowledges for SilKitService {}.",
+                  typeid(*service).name());
         }
     }
 
@@ -157,16 +158,17 @@ public:
         });
     }
 
-    template<typename SilKitMessageT>
+    template <typename SilKitMessageT>
     void SendMsg(const IServiceEndpoint* from, SilKitMessageT&& msg)
     {
         ExecuteOnIoThread(&VAsioConnection::SendMsgImpl<SilKitMessageT>, from, std::forward<SilKitMessageT>(msg));
     }
 
-    template<typename SilKitMessageT>
+    template <typename SilKitMessageT>
     void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, SilKitMessageT&& msg)
     {
-        ExecuteOnIoThread(&VAsioConnection::SendMsgToTargetImpl<SilKitMessageT>, from, targetParticipantName, std::forward<SilKitMessageT>(msg));
+        ExecuteOnIoThread(&VAsioConnection::SendMsgToTargetImpl<SilKitMessageT>, from, targetParticipantName,
+                          std::forward<SilKitMessageT>(msg));
     }
 
     inline void OnAllMessagesDelivered(const std::function<void()>& callback)
@@ -189,9 +191,9 @@ public:
     void RegisterMessageReceiver(std::function<void(IVAsioPeer* peer, ParticipantAnnouncement)> callback);
 
     // Prepare Acceptor Sockets (Local Domain and TCP)
-    auto PrepareAcceptorEndpointUris(const std::string &connectUri) -> std::vector<std::string>;
-    void OpenTcpAcceptors(const std::vector<std::string> & acceptorEndpointUris);
-    void OpenLocalAcceptors(const std::vector<std::string> & acceptorEndpointUris);
+    auto PrepareAcceptorEndpointUris(const std::string& connectUri) -> std::vector<std::string>;
+    void OpenTcpAcceptors(const std::vector<std::string>& acceptorEndpointUris);
+    void OpenLocalAcceptors(const std::vector<std::string>& acceptorEndpointUris);
 
     // Listening Sockets (acceptors)
     void AcceptLocalConnections(const std::string& uniqueId);
@@ -212,8 +214,8 @@ public:
     };
 
     auto GetNumberOfRemoteReceivers(const IServiceEndpoint* service, const std::string& msgTypeName) -> size_t;
-    auto GetParticipantNamesOfRemoteReceivers(const IServiceEndpoint* service, const std::string& msgTypeName)
-        -> std::vector<std::string>;
+    auto GetParticipantNamesOfRemoteReceivers(const IServiceEndpoint* service,
+                                              const std::string& msgTypeName) -> std::vector<std::string>;
 
     bool ParticipantHasCapability(const std::string& participantName, const std::string& capability) const;
 
@@ -231,50 +233,26 @@ private: // data types
     using ParticipantAnnouncementReceiver = std::function<void(IVAsioPeer* peer, ParticipantAnnouncement)>;
 
     using SilKitMessageTypes = std::tuple<
-        Services::Logging::LogMsg,
-        Services::Orchestration::NextSimTask,
-        Services::Orchestration::SystemCommand,
-        Services::Orchestration::ParticipantStatus,
-        Services::Orchestration::WorkflowConfiguration,
-        Services::PubSub::WireDataMessageEvent,
-        Services::Rpc::FunctionCall,
-        Services::Rpc::FunctionCallResponse,
-        Services::Can::WireCanFrameEvent,
-        Services::Can::CanFrameTransmitEvent,
-        Services::Can::CanControllerStatus,
-        Services::Can::CanConfigureBaudrate,
-        Services::Can::CanSetControllerMode,
-        Services::Ethernet::WireEthernetFrameEvent,
-        Services::Ethernet::EthernetFrameTransmitEvent,
-        Services::Ethernet::EthernetStatus,
-        Services::Ethernet::EthernetSetMode,
-        Services::Lin::LinSendFrameRequest,
-        Services::Lin::LinSendFrameHeaderRequest,
-        Services::Lin::LinTransmission,
-        Services::Lin::LinWakeupPulse,
-        Services::Lin::WireLinControllerConfig,
-        Services::Lin::LinControllerStatusUpdate,
-        Services::Lin::LinFrameResponseUpdate,
-        Services::Flexray::WireFlexrayFrameEvent,
-        Services::Flexray::WireFlexrayFrameTransmitEvent,
-        Services::Flexray::FlexraySymbolEvent,
-        Services::Flexray::FlexraySymbolTransmitEvent,
-        Services::Flexray::FlexrayCycleStartEvent,
-        Services::Flexray::FlexrayHostCommand,
-        Services::Flexray::FlexrayControllerConfig,
-        Services::Flexray::FlexrayTxBufferConfigUpdate,
-        Services::Flexray::WireFlexrayTxBufferUpdate,
-        Services::Flexray::FlexrayPocStatusEvent,
-        Core::Discovery::ParticipantDiscoveryEvent,
-        Core::Discovery::ServiceDiscoveryEvent,
-        Core::RequestReply::RequestReplyCall,
+        Services::Logging::LogMsg, Services::Orchestration::NextSimTask, Services::Orchestration::SystemCommand,
+        Services::Orchestration::ParticipantStatus, Services::Orchestration::WorkflowConfiguration,
+        Services::PubSub::WireDataMessageEvent, Services::Rpc::FunctionCall, Services::Rpc::FunctionCallResponse,
+        Services::Can::WireCanFrameEvent, Services::Can::CanFrameTransmitEvent, Services::Can::CanControllerStatus,
+        Services::Can::CanConfigureBaudrate, Services::Can::CanSetControllerMode,
+        Services::Ethernet::WireEthernetFrameEvent, Services::Ethernet::EthernetFrameTransmitEvent,
+        Services::Ethernet::EthernetStatus, Services::Ethernet::EthernetSetMode, Services::Lin::LinSendFrameRequest,
+        Services::Lin::LinSendFrameHeaderRequest, Services::Lin::LinTransmission, Services::Lin::LinWakeupPulse,
+        Services::Lin::WireLinControllerConfig, Services::Lin::LinControllerStatusUpdate,
+        Services::Lin::LinFrameResponseUpdate, Services::Flexray::WireFlexrayFrameEvent,
+        Services::Flexray::WireFlexrayFrameTransmitEvent, Services::Flexray::FlexraySymbolEvent,
+        Services::Flexray::FlexraySymbolTransmitEvent, Services::Flexray::FlexrayCycleStartEvent,
+        Services::Flexray::FlexrayHostCommand, Services::Flexray::FlexrayControllerConfig,
+        Services::Flexray::FlexrayTxBufferConfigUpdate, Services::Flexray::WireFlexrayTxBufferUpdate,
+        Services::Flexray::FlexrayPocStatusEvent, Core::Discovery::ParticipantDiscoveryEvent,
+        Core::Discovery::ServiceDiscoveryEvent, Core::RequestReply::RequestReplyCall,
         Core::RequestReply::RequestReplyCallReturn,
 
         // Private testing data types
-        Core::Tests::Version1::TestMessage,
-        Core::Tests::Version2::TestMessage,
-        Core::Tests::TestFrameEvent
-    >;
+        Core::Tests::Version1::TestMessage, Core::Tests::Version2::TestMessage, Core::Tests::TestFrameEvent>;
 
 private:
     // ----------------------------------------
@@ -303,7 +281,8 @@ private:
 
     void LogAndPrintNetworkIncompatibility(const RegistryMsgHeader& other, const std::string& otherParticipantName);
 
-    void AssociateParticipantNameAndPeer(const std::string& simulationName, const std::string& participantName, IVAsioPeer* peer);
+    void AssociateParticipantNameAndPeer(const std::string& simulationName, const std::string& participantName,
+                                         IVAsioPeer* peer);
     auto FindPeerByName(const std::string& simulationName, const std::string& participantName) const -> IVAsioPeer*;
 
     // Subscriptions completed Helper
@@ -317,7 +296,7 @@ private:
     void RemovePeerFromLinks(IVAsioPeer* peer);
     void RemovePeerFromConnection(IVAsioPeer* peer);
 
-    template<class SilKitMessageT>
+    template <class SilKitMessageT>
     auto GetLinkByName(const std::string& networkName) -> std::shared_ptr<SilKitLink<SilKitMessageT>>
     {
         std::unique_lock<decltype(_linksMx)> lock{_linksMx};
@@ -330,7 +309,7 @@ private:
         return link;
     }
 
-    template<class SilKitMessageT, class SilKitServiceT>
+    template <class SilKitMessageT, class SilKitServiceT>
     void RegisterSilKitMsgReceiver(IMessageReceiver<SilKitMessageT>* receiver)
     {
         SILKIT_ASSERT(_logger);
@@ -352,7 +331,8 @@ private:
             subscriptionInfo.msgTypeName = msgSerdesName;
             subscriptionInfo.version = SilKitMsgTraits<SilKitMessageT>::Version();
 
-            std::unique_ptr<IVAsioReceiver> rawReceiver = std::make_unique<VAsioReceiver<SilKitMessageT>>(subscriptionInfo, link, _logger);
+            std::unique_ptr<IVAsioReceiver> rawReceiver =
+                std::make_unique<VAsioReceiver<SilKitMessageT>>(subscriptionInfo, link, _logger);
             auto* serviceEndpointPtr = dynamic_cast<IServiceEndpoint*>(rawReceiver.get());
             ServiceDescriptor tmpServiceDescriptor(GetServiceDescriptor(receiver));
             tmpServiceDescriptor.SetParticipantNameAndComputeId(_participantName);
@@ -382,7 +362,7 @@ private:
         }
     }
 
-    template<class SilKitMessageT>
+    template <class SilKitMessageT>
     void RegisterSilKitMsgSender(const std::string& networkName)
     {
         auto link = GetLinkByName<SilKitMessageT>(networkName);
@@ -390,26 +370,21 @@ private:
         serviceLinkMap[networkName] = link;
     }
 
-    template<class SilKitServiceT>
+    template <class SilKitServiceT>
     inline void RegisterSilKitServiceImpl(SilKitServiceT* service)
     {
         typename SilKitServiceT::SilKitReceiveMessagesTypes receiveMessageTypes{};
         typename SilKitServiceT::SilKitSendMessagesTypes sendMessageTypes{};
 
-        Util::tuple_tools::for_each(receiveMessageTypes, [this, service](auto&& message)
-        {
+        Util::tuple_tools::for_each(receiveMessageTypes, [this, service](auto&& message) {
             using SilKitMessageT = std::decay_t<decltype(message)>;
             this->RegisterSilKitMsgReceiver<SilKitMessageT, SilKitServiceT>(service);
-        }
-        );
+        });
 
-        Util::tuple_tools::for_each(sendMessageTypes,
-            [this, service](auto&& message)
-        {
+        Util::tuple_tools::for_each(sendMessageTypes, [this, service](auto&& message) {
             using SilKitMessageT = std::decay_t<decltype(message)>;
             this->RegisterSilKitMsgSender<SilKitMessageT>(GetServiceDescriptor(service).GetNetworkName());
-        }
-        );
+        });
 
         // We could have registered a receiver that only uses already acknowledged senders, thus no new handshake is
         // triggered. In that case, the pending acks might be already empty and the subscription is completed.
@@ -437,7 +412,7 @@ private:
         auto& linkMap = std::get<SilKitServiceToLinkMap<std::decay_t<SilKitMessageT>>>(_serviceToLinkMap);
         if (linkMap.count(key) < 1)
         {
-            throw SilKitError{ "SendMsgImpl: sending on empty link for " + key };
+            throw SilKitError{"SendMsgImpl: sending on empty link for " + key};
         }
         auto&& link = linkMap[key];
         link->DistributeLocalSilKitMessage(from, std::forward<SilKitMessageT>(msg));
@@ -445,7 +420,7 @@ private:
 
     template <class SilKitMessageT>
     void SendMsgToTargetImpl(const IServiceEndpoint* from, const std::string& targetParticipantName,
-                                   SilKitMessageT&& msg)
+                             SilKitMessageT&& msg)
     {
         const auto& key = from->GetServiceDescriptor().GetNetworkName();
 
@@ -575,10 +550,11 @@ private:
     std::atomic_bool _isShuttingDown{false};
 
     // Hold mapping from simulationName to mapping from participantName to peer
-    std::unordered_map<std::string, std::unordered_map<std::string, IVAsioPeer *>> _participantNameToPeer;
+    std::unordered_map<std::string, std::unordered_map<std::string, IVAsioPeer*>> _participantNameToPeer;
 
     // Hold mapping from proxy source to all proxy destinations (used by registry for shutdown information)
-    std::unordered_map<std::string, std::unordered_map<std::string, std::unordered_set<std::string>>> _proxySourceToDestinations;
+    std::unordered_map<std::string, std::unordered_map<std::string, std::unordered_set<std::string>>>
+        _proxySourceToDestinations;
 
     // Hold mapping from proxied peer to all proxy peers being served via the key.
     std::unordered_map<IVAsioPeer*, std::unordered_set<IVAsioPeer*>> _peerToProxyPeers;

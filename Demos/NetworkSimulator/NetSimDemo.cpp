@@ -38,7 +38,8 @@ int main(int argc, char** argv)
 
     try
     {
-        auto participantConfiguration = SilKit::Config::ParticipantConfigurationFromFile(participantConfigurationFilename);
+        auto participantConfiguration =
+            SilKit::Config::ParticipantConfigurationFromFile(participantConfigurationFilename);
         auto participant = SilKit::CreateParticipant(participantConfiguration, participantName, registryUri);
 
         auto operationMode = SilKit::Services::Orchestration::OperationMode::Coordinated;
@@ -62,14 +63,12 @@ int main(int argc, char** argv)
         // ---------------------
 
         timeSyncService->SetSimulationStepHandler(
-            [scheduler = scheduler.get()](std::chrono::nanoseconds now,
-                                                                  std::chrono::nanoseconds /*duration*/) {
-                auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
-                std::cout << "now=" << nowMs.count() << "ms" << std::endl;
-                scheduler->OnSimulationStep(now);
-                std::this_thread::sleep_for(1s);
-            },
-            1ms);
+            [scheduler = scheduler.get()](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
+            auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
+            std::cout << "now=" << nowMs.count() << "ms" << std::endl;
+            scheduler->OnSimulationStep(now);
+            std::this_thread::sleep_for(1s);
+        }, 1ms);
 
         auto lifecycleFuture = lifecycleService->StartLifecycle();
         auto finalState = lifecycleFuture.get();
@@ -77,7 +76,6 @@ int main(int argc, char** argv)
         std::cout << "Simulation stopped. Final State: " << finalState << std::endl;
         std::cout << "Press enter to stop the process..." << std::endl;
         std::cin.ignore();
-        
     }
     catch (const SilKit::ConfigurationError& error)
     {

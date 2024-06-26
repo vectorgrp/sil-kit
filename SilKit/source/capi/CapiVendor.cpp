@@ -88,9 +88,8 @@ try
 
     auto* cppRegistry = reinterpret_cast<SilKit::Vendor::Vector::ISilKitRegistry*>(cSilKitRegistry);
 
-    cppRegistry->SetAllDisconnectedHandler([handler, context, cSilKitRegistry]() {
-        handler(context, cSilKitRegistry);
-    });
+    cppRegistry->SetAllDisconnectedHandler(
+        [handler, context, cSilKitRegistry]() { handler(context, cSilKitRegistry); });
 
     return SilKit_ReturnCode_SUCCESS;
 }

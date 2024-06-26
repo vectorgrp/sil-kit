@@ -92,7 +92,10 @@ public:
     }
 
 private:
-    auto GetLimit() const -> std::chrono::nanoseconds { return std::chrono::nanoseconds{_limitRep}; }
+    auto GetLimit() const -> std::chrono::nanoseconds
+    {
+        return std::chrono::nanoseconds{_limitRep};
+    }
 
 private:
     std::atomic<std::chrono::nanoseconds::rep> _limitRep;

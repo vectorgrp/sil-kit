@@ -30,19 +30,18 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "ParticipantConfiguration.hpp"
 
-namespace SilKit { 
+namespace SilKit {
 
-auto CreateMdf4Tracing(Config::ParticipantConfiguration config,
-    SilKit::Services::Logging::ILogger* logger, const std::string& participantName, const std::string& sinkName)
-    -> std::unique_ptr<ITraceMessageSink>;
+auto CreateMdf4Tracing(Config::ParticipantConfiguration config, SilKit::Services::Logging::ILogger* logger,
+                       const std::string& participantName,
+                       const std::string& sinkName) -> std::unique_ptr<ITraceMessageSink>;
 
 //////////////////////////////////////////////////////////////////////
 // MDF4 Replay
 //////////////////////////////////////////////////////////////////////
 
 auto CreateMdf4Replay(Config::ParticipantConfiguration config, SilKit::Services::Logging::ILogger* logger,
-                      const std::string& fileName)
-    -> std::shared_ptr<IReplayFile>;
+                      const std::string& fileName) -> std::shared_ptr<IReplayFile>;
 
 
-}//end namespace SilKit
+} //end namespace SilKit

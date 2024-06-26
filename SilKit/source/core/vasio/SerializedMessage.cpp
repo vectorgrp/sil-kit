@@ -58,7 +58,7 @@ auto SerializedMessage::GetRemoteIndex() const -> EndpointId
     if (!IsMwOrSim(_messageKind))
     {
         throw SilKitError("SerializedMessage::GetEndpointAddress called on wrong message kind: "
-                                 + std::to_string((int)_messageKind));
+                          + std::to_string((int)_messageKind));
     }
     return _remoteIndex;
 }
@@ -68,7 +68,7 @@ auto SerializedMessage::GetEndpointAddress() const -> EndpointAddress
     if (!IsMwOrSim(_messageKind))
     {
         throw SilKitError("SerializedMessage::GetEndpointAddress called on wrong message kind: "
-                                 + std::to_string((int)_messageKind));
+                          + std::to_string((int)_messageKind));
     }
     return _endpointAddress;
 }
@@ -118,7 +118,7 @@ void SerializedMessage::ReadNetworkHeaders()
         //     ParticipantAnnouncement and KnownParticipants start with the RegistryMessageHeader
         //     ParticipantAnnouncementReply does _NOT_ start with the RegistryMessageHeader
 
-        switch(_registryKind)
+        switch (_registryKind)
         {
         case RegistryMessageKind::ParticipantAnnouncement:
         case RegistryMessageKind::KnownParticipants:

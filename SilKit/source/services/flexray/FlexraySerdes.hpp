@@ -52,6 +52,6 @@ void Deserialize(SilKit::Core::MessageBuffer& buffer, FlexrayTxBufferConfigUpdat
 void Deserialize(SilKit::Core::MessageBuffer& buffer, WireFlexrayTxBufferUpdate& out);
 void Deserialize(SilKit::Core::MessageBuffer& buffer, FlexrayPocStatusEvent& out);
 
-} // namespace Flexray    
+} // namespace Flexray
 } // namespace Services
 } // namespace SilKit

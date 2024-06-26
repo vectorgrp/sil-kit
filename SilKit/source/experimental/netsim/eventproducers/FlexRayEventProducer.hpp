@@ -18,29 +18,23 @@ public:
 
     // IFlexRayEventProducer
 
-    void Produce(
-        const SilKit::Services::Flexray::FlexrayFrameEvent& msg,
-        const SilKit::Util::Span<const ControllerDescriptor>& receivers) override;
+    void Produce(const SilKit::Services::Flexray::FlexrayFrameEvent& msg,
+                 const SilKit::Util::Span<const ControllerDescriptor>& receivers) override;
 
-    void Produce(
-        const SilKit::Services::Flexray::FlexrayFrameTransmitEvent& msg,
-        const SilKit::Util::Span<const ControllerDescriptor>& receivers) override;
+    void Produce(const SilKit::Services::Flexray::FlexrayFrameTransmitEvent& msg,
+                 const SilKit::Util::Span<const ControllerDescriptor>& receivers) override;
 
-    void Produce(
-        const SilKit::Services::Flexray::FlexraySymbolEvent& msg,
-        const SilKit::Util::Span<const ControllerDescriptor>& receivers) override;
+    void Produce(const SilKit::Services::Flexray::FlexraySymbolEvent& msg,
+                 const SilKit::Util::Span<const ControllerDescriptor>& receivers) override;
 
-    void Produce(
-        const SilKit::Services::Flexray::FlexraySymbolTransmitEvent& msg,
-        const SilKit::Util::Span<const ControllerDescriptor>& receivers) override;
+    void Produce(const SilKit::Services::Flexray::FlexraySymbolTransmitEvent& msg,
+                 const SilKit::Util::Span<const ControllerDescriptor>& receivers) override;
 
-    void Produce(
-        const SilKit::Services::Flexray::FlexrayCycleStartEvent& msg,
-        const SilKit::Util::Span<const ControllerDescriptor>& receivers) override;
+    void Produce(const SilKit::Services::Flexray::FlexrayCycleStartEvent& msg,
+                 const SilKit::Util::Span<const ControllerDescriptor>& receivers) override;
 
-    void Produce(
-        const SilKit::Services::Flexray::FlexrayPocStatusEvent& msg,
-        const SilKit::Util::Span<const ControllerDescriptor>& receivers) override;
+    void Produce(const SilKit::Services::Flexray::FlexrayPocStatusEvent& msg,
+                 const SilKit::Util::Span<const ControllerDescriptor>& receivers) override;
 
 private:
     SimulatedNetworkRouter* _simulatedNetworkRouter;

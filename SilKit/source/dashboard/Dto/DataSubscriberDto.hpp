@@ -32,10 +32,16 @@ class DataSubscriberDto : public oatpp::DTO
 {
     DTO_INIT(DataSubscriberDto, DTO)
 
-    DTO_FIELD_INFO(name) { info->description = "Name of the service"; }
+    DTO_FIELD_INFO(name)
+    {
+        info->description = "Name of the service";
+    }
     DTO_FIELD(String, name);
 
-    DTO_FIELD_INFO(spec) { info->description = "Data spec"; }
+    DTO_FIELD_INFO(spec)
+    {
+        info->description = "Data spec";
+    }
     DTO_FIELD(Object<DataSpecDto>, spec);
 };
 

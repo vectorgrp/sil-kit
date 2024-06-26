@@ -34,20 +34,25 @@ class MockTraceSink : public ITraceMessageSink
 public:
     MOCK_METHOD(void, Open, (SinkType type, const std::string& outputPath), (override));
     MOCK_METHOD(void, Close, (), (override));
-    MOCK_METHOD(void, Trace, (SilKit::Services::TransmitDirection dir, const ServiceDescriptor& address,
-        std::chrono::nanoseconds timestamp, const SilKit::Services::Can::CanFrameEvent& message));
-    MOCK_METHOD(void, Trace, (SilKit::Services::TransmitDirection dir, const ServiceDescriptor& address,
-        std::chrono::nanoseconds timestamp, const SilKit::Services::Ethernet::EthernetFrame& message));
-    MOCK_METHOD(void, Trace, (SilKit::Services::TransmitDirection dir, const ServiceDescriptor& address,
-        std::chrono::nanoseconds timestamp, const SilKit::Services::Lin::LinFrame& message));
-    MOCK_METHOD(void, Trace, (SilKit::Services::TransmitDirection dir, const ServiceDescriptor& address,
-        std::chrono::nanoseconds timestamp, const SilKit::Services::PubSub::DataMessageEvent& message));
-    MOCK_METHOD(void, Trace, (SilKit::Services::TransmitDirection dir, const ServiceDescriptor& address,
-        std::chrono::nanoseconds timestamp, const SilKit::Services::Flexray::FlexrayFrameEvent& message));
+    MOCK_METHOD(void, Trace,
+                (SilKit::Services::TransmitDirection dir, const ServiceDescriptor& address,
+                 std::chrono::nanoseconds timestamp, const SilKit::Services::Can::CanFrameEvent& message));
+    MOCK_METHOD(void, Trace,
+                (SilKit::Services::TransmitDirection dir, const ServiceDescriptor& address,
+                 std::chrono::nanoseconds timestamp, const SilKit::Services::Ethernet::EthernetFrame& message));
+    MOCK_METHOD(void, Trace,
+                (SilKit::Services::TransmitDirection dir, const ServiceDescriptor& address,
+                 std::chrono::nanoseconds timestamp, const SilKit::Services::Lin::LinFrame& message));
+    MOCK_METHOD(void, Trace,
+                (SilKit::Services::TransmitDirection dir, const ServiceDescriptor& address,
+                 std::chrono::nanoseconds timestamp, const SilKit::Services::PubSub::DataMessageEvent& message));
+    MOCK_METHOD(void, Trace,
+                (SilKit::Services::TransmitDirection dir, const ServiceDescriptor& address,
+                 std::chrono::nanoseconds timestamp, const SilKit::Services::Flexray::FlexrayFrameEvent& message));
 
     //! \brief This works around TraceMessage not being copyable for use in Matchers
     void Trace(SilKit::Services::TransmitDirection dir, const ServiceDescriptor& address,
-        std::chrono::nanoseconds timestamp, const TraceMessage& message) override
+               std::chrono::nanoseconds timestamp, const TraceMessage& message) override
     {
         switch (message.Type())
         {
@@ -67,7 +72,6 @@ public:
             throw SilKitError("Invalid replay data");
         }
     }
-
 
 
     auto GetLogger() const -> Services::Logging::ILogger* override

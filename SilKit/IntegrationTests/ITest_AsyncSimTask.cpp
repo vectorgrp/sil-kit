@@ -71,25 +71,21 @@ TEST(ITest_AsyncSimTask, test_async_simtask_lockstep)
     }, 1ms);
 
     async->SetSimulationStepHandlerAsync([&](auto now, auto) {
-        std::cout << "Async SimTask now=" << now.count()
-            << " numActiveSimtasks=" << numActiveSimtasks
-            << " numSyncSimtasks=" << numSyncSimtasks
-            << std::endl;
+        std::cout << "Async SimTask now=" << now.count() << " numActiveSimtasks=" << numActiveSimtasks
+                  << " numSyncSimtasks=" << numSyncSimtasks << std::endl;
 
 
         syncTimeNs = now;
         numActiveSimtasks++;
 
-        if(done)
+        if (done)
         {
             return;
         }
 
         //wait until counter is even
         std::unique_lock<decltype(mx)> lock(mx);
-        cv.wait(lock, [] {
-            return cvCounter % 2 == 0;
-            });
+        cv.wait(lock, [] { return cvCounter % 2 == 0; });
 
         // increment so that completer thread will be notified
         cvCounter++;
@@ -103,25 +99,23 @@ TEST(ITest_AsyncSimTask, test_async_simtask_lockstep)
         }
 
         cv.notify_one();
+    }, 1ms);
 
-    },1ms);
-
-    auto completer = std::thread{[&](){
+    auto completer = std::thread{[&]() {
         while (!done && (syncTimeNs.load() < expectedTime))
         {
             std::unique_lock<decltype(mx)> lock(mx);
             //wait for odd counter
-            cv.wait(lock, [] {
-                return cvCounter % 2 == 1;
-                });
-            if(done)
+            cv.wait(lock, [] { return cvCounter % 2 == 1; });
+            if (done)
             {
                 return;
             }
-            std::cout <<"Completer numActiveSimtasks=" << numActiveSimtasks << std::endl;
-            if(numActiveSimtasks != 1)
+            std::cout << "Completer numActiveSimtasks=" << numActiveSimtasks << std::endl;
+            if (numActiveSimtasks != 1)
             {
-                ASSERT_EQ(numActiveSimtasks,0 ) << "Only one SimTask should be active until CompleteSimulationStep is called";
+                ASSERT_EQ(numActiveSimtasks, 0)
+                    << "Only one SimTask should be active until CompleteSimulationStep is called";
                 done = true;
             }
             numActiveSimtasks--;
@@ -133,12 +127,11 @@ TEST(ITest_AsyncSimTask, test_async_simtask_lockstep)
         }
     }};
     ASSERT_TRUE(testHarness.Run(5s)) << "TestSim Harness should not reach timeout"
-        << " numActiveSimtasks=" << numActiveSimtasks
-        << " numSyncSimtasks=" << numSyncSimtasks
-        ;
-    done=true;
+                                     << " numActiveSimtasks=" << numActiveSimtasks
+                                     << " numSyncSimtasks=" << numSyncSimtasks;
+    done = true;
     cv.notify_all();
-    if(completer.joinable())
+    if (completer.joinable())
     {
         completer.join();
     }
@@ -163,9 +156,7 @@ TEST(ITest_AsyncSimTask, test_async_simtask_nodeadlock)
     }, 1ms);
 
     async->SetSimulationStepHandlerAsync([&](auto now, auto) {
-        std::cout << "Async SimTask now=" << now.count() 
-            << " expectedTime=" << expectedTime.count()
-            << std::endl;
+        std::cout << "Async SimTask now=" << now.count() << " expectedTime=" << expectedTime.count() << std::endl;
         if (now == expectedTime)
         {
             std::cout << "Stopping simulation at expected time" << std::endl;
@@ -178,11 +169,9 @@ TEST(ITest_AsyncSimTask, test_async_simtask_nodeadlock)
 
     auto isSame = expectedTime == syncTimeNs;
     auto isOffByOne = (syncTimeNs == (expectedTime + 1ms)) || (syncTimeNs == (expectedTime - 1ms));
-    ASSERT_TRUE(isSame || isOffByOne)
-        << "Simulation time should be at most off by one expectedTime "
-        << " (due to NextSimTask handling in distributed participants): "
-        << " expectedTime=" << expectedTime.count()
-        << " syncTime=" << syncTimeNs.count();
+    ASSERT_TRUE(isSame || isOffByOne) << "Simulation time should be at most off by one expectedTime "
+                                      << " (due to NextSimTask handling in distributed participants): "
+                                      << " expectedTime=" << expectedTime.count() << " syncTime=" << syncTimeNs.count();
 }
 
 TEST(ITest_AsyncSimTask, test_async_simtask_different_periods)
@@ -215,8 +204,7 @@ TEST(ITest_AsyncSimTask, test_async_simtask_different_periods)
             asyncParticipant->GetOrCreateLifecycleService()->Stop("Test");
         }
         async->CompleteSimulationStep();
-        },
-    periodFactor * 1ms);
+    }, periodFactor * 1ms);
     // validate that they are called approximately equally often
     ASSERT_TRUE(std::abs(countAsync * periodFactor - countSync) < periodFactor);
 }
@@ -255,8 +243,7 @@ TEST(ITest_AsyncSimTask, test_async_simtask_multiple_completion_calls)
         async->CompleteSimulationStep();
         async->CompleteSimulationStep();
         async->CompleteSimulationStep();
-        },
-        periodFactor * 1ms);
+    }, periodFactor * 1ms);
     // validate that they are called approximately equally often
     ASSERT_TRUE(std::abs(countAsync * periodFactor - countSync) < periodFactor);
 }

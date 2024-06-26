@@ -81,7 +81,8 @@ class Schedule
 {
 public:
     Schedule() = default;
-    Schedule(std::initializer_list<std::pair<std::chrono::nanoseconds, std::function<void(std::chrono::nanoseconds)>>> tasks)
+    Schedule(
+        std::initializer_list<std::pair<std::chrono::nanoseconds, std::function<void(std::chrono::nanoseconds)>>> tasks)
     {
         for (auto&& task : tasks)
         {
@@ -114,8 +115,13 @@ public:
     }
 
 private:
-    struct Task {
-        Task(std::chrono::nanoseconds delay, std::function<void(std::chrono::nanoseconds)> action) : delay{delay}, action{action} {}
+    struct Task
+    {
+        Task(std::chrono::nanoseconds delay, std::function<void(std::chrono::nanoseconds)> action)
+            : delay{delay}
+            , action{action}
+        {
+        }
 
         std::chrono::nanoseconds delay;
         std::function<void(std::chrono::nanoseconds)> action;
@@ -151,7 +157,10 @@ struct LinNode
 
     virtual ~LinNode() = default;
 
-    void Stop() { _lifecycleService->Stop("Stop"); }
+    void Stop()
+    {
+        _lifecycleService->Stop("Stop");
+    }
 
     ILinController* _controller{nullptr};
     IParticipant* _participant{nullptr};
@@ -164,18 +173,15 @@ struct LinNode
 class LinMaster : public LinNode
 {
 public:
-    LinMaster(IParticipant* participant, ILinController* controller,
-              Orchestration::ILifecycleService* lifecycleService)
+    LinMaster(IParticipant* participant, ILinController* controller, Orchestration::ILifecycleService* lifecycleService)
         : LinNode(participant, controller, "LinMaster", lifecycleService)
     {
-        schedule = {
-            {0ns, [this](std::chrono::nanoseconds now) { SendFrame_16(now); }},
-            {0ns, [this](std::chrono::nanoseconds now) { SendFrame_17(now); }},
-            {0ns, [this](std::chrono::nanoseconds now) { SendFrame_18(now); }},
-            {0ns, [this](std::chrono::nanoseconds now) { SendFrame_19(now); }},
-            {0ns, [this](std::chrono::nanoseconds now) { SendFrame_34(now); }},
-            {5ms, [this](std::chrono::nanoseconds now) { GoToSleep(now); }}
-        };
+        schedule = {{0ns, [this](std::chrono::nanoseconds now) { SendFrame_16(now); }},
+                    {0ns, [this](std::chrono::nanoseconds now) { SendFrame_17(now); }},
+                    {0ns, [this](std::chrono::nanoseconds now) { SendFrame_18(now); }},
+                    {0ns, [this](std::chrono::nanoseconds now) { SendFrame_19(now); }},
+                    {0ns, [this](std::chrono::nanoseconds now) { SendFrame_34(now); }},
+                    {5ms, [this](std::chrono::nanoseconds now) { GoToSleep(now); }}};
     }
 
     void doAction(std::chrono::nanoseconds now)
@@ -198,14 +204,14 @@ public:
         _controller->SendFrame(frame, LinFrameResponseType::MasterResponse);
         Log() << "<< LIN LinFrame sent with ID=" << static_cast<uint16_t>(frame.id) << " now=" << now;
     }
-        
+
     void SendFrame_17(std::chrono::nanoseconds now)
     {
         LinFrame frame;
         frame.id = 17;
         frame.checksumModel = Lin::LinChecksumModel::Classic;
         frame.dataLength = 6;
-        frame.data = std::array<uint8_t, 8>{1,7,1,7,1,7,1,7};
+        frame.data = std::array<uint8_t, 8>{1, 7, 1, 7, 1, 7, 1, 7};
 
         _result.sendTimes.push_back(now);
         _controller->SendFrame(frame, LinFrameResponseType::MasterResponse);
@@ -256,22 +262,24 @@ public:
         _controller->GoToSleep();
         _result.gotoSleepSent = true;
         _result.sendTimes.push_back(now);
-
     }
 
 
-    void ReceiveFrameStatus(ILinController* , const LinFrameStatusEvent& frameStatusEvent)
+    void ReceiveFrameStatus(ILinController*, const LinFrameStatusEvent& frameStatusEvent)
     {
         switch (frameStatusEvent.status)
         {
-        case LinFrameStatus::LIN_RX_OK: break; // good case, no need to warn
-        case LinFrameStatus::LIN_TX_OK: break; // good case, no need to warn
+        case LinFrameStatus::LIN_RX_OK:
+            break; // good case, no need to warn
+        case LinFrameStatus::LIN_TX_OK:
+            break; // good case, no need to warn
         default:
             Log() << "WARNING: LIN transmission failed!";
         }
 
         _result.receiveTimes.push_back(frameStatusEvent.timestamp);
-        Log() << ">> " << frameStatusEvent.frame << " status=" << frameStatusEvent.status << " timestamp=" << frameStatusEvent.timestamp;
+        Log() << ">> " << frameStatusEvent.frame << " status=" << frameStatusEvent.status
+              << " timestamp=" << frameStatusEvent.timestamp;
         schedule.ScheduleNextTask();
     }
 
@@ -291,12 +299,10 @@ private:
 };
 
 
-
 class LinSlave : public LinNode
 {
 public:
-    LinSlave(IParticipant* participant, ILinController* controller,
-             Orchestration::ILifecycleService* lifecycleService)
+    LinSlave(IParticipant* participant, ILinController* controller, Orchestration::ILifecycleService* lifecycleService)
         : LinNode(participant, controller, "LinSlave", lifecycleService)
     {
     }
@@ -309,44 +315,42 @@ public:
 
     void FrameStatusHandler(ILinController* controller, const LinFrameStatusEvent& frameStatusEvent)
     {
-        Log() << ">> " << frameStatusEvent.frame
-                  << " status=" << frameStatusEvent.status
-                  << " timestamp=" << frameStatusEvent.timestamp
-                  ;
-        for (const auto& response: _controllerConfig.frameResponses)
+        Log() << ">> " << frameStatusEvent.frame << " status=" << frameStatusEvent.status
+              << " timestamp=" << frameStatusEvent.timestamp;
+        for (const auto& response : _controllerConfig.frameResponses)
         {
             if (controller->Status() == LinControllerStatus::Sleep)
             {
-              _result.numberReceivedInSleep++;
+                _result.numberReceivedInSleep++;
             }
-            if (response.frame.id == frameStatusEvent.frame.id && response.frame.checksumModel == frameStatusEvent.frame.checksumModel)
+            if (response.frame.id == frameStatusEvent.frame.id
+                && response.frame.checksumModel == frameStatusEvent.frame.checksumModel)
             {
                 _result.numberReceived++;
                 if (_result.numberReceived == _controllerConfig.frameResponses.size())
                 {
-                  //Test finished
+                    //Test finished
                     Stop();
                 }
             }
         }
     }
 
-    void GoToSleepHandler(ILinController* controller, const LinGoToSleepEvent& )
+    void GoToSleepHandler(ILinController* controller, const LinGoToSleepEvent&)
     {
-        Log() << "LIN Slave received go-to-sleep command; entering sleep mode." ;
+        Log() << "LIN Slave received go-to-sleep command; entering sleep mode.";
         // wakeup in 10 ms
-        timer.Set(now + 10ms,
-            [controller](std::chrono::nanoseconds now) {
-                Log() << "<< Wakeup pulse now=" << now ;
-                controller->Wakeup();
-            });
+        timer.Set(now + 10ms, [controller](std::chrono::nanoseconds now) {
+            Log() << "<< Wakeup pulse now=" << now;
+            controller->Wakeup();
+        });
         controller->GoToSleepInternal();
         _result.gotoSleepReceived = true;
     }
 
-    void WakeupHandler(ILinController* controller, const LinWakeupEvent& )
+    void WakeupHandler(ILinController* controller, const LinWakeupEvent&)
     {
-        Log() << "LIN Slave received wakeup pulse; entering normal operation mode." ;
+        Log() << "LIN Slave received wakeup pulse; entering normal operation mode.";
         controller->WakeupInternal();
         _result.wakeupReceived = true;
     }
@@ -358,7 +362,7 @@ private:
 
 auto MakeControllerConfig(const std::string& participantName)
 {
-  LinControllerConfig config;
+    LinControllerConfig config;
     config.controllerMode = Lin::LinControllerMode::Master;
     config.baudRate = 20'000;
 
@@ -424,84 +428,75 @@ TEST_F(ITest_LinDemo, DISABLED_lin_demo)
     {
         const std::string participantName = "LinMaster";
         auto&& participant = _simTestHarness->GetParticipant(participantName)->Participant();
-        auto&& lifecycleService =
-            _simTestHarness->GetParticipant(participantName)->GetOrCreateLifecycleService();
+        auto&& lifecycleService = _simTestHarness->GetParticipant(participantName)->GetOrCreateLifecycleService();
         auto&& timeSyncService = _simTestHarness->GetParticipant(participantName)->GetOrCreateTimeSyncService();
         auto&& linController = participant->CreateLinController("LinController1", "LIN1");
         lifecycleService->SetCommunicationReadyHandler([participantName, linController]() {
-
             Log() << "Initializing " << participantName;
 
             auto config = MakeControllerConfig(participantName);
             linController->Init(config);
-
-            });
+        });
 
         auto master = std::make_unique<LinMaster>(participant, linController, lifecycleService);
 
         linController->AddFrameStatusHandler(
             [master = master.get()](ILinController* linController, const LinFrameStatusEvent& frameStatusEvent) {
-                master->ReceiveFrameStatus(linController, frameStatusEvent);
-            });
+            master->ReceiveFrameStatus(linController, frameStatusEvent);
+        });
         linController->AddWakeupHandler(
             [master = master.get()](ILinController* linController, const LinWakeupEvent& wakeupEvent) {
-                master->WakeupHandler(linController, wakeupEvent);
-            });
+            master->WakeupHandler(linController, wakeupEvent);
+        });
 
         timeSyncService->SetSimulationStepHandler(
             [master = master.get(), participantName](auto now, std::chrono::nanoseconds /*duration*/) {
+            auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
+            Log() << participantName << " now=" << nowMs.count() << "ms";
 
-                auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
-                Log() << participantName << " now=" << nowMs.count() << "ms";
-
-                master->doAction(now);
-
-            }, 1ms);
+            master->doAction(now);
+        }, 1ms);
         linNodes.emplace_back(std::move(master));
     }
 
     {
         const std::string participantName = "LinSlave";
         auto&& participant = _simTestHarness->GetParticipant(participantName)->Participant();
-        auto&& lifecycleService =
-            _simTestHarness->GetParticipant(participantName)->GetOrCreateLifecycleService();
+        auto&& lifecycleService = _simTestHarness->GetParticipant(participantName)->GetOrCreateLifecycleService();
         auto&& timeSyncService = _simTestHarness->GetParticipant(participantName)->GetOrCreateTimeSyncService();
         auto&& linController = participant->CreateLinController("LinController1", "LIN1");
 
 
         auto config = MakeControllerConfig(participantName);
         lifecycleService->SetCommunicationReadyHandler([config, participantName, linController]() {
-
             Log() << " Initializing " << participantName;
 
             linController->Init(config);
-
-          });
+        });
 
         auto slave = std::make_unique<LinSlave>(participant, linController, lifecycleService);
 
         linController->AddFrameStatusHandler(
             [slave = slave.get()](ILinController* linController, const LinFrameStatusEvent& frameStatusEvent) {
-                slave->FrameStatusHandler(linController, frameStatusEvent);
-            });
+            slave->FrameStatusHandler(linController, frameStatusEvent);
+        });
         linController->AddGoToSleepHandler(
             [slave = slave.get()](ILinController* linController, const LinGoToSleepEvent& goToSleepEvent) {
-                slave->GoToSleepHandler(linController, goToSleepEvent);
-            });
+            slave->GoToSleepHandler(linController, goToSleepEvent);
+        });
         linController->AddWakeupHandler(
             [slave = slave.get()](ILinController* linController, const LinWakeupEvent& wakeupEvent) {
-                slave->WakeupHandler(linController, wakeupEvent);
-            });
+            slave->WakeupHandler(linController, wakeupEvent);
+        });
 
         //to validate the inputs
         slave->_controllerConfig = config;
 
         timeSyncService->SetSimulationStepHandler(
             [slave = slave.get()](auto now, std::chrono::nanoseconds /*duration*/) {
-
-                Log() << "now=" << std::chrono::duration_cast<std::chrono::milliseconds>(now).count() << "ms";
-                slave->DoAction(now);
-            }, 1ms);
+            Log() << "now=" << std::chrono::duration_cast<std::chrono::milliseconds>(now).count() << "ms";
+            slave->DoAction(now);
+        }, 1ms);
         linNodes.emplace_back(std::move(slave));
     }
 
@@ -510,7 +505,7 @@ TEST_F(ITest_LinDemo, DISABLED_lin_demo)
     auto ok = _simTestHarness->Run(5s);
     ASSERT_TRUE(ok) << "SimTestHarness should terminate without timeout";
 
-    for (auto& node: linNodes)
+    for (auto& node : linNodes)
     {
         if (node->_name == "LinSlave")
         {
@@ -521,8 +516,7 @@ TEST_F(ITest_LinDemo, DISABLED_lin_demo)
         }
         else
         {
-            EXPECT_TRUE(node->_result.gotoSleepSent)
-                << "Assuming node " << node->_name << " has received a GoToSleep";
+            EXPECT_TRUE(node->_result.gotoSleepSent) << "Assuming node " << node->_name << " has received a GoToSleep";
         }
         EXPECT_TRUE(node->_result.wakeupReceived) << "Assuming node " << node->_name << " has received a Wakeup";
     }
@@ -548,14 +542,14 @@ TEST_F(ITest_LinDemo, DISABLED_lin_demo)
     }
 
     // Ensure that the receive times have no least significant digits (i.e., are rounded to 1ms)
-    for (auto ts: masterRecvTimes)
+    for (auto ts : masterRecvTimes)
     {
-      using namespace std::chrono;
-      //Round nanoseconds to milliseconds
-      auto tMs = duration_cast<milliseconds>(ts);
-      const auto diffTs = ts - duration_cast<nanoseconds>(tMs);
-      EXPECT_EQ(diffTs.count(), (0ns).count())
-        << "The simulated timestamps should have millisecond resolution in trivial simulation.";
+        using namespace std::chrono;
+        //Round nanoseconds to milliseconds
+        auto tMs = duration_cast<milliseconds>(ts);
+        const auto diffTs = ts - duration_cast<nanoseconds>(tMs);
+        EXPECT_EQ(diffTs.count(), (0ns).count())
+            << "The simulated timestamps should have millisecond resolution in trivial simulation.";
     }
 }
 

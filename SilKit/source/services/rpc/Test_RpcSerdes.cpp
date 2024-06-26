@@ -37,7 +37,7 @@ TEST(Test_RpcSerdes, SimRpc_functionCall)
 
     SilKit::Core::MessageBuffer buffer;
     FunctionCall in, out;
-    in.callUuid ={1234565, 0x789abcdf};
+    in.callUuid = {1234565, 0x789abcdf};
     in.data = referenceData;
     in.timestamp = 12345ns;
 
@@ -53,7 +53,7 @@ TEST(Test_RpcSerdes, SimRpc_functioncall_response)
 
     SilKit::Core::MessageBuffer buffer;
     FunctionCallResponse in, out;
-    in.callUuid ={1234565, 0x789abcdf};
+    in.callUuid = {1234565, 0x789abcdf};
     in.data = referenceData;
     in.timestamp = 12345ns;
 

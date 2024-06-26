@@ -48,9 +48,7 @@ using testing::Return;
 class ITest_CatchExceptionsInCallbacks : public testing::Test
 {
 protected:
-    ITest_CatchExceptionsInCallbacks()
-    {
-    }
+    ITest_CatchExceptionsInCallbacks() {}
 
     void Publish()
     {
@@ -69,7 +67,8 @@ TEST_F(ITest_CatchExceptionsInCallbacks, please_dont_crash_vasio)
 {
     auto registryUri = MakeTestRegistryUri();
 
-    auto registry = SilKit::Vendor::Vector::CreateSilKitRegistry(SilKit::Config::ParticipantConfigurationFromString(""));
+    auto registry =
+        SilKit::Vendor::Vector::CreateSilKitRegistry(SilKit::Config::ParticipantConfigurationFromString(""));
     registry->StartListening(registryUri);
 
     auto pubParticipant =
@@ -84,9 +83,9 @@ TEST_F(ITest_CatchExceptionsInCallbacks, please_dont_crash_vasio)
     subscriber = subParticipant->CreateDataSubscriber(
         "SubCtrl1", matchingDataSpec,
         [this](auto* /*subscriber*/, const SilKit::Services::PubSub::DataMessageEvent& /*data*/) {
-            this->testOk.set_value(true);
-            throw SilKit::SilKitError{"CrashTest"};
-        });
+        this->testOk.set_value(true);
+        throw SilKit::SilKitError{"CrashTest"};
+    });
 
     std::this_thread::sleep_for(500ms);
     std::thread publishThread{[this] { this->Publish(); }};

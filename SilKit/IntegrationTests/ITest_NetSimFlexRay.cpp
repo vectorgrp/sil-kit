@@ -19,41 +19,39 @@ using namespace SilKit::Experimental::NetworkSimulation::Flexray;
 
 struct ITest_NetSimFlexray : ITest_NetSim
 {
-
     void SetupFlexrayController(Orchestration::ILifecycleService* lifecycleService, IFlexrayController* controller,
-                            CallCountsSilKitHandlersFlexray& callCountsSilKitHandlersFlexray)
+                                CallCountsSilKitHandlersFlexray& callCountsSilKitHandlersFlexray)
     {
         controller->AddCycleStartHandler(
             [&callCountsSilKitHandlersFlexray](IFlexrayController*, const FlexrayCycleStartEvent& /*msg*/) {
-                callCountsSilKitHandlersFlexray.CycleStartHandler++;
-            });
+            callCountsSilKitHandlersFlexray.CycleStartHandler++;
+        });
         controller->AddFrameHandler(
             [&callCountsSilKitHandlersFlexray](IFlexrayController*, const FlexrayFrameEvent& /*msg*/) {
-                callCountsSilKitHandlersFlexray.FrameHandler++;
-            });
+            callCountsSilKitHandlersFlexray.FrameHandler++;
+        });
         controller->AddFrameTransmitHandler(
             [&callCountsSilKitHandlersFlexray](IFlexrayController*, const FlexrayFrameTransmitEvent& /*msg*/) {
-                callCountsSilKitHandlersFlexray.FrameTransmitHandler++;
-            });
+            callCountsSilKitHandlersFlexray.FrameTransmitHandler++;
+        });
         controller->AddPocStatusHandler(
             [&callCountsSilKitHandlersFlexray](IFlexrayController*, const FlexrayPocStatusEvent& /*msg*/) {
-                callCountsSilKitHandlersFlexray.PocStatusHandler++;
-            });
+            callCountsSilKitHandlersFlexray.PocStatusHandler++;
+        });
         controller->AddSymbolHandler(
             [&callCountsSilKitHandlersFlexray](IFlexrayController*, const FlexraySymbolEvent& /*msg*/) {
-                callCountsSilKitHandlersFlexray.SymbolHandler++;
-            });
+            callCountsSilKitHandlersFlexray.SymbolHandler++;
+        });
         controller->AddSymbolTransmitHandler(
             [&callCountsSilKitHandlersFlexray](IFlexrayController*, const FlexraySymbolTransmitEvent& /*msg*/) {
-                callCountsSilKitHandlersFlexray.SymbolTransmitHandler++;
-            });
+            callCountsSilKitHandlersFlexray.SymbolTransmitHandler++;
+        });
         controller->AddWakeupHandler(
             [&callCountsSilKitHandlersFlexray](IFlexrayController*, const FlexrayWakeupEvent& /*msg*/) {
-                callCountsSilKitHandlersFlexray.WakeupHandler++;
-            });
+            callCountsSilKitHandlersFlexray.WakeupHandler++;
+        });
 
         lifecycleService->SetCommunicationReadyHandler([controller] {
-
             FlexrayClusterParameters clusterParams;
             clusterParams.gColdstartAttempts = 8;
             clusterParams.gCycleCountMax = 63;
@@ -112,7 +110,7 @@ struct ITest_NetSimFlexray : ITest_NetSim
             bufferCfg.headerCrc = 5;
             bufferCfg.transmissionMode = FlexrayTransmissionMode::SingleShot;
             bufferConfigs.push_back(bufferCfg);
-            
+
             bufferCfg.channels = FlexrayChannel::A;
             bufferCfg.slotId = 41;
             bufferConfigs.push_back(bufferCfg);
@@ -130,7 +128,7 @@ struct ITest_NetSimFlexray : ITest_NetSim
         });
     }
 
-    void OnetimeActions(std::chrono::nanoseconds now, IFlexrayController* controller) 
+    void OnetimeActions(std::chrono::nanoseconds now, IFlexrayController* controller)
     {
         if (now == 0ns)
         {
@@ -179,7 +177,6 @@ struct ITest_NetSimFlexray : ITest_NetSim
             }
         }
     }
-
 };
 
 class MySimulatedFlexrayController
@@ -193,10 +190,10 @@ public:
     }
 
     void OnHostCommand(const FlexrayHostCommand& msg) override;
-    void OnControllerConfig(const SilKit::Experimental::NetworkSimulation::Flexray::FlexrayControllerConfig& msg) override;
+    void OnControllerConfig(
+        const SilKit::Experimental::NetworkSimulation::Flexray::FlexrayControllerConfig& msg) override;
     void OnTxBufferConfigUpdate(const FlexrayTxBufferConfigUpdate& msg) override;
     void OnTxBufferUpdate(const SilKit::Experimental::NetworkSimulation::Flexray::FlexrayTxBufferUpdate& msg) override;
-
 };
 
 
@@ -209,7 +206,8 @@ auto MySimulatedNetwork::ProvideSimulatedController(ControllerDescriptor control
     {
     case SimulatedNetworkType::FlexRay:
     {
-        _mySimulatedControllers.emplace_back(std::make_unique<MySimulatedFlexrayController>(this, controllerDescriptor));
+        _mySimulatedControllers.emplace_back(
+            std::make_unique<MySimulatedFlexrayController>(this, controllerDescriptor));
         return _mySimulatedControllers.back().get();
     }
     default:
@@ -248,7 +246,6 @@ void MySimulatedFlexrayController::OnHostCommand(const FlexrayHostCommand& msg)
         auto receiver = SilKit::Util::MakeSpan(receiverArray);
         _mySimulatedNetwork->GetFlexRayEventProducer()->Produce(symbolTransmitEvent, receiver);
     }
-    
 }
 
 void MySimulatedFlexrayController::OnControllerConfig(
@@ -257,7 +254,7 @@ void MySimulatedFlexrayController::OnControllerConfig(
     callCounts.netSimFlexray.OnControllerConfig++;
 }
 
-void MySimulatedFlexrayController::OnTxBufferConfigUpdate(const FlexrayTxBufferConfigUpdate& /*msg*/) 
+void MySimulatedFlexrayController::OnTxBufferConfigUpdate(const FlexrayTxBufferConfigUpdate& /*msg*/)
 {
     callCounts.netSimFlexray.OnTxBufferConfigUpdate++;
 }
@@ -311,16 +308,16 @@ TEST_F(ITest_NetSimFlexray, basic_networksimulation_flexray)
         timeSyncService->SetSimulationStepHandler(
             [this, simulatedNetworkPtr, lifecycleService, flexrayController](
                 auto now, const std::chrono::nanoseconds /*duration*/) {
-                if (now == _stopAtMs)
-                {
-                    lifecycleService->Stop("stopping the simulation");
-                }
-                else
-                {
-                    OnetimeActions(now, flexrayController);
-                    SendFlexrayFrames(simulatedNetworkPtr, now, callCounts.silKitSentMsgFlexray.SentFrames);
-                }
-            },
+            if (now == _stopAtMs)
+            {
+                lifecycleService->Stop("stopping the simulation");
+            }
+            else
+            {
+                OnetimeActions(now, flexrayController);
+                SendFlexrayFrames(simulatedNetworkPtr, now, callCounts.silKitSentMsgFlexray.SentFrames);
+            }
+        },
             _stepSize);
     }
 
@@ -341,9 +338,8 @@ TEST_F(ITest_NetSimFlexray, basic_networksimulation_flexray)
 
             timeSyncService->SetSimulationStepHandler(
                 [this, flexrayController](auto now, const std::chrono::nanoseconds /*duration*/) {
-                    OnetimeActions(now, flexrayController);
-                },
-                _stepSize);
+                OnetimeActions(now, flexrayController);
+            }, _stepSize);
         }
     }
 
@@ -377,7 +373,7 @@ TEST_F(ITest_NetSimFlexray, basic_networksimulation_flexray)
     EXPECT_EQ(callCounts.silKitHandlersFlexray.FrameHandler, numReceivedFramesSimulated);
     EXPECT_EQ(callCounts.silKitHandlersFlexray.FrameTransmitHandler, numReceivedFramesSimulated);
 
-    // Every controller calls Wakeup(), netsim broadcasts back to all controllers: n*n 
+    // Every controller calls Wakeup(), netsim broadcasts back to all controllers: n*n
     const size_t numSimulatedFlexrayControllersSq = numSimulatedFlexrayControllers * numSimulatedFlexrayControllers;
     EXPECT_EQ(callCounts.silKitHandlersFlexray.PocStatusHandler, numSimulatedFlexrayControllersSq);
     EXPECT_EQ(callCounts.silKitHandlersFlexray.CycleStartHandler, numSimulatedFlexrayControllersSq);
@@ -392,7 +388,6 @@ TEST_F(ITest_NetSimFlexray, basic_networksimulation_flexray)
     EXPECT_EQ(callCounts.netSimFlexray.OnHostCommand, numSimulatedFlexrayControllers);
     EXPECT_EQ(callCounts.netSimFlexray.OnTxBufferConfigUpdate, numSimulatedFlexrayControllers);
     EXPECT_EQ(callCounts.netSimFlexray.OnTxBufferUpdate, numSimulatedFlexrayControllers);
-
 }
 
 } //end namespace

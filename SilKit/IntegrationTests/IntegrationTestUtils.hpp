@@ -38,7 +38,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #if _WIN32
 #include <Windows.h> //for 'HANDLE'
-#endif//__WIN32
+#endif //__WIN32
 
 #include "silkit/participant/exception.hpp"
 
@@ -51,23 +51,21 @@ struct Barrier
     std::atomic_uint expected{0};
     std::atomic_uint have{0};
     std::chrono::seconds timeout{1};
-    
+
     Barrier(const Barrier&) = delete;
     Barrier() = delete;
 
     Barrier(unsigned expectedEntries, std::chrono::seconds timeout)
         : expected{expectedEntries}
         , timeout{timeout}
-    {}
+    {
+    }
 
     ~Barrier()
     {
-        if(have < expected)
+        if (have < expected)
         {
-            std::cout << "Barrier: error in destructor: have=" 
-                << have
-                << " expected=" << expected
-                << std::endl;
+            std::cout << "Barrier: error in destructor: have=" << have << " expected=" << expected << std::endl;
             //wakeup dormant threads
             have.store(expected);
             cv.notify_all();
@@ -85,12 +83,11 @@ struct Barrier
         }
         else
         {
-            auto ok = cv.wait_for(lock, timeout, [this] {return have == expected; });
+            auto ok = cv.wait_for(lock, timeout, [this] { return have == expected; });
             if (!ok)
             {
                 std::stringstream ss;
-                ss << "Barrier Enter: timeout! have="
-                    << have << " expected=" << expected;
+                ss << "Barrier Enter: timeout! have=" << have << " expected=" << expected;
                 std::cout << ss.str() << std::endl;
 
                 throw SilKit::SilKitError(ss.str()); //abort test!
@@ -110,13 +107,7 @@ struct Pipe
     {
         auto path = R"(\\.\pipe\)" + pipeName;
 
-        handle = CreateFileA(path.c_str(),
-            GENERIC_READ,
-            0,
-            nullptr,
-            OPEN_EXISTING,
-            0,
-            nullptr);
+        handle = CreateFileA(path.c_str(), GENERIC_READ, 0, nullptr, OPEN_EXISTING, 0, nullptr);
         if (handle == INVALID_HANDLE_VALUE)
         {
             throw SilKit::SilKitError("Cannot open WIN32 pipe " + path);
@@ -171,8 +162,7 @@ struct Pipe
             auto ok = fclose(file);
             if (ok != 0)
             {
-                std::cout << "Fclose on linux pipe failed: " << strerror(errno)
-                    << std::endl;
+                std::cout << "Fclose on linux pipe failed: " << strerror(errno) << std::endl;
             }
             file = nullptr;
         }
@@ -236,19 +226,17 @@ void removeTempFile(const std::string& fileName)
 std::string randomString(size_t len)
 {
     static const std::string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-        "abcdefghijklmnopqrstuvwxyz"
-        "0123456789"
-        "_-"
-        ;
+                                     "abcdefghijklmnopqrstuvwxyz"
+                                     "0123456789"
+                                     "_-";
     static std::default_random_engine re{std::random_device{}()};
-    static std::uniform_int_distribution<std::string::size_type> randPick(0, chars.size()-1);
+    static std::uniform_int_distribution<std::string::size_type> randPick(0, chars.size() - 1);
 
     std::string rv;
     rv.resize(len);
     std::generate_n(rv.begin(), len, [&]() { return chars.at(randPick(re)); });
     return rv;
 }
-
 
 
 } // end namespace IntegrationTestUtils

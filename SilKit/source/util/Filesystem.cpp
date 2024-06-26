@@ -27,34 +27,34 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <sstream>
 
 #if defined(_WIN32)
-#   ifndef WIN32_LEAN_AND_MEAN
-#       define WIN32_LEAN_AND_MAN
-#   endif
-#   include <windows.h>
-#   include <direct.h>
-#   define getcwd _getcwd
-#   define chdir _chdir
-#   define mkdir(X, Y) _mkdir(X)
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MAN
+#endif
+#include <windows.h>
+#include <direct.h>
+#define getcwd _getcwd
+#define chdir _chdir
+#define mkdir(X, Y) _mkdir(X)
 
 namespace {
 auto platform_temp_directory() -> std::string
 {
     std::array<char, 4096> buffer;
     auto len = ::GetTempPathA(static_cast<DWORD>(buffer.size()), buffer.data());
-    return std::string{ buffer.data(), len };
+    return std::string{buffer.data(), len};
 }
 #else
 // Assume Linux/POSIX
-#   include <unistd.h>
-#   include <stdio.h>
-#   include <sys/stat.h>
-#   include <sys/types.h>
-#   include <errno.h>
-#   include <string.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <errno.h>
+#include <string.h>
 namespace {
 auto platform_temp_directory() -> std::string
 {
-    return { "/tmp" }; 
+    return {"/tmp"};
 }
 #endif
 } //end anonymous namespace
@@ -62,7 +62,7 @@ namespace SilKit {
 namespace Filesystem {
 
 path::path(const string_type& source)
-    :_path{ source }
+    : _path{source}
 {
 }
 auto path::string() const -> std::string
@@ -97,10 +97,7 @@ void current_path(const path& newPath)
     if (chdir(newPath.c_str()) != 0)
     {
         std::stringstream msg;
-        msg << "filsystem::current_path: Couldn't set the current working directory to \""
-        << newPath.string()
-        << "\""
-        ;
+        msg << "filsystem::current_path: Couldn't set the current working directory to \"" << newPath.string() << "\"";
         throw SilKitError(msg.str());
     }
 }
@@ -135,7 +132,7 @@ void rename(const path& old_p, const path& new_p)
 bool create_directory(const path& where)
 {
     auto status = ::mkdir(where.c_str(), 0755);
-    if(status == 0)
+    if (status == 0)
     {
         return status == 0;
     }
@@ -151,7 +148,7 @@ path parent_path(const path& child)
 
     const auto last_separator = path_string.rfind(SilKit::Filesystem::path::preferred_separator);
 
-    if(last_separator == std::string::npos)
+    if (last_separator == std::string::npos)
     {
         return Filesystem::path();
     }
@@ -168,7 +165,7 @@ path concatenate_paths(const std::string& root, const std::string& child)
     path tmpPath;
     if (!(root.back() == path::preferred_separator) && !(child.front() == path::preferred_separator))
     {
-        tmpPath =  path(root + path::preferred_separator + child);
+        tmpPath = path(root + path::preferred_separator + child);
     }
     else
     {

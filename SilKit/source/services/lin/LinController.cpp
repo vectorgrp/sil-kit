@@ -32,8 +32,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "ILogger.hpp"
 #include "WireLinMessages.hpp"
 
-namespace
-{
+namespace {
 using namespace SilKit::Services::Lin;
 auto to_wire(const LinControllerConfig& config) -> WireLinControllerConfig
 {
@@ -55,13 +54,13 @@ auto to_wire(const SilKit::Experimental::Services::Lin::LinControllerDynamicConf
     return result;
 }
 
-}
+} // namespace
 namespace SilKit {
 namespace Services {
 namespace Lin {
 
 LinController::LinController(Core::IParticipantInternal* participant, SilKit::Config::LinController config,
-                               Services::Orchestration::ITimeProvider* timeProvider)
+                             Services::Orchestration::ITimeProvider* timeProvider)
     : _participant{participant}
     , _config{config}
     , _logger{participant->GetLogger()}
@@ -79,36 +78,36 @@ void LinController::RegisterServiceDiscovery()
 {
     _participant->GetServiceDiscovery()->RegisterServiceDiscoveryHandler(
         [this](Core::Discovery::ServiceDiscoveryEvent::Type discoveryType,
-                                  const Core::ServiceDescriptor& remoteServiceDescriptor) {
-            // check if discovered service is a network simulator (if none is known)
-            if (_simulationBehavior.IsTrivial())
+               const Core::ServiceDescriptor& remoteServiceDescriptor) {
+        // check if discovered service is a network simulator (if none is known)
+        if (_simulationBehavior.IsTrivial())
+        {
+            // check if received descriptor has a matching simulated link
+            if (discoveryType == Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated
+                && IsRelevantNetwork(remoteServiceDescriptor))
             {
-                // check if received descriptor has a matching simulated link
-                if (discoveryType == Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated
-                    && IsRelevantNetwork(remoteServiceDescriptor))
-                {
-                    Logging::Info(_logger,
-                                  "Controller '{}' is using the simulated network '{}' and will route all messages to "
-                                  "the network simulator '{}'",
-                                  _config.name, remoteServiceDescriptor.GetNetworkName(),
-                                  remoteServiceDescriptor.GetParticipantName());
-                    SetDetailedBehavior(remoteServiceDescriptor);
-                }
+                Logging::Info(_logger,
+                              "Controller '{}' is using the simulated network '{}' and will route all messages to "
+                              "the network simulator '{}'",
+                              _config.name, remoteServiceDescriptor.GetNetworkName(),
+                              remoteServiceDescriptor.GetParticipantName());
+                SetDetailedBehavior(remoteServiceDescriptor);
             }
-            else
+        }
+        else
+        {
+            if (discoveryType == Core::Discovery::ServiceDiscoveryEvent::Type::ServiceRemoved
+                && IsRelevantNetwork(remoteServiceDescriptor))
+
             {
-                if (discoveryType == Core::Discovery::ServiceDiscoveryEvent::Type::ServiceRemoved
-                    && IsRelevantNetwork(remoteServiceDescriptor))
-                
-                {
-                    Logging::Warn(_logger,
-                                  "The network simulator for controller '{}' left the simulation. The controller is no "
-                                  "longer simulated.",
-                                  _config.name);
-                    SetTrivialBehavior();
-                }
+                Logging::Warn(_logger,
+                              "The network simulator for controller '{}' left the simulation. The controller is no "
+                              "longer simulated.",
+                              _config.name);
+                SetTrivialBehavior();
             }
-        });
+        }
+    });
 }
 
 void LinController::SetDetailedBehavior(const Core::ServiceDescriptor& remoteServiceDescriptor)
@@ -158,8 +157,7 @@ void LinController::ThrowIfNotMaster(const std::string& callingMethodName) const
 {
     if (_controllerMode != LinControllerMode::Master)
     {
-        std::string errorMsg = callingMethodName
-                               + " must only be called in master mode!";
+        std::string errorMsg = callingMethodName + " must only be called in master mode!";
         _logger->Error(errorMsg);
         throw SilKitError{errorMsg};
     }
@@ -169,8 +167,7 @@ void LinController::ThrowIfDynamic(const std::string& callingMethodName) const
 {
     if (_useDynamicResponse)
     {
-        std::string errorMsg = callingMethodName
-                               + " can not be called if the node was initialized using InitDynamic!";
+        std::string errorMsg = callingMethodName + " can not be called if the node was initialized using InitDynamic!";
         _logger->Error(errorMsg);
         throw SilKitError{errorMsg};
     }
@@ -180,8 +177,7 @@ void LinController::ThrowIfNotDynamic(const std::string& callingMethodName) cons
 {
     if (_useDynamicResponse)
     {
-        std::string errorMsg = callingMethodName
-                               + " can only be called if the node was initialized using InitDynamic!";
+        std::string errorMsg = callingMethodName + " can only be called if the node was initialized using InitDynamic!";
         _logger->Error(errorMsg);
         throw SilKitError{errorMsg};
     }
@@ -272,8 +268,9 @@ void LinController::WarnOnResponseModeReconfiguration(LinId id, LinFrameResponse
 
 void LinController::WarnOnUnconfiguredSlaveResponse(LinId id) const
 {
-    std::string errorMsg =
-        fmt::format("No slave has configured a response for ID={}. Use Init() or SetFrameResponse() on the slave node to configure responses.", id);
+    std::string errorMsg = fmt::format("No slave has configured a response for ID={}. Use Init() or SetFrameResponse() "
+                                       "on the slave node to configure responses.",
+                                       id);
     _logger->Warn(errorMsg);
 }
 
@@ -287,8 +284,7 @@ void LinController::WarnOnSendFrameSlaveResponseWithMasterTx(LinId id) const
 void LinController::ThrowOnSendAttemptWithUndefinedChecksum(const LinFrame& frame) const
 {
     std::string errorMsg =
-        fmt::format("LinFrame with ID {} has an undefined checksum model.",
-                    static_cast<uint16_t>(frame.id));
+        fmt::format("LinFrame with ID {} has an undefined checksum model.", static_cast<uint16_t>(frame.id));
     _logger->Error(errorMsg);
     throw SilKit::StateError{errorMsg};
 }
@@ -296,8 +292,7 @@ void LinController::ThrowOnSendAttemptWithUndefinedChecksum(const LinFrame& fram
 void LinController::ThrowOnSendAttemptWithUndefinedDataLength(const LinFrame& frame) const
 {
     std::string errorMsg =
-        fmt::format("LinFrame with ID {} has an undefined data length.",
-                    static_cast<uint16_t>(frame.id));
+        fmt::format("LinFrame with ID {} has an undefined data length.", static_cast<uint16_t>(frame.id));
     _logger->Error(errorMsg);
     throw SilKit::StateError{errorMsg};
 }
@@ -441,8 +436,7 @@ void LinController::SendFrameInternal(LinFrame frame, LinFrameResponseType respo
         }
         else if (responseType == LinFrameResponseType::SlaveToSlave)
         {
-            CallLinFrameStatusEventHandler(
-                LinFrameStatusEvent{_timeProvider->Now(), frame, LinFrameStatus::LIN_TX_OK});
+            CallLinFrameStatusEventHandler(LinFrameStatusEvent{_timeProvider->Now(), frame, LinFrameStatus::LIN_TX_OK});
         }
     }
 
@@ -459,8 +453,8 @@ void LinController::SendFrame(LinFrame frame, LinFrameResponseType responseType)
 
     if (Tracing::IsReplayEnabledFor(_config.replay, Config::Replay::Direction::Send))
     {
-        Logging::Debug(_logger, _logOnce,
-            "LinController: Ignoring SendFrame API call due to Replay config on {}", _config.name);
+        Logging::Debug(_logger, _logOnce, "LinController: Ignoring SendFrame API call due to Replay config on {}",
+                       _config.name);
         return;
     }
 
@@ -474,7 +468,7 @@ void LinController::SendFrameHeader(LinId linId)
 
     // Detailed: Send LinSendFrameHeaderRequest to BusSim
     // Trivial: Good case (numResponses == 1): Distribute LinSendFrameHeaderRequest, the receiving Tx-Node will generate the LinTransmission.
-    //          Error case: Generate the LinTransmission and trigger a FrameStatusUpdate with 
+    //          Error case: Generate the LinTransmission and trigger a FrameStatusUpdate with
     //                      LIN_RX_NO_RESPONSE (numResponses == 0) or LIN_RX_ERROR (numResponses > 1).
     SendMsg(LinSendFrameHeaderRequest{_timeProvider->Now(), linId});
 }
@@ -519,7 +513,7 @@ void LinController::SetFrameResponse(LinFrameResponse response)
     if (Tracing::IsReplayEnabledFor(_config.replay, Config::Replay::Direction::Send))
     {
         Logging::Debug(_logger, _logOnce,
-            "LinController: Ignoring SetFrameResponse API call due to Replay config on {}", _config.name);
+                       "LinController: Ignoring SetFrameResponse API call due to Replay config on {}", _config.name);
         return;
     }
 
@@ -544,8 +538,8 @@ void LinController::GoToSleep()
 
     if (Tracing::IsReplayEnabledFor(_config.replay, Config::Replay::Direction::Send))
     {
-        Logging::Debug(_logger, _logOnce,
-            "LinController: Ignoring GoToSleep API call due to Replay config on {}", _config.name);
+        Logging::Debug(_logger, _logOnce, "LinController: Ignoring GoToSleep API call due to Replay config on {}",
+                       _config.name);
         return;
     }
 
@@ -663,7 +657,8 @@ void LinController::HandleResponsesUpdate(const IServiceEndpoint* from,
 // Node bookkeeping
 //------------------------
 
-void LinController::LinNode::UpdateResponses(std::vector<LinFrameResponse> responsesToUpdate, Services::Logging::ILogger* logger)
+void LinController::LinNode::UpdateResponses(std::vector<LinFrameResponse> responsesToUpdate,
+                                             Services::Logging::ILogger* logger)
 {
     for (auto&& response : responsesToUpdate)
     {
@@ -674,7 +669,7 @@ void LinController::LinNode::UpdateResponses(std::vector<LinFrameResponse> respo
             continue;
         }
         responses[linId] = std::move(response);
-   }
+    }
 }
 
 void LinController::LinNode::UpdateTxBuffer(LinId linId, std::array<uint8_t, 8> data,
@@ -695,10 +690,9 @@ auto LinController::GetThisLinNode() -> LinNode&
 
 auto LinController::GetLinNode(Core::EndpointAddress addr) -> LinNode&
 {
-    auto iter = std::lower_bound(_linNodes.begin(), _linNodes.end(), addr,
-                                 [](const LinNode& lhs, const Core::EndpointAddress& address) {
-                                     return lhs.address < address;
-                                 });
+    auto iter = std::lower_bound(
+        _linNodes.begin(), _linNodes.end(), addr,
+        [](const LinNode& lhs, const Core::EndpointAddress& address) { return lhs.address < address; });
     if (iter == _linNodes.end() || iter->address != addr)
     {
         LinNode node;
@@ -791,7 +785,7 @@ void LinController::ReceiveMsg(const IServiceEndpoint* from, const LinTransmissi
     if (frame.id >= _maxLinId)
     {
         WarnOnReceptionWithInvalidLinId(frame.id, from->GetServiceDescriptor().GetParticipantName(),
-                                             from->GetServiceDescriptor().GetServiceName());
+                                        from->GetServiceDescriptor().GetServiceName());
         return;
     }
 
@@ -817,7 +811,6 @@ void LinController::ReceiveMsg(const IServiceEndpoint* from, const LinTransmissi
             CallHandlers(LinGoToSleepEvent{msg.timestamp});
         }
     }
-
 }
 
 void LinController::ReceiveMsg(const IServiceEndpoint* from, const LinWakeupPulse& msg)
@@ -894,7 +887,8 @@ HandlerId LinController::AddWakeupHandler(WakeupHandler handler)
     return AddHandler(std::move(handler));
 }
 
-auto LinController::AddFrameHeaderHandler(SilKit::Experimental::Services::Lin::LinFrameHeaderHandler handler ) -> HandlerId
+auto LinController::AddFrameHeaderHandler(SilKit::Experimental::Services::Lin::LinFrameHeaderHandler handler)
+    -> HandlerId
 {
     return AddHandler(std::move(handler));
 }
@@ -921,7 +915,7 @@ HandlerId LinController::AddLinSlaveConfigurationHandler(
     auto handlerId = AddHandler(std::move(handler));
 
     // Trigger handler if a LinSlaveConfigurations was received before adding a handler
-    // No need to cache the LinSlaveConfigs (just the reception time), 
+    // No need to cache the LinSlaveConfigs (just the reception time),
     // as the user has to actively call GetSlaveConfiguration in the callback
     if (_triggerLinSlaveConfigurationHandlers)
     {
@@ -965,12 +959,11 @@ void LinController::CallHandlers(const MsgT& msg)
 
 void LinController::ReplayMessage(const IReplayMessage* replayMessage)
 {
-
     if (!_replayActive)
     {
         return;
     }
- 
+
     if (_controllerMode != LinControllerMode::Master)
     {
         Logging::Debug(_logger, "ReplayMessage: skipping, because controller mode is {}", _controllerMode);
@@ -980,8 +973,7 @@ void LinController::ReplayMessage(const IReplayMessage* replayMessage)
     // response that is going to be generated by a slave.
 
     auto&& frame = dynamic_cast<const LinFrame&>(*replayMessage);
-    const auto isSleepFrame = (frame.id == GoToSleepFrame().id
-        && frame.data == GoToSleepFrame().data);
+    const auto isSleepFrame = (frame.id == GoToSleepFrame().id && frame.data == GoToSleepFrame().data);
     const auto isReceive = replayMessage->GetDirection() == TransmitDirection::RX;
     LinTransmission tm{};
 

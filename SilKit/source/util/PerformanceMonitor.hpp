@@ -79,7 +79,8 @@ auto PerformanceMonitor::CurrentDuration() -> std::chrono::nanoseconds
 {
     return _currentDuration;
 }
-auto PerformanceMonitor::MaxDuration() -> std::chrono::nanoseconds {
+auto PerformanceMonitor::MaxDuration() -> std::chrono::nanoseconds
+{
     return _maxDuration;
 }
 template <class StdDurationT>

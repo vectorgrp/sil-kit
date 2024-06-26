@@ -43,4 +43,3 @@ public:
 } // namespace Rpc
 } // namespace Services
 } // namespace SilKit
-

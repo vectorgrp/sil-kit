@@ -36,12 +36,12 @@ class SimBehaviorDetailed : public ISimBehavior
 {
 public:
     SimBehaviorDetailed(Core::IParticipantInternal* participant, CanController* canController,
-                       const Core::ServiceDescriptor& serviceDescriptor);
+                        const Core::ServiceDescriptor& serviceDescriptor);
 
     void SendMsg(CanConfigureBaudrate&& msg) override;
     void SendMsg(CanSetControllerMode&& msg) override;
     void SendMsg(WireCanFrameEvent&& msg) override;
-    
+
     auto AllowReception(const Core::IServiceEndpoint* from) const -> bool override;
 
     void SetSimulatedLink(const Core::ServiceDescriptor& simulatedLink);

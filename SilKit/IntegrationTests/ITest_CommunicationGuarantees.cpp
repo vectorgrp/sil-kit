@@ -72,8 +72,7 @@ public:
     TestParticipant& operator=(TestParticipant&&) = default;
 
     TestParticipant(const std::string& newName, std::vector<std::string> newPubTopics,
-                    std::vector<std::string> newSubTopics, OperationMode newOperationMode,
-                    TimeMode newTimeMode)
+                    std::vector<std::string> newSubTopics, OperationMode newOperationMode, TimeMode newTimeMode)
     {
         name = newName;
         operationMode = newOperationMode;
@@ -105,14 +104,35 @@ public:
         }
     }
 
-    void SetPublishInCommReady(bool on) { publishInCommReady = on; }
-    void SetPublishInStopHandler(bool on) { publishInStopHandler = on; }
-    void SetPublishInShutdownHandler(bool on) { publishInShutdownHandler = on; }
-    void SetPublishInAbortHandler(bool on) { publishInAbortHandler = on; }
-    void SetWaitForCommunicationInCommReadyHandler(bool on) { waitForCommunicationInCommReadyHandler = on; }
+    void SetPublishInCommReady(bool on)
+    {
+        publishInCommReady = on;
+    }
+    void SetPublishInStopHandler(bool on)
+    {
+        publishInStopHandler = on;
+    }
+    void SetPublishInShutdownHandler(bool on)
+    {
+        publishInShutdownHandler = on;
+    }
+    void SetPublishInAbortHandler(bool on)
+    {
+        publishInAbortHandler = on;
+    }
+    void SetWaitForCommunicationInCommReadyHandler(bool on)
+    {
+        waitForCommunicationInCommReadyHandler = on;
+    }
 
-    auto GetPubBuffer() { return pubBuffer; }
-    auto GetSubBuffer() { return subBuffer; }
+    auto GetPubBuffer()
+    {
+        return pubBuffer;
+    }
+    auto GetSubBuffer()
+    {
+        return subBuffer;
+    }
 
     void ResetReception()
     {
@@ -218,9 +238,7 @@ public:
             // Sync participant stop the test in the first SimTask
             timeSyncService = lifecycleService->CreateTimeSyncService();
             timeSyncService->SetSimulationStepHandler(
-                [](std::chrono::nanoseconds /*now*/, std::chrono::nanoseconds /*duration*/) {
-                },
-                1s);
+                [](std::chrono::nanoseconds /*now*/, std::chrono::nanoseconds /*duration*/) {}, 1s);
         }
 
         // Async participant stop the test on enter RunningState
@@ -311,17 +329,17 @@ public:
                 subControllers.push_back(participant->CreateDataSubscriber(
                     controllerName, spec,
                     [this](IDataSubscriber* /*subscriber*/, const DataMessageEvent& dataMessageEvent) {
-                        if (!allReceived)
+                    if (!allReceived)
+                    {
+                        receiveMsgCount++;
+                        if (receiveMsgCount >= numMsgToReceiveTotal)
                         {
-                            receiveMsgCount++;
-                            if (receiveMsgCount >= numMsgToReceiveTotal)
-                            {
-                                Log() << "[" << name << "] All received";
-                                AffirmCommunication();
-                            }
+                            Log() << "[" << name << "] All received";
+                            AffirmCommunication();
                         }
-                        subBuffer.push_back(SilKit::Util::ToStdVector(dataMessageEvent.data));
-                    }));
+                    }
+                    subBuffer.push_back(SilKit::Util::ToStdVector(dataMessageEvent.data));
+                }));
             }
             Log() << "[" << name << "] ...created subscribers";
         }
@@ -337,7 +355,10 @@ public:
         AffirmFinalState();
     }
 
-    auto Name() const -> std::string { return name; }
+    auto Name() const -> std::string
+    {
+        return name;
+    }
 
 public:
     std::string name;
@@ -441,9 +462,10 @@ protected:
     void RunSystemMaster(const std::string& registryUri)
     {
         systemController.participant = SilKit::CreateParticipant(SilKit::Config::ParticipantConfigurationFromString(""),
-                                                             systemMasterName, registryUri);
+                                                                 systemMasterName, registryUri);
 
-        systemController.lifecycleService = systemController.participant->CreateLifecycleService({OperationMode::Coordinated});
+        systemController.lifecycleService =
+            systemController.participant->CreateLifecycleService({OperationMode::Coordinated});
 
         systemController.systemController =
             SilKit::Experimental::Participant::CreateSystemController(systemController.participant.get());
@@ -452,13 +474,11 @@ protected:
 
         systemController.systemController->SetWorkflowConfiguration({requiredParticipantNames});
 
-        systemController.systemMonitor->AddSystemStateHandler([this](SystemState newState) {
-            SystemStateHandler(newState);
-        });
+        systemController.systemMonitor->AddSystemStateHandler(
+            [this](SystemState newState) { SystemStateHandler(newState); });
 
-        systemController.systemMonitor->AddParticipantStatusHandler([this](ParticipantStatus newStatus) {
-            ParticipantStatusHandler(newStatus);
-        });
+        systemController.systemMonitor->AddParticipantStatusHandler(
+            [this](ParticipantStatus newStatus) { ParticipantStatusHandler(newStatus); });
 
         systemController.systemStateRunning = systemController.systemStateRunningPromise.get_future();
 
@@ -469,9 +489,7 @@ protected:
     {
         for (auto& p : participants)
         {
-            participantThreads.emplace_back([&p, registryUri] {
-                p.ParticipantThread(registryUri);
-            });
+            participantThreads.emplace_back([&p, registryUri] { p.ParticipantThread(registryUri); });
         }
     }
 
@@ -540,7 +558,7 @@ protected:
             for (auto& p : participants)
             {
                 if (p.operationMode == OperationMode::Autonomous)
-                  p.lifecycleService->Stop("End test");
+                    p.lifecycleService->Stop("End test");
             }
 
             Log() << ">> Joining participant threads";
@@ -571,11 +589,11 @@ protected:
             participants.push_back({"Pub", {topic1}, {}, OperationMode::Autonomous, TimeMode::Async});
             auto& pubParticipant = participants.at(0);
             if (handlerToTest == "Stop")
-              pubParticipant.SetPublishInStopHandler(true);
+                pubParticipant.SetPublishInStopHandler(true);
             else if (handlerToTest == "Shutdown")
-              pubParticipant.SetPublishInShutdownHandler(true);
+                pubParticipant.SetPublishInShutdownHandler(true);
             else if (handlerToTest == "Abort")
-              pubParticipant.SetPublishInAbortHandler(true);
+                pubParticipant.SetPublishInAbortHandler(true);
 
             participants.push_back({"Sub", {}, {topic1}, OperationMode::Autonomous, TimeMode::Async});
             auto& subParticipant = participants.at(1);
@@ -766,10 +784,8 @@ TEST_F(ITest_CommunicationGuarantees, test_receive_in_comm_ready_handler_mixed)
     }
 
     std::vector<TestParticipant> coordinatedSyncParticipantsSub;
-    coordinatedSyncParticipantsSub.push_back(
-        {"CoordSub1", {}, topics, OperationMode::Coordinated, TimeMode::Sync});
-    coordinatedSyncParticipantsSub.push_back(
-        {"CoordSub2", {}, topics, OperationMode::Coordinated, TimeMode::Sync});
+    coordinatedSyncParticipantsSub.push_back({"CoordSub1", {}, topics, OperationMode::Coordinated, TimeMode::Sync});
+    coordinatedSyncParticipantsSub.push_back({"CoordSub2", {}, topics, OperationMode::Coordinated, TimeMode::Sync});
 
     std::vector<TestParticipant> autonomousAsyncParticipantsPub;
     autonomousAsyncParticipantsPub.push_back({"Pub", topics, {}, OperationMode::Autonomous, TimeMode::Async});

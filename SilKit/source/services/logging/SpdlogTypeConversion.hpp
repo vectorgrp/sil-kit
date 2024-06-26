@@ -71,7 +71,8 @@ inline auto from_spdlog(spdlog::level::level_enum level) -> Level
     case spdlog::level::off:
         return Level::Off;
     case spdlog::level::n_levels:
-        throw SilKitError("SpdlogTypeConversion: Don't convert the guard. Squelch warning by covering this in the switch");
+        throw SilKitError(
+            "SpdlogTypeConversion: Don't convert the guard. Squelch warning by covering this in the switch");
     }
     throw SilKit::TypeConversionError{};
 }
@@ -79,12 +80,12 @@ inline auto from_spdlog(spdlog::level::level_enum level) -> Level
 inline auto from_spdlog(const spdlog::source_loc& spdLoc) -> SourceLoc
 {
     SourceLoc loc;
-    if(spdLoc.filename != nullptr)
+    if (spdLoc.filename != nullptr)
     {
         loc.filename = spdLoc.filename;
     }
     loc.line = spdLoc.line;
-    if(spdLoc.funcname != nullptr)
+    if (spdLoc.funcname != nullptr)
     {
         loc.funcname = spdLoc.funcname;
     }
@@ -112,12 +113,7 @@ inline auto to_spdlog(const SourceLoc& loc) -> spdlog::source_loc
 
 inline auto to_spdlog(const LogMsg& msg) -> spdlog::details::log_msg
 {
-    return spdlog::details::log_msg{
-        to_spdlog(msg.source),
-        msg.logger_name,
-        to_spdlog(msg.level),
-        msg.payload
-    };
+    return spdlog::details::log_msg{to_spdlog(msg.source), msg.logger_name, to_spdlog(msg.level), msg.payload};
 }
 
 } // namespace Logging

@@ -35,6 +35,6 @@ void Serialize(SilKit::Core::MessageBuffer& buffer, const ServiceDiscoveryEvent&
 void Deserialize(MessageBuffer& buffer, ParticipantDiscoveryEvent& out);
 void Deserialize(MessageBuffer& buffer, ServiceDiscoveryEvent& out);
 
-} // namespace Discovery    
+} // namespace Discovery
 } // namespace Core
 } // namespace SilKit

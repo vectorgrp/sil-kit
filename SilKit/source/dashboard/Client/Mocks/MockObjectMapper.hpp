@@ -30,7 +30,10 @@ namespace Dashboard {
 class MockObjectMapper : public oatpp::data::mapping::ObjectMapper
 {
 public:
-    explicit MockObjectMapper(const Info& info) : ObjectMapper(info) {}
+    explicit MockObjectMapper(const Info& info)
+        : ObjectMapper(info)
+    {
+    }
 
     virtual ~MockObjectMapper() = default;
 

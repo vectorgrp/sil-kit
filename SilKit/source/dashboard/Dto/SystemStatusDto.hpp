@@ -48,7 +48,10 @@ class SystemStatusDto : public oatpp::DTO
 {
     DTO_INIT(SystemStatusDto, DTO)
 
-    DTO_FIELD_INFO(state) { info->description = "Name of the state"; }
+    DTO_FIELD_INFO(state)
+    {
+        info->description = "Name of the state";
+    }
     DTO_FIELD(Enum<SystemState>::AsString, state);
 };
 

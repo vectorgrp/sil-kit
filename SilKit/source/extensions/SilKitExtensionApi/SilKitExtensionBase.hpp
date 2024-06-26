@@ -30,19 +30,18 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "SilKitExtensionABI.h"
 #include "ISilKitExtension.hpp"
 
-namespace SilKit { 
+namespace SilKit {
 
-//! \brief For convenience, implements an extension base with nice 
+//! \brief For convenience, implements an extension base with nice
 //         accessors to the extension descriptor.
 class SilKitExtensionBase : public ISilKitExtension
 {
 public:
-
     //! \brief The Ctor relies on the externally defined
-    //         silkit_extension_descriptor from the implementation of the 
+    //         silkit_extension_descriptor from the implementation of the
     //         extension library.
     SilKitExtensionBase()
-        :_descriptor(silkit_extension_descriptor)
+        : _descriptor(silkit_extension_descriptor)
     {
     }
 
@@ -56,8 +55,7 @@ public:
         return _descriptor.vendor_name;
     }
 
-    void GetVersion(uint32_t& major,
-            uint32_t& minor, uint32_t& patch) const
+    void GetVersion(uint32_t& major, uint32_t& minor, uint32_t& patch) const
     {
         major = _descriptor.silkit_version_major;
         minor = _descriptor.silkit_version_minor;
@@ -65,10 +63,8 @@ public:
     }
 
 private:
-
-    const SilKitExtensionDescriptor_t&  _descriptor;
+    const SilKitExtensionDescriptor_t& _descriptor;
 };
 
 
-
-}//end namespace SilKit
+} //end namespace SilKit

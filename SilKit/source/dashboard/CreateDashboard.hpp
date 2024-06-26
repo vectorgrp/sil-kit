@@ -33,15 +33,15 @@ namespace SilKit {
 namespace Dashboard {
 
 auto CreateDashboard(std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig,
-                               const std::string& registryUri, const std::string& dashboardUri)
-    -> std::unique_ptr<SilKit::Dashboard::IDashboard>;
+                     const std::string& registryUri,
+                     const std::string& dashboardUri) -> std::unique_ptr<SilKit::Dashboard::IDashboard>;
 
 //! returns information about simulation, participants and networks
 auto RunDashboardTest(std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig,
-                                const std::string& registryUri, const std::string& dashboardUri,
-                                std::function<void()> testCode, uint64_t expectedSimulationsCount = 1, 
-                                std::chrono::seconds creationTimeout = std::chrono::seconds{0},
-                                std::chrono::seconds updateTimeout = std::chrono::seconds{0}) -> TestResult;
+                      const std::string& registryUri, const std::string& dashboardUri, std::function<void()> testCode,
+                      uint64_t expectedSimulationsCount = 1,
+                      std::chrono::seconds creationTimeout = std::chrono::seconds{0},
+                      std::chrono::seconds updateTimeout = std::chrono::seconds{0}) -> TestResult;
 
 } // namespace Dashboard
 } // namespace SilKit

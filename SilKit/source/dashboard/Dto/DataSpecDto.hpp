@@ -32,13 +32,22 @@ class DataSpecDto : public oatpp::DTO
 {
     DTO_INIT(DataSpecDto, DTO)
 
-    DTO_FIELD_INFO(topic) { info->description = "Topic"; }
+    DTO_FIELD_INFO(topic)
+    {
+        info->description = "Topic";
+    }
     DTO_FIELD(String, topic);
 
-    DTO_FIELD_INFO(mediaType) { info->description = "Media type"; }
+    DTO_FIELD_INFO(mediaType)
+    {
+        info->description = "Media type";
+    }
     DTO_FIELD(String, mediaType);
 
-    DTO_FIELD_INFO(labels) { info->description = "Labels"; }
+    DTO_FIELD_INFO(labels)
+    {
+        info->description = "Labels";
+    }
     DTO_FIELD(Vector<Object<MatchingLabelDto>>, labels);
 };
 

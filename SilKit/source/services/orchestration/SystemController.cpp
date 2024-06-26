@@ -45,7 +45,7 @@ void SystemController::AbortSimulation() const
 
 void SystemController::SetWorkflowConfiguration(const WorkflowConfiguration& workflowConfiguration)
 {
-    //  Distribute to SystemMonitors (including self delivery) 
+    //  Distribute to SystemMonitors (including self delivery)
     _participant->SendMsg(this, workflowConfiguration);
 }
 

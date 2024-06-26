@@ -42,73 +42,73 @@ typedef uint64_t SilKit_NanosecondsWallclockTime;
 typedef int16_t SilKit_ParticipantState;
 
 /*! An invalid participant state */
-#define SilKit_ParticipantState_Invalid                     ((SilKit_ParticipantState)   0)
+#define SilKit_ParticipantState_Invalid ((SilKit_ParticipantState)0)
 /*! The controllers created state */
-#define SilKit_ParticipantState_ServicesCreated             ((SilKit_ParticipantState)  10)
+#define SilKit_ParticipantState_ServicesCreated ((SilKit_ParticipantState)10)
 /*! The communication initializing state */
-#define SilKit_ParticipantState_CommunicationInitializing   ((SilKit_ParticipantState)  20)
+#define SilKit_ParticipantState_CommunicationInitializing ((SilKit_ParticipantState)20)
 /*! The communication initialized state */
-#define SilKit_ParticipantState_CommunicationInitialized    ((SilKit_ParticipantState)  30)
+#define SilKit_ParticipantState_CommunicationInitialized ((SilKit_ParticipantState)30)
 /*! The initialized state */
-#define SilKit_ParticipantState_ReadyToRun                  ((SilKit_ParticipantState)  40)
+#define SilKit_ParticipantState_ReadyToRun ((SilKit_ParticipantState)40)
 /*! The running state */
-#define SilKit_ParticipantState_Running                     ((SilKit_ParticipantState)  50)
+#define SilKit_ParticipantState_Running ((SilKit_ParticipantState)50)
 /*! The paused state */
-#define SilKit_ParticipantState_Paused                      ((SilKit_ParticipantState)  60)
+#define SilKit_ParticipantState_Paused ((SilKit_ParticipantState)60)
 /*! The stopping state */
-#define SilKit_ParticipantState_Stopping                    ((SilKit_ParticipantState)  70)
+#define SilKit_ParticipantState_Stopping ((SilKit_ParticipantState)70)
 /*! The stopped state */
-#define SilKit_ParticipantState_Stopped                     ((SilKit_ParticipantState)  80)
+#define SilKit_ParticipantState_Stopped ((SilKit_ParticipantState)80)
 /*! The error state */
-#define SilKit_ParticipantState_Error                       ((SilKit_ParticipantState)  90)
+#define SilKit_ParticipantState_Error ((SilKit_ParticipantState)90)
 /*! The shutting down state */
-#define SilKit_ParticipantState_ShuttingDown                ((SilKit_ParticipantState) 100)
+#define SilKit_ParticipantState_ShuttingDown ((SilKit_ParticipantState)100)
 /*! The shutdown state */
-#define SilKit_ParticipantState_Shutdown                    ((SilKit_ParticipantState) 110)
+#define SilKit_ParticipantState_Shutdown ((SilKit_ParticipantState)110)
 /*! The aborting state */
-#define SilKit_ParticipantState_Aborting                    ((SilKit_ParticipantState) 120)
+#define SilKit_ParticipantState_Aborting ((SilKit_ParticipantState)120)
 
 
 /*! The state of a system, deduced by states of the required participants. */
 typedef int16_t SilKit_SystemState;
 
 /*! An invalid participant state */
-#define SilKit_SystemState_Invalid                      ((SilKit_SystemState)   0)
+#define SilKit_SystemState_Invalid ((SilKit_SystemState)0)
 /*! The controllers created state */
-#define SilKit_SystemState_ServicesCreated              ((SilKit_SystemState)  10)
+#define SilKit_SystemState_ServicesCreated ((SilKit_SystemState)10)
 /*! The communication initializing state */
-#define SilKit_SystemState_CommunicationInitializing    ((SilKit_SystemState)  20)
+#define SilKit_SystemState_CommunicationInitializing ((SilKit_SystemState)20)
 /*! The communication initialized state */
-#define SilKit_SystemState_CommunicationInitialized     ((SilKit_SystemState)  30)
+#define SilKit_SystemState_CommunicationInitialized ((SilKit_SystemState)30)
 /*! The initialized state */
-#define SilKit_SystemState_ReadyToRun                   ((SilKit_SystemState)  40)
+#define SilKit_SystemState_ReadyToRun ((SilKit_SystemState)40)
 /*! The running state */
-#define SilKit_SystemState_Running                      ((SilKit_SystemState)  50)
+#define SilKit_SystemState_Running ((SilKit_SystemState)50)
 /*! The paused state */
-#define SilKit_SystemState_Paused                       ((SilKit_SystemState)  60)
+#define SilKit_SystemState_Paused ((SilKit_SystemState)60)
 /*! The stopping state */
-#define SilKit_SystemState_Stopping                     ((SilKit_SystemState)  70)
+#define SilKit_SystemState_Stopping ((SilKit_SystemState)70)
 /*! The stopped state */
-#define SilKit_SystemState_Stopped                      ((SilKit_SystemState)  80)
+#define SilKit_SystemState_Stopped ((SilKit_SystemState)80)
 /*! The error state */
-#define SilKit_SystemState_Error                        ((SilKit_SystemState)  90)
+#define SilKit_SystemState_Error ((SilKit_SystemState)90)
 /*! The shutting down state */
-#define SilKit_SystemState_ShuttingDown                 ((SilKit_SystemState) 100)
+#define SilKit_SystemState_ShuttingDown ((SilKit_SystemState)100)
 /*! The shutdown state */
-#define SilKit_SystemState_Shutdown                     ((SilKit_SystemState) 110)
+#define SilKit_SystemState_Shutdown ((SilKit_SystemState)110)
 /*! The aborting state */
-#define SilKit_SystemState_Aborting                     ((SilKit_SystemState) 120)
+#define SilKit_SystemState_Aborting ((SilKit_SystemState)120)
 
 
 /*! The OperationMode for lifecycle service. */
 typedef int8_t SilKit_OperationMode;
 
 /*! An invalid operation mode */
-#define SilKit_OperationMode_Invalid        ((SilKit_OperationMode)  0)
+#define SilKit_OperationMode_Invalid ((SilKit_OperationMode)0)
 /*! The coordinated operation mode */
-#define SilKit_OperationMode_Coordinated    ((SilKit_OperationMode) 10)
+#define SilKit_OperationMode_Coordinated ((SilKit_OperationMode)10)
 /*! The autonomous operation mode */
-#define SilKit_OperationMode_Autonomous     ((SilKit_OperationMode) 20)
+#define SilKit_OperationMode_Autonomous ((SilKit_OperationMode)20)
 
 
 /*! Details about a status change of a participant. */
@@ -159,13 +159,13 @@ typedef struct SilKit_TimeSyncService SilKit_TimeSyncService;
  *
  * The object returned must not be deallocated using free()!
  */
-SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LifecycleService_Create(SilKit_LifecycleService** outLifecycleService,
-                                                           SilKit_Participant* participant,
-                                                           const SilKit_LifecycleConfiguration* startConfiguration);
+SilKitAPI SilKit_ReturnCode SilKitCALL
+SilKit_LifecycleService_Create(SilKit_LifecycleService** outLifecycleService, SilKit_Participant* participant,
+                               const SilKit_LifecycleConfiguration* startConfiguration);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LifecycleService_Create_t)(SilKit_LifecycleService** outLifecycleService,
-                                                              SilKit_Participant* participant,
-                                                              const SilKit_LifecycleConfiguration* startConfiguration);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_LifecycleService_Create_t)(
+    SilKit_LifecycleService** outLifecycleService, SilKit_Participant* participant,
+    const SilKit_LifecycleConfiguration* startConfiguration);
 
 /*! \brief  The handler to be called on initialization
  *
@@ -209,11 +209,13 @@ typedef SilKit_ReturnCode(SilKitFPTR* SilKit_LifecycleService_SetCommunicationRe
  * \param context A user provided context accessible in the handler
  * \param handler The handler to be called on initialization
  */
-SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LifecycleService_SetCommunicationReadyHandlerAsync(
-    SilKit_LifecycleService* lifecycleService, void* context, SilKit_LifecycleService_CommunicationReadyHandler_t handler);
+SilKitAPI SilKit_ReturnCode SilKitCALL
+SilKit_LifecycleService_SetCommunicationReadyHandlerAsync(SilKit_LifecycleService* lifecycleService, void* context,
+                                                          SilKit_LifecycleService_CommunicationReadyHandler_t handler);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LifecycleService_SetCommunicationReadyHandlerAsync_t)(
-    SilKit_LifecycleService* lifecycleService, void* context, SilKit_LifecycleService_CommunicationReadyHandler_t handler);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_LifecycleService_SetCommunicationReadyHandlerAsync_t)(
+    SilKit_LifecycleService* lifecycleService, void* context,
+    SilKit_LifecycleService_CommunicationReadyHandler_t handler);
 
 /*! \brief Notify that the async \ref SilKit_LifecycleService_CommunicationReadyHandler_t is completed.
  *
@@ -221,10 +223,10 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LifecycleService_SetCommunicationR
  * \param lifecycleService The lifecycle service receiving the update.
  * \return \ref SilKit_ReturnCode
  */
-SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LifecycleService_CompleteCommunicationReadyHandlerAsync(
-    SilKit_LifecycleService* lifecycleService);
+SilKitAPI SilKit_ReturnCode SilKitCALL
+SilKit_LifecycleService_CompleteCommunicationReadyHandlerAsync(SilKit_LifecycleService* lifecycleService);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LifecycleService_CompleteCommunicationReadyHandlerAsync_t)(
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_LifecycleService_CompleteCommunicationReadyHandlerAsync_t)(
     SilKit_LifecycleService* lifecycleService);
 
 /*! \brief  This handler is triggered just before the lifecycle service changes to SilKit_ParticipantState_Running.
@@ -234,7 +236,8 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LifecycleService_CompleteCommunica
  * \param context The user provided context passed in \ref SilKit_LifecycleService_SetCommunicationReadyHandler.
  * \param lifecycleService The lifecycle service receiving the update.
  */
-typedef void (SilKitFPTR *SilKit_LifecycleService_StartingHandler_t)(void* context, SilKit_LifecycleService* lifecycleService);
+typedef void(SilKitFPTR* SilKit_LifecycleService_StartingHandler_t)(void* context,
+                                                                    SilKit_LifecycleService* lifecycleService);
 
 /*! \brief (Asynchronous participants only) Register a callback that is executed once directly before the participant enters SilKit_ParticipantState_Running.
  *
@@ -253,7 +256,7 @@ typedef void (SilKitFPTR *SilKit_LifecycleService_StartingHandler_t)(void* conte
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LifecycleService_SetStartingHandler(
     SilKit_LifecycleService* lifecycleService, void* context, SilKit_LifecycleService_StartingHandler_t handler);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LifecycleService_SetStartingHandler_t)(
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_LifecycleService_SetStartingHandler_t)(
     SilKit_LifecycleService* lifecycleService, void* context, SilKit_LifecycleService_StartingHandler_t handler);
 
 /*! \brief The handler to be called on a simulation stop
@@ -261,7 +264,8 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LifecycleService_SetStartingHandle
  * \param context The user provided context passed in \ref SilKit_LifecycleService_SetStopHandler
  * \param lifecycleService The lifecycle service receiving the stop command
  */
-typedef void (SilKitFPTR *SilKit_LifecycleService_StopHandler_t)(void* context, SilKit_LifecycleService* lifecycleService);
+typedef void(SilKitFPTR* SilKit_LifecycleService_StopHandler_t)(void* context,
+                                                                SilKit_LifecycleService* lifecycleService);
 
 /*! \brief Register a callback that is executed on simulation stop.
  *
@@ -279,20 +283,19 @@ typedef void (SilKitFPTR *SilKit_LifecycleService_StopHandler_t)(void* context, 
  * \param context A user provided context accessible in the handler
  * \param handler The handler to be called
  */
-SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LifecycleService_SetStopHandler(SilKit_LifecycleService* lifecycleService,
-                                                                   void* context,
-                                                                   SilKit_LifecycleService_StopHandler_t handler);
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LifecycleService_SetStopHandler(
+    SilKit_LifecycleService* lifecycleService, void* context, SilKit_LifecycleService_StopHandler_t handler);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LifecycleService_SetStopHandler_t)(SilKit_LifecycleService* lifecycleService,
-                                                                      void* context,
-                                                                      SilKit_LifecycleService_StopHandler_t handler);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_LifecycleService_SetStopHandler_t)(
+    SilKit_LifecycleService* lifecycleService, void* context, SilKit_LifecycleService_StopHandler_t handler);
 
 /*! \brief The handler to be called on a simulation shutdown
  *
  * \param context The user provided context passed in \ref SilKit_LifecycleService_SetShutdownHandler
  * \param lifecycleService The lifecycleService receiving the shutdown
  */
-typedef void (SilKitFPTR *SilKit_LifecycleService_ShutdownHandler_t)(void* context, SilKit_LifecycleService* lifecycleService);
+typedef void(SilKitFPTR* SilKit_LifecycleService_ShutdownHandler_t)(void* context,
+                                                                    SilKit_LifecycleService* lifecycleService);
 
 /*! \brief Register a callback that is executed on simulation shutdown.
  *
@@ -310,7 +313,7 @@ typedef void (SilKitFPTR *SilKit_LifecycleService_ShutdownHandler_t)(void* conte
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LifecycleService_SetShutdownHandler(
     SilKit_LifecycleService* lifecycleService, void* context, SilKit_LifecycleService_ShutdownHandler_t handler);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LifecycleService_SetShutdownHandler_t)(
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_LifecycleService_SetShutdownHandler_t)(
     SilKit_LifecycleService* lifecycleService, void* context, SilKit_LifecycleService_ShutdownHandler_t handler);
 
 /*! \brief The handler to be called on a simulation abort.
@@ -332,17 +335,17 @@ typedef void(SilKitFPTR* SilKit_LifecycleService_AbortHandler_t)(void* context,
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LifecycleService_SetAbortHandler(
     SilKit_LifecycleService* lifecycleService, void* context, SilKit_LifecycleService_AbortHandler_t handler);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LifecycleService_SetAbortHandler_t)(
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_LifecycleService_SetAbortHandler_t)(
     SilKit_LifecycleService* lifecycleService, void* context, SilKit_LifecycleService_AbortHandler_t handler);
 
 /*! \brief Start the lifecycle.
  *
  * \param lifecycleService The instance of the lifecycleService.
  */
-SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LifecycleService_StartLifecycle(
-    SilKit_LifecycleService* lifecycleService);
+SilKitAPI SilKit_ReturnCode SilKitCALL
+SilKit_LifecycleService_StartLifecycle(SilKit_LifecycleService* lifecycleService);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LifecycleService_StartLifecycle_t)(
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_LifecycleService_StartLifecycle_t)(
     SilKit_LifecycleService* lifecycleService);
 
 /*! \brief Wait for to asynchronous run operation to complete and return the final participant state
@@ -356,7 +359,7 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LifecycleService_StartLifecycle_t)
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LifecycleService_WaitForLifecycleToComplete(
     SilKit_LifecycleService* lifecycleService, SilKit_ParticipantState* outParticipantState);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LifecycleService_WaitForLifecycleToComplete_t)(
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_LifecycleService_WaitForLifecycleToComplete_t)(
     SilKit_LifecycleService* lifecycleService, SilKit_ParticipantState* outParticipantState);
 
 /*! \brief Abort current simulation run due to an error.
@@ -370,8 +373,8 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LifecycleService_WaitForLifecycleT
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LifecycleService_ReportError(SilKit_LifecycleService* lifecycleService,
                                                                            const char* reason);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LifecycleService_ReportError_t)(SilKit_LifecycleService* lifecycleService,
-                                                                              const char* reason);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_LifecycleService_ReportError_t)(SilKit_LifecycleService* lifecycleService,
+                                                                             const char* reason);
 
 /*! \brief Pause execution of the participant
  *
@@ -387,10 +390,10 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LifecycleService_ReportError_t)(Si
  * \param reason A string describing the reason why the simulation was paused (UTF-8).
  */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LifecycleService_Pause(SilKit_LifecycleService* lifecycleService,
-    const char* reason);
+                                                                     const char* reason);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LifecycleService_Pause_t)(SilKit_LifecycleService* lifecycleService,
-    const char* reason);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_LifecycleService_Pause_t)(SilKit_LifecycleService* lifecycleService,
+                                                                       const char* reason);
 
 /*! \brief Switch back to \ref SilKit_ParticipantState_Running
  * after having paused.
@@ -399,7 +402,7 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LifecycleService_Pause_t)(SilKit_L
  */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LifecycleService_Continue(SilKit_LifecycleService* lifecycleService);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LifecycleService_Continue_t)(SilKit_LifecycleService* lifecycleService);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_LifecycleService_Continue_t)(SilKit_LifecycleService* lifecycleService);
 
 /*! \brief Stop execution of the participant.
  *
@@ -419,9 +422,11 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LifecycleService_Continue_t)(SilKi
  * \param lifecycleService The lifecycle service of the simulation.
  * \param reason A string describing why the simulation was stopped (UTF-8).
  */
-SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LifecycleService_Stop(SilKit_LifecycleService* lifecycleService, const char* reason);
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LifecycleService_Stop(SilKit_LifecycleService* lifecycleService,
+                                                                    const char* reason);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LifecycleService_Stop_t)(SilKit_LifecycleService* lifecycleService, const char* reason);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_LifecycleService_Stop_t)(SilKit_LifecycleService* lifecycleService,
+                                                                      const char* reason);
 
 /*! \brief Get the current participant state.
  *
@@ -442,8 +447,8 @@ typedef SilKit_ReturnCode(SilKitFPTR* SilKit_LifecycleService_State_t)(SilKit_Pa
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LifecycleService_Status(SilKit_ParticipantStatus* outParticipantStatus,
                                                                       SilKit_LifecycleService* lifecycleService);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LifecycleService_Status_t)(SilKit_ParticipantStatus* outParticipantStatus,
-                                                                         SilKit_LifecycleService* lifecycleService);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_LifecycleService_Status_t)(SilKit_ParticipantStatus* outParticipantStatus,
+                                                                        SilKit_LifecycleService* lifecycleService);
 
 /*
  *
@@ -459,10 +464,10 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LifecycleService_Status_t)(SilKit_
  * The object returned must not be deallocated using free()!
  */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_TimeSyncService_Create(SilKit_TimeSyncService** outTimeSyncService,
-    SilKit_LifecycleService* lifecycleService);
+                                                                     SilKit_LifecycleService* lifecycleService);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_TimeSyncService_Create_t)(SilKit_TimeSyncService** outTimeSyncService,
-    SilKit_Participant* lifecycleService);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_TimeSyncService_Create_t)(SilKit_TimeSyncService** outTimeSyncService,
+                                                                       SilKit_Participant* lifecycleService);
 
 /*! \brief The handler to be called if the simulation task is due
  *
@@ -471,8 +476,10 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_TimeSyncService_Create_t)(SilKit_T
  * \param now The current simulation time
  * \param duration The duration of the simulation step
  */
-typedef void (SilKitFPTR *SilKit_TimeSyncService_SimulationStepHandler_t)(void* context, SilKit_TimeSyncService* timeSyncService,
-                                                               SilKit_NanosecondsTime now, SilKit_NanosecondsTime duration);
+typedef void(SilKitFPTR* SilKit_TimeSyncService_SimulationStepHandler_t)(void* context,
+                                                                         SilKit_TimeSyncService* timeSyncService,
+                                                                         SilKit_NanosecondsTime now,
+                                                                         SilKit_NanosecondsTime duration);
 /*! \brief Set the task to be executed with each grant / tick
  *
  * Can be changed at runtime. Execution context depends on the run type.
@@ -483,9 +490,10 @@ typedef void (SilKitFPTR *SilKit_TimeSyncService_SimulationStepHandler_t)(void* 
  * \param initialStepSize The initial size of the simulation step of this participant in nanoseconds
  */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_TimeSyncService_SetSimulationStepHandler(
-    SilKit_TimeSyncService* timeSyncService, void* context, SilKit_TimeSyncService_SimulationStepHandler_t handler, SilKit_NanosecondsTime initialStepSize);
+    SilKit_TimeSyncService* timeSyncService, void* context, SilKit_TimeSyncService_SimulationStepHandler_t handler,
+    SilKit_NanosecondsTime initialStepSize);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_TimeSyncService_SetSimulationStepHandler_t)(
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_TimeSyncService_SetSimulationStepHandler_t)(
     SilKit_TimeSyncService* timeSyncService, void* context, SilKit_TimeSyncService_SimulationStepHandler_t handler,
     SilKit_NanosecondsTime initialStepSize);
 
@@ -511,7 +519,7 @@ SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_TimeSyncService_SetSimulationStepH
     SilKit_TimeSyncService* timeSyncService, void* context, SilKit_TimeSyncService_SimulationStepHandler_t handler,
     SilKit_NanosecondsTime initialStepSize);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_TimeSyncService_SetSimulationStepHandlerAsync_t)(
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_TimeSyncService_SetSimulationStepHandlerAsync_t)(
     SilKit_TimeSyncService* timeSyncService, void* context, SilKit_TimeSyncService_SimulationStepHandler_t handler,
     SilKit_NanosecondsTime initialStepSize);
 
@@ -519,9 +527,11 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_TimeSyncService_SetSimulationStepH
  *
  * \param timeSyncService The time sync service
  */
-SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_TimeSyncService_CompleteSimulationStep(SilKit_TimeSyncService* timeSyncService);
+SilKitAPI SilKit_ReturnCode SilKitCALL
+SilKit_TimeSyncService_CompleteSimulationStep(SilKit_TimeSyncService* timeSyncService);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_TimeSyncService_CompleteSimulationStep_t)(SilKit_TimeSyncService* timeSyncService);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_TimeSyncService_CompleteSimulationStep_t)(
+    SilKit_TimeSyncService* timeSyncService);
 
 /*! \brief Get the current simulation time
  *
@@ -529,10 +539,10 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_TimeSyncService_CompleteSimulation
  * \param outNanosecondsTime The simulation time in nanoseconds.
  */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_TimeSyncService_Now(SilKit_TimeSyncService* timeSyncService,
-    SilKit_NanosecondsTime* outNanosecondsTime);
+                                                                  SilKit_NanosecondsTime* outNanosecondsTime);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_TimeSyncService_Now_t)(SilKit_TimeSyncService* timeSyncService,
-    SilKit_NanosecondsTime* outNanosecondsTime);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_TimeSyncService_Now_t)(SilKit_TimeSyncService* timeSyncService,
+                                                                    SilKit_NanosecondsTime* outNanosecondsTime);
 
 
 /*
@@ -549,30 +559,28 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_TimeSyncService_Now_t)(SilKit_Time
  * The object returned must not be deallocated using free()!
  */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_SystemMonitor_Create(SilKit_SystemMonitor** outSystemMonitor,
-    SilKit_Participant* participant);
+                                                                   SilKit_Participant* participant);
 
 typedef SilKit_ReturnCode(SilKitFPTR* SilKit_SystemMonitor_Create_t)(SilKit_SystemMonitor** outSystemMonitor,
-    SilKit_Participant* participant);
+                                                                     SilKit_Participant* participant);
 
 /*! \brief Get the current participant state of the participant given by participantName (UTF-8)
  */
-SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_SystemMonitor_GetParticipantStatus(SilKit_ParticipantStatus* outParticipantState,
-                                                                      SilKit_SystemMonitor* systemMonitor,
-                                                                      const char* participantName);
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_SystemMonitor_GetParticipantStatus(
+    SilKit_ParticipantStatus* outParticipantState, SilKit_SystemMonitor* systemMonitor, const char* participantName);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_SystemMonitor_GetParticipantStatus_t)(SilKit_ParticipantStatus* outParticipantState,
-                                                                         SilKit_SystemMonitor* systemMonitor,
-                                                                         const char* participantName);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_SystemMonitor_GetParticipantStatus_t)(
+    SilKit_ParticipantStatus* outParticipantState, SilKit_SystemMonitor* systemMonitor, const char* participantName);
 
 /*! \brief Get the current \ref SilKit_SystemState */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_SystemMonitor_GetSystemState(SilKit_SystemState* outSystemState,
-                                                                SilKit_SystemMonitor* systemMonitor);
+                                                                           SilKit_SystemMonitor* systemMonitor);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_SystemMonitor_GetSystemState_t)(SilKit_SystemState* outSystemState,
-                                                                   SilKit_SystemMonitor* systemMonitor);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_SystemMonitor_GetSystemState_t)(SilKit_SystemState* outSystemState,
+                                                                             SilKit_SystemMonitor* systemMonitor);
 
-typedef void (SilKitFPTR *SilKit_SystemStateHandler_t)(void* context, SilKit_SystemMonitor* systemMonitor,
-                                            SilKit_SystemState state);
+typedef void(SilKitFPTR* SilKit_SystemStateHandler_t)(void* context, SilKit_SystemMonitor* systemMonitor,
+                                                      SilKit_SystemState state);
 
 /*! \brief Register a callback for system state changes
  *
@@ -585,27 +593,28 @@ typedef void (SilKitFPTR *SilKit_SystemStateHandler_t)(void* context, SilKit_Sys
  * \param outHandlerId The handler identifier that can be used to remove the callback.
  */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_SystemMonitor_AddSystemStateHandler(SilKit_SystemMonitor* systemMonitor,
-                                                                       void* context,
-                                                                       SilKit_SystemStateHandler_t handler,
-                                                                       SilKit_HandlerId* outHandlerId);
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_SystemMonitor_AddSystemStateHandler_t)(SilKit_SystemMonitor* systemMonitor,
-                                                                          void* context,
-                                                                          SilKit_SystemStateHandler_t handler,
-                                                                          SilKit_HandlerId* outHandlerId);
+                                                                                  void* context,
+                                                                                  SilKit_SystemStateHandler_t handler,
+                                                                                  SilKit_HandlerId* outHandlerId);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_SystemMonitor_AddSystemStateHandler_t)(SilKit_SystemMonitor* systemMonitor,
+                                                                                    void* context,
+                                                                                    SilKit_SystemStateHandler_t handler,
+                                                                                    SilKit_HandlerId* outHandlerId);
 
 /*! \brief  Remove a \ref SilKit_SystemStateHandler_t by SilKit_HandlerId on this participant
  *
  * \param systemMonitor The system monitor obtained via \ref SilKit_SystemMonitor_Create.
  * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
  */
-SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_SystemMonitor_RemoveSystemStateHandler(SilKit_SystemMonitor* systemMonitor,
-                                                                          SilKit_HandlerId handlerId);
+SilKitAPI SilKit_ReturnCode SilKitCALL
+SilKit_SystemMonitor_RemoveSystemStateHandler(SilKit_SystemMonitor* systemMonitor, SilKit_HandlerId handlerId);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_SystemMonitor_RemoveSystemStateHandler_t)(SilKit_SystemMonitor* systemMonitor,
-                                                                             SilKit_HandlerId handlerId);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_SystemMonitor_RemoveSystemStateHandler_t)(
+    SilKit_SystemMonitor* systemMonitor, SilKit_HandlerId handlerId);
 
-typedef void (SilKitFPTR *SilKit_ParticipantStatusHandler_t)(void* context, SilKit_SystemMonitor* systemMonitor,
-                                                  const char* participantName, SilKit_ParticipantStatus* status);
+typedef void(SilKitFPTR* SilKit_ParticipantStatusHandler_t)(void* context, SilKit_SystemMonitor* systemMonitor,
+                                                            const char* participantName,
+                                                            SilKit_ParticipantStatus* status);
 
 /*! \brief Register a callback for status changes of participants.
  *
@@ -617,12 +626,11 @@ typedef void (SilKitFPTR *SilKit_ParticipantStatusHandler_t)(void* context, SilK
  * \param handler The handler to be called to be called when the participant status changes.
  * \param outHandlerId The handler identifier that can be used to remove the callback.
  */
-SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_SystemMonitor_AddParticipantStatusHandler(SilKit_SystemMonitor* systemMonitor,
-                                                                             void* context,
-                                                                             SilKit_ParticipantStatusHandler_t handler,
-                                                                             SilKit_HandlerId* outHandlerId);
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_SystemMonitor_AddParticipantStatusHandler(
+    SilKit_SystemMonitor* systemMonitor, void* context, SilKit_ParticipantStatusHandler_t handler,
+    SilKit_HandlerId* outHandlerId);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_SystemMonitor_AddParticipantStatusHandler_t)(
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_SystemMonitor_AddParticipantStatusHandler_t)(
     SilKit_SystemMonitor* systemMonitor, void* context, SilKit_ParticipantStatusHandler_t handler,
     SilKit_HandlerId* outHandlerId);
 
@@ -631,11 +639,11 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_SystemMonitor_AddParticipantStatus
  * \param systemMonitor The system monitor obtained via \ref SilKit_SystemMonitor_Create.
  * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
  */
-SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_SystemMonitor_RemoveParticipantStatusHandler(SilKit_SystemMonitor* systemMonitor,
-                                                                                SilKit_HandlerId handlerId);
+SilKitAPI SilKit_ReturnCode SilKitCALL
+SilKit_SystemMonitor_RemoveParticipantStatusHandler(SilKit_SystemMonitor* systemMonitor, SilKit_HandlerId handlerId);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_SystemMonitor_RemoveParticipantStatusHandler_t)(SilKit_SystemMonitor* systemMonitor,
-                                                                                   SilKit_HandlerId handlerId);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_SystemMonitor_RemoveParticipantStatusHandler_t)(
+    SilKit_SystemMonitor* systemMonitor, SilKit_HandlerId handlerId);
 
 /*! \brief Information about a participant connection in the \ref SilKit_SystemMonitor_ParticipantConnectedHandler_t. */
 typedef struct SilKit_ParticipantConnectionInformation
@@ -648,7 +656,7 @@ typedef struct SilKit_ParticipantConnectionInformation
 /*! Callback type to indicate that a participant has been connected.
  * Cf., \ref SilKit_SystemMonitor_SetParticipantConnectedHandler
  */
-typedef void (SilKitFPTR *SilKit_SystemMonitor_ParticipantConnectedHandler_t)(
+typedef void(SilKitFPTR* SilKit_SystemMonitor_ParticipantConnectedHandler_t)(
     void* context, SilKit_SystemMonitor* systemMonitor,
     const SilKit_ParticipantConnectionInformation* participantConnectionInformation);
 
@@ -661,13 +669,13 @@ typedef void (SilKitFPTR *SilKit_SystemMonitor_ParticipantConnectedHandler_t)(
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_SystemMonitor_SetParticipantConnectedHandler(
     SilKit_SystemMonitor* systemMonitor, void* context, SilKit_SystemMonitor_ParticipantConnectedHandler_t handler);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_SystemMonitor_SetParticipantConnectedHandler_t)(
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_SystemMonitor_SetParticipantConnectedHandler_t)(
     SilKit_SystemMonitor* systemMonitor, void* context, SilKit_SystemMonitor_ParticipantConnectedHandler_t handler);
 
 /*! Callback type to indicate that a participant has been disconnected.
  * Cf., \ref SilKit_SystemMonitor_SetParticipantDisconnectedHandler
  */
-typedef void (SilKitFPTR *SilKit_SystemMonitor_ParticipantDisconnectedHandler_t)(
+typedef void(SilKitFPTR* SilKit_SystemMonitor_ParticipantDisconnectedHandler_t)(
     void* context, SilKit_SystemMonitor* systemMonitor,
     const SilKit_ParticipantConnectionInformation* participantConnectionInformation);
 
@@ -680,7 +688,7 @@ typedef void (SilKitFPTR *SilKit_SystemMonitor_ParticipantDisconnectedHandler_t)
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_SystemMonitor_SetParticipantDisconnectedHandler(
     SilKit_SystemMonitor* systemMonitor, void* context, SilKit_SystemMonitor_ParticipantDisconnectedHandler_t handler);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_SystemMonitor_SetParticipantDisconnectedHandler_t)(
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_SystemMonitor_SetParticipantDisconnectedHandler_t)(
     SilKit_SystemMonitor* systemMonitor, void* context, SilKit_SystemMonitor_ParticipantDisconnectedHandler_t handler);
 
 /*! \brief Check if a participant identified by the participantName is present.
@@ -693,7 +701,7 @@ SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_SystemMonitor_IsParticipantConnect
                                                                                    const char* participantName,
                                                                                    SilKit_Bool* out);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_SystemMonitor_IsParticipantConnected_t)(
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_SystemMonitor_IsParticipantConnected_t)(
     SilKit_SystemMonitor* systemMonitor, const char* participantName, SilKit_Bool* out);
 
 /*! \brief Return the experimental ISystemController at a given SIL Kit participant.
@@ -707,7 +715,7 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_SystemMonitor_IsParticipantConnect
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Experimental_SystemController_Create(
     SilKit_Experimental_SystemController** outSystemController, SilKit_Participant* participant);
 
-typedef SilKit_ReturnCode(SilKitFPTR * SilKit_Experimental_SystemController_Create_t)(
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_Experimental_SystemController_Create_t)(
     SilKit_Experimental_SystemController** outSystemController, SilKit_Participant* participant);
 
 /*! \brief Sends a SilKit::Services::Orchestration::SystemCommand::Kind::AbortSimulation to all participants
@@ -722,8 +730,8 @@ typedef SilKit_ReturnCode(SilKitFPTR * SilKit_Experimental_SystemController_Crea
  *
  * @param systemController The system controller obtained via \ref SilKit_Experimental_SystemController_Create.
  */
-SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Experimental_SystemController_AbortSimulation(
-    SilKit_Experimental_SystemController* systemController);
+SilKitAPI SilKit_ReturnCode SilKitCALL
+SilKit_Experimental_SystemController_AbortSimulation(SilKit_Experimental_SystemController* systemController);
 
 typedef SilKit_ReturnCode(SilKitFPTR* SilKit_Experimental_SystemController_AbortSimulation_t)(
     SilKit_Experimental_SystemController* systemController);
@@ -744,12 +752,10 @@ typedef SilKit_ReturnCode(SilKitFPTR* SilKit_Experimental_SystemController_Abort
  * @param workflowConfiguration The desired configuration, currently containing a list of required participants
  */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Experimental_SystemController_SetWorkflowConfiguration(
-    SilKit_Experimental_SystemController* systemController,
-    const SilKit_WorkflowConfiguration* workflowConfiguration);
+    SilKit_Experimental_SystemController* systemController, const SilKit_WorkflowConfiguration* workflowConfiguration);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_Experimental_SystemController_SetWorkflowConfiguration_t)(
-    SilKit_Experimental_SystemController* systemController,
-    const SilKit_WorkflowConfiguration* workflowConfiguration);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_Experimental_SystemController_SetWorkflowConfiguration_t)(
+    SilKit_Experimental_SystemController* systemController, const SilKit_WorkflowConfiguration* workflowConfiguration);
 
 SILKIT_END_DECLS
 

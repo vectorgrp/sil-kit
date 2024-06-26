@@ -37,12 +37,12 @@ class SimBehaviorDetailed : public ISimBehavior
 {
 public:
     SimBehaviorDetailed(Core::IParticipantInternal* participant, EthController* ethController,
-                       const Core::ServiceDescriptor& serviceDescriptor);
+                        const Core::ServiceDescriptor& serviceDescriptor);
 
     void SendMsg(WireEthernetFrameEvent&& msg) override;
     void SendMsg(EthernetSetMode&& msg) override;
     void OnReceiveAck(const EthernetFrameTransmitEvent& msg) override;
-    
+
     auto AllowReception(const Core::IServiceEndpoint* from) const -> bool override;
 
     void SetSimulatedLink(const Core::ServiceDescriptor& simulatedLink);

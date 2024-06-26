@@ -29,8 +29,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "CapiImpl.hpp"
 
 
-SilKit_ReturnCode SilKitCALL SilKit_EthernetController_Create(SilKit_EthernetController** outController, SilKit_Participant* participant,
-                                            const char* name, const char* network)
+SilKit_ReturnCode SilKitCALL SilKit_EthernetController_Create(SilKit_EthernetController** outController,
+                                                              SilKit_Participant* participant, const char* name,
+                                                              const char* network)
 try
 {
     ASSERT_VALID_OUT_PARAMETER(outController);
@@ -70,10 +71,11 @@ try
 CAPI_CATCH_EXCEPTIONS
 
 
-SilKit_ReturnCode SilKitCALL SilKit_EthernetController_AddFrameHandler(SilKit_EthernetController* controller, void* context,
-                                                            SilKit_EthernetFrameHandler_t handler,
-                                                            SilKit_Direction directionMask,
-                                                            SilKit_HandlerId* outHandlerId)
+SilKit_ReturnCode SilKitCALL SilKit_EthernetController_AddFrameHandler(SilKit_EthernetController* controller,
+                                                                       void* context,
+                                                                       SilKit_EthernetFrameHandler_t handler,
+                                                                       SilKit_Direction directionMask,
+                                                                       SilKit_HandlerId* outHandlerId)
 try
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
@@ -81,34 +83,34 @@ try
     ASSERT_VALID_OUT_PARAMETER(outHandlerId);
 
     auto cppController = reinterpret_cast<SilKit::Services::Ethernet::IEthernetController*>(controller);
-    auto cppHandlerId = cppController->AddFrameHandler(
-        [handler, context, controller](auto* /*ctrl*/,
-                                       const auto& cppFrameEvent) {
-            auto& cppFrame = cppFrameEvent.frame;
-            auto* dataPointer = !cppFrame.raw.empty() ? cppFrame.raw.data() : nullptr;
+    auto cppHandlerId =
+        cppController->AddFrameHandler([handler, context, controller](auto* /*ctrl*/, const auto& cppFrameEvent) {
+        auto& cppFrame = cppFrameEvent.frame;
+        auto* dataPointer = !cppFrame.raw.empty() ? cppFrame.raw.data() : nullptr;
 
-            SilKit_EthernetFrame frame;
-            SilKit_Struct_Init(SilKit_EthernetFrame, frame);
+        SilKit_EthernetFrame frame;
+        SilKit_Struct_Init(SilKit_EthernetFrame, frame);
 
-            frame.raw = {dataPointer, cppFrame.raw.size()};
+        frame.raw = {dataPointer, cppFrame.raw.size()};
 
-            SilKit_EthernetFrameEvent frameEvent;
-            SilKit_Struct_Init(SilKit_EthernetFrameEvent, frameEvent);
+        SilKit_EthernetFrameEvent frameEvent;
+        SilKit_Struct_Init(SilKit_EthernetFrameEvent, frameEvent);
 
-            frameEvent.ethernetFrame = &frame;
-            frameEvent.timestamp = cppFrameEvent.timestamp.count();
-            frameEvent.direction = static_cast<SilKit_Direction>(cppFrameEvent.direction);
-            frameEvent.userContext = cppFrameEvent.userContext;
+        frameEvent.ethernetFrame = &frame;
+        frameEvent.timestamp = cppFrameEvent.timestamp.count();
+        frameEvent.direction = static_cast<SilKit_Direction>(cppFrameEvent.direction);
+        frameEvent.userContext = cppFrameEvent.userContext;
 
-            handler(context, controller, &frameEvent);
-        }, directionMask);
+        handler(context, controller, &frameEvent);
+    }, directionMask);
     *outHandlerId = static_cast<SilKit_HandlerId>(cppHandlerId);
     return SilKit_ReturnCode_SUCCESS;
 }
 CAPI_CATCH_EXCEPTIONS
 
 
-SilKit_ReturnCode SilKitCALL SilKit_EthernetController_RemoveFrameHandler(SilKit_EthernetController* controller, SilKit_HandlerId handlerId)
+SilKit_ReturnCode SilKitCALL SilKit_EthernetController_RemoveFrameHandler(SilKit_EthernetController* controller,
+                                                                          SilKit_HandlerId handlerId)
 try
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
@@ -120,11 +122,9 @@ try
 CAPI_CATCH_EXCEPTIONS
 
 
-SilKit_ReturnCode SilKitCALL SilKit_EthernetController_AddFrameTransmitHandler(SilKit_EthernetController* controller,
-                                                                    void* context,
-                                                                    SilKit_EthernetFrameTransmitHandler_t handler,
-                                                                    SilKit_EthernetTransmitStatus transmitStatusMask,
-                                                                    SilKit_HandlerId* outHandlerId)
+SilKit_ReturnCode SilKitCALL SilKit_EthernetController_AddFrameTransmitHandler(
+    SilKit_EthernetController* controller, void* context, SilKit_EthernetFrameTransmitHandler_t handler,
+    SilKit_EthernetTransmitStatus transmitStatusMask, SilKit_HandlerId* outHandlerId)
 try
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
@@ -138,13 +138,13 @@ try
     auto cppController = reinterpret_cast<IEthernetController*>(controller);
     auto cppHandlerId = cppController->AddFrameTransmitHandler(
         [context, handler](IEthernetController* controller, const EthernetFrameTransmitEvent& frameTransmitEvent) {
-            SilKit_EthernetFrameTransmitEvent cEvent;
-            SilKit_Struct_Init(SilKit_EthernetFrameTransmitEvent, cEvent);
-            cEvent.status = (SilKit_EthernetTransmitStatus)frameTransmitEvent.status;
-            cEvent.timestamp = frameTransmitEvent.timestamp.count();
-            cEvent.userContext = frameTransmitEvent.userContext;
-            handler(context, reinterpret_cast<SilKit_EthernetController*>(controller), &cEvent);
-        }, transmitStatusMask);
+        SilKit_EthernetFrameTransmitEvent cEvent;
+        SilKit_Struct_Init(SilKit_EthernetFrameTransmitEvent, cEvent);
+        cEvent.status = (SilKit_EthernetTransmitStatus)frameTransmitEvent.status;
+        cEvent.timestamp = frameTransmitEvent.timestamp.count();
+        cEvent.userContext = frameTransmitEvent.userContext;
+        handler(context, reinterpret_cast<SilKit_EthernetController*>(controller), &cEvent);
+    }, transmitStatusMask);
     *outHandlerId = static_cast<SilKit_HandlerId>(cppHandlerId);
     return SilKit_ReturnCode_SUCCESS;
 }
@@ -152,7 +152,7 @@ CAPI_CATCH_EXCEPTIONS
 
 
 SilKit_ReturnCode SilKitCALL SilKit_EthernetController_RemoveFrameTransmitHandler(SilKit_EthernetController* controller,
-                                                                SilKit_HandlerId handlerId)
+                                                                                  SilKit_HandlerId handlerId)
 try
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
@@ -164,9 +164,9 @@ try
 CAPI_CATCH_EXCEPTIONS
 
 
-SilKit_ReturnCode SilKitCALL SilKit_EthernetController_AddStateChangeHandler(SilKit_EthernetController* controller, void* context,
-                                                           SilKit_EthernetStateChangeHandler_t handler,
-                                                           SilKit_HandlerId* outHandlerId)
+SilKit_ReturnCode SilKitCALL SilKit_EthernetController_AddStateChangeHandler(
+    SilKit_EthernetController* controller, void* context, SilKit_EthernetStateChangeHandler_t handler,
+    SilKit_HandlerId* outHandlerId)
 try
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
@@ -177,12 +177,12 @@ try
     auto cppHandlerId = cppController->AddStateChangeHandler(
         [handler, context, controller](SilKit::Services::Ethernet::IEthernetController*,
                                        const SilKit::Services::Ethernet::EthernetStateChangeEvent& stateChangeEvent) {
-            SilKit_EthernetStateChangeEvent cStateChangeEvent;
-            SilKit_Struct_Init(SilKit_EthernetStateChangeEvent, cStateChangeEvent);
-            cStateChangeEvent.timestamp = stateChangeEvent.timestamp.count();
-            cStateChangeEvent.state = (SilKit_EthernetState)stateChangeEvent.state;
-            handler(context, controller, &cStateChangeEvent);
-        });
+        SilKit_EthernetStateChangeEvent cStateChangeEvent;
+        SilKit_Struct_Init(SilKit_EthernetStateChangeEvent, cStateChangeEvent);
+        cStateChangeEvent.timestamp = stateChangeEvent.timestamp.count();
+        cStateChangeEvent.state = (SilKit_EthernetState)stateChangeEvent.state;
+        handler(context, controller, &cStateChangeEvent);
+    });
     *outHandlerId = static_cast<SilKit_HandlerId>(cppHandlerId);
     return SilKit_ReturnCode_SUCCESS;
 }
@@ -190,7 +190,7 @@ CAPI_CATCH_EXCEPTIONS
 
 
 SilKit_ReturnCode SilKitCALL SilKit_EthernetController_RemoveStateChangeHandler(SilKit_EthernetController* controller,
-                                                              SilKit_HandlerId handlerId)
+                                                                                SilKit_HandlerId handlerId)
 try
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
@@ -202,9 +202,9 @@ try
 CAPI_CATCH_EXCEPTIONS
 
 
-SilKit_ReturnCode SilKitCALL SilKit_EthernetController_AddBitrateChangeHandler(SilKit_EthernetController* controller, void* context,
-                                                             SilKit_EthernetBitrateChangeHandler_t handler,
-                                                             SilKit_HandlerId* outHandlerId)
+SilKit_ReturnCode SilKitCALL SilKit_EthernetController_AddBitrateChangeHandler(
+    SilKit_EthernetController* controller, void* context, SilKit_EthernetBitrateChangeHandler_t handler,
+    SilKit_HandlerId* outHandlerId)
 try
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
@@ -213,15 +213,16 @@ try
 
     auto cppController = reinterpret_cast<SilKit::Services::Ethernet::IEthernetController*>(controller);
     auto cppHandlerId = cppController->AddBitrateChangeHandler(
-        [handler, context, controller](SilKit::Services::Ethernet::IEthernetController*,
-                                       const SilKit::Services::Ethernet::EthernetBitrateChangeEvent& bitrateChangeEvent) {
-            SilKit_EthernetBitrateChangeEvent cBitrateChangeEvent;
-            SilKit_Struct_Init(SilKit_EthernetBitrateChangeEvent, cBitrateChangeEvent);
-            cBitrateChangeEvent.timestamp = bitrateChangeEvent.timestamp.count();
-            cBitrateChangeEvent.bitrate = (SilKit_EthernetBitrate)bitrateChangeEvent.bitrate;
+        [handler, context, controller](
+            SilKit::Services::Ethernet::IEthernetController*,
+            const SilKit::Services::Ethernet::EthernetBitrateChangeEvent& bitrateChangeEvent) {
+        SilKit_EthernetBitrateChangeEvent cBitrateChangeEvent;
+        SilKit_Struct_Init(SilKit_EthernetBitrateChangeEvent, cBitrateChangeEvent);
+        cBitrateChangeEvent.timestamp = bitrateChangeEvent.timestamp.count();
+        cBitrateChangeEvent.bitrate = (SilKit_EthernetBitrate)bitrateChangeEvent.bitrate;
 
-            handler(context, controller, &cBitrateChangeEvent);
-        });
+        handler(context, controller, &cBitrateChangeEvent);
+    });
     *outHandlerId = static_cast<SilKit_HandlerId>(cppHandlerId);
     return SilKit_ReturnCode_SUCCESS;
 }
@@ -229,7 +230,7 @@ CAPI_CATCH_EXCEPTIONS
 
 
 SilKit_ReturnCode SilKitCALL SilKit_EthernetController_RemoveBitrateChangeHandler(SilKit_EthernetController* controller,
-                                                                SilKit_HandlerId handlerId)
+                                                                                  SilKit_HandlerId handlerId)
 try
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
@@ -241,8 +242,8 @@ try
 CAPI_CATCH_EXCEPTIONS
 
 
-SilKit_ReturnCode SilKitCALL SilKit_EthernetController_SendFrame(SilKit_EthernetController* controller, SilKit_EthernetFrame* frame,
-                                               void* userContext)
+SilKit_ReturnCode SilKitCALL SilKit_EthernetController_SendFrame(SilKit_EthernetController* controller,
+                                                                 SilKit_EthernetFrame* frame, void* userContext)
 try
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);

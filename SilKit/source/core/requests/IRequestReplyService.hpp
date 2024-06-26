@@ -36,7 +36,6 @@ class IParticipantReplies;
 class IRequestReplyService
 {
 public:
-
     virtual ~IRequestReplyService() = default;
 
     virtual Util::Uuid Call(FunctionType functionType, std::vector<uint8_t> callData) = 0;

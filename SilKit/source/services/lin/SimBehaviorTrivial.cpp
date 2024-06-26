@@ -32,11 +32,16 @@ inline auto ToTxFrameStatus(LinFrameStatus status) -> LinFrameStatus
 {
     switch (status)
     {
-    case LinFrameStatus::LIN_RX_BUSY: return LinFrameStatus::LIN_TX_BUSY;
-    case LinFrameStatus::LIN_RX_ERROR: return LinFrameStatus::LIN_TX_ERROR;
-    case LinFrameStatus::LIN_RX_NO_RESPONSE: return LinFrameStatus::LIN_RX_NO_RESPONSE;
-    case LinFrameStatus::LIN_RX_OK: return LinFrameStatus::LIN_TX_OK;
-    default: return status;
+    case LinFrameStatus::LIN_RX_BUSY:
+        return LinFrameStatus::LIN_TX_BUSY;
+    case LinFrameStatus::LIN_RX_ERROR:
+        return LinFrameStatus::LIN_TX_ERROR;
+    case LinFrameStatus::LIN_RX_NO_RESPONSE:
+        return LinFrameStatus::LIN_RX_NO_RESPONSE;
+    case LinFrameStatus::LIN_RX_OK:
+        return LinFrameStatus::LIN_TX_OK;
+    default:
+        return status;
     }
 }
 
@@ -47,12 +52,14 @@ inline auto ToTracingDir(LinFrameStatus status) -> SilKit::Services::TransmitDir
     case LinFrameStatus::LIN_RX_ERROR: //[[fallthrough]]
     case LinFrameStatus::LIN_RX_BUSY: //[[fallthrough]]
     case LinFrameStatus::LIN_RX_NO_RESPONSE: //[[fallthrough]]
-    case LinFrameStatus::LIN_RX_OK: return SilKit::Services::TransmitDirection::RX;
+    case LinFrameStatus::LIN_RX_OK:
+        return SilKit::Services::TransmitDirection::RX;
 
     case LinFrameStatus::LIN_TX_ERROR: //[[fallthrough]]
     case LinFrameStatus::LIN_TX_BUSY: //[[fallthrough]]
     case LinFrameStatus::LIN_TX_HEADER_ERROR: //[[fallthrough]]
-    case LinFrameStatus::LIN_TX_OK: return SilKit::Services::TransmitDirection::TX;
+    case LinFrameStatus::LIN_TX_OK:
+        return SilKit::Services::TransmitDirection::TX;
 
     default:
         //if invalid status given, failsafe to send.
@@ -79,15 +86,15 @@ void SimBehaviorTrivial::ReceiveMsg(const MsgT& msg)
     receivingController->ReceiveMsg(_parentServiceEndpoint, msg);
 }
 
-auto SimBehaviorTrivial::AllowReception(const Core::IServiceEndpoint* /*from*/) const -> bool 
-{ 
-    return true; 
+auto SimBehaviorTrivial::AllowReception(const Core::IServiceEndpoint* /*from*/) const -> bool
+{
+    return true;
 }
 
 template <typename MsgT>
 void SimBehaviorTrivial::SendMsgImpl(MsgT&& msg)
 {
-    _participant->SendMsg(_parentServiceEndpoint, std::forward<MsgT>(msg)); 
+    _participant->SendMsg(_parentServiceEndpoint, std::forward<MsgT>(msg));
 }
 
 void SimBehaviorTrivial::SendMsg(LinSendFrameRequest&& msg)
@@ -208,8 +215,8 @@ void SimBehaviorTrivial::UpdateTxBuffer(const LinFrame& /*frame*/)
     // NOP
 }
 
-auto SimBehaviorTrivial::CalcFrameStatus(const LinTransmission& linTransmission, bool /*isGoToSleepFrame*/)
-    -> LinFrameStatus
+auto SimBehaviorTrivial::CalcFrameStatus(const LinTransmission& linTransmission,
+                                         bool /*isGoToSleepFrame*/) -> LinFrameStatus
 {
     // dynamic controllers report every transmission as it was received
     if (_parentController->GetThisLinNode().simulationMode == WireLinControllerConfig::SimulationMode::Dynamic)
@@ -222,37 +229,37 @@ auto SimBehaviorTrivial::CalcFrameStatus(const LinTransmission& linTransmission,
     const auto response = thisLinNode.responses[linTransmission.frame.id];
     switch (response.responseMode)
     {
-        case LinFrameResponseMode::Unused:
+    case LinFrameResponseMode::Unused:
+    {
+        // Return NOT_OK to not trigger the reception callback
+        return LinFrameStatus::NOT_OK;
+    }
+    case LinFrameResponseMode::Rx:
+    {
+        // Skip check if receiving with unknown DataLength
+        const bool checkDataLength = (response.frame.dataLength != LinDataLengthUnknown);
+        if (checkDataLength && (response.frame.dataLength != linTransmission.frame.dataLength))
         {
-            // Return NOT_OK to not trigger the reception callback
-            return LinFrameStatus::NOT_OK;
+            _parentController->WarnOnWrongDataLength(linTransmission.frame, response.frame);
+            return LinFrameStatus::LIN_RX_ERROR;
         }
-        case LinFrameResponseMode::Rx:
-        {
-            // Skip check if receiving with unknown DataLength
-            const bool checkDataLength = (response.frame.dataLength != LinDataLengthUnknown);
-            if (checkDataLength && (response.frame.dataLength != linTransmission.frame.dataLength))
-            {
-                _parentController->WarnOnWrongDataLength(linTransmission.frame, response.frame);
-                return LinFrameStatus::LIN_RX_ERROR;
-            }
 
-            // Skip check if sending or receiving with unknown CSM
-            const bool checkChecksumModel = (linTransmission.frame.checksumModel != LinChecksumModel::Unknown)
-                                         && (response.frame.checksumModel != LinChecksumModel::Unknown);
-            if (checkChecksumModel && (response.frame.checksumModel != linTransmission.frame.checksumModel))
-            {
-                _parentController->WarnOnWrongChecksum(linTransmission.frame, response.frame);
-                return LinFrameStatus::LIN_RX_ERROR;
-            }
-            break;
-        }
-        case LinFrameResponseMode::TxUnconditional:
+        // Skip check if sending or receiving with unknown CSM
+        const bool checkChecksumModel = (linTransmission.frame.checksumModel != LinChecksumModel::Unknown)
+                                        && (response.frame.checksumModel != LinChecksumModel::Unknown);
+        if (checkChecksumModel && (response.frame.checksumModel != linTransmission.frame.checksumModel))
         {
-            // Transmissions are always sent with LinFrameStatus::RX_xxx so we have to
-            // convert the status to a TX_xxx if we sent this frame.
-            return ToTxFrameStatus(linTransmission.status);
+            _parentController->WarnOnWrongChecksum(linTransmission.frame, response.frame);
+            return LinFrameStatus::LIN_RX_ERROR;
         }
+        break;
+    }
+    case LinFrameResponseMode::TxUnconditional:
+    {
+        // Transmissions are always sent with LinFrameStatus::RX_xxx so we have to
+        // convert the status to a TX_xxx if we sent this frame.
+        return ToTxFrameStatus(linTransmission.status);
+    }
     }
     return linTransmission.status;
 }

@@ -37,12 +37,12 @@ namespace Lin {
 *  Used by the Participant, implemented by the LinSimulator
 */
 class IMsgForLinSimulator
-    : public Core::IReceiver<LinSendFrameRequest, LinSendFrameHeaderRequest, LinWakeupPulse, WireLinControllerConfig, LinControllerStatusUpdate, LinFrameResponseUpdate>
+    : public Core::IReceiver<LinSendFrameRequest, LinSendFrameHeaderRequest, LinWakeupPulse, WireLinControllerConfig,
+                             LinControllerStatusUpdate, LinFrameResponseUpdate>
     , public Core::ISender<LinSendFrameHeaderRequest, LinTransmission, LinWakeupPulse, WireLinControllerConfig>
 {
 public:
     virtual ~IMsgForLinSimulator() = default;
-
 };
 
 } // namespace Lin

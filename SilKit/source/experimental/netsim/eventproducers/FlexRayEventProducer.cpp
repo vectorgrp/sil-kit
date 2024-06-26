@@ -14,46 +14,40 @@ FlexRayEventProducer::FlexRayEventProducer(SimulatedNetworkRouter* simulatedNetw
 {
 }
 
-void FlexRayEventProducer::Produce(
-    const SilKit::Services::Flexray::FlexrayFrameEvent& msg,
-    const SilKit::Util::Span<const ControllerDescriptor>& receivers)
+void FlexRayEventProducer::Produce(const SilKit::Services::Flexray::FlexrayFrameEvent& msg,
+                                   const SilKit::Util::Span<const ControllerDescriptor>& receivers)
 {
     auto wireMsg = SilKit::Services::Flexray::MakeWireFlexrayFrameEvent(msg);
     _simulatedNetworkRouter->SendMsg(std::move(wireMsg), receivers);
 }
 
-void FlexRayEventProducer::Produce(
-    const SilKit::Services::Flexray::FlexrayFrameTransmitEvent& msg,
-    const SilKit::Util::Span<const ControllerDescriptor>& receivers)
+void FlexRayEventProducer::Produce(const SilKit::Services::Flexray::FlexrayFrameTransmitEvent& msg,
+                                   const SilKit::Util::Span<const ControllerDescriptor>& receivers)
 {
     auto wireMsg = SilKit::Services::Flexray::MakeWireFlexrayFrameTransmitEvent(msg);
     _simulatedNetworkRouter->SendMsg(std::move(wireMsg), receivers);
 }
 
-void FlexRayEventProducer::Produce(
-    const SilKit::Services::Flexray::FlexraySymbolEvent& msg,
-    const SilKit::Util::Span<const ControllerDescriptor>& receivers)
+void FlexRayEventProducer::Produce(const SilKit::Services::Flexray::FlexraySymbolEvent& msg,
+                                   const SilKit::Util::Span<const ControllerDescriptor>& receivers)
 {
     _simulatedNetworkRouter->SendMsg(msg, receivers);
 }
 
-void FlexRayEventProducer::Produce(
-    const SilKit::Services::Flexray::FlexraySymbolTransmitEvent& msg,
-    const SilKit::Util::Span<const ControllerDescriptor>& receivers)
+void FlexRayEventProducer::Produce(const SilKit::Services::Flexray::FlexraySymbolTransmitEvent& msg,
+                                   const SilKit::Util::Span<const ControllerDescriptor>& receivers)
 {
     _simulatedNetworkRouter->SendMsg(msg, receivers);
 }
 
-void FlexRayEventProducer::Produce(
-    const SilKit::Services::Flexray::FlexrayCycleStartEvent& msg,
-    const SilKit::Util::Span<const ControllerDescriptor>& receivers)
+void FlexRayEventProducer::Produce(const SilKit::Services::Flexray::FlexrayCycleStartEvent& msg,
+                                   const SilKit::Util::Span<const ControllerDescriptor>& receivers)
 {
     _simulatedNetworkRouter->SendMsg(msg, receivers);
 }
 
-void FlexRayEventProducer::Produce(
-    const SilKit::Services::Flexray::FlexrayPocStatusEvent& msg,
-    const SilKit::Util::Span<const ControllerDescriptor>& receivers)
+void FlexRayEventProducer::Produce(const SilKit::Services::Flexray::FlexrayPocStatusEvent& msg,
+                                   const SilKit::Util::Span<const ControllerDescriptor>& receivers)
 {
     _simulatedNetworkRouter->SendMsg(msg, receivers);
 }

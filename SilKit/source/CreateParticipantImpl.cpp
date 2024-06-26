@@ -27,8 +27,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 namespace SilKit {
 
 auto CreateParticipantImpl(std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig,
-                           const std::string& participantName, const std::string& registryUri)
-    -> std::unique_ptr<IParticipant>
+                           const std::string& participantName,
+                           const std::string& registryUri) -> std::unique_ptr<IParticipant>
 {
     auto participant = Core::CreateParticipantInternal(std::move(participantConfig), participantName, registryUri);
     participant->JoinSilKitSimulation();

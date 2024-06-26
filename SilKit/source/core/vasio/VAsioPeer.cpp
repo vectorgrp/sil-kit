@@ -35,9 +35,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 
 #if SILKIT_ENABLE_TRACING_INSTRUMENTATION_VAsioPeer
-#    define SILKIT_TRACE_METHOD_(logger, ...) SILKIT_TRACE_METHOD(logger, __VA_ARGS__)
+#define SILKIT_TRACE_METHOD_(logger, ...) SILKIT_TRACE_METHOD(logger, __VA_ARGS__)
 #else
-#    define SILKIT_TRACE_METHOD_(...)
+#define SILKIT_TRACE_METHOD_(...)
 #endif
 
 
@@ -119,9 +119,7 @@ void VAsioPeer::SendSilKitMsg(SerializedMessage buffer)
 
         lock.unlock();
 
-        _ioContext->Dispatch([this] {
-            StartAsyncWrite();
-        });
+        _ioContext->Dispatch([this] { StartAsyncWrite(); });
     }
 }
 
@@ -153,7 +151,8 @@ void VAsioPeer::WriteSomeAsync()
 
 void VAsioPeer::Subscribe(VAsioMsgSubscriber subscriber)
 {
-    Services::Logging::Debug(_logger, "VAsioTcpPeer: Subscribing to messages of type '{}' on link '{}' from participant '{}'",
+    Services::Logging::Debug(_logger,
+                             "VAsioTcpPeer: Subscribing to messages of type '{}' on link '{}' from participant '{}'",
                              subscriber.msgTypeName, subscriber.networkName, _info.participantName);
     SendSilKitMsg(SerializedMessage{subscriber});
 }
@@ -172,7 +171,7 @@ void VAsioPeer::ReadSomeAsync()
 {
     SILKIT_ASSERT(_msgBuffer.size() > 0);
     auto* wPtr = _msgBuffer.data() + _wPos;
-    auto  size = _msgBuffer.size() - _wPos;
+    auto size = _msgBuffer.size() - _wPos;
 
     _currentReceivingBuffer = MutableBuffer{wPtr, size};
 
@@ -227,7 +226,7 @@ void VAsioPeer::DispatchBuffer()
         uint32_t msgSize{0u};
         if (_msgBuffer.size() < sizeof msgSize)
         {
-            throw SilKitError{ "DispatchBuffer: Received message is too small to contain message size header" };
+            throw SilKitError{"DispatchBuffer: Received message is too small to contain message size header"};
         }
         memcpy(&msgSize, _msgBuffer.data(), sizeof msgSize);
         //ensure buffer does not contain data from contiguous messages

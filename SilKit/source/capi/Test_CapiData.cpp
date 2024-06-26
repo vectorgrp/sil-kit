@@ -21,7 +21,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 
 #ifdef WIN32
-#    define _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS
 #endif
 
 #include "gtest/gtest.h"
@@ -67,7 +67,8 @@ class MockParticipant : public SilKit::Core::Tests::DummyParticipant
 {
 public:
     MOCK_METHOD(SilKit::Services::PubSub::IDataPublisher*, CreateDataPublisher,
-                (const std::string& /*canonicalName*/, (const SilKit::Services::PubSub::PubSubSpec& /*dataSpec*/), size_t /*history*/),
+                (const std::string& /*canonicalName*/, (const SilKit::Services::PubSub::PubSubSpec& /*dataSpec*/),
+                 size_t /*history*/),
                 (override));
 
     MOCK_METHOD(SilKit::Services::PubSub::IDataSubscriber*, CreateDataSubscriber,
@@ -123,8 +124,8 @@ public:
     {
         for (uint32_t index = 0; index != labelList->numLabels; ++index)
         {
-            free(const_cast<char *>(labelList->labels[index].key));
-            free(const_cast<char *>(labelList->labels[index].value));
+            free(const_cast<char*>(labelList->labels[index].key));
+            free(const_cast<char*>(labelList->labels[index].value));
         }
         free(labelList->labels);
         free(labelList);
@@ -142,7 +143,8 @@ public:
     SilKit_LabelList* labelList;
 };
 
-void SilKitCALL DefaultDataHandler(void* /*context*/, SilKit_DataSubscriber* /*subscriber*/, const SilKit_DataMessageEvent* /*dataMessageEvent*/)
+void SilKitCALL DefaultDataHandler(void* /*context*/, SilKit_DataSubscriber* /*subscriber*/,
+                                   const SilKit_DataMessageEvent* /*dataMessageEvent*/)
 {
 }
 
@@ -175,9 +177,7 @@ TEST_F(Test_CapiData, data_subscriber_function_mapping)
 
     SilKit_DataSubscriber* subscriber;
 
-    EXPECT_CALL(mockParticipant,
-                CreateDataSubscriber("subscriber", testing::_, testing::_))
-        .Times(testing::Exactly(1));
+    EXPECT_CALL(mockParticipant, CreateDataSubscriber("subscriber", testing::_, testing::_)).Times(testing::Exactly(1));
     SilKit_DataSpec dataSpec;
     SilKit_Struct_Init(SilKit_DataSpec, dataSpec);
     dataSpec.topic = "TopicA";
@@ -190,9 +190,8 @@ TEST_F(Test_CapiData, data_subscriber_function_mapping)
 
     EXPECT_CALL(mockDataSubscriber, SetDataMessageHandler(testing::_)).Times(testing::Exactly(1));
     returnCode = SilKit_DataSubscriber_SetDataMessageHandler((SilKit_DataSubscriber*)&mockDataSubscriber, nullptr,
-                                                          &DefaultDataHandler);
+                                                             &DefaultDataHandler);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
-
 }
 
 TEST_F(Test_CapiData, data_publisher_bad_parameters)
@@ -207,8 +206,7 @@ TEST_F(Test_CapiData, data_publisher_bad_parameters)
     dataSpec.labelList.numLabels = 0;
     dataSpec.labelList.labels = nullptr;
 
-    returnCode =
-        SilKit_DataPublisher_Create(nullptr, (SilKit_Participant*)&mockParticipant, "publisher", &dataSpec, 0);
+    returnCode = SilKit_DataPublisher_Create(nullptr, (SilKit_Participant*)&mockParticipant, "publisher", &dataSpec, 0);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
     returnCode = SilKit_DataPublisher_Create(&publisher, nullptr, "publisher", &dataSpec, 0);
@@ -217,7 +215,8 @@ TEST_F(Test_CapiData, data_publisher_bad_parameters)
     returnCode = SilKit_DataPublisher_Create(&publisher, (SilKit_Participant*)&mockParticipant, nullptr, &dataSpec, 0);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
-    returnCode = SilKit_DataPublisher_Create(&publisher, (SilKit_Participant*)&mockParticipant, "publisher", nullptr, 0);
+    returnCode =
+        SilKit_DataPublisher_Create(&publisher, (SilKit_Participant*)&mockParticipant, "publisher", nullptr, 0);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
     returnCode = SilKit_DataPublisher_Publish(nullptr, &data);
@@ -238,30 +237,27 @@ TEST_F(Test_CapiData, data_subscriber_bad_parameters)
     dataSpec.labelList.numLabels = 0;
     dataSpec.labelList.labels = nullptr;
 
-    returnCode =
-        SilKit_DataSubscriber_Create(nullptr, (SilKit_Participant*)&mockParticipant, "subscriber", &dataSpec,
-                                     dummyContextPtr,
-                                           &DefaultDataHandler);
+    returnCode = SilKit_DataSubscriber_Create(nullptr, (SilKit_Participant*)&mockParticipant, "subscriber", &dataSpec,
+                                              dummyContextPtr, &DefaultDataHandler);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
-    returnCode = SilKit_DataSubscriber_Create(&subscriber, nullptr, "subscriber", &dataSpec,
-                                  dummyContextPtr, &DefaultDataHandler);
+    returnCode = SilKit_DataSubscriber_Create(&subscriber, nullptr, "subscriber", &dataSpec, dummyContextPtr,
+                                              &DefaultDataHandler);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
-    returnCode =
-        SilKit_DataSubscriber_Create(&subscriber, (SilKit_Participant*)&mockParticipant, nullptr, &dataSpec,
-                                  dummyContextPtr, &DefaultDataHandler);
+    returnCode = SilKit_DataSubscriber_Create(&subscriber, (SilKit_Participant*)&mockParticipant, nullptr, &dataSpec,
+                                              dummyContextPtr, &DefaultDataHandler);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
-    returnCode = SilKit_DataSubscriber_Create(&subscriber, (SilKit_Participant*)&mockParticipant, "subscriber", nullptr, dummyContextPtr,
-                                           &DefaultDataHandler);
+    returnCode = SilKit_DataSubscriber_Create(&subscriber, (SilKit_Participant*)&mockParticipant, "subscriber", nullptr,
+                                              dummyContextPtr, &DefaultDataHandler);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
     returnCode = SilKit_DataSubscriber_SetDataMessageHandler(nullptr, dummyContextPtr, &DefaultDataHandler);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
-    returnCode =
-        SilKit_DataSubscriber_SetDataMessageHandler((SilKit_DataSubscriber*)&mockDataSubscriber, dummyContextPtr, nullptr);
+    returnCode = SilKit_DataSubscriber_SetDataMessageHandler((SilKit_DataSubscriber*)&mockDataSubscriber,
+                                                             dummyContextPtr, nullptr);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 }
 

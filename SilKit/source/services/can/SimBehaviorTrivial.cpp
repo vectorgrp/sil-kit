@@ -20,12 +20,10 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "CanController.hpp"
-#include "SimBehaviorTrivial.hpp" 
+#include "SimBehaviorTrivial.hpp"
 #include "Assert.hpp"
 
 #include "silkit/services/logging/ILogger.hpp"
-
-
 
 
 namespace SilKit {
@@ -33,7 +31,7 @@ namespace Services {
 namespace Can {
 
 SimBehaviorTrivial::SimBehaviorTrivial(Core::IParticipantInternal* participant, CanController* canController,
-                    Services::Orchestration::ITimeProvider* timeProvider)
+                                       Services::Orchestration::ITimeProvider* timeProvider)
     : _participant{participant}
     , _parentController{canController}
     , _parentServiceEndpoint{dynamic_cast<Core::IServiceEndpoint*>(canController)}
@@ -50,14 +48,12 @@ void SimBehaviorTrivial::ReceiveMsg(const MsgT& msg)
     receivingController->ReceiveMsg(_parentServiceEndpoint, msg);
 }
 
-auto SimBehaviorTrivial::AllowReception(const Core::IServiceEndpoint* /*from*/) const -> bool 
-{ 
-    return true; 
+auto SimBehaviorTrivial::AllowReception(const Core::IServiceEndpoint* /*from*/) const -> bool
+{
+    return true;
 }
 
-void SimBehaviorTrivial::SendMsg(CanConfigureBaudrate&& /*baudRate*/)
-{ 
-}
+void SimBehaviorTrivial::SendMsg(CanConfigureBaudrate&& /*baudRate*/) {}
 
 void SimBehaviorTrivial::SendMsg(CanSetControllerMode&& mode)
 {
@@ -95,7 +91,8 @@ void SimBehaviorTrivial::SendMsg(WireCanFrameEvent&& canFrameEvent)
     }
     else
     {
-        _participant->GetLogger()->Warn("ICanController::SendFrame is called although can controller is not in state CanController::Started.");
+        _participant->GetLogger()->Warn(
+            "ICanController::SendFrame is called although can controller is not in state CanController::Started.");
     }
 }
 

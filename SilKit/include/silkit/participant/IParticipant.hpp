@@ -57,29 +57,30 @@ public:
      */
 
     //! \brief Create a CAN controller at this SIL Kit participant.
-    virtual auto CreateCanController(const std::string& canonicalName, const std::string& networkName)
-        -> Services::Can::ICanController* = 0;
+    virtual auto CreateCanController(const std::string& canonicalName,
+                                     const std::string& networkName) -> Services::Can::ICanController* = 0;
 
     //! \brief Create an Ethernet controller at this SIL Kit participant.
     virtual auto CreateEthernetController(const std::string& canonicalName, const std::string& networkName)
         -> Services::Ethernet::IEthernetController* = 0;
 
     //! \brief Create an FlexRay controller at this SIL Kit participant.
-    virtual auto CreateFlexrayController(const std::string& canonicalName, const std::string& networkName)
-        -> Services::Flexray::IFlexrayController* = 0;
+    virtual auto CreateFlexrayController(const std::string& canonicalName,
+                                         const std::string& networkName) -> Services::Flexray::IFlexrayController* = 0;
 
     //! \brief Create a LIN controller at this SIL Kit participant.
-    virtual auto CreateLinController(const std::string& canonicalName, const std::string& networkName)
-        -> Services::Lin::ILinController* = 0;
+    virtual auto CreateLinController(const std::string& canonicalName,
+                                     const std::string& networkName) -> Services::Lin::ILinController* = 0;
 
     //! \brief Create a data publisher at this SIL Kit participant.
-    virtual auto CreateDataPublisher(const std::string& canonicalName, const SilKit::Services::PubSub::PubSubSpec& dataSpec, size_t history = 0)
-        -> Services::PubSub::IDataPublisher* = 0;
+    virtual auto CreateDataPublisher(const std::string& canonicalName,
+                                     const SilKit::Services::PubSub::PubSubSpec& dataSpec,
+                                     size_t history = 0) -> Services::PubSub::IDataPublisher* = 0;
 
     //! \brief Create a data subscriber at this SIL Kit participant.
-    virtual auto CreateDataSubscriber(const std::string& canonicalName, const SilKit::Services::PubSub::PubSubSpec& dataSpec,
-                                      Services::PubSub::DataMessageHandler dataMessageHandler)
-        -> Services::PubSub::IDataSubscriber* = 0;
+    virtual auto CreateDataSubscriber(
+        const std::string& canonicalName, const SilKit::Services::PubSub::PubSubSpec& dataSpec,
+        Services::PubSub::DataMessageHandler dataMessageHandler) -> Services::PubSub::IDataSubscriber* = 0;
 
     //! \brief Create a Rpc client at this SIL Kit participant.
     virtual auto CreateRpcClient(const std::string& canonicalName, const SilKit::Services::Rpc::RpcSpec& dataSpec,

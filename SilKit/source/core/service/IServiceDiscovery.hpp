@@ -36,7 +36,6 @@ using ServiceDiscoveryHandler =
 class IServiceDiscovery
 {
 public:
-
     virtual ~IServiceDiscovery() = default;
     //!< Publish a locally created new ServiceDescriptor to all other participants
     virtual void NotifyServiceCreated(const ServiceDescriptor& serviceDescriptor) = 0;
@@ -44,8 +43,8 @@ public:
     virtual void NotifyServiceRemoved(const ServiceDescriptor& serviceDescriptor) = 0;
     //!< Register a handler for asynchronous service creation notifications
     virtual void RegisterServiceDiscoveryHandler(ServiceDiscoveryHandler handler) = 0;
-    //!< Register a handler for service creation notifications for a specific controllerTypeName, 
-    //!< associated supplDataKey and given supplDataValue 
+    //!< Register a handler for service creation notifications for a specific controllerTypeName,
+    //!< associated supplDataKey and given supplDataValue
     virtual void RegisterSpecificServiceDiscoveryHandler(
         ServiceDiscoveryHandler handler, const std::string& controllerType, const std::string& topic,
         const std::vector<SilKit::Services::MatchingLabel>& labels) = 0;
@@ -53,9 +52,8 @@ public:
     virtual std::vector<ServiceDescriptor> GetServices() const = 0;
     //!< React on a participant shutdown
     virtual void OnParticpantRemoval(const std::string& participantName) = 0;
-
 };
 
-} // namespace Orchestration
+} // namespace Discovery
 } // namespace Core
 } // namespace SilKit

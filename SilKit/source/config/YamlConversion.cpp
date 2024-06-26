@@ -46,35 +46,35 @@ void optional_encode(const Replay& value, YAML::Node& node, const std::string& f
 // YAML type conversion helpers for ParticipantConfiguration data types
 namespace YAML {
 
-template<>
+template <>
 Node Converter::encode(const std::chrono::milliseconds& obj)
 {
     Node node;
     node = obj.count();
     return node;
 }
-template<>
+template <>
 bool Converter::decode(const Node& node, std::chrono::milliseconds& obj)
 {
     obj = std::chrono::milliseconds{parse_as<uint64_t>(node)};
     return true;
 }
 
-template<>
+template <>
 Node Converter::encode(const std::chrono::nanoseconds& obj)
 {
     Node node;
     node = obj.count();
     return node;
 }
-template<>
+template <>
 bool Converter::decode(const Node& node, std::chrono::nanoseconds& obj)
 {
     obj = std::chrono::nanoseconds{parse_as<uint64_t>(node)};
     return true;
 }
 
-template<>
+template <>
 Node Converter::encode(const Logging& obj)
 {
     Node node;
@@ -87,7 +87,7 @@ Node Converter::encode(const Logging& obj)
 
     return node;
 }
-template<>
+template <>
 bool Converter::decode(const Node& node, Logging& obj)
 {
     optional_decode(obj.logFromRemotes, node, "LogFromRemotes");
@@ -96,7 +96,7 @@ bool Converter::decode(const Node& node, Logging& obj)
     return true;
 }
 
-template<>
+template <>
 Node Converter::encode(const Sink& obj)
 {
     static const Sink defaultSink{};
@@ -107,7 +107,7 @@ Node Converter::encode(const Sink& obj)
     non_default_encode(obj.logName, node, "LogName", defaultSink.logName);
     return node;
 }
-template<>
+template <>
 bool Converter::decode(const Node& node, Sink& obj)
 {
     optional_decode(obj.type, node, "Type");
@@ -124,7 +124,7 @@ bool Converter::decode(const Node& node, Sink& obj)
     return true;
 }
 
-template<>
+template <>
 Node Converter::encode(const Sink::Type& obj)
 {
     Node node;
@@ -144,7 +144,7 @@ Node Converter::encode(const Sink::Type& obj)
     }
     return node;
 }
-template<>
+template <>
 bool Converter::decode(const Node& node, Sink::Type& obj)
 {
     if (!node.IsScalar())
@@ -171,7 +171,7 @@ bool Converter::decode(const Node& node, Sink::Type& obj)
     return true;
 }
 
-template<>
+template <>
 Node Converter::encode(const Services::Logging::Level& obj)
 {
     Node node;
@@ -201,13 +201,12 @@ Node Converter::encode(const Services::Logging::Level& obj)
     }
     return node;
 }
-template<>
+template <>
 bool Converter::decode(const Node& node, Services::Logging::Level& obj)
 {
     if (!node.IsScalar())
     {
-        throw ConversionError(node,
-            "Level should be a string of Critical|Error|Warn|Info|Debug|Trace|Off.");
+        throw ConversionError(node, "Level should be a string of Critical|Error|Warn|Info|Debug|Trace|Off.");
     }
     auto&& str = parse_as<std::string>(node);
     if (str == "Critical")
@@ -231,7 +230,7 @@ bool Converter::decode(const Node& node, Services::Logging::Level& obj)
     return true;
 }
 
-template<>
+template <>
 Node Converter::encode(const MdfChannel& obj)
 {
     Node node;
@@ -243,7 +242,7 @@ Node Converter::encode(const MdfChannel& obj)
     optional_encode(obj.groupSource, node, "GroupSource");
     return node;
 }
-template<>
+template <>
 bool Converter::decode(const Node& node, MdfChannel& obj)
 {
     if (!node.IsMap())
@@ -259,7 +258,7 @@ bool Converter::decode(const Node& node, MdfChannel& obj)
     return true;
 }
 
-template<>
+template <>
 Node Converter::encode(const Replay& obj)
 {
     static const Replay defaultObj{};
@@ -269,7 +268,7 @@ Node Converter::encode(const Replay& obj)
     non_default_encode(obj.mdfChannel, node, "MdfChannel", defaultObj.mdfChannel);
     return node;
 }
-template<>
+template <>
 bool Converter::decode(const Node& node, Replay& obj)
 {
     obj.useTraceSource = parse_as<decltype(obj.useTraceSource)>(node["UseTraceSource"]);
@@ -278,7 +277,7 @@ bool Converter::decode(const Node& node, Replay& obj)
     return true;
 }
 
-template<>
+template <>
 Node Converter::encode(const Replay::Direction& obj)
 {
     Node node;
@@ -299,7 +298,7 @@ Node Converter::encode(const Replay::Direction& obj)
     }
     return node;
 }
-template<>
+template <>
 bool Converter::decode(const Node& node, Replay::Direction& obj)
 {
     auto&& str = parse_as<std::string>(node);
@@ -318,7 +317,7 @@ bool Converter::decode(const Node& node, Replay::Direction& obj)
     return true;
 }
 
-template<>
+template <>
 Node Converter::encode(const CanController& obj)
 {
     static const CanController defaultObj{};
@@ -329,7 +328,7 @@ Node Converter::encode(const CanController& obj)
     optional_encode(obj.replay, node, "Replay");
     return node;
 }
-template<>
+template <>
 bool Converter::decode(const Node& node, CanController& obj)
 {
     obj.name = parse_as<std::string>(node["Name"]);
@@ -339,7 +338,7 @@ bool Converter::decode(const Node& node, CanController& obj)
     return true;
 }
 
-template<>
+template <>
 Node Converter::encode(const LinController& obj)
 {
     static const LinController defaultObj{};
@@ -350,7 +349,7 @@ Node Converter::encode(const LinController& obj)
     optional_encode(obj.replay, node, "Replay");
     return node;
 }
-template<>
+template <>
 bool Converter::decode(const Node& node, LinController& obj)
 {
     obj.name = parse_as<std::string>(node["Name"]);
@@ -360,7 +359,7 @@ bool Converter::decode(const Node& node, LinController& obj)
     return true;
 }
 
-template<>
+template <>
 Node Converter::encode(const EthernetController& obj)
 {
     static const EthernetController defaultObj{};
@@ -372,7 +371,7 @@ Node Converter::encode(const EthernetController& obj)
 
     return node;
 }
-template<>
+template <>
 bool Converter::decode(const Node& node, EthernetController& obj)
 {
     obj.name = parse_as<std::string>(node["Name"]);
@@ -382,7 +381,7 @@ bool Converter::decode(const Node& node, EthernetController& obj)
     return true;
 }
 
-template<>
+template <>
 Node Converter::encode(const Services::Flexray::FlexrayClusterParameters& obj)
 {
     Node node;
@@ -409,12 +408,11 @@ Node Converter::encode(const Services::Flexray::FlexrayClusterParameters& obj)
     node["gSyncFrameIDCountMax"] = static_cast<int>(obj.gSyncFrameIDCountMax);
     return node;
 }
-template<>
+template <>
 bool Converter::decode(const Node& node, Services::Flexray::FlexrayClusterParameters& obj)
 {
     // Parse parameters as an int value; uint8_t would be interpreted as a character
-    auto parseInt = [&node](auto instance, auto name)
-    {
+    auto parseInt = [&node](auto instance, auto name) {
         return static_cast<decltype(instance)>(parse_as<int>(node[name]));
     };
     obj.gColdstartAttempts = parseInt(obj.gColdstartAttempts, "gColdstartAttempts");
@@ -425,24 +423,24 @@ bool Converter::decode(const Node& node, Services::Flexray::FlexrayClusterParame
     obj.gdMiniSlotActionPointOffset = parseInt(obj.gdMiniSlotActionPointOffset, "gdMiniSlotActionPointOffset");
     obj.gdStaticSlot = parseInt(obj.gdStaticSlot, "gdStaticSlot");
     obj.gdSymbolWindow = parseInt(obj.gdSymbolWindow, "gdSymbolWindow");
-    obj.gdSymbolWindowActionPointOffset = parseInt(obj.gdSymbolWindowActionPointOffset, 
-        "gdSymbolWindowActionPointOffset");
+    obj.gdSymbolWindowActionPointOffset =
+        parseInt(obj.gdSymbolWindowActionPointOffset, "gdSymbolWindowActionPointOffset");
     obj.gdTSSTransmitter = parseInt(obj.gdTSSTransmitter, "gdTSSTransmitter");
     obj.gdWakeupTxActive = parseInt(obj.gdWakeupTxActive, "gdWakeupTxActive");
     obj.gdWakeupTxIdle = parseInt(obj.gdWakeupTxIdle, "gdWakeupTxIdle");
     obj.gListenNoise = parseInt(obj.gListenNoise, "gListenNoise");
     obj.gMacroPerCycle = parseInt(obj.gMacroPerCycle, "gMacroPerCycle");
-    obj.gMaxWithoutClockCorrectionFatal = parseInt(obj.gMaxWithoutClockCorrectionFatal, 
-        "gMaxWithoutClockCorrectionFatal");
-    obj.gMaxWithoutClockCorrectionPassive = parseInt(obj.gMaxWithoutClockCorrectionPassive, 
-        "gMaxWithoutClockCorrectionPassive");
+    obj.gMaxWithoutClockCorrectionFatal =
+        parseInt(obj.gMaxWithoutClockCorrectionFatal, "gMaxWithoutClockCorrectionFatal");
+    obj.gMaxWithoutClockCorrectionPassive =
+        parseInt(obj.gMaxWithoutClockCorrectionPassive, "gMaxWithoutClockCorrectionPassive");
     obj.gNumberOfMiniSlots = parseInt(obj.gNumberOfMiniSlots, "gNumberOfMiniSlots");
     obj.gNumberOfStaticSlots = parseInt(obj.gNumberOfStaticSlots, "gNumberOfStaticSlots");
     obj.gPayloadLengthStatic = parseInt(obj.gPayloadLengthStatic, "gPayloadLengthStatic");
     obj.gSyncFrameIDCountMax = parseInt(obj.gSyncFrameIDCountMax, "gSyncFrameIDCountMax");
     return true;
 }
-template<>
+template <>
 Node Converter::encode(const Services::Flexray::FlexrayNodeParameters& obj)
 {
     Node node;
@@ -471,11 +469,10 @@ Node Converter::encode(const Services::Flexray::FlexrayNodeParameters& obj)
     node["pChannels"] = obj.pChannels;
     return node;
 }
-template<>
+template <>
 bool Converter::decode(const Node& node, Services::Flexray::FlexrayNodeParameters& obj)
 {
-    auto parseInt = [&node](auto instance, auto name)
-    {
+    auto parseInt = [&node](auto instance, auto name) {
         return static_cast<decltype(instance)>(parse_as<int>(node[name]));
     };
     obj.pAllowHaltDueToClock = parseInt(obj.pAllowHaltDueToClock, "pAllowHaltDueToClock");
@@ -504,7 +501,7 @@ bool Converter::decode(const Node& node, Services::Flexray::FlexrayNodeParameter
     return true;
 }
 
-template<>
+template <>
 Node Converter::encode(const Services::Flexray::FlexrayTxBufferConfig& obj)
 {
     Node node;
@@ -517,7 +514,7 @@ Node Converter::encode(const Services::Flexray::FlexrayTxBufferConfig& obj)
     node["transmissionMode"] = obj.transmissionMode;
     return node;
 }
-template<>
+template <>
 bool Converter::decode(const Node& node, Services::Flexray::FlexrayTxBufferConfig& obj)
 {
     obj.channels = parse_as<Services::Flexray::FlexrayChannel>(node["channels"]);
@@ -530,7 +527,7 @@ bool Converter::decode(const Node& node, Services::Flexray::FlexrayTxBufferConfi
     return true;
 }
 
-template<>
+template <>
 Node Converter::encode(const Services::Flexray::FlexrayChannel& obj)
 {
     Node node;
@@ -543,7 +540,7 @@ Node Converter::encode(const Services::Flexray::FlexrayChannel& obj)
         node = "B";
         break;
     case Services::Flexray::FlexrayChannel::AB:
-        node =  "AB";
+        node = "AB";
         break;
     case Services::Flexray::FlexrayChannel::None:
         node = "None";
@@ -551,16 +548,16 @@ Node Converter::encode(const Services::Flexray::FlexrayChannel& obj)
     }
     return node;
 }
-template<>
+template <>
 bool Converter::decode(const Node& node, Services::Flexray::FlexrayChannel& obj)
 {
     auto&& str = parse_as<std::string>(node);
     if (str == "A")
-        obj =  Services::Flexray::FlexrayChannel::A;
+        obj = Services::Flexray::FlexrayChannel::A;
     else if (str == "B")
-        obj =  Services::Flexray::FlexrayChannel::B;
+        obj = Services::Flexray::FlexrayChannel::B;
     else if (str == "AB")
-        obj =  Services::Flexray::FlexrayChannel::AB;
+        obj = Services::Flexray::FlexrayChannel::AB;
     else if (str == "None" || str == "")
         obj = Services::Flexray::FlexrayChannel::None;
     else
@@ -570,7 +567,7 @@ bool Converter::decode(const Node& node, Services::Flexray::FlexrayChannel& obj)
     return true;
 }
 
-template<>
+template <>
 Node Converter::encode(const Services::Flexray::FlexrayClockPeriod& obj)
 {
     Node node;
@@ -580,7 +577,7 @@ Node Converter::encode(const Services::Flexray::FlexrayClockPeriod& obj)
         node = "12.5ns";
         break;
     case Services::Flexray::FlexrayClockPeriod::T25NS:
-        node =  "25ns";
+        node = "25ns";
         break;
     case Services::Flexray::FlexrayClockPeriod::T50NS:
         node = "50ns";
@@ -590,7 +587,7 @@ Node Converter::encode(const Services::Flexray::FlexrayClockPeriod& obj)
     }
     return node;
 }
-template<>
+template <>
 bool Converter::decode(const Node& node, Services::Flexray::FlexrayClockPeriod& obj)
 {
     auto&& str = parse_as<std::string>(node);
@@ -607,7 +604,7 @@ bool Converter::decode(const Node& node, Services::Flexray::FlexrayClockPeriod& 
     return true;
 }
 
-template<>
+template <>
 Node Converter::encode(const Services::Flexray::FlexrayTransmissionMode& obj)
 {
     Node node;
@@ -624,7 +621,7 @@ Node Converter::encode(const Services::Flexray::FlexrayTransmissionMode& obj)
     }
     return node;
 }
-template<>
+template <>
 bool Converter::decode(const Node& node, Services::Flexray::FlexrayTransmissionMode& obj)
 {
     auto&& str = parse_as<std::string>(node);
@@ -639,7 +636,7 @@ bool Converter::decode(const Node& node, Services::Flexray::FlexrayTransmissionM
     return true;
 }
 
-template<>
+template <>
 Node Converter::encode(const FlexrayController& obj)
 {
     static const FlexrayController defaultObj{};
@@ -661,7 +658,7 @@ Node Converter::encode(const FlexrayController& obj)
     optional_encode(obj.replay, node, "Replay");
     return node;
 }
-template<>
+template <>
 bool Converter::decode(const Node& node, FlexrayController& obj)
 {
     obj.name = parse_as<std::string>(node["Name"]);
@@ -776,7 +773,7 @@ bool Converter::decode(const Node& node, HealthCheck& obj)
     return true;
 }
 
-template<>
+template <>
 Node Converter::encode(const Tracing& obj)
 {
     static const Tracing defaultObj{};
@@ -785,7 +782,7 @@ Node Converter::encode(const Tracing& obj)
     optional_encode(obj.traceSources, node, "TraceSources");
     return node;
 }
-template<>
+template <>
 bool Converter::decode(const Node& node, Tracing& obj)
 {
     optional_decode(obj.traceSinks, node, "TraceSinks");
@@ -793,7 +790,7 @@ bool Converter::decode(const Node& node, Tracing& obj)
     return true;
 }
 
-template<>
+template <>
 Node Converter::encode(const TraceSink& obj)
 {
     Node node;
@@ -808,7 +805,7 @@ Node Converter::encode(const TraceSink& obj)
 
     return node;
 }
-template<>
+template <>
 bool Converter::decode(const Node& node, TraceSink& obj)
 {
     obj.name = parse_as<std::string>(node["Name"]);
@@ -821,7 +818,7 @@ bool Converter::decode(const Node& node, TraceSink& obj)
     return true;
 }
 
-template<>
+template <>
 Node Converter::encode(const TraceSink::Type& obj)
 {
     Node node;
@@ -840,11 +837,11 @@ Node Converter::encode(const TraceSink::Type& obj)
         node = "PcapPipe";
         break;
     default:
-        throw ConfigurationError{ "Unknown TraceSink Type" };
+        throw ConfigurationError{"Unknown TraceSink Type"};
     }
     return node;
 }
-template<>
+template <>
 bool Converter::decode(const Node& node, TraceSink::Type& obj)
 {
     auto&& str = parse_as<std::string>(node);
@@ -863,7 +860,7 @@ bool Converter::decode(const Node& node, TraceSink::Type& obj)
     return true;
 }
 
-template<>
+template <>
 Node Converter::encode(const TraceSource& obj)
 {
     Node node;
@@ -877,7 +874,7 @@ Node Converter::encode(const TraceSource& obj)
     //}
     return node;
 }
-template<>
+template <>
 bool Converter::decode(const Node& node, TraceSource& obj)
 {
     obj.name = parse_as<std::string>(node["Name"]);
@@ -890,7 +887,7 @@ bool Converter::decode(const Node& node, TraceSource& obj)
     return true;
 }
 
-template<>
+template <>
 Node Converter::encode(const TraceSource::Type& obj)
 {
     Node node;
@@ -906,11 +903,11 @@ Node Converter::encode(const TraceSource::Type& obj)
         node = "PcapFile";
         break;
     default:
-        throw ConfigurationError{ "Unknown TraceSource Type" };
+        throw ConfigurationError{"Unknown TraceSource Type"};
     }
     return node;
 }
-template<>
+template <>
 bool Converter::decode(const Node& node, TraceSource::Type& obj)
 {
     auto&& str = parse_as<std::string>(node);
@@ -927,7 +924,7 @@ bool Converter::decode(const Node& node, TraceSource::Type& obj)
     return true;
 }
 
-template<>
+template <>
 Node Converter::encode(const Extensions& obj)
 {
     static const Extensions defaultObj{};
@@ -935,7 +932,7 @@ Node Converter::encode(const Extensions& obj)
     non_default_encode(obj.searchPathHints, node, "SearchPathHints", defaultObj.searchPathHints);
     return node;
 }
-template<>
+template <>
 bool Converter::decode(const Node& node, Extensions& obj)
 {
     optional_decode(obj.searchPathHints, node, "SearchPathHints");
@@ -943,7 +940,7 @@ bool Converter::decode(const Node& node, Extensions& obj)
 }
 
 
-template<>
+template <>
 Node Converter::encode(const Middleware& obj)
 {
     Node node;
@@ -956,12 +953,14 @@ Node Converter::encode(const Middleware& obj)
     non_default_encode(obj.tcpSendBufferSize, node, "TcpSendBufferSize", defaultObj.tcpSendBufferSize);
     non_default_encode(obj.enableDomainSockets, node, "EnableDomainSockets", defaultObj.enableDomainSockets);
     non_default_encode(obj.acceptorUris, node, "acceptorUris", defaultObj.acceptorUris);
-    non_default_encode(obj.registryAsFallbackProxy, node, "RegistryAsFallbackProxy", defaultObj.registryAsFallbackProxy);
-    non_default_encode(obj.experimentalRemoteParticipantConnection, node, "ExperimentalRemoteParticipantConnection", defaultObj.experimentalRemoteParticipantConnection);
+    non_default_encode(obj.registryAsFallbackProxy, node, "RegistryAsFallbackProxy",
+                       defaultObj.registryAsFallbackProxy);
+    non_default_encode(obj.experimentalRemoteParticipantConnection, node, "ExperimentalRemoteParticipantConnection",
+                       defaultObj.experimentalRemoteParticipantConnection);
     non_default_encode(obj.connectTimeoutSeconds, node, "ConnectTimeoutSeconds", defaultObj.connectTimeoutSeconds);
     return node;
 }
-template<>
+template <>
 bool Converter::decode(const Node& node, Middleware& obj)
 {
     optional_decode(obj.registryUri, node, "RegistryUri");
@@ -978,7 +977,7 @@ bool Converter::decode(const Node& node, Middleware& obj)
     return true;
 }
 
-template<>
+template <>
 Node Converter::encode(const ParticipantConfiguration& obj)
 {
     static const ParticipantConfiguration defaultObj{};
@@ -1009,7 +1008,7 @@ Node Converter::encode(const ParticipantConfiguration& obj)
     non_default_encode(obj.middleware, node, "Middleware", defaultObj.middleware);
     return node;
 }
-template<>
+template <>
 bool Converter::decode(const Node& node, ParticipantConfiguration& obj)
 {
     optional_decode(obj.schemaVersion, node, "SchemaVersion");

@@ -37,10 +37,12 @@ class MockLinController
 {
 public:
     MOCK_METHOD(void, Init, (LinControllerConfig config), (override));
-    MOCK_METHOD(void, InitDynamic,(const SilKit::Experimental::Services::Lin::LinControllerDynamicConfig& config), (override));
+    MOCK_METHOD(void, InitDynamic, (const SilKit::Experimental::Services::Lin::LinControllerDynamicConfig& config),
+                (override));
     MOCK_METHOD(LinControllerStatus, Status, (), (const, noexcept));
     MOCK_METHOD(void, SendFrame, (LinFrame frame, LinFrameResponseType responseType));
-    MOCK_METHOD(void, SendFrame, (LinFrame frame, LinFrameResponseType responseType, std::chrono::nanoseconds timestamp));
+    MOCK_METHOD(void, SendFrame,
+                (LinFrame frame, LinFrameResponseType responseType, std::chrono::nanoseconds timestamp));
     MOCK_METHOD(void, SendFrameHeader, (LinId linId), (override));
     MOCK_METHOD(void, SendFrameHeader, (LinId linId, std::chrono::nanoseconds timestamp));
     MOCK_METHOD(void, UpdateTxBuffer, (LinFrame frame), (override));
@@ -63,23 +65,35 @@ public:
                 (SilKit::Experimental::Services::Lin::LinSlaveConfigurationHandler), (override));
     MOCK_METHOD(void, RemoveLinSlaveConfigurationHandler, (SilKit::Services::HandlerId), (override));
 
-    MOCK_METHOD(SilKit::Services::HandlerId, AddFrameHeaderHandler, (SilKit::Experimental::Services::Lin::LinFrameHeaderHandler), (override));
+    MOCK_METHOD(SilKit::Services::HandlerId, AddFrameHeaderHandler,
+                (SilKit::Experimental::Services::Lin::LinFrameHeaderHandler), (override));
 };
 
 void SilKitCALL CFrameStatusHandler(void* /*context*/, SilKit_LinController* /*controller*/,
-                         const SilKit_LinFrameStatusEvent* /*frameStatusEvent*/) { }
+                                    const SilKit_LinFrameStatusEvent* /*frameStatusEvent*/)
+{
+}
 
 void SilKitCALL CGoToSleepHandler(void* /*context*/, SilKit_LinController* /*controller*/,
-                       const SilKit_LinGoToSleepEvent* /*goToSleepEvent*/) { }
+                                  const SilKit_LinGoToSleepEvent* /*goToSleepEvent*/)
+{
+}
 
 void SilKitCALL CWakeupHandler(void* /*context*/, SilKit_LinController* /*controller*/,
-                    const SilKit_LinWakeupEvent* /*wakeupEvent*/) { }
+                               const SilKit_LinWakeupEvent* /*wakeupEvent*/)
+{
+}
 
 void SilKitCALL CFrameHeaderHandler(void* /*context*/, SilKit_LinController* /*controller*/,
-                                    const SilKit_Experimental_LinFrameHeaderEvent* /*frameHeaderEvent*/) { }
+                                    const SilKit_Experimental_LinFrameHeaderEvent* /*frameHeaderEvent*/)
+{
+}
 
-void SilKitCALL CLinSlaveConfigurationHandler(void* /*context*/, SilKit_LinController* /*controller*/,
-                                   const SilKit_Experimental_LinSlaveConfigurationEvent* /*slaveConfigurationEvent*/) { }
+void SilKitCALL
+CLinSlaveConfigurationHandler(void* /*context*/, SilKit_LinController* /*controller*/,
+                              const SilKit_Experimental_LinSlaveConfigurationEvent* /*slaveConfigurationEvent*/)
+{
+}
 
 class Test_CapiLin : public testing::Test
 {
@@ -152,8 +166,7 @@ TEST_F(Test_CapiLin, lin_controller_function_mapping)
     EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 
     EXPECT_CALL(mockController, AddFrameStatusHandler(testing::_)).Times(testing::Exactly(1));
-    returnCode =
-        SilKit_LinController_AddFrameStatusHandler(cMockController, nullptr, &CFrameStatusHandler, &handlerId);
+    returnCode = SilKit_LinController_AddFrameStatusHandler(cMockController, nullptr, &CFrameStatusHandler, &handlerId);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 
     EXPECT_CALL(mockController, RemoveFrameStatusHandler(static_cast<HandlerId>(0))).Times(testing::Exactly(1));
@@ -177,19 +190,24 @@ TEST_F(Test_CapiLin, lin_controller_function_mapping)
     EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 
     EXPECT_CALL(mockController, AddLinSlaveConfigurationHandler(testing::_)).Times(testing::Exactly(1));
-    returnCode = SilKit_Experimental_LinController_AddLinSlaveConfigurationHandler(cMockController, nullptr, &CLinSlaveConfigurationHandler, &handlerId);
+    returnCode = SilKit_Experimental_LinController_AddLinSlaveConfigurationHandler(
+        cMockController, nullptr, &CLinSlaveConfigurationHandler, &handlerId);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 
-    EXPECT_CALL(mockController, RemoveLinSlaveConfigurationHandler(static_cast<HandlerId>(0))).Times(testing::Exactly(1));
-    returnCode = SilKit_Experimental_LinController_RemoveLinSlaveConfigurationHandler((SilKit_LinController*)&mockController, 0);
+    EXPECT_CALL(mockController, RemoveLinSlaveConfigurationHandler(static_cast<HandlerId>(0)))
+        .Times(testing::Exactly(1));
+    returnCode =
+        SilKit_Experimental_LinController_RemoveLinSlaveConfigurationHandler((SilKit_LinController*)&mockController, 0);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 
     EXPECT_CALL(mockController, AddFrameHeaderHandler(testing::_)).Times(testing::Exactly(1));
-    returnCode = SilKit_Experimental_LinController_AddFrameHeaderHandler((SilKit_LinController*)&mockController, nullptr, &CFrameHeaderHandler, &handlerId);
+    returnCode = SilKit_Experimental_LinController_AddFrameHeaderHandler((SilKit_LinController*)&mockController,
+                                                                         nullptr, &CFrameHeaderHandler, &handlerId);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 
     EXPECT_CALL(mockController, RemoveFrameHeaderHandler(static_cast<HandlerId>(0))).Times(testing::Exactly(1));
-    returnCode = SilKit_Experimental_LinController_RemoveFrameHeaderHandler((SilKit_LinController*)&mockController, handlerId);
+    returnCode =
+        SilKit_Experimental_LinController_RemoveFrameHeaderHandler((SilKit_LinController*)&mockController, handlerId);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 
     EXPECT_CALL(mockController, InitDynamic(testing::_)).Times(testing::Exactly(1));
@@ -201,11 +219,13 @@ TEST_F(Test_CapiLin, lin_controller_function_mapping)
     EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 
     EXPECT_CALL(mockController, AddFrameHeaderHandler(testing::_)).Times(testing::Exactly(1));
-    returnCode = SilKit_Experimental_LinController_AddFrameHeaderHandler((SilKit_LinController*)&mockController, nullptr, &CFrameHeaderHandler, &handlerId);
+    returnCode = SilKit_Experimental_LinController_AddFrameHeaderHandler((SilKit_LinController*)&mockController,
+                                                                         nullptr, &CFrameHeaderHandler, &handlerId);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 
     EXPECT_CALL(mockController, RemoveFrameHeaderHandler(static_cast<HandlerId>(0))).Times(testing::Exactly(1));
-    returnCode = SilKit_Experimental_LinController_RemoveFrameHeaderHandler((SilKit_LinController*)&mockController, handlerId);
+    returnCode =
+        SilKit_Experimental_LinController_RemoveFrameHeaderHandler((SilKit_LinController*)&mockController, handlerId);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 }
 
@@ -280,8 +300,7 @@ TEST_F(Test_CapiLin, lin_controller_nullpointer_params)
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
     returnCode = SilKit_LinController_AddFrameStatusHandler(cMockController, nullptr, nullptr, &handlerId);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
-    returnCode =
-        SilKit_LinController_AddFrameStatusHandler(cMockController, nullptr, &CFrameStatusHandler, nullptr);
+    returnCode = SilKit_LinController_AddFrameStatusHandler(cMockController, nullptr, &CFrameStatusHandler, nullptr);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
     returnCode = SilKit_LinController_AddGoToSleepHandler(nullptr, nullptr, &CGoToSleepHandler, &handlerId);
@@ -298,11 +317,14 @@ TEST_F(Test_CapiLin, lin_controller_nullpointer_params)
     returnCode = SilKit_LinController_AddWakeupHandler(cMockController, nullptr, &CWakeupHandler, nullptr);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
-    returnCode = SilKit_Experimental_LinController_AddLinSlaveConfigurationHandler(nullptr, nullptr, &CLinSlaveConfigurationHandler, &handlerId);
+    returnCode = SilKit_Experimental_LinController_AddLinSlaveConfigurationHandler(
+        nullptr, nullptr, &CLinSlaveConfigurationHandler, &handlerId);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
-    returnCode = SilKit_Experimental_LinController_AddLinSlaveConfigurationHandler(cMockController, nullptr, nullptr, &handlerId);
+    returnCode = SilKit_Experimental_LinController_AddLinSlaveConfigurationHandler(cMockController, nullptr, nullptr,
+                                                                                   &handlerId);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
-    returnCode = SilKit_Experimental_LinController_AddLinSlaveConfigurationHandler(cMockController, nullptr, &CLinSlaveConfigurationHandler, nullptr);
+    returnCode = SilKit_Experimental_LinController_AddLinSlaveConfigurationHandler(
+        cMockController, nullptr, &CLinSlaveConfigurationHandler, nullptr);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
     returnCode = SilKit_Experimental_LinController_InitDynamic(nullptr, nullptr);
@@ -315,15 +337,17 @@ TEST_F(Test_CapiLin, lin_controller_nullpointer_params)
     returnCode = SilKit_Experimental_LinController_SendDynamicResponse(cMockController, nullptr);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
-    returnCode = SilKit_Experimental_LinController_AddFrameHeaderHandler(nullptr, nullptr, &CFrameHeaderHandler, &handlerId);
+    returnCode =
+        SilKit_Experimental_LinController_AddFrameHeaderHandler(nullptr, nullptr, &CFrameHeaderHandler, &handlerId);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
     returnCode = SilKit_Experimental_LinController_AddFrameHeaderHandler(cMockController, nullptr, nullptr, &handlerId);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
-    returnCode = SilKit_Experimental_LinController_AddFrameHeaderHandler(cMockController, nullptr, &CFrameHeaderHandler, nullptr);
+    returnCode = SilKit_Experimental_LinController_AddFrameHeaderHandler(cMockController, nullptr, &CFrameHeaderHandler,
+                                                                         nullptr);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
     returnCode = SilKit_Experimental_LinController_RemoveFrameHeaderHandler(nullptr, static_cast<SilKit_HandlerId>(0));
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 }
 
-}
+} // namespace

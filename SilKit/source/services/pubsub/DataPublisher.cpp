@@ -31,10 +31,8 @@ namespace PubSub {
 
 DataPublisher::DataPublisher(Core::IParticipantInternal* participant,
                              Services::Orchestration::ITimeProvider* timeProvider,
-                             const SilKit::Services::PubSub::PubSubSpec& dataSpec,
-                             const std::string& pubUUID,
-                             const Config::DataPublisher& config  
-)
+                             const SilKit::Services::PubSub::PubSubSpec& dataSpec, const std::string& pubUUID,
+                             const Config::DataPublisher& config)
     : _topic{dataSpec.Topic()}
     , _mediaType{dataSpec.MediaType()}
     , _labels{dataSpec.Labels()}

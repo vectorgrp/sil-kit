@@ -58,22 +58,14 @@ using CliParser = SilKit::Util::CommandlineParser;
 namespace {
 auto lowerCase(std::string s)
 {
-    std::transform(s.begin(),
-        s.end(),
-        s.begin(),
-        [](unsigned char c){ return (unsigned char)std::tolower(c);});
+    std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) { return (unsigned char)std::tolower(c); });
     return s;
 }
 auto isValidLogLevel(const std::string& levelStr)
 {
     auto logLevel = lowerCase(levelStr);
-    return logLevel == "trace"
-        || logLevel == "debug"
-        || logLevel == "warn"
-        || logLevel == "info"
-        || logLevel == "error"
-        || logLevel == "critical"
-        || logLevel == "off";
+    return logLevel == "trace" || logLevel == "debug" || logLevel == "warn" || logLevel == "info" || logLevel == "error"
+           || logLevel == "critical" || logLevel == "off";
 }
 
 void ConfigureLogging(std::shared_ptr<SilKit::Config::IParticipantConfiguration> configuration,
@@ -86,7 +78,6 @@ void ConfigureLogging(std::shared_ptr<SilKit::Config::IParticipantConfiguration>
     newSink.type = SilKit::Config::Sink::Type::Stdout;
     newSink.level = SilKit::Services::Logging::from_string(logLevel);
     config->logging.sinks.emplace_back(std::move(newSink));
-
 }
 
 void ConfigureLoggingForWindowsService(std::shared_ptr<SilKit::Config::IParticipantConfiguration> configuration,
@@ -105,17 +96,17 @@ void ConfigureLoggingForWindowsService(std::shared_ptr<SilKit::Config::IParticip
         newSink.type = SilKit::Config::Sink::Type::File;
         newSink.level = silkitLogLevel;
         newSink.logName = [explicitWorkingDirectory]() -> std::string {
-          std::ostringstream path;
-          const char * logName = "VectorSilKitRegistry_WindowsService";
-          if (explicitWorkingDirectory)
-          {
-              path << logName;
-          }
-          else
-          {
-              path << fs::temp_directory_path().string() << fs::path::preferred_separator << logName;
-          }
-          return path.str();
+            std::ostringstream path;
+            const char* logName = "VectorSilKitRegistry_WindowsService";
+            if (explicitWorkingDirectory)
+            {
+                path << logName;
+            }
+            else
+            {
+                path << fs::temp_directory_path().string() << fs::path::preferred_separator << logName;
+            }
+            return path.str();
         }();
         config->logging.sinks.emplace_back(std::move(newSink));
     }
@@ -158,7 +149,8 @@ void OverrideFromRegistryConfiguration(std::shared_ptr<SilKit::Config::IParticip
     }
 }
 
-void OverrideRegistryUri(std::shared_ptr<SilKit::Config::IParticipantConfiguration> configuration, const std::string& registryUri)
+void OverrideRegistryUri(std::shared_ptr<SilKit::Config::IParticipantConfiguration> configuration,
+                         const std::string& registryUri)
 {
     auto config = std::dynamic_pointer_cast<SilKit::Config::ParticipantConfiguration>(configuration);
     SILKIT_ASSERT(config != nullptr);
@@ -214,8 +206,8 @@ auto GenerateRandomCharacters(const std::string& generatedConfigurationPath, siz
 }
 
 auto StartRegistry(std::shared_ptr<SilKit::Config::IParticipantConfiguration> configuration, std::string listenUri,
-        std::string dashboardUri, bool enableDashboard,
-        CommandlineParser::Option generatedConfigurationPathOpt) -> SilKitRegistry::RegistryInstance
+                   std::string dashboardUri, bool enableDashboard,
+                   CommandlineParser::Option generatedConfigurationPathOpt) -> SilKitRegistry::RegistryInstance
 {
     std::unique_ptr<VSilKit::IDashboardInstance> dashboard;
 
@@ -335,15 +327,14 @@ std::promise<int> signalPromise;
 int main(int argc, char** argv)
 {
     CliParser commandlineParser;
-    commandlineParser.Add<CliParser::Flag>("version", "v", "[--version]",
-        "-v, --version: Get version info.");
-    commandlineParser.Add<CliParser::Flag>("help", "h", "[--help]",
-        "-h, --help: Get this help.");
+    commandlineParser.Add<CliParser::Flag>("version", "v", "[--version]", "-v, --version: Get version info.");
+    commandlineParser.Add<CliParser::Flag>("help", "h", "[--help]", "-h, --help: Get this help.");
     commandlineParser.Add<CliParser::Flag>("use-signal-handler", "s", "[--use-signal-handler]",
-        "-s, --use-signal-handler: Exit this process when a signal is received. If not set, the process runs infinitely.");
-    commandlineParser.Add<CliParser::Option>(
-        "listen-uri", "u", "silkit://localhost:8500", "[--listen-uri <uri>]",
-        "-u, --listen-uri <silkit-uri>: The silkit:// URI the registry should listen on. Defaults to 'silkit://localhost:8500'.");
+                                           "-s, --use-signal-handler: Exit this process when a signal is received. If "
+                                           "not set, the process runs infinitely.");
+    commandlineParser.Add<CliParser::Option>("listen-uri", "u", "silkit://localhost:8500", "[--listen-uri <uri>]",
+                                             "-u, --listen-uri <silkit-uri>: The silkit:// URI the registry should "
+                                             "listen on. Defaults to 'silkit://localhost:8500'.");
     commandlineParser.Add<CliParser::Option>(
         "generate-configuration", "g", "", "[--generate-configuration <configuration>]",
         "-g, --generate-configuration <configuration>: Generate a configuration file which includes the URI the "
@@ -352,7 +343,8 @@ int main(int argc, char** argv)
         "dashboard-uri", "d", "http://localhost:8082", "[--dashboard-uri <uri>]",
         "-d, --dashboard-uri <dashboard-uri>: The http:// URI the data should be sent to.");
     commandlineParser.Add<CliParser::Option>("log", "l", "info", "[--log <level>]",
-            "-l, --log <level>: Log to stdout with level 'off', 'critical', 'error', 'warn', 'info', 'debug', or 'trace'. Defaults to 'info'.");
+                                             "-l, --log <level>: Log to stdout with level 'off', 'critical', 'error', "
+                                             "'warn', 'info', 'debug', or 'trace'. Defaults to 'info'.");
     commandlineParser.Add<CliParser::Option>("registry-configuration", "c", "", "[--registry-configuration <path>]",
                                              "-c, --registry-configuration: The configuration read from this file "
                                              "overrides the values specified on the command line.");
@@ -362,8 +354,9 @@ int main(int argc, char** argv)
         CliParser::Hidden);
 
     // ignored and deprecated
-    commandlineParser.Add<CliParser::Flag>("enable-dashboard", "Q", "[--enable-dashboard]",
-                                           "-Q, --enable-dashboard: Enable the built-in dashboard REST client (experimental).", CliParser::Hidden);
+    commandlineParser.Add<CliParser::Flag>(
+        "enable-dashboard", "Q", "[--enable-dashboard]",
+        "-Q, --enable-dashboard: Enable the built-in dashboard REST client (experimental).", CliParser::Hidden);
 
 
     if (SilKitRegistry::HasWindowsServiceSupport())
@@ -372,8 +365,7 @@ int main(int argc, char** argv)
                                                "-W, --windows-service: Run as a Windows service.", CliParser::Hidden);
     }
 
-    std::cout << "Vector SIL Kit -- Registry, SIL Kit version: " << SilKit::Version::String() << std::endl
-        << std::endl;
+    std::cout << "Vector SIL Kit -- Registry, SIL Kit version: " << SilKit::Version::String() << std::endl << std::endl;
 
     try
     {
@@ -422,18 +414,17 @@ int main(int argc, char** argv)
 
     if (commandlineParser.Get<CliParser::Flag>("version").Value())
     {
-        std::string hash{ SilKit::Version::GitHash() };
+        std::string hash{SilKit::Version::GitHash()};
         auto shortHash = hash.substr(0, 7);
-        std::cout
-            << "Version Info:" << std::endl
-            << " - Vector SilKit: " << SilKit::Version::String() << ", #" << shortHash << std::endl;
+        std::cout << "Version Info:" << std::endl
+                  << " - Vector SilKit: " << SilKit::Version::String() << ", #" << shortHash << std::endl;
 
         return 0;
     }
 
-    auto useSignalHandler{ commandlineParser.Get<CliParser::Flag>("use-signal-handler").Value() };
-    auto listenUri{ commandlineParser.Get<CliParser::Option>("listen-uri").Value() };
-    auto logLevel{ commandlineParser.Get<SilKit::Util::CommandlineParser::Option>("log").Value() };
+    auto useSignalHandler{commandlineParser.Get<CliParser::Flag>("use-signal-handler").Value()};
+    auto listenUri{commandlineParser.Get<CliParser::Option>("listen-uri").Value()};
+    auto logLevel{commandlineParser.Get<SilKit::Util::CommandlineParser::Option>("log").Value()};
     auto dashboardUri{commandlineParser.Get<CliParser::Option>("dashboard-uri").Value()};
     auto enableDashboard{commandlineParser.Get<CliParser::Option>("dashboard-uri").HasValue()};
 
@@ -457,8 +448,7 @@ int main(int argc, char** argv)
     if (!isValidLogLevel(logLevel))
     {
         std::cerr << "Error: Argument '<level>' must be one of "
-                  << "'off', 'critical', 'error', 'warn', 'info', 'debug', or 'trace'"
-                  << std::endl;
+                  << "'off', 'critical', 'error', 'warn', 'info', 'debug', or 'trace'" << std::endl;
         return -1;
     }
 
@@ -502,23 +492,21 @@ int main(int argc, char** argv)
         if (windowsService)
         {
             SilKitRegistry::RunWindowsService([=] {
-                return StartRegistry(configuration, listenUri,
-                    dashboardUri, enableDashboard, generatedConfigurationPathOpt);
+                return StartRegistry(configuration, listenUri, dashboardUri, enableDashboard,
+                                     generatedConfigurationPathOpt);
             });
         }
         else
         {
-            const auto registry = StartRegistry(configuration, listenUri,
-                dashboardUri,  enableDashboard, generatedConfigurationPathOpt);
+            const auto registry =
+                StartRegistry(configuration, listenUri, dashboardUri, enableDashboard, generatedConfigurationPathOpt);
 
             if (useSignalHandler)
             {
                 using namespace SilKit::Util;
 
                 auto signalValue = signalPromise.get_future();
-                RegisterSignalHandler([](auto sigNum) {
-                    signalPromise.set_value(sigNum);
-                });
+                RegisterSignalHandler([](auto sigNum) { signalPromise.set_value(sigNum); });
                 std::cout << "Registered signal handler" << std::endl;
 
                 signalValue.wait();

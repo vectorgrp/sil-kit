@@ -45,7 +45,10 @@ public:
     {
     }
 
-    auto GetCallUuid() const -> const Util::Uuid& { return _callUuid; }
+    auto GetCallUuid() const -> const Util::Uuid&
+    {
+        return _callUuid;
+    }
 
 private:
     Util::Uuid _callUuid{};

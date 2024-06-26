@@ -54,8 +54,8 @@ public:
 
     inline void SendFrame(const SilKit::Services::Can::CanFrame &msg, void *userContext) override;
 
-    inline auto AddFrameHandler(FrameHandler handler, SilKit::Services::DirectionMask directionMask)
-        -> Util::HandlerId override;
+    inline auto AddFrameHandler(FrameHandler handler,
+                                SilKit::Services::DirectionMask directionMask) -> Util::HandlerId override;
 
     inline void RemoveFrameHandler(Util::HandlerId handlerId) override;
 
@@ -171,8 +171,8 @@ void CanController::SendFrame(const SilKit::Services::Can::CanFrame &msg, void *
     ThrowOnError(returnCode);
 }
 
-auto CanController::AddFrameHandler(FrameHandler handler, SilKit::Services::DirectionMask directionMask)
-    -> Util::HandlerId
+auto CanController::AddFrameHandler(FrameHandler handler,
+                                    SilKit::Services::DirectionMask directionMask) -> Util::HandlerId
 {
     const auto cHandler = [](void *context, SilKit_CanController *controller, SilKit_CanFrameEvent *frameEvent) {
         SILKIT_UNUSED_ARG(controller);

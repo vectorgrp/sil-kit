@@ -20,8 +20,7 @@ using namespace SilKit::Experimental::NetworkSimulation::Can;
 
 struct ITest_NetSimCan : ITest_NetSim
 {
-    void SendCanFrames(std::chrono::nanoseconds now, ICanController* controller,
-                                        std::atomic_uint& sendCount)
+    void SendCanFrames(std::chrono::nanoseconds now, ICanController* controller, std::atomic_uint& sendCount)
     {
         std::array<uint8_t, 1> dataBytes{78};
 
@@ -49,16 +48,16 @@ struct ITest_NetSimCan : ITest_NetSim
         });
         controller->AddFrameTransmitHandler(
             [&callCountsSilKitHandlersCan](ICanController*, const CanFrameTransmitEvent& /*msg*/) {
-                callCountsSilKitHandlersCan.FrameTransmitHandler++;
-            });
+            callCountsSilKitHandlersCan.FrameTransmitHandler++;
+        });
         controller->AddStateChangeHandler(
             [&callCountsSilKitHandlersCan](ICanController*, const CanStateChangeEvent& /*msg*/) {
-                callCountsSilKitHandlersCan.StateChangeHandler++;
-            });
+            callCountsSilKitHandlersCan.StateChangeHandler++;
+        });
         controller->AddErrorStateChangeHandler(
             [&callCountsSilKitHandlersCan](ICanController*, const CanErrorStateChangeEvent& /*msg*/) {
-                callCountsSilKitHandlersCan.ErrorStateChangeHandler++;
-            });
+            callCountsSilKitHandlersCan.ErrorStateChangeHandler++;
+        });
 
         lifecycleService->SetCommunicationReadyHandler([controller] {
             controller->SetBaudRate(10'000, 1'000'000, 2'000'000);
@@ -118,7 +117,6 @@ void MySimulatedCanController::OnSetControllerMode(const CanControllerMode& /*co
     CanErrorStateChangeEvent errorStateChangeEvent{};
     errorStateChangeEvent.errorState = CanErrorState::BusOff;
     _mySimulatedNetwork->GetCanEventProducer()->Produce(std::move(errorStateChangeEvent), receiver);
-
 }
 
 void MySimulatedCanController::OnSetBaudrate(const CanConfigureBaudrate& /*configureBaudrate*/)
@@ -191,16 +189,15 @@ TEST_F(ITest_NetSimCan, basic_networksimulation_can)
 
         timeSyncService->SetSimulationStepHandler(
             [this, lifecycleService, canController](auto now, const std::chrono::nanoseconds /*duration*/) {
-                if (now == _stopAtMs)
-                {
-                    lifecycleService->Stop("stopping the simulation");
-                }
-                else
-                {
-                    SendCanFrames(now, canController, callCounts.silKitSentMsgCan.SentFramesSimulated);
-                }
-            },
-            _stepSize);
+            if (now == _stopAtMs)
+            {
+                lifecycleService->Stop("stopping the simulation");
+            }
+            else
+            {
+                SendCanFrames(now, canController, callCounts.silKitSentMsgCan.SentFramesSimulated);
+            }
+        }, _stepSize);
     }
 
     {
@@ -220,9 +217,8 @@ TEST_F(ITest_NetSimCan, basic_networksimulation_can)
 
             timeSyncService->SetSimulationStepHandler(
                 [this, canController](auto now, const std::chrono::nanoseconds /*duration*/) {
-                    SendCanFrames(now, canController, callCounts.silKitSentMsgCan.SentFramesSimulated);
-                },
-                _stepSize);
+                SendCanFrames(now, canController, callCounts.silKitSentMsgCan.SentFramesSimulated);
+            }, _stepSize);
         }
     }
 
@@ -243,9 +239,8 @@ TEST_F(ITest_NetSimCan, basic_networksimulation_can)
 
             timeSyncService->SetSimulationStepHandler(
                 [this, canController](auto now, const std::chrono::nanoseconds /*duration*/) {
-                    SendCanFrames(now, canController, callCounts.silKitSentMsgCan.SentFramesTrivial);
-                },
-                _stepSize);
+                SendCanFrames(now, canController, callCounts.silKitSentMsgCan.SentFramesTrivial);
+            }, _stepSize);
         }
     }
 
@@ -261,7 +256,8 @@ TEST_F(ITest_NetSimCan, basic_networksimulation_can)
     EXPECT_EQ(callCounts.simulatedNetwork.ProvideSimulatedController, numSimulatedCanControllers);
 
     EXPECT_EQ(callCounts.silKitHandlersCanSimulated.FrameHandler, numSentFramesSimulated * numSimulatedCanControllers);
-    EXPECT_EQ(callCounts.silKitHandlersCanTrivial.FrameHandler, numSentFramesTrivial * (_numParticipantsTrivial - 1)); // FrameHandler filters messages from sender
+    EXPECT_EQ(callCounts.silKitHandlersCanTrivial.FrameHandler,
+              numSentFramesTrivial * (_numParticipantsTrivial - 1)); // FrameHandler filters messages from sender
     EXPECT_EQ(callCounts.silKitHandlersCanSimulated.FrameTransmitHandler, numSentFramesSimulated);
     EXPECT_EQ(callCounts.silKitHandlersCanTrivial.FrameTransmitHandler, numSentFramesTrivial);
     EXPECT_EQ(callCounts.silKitHandlersCanSimulated.StateChangeHandler, numSimulatedCanControllers);

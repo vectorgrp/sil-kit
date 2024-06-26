@@ -22,19 +22,19 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "SpecificDiscoveryStore.hpp"
 #include "YamlParser.hpp"
 namespace {
-inline auto MakeFilter(const std::string& type, const std::string& topicOrFunction) 
-  -> SilKit::Core::Discovery::FilterType
+inline auto MakeFilter(const std::string& type,
+                       const std::string& topicOrFunction) -> SilKit::Core::Discovery::FilterType
 {
-     return std::make_tuple(type, topicOrFunction);
+    return std::make_tuple(type, topicOrFunction);
 }
 } // end namespace
 namespace SilKit {
 namespace Core {
 namespace Discovery {
 
-// Service changes get announced here. 
+// Service changes get announced here.
 void SpecificDiscoveryStore::ServiceChange(ServiceDiscoveryEvent::Type changeType,
-                                           const ServiceDescriptor& serviceDescriptor) 
+                                           const ServiceDescriptor& serviceDescriptor)
 {
     std::string supplControllerTypeName;
     if (serviceDescriptor.GetSupplementalDataItem(Core::Discovery::controllerType, supplControllerTypeName))
@@ -58,7 +58,7 @@ void SpecificDiscoveryStore::ServiceChange(ServiceDiscoveryEvent::Type changeTyp
 
                 // Add labels
                 std::string labelsStr;
-                if(serviceDescriptor.GetSupplementalDataItem(supplKeyRpcClientLabels, labelsStr))
+                if (serviceDescriptor.GetSupplementalDataItem(supplKeyRpcClientLabels, labelsStr))
                 {
                     labels = SilKit::Config::Deserialize<decltype(labels)>(labelsStr);
                 }
@@ -70,7 +70,7 @@ void SpecificDiscoveryStore::ServiceChange(ServiceDiscoveryEvent::Type changeTyp
 
                 // Add labels
                 std::string labelsStr;
-                if(serviceDescriptor.GetSupplementalDataItem(supplKeyDataPublisherPubLabels, labelsStr))
+                if (serviceDescriptor.GetSupplementalDataItem(supplKeyDataPublisherPubLabels, labelsStr))
                 {
                     labels = SilKit::Config::Deserialize<decltype(labels)>(labelsStr);
                 }
@@ -90,9 +90,9 @@ void SpecificDiscoveryStore::ServiceChange(ServiceDiscoveryEvent::Type changeTyp
 }
 
 // A new subscriber shows up -> notify of all earlier services
-void SpecificDiscoveryStore::CallHandlerOnHandlerRegistration(const ServiceDiscoveryHandler& handler,
-                                                              const std::string& controllerType_, const std::string& key,
-                                                              const std::vector<SilKit::Services::MatchingLabel>& labels)
+void SpecificDiscoveryStore::CallHandlerOnHandlerRegistration(
+    const ServiceDiscoveryHandler& handler, const std::string& controllerType_, const std::string& key,
+    const std::vector<SilKit::Services::MatchingLabel>& labels)
 {
     // pre filter key and mediaType
     auto& entry = _lookup[MakeFilter(controllerType_, key)];
@@ -131,13 +131,14 @@ void SpecificDiscoveryStore::CallHandlerOnHandlerRegistration(const ServiceDisco
 
 // A new publisher shows up -> notify all subscriber handlers
 void SpecificDiscoveryStore::CallHandlersOnServiceChange(ServiceDiscoveryEvent::Type eventType,
-                                                         const std::string& supplControllerTypeName, const std::string& key,
+                                                         const std::string& supplControllerTypeName,
+                                                         const std::string& key,
                                                          const std::vector<SilKit::Services::MatchingLabel>& labels,
                                                          const ServiceDescriptor& serviceDescriptor)
 {
     // pre filter key and mediaType
     auto& entry = _lookup[MakeFilter(supplControllerTypeName, key)];
-    
+
     const SilKit::Services::MatchingLabel* greedyLabel = GetLabelWithMinimalHandlerSet(entry, labels);
 
     if (greedyLabel == nullptr)
@@ -183,10 +184,11 @@ void SpecificDiscoveryStore::CallHandlersOnServiceChange(ServiceDiscoveryEvent::
 }
 
 void SpecificDiscoveryStore::UpdateLookupOnServiceChange(ServiceDiscoveryEvent::Type eventType,
-                                                         const std::string& supplControllerTypeName, const std::string& key,
+                                                         const std::string& supplControllerTypeName,
+                                                         const std::string& key,
                                                          const std::vector<SilKit::Services::MatchingLabel>& labels,
                                                          const ServiceDescriptor& serviceDescriptor)
-{    
+{
     if (eventType == ServiceDiscoveryEvent::Type::ServiceCreated)
     {
         InsertLookupNode(supplControllerTypeName, key, labels, serviceDescriptor);
@@ -197,8 +199,8 @@ void SpecificDiscoveryStore::UpdateLookupOnServiceChange(ServiceDiscoveryEvent::
     }
 }
 
-auto SpecificDiscoveryStore::GetLabelWithMinimalHandlerSet(
-    DiscoveryKeyNode& keyNode, const std::vector<SilKit::Services::MatchingLabel>& labels)
+auto SpecificDiscoveryStore::GetLabelWithMinimalHandlerSet(DiscoveryKeyNode& keyNode,
+                                                           const std::vector<SilKit::Services::MatchingLabel>& labels)
     -> const SilKit::Services::MatchingLabel*
 {
     const SilKit::Services::MatchingLabel* outGreedyLabel = nullptr;
@@ -237,8 +239,8 @@ auto SpecificDiscoveryStore::GetLabelWithMinimalHandlerSet(
     return outGreedyLabel;
 }
 
-auto SpecificDiscoveryStore::GetLabelWithMinimalNodeSet(DiscoveryKeyNode& keyNode, 
-                                                           const std::vector<SilKit::Services::MatchingLabel>& labels)
+auto SpecificDiscoveryStore::GetLabelWithMinimalNodeSet(DiscoveryKeyNode& keyNode,
+                                                        const std::vector<SilKit::Services::MatchingLabel>& labels)
     -> const SilKit::Services::MatchingLabel*
 {
     const SilKit::Services::MatchingLabel* outGreedyLabel = nullptr;
@@ -279,7 +281,7 @@ auto SpecificDiscoveryStore::GetLabelWithMinimalNodeSet(DiscoveryKeyNode& keyNod
 
 void SpecificDiscoveryStore::UpdateDiscoveryClusters(const std::string& controllerType_, const std::string& key,
                                                      const std::vector<SilKit::Services::MatchingLabel>& labels,
-    std::function<void(DiscoveryCluster&)> updater)
+                                                     std::function<void(DiscoveryCluster&)> updater)
 {
     auto& entry = _lookup[MakeFilter(controllerType_, key)];
     updater(entry.allCluster);
@@ -315,13 +317,11 @@ void SpecificDiscoveryStore::UpdateDiscoveryClusters(const std::string& controll
         }
 
         // insert for every label
-        for (auto&& keyval: entry.notLabelMap)
+        for (auto&& keyval : entry.notLabelMap)
         {
             const auto& labelKey = keyval.first;
             auto foundLabel =
-                std::find_if(labels.begin(), labels.end(), [&labelKey](const auto& ml) {
-                    return ml.key == labelKey;
-                });
+                std::find_if(labels.begin(), labels.end(), [&labelKey](const auto& ml) { return ml.key == labelKey; });
             if (foundLabel != labels.end())
             {
                 auto& labelEntry = entry.labelMap[MakeFilter(labelKey, foundLabel->value)];
@@ -336,34 +336,32 @@ void SpecificDiscoveryStore::UpdateDiscoveryClusters(const std::string& controll
     }
 }
 
-void SpecificDiscoveryStore::InsertLookupNode(const std::string& controllerType_, const std::string& key, 
-                                            const std::vector<SilKit::Services::MatchingLabel>& labels,
-                                            const ServiceDescriptor& serviceDescriptor)
+void SpecificDiscoveryStore::InsertLookupNode(const std::string& controllerType_, const std::string& key,
+                                              const std::vector<SilKit::Services::MatchingLabel>& labels,
+                                              const ServiceDescriptor& serviceDescriptor)
 {
-    UpdateDiscoveryClusters(controllerType_, key, labels, [&serviceDescriptor](auto& cluster) {
-        cluster.nodes.push_back(serviceDescriptor);
-    });
+    UpdateDiscoveryClusters(controllerType_, key, labels,
+                            [&serviceDescriptor](auto& cluster) { cluster.nodes.push_back(serviceDescriptor); });
 }
 
 void SpecificDiscoveryStore::RemoveLookupNode(const std::string& controllerType_, const std::string& key,
                                               const ServiceDescriptor& serviceDescriptor)
 {
-
     auto& entry = _lookup[MakeFilter(controllerType_, key)];
     entry.allCluster.nodes.erase(
         std::remove(entry.allCluster.nodes.begin(), entry.allCluster.nodes.end(), serviceDescriptor),
-                                 entry.allCluster.nodes.end());
+        entry.allCluster.nodes.end());
     entry.noLabelCluster.nodes.erase(
         std::remove(entry.noLabelCluster.nodes.begin(), entry.noLabelCluster.nodes.end(), serviceDescriptor),
         entry.noLabelCluster.nodes.end());
 
-    for (auto&& keyval: entry.notLabelMap) 
+    for (auto&& keyval : entry.notLabelMap)
     {
         auto& cluster = keyval.second;
         cluster.nodes.erase(std::remove(cluster.nodes.begin(), cluster.nodes.end(), serviceDescriptor),
                             cluster.nodes.end());
     }
-    for (auto&& keyval: entry.labelMap)
+    for (auto&& keyval : entry.labelMap)
     {
         auto& cluster = keyval.second;
         cluster.nodes.erase(std::remove(cluster.nodes.begin(), cluster.nodes.end(), serviceDescriptor),
@@ -373,16 +371,15 @@ void SpecificDiscoveryStore::RemoveLookupNode(const std::string& controllerType_
 
 void SpecificDiscoveryStore::InsertLookupHandler(const std::string& controllerType_, const std::string& key,
                                                  const std::vector<SilKit::Services::MatchingLabel>& labels,
-                                                ServiceDiscoveryHandler handler)
+                                                 ServiceDiscoveryHandler handler)
 {
     auto handlerPtr = std::make_shared<decltype(handler)>(std::move(handler));
-    UpdateDiscoveryClusters(controllerType_, key, labels, [handlerPtr](auto& cluster) {
-        cluster.handlers.push_back(handlerPtr);
-    });
+    UpdateDiscoveryClusters(controllerType_, key, labels,
+                            [handlerPtr](auto& cluster) { cluster.handlers.push_back(handlerPtr); });
 }
 
 void SpecificDiscoveryStore::RegisterSpecificServiceDiscoveryHandler(
-    ServiceDiscoveryHandler handler, const std::string& controllerType_, const std::string& key, 
+    ServiceDiscoveryHandler handler, const std::string& controllerType_, const std::string& key,
     const std::vector<SilKit::Services::MatchingLabel>& labels)
 {
     CallHandlerOnHandlerRegistration(handler, controllerType_, key, labels);
@@ -392,4 +389,3 @@ void SpecificDiscoveryStore::RegisterSpecificServiceDiscoveryHandler(
 } // namespace Discovery
 } // namespace Core
 } // namespace SilKit
-

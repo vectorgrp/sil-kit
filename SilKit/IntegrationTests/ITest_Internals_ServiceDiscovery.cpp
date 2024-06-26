@@ -47,10 +47,7 @@ using namespace SilKit::Core;
 class ITest_Internals_ServiceDiscovery : public testing::Test
 {
 protected:
-    ITest_Internals_ServiceDiscovery()
-    {
-    }
-
+    ITest_Internals_ServiceDiscovery() {}
 };
 
 // Tests that the service discovery handler fires for created services
@@ -67,11 +64,12 @@ TEST_F(ITest_Internals_ServiceDiscovery, discover_services)
     registry->StartListening(registryUri);
 
     // Publisher that will leave the simulation and trigger service removal
-    auto&& publisher =  SilKit::CreateParticipantImpl(SilKit::Config::MakeEmptyParticipantConfigurationImpl(), publisherName, registryUri);
+    auto&& publisher = SilKit::CreateParticipantImpl(SilKit::Config::MakeEmptyParticipantConfigurationImpl(),
+                                                     publisherName, registryUri);
 
     // Subscriber that monitors the services
-    auto&& subscriber =
-        SilKit::CreateParticipantImpl(SilKit::Config::MakeEmptyParticipantConfigurationImpl(), subscriberName, registryUri);
+    auto&& subscriber = SilKit::CreateParticipantImpl(SilKit::Config::MakeEmptyParticipantConfigurationImpl(),
+                                                      subscriberName, registryUri);
 
     // Services
     for (auto i = 0u; i < numberOfServices; i++)
@@ -90,42 +88,41 @@ TEST_F(ITest_Internals_ServiceDiscovery, discover_services)
 
     // Cast to internal participant for access to service discovery
     auto subscriberServiceDiscovery = dynamic_cast<IParticipantInternal*>(subscriber.get())->GetServiceDiscovery();
-    
+
     auto allCreated = std::promise<void>();
     auto allRemoved = std::promise<void>();
-    // Participants are already there, so the registration will trigger the provided handler immediately 
+    // Participants are already there, so the registration will trigger the provided handler immediately
     subscriberServiceDiscovery->RegisterServiceDiscoveryHandler(
         [numberOfServices, &allRemoved, &allCreated, &createdServiceNames, &removedServiceNames, publisherName](
-            auto discoveryType, const auto& service)
+            auto discoveryType, const auto& service) {
+        switch (discoveryType)
         {
-            switch (discoveryType)
+        case SilKit::Core::Discovery::ServiceDiscoveryEvent::Type::Invalid:
+            break;
+        case SilKit::Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated:
+            if (service.GetParticipantName() == publisherName)
             {
-            case SilKit::Core::Discovery::ServiceDiscoveryEvent::Type::Invalid:
-                break;
-            case SilKit::Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated:
-                if (service.GetParticipantName() == publisherName)
+                createdServiceNames.push_back(service.GetServiceName());
+                if (createdServiceNames.size() == numberOfServices)
                 {
-                    createdServiceNames.push_back(service.GetServiceName());
-                    if (createdServiceNames.size() == numberOfServices)
-                    {
-                        allCreated.set_value();
-                    }
+                    allCreated.set_value();
                 }
-                break;
-            case SilKit::Core::Discovery::ServiceDiscoveryEvent::Type::ServiceRemoved:
-                if (service.GetParticipantName() == publisherName)
-                {
-                    removedServiceNames.push_back(service.GetServiceName());
-                    if (removedServiceNames.size() == createdServiceNames.size())
-                    {
-                        allRemoved.set_value();
-                    }
-                }
-                break;
-            default:
-                break;
             }
-        });
+            break;
+        case SilKit::Core::Discovery::ServiceDiscoveryEvent::Type::ServiceRemoved:
+            if (service.GetParticipantName() == publisherName)
+            {
+                removedServiceNames.push_back(service.GetServiceName());
+                if (removedServiceNames.size() == createdServiceNames.size())
+                {
+                    allRemoved.set_value();
+                }
+            }
+            break;
+        default:
+            break;
+        }
+    });
 
     // Await the creation
     allCreated.get_future().wait_for(10s);
@@ -159,10 +156,12 @@ TEST_F(ITest_Internals_ServiceDiscovery, discover_specific_services)
     registry->StartListening(registryUri);
 
     // Publisher that will leave the simulation and trigger service removal
-    auto&& publisher = SilKit::CreateParticipantImpl(SilKit::Config::MakeEmptyParticipantConfigurationImpl(), publisherName, registryUri);
+    auto&& publisher = SilKit::CreateParticipantImpl(SilKit::Config::MakeEmptyParticipantConfigurationImpl(),
+                                                     publisherName, registryUri);
 
     // Subscriber that monitors the services
-    auto&& subscriber = SilKit::CreateParticipantImpl(SilKit::Config::MakeEmptyParticipantConfigurationImpl(), subscriberName, registryUri);
+    auto&& subscriber = SilKit::CreateParticipantImpl(SilKit::Config::MakeEmptyParticipantConfigurationImpl(),
+                                                      subscriberName, registryUri);
 
     // Services
     const std::string topic = "Topic";
@@ -183,46 +182,48 @@ TEST_F(ITest_Internals_ServiceDiscovery, discover_specific_services)
     auto allRemoved = std::promise<void>();
 
     const auto discoveryLookupKey = SilKit::Core::Discovery::controllerTypeDataPublisher + "/"
-                               + SilKit::Core::Discovery::supplKeyDataPublisherTopic + "/" + topic + "/"
-                               + SilKit::Core::Discovery::supplKeyDataPublisherPubLabels + "/";
+                                    + SilKit::Core::Discovery::supplKeyDataPublisherTopic + "/" + topic + "/"
+                                    + SilKit::Core::Discovery::supplKeyDataPublisherPubLabels + "/";
 
     std::string controllerType = SilKit::Core::Discovery::controllerTypeDataPublisher;
 
     std::string mediaType = "";
     std::string topicCopy = topic;
-    std::vector<SilKit::Services::MatchingLabel> labels; 
+    std::vector<SilKit::Services::MatchingLabel> labels;
 
     // Participants are already there, so the registration will trigger the provided handler immediately
     subscriberServiceDiscovery->RegisterSpecificServiceDiscoveryHandler(
         [numberOfServices, &allRemoved, &allCreated, &createdServiceNames, &removedServiceNames, publisherName](
             auto discoveryType, const auto& service) {
-            switch (discoveryType)
+        switch (discoveryType)
+        {
+        case SilKit::Core::Discovery::ServiceDiscoveryEvent::Type::Invalid:
+            break;
+        case SilKit::Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated:
+            if (service.GetParticipantName() == publisherName)
             {
-            case SilKit::Core::Discovery::ServiceDiscoveryEvent::Type::Invalid: break;
-            case SilKit::Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated:
-                if (service.GetParticipantName() == publisherName)
+                createdServiceNames.push_back(service.GetServiceName());
+                if (createdServiceNames.size() == numberOfServices)
                 {
-                    createdServiceNames.push_back(service.GetServiceName());
-                    if (createdServiceNames.size() == numberOfServices)
-                    {
-                        allCreated.set_value();
-                    }
+                    allCreated.set_value();
                 }
-                break;
-            case SilKit::Core::Discovery::ServiceDiscoveryEvent::Type::ServiceRemoved:
-                if (service.GetParticipantName() == publisherName)
-                {
-                    removedServiceNames.push_back(service.GetServiceName());
-                    if (removedServiceNames.size() == createdServiceNames.size())
-                    {
-                        allRemoved.set_value();
-                    }
-                }
-                break;
-            default: break;
             }
-        }, controllerType, 
-        topicCopy, labels);
+            break;
+        case SilKit::Core::Discovery::ServiceDiscoveryEvent::Type::ServiceRemoved:
+            if (service.GetParticipantName() == publisherName)
+            {
+                removedServiceNames.push_back(service.GetServiceName());
+                if (removedServiceNames.size() == createdServiceNames.size())
+                {
+                    allRemoved.set_value();
+                }
+            }
+            break;
+        default:
+            break;
+        }
+    },
+        controllerType, topicCopy, labels);
 
     // Await the creation
     allCreated.get_future().wait_for(10s);

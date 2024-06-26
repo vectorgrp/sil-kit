@@ -45,7 +45,7 @@ enum class RpcCallStatus : SilKit_RpcCallStatus
     /*! \brief The Call lead to an internal RpcServer error.
      * This might happen if no CallHandler was specified for the RpcServer.
      */
-    InternalServerError = SilKit_RpcCallStatus_InternalServerError, 
+    InternalServerError = SilKit_RpcCallStatus_InternalServerError,
     /*! \brief The Call did run into a timeout and was canceled.
      * This might happen if a corresponding server crashed, ran into an error or took too long to answer the call
      */

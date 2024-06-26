@@ -24,8 +24,7 @@ namespace SilKit {
 namespace Experimental {
 namespace NetworkSimulation {
 
-class SimulatedNetworkRouter
-    : public Core::ISimulator
+class SimulatedNetworkRouter : public Core::ISimulator
 {
 public:
     SimulatedNetworkRouter(Core::IParticipantInternal* participant, const std::string& networkName,
@@ -83,7 +82,8 @@ public:
             }
             else
             {
-                _participant->GetLogger()->Warn("EventProvider has no receiving controller on network '" + _networkName + "'");
+                _participant->GetLogger()->Warn("EventProvider has no receiving controller on network '" + _networkName
+                                                + "'");
             }
         }
     }
@@ -92,18 +92,16 @@ public:
     inline void SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor) override;
     inline auto GetServiceDescriptor() const -> const Core::ServiceDescriptor& override;
 
-    void AddSimulatedController(const std::string& fromParticipantName,
-                                const std::string& controllerName, Core::EndpointId serviceId,
-                                ControllerDescriptor controllerDescriptor,
+    void AddSimulatedController(const std::string& fromParticipantName, const std::string& controllerName,
+                                Core::EndpointId serviceId, ControllerDescriptor controllerDescriptor,
                                 ISimulatedController* userSimulatedController);
     void RemoveSimulatedController(const std::string& fromParticipantName, Core::EndpointId serviceId,
                                    ControllerDescriptor controllerDescriptor);
 
-private :
+private:
     void AnnounceNetwork(const std::string& networkName, SimulatedNetworkType networkType);
     bool AllowReception(const SilKit::Core::IServiceEndpoint* from);
-    auto GetSimulatedControllerFromServiceEndpoint(const SilKit::Core::IServiceEndpoint* from) 
-        -> ISimulatedController*;
+    auto GetSimulatedControllerFromServiceEndpoint(const SilKit::Core::IServiceEndpoint* from) -> ISimulatedController*;
 
     auto GetSimulatedCanControllerFromServiceEndpoint(const SilKit::Core::IServiceEndpoint* from)
         -> Can::ISimulatedCanController*;
@@ -136,7 +134,8 @@ private :
     Core::ServiceDescriptor _serviceDescriptor{};
 
     // ServiceId is unique per participant
-    using SimulatedControllersByServiceId = std::unordered_map<Core::EndpointId /*serviceId*/, ISimulatedController* /*controller*/>;
+    using SimulatedControllersByServiceId =
+        std::unordered_map<Core::EndpointId /*serviceId*/, ISimulatedController* /*controller*/>;
     using SimulatedControllersByParticipantAndServiceId =
         std::unordered_map<std::string /*participantName*/, SimulatedControllersByServiceId /*inner*/>;
     SimulatedControllersByParticipantAndServiceId _simulatedControllers;

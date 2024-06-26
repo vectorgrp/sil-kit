@@ -45,14 +45,14 @@ public:
 
     // IServiceEndpoint
     inline void SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor) override;
-    inline auto GetServiceDescriptor() const -> const Core::ServiceDescriptor & override;
+    inline auto GetServiceDescriptor() const -> const Core::ServiceDescriptor& override;
 
 private:
     // ----------------------------------------
     // private members
     Core::IParticipantInternal* _participant{nullptr};
     Core::ServiceDescriptor _serviceDescriptor{};
-    
+
     Logging::Logger* _logger;
 };
 // ================================================================================

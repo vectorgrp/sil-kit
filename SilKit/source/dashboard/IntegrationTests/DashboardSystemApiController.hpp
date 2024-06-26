@@ -91,7 +91,10 @@ public:
                                                               updateTimeout, objectMapper);
     }
 
-    std::map<uint64_t, SimulationData> GetData() { return _data; }
+    std::map<uint64_t, SimulationData> GetData()
+    {
+        return _data;
+    }
 
     ENDPOINT("POST", "system-service/v1.0/simulations", createSimulation,
              BODY_DTO(Object<SilKit::Dashboard::SimulationCreationRequestDto>, simulation))
@@ -390,9 +393,15 @@ public:
         return finishedSimulationsCount;
     }
 
-    void WaitSimulationsFinished() { _allSimulationsFinishedStatus = _allSimulationsFinishedFuture.wait_for(5s); }
+    void WaitSimulationsFinished()
+    {
+        _allSimulationsFinishedStatus = _allSimulationsFinishedFuture.wait_for(5s);
+    }
 
-    bool AllSimulationsFinished() { return _allSimulationsFinishedStatus == std::future_status::ready; }
+    bool AllSimulationsFinished()
+    {
+        return _allSimulationsFinishedStatus == std::future_status::ready;
+    }
 
 private:
     std::vector<SilKit::Services::MatchingLabel> GetLabels(oatpp::Vector<Object<MatchingLabelDto>> labels)

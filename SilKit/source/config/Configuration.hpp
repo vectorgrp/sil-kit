@@ -68,16 +68,16 @@ struct Sink
         File
     };
 
-    Type type{ Type::Remote };
-    Services::Logging::Level level{ Services::Logging::Level::Info };
+    Type type{Type::Remote};
+    Services::Logging::Level level{Services::Logging::Level::Info};
     std::string logName;
 };
 
 //! \brief Logger service
 struct Logging
 {
-    bool logFromRemotes{ false };
-    Services::Logging::Level flushLevel{ Services::Logging::Level::Off };
+    bool logFromRemotes{false};
+    Services::Logging::Level flushLevel{Services::Logging::Level::Off};
     std::vector<Sink> sinks;
 };
 
@@ -95,7 +95,7 @@ struct TraceSink
         Mdf4File
     };
 
-    Type type{ Type::Undefined };
+    Type type{Type::Undefined};
     std::string name;
     std::string outputPath;
 };
@@ -109,7 +109,7 @@ struct TraceSource
         Mdf4File
     };
 
-    Type type{ Type::Undefined };
+    Type type{Type::Undefined};
     std::string name;
     std::string inputPath;
 };
@@ -138,19 +138,19 @@ struct Replay
         Receive,
         Both,
     };
-    Direction direction{ Direction::Undefined };
+    Direction direction{Direction::Undefined};
     MdfChannel mdfChannel;
 };
 
 struct SimulatedNetwork
 {
     // This method allows for generic usage, along with ControllerConfigTs
-    auto GetNetworkType() -> NetworkType 
+    auto GetNetworkType() -> NetworkType
     {
         return type;
     }
     std::string name;
-    NetworkType type{ NetworkType::Undefined };
+    NetworkType type{NetworkType::Undefined};
     std::vector<std::string> useTraceSinks;
     Replay replay;
 };
@@ -183,7 +183,7 @@ auto to_string(TraceSink::Type sinkType) -> std::string
     case TraceSink::Type::Undefined:
         return "Undefined";
     default:
-        throw SilKit::TypeConversionError{ "Invalid SinkType" };
+        throw SilKit::TypeConversionError{"Invalid SinkType"};
     }
 }
 
@@ -191,23 +191,30 @@ auto to_string(NetworkType networkType) -> std::string
 {
     switch (networkType)
     {
-    case NetworkType::Undefined: return "Undefined";
-    case NetworkType::Invalid: return "Invalid";
-    case NetworkType::CAN: return "CAN";
-    case NetworkType::LIN: return "LIN";
-    case NetworkType::Ethernet: return "Ethernet";
-    case NetworkType::FlexRay: return "FlexRay";
-    case NetworkType::Data: return "Data";
-    case NetworkType::RPC: return "RPC";
-    default: return "Unknown";
+    case NetworkType::Undefined:
+        return "Undefined";
+    case NetworkType::Invalid:
+        return "Invalid";
+    case NetworkType::CAN:
+        return "CAN";
+    case NetworkType::LIN:
+        return "LIN";
+    case NetworkType::Ethernet:
+        return "Ethernet";
+    case NetworkType::FlexRay:
+        return "FlexRay";
+    case NetworkType::Data:
+        return "Data";
+    case NetworkType::RPC:
+        return "RPC";
+    default:
+        return "Unknown";
     }
 }
 
 bool operator==(const Sink& lhs, const Sink& rhs)
 {
-    return lhs.type == rhs.type
-        && lhs.level == rhs.level
-        && lhs.logName == rhs.logName;
+    return lhs.type == rhs.type && lhs.level == rhs.level && lhs.logName == rhs.logName;
 }
 
 bool operator<(const Sink& lhs, const Sink& rhs)
@@ -222,44 +229,33 @@ bool operator>(const Sink& lhs, const Sink& rhs)
 
 bool operator==(const Logging& lhs, const Logging& rhs)
 {
-    return lhs.logFromRemotes == rhs.logFromRemotes
-        && lhs.flushLevel == rhs.flushLevel
-        && lhs.sinks == rhs.sinks;
+    return lhs.logFromRemotes == rhs.logFromRemotes && lhs.flushLevel == rhs.flushLevel && lhs.sinks == rhs.sinks;
 }
 
 bool operator==(const TraceSink& lhs, const TraceSink& rhs)
 {
-    return lhs.name == rhs.name
-        && lhs.outputPath == rhs.outputPath
-        && lhs.type == rhs.type;
+    return lhs.name == rhs.name && lhs.outputPath == rhs.outputPath && lhs.type == rhs.type;
 }
 
 bool operator==(const TraceSource& lhs, const TraceSource& rhs)
 {
-    return lhs.inputPath == rhs.inputPath
-        && lhs.type == rhs.type
-        && lhs.name == rhs.name;
+    return lhs.inputPath == rhs.inputPath && lhs.type == rhs.type && lhs.name == rhs.name;
 }
 
 bool operator==(const Replay& lhs, const Replay& rhs)
 {
-    return lhs.useTraceSource == rhs.useTraceSource
-        && lhs.direction == rhs.direction
-        && lhs.mdfChannel == rhs.mdfChannel
-        ;
+    return lhs.useTraceSource == rhs.useTraceSource && lhs.direction == rhs.direction
+           && lhs.mdfChannel == rhs.mdfChannel;
 }
 
 bool operator==(const MdfChannel& lhs, const MdfChannel& rhs)
 {
-    return lhs.channelName == rhs.channelName
-        && lhs.channelSource == rhs.channelSource
-        && lhs.channelPath == rhs.channelPath
-        && lhs.groupName == rhs.groupName
-        && lhs.groupSource == rhs.groupSource
-        && lhs.groupPath == rhs.groupPath;
+    return lhs.channelName == rhs.channelName && lhs.channelSource == rhs.channelSource
+           && lhs.channelPath == rhs.channelPath && lhs.groupName == rhs.groupName && lhs.groupSource == rhs.groupSource
+           && lhs.groupPath == rhs.groupPath;
 }
 
-} // inline namespace v1
+} // namespace v1
 
 } // namespace Config
 } // namespace SilKit

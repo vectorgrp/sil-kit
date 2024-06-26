@@ -79,9 +79,10 @@ public:
 private:
     // private ctor
     Uri() = default;
+
 private:
     // private members
-    UriType _type{ UriType::Undefined };
+    UriType _type{UriType::Undefined};
     std::string _scheme;
     std::string _host;
     Util::Optional<uint16_t> _port{};

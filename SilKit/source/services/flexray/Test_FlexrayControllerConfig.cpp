@@ -37,7 +37,7 @@ using namespace SilKit::Services::Flexray;
 class Test_FlexrayControllerConfig : public testing::Test
 {
 public:
-    Test_FlexrayControllerConfig(){};
+    Test_FlexrayControllerConfig() {};
 };
 
 auto PrepareParticipantConfiguration() -> std::shared_ptr<SilKit::Config::ParticipantConfiguration>
@@ -91,4 +91,4 @@ TEST(Test_FlexrayControllerConfig, create_controller_configured_with_network)
     EXPECT_EQ(serviceDescr.GetNetworkName(), expectedNetworkName);
 }
 
-}  // anonymous namespace
+} // anonymous namespace

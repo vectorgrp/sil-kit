@@ -49,13 +49,25 @@ public:
         _minor = 0;
     }
 
-    void IncrementMinor() { ++_minor; }
+    void IncrementMinor()
+    {
+        ++_minor;
+    }
 
-    auto Value() const -> uint64_t { return (static_cast<uint64_t>(_major) << 32) | static_cast<uint64_t>(_minor); }
+    auto Value() const -> uint64_t
+    {
+        return (static_cast<uint64_t>(_major) << 32) | static_cast<uint64_t>(_minor);
+    }
 
-    auto Major() const -> uint32_t { return _major; }
+    auto Major() const -> uint32_t
+    {
+        return _major;
+    }
 
-    auto Minor() const -> uint32_t { return _minor; }
+    auto Minor() const -> uint32_t
+    {
+        return _minor;
+    }
 
     void PublishValue(SilKit::Services::PubSub::IDataPublisher *publisher) const
     {
@@ -82,9 +94,15 @@ public:
         return value;
     }
 
-    static auto ExtractMajor(const uint64_t value) -> uint32_t { return static_cast<uint32_t>(value >> 32); }
+    static auto ExtractMajor(const uint64_t value) -> uint32_t
+    {
+        return static_cast<uint32_t>(value >> 32);
+    }
 
-    static auto ExtractMinor(const uint64_t value) -> uint32_t { return static_cast<uint32_t>(value & 0xFFFFFFFF); }
+    static auto ExtractMinor(const uint64_t value) -> uint32_t
+    {
+        return static_cast<uint32_t>(value & 0xFFFFFFFF);
+    }
 };
 
 TEST(ITest_SimTask, blocking_during_simtask_does_not_affect_processing_order)
@@ -126,12 +144,9 @@ TEST(ITest_SimTask, blocking_during_simtask_does_not_affect_processing_order)
         SilKit::Services::Orchestration::WorkflowConfiguration workflowConfiguration{{"Pub", "Sub", "Control"}};
         cSystemController->SetWorkflowConfiguration(workflowConfiguration);
 
-        cTimeSyncService->SetSimulationStepHandler(
-            [](std::chrono::nanoseconds, std::chrono::nanoseconds) {
-
-                // do nothing
-            },
-            1ms);
+        cTimeSyncService->SetSimulationStepHandler([](std::chrono::nanoseconds, std::chrono::nanoseconds) {
+            // do nothing
+        }, 1ms);
 
         auto lifecycleDone = cLifecycleService->StartLifecycle();
         ASSERT_EQ(lifecycleDone.wait_for(5s), std::future_status::ready);
@@ -160,56 +175,51 @@ TEST(ITest_SimTask, blocking_during_simtask_does_not_affect_processing_order)
 
         pTimeSyncService->SetSimulationStepHandler(
             [pLifecycleService, pPublisher, &counter, &s](std::chrono::nanoseconds now, std::chrono::nanoseconds) {
+            if (!s.running)
+            {
+                return;
+            }
+
+            if (now >= 100ms)
+            {
+                pLifecycleService->Stop("test reached limit");
+                s.running = false;
+                s.cv.notify_all();
+                return;
+            }
+
+            counter.IncrementMajor();
+
+            counter.IncrementMinor();
+            counter.PublishValue(pPublisher);
+
+            {
+                Lock lock{s.mx};
+                s.blocking = true;
+            }
+            s.cv.notify_all();
+
+            // do nothing
+
+            {
+                Lock lock{s.mx};
+                s.cv.wait(lock, [&s] { return !s.blocking || !s.running; });
+
                 if (!s.running)
                 {
                     return;
                 }
+            }
 
-                if (now >= 100ms)
-                {
-                    pLifecycleService->Stop("test reached limit");
-                    s.running = false;
-                    s.cv.notify_all();
-                    return;
-                }
-                
-                counter.IncrementMajor();
-
-                counter.IncrementMinor();
-                counter.PublishValue(pPublisher);
-
-                {
-                    Lock lock{s.mx};
-                    s.blocking = true;
-                }
-                s.cv.notify_all();
-
-                // do nothing
-
-                {
-                    Lock lock{s.mx};
-                    s.cv.wait(lock, [&s] {
-                        return !s.blocking || !s.running;
-                    });
-
-                    if (!s.running)
-                    {
-                        return;
-                    }
-                }
-
-                counter.IncrementMinor();
-                counter.PublishValue(pPublisher);
-            },
-            1ms);
+            counter.IncrementMinor();
+            counter.PublishValue(pPublisher);
+        }, 1ms);
 
         auto completerDone = std::async(std::launch::async, [pPublisher, &counter, &s] {
             while (s.running)
             {
                 Lock lock{s.mx};
-                s.cv.wait(lock, [&s] {
-                    return s.blocking || !s.running;
-                });
+                s.cv.wait(lock, [&s] { return s.blocking || !s.running; });
 
                 if (!s.running)
                 {
@@ -239,20 +249,18 @@ TEST(ITest_SimTask, blocking_during_simtask_does_not_affect_processing_order)
         s->CreateDataSubscriber("Sub", spec,
                                 [&received](SilKit::Services::PubSub::IDataSubscriber *,
                                             const SilKit::Services::PubSub::DataMessageEvent &event) {
-                                    ASSERT_EQ(event.data.size(), 8);
-                                    const auto value = Counter::ExtractValue(event.data);
-                                    ASSERT_GT(Counter::ExtractMajor(value), uint32_t{0})
-                                        << SilKit::Util::AsHexString(event.data).WithSeparator(":");
-                                    ASSERT_GT(Counter::ExtractMinor(value), uint32_t{0})
-                                        << SilKit::Util::AsHexString(event.data).WithSeparator(":");
-                                    received.emplace_back(value);
-                                });
+            ASSERT_EQ(event.data.size(), 8);
+            const auto value = Counter::ExtractValue(event.data);
+            ASSERT_GT(Counter::ExtractMajor(value), uint32_t{0})
+                << SilKit::Util::AsHexString(event.data).WithSeparator(":");
+            ASSERT_GT(Counter::ExtractMinor(value), uint32_t{0})
+                << SilKit::Util::AsHexString(event.data).WithSeparator(":");
+            received.emplace_back(value);
+        });
 
-        sTimeSyncService->SetSimulationStepHandler(
-            [](std::chrono::nanoseconds, std::chrono::nanoseconds) {
-                // do nothing
-            },
-            1ms);
+        sTimeSyncService->SetSimulationStepHandler([](std::chrono::nanoseconds, std::chrono::nanoseconds) {
+            // do nothing
+        }, 1ms);
 
         auto lifecycleDone = sLifecycleService->StartLifecycle();
 

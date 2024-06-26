@@ -37,7 +37,7 @@ using namespace SilKit::Services::Lin;
 class Test_LinControllerConfig : public testing::Test
 {
 public:
-    Test_LinControllerConfig(){};
+    Test_LinControllerConfig() {};
 };
 
 auto PrepareParticipantConfiguration() -> std::shared_ptr<SilKit::Config::ParticipantConfiguration>
@@ -89,4 +89,4 @@ TEST(Test_LinControllerConfig, create_controller_configured_with_network)
     EXPECT_EQ(serviceDescr.GetNetworkName(), expectedNetworkName);
 }
 
-}  // anonymous namespace
+} // anonymous namespace

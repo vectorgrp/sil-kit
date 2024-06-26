@@ -47,7 +47,7 @@ typedef struct
     //! Send timestamp of the event
     SilKit_NanosecondsTime timestamp;
     //! Data field containing the payload
-    SilKit_ByteVector data; 
+    SilKit_ByteVector data;
 } SilKit_DataMessageEvent;
 
 /*! \brief Represents a handle to a data publisher instance */
@@ -60,8 +60,8 @@ typedef struct SilKit_DataSubscriber SilKit_DataSubscriber;
 * \param subscriber The affected subscriber.
 * \param dataMessageEvent Contains the raw data and send timestamp.
 */
-typedef void (SilKitFPTR *SilKit_DataMessageHandler_t)(void* context, SilKit_DataSubscriber* subscriber,
-    const SilKit_DataMessageEvent* dataMessageEvent);
+typedef void(SilKitFPTR* SilKit_DataMessageHandler_t)(void* context, SilKit_DataSubscriber* subscriber,
+                                                      const SilKit_DataMessageEvent* dataMessageEvent);
 
 /*! \brief Create a DataPublisher on the provided simulation participant with the provided properties.
 * \param outPublisher Pointer to which the resulting DataPublisher reference will be written.
@@ -103,9 +103,11 @@ typedef SilKit_ReturnCode(SilKitFPTR* SilKit_DataSubscriber_Create_t)(
 * \param self The DataPublisher that should publish the data.
 * \param data The data that should be published.
 */
-SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_DataPublisher_Publish(SilKit_DataPublisher* self, const SilKit_ByteVector* data);
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_DataPublisher_Publish(SilKit_DataPublisher* self,
+                                                                    const SilKit_ByteVector* data);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_DataPublisher_Publish_t)(SilKit_DataPublisher* self, const SilKit_ByteVector* data);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_DataPublisher_Publish_t)(SilKit_DataPublisher* self,
+                                                                      const SilKit_ByteVector* data);
 
 /*! \brief Sets / overwrites the default handler to be called on data reception.
 * \param self The DataSubscriber for which the handler should be set.
@@ -115,8 +117,8 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_DataPublisher_Publish_t)(SilKit_Da
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_DataSubscriber_SetDataMessageHandler(
     SilKit_DataSubscriber* self, void* context, SilKit_DataMessageHandler_t dataHandler);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_DataSubscriber_SetDataMessageHandler_t)(SilKit_DataSubscriber* self, void* context,
-                                                                           SilKit_DataMessageHandler_t dataHandler);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_DataSubscriber_SetDataMessageHandler_t)(
+    SilKit_DataSubscriber* self, void* context, SilKit_DataMessageHandler_t dataHandler);
 
 SILKIT_END_DECLS
 

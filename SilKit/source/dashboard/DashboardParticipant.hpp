@@ -38,7 +38,7 @@ namespace Core {
 class IParticipantInternal;
 namespace Discovery {
 class IServiceDiscovery;
-} // Discovery
+} // namespace Discovery
 } // namespace Core
 namespace Config {
 class IParticipantConfiguration;
@@ -48,7 +48,7 @@ class IParticipantConfiguration;
 namespace SilKit {
 namespace Dashboard {
 
-class DashboardParticipant 
+class DashboardParticipant
 {
 public:
     DashboardParticipant(std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig,
@@ -70,7 +70,7 @@ private:
     void OnParticipantStatusChanged(const Services::Orchestration::ParticipantStatus& participantStatus);
     void OnSystemStateChanged(Services::Orchestration::SystemState systemState);
     void OnServiceDiscoveryEvent(Core::Discovery::ServiceDiscoveryEvent::Type discoveryType,
-                                            const Core::ServiceDescriptor& serviceDescriptor);
+                                 const Core::ServiceDescriptor& serviceDescriptor);
     bool LastParticipantDisconnected(
         const Services::Orchestration::ParticipantConnectionInformation& participantInformation);
     bool NoParticipantConnected();

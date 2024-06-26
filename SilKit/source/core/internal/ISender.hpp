@@ -26,7 +26,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 namespace SilKit {
 namespace Core {
 
-template<typename... MsgT>
+template <typename... MsgT>
 class ISender
 {
 public:

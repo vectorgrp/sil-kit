@@ -32,7 +32,7 @@ namespace {
 using namespace SilKit::Services::Ethernet;
 using SilKit::Core::Tests::DummyParticipant;
 
-MATCHER_P(EthFrameMatcher, controlFrame, "") 
+MATCHER_P(EthFrameMatcher, controlFrame, "")
 {
     *result_listener << "matches ethernet frames by their content and length";
     auto frame1 = controlFrame;
@@ -51,13 +51,16 @@ MATCHER_P(EthFrameMatcher, controlFrame, "")
     return true;
 }
 
-class MockEthernetController : public SilKit::Services::Ethernet::IEthernetController {
+class MockEthernetController : public SilKit::Services::Ethernet::IEthernetController
+{
 public:
     MOCK_METHOD(void, Activate, (), (override));
     MOCK_METHOD(void, Deactivate, (), (override));
-    MOCK_METHOD(SilKit::Services::HandlerId, AddFrameHandler, (FrameHandler, SilKit::Services::DirectionMask), (override));
+    MOCK_METHOD(SilKit::Services::HandlerId, AddFrameHandler, (FrameHandler, SilKit::Services::DirectionMask),
+                (override));
     MOCK_METHOD(void, RemoveFrameHandler, (SilKit::Services::HandlerId), (override));
-    MOCK_METHOD(SilKit::Services::HandlerId, AddFrameTransmitHandler, (FrameTransmitHandler, EthernetTransmitStatusMask), (override));
+    MOCK_METHOD(SilKit::Services::HandlerId, AddFrameTransmitHandler,
+                (FrameTransmitHandler, EthernetTransmitStatusMask), (override));
     MOCK_METHOD(void, RemoveFrameTransmitHandler, (SilKit::Services::HandlerId), (override));
     MOCK_METHOD(SilKit::Services::HandlerId, AddStateChangeHandler, (StateChangeHandler), (override));
     MOCK_METHOD(void, RemoveStateChangeHandler, (SilKit::Services::HandlerId), (override));
@@ -68,34 +71,37 @@ public:
 
 class Test_CapiEthernet : public testing::Test
 {
-public: 
+public:
     MockEthernetController mockController;
-    Test_CapiEthernet() 
-    {
-    }
+    Test_CapiEthernet() {}
 };
 
-void SilKitCALL FrameTransmitHandler(void* /*context*/, SilKit_EthernetController* /*controller*/, SilKit_EthernetFrameTransmitEvent* /*cAck*/)
+void SilKitCALL FrameTransmitHandler(void* /*context*/, SilKit_EthernetController* /*controller*/,
+                                     SilKit_EthernetFrameTransmitEvent* /*cAck*/)
 {
 }
 
-void SilKitCALL FrameHandler(void* /*context*/, SilKit_EthernetController* /*controller*/, SilKit_EthernetFrameEvent* /*metaData*/)
+void SilKitCALL FrameHandler(void* /*context*/, SilKit_EthernetController* /*controller*/,
+                             SilKit_EthernetFrameEvent* /*metaData*/)
 {
 }
 
-void SilKitCALL StateChangeHandler(void* /*context*/, SilKit_EthernetController* /*controller*/, SilKit_EthernetStateChangeEvent* /*stateChangeEvent*/)
+void SilKitCALL StateChangeHandler(void* /*context*/, SilKit_EthernetController* /*controller*/,
+                                   SilKit_EthernetStateChangeEvent* /*stateChangeEvent*/)
 {
 }
 
-void SilKitCALL BitrateChangeHandler(void* /*context*/, SilKit_EthernetController* /*controller*/, SilKit_EthernetBitrateChangeEvent* /*bitrateChangeEvent*/)
+void SilKitCALL BitrateChangeHandler(void* /*context*/, SilKit_EthernetController* /*controller*/,
+                                     SilKit_EthernetBitrateChangeEvent* /*bitrateChangeEvent*/)
 {
 }
 
-    class MockParticipant : public DummyParticipant
+class MockParticipant : public DummyParticipant
 {
 public:
-    MOCK_METHOD2(CreateEthernetController, SilKit::Services::Ethernet::IEthernetController*(const std::string& /*canonicalName*/,
-                                                                    const std::string& /*networkName*/));
+    MOCK_METHOD2(CreateEthernetController,
+                 SilKit::Services::Ethernet::IEthernetController*(const std::string& /*canonicalName*/,
+                                                                  const std::string& /*networkName*/));
 };
 
 TEST_F(Test_CapiEthernet, ethernet_controller_function_mapping)
@@ -114,7 +120,7 @@ TEST_F(Test_CapiEthernet, ethernet_controller_function_mapping)
     EXPECT_CALL(mockParticipant, CreateEthernetController("ControllerName", "NetworkName")).Times(testing::Exactly(1));
     SilKit_EthernetController* testParam;
     returnCode = SilKit_EthernetController_Create(&testParam, (SilKit_Participant*)&mockParticipant, "ControllerName",
-                                          "NetworkName");
+                                                  "NetworkName");
     EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 
     EXPECT_CALL(mockController, Activate()).Times(testing::Exactly(1));
@@ -208,7 +214,7 @@ TEST_F(Test_CapiEthernet, ethernet_controller_function_mapping)
 
     EXPECT_CALL(mockController, AddStateChangeHandler(testing::_)).Times(testing::Exactly(1));
     returnCode = SilKit_EthernetController_AddStateChangeHandler((SilKit_EthernetController*)&mockController, NULL,
-                                                              &StateChangeHandler, &handlerId);
+                                                                 &StateChangeHandler, &handlerId);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 
     EXPECT_CALL(mockController, RemoveStateChangeHandler(static_cast<HandlerId>(0))).Times(testing::Exactly(1));
@@ -217,7 +223,7 @@ TEST_F(Test_CapiEthernet, ethernet_controller_function_mapping)
 
     EXPECT_CALL(mockController, AddBitrateChangeHandler(testing::_)).Times(testing::Exactly(1));
     returnCode = SilKit_EthernetController_AddBitrateChangeHandler((SilKit_EthernetController*)&mockController, NULL,
-                                                                &BitrateChangeHandler, &handlerId);
+                                                                   &BitrateChangeHandler, &handlerId);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 
     EXPECT_CALL(mockController, RemoveBitrateChangeHandler(static_cast<HandlerId>(0))).Times(testing::Exactly(1));
@@ -227,13 +233,15 @@ TEST_F(Test_CapiEthernet, ethernet_controller_function_mapping)
     WireEthernetFrame referenceFrame{};
     referenceFrame.raw = SilKit::Util::SharedVector<uint8_t>{SilKit::Util::MakeSpan(buffer)};
 
-    EXPECT_CALL(mockController, SendFrame(EthFrameMatcher(ToEthernetFrame(referenceFrame)), nullptr)).Times(testing::Exactly(1));
+    EXPECT_CALL(mockController, SendFrame(EthFrameMatcher(ToEthernetFrame(referenceFrame)), nullptr))
+        .Times(testing::Exactly(1));
     returnCode = SilKit_EthernetController_SendFrame((SilKit_EthernetController*)&mockController, &ef, NULL);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 
     const auto userContext = reinterpret_cast<void*>(0x12345);
 
-    EXPECT_CALL(mockController, SendFrame(EthFrameMatcher(ToEthernetFrame(referenceFrame)), userContext)).Times(testing::Exactly(1));
+    EXPECT_CALL(mockController, SendFrame(EthFrameMatcher(ToEthernetFrame(referenceFrame)), userContext))
+        .Times(testing::Exactly(1));
     returnCode = SilKit_EthernetController_SendFrame((SilKit_EthernetController*)&mockController, &ef, userContext);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 }
@@ -271,22 +279,22 @@ TEST_F(Test_CapiEthernet, ethernet_controller_nullptr_params)
                                                                    SilKit_EthernetTransmitStatus_Transmitted, nullptr);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
-    returnCode = SilKit_EthernetController_AddStateChangeHandler((SilKit_EthernetController*)&mockController, NULL, nullptr,
-                                                              &handlerId);
+    returnCode = SilKit_EthernetController_AddStateChangeHandler((SilKit_EthernetController*)&mockController, NULL,
+                                                                 nullptr, &handlerId);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
     returnCode = SilKit_EthernetController_AddStateChangeHandler(nullptr, NULL, &StateChangeHandler, &handlerId);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
     returnCode = SilKit_EthernetController_AddStateChangeHandler((SilKit_EthernetController*)&mockController, NULL,
-                                                              &StateChangeHandler, nullptr);
+                                                                 &StateChangeHandler, nullptr);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
-    returnCode = SilKit_EthernetController_AddBitrateChangeHandler((SilKit_EthernetController*)&mockController, NULL, nullptr,
-                                                                &handlerId);
+    returnCode = SilKit_EthernetController_AddBitrateChangeHandler((SilKit_EthernetController*)&mockController, NULL,
+                                                                   nullptr, &handlerId);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
     returnCode = SilKit_EthernetController_AddBitrateChangeHandler(nullptr, NULL, &BitrateChangeHandler, &handlerId);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
     returnCode = SilKit_EthernetController_AddBitrateChangeHandler((SilKit_EthernetController*)&mockController, NULL,
-                                                                &BitrateChangeHandler, nullptr);
+                                                                   &BitrateChangeHandler, nullptr);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
     returnCode = SilKit_EthernetController_RemoveFrameHandler(nullptr, handlerId);
@@ -298,7 +306,7 @@ TEST_F(Test_CapiEthernet, ethernet_controller_nullptr_params)
     returnCode = SilKit_EthernetController_RemoveBitrateChangeHandler(nullptr, handlerId);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
-    const auto testUserContext = reinterpret_cast<void *>(0x12345);
+    const auto testUserContext = reinterpret_cast<void*>(0x12345);
 
     SilKit_EthernetFrame ef{};
     SilKit_Struct_Init(SilKit_EthernetFrame, ef);
@@ -306,7 +314,8 @@ TEST_F(Test_CapiEthernet, ethernet_controller_nullptr_params)
     returnCode = SilKit_EthernetController_SendFrame((SilKit_EthernetController*)&mockController, nullptr, nullptr);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
-    returnCode = SilKit_EthernetController_SendFrame((SilKit_EthernetController*)&mockController, nullptr, testUserContext);
+    returnCode =
+        SilKit_EthernetController_SendFrame((SilKit_EthernetController*)&mockController, nullptr, testUserContext);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
     returnCode = SilKit_EthernetController_SendFrame(nullptr, &ef, nullptr);
@@ -324,11 +333,11 @@ TEST_F(Test_CapiEthernet, ethernet_controller_send_frame)
     uint8_t buffer[100];
 
     // set destination mac
-    uint8_t destinationMac[6] = { 0xF6, 0x04, 0x68, 0x71, 0xAA, 0xC1 };
+    uint8_t destinationMac[6] = {0xF6, 0x04, 0x68, 0x71, 0xAA, 0xC1};
     memcpy(&(buffer[0]), destinationMac, sizeof(destinationMac));
 
     // set source mac
-    uint8_t sourceMac[6] = { 0xF6, 0x04, 0x68, 0x71, 0xAA, 0xC2 };
+    uint8_t sourceMac[6] = {0xF6, 0x04, 0x68, 0x71, 0xAA, 0xC2};
     memcpy(&(buffer[6]), sourceMac, sizeof(sourceMac));
 
     // set ethertype
@@ -337,16 +346,14 @@ TEST_F(Test_CapiEthernet, ethernet_controller_send_frame)
 
     // set payload
     int ethernetMessageCounter = 1;
-    size_t payloadSize = snprintf((char*)buffer + PAYLOAD_OFFSET,
-        sizeof(buffer) - PAYLOAD_OFFSET,
-        "This is the demonstration ethernet frame number %i.",
-         ethernetMessageCounter);
+    size_t payloadSize = snprintf((char*)buffer + PAYLOAD_OFFSET, sizeof(buffer) - PAYLOAD_OFFSET,
+                                  "This is the demonstration ethernet frame number %i.", ethernetMessageCounter);
 
     SilKit_EthernetFrame ef{};
     SilKit_Struct_Init(SilKit_EthernetFrame, ef);
     ef.raw = {(const uint8_t*)buffer, PAYLOAD_OFFSET + payloadSize};
 
-    const auto testUserContext = reinterpret_cast<void *>(0x12345);
+    const auto testUserContext = reinterpret_cast<void*>(0x12345);
 
     EthernetFrame refFrame{};
     std::vector<uint8_t> rawFrame(ef.raw.data, ef.raw.data + ef.raw.size);
@@ -354,7 +361,6 @@ TEST_F(Test_CapiEthernet, ethernet_controller_send_frame)
     EXPECT_CALL(mockController, SendFrame(EthFrameMatcher(refFrame), testUserContext)).Times(testing::Exactly(1));
     returnCode = SilKit_EthernetController_SendFrame((SilKit_EthernetController*)&mockController, &ef, testUserContext);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
-
 }
 
 TEST_F(Test_CapiEthernet, ethernet_controller_send_short_frame)
@@ -362,11 +368,11 @@ TEST_F(Test_CapiEthernet, ethernet_controller_send_short_frame)
     std::vector<uint8_t> buffer;
 
     // set destination mac
-    const EthernetMac destinationMac{ 0xF6, 0x04, 0x68, 0x71, 0xAA, 0xC1 };
+    const EthernetMac destinationMac{0xF6, 0x04, 0x68, 0x71, 0xAA, 0xC1};
     std::copy(destinationMac.begin(), destinationMac.end(), std::back_inserter(buffer));
 
     // set source mac
-    const EthernetMac sourceMac{ 0xF6, 0x04, 0x68, 0x71, 0xAA, 0xC2 };
+    const EthernetMac sourceMac{0xF6, 0x04, 0x68, 0x71, 0xAA, 0xC2};
     std::copy(sourceMac.begin(), sourceMac.end(), std::back_inserter(buffer));
 
     // set ethertype
@@ -382,7 +388,7 @@ TEST_F(Test_CapiEthernet, ethernet_controller_send_short_frame)
     SilKit_Struct_Init(SilKit_EthernetFrame, ef);
     ef.raw = {buffer.data(), buffer.size()};
 
-    const auto testUserContext = reinterpret_cast<void *>(0x12345);
+    const auto testUserContext = reinterpret_cast<void*>(0x12345);
 
     // create the expected Ethernet frame
     std::vector<uint8_t> expectedFrameRaw(ef.raw.data, ef.raw.data + ef.raw.size);
@@ -393,8 +399,9 @@ TEST_F(Test_CapiEthernet, ethernet_controller_send_short_frame)
     //       in the implementation.
     EXPECT_CALL(mockController, SendFrame(EthFrameMatcher(expectedFrame), testUserContext)).Times(testing::Exactly(1));
 
-    const auto returnCode = SilKit_EthernetController_SendFrame((SilKit_EthernetController*)&mockController, &ef, testUserContext);
+    const auto returnCode =
+        SilKit_EthernetController_SendFrame((SilKit_EthernetController*)&mockController, &ef, testUserContext);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 }
 
-}
+} // namespace

@@ -36,7 +36,7 @@ class SimBehaviorDetailed : public ISimBehavior
 {
 public:
     SimBehaviorDetailed(Core::IParticipantInternal* participant, LinController* linController,
-                       const Core::ServiceDescriptor& serviceDescriptor);
+                        const Core::ServiceDescriptor& serviceDescriptor);
 
     auto AllowReception(const Core::IServiceEndpoint* from) const -> bool override;
 

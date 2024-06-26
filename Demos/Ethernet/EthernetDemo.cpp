@@ -55,14 +55,14 @@ std::ostream& operator<<(std::ostream& out, std::chrono::nanoseconds timestamp)
 std::vector<uint8_t> CreateFrame(const EthernetMac& destinationAddress, const EthernetMac& sourceAddress,
                                  const std::vector<uint8_t>& payload)
 {
-    const uint16_t etherType = 0x0000;  // no protocol
+    const uint16_t etherType = 0x0000; // no protocol
 
     std::vector<uint8_t> raw;
 
     std::copy(destinationAddress.begin(), destinationAddress.end(), std::back_inserter(raw));
     std::copy(sourceAddress.begin(), sourceAddress.end(), std::back_inserter(raw));
     auto etherTypeBytes = reinterpret_cast<const uint8_t*>(&etherType);
-    raw.push_back(etherTypeBytes[1]);  // We assume our platform to be little-endian
+    raw.push_back(etherTypeBytes[1]); // We assume our platform to be little-endian
     raw.push_back(etherTypeBytes[0]);
     std::copy(payload.begin(), payload.end(), std::back_inserter(raw));
 
@@ -114,23 +114,23 @@ void FrameHandler(IEthernetController* /*controller*/, const EthernetFrameEvent&
 {
     auto frame = frameEvent.frame;
     auto payload = GetPayloadStringFromFrame(frame);
-    std::cout << ">> Ethernet frame: \""
-              << payload
-              << "\"" << std::endl;
+    std::cout << ">> Ethernet frame: \"" << payload << "\"" << std::endl;
 }
 
 void SendFrame(IEthernetController* controller, const EthernetMac& from, const EthernetMac& to)
 {
     static int frameId = 0;
     std::stringstream stream;
-    stream << "Hello from Ethernet writer! (frameId =" << frameId++ << ")"
-              "----------------------------------------------------"; // ensure that the payload is long enough to constitute a valid Ethernet frame
+    stream
+        << "Hello from Ethernet writer! (frameId =" << frameId++
+        << ")"
+           "----------------------------------------------------"; // ensure that the payload is long enough to constitute a valid Ethernet frame
 
     auto payloadString = stream.str();
     std::vector<uint8_t> payload(payloadString.size() + 1);
     memcpy(payload.data(), payloadString.c_str(), payloadString.size() + 1);
 
-    const auto userContext = reinterpret_cast<void *>(static_cast<intptr_t>(frameId));
+    const auto userContext = reinterpret_cast<void*>(static_cast<intptr_t>(frameId));
 
     auto frame = CreateFrame(to, from, payload);
     controller->SendFrame(EthernetFrame{frame}, userContext);
@@ -209,15 +209,10 @@ int main(int argc, char** argv)
         auto* lifecycleService = participant->CreateLifecycleService({operationMode});
 
         // Observe state changes
-        lifecycleService->SetStopHandler([]() {
-            std::cout << "Stop handler called" << std::endl;
-        });
-        lifecycleService->SetShutdownHandler([]() {
-            std::cout << "Shutdown handler called" << std::endl;
-        });
-        lifecycleService->SetAbortHandler([](auto lastState) {
-            std::cout << "Abort handler called while in state " << lastState << std::endl;
-        });
+        lifecycleService->SetStopHandler([]() { std::cout << "Stop handler called" << std::endl; });
+        lifecycleService->SetShutdownHandler([]() { std::cout << "Shutdown handler called" << std::endl; });
+        lifecycleService->SetAbortHandler(
+            [](auto lastState) { std::cout << "Abort handler called while in state " << lastState << std::endl; });
 
         if (runSync)
         {
@@ -234,20 +229,21 @@ int main(int argc, char** argv)
                 timeSyncService->SetSimulationStepHandler(
                     [ethernetController, WriterMacAddr, destinationAddress = BroadcastMacAddr](
                         std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
-                        std::cout << "now=" << std::chrono::duration_cast<std::chrono::milliseconds>(now).count()
-                                  << "ms" << std::endl;
-                        SendFrame(ethernetController, WriterMacAddr, destinationAddress);
-                        std::this_thread::sleep_for(300ms);
-                    }, 1ms);
+                    std::cout << "now=" << std::chrono::duration_cast<std::chrono::milliseconds>(now).count() << "ms"
+                              << std::endl;
+                    SendFrame(ethernetController, WriterMacAddr, destinationAddress);
+                    std::this_thread::sleep_for(300ms);
+                },
+                    1ms);
             }
             else
             {
                 timeSyncService->SetSimulationStepHandler(
                     [](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
-                        std::cout << "now=" << std::chrono::duration_cast<std::chrono::milliseconds>(now).count()
-                                  << "ms" << std::endl;
-                        std::this_thread::sleep_for(300ms);
-                    }, 1ms);
+                    std::cout << "now=" << std::chrono::duration_cast<std::chrono::milliseconds>(now).count() << "ms"
+                              << std::endl;
+                    std::this_thread::sleep_for(300ms);
+                }, 1ms);
             }
 
             auto finalStateFuture = lifecycleService->StartLifecycle();
@@ -268,8 +264,8 @@ int main(int argc, char** argv)
                 std::cout << "Communication ready handler called for " << participantName << std::endl;
                 workerThread = std::thread{[&]() {
                     startHandlerFuture.get();
-                    while (lifecycleService->State() == ParticipantState::ReadyToRun ||
-                           lifecycleService->State() == ParticipantState::Running)
+                    while (lifecycleService->State() == ParticipantState::ReadyToRun
+                           || lifecycleService->State() == ParticipantState::Running)
                     {
                         if (participantName == "EthernetWriter")
                         {
@@ -285,17 +281,15 @@ int main(int argc, char** argv)
                 ethernetController->Activate();
             });
 
-            lifecycleService->SetStartingHandler([&]() {
-                startHandlerPromise.set_value();
-            });
+            lifecycleService->SetStartingHandler([&]() { startHandlerPromise.set_value(); });
 
             lifecycleService->StartLifecycle();
             std::cout << "Press enter to leave the simulation..." << std::endl;
             std::cin.ignore();
 
             isStopRequested = true;
-            if (lifecycleService->State() == ParticipantState::Running || 
-                lifecycleService->State() == ParticipantState::Paused)
+            if (lifecycleService->State() == ParticipantState::Running
+                || lifecycleService->State() == ParticipantState::Paused)
             {
                 std::cout << "User requested to stop in state " << lifecycleService->State() << std::endl;
                 lifecycleService->Stop("User requested to stop");

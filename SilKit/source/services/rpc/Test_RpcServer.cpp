@@ -56,11 +56,11 @@ TEST_F(Test_RpcServer, rpc_server_call_response_sends_message_with_timestamp_and
     });
 
     EXPECT_CALL(participant->GetSilKitConnection(), Mock_SendMsg(testing::_, testing::A<FunctionCallResponse>()))
-        .WillOnce(
-            [this, &fixedTimeProvider](const SilKit::Core::IServiceEndpoint* /*from*/, const FunctionCallResponse& msg) {
-                ASSERT_EQ(msg.timestamp, fixedTimeProvider.now);
-                ASSERT_EQ(msg.data, sampleData);
-            });
+        .WillOnce([this, &fixedTimeProvider](const SilKit::Core::IServiceEndpoint* /*from*/,
+                                             const FunctionCallResponse& msg) {
+        ASSERT_EQ(msg.timestamp, fixedTimeProvider.now);
+        ASSERT_EQ(msg.data, sampleData);
+    });
 
     IRpcClient* iRpcClient = CreateRpcClient();
 

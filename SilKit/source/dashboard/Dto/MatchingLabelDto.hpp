@@ -36,13 +36,22 @@ class MatchingLabelDto : public oatpp::DTO
 {
     DTO_INIT(MatchingLabelDto, DTO)
 
-    DTO_FIELD_INFO(key) { info->description = "Key of the label"; }
+    DTO_FIELD_INFO(key)
+    {
+        info->description = "Key of the label";
+    }
     DTO_FIELD(String, key);
 
-    DTO_FIELD_INFO(value) { info->description = "Value of the label"; }
+    DTO_FIELD_INFO(value)
+    {
+        info->description = "Value of the label";
+    }
     DTO_FIELD(String, value);
 
-    DTO_FIELD_INFO(kind) { info->description = "Kind of the label"; }
+    DTO_FIELD_INFO(kind)
+    {
+        info->description = "Kind of the label";
+    }
     DTO_FIELD(Enum<LabelKind>::AsString, kind);
 };
 

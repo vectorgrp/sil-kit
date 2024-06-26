@@ -54,22 +54,18 @@ TEST_F(ITest_DashboardServerTimeout, dashboard_creationtimeout)
     auto testResult = SilKit::Dashboard::RunDashboardTest(
         ParticipantConfigurationFromStringImpl(_dashboardParticipantConfig), _registryUri, _dashboardUri,
         [this, &participantName, &canonicalName, &networkName]() {
-            _simTestHarness->CreateSystemController();
-            auto&& simParticipant = _simTestHarness->GetParticipant(participantName, _participantConfig);
-            auto&& participant = simParticipant->Participant();
-            auto&& lifecycleService = simParticipant->GetOrCreateLifecycleService();
-            auto&& timeSyncService = simParticipant->GetOrCreateTimeSyncService();
-            (void)participant->CreateCanController(canonicalName, networkName);
-            timeSyncService->SetSimulationStepHandler(
-                [lifecycleService](auto, auto) {
-                    lifecycleService->Stop("Test done");
-                },
-                1ms);
-            auto ok = _simTestHarness->Run(5s);
-            ASSERT_TRUE(ok) << "SimTestHarness should terminate without timeout";
-            _simTestHarness->ResetParticipants();
-        },
-        1, std::chrono::seconds{7}, std::chrono::seconds{0});
+        _simTestHarness->CreateSystemController();
+        auto&& simParticipant = _simTestHarness->GetParticipant(participantName, _participantConfig);
+        auto&& participant = simParticipant->Participant();
+        auto&& lifecycleService = simParticipant->GetOrCreateLifecycleService();
+        auto&& timeSyncService = simParticipant->GetOrCreateTimeSyncService();
+        (void)participant->CreateCanController(canonicalName, networkName);
+        timeSyncService->SetSimulationStepHandler(
+            [lifecycleService](auto, auto) { lifecycleService->Stop("Test done"); }, 1ms);
+        auto ok = _simTestHarness->Run(5s);
+        ASSERT_TRUE(ok) << "SimTestHarness should terminate without timeout";
+        _simTestHarness->ResetParticipants();
+    }, 1, std::chrono::seconds{7}, std::chrono::seconds{0});
     ASSERT_FALSE(testResult.allSimulationsFinished) << "Simulation should not be finished!";
     _simTestHarness->ResetRegistry();
 }
@@ -83,22 +79,18 @@ TEST_F(ITest_DashboardServerTimeout, dashboard_updatetimeout)
     auto testResult = SilKit::Dashboard::RunDashboardTest(
         ParticipantConfigurationFromStringImpl(_dashboardParticipantConfig), _registryUri, _dashboardUri,
         [this, &participantName, &canonicalName, &networkName]() {
-            _simTestHarness->CreateSystemController();
-            auto&& simParticipant = _simTestHarness->GetParticipant(participantName, _participantConfig);
-            auto&& participant = simParticipant->Participant();
-            auto&& lifecycleService = simParticipant->GetOrCreateLifecycleService();
-            auto&& timeSyncService = simParticipant->GetOrCreateTimeSyncService();
-            (void)participant->CreateCanController(canonicalName, networkName);
-            timeSyncService->SetSimulationStepHandler(
-                [lifecycleService](auto, auto) {
-                    lifecycleService->Stop("Test done");
-                },
-                1ms);
-            auto ok = _simTestHarness->Run(5s);
-            ASSERT_TRUE(ok) << "SimTestHarness should terminate without timeout";
-            _simTestHarness->ResetParticipants();
-        },
-        1, std::chrono::seconds{0}, std::chrono::seconds{7});
+        _simTestHarness->CreateSystemController();
+        auto&& simParticipant = _simTestHarness->GetParticipant(participantName, _participantConfig);
+        auto&& participant = simParticipant->Participant();
+        auto&& lifecycleService = simParticipant->GetOrCreateLifecycleService();
+        auto&& timeSyncService = simParticipant->GetOrCreateTimeSyncService();
+        (void)participant->CreateCanController(canonicalName, networkName);
+        timeSyncService->SetSimulationStepHandler(
+            [lifecycleService](auto, auto) { lifecycleService->Stop("Test done"); }, 1ms);
+        auto ok = _simTestHarness->Run(5s);
+        ASSERT_TRUE(ok) << "SimTestHarness should terminate without timeout";
+        _simTestHarness->ResetParticipants();
+    }, 1, std::chrono::seconds{0}, std::chrono::seconds{7});
     ASSERT_FALSE(testResult.allSimulationsFinished) << "Simulation should not be finished!";
     _simTestHarness->ResetRegistry();
 }

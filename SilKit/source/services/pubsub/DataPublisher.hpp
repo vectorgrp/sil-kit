@@ -44,12 +44,9 @@ class DataPublisher
     , public Tracing::IReplayDataController
 {
 public:
-    DataPublisher(Core::IParticipantInternal* participant,
-                  Services::Orchestration::ITimeProvider* timeProvider,
-                  const SilKit::Services::PubSub::PubSubSpec& dataSpec,
-                  const std::string& pubUUID,
-                  const Config::DataPublisher& config  
-    );
+    DataPublisher(Core::IParticipantInternal* participant, Services::Orchestration::ITimeProvider* timeProvider,
+                  const SilKit::Services::PubSub::PubSubSpec& dataSpec, const std::string& pubUUID,
+                  const Config::DataPublisher& config);
 
 
 public: // Methods
@@ -60,7 +57,7 @@ public: // Methods
 
     // IServiceEndpoint
     inline void SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor) override;
-    inline auto GetServiceDescriptor() const -> const Core::ServiceDescriptor & override;
+    inline auto GetServiceDescriptor() const -> const Core::ServiceDescriptor& override;
 
     //ITraceMessageSource
     inline void AddSink(ITraceMessageSink* sink, SilKit::Config::NetworkType networkType) override;
@@ -68,7 +65,8 @@ public: // Methods
     auto GetTracer() -> Tracer*;
 
     // IReplayDataController
-    void ReplayMessage(const SilKit::IReplayMessage *message) override;
+    void ReplayMessage(const SilKit::IReplayMessage* message) override;
+
 private: // Methods
     void PublishInternal(Util::Span<const uint8_t> data);
 

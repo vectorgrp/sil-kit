@@ -45,26 +45,27 @@ public:
 
     // INetworkSimulatorInternal
     auto GetServiceDescriptorString(ControllerDescriptor controllerDescriptor) -> std::string const override;
-     
+
 
 private:
-
     void CreateSimulatedNetwork(const std::string& networkName, SimulatedNetworkType networkType,
                                 std::unique_ptr<ISimulatedNetwork> userSimulatedNetwork);
 
     void DiscoveryHandler(Core::Discovery::ServiceDiscoveryEvent::Type type,
                           const Core::ServiceDescriptor& serviceDescriptor);
 
-    void OnNetworkDiscovered(const std::string& networkName, const Experimental::NetworkSimulation::SimulatedNetworkType networkType);
-    void OnNetworkRemoved(const std::string& networkName, const Experimental::NetworkSimulation::SimulatedNetworkType networkType);
+    void OnNetworkDiscovered(const std::string& networkName,
+                             const Experimental::NetworkSimulation::SimulatedNetworkType networkType);
+    void OnNetworkRemoved(const std::string& networkName,
+                          const Experimental::NetworkSimulation::SimulatedNetworkType networkType);
 
     void OnControllerDiscovered(const SilKit::Core::ServiceDescriptor& serviceDescriptor);
     void OnControllerRemoved(const std::string& fromParticipantName, const std::string& networkName,
                              Experimental::NetworkSimulation::SimulatedNetworkType networkType,
                              Core::EndpointId serviceId);
 
-    auto LookupSimulatedNetwork(const std::string& networkName, SimulatedNetworkType networkType)
-        -> SimulatedNetworkInternal*;
+    auto LookupSimulatedNetwork(const std::string& networkName,
+                                SimulatedNetworkType networkType) -> SimulatedNetworkInternal*;
 
     ControllerDescriptor NextControllerDescriptor();
 

@@ -39,7 +39,7 @@ DataSubscriber::DataSubscriber(Core::IParticipantInternal* participant, Config::
     , _labels{dataSpec.Labels()}
     , _defaultDataHandler{WrapTracingCallback(defaultDataHandler)}
     , _timeProvider{timeProvider}
-    , _participant{ participant }
+    , _participant{participant}
     , _config{std::move(config)}
 {
 }
@@ -113,7 +113,7 @@ void DataSubscriber::AddInternalSubscriber(const std::string& pubUUID, const std
 {
     auto internalSubscriber = dynamic_cast<DataSubscriberInternal*>(_participant->CreateDataSubscriberInternal(
         _topic, pubUUID, joinedMediaType, publisherLabels, _defaultDataHandler, this));
-    
+
     _internalSubscribers.emplace(pubUUID, internalSubscriber);
 }
 
@@ -127,10 +127,9 @@ void DataSubscriber::RemoveInternalSubscriber(const std::string& pubUUID)
     }
 }
 
- auto DataSubscriber::WrapTracingCallback(DataMessageHandler callback) ->
-    SilKit::Services::PubSub::DataMessageHandler
+auto DataSubscriber::WrapTracingCallback(DataMessageHandler callback) -> SilKit::Services::PubSub::DataMessageHandler
 {
-    auto tracingCallback = [this, callback=std::move(callback)](auto&& service, auto&& message) {
+    auto tracingCallback = [this, callback = std::move(callback)](auto&& service, auto&& message) {
         _tracer.Trace(TransmitDirection::RX, _timeProvider->Now(), message);
         if (callback)
         {

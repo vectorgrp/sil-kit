@@ -31,7 +31,7 @@ namespace {
 
 class Test_CapiVersion : public testing::Test
 {
-protected: 
+protected:
     Test_CapiVersion() {}
 };
 

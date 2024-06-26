@@ -43,8 +43,8 @@ auto ExtractRegistryMessageKind(MessageBuffer& buffer) -> RegistryMessageKind;
 auto PeekRegistryMessageHeader(MessageBuffer& buffer) -> RegistryMsgHeader;
 auto PeekProxyMessageHeader(MessageBuffer& buffer) -> ProxyMessageHeader;
 
-auto ExtractEndpointId(MessageBuffer& buffer) ->EndpointId;
-auto ExtractEndpointAddress(MessageBuffer& buffer) ->EndpointAddress;
+auto ExtractEndpointId(MessageBuffer& buffer) -> EndpointId;
+auto ExtractEndpointAddress(MessageBuffer& buffer) -> EndpointAddress;
 
 //! Handshake: Serialize ParticipantAnnouncementReply (contains remote peer's protocol version)
 //  VAsioMsgKind: SilKitRegistryMessage
@@ -57,10 +57,10 @@ void Serialize(MessageBuffer& buffer, const ProxyMessage& msg);
 void Serialize(MessageBuffer& buffer, const RemoteParticipantConnectRequest& msg);
 
 void Deserialize(MessageBuffer& buffer, ParticipantAnnouncement& out);
-void Deserialize(MessageBuffer& buffer,ParticipantAnnouncementReply& out);
+void Deserialize(MessageBuffer& buffer, ParticipantAnnouncementReply& out);
 void Deserialize(MessageBuffer&, VAsioMsgSubscriber&);
 void Deserialize(MessageBuffer&, SubscriptionAcknowledge&);
-void Deserialize(MessageBuffer& buffer,KnownParticipants& out);
+void Deserialize(MessageBuffer& buffer, KnownParticipants& out);
 void Deserialize(MessageBuffer& buffer, ProxyMessage& out);
 void Deserialize(MessageBuffer& buffer, RemoteParticipantConnectRequest& out);
 

@@ -56,7 +56,8 @@ private:
     SilKit::Experimental::Services::Orchestration::ISystemController* _controller;
     SilKit::Services::Orchestration::ISystemMonitor* _monitor;
     std::vector<std::string> _syncParticipantNames;
-    std::map<std::string, SilKit::Services::Orchestration::ParticipantState> _participantStates; //for printing status updates
+    std::map<std::string, SilKit::Services::Orchestration::ParticipantState>
+        _participantStates; //for printing status updates
     std::atomic<bool> _isShuttingDown{false};
     std::unique_ptr<SilKit::IParticipant> _participant;
 };
