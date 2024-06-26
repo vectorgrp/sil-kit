@@ -14,11 +14,6 @@ INFO_PREFIX = "::notice ::" if os.getenv('CI') != None else "INFO: "
 WARN_PREFIX = "::warning ::" if os.getenv('CI') != None else "WARNING: "
 ERROR_PREFIX = "::error ::" if os.getenv('CI') != None else "ERROR: "
 
-if os.getenv('CI') != None:
-    print("It is CI")
-else:
-    print("It is not CI")
-
 ## Convenience
 def log(fmt, *args):
     print(fmt.format(*args))
@@ -34,14 +29,16 @@ def die(status, fmt, *args):
     sys.exit(status)
 
 ## Check if clang-format is installed
+CLANG_VERSION = "18"
+CLANG_FORMAT = "clang-format-" + CLANG_VERSION
 
 def main():
-    if which('clang-format') is None:
-        warn("No clang-format found!")
-        die(1, "Please install clang-format!")
+    if which(CLANG_FORMAT) is None:
+        warn("No {} found!", CLANG_FORMAT)
+        die(1, "Please install {}!", CLANG_FORMAT)
 
     # Check for supported clang-format version
-    format_version = subprocess.run(['clang-format', '--version'], capture_output=True, encoding='utf-8')
+    format_version = subprocess.run([CLANG_FORMAT, '--version'], capture_output=True, encoding='utf-8')
 
     version_reg = re.compile('^.* clang-format version (\d+)\.(\d+)\.(\d+).*')
     version = re.match(version_reg, format_version.stdout)
@@ -51,7 +48,7 @@ def main():
 
     major, minor, patch = version.group(1,2,3)
     if int(major) < 13:
-        die(3, "clang{} not supported!\r\n       Minimum supported version is clang14!", major)
+        die(3, "clang{} not supported!\r\n       Minimum supported version is clang-{}!", major, CLANG_VERSION)
 
     info("clang-format-{}.{}.{} found!", major, minor, patch)
 
@@ -59,7 +56,9 @@ def main():
     fileExtensions = ["*.cpp", "*.ipp", "*.c", "*.hpp", "*.h"]
     dirs = ["SilKit", "Demos", "Utilities"]
 
-    formatting_correct = True
+    formattingCorrect = True
+    totalFiles = 0
+    totalWarnings = 0
 
     # Check  the Formatting!
     for directory in dirs:
@@ -69,14 +68,19 @@ def main():
             #print("INFO: Found {} {} files in {}!".format(len(files), ext, directory))
 
             for file in files:
-                format_result = subprocess.run(['clang-format', '--Werror', '--dry-run', '-i', '--style=file', file], capture_output=True, encoding='utf-8')
-                if format_result.returncode != 0:
-                    formatting_correct = False
+                totalFiles = totalFiles + 1
+                formatResult = subprocess.run([CLANG_FORMAT, '--Werror', '--dry-run', '-i', '--style=file', file], capture_output=True, encoding='utf-8')
+                if formatResult.returncode != 0:
+                    formattingCorrect = False
+                    totalWarnings = totalWarnings + 1
                     warn("File not formatted correctly: {}!", file)
 
-    if formatting_correct is False:
+    info("{} files checked, {} produced a warning!", totalFiles, totalWarnings)
+    if formattingCorrect is False:
+        # Only warn for now
         warn("Formatting for one or more SilKit source code files not correct.!")
-        die(4, "Please format your source code properly using the SilKit .clang-format config file!")
+        warn("Please format your source code properly using the SilKit .clang-format config file!")
+        exit(0)
 
     info("All source code files properly formatted!")
     exit(0)

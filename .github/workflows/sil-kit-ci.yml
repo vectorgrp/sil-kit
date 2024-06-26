@@ -50,6 +50,15 @@ jobs:
   check-formatting:
     name: Format checks for SIL Kit sources
     runs-on: ubuntu-22.04
+    steps:
+      - name: Install clang-format 18
+        id: install-clang18
+        run: |
+          wget https://apt.llvm.org/llvm.sh -P /tmp/
+          chmod +x /tmp/llvm.sh
+          sudo bash -c '/tmp/llvm.sh'
+          sudo apt update
+          sudo apt install -y clang-format-18
       - uses: actions/checkout@v4
         with:
           submodules: false
