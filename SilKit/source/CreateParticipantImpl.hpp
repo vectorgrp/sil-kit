@@ -45,8 +45,8 @@ class IParticipantConfiguration;
 namespace SilKit {
 
 auto CreateParticipantImpl(std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig,
-                           const std::string& participantName, const std::string& registryUri)
-    -> std::unique_ptr<IParticipant>;
+                           const std::string& participantName,
+                           const std::string& registryUri) -> std::unique_ptr<IParticipant>;
 
 auto CreateParticipantImpl(std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig,
                            const std::string& participantName) -> std::unique_ptr<IParticipant>;

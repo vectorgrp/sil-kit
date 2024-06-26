@@ -85,8 +85,10 @@ inline std::string to_string(FunctionType value)
 {
     switch (value)
     {
-    case FunctionType::ParticipantReplies: return "ParticipantReplies";
-    case FunctionType::Invalid: return "Invalid";
+    case FunctionType::ParticipantReplies:
+        return "ParticipantReplies";
+    case FunctionType::Invalid:
+        return "Invalid";
     };
     throw SilKit::TypeConversionError{};
 }
@@ -95,18 +97,21 @@ inline std::string to_string(CallReturnStatus value)
 {
     switch (value)
     {
-    case CallReturnStatus::Success: return "Success";
-    case CallReturnStatus::UnknownFunctionType: return "UnknownFunctionType";
-    case CallReturnStatus::ProcedureError: return "ProcedureError";
-    case CallReturnStatus::RecipientDisconnected: return "RecipientDisconnected";
+    case CallReturnStatus::Success:
+        return "Success";
+    case CallReturnStatus::UnknownFunctionType:
+        return "UnknownFunctionType";
+    case CallReturnStatus::ProcedureError:
+        return "ProcedureError";
+    case CallReturnStatus::RecipientDisconnected:
+        return "RecipientDisconnected";
     };
     throw SilKit::TypeConversionError{};
 }
 
 inline std::ostream& operator<<(std::ostream& out, const RequestReplyCall& msg)
 {
-    out << "RequestReplyCall{functionType=" << to_string(msg.functionType) 
-        << ", callUuid=" << msg.callUuid
+    out << "RequestReplyCall{functionType=" << to_string(msg.functionType) << ", callUuid=" << msg.callUuid
         << ", data=" << Util::AsHexString(msg.callData).WithSeparator(" ").WithMaxLength(16)
         << ", size=" << msg.callData.size() << "}";
 

@@ -137,7 +137,7 @@ Logging:
     YamlValidator validator;
     bool yamlValid = validator.Validate(yamlString, warnings);
     EXPECT_FALSE(yamlValid) << "YamlValidator warnings: " << warnings.str();
-    std::cout << "YamlValidator warnings: " << warnings.str() <<std::endl;
+    std::cout << "YamlValidator warnings: " << warnings.str() << std::endl;
     EXPECT_TRUE(warnings.str().size() > 0);
 }
 

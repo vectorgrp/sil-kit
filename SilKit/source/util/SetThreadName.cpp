@@ -71,9 +71,9 @@ void SetThreadName(const std::string& threadName)
 
     if (sSetThreadDescriptionProc != nullptr)
     {
-        HANDLE       threadHandle = GetCurrentThread();
+        HANDLE threadHandle = GetCurrentThread();
         std::wstring threadnameW = ToWString(threadName.c_str());
-        HRESULT      hr = (*sSetThreadDescriptionProc)(threadHandle, threadnameW.c_str());
+        HRESULT hr = (*sSetThreadDescriptionProc)(threadHandle, threadnameW.c_str());
         (void)hr;
         SILKIT_ASSERT(SUCCEEDED(hr));
     }
@@ -89,17 +89,17 @@ void SetThreadName(const std::string& threadName)
 
     pthread_t thisThread = pthread_self();
 
-#   if defined(__linux__) || defined(__QNX__)
+#if defined(__linux__) || defined(__QNX__)
     rc = pthread_setname_np(thisThread, threadName.c_str());
-#   elif defined(__NetBSD__)
+#elif defined(__NetBSD__)
     rc = pthread_setname_np(thisThread, threadName.c_str(), nullptr);
-#   elif defined(__APPLE__)
+#elif defined(__APPLE__)
     SILKIT_UNUSED_ARG(thisThread);
     rc = pthread_setname_np(threadName.c_str());
-#   endif
+#endif
     // The function pthread_setname_np fails if the length of the specified name exceeds the allowed
     // limit. (16 characters including the terminating null byte)
-    SILKIT_ASSERT(rc == 0); 
+    SILKIT_ASSERT(rc == 0);
     (void)rc;
 }
 

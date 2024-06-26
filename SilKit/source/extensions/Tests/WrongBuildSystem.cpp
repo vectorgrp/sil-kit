@@ -31,15 +31,9 @@ struct WrongBuildSystem : public SilKit::SilKitExtensionBase
 };
 
 // Manually declare entry symbol
-extern "C" const SilKitExtensionDescriptor_t silkit_extension_descriptor
-{
-    SilKit::Version::Major(),
-    SilKit::Version::Minor(),
-    SilKit::Version::Patch(),
-    "WrongBuildSystem",
-    "Vector",
-    "IncompatibleBuildHost",
-    SILKIT_MAKE_BUILDINFOS(),
+extern "C" const SilKitExtensionDescriptor_t silkit_extension_descriptor{
+    SilKit::Version::Major(), SilKit::Version::Minor(), SilKit::Version::Patch(), "WrongBuildSystem", "Vector",
+    "IncompatibleBuildHost",  SILKIT_MAKE_BUILDINFOS(),
 };
 
 SILEXT_API SILEXT_EXTENSION_HANDLE SILEXT_CABI CreateExtension()
@@ -49,6 +43,6 @@ SILEXT_API SILEXT_EXTENSION_HANDLE SILEXT_CABI CreateExtension()
 
 SILEXT_API void SILEXT_CABI ReleaseExtension(SILEXT_EXTENSION_HANDLE extension)
 {
-    auto* instance = static_cast<WrongBuildSystem *>(extension);
+    auto* instance = static_cast<WrongBuildSystem*>(extension);
     delete instance;
 }

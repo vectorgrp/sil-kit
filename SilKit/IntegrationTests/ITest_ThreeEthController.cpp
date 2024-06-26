@@ -87,7 +87,7 @@ protected:
             testMessages[index].expectedData = std::move(messageString);
         }
 
-        syncParticipantNames = { "EthWriter" ,"EthReader1" ,"EthReader2" };
+        syncParticipantNames = {"EthWriter", "EthReader1", "EthReader2"};
     }
 
     void SetupSender(SilKit::Tests::SimParticipant* participant)
@@ -103,31 +103,30 @@ protected:
         });
         auto* lifecycleService = participant->GetOrCreateLifecycleService();
 
-        lifecycleService->SetCommunicationReadyHandler([controller]() {
-            controller->Activate();
-        });
+        lifecycleService->SetCommunicationReadyHandler([controller]() { controller->Activate(); });
 
         auto* timeSyncService = participant->GetOrCreateTimeSyncService();
         timeSyncService->SetSimulationStepHandler(
             [this, participant, controller](std::chrono::nanoseconds now, std::chrono::nanoseconds) {
-                if (numSent < testMessages.size())
-                {
-                    const auto& message = testMessages.at(numSent);
+            if (numSent < testMessages.size())
+            {
+                const auto& message = testMessages.at(numSent);
 
-                    std::cout << participant->Name() << " -> sent frame @" << now.count() << "ns" << std::endl;
+                std::cout << participant->Name() << " -> sent frame @" << now.count() << "ns" << std::endl;
 
-                    EthernetMac destinationMac{ 0x12, 0x23, 0x45, 0x67, 0x89, 0x9a };
-                    EthernetMac sourceMac{ 0x9a, 0x89, 0x67, 0x45, 0x23, 0x12 };
-                    EthernetEtherType etherType{ 0x0800 };
-                    EthernetVlanTagControlIdentifier tci{ 0x0000 };
+                EthernetMac destinationMac{0x12, 0x23, 0x45, 0x67, 0x89, 0x9a};
+                EthernetMac sourceMac{0x9a, 0x89, 0x67, 0x45, 0x23, 0x12};
+                EthernetEtherType etherType{0x0800};
+                EthernetVlanTagControlIdentifier tci{0x0000};
 
-                    auto ethernetFrameData = CreateEthernetFrameWithVlanTagFromString(destinationMac, sourceMac, etherType, message.expectedData, tci);
-                    auto ethernetFrame = SilKit::Services::Ethernet::EthernetFrame{ethernetFrameData};
+                auto ethernetFrameData = CreateEthernetFrameWithVlanTagFromString(destinationMac, sourceMac, etherType,
+                                                                                  message.expectedData, tci);
+                auto ethernetFrame = SilKit::Services::Ethernet::EthernetFrame{ethernetFrameData};
 
-                    EXPECT_GE(ethernetFrame.raw.size(), MINIMUM_ETHERNET_FRAME_LENGTH);
-                    controller->SendFrame(ethernetFrame, reinterpret_cast<void *>(static_cast<uintptr_t>(numSent + 1)));
-                    numSent++;
-                }
+                EXPECT_GE(ethernetFrame.raw.size(), MINIMUM_ETHERNET_FRAME_LENGTH);
+                controller->SendFrame(ethernetFrame, reinterpret_cast<void*>(static_cast<uintptr_t>(numSent + 1)));
+                numSent++;
+            }
         }, 1ms);
     }
 
@@ -137,34 +136,26 @@ protected:
         auto* controller = participant->Participant()->CreateEthernetController("ETH1", "LINK1");
 
         controller->AddFrameTransmitHandler(
-            [this](IEthernetController* , const EthernetFrameTransmitEvent& ack) {
-            callbacks.AckHandler(ack);
-        });
+            [this](IEthernetController*, const EthernetFrameTransmitEvent& ack) { callbacks.AckHandler(ack); });
 
-        controller->AddFrameHandler(
-            [this, participant](IEthernetController*, const EthernetFrameEvent& event) {
-                const auto& frame = event.frame;
-                std::string message(frame.raw.begin() + EthernetFrameHeaderSize + EthernetFrameVlanTagSize, frame.raw.end());
-                std::cout << participant->Name() 
-                    <<" <- received frame"
-                    << ": frame size=" << frame.raw.size()
-                    << ": testMessages size=" << testMessages.size()
-                    << ": receiveCount=" << numReceived
-                    << ": message='" << message << "'"
-                    << std::endl;
-                testMessages[numReceived].receivedData = message;
-                numReceived++;
-                if (numReceived >= testMessages.size())
-                {
-                    participant->Stop();
-                }
-            });
+        controller->AddFrameHandler([this, participant](IEthernetController*, const EthernetFrameEvent& event) {
+            const auto& frame = event.frame;
+            std::string message(frame.raw.begin() + EthernetFrameHeaderSize + EthernetFrameVlanTagSize,
+                                frame.raw.end());
+            std::cout << participant->Name() << " <- received frame"
+                      << ": frame size=" << frame.raw.size() << ": testMessages size=" << testMessages.size()
+                      << ": receiveCount=" << numReceived << ": message='" << message << "'" << std::endl;
+            testMessages[numReceived].receivedData = message;
+            numReceived++;
+            if (numReceived >= testMessages.size())
+            {
+                participant->Stop();
+            }
+        });
 
         auto* lifecycleService = participant->GetOrCreateLifecycleService();
 
-        lifecycleService->SetCommunicationReadyHandler([controller]() {
-            controller->Activate();
-        });
+        lifecycleService->SetCommunicationReadyHandler([controller]() { controller->Activate(); });
     }
 
     void ExecuteTest()
@@ -172,7 +163,7 @@ protected:
         SilKit::Tests::SimTestHarness testHarness(syncParticipantNames, registryUri);
 
         //participant setup
-        auto* ethWriter  = testHarness.GetParticipant("EthWriter");
+        auto* ethWriter = testHarness.GetParticipant("EthWriter");
         auto* ethReader1 = testHarness.GetParticipant("EthReader1");
         auto* ethReader2 = testHarness.GetParticipant("EthReader2");
 
@@ -181,25 +172,19 @@ protected:
 
         // reader 2 simply counts the number of messages
         auto* controller = ethReader2->Participant()->CreateEthernetController("ETH1", "LINK1");
-        controller->AddFrameHandler(
-            [this](auto, auto) {
-                numReceived2++;
-            }
-        );
-    
+        controller->AddFrameHandler([this](auto, auto) { numReceived2++; });
+
         // run the simulation and check invariants
         for (auto index = 1u; index <= testMessages.size(); index++)
         {
-            EXPECT_CALL(callbacks, AckHandler(MatchUserContext(reinterpret_cast<void *>(static_cast<uintptr_t>(index)))));
+            EXPECT_CALL(callbacks,
+                        AckHandler(MatchUserContext(reinterpret_cast<void*>(static_cast<uintptr_t>(index)))));
         }
         EXPECT_CALL(callbacks, AckHandler(MatchUserContext(nullptr))).Times(0);
 
-        EXPECT_TRUE(testHarness.Run(30s))
-            << "TestHarness Timeout occurred!"
-            << " numSent=" << numSent
-            << " numAcked=" << numAcked
-            << " numReceived=" << numReceived
-            << " numReceived2=" << numReceived2;
+        EXPECT_TRUE(testHarness.Run(30s)) << "TestHarness Timeout occurred!"
+                                          << " numSent=" << numSent << " numAcked=" << numAcked
+                                          << " numReceived=" << numReceived << " numReceived2=" << numReceived2;
 
         EXPECT_EQ(numAcked, numSent);
         EXPECT_EQ(numSent, numReceived);
@@ -220,10 +205,7 @@ protected:
         std::string receivedData;
     };
     std::vector<TestMessage> testMessages;
-    unsigned numSent{0},
-        numReceived{0},
-        numReceived2{0},
-        numAcked{0};
+    unsigned numSent{0}, numReceived{0}, numReceived2{0}, numAcked{0};
 
     Callbacks callbacks;
 };

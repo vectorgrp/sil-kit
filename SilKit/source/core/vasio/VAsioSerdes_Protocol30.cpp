@@ -41,16 +41,12 @@ struct RegistryMsgHeader
 
 inline MessageBuffer& operator<<(MessageBuffer& buffer, const RegistryMsgHeader& header)
 {
-    buffer << header.preambel
-           << header.versionHigh
-           << header.versionLow;
+    buffer << header.preambel << header.versionHigh << header.versionLow;
     return buffer;
 }
 inline MessageBuffer& operator>>(MessageBuffer& buffer, RegistryMsgHeader& header)
 {
-    buffer >> header.preambel
-           >> header.versionHigh
-           >> header.versionLow;
+    buffer >> header.preambel >> header.versionHigh >> header.versionLow;
     return buffer;
 }
 
@@ -64,19 +60,13 @@ struct VAsioMsgSubscriber
 
 inline MessageBuffer& operator<<(MessageBuffer& buffer, const VAsioMsgSubscriber& subscriber)
 {
-    buffer << subscriber.receiverIdx
-           << subscriber.networkName
-           << subscriber.msgTypeName
-        ;
+    buffer << subscriber.receiverIdx << subscriber.networkName << subscriber.msgTypeName;
     return buffer;
 }
 
 inline MessageBuffer& operator>>(MessageBuffer& buffer, VAsioMsgSubscriber& subscriber)
 {
-    buffer >> subscriber.receiverIdx
-           >> subscriber.networkName
-           >> subscriber.msgTypeName
-        ;
+    buffer >> subscriber.receiverIdx >> subscriber.networkName >> subscriber.msgTypeName;
     return buffer;
 }
 
@@ -120,71 +110,53 @@ struct KnownParticipants
 // Actual Serdes Code
 inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const VAsioPeerInfo& peerInfo)
 {
-    buffer << peerInfo.participantName
-           << peerInfo.participantId
-           << peerInfo.acceptorHost
-           << peerInfo.acceptorPort;
+    buffer << peerInfo.participantName << peerInfo.participantId << peerInfo.acceptorHost << peerInfo.acceptorPort;
     return buffer;
 }
 
 inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, VAsioPeerInfo& peerInfo)
 {
-    buffer >> peerInfo.participantName
-           >> peerInfo.participantId
-           >> peerInfo.acceptorHost
-           >> peerInfo.acceptorPort;
+    buffer >> peerInfo.participantName >> peerInfo.participantId >> peerInfo.acceptorHost >> peerInfo.acceptorPort;
     return buffer;
 }
 
 //SerDes v3.1
 inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const VAsioPeerUri& peerUri)
 {
-    buffer << peerUri.participantName
-           << peerUri.participantId
-           << peerUri.acceptorUris
-           ;
+    buffer << peerUri.participantName << peerUri.participantId << peerUri.acceptorUris;
     return buffer;
 }
 
 inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, VAsioPeerUri& peerUri)
 {
-    buffer >> peerUri.participantName
-           >> peerUri.participantId
-           >> peerUri.acceptorUris
-        ;
+    buffer >> peerUri.participantName >> peerUri.participantId >> peerUri.acceptorUris;
     return buffer;
 }
 
 
-inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const ParticipantAnnouncement& announcement)
+inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer,
+                                               const ParticipantAnnouncement& announcement)
 {
-    buffer << announcement.messageHeader
-        << announcement.peerInfo
-        << announcement.peerUri
-        ;
+    buffer << announcement.messageHeader << announcement.peerInfo << announcement.peerUri;
 
     return buffer;
 }
-inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, ParticipantAnnouncement& announcement)
+inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer,
+                                               ParticipantAnnouncement& announcement)
 {
-    buffer >> announcement.messageHeader
-        >> announcement.peerInfo
-        >> announcement.peerUri
-        ;
+    buffer >> announcement.messageHeader >> announcement.peerInfo >> announcement.peerUri;
     return buffer;
 }
 
-inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const KnownParticipants& participants)
+inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer,
+                                               const KnownParticipants& participants)
 {
-    buffer << participants.messageHeader
-        << participants.peerInfos
-        << participants.peerUris;
+    buffer << participants.messageHeader << participants.peerInfos << participants.peerUris;
     return buffer;
 }
 inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, KnownParticipants& participants)
 {
-    buffer >> participants.messageHeader
-        >> participants.peerInfos;
+    buffer >> participants.messageHeader >> participants.peerInfos;
     if (buffer.RemainingBytesLeft() > 0)
     {
         buffer >> participants.peerUris;
@@ -192,7 +164,8 @@ inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buff
     return buffer;
 }
 
-inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const ParticipantAnnouncementReply& reply)
+inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer,
+                                               const ParticipantAnnouncementReply& reply)
 {
     buffer << reply.subscribers;
     return buffer;
@@ -262,7 +235,6 @@ void SerializeV30(MessageBuffer& buffer, const ParticipantAnnouncementReply& rep
     protocol_3_0::ParticipantAnnouncementReply oldReply;
     for (const auto& subscriber : reply.subscribers)
     {
-
         protocol_3_0::VAsioMsgSubscriber oldSubscriber;
         oldSubscriber.msgTypeName = subscriber.msgTypeName;
         oldSubscriber.networkName = subscriber.networkName;

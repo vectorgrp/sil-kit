@@ -20,7 +20,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #ifdef WIN32
-#    define _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS
 #endif
 
 #include "SilKitExtensions.hpp"
@@ -182,8 +182,8 @@ auto LoadExtension(Services::Logging::ILogger* logger, const std::string& name) 
     return LoadExtension(logger, name, Config::Extensions{});
 }
 
-auto LoadExtension(Services::Logging::ILogger* logger, const std::string& name, const Config::Extensions& config)
-    -> std::shared_ptr<ISilKitExtension>
+auto LoadExtension(Services::Logging::ILogger* logger, const std::string& name,
+                   const Config::Extensions& config) -> std::shared_ptr<ISilKitExtension>
 {
     using namespace detail;
 
@@ -250,11 +250,11 @@ auto LoadExtension(Services::Logging::ILogger* logger, const std::string& name, 
 
     auto* extension = static_cast<ISilKitExtension*>(create_ext());
     return {extension, [lib_handle, release_ext](ISilKitExtension* instance) {
-                //call the cleanup code inside the module
-                release_ext(instance);
-                //unload the actual shared library
-                CloseLibrary(lib_handle);
-            }};
+        //call the cleanup code inside the module
+        release_ext(instance);
+        //unload the actual shared library
+        CloseLibrary(lib_handle);
+    }};
 }
 
 

@@ -38,9 +38,7 @@ SilKitEventHandler::SilKitEventHandler(Services::Logging::ILogger* logger,
 {
 }
 
-SilKitEventHandler::~SilKitEventHandler()
-{
-}
+SilKitEventHandler::~SilKitEventHandler() {}
 
 uint64_t SilKitEventHandler::OnSimulationStart(const std::string& connectUri, uint64_t time)
 {
@@ -96,9 +94,14 @@ void SilKitEventHandler::OnServiceDiscoveryEvent(uint64_t simulationId,
     SILKIT_UNUSED_ARG(discoveryType);
     switch (serviceDescriptor.GetServiceType())
     {
-    case Core::ServiceType::Controller: OnControllerCreated(simulationId, serviceDescriptor); break;
-    case Core::ServiceType::Link: OnLinkCreated(simulationId, serviceDescriptor); break;
-    default: break;
+    case Core::ServiceType::Controller:
+        OnControllerCreated(simulationId, serviceDescriptor);
+        break;
+    case Core::ServiceType::Link:
+        OnLinkCreated(simulationId, serviceDescriptor);
+        break;
+    default:
+        break;
     }
 }
 
@@ -208,7 +211,8 @@ void SilKitEventHandler::OnLinkCreated(uint64_t simulationId, const Core::Servic
     case Config::NetworkType::LIN:
         _dashboardSystemServiceClient->AddLinNetworkToSimulation(simulationId, participantName, networkName);
         break;
-    default: return;
+    default:
+        return;
     }
 }
 

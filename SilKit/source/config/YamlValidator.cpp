@@ -31,8 +31,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 namespace {
 
 //! Recursive validation helper to iterate through the YAML document
-bool ValidateDoc(YAML::Node& doc, const SilKit::Config::YamlValidator& v,
-    std::ostream& warnings, const std::string& parent)
+bool ValidateDoc(YAML::Node& doc, const SilKit::Config::YamlValidator& v, std::ostream& warnings,
+                 const std::string& parent)
 {
     using namespace SilKit::Config;
     bool ok = true;
@@ -46,21 +46,18 @@ bool ValidateDoc(YAML::Node& doc, const SilKit::Config::YamlValidator& v,
     {
         if (node.IsDefined())
         {
-            if(node.IsScalar())
-            { 
+            if (node.IsScalar())
+            {
                 auto nodeName = v.MakeName(parent, node.Scalar());
-                if (v.IsSchemaElement(nodeName)
-                    && !v.IsSubelementOf(parent, nodeName))
+                if (v.IsSchemaElement(nodeName) && !v.IsSubelementOf(parent, nodeName))
                 {
-                    warnings << "At " << node.Mark() << ": Element \""
-                        << v.ElementName(nodeName)  << "\""
-                        << " is not a valid sub-element of schema path \""
-                        << parent << "\"\n";
+                    warnings << "At " << node.Mark() << ": Element \"" << v.ElementName(nodeName) << "\""
+                             << " is not a valid sub-element of schema path \"" << parent << "\"\n";
                     ok &= false;
                 }
                 else
                 {
-                    // This is a user-defined value, that is, a subelement 
+                    // This is a user-defined value, that is, a subelement
                     // with no corresponding schema element as parent
                 }
             }
@@ -86,12 +83,11 @@ bool ValidateDoc(YAML::Node& doc, const SilKit::Config::YamlValidator& v,
             if (!keyName.empty() && !v.IsSchemaElement(keyName))
             {
                 // Unknown elements, which are not found in the schema are only warnings
-                warnings << "At " << key.Mark() << ": Element \""
-                    << v.ElementName(keyName) << "\"";
+                warnings << "At " << key.Mark() << ": Element \"" << v.ElementName(keyName) << "\"";
                 if (v.IsReservedElementName(keyName))
                 {
                     warnings << " is a reserved element name and as such"
-                        << " not a sub-element of schema path \"";
+                             << " not a sub-element of schema path \"";
                     // Misplacing a keyword is an error!
                     ok &= false;
                 }
@@ -103,17 +99,13 @@ bool ValidateDoc(YAML::Node& doc, const SilKit::Config::YamlValidator& v,
                 warnings << parent << "\"\n";
             }
             // We are not a subelement of parent
-            else if (v.HasSubelements(parent)
-                && !v.IsSubelementOf(parent, keyName)
-                )
+            else if (v.HasSubelements(parent) && !v.IsSubelementOf(parent, keyName))
             {
-                warnings << "At " << key.Mark() << ": Element \""
-                    << v.ElementName(keyName)  << "\""
-                    << " is not a valid sub-element of schema path \""
-                    << parent << "\"\n";
+                warnings << "At " << key.Mark() << ": Element \"" << v.ElementName(keyName) << "\""
+                         << " is not a valid sub-element of schema path \"" << parent << "\"\n";
                 ok &= false;
             }
-            else if(value.IsMap() || value.IsSequence())
+            else if (value.IsMap() || value.IsSequence())
             {
                 // Nested sequences and maps might have no  key name
                 std::string newParent = parent; // A fallback in case keyName is not given
@@ -145,7 +137,7 @@ bool ValidateDoc(YAML::Node& doc, const SilKit::Config::YamlValidator& v,
 
 namespace SilKit {
 namespace Config {
-  
+
 const std::string YamlValidator::_elementSeparator{"/"};
 
 bool YamlValidator::LoadSchema(std::string schemaVersion)
@@ -183,14 +175,15 @@ auto YamlValidator::ElementName(const std::string& elementName) const -> std::st
     {
         return {};
     }
-    return elementName.substr(sep+1, elementName.size());
+    return elementName.substr(sep + 1, elementName.size());
 }
 
-bool YamlValidator::Validate(const std::string& yamlString, std::ostream& warnings) 
+bool YamlValidator::Validate(const std::string& yamlString, std::ostream& warnings)
 {
-    try {
+    try
+    {
         auto yamlDoc = YAML::Load(yamlString);
-        if (yamlDoc.IsDefined() && yamlDoc.IsMap()  && yamlDoc["SchemaVersion"])
+        if (yamlDoc.IsDefined() && yamlDoc.IsMap() && yamlDoc["SchemaVersion"])
         {
             auto version = yamlDoc["SchemaVersion"].as<std::string>();
             if (!LoadSchema(version))
@@ -204,9 +197,10 @@ bool YamlValidator::Validate(const std::string& yamlString, std::ostream& warnin
             // The document does not specify 'SchemaVersion', we're assuming version '1'
             LoadSchema("1");
         }
-        return ValidateDoc(yamlDoc, *this,  warnings, DocumentRoot());
+        return ValidateDoc(yamlDoc, *this, warnings, DocumentRoot());
     }
-    catch (const std::exception& ex) {
+    catch (const std::exception& ex)
+    {
         warnings << "Error: caught exception: " << ex.what() << "\n";
         return false;
     }

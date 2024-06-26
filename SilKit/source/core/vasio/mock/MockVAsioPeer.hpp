@@ -32,8 +32,8 @@ struct MockVAsioPeer : IVAsioPeer
     MOCK_METHOD(void, SetInfo, (VAsioPeerInfo), (override));
     MOCK_METHOD(std::string, GetRemoteAddress, (), (const, override));
     MOCK_METHOD(std::string, GetLocalAddress, (), (const, override));
-    MOCK_METHOD(void, SetSimulationName, (const std::string&), (override));
-    MOCK_METHOD(const std::string&, GetSimulationName, (), (const, override));
+    MOCK_METHOD(void, SetSimulationName, (const std::string &), (override));
+    MOCK_METHOD(const std::string &, GetSimulationName, (), (const, override));
     MOCK_METHOD(void, StartAsyncRead, (), (override));
     MOCK_METHOD(void, Shutdown, (), (override));
     MOCK_METHOD(void, SetProtocolVersion, (ProtocolVersion), (override));

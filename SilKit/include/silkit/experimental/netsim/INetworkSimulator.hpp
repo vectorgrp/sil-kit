@@ -28,8 +28,8 @@ public:
     virtual ~IEventProducer() = default;
 };
 
-//! Interface for a simulated network. 
-//! An instance of a class inheriting from this interface is passed to the SIL Kit via \ref INetworkSimulator::SimulateNetwork. 
+//! Interface for a simulated network.
+//! An instance of a class inheriting from this interface is passed to the SIL Kit via \ref INetworkSimulator::SimulateNetwork.
 //! The interface functions are then invoked by the SIL Kit.
 class ISimulatedNetwork
 {
@@ -52,7 +52,7 @@ public:
      *  \param controllerDescriptor The identifier of a remote controller.
      */
     virtual void SimulatedControllerRemoved(ControllerDescriptor controllerDescriptor) = 0;
-    
+
     /*! \brief Called once to provide an \ref SilKit::Experimental::NetworkSimulation::IEventProducer. 
      *         This happens when the first controller appears on a simulated network.
      *  \param eventProducer Used to generate events for a given group of receivers. 
@@ -88,7 +88,7 @@ public:
      *         This holds true for remote controllers that have been created before the call to \ref INetworkSimulator::Start.
      *         Internally, remote controllers are informed that they are now part of a detailed network simulation and will route their messages to the network simulator.
      *         See the documentation for further information about the usage within the SIL Kit Lifecyle in order not to miss any messages on the network simulator.
-     */        
+     */
     virtual void Start() = 0;
 };
 

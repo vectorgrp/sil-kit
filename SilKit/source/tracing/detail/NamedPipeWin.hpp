@@ -44,6 +44,7 @@ public:
     // Public interface methods
     bool Write(const char* buffer, size_t size) override;
     void Close() override;
+
 private:
     // ----------------------------------------
     // private members
@@ -52,7 +53,10 @@ private:
 private:
     // ----------------------------------------
     // private methods
-    bool isValid() const { return _pipeHandle != INVALID_HANDLE_VALUE; }
+    bool isValid() const
+    {
+        return _pipeHandle != INVALID_HANDLE_VALUE;
+    }
 
     bool _isConnected{false};
     std::string _name;

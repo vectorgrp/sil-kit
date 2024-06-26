@@ -30,124 +30,106 @@ auto MakeYamlSchema() -> YamlSchemaElem
 {
     // Note: Keep these definitions in sync with ParticipantConfiguration.schema.json,
     //       which is currently the main reference for valid configuration files.
-    YamlSchemaElem replay("Replay",
-        {
-            {"UseTraceSource"},
-            {"Direction"},
-            {"MdfChannel", {
-                {"ChannelName"}, {"ChannelSource"}, {"ChannelPath"},
-                {"GroupName"}, {"GroupSource"}, {"GroupPath"},
-                }
-            }
-        }
-    );
-    YamlSchemaElem traceSinks("TraceSinks",
-        {
-            {"Name"},
-            {"OutputPath"},
-            {"Type"},
-        }
-    );
-    YamlSchemaElem traceSources("TraceSources",
-        {
-            {"Name"},
-            {"InputPath"},
-            {"Type"},
-        }
-    );
-    YamlSchemaElem logging("Logging",
-        {
-            {"LogFromRemotes"},
-            {"FlushLevel"},
-            {"Sinks", {
-                    {"Type"},
-                    {"Level"},
-                    {"LogName"},
-                },
-            },
+    YamlSchemaElem replay("Replay", {{"UseTraceSource"},
+                                     {"Direction"},
+                                     {"MdfChannel",
+                                      {
+                                          {"ChannelName"},
+                                          {"ChannelSource"},
+                                          {"ChannelPath"},
+                                          {"GroupName"},
+                                          {"GroupSource"},
+                                          {"GroupPath"},
+                                      }}});
+    YamlSchemaElem traceSinks("TraceSinks", {
+                                                {"Name"},
+                                                {"OutputPath"},
+                                                {"Type"},
+                                            });
+    YamlSchemaElem traceSources("TraceSources", {
+                                                    {"Name"},
+                                                    {"InputPath"},
+                                                    {"Type"},
+                                                });
+    YamlSchemaElem logging("Logging", {
+                                          {"LogFromRemotes"},
+                                          {"FlushLevel"},
+                                          {
+                                              "Sinks",
+                                              {
+                                                  {"Type"},
+                                                  {"Level"},
+                                                  {"LogName"},
+                                              },
+                                          },
 
-        }
-    );
-    YamlSchemaElem clusterParameters("ClusterParameters",
-        {
-            {"gColdstartAttempts"}, 
-            {"gCycleCountMax"}, 
-            {"gdActionPointOffset"}, 
-            {"gdDynamicSlotIdlePhase"}, 
-            {"gdMiniSlot"}, 
-            {"gdMiniSlotActionPointOffset"}, 
-            {"gdStaticSlot"}, 
-            {"gdSymbolWindow"}, 
-            {"gdSymbolWindowActionPointOffset"}, 
-            {"gdTSSTransmitter"}, 
-            {"gdWakeupTxActive"}, 
-            {"gdWakeupTxIdle"}, 
-            {"gListenNoise"}, 
-            {"gMacroPerCycle"}, 
-            {"gMaxWithoutClockCorrectionFatal"}, 
-            {"gMaxWithoutClockCorrectionPassive"}, 
-            {"gNumberOfMiniSlots"}, 
-            {"gNumberOfStaticSlots"}, 
-            {"gPayloadLengthStatic"}, 
-            {"gSyncFrameIDCountMax"}, 
-        }
-    );
-    YamlSchemaElem nodeParameters("NodeParameters",
-        {
-            {"pAllowHaltDueToClock"}, 
-            {"pAllowPassiveToActive"}, 
-            {"pChannels"}, 
-            {"pClusterDriftDamping"}, 
-            {"pdAcceptedStartupRange"}, 
-            {"pdListenTimeout"}, 
-            {"pKeySlotId"}, 
-            {"pKeySlotOnlyEnabled"}, 
-            {"pKeySlotUsedForStartup"}, 
-            {"pKeySlotUsedForSync"}, 
-            {"pLatestTx"}, 
-            {"pMacroInitialOffsetA"}, 
-            {"pMacroInitialOffsetB"}, 
-            {"pMicroInitialOffsetA"}, 
-            {"pMicroInitialOffsetB"}, 
-            {"pMicroPerCycle"}, 
-            {"pOffsetCorrectionOut"}, 
-            {"pOffsetCorrectionStart"}, 
-            {"pRateCorrectionOut"}, 
-            {"pWakeupChannel"}, 
-            {"pWakeupPattern"}, 
-            {"pdMicrotick"}, 
-            {"pSamplesPerMicrotick"}, 
-        }
-    );
-    YamlSchemaElem txBufferConfigurations("TxBufferConfigurations",
-        {
-            {"channels"}, 
-            {"slotId"}, 
-            {"offset"}, 
-            {"repetition"}, 
-            {"PPindicator"}, 
-            {"headerCrc"}, 
-            {"transmissionMode"}, 
-        }
-    );
+                                      });
+    YamlSchemaElem clusterParameters("ClusterParameters", {
+                                                              {"gColdstartAttempts"},
+                                                              {"gCycleCountMax"},
+                                                              {"gdActionPointOffset"},
+                                                              {"gdDynamicSlotIdlePhase"},
+                                                              {"gdMiniSlot"},
+                                                              {"gdMiniSlotActionPointOffset"},
+                                                              {"gdStaticSlot"},
+                                                              {"gdSymbolWindow"},
+                                                              {"gdSymbolWindowActionPointOffset"},
+                                                              {"gdTSSTransmitter"},
+                                                              {"gdWakeupTxActive"},
+                                                              {"gdWakeupTxIdle"},
+                                                              {"gListenNoise"},
+                                                              {"gMacroPerCycle"},
+                                                              {"gMaxWithoutClockCorrectionFatal"},
+                                                              {"gMaxWithoutClockCorrectionPassive"},
+                                                              {"gNumberOfMiniSlots"},
+                                                              {"gNumberOfStaticSlots"},
+                                                              {"gPayloadLengthStatic"},
+                                                              {"gSyncFrameIDCountMax"},
+                                                          });
+    YamlSchemaElem nodeParameters("NodeParameters", {
+                                                        {"pAllowHaltDueToClock"},
+                                                        {"pAllowPassiveToActive"},
+                                                        {"pChannels"},
+                                                        {"pClusterDriftDamping"},
+                                                        {"pdAcceptedStartupRange"},
+                                                        {"pdListenTimeout"},
+                                                        {"pKeySlotId"},
+                                                        {"pKeySlotOnlyEnabled"},
+                                                        {"pKeySlotUsedForStartup"},
+                                                        {"pKeySlotUsedForSync"},
+                                                        {"pLatestTx"},
+                                                        {"pMacroInitialOffsetA"},
+                                                        {"pMacroInitialOffsetB"},
+                                                        {"pMicroInitialOffsetA"},
+                                                        {"pMicroInitialOffsetB"},
+                                                        {"pMicroPerCycle"},
+                                                        {"pOffsetCorrectionOut"},
+                                                        {"pOffsetCorrectionStart"},
+                                                        {"pRateCorrectionOut"},
+                                                        {"pWakeupChannel"},
+                                                        {"pWakeupPattern"},
+                                                        {"pdMicrotick"},
+                                                        {"pSamplesPerMicrotick"},
+                                                    });
+    YamlSchemaElem txBufferConfigurations("TxBufferConfigurations", {
+                                                                        {"channels"},
+                                                                        {"slotId"},
+                                                                        {"offset"},
+                                                                        {"repetition"},
+                                                                        {"PPindicator"},
+                                                                        {"headerCrc"},
+                                                                        {"transmissionMode"},
+                                                                    });
     std::initializer_list<YamlSchemaElem> flexrayControllerElements = {
-        {"Name"},
-        {"Network"},
-        {"UseTraceSinks"},
-        clusterParameters,
-        nodeParameters,
-        txBufferConfigurations,
-        replay,
+        {"Name"}, {"Network"}, {"UseTraceSinks"}, clusterParameters, nodeParameters, txBufferConfigurations, replay,
     };
 
-    YamlSchemaElem ethernetControllers("EthernetControllers",
-        {
-            {"Name"},
-            {"Network"},
-            {"UseTraceSinks"},
-            replay,
-        }
-    );
+    YamlSchemaElem ethernetControllers("EthernetControllers", {
+                                                                  {"Name"},
+                                                                  {"Network"},
+                                                                  {"UseTraceSinks"},
+                                                                  replay,
+                                                              });
 
     // Root element of the YAML schema
     YamlSchemaElem yamlSchema{
@@ -157,89 +139,65 @@ auto MakeYamlSchema() -> YamlSchemaElem
         {"schemaVersion"}, // should be removed in the future (deprecated)
         {"Description"},
         {"ParticipantName"},
-        {"Includes", {
-                {"SearchPathHints"},
-                {"Files"}
-            }
-        },
-        {"CanControllers", {
-                {"Name"},
-                {"Network"},
-                {"UseTraceSinks"},
-                replay
-            }
-        },
-        {"LinControllers", {
-                {"Name"},
-                {"Network"},
-                {"UseTraceSinks"},
-                replay
-            }
-        },
+        {"Includes", {{"SearchPathHints"}, {"Files"}}},
+        {"CanControllers", {{"Name"}, {"Network"}, {"UseTraceSinks"}, replay}},
+        {"LinControllers", {{"Name"}, {"Network"}, {"UseTraceSinks"}, replay}},
         {"FlexrayControllers", flexrayControllerElements},
         {"FlexRayControllers", flexrayControllerElements}, // deprecated (renamed to FlexrayControllers)
         ethernetControllers,
-        {"DataPublishers", {
-                {"Name"},
-                {"Topic"},
-                {"UseTraceSinks"},
-                replay,
-            }
-        },
-        {"DataSubscribers", {
-                {"Name"},
-                {"Topic"},
-                {"UseTraceSinks"},
-                replay,
-            }
-        },
-        {"RpcClients", {
-                {"Name"},
-                {"FunctionName"},
-                {"UseTraceSinks"},
-                replay,
-            }
-        },
-        {"RpcServers", {
-                {"Name"},
-                {"FunctionName"},
-                {"UseTraceSinks"},
-                replay,
-            }
-        },
+        {"DataPublishers",
+         {
+             {"Name"},
+             {"Topic"},
+             {"UseTraceSinks"},
+             replay,
+         }},
+        {"DataSubscribers",
+         {
+             {"Name"},
+             {"Topic"},
+             {"UseTraceSinks"},
+             replay,
+         }},
+        {"RpcClients",
+         {
+             {"Name"},
+             {"FunctionName"},
+             {"UseTraceSinks"},
+             replay,
+         }},
+        {"RpcServers",
+         {
+             {"Name"},
+             {"FunctionName"},
+             {"UseTraceSinks"},
+             replay,
+         }},
         logging,
-        {"HealthCheck", {
-                {"SoftResponseTimeout"},
-                {"HardResponseTimeout"},
-            }
-        },
-        {"Tracing", {
-                traceSinks,
-                traceSources
-            }
-        },
-        {"Extensions", {
-                {"SearchPathHints"}
-            }
-        },
-        {"Middleware", {
-                {"RegistryUri"},
-                {"ConnectAttempts"},
-                {"TcpNoDelay"},
-                {"TcpQuickAck"},
-                {"TcpReceiveBufferSize"},
-                {"TcpSendBufferSize"},
-                {"EnableDomainSockets"},
-                {"AcceptorUris"},
-                {"RegistryAsFallbackProxy"},
-                {"ExperimentalRemoteParticipantConnection"},
-                {"ConnectTimeoutSeconds"},
-            }
-        }
-    };
+        {"HealthCheck",
+         {
+             {"SoftResponseTimeout"},
+             {"HardResponseTimeout"},
+         }},
+        {"Tracing", {traceSinks, traceSources}},
+        {"Extensions", {{"SearchPathHints"}}},
+        {"Middleware",
+         {
+             {"RegistryUri"},
+             {"ConnectAttempts"},
+             {"TcpNoDelay"},
+             {"TcpQuickAck"},
+             {"TcpReceiveBufferSize"},
+             {"TcpSendBufferSize"},
+             {"EnableDomainSockets"},
+             {"AcceptorUris"},
+             {"RegistryAsFallbackProxy"},
+             {"ExperimentalRemoteParticipantConnection"},
+             {"ConnectTimeoutSeconds"},
+         }}};
     return yamlSchema;
 }
 
-} // inline namespace v1
+} // namespace v1
 } // namespace Config
 } // namespace SilKit

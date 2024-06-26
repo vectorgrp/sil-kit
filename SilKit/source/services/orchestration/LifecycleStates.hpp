@@ -42,9 +42,9 @@ public:
 
 public:
     virtual ~State() = default;
-    
+
     // See method description in ILifecycleState
-    
+
     virtual void Initialize(std::string reason) override;
     virtual void ServicesCreated(std::string reason) override;
     virtual void CommunicationInitializing(std::string reason) override;
@@ -70,7 +70,7 @@ protected:
     LifecycleManagement* _lifecycleManager;
     bool _abortRequested{false};
 };
-    
+
 class InvalidState : public State
 {
 public:
@@ -113,7 +113,7 @@ public:
 
     void ServicesCreated(std::string reason) override;
     void CommunicationInitializing(std::string reason) override;
-    
+
     void AbortSimulation(std::string reason) override;
     void ResolveAbortSimulation(std::string reason) override;
     auto toString() -> std::string override;
@@ -169,7 +169,7 @@ public:
         : State(lifecycleManager)
     {
     }
-    
+
     void CommunicationInitializing(std::string reason) override;
     void CommunicationInitialized(std::string reason) override;
     void ReadyToRun(std::string reason) override;
@@ -226,7 +226,7 @@ public:
     }
 
     void StopSimulation(std::string reason) override;
-    
+
     void RestartParticipant(std::string reason) override;
     void ShutdownParticipant(std::string reason) override;
 
@@ -262,7 +262,7 @@ public:
     {
     }
     void Initialize(std::string reason) override;
-    
+
     void CommunicationInitialized(std::string reason) override;
     void ReadyToRun(std::string reason) override;
     void StopSimulation(std::string reason) override;

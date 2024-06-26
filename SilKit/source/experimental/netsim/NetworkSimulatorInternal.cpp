@@ -38,7 +38,7 @@ void NetworkSimulatorInternal::SimulateNetwork(const std::string& networkName, S
     CreateSimulatedNetwork(networkName, networkType, std::move(simulatedNetwork));
 }
 
-void NetworkSimulatorInternal::Start() 
+void NetworkSimulatorInternal::Start()
 {
     if (_networkSimulatorStarted)
     {
@@ -57,21 +57,21 @@ void NetworkSimulatorInternal::Start()
     // Otherwise, the discovery events cannot be processed by the network simulator
     auto disco = _participant->GetServiceDiscovery();
     disco->RegisterServiceDiscoveryHandler([this](Core::Discovery::ServiceDiscoveryEvent::Type discoveryType,
-                                                    const Core::ServiceDescriptor& serviceDescriptor) {
+                                                  const Core::ServiceDescriptor& serviceDescriptor) {
         DiscoveryHandler(discoveryType, serviceDescriptor);
     });
 
     // Barrier to guarantee catching two network simulators on the same simulated network
     std::promise<void> netSimStartBarrier{};
-    _participant->GetParticipantRepliesProcedure()->CallAfterAllParticipantsReplied([&netSimStartBarrier]() {
-        netSimStartBarrier.set_value();
-    });
+    _participant->GetParticipantRepliesProcedure()->CallAfterAllParticipantsReplied(
+        [&netSimStartBarrier]() { netSimStartBarrier.set_value(); });
     netSimStartBarrier.get_future().wait();
 }
 
 // INetworkSimulatorInternal
 
-auto NetworkSimulatorInternal::GetServiceDescriptorString(ControllerDescriptor controllerDescriptor) -> std::string const
+auto NetworkSimulatorInternal::GetServiceDescriptorString(ControllerDescriptor controllerDescriptor)
+    -> std::string const
 {
     auto serviceDescriptor_it = _serviceDescriptorByControllerDescriptor.find(controllerDescriptor);
     if (serviceDescriptor_it == _serviceDescriptorByControllerDescriptor.end())
@@ -97,9 +97,9 @@ auto NetworkSimulatorInternal::NextControllerDescriptor() -> uint64_t
 void NetworkSimulatorInternal::CreateSimulatedNetwork(const std::string& networkName, SimulatedNetworkType networkType,
                                                       std::unique_ptr<ISimulatedNetwork> userSimulatedNetwork)
 {
-    auto simulatedNetworkInternal =
-        std::make_unique<SimulatedNetworkInternal>(_participant, networkName, networkType, std::move(userSimulatedNetwork));
-    
+    auto simulatedNetworkInternal = std::make_unique<SimulatedNetworkInternal>(_participant, networkName, networkType,
+                                                                               std::move(userSimulatedNetwork));
+
     auto networksOfType_it = _simulatedNetworks.find(networkType);
     if (networksOfType_it != _simulatedNetworks.end())
     {
@@ -113,8 +113,8 @@ void NetworkSimulatorInternal::CreateSimulatedNetwork(const std::string& network
 }
 
 
-auto NetworkSimulatorInternal::LookupSimulatedNetwork(const std::string& networkName, SimulatedNetworkType networkType)
-    -> SimulatedNetworkInternal*
+auto NetworkSimulatorInternal::LookupSimulatedNetwork(const std::string& networkName,
+                                                      SimulatedNetworkType networkType) -> SimulatedNetworkInternal*
 {
     auto it_simulatedNetworksByType = _simulatedNetworks.find(networkType);
     if (it_simulatedNetworksByType != _simulatedNetworks.end())
@@ -129,7 +129,7 @@ auto NetworkSimulatorInternal::LookupSimulatedNetwork(const std::string& network
 }
 
 void NetworkSimulatorInternal::DiscoveryHandler(SilKit::Core::Discovery::ServiceDiscoveryEvent::Type discoveryType,
-                                               const SilKit::Core::ServiceDescriptor& serviceDescriptor)
+                                                const SilKit::Core::ServiceDescriptor& serviceDescriptor)
 {
     auto configNetworkType = serviceDescriptor.GetNetworkType();
     auto networkType = ConvertNetworkTypeFromConfig(configNetworkType);
@@ -151,11 +151,11 @@ void NetworkSimulatorInternal::DiscoveryHandler(SilKit::Core::Discovery::Service
             throw SilKitError{errorMsg};
         }
     }
-    if (serviceType != Core::ServiceType::Controller) 
+    if (serviceType != Core::ServiceType::Controller)
     {
         return; // Only remote controllers
     }
-    if (!AllowedNetworkTypes.count(configNetworkType)) 
+    if (!AllowedNetworkTypes.count(configNetworkType))
     {
         return; // Only allowed network types
     }
@@ -185,12 +185,13 @@ void NetworkSimulatorInternal::DiscoveryHandler(SilKit::Core::Discovery::Service
 }
 
 
-void NetworkSimulatorInternal::OnNetworkDiscovered(const std::string& networkName, Experimental::NetworkSimulation::SimulatedNetworkType networkType)
+void NetworkSimulatorInternal::OnNetworkDiscovered(const std::string& networkName,
+                                                   Experimental::NetworkSimulation::SimulatedNetworkType networkType)
 {
     // Count all controllers per network to remove the network at some point
     _controllerCountPerNetwork[networkName]++;
 
-    if (_discoveredNetworks.count(networkName)) 
+    if (_discoveredNetworks.count(networkName))
     {
         return; // Already known
     }
@@ -213,7 +214,7 @@ void NetworkSimulatorInternal::OnNetworkDiscovered(const std::string& networkNam
 }
 
 void NetworkSimulatorInternal::OnNetworkRemoved(const std::string& networkName,
-                                               Experimental::NetworkSimulation::SimulatedNetworkType /*networkType*/)
+                                                Experimental::NetworkSimulation::SimulatedNetworkType /*networkType*/)
 {
     _controllerCountPerNetwork[networkName]--;
 

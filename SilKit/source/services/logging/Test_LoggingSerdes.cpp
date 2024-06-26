@@ -30,7 +30,7 @@ TEST(Test_LoggingSerdes, LoggingSerdes)
     in.level = SilKit::Services::Logging::Level::Trace;
     SilKit::Services::Logging::SourceLoc loc;
     loc.filename = "somefile.txt";
-    loc.funcname ="TEST(LoggingSerdes)";
+    loc.funcname = "TEST(LoggingSerdes)";
     loc.line = 15;
     in.source = loc;
     in.payload = "Hello, logger!";

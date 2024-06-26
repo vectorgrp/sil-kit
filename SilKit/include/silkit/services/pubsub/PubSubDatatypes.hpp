@@ -43,10 +43,9 @@ struct DataMessageEvent
 };
 
 //! \brief Callback type for new data reception callbacks
-using DataMessageHandler =
-    std::function<void(SilKit::Services::PubSub::IDataSubscriber* subscriber, const DataMessageEvent& dataMessageEvent)>;
+using DataMessageHandler = std::function<void(SilKit::Services::PubSub::IDataSubscriber* subscriber,
+                                              const DataMessageEvent& dataMessageEvent)>;
 
 } // namespace PubSub
 } // namespace Services
 } // namespace SilKit
-

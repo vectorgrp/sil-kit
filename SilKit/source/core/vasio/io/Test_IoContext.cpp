@@ -98,13 +98,9 @@ TEST_F(Test_IoContext, sequential_post_keeps_order)
 
     auto ioContext = VSilKit::MakeAsioIoContext({});
 
-    ioContext->Post([&callbacks]() {
-        callbacks.Handle(0);
-    });
+    ioContext->Post([&callbacks]() { callbacks.Handle(0); });
 
-    ioContext->Post([&callbacks]() {
-        callbacks.Handle(1);
-    });
+    ioContext->Post([&callbacks]() { callbacks.Handle(1); });
 
     ioContext->Run();
 }
@@ -123,15 +119,11 @@ TEST_F(Test_IoContext, nested_post_is_executed_last)
 
     ioContext->Post([&ioContext, &callbacks]() {
         callbacks.Handle(0);
-        ioContext->Post([&callbacks]() {
-            callbacks.Handle(3);
-        });
+        ioContext->Post([&callbacks]() { callbacks.Handle(3); });
         callbacks.Handle(1);
     });
 
-    ioContext->Post([&callbacks]() {
-        callbacks.Handle(2);
-    });
+    ioContext->Post([&callbacks]() { callbacks.Handle(2); });
 
     ioContext->Run();
 }
@@ -146,13 +138,9 @@ TEST_F(Test_IoContext, sequential_dispatch_keeps_order)
 
     auto ioContext = VSilKit::MakeAsioIoContext({});
 
-    ioContext->Dispatch([&callbacks]() {
-        callbacks.Handle(0);
-    });
+    ioContext->Dispatch([&callbacks]() { callbacks.Handle(0); });
 
-    ioContext->Dispatch([&callbacks]() {
-        callbacks.Handle(1);
-    });
+    ioContext->Dispatch([&callbacks]() { callbacks.Handle(1); });
 
     ioContext->Run();
 }
@@ -171,15 +159,11 @@ TEST_F(Test_IoContext, nested_dispatch_is_executed_immediately)
 
     ioContext->Dispatch([&ioContext, &callbacks]() {
         callbacks.Handle(0);
-        ioContext->Dispatch([&callbacks]() {
-            callbacks.Handle(1);
-        });
+        ioContext->Dispatch([&callbacks]() { callbacks.Handle(1); });
         callbacks.Handle(2);
     });
 
-    ioContext->Dispatch([&callbacks]() {
-        callbacks.Handle(3);
-    });
+    ioContext->Dispatch([&callbacks]() { callbacks.Handle(3); });
 
     ioContext->Run();
 }
@@ -348,9 +332,7 @@ struct Test_IoContext_AcceptorConnector_PingPong : Test_IoContext
             accepted.stream->AsyncWriteSome(ConstBufferSequence{&writeBuffer, 1});
         });
 
-        EXPECT_CALL(accepted.listener, OnAsyncWriteSomeDone).WillOnce([this] {
-            callbacks.Handle(12);
-        });
+        EXPECT_CALL(accepted.listener, OnAsyncWriteSomeDone).WillOnce([this] { callbacks.Handle(12); });
 
         // expectations and behavior of the connected stream
 

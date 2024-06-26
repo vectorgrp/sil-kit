@@ -39,7 +39,7 @@ struct ServiceDiscoveryEvent
         ServiceCreated,
         ServiceRemoved,
     };
-    Type type{ Type::Invalid };
+    Type type{Type::Invalid};
     ServiceDescriptor serviceDescriptor;
 };
 
@@ -55,15 +55,11 @@ struct ParticipantDiscoveryEvent //requires history >= 1
 ////////////////////////////////////////////////////////////////////////////////
 inline bool operator==(const ServiceDiscoveryEvent& lhs, const ServiceDiscoveryEvent& rhs)
 {
-    return lhs.type == rhs.type
-        && lhs.serviceDescriptor == rhs.serviceDescriptor
-        ;
+    return lhs.type == rhs.type && lhs.serviceDescriptor == rhs.serviceDescriptor;
 }
 inline bool operator==(const ParticipantDiscoveryEvent& lhs, const ParticipantDiscoveryEvent& rhs)
 {
-    return lhs.participantName == rhs.participantName
-        && lhs.services == rhs.services
-        ;
+    return lhs.participantName == rhs.participantName && lhs.services == rhs.services;
 }
 inline bool operator!=(const ParticipantDiscoveryEvent& lhs, const ParticipantDiscoveryEvent& rhs)
 {
@@ -77,9 +73,15 @@ inline std::ostream& operator<<(std::ostream& out, const ServiceDiscoveryEvent::
 {
     switch (t)
     {
-    case ServiceDiscoveryEvent::Type::Invalid: out << "Invalid"; break;
-    case ServiceDiscoveryEvent::Type::ServiceCreated: out << "ServiceCreated"; break;
-    case ServiceDiscoveryEvent::Type::ServiceRemoved: out << "ServiceRemoved"; break;
+    case ServiceDiscoveryEvent::Type::Invalid:
+        out << "Invalid";
+        break;
+    case ServiceDiscoveryEvent::Type::ServiceCreated:
+        out << "ServiceCreated";
+        break;
+    case ServiceDiscoveryEvent::Type::ServiceRemoved:
+        out << "ServiceRemoved";
+        break;
     default:
         out << "Unknown ServiceDiscoveryEvent::Type{"
             << static_cast<std::underlying_type_t<ServiceDiscoveryEvent::Type>>(t);
@@ -94,14 +96,10 @@ inline std::ostream& operator<<(std::ostream& out, const ServiceDiscoveryEvent& 
 
 inline std::ostream& operator<<(std::ostream& out, const ParticipantDiscoveryEvent& serviceAnnouncement)
 {
-    out << "ParticipantDiscoveryEvent{\"" << serviceAnnouncement.participantName
-        << "\", services=["
-        ;
+    out << "ParticipantDiscoveryEvent{\"" << serviceAnnouncement.participantName << "\", services=[";
     for (auto&& service : serviceAnnouncement.services)
     {
-        out << service
-            << ", "
-            ;
+        out << service << ", ";
     }
     out << "] }";
     return out;

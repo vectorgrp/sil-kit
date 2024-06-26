@@ -50,8 +50,8 @@ TEST_F(ITest_DashboardServerUnavailable, dashboard_server_unavailable)
     const auto networkName = "CAN1";
     SetupFromParticipantLists({participantName}, {});
     {
-        auto dashboard =
-            SilKit::Dashboard::CreateDashboard(ParticipantConfigurationFromStringImpl(_dashboardParticipantConfig), _registryUri, _dashboardUri);
+        auto dashboard = SilKit::Dashboard::CreateDashboard(
+            ParticipantConfigurationFromStringImpl(_dashboardParticipantConfig), _registryUri, _dashboardUri);
         {
             _simTestHarness->CreateSystemController();
             auto&& simParticipant = _simTestHarness->GetParticipant(participantName, _participantConfig);
@@ -60,10 +60,7 @@ TEST_F(ITest_DashboardServerUnavailable, dashboard_server_unavailable)
             auto&& timeSyncService = simParticipant->GetOrCreateTimeSyncService();
             (void)participant->CreateCanController(canonicalName, networkName);
             timeSyncService->SetSimulationStepHandler(
-                [lifecycleService](auto, auto) {
-                    lifecycleService->Stop("Test done");
-                },
-                1ms);
+                [lifecycleService](auto, auto) { lifecycleService->Stop("Test done"); }, 1ms);
             auto ok = _simTestHarness->Run(5s);
             ASSERT_TRUE(ok) << "SimTestHarness should terminate without timeout";
             _simTestHarness->ResetParticipants();

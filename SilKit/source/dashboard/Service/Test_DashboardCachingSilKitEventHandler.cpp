@@ -60,11 +60,20 @@ public:
                                                            _mockEventQueue);
     }
 
-    void CheckConnectUri(const std::string& actual) { ASSERT_EQ(actual, _connectUri) << "Wrong connectUri!"; }
+    void CheckConnectUri(const std::string& actual)
+    {
+        ASSERT_EQ(actual, _connectUri) << "Wrong connectUri!";
+    }
 
-    void CheckTime(uint64_t actual) { ASSERT_TRUE(actual > 0) << "Wrong time!"; }
+    void CheckTime(uint64_t actual)
+    {
+        ASSERT_TRUE(actual > 0) << "Wrong time!";
+    }
 
-    void CheckSimulationId(uint64_t actual) { ASSERT_EQ(actual, _simulationId) << "Wrong simulationId!"; }
+    void CheckSimulationId(uint64_t actual)
+    {
+        ASSERT_EQ(actual, _simulationId) << "Wrong simulationId!";
+    }
 
     Core::Tests::MockLogger _dummyLogger;
     std::shared_ptr<StrictMock<MockSilKitEventHandler>> _mockEventHandler;
@@ -78,10 +87,7 @@ TEST_F(Test_DashboardCachingSilKitEventHandler, NoEvents)
 {
     // Arrange
     EXPECT_CALL(*_mockEventQueue, DequeueAllInto)
-        .WillOnce(DoAll(WithArgs<0>([&](auto& evts) {
-                            evts.clear();
-                        }),
-                        Return(false)));
+        .WillOnce(DoAll(WithArgs<0>([&](auto& evts) { evts.clear(); }), Return(false)));
     EXPECT_CALL(*_mockEventQueue, Stop);
 
     // Act
@@ -100,33 +106,35 @@ TEST_F(Test_DashboardCachingSilKitEventHandler, OnParticipantConnected_CreateSim
     EXPECT_CALL(*_mockEventQueue, Enqueue).WillRepeatedly(WithArgs<0>([&](const auto& evt) {
         switch (evt.Type())
         {
-        case SilKitEventType::OnSimulationStart: simulationStartFound = true; break;
-        case SilKitEventType::OnParticipantConnected: participantConnectionInformationFound = true; break;
-        default: /* do nothing */ break;
+        case SilKitEventType::OnSimulationStart:
+            simulationStartFound = true;
+            break;
+        case SilKitEventType::OnParticipantConnected:
+            participantConnectionInformationFound = true;
+            break;
+        default: /* do nothing */
+            break;
         }
     }));
 
     Services::Orchestration::ParticipantConnectionInformation participantConnectionInformation;
     EXPECT_CALL(*_mockEventQueue, DequeueAllInto)
         .WillOnce(DoAll(WithArgs<0>([&](auto& evts) {
-                            SimulationStart simulationStart{"silkit://localhost:8500", 123456};
-                            std::vector<SilKitEvent> events;
-                            events.emplace_back("", simulationStart);
-                            events.emplace_back("", participantConnectionInformation);
-                            evts.swap(events);
-                        }),
+        SimulationStart simulationStart{"silkit://localhost:8500", 123456};
+        std::vector<SilKitEvent> events;
+        events.emplace_back("", simulationStart);
+        events.emplace_back("", participantConnectionInformation);
+        evts.swap(events);
+    }),
                         Return(true)))
-        .WillOnce(DoAll(WithArgs<0>([&](auto& evts) {
-                            evts.clear();
-                        }),
-                        Return(false)));
+        .WillOnce(DoAll(WithArgs<0>([&](auto& evts) { evts.clear(); }), Return(false)));
     std::string actualConnectUri;
     uint64_t actualTime = 0;
     EXPECT_CALL(*_mockEventHandler, OnSimulationStart)
         .WillOnce(DoAll(WithArgs<0, 1>([&](auto connectUri, auto time) {
-                            actualConnectUri = connectUri;
-                            actualTime = time;
-                        }),
+        actualConnectUri = connectUri;
+        actualTime = time;
+    }),
                         Return(_invalidSimulationId)));
     EXPECT_CALL(*_mockEventQueue, Stop);
 
@@ -151,32 +159,34 @@ TEST_F(Test_DashboardCachingSilKitEventHandler, OnParticipantConnected_CreateSim
     EXPECT_CALL(*_mockEventQueue, Enqueue).WillRepeatedly(WithArgs<0>([&](const auto& evt) {
         switch (evt.Type())
         {
-        case SilKitEventType::OnSimulationStart: simulationStartFound = true; break;
-        case SilKitEventType::OnParticipantConnected: participantConnectionInformationFound = true; break;
-        default: /* do nothing */ break;
+        case SilKitEventType::OnSimulationStart:
+            simulationStartFound = true;
+            break;
+        case SilKitEventType::OnParticipantConnected:
+            participantConnectionInformationFound = true;
+            break;
+        default: /* do nothing */
+            break;
         }
     }));
     Services::Orchestration::ParticipantConnectionInformation participantConnectionInformation;
     EXPECT_CALL(*_mockEventQueue, DequeueAllInto)
         .WillOnce(DoAll(WithArgs<0>([&](auto& evts) {
-                            SimulationStart simulationStart{"silkit://localhost:8500", 123456};
-                            std::vector<SilKitEvent> events;
-                            events.emplace_back("", simulationStart);
-                            events.emplace_back("", participantConnectionInformation);
-                            evts.swap(events);
-                        }),
+        SimulationStart simulationStart{"silkit://localhost:8500", 123456};
+        std::vector<SilKitEvent> events;
+        events.emplace_back("", simulationStart);
+        events.emplace_back("", participantConnectionInformation);
+        evts.swap(events);
+    }),
                         Return(true)))
-        .WillOnce(DoAll(WithArgs<0>([&](auto& evts) {
-                            evts.clear();
-                        }),
-                        Return(false)));
+        .WillOnce(DoAll(WithArgs<0>([&](auto& evts) { evts.clear(); }), Return(false)));
     std::string actualConnectUri;
     uint64_t actualTime = 0;
     EXPECT_CALL(*_mockEventHandler, OnSimulationStart)
         .WillOnce(DoAll(WithArgs<0, 1>([&](auto connectUri, auto time) {
-                            actualConnectUri = connectUri;
-                            actualTime = time;
-                        }),
+        actualConnectUri = connectUri;
+        actualTime = time;
+    }),
                         Return(_simulationId)));
     uint64_t actualSimulationId = 0;
     Services::Orchestration::ParticipantConnectionInformation actualInfo;
@@ -205,10 +215,7 @@ TEST_F(Test_DashboardCachingSilKitEventHandler, OnLastParticipantDisconnected_Si
 {
     // Arrange
     EXPECT_CALL(*_mockEventQueue, DequeueAllInto)
-        .WillOnce(DoAll(WithArgs<0>([&](auto& evts) {
-                            evts.clear();
-                        }),
-                        Return(false)));
+        .WillOnce(DoAll(WithArgs<0>([&](auto& evts) { evts.clear(); }), Return(false)));
     EXPECT_CALL(*_mockEventQueue, Stop);
 
     // Act

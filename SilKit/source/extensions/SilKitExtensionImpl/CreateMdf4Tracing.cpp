@@ -34,25 +34,22 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "SilKitExtensionLoader.hpp"
 #include "ParticipantConfiguration.hpp"
 
-namespace SilKit { 
+namespace SilKit {
 
-auto CreateMdf4Tracing(Config::ParticipantConfiguration config,
-    SilKit::Services::Logging::ILogger* logger,
-    const std::string& participantName,
-    const std::string& sinkName)
-    -> std::unique_ptr<ITraceMessageSink>
+auto CreateMdf4Tracing(Config::ParticipantConfiguration config, SilKit::Services::Logging::ILogger* logger,
+                       const std::string& participantName,
+                       const std::string& sinkName) -> std::unique_ptr<ITraceMessageSink>
 {
     auto& factory = SilKitExtensionLoader<ITraceMessageSinkFactory>(logger, "SilKitExtension_Mdf", config.extensions);
     return factory.Create(std::move(config), logger, participantName, sinkName);
 }
 
 auto CreateMdf4Replay(Config::ParticipantConfiguration config, SilKit::Services::Logging::ILogger* logger,
-                      const std::string& fileName)
-    -> std::shared_ptr<IReplayFile>
+                      const std::string& fileName) -> std::shared_ptr<IReplayFile>
 {
     auto& factory = SilKitExtensionLoader<IReplayDataProvider>(logger, "SilKitExtension_Mdf", config.extensions);
     return factory.OpenFile(config, fileName, logger);
 }
 
 
-}//end namespace SilKit
+} //end namespace SilKit

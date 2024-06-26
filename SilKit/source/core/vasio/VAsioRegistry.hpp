@@ -93,8 +93,8 @@ private:
 private:
     // ----------------------------------------
     // private methods
-    auto FindConnectedParticipant(const std::string& participantName, const std::string& simulationName) const
-        -> const ConnectedParticipantInfo*;
+    auto FindConnectedParticipant(const std::string& participantName,
+                                  const std::string& simulationName) const -> const ConnectedParticipantInfo*;
 
     void OnParticipantAnnouncement(IVAsioPeer* peer, const ParticipantAnnouncement& announcement);
     void SendKnownParticipants(IVAsioPeer* peer, const std::string& simulationName);

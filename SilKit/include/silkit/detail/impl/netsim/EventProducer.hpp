@@ -29,21 +29,21 @@ public:
 
     inline ~CanEventProducer() override = default;
 
-    inline void Produce(
-        const SilKit::Services::Can::CanFrameEvent& cxxEvent,
-        const SilKit::Util::Span<const SilKit::Experimental::NetworkSimulation::ControllerDescriptor>& cxxReceivers) override;
+    inline void Produce(const SilKit::Services::Can::CanFrameEvent& cxxEvent,
+                        const SilKit::Util::Span<const SilKit::Experimental::NetworkSimulation::ControllerDescriptor>&
+                            cxxReceivers) override;
 
-    inline void Produce(
-        const SilKit::Services::Can::CanFrameTransmitEvent& cxxEvent,
-        const SilKit::Util::Span<const SilKit::Experimental::NetworkSimulation::ControllerDescriptor>& cxxReceivers) override;
+    inline void Produce(const SilKit::Services::Can::CanFrameTransmitEvent& cxxEvent,
+                        const SilKit::Util::Span<const SilKit::Experimental::NetworkSimulation::ControllerDescriptor>&
+                            cxxReceivers) override;
 
-    inline void Produce(
-        const SilKit::Services::Can::CanStateChangeEvent& cxxEvent,
-        const SilKit::Util::Span<const SilKit::Experimental::NetworkSimulation::ControllerDescriptor>& cxxReceivers) override;
+    inline void Produce(const SilKit::Services::Can::CanStateChangeEvent& cxxEvent,
+                        const SilKit::Util::Span<const SilKit::Experimental::NetworkSimulation::ControllerDescriptor>&
+                            cxxReceivers) override;
 
-    inline void Produce(
-        const SilKit::Services::Can::CanErrorStateChangeEvent& cxxEvent,
-        const SilKit::Util::Span<const SilKit::Experimental::NetworkSimulation::ControllerDescriptor>& cxxReceivers) override;
+    inline void Produce(const SilKit::Services::Can::CanErrorStateChangeEvent& cxxEvent,
+                        const SilKit::Util::Span<const SilKit::Experimental::NetworkSimulation::ControllerDescriptor>&
+                            cxxReceivers) override;
 
 private:
     SilKit_Experimental_CanEventProducer* _canEventProducer{nullptr};
@@ -60,29 +60,29 @@ public:
 
     inline ~FlexRayEventProducer() override = default;
 
-    inline void Produce(
-        const SilKit::Services::Flexray::FlexrayFrameEvent& cxxEvent,
-        const SilKit::Util::Span<const SilKit::Experimental::NetworkSimulation::ControllerDescriptor>& cxxReceivers) override;
+    inline void Produce(const SilKit::Services::Flexray::FlexrayFrameEvent& cxxEvent,
+                        const SilKit::Util::Span<const SilKit::Experimental::NetworkSimulation::ControllerDescriptor>&
+                            cxxReceivers) override;
 
-    inline void Produce(
-        const SilKit::Services::Flexray::FlexrayFrameTransmitEvent& cxxEvent,
-        const SilKit::Util::Span<const SilKit::Experimental::NetworkSimulation::ControllerDescriptor>& cxxReceivers) override;
+    inline void Produce(const SilKit::Services::Flexray::FlexrayFrameTransmitEvent& cxxEvent,
+                        const SilKit::Util::Span<const SilKit::Experimental::NetworkSimulation::ControllerDescriptor>&
+                            cxxReceivers) override;
 
-    inline void Produce(
-        const SilKit::Services::Flexray::FlexraySymbolEvent& cxxEvent,
-        const SilKit::Util::Span<const SilKit::Experimental::NetworkSimulation::ControllerDescriptor>& cxxReceivers) override;
+    inline void Produce(const SilKit::Services::Flexray::FlexraySymbolEvent& cxxEvent,
+                        const SilKit::Util::Span<const SilKit::Experimental::NetworkSimulation::ControllerDescriptor>&
+                            cxxReceivers) override;
 
-    inline void Produce(
-        const SilKit::Services::Flexray::FlexraySymbolTransmitEvent& cxxEvent,
-        const SilKit::Util::Span<const SilKit::Experimental::NetworkSimulation::ControllerDescriptor>& cxxReceivers) override;
+    inline void Produce(const SilKit::Services::Flexray::FlexraySymbolTransmitEvent& cxxEvent,
+                        const SilKit::Util::Span<const SilKit::Experimental::NetworkSimulation::ControllerDescriptor>&
+                            cxxReceivers) override;
 
-    inline void Produce(
-        const SilKit::Services::Flexray::FlexrayCycleStartEvent& cxxEvent,
-        const SilKit::Util::Span<const SilKit::Experimental::NetworkSimulation::ControllerDescriptor>& cxxReceivers) override;
+    inline void Produce(const SilKit::Services::Flexray::FlexrayCycleStartEvent& cxxEvent,
+                        const SilKit::Util::Span<const SilKit::Experimental::NetworkSimulation::ControllerDescriptor>&
+                            cxxReceivers) override;
 
-    inline void Produce(
-        const SilKit::Services::Flexray::FlexrayPocStatusEvent& cxxEvent,
-        const SilKit::Util::Span<const SilKit::Experimental::NetworkSimulation::ControllerDescriptor>& cxxReceivers) override;
+    inline void Produce(const SilKit::Services::Flexray::FlexrayPocStatusEvent& cxxEvent,
+                        const SilKit::Util::Span<const SilKit::Experimental::NetworkSimulation::ControllerDescriptor>&
+                            cxxReceivers) override;
 
 private:
     SilKit_Experimental_FlexRayEventProducer* _flexRayEventProducer{nullptr};
@@ -99,18 +99,18 @@ public:
 
     inline ~EthernetEventProducer() override = default;
 
-    inline void Produce(
-        const SilKit::Services::Ethernet::EthernetFrameEvent& cxxEvent,
-        const SilKit::Util::Span<const SilKit::Experimental::NetworkSimulation::ControllerDescriptor>& cxxReceivers) override;
-    inline void Produce(
-        const SilKit::Services::Ethernet::EthernetFrameTransmitEvent& cxxEvent,
-        const SilKit::Util::Span<const SilKit::Experimental::NetworkSimulation::ControllerDescriptor>& cxxReceivers) override;
-    inline void Produce(
-        const SilKit::Services::Ethernet::EthernetStateChangeEvent& cxxEvent,
-        const SilKit::Util::Span<const SilKit::Experimental::NetworkSimulation::ControllerDescriptor>& cxxReceivers) override;
-    inline void Produce(
-        const SilKit::Services::Ethernet::EthernetBitrateChangeEvent& cxxEvent,
-        const SilKit::Util::Span<const SilKit::Experimental::NetworkSimulation::ControllerDescriptor>& cxxReceivers) override;
+    inline void Produce(const SilKit::Services::Ethernet::EthernetFrameEvent& cxxEvent,
+                        const SilKit::Util::Span<const SilKit::Experimental::NetworkSimulation::ControllerDescriptor>&
+                            cxxReceivers) override;
+    inline void Produce(const SilKit::Services::Ethernet::EthernetFrameTransmitEvent& cxxEvent,
+                        const SilKit::Util::Span<const SilKit::Experimental::NetworkSimulation::ControllerDescriptor>&
+                            cxxReceivers) override;
+    inline void Produce(const SilKit::Services::Ethernet::EthernetStateChangeEvent& cxxEvent,
+                        const SilKit::Util::Span<const SilKit::Experimental::NetworkSimulation::ControllerDescriptor>&
+                            cxxReceivers) override;
+    inline void Produce(const SilKit::Services::Ethernet::EthernetBitrateChangeEvent& cxxEvent,
+                        const SilKit::Util::Span<const SilKit::Experimental::NetworkSimulation::ControllerDescriptor>&
+                            cxxReceivers) override;
 
 private:
     SilKit_Experimental_EthernetEventProducer* _ethernetEventProducer{nullptr};
@@ -127,15 +127,15 @@ public:
 
     inline ~LinEventProducer() override = default;
 
-    inline void Produce(
-        const SilKit::Services::Lin::LinFrameStatusEvent& cxxEvent,
-        const SilKit::Util::Span<const SilKit::Experimental::NetworkSimulation::ControllerDescriptor>& cxxReceivers) override;
-    inline void Produce(
-        const SilKit::Services::Lin::LinSendFrameHeaderRequest& cxxEvent,
-        const SilKit::Util::Span<const SilKit::Experimental::NetworkSimulation::ControllerDescriptor>& cxxReceivers) override;
-    inline void Produce(
-        const SilKit::Services::Lin::LinWakeupEvent& cxxEvent,
-        const SilKit::Util::Span<const SilKit::Experimental::NetworkSimulation::ControllerDescriptor>& cxxReceivers) override;
+    inline void Produce(const SilKit::Services::Lin::LinFrameStatusEvent& cxxEvent,
+                        const SilKit::Util::Span<const SilKit::Experimental::NetworkSimulation::ControllerDescriptor>&
+                            cxxReceivers) override;
+    inline void Produce(const SilKit::Services::Lin::LinSendFrameHeaderRequest& cxxEvent,
+                        const SilKit::Util::Span<const SilKit::Experimental::NetworkSimulation::ControllerDescriptor>&
+                            cxxReceivers) override;
+    inline void Produce(const SilKit::Services::Lin::LinWakeupEvent& cxxEvent,
+                        const SilKit::Util::Span<const SilKit::Experimental::NetworkSimulation::ControllerDescriptor>&
+                            cxxReceivers) override;
 
 private:
     SilKit_Experimental_LinEventProducer* _linEventProducer{nullptr};
@@ -177,7 +177,8 @@ void CanEventProducer::Produce(
 
     SilKit_Experimental_EventReceivers receivers = assignReceivers(cxxReceivers);
 
-    const auto returnCode = SilKit_Experimental_CanEventProducer_Produce(_canEventProducer, &cEvent.structHeader, &receivers);
+    const auto returnCode =
+        SilKit_Experimental_CanEventProducer_Produce(_canEventProducer, &cEvent.structHeader, &receivers);
     ThrowOnError(returnCode);
 }
 
@@ -191,7 +192,8 @@ void CanEventProducer::Produce(
 
     SilKit_Experimental_EventReceivers receivers = assignReceivers(cxxReceivers);
 
-    const auto returnCode = SilKit_Experimental_CanEventProducer_Produce(_canEventProducer, &cEvent.structHeader, &receivers);
+    const auto returnCode =
+        SilKit_Experimental_CanEventProducer_Produce(_canEventProducer, &cEvent.structHeader, &receivers);
     ThrowOnError(returnCode);
 }
 
@@ -205,7 +207,8 @@ void CanEventProducer::Produce(
 
     SilKit_Experimental_EventReceivers receivers = assignReceivers(cxxReceivers);
 
-    const auto returnCode = SilKit_Experimental_CanEventProducer_Produce(_canEventProducer, &cEvent.structHeader, &receivers);
+    const auto returnCode =
+        SilKit_Experimental_CanEventProducer_Produce(_canEventProducer, &cEvent.structHeader, &receivers);
     ThrowOnError(returnCode);
 }
 
@@ -219,7 +222,8 @@ void CanEventProducer::Produce(
 
     SilKit_Experimental_EventReceivers receivers = assignReceivers(cxxReceivers);
 
-    const auto returnCode = SilKit_Experimental_CanEventProducer_Produce(_canEventProducer, &cEvent.structHeader, &receivers);
+    const auto returnCode =
+        SilKit_Experimental_CanEventProducer_Produce(_canEventProducer, &cEvent.structHeader, &receivers);
     ThrowOnError(returnCode);
 }
 
@@ -428,7 +432,8 @@ void LinEventProducer::Produce(
     assignCxxToC(cxxEvent, cEvent);
     SilKit_Experimental_EventReceivers receivers = assignReceivers(cxxReceivers);
 
-    const auto returnCode = SilKit_Experimental_LinEventProducer_Produce(_linEventProducer, &cEvent.structHeader, &receivers);
+    const auto returnCode =
+        SilKit_Experimental_LinEventProducer_Produce(_linEventProducer, &cEvent.structHeader, &receivers);
     ThrowOnError(returnCode);
 }
 
@@ -441,7 +446,8 @@ void LinEventProducer::Produce(
     assignCxxToC(cxxEvent, cEvent);
     SilKit_Experimental_EventReceivers receivers = assignReceivers(cxxReceivers);
 
-    const auto returnCode = SilKit_Experimental_LinEventProducer_Produce(_linEventProducer, &cEvent.structHeader, &receivers);
+    const auto returnCode =
+        SilKit_Experimental_LinEventProducer_Produce(_linEventProducer, &cEvent.structHeader, &receivers);
     ThrowOnError(returnCode);
 }
 
@@ -454,7 +460,8 @@ void LinEventProducer::Produce(
     assignCxxToC(cxxEvent, cEvent);
     SilKit_Experimental_EventReceivers receivers = assignReceivers(cxxReceivers);
 
-    const auto returnCode = SilKit_Experimental_LinEventProducer_Produce(_linEventProducer, &cEvent.structHeader, &receivers);
+    const auto returnCode =
+        SilKit_Experimental_LinEventProducer_Produce(_linEventProducer, &cEvent.structHeader, &receivers);
     ThrowOnError(returnCode);
 }
 

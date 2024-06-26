@@ -27,9 +27,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 namespace SilKit {
 namespace Core {
 
-auto CreateNullConnectionParticipantImpl(std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig, const std::string& participantName)
-    -> std::unique_ptr<IParticipantInternal>;
+auto CreateNullConnectionParticipantImpl(std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig,
+                                         const std::string& participantName) -> std::unique_ptr<IParticipantInternal>;
 
 } // namespace Core
 } // namespace SilKit
-

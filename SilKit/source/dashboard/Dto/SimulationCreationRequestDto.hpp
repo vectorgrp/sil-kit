@@ -32,10 +32,16 @@ class SimulationCreationRequestDto : public oatpp::DTO
 {
     DTO_INIT(SimulationCreationRequestDto, DTO)
 
-    DTO_FIELD_INFO(started) { info->description = "Time when simulation started"; }
+    DTO_FIELD_INFO(started)
+    {
+        info->description = "Time when simulation started";
+    }
     DTO_FIELD(UInt64, started);
 
-    DTO_FIELD_INFO(configuration) { info->description = "Configuration of the simulation"; }
+    DTO_FIELD_INFO(configuration)
+    {
+        info->description = "Configuration of the simulation";
+    }
     DTO_FIELD(Object<SimulationConfigurationDto>, configuration);
 };
 

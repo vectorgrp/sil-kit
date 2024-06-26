@@ -28,75 +28,48 @@ namespace Core {
 
 // ServiceDescriptor encoding is here, because it pulls in O_SilKit_Config
 inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer,
-    const SilKit::Core::ServiceDescriptor& msg)
+                                               const SilKit::Core::ServiceDescriptor& msg)
 {
-    buffer
-        << msg._participantName
-        << msg._serviceType
-        << msg._networkName
-        << msg._networkType
-        << msg._serviceName
-        << msg._serviceId
-        << msg._supplementalData
-        << msg._participantId
-        ;
+    buffer << msg._participantName << msg._serviceType << msg._networkName << msg._networkType << msg._serviceName
+           << msg._serviceId << msg._supplementalData << msg._participantId;
     return buffer;
 }
 
 inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer,
-    SilKit::Core::ServiceDescriptor& updatedMsg)
+                                               SilKit::Core::ServiceDescriptor& updatedMsg)
 {
-    buffer
-        >> updatedMsg._participantName
-        >> updatedMsg._serviceType
-        >> updatedMsg._networkName
-        >> updatedMsg._networkType
-        >> updatedMsg._serviceName
-        >> updatedMsg._serviceId
-        >> updatedMsg._supplementalData
-        >> updatedMsg._participantId
-        ;
+    buffer >> updatedMsg._participantName >> updatedMsg._serviceType >> updatedMsg._networkName
+        >> updatedMsg._networkType >> updatedMsg._serviceName >> updatedMsg._serviceId >> updatedMsg._supplementalData
+        >> updatedMsg._participantId;
     return buffer;
 }
 namespace Discovery {
 
 // ParticipantDiscoveryEvent
 inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer,
-    const ParticipantDiscoveryEvent& msg)
+                                               const ParticipantDiscoveryEvent& msg)
 {
-    buffer << msg.participantName
-        << msg.version
-        << msg.services
-        ;
+    buffer << msg.participantName << msg.version << msg.services;
     return buffer;
 }
 
 inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer,
-    ParticipantDiscoveryEvent& updatedMsg)
+                                               ParticipantDiscoveryEvent& updatedMsg)
 {
-    buffer >> updatedMsg.participantName
-        >> updatedMsg.version
-        >> updatedMsg.services
-        ;
+    buffer >> updatedMsg.participantName >> updatedMsg.version >> updatedMsg.services;
     return buffer;
 }
 
 // ServiceDiscoveryEvent
-inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer,
-    const ServiceDiscoveryEvent& msg)
+inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const ServiceDiscoveryEvent& msg)
 {
-    buffer << msg.type
-        << msg.serviceDescriptor
-        ;
+    buffer << msg.type << msg.serviceDescriptor;
     return buffer;
 }
 
-inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer,
-    ServiceDiscoveryEvent& updatedMsg)
+inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, ServiceDiscoveryEvent& updatedMsg)
 {
-    buffer >> updatedMsg.type
-        >> updatedMsg.serviceDescriptor
-        ;
+    buffer >> updatedMsg.type >> updatedMsg.serviceDescriptor;
     return buffer;
 }
 

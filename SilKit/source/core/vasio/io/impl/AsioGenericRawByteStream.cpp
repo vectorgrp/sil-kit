@@ -21,16 +21,16 @@
 
 // For EnableQuickAck
 #if defined(__linux__)
-#    include <sys/types.h>
-#    include <sys/socket.h>
-#    include <errno.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <errno.h>
 #endif
 
 
 #if SILKIT_ENABLE_TRACING_INSTRUMENTATION_AsioGenericRawByteStream
-#    define SILKIT_TRACE_METHOD_(logger, ...) SILKIT_TRACE_METHOD(logger, __VA_ARGS__)
+#define SILKIT_TRACE_METHOD_(logger, ...) SILKIT_TRACE_METHOD(logger, __VA_ARGS__)
 #else
-#    define SILKIT_TRACE_METHOD_(...)
+#define SILKIT_TRACE_METHOD_(...)
 #endif
 
 
@@ -122,12 +122,11 @@ void AsioGenericRawByteStream::AsyncReadSome(MutableBufferSequence bufferSequenc
         _readBufferSequence.resize(bufferSequence.size());
         std::transform(bufferSequence.begin(), bufferSequence.end(), _readBufferSequence.begin(),
                        [](const MutableBuffer& buffer) -> asio::mutable_buffer {
-                           return asio::mutable_buffer{buffer.GetData(), buffer.GetSize()};
-                       });
-
-        _socket.async_read_some(_readBufferSequence, [this](const auto& e, auto s) {
-            OnAsioAsyncReadSomeComplete(e, s);
+            return asio::mutable_buffer{buffer.GetData(), buffer.GetSize()};
         });
+
+        _socket.async_read_some(_readBufferSequence,
+                                [this](const auto& e, auto s) { OnAsioAsyncReadSomeComplete(e, s); });
     }
 }
 
@@ -157,12 +156,11 @@ void AsioGenericRawByteStream::AsyncWriteSome(ConstBufferSequence bufferSequence
         _writeBufferSequence.resize(bufferSequence.size());
         std::transform(bufferSequence.begin(), bufferSequence.end(), _writeBufferSequence.begin(),
                        [](const ConstBuffer& buffer) -> asio::const_buffer {
-                           return asio::const_buffer{buffer.GetData(), buffer.GetSize()};
-                       });
-
-        _socket.async_write_some(_writeBufferSequence, [this](const auto& e, auto s) {
-            OnAsioAsyncWriteSomeComplete(e, s);
+            return asio::const_buffer{buffer.GetData(), buffer.GetSize()};
         });
+
+        _socket.async_write_some(_writeBufferSequence,
+                                 [this](const auto& e, auto s) { OnAsioAsyncWriteSomeComplete(e, s); });
     }
 }
 
@@ -207,9 +205,8 @@ void AsioGenericRawByteStream::OnAsioAsyncReadSomeComplete(asio::error_code cons
             // only re-trigger the read if no bytes were transferred, otherwise treat it as a 'normal' completion
 
             _reading = true;
-            _socket.async_read_some(_readBufferSequence, [this](const auto& e, auto s) {
-                OnAsioAsyncReadSomeComplete(e, s);
-            });
+            _socket.async_read_some(_readBufferSequence,
+                                    [this](const auto& e, auto s) { OnAsioAsyncReadSomeComplete(e, s); });
 
             return;
         }
@@ -246,9 +243,8 @@ void AsioGenericRawByteStream::OnAsioAsyncWriteSomeComplete(asio::error_code con
             // only re-trigger the write if no bytes were transferred, otherwise treat it as a 'normal' completion
 
             _writing = true;
-            _socket.async_write_some(_writeBufferSequence, [this](const auto& e, auto s) {
-                OnAsioAsyncWriteSomeComplete(e, s);
-            });
+            _socket.async_write_some(_writeBufferSequence,
+                                     [this](const auto& e, auto s) { OnAsioAsyncWriteSomeComplete(e, s); });
 
             return;
         }
@@ -260,8 +256,8 @@ void AsioGenericRawByteStream::OnAsioAsyncWriteSomeComplete(asio::error_code con
 
 void AsioGenericRawByteStream::HandleShutdownOrError()
 {
-    SILKIT_TRACE_METHOD_(_logger, "() [shutdownPosted={}, shutdownPending={}, reading={}, writing={}]", _shutdownPending,
-                        _shutdownPosted, _reading, _writing);
+    SILKIT_TRACE_METHOD_(_logger, "() [shutdownPosted={}, shutdownPending={}, reading={}, writing={}]",
+                         _shutdownPending, _shutdownPosted, _reading, _writing);
 
     if (!_shutdownPending)
     {
@@ -287,9 +283,7 @@ void AsioGenericRawByteStream::HandleShutdownOrError()
 
             _shutdownPosted = true;
 
-            _asioIoContext->post([this] {
-                _listener->OnShutdown(*this);
-            });
+            _asioIoContext->post([this] { _listener->OnShutdown(*this); });
         }
     }
 }

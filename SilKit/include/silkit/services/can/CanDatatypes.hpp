@@ -80,17 +80,17 @@ struct CanFrameEvent
  */
 enum class CanControllerState : SilKit_CanControllerState
 {
-  //! CAN controller is not initialized (initial state after reset).
-  Uninit = SilKit_CanControllerState_Uninit,
+    //! CAN controller is not initialized (initial state after reset).
+    Uninit = SilKit_CanControllerState_Uninit,
 
-  //! CAN controller is initialized but does not participate on the CAN bus.
-  Stopped = SilKit_CanControllerState_Stopped,
+    //! CAN controller is initialized but does not participate on the CAN bus.
+    Stopped = SilKit_CanControllerState_Stopped,
 
-  //! CAN controller is in normal operation mode.
-  Started = SilKit_CanControllerState_Started,
+    //! CAN controller is in normal operation mode.
+    Started = SilKit_CanControllerState_Started,
 
-  //! CAN controller is in sleep mode which is similar to the Stopped state.
-  Sleep = SilKit_CanControllerState_Sleep,
+    //! CAN controller is in sleep mode which is similar to the Stopped state.
+    Sleep = SilKit_CanControllerState_Sleep,
 };
 
 
@@ -98,25 +98,25 @@ enum class CanControllerState : SilKit_CanControllerState
  */
 enum class CanErrorState : SilKit_CanErrorState
 {
-  /*! Error State is Not Available, because CAN controller is in state Uninit.
+    /*! Error State is Not Available, because CAN controller is in state Uninit.
   *
   * *AUTOSAR Doc:* Successful transmission.
   */
-  NotAvailable = SilKit_CanErrorState_NotAvailable,
+    NotAvailable = SilKit_CanErrorState_NotAvailable,
 
-  /*! Error Active Mode, the CAN controller is allowed to send messages and active error flags.
+    /*! Error Active Mode, the CAN controller is allowed to send messages and active error flags.
   */
-  ErrorActive = SilKit_CanErrorState_ErrorActive,
+    ErrorActive = SilKit_CanErrorState_ErrorActive,
 
-  /*! Error Passive Mode, the CAN controller is still allowed to send messages, but must not send active error flags.
+    /*! Error Passive Mode, the CAN controller is still allowed to send messages, but must not send active error flags.
   */
-  ErrorPassive = SilKit_CanErrorState_ErrorPassive,
+    ErrorPassive = SilKit_CanErrorState_ErrorPassive,
 
-  /*! (currently not in use)
+    /*! (currently not in use)
    *
    * *AUTOSAR Doc:* Bus Off Mode, the CAN controller does not take part in communication.
   */
-  BusOff = SilKit_CanErrorState_BusOff,
+    BusOff = SilKit_CanErrorState_BusOff,
 };
 
 using CanTransmitStatusMask = SilKit_CanTransmitStatus;

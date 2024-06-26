@@ -42,7 +42,7 @@ class SimBehavior : public ISimBehavior
 {
 public:
     SimBehavior(Core::IParticipantInternal* participant, EthController* ethController,
-                       Services::Orchestration::ITimeProvider* timeProvider);
+                Services::Orchestration::ITimeProvider* timeProvider);
 
     auto AllowReception(const Core::IServiceEndpoint* from) const -> bool override;
     void SendMsg(WireEthernetFrameEvent&& msg) override;

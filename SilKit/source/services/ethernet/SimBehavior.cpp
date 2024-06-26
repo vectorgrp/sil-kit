@@ -29,7 +29,7 @@ namespace Ethernet {
 class EthController;
 
 SimBehavior::SimBehavior(Core::IParticipantInternal* participant, EthController* ethController,
-                    Services::Orchestration::ITimeProvider* timeProvider)
+                         Services::Orchestration::ITimeProvider* timeProvider)
     : _trivial{participant, ethController, timeProvider}
     , _detailed{participant, ethController, ethController->GetServiceDescriptor()}
 {
@@ -48,7 +48,7 @@ void SimBehavior::SendMsgImpl(MsgT&& msg)
 }
 
 void SimBehavior::SendMsg(WireEthernetFrameEvent&& msg)
-{ 
+{
     SendMsgImpl(std::move(msg));
 }
 

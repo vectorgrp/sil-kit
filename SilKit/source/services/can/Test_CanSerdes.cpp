@@ -72,7 +72,7 @@ TEST(Test_CanSerdes, SimCan_CanTransmitAcknowledge)
 
     in.timestamp = 13ns;
     in.status = CanTransmitStatus::Transmitted;
-    in.userContext = (void*)((size_t) 0xcafecafe );
+    in.userContext = (void*)((size_t)0xcafecafe);
 
     Serialize(buffer, in);
     Deserialize(buffer, out);

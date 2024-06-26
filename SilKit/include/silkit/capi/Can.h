@@ -73,17 +73,17 @@ typedef int32_t SilKit_CanTransmitStatus;
 
 /*! The message was successfully transmitted on the CAN bus.
 */
-#define SilKit_CanTransmitStatus_Transmitted          ((SilKit_CanTransmitStatus) BIT(0))
+#define SilKit_CanTransmitStatus_Transmitted ((SilKit_CanTransmitStatus)BIT(0))
 
 /*! (currently not in use)
 *
 * The transmit queue was reset.
 */
-#define SilKit_CanTransmitStatus_Canceled             ((SilKit_CanTransmitStatus) BIT(1))
+#define SilKit_CanTransmitStatus_Canceled ((SilKit_CanTransmitStatus)BIT(1))
 
 /*! The transmit request was rejected, because the transmit queue is full.
 */
-#define SilKit_CanTransmitStatus_TransmitQueueFull    ((SilKit_CanTransmitStatus) BIT(2))
+#define SilKit_CanTransmitStatus_TransmitQueueFull ((SilKit_CanTransmitStatus)BIT(2))
 
 /* (SilKit_CanTransmitStatus) BIT(3) is RESERVED (used to be SilKit_CanTransmitStatus_DuplicatedTransmitId) */
 
@@ -117,16 +117,16 @@ typedef struct SilKit_CanFrameTransmitEvent SilKit_CanFrameTransmitEvent;
 typedef int32_t SilKit_CanControllerState;
 /*! CAN controller is not initialized (initial state after reset).
 */
-#define SilKit_CanControllerState_Uninit  ((SilKit_CanControllerState) 0)
+#define SilKit_CanControllerState_Uninit ((SilKit_CanControllerState)0)
 /*! CAN controller is initialized but does not participate on the CAN bus.
 */
-#define SilKit_CanControllerState_Stopped ((SilKit_CanControllerState) 1)
+#define SilKit_CanControllerState_Stopped ((SilKit_CanControllerState)1)
 /*! CAN controller is in normal operation mode.
 */
-#define SilKit_CanControllerState_Started ((SilKit_CanControllerState) 2)
+#define SilKit_CanControllerState_Started ((SilKit_CanControllerState)2)
 /*! CAN controller is in sleep mode which is similar to the Stopped state.
 */
-#define SilKit_CanControllerState_Sleep   ((SilKit_CanControllerState) 3)
+#define SilKit_CanControllerState_Sleep ((SilKit_CanControllerState)3)
 
 /*! \brief An incoming state change of a CAN controller
 */
@@ -145,18 +145,18 @@ typedef int32_t SilKit_CanErrorState;
 *
 * *AUTOSAR Doc:* Successful transmission.
 */
-#define SilKit_CanErrorState_NotAvailable ((SilKit_CanControllerState) 0)
+#define SilKit_CanErrorState_NotAvailable ((SilKit_CanControllerState)0)
 /*! Error Active Mode, the CAN controller is allowed to send messages and active error flags.
 */
-#define SilKit_CanErrorState_ErrorActive  ((SilKit_CanControllerState) 1)
+#define SilKit_CanErrorState_ErrorActive ((SilKit_CanControllerState)1)
 /*! Error Passive Mode, the CAN controller is still allowed to send messages, but must not send active error flags.
 */
-#define SilKit_CanErrorState_ErrorPassive ((SilKit_CanControllerState) 2)
+#define SilKit_CanErrorState_ErrorPassive ((SilKit_CanControllerState)2)
 /*! (currently not in use)
 *
 * *AUTOSAR Doc:* Bus Off Mode, the CAN controller does not take part in communication.
 */
-#define SilKit_CanErrorState_BusOff       ((SilKit_CanControllerState) 3)
+#define SilKit_CanErrorState_BusOff ((SilKit_CanControllerState)3)
 
 /*! \brief An incoming state change of a CAN controller
 */
@@ -175,32 +175,32 @@ typedef struct SilKit_CanController SilKit_CanController;
 * \param controller The CAN controller that received the acknowledge.
 * \param frameTransmitEvent The incoming CAN frame transmit event.
 */
-typedef void (SilKitFPTR *SilKit_CanFrameTransmitHandler_t)(void* context, SilKit_CanController* controller,
-                                              SilKit_CanFrameTransmitEvent* frameTransmitEvent);
+typedef void(SilKitFPTR* SilKit_CanFrameTransmitHandler_t)(void* context, SilKit_CanController* controller,
+                                                           SilKit_CanFrameTransmitEvent* frameTransmitEvent);
 
 /*! Callback type to indicate that a CanMessage has been received.
 * \param context The by the user provided context on registration.
 * \param controller The CAN controller that received the message.
 * \param frameEvent The incoming CAN frame event containing timestamp, transmit ID and referencing the CAN frame itself.
 */
-typedef void (SilKitFPTR *SilKit_CanFrameHandler_t)(void* context, SilKit_CanController* controller,
-                                               SilKit_CanFrameEvent* frameEvent);
+typedef void(SilKitFPTR* SilKit_CanFrameHandler_t)(void* context, SilKit_CanController* controller,
+                                                   SilKit_CanFrameEvent* frameEvent);
 
 /*! Callback type to indicate that the State of the CAN Controller has changed.
 * \param context The by the user provided context on registration.
 * \param controller The CAN controller that changed its state.
 * \param stateChangeEvent The state change event containing timestamp and new state.
 */
-typedef void (SilKitFPTR *SilKit_CanStateChangeHandler_t)(void* context, SilKit_CanController* controller,
-                                             SilKit_CanStateChangeEvent* stateChangeEvent);
+typedef void(SilKitFPTR* SilKit_CanStateChangeHandler_t)(void* context, SilKit_CanController* controller,
+                                                         SilKit_CanStateChangeEvent* stateChangeEvent);
 
 /*! Callback type to indicate that the controller CAN error state has changed.
 * \param context The by the user provided context on registration.
 * \param controller The CAN controller that received the message.
 * \param errorStateChangeEvent The error state change event containing timestamp and new error state.
 */
-typedef void (SilKitFPTR *SilKit_CanErrorStateChangeHandler_t)(void* context, SilKit_CanController* controller,
-                                                  SilKit_CanErrorStateChangeEvent* errorStateChangeEvent);
+typedef void(SilKitFPTR* SilKit_CanErrorStateChangeHandler_t)(void* context, SilKit_CanController* controller,
+                                                              SilKit_CanErrorStateChangeEvent* errorStateChangeEvent);
 
 /*! \brief Create a CAN controller at this SIL Kit simulation participant.
  * \param outCanController Pointer that refers to the resulting CAN controller (out parameter).
@@ -214,12 +214,12 @@ typedef void (SilKitFPTR *SilKit_CanErrorStateChangeHandler_t)(void* context, Si
  * The object returned must not be deallocated using free()!
  */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_CanController_Create(SilKit_CanController** outCanController,
-                                                         SilKit_Participant* participant, const char* name,
-                                                         const char* network);
+                                                                   SilKit_Participant* participant, const char* name,
+                                                                   const char* network);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_CanController_Create_t)(SilKit_CanController** outCanController,
-                                                    SilKit_Participant* participant, const char* name,
-                                                    const char* network);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_CanController_Create_t)(SilKit_CanController** outCanController,
+                                                                     SilKit_Participant* participant, const char* name,
+                                                                     const char* network);
 
 /*! \brief Start the CAN controller
 *
@@ -227,7 +227,7 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_CanController_Create_t)(SilKit_Can
 */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_CanController_Start(SilKit_CanController* controller);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_CanController_Start_t)(SilKit_CanController* controller);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_CanController_Start_t)(SilKit_CanController* controller);
 
 /*! \brief Stop the CAN controller
 *
@@ -235,7 +235,7 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_CanController_Start_t)(SilKit_CanC
 */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_CanController_Stop(SilKit_CanController* controller);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_CanController_Stop_t)(SilKit_CanController* controller);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_CanController_Stop_t)(SilKit_CanController* controller);
 
 /*! \brief Reset the CAN controller
 *
@@ -248,7 +248,7 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_CanController_Stop_t)(SilKit_CanCo
 */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_CanController_Reset(SilKit_CanController* controller);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_CanController_Reset_t)(SilKit_CanController* controller);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_CanController_Reset_t)(SilKit_CanController* controller);
 
 /*! \brief Put the CAN controller in sleep mode
 *
@@ -256,7 +256,7 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_CanController_Reset_t)(SilKit_CanC
 */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_CanController_Sleep(SilKit_CanController* controller);
 
-typedef SilKit_ReturnCode(SilKitFPTR *SilKit_CanController_Sleep_t)(SilKit_CanController* controller);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_CanController_Sleep_t)(SilKit_CanController* controller);
 
 /*! \brief Request the transmission of a CanFrame
 *
@@ -270,11 +270,11 @@ typedef SilKit_ReturnCode(SilKitFPTR *SilKit_CanController_Sleep_t)(SilKit_CanCo
 * reobtained in the SilKit_CanController_AddFrameTransmitHandler
 * handler.
 */
-SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_CanController_SendFrame(SilKit_CanController* controller, SilKit_CanFrame* frame,
-    void* userContext);
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_CanController_SendFrame(SilKit_CanController* controller,
+                                                                      SilKit_CanFrame* frame, void* userContext);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_CanController_SendFrame_t)(SilKit_CanController* controller, SilKit_CanFrame* frame,
-    void* userContext);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_CanController_SendFrame_t)(SilKit_CanController* controller,
+                                                                        SilKit_CanFrame* frame, void* userContext);
 
 /*! \brief Configure the baud rate of the controller
  *
@@ -294,10 +294,11 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_CanController_SendFrame_t)(SilKit_
  * configuration and interoperation of the connected controllers.
  */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_CanController_SetBaudRate(SilKit_CanController* controller, uint32_t rate,
-    uint32_t fdRate, uint32_t xlRate);
+                                                                        uint32_t fdRate, uint32_t xlRate);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_CanController_SetBaudRate_t)(SilKit_CanController* controller, uint32_t rate,
-    uint32_t fdRate, uint32_t xlRate);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_CanController_SetBaudRate_t)(SilKit_CanController* controller,
+                                                                          uint32_t rate, uint32_t fdRate,
+                                                                          uint32_t xlRate);
 
 /*! \brief Register a callback for the TX status of sent CAN messages
 *
@@ -313,15 +314,13 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_CanController_SetBaudRate_t)(SilKi
 * \param statusMask A mask to select for which transmit statuses the handler should be called.
 * \param outHandlerId The handler identifier that can be used to remove the callback.
 */
-SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_CanController_AddFrameTransmitHandler(SilKit_CanController* controller, void* context,
-                                                                          SilKit_CanFrameTransmitHandler_t handler,
-                                                                          SilKit_CanTransmitStatus statusMask,
-                                                                          SilKit_HandlerId* outHandlerId);
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_CanController_AddFrameTransmitHandler(
+    SilKit_CanController* controller, void* context, SilKit_CanFrameTransmitHandler_t handler,
+    SilKit_CanTransmitStatus statusMask, SilKit_HandlerId* outHandlerId);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_CanController_AddFrameTransmitHandler_t)(SilKit_CanController* controller, void* context,
-                                                                     SilKit_CanFrameTransmitHandler_t handler,
-                                                                     SilKit_CanTransmitStatus statusMask,
-                                                                     SilKit_HandlerId* outHandlerId);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_CanController_AddFrameTransmitHandler_t)(
+    SilKit_CanController* controller, void* context, SilKit_CanFrameTransmitHandler_t handler,
+    SilKit_CanTransmitStatus statusMask, SilKit_HandlerId* outHandlerId);
 
 /*! \brief  Remove a \ref SilKit_CanFrameTransmitHandler_t by SilKit_HandlerId on this controller 
 *
@@ -329,10 +328,10 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_CanController_AddFrameTransmitHand
 * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
 */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_CanController_RemoveFrameTransmitHandler(SilKit_CanController* controller,
-                                                                             SilKit_HandlerId handlerId);
+                                                                                       SilKit_HandlerId handlerId);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_CanController_RemoveFrameTransmitHandler_t)(SilKit_CanController* controller,
-                                                                        SilKit_HandlerId handlerId);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_CanController_RemoveFrameTransmitHandler_t)(
+    SilKit_CanController* controller, SilKit_HandlerId handlerId);
 
 /*! \brief Register a callback for CAN message reception
 *
@@ -345,13 +344,16 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_CanController_RemoveFrameTransmitH
 * \param directionMask A bit mask defining the transmit direction of the messages (rx/tx)
 * \param outHandlerId The handler identifier that can be used to remove the callback.
 */
-SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_CanController_AddFrameHandler(SilKit_CanController* controller, void* context,
-                                                                  SilKit_CanFrameHandler_t handler,
-                                                                  SilKit_Direction directionMask,
-                                                                  SilKit_HandlerId* outHandlerId);
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_CanController_AddFrameHandler(SilKit_CanController* controller,
+                                                                            void* context,
+                                                                            SilKit_CanFrameHandler_t handler,
+                                                                            SilKit_Direction directionMask,
+                                                                            SilKit_HandlerId* outHandlerId);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_CanController_AddFrameHandler_t)(SilKit_CanController* controller, void* context,
-                                                             SilKit_CanFrameHandler_t handler, SilKit_HandlerId* outHandlerId);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_CanController_AddFrameHandler_t)(SilKit_CanController* controller,
+                                                                              void* context,
+                                                                              SilKit_CanFrameHandler_t handler,
+                                                                              SilKit_HandlerId* outHandlerId);
 
 /*! \brief  Remove a \ref SilKit_CanFrameHandler_t by SilKit_HandlerId on this controller 
 *
@@ -359,9 +361,10 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_CanController_AddFrameHandler_t)(S
 * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
 */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_CanController_RemoveFrameHandler(SilKit_CanController* controller,
-                                                                     SilKit_HandlerId handlerId);
+                                                                               SilKit_HandlerId handlerId);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_CanController_RemoveFrameHandler_t)(SilKit_CanController* controller, SilKit_HandlerId handlerId);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_CanController_RemoveFrameHandler_t)(SilKit_CanController* controller,
+                                                                                 SilKit_HandlerId handlerId);
 
 /*! \brief Register a callback for controller state changes
 *
@@ -375,13 +378,13 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_CanController_RemoveFrameHandler_t
 * \param handler The handler to be called on state change.
 * \param outHandlerId The handler identifier that can be used to remove the callback.
 */
-SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_CanController_AddStateChangeHandler(SilKit_CanController* controller, void* context,
-                                                                        SilKit_CanStateChangeHandler_t handler,
-                                                                        SilKit_HandlerId* outHandlerId);
+SilKitAPI SilKit_ReturnCode SilKitCALL
+SilKit_CanController_AddStateChangeHandler(SilKit_CanController* controller, void* context,
+                                           SilKit_CanStateChangeHandler_t handler, SilKit_HandlerId* outHandlerId);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_CanController_AddStateChangeHandler_t)(SilKit_CanController* controller, void* context,
-                                                                   SilKit_CanStateChangeHandler_t handler,
-                                                                   SilKit_HandlerId* outHandlerId);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_CanController_AddStateChangeHandler_t)(
+    SilKit_CanController* controller, void* context, SilKit_CanStateChangeHandler_t handler,
+    SilKit_HandlerId* outHandlerId);
 
 /*! \brief  Remove a \ref SilKit_CanStateChangeHandler_t by SilKit_HandlerId on this controller 
 *
@@ -389,10 +392,10 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_CanController_AddStateChangeHandle
 * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
 */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_CanController_RemoveStateChangeHandler(SilKit_CanController* controller,
-                                                                           SilKit_HandlerId handlerId);
+                                                                                     SilKit_HandlerId handlerId);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_CanController_RemoveStateChangeHandler_t)(SilKit_CanController* controller,
-                                                                      SilKit_HandlerId handlerId);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_CanController_RemoveStateChangeHandler_t)(SilKit_CanController* controller,
+                                                                                       SilKit_HandlerId handlerId);
 
 /*! \brief Register a callback for changes of the controller's error state
 *
@@ -406,25 +409,24 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_CanController_RemoveStateChangeHan
 * \param handler The handler to be called on error state change.
 * \param outHandlerId The handler identifier that can be used to remove the callback.
 */
-SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_CanController_AddErrorStateChangeHandler(SilKit_CanController* controller,
-                                                                             void* context,
-                                                                             SilKit_CanErrorStateChangeHandler_t handler,
-                                                                             SilKit_HandlerId* outHandlerId);
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_CanController_AddErrorStateChangeHandler(
+    SilKit_CanController* controller, void* context, SilKit_CanErrorStateChangeHandler_t handler,
+    SilKit_HandlerId* outHandlerId);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_CanController_AddErrorStateChangeHandler_t)(SilKit_CanController* controller, void* context,
-                                                                        SilKit_CanErrorStateChangeHandler_t handler,
-                                                                        SilKit_HandlerId* outHandlerId);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_CanController_AddErrorStateChangeHandler_t)(
+    SilKit_CanController* controller, void* context, SilKit_CanErrorStateChangeHandler_t handler,
+    SilKit_HandlerId* outHandlerId);
 
 /*! \brief  Remove a \ref SilKit_CanErrorStateChangeHandler_t by SilKit_HandlerId on this controller 
 *
 * \param controller The CAN controller for which the callback should be removed.
 * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
 */
-SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_CanController_RemoveErrorStateChangeHandler(SilKit_CanController* controller,
-                                                                                SilKit_HandlerId handlerId);
+SilKitAPI SilKit_ReturnCode SilKitCALL
+SilKit_CanController_RemoveErrorStateChangeHandler(SilKit_CanController* controller, SilKit_HandlerId handlerId);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_CanController_RemoveErrorStateChangeHandler_t)(SilKit_CanController* controller,
-                                                                           SilKit_HandlerId handlerId);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_CanController_RemoveErrorStateChangeHandler_t)(
+    SilKit_CanController* controller, SilKit_HandlerId handlerId);
 
 
 SILKIT_END_DECLS

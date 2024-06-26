@@ -4,8 +4,10 @@
 
 #include "Scheduler.hpp"
 
-Scheduler::Scheduler() : _now{0}
-{}
+Scheduler::Scheduler()
+    : _now{0}
+{
+}
 
 void Scheduler::ScheduleEvent(std::chrono::nanoseconds delta, const std::function<void()>& callback)
 {
@@ -14,7 +16,7 @@ void Scheduler::ScheduleEvent(std::chrono::nanoseconds delta, const std::functio
 
 void Scheduler::OnSimulationStep(std::chrono::nanoseconds now)
 {
-    _now = now; 
+    _now = now;
 
     while (!events.empty() && events.top().timestamp <= now)
     {
@@ -26,4 +28,3 @@ void Scheduler::OnSimulationStep(std::chrono::nanoseconds now)
         }
     }
 }
-

@@ -51,7 +51,7 @@ TEST_F(Test_LabelMatching, match_single_labels)
         labels2 = {};
         EXPECT_EQ(MatchLabels(labels1, labels2), true);
         EXPECT_EQ(MatchLabels(labels2, labels1), true);
-        
+
         // Mandatory <-> Empty => No match
         labels1 = {MatchingLabel{"KeyA", "ValA", MatchingLabel::Kind::Mandatory}};
         labels2 = {};
@@ -64,7 +64,7 @@ TEST_F(Test_LabelMatching, match_single_labels)
         EXPECT_EQ(MatchLabels(labels1, labels2), true);
     }
 
-    // Same Key+Val 
+    // Same Key+Val
     {
         // Optional <-> Optional => Match
         labels1 = {MatchingLabel{"KeyA", "ValA", MatchingLabel::Kind::Optional}};
@@ -76,7 +76,7 @@ TEST_F(Test_LabelMatching, match_single_labels)
         labels2 = {MatchingLabel{"KeyA", "ValA", MatchingLabel::Kind::Mandatory}};
         EXPECT_EQ(MatchLabels(labels1, labels2), true);
         EXPECT_EQ(MatchLabels(labels2, labels1), true);
-        
+
         // Mandatory <-> Mandatory => Match
         labels1 = {MatchingLabel{"KeyA", "ValA", MatchingLabel::Kind::Mandatory}};
         labels2 = {MatchingLabel{"KeyA", "ValA", MatchingLabel::Kind::Mandatory}};

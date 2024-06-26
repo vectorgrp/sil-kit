@@ -47,13 +47,15 @@ class LifecycleService : public SilKit::Services::Orchestration::ILifecycleServi
 
 public:
     inline explicit LifecycleService(SilKit_Participant *participant,
-                              SilKit::Services::Orchestration::LifecycleConfiguration startConfiguration);
+                                     SilKit::Services::Orchestration::LifecycleConfiguration startConfiguration);
 
     inline ~LifecycleService() override = default;
 
-    inline void SetCommunicationReadyHandler(SilKit::Services::Orchestration::CommunicationReadyHandler handler) override;
+    inline void SetCommunicationReadyHandler(
+        SilKit::Services::Orchestration::CommunicationReadyHandler handler) override;
 
-    inline void SetCommunicationReadyHandlerAsync(SilKit::Services::Orchestration::CommunicationReadyHandler handler) override;
+    inline void SetCommunicationReadyHandlerAsync(
+        SilKit::Services::Orchestration::CommunicationReadyHandler handler) override;
 
     inline void CompleteCommunicationReadyHandlerAsync() override;
 

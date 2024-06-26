@@ -32,8 +32,8 @@ namespace Core {
 namespace {
 struct NullConnection
 {
-    NullConnection(SilKit::Core::IParticipantInternal*, SilKit::Config::ParticipantConfiguration /*config*/, std::string /*participantName*/,
-                   SilKit::Core::ParticipantId /*participantId*/,
+    NullConnection(SilKit::Core::IParticipantInternal*, SilKit::Config::ParticipantConfiguration /*config*/,
+                   std::string /*participantName*/, SilKit::Core::ParticipantId /*participantId*/,
                    SilKit::Core::Orchestration::ITimeProvider* /*timeProvider*/, ProtocolVersion)
     {
     }
@@ -48,13 +48,19 @@ struct NullConnection
     }
 
     template <class SilKitServiceT>
-    inline void SetHistoryLengthForLink(size_t /*history*/, SilKitServiceT* /*service*/) {}
+    inline void SetHistoryLengthForLink(size_t /*history*/, SilKitServiceT* /*service*/)
+    {
+    }
 
-    template<typename SilKitMessageT>
-    void SendMsg(const Core::IServiceEndpoint* /*from*/, SilKitMessageT&& /*msg*/) {}
+    template <typename SilKitMessageT>
+    void SendMsg(const Core::IServiceEndpoint* /*from*/, SilKitMessageT&& /*msg*/)
+    {
+    }
 
-    template<typename SilKitMessageT>
-    void SendMsg(const Core::IServiceEndpoint* /*from*/, const std::string& /*target*/, SilKitMessageT&& /*msg*/) {}
+    template <typename SilKitMessageT>
+    void SendMsg(const Core::IServiceEndpoint* /*from*/, const std::string& /*target*/, SilKitMessageT&& /*msg*/)
+    {
+    }
 
     void OnAllMessagesDelivered(std::function<void()> /*callback*/) {}
     void FlushSendBuffers() {}
@@ -66,13 +72,17 @@ struct NullConnection
 
     void AddAsyncSubscriptionsCompletionHandler(std::function<void()> /*completionHandler*/) {}
 
-    size_t GetNumberOfConnectedParticipants() { return 0; }
+    size_t GetNumberOfConnectedParticipants()
+    {
+        return 0;
+    }
 
     size_t GetNumberOfRemoteReceivers(const IServiceEndpoint* /*service*/, const std::string& /*msgTypeName*/)
     {
         return 0;
     };
-    std::vector<std::string> GetParticipantNamesOfRemoteReceivers(const IServiceEndpoint* /*service*/, const std::string& /*msgTypeName*/)
+    std::vector<std::string> GetParticipantNamesOfRemoteReceivers(const IServiceEndpoint* /*service*/,
+                                                                  const std::string& /*msgTypeName*/)
     {
         return {};
     };
@@ -83,7 +93,7 @@ struct NullConnection
     }
 };
 } // anonymous namespace
-    
+
 auto CreateNullConnectionParticipantImpl(std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig,
                                          const std::string& participantName) -> std::unique_ptr<IParticipantInternal>
 {
@@ -93,4 +103,3 @@ auto CreateNullConnectionParticipantImpl(std::shared_ptr<SilKit::Config::IPartic
 
 } // namespace Core
 } // namespace SilKit
-

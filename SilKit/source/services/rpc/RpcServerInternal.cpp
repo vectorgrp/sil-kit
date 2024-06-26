@@ -30,11 +30,11 @@ namespace SilKit {
 namespace Services {
 namespace Rpc {
 
-RpcServerInternal::RpcServerInternal(Core::IParticipantInternal* participant, Services::Orchestration::ITimeProvider* timeProvider,
+RpcServerInternal::RpcServerInternal(Core::IParticipantInternal* participant,
+                                     Services::Orchestration::ITimeProvider* timeProvider,
                                      const std::string& functionName, const std::string& mediaType,
                                      const std::vector<SilKit::Services::MatchingLabel>& labels,
-                                     const std::string& clientUUID,
-                                     RpcCallHandler handler, IRpcServer* parent)
+                                     const std::string& clientUUID, RpcCallHandler handler, IRpcServer* parent)
     : _functionName{functionName}
     , _mediaType{mediaType}
     , _labels{labels}

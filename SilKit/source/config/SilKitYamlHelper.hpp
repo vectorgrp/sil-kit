@@ -38,11 +38,21 @@ using namespace SilKit::Config;
 template <typename T>
 struct ParseTypeName
 {
-    static constexpr const char* Name() { return  "Unknown Type"; }
+    static constexpr const char* Name()
+    {
+        return "Unknown Type";
+    }
 };
 
 #define DEFINE_SILKIT_PARSE_TYPE_NAME(TYPE) \
-    template<> struct ParseTypeName<TYPE> { static constexpr const char* Name(){ return #TYPE;} }
+    template <> \
+    struct ParseTypeName<TYPE> \
+    { \
+        static constexpr const char* Name() \
+        { \
+            return #TYPE; \
+        } \
+    }
 
 template <typename T>
 struct ParseTypeName<std::vector<T>>
@@ -57,14 +67,17 @@ struct ParseTypeName<std::vector<T>>
 struct Converter
 {
     // required for YAML::convert<T>:
-    template<typename SilKitDataType>
+    template <typename SilKitDataType>
     static Node encode(const SilKitDataType& obj);
-    template<typename SilKitDataType>
+    template <typename SilKitDataType>
     static bool decode(const Node& node, SilKitDataType& obj);
 };
 
-#define DEFINE_SILKIT_CONVERT(TYPE)\
-    template<> struct convert<TYPE> : public Converter  { };\
+#define DEFINE_SILKIT_CONVERT(TYPE) \
+    template <> \
+    struct convert<TYPE> : public Converter \
+    { \
+    }; \
     DEFINE_SILKIT_PARSE_TYPE_NAME(TYPE)
 
 // Other types used for parsing, required in ConversionError for helpful error messages
@@ -123,8 +136,9 @@ auto parse_as(const YAML::Node& node) -> ValueT
 
 // Utility functions to encode/decode optional elements
 
-template<typename ConfigT, typename std::enable_if<
-    (std::is_fundamental<ConfigT>::value || std::is_same<ConfigT, std::string>::value), bool>::type = true>
+template <typename ConfigT,
+          typename std::enable_if<(std::is_fundamental<ConfigT>::value || std::is_same<ConfigT, std::string>::value),
+                                  bool>::type = true>
 void optional_encode(const Util::Optional<ConfigT>& value, YAML::Node& node, const std::string& fieldName)
 {
     if (value.has_value())
@@ -133,8 +147,9 @@ void optional_encode(const Util::Optional<ConfigT>& value, YAML::Node& node, con
     }
 }
 
-template<typename ConfigT, typename std::enable_if<
-    !(std::is_fundamental<ConfigT>::value || std::is_same<ConfigT, std::string>::value), bool>::type = true>
+template <typename ConfigT,
+          typename std::enable_if<!(std::is_fundamental<ConfigT>::value || std::is_same<ConfigT, std::string>::value),
+                                  bool>::type = true>
 void optional_encode(const SilKit::Util::Optional<ConfigT>& value, YAML::Node& node, const std::string& fieldName)
 {
     if (value.has_value())
@@ -143,7 +158,7 @@ void optional_encode(const SilKit::Util::Optional<ConfigT>& value, YAML::Node& n
     }
 }
 
-template<typename ConfigT>
+template <typename ConfigT>
 void optional_encode(const std::vector<ConfigT>& value, YAML::Node& node, const std::string& fieldName)
 {
     if (value.size() > 0)
@@ -153,7 +168,7 @@ void optional_encode(const std::vector<ConfigT>& value, YAML::Node& node, const 
 }
 
 
-template<typename ConfigT>
+template <typename ConfigT>
 void optional_decode(Util::Optional<ConfigT>& value, const YAML::Node& node, const std::string& fieldName)
 {
     if (node.IsMap() && node[fieldName]) //operator[] does not modify node
@@ -162,7 +177,7 @@ void optional_decode(Util::Optional<ConfigT>& value, const YAML::Node& node, con
     }
 }
 
-template<typename ConfigT>
+template <typename ConfigT>
 void optional_decode(ConfigT& value, const YAML::Node& node, const std::string& fieldName)
 {
     if (node.IsMap() && node[fieldName]) //operator[] does not modify node
@@ -179,9 +194,8 @@ void optional_decode_deprecated_alternative(ConfigT& value, const YAML::Node& no
     {
         std::vector<std::string> presentDeprecatedFieldNames;
         std::copy_if(deprecatedFieldNames.begin(), deprecatedFieldNames.end(),
-                     std::back_inserter(presentDeprecatedFieldNames), [&node](const auto& deprecatedFieldName) {
-                         return node[deprecatedFieldName];
-                     });
+                     std::back_inserter(presentDeprecatedFieldNames),
+                     [&node](const auto& deprecatedFieldName) { return node[deprecatedFieldName]; });
 
         if (node[fieldName] && presentDeprecatedFieldNames.size() >= 1)
         {
@@ -217,7 +231,7 @@ void optional_decode_deprecated_alternative(ConfigT& value, const YAML::Node& no
 
 template <typename ConfigT>
 auto non_default_encode(const std::vector<ConfigT>& values, YAML::Node& node, const std::string& fieldName,
-    const std::vector<ConfigT>& defaultValue)
+                        const std::vector<ConfigT>& defaultValue)
 {
     // Only encode vectors that have members that deviate from a default-value.
     // And also ensure we only encode values that are user-defined.
@@ -242,7 +256,7 @@ auto non_default_encode(const std::vector<ConfigT>& values, YAML::Node& node, co
 
 template <typename ConfigT>
 auto non_default_encode(const ConfigT& value, YAML::Node& node, const std::string& fieldName,
-    const ConfigT& defaultValue)
+                        const ConfigT& defaultValue)
 {
     if (!(value == defaultValue))
     {

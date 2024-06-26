@@ -37,10 +37,10 @@ class SystemController
     , public IMsgForSystemController
     , public Core::IServiceEndpoint
 {
-    public:
+public:
     // ----------------------------------------
     // Public Data Types
-    
+
 public:
     // ----------------------------------------
     // Constructors, Destructor, and Assignment
@@ -50,7 +50,7 @@ public:
     SystemController(SystemController&& other) = default;
     SystemController& operator=(const SystemController& other) = default;
     SystemController& operator=(SystemController&& other) = default;
-    
+
 public:
     // ----------------------------------------
     // Public Methods
@@ -60,7 +60,7 @@ public:
 
     // IServiceEndpoint
     inline void SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor) override;
-    inline auto GetServiceDescriptor() const -> const Core::ServiceDescriptor & override;
+    inline auto GetServiceDescriptor() const -> const Core::ServiceDescriptor& override;
 
 private:
     // ----------------------------------------
@@ -69,7 +69,7 @@ private:
     inline void SendMsg(MsgT&& msg) const;
 
     inline void SendSystemCommand(SystemCommand::Kind kind) const;
-    
+
 private:
     // ----------------------------------------
     // private members
@@ -86,7 +86,7 @@ void SystemController::SendMsg(MsgT&& msg) const
     SILKIT_ASSERT(_participant);
     _participant->SendMsg(this, std::forward<MsgT>(msg));
 }
-    
+
 void SystemController::SendSystemCommand(SystemCommand::Kind kind) const
 {
     SystemCommand cmd;

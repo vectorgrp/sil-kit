@@ -34,14 +34,14 @@ namespace Core {
 
 struct RemoteServiceEndpoint : IServiceEndpoint
 {
-    void SetServiceDescriptor(const SilKit::Core::ServiceDescriptor&) override 
+    void SetServiceDescriptor(const SilKit::Core::ServiceDescriptor&) override
     {
         throw LogicError("This method is not supposed to be used in this struct.");
     }
 
-    auto GetServiceDescriptor() const -> const ServiceDescriptor & override
+    auto GetServiceDescriptor() const -> const ServiceDescriptor& override
     {
-        return _serviceDescriptor; 
+        return _serviceDescriptor;
     }
 
     RemoteServiceEndpoint(const ServiceDescriptor& descriptor)
@@ -73,7 +73,8 @@ class VAsioReceiver
 public:
     // ----------------------------------------
     // Constructors and Destructor
-    VAsioReceiver(VAsioMsgSubscriber subscriberInfo, std::shared_ptr<SilKitLink<MsgT>> link, Services::Logging::ILogger* logger);
+    VAsioReceiver(VAsioMsgSubscriber subscriberInfo, std::shared_ptr<SilKitLink<MsgT>> link,
+                  Services::Logging::ILogger* logger);
 
 public:
     // ----------------------------------------
@@ -102,7 +103,8 @@ private:
 //  Inline Implementations
 // ================================================================================
 template <class MsgT>
-VAsioReceiver<MsgT>::VAsioReceiver(VAsioMsgSubscriber subscriberInfo, std::shared_ptr<SilKitLink<MsgT>> link, Services::Logging::ILogger* logger)
+VAsioReceiver<MsgT>::VAsioReceiver(VAsioMsgSubscriber subscriberInfo, std::shared_ptr<SilKitLink<MsgT>> link,
+                                   Services::Logging::ILogger* logger)
     : _subscriptionInfo{std::move(subscriberInfo)}
     , _link{link}
     , _logger{logger}
@@ -117,7 +119,8 @@ auto VAsioReceiver<MsgT>::GetDescriptor() const -> const VAsioMsgSubscriber&
 }
 
 template <class MsgT>
-void VAsioReceiver<MsgT>::ReceiveRawMsg(IVAsioPeer* /*from*/, const ServiceDescriptor& descriptor, SerializedMessage&& buffer)
+void VAsioReceiver<MsgT>::ReceiveRawMsg(IVAsioPeer* /*from*/, const ServiceDescriptor& descriptor,
+                                        SerializedMessage&& buffer)
 {
     MsgT msg = buffer.Deserialize<MsgT>();
 
@@ -125,7 +128,6 @@ void VAsioReceiver<MsgT>::ReceiveRawMsg(IVAsioPeer* /*from*/, const ServiceDescr
 
     auto remoteId = RemoteServiceEndpoint(descriptor);
     _link->DistributeRemoteSilKitMessage(&remoteId, std::move(msg));
-
 }
 
 } // namespace Core

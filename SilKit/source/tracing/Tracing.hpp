@@ -52,7 +52,7 @@ auto CreateReplayFiles(Services::Logging::ILogger* logger, const Config::Partici
 //         has a Replay config.
 bool HasReplayConfig(const Config::ParticipantConfiguration& config);
 
-bool IsValidReplayConfig(const Config::Replay &config);
+bool IsValidReplayConfig(const Config::Replay& config);
 
 } // namespace Tracing
 } // namespace SilKit

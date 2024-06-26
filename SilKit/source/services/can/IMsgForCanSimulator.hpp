@@ -42,7 +42,6 @@ class IMsgForCanSimulator
 {
 public:
     ~IMsgForCanSimulator() = default;
-
 };
 
 } // namespace Can

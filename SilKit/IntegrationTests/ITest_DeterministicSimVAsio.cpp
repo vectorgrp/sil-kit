@@ -66,7 +66,7 @@ std::istream& operator>>(std::istream& in, nanoseconds& timestamp)
 class Publisher
 {
 public:
-    Publisher(const std::string&  registryUri, const uint32_t publisherIndex, const uint32_t testSize)
+    Publisher(const std::string& registryUri, const uint32_t publisherIndex, const uint32_t testSize)
         : _testSize{testSize}
     {
         _participantName = "Publisher" + std::to_string(publisherIndex);
@@ -79,15 +79,12 @@ public:
         auto* timeSyncService = _lifecycleService->CreateTimeSyncService();
         SilKit::Services::PubSub::PubSubSpec dataSpec{topicName, {}};
         auto* publisher = _participant->CreateDataPublisher("PubCtrl1", dataSpec, 0);
-        timeSyncService->SetSimulationStepHandler(
-            [this, publisher](const nanoseconds now, nanoseconds /*duration*/) {
-
+        timeSyncService->SetSimulationStepHandler([this, publisher](const nanoseconds now, nanoseconds /*duration*/) {
             if (_messageIndex < _testSize)
             {
                 PublishMessage(publisher, now, _messageIndex++);
             }
-            },
-            period);
+        }, period);
     }
 
     void RunAsync()
@@ -124,13 +121,14 @@ private:
     uint32_t _messageIndex{0u};
     uint32_t _testSize{0u};
     std::future<ParticipantState> _simulationFuture;
-    std::string  _participantName;
+    std::string _participantName;
 };
 
 class Subscriber
 {
 public:
-    Subscriber(const std::string& participantName, const std::string& registryUri, const uint32_t& publisherCount, const uint32_t testSize)
+    Subscriber(const std::string& participantName, const std::string& registryUri, const uint32_t& publisherCount,
+               const uint32_t testSize)
         : _publisherCount{publisherCount}
         , _messageIndexes(publisherCount, 0u)
         , _testSize{testSize}
@@ -155,17 +153,13 @@ public:
             _participant->CreateDataSubscriber(
                 "SubCtrl" + std::to_string(publisherIndex), dataSpec,
                 [this, publisherIndex](IDataSubscriber* subscriber, const DataMessageEvent& dataMessageEvent) {
-                    ReceiveMessage(subscriber, dataMessageEvent, publisherIndex);
-                });
+                ReceiveMessage(subscriber, dataMessageEvent, publisherIndex);
+            });
         }
 
-        timeSyncService->SetSimulationStepHandler(
-            [this](const nanoseconds now, nanoseconds /*duration*/) {
-
+        timeSyncService->SetSimulationStepHandler([this](const nanoseconds now, nanoseconds /*duration*/) {
             _currentTick = now;
-
-        },
-        period);
+        }, period);
     }
 
     std::future<ParticipantState> RunAsync() const
@@ -179,10 +173,11 @@ public:
     }
 
 private:
-    void ReceiveMessage(IDataSubscriber* /*subscriber*/, const DataMessageEvent& dataMessageEvent, const uint32_t publisherIndex)
+    void ReceiveMessage(IDataSubscriber* /*subscriber*/, const DataMessageEvent& dataMessageEvent,
+                        const uint32_t publisherIndex)
     {
         auto& messageIndex = _messageIndexes[publisherIndex];
-        const std::string message{ dataMessageEvent.data.begin(), dataMessageEvent.data.end()};
+        const std::string message{dataMessageEvent.data.begin(), dataMessageEvent.data.end()};
 
         std::string receivedMessage;
         nanoseconds sentTick = {};
@@ -211,7 +206,7 @@ private:
         ASSERT_TRUE(_currentTick == sentTick || _currentTick + period == sentTick);
 
         // This expectation tests the order of the messages per publisher.
-        // For each publisher each send message should come in order. The order is tested 
+        // For each publisher each send message should come in order. The order is tested
         // by incrementing the messageIndex for each message in the Publisher and Subscriber.
         ASSERT_EQ(messageIndex, receivedIndex);
 
@@ -262,7 +257,8 @@ TEST_F(ITest_DeterministicSimVAsio, deterministic_simulation_vasio)
         syncParticipantNames.push_back("Publisher" + std::to_string(i));
     }
 
-    auto registry = SilKit::Vendor::Vector::CreateSilKitRegistry(SilKit::Config::ParticipantConfigurationFromString(""));
+    auto registry =
+        SilKit::Vendor::Vector::CreateSilKitRegistry(SilKit::Config::ParticipantConfigurationFromString(""));
     registry->StartListening(registryUri);
 
     // The subscriber assumes the role of the system controller and initiates simulation state changes

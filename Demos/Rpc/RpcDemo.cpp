@@ -57,12 +57,10 @@ static std::ostream& operator<<(std::ostream& os, const std::vector<uint8_t>& v)
 
 void Call(IRpcClient* client)
 {
-    std::vector<uint8_t> argumentData{
-        static_cast<uint8_t>(rand() % 10),
-        static_cast<uint8_t>(rand() % 10),
-        static_cast<uint8_t>(rand() % 10) };
+    std::vector<uint8_t> argumentData{static_cast<uint8_t>(rand() % 10), static_cast<uint8_t>(rand() % 10),
+                                      static_cast<uint8_t>(rand() % 10)};
 
-    // Add an incrementing callCounter as userContext, to reidentify the corresponding call on reception of a 
+    // Add an incrementing callCounter as userContext, to reidentify the corresponding call on reception of a
     // call result.
     const auto userContext = reinterpret_cast<void*>(uintptr_t(callCounter++));
 
@@ -84,20 +82,22 @@ void CallReturn(IRpcClient* /*client*/, RpcCallResultEvent event)
         SilKit::Util::SerDes::Deserializer deserializer(resultDataVector);
         resultData = deserializer.Deserialize<std::vector<uint8_t>>();
     }
-    
+
     switch (event.callStatus)
     {
     case RpcCallStatus::Success:
         std::cout << ">> Call " << event.userContext << " returned with resultData=" << resultData << std::endl;
         break;
     case RpcCallStatus::ServerNotReachable:
-        std::cout << "Warning: Call " << event.userContext << " failed with RpcCallStatus::ServerNotReachable" << std::endl;
+        std::cout << "Warning: Call " << event.userContext << " failed with RpcCallStatus::ServerNotReachable"
+                  << std::endl;
         break;
     case RpcCallStatus::UndefinedError:
         std::cout << "Warning: Call " << event.userContext << " failed with RpcCallStatus::UndefinedError" << std::endl;
         break;
     case RpcCallStatus::InternalServerError:
-        std::cout << "Warning: Call " << event.userContext << " failed with RpcCallStatus::InternalServerError" << std::endl;
+        std::cout << "Warning: Call " << event.userContext << " failed with RpcCallStatus::InternalServerError"
+                  << std::endl;
         break;
     case RpcCallStatus::Timeout:
         std::cout << "Warning: Call " << event.userContext << " failed with RpcCallStatus::Timeout" << std::endl;
@@ -146,8 +146,8 @@ void RemoteFunc_Sort(IRpcServer* server, RpcCallEvent event)
 
     // Perform calculation (sort argument values)
     std::sort(resultData.begin(), resultData.end());
-    std::cout << ">> Received call with argumentData=" << argumentData
-              << ", returning resultData=" << resultData << std::endl;
+    std::cout << ">> Received call with argumentData=" << argumentData << ", returning resultData=" << resultData
+              << std::endl;
 
     // Serialize result data
     SilKit::Util::SerDes::Serializer serializer;
@@ -200,7 +200,8 @@ int main(int argc, char** argv)
             }
         }
 
-        auto participantConfiguration = SilKit::Config::ParticipantConfigurationFromFile(participantConfigurationFilename);
+        auto participantConfiguration =
+            SilKit::Config::ParticipantConfigurationFromFile(participantConfigurationFilename);
 
         std::cout << "Creating participant '" << participantName << "' with registry " << registryUri << std::endl;
         auto participant = SilKit::CreateParticipant(participantConfiguration, participantName, registryUri);
@@ -209,15 +210,10 @@ int main(int argc, char** argv)
         auto* lifecycleService = participant->CreateLifecycleService({operationMode});
 
         // Observe state changes
-        lifecycleService->SetStopHandler([]() {
-            std::cout << "Stop handler called" << std::endl;
-        });
-        lifecycleService->SetShutdownHandler([]() {
-            std::cout << "Shutdown handler called" << std::endl;
-        });
-        lifecycleService->SetAbortHandler([](auto lastState) {
-            std::cout << "Abort handler called while in state " << lastState << std::endl;
-        });
+        lifecycleService->SetStopHandler([]() { std::cout << "Stop handler called" << std::endl; });
+        lifecycleService->SetShutdownHandler([]() { std::cout << "Shutdown handler called" << std::endl; });
+        lifecycleService->SetAbortHandler(
+            [](auto lastState) { std::cout << "Abort handler called while in state " << lastState << std::endl; });
 
         auto isClient = participantName == "Client";
         if (!isClient)
@@ -230,11 +226,10 @@ int main(int argc, char** argv)
         }
 
         // Create RpcClient to call "Add100"
-        auto* clientAdd100 = (isClient ? participant->CreateRpcClient("ClientAdd100", rpcSpecAdd100, &CallReturn)
-                              : nullptr);
+        auto* clientAdd100 =
+            (isClient ? participant->CreateRpcClient("ClientAdd100", rpcSpecAdd100, &CallReturn) : nullptr);
         // Create RpcClient to call "Sort"
-        auto* clientSort = (isClient ? participant->CreateRpcClient("ClientSort", rpcSpecSort, &CallReturn)
-                            : nullptr);
+        auto* clientSort = (isClient ? participant->CreateRpcClient("ClientSort", rpcSpecSort, &CallReturn) : nullptr);
 
         if (runSync)
         {
@@ -244,26 +239,24 @@ int main(int argc, char** argv)
             {
                 timeSyncService->SetSimulationStepHandler(
                     [clientAdd100, clientSort](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
-                        auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
-                        std::cout << "now=" << nowMs.count() << "ms" << std::endl;
+                    auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
+                    std::cout << "now=" << nowMs.count() << "ms" << std::endl;
 
-                        // Call both remote procedures in each simulation step
-                        if (clientAdd100)
-                            Call(clientAdd100);
-                        if (clientSort)
-                            Call(clientSort);
-                    },
-                    1s);
+                    // Call both remote procedures in each simulation step
+                    if (clientAdd100)
+                        Call(clientAdd100);
+                    if (clientSort)
+                        Call(clientSort);
+                }, 1s);
             }
             else
             {
                 timeSyncService->SetSimulationStepHandler(
                     [](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
-                        auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
-                        std::cout << "now=" << nowMs.count() << "ms" << std::endl;
-                        std::this_thread::sleep_for(1s);
-                    },
-                    1s);
+                    auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
+                    std::cout << "now=" << nowMs.count() << "ms" << std::endl;
+                    std::this_thread::sleep_for(1s);
+                }, 1s);
             }
 
             auto finalStateFuture = lifecycleService->StartLifecycle();
@@ -282,13 +275,13 @@ int main(int argc, char** argv)
             lifecycleService->SetCommunicationReadyHandler([&]() {
                 workerThread = std::thread{[&]() {
                     startHandlerFuture.get();
-                    while (lifecycleService->State() == ParticipantState::ReadyToRun ||
-                           lifecycleService->State() == ParticipantState::Running)
+                    while (lifecycleService->State() == ParticipantState::ReadyToRun
+                           || lifecycleService->State() == ParticipantState::Running)
                     {
                         if (clientAdd100)
-                          Call(clientAdd100);
+                            Call(clientAdd100);
                         if (clientSort)
-                          Call(clientSort);
+                            Call(clientSort);
                         std::this_thread::sleep_for(1s);
                     }
                     if (!isStopRequested)
@@ -298,17 +291,15 @@ int main(int argc, char** argv)
                 }};
             });
 
-            lifecycleService->SetStartingHandler([&]() {
-                startHandlerPromise.set_value();
-            });
+            lifecycleService->SetStartingHandler([&]() { startHandlerPromise.set_value(); });
 
             lifecycleService->StartLifecycle();
             std::cout << "Press enter to stop the simulation..." << std::endl;
             std::cin.ignore();
 
             isStopRequested = true;
-            if (lifecycleService->State() == ParticipantState::Running || 
-                lifecycleService->State() == ParticipantState::Paused)
+            if (lifecycleService->State() == ParticipantState::Running
+                || lifecycleService->State() == ParticipantState::Paused)
             {
                 std::cout << "User requested to stop in state " << lifecycleService->State() << std::endl;
                 lifecycleService->Stop("User requested to stop");

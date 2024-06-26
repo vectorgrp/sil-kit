@@ -67,7 +67,8 @@ std::istream& operator>>(std::istream& in, nanoseconds& timestamp)
 class Publisher
 {
 public:
-    Publisher(const std::string& registryUri, const uint32_t publisherIndex, const uint32_t numMessages, std::chrono::nanoseconds period)
+    Publisher(const std::string& registryUri, const uint32_t publisherIndex, const uint32_t numMessages,
+              std::chrono::nanoseconds period)
         : _numMessages{numMessages}
     {
         _participantName = "Publisher" + std::to_string(publisherIndex);
@@ -83,12 +84,12 @@ public:
 
         timeSyncService->SetSimulationStepHandler(
             [this, publisher, period](const nanoseconds now, nanoseconds /*duration*/) {
-                ASSERT_TRUE((now.count() % period.count()) == 0);
-                if (_messageIndex < _numMessages)
-                {
-                    PublishMessage(publisher, now, _messageIndex++);
-                }
-            }, period);
+            ASSERT_TRUE((now.count() % period.count()) == 0);
+            if (_messageIndex < _numMessages)
+            {
+                PublishMessage(publisher, now, _messageIndex++);
+            }
+        }, period);
     }
 
     void RunAsync()
@@ -136,7 +137,7 @@ public:
         : _publisherCount{publisherCount}
         , _messageIndexes(publisherCount, 0u)
         , _numMessages{numMessages}
-        , _syncParticipantNames { syncParticipantNames }
+        , _syncParticipantNames{syncParticipantNames}
         , _participantName{participantName}
     {
         _participant = SilKit::CreateParticipant(SilKit::Config::ParticipantConfigurationFromString(""),
@@ -158,15 +159,13 @@ public:
             _participant->CreateDataSubscriber(
                 "SubCtrl" + std::to_string(publisherIndex), dataSpec,
                 [this, publisherIndex](IDataSubscriber* subscriber, const DataMessageEvent& dataMessageEvent) {
-                    ReceiveMessage(subscriber, dataMessageEvent, publisherIndex);
-                });
+                ReceiveMessage(subscriber, dataMessageEvent, publisherIndex);
+            });
         }
-        timeSyncService->SetSimulationStepHandler(
-            [this](const nanoseconds now, nanoseconds /*duration*/) {
+        timeSyncService->SetSimulationStepHandler([this](const nanoseconds now, nanoseconds /*duration*/) {
             _currentTime = now;
             ASSERT_TRUE((_currentTime.count() % subscriberPeriod.count()) == 0);
-            },
-            subscriberPeriod);
+        }, subscriberPeriod);
     }
 
     std::future<ParticipantState> RunAsync() const
@@ -180,12 +179,11 @@ public:
     }
 
 private:
-
     void ReceiveMessage(IDataSubscriber* /*subscriber*/, const DataMessageEvent& dataMessageEvent,
                         const uint32_t publisherIndex)
     {
         auto& messageIndex = _messageIndexes[publisherIndex];
-        const std::string message{ dataMessageEvent.data.begin(), dataMessageEvent.data.end()};
+        const std::string message{dataMessageEvent.data.begin(), dataMessageEvent.data.end()};
 
         std::string receivedMessage;
         nanoseconds sentTime = {};
@@ -205,7 +203,7 @@ private:
 
         // The constant testMessage should have been sent and received correctly
         EXPECT_EQ(testMessage, receivedMessage);
-         
+
         ASSERT_TRUE(sentTime >= _currentTime - subscriberPeriod);
         ASSERT_TRUE(sentTime <= _currentTime + subscriberPeriod);
 
@@ -248,7 +246,6 @@ protected:
 
 protected:
     std::string registryUri;
-
 };
 
 
@@ -270,7 +267,8 @@ TEST_F(ITest_DifferentPeriods, different_simtask_periods)
         syncParticipantNames.push_back("Publisher" + std::to_string(i));
     }
 
-    auto registry = SilKit::Vendor::Vector::CreateSilKitRegistry(SilKit::Config::ParticipantConfigurationFromString(""));
+    auto registry =
+        SilKit::Vendor::Vector::CreateSilKitRegistry(SilKit::Config::ParticipantConfigurationFromString(""));
     registry->StartListening(registryUri);
 
     // The subscriber assumes the role of the system controller and initiates simulation state changes

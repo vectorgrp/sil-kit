@@ -30,8 +30,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/services/can/all.hpp"
 
 
-SilKit_ReturnCode SilKitCALL SilKit_CanController_Create(SilKit_CanController** outController, SilKit_Participant* participant,
-        const char* cName, const char* cNetwork)
+SilKit_ReturnCode SilKitCALL SilKit_CanController_Create(SilKit_CanController** outController,
+                                                         SilKit_Participant* participant, const char* cName,
+                                                         const char* cNetwork)
 try
 {
     ASSERT_VALID_OUT_PARAMETER(outController);
@@ -48,8 +49,9 @@ CAPI_CATCH_EXCEPTIONS
 
 
 SilKit_ReturnCode SilKitCALL SilKit_CanController_AddFrameHandler(SilKit_CanController* controller, void* context,
-        SilKit_CanFrameHandler_t callback, SilKit_Direction directionMask,
-        SilKit_HandlerId* outHandlerId)
+                                                                  SilKit_CanFrameHandler_t callback,
+                                                                  SilKit_Direction directionMask,
+                                                                  SilKit_HandlerId* outHandlerId)
 try
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
@@ -58,33 +60,35 @@ try
 
     auto canController = reinterpret_cast<SilKit::Services::Can::ICanController*>(controller);
     *outHandlerId = (SilKit_HandlerId)canController->AddFrameHandler(
-            [context, controller, callback](SilKit::Services::Can::ICanController* /*ctrl*/,
-                const SilKit::Services::Can::CanFrameEvent& cppCanFrameEvent) {
-            SilKit_CanFrame frame{};
-            SilKit_Struct_Init(SilKit_CanFrame, frame);
-            frame.id = cppCanFrameEvent.frame.canId;
-            frame.flags = cppCanFrameEvent.frame.flags;
-            frame.dlc = cppCanFrameEvent.frame.dlc;
-            frame.sdt = cppCanFrameEvent.frame.sdt;
-            frame.vcid = cppCanFrameEvent.frame.vcid;
-            frame.af = cppCanFrameEvent.frame.af;
-            frame.data = ToSilKitByteVector(cppCanFrameEvent.frame.dataField);
+        [context, controller, callback](SilKit::Services::Can::ICanController* /*ctrl*/,
+                                        const SilKit::Services::Can::CanFrameEvent& cppCanFrameEvent) {
+        SilKit_CanFrame frame{};
+        SilKit_Struct_Init(SilKit_CanFrame, frame);
+        frame.id = cppCanFrameEvent.frame.canId;
+        frame.flags = cppCanFrameEvent.frame.flags;
+        frame.dlc = cppCanFrameEvent.frame.dlc;
+        frame.sdt = cppCanFrameEvent.frame.sdt;
+        frame.vcid = cppCanFrameEvent.frame.vcid;
+        frame.af = cppCanFrameEvent.frame.af;
+        frame.data = ToSilKitByteVector(cppCanFrameEvent.frame.dataField);
 
-            SilKit_CanFrameEvent frameEvent{};
-            SilKit_Struct_Init(SilKit_CanFrameEvent, frameEvent);
-            frameEvent.timestamp = cppCanFrameEvent.timestamp.count();
-            frameEvent.frame = &frame;
-            frameEvent.direction = static_cast<SilKit_Direction>(cppCanFrameEvent.direction);
-            frameEvent.userContext = cppCanFrameEvent.userContext;
+        SilKit_CanFrameEvent frameEvent{};
+        SilKit_Struct_Init(SilKit_CanFrameEvent, frameEvent);
+        frameEvent.timestamp = cppCanFrameEvent.timestamp.count();
+        frameEvent.frame = &frame;
+        frameEvent.direction = static_cast<SilKit_Direction>(cppCanFrameEvent.direction);
+        frameEvent.userContext = cppCanFrameEvent.userContext;
 
-            callback(context, controller, &frameEvent);
-    }, directionMask);
+        callback(context, controller, &frameEvent);
+    },
+        directionMask);
     return SilKit_ReturnCode_SUCCESS;
 }
 CAPI_CATCH_EXCEPTIONS
 
 
-SilKit_ReturnCode SilKitCALL SilKit_CanController_RemoveFrameHandler(SilKit_CanController* controller, SilKit_HandlerId handlerId)
+SilKit_ReturnCode SilKitCALL SilKit_CanController_RemoveFrameHandler(SilKit_CanController* controller,
+                                                                     SilKit_HandlerId handlerId)
 try
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
@@ -96,9 +100,11 @@ try
 CAPI_CATCH_EXCEPTIONS
 
 
-SilKit_ReturnCode SilKitCALL SilKit_CanController_AddFrameTransmitHandler(SilKit_CanController* controller, void* context,
-        SilKit_CanFrameTransmitHandler_t callback,
-        SilKit_CanTransmitStatus statusMask, SilKit_HandlerId* outHandlerId)
+SilKit_ReturnCode SilKitCALL SilKit_CanController_AddFrameTransmitHandler(SilKit_CanController* controller,
+                                                                          void* context,
+                                                                          SilKit_CanFrameTransmitHandler_t callback,
+                                                                          SilKit_CanTransmitStatus statusMask,
+                                                                          SilKit_HandlerId* outHandlerId)
 try
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
@@ -107,23 +113,24 @@ try
 
     auto canController = reinterpret_cast<SilKit::Services::Can::ICanController*>(controller);
     *outHandlerId = (SilKit_HandlerId)canController->AddFrameTransmitHandler(
-            [callback, context, controller](SilKit::Services::Can::ICanController* /*ctrl*/,
-                const SilKit::Services::Can::CanFrameTransmitEvent& cppFrameTransmitEvent) {
-            SilKit_CanFrameTransmitEvent frameTransmitEvent{};
-            SilKit_Struct_Init(SilKit_CanFrameTransmitEvent, frameTransmitEvent);
-            frameTransmitEvent.userContext = cppFrameTransmitEvent.userContext;
-            frameTransmitEvent.timestamp = cppFrameTransmitEvent.timestamp.count();
-            frameTransmitEvent.status = (SilKit_CanTransmitStatus)cppFrameTransmitEvent.status;
-            frameTransmitEvent.canId = cppFrameTransmitEvent.canId;
-            callback(context, controller, &frameTransmitEvent);
-            },
-            static_cast<SilKit::Services::Can::CanTransmitStatusMask>(statusMask));
+        [callback, context, controller](SilKit::Services::Can::ICanController* /*ctrl*/,
+                                        const SilKit::Services::Can::CanFrameTransmitEvent& cppFrameTransmitEvent) {
+        SilKit_CanFrameTransmitEvent frameTransmitEvent{};
+        SilKit_Struct_Init(SilKit_CanFrameTransmitEvent, frameTransmitEvent);
+        frameTransmitEvent.userContext = cppFrameTransmitEvent.userContext;
+        frameTransmitEvent.timestamp = cppFrameTransmitEvent.timestamp.count();
+        frameTransmitEvent.status = (SilKit_CanTransmitStatus)cppFrameTransmitEvent.status;
+        frameTransmitEvent.canId = cppFrameTransmitEvent.canId;
+        callback(context, controller, &frameTransmitEvent);
+    },
+        static_cast<SilKit::Services::Can::CanTransmitStatusMask>(statusMask));
     return SilKit_ReturnCode_SUCCESS;
 }
 CAPI_CATCH_EXCEPTIONS
 
 
-SilKit_ReturnCode SilKitCALL SilKit_CanController_RemoveFrameTransmitHandler(SilKit_CanController* controller, SilKit_HandlerId handlerId)
+SilKit_ReturnCode SilKitCALL SilKit_CanController_RemoveFrameTransmitHandler(SilKit_CanController* controller,
+                                                                             SilKit_HandlerId handlerId)
 try
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
@@ -136,7 +143,8 @@ CAPI_CATCH_EXCEPTIONS
 
 
 SilKit_ReturnCode SilKitCALL SilKit_CanController_AddStateChangeHandler(SilKit_CanController* controller, void* context,
-        SilKit_CanStateChangeHandler_t callback, SilKit_HandlerId* outHandlerId)
+                                                                        SilKit_CanStateChangeHandler_t callback,
+                                                                        SilKit_HandlerId* outHandlerId)
 try
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
@@ -145,20 +153,21 @@ try
 
     auto canController = reinterpret_cast<SilKit::Services::Can::ICanController*>(controller);
     *outHandlerId = (SilKit_HandlerId)canController->AddStateChangeHandler(
-            [callback, context, controller](SilKit::Services::Can::ICanController* /*ctrl*/,
-                const SilKit::Services::Can::CanStateChangeEvent cppStateChangeEvent) {
-            SilKit_CanStateChangeEvent stateChangeEvent;
-            SilKit_Struct_Init(SilKit_CanStateChangeEvent, stateChangeEvent);
-            stateChangeEvent.timestamp = cppStateChangeEvent.timestamp.count();
-            stateChangeEvent.state = (SilKit_CanControllerState)cppStateChangeEvent.state;
-            callback(context, controller, &stateChangeEvent);
-            });
+        [callback, context, controller](SilKit::Services::Can::ICanController* /*ctrl*/,
+                                        const SilKit::Services::Can::CanStateChangeEvent cppStateChangeEvent) {
+        SilKit_CanStateChangeEvent stateChangeEvent;
+        SilKit_Struct_Init(SilKit_CanStateChangeEvent, stateChangeEvent);
+        stateChangeEvent.timestamp = cppStateChangeEvent.timestamp.count();
+        stateChangeEvent.state = (SilKit_CanControllerState)cppStateChangeEvent.state;
+        callback(context, controller, &stateChangeEvent);
+    });
     return SilKit_ReturnCode_SUCCESS;
 }
 CAPI_CATCH_EXCEPTIONS
 
 
-SilKit_ReturnCode SilKitCALL SilKit_CanController_RemoveStateChangeHandler(SilKit_CanController* controller, SilKit_HandlerId handlerId)
+SilKit_ReturnCode SilKitCALL SilKit_CanController_RemoveStateChangeHandler(SilKit_CanController* controller,
+                                                                           SilKit_HandlerId handlerId)
 try
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
@@ -170,9 +179,9 @@ try
 CAPI_CATCH_EXCEPTIONS
 
 
-SilKit_ReturnCode SilKitCALL SilKit_CanController_AddErrorStateChangeHandler(SilKit_CanController* controller, void* context,
-        SilKit_CanErrorStateChangeHandler_t callback,
-        SilKit_HandlerId* outHandlerId)
+SilKit_ReturnCode SilKitCALL SilKit_CanController_AddErrorStateChangeHandler(
+    SilKit_CanController* controller, void* context, SilKit_CanErrorStateChangeHandler_t callback,
+    SilKit_HandlerId* outHandlerId)
 try
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
@@ -181,21 +190,23 @@ try
 
     auto canController = reinterpret_cast<SilKit::Services::Can::ICanController*>(controller);
     auto cppHandlerId = canController->AddErrorStateChangeHandler(
-            [callback, context, controller](SilKit::Services::Can::ICanController* /*ctrl*/,
-                const SilKit::Services::Can::CanErrorStateChangeEvent cppErrorStateChangeEvent) {
-            SilKit_CanErrorStateChangeEvent errorStateChangeEvent;
-            SilKit_Struct_Init(SilKit_CanErrorStateChangeEvent, errorStateChangeEvent);
-            errorStateChangeEvent.timestamp = cppErrorStateChangeEvent.timestamp.count();
-            errorStateChangeEvent.errorState = (SilKit_CanErrorState)cppErrorStateChangeEvent.errorState;
-            callback(context, controller, &errorStateChangeEvent);
-            });
+        [callback, context, controller](
+            SilKit::Services::Can::ICanController* /*ctrl*/,
+            const SilKit::Services::Can::CanErrorStateChangeEvent cppErrorStateChangeEvent) {
+        SilKit_CanErrorStateChangeEvent errorStateChangeEvent;
+        SilKit_Struct_Init(SilKit_CanErrorStateChangeEvent, errorStateChangeEvent);
+        errorStateChangeEvent.timestamp = cppErrorStateChangeEvent.timestamp.count();
+        errorStateChangeEvent.errorState = (SilKit_CanErrorState)cppErrorStateChangeEvent.errorState;
+        callback(context, controller, &errorStateChangeEvent);
+    });
     *outHandlerId = static_cast<SilKit_HandlerId>(cppHandlerId);
     return SilKit_ReturnCode_SUCCESS;
 }
 CAPI_CATCH_EXCEPTIONS
 
 
-SilKit_ReturnCode SilKitCALL SilKit_CanController_RemoveErrorStateChangeHandler(SilKit_CanController* controller, SilKit_HandlerId handlerId)
+SilKit_ReturnCode SilKitCALL SilKit_CanController_RemoveErrorStateChangeHandler(SilKit_CanController* controller,
+                                                                                SilKit_HandlerId handlerId)
 try
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
@@ -207,7 +218,8 @@ try
 CAPI_CATCH_EXCEPTIONS
 
 
-SilKit_ReturnCode SilKitCALL SilKit_CanController_SetBaudRate(SilKit_CanController* controller, uint32_t rate, uint32_t fdRate, uint32_t xlRate)
+SilKit_ReturnCode SilKitCALL SilKit_CanController_SetBaudRate(SilKit_CanController* controller, uint32_t rate,
+                                                              uint32_t fdRate, uint32_t xlRate)
 try
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
@@ -219,7 +231,8 @@ try
 CAPI_CATCH_EXCEPTIONS
 
 
-SilKit_ReturnCode SilKitCALL SilKit_CanController_SendFrame(SilKit_CanController* controller, SilKit_CanFrame* message, void* transmitContext)
+SilKit_ReturnCode SilKitCALL SilKit_CanController_SendFrame(SilKit_CanController* controller, SilKit_CanFrame* message,
+                                                            void* transmitContext)
 try
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);

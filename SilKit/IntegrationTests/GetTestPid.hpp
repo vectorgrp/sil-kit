@@ -23,10 +23,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <sstream>
 
 #if defined(_WIN32)
-#   include <process.h>
-#   define getpid _getpid
+#include <process.h>
+#define getpid _getpid
 #else // assume POSIX
-#   include <unistd.h>
+#include <unistd.h>
 #endif
 
 inline auto MakeTestRegistryUri()

@@ -29,7 +29,7 @@ namespace Lin {
 class LinController;
 
 SimBehavior::SimBehavior(Core::IParticipantInternal* participant, LinController* linController,
-                    Services::Orchestration::ITimeProvider* timeProvider)
+                         Services::Orchestration::ITimeProvider* timeProvider)
     : _trivial{participant, linController, timeProvider}
     , _detailed{participant, linController, linController->GetServiceDescriptor()}
 {

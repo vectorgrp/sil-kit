@@ -57,15 +57,12 @@ public:
 class Callbacks
 {
 public:
-    MOCK_METHOD(void, ServiceDiscoveryHandler,
-        (ServiceDiscoveryEvent::Type, const ServiceDescriptor&));
+    MOCK_METHOD(void, ServiceDiscoveryHandler, (ServiceDiscoveryEvent::Type, const ServiceDescriptor&));
 };
 class Test_ServiceDiscovery : public testing::Test
 {
 protected:
-    Test_ServiceDiscovery()
-    {
-    }
+    Test_ServiceDiscovery() {}
 
 
 protected:
@@ -89,7 +86,7 @@ TEST_F(Test_ServiceDiscovery, portable_hash_function)
         testStrings.push_back(to_string(Uuid::GenerateRandom()));
     }
     std::set<uint64_t> hashes;
-    for (const auto& s: testStrings)
+    for (const auto& s : testStrings)
     {
         hashes.insert(SilKit::Util::Hash::Hash(s));
     }
@@ -102,19 +99,17 @@ TEST_F(Test_ServiceDiscovery, service_creation_notification)
     senderDescriptor.SetParticipantNameAndComputeId("ParticipantA");
     senderDescriptor.SetNetworkName("Link1");
     senderDescriptor.SetServiceName("ServiceDiscovery");
-    ServiceDiscovery disco{ &participant, "ParticipantA" };
+    ServiceDiscovery disco{&participant, "ParticipantA"};
     disco.SetServiceDescriptor(senderDescriptor);
 
     ServiceDescriptor descr;
     descr = senderDescriptor;
 
+    disco.RegisterServiceDiscoveryHandler([&descr](auto /*eventType*/, auto&& newServiceDescr) {
+        ASSERT_EQ(descr.GetSupplementalData(), newServiceDescr.GetSupplementalData());
+    });
     disco.RegisterServiceDiscoveryHandler(
-        [&descr](auto /*eventType*/, auto&& newServiceDescr) {
-            ASSERT_EQ(descr.GetSupplementalData(), newServiceDescr.GetSupplementalData());
-    });
-    disco.RegisterServiceDiscoveryHandler([this](auto type, auto&& serviceDescr) {
-        callbacks.ServiceDiscoveryHandler(type, serviceDescr);
-    });
+        [this](auto type, auto&& serviceDescr) { callbacks.ServiceDiscoveryHandler(type, serviceDescr); });
 
     // reference data for validation
     ServiceDiscoveryEvent event;
@@ -123,30 +118,27 @@ TEST_F(Test_ServiceDiscovery, service_creation_notification)
     // NotifyServiceCreated should publish a message
     EXPECT_CALL(participant, SendMsg(&disco, event)).Times(1);
     // NotifyServiceCreated should also trigger ourself
-    EXPECT_CALL(callbacks, ServiceDiscoveryHandler(ServiceDiscoveryEvent::Type::ServiceCreated,
-        descr)).Times(1);
+    EXPECT_CALL(callbacks, ServiceDiscoveryHandler(ServiceDiscoveryEvent::Type::ServiceCreated, descr)).Times(1);
     // trigger notification on the same participant
     disco.NotifyServiceCreated(descr);
 
     // trigger notifications on reception path from different participant
-    MockServiceEndpoint otherParticipant{ "P1", "N1", "C1", 2 };
+    MockServiceEndpoint otherParticipant{"P1", "N1", "C1", 2};
     descr.SetParticipantNameAndComputeId("ParticipantOther");
     event.serviceDescriptor = descr;
-    EXPECT_CALL(callbacks, ServiceDiscoveryHandler(ServiceDiscoveryEvent::Type::ServiceCreated,
-        descr)).Times(1);
+    EXPECT_CALL(callbacks, ServiceDiscoveryHandler(ServiceDiscoveryEvent::Type::ServiceCreated, descr)).Times(1);
 
     // when sending a different service descriptor, we expect a notification once
     disco.ReceiveMsg(&otherParticipant, event);
-    disco.ReceiveMsg(&otherParticipant, event);//should not trigger callback, is cached
+    disco.ReceiveMsg(&otherParticipant, event); //should not trigger callback, is cached
 }
 TEST_F(Test_ServiceDiscovery, multiple_service_creation_notification)
 {
-    MockServiceEndpoint otherParticipant{ "P1", "N1", "C1", 2 };
-    ServiceDiscovery disco{ &participant, "ParticipantA" };
+    MockServiceEndpoint otherParticipant{"P1", "N1", "C1", 2};
+    ServiceDiscovery disco{&participant, "ParticipantA"};
 
-    disco.RegisterServiceDiscoveryHandler([this](auto type, auto&& descr) {
-        callbacks.ServiceDiscoveryHandler(type, descr);
-    });
+    disco.RegisterServiceDiscoveryHandler(
+        [this](auto type, auto&& descr) { callbacks.ServiceDiscoveryHandler(type, descr); });
 
     ServiceDescriptor senderDescriptor;
     senderDescriptor.SetParticipantNameAndComputeId("ParticipantA");
@@ -165,13 +157,10 @@ TEST_F(Test_ServiceDiscovery, multiple_service_creation_notification)
 
         // Expect that each serviceDescriptor is only handled by a single notification handler
         // e.g., no duplicate notifications
-        EXPECT_CALL(callbacks,
-            ServiceDiscoveryHandler(ServiceDiscoveryEvent::Type::ServiceCreated, descr)
-        ).Times(1);
+        EXPECT_CALL(callbacks, ServiceDiscoveryHandler(ServiceDiscoveryEvent::Type::ServiceCreated, descr)).Times(1);
 
         disco.ReceiveMsg(&otherParticipant, event);
-        disco.ReceiveMsg(&otherParticipant, event);//duplicate should not trigger a notification
-
+        disco.ReceiveMsg(&otherParticipant, event); //duplicate should not trigger a notification
     };
 
     for (auto i = 0; i < 10; i++)
@@ -182,12 +171,11 @@ TEST_F(Test_ServiceDiscovery, multiple_service_creation_notification)
 
 TEST_F(Test_ServiceDiscovery, service_removal)
 {
-    MockServiceEndpoint otherParticipant{ "P1", "N1", "C1", 2 };
-    ServiceDiscovery disco{ &participant, "ParticipantA" };
+    MockServiceEndpoint otherParticipant{"P1", "N1", "C1", 2};
+    ServiceDiscovery disco{&participant, "ParticipantA"};
 
-    disco.RegisterServiceDiscoveryHandler([this](auto type, auto&& descr) {
-        callbacks.ServiceDiscoveryHandler(type, descr);
-    });
+    disco.RegisterServiceDiscoveryHandler(
+        [this](auto type, auto&& descr) { callbacks.ServiceDiscoveryHandler(type, descr); });
 
     ServiceDescriptor senderDescriptor;
     senderDescriptor.SetParticipantNameAndComputeId("ParticipantA");
@@ -203,36 +191,27 @@ TEST_F(Test_ServiceDiscovery, service_removal)
     event.serviceDescriptor = descr;
 
     // Test addition
-    EXPECT_CALL(callbacks,
-        ServiceDiscoveryHandler(ServiceDiscoveryEvent::Type::ServiceCreated, descr)
-    ).Times(1);
-    EXPECT_CALL(callbacks,
-        ServiceDiscoveryHandler(ServiceDiscoveryEvent::Type::ServiceRemoved, descr)
-    ).Times(0);
+    EXPECT_CALL(callbacks, ServiceDiscoveryHandler(ServiceDiscoveryEvent::Type::ServiceCreated, descr)).Times(1);
+    EXPECT_CALL(callbacks, ServiceDiscoveryHandler(ServiceDiscoveryEvent::Type::ServiceRemoved, descr)).Times(0);
     disco.ReceiveMsg(&otherParticipant, event);
 
     // add a modified one
     event.serviceDescriptor.SetServiceName("Modified");
     auto modifiedDescr = event.serviceDescriptor;
-    EXPECT_CALL(callbacks,
-        ServiceDiscoveryHandler(ServiceDiscoveryEvent::Type::ServiceCreated, modifiedDescr)
-    ).Times(1);
-    EXPECT_CALL(callbacks,
-        ServiceDiscoveryHandler(ServiceDiscoveryEvent::Type::ServiceRemoved, modifiedDescr)
-    ).Times(0);
+    EXPECT_CALL(callbacks, ServiceDiscoveryHandler(ServiceDiscoveryEvent::Type::ServiceCreated, modifiedDescr))
+        .Times(1);
+    EXPECT_CALL(callbacks, ServiceDiscoveryHandler(ServiceDiscoveryEvent::Type::ServiceRemoved, modifiedDescr))
+        .Times(0);
     disco.ReceiveMsg(&otherParticipant, event);
     // Test removal
     event.type = ServiceDiscoveryEvent::Type::ServiceRemoved;
-    EXPECT_CALL(callbacks,
-        ServiceDiscoveryHandler(ServiceDiscoveryEvent::Type::ServiceRemoved, modifiedDescr)
-    ).Times(1);
+    EXPECT_CALL(callbacks, ServiceDiscoveryHandler(ServiceDiscoveryEvent::Type::ServiceRemoved, modifiedDescr))
+        .Times(1);
     disco.ReceiveMsg(&otherParticipant, event);
 
     // Nothing to remove, no triggers
     event.type = ServiceDiscoveryEvent::Type::ServiceRemoved;
-    EXPECT_CALL(callbacks,
-        ServiceDiscoveryHandler(_, _)
-    ).Times(0);
+    EXPECT_CALL(callbacks, ServiceDiscoveryHandler(_, _)).Times(0);
     disco.ReceiveMsg(&otherParticipant, event);
 }
-} // anonymous namespace for test
+} // namespace

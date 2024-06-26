@@ -41,6 +41,5 @@ public:
     virtual ~ISimulator() = default;
 };
 
-}//Core
-}//SilKit
-
+} // namespace Core
+} // namespace SilKit

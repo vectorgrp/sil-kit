@@ -51,7 +51,10 @@ private:
     OATPP_COMPONENT(std::shared_ptr<oatpp::network::ConnectionHandler>, m_connectionHandler);
 
 public:
-    std::shared_ptr<HttpRouter> getRouter() { return m_router; }
+    std::shared_ptr<HttpRouter> getRouter()
+    {
+        return m_router;
+    }
 
     /**
    * Add controller's endpoints to router
@@ -63,7 +66,10 @@ public:
         m_controllers.push_back(controller);
     }
 
-    std::shared_ptr<oatpp::network::Server> getServer() { return m_server; }
+    std::shared_ptr<oatpp::network::Server> getServer()
+    {
+        return m_server;
+    }
 
     /**
    * Start server, execute code block passed as lambda, stop server.
@@ -87,9 +93,7 @@ public:
                    "\033[1;34mRunning server on port %s. Timeout %lld(micro)\033[0m",
                    m_connectionProvider->getProperty("port").toString()->c_str(), timeout.count());
 
-        std::function<bool()> condition = [&runConditionForLambda]() {
-            return runConditionForLambda.load();
-        };
+        std::function<bool()> condition = [&runConditionForLambda]() { return runConditionForLambda.load(); };
 
         std::thread serverThread([&condition, this] {
             m_server->run(condition);

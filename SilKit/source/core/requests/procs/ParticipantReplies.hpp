@@ -42,7 +42,6 @@ class ParticipantReplies
     , public IRequestReplyProcedure
 {
 public:
-
     ParticipantReplies(IParticipantInternal* participant, IServiceEndpoint* requestReplyServiceEndpoint);
 
     // IParticipantReplies
@@ -53,7 +52,8 @@ public:
 
     void ReceiveCall(IRequestReplyService* requestReplyService, Util::Uuid callUuid,
                      std::vector<uint8_t> callData) override;
-    void ReceiveCallReturn(std::string fromParticipant, Util::Uuid callUuid, std::vector<uint8_t> callReturnData, CallReturnStatus callReturnStatus) override;
+    void ReceiveCallReturn(std::string fromParticipant, Util::Uuid callUuid, std::vector<uint8_t> callReturnData,
+                           CallReturnStatus callReturnStatus) override;
     void SetRequestReplyServiceEndpoint(IServiceEndpoint* requestReplyService) override;
 
 
@@ -70,8 +70,6 @@ private:
 };
 
 
-
 } // namespace RequestReply
 } // namespace Core
 } // namespace SilKit
-

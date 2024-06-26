@@ -43,10 +43,8 @@ struct FilterTypeHash
 {
     std::size_t operator()(const FilterType& ft) const
     {
-        return static_cast<size_t>(
-          SilKit::Util::Hash::HashCombine(std::hash<ControllerType>()(std::get<0>(ft)),
-                                                                   (std::hash<TopicOrKey>()(std::get<1>(ft))))
-          );
+        return static_cast<size_t>(SilKit::Util::Hash::HashCombine(std::hash<ControllerType>()(std::get<0>(ft)),
+                                                                   (std::hash<TopicOrKey>()(std::get<1>(ft)))));
     }
 };
 
@@ -77,8 +75,7 @@ public:
 //! Store to prevent quadratic lookup of services
 class SpecificDiscoveryStore
 {
-public: 
-   
+public:
     /*! \brief Service addition/removal is called on service discovery events
     * 
     *   Note: Implementation is not thread safe, all public API interactions must be secured with a common mutex
@@ -94,16 +91,16 @@ public:
     *
     *   Note: handler might be called for service discovery events that only if a subset of the parameter constraints
     *   Implementation is not thread safe, all public API interactions must be secured with a common mutex
-    */ 
+    */
     void RegisterSpecificServiceDiscoveryHandler(ServiceDiscoveryHandler handler, const std::string& controllerType,
                                                  const std::string& key,
                                                  const std::vector<SilKit::Services::MatchingLabel>& labels);
 
 private: //methods
-
     //!< Trigger relevant handler calls when a service has changed
     void CallHandlersOnServiceChange(ServiceDiscoveryEvent::Type eventType, const std::string& controllerType,
-                                     const std::string& topic, const std::vector<SilKit::Services::MatchingLabel>& labels,
+                                     const std::string& topic,
+                                     const std::vector<SilKit::Services::MatchingLabel>& labels,
                                      const ServiceDescriptor& serviceDescriptor);
 
     //!< Trigger handler for past events that happened before registration
@@ -120,7 +117,7 @@ private: //methods
     //!< Update all DiscoveryClusters within the internal lookup structure
     void UpdateDiscoveryClusters(const std::string& controllerType, const std::string& key,
                                  const std::vector<SilKit::Services::MatchingLabel>& labels,
-                                                         std::function<void(DiscoveryCluster&)>);
+                                 std::function<void(DiscoveryCluster&)>);
 
     //!< Looks for the label that returns a minimal handler set
     auto GetLabelWithMinimalHandlerSet(DiscoveryKeyNode& keyNode,
@@ -133,21 +130,20 @@ private: //methods
         -> const SilKit::Services::MatchingLabel*;
 
     //!< Insert a new lookup node from internal lookup structure
-    void InsertLookupNode(const std::string& controllerType, const std::string& key, 
-                           const std::vector<SilKit::Services::MatchingLabel>& labels,
-                           const ServiceDescriptor& serviceDescriptor);
-    
+    void InsertLookupNode(const std::string& controllerType, const std::string& key,
+                          const std::vector<SilKit::Services::MatchingLabel>& labels,
+                          const ServiceDescriptor& serviceDescriptor);
+
     //!< Remove a new lookup node from internal lookup structure
     void RemoveLookupNode(const std::string& controllerType, const std::string& key,
                           const ServiceDescriptor& serviceDescriptor);
 
     //!< Insert a new lookup handler
-    void InsertLookupHandler(const std::string& controllerType, const std::string& key, 
-                          const std::vector<SilKit::Services::MatchingLabel>& labels,
+    void InsertLookupHandler(const std::string& controllerType, const std::string& key,
+                             const std::vector<SilKit::Services::MatchingLabel>& labels,
                              ServiceDiscoveryHandler handler);
 
 private: //member
-
     //!< SpecificDiscoveryStore is only available to a a sub set of controllers
     const std::unordered_set<std::string> _allowedControllers = {
         controllerTypeDataPublisher, controllerTypeRpcServerInternal, controllerTypeRpcClient};
@@ -160,4 +156,3 @@ protected:
 } // namespace Discovery
 } // namespace Core
 } // namespace SilKit
-

@@ -128,13 +128,11 @@ struct Simulation
             SilKit::Services::Orchestration::LifecycleConfiguration{
                 SilKit::Services::Orchestration::OperationMode::Coordinated});
 
-        systemController.lifecycleService->SetCommunicationReadyHandler([systemController = &systemController] {
-            systemController->comReadyPromise.set_value();
-        });
+        systemController.lifecycleService->SetCommunicationReadyHandler(
+            [systemController = &systemController] { systemController->comReadyPromise.set_value(); });
 
-        systemController.lifecycleService->SetStartingHandler([systemController = &systemController] {
-            systemController->startingPromise.set_value();
-        });
+        systemController.lifecycleService->SetStartingHandler(
+            [systemController = &systemController] { systemController->startingPromise.set_value(); });
 
         systemController.comReadyFuture = systemController.comReadyPromise.get_future();
         systemController.startingFuture = systemController.startingPromise.get_future();
@@ -153,13 +151,11 @@ struct Simulation
             publisher->participant->CreateLifecycleService(SilKit::Services::Orchestration::LifecycleConfiguration{
                 SilKit::Services::Orchestration::OperationMode::Coordinated});
 
-        publisher->lifecycleService->SetCommunicationReadyHandler([publisher = publisher.get()] {
-            publisher->comReadyPromise.set_value();
-        });
+        publisher->lifecycleService->SetCommunicationReadyHandler(
+            [publisher = publisher.get()] { publisher->comReadyPromise.set_value(); });
 
-        publisher->lifecycleService->SetStartingHandler([publisher = publisher.get()] {
-            publisher->startingPromise.set_value();
-        });
+        publisher->lifecycleService->SetStartingHandler(
+            [publisher = publisher.get()] { publisher->startingPromise.set_value(); });
 
         publisher->comReadyFuture = publisher->comReadyPromise.get_future();
         publisher->startingFuture = publisher->startingPromise.get_future();
@@ -190,13 +186,11 @@ struct Simulation
             subscriber->participant->CreateLifecycleService(SilKit::Services::Orchestration::LifecycleConfiguration{
                 SilKit::Services::Orchestration::OperationMode::Coordinated});
 
-        subscriber->lifecycleService->SetCommunicationReadyHandler([subscriber = subscriber.get()] {
-            subscriber->comReadyPromise.set_value();
-        });
+        subscriber->lifecycleService->SetCommunicationReadyHandler(
+            [subscriber = subscriber.get()] { subscriber->comReadyPromise.set_value(); });
 
-        subscriber->lifecycleService->SetStartingHandler([subscriber = subscriber.get()] {
-            subscriber->startingPromise.set_value();
-        });
+        subscriber->lifecycleService->SetStartingHandler(
+            [subscriber = subscriber.get()] { subscriber->startingPromise.set_value(); });
 
         subscriber->comReadyFuture = subscriber->comReadyPromise.get_future();
         subscriber->startingFuture = subscriber->startingPromise.get_future();
@@ -208,20 +202,20 @@ struct Simulation
             "Subscriber", spec,
             [subscriber = subscriber.get()](SilKit::Services::PubSub::IDataSubscriber*,
                                             const SilKit::Services::PubSub::DataMessageEvent& event) {
-                if (event.data.size() != subscriber->message.size())
-                {
-                    subscriber->receivedDataPromise.set_exception(
-                        std::make_exception_ptr(std::runtime_error{"invalid message size"}));
-                }
+            if (event.data.size() != subscriber->message.size())
+            {
+                subscriber->receivedDataPromise.set_exception(
+                    std::make_exception_ptr(std::runtime_error{"invalid message size"}));
+            }
 
-                if (!ItemsAreEqual(event.data, SilKit::Util::ToSpan(subscriber->message)))
-                {
-                    subscriber->receivedDataPromise.set_exception(
-                        std::make_exception_ptr(std::runtime_error{"invalid message data"}));
-                }
+            if (!ItemsAreEqual(event.data, SilKit::Util::ToSpan(subscriber->message)))
+            {
+                subscriber->receivedDataPromise.set_exception(
+                    std::make_exception_ptr(std::runtime_error{"invalid message data"}));
+            }
 
-                subscriber->receivedDataPromise.set_value();
-            });
+            subscriber->receivedDataPromise.set_value();
+        });
 
         subscriber->receivedDataFuture = subscriber->receivedDataPromise.get_future();
 
@@ -291,14 +285,14 @@ struct Simulation
         {
             const auto& publisher = pair.second;
             ASSERT_EQ(publisher->startingFuture.wait_for(timeout), std::future_status::ready)
-                            << registryUri << " " << publisher->participantName;
+                << registryUri << " " << publisher->participantName;
         }
 
         for (const auto& pair : subscribers)
         {
             const auto& subscriber = pair.second;
             ASSERT_EQ(subscriber->startingFuture.wait_for(timeout), std::future_status::ready)
-                            << registryUri << " " << subscriber->participantName;
+                << registryUri << " " << subscriber->participantName;
         }
 
         systemController.startingFuture.get();

@@ -52,15 +52,27 @@ public:
         return SilKit::TraceMessageType::EthernetFrame;
     }
 
-    auto StartTime() const -> std::chrono::nanoseconds override { return _reader.StartTime(); }
-    auto EndTime() const -> std::chrono::nanoseconds override { return _reader.EndTime(); }
-    auto NumberOfMessages() const -> uint64_t override { return _reader.NumberOfMessages(); }
+    auto StartTime() const -> std::chrono::nanoseconds override
+    {
+        return _reader.StartTime();
+    }
+    auto EndTime() const -> std::chrono::nanoseconds override
+    {
+        return _reader.EndTime();
+    }
+    auto NumberOfMessages() const -> uint64_t override
+    {
+        return _reader.NumberOfMessages();
+    }
     auto Name() const -> const std::string& override
     {
         // Pcap has no concept of channel, return hard coded.
         return _channelName;
     }
-    auto GetMetaInfos() const -> const std::map<std::string, std::string>& override { return _reader.GetMetaInfos(); }
+    auto GetMetaInfos() const -> const std::map<std::string, std::string>& override
+    {
+        return _reader.GetMetaInfos();
+    }
     auto GetReader() -> std::shared_ptr<SilKit::IReplayChannelReader> override
     {
         // return a copy, which allows caching the internal data structures
@@ -83,13 +95,28 @@ public:
         _channels.emplace_back(std::move(channel));
     }
 
-    auto FilePath() const -> const std::string& override { return _filePath; }
-    auto SilKitConfig() const -> std::string override { return {}; }
+    auto FilePath() const -> const std::string& override
+    {
+        return _filePath;
+    }
+    auto SilKitConfig() const -> std::string override
+    {
+        return {};
+    }
 
-    FileType Type() const override { return IReplayFile::FileType::PcapFile; }
+    FileType Type() const override
+    {
+        return IReplayFile::FileType::PcapFile;
+    }
 
-    std::vector<std::shared_ptr<SilKit::IReplayChannel>>::iterator begin() override { return _channels.begin(); }
-    std::vector<std::shared_ptr<SilKit::IReplayChannel>>::iterator end() override { return _channels.end(); }
+    std::vector<std::shared_ptr<SilKit::IReplayChannel>>::iterator begin() override
+    {
+        return _channels.begin();
+    }
+    std::vector<std::shared_ptr<SilKit::IReplayChannel>>::iterator end() override
+    {
+        return _channels.end();
+    }
 
 private:
     std::string _filePath;
@@ -101,8 +128,8 @@ private:
 namespace SilKit {
 namespace Tracing {
 
-auto PcapReplay::OpenFile(const SilKit::Config::ParticipantConfiguration&, const std::string& filePath, SilKit::Services::Logging::ILogger* logger)
-    -> std::shared_ptr<IReplayFile>
+auto PcapReplay::OpenFile(const SilKit::Config::ParticipantConfiguration&, const std::string& filePath,
+                          SilKit::Services::Logging::ILogger* logger) -> std::shared_ptr<IReplayFile>
 {
     return std::make_shared<ReplayPcapFile>(filePath, logger);
 }

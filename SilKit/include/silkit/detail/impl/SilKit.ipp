@@ -41,8 +41,8 @@ auto CreateParticipant(std::shared_ptr<SilKit::Config::IParticipantConfiguration
 }
 
 auto CreateParticipant(std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig,
-                       const std::string& participantName, const std::string& registryUri)
-    -> std::unique_ptr<IParticipant>
+                       const std::string& participantName,
+                       const std::string& registryUri) -> std::unique_ptr<IParticipant>
 {
     auto& config = dynamic_cast<Impl::Config::ParticipantConfiguration&>(*participantConfig.get());
 

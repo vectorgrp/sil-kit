@@ -7,8 +7,7 @@
 
 using namespace SilKit::Experimental::NetworkSimulation;
 
-MySimulatedNetwork::MySimulatedNetwork(SilKit::IParticipant* participant,
-                                       Scheduler* scheduler,
+MySimulatedNetwork::MySimulatedNetwork(SilKit::IParticipant* participant, Scheduler* scheduler,
                                        SimulatedNetworkType networkType, std::string networkName)
     : _participant{participant}
     , _logger{_participant->GetLogger()}
@@ -20,18 +19,17 @@ MySimulatedNetwork::MySimulatedNetwork(SilKit::IParticipant* participant,
     std::stringstream msg;
     msg << "Registered SimulatedNetwork '" << networkName << "' of type '" << _networkType << "'";
     _logger->Info(msg.str());
-
 }
 
 // ISimulatedNetwork
 
-void MySimulatedNetwork::SetEventProducer(std::unique_ptr<IEventProducer> eventProducer) {
+void MySimulatedNetwork::SetEventProducer(std::unique_ptr<IEventProducer> eventProducer)
+{
     _eventProducer = std::move(eventProducer);
 }
 
 auto MySimulatedNetwork::ProvideSimulatedController(ControllerDescriptor controllerDescriptor) -> ISimulatedController*
 {
-
     _controllerDescriptors.push_back(controllerDescriptor);
 
     switch (_networkType)
@@ -48,6 +46,4 @@ auto MySimulatedNetwork::ProvideSimulatedController(ControllerDescriptor control
     return {};
 }
 
-void MySimulatedNetwork::SimulatedControllerRemoved(ControllerDescriptor /*controllerDescriptor*/)
-{
-}
+void MySimulatedNetwork::SimulatedControllerRemoved(ControllerDescriptor /*controllerDescriptor*/) {}

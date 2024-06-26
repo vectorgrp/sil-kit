@@ -17,9 +17,9 @@
 
 
 #if SILKIT_ENABLE_TRACING_INSTRUMENTATION_ConnectPeer
-#    define SILKIT_TRACE_METHOD_(logger, ...) SILKIT_TRACE_METHOD(logger, __VA_ARGS__)
+#define SILKIT_TRACE_METHOD_(logger, ...) SILKIT_TRACE_METHOD(logger, __VA_ARGS__)
 #else
-#    define SILKIT_TRACE_METHOD_(...)
+#define SILKIT_TRACE_METHOD_(...)
 #endif
 
 
@@ -62,9 +62,7 @@ void ConnectPeer::AsyncConnect(size_t numberOfAttempts, std::chrono::millisecond
     _remainingAttempts = std::max<size_t>(numberOfAttempts, 1);
     _timeout = timeout;
 
-    _ioContext->Dispatch([this] {
-        TryNextUri();
-    });
+    _ioContext->Dispatch([this] { TryNextUri(); });
 }
 
 
@@ -187,9 +185,7 @@ void ConnectPeer::TryNextUri()
         _remainingAttempts -= 1;
         _uriIndex = 0;
 
-        _ioContext->Dispatch([this] {
-            TryNextUri();
-        });
+        _ioContext->Dispatch([this] { TryNextUri(); });
         return;
     }
 
@@ -241,9 +237,7 @@ void ConnectPeer::TryNextUri()
 
     if (_connector == nullptr)
     {
-        _ioContext->Dispatch([this] {
-            TryNextUri();
-        });
+        _ioContext->Dispatch([this] { TryNextUri(); });
     }
 }
 

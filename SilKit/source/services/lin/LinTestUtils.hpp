@@ -54,8 +54,8 @@ inline auto MakeControllerConfig(LinControllerMode mode) -> LinControllerConfig
     return config;
 }
 
-inline auto MakeFrame(LinId linId, LinChecksumModel checksumModel = LinChecksumModel::Unknown,
-                      uint8_t dataLength = 0, std::array<uint8_t, 8> data = std::array<uint8_t, 8>{}) -> LinFrame
+inline auto MakeFrame(LinId linId, LinChecksumModel checksumModel = LinChecksumModel::Unknown, uint8_t dataLength = 0,
+                      std::array<uint8_t, 8> data = std::array<uint8_t, 8>{}) -> LinFrame
 {
     LinFrame frame;
     frame.id = linId;
@@ -89,8 +89,8 @@ inline auto ATransmissionWith(LinFrameStatus status) -> testing::Matcher<const L
     return Field(&LinTransmission::status, status);
 }
 
-inline auto ATransmissionWith(LinFrameStatus status, std::chrono::nanoseconds timestamp)
-    -> testing::Matcher<const LinTransmission&>
+inline auto ATransmissionWith(LinFrameStatus status,
+                              std::chrono::nanoseconds timestamp) -> testing::Matcher<const LinTransmission&>
 {
     using namespace testing;
     return AllOf(Field(&LinTransmission::status, status), Field(&LinTransmission::timestamp, timestamp));
@@ -102,8 +102,8 @@ inline auto ATransmissionWith(LinFrame frame, LinFrameStatus status) -> testing:
     return AllOf(Field(&LinTransmission::frame, frame), Field(&LinTransmission::status, status));
 }
 
-inline auto ATransmissionWith(LinFrame frame, LinFrameStatus status, std::chrono::nanoseconds timestamp)
-    -> testing::Matcher<const LinTransmission&>
+inline auto ATransmissionWith(LinFrame frame, LinFrameStatus status,
+                              std::chrono::nanoseconds timestamp) -> testing::Matcher<const LinTransmission&>
 {
     using namespace testing;
     return AllOf(Field(&LinTransmission::frame, frame), Field(&LinTransmission::status, status),
@@ -125,9 +125,9 @@ struct Callbacks
     MOCK_METHOD1(LinSlaveConfigurationHandler, void(ILinController*));
 };
 
-inline auto ToWire(LinControllerConfig config, WireLinControllerConfig::SimulationMode simulationMode =
-                                                   WireLinControllerConfig::SimulationMode::Default)
-    -> WireLinControllerConfig
+inline auto ToWire(LinControllerConfig config,
+                   WireLinControllerConfig::SimulationMode simulationMode =
+                       WireLinControllerConfig::SimulationMode::Default) -> WireLinControllerConfig
 {
     WireLinControllerConfig result{};
     result.baudRate = config.baudRate;

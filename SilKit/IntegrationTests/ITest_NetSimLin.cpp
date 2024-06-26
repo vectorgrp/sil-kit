@@ -21,8 +21,7 @@ using namespace SilKit::Experimental::NetworkSimulation::Lin;
 
 struct ITest_NetSimLin : ITest_NetSim
 {
-    void SendLinFrameHeaders(std::chrono::nanoseconds now, ILinController* controller,
-                                        std::atomic_uint& sendCount)
+    void SendLinFrameHeaders(std::chrono::nanoseconds now, ILinController* controller, std::atomic_uint& sendCount)
     {
         if (now < _sendUntilMs)
         {
@@ -34,8 +33,7 @@ struct ITest_NetSimLin : ITest_NetSim
         }
     }
 
-    void SendLinFrames(std::chrono::nanoseconds now, ILinController* controller,
-                                        std::atomic_uint& sendCount)
+    void SendLinFrames(std::chrono::nanoseconds now, ILinController* controller, std::atomic_uint& sendCount)
     {
         LinFrame frame{};
         frame.checksumModel = LinChecksumModel::Classic;
@@ -73,42 +71,37 @@ struct ITest_NetSimLin : ITest_NetSim
                             CallCountsSilKitHandlersLin& callCountsSilKitHandlersLin, bool isMaster, bool isDynamic)
     {
         controller->AddFrameStatusHandler(
-            [&callCountsSilKitHandlersLin](ILinController*,
-                                          const LinFrameStatusEvent& /*msg*/) {
-                callCountsSilKitHandlersLin.FrameStatusHandler++;
-            });
+            [&callCountsSilKitHandlersLin](ILinController*, const LinFrameStatusEvent& /*msg*/) {
+            callCountsSilKitHandlersLin.FrameStatusHandler++;
+        });
         SilKit::Experimental::Services::Lin::AddFrameHeaderHandler(
             controller,
-            [isMaster, isDynamic, & callCountsSilKitHandlersLin](
-                            ILinController* controller, const SilKit::Experimental::Services::Lin::LinFrameHeaderEvent& /*msg*/) {
-                callCountsSilKitHandlersLin.FrameHeaderHandler++;
+            [isMaster, isDynamic, &callCountsSilKitHandlersLin](
+                ILinController* controller, const SilKit::Experimental::Services::Lin::LinFrameHeaderEvent& /*msg*/) {
+            callCountsSilKitHandlersLin.FrameHeaderHandler++;
 
-                ASSERT_TRUE(isDynamic);
+            ASSERT_TRUE(isDynamic);
 
-                LinFrame frame{};
-                frame.checksumModel = LinChecksumModel::Classic;
-                frame.id = 16;
-                frame.dataLength = 8;
-                frame.data = std::array<uint8_t, 8>{3, 4, 3, 4, 3, 4, 3, 4};
-                if (isMaster)
-                {
-                    // Sends a LinFrameResponseUpdate
-                    SilKit::Experimental::Services::Lin::SendDynamicResponse(controller, frame);
-                }
-            });
+            LinFrame frame{};
+            frame.checksumModel = LinChecksumModel::Classic;
+            frame.id = 16;
+            frame.dataLength = 8;
+            frame.data = std::array<uint8_t, 8>{3, 4, 3, 4, 3, 4, 3, 4};
+            if (isMaster)
+            {
+                // Sends a LinFrameResponseUpdate
+                SilKit::Experimental::Services::Lin::SendDynamicResponse(controller, frame);
+            }
+        });
         controller->AddGoToSleepHandler(
-            [&callCountsSilKitHandlersLin](ILinController*,
-                                           const LinGoToSleepEvent& /*msg*/) {
-                callCountsSilKitHandlersLin.GoToSleepHandler++;
-            });
-        controller->AddWakeupHandler(
-            [&callCountsSilKitHandlersLin](ILinController*,
-                                           const LinWakeupEvent& /*msg*/) {
-                callCountsSilKitHandlersLin.WakeupHandler++;
-            });
+            [&callCountsSilKitHandlersLin](ILinController*, const LinGoToSleepEvent& /*msg*/) {
+            callCountsSilKitHandlersLin.GoToSleepHandler++;
+        });
+        controller->AddWakeupHandler([&callCountsSilKitHandlersLin](ILinController*, const LinWakeupEvent& /*msg*/) {
+            callCountsSilKitHandlersLin.WakeupHandler++;
+        });
 
         lifecycleService->SetCommunicationReadyHandler([isMaster, isDynamic, controller] {
-            
             if (isDynamic)
             {
                 SilKit::Experimental::Services::Lin::LinControllerDynamicConfig config{};
@@ -162,11 +155,8 @@ struct ITest_NetSimLin : ITest_NetSim
 
                 controller->Init(config);
             }
-            
         });
-
     }
-
 };
 
 class MySimulatedLinController
@@ -174,14 +164,17 @@ class MySimulatedLinController
     , public ISimulatedLinController
 {
 public:
-    MySimulatedLinController(MySimulatedNetwork* mySimulatedNetwork, ControllerDescriptor controllerDescriptor, bool isDynamic = false)
-        : MySimulatedController(mySimulatedNetwork, controllerDescriptor), _isDynamic{isDynamic}
+    MySimulatedLinController(MySimulatedNetwork* mySimulatedNetwork, ControllerDescriptor controllerDescriptor,
+                             bool isDynamic = false)
+        : MySimulatedController(mySimulatedNetwork, controllerDescriptor)
+        , _isDynamic{isDynamic}
     {
     }
     void OnFrameRequest(const LinFrameRequest& linFrameRequest) override;
     void OnFrameHeaderRequest(const LinFrameHeaderRequest& linFrameHeaderRequest) override;
     void OnWakeupPulse(const LinWakeupPulse& linWakeupPulse) override;
-    void OnControllerConfig(const SilKit::Experimental::NetworkSimulation::Lin::LinControllerConfig& linControllerConfig) override;
+    void OnControllerConfig(
+        const SilKit::Experimental::NetworkSimulation::Lin::LinControllerConfig& linControllerConfig) override;
     void OnFrameResponseUpdate(const LinFrameResponseUpdate& linFrameResponseUpdate) override;
     void OnControllerStatusUpdate(const LinControllerStatusUpdate& linControllerStatusUpdate) override;
 
@@ -197,7 +190,8 @@ auto MySimulatedNetwork::ProvideSimulatedController(ControllerDescriptor control
     {
     case SimulatedNetworkType::LIN:
     {
-        _mySimulatedControllers.emplace_back(std::make_unique<MySimulatedLinController>(this, controllerDescriptor, _isLinDynamic));
+        _mySimulatedControllers.emplace_back(
+            std::make_unique<MySimulatedLinController>(this, controllerDescriptor, _isLinDynamic));
         return _mySimulatedControllers.back().get();
     }
     default:
@@ -260,7 +254,7 @@ void MySimulatedLinController::OnFrameResponseUpdate(const LinFrameResponseUpdat
         // In dynamic mode, path is:
         // controller->SendFrameHeader(): SendMsg(LinSendFrameHeaderRequest)
         // netsim->OnFrameHeaderRequest(): Produce(LinSendFrameHeaderRequest)
-        // Controller::FrameHeaderHandler(): SendDynamicResponse -> SendMsg(LinFrameResponseUpdate) 
+        // Controller::FrameHeaderHandler(): SendDynamicResponse -> SendMsg(LinFrameResponseUpdate)
         // netsim->OnFrameResponseUpdate(): Produce(LinFrameStatusEvent)
         // Controller::FrameStatusHandler()
 
@@ -329,12 +323,11 @@ TEST_F(ITest_NetSimLin, basic_networksimulation_lin)
 
         timeSyncService->SetSimulationStepHandler(
             [this, lifecycleService](auto now, const std::chrono::nanoseconds /*duration*/) {
-                if (now == _stopAtMs)
-                {
-                    lifecycleService->Stop("stopping the simulation");
-                }
-            },
-            _stepSize);
+            if (now == _stopAtMs)
+            {
+                lifecycleService->Stop("stopping the simulation");
+            }
+        }, _stepSize);
     }
 
     {
@@ -351,19 +344,19 @@ TEST_F(ITest_NetSimLin, basic_networksimulation_lin)
 
             auto&& participant = simParticipant->Participant();
             auto&& linController = participant->CreateLinController("LIN1", _simulatedNetworkName);
-            SetupLinController(lifecycleService, linController, callCounts.silKitHandlersLinSimulated, isLinMaster, false);
+            SetupLinController(lifecycleService, linController, callCounts.silKitHandlersLinSimulated, isLinMaster,
+                               false);
 
             timeSyncService->SetSimulationStepHandler(
                 [this, linController, isLinMaster](auto now, const std::chrono::nanoseconds /*duration*/) {
-                    if (isLinMaster)
-                    {
-                        SendLinFrames(now, linController, callCounts.silKitSentMsgLin.SentFramesSimulated);
-                        SendLinFrameHeaders(now, linController, callCounts.silKitSentMsgLin.SentFrameHeadersSimulated);
-                        GoToSleepOnce(now, linController);
-                        WakeupOnce(now, linController);
-                    }
-                },
-                _stepSize);
+                if (isLinMaster)
+                {
+                    SendLinFrames(now, linController, callCounts.silKitSentMsgLin.SentFramesSimulated);
+                    SendLinFrameHeaders(now, linController, callCounts.silKitSentMsgLin.SentFrameHeadersSimulated);
+                    GoToSleepOnce(now, linController);
+                    WakeupOnce(now, linController);
+                }
+            }, _stepSize);
 
             isLinMaster = false;
         }
@@ -383,20 +376,20 @@ TEST_F(ITest_NetSimLin, basic_networksimulation_lin)
 
             auto&& participant = simParticipant->Participant();
             auto&& linController = participant->CreateLinController("LIN1", _trivialNetworkName);
-            
-            SetupLinController(lifecycleService, linController, callCounts.silKitHandlersLinTrivial, isLinMaster, false);
+
+            SetupLinController(lifecycleService, linController, callCounts.silKitHandlersLinTrivial, isLinMaster,
+                               false);
 
             timeSyncService->SetSimulationStepHandler(
                 [this, linController, isLinMaster](auto now, const std::chrono::nanoseconds /*duration*/) {
-                    if (isLinMaster)
-                    {
-                        SendLinFrames(now, linController, callCounts.silKitSentMsgLin.SentFramesTrivial);
-                        SendLinFrameHeaders(now, linController, callCounts.silKitSentMsgLin.SentFrameHeadersTrivial);
-                        GoToSleepOnce(now, linController);
-                        WakeupOnce(now, linController);
-                    }
-                },
-                _stepSize);
+                if (isLinMaster)
+                {
+                    SendLinFrames(now, linController, callCounts.silKitSentMsgLin.SentFramesTrivial);
+                    SendLinFrameHeaders(now, linController, callCounts.silKitSentMsgLin.SentFrameHeadersTrivial);
+                    GoToSleepOnce(now, linController);
+                    WakeupOnce(now, linController);
+                }
+            }, _stepSize);
 
             isLinMaster = false;
         }
@@ -405,38 +398,42 @@ TEST_F(ITest_NetSimLin, basic_networksimulation_lin)
     auto ok = _simTestHarness->Run(5s);
     ASSERT_TRUE(ok) << "SimTestHarness should terminate without timeout";
 
-    const size_t numSimulatedLinControllers = _numParticipantsSimulated + 1; // +1 for the LIN controller on the Netsim participant
-    const size_t numTrivialLinControllers = _numParticipantsTrivial; 
-    const size_t numSentFramesSimulated = 1 * _numFramesPerSimStep * _numSimSteps; // Only the single master will send (1 * ...)
-    const size_t numSentFrameHeadersSimulated = 1 * _numFramesPerSimStep * _numSimSteps; 
-    const size_t numSentFramesTrivial = 1 * _numFramesPerSimStep * _numSimSteps; 
-    const size_t numSentFrameHeadersTrivial = 1 * _numFramesPerSimStep * _numSimSteps; 
+    const size_t numSimulatedLinControllers =
+        _numParticipantsSimulated + 1; // +1 for the LIN controller on the Netsim participant
+    const size_t numTrivialLinControllers = _numParticipantsTrivial;
+    const size_t numSentFramesSimulated =
+        1 * _numFramesPerSimStep * _numSimSteps; // Only the single master will send (1 * ...)
+    const size_t numSentFrameHeadersSimulated = 1 * _numFramesPerSimStep * _numSimSteps;
+    const size_t numSentFramesTrivial = 1 * _numFramesPerSimStep * _numSimSteps;
+    const size_t numSentFrameHeadersTrivial = 1 * _numFramesPerSimStep * _numSimSteps;
 
     EXPECT_EQ(callCounts.simulatedNetwork.EventProducer, _numSimulatedNetworks);
     EXPECT_EQ(callCounts.simulatedNetwork.ProvideSimulatedController, numSimulatedLinControllers);
 
     // + 1 for GoToSleepFrame
-    EXPECT_EQ(callCounts.silKitHandlersLinSimulated.FrameStatusHandler, (numSentFramesSimulated  + 1) * numSimulatedLinControllers ); 
+    EXPECT_EQ(callCounts.silKitHandlersLinSimulated.FrameStatusHandler,
+              (numSentFramesSimulated + 1) * numSimulatedLinControllers);
 
     // + 1 for GoToSleepFrame
     // Trivial: SendFrameHeader also leads to FrameStatusHandler if ID is configured for TX -> numSentFrameHeadersTrivial included
-    EXPECT_EQ(callCounts.silKitHandlersLinTrivial.FrameStatusHandler, (numSentFramesTrivial + numSentFrameHeadersTrivial) * numTrivialLinControllers + 1);
-    
+    EXPECT_EQ(callCounts.silKitHandlersLinTrivial.FrameStatusHandler,
+              (numSentFramesTrivial + numSentFrameHeadersTrivial) * numTrivialLinControllers + 1);
+
     // Not dynamic: No Handler triggered
     // See: LinController::ReceiveMsg(const IServiceEndpoint* from, const LinSendFrameHeaderRequest& msg)
     EXPECT_EQ(callCounts.silKitHandlersLinSimulated.FrameHeaderHandler, 0);
     // Trivial: No Handler triggered, but a LinTransmission and thus FrameStatusHandler
     EXPECT_EQ(callCounts.silKitHandlersLinTrivial.FrameHeaderHandler, 0);
-    
+
     // - 1 because the handler is not called on the master
-    EXPECT_EQ(callCounts.silKitHandlersLinSimulated.GoToSleepHandler, numSimulatedLinControllers - 1);  
+    EXPECT_EQ(callCounts.silKitHandlersLinSimulated.GoToSleepHandler, numSimulatedLinControllers - 1);
     EXPECT_EQ(callCounts.silKitHandlersLinTrivial.GoToSleepHandler, numTrivialLinControllers - 1);
 
     EXPECT_EQ(callCounts.silKitHandlersLinSimulated.WakeupHandler, numSimulatedLinControllers);
     EXPECT_EQ(callCounts.silKitHandlersLinTrivial.WakeupHandler, numTrivialLinControllers);
 
     // +1 for GoToSleepFrame
-    EXPECT_EQ(callCounts.netSimLin.OnFrameRequest, numSentFramesSimulated + 1 ); 
+    EXPECT_EQ(callCounts.netSimLin.OnFrameRequest, numSentFramesSimulated + 1);
 
     EXPECT_EQ(callCounts.netSimLin.OnFrameHeaderRequest, numSentFrameHeadersSimulated);
 
@@ -445,11 +442,11 @@ TEST_F(ITest_NetSimLin, basic_networksimulation_lin)
 
     EXPECT_EQ(callCounts.netSimLin.OnControllerConfig, numSimulatedLinControllers);
 
-    // linController->SendFrame will send a LinFrameResponseUpdate+LinSendFrameRequest 
+    // linController->SendFrame will send a LinFrameResponseUpdate+LinSendFrameRequest
     EXPECT_EQ(callCounts.netSimLin.OnFrameResponseUpdate, numSentFramesSimulated);
 
     // Once via ILinController::Wakeup, once via ILinController::GoToSleep
-    EXPECT_EQ(callCounts.netSimLin.OnControllerStatusUpdate, 2); 
+    EXPECT_EQ(callCounts.netSimLin.OnControllerStatusUpdate, 2);
 
     EXPECT_EQ(callCounts.silKitSentMsgLin.SentFramesSimulated, numSentFramesSimulated);
     EXPECT_EQ(callCounts.silKitSentMsgLin.SentFrameHeadersSimulated, numSentFrameHeadersSimulated);
@@ -496,12 +493,11 @@ TEST_F(ITest_NetSimLin, networksimulation_lin_dynamic)
 
         timeSyncService->SetSimulationStepHandler(
             [this, lifecycleService](auto now, const std::chrono::nanoseconds /*duration*/) {
-                if (now == _stopAtMs)
-                {
-                    lifecycleService->Stop("stopping the simulation");
-                }
-            },
-            _stepSize);
+            if (now == _stopAtMs)
+            {
+                lifecycleService->Stop("stopping the simulation");
+            }
+        }, _stepSize);
     }
 
     {
@@ -523,15 +519,14 @@ TEST_F(ITest_NetSimLin, networksimulation_lin_dynamic)
 
             timeSyncService->SetSimulationStepHandler(
                 [this, linController, isLinMaster](auto now, const std::chrono::nanoseconds /*duration*/) {
-                    if (isLinMaster)
-                    {
-                        // Dynamic mode: Only send frameHeaders
-                        SendLinFrameHeaders(now, linController, callCounts.silKitSentMsgLin.SentFrameHeadersSimulated);
-                        GoToSleepOnce(now, linController);
-                        WakeupOnce(now, linController);
-                    }
-                },
-                _stepSize);
+                if (isLinMaster)
+                {
+                    // Dynamic mode: Only send frameHeaders
+                    SendLinFrameHeaders(now, linController, callCounts.silKitSentMsgLin.SentFrameHeadersSimulated);
+                    GoToSleepOnce(now, linController);
+                    WakeupOnce(now, linController);
+                }
+            }, _stepSize);
 
             isLinMaster = false;
         }
@@ -558,15 +553,14 @@ TEST_F(ITest_NetSimLin, networksimulation_lin_dynamic)
 
             timeSyncService->SetSimulationStepHandler(
                 [this, linController, isLinMaster](auto now, const std::chrono::nanoseconds /*duration*/) {
-                    if (isLinMaster)
-                    {
-                        SendLinFrames(now, linController, callCounts.silKitSentMsgLin.SentFramesTrivial);
-                        SendLinFrameHeaders(now, linController, callCounts.silKitSentMsgLin.SentFrameHeadersTrivial);
-                        WakeupOnce(now, linController);
-                        GoToSleepOnce(now, linController);
-                    }
-                },
-                _stepSize);
+                if (isLinMaster)
+                {
+                    SendLinFrames(now, linController, callCounts.silKitSentMsgLin.SentFramesTrivial);
+                    SendLinFrameHeaders(now, linController, callCounts.silKitSentMsgLin.SentFrameHeadersTrivial);
+                    WakeupOnce(now, linController);
+                    GoToSleepOnce(now, linController);
+                }
+            }, _stepSize);
 
             isLinMaster = false;
         }
@@ -597,7 +591,8 @@ TEST_F(ITest_NetSimLin, networksimulation_lin_dynamic)
 
     // Dynamic: Handler triggered
     // See: LinController::ReceiveMsg(const IServiceEndpoint* from, const LinSendFrameHeaderRequest& msg)
-    EXPECT_EQ(callCounts.silKitHandlersLinSimulated.FrameHeaderHandler, numSentFrameHeadersSimulated * numSimulatedLinControllers);
+    EXPECT_EQ(callCounts.silKitHandlersLinSimulated.FrameHeaderHandler,
+              numSentFrameHeadersSimulated * numSimulatedLinControllers);
     // Trivial: No Handler triggered, but a LinTransmission and thus FrameStatusHandler
     EXPECT_EQ(callCounts.silKitHandlersLinTrivial.FrameHeaderHandler, 0);
 

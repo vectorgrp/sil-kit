@@ -40,18 +40,14 @@ using namespace std::chrono_literals;
 // basically the same as the normal == operator, but it doesn't compare timestamps
 bool Matches(const SilKit::Services::Can::CanFrameEvent& lhs, const SilKit::Services::Can::CanFrameEvent& rhs)
 {
-    return lhs.frame.canId == rhs.frame.canId
-        && lhs.frame.flags == rhs.frame.flags
-        && lhs.frame.dlc == rhs.frame.dlc
-        && SilKit::Util::ItemsAreEqual(lhs.frame.dataField, rhs.frame.dataField)
-        && lhs.userContext == rhs.userContext 
-        && lhs.direction == rhs.direction;
+    return lhs.frame.canId == rhs.frame.canId && lhs.frame.flags == rhs.frame.flags && lhs.frame.dlc == rhs.frame.dlc
+           && SilKit::Util::ItemsAreEqual(lhs.frame.dataField, rhs.frame.dataField)
+           && lhs.userContext == rhs.userContext && lhs.direction == rhs.direction;
 }
 
 class FTest_CanWithoutSync : public testing::Test
 {
 protected:
-
     FTest_CanWithoutSync()
     {
         _registryUri = MakeTestRegistryUri();
@@ -92,40 +88,40 @@ protected:
             canack.canId = index;
             canack.timestamp = 1s;
             canack.status = SilKit::Services::Can::CanTransmitStatus::Transmitted;
-            canack.userContext = (void*)((size_t)index+1);
+            canack.userContext = (void*)((size_t)index + 1);
         }
     }
 
     void CanWriter()
     {
-        unsigned numSent{ 0 }, numAcks{ 0 };
+        unsigned numSent{0}, numAcks{0};
         std::promise<void> canWriterAllAcksReceivedPromiseLocal;
 
         auto participant = SilKit::CreateParticipant(SilKit::Config::ParticipantConfigurationFromString(""),
                                                      "CanWriter", _registryUri);
         auto* controller = participant->CreateCanController("CAN1", "CAN1");
 
-        controller->AddFrameTransmitHandler(
-            [this, &canWriterAllAcksReceivedPromiseLocal, &numAcks](SilKit::Services::Can::ICanController* /*ctrl*/, const SilKit::Services::Can::CanFrameTransmitEvent& ack) {
-                _testMessages.at(numAcks++).receivedAck = ack;
-                auto tempUserContext = ack.userContext;
-                // double check that userContext is not nullified for frame transmit handler
-                EXPECT_TRUE(tempUserContext == (void*)((size_t)numAcks));
-                if (numAcks >= _testMessages.size())
-                {
-                    std::cout << "All can acks received" << std::endl;
-                    _canWriterAllAcksReceivedPromise.set_value(); // Promise for canReader
-                    canWriterAllAcksReceivedPromiseLocal.set_value();
-                }
-            });
+        controller->AddFrameTransmitHandler([this, &canWriterAllAcksReceivedPromiseLocal, &numAcks](
+                                                SilKit::Services::Can::ICanController* /*ctrl*/,
+                                                const SilKit::Services::Can::CanFrameTransmitEvent& ack) {
+            _testMessages.at(numAcks++).receivedAck = ack;
+            auto tempUserContext = ack.userContext;
+            // double check that userContext is not nullified for frame transmit handler
+            EXPECT_TRUE(tempUserContext == (void*)((size_t)numAcks));
+            if (numAcks >= _testMessages.size())
+            {
+                std::cout << "All can acks received" << std::endl;
+                _canWriterAllAcksReceivedPromise.set_value(); // Promise for canReader
+                canWriterAllAcksReceivedPromiseLocal.set_value();
+            }
+        });
 
-        
+
         controller->AddFrameHandler(
             [](SilKit::Services::Can::ICanController*, const SilKit::Services::Can::CanFrameEvent& msg) {
-                // make sure that userContext fo TX is not nullified
-                EXPECT_TRUE(msg.userContext > (void*)((size_t)0));
-            },
-            static_cast<SilKit::Services::DirectionMask>(SilKit::Services::TransmitDirection::TX));
+            // make sure that userContext fo TX is not nullified
+            EXPECT_TRUE(msg.userContext > (void*)((size_t)0));
+        }, static_cast<SilKit::Services::DirectionMask>(SilKit::Services::TransmitDirection::TX));
 
         controller->Start();
 
@@ -133,7 +129,8 @@ protected:
 
         while (numSent < _testMessages.size())
         {
-            controller->SendFrame(_testMessages.at(numSent).expectedMsg.frame, (void*)((size_t)numSent+1)); // Don't move the msg to test the altered transmitID
+            controller->SendFrame(_testMessages.at(numSent).expectedMsg.frame,
+                                  (void*)((size_t)numSent + 1)); // Don't move the msg to test the altered transmitID
             numSent++;
         }
         std::cout << "All can messages sent" << std::endl;
@@ -145,30 +142,31 @@ protected:
     void CanReader()
     {
         std::promise<void> canReaderAllReceivedPromiseLocal;
-        unsigned numReceived{ 0 };
+        unsigned numReceived{0};
 
         auto participant = SilKit::CreateParticipant(SilKit::Config::ParticipantConfigurationFromString(""),
                                                      "CanReader", _registryUri);
         auto* controller = participant->CreateCanController("CAN1", "CAN1");
 
         controller->AddFrameHandler(
-            [this, &canReaderAllReceivedPromiseLocal, &numReceived](SilKit::Services::Can::ICanController*, const SilKit::Services::Can::CanFrameEvent& msg) {
-                unsigned msgIndex = numReceived++;
+            [this, &canReaderAllReceivedPromiseLocal, &numReceived](SilKit::Services::Can::ICanController*,
+                                                                    const SilKit::Services::Can::CanFrameEvent& msg) {
+            unsigned msgIndex = numReceived++;
 
-                auto& msgData = _testMessages.at(msgIndex).receivedMsgData;
-                auto& msgEvent = _testMessages.at(msgIndex).receivedMsg;
+            auto& msgData = _testMessages.at(msgIndex).receivedMsgData;
+            auto& msgEvent = _testMessages.at(msgIndex).receivedMsg;
 
-                msgEvent = msg;
+            msgEvent = msg;
 
-                msgData = ToStdVector(msg.frame.dataField);
-                msgEvent.frame.dataField = msgData;
+            msgData = ToStdVector(msg.frame.dataField);
+            msgEvent.frame.dataField = msgData;
 
-                if (numReceived >= _testMessages.size())
-                {
-                    std::cout << "All can messages received" << std::endl;
-                    _canReaderAllReceivedPromise.set_value();
-                    canReaderAllReceivedPromiseLocal.set_value();
-                }
+            if (numReceived >= _testMessages.size())
+            {
+                std::cout << "All can messages received" << std::endl;
+                _canReaderAllReceivedPromise.set_value();
+                canReaderAllReceivedPromiseLocal.set_value();
+            }
         });
 
         controller->Start();
@@ -182,8 +180,8 @@ protected:
 
     void ExecuteTest()
     {
-        std::thread canReaderThread{ [this] { CanReader(); } };
-        std::thread canWriterThread{ [this] { CanWriter(); } };
+        std::thread canReaderThread{[this] { CanReader(); }};
+        std::thread canWriterThread{[this] { CanWriter(); }};
         canReaderThread.join();
         canWriterThread.join();
         for (auto&& message : _testMessages)
@@ -214,7 +212,8 @@ protected:
 
 TEST_F(FTest_CanWithoutSync, can_communication_no_simulation_flow_vasio)
 {
-    auto registry = SilKit::Vendor::Vector::CreateSilKitRegistry(SilKit::Config::ParticipantConfigurationFromString(""));
+    auto registry =
+        SilKit::Vendor::Vector::CreateSilKitRegistry(SilKit::Config::ParticipantConfigurationFromString(""));
     registry->StartListening(_registryUri);
     ExecuteTest();
 }

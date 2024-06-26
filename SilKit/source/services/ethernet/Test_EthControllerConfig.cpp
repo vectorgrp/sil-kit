@@ -37,7 +37,7 @@ using namespace SilKit::Services::Ethernet;
 class Test_EthControllerConfig : public testing::Test
 {
 public:
-    Test_EthControllerConfig(){};
+    Test_EthControllerConfig() {};
 };
 
 auto PrepareParticipantConfiguration() -> std::shared_ptr<SilKit::Config::ParticipantConfiguration>
@@ -67,8 +67,7 @@ TEST(Test_EthControllerConfig, create_controller_configured_no_network)
 
     auto participant = SilKit::Core::CreateNullConnectionParticipantImpl(config, "TestParticipant");
 
-    auto controller =
-        dynamic_cast<EthController*>(participant->CreateEthernetController(controllerName, networkName));
+    auto controller = dynamic_cast<EthController*>(participant->CreateEthernetController(controllerName, networkName));
     auto serviceDescr = controller->GetServiceDescriptor();
     EXPECT_EQ(serviceDescr.GetServiceName(), controllerName);
     EXPECT_EQ(serviceDescr.GetNetworkName(), expectedNetworkName);
@@ -84,11 +83,10 @@ TEST(Test_EthControllerConfig, create_controller_configured_with_network)
 
     auto participant = SilKit::Core::CreateNullConnectionParticipantImpl(config, "TestParticipant");
 
-    auto controller =
-        dynamic_cast<EthController*>(participant->CreateEthernetController(controllerName, networkName));
+    auto controller = dynamic_cast<EthController*>(participant->CreateEthernetController(controllerName, networkName));
     auto serviceDescr = controller->GetServiceDescriptor();
     EXPECT_EQ(serviceDescr.GetServiceName(), controllerName);
     EXPECT_EQ(serviceDescr.GetNetworkName(), expectedNetworkName);
 }
 
-}  // anonymous namespace
+} // anonymous namespace

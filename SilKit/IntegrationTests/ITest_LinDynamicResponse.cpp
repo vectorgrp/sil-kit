@@ -83,7 +83,8 @@ class Schedule
 {
 public:
     Schedule() = default;
-    Schedule(std::initializer_list<std::pair<std::chrono::nanoseconds, std::function<void(std::chrono::nanoseconds)>>> tasks)
+    Schedule(
+        std::initializer_list<std::pair<std::chrono::nanoseconds, std::function<void(std::chrono::nanoseconds)>>> tasks)
     {
         for (auto&& task : tasks)
         {
@@ -105,7 +106,7 @@ public:
 
     void ScheduleNextTask()
     {
-        if(_nextTask == _schedule.end())
+        if (_nextTask == _schedule.end())
         {
             return;
         }
@@ -124,8 +125,13 @@ public:
     }
 
 private:
-    struct Task {
-        Task(std::chrono::nanoseconds delay, std::function<void(std::chrono::nanoseconds)> action) : delay{delay}, action{action} {}
+    struct Task
+    {
+        Task(std::chrono::nanoseconds delay, std::function<void(std::chrono::nanoseconds)> action)
+            : delay{delay}
+            , action{action}
+        {
+        }
 
         std::chrono::nanoseconds delay;
         std::function<void(std::chrono::nanoseconds)> action;
@@ -163,8 +169,8 @@ struct LinNode
 
     virtual ~LinNode() = default;
 
-    void Stop() 
-    { 
+    void Stop()
+    {
         _lifecycleService->Stop("Stop");
     }
 
@@ -178,7 +184,8 @@ struct LinNode
 class LinDynamicMaster : public LinNode
 {
 public:
-    LinDynamicMaster(IParticipant* participant, ILinController* controller, Orchestration::ILifecycleService* lifecycleService)
+    LinDynamicMaster(IParticipant* participant, ILinController* controller,
+                     Orchestration::ILifecycleService* lifecycleService)
         : LinNode(participant, controller, "LinMaster", lifecycleService)
     {
         schedule = {
@@ -201,7 +208,7 @@ public:
         f17.id = 17;
         f17.checksumModel = LinChecksumModel::Classic;
         f17.dataLength = 6;
-        f17.data = std::array<uint8_t, 8>{1,7,1,7,1,7,1,7};
+        f17.data = std::array<uint8_t, 8>{1, 7, 1, 7, 1, 7, 1, 7};
         _masterResponses[f17.id] = f17;
 
         LinFrame f18{};
@@ -266,7 +273,8 @@ public:
 
     void ReceiveFrameStatus(ILinController* /*controller*/, const LinFrameStatusEvent& frameStatusEvent)
     {
-        Log() << ">> " << _name << " " << frameStatusEvent.frame << " status=" << frameStatusEvent.status << " timestamp=" << frameStatusEvent.timestamp;
+        Log() << ">> " << _name << " " << frameStatusEvent.frame << " status=" << frameStatusEvent.status
+              << " timestamp=" << frameStatusEvent.timestamp;
 
         _result.receivedFrames[frameStatusEvent.status].push_back(frameStatusEvent.frame);
         _result.receiveTimes.push_back(frameStatusEvent.timestamp);
@@ -283,7 +291,8 @@ public:
         Stop();
     }
 
-    void OnFrameHeader(ILinController* linController, const SilKit::Experimental::Services::Lin::LinFrameHeaderEvent& header)
+    void OnFrameHeader(ILinController* linController,
+                       const SilKit::Experimental::Services::Lin::LinFrameHeaderEvent& header)
     {
         Log() << ">> " << _name << " received frame header: id=" << (int)header.id << "@" << header.timestamp;
 
@@ -348,7 +357,7 @@ public:
         frame.id = 17;
         frame.checksumModel = LinChecksumModel::Classic;
         frame.dataLength = 6;
-        frame.data = std::array<uint8_t, 8>{1,7,1,7,1,7,1,7};
+        frame.data = std::array<uint8_t, 8>{1, 7, 1, 7, 1, 7, 1, 7};
 
         _result.sendTimes.push_back(now);
         controller->SendFrame(frame, LinFrameResponseType::MasterResponse);
@@ -400,7 +409,8 @@ public:
 
     void ReceiveFrameStatus(ILinController* /*controller*/, const LinFrameStatusEvent& frameStatusEvent)
     {
-        Log() << ">> " << _name << " " << frameStatusEvent.frame << " status=" << frameStatusEvent.status << " timestamp=" << frameStatusEvent.timestamp;
+        Log() << ">> " << _name << " " << frameStatusEvent.frame << " status=" << frameStatusEvent.status
+              << " timestamp=" << frameStatusEvent.timestamp;
 
         _result.receivedFrames[frameStatusEvent.status].push_back(frameStatusEvent.frame);
         _result.receiveTimes.push_back(frameStatusEvent.timestamp);
@@ -439,7 +449,7 @@ class LinDynamicSlave : public LinNode
 {
 public:
     LinDynamicSlave(std::string participantName, IParticipant* participant, ILinController* controller,
-             Orchestration::ILifecycleService* lifecycleService)
+                    Orchestration::ILifecycleService* lifecycleService)
         : LinNode(participant, controller, participantName, lifecycleService)
         , _slaveResponses{MakeSlaveResponses()}
     {
@@ -453,7 +463,8 @@ public:
 
     void FrameStatusHandler(ILinController* linController, const LinFrameStatusEvent& frameStatusEvent)
     {
-        Log() << ">> " << _name << " " << frameStatusEvent.frame << " status=" << frameStatusEvent.status << " timestamp=" << frameStatusEvent.timestamp;
+        Log() << ">> " << _name << " " << frameStatusEvent.frame << " status=" << frameStatusEvent.status
+              << " timestamp=" << frameStatusEvent.timestamp;
 
         _result.receivedFrames[frameStatusEvent.status].push_back(frameStatusEvent.frame);
 
@@ -472,16 +483,16 @@ public:
         Log() << ">> " << _name << " received goto sleep command";
 
         // wakeup in 10 ms
-        timer.Set(now + 10ms,
-            [linController](std::chrono::nanoseconds /*now*/) {
-                linController->Wakeup();
-                // The LIN slave doesn't receive the wakeup pulse sent by himself in a trivial simulation (without netsim)
-            });
+        timer.Set(now + 10ms, [linController](std::chrono::nanoseconds /*now*/) {
+            linController->Wakeup();
+            // The LIN slave doesn't receive the wakeup pulse sent by himself in a trivial simulation (without netsim)
+        });
         linController->GoToSleepInternal();
         _result.gotoSleepReceived = true;
     }
 
-    void OnFrameHeader(ILinController* linController, const SilKit::Experimental::Services::Lin::LinFrameHeaderEvent& header)
+    void OnFrameHeader(ILinController* linController,
+                       const SilKit::Experimental::Services::Lin::LinFrameHeaderEvent& header)
     {
         Log() << ">> " << _name << " received frame header: id=" << (int)header.id << "@" << header.timestamp;
 
@@ -509,7 +520,7 @@ class LinSlave : public LinNode
 {
 public:
     LinSlave(std::string participantName, IParticipant* participant, ILinController* controller,
-        Orchestration::ILifecycleService* lifecycleService)
+             Orchestration::ILifecycleService* lifecycleService)
         : LinNode(participant, controller, participantName, lifecycleService)
     {
     }
@@ -522,7 +533,8 @@ public:
 
     void FrameStatusHandler(ILinController* linController, const LinFrameStatusEvent& frameStatusEvent)
     {
-        Log() << ">> " << _name << " " << frameStatusEvent.frame << " status=" << frameStatusEvent.status << " timestamp=" << frameStatusEvent.timestamp;
+        Log() << ">> " << _name << " " << frameStatusEvent.frame << " status=" << frameStatusEvent.status
+              << " timestamp=" << frameStatusEvent.timestamp;
 
         _result.receivedFrames[frameStatusEvent.status].push_back(frameStatusEvent.frame);
 
@@ -652,7 +664,7 @@ protected:
 TEST_F(ITest_LinDynamicResponse, deferred_simstep_response)
 {
     auto registryUri = MakeTestRegistryUri();
-    auto participantNames = std::vector<std::string>{ "LinMaster", "LinSlave1" };
+    auto participantNames = std::vector<std::string>{"LinMaster", "LinSlave1"};
 
     _simTestHarness = std::make_unique<SimTestHarness>(participantNames, registryUri, false);
 
@@ -675,10 +687,11 @@ TEST_F(ITest_LinDynamicResponse, deferred_simstep_response)
     //  LinMaster
     //////////////////////////////////////////////////////////////////////
 
-    enum class State {
+    enum class State
+    {
         Sending,
         WaitingForResponse,
-    } state{ State::Sending };
+    } state{State::Sending};
 
     {
         auto&& participant = _simTestHarness->GetParticipant("LinMaster")->Participant();
@@ -690,27 +703,25 @@ TEST_F(ITest_LinDynamicResponse, deferred_simstep_response)
             auto config = MakeDynamicSlaveConfig();
             config.controllerMode = LinControllerMode::Master;
             SilKit::Experimental::Services::Lin::InitDynamic(linController, config);
-            });
+        });
 
-        linController->AddFrameStatusHandler(
-            [&](auto /*linController*/, auto frameStatusEvent) {
-                Log() << "Received frameStatusEvent @" << frameStatusEvent.timestamp;
-                if (frameStatusEvent.frame == slaveResponseFrame)
-                {
-                    state = State::Sending;
-                }
-            });
+        linController->AddFrameStatusHandler([&](auto /*linController*/, auto frameStatusEvent) {
+            Log() << "Received frameStatusEvent @" << frameStatusEvent.timestamp;
+            if (frameStatusEvent.frame == slaveResponseFrame)
+            {
+                state = State::Sending;
+            }
+        });
 
-        timeSyncService->SetSimulationStepHandler(
-            [&, linController](auto now, auto /*duration*/) {
-                if(state == State::Sending)
-                {
-                    Log() << "Sending master frame request @" << now;
-                    linController->SendFrameHeader(masterFrame.id);
-                    sentTimes.push_back(now);
-                    state = State::WaitingForResponse;
-                }
-            }, 1ms);
+        timeSyncService->SetSimulationStepHandler([&, linController](auto now, auto /*duration*/) {
+            if (state == State::Sending)
+            {
+                Log() << "Sending master frame request @" << now;
+                linController->SendFrameHeader(masterFrame.id);
+                sentTimes.push_back(now);
+                state = State::WaitingForResponse;
+            }
+        }, 1ms);
     }
 
     //////////////////////////////////////////////////////////////////////
@@ -727,29 +738,30 @@ TEST_F(ITest_LinDynamicResponse, deferred_simstep_response)
         lifecycleService->SetCommunicationReadyHandler([linController]() {
             auto config = MakeDynamicSlaveConfig();
             SilKit::Experimental::Services::Lin::InitDynamic(linController, config);
-            });
+        });
 
         timeSyncService->SetSimulationStepHandler(
-            [lifecycleService, linController, &headerReceived, &slaveResponseFrame, &responseTimes](
-                auto now, auto /*duration*/) {
-                //Send response delayed by 2ms
-                if (now == ( headerReceived + 2ms))
+            [lifecycleService, linController, &headerReceived, &slaveResponseFrame, &responseTimes](auto now,
+                                                                                                    auto /*duration*/) {
+            //Send response delayed by 2ms
+            if (now == (headerReceived + 2ms))
+            {
+                SilKit::Experimental::Services::Lin::SendDynamicResponse(linController, slaveResponseFrame);
+                responseTimes.push_back(now);
+                if (responseTimes.size() == MAX_RESPONSES)
                 {
-                    SilKit::Experimental::Services::Lin::SendDynamicResponse(linController, slaveResponseFrame);
-                    responseTimes.push_back(now);
-                    if (responseTimes.size() == MAX_RESPONSES)
-                    {
-                        lifecycleService->Stop("Test done");
-                    }
-                    headerReceived = 0ms; //reset
+                    lifecycleService->Stop("Test done");
                 }
-            }, 1ms);
+                headerReceived = 0ms; //reset
+            }
+        },
+            1ms);
 
-        SilKit::Experimental::Services::Lin::AddFrameHeaderHandler(
-            linController, [&](auto&& /*controller*/, auto&& event) {
-                Log() << "LinSlave1: Got Frame Header @" << event.timestamp;
-                headerReceived = event.timestamp;
-            });
+        SilKit::Experimental::Services::Lin::AddFrameHeaderHandler(linController,
+                                                                   [&](auto&& /*controller*/, auto&& event) {
+            Log() << "LinSlave1: Got Frame Header @" << event.timestamp;
+            headerReceived = event.timestamp;
+        });
     }
 
     //Run the test
@@ -760,7 +772,7 @@ TEST_F(ITest_LinDynamicResponse, deferred_simstep_response)
 TEST_F(ITest_LinDynamicResponse, normal_master_dynamic_slave)
 {
     auto registryUri = MakeTestRegistryUri();
-    std::vector<std::string> participantNames = { "LinMaster", "LinSlave" };
+    std::vector<std::string> participantNames = {"LinMaster", "LinSlave"};
     _simTestHarness = std::make_unique<SimTestHarness>(participantNames, registryUri, false);
 
     std::vector<std::unique_ptr<LinNode>> linNodes;
@@ -772,8 +784,7 @@ TEST_F(ITest_LinDynamicResponse, normal_master_dynamic_slave)
     {
         const std::string participantName = "LinMaster";
         auto&& participant = _simTestHarness->GetParticipant(participantName)->Participant();
-        auto&& lifecycleService =
-            _simTestHarness->GetParticipant(participantName)->GetOrCreateLifecycleService();
+        auto&& lifecycleService = _simTestHarness->GetParticipant(participantName)->GetOrCreateLifecycleService();
         auto&& timeSyncService = _simTestHarness->GetParticipant(participantName)->GetOrCreateTimeSyncService();
         auto&& linController = participant->CreateLinController("LinController1", "LIN_1");
         lifecycleService->SetCommunicationReadyHandler([participantName, linController]() {
@@ -785,17 +796,17 @@ TEST_F(ITest_LinDynamicResponse, normal_master_dynamic_slave)
 
         linController->AddFrameStatusHandler(
             [master = master.get()](ILinController* linController, const LinFrameStatusEvent& frameStatusEvent) {
-                master->ReceiveFrameStatus(linController, frameStatusEvent);
-            });
+            master->ReceiveFrameStatus(linController, frameStatusEvent);
+        });
         linController->AddWakeupHandler(
             [master = master.get()](ILinController* linController, const LinWakeupEvent& wakeupEvent) {
-                master->WakeupHandler(linController, wakeupEvent);
-            });
+            master->WakeupHandler(linController, wakeupEvent);
+        });
 
         timeSyncService->SetSimulationStepHandler(
             [master = master.get(), participantName](auto now, std::chrono::nanoseconds /*duration*/) {
-                master->doAction(now);
-            }, 1ms);
+            master->doAction(now);
+        }, 1ms);
         linNodes.emplace_back(std::move(master));
     }
 
@@ -805,8 +816,7 @@ TEST_F(ITest_LinDynamicResponse, normal_master_dynamic_slave)
     {
         const std::string participantName = "LinSlave";
         auto&& participant = _simTestHarness->GetParticipant(participantName)->Participant();
-        auto&& lifecycleService =
-            _simTestHarness->GetParticipant(participantName)->GetOrCreateLifecycleService();
+        auto&& lifecycleService = _simTestHarness->GetParticipant(participantName)->GetOrCreateLifecycleService();
         auto&& timeSyncService = _simTestHarness->GetParticipant(participantName)->GetOrCreateTimeSyncService();
         auto&& linController = participant->CreateLinController("LinController1", "LIN_1");
 
@@ -826,15 +836,12 @@ TEST_F(ITest_LinDynamicResponse, normal_master_dynamic_slave)
         });
 
         timeSyncService->SetSimulationStepHandler(
-            [slave = slave.get()](auto now, auto /*duration*/) {
-                slave->DoAction(now);
-            }, 1ms);
+            [slave = slave.get()](auto now, auto /*duration*/) { slave->DoAction(now); }, 1ms);
 
         // Dynamic Response API starts here
         SilKit::Experimental::Services::Lin::AddFrameHeaderHandler(
-            linController, [slave = slave.get()](auto&& controller, auto&& event) {
-                slave->OnFrameHeader(controller, event);
-            });
+            linController,
+            [slave = slave.get()](auto&& controller, auto&& event) { slave->OnFrameHeader(controller, event); });
         linNodes.emplace_back(std::move(slave));
     }
 
@@ -844,20 +851,19 @@ TEST_F(ITest_LinDynamicResponse, normal_master_dynamic_slave)
 
     // Sim is stopped when master received the wakeup pulse
 
-    for (auto& node: linNodes)
+    for (auto& node : linNodes)
     {
         if (node->_name == "LinSlave")
         {
             EXPECT_EQ(node->_result.numberReceivedInSleep, 0u);
             EXPECT_TRUE(node->_result.gotoSleepReceived)
-                        << "Assuming node " << node->_name << " has received a GoToSleep";
+                << "Assuming node " << node->_name << " has received a GoToSleep";
             // The LIN slave doesn't receive the wakeup pulse sent by himself in a trivial simulation (without netsim),
             // so don't expect a wakeup
         }
         else
         {
-            EXPECT_TRUE(node->_result.gotoSleepSent)
-                        << "Assuming node " << node->_name << " has received a GoToSleep";
+            EXPECT_TRUE(node->_result.gotoSleepSent) << "Assuming node " << node->_name << " has received a GoToSleep";
             EXPECT_TRUE(node->_result.wakeupReceived) << "Assuming node " << node->_name << " has received a Wakeup";
         }
     }
@@ -869,8 +875,8 @@ TEST_F(ITest_LinDynamicResponse, normal_master_dynamic_slave)
     EXPECT_GT(masterSendTimes.size(), 0u);
     EXPECT_GT(masterRecvTimes.size(), 0u);
     ASSERT_EQ(masterSendTimes.size(), masterRecvTimes.size())
-                    << "The master send times and receive times should have equal size.";
-    for(auto i = 0u; i< masterRecvTimes.size(); i++)
+        << "The master send times and receive times should have equal size.";
+    for (auto i = 0u; i < masterRecvTimes.size(); i++)
     {
         const auto& sendT = masterSendTimes.at(i);
         const auto& recvT = masterRecvTimes.at(i);
@@ -915,7 +921,8 @@ TEST_F(ITest_LinDynamicResponse, normal_master_dynamic_slave)
     EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_TX_OK][4].id, 60);
     EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_TX_OK][4].checksumModel, LinChecksumModel::Classic);
     EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_TX_OK][4].dataLength, 8);
-    EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_TX_OK][4].data, (std::array<uint8_t, 8>{0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}));
+    EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_TX_OK][4].data,
+              (std::array<uint8_t, 8>{0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}));
 
     // 2 frame states on dynamic slave
     ASSERT_EQ(slaveRecvFrames.size(), 2);
@@ -941,7 +948,8 @@ TEST_F(ITest_LinDynamicResponse, normal_master_dynamic_slave)
     EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_RX_OK][4].id, 60);
     EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_RX_OK][4].checksumModel, LinChecksumModel::Classic);
     EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_RX_OK][4].dataLength, 8);
-    EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_RX_OK][4].data, (std::array<uint8_t, 8>{0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}));
+    EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_RX_OK][4].data,
+              (std::array<uint8_t, 8>{0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}));
 
     // 1x TX_OK for id 34 on dynamic slave
     ASSERT_EQ(slaveRecvFrames[LinFrameStatus::LIN_TX_OK].size(), 1);
@@ -954,7 +962,7 @@ TEST_F(ITest_LinDynamicResponse, normal_master_dynamic_slave)
 TEST_F(ITest_LinDynamicResponse, normal_master_two_dynamic_slave_collision)
 {
     auto registryUri = MakeTestRegistryUri();
-    std::vector<std::string> participantNames = { "LinMaster", "LinSlave1", "LinSlave2" };
+    std::vector<std::string> participantNames = {"LinMaster", "LinSlave1", "LinSlave2"};
     _simTestHarness = std::make_unique<SimTestHarness>(participantNames, registryUri, false);
 
     std::vector<std::unique_ptr<LinNode>> linNodes;
@@ -975,21 +983,21 @@ TEST_F(ITest_LinDynamicResponse, normal_master_two_dynamic_slave_collision)
             linController->Init(config);
         });
 
-        auto master = std::make_unique<LinMaster>( participant, linController, lifecycleService);
+        auto master = std::make_unique<LinMaster>(participant, linController, lifecycleService);
 
         linController->AddFrameStatusHandler(
             [master = master.get()](ILinController* linController, const LinFrameStatusEvent& frameStatusEvent) {
-                master->ReceiveFrameStatus(linController, frameStatusEvent);
-            });
+            master->ReceiveFrameStatus(linController, frameStatusEvent);
+        });
         linController->AddWakeupHandler(
             [master = master.get()](ILinController* linController, const LinWakeupEvent& wakeupEvent) {
-                master->WakeupHandler(linController, wakeupEvent);
-            });
+            master->WakeupHandler(linController, wakeupEvent);
+        });
 
         timeSyncService->SetSimulationStepHandler(
             [master = master.get(), participantName](auto now, std::chrono::nanoseconds /*duration*/) {
-                master->doAction(now);
-            }, 1ms);
+            master->doAction(now);
+        }, 1ms);
 
         linNodes.emplace_back(std::move(master));
     }
@@ -1020,15 +1028,12 @@ TEST_F(ITest_LinDynamicResponse, normal_master_two_dynamic_slave_collision)
         });
 
         timeSyncService->SetSimulationStepHandler(
-            [slave = slave.get()](auto now, auto /*duration*/) {
-                slave->DoAction(now);
-            }, 1ms);
+            [slave = slave.get()](auto now, auto /*duration*/) { slave->DoAction(now); }, 1ms);
 
         // Dynamic Response API starts here
         SilKit::Experimental::Services::Lin::AddFrameHeaderHandler(
-            linController, [slave = slave.get()](auto&& controller, auto&& event) {
-                slave->OnFrameHeader(controller, event);
-            });
+            linController,
+            [slave = slave.get()](auto&& controller, auto&& event) { slave->OnFrameHeader(controller, event); });
 
         linNodes.emplace_back(std::move(slave));
     }
@@ -1059,15 +1064,12 @@ TEST_F(ITest_LinDynamicResponse, normal_master_two_dynamic_slave_collision)
         });
 
         timeSyncService->SetSimulationStepHandler(
-            [slave = slave.get()](auto now, auto /*duration*/) {
-                slave->DoAction(now);
-            }, 1ms);
+            [slave = slave.get()](auto now, auto /*duration*/) { slave->DoAction(now); }, 1ms);
 
         // Dynamic Response API starts here
         SilKit::Experimental::Services::Lin::AddFrameHeaderHandler(
-            linController, [slave = slave.get()](auto&& controller, auto&& event) {
-                slave->OnFrameHeader(controller, event);
-            });
+            linController,
+            [slave = slave.get()](auto&& controller, auto&& event) { slave->OnFrameHeader(controller, event); });
 
         linNodes.emplace_back(std::move(slave));
     }
@@ -1117,7 +1119,8 @@ TEST_F(ITest_LinDynamicResponse, normal_master_two_dynamic_slave_collision)
     EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_TX_OK][4].id, 60);
     EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_TX_OK][4].checksumModel, LinChecksumModel::Classic);
     EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_TX_OK][4].dataLength, 8);
-    EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_TX_OK][4].data, (std::array<uint8_t, 8>{0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}));
+    EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_TX_OK][4].data,
+              (std::array<uint8_t, 8>{0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}));
 
     // 2 frame states on dynamic slave 1
     ASSERT_EQ(slave1RecvFrames.size(), 2);
@@ -1147,7 +1150,8 @@ TEST_F(ITest_LinDynamicResponse, normal_master_two_dynamic_slave_collision)
     EXPECT_EQ(slave1RecvFrames[LinFrameStatus::LIN_RX_OK][5].id, 60);
     EXPECT_EQ(slave1RecvFrames[LinFrameStatus::LIN_RX_OK][5].checksumModel, LinChecksumModel::Classic);
     EXPECT_EQ(slave1RecvFrames[LinFrameStatus::LIN_RX_OK][5].dataLength, 8);
-    EXPECT_EQ(slave1RecvFrames[LinFrameStatus::LIN_RX_OK][5].data, (std::array<uint8_t, 8>{0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}));
+    EXPECT_EQ(slave1RecvFrames[LinFrameStatus::LIN_RX_OK][5].data,
+              (std::array<uint8_t, 8>{0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}));
 
     // 1x TX_OK for id 34 on dynamic slave 1
     ASSERT_EQ(slave1RecvFrames[LinFrameStatus::LIN_TX_OK].size(), 1);
@@ -1184,7 +1188,8 @@ TEST_F(ITest_LinDynamicResponse, normal_master_two_dynamic_slave_collision)
     EXPECT_EQ(slave2RecvFrames[LinFrameStatus::LIN_RX_OK][5].id, 60);
     EXPECT_EQ(slave2RecvFrames[LinFrameStatus::LIN_RX_OK][5].checksumModel, LinChecksumModel::Classic);
     EXPECT_EQ(slave2RecvFrames[LinFrameStatus::LIN_RX_OK][5].dataLength, 8);
-    EXPECT_EQ(slave2RecvFrames[LinFrameStatus::LIN_RX_OK][5].data, (std::array<uint8_t, 8>{0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}));
+    EXPECT_EQ(slave2RecvFrames[LinFrameStatus::LIN_RX_OK][5].data,
+              (std::array<uint8_t, 8>{0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}));
 
     // 1x TX_OK for id 34 on dynamic slave 2
     ASSERT_EQ(slave2RecvFrames[LinFrameStatus::LIN_TX_OK].size(), 1);
@@ -1201,7 +1206,7 @@ TEST_F(ITest_LinDynamicResponse, normal_master_two_dynamic_slave_collision)
 TEST_F(ITest_LinDynamicResponse, dynamic_master_normal_slave)
 {
     auto registryUri = MakeTestRegistryUri();
-    std::vector<std::string> participantNames = { "LinMaster", "LinSlave" };
+    std::vector<std::string> participantNames = {"LinMaster", "LinSlave"};
     _simTestHarness = std::make_unique<SimTestHarness>(participantNames, registryUri, false);
 
     std::vector<std::unique_ptr<LinNode>> linNodes;
@@ -1213,8 +1218,7 @@ TEST_F(ITest_LinDynamicResponse, dynamic_master_normal_slave)
     {
         const std::string participantName = "LinMaster";
         auto&& participant = _simTestHarness->GetParticipant(participantName)->Participant();
-        auto&& lifecycleService =
-            _simTestHarness->GetParticipant(participantName)->GetOrCreateLifecycleService();
+        auto&& lifecycleService = _simTestHarness->GetParticipant(participantName)->GetOrCreateLifecycleService();
         auto&& timeSyncService = _simTestHarness->GetParticipant(participantName)->GetOrCreateTimeSyncService();
         auto&& linController = participant->CreateLinController("LinController1", "LIN_1");
 
@@ -1227,23 +1231,22 @@ TEST_F(ITest_LinDynamicResponse, dynamic_master_normal_slave)
 
         linController->AddFrameStatusHandler(
             [master = master.get()](ILinController* linController, const LinFrameStatusEvent& frameStatusEvent) {
-                master->ReceiveFrameStatus(linController, frameStatusEvent);
-            });
+            master->ReceiveFrameStatus(linController, frameStatusEvent);
+        });
         linController->AddWakeupHandler(
             [master = master.get()](ILinController* linController, const LinWakeupEvent& wakeupEvent) {
-                master->WakeupHandler(linController, wakeupEvent);
-            });
+            master->WakeupHandler(linController, wakeupEvent);
+        });
 
         timeSyncService->SetSimulationStepHandler(
             [master = master.get(), participantName](auto now, std::chrono::nanoseconds /*duration*/) {
-                master->doAction(now);
-            }, 1ms);
+            master->doAction(now);
+        }, 1ms);
 
         // Dynamic Response API starts here
         SilKit::Experimental::Services::Lin::AddFrameHeaderHandler(
-            linController, [master = master.get()](auto&& controller, auto&& event) {
-                master->OnFrameHeader(controller, event);
-            });
+            linController,
+            [master = master.get()](auto&& controller, auto&& event) { master->OnFrameHeader(controller, event); });
 
         linNodes.emplace_back(std::move(master));
     }
@@ -1254,8 +1257,7 @@ TEST_F(ITest_LinDynamicResponse, dynamic_master_normal_slave)
     {
         const std::string participantName = "LinSlave";
         auto&& participant = _simTestHarness->GetParticipant(participantName)->Participant();
-        auto&& lifecycleService =
-            _simTestHarness->GetParticipant(participantName)->GetOrCreateLifecycleService();
+        auto&& lifecycleService = _simTestHarness->GetParticipant(participantName)->GetOrCreateLifecycleService();
         auto&& timeSyncService = _simTestHarness->GetParticipant(participantName)->GetOrCreateTimeSyncService();
         auto&& linController = participant->CreateLinController("LinController1", "LIN_1");
 
@@ -1266,19 +1268,15 @@ TEST_F(ITest_LinDynamicResponse, dynamic_master_normal_slave)
 
         auto slave = std::make_unique<LinSlave>(participantName, participant, linController, lifecycleService);
 
-        linController->AddFrameStatusHandler(
-            [slave = slave.get()](auto&& linController, auto&& frameStatusEvent) {
-                slave->FrameStatusHandler(linController, frameStatusEvent);
-            });
-        linController->AddGoToSleepHandler(
-            [slave = slave.get()](auto&& linController, auto&& goToSleepEvent) {
-                slave->GoToSleepHandler(linController, goToSleepEvent);
-            });
+        linController->AddFrameStatusHandler([slave = slave.get()](auto&& linController, auto&& frameStatusEvent) {
+            slave->FrameStatusHandler(linController, frameStatusEvent);
+        });
+        linController->AddGoToSleepHandler([slave = slave.get()](auto&& linController, auto&& goToSleepEvent) {
+            slave->GoToSleepHandler(linController, goToSleepEvent);
+        });
 
         timeSyncService->SetSimulationStepHandler(
-            [slave = slave.get()](auto now, auto /*duration*/) {
-                slave->DoAction(now);
-            }, 1ms);
+            [slave = slave.get()](auto now, auto /*duration*/) { slave->DoAction(now); }, 1ms);
 
         linNodes.emplace_back(std::move(slave));
     }
@@ -1289,20 +1287,19 @@ TEST_F(ITest_LinDynamicResponse, dynamic_master_normal_slave)
 
     // Sim is stopped when master received the wakeup pulse
 
-    for (auto& node: linNodes)
+    for (auto& node : linNodes)
     {
         if (node->_name == "LinSlave")
         {
             EXPECT_EQ(node->_result.numberReceivedInSleep, 0u);
             EXPECT_TRUE(node->_result.gotoSleepReceived)
-                        << "Assuming node " << node->_name << " has received a GoToSleep";
+                << "Assuming node " << node->_name << " has received a GoToSleep";
             // The LIN slave doesn't receive the wakeup pulse sent by himself in a trivial simulation (without netsim),
             // so don't expect a wakeup
         }
         else
         {
-            EXPECT_TRUE(node->_result.gotoSleepSent)
-                        << "Assuming node " << node->_name << " has received a GoToSleep";
+            EXPECT_TRUE(node->_result.gotoSleepSent) << "Assuming node " << node->_name << " has received a GoToSleep";
             EXPECT_TRUE(node->_result.wakeupReceived) << "Assuming node " << node->_name << " has received a Wakeup";
         }
     }
@@ -1314,8 +1311,8 @@ TEST_F(ITest_LinDynamicResponse, dynamic_master_normal_slave)
     EXPECT_GT(masterSendTimes.size(), 0u);
     EXPECT_GT(masterRecvTimes.size(), 0u);
     ASSERT_EQ(masterSendTimes.size(), masterRecvTimes.size())
-                    << "The master send times and receive times should have equal size.";
-    for(auto i = 0u; i< masterRecvTimes.size(); i++)
+        << "The master send times and receive times should have equal size.";
+    for (auto i = 0u; i < masterRecvTimes.size(); i++)
     {
         const auto& sendT = masterSendTimes.at(i);
         const auto& recvT = masterRecvTimes.at(i);
@@ -1360,7 +1357,8 @@ TEST_F(ITest_LinDynamicResponse, dynamic_master_normal_slave)
     EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_TX_OK][4].id, 60);
     EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_TX_OK][4].checksumModel, LinChecksumModel::Classic);
     EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_TX_OK][4].dataLength, 8);
-    EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_TX_OK][4].data, (std::array<uint8_t, 8>{0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}));
+    EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_TX_OK][4].data,
+              (std::array<uint8_t, 8>{0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}));
 
     // 3 frame states on slave RX_OK,RX_ERROR,TX_OK
     ASSERT_EQ(slaveRecvFrames.size(), 3);
@@ -1374,7 +1372,8 @@ TEST_F(ITest_LinDynamicResponse, dynamic_master_normal_slave)
     EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_RX_OK][1].id, 60);
     EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_RX_OK][1].checksumModel, LinChecksumModel::Classic);
     EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_RX_OK][1].dataLength, 8);
-    EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_RX_OK][1].data, (std::array<uint8_t, 8>{0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}));
+    EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_RX_OK][1].data,
+              (std::array<uint8_t, 8>{0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}));
 
     // 2x RX_ERROR for id 18,19 on slave
     ASSERT_EQ(slaveRecvFrames[LinFrameStatus::LIN_RX_ERROR].size(), 2);
@@ -1400,7 +1399,7 @@ TEST_F(ITest_LinDynamicResponse, dynamic_master_normal_slave)
 TEST_F(ITest_LinDynamicResponse, dynamic_master_dynamic_slave)
 {
     auto registryUri = MakeTestRegistryUri();
-    std::vector<std::string> participantNames = { "LinMaster", "LinSlave" };
+    std::vector<std::string> participantNames = {"LinMaster", "LinSlave"};
     _simTestHarness = std::make_unique<SimTestHarness>(participantNames, registryUri, false);
 
     std::vector<std::unique_ptr<LinNode>> linNodes;
@@ -1412,37 +1411,35 @@ TEST_F(ITest_LinDynamicResponse, dynamic_master_dynamic_slave)
     {
         const std::string participantName = "LinMaster";
         auto&& participant = _simTestHarness->GetParticipant(participantName)->Participant();
-        auto&& lifecycleService =
-            _simTestHarness->GetParticipant(participantName)->GetOrCreateLifecycleService();
+        auto&& lifecycleService = _simTestHarness->GetParticipant(participantName)->GetOrCreateLifecycleService();
         auto&& timeSyncService = _simTestHarness->GetParticipant(participantName)->GetOrCreateTimeSyncService();
         auto&& linController = participant->CreateLinController("LinController1", "LIN_1");
 
         lifecycleService->SetCommunicationReadyHandler([participantName, linController]() {
-          auto config = MakeDynamicMasterConfig();
-          SilKit::Experimental::Services::Lin::InitDynamic(linController, config);
+            auto config = MakeDynamicMasterConfig();
+            SilKit::Experimental::Services::Lin::InitDynamic(linController, config);
         });
 
         auto master = std::make_unique<LinDynamicMaster>(participant, linController, lifecycleService);
 
         linController->AddFrameStatusHandler(
             [master = master.get()](ILinController* linController, const LinFrameStatusEvent& frameStatusEvent) {
-              master->ReceiveFrameStatus(linController, frameStatusEvent);
-            });
+            master->ReceiveFrameStatus(linController, frameStatusEvent);
+        });
         linController->AddWakeupHandler(
             [master = master.get()](ILinController* linController, const LinWakeupEvent& wakeupEvent) {
-              master->WakeupHandler(linController, wakeupEvent);
-            });
+            master->WakeupHandler(linController, wakeupEvent);
+        });
 
         timeSyncService->SetSimulationStepHandler(
             [master = master.get(), participantName](auto now, std::chrono::nanoseconds /*duration*/) {
-              master->doAction(now);
-            }, 1ms);
+            master->doAction(now);
+        }, 1ms);
 
         // Dynamic Response API starts here
         SilKit::Experimental::Services::Lin::AddFrameHeaderHandler(
-            linController, [master = master.get()](auto&& controller, auto&& event) {
-              master->OnFrameHeader(controller, event);
-            });
+            linController,
+            [master = master.get()](auto&& controller, auto&& event) { master->OnFrameHeader(controller, event); });
 
         linNodes.emplace_back(std::move(master));
     }
@@ -1453,37 +1450,31 @@ TEST_F(ITest_LinDynamicResponse, dynamic_master_dynamic_slave)
     {
         const std::string participantName = "LinSlave";
         auto&& participant = _simTestHarness->GetParticipant(participantName)->Participant();
-        auto&& lifecycleService =
-            _simTestHarness->GetParticipant(participantName)->GetOrCreateLifecycleService();
+        auto&& lifecycleService = _simTestHarness->GetParticipant(participantName)->GetOrCreateLifecycleService();
         auto&& timeSyncService = _simTestHarness->GetParticipant(participantName)->GetOrCreateTimeSyncService();
         auto&& linController = participant->CreateLinController("LinController1", "LIN_1");
 
         lifecycleService->SetCommunicationReadyHandler([linController]() {
-          auto config = MakeDynamicSlaveConfig();
-          SilKit::Experimental::Services::Lin::InitDynamic(linController, config);
+            auto config = MakeDynamicSlaveConfig();
+            SilKit::Experimental::Services::Lin::InitDynamic(linController, config);
         });
 
         auto slave = std::make_unique<LinDynamicSlave>(participantName, participant, linController, lifecycleService);
 
-        linController->AddFrameStatusHandler(
-            [slave = slave.get()](auto&& linController, auto&& frameStatusEvent) {
-              slave->FrameStatusHandler(linController, frameStatusEvent);
-            });
-        linController->AddGoToSleepHandler(
-            [slave = slave.get()](auto&& linController, auto&& goToSleepEvent) {
-              slave->GoToSleepHandler(linController, goToSleepEvent);
-            });
+        linController->AddFrameStatusHandler([slave = slave.get()](auto&& linController, auto&& frameStatusEvent) {
+            slave->FrameStatusHandler(linController, frameStatusEvent);
+        });
+        linController->AddGoToSleepHandler([slave = slave.get()](auto&& linController, auto&& goToSleepEvent) {
+            slave->GoToSleepHandler(linController, goToSleepEvent);
+        });
 
         timeSyncService->SetSimulationStepHandler(
-            [slave = slave.get()](auto now, auto /*duration*/) {
-              slave->DoAction(now);
-            }, 1ms);
+            [slave = slave.get()](auto now, auto /*duration*/) { slave->DoAction(now); }, 1ms);
 
         // Dynamic Response API starts here
         SilKit::Experimental::Services::Lin::AddFrameHeaderHandler(
-            linController, [slave = slave.get()](auto&& controller, auto&& event) {
-              slave->OnFrameHeader(controller, event);
-            });
+            linController,
+            [slave = slave.get()](auto&& controller, auto&& event) { slave->OnFrameHeader(controller, event); });
         linNodes.emplace_back(std::move(slave));
     }
 
@@ -1493,20 +1484,19 @@ TEST_F(ITest_LinDynamicResponse, dynamic_master_dynamic_slave)
 
     // Sim is stopped when master received the wakeup pulse
 
-    for (auto& node: linNodes)
+    for (auto& node : linNodes)
     {
         if (node->_name == "LinSlave")
         {
             EXPECT_EQ(node->_result.numberReceivedInSleep, 0u);
             EXPECT_TRUE(node->_result.gotoSleepReceived)
-                        << "Assuming node " << node->_name << " has received a GoToSleep";
+                << "Assuming node " << node->_name << " has received a GoToSleep";
             // The LIN slave doesn't receive the wakeup pulse sent by himself in a trivial simulation (without netsim),
             // so don't expect a wakeup
         }
         else
         {
-            EXPECT_TRUE(node->_result.gotoSleepSent)
-                        << "Assuming node " << node->_name << " has received a GoToSleep";
+            EXPECT_TRUE(node->_result.gotoSleepSent) << "Assuming node " << node->_name << " has received a GoToSleep";
             EXPECT_TRUE(node->_result.wakeupReceived) << "Assuming node " << node->_name << " has received a Wakeup";
         }
     }
@@ -1518,8 +1508,8 @@ TEST_F(ITest_LinDynamicResponse, dynamic_master_dynamic_slave)
     EXPECT_GT(masterSendTimes.size(), 0u);
     EXPECT_GT(masterRecvTimes.size(), 0u);
     ASSERT_EQ(masterSendTimes.size(), masterRecvTimes.size())
-                    << "The master send times and receive times should have equal size.";
-    for(auto i = 0u; i< masterRecvTimes.size(); i++)
+        << "The master send times and receive times should have equal size.";
+    for (auto i = 0u; i < masterRecvTimes.size(); i++)
     {
         const auto& sendT = masterSendTimes.at(i);
         const auto& recvT = masterRecvTimes.at(i);
@@ -1564,7 +1554,8 @@ TEST_F(ITest_LinDynamicResponse, dynamic_master_dynamic_slave)
     EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_TX_OK][4].id, 60);
     EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_TX_OK][4].checksumModel, LinChecksumModel::Classic);
     EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_TX_OK][4].dataLength, 8);
-    EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_TX_OK][4].data, (std::array<uint8_t, 8>{0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}));
+    EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_TX_OK][4].data,
+              (std::array<uint8_t, 8>{0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}));
 
     // 2 frame states on dynamic slave
     ASSERT_EQ(slaveRecvFrames.size(), 2);
@@ -1590,7 +1581,8 @@ TEST_F(ITest_LinDynamicResponse, dynamic_master_dynamic_slave)
     EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_RX_OK][4].id, 60);
     EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_RX_OK][4].checksumModel, LinChecksumModel::Classic);
     EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_RX_OK][4].dataLength, 8);
-    EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_RX_OK][4].data, (std::array<uint8_t, 8>{0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}));
+    EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_RX_OK][4].data,
+              (std::array<uint8_t, 8>{0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}));
 
     // 1x TX_OK for id 34 on dynamic slave
     ASSERT_EQ(slaveRecvFrames[LinFrameStatus::LIN_TX_OK].size(), 1);
@@ -1649,9 +1641,12 @@ public:
     {
         switch (frameStatusEvent.status)
         {
-        case LinFrameStatus::LIN_RX_OK: break; // good case, no need to warn
-        case LinFrameStatus::LIN_TX_OK: break; // good case, no need to warn
-        default: Log() << "WARNING: LIN transmission failed!";
+        case LinFrameStatus::LIN_RX_OK:
+            break; // good case, no need to warn
+        case LinFrameStatus::LIN_TX_OK:
+            break; // good case, no need to warn
+        default:
+            Log() << "WARNING: LIN transmission failed!";
         }
 
         Log() << ">> " << _name << " " << frameStatusEvent.frame << " status=" << frameStatusEvent.status
@@ -1668,8 +1663,8 @@ private:
 class LinDynamicSlaveCheckResponseResets : public LinNode
 {
 public:
-    LinDynamicSlaveCheckResponseResets(std::string participantName, IParticipant* participant, ILinController* controller,
-                                       Orchestration::ILifecycleService* lifecycleService)
+    LinDynamicSlaveCheckResponseResets(std::string participantName, IParticipant* participant,
+                                       ILinController* controller, Orchestration::ILifecycleService* lifecycleService)
         : LinNode(participant, controller, participantName, lifecycleService)
         , _slaveResponses{MakeSlaveResponses()}
     {
@@ -1762,15 +1757,14 @@ TEST_F(ITest_LinDynamicResponse, normal_master_dynamic_slave_response_resets)
 
         linController->AddFrameStatusHandler(
             [master = master.get()](ILinController* linController, const LinFrameStatusEvent& frameStatusEvent) {
-                master->ReceiveFrameStatus(linController, frameStatusEvent);
-            });
+            master->ReceiveFrameStatus(linController, frameStatusEvent);
+        });
 
         timeSyncService->SetSimulationStepHandler(
             [master = master.get(), participantName](auto now, std::chrono::nanoseconds /*duration*/) {
-                Log() << participantName << " now=" << now.count() << "ns";
-                master->doAction(now);
-            },
-            1ms);
+            Log() << participantName << " now=" << now.count() << "ns";
+            master->doAction(now);
+        }, 1ms);
 
         linNodes.emplace_back(std::move(master));
     }
@@ -1792,24 +1786,22 @@ TEST_F(ITest_LinDynamicResponse, normal_master_dynamic_slave_response_resets)
             SilKit::Experimental::Services::Lin::InitDynamic(linController, config);
         });
 
-        auto slave = std::make_unique<LinDynamicSlaveCheckResponseResets>(participantName, participant, linController, lifecycleService);
+        auto slave = std::make_unique<LinDynamicSlaveCheckResponseResets>(participantName, participant, linController,
+                                                                          lifecycleService);
 
         linController->AddFrameStatusHandler([slave = slave.get()](auto&& linController, auto&& frameStatusEvent) {
             slave->FrameStatusHandler(linController, frameStatusEvent);
         });
 
-        timeSyncService->SetSimulationStepHandler(
-            [slave = slave.get()](auto now, auto /*duration*/) {
-                Log() << "now=" << std::chrono::duration_cast<std::chrono::milliseconds>(now).count() << "ms";
-                slave->DoAction(now);
-            },
-            1ms);
+        timeSyncService->SetSimulationStepHandler([slave = slave.get()](auto now, auto /*duration*/) {
+            Log() << "now=" << std::chrono::duration_cast<std::chrono::milliseconds>(now).count() << "ms";
+            slave->DoAction(now);
+        }, 1ms);
 
         // Dynamic Response API starts here
         SilKit::Experimental::Services::Lin::AddFrameHeaderHandler(
-            linController, [slave = slave.get()](auto&& controller, auto&& event) {
-                slave->OnFrameHeader(controller, event);
-            });
+            linController,
+            [slave = slave.get()](auto&& controller, auto&& event) { slave->OnFrameHeader(controller, event); });
 
         linNodes.emplace_back(std::move(slave));
     }
@@ -1830,7 +1822,8 @@ TEST_F(ITest_LinDynamicResponse, normal_master_dynamic_slave_response_resets)
     // 1x RX_OK for id 34 on master
     ASSERT_EQ(masterRecvFrames[LinFrameStatus::LIN_RX_OK].size(), 1);
     EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_RX_OK][0].id, 34);
-    EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_RX_OK][0].checksumModel, SilKit::Services::Lin::LinChecksumModel::Enhanced);
+    EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_RX_OK][0].checksumModel,
+              SilKit::Services::Lin::LinChecksumModel::Enhanced);
     EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_RX_OK][0].dataLength, 6);
     EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_RX_OK][0].data, (std::array<uint8_t, 8>{3, 4, 3, 4, 3, 4, 3, 4}));
 
@@ -1844,7 +1837,8 @@ TEST_F(ITest_LinDynamicResponse, normal_master_dynamic_slave_response_resets)
     // 1x TX_OK for id 34 on dynamic slave
     ASSERT_EQ(slaveRecvFrames[LinFrameStatus::LIN_TX_OK].size(), 1);
     EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_TX_OK][0].id, 34);
-    EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_TX_OK][0].checksumModel, SilKit::Services::Lin::LinChecksumModel::Enhanced);
+    EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_TX_OK][0].checksumModel,
+              SilKit::Services::Lin::LinChecksumModel::Enhanced);
     EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_TX_OK][0].dataLength, 6);
     EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_TX_OK][0].data, (std::array<uint8_t, 8>{3, 4, 3, 4, 3, 4, 3, 4}));
 
@@ -1856,7 +1850,7 @@ TEST_F(ITest_LinDynamicResponse, normal_master_dynamic_slave_response_resets)
 TEST_F(ITest_LinDynamicResponse, normal_master_dynamic_slave_out_of_band_response_does_nothing)
 {
     auto registryUri = MakeTestRegistryUri();
-    std::vector<std::string> participantNames = { "LinMaster", "LinSlave", "LinSlaveDynamic" };
+    std::vector<std::string> participantNames = {"LinMaster", "LinSlave", "LinSlaveDynamic"};
     _simTestHarness = std::make_unique<SimTestHarness>(participantNames, registryUri, false);
 
     std::vector<std::unique_ptr<LinNode>> linNodes;
@@ -1868,29 +1862,28 @@ TEST_F(ITest_LinDynamicResponse, normal_master_dynamic_slave_out_of_band_respons
     {
         const std::string participantName = "LinMaster";
         auto&& participant = _simTestHarness->GetParticipant(participantName)->Participant();
-        auto&& lifecycleService =
-            _simTestHarness->GetParticipant(participantName)->GetOrCreateLifecycleService();
+        auto&& lifecycleService = _simTestHarness->GetParticipant(participantName)->GetOrCreateLifecycleService();
         auto&& timeSyncService = _simTestHarness->GetParticipant(participantName)->GetOrCreateTimeSyncService();
         auto&& linController = participant->CreateLinController("LinController1", "LIN_1");
         lifecycleService->SetCommunicationReadyHandler([participantName, linController]() {
-          auto config = MakeMasterConfig();
-          linController->Init(config);
+            auto config = MakeMasterConfig();
+            linController->Init(config);
         });
 
         auto master = std::make_unique<LinMaster>(participant, linController, lifecycleService);
 
         linController->AddFrameStatusHandler(
             [master = master.get()](ILinController* linController, const LinFrameStatusEvent& frameStatusEvent) {
-                master->ReceiveFrameStatus(linController, frameStatusEvent);
-            });
+            master->ReceiveFrameStatus(linController, frameStatusEvent);
+        });
 
         timeSyncService->SetSimulationStepHandler(
             [lifecycleService, participantName](auto now, std::chrono::nanoseconds /*duration*/) {
-                if (now == 30ms)
-                {
-                    lifecycleService->Stop("done");
-                }
-            }, 1ms);
+            if (now == 30ms)
+            {
+                lifecycleService->Stop("done");
+            }
+        }, 1ms);
 
         linNodes.emplace_back(std::move(master));
     }
@@ -1901,8 +1894,7 @@ TEST_F(ITest_LinDynamicResponse, normal_master_dynamic_slave_out_of_band_respons
     {
         const std::string participantName = "LinSlave";
         auto&& participant = _simTestHarness->GetParticipant(participantName)->Participant();
-        auto&& lifecycleService =
-            _simTestHarness->GetParticipant(participantName)->GetOrCreateLifecycleService();
+        auto&& lifecycleService = _simTestHarness->GetParticipant(participantName)->GetOrCreateLifecycleService();
         auto&& timeSyncService = _simTestHarness->GetParticipant(participantName)->GetOrCreateTimeSyncService();
         auto&& linController = participant->CreateLinController("LinController1", "LIN_1");
 
@@ -1917,21 +1909,20 @@ TEST_F(ITest_LinDynamicResponse, normal_master_dynamic_slave_out_of_band_respons
             slave->FrameStatusHandler(linController, frameStatusEvent);
         });
 
-        timeSyncService->SetSimulationStepHandler(
-            [linController](auto now, auto /*duration*/) {
-                Log() << "now=" << std::chrono::duration_cast<std::chrono::milliseconds>(now).count() << "ms";
+        timeSyncService->SetSimulationStepHandler([linController](auto now, auto /*duration*/) {
+            Log() << "now=" << std::chrono::duration_cast<std::chrono::milliseconds>(now).count() << "ms";
 
-                LinFrame frame{};
-                frame.id = 34;
-                frame.checksumModel = SilKit::Services::Lin::LinChecksumModel::Enhanced;
-                frame.dataLength = 6;
-                frame.data = std::array<uint8_t, 8>{1, 2, 3, 4, 5, 6, 0, 0};
+            LinFrame frame{};
+            frame.id = 34;
+            frame.checksumModel = SilKit::Services::Lin::LinChecksumModel::Enhanced;
+            frame.dataLength = 6;
+            frame.data = std::array<uint8_t, 8>{1, 2, 3, 4, 5, 6, 0, 0};
 
-                if (now == 10ms || now == 20ms)
-                {
-                    SilKit::Experimental::Services::Lin::SendDynamicResponse(linController, frame);
-                }
-            }, 1ms);
+            if (now == 10ms || now == 20ms)
+            {
+                SilKit::Experimental::Services::Lin::SendDynamicResponse(linController, frame);
+            }
+        }, 1ms);
 
         linNodes.emplace_back(std::move(slave));
     }
@@ -1942,8 +1933,7 @@ TEST_F(ITest_LinDynamicResponse, normal_master_dynamic_slave_out_of_band_respons
     {
         const std::string participantName = "LinSlaveDynamic";
         auto&& participant = _simTestHarness->GetParticipant(participantName)->Participant();
-        auto&& lifecycleService =
-            _simTestHarness->GetParticipant(participantName)->GetOrCreateLifecycleService();
+        auto&& lifecycleService = _simTestHarness->GetParticipant(participantName)->GetOrCreateLifecycleService();
         auto&& timeSyncService = _simTestHarness->GetParticipant(participantName)->GetOrCreateTimeSyncService();
         auto&& linController = participant->CreateLinController("LinController1", "LIN_1");
 
@@ -1958,10 +1948,9 @@ TEST_F(ITest_LinDynamicResponse, normal_master_dynamic_slave_out_of_band_respons
             slave->FrameStatusHandler(linController, frameStatusEvent);
         });
 
-        timeSyncService->SetSimulationStepHandler(
-            [](auto now, auto /*duration*/) {
-                Log() << "now=" << std::chrono::duration_cast<std::chrono::milliseconds>(now).count() << "ms";
-            }, 1ms);
+        timeSyncService->SetSimulationStepHandler([](auto now, auto /*duration*/) {
+            Log() << "now=" << std::chrono::duration_cast<std::chrono::milliseconds>(now).count() << "ms";
+        }, 1ms);
 
         linNodes.emplace_back(std::move(slave));
     }
@@ -2001,11 +1990,13 @@ TEST_F(ITest_LinDynamicResponse, normal_master_dynamic_slave_out_of_band_respons
     EXPECT_EQ(slaveDynamicRecvFrames[LinFrameStatus::LIN_RX_OK][0].id, 34);
     EXPECT_EQ(slaveDynamicRecvFrames[LinFrameStatus::LIN_RX_OK][0].checksumModel, LinChecksumModel::Enhanced);
     EXPECT_EQ(slaveDynamicRecvFrames[LinFrameStatus::LIN_RX_OK][0].dataLength, 6);
-    EXPECT_EQ(slaveDynamicRecvFrames[LinFrameStatus::LIN_RX_OK][0].data, (std::array<uint8_t, 8>{1, 2, 3, 4, 5, 6, 0, 0}));
+    EXPECT_EQ(slaveDynamicRecvFrames[LinFrameStatus::LIN_RX_OK][0].data,
+              (std::array<uint8_t, 8>{1, 2, 3, 4, 5, 6, 0, 0}));
     EXPECT_EQ(slaveDynamicRecvFrames[LinFrameStatus::LIN_RX_OK][1].id, 34);
     EXPECT_EQ(slaveDynamicRecvFrames[LinFrameStatus::LIN_RX_OK][1].checksumModel, LinChecksumModel::Enhanced);
     EXPECT_EQ(slaveDynamicRecvFrames[LinFrameStatus::LIN_RX_OK][1].dataLength, 6);
-    EXPECT_EQ(slaveDynamicRecvFrames[LinFrameStatus::LIN_RX_OK][1].data, (std::array<uint8_t, 8>{1, 2, 3, 4, 5, 6, 0, 0}));
+    EXPECT_EQ(slaveDynamicRecvFrames[LinFrameStatus::LIN_RX_OK][1].data,
+              (std::array<uint8_t, 8>{1, 2, 3, 4, 5, 6, 0, 0}));
 
     // Known Issue (Trivial Simulation):
     //

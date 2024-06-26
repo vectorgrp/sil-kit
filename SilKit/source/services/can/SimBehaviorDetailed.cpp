@@ -27,7 +27,7 @@ namespace Services {
 namespace Can {
 
 SimBehaviorDetailed::SimBehaviorDetailed(Core::IParticipantInternal* participant, CanController* canController,
-                                       const Core::ServiceDescriptor& serviceDescriptor)
+                                         const Core::ServiceDescriptor& serviceDescriptor)
     : _participant{participant}
     , _parentServiceEndpoint{dynamic_cast<Core::IServiceEndpoint*>(canController)}
     , _parentServiceDescriptor{&serviceDescriptor}
@@ -54,7 +54,7 @@ void SimBehaviorDetailed::SendMsg(WireCanFrameEvent&& msg)
     SendMsgImpl(msg);
 }
 
-auto SimBehaviorDetailed::AllowReception(const Core::IServiceEndpoint* from) const -> bool 
+auto SimBehaviorDetailed::AllowReception(const Core::IServiceEndpoint* from) const -> bool
 {
     // If simulated, only allow reception from NetSim.
     // NetSim internally sets the ServiceId of this controller and sends messages with it,

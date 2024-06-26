@@ -21,7 +21,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #ifdef _MSC_VER
 #pragma warning(push)
-#pragma warning(disable:4702)
+#pragma warning(disable : 4702)
 #endif
 
 #include "gmock/gmock.h"
@@ -77,8 +77,8 @@ public:
                                                                          _nullInput, _mockBodyDecoder);
         EXPECT_CALL(*_mockDashboardSystemApiClient, executeRequest)
             .WillOnce(DoAll(WithArgs<0, 1, 3>([OnRequest](auto currentMethod, auto pathTemplate, auto map) {
-                                OnRequest(currentMethod, pathTemplate, map);
-                            }),
+            OnRequest(currentMethod, pathTemplate, map);
+        }),
                             Return(response)));
     }
 
@@ -99,9 +99,9 @@ TEST_F(Test_DashboardSystemServiceClient, CreateSimulation_Success)
     oatpp::String actualMethod;
     SetupExecuteRequest(Status::CODE_201,
                         [&actualPath, &actualMethod](auto currentMethod, auto pathTemplate, auto map) {
-                            actualMethod = currentMethod;
-                            actualPath = pathTemplate.format(map);
-                        });
+        actualMethod = currentMethod;
+        actualPath = pathTemplate.format(map);
+    });
     EXPECT_CALL(*_mockBodyDecoder, decode);
     auto expectedResponse = SimulationCreationResponseDto::createShared();
     expectedResponse->id = 123;
@@ -130,9 +130,9 @@ TEST_F(Test_DashboardSystemServiceClient, CreateSimulation_Failure)
     oatpp::String actualMethod;
     SetupExecuteRequest(Status::CODE_500,
                         [&actualPath, &actualMethod](auto currentMethod, auto pathTemplate, auto map) {
-                            actualMethod = currentMethod;
-                            actualPath = pathTemplate.format(map);
-                        });
+        actualMethod = currentMethod;
+        actualPath = pathTemplate.format(map);
+    });
     EXPECT_CALL(_dummyLogger, Log(Services::Logging::Level::Error, "Dashboard: creating simulation returned 500"));
 
     // Act
@@ -157,9 +157,9 @@ TEST_F(Test_DashboardSystemServiceClient, SetSimulationEnd_Success)
     oatpp::String actualMethod;
     SetupExecuteRequest(Status::CODE_204,
                         [&actualPath, &actualMethod](auto currentMethod, auto pathTemplate, auto map) {
-                            actualMethod = currentMethod;
-                            actualPath = pathTemplate.format(map);
-                        });
+        actualMethod = currentMethod;
+        actualPath = pathTemplate.format(map);
+    });
     EXPECT_CALL(_dummyLogger, Log(Services::Logging::Level::Debug, "Dashboard: setting simulation end returned 204"));
 
     // Act
@@ -183,9 +183,9 @@ TEST_F(Test_DashboardSystemServiceClient, SetSimulationEnd_Failure)
     oatpp::String actualMethod;
     SetupExecuteRequest(Status::CODE_500,
                         [&actualPath, &actualMethod](auto currentMethod, auto pathTemplate, auto map) {
-                            actualMethod = currentMethod;
-                            actualPath = pathTemplate.format(map);
-                        });
+        actualMethod = currentMethod;
+        actualPath = pathTemplate.format(map);
+    });
     EXPECT_CALL(_dummyLogger, Log(Services::Logging::Level::Error, "Dashboard: setting simulation end returned 500"));
 
     // Act

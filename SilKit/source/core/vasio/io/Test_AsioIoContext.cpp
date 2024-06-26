@@ -40,9 +40,7 @@ void CheckIoContextDispatchBeforeRunIsExecutedAtRun(VSilKit::IIoContext& ioConte
 {
     bool flag{false};
 
-    ioContext.Dispatch([&flag] {
-        flag = true;
-    });
+    ioContext.Dispatch([&flag] { flag = true; });
     ASSERT_FALSE(flag);
 
     ioContext.Run();
@@ -54,9 +52,7 @@ void CheckIoContextPostBeforeRunIsExecutedAtRun(VSilKit::IIoContext& ioContext)
 {
     bool flag{false};
 
-    ioContext.Post([&flag] {
-        flag = true;
-    });
+    ioContext.Post([&flag] { flag = true; });
     ASSERT_FALSE(flag);
 
     ioContext.Run();

@@ -29,29 +29,23 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "LoadExtension.hpp"
 
 
-#if !defined( F_OK )
-#   define F_OK 00 //not provided by io.h, but used in _access()
+#if !defined(F_OK)
+#define F_OK 00 //not provided by io.h, but used in _access()
 #endif
 
 
-namespace SilKit {  namespace detail {
+namespace SilKit {
+namespace detail {
 static std::string lastErrorMessage()
 {
     std::string rv{};
     DWORD e = ::GetLastError();
-    if(e != 0)
+    if (e != 0)
     {
         LPSTR buf = nullptr;
-        size_t size = FormatMessageA(
-                FORMAT_MESSAGE_ALLOCATE_BUFFER
-                | FORMAT_MESSAGE_FROM_SYSTEM
-                | FORMAT_MESSAGE_IGNORE_INSERTS,
-                NULL,
-                e,
-                MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-                (LPSTR)&buf,
-                0,
-                nullptr);
+        size_t size =
+            FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+                           NULL, e, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&buf, 0, nullptr);
 
         rv.assign(buf, size);
         LocalFree(buf);
@@ -61,9 +55,9 @@ static std::string lastErrorMessage()
 
 
 //used by FindLibrary
-const std::string lib_file_extension=".dll";
-const std::string lib_prefix="";
-const std::string path_sep="\\";
+const std::string lib_file_extension = ".dll";
+const std::string lib_prefix = "";
+const std::string path_sep = "\\";
 
 bool FileExists(const std::string& path)
 {
@@ -73,7 +67,7 @@ bool FileExists(const std::string& path)
 LibraryHandle OpenLibrary(const std::string& path)
 {
     LibraryHandle tmp = ::LoadLibraryA(path.c_str());
-    if(tmp == nullptr)
+    if (tmp == nullptr)
     {
         throw ExtensionError("::LoadLibrary() failed: " + lastErrorMessage());
     }
@@ -83,22 +77,19 @@ LibraryHandle OpenLibrary(const std::string& path)
 void CloseLibrary(const LibraryHandle& hnd)
 {
     BOOL ok = ::FreeLibrary(hnd);
-    if(!ok)
+    if (!ok)
     {
-        throw ExtensionError(
-                    "Calling FreeLibrary failed: " + lastErrorMessage());
+        throw ExtensionError("Calling FreeLibrary failed: " + lastErrorMessage());
     }
 }
 
 void* FindSymbol(LibraryHandle& hnd, const std::string& symbol_name)
 {
     auto* entry = (void*)::GetProcAddress(hnd, symbol_name.c_str());
-    if(entry == nullptr)
+    if (entry == nullptr)
     {
-        throw ExtensionError(
-                "Calling GetProcAddress() failed: Could not find \""
-                + symbol_name +"\"" + lastErrorMessage()
-        );
+        throw ExtensionError("Calling GetProcAddress() failed: Could not find \"" + symbol_name + "\""
+                             + lastErrorMessage());
     }
     return entry;
 }
@@ -118,6 +109,6 @@ std::string GetProcessPath()
     return path;
 }
 
-}//detail
+} // namespace detail
 
-}//silkit
+} // namespace SilKit

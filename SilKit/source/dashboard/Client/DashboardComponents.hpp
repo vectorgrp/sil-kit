@@ -44,12 +44,13 @@ public:
     }
 
 public:
-
     OATPP_CREATE_COMPONENT(std::shared_ptr<oatpp::network::ClientConnectionProvider>, clientConnectionProvider)
-    ("DashboardComponents_clientConnectionProvider", [this]() -> std::shared_ptr<oatpp::network::ClientConnectionProvider> {
+    ("DashboardComponents_clientConnectionProvider",
+     [this]() -> std::shared_ptr<oatpp::network::ClientConnectionProvider> {
          auto connectionProvider = oatpp::network::tcp::client::ConnectionProvider::createShared({_host, _port});
-         return oatpp::network::ClientConnectionPool::createShared(connectionProvider, 5, std::chrono::seconds(10), std::chrono::seconds(5));
-    }());
+         return oatpp::network::ClientConnectionPool::createShared(connectionProvider, 5, std::chrono::seconds(10),
+                                                                   std::chrono::seconds(5));
+     }());
 
     OATPP_CREATE_COMPONENT(std::shared_ptr<oatpp::data::mapping::ObjectMapper>, apiObjectMapper)
     ("DashboardComponents_apiObjectMapper", [] {
@@ -57,7 +58,6 @@ public:
         objectMapper->getDeserializer()->getConfig()->allowUnknownFields = false;
         return objectMapper;
     }());
-
 };
 
 } // namespace Dashboard

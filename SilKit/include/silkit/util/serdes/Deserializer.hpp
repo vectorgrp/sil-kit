@@ -125,7 +125,10 @@ public:
     }
 
     /*! \brief Deserializes the start of a struct. */
-    void BeginStruct() { Align(); }
+    void BeginStruct()
+    {
+        Align();
+    }
 
     /*! \brief Deserializes the end of a struct. */
     void EndStruct() {}
@@ -134,7 +137,10 @@ public:
      *  Note: Because the array size is serialized as well, dynamic arrays aka. lists are also supported.
      *  \returns The size of the array (in elements).
      */
-    auto BeginArray() -> std::size_t { return DeserializeAligned<uint32_t>(sizeof(uint32_t)); }
+    auto BeginArray() -> std::size_t
+    {
+        return DeserializeAligned<uint32_t>(sizeof(uint32_t));
+    }
 
     /*! \brief Deserializes the end of an array or list.
      */
@@ -143,13 +149,22 @@ public:
     /*! \brief Deserializes the start of an optional value.
      *  \returns `true` if the value is set, otherwise `false`.
      */
-    auto BeginOptional() -> bool { return Deserialize<bool>(); }
+    auto BeginOptional() -> bool
+    {
+        return Deserialize<bool>();
+    }
 
     /*! \brief Deserializes the end of an optional value. */
     void EndOptional() {}
 
-    auto BeginUnion() -> int { throw SilKitError("Unions are currently not supported."); }
-    void EndUnion() { throw SilKitError("Unions are currently not supported."); }
+    auto BeginUnion() -> int
+    {
+        throw SilKitError("Unions are currently not supported.");
+    }
+    void EndUnion()
+    {
+        throw SilKitError("Unions are currently not supported.");
+    }
 
     /*! \brief Resets the buffer and replaces it with another one.
      *  \param buffer The new data buffer.

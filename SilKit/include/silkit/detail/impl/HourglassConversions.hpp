@@ -81,7 +81,8 @@ inline void assignCxxToC(const SilKit::Services::Can::CanStateChangeEvent& cxxIn
     cOut.state = (SilKit_CanControllerState)cxxIn.state;
 }
 
-inline void assignCxxToC(const SilKit::Services::Can::CanErrorStateChangeEvent& cxxIn, SilKit_CanErrorStateChangeEvent& cOut)
+inline void assignCxxToC(const SilKit::Services::Can::CanErrorStateChangeEvent& cxxIn,
+                         SilKit_CanErrorStateChangeEvent& cOut)
 {
     cOut.timestamp = cxxIn.timestamp.count();
     cOut.errorState = (SilKit_CanErrorState)cxxIn.errorState;
@@ -99,7 +100,7 @@ inline void assignCxxToC(const SilKit::Experimental::NetworkSimulation::Can::Can
 }
 
 inline void assignCxxToC(const SilKit::Experimental::NetworkSimulation::Can::CanConfigureBaudrate& cxxIn,
-                  SilKit_Experimental_NetSim_CanConfigureBaudrate& cOut)
+                         SilKit_Experimental_NetSim_CanConfigureBaudrate& cOut)
 {
     cOut.rate = cxxIn.baudRate;
     cOut.fdRate = cxxIn.fdBaudRate;
@@ -141,7 +142,7 @@ inline void assignCxxToC(const SilKit::Services::Flexray::FlexrayFrameEvent& cxx
 }
 
 inline void assignCxxToC(const SilKit::Services::Flexray::FlexrayFrameTransmitEvent& cxxIn,
-                   SilKit_FlexrayFrameTransmitEvent& cOut)
+                         SilKit_FlexrayFrameTransmitEvent& cOut)
 {
     assignCxxToC(cxxIn.frame, *cOut.frame);
     cOut.timestamp = cxxIn.timestamp.count();
@@ -157,20 +158,22 @@ inline void assignCxxToC(const SilKit::Services::Flexray::FlexraySymbolEvent& cx
 }
 
 inline void assignCxxToC(const SilKit::Services::Flexray::FlexraySymbolTransmitEvent& cxxIn,
-                   SilKit_FlexraySymbolTransmitEvent& cOut)
+                         SilKit_FlexraySymbolTransmitEvent& cOut)
 {
     cOut.timestamp = cxxIn.timestamp.count();
     cOut.channel = (SilKit_FlexrayChannel)cxxIn.channel;
     cOut.pattern = (SilKit_FlexraySymbolPattern)cxxIn.pattern;
 }
 
-inline void assignCxxToC(const SilKit::Services::Flexray::FlexrayCycleStartEvent& cxxIn, SilKit_FlexrayCycleStartEvent& cOut)
+inline void assignCxxToC(const SilKit::Services::Flexray::FlexrayCycleStartEvent& cxxIn,
+                         SilKit_FlexrayCycleStartEvent& cOut)
 {
     cOut.timestamp = cxxIn.timestamp.count();
     cOut.cycleCounter = cxxIn.cycleCounter;
 }
 
-inline void assignCxxToC(const SilKit::Services::Flexray::FlexrayPocStatusEvent& cxxIn, SilKit_FlexrayPocStatusEvent& cOut)
+inline void assignCxxToC(const SilKit::Services::Flexray::FlexrayPocStatusEvent& cxxIn,
+                         SilKit_FlexrayPocStatusEvent& cOut)
 {
     cOut.timestamp = cxxIn.timestamp.count();
     cOut.state = (SilKit_FlexrayPocState)cxxIn.state;
@@ -185,7 +188,7 @@ inline void assignCxxToC(const SilKit::Services::Flexray::FlexrayPocStatusEvent&
 }
 
 inline void assignCxxToC(const SilKit::Services::Flexray::FlexrayClusterParameters& cxxIn,
-                  SilKit_FlexrayClusterParameters& cOut)
+                         SilKit_FlexrayClusterParameters& cOut)
 {
     cOut.gColdstartAttempts = cxxIn.gColdstartAttempts;
     cOut.gCycleCountMax = cxxIn.gCycleCountMax;
@@ -209,7 +212,8 @@ inline void assignCxxToC(const SilKit::Services::Flexray::FlexrayClusterParamete
     cOut.gSyncFrameIDCountMax = cxxIn.gSyncFrameIDCountMax;
 }
 
-inline void assignCxxToC(const SilKit::Services::Flexray::FlexrayNodeParameters& cxxIn, SilKit_FlexrayNodeParameters& cOut)
+inline void assignCxxToC(const SilKit::Services::Flexray::FlexrayNodeParameters& cxxIn,
+                         SilKit_FlexrayNodeParameters& cOut)
 {
     cOut.pAllowHaltDueToClock = cxxIn.pAllowHaltDueToClock;
     cOut.pAllowPassiveToActive = cxxIn.pAllowPassiveToActive;
@@ -236,7 +240,8 @@ inline void assignCxxToC(const SilKit::Services::Flexray::FlexrayNodeParameters&
     cOut.pSamplesPerMicrotick = cxxIn.pSamplesPerMicrotick;
 }
 
-inline void assignCxxToC(const SilKit::Services::Flexray::FlexrayTxBufferConfig& cxxIn, SilKit_FlexrayTxBufferConfig& cOut)
+inline void assignCxxToC(const SilKit::Services::Flexray::FlexrayTxBufferConfig& cxxIn,
+                         SilKit_FlexrayTxBufferConfig& cOut)
 {
     cOut.channels = static_cast<SilKit_FlexrayChannel>(cxxIn.channels);
     cOut.slotId = cxxIn.slotId;
@@ -258,7 +263,7 @@ inline void assignCxxToC(const SilKit::Experimental::NetworkSimulation::Flexray:
 }
 
 inline void assignCxxToC(const SilKit::Experimental::NetworkSimulation::Flexray::FlexrayControllerConfig& cxxIn,
-                  SilKit_Experimental_NetSim_FlexrayControllerConfig& cOut)
+                         SilKit_Experimental_NetSim_FlexrayControllerConfig& cOut)
 {
     assignCxxToC(cxxIn.clusterParams, *cOut.clusterParams);
     assignCxxToC(cxxIn.nodeParams, *cOut.nodeParams);
@@ -272,14 +277,14 @@ inline void assignCxxToC(const SilKit::Experimental::NetworkSimulation::Flexray:
 }
 
 inline void assignCxxToC(const SilKit::Experimental::NetworkSimulation::Flexray::FlexrayTxBufferConfigUpdate& cxxIn,
-                  SilKit_Experimental_NetSim_FlexrayTxBufferConfigUpdate& cOut)
+                         SilKit_Experimental_NetSim_FlexrayTxBufferConfigUpdate& cOut)
 {
     cOut.txBufferIdx = cxxIn.txBufferIndex;
     assignCxxToC(cxxIn.txBufferConfig, *cOut.txBufferConfig);
 }
 
 inline void assignCxxToC(const SilKit::Experimental::NetworkSimulation::Flexray::FlexrayTxBufferUpdate& cxxIn,
-                  SilKit_Experimental_NetSim_FlexrayTxBufferUpdate& cOut)
+                         SilKit_Experimental_NetSim_FlexrayTxBufferUpdate& cOut)
 {
     cOut.txBufferIndex = cxxIn.txBufferIndex;
     cOut.payloadDataValid = cxxIn.payloadDataValid;
@@ -393,7 +398,8 @@ inline void assignCxxToC(const SilKit::Services::Lin::LinSendFrameHeaderRequest&
 // Cxx Experimental::NetworkSimulation::Lin to C
 // -----------------------------------
 
-inline void assignCxxToC(const SilKit::Experimental::NetworkSimulation::Lin::LinFrameRequest& cxxIn, SilKit_Experimental_NetSim_LinFrameRequest& cOut)
+inline void assignCxxToC(const SilKit::Experimental::NetworkSimulation::Lin::LinFrameRequest& cxxIn,
+                         SilKit_Experimental_NetSim_LinFrameRequest& cOut)
 {
     assignCxxToC(cxxIn.frame, *cOut.frame);
     cOut.responseType = (SilKit_LinFrameResponseType)cxxIn.responseType;
@@ -476,7 +482,8 @@ inline void assignCToCxx(const SilKit_CanFrameEvent* cIn, SilKit::Services::Can:
     cxxOut.userContext = cIn->userContext;
 }
 
-inline void assignCToCxx(const SilKit_CanFrameTransmitEvent* cIn, SilKit::Services::Can::CanFrameTransmitEvent& cxxOut) {
+inline void assignCToCxx(const SilKit_CanFrameTransmitEvent* cIn, SilKit::Services::Can::CanFrameTransmitEvent& cxxOut)
+{
     cxxOut.userContext = cIn->userContext;
     cxxOut.timestamp = std::chrono::nanoseconds{cIn->timestamp};
     cxxOut.status = static_cast<SilKit::Services::Can::CanTransmitStatus>(cIn->status);
@@ -487,13 +494,14 @@ inline void assignCToCxx(const SilKit_CanFrameTransmitEvent* cIn, SilKit::Servic
 }
 
 
-inline void assignCToCxx(const SilKit_CanStateChangeEvent* cIn, SilKit::Services::Can::CanStateChangeEvent& cxxOut) 
+inline void assignCToCxx(const SilKit_CanStateChangeEvent* cIn, SilKit::Services::Can::CanStateChangeEvent& cxxOut)
 {
     cxxOut.timestamp = std::chrono::nanoseconds{cIn->timestamp};
     cxxOut.state = static_cast<SilKit::Services::Can::CanControllerState>(cIn->state);
 }
 
-inline void assignCToCxx(const SilKit_CanErrorStateChangeEvent* cIn, SilKit::Services::Can::CanErrorStateChangeEvent& cxxOut)
+inline void assignCToCxx(const SilKit_CanErrorStateChangeEvent* cIn,
+                         SilKit::Services::Can::CanErrorStateChangeEvent& cxxOut)
 {
     cxxOut.timestamp = std::chrono::nanoseconds{cIn->timestamp};
     cxxOut.errorState = static_cast<SilKit::Services::Can::CanErrorState>(cIn->errorState);
@@ -503,7 +511,8 @@ inline void assignCToCxx(const SilKit_CanErrorStateChangeEvent* cIn, SilKit::Ser
 // C to Cxx Experimental::NetworkSimulation::Can
 // --------------------------------
 
-inline void assignCToCxx(const SilKit_Experimental_NetSim_CanFrameRequest* cIn, SilKit::Experimental::NetworkSimulation::Can::CanFrameRequest& cxxOut)
+inline void assignCToCxx(const SilKit_Experimental_NetSim_CanFrameRequest* cIn,
+                         SilKit::Experimental::NetworkSimulation::Can::CanFrameRequest& cxxOut)
 {
     cxxOut.userContext = cIn->userContext;
     assignCToCxx(cIn->frame, cxxOut.frame);
@@ -528,7 +537,7 @@ inline void assignCToCxx(const SilKit_Experimental_NetSim_CanControllerMode* cIn
 // C to Cxx Services::Flexray
 // --------------------------------
 
-inline void assignCToCxx(const SilKit_FlexrayHeader* cIn, SilKit::Services::Flexray::FlexrayHeader& cxxOut) 
+inline void assignCToCxx(const SilKit_FlexrayHeader* cIn, SilKit::Services::Flexray::FlexrayHeader& cxxOut)
 {
     cxxOut.cycleCount = cIn->cycleCount;
     cxxOut.flags = cIn->flags;
@@ -551,12 +560,12 @@ inline void assignCToCxx(const SilKit_FlexrayFrameEvent* cIn, SilKit::Services::
 }
 
 inline void assignCToCxx(const SilKit_FlexrayFrameTransmitEvent* cIn,
-                  SilKit::Services::Flexray::FlexrayFrameTransmitEvent& cxxOut)
+                         SilKit::Services::Flexray::FlexrayFrameTransmitEvent& cxxOut)
 {
     cxxOut.timestamp = std::chrono::nanoseconds{cIn->timestamp};
     cxxOut.channel = static_cast<SilKit::Services::Flexray::FlexrayChannel>(cIn->channel);
     cxxOut.txBufferIndex = cIn->txBufferIndex;
-    assignCToCxx(cIn->frame, cxxOut.frame);    
+    assignCToCxx(cIn->frame, cxxOut.frame);
 }
 
 inline void assignCToCxx(const SilKit_FlexraySymbolEvent* cIn, SilKit::Services::Flexray::FlexraySymbolEvent& cxxOut)
@@ -567,20 +576,22 @@ inline void assignCToCxx(const SilKit_FlexraySymbolEvent* cIn, SilKit::Services:
 }
 
 inline void assignCToCxx(const SilKit_FlexraySymbolTransmitEvent* cIn,
-                  SilKit::Services::Flexray::FlexraySymbolTransmitEvent& cxxOut)
+                         SilKit::Services::Flexray::FlexraySymbolTransmitEvent& cxxOut)
 {
     cxxOut.timestamp = std::chrono::nanoseconds{cIn->timestamp};
     cxxOut.channel = static_cast<SilKit::Services::Flexray::FlexrayChannel>(cIn->channel);
     cxxOut.pattern = static_cast<SilKit::Services::Flexray::FlexraySymbolPattern>(cIn->pattern);
 }
 
-inline void assignCToCxx(const SilKit_FlexrayCycleStartEvent* cIn, SilKit::Services::Flexray::FlexrayCycleStartEvent& cxxOut)
+inline void assignCToCxx(const SilKit_FlexrayCycleStartEvent* cIn,
+                         SilKit::Services::Flexray::FlexrayCycleStartEvent& cxxOut)
 {
     cxxOut.timestamp = std::chrono::nanoseconds{cIn->timestamp};
     cxxOut.cycleCounter = cIn->cycleCounter;
 }
 
-inline void assignCToCxx(const SilKit_FlexrayPocStatusEvent* cIn, SilKit::Services::Flexray::FlexrayPocStatusEvent& cxxOut)
+inline void assignCToCxx(const SilKit_FlexrayPocStatusEvent* cIn,
+                         SilKit::Services::Flexray::FlexrayPocStatusEvent& cxxOut)
 {
     cxxOut.timestamp = std::chrono::nanoseconds{cIn->timestamp};
     cxxOut.state = static_cast<SilKit::Services::Flexray::FlexrayPocState>(cIn->state);
@@ -594,7 +605,8 @@ inline void assignCToCxx(const SilKit_FlexrayPocStatusEvent* cIn, SilKit::Servic
     cxxOut.wakeupStatus = static_cast<SilKit::Services::Flexray::FlexrayWakeupStatusType>(cIn->wakeupStatus);
 }
 
-inline void assignCToCxx(const SilKit_FlexrayTxBufferConfig* cIn, SilKit::Services::Flexray::FlexrayTxBufferConfig& cxxOut)
+inline void assignCToCxx(const SilKit_FlexrayTxBufferConfig* cIn,
+                         SilKit::Services::Flexray::FlexrayTxBufferConfig& cxxOut)
 {
     cxxOut.channels = (SilKit::Services::Flexray::FlexrayChannel)cIn->channels;
     cxxOut.slotId = cIn->slotId;
@@ -606,7 +618,7 @@ inline void assignCToCxx(const SilKit_FlexrayTxBufferConfig* cIn, SilKit::Servic
 }
 
 inline void assignCToCxx(const SilKit_FlexrayClusterParameters* cIn,
-                  SilKit::Services::Flexray::FlexrayClusterParameters& cxxOut)
+                         SilKit::Services::Flexray::FlexrayClusterParameters& cxxOut)
 {
     cxxOut.gColdstartAttempts = cIn->gColdstartAttempts;
     cxxOut.gCycleCountMax = cIn->gCycleCountMax;
@@ -630,7 +642,8 @@ inline void assignCToCxx(const SilKit_FlexrayClusterParameters* cIn,
     cxxOut.gSyncFrameIDCountMax = cIn->gSyncFrameIDCountMax;
 }
 
-inline void assignCToCxx(const SilKit_FlexrayNodeParameters* cIn, SilKit::Services::Flexray::FlexrayNodeParameters& cxxOut)
+inline void assignCToCxx(const SilKit_FlexrayNodeParameters* cIn,
+                         SilKit::Services::Flexray::FlexrayNodeParameters& cxxOut)
 {
     cxxOut.pAllowHaltDueToClock = cIn->pAllowHaltDueToClock;
     cxxOut.pAllowPassiveToActive = cIn->pAllowPassiveToActive;
@@ -703,14 +716,12 @@ inline void assignCToCxx(const SilKit_Experimental_NetSim_FlexrayTxBufferUpdate*
 // C to Cxx Services::Ethernet
 // --------------------------------
 
-inline void assignCToCxx(const SilKit_EthernetFrame* cIn,
-                         SilKit::Services::Ethernet::EthernetFrame& cxxOut)
+inline void assignCToCxx(const SilKit_EthernetFrame* cIn, SilKit::Services::Ethernet::EthernetFrame& cxxOut)
 {
     cxxOut.raw = SilKit::Util::ToSpan(cIn->raw);
 }
 
-inline void assignCToCxx(const SilKit_EthernetFrameEvent* cIn,
-                         SilKit::Services::Ethernet::EthernetFrameEvent& cxxOut)
+inline void assignCToCxx(const SilKit_EthernetFrameEvent* cIn, SilKit::Services::Ethernet::EthernetFrameEvent& cxxOut)
 {
     assignCToCxx(cIn->ethernetFrame, cxxOut.frame);
     cxxOut.timestamp = std::chrono::nanoseconds{cIn->timestamp};
@@ -830,7 +841,9 @@ inline void assignCToCxx(const SilKit_Experimental_NetSim_LinControllerConfig* c
         assignCToCxx(&cIn->frameResponses[i], frameResponse);
         cxxOut.frameResponses.push_back(std::move(frameResponse));
     }
-    cxxOut.simulationMode = static_cast<SilKit::Experimental::NetworkSimulation::Lin::LinControllerConfig::SimulationMode>(cIn->simulationMode);
+    cxxOut.simulationMode =
+        static_cast<SilKit::Experimental::NetworkSimulation::Lin::LinControllerConfig::SimulationMode>(
+            cIn->simulationMode);
 }
 
 inline void assignCToCxx(const SilKit_Experimental_NetSim_LinFrameResponseUpdate* cIn,

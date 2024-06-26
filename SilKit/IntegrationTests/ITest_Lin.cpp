@@ -78,7 +78,8 @@ class Schedule
 {
 public:
     Schedule() = default;
-    Schedule(std::initializer_list<std::pair<std::chrono::nanoseconds, std::function<void(std::chrono::nanoseconds)>>> tasks)
+    Schedule(
+        std::initializer_list<std::pair<std::chrono::nanoseconds, std::function<void(std::chrono::nanoseconds)>>> tasks)
     {
         for (auto&& task : tasks)
         {
@@ -100,7 +101,7 @@ public:
 
     void ScheduleNextTask()
     {
-        if(_nextTask == _schedule.end())
+        if (_nextTask == _schedule.end())
         {
             return;
         }
@@ -119,8 +120,13 @@ public:
     }
 
 private:
-    struct Task {
-        Task(std::chrono::nanoseconds delay, std::function<void(std::chrono::nanoseconds)> action) : delay{delay}, action{action} {}
+    struct Task
+    {
+        Task(std::chrono::nanoseconds delay, std::function<void(std::chrono::nanoseconds)> action)
+            : delay{delay}
+            , action{action}
+        {
+        }
 
         std::chrono::nanoseconds delay;
         std::function<void(std::chrono::nanoseconds)> action;
@@ -158,8 +164,8 @@ struct LinNode
 
     virtual ~LinNode() = default;
 
-    void Stop() 
-    { 
+    void Stop()
+    {
         _lifecycleService->Stop("Stop");
     }
 
@@ -205,14 +211,14 @@ public:
         _result.sendTimes.push_back(now);
         controller->SendFrame(frame, LinFrameResponseType::MasterResponse);
     }
-        
+
     void SendFrame_17(std::chrono::nanoseconds now)
     {
         LinFrame frame;
         frame.id = 17;
         frame.checksumModel = LinChecksumModel::Classic;
         frame.dataLength = 6;
-        frame.data = std::array<uint8_t, 8>{1,7,1,7,1,7,1,7};
+        frame.data = std::array<uint8_t, 8>{1, 7, 1, 7, 1, 7, 1, 7};
 
         _result.sendTimes.push_back(now);
         controller->SendFrame(frame, LinFrameResponseType::MasterResponse);
@@ -280,12 +286,10 @@ private:
 };
 
 
-
 class LinSlave : public LinNode
 {
 public:
-    LinSlave(IParticipant* participant, ILinController* controller,
-             Orchestration::ILifecycleService* lifecycleService)
+    LinSlave(IParticipant* participant, ILinController* controller, Orchestration::ILifecycleService* lifecycleService)
         : LinNode(participant, controller, "LinSlave", lifecycleService)
     {
     }
@@ -313,11 +317,10 @@ public:
     void GoToSleepHandler(ILinController* linController, const LinGoToSleepEvent& /*goToSleepEvent*/)
     {
         // wakeup in 10 ms
-        timer.Set(now + 10ms,
-            [linController](std::chrono::nanoseconds /*now*/) {
-                linController->Wakeup();
-                // The LinSlave doesn't receive the wakeup pulse sent by himself in a trivial simulation (without netsim)
-            });
+        timer.Set(now + 10ms, [linController](std::chrono::nanoseconds /*now*/) {
+            linController->Wakeup();
+            // The LinSlave doesn't receive the wakeup pulse sent by himself in a trivial simulation (without netsim)
+        });
         linController->GoToSleepInternal();
         _result.gotoSleepReceived = true;
     }
@@ -401,7 +404,7 @@ protected:
 TEST_F(ITest_Lin, sync_lin_simulation)
 {
     auto registryUri = MakeTestRegistryUri();
-    std::vector<std::string> participantNames = { "LinMaster", "LinSlave" };
+    std::vector<std::string> participantNames = {"LinMaster", "LinSlave"};
     _simTestHarness = std::make_unique<SimTestHarness>(participantNames, registryUri, false);
 
     std::vector<std::unique_ptr<LinNode>> linNodes;
@@ -409,62 +412,57 @@ TEST_F(ITest_Lin, sync_lin_simulation)
     {
         const std::string participantName = "LinMaster";
         auto&& participant = _simTestHarness->GetParticipant(participantName)->Participant();
-        auto&& lifecycleService =
-            _simTestHarness->GetParticipant(participantName)->GetOrCreateLifecycleService();
+        auto&& lifecycleService = _simTestHarness->GetParticipant(participantName)->GetOrCreateLifecycleService();
         auto&& timeSyncService = _simTestHarness->GetParticipant(participantName)->GetOrCreateTimeSyncService();
         auto&& linController = participant->CreateLinController("LinController1", "LIN_1");
         lifecycleService->SetCommunicationReadyHandler([participantName, linController]() {
             auto config = MakeControllerConfig(participantName);
             linController->Init(config);
-            });
+        });
 
         auto master = std::make_unique<LinMaster>(participant, linController, lifecycleService);
 
         linController->AddFrameStatusHandler(
             [master = master.get()](ILinController* linController, const LinFrameStatusEvent& frameStatusEvent) {
-                master->ReceiveFrameStatus(linController, frameStatusEvent);
-            });
+            master->ReceiveFrameStatus(linController, frameStatusEvent);
+        });
         linController->AddWakeupHandler(
             [master = master.get()](ILinController* linController, const LinWakeupEvent& wakeupEvent) {
-                master->WakeupHandler(linController, wakeupEvent);
-            });
+            master->WakeupHandler(linController, wakeupEvent);
+        });
 
         timeSyncService->SetSimulationStepHandler(
             [master = master.get(), participantName](auto now, std::chrono::nanoseconds /*duration*/) {
-                master->doAction(now);
-            }, 1ms);
+            master->doAction(now);
+        }, 1ms);
         linNodes.emplace_back(std::move(master));
     }
 
     {
         const std::string participantName = "LinSlave";
         auto&& participant = _simTestHarness->GetParticipant(participantName)->Participant();
-        auto&& lifecycleService =
-            _simTestHarness->GetParticipant(participantName)->GetOrCreateLifecycleService();
+        auto&& lifecycleService = _simTestHarness->GetParticipant(participantName)->GetOrCreateLifecycleService();
         auto&& timeSyncService = _simTestHarness->GetParticipant(participantName)->GetOrCreateTimeSyncService();
         auto&& linController = participant->CreateLinController("LinController1", "LIN_1");
 
 
         auto config = MakeControllerConfig(participantName);
-        lifecycleService->SetCommunicationReadyHandler([config, participantName, linController]() {
-            linController->Init(config);
-          });
+        lifecycleService->SetCommunicationReadyHandler(
+            [config, participantName, linController]() { linController->Init(config); });
 
         auto slave = std::make_unique<LinSlave>(participant, linController, lifecycleService);
 
         linController->AddFrameStatusHandler(
             [slave = slave.get()](ILinController* linController, const LinFrameStatusEvent& frameStatusEvent) {
-                slave->FrameStatusHandler(linController, frameStatusEvent);
-            });
+            slave->FrameStatusHandler(linController, frameStatusEvent);
+        });
         linController->AddGoToSleepHandler(
             [slave = slave.get()](ILinController* linController, const LinGoToSleepEvent& goToSleepEvent) {
-                slave->GoToSleepHandler(linController, goToSleepEvent);
-            });
+            slave->GoToSleepHandler(linController, goToSleepEvent);
+        });
 
         timeSyncService->SetSimulationStepHandler(
-            [slave = slave.get()](auto now, std::chrono::nanoseconds /*duration*/) {
-                slave->DoAction(now);
-            }, 1ms);
+            [slave = slave.get()](auto now, std::chrono::nanoseconds /*duration*/) { slave->DoAction(now); }, 1ms);
         linNodes.emplace_back(std::move(slave));
     }
 
@@ -475,7 +473,7 @@ TEST_F(ITest_Lin, sync_lin_simulation)
 
     // Sim is stopped when master received the wakeup pulse
 
-    for (auto& node: linNodes)
+    for (auto& node : linNodes)
     {
         if (node->_name == "LinSlave")
         {
@@ -487,8 +485,7 @@ TEST_F(ITest_Lin, sync_lin_simulation)
         }
         else
         {
-            EXPECT_TRUE(node->_result.gotoSleepSent)
-                << "Assuming node " << node->_name << " has received a GoToSleep";
+            EXPECT_TRUE(node->_result.gotoSleepSent) << "Assuming node " << node->_name << " has received a GoToSleep";
             EXPECT_TRUE(node->_result.wakeupReceived) << "Assuming node " << node->_name << " has received a Wakeup";
         }
     }
@@ -500,7 +497,7 @@ TEST_F(ITest_Lin, sync_lin_simulation)
     EXPECT_GT(masterRecvTimes.size(), 0u);
     ASSERT_EQ(masterSendTimes.size(), masterRecvTimes.size())
         << "The master send times and receive times should have equal size.";
-    for(auto i = 0u; i< masterRecvTimes.size(); i++)
+    for (auto i = 0u; i < masterRecvTimes.size(); i++)
     {
         const auto& sendT = masterSendTimes.at(i);
         const auto& recvT = masterRecvTimes.at(i);
@@ -522,7 +519,7 @@ TEST_F(ITest_Lin, sync_lin_simulation)
     auto&& slaveRecvFrames = linNodes.at(1)->_result.receivedFrames;
 
     // 5x acks with TX_OK for id 16,17,18,19,60 on master
-    EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_TX_OK].size(), 5); 
+    EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_TX_OK].size(), 5);
 
     // LIN_RX_OK for Id 16 and GoToSleep-Frame
     EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_RX_OK].size(), 2);

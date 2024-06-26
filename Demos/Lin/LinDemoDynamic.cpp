@@ -79,7 +79,8 @@ class Schedule
 {
 public:
     Schedule() = default;
-    Schedule(std::initializer_list<std::pair<std::chrono::nanoseconds, std::function<void(std::chrono::nanoseconds)>>> tasks)
+    Schedule(
+        std::initializer_list<std::pair<std::chrono::nanoseconds, std::function<void(std::chrono::nanoseconds)>>> tasks)
     {
         for (auto&& task : tasks)
         {
@@ -112,8 +113,13 @@ public:
     }
 
 private:
-    struct Task {
-        Task(std::chrono::nanoseconds delay, std::function<void(std::chrono::nanoseconds)> action) : delay{delay}, action{action} {}
+    struct Task
+    {
+        Task(std::chrono::nanoseconds delay, std::function<void(std::chrono::nanoseconds)> action)
+            : delay{delay}
+            , action{action}
+        {
+        }
 
         std::chrono::nanoseconds delay;
         std::function<void(std::chrono::nanoseconds)> action;
@@ -151,7 +157,7 @@ public:
         f17.id = 17;
         f17.checksumModel = LinChecksumModel::Classic;
         f17.dataLength = 6;
-        f17.data = std::array<uint8_t, 8>{1,7,1,7,1,7,1,7};
+        f17.data = std::array<uint8_t, 8>{1, 7, 1, 7, 1, 7, 1, 7};
         _masterResponses[f17.id] = f17;
 
         LinFrame f18{};
@@ -180,7 +186,8 @@ public:
     void SendFrameHeader(std::chrono::nanoseconds now, LinId linId)
     {
         controller->SendFrameHeader(linId);
-        std::cout << "<< LIN Frame sent with ID=" << static_cast<uint16_t>(linId) << " @" << now.count() << "ns" << std::endl;
+        std::cout << "<< LIN Frame sent with ID=" << static_cast<uint16_t>(linId) << " @" << now.count() << "ns"
+                  << std::endl;
     }
 
     void GoToSleep(std::chrono::nanoseconds now)
@@ -193,8 +200,10 @@ public:
     {
         switch (frameStatusEvent.status)
         {
-        case LinFrameStatus::LIN_RX_OK: break; // good case, no need to warn
-        case LinFrameStatus::LIN_TX_OK: break; // good case, no need to warn
+        case LinFrameStatus::LIN_RX_OK:
+            break; // good case, no need to warn
+        case LinFrameStatus::LIN_TX_OK:
+            break; // good case, no need to warn
         default:
             std::cout << "WARNING: LIN transmission failed!" << std::endl;
         }
@@ -216,7 +225,8 @@ public:
         schedule.ScheduleNextTask();
     }
 
-    void OnFrameHeader(ILinController* linController, const SilKit::Experimental::Services::Lin::LinFrameHeaderEvent& header)
+    void OnFrameHeader(ILinController* linController,
+                       const SilKit::Experimental::Services::Lin::LinFrameHeaderEvent& header)
     {
         std::cout << ">> Received Frame Header: id=" << (int)header.id << "@" << header.timestamp << std::endl;
 
@@ -271,21 +281,18 @@ public:
             UpdateDynamicResponseTo34();
         }
 
-        std::cout << ">> " << frameStatusEvent.frame
-                  << " status=" << frameStatusEvent.status
-                  << " timestamp=" << frameStatusEvent.timestamp
-                  << std::endl;
+        std::cout << ">> " << frameStatusEvent.frame << " status=" << frameStatusEvent.status
+                  << " timestamp=" << frameStatusEvent.timestamp << std::endl;
     }
 
     void GoToSleepHandler(ILinController* linController, const LinGoToSleepEvent& /*goToSleepEvent*/)
     {
         std::cout << "LIN Slave received go-to-sleep command; entering sleep mode." << std::endl;
         // wakeup in 10 ms
-        timer.Set(now + 10ms,
-            [linController](std::chrono::nanoseconds tnow) {
-                std::cout << "<< Wakeup pulse @" << tnow << std::endl;
-                linController->Wakeup();
-            });
+        timer.Set(now + 10ms, [linController](std::chrono::nanoseconds tnow) {
+            std::cout << "<< Wakeup pulse @" << tnow << std::endl;
+            linController->Wakeup();
+        });
         linController->GoToSleepInternal();
     }
 
@@ -301,7 +308,8 @@ public:
         }
     }
 
-    void OnFrameHeader(ILinController* linController, const SilKit::Experimental::Services::Lin::LinFrameHeaderEvent& header)
+    void OnFrameHeader(ILinController* linController,
+                       const SilKit::Experimental::Services::Lin::LinFrameHeaderEvent& header)
     {
         std::cout << "<< Received Frame Header: id=" << (int)header.id << "@" << header.timestamp << std::endl;
 
@@ -351,7 +359,8 @@ void InitLinSlave(ILinController* linController, std::string participantName)
  * Main Function
  **************************************************************************************************/
 
-int main(int argc, char** argv) try
+int main(int argc, char** argv)
+try
 {
     if (argc < 3)
     {
@@ -387,52 +396,44 @@ int main(int argc, char** argv) try
 
     std::cout << "Creating participant '" << participantName << "' with registry " << registryUri << std::endl;
     auto participant = SilKit::CreateParticipant(participantConfiguration, participantName, registryUri);
-    auto* lifecycleService =
-        participant->CreateLifecycleService({OperationMode::Coordinated});
+    auto* lifecycleService = participant->CreateLifecycleService({OperationMode::Coordinated});
     auto* timeSyncService = lifecycleService->CreateTimeSyncService();
     auto* linController = participant->CreateLinController("LIN1", "LIN1");
 
     // Set a Stop and Shutdown Handler
-    lifecycleService->SetStopHandler([]() {
-        std::cout << "Stop handler called" << std::endl;
-    });
-    lifecycleService->SetShutdownHandler([]() {
-        std::cout << "Shutdown handler called" << std::endl;
-    });
+    lifecycleService->SetStopHandler([]() { std::cout << "Stop handler called" << std::endl; });
+    lifecycleService->SetShutdownHandler([]() { std::cout << "Shutdown handler called" << std::endl; });
 
     LinMaster master{linController};
     LinSlave slave;
 
     if (participantName == "LinMaster")
     {
-
-        lifecycleService->SetCommunicationReadyHandler([&participantName, linController]() {
-            InitLinMaster(linController, participantName);
-        });
+        lifecycleService->SetCommunicationReadyHandler(
+            [&participantName, linController]() { InitLinMaster(linController, participantName); });
         linController->AddFrameStatusHandler(
             [&master](ILinController* linController, const LinFrameStatusEvent& frameStatusEvent) {
-                master.FrameStatusHandler(linController, frameStatusEvent);
-            });
+            master.FrameStatusHandler(linController, frameStatusEvent);
+        });
         linController->AddWakeupHandler([&master](ILinController* linController, const LinWakeupEvent& wakeupEvent) {
-                master.WakeupHandler(linController, wakeupEvent);
-            });
+            master.WakeupHandler(linController, wakeupEvent);
+        });
 
         SilKit::Experimental::Services::Lin::AddFrameHeaderHandler(
             linController, [&master](ILinController* linController,
                                      const SilKit::Experimental::Services::Lin::LinFrameHeaderEvent& event) {
-                master.OnFrameHeader(linController, event);
-            });
+            master.OnFrameHeader(linController, event);
+        });
 
         if (runSync)
         {
             timeSyncService->SetSimulationStepHandler(
                 [&master](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
-                    auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
-                    std::cout << "now=" << nowMs.count() << "ms" << std::endl;
+                auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
+                std::cout << "now=" << nowMs.count() << "ms" << std::endl;
 
-                    master.DoAction(now);
-                },
-                1ms);
+                master.DoAction(now);
+            }, 1ms);
 
 
             auto finalStateFuture = lifecycleService->StartLifecycle();
@@ -450,8 +451,8 @@ int main(int argc, char** argv) try
             auto now = 0ms;
 
             workerThread = std::thread{[&]() {
-                while (lifecycleService->State() == ParticipantState::ReadyToRun ||
-                       lifecycleService->State() == ParticipantState::Running)
+                while (lifecycleService->State() == ParticipantState::ReadyToRun
+                       || lifecycleService->State() == ParticipantState::Running)
                 {
                     master.DoAction(now);
                     now += 1ms;
@@ -484,39 +485,37 @@ int main(int argc, char** argv) try
     }
     else if (participantName == "LinSlave")
     {
-        lifecycleService->SetCommunicationReadyHandler([&participantName, linController]() {
-            InitLinSlave(linController, participantName);
-        });
+        lifecycleService->SetCommunicationReadyHandler(
+            [&participantName, linController]() { InitLinSlave(linController, participantName); });
 
         linController->AddFrameStatusHandler(
             [&slave](ILinController* linController, const LinFrameStatusEvent& frameStatusEvent) {
-                slave.FrameStatusHandler(linController, frameStatusEvent);
-            });
+            slave.FrameStatusHandler(linController, frameStatusEvent);
+        });
         linController->AddGoToSleepHandler(
             [&slave](ILinController* linController, const LinGoToSleepEvent& goToSleepEvent) {
-                slave.GoToSleepHandler(linController, goToSleepEvent);
-            });
+            slave.GoToSleepHandler(linController, goToSleepEvent);
+        });
         linController->AddWakeupHandler([&slave](ILinController* linController, const LinWakeupEvent& wakeupEvent) {
-                slave.WakeupHandler(linController, wakeupEvent);
-            });
+            slave.WakeupHandler(linController, wakeupEvent);
+        });
 
         SilKit::Experimental::Services::Lin::AddFrameHeaderHandler(
             linController, [&slave](ILinController* linController,
-                const SilKit::Experimental::Services::Lin::LinFrameHeaderEvent& event) {
-              slave.OnFrameHeader(linController, event);
-            });
+                                    const SilKit::Experimental::Services::Lin::LinFrameHeaderEvent& event) {
+            slave.OnFrameHeader(linController, event);
+        });
 
         if (runSync)
         {
             timeSyncService->SetSimulationStepHandler(
                 [&slave](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
-                    std::cout << "now=" << std::chrono::duration_cast<std::chrono::milliseconds>(now).count() << "ms"
-                              << std::endl;
-                    slave.DoAction(now);
+                std::cout << "now=" << std::chrono::duration_cast<std::chrono::milliseconds>(now).count() << "ms"
+                          << std::endl;
+                slave.DoAction(now);
 
-                    std::this_thread::sleep_for(100ms);
-                },
-                1ms);
+                std::this_thread::sleep_for(100ms);
+            }, 1ms);
 
             auto finalStateFuture = lifecycleService->StartLifecycle();
             auto finalState = finalStateFuture.get();
@@ -534,8 +533,8 @@ int main(int argc, char** argv) try
             auto now = 0ms;
 
             workerThread = std::thread{[&]() {
-                while (lifecycleService->State() == ParticipantState::ReadyToRun ||
-                       lifecycleService->State() == ParticipantState::Running)
+                while (lifecycleService->State() == ParticipantState::ReadyToRun
+                       || lifecycleService->State() == ParticipantState::Running)
                 {
                     slave.DoAction(now);
                     now += 1ms;
@@ -568,8 +567,7 @@ int main(int argc, char** argv) try
     }
     else
     {
-        std::cout << "Wrong participant name provided. Use either \"LinMaster\" or \"LinSlave\"."
-                  << std::endl;
+        std::cout << "Wrong participant name provided. Use either \"LinMaster\" or \"LinSlave\"." << std::endl;
         return 1;
     }
 

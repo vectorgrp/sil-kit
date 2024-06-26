@@ -37,8 +37,8 @@ TEST(Test_SyncSerdes, MwSync_SystemCommand)
     SystemCommand in{SystemCommand::Kind::AbortSimulation};
     SystemCommand out{SystemCommand::Kind::Invalid};
 
-    Serialize(buffer , in);
-    Deserialize(buffer,out);
+    Serialize(buffer, in);
+    Deserialize(buffer, out);
 
     EXPECT_EQ(in.kind, out.kind);
 }
@@ -49,7 +49,8 @@ TEST(Test_SyncSerdes, MwSync_ParticipantStatus)
     SilKit::Core::MessageBuffer buffer;
 
     auto now = std::chrono::system_clock::now();
-    decltype(now) nowUs = std::chrono::system_clock::time_point{std::chrono::duration_cast<std::chrono::microseconds>(now.time_since_epoch())};
+    decltype(now) nowUs = std::chrono::system_clock::time_point{
+        std::chrono::duration_cast<std::chrono::microseconds>(now.time_since_epoch())};
 
     ParticipantStatus in;
     ParticipantStatus out{};
@@ -60,8 +61,8 @@ TEST(Test_SyncSerdes, MwSync_ParticipantStatus)
     in.enterTime = nowUs;
     in.refreshTime = nowUs;
 
-    Serialize(buffer , in);
-    Deserialize(buffer,out);
+    Serialize(buffer, in);
+    Deserialize(buffer, out);
 
     EXPECT_EQ(in.participantName, out.participantName);
     EXPECT_EQ(in.state, out.state);
@@ -71,4 +72,3 @@ TEST(Test_SyncSerdes, MwSync_ParticipantStatus)
 }
 
 } // anonymous namespace
-

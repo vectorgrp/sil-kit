@@ -57,8 +57,7 @@ std::ostream& operator<<(std::ostream& out, nanoseconds timestamp)
 void FrameTransmitHandler(const CanFrameTransmitEvent& ack, ILogger* logger)
 {
     std::stringstream buffer;
-    buffer << ">> " << ack.status
-           << " for CAN frame with timestamp=" << ack.timestamp
+    buffer << ">> " << ack.status << " for CAN frame with timestamp=" << ack.timestamp
            << " and userContext=" << ack.userContext;
     logger->Info(buffer.str());
 }
@@ -67,15 +66,14 @@ void FrameHandler(const CanFrameEvent& frameEvent, ILogger* logger)
 {
     std::string payload(frameEvent.frame.dataField.begin(), frameEvent.frame.dataField.end());
     std::stringstream buffer;
-    buffer << ">> CAN frame: canId=" << frameEvent.frame.canId
-           << " timestamp=" << frameEvent.timestamp
-           << " \"" << payload << "\"";
+    buffer << ">> CAN frame: canId=" << frameEvent.frame.canId << " timestamp=" << frameEvent.timestamp << " \""
+           << payload << "\"";
     logger->Info(buffer.str());
 }
 
 void SendFrame(ICanController* controller, ILogger* logger)
 {
-    CanFrame canFrame {};
+    CanFrame canFrame{};
     canFrame.canId = 3;
     canFrame.flags |= static_cast<CanFrameFlagMask>(CanFrameFlag::Fdf) // FD Format Indicator
                       | static_cast<CanFrameFlagMask>(CanFrameFlag::Brs); // Bit Rate Switch (for FD Format only)
@@ -94,7 +92,7 @@ void SendFrame(ICanController* controller, ILogger* logger)
     canFrame.dataField = payloadBytes;
     canFrame.dlc = static_cast<uint16_t>(canFrame.dataField.size());
 
-    void* const userContext = reinterpret_cast<void *>(static_cast<intptr_t>(currentMessageId));
+    void* const userContext = reinterpret_cast<void*>(static_cast<intptr_t>(currentMessageId));
 
     controller->SendFrame(std::move(canFrame), userContext);
     std::stringstream buffer;
@@ -155,7 +153,8 @@ int main(int argc, char** argv)
             }
         }
 
-        auto participantConfiguration = SilKit::Config::ParticipantConfigurationFromFile(participantConfigurationFilename);
+        auto participantConfiguration =
+            SilKit::Config::ParticipantConfigurationFromFile(participantConfigurationFilename);
         auto sleepTimePerTick = 1000ms;
 
         std::cout << "Creating participant '" << participantName << "' with registry " << registryUri << std::endl;
@@ -165,29 +164,21 @@ int main(int argc, char** argv)
         auto* logger = participant->GetLogger();
         auto* canController = participant->CreateCanController("CAN1", "CAN1");
 
-        canController->AddFrameTransmitHandler(
-            [logger](ICanController* /*ctrl*/, const CanFrameTransmitEvent& ack) {
-                FrameTransmitHandler(ack, logger);
-            });
+        canController->AddFrameTransmitHandler([logger](ICanController* /*ctrl*/, const CanFrameTransmitEvent& ack) {
+            FrameTransmitHandler(ack, logger);
+        });
         canController->AddFrameHandler(
-            [logger](ICanController* /*ctrl*/, const CanFrameEvent& frameEvent) {
-                FrameHandler(frameEvent, logger);
-            });
+            [logger](ICanController* /*ctrl*/, const CanFrameEvent& frameEvent) { FrameHandler(frameEvent, logger); });
 
         auto operationMode = (runSync ? OperationMode::Coordinated : OperationMode::Autonomous);
 
         auto* lifecycleService = participant->CreateLifecycleService({operationMode});
 
         // Observe state changes
-        lifecycleService->SetStopHandler([]() {
-            std::cout << "Stop handler called" << std::endl;
-        });
-        lifecycleService->SetShutdownHandler([]() {
-            std::cout << "Shutdown handler called" << std::endl;
-        });
-        lifecycleService->SetAbortHandler([](auto lastState) {
-            std::cout << "Abort handler called while in state " << lastState << std::endl;
-        });
+        lifecycleService->SetStopHandler([]() { std::cout << "Stop handler called" << std::endl; });
+        lifecycleService->SetShutdownHandler([]() { std::cout << "Shutdown handler called" << std::endl; });
+        lifecycleService->SetAbortHandler(
+            [](auto lastState) { std::cout << "Abort handler called while in state " << lastState << std::endl; });
 
         if (runSync)
         {
@@ -204,18 +195,19 @@ int main(int argc, char** argv)
                 timeSyncService->SetSimulationStepHandler(
                     [canController, logger, sleepTimePerTick](std::chrono::nanoseconds now,
                                                               std::chrono::nanoseconds duration) {
-                        std::cout << "now=" << now << ", duration=" << duration << std::endl;
-                        SendFrame(canController, logger);
-                        std::this_thread::sleep_for(sleepTimePerTick);
-                    }, 5ms);
+                    std::cout << "now=" << now << ", duration=" << duration << std::endl;
+                    SendFrame(canController, logger);
+                    std::this_thread::sleep_for(sleepTimePerTick);
+                },
+                    5ms);
             }
             else
             {
                 timeSyncService->SetSimulationStepHandler(
                     [sleepTimePerTick](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {
-                        std::cout << "now=" << now << ", duration=" << duration << std::endl;
-                        std::this_thread::sleep_for(sleepTimePerTick);
-                    }, 5ms);
+                    std::cout << "now=" << now << ", duration=" << duration << std::endl;
+                    std::this_thread::sleep_for(sleepTimePerTick);
+                }, 5ms);
             }
 
             auto finalStateFuture = lifecycleService->StartLifecycle();
@@ -238,8 +230,8 @@ int main(int argc, char** argv)
 
                 workerThread = std::thread{[&]() {
                     futureObj.get();
-                    while (lifecycleService->State() == ParticipantState::ReadyToRun ||
-                           lifecycleService->State() == ParticipantState::Running)
+                    while (lifecycleService->State() == ParticipantState::ReadyToRun
+                           || lifecycleService->State() == ParticipantState::Running)
                     {
                         if (participantName == "CanWriter")
                         {
@@ -255,17 +247,15 @@ int main(int argc, char** argv)
                 canController->Start();
             });
 
-            lifecycleService->SetStartingHandler([&]() {
-                promiseObj.set_value();
-            });
+            lifecycleService->SetStartingHandler([&]() { promiseObj.set_value(); });
 
             lifecycleService->StartLifecycle();
             std::cout << "Press enter to leave the simulation..." << std::endl;
             std::cin.ignore();
 
             isStopRequested = true;
-            if (lifecycleService->State() == ParticipantState::Running || 
-                lifecycleService->State() == ParticipantState::Paused)
+            if (lifecycleService->State() == ParticipantState::Running
+                || lifecycleService->State() == ParticipantState::Paused)
             {
                 std::cout << "User requested to stop in state " << lifecycleService->State() << std::endl;
                 lifecycleService->Stop("User requested to stop");

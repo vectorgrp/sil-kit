@@ -27,15 +27,13 @@ namespace PubSub {
 
 inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const WireDataMessageEvent& msg)
 {
-    buffer << msg.data
-           << msg.timestamp;
+    buffer << msg.data << msg.timestamp;
     return buffer;
 }
 
 inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, WireDataMessageEvent& msg)
 {
-    buffer >> msg.data
-           >> msg.timestamp;
+    buffer >> msg.data >> msg.timestamp;
     return buffer;
 }
 
@@ -50,6 +48,6 @@ void Deserialize(SilKit::Core::MessageBuffer& buffer, WireDataMessageEvent& out)
     buffer >> out;
 }
 
-} // namespace PubSub    
+} // namespace PubSub
 } // namespace Services
 } // namespace SilKit

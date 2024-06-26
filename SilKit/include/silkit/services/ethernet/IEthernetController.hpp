@@ -36,7 +36,7 @@ class IEthernetController
 public:
     /*! \brief Generic Ethernet callback method
     */
-    template<typename MsgT>
+    template <typename MsgT>
     using CallbackT = std::function<void(IEthernetController* controller, const MsgT& msg)>;
 
     /*! Callback type to indicate that an EthernetFrameEvent has been received.
@@ -86,8 +86,8 @@ public:
      * 
      * \return Returns a \ref SilKit::Util::HandlerId that can be used to remove the callback.
      */
-    virtual auto AddFrameHandler(
-        FrameHandler handler, DirectionMask directionMask = static_cast<DirectionMask>(TransmitDirection::RX)) -> HandlerId = 0;
+    virtual auto AddFrameHandler(FrameHandler handler, DirectionMask directionMask = static_cast<DirectionMask>(
+                                                           TransmitDirection::RX)) -> HandlerId = 0;
 
     /*! \brief Remove a FrameHandler by \ref SilKit::Util::HandlerId on this controller
      *
@@ -107,9 +107,9 @@ public:
      * 
      * \return Returns a \ref SilKit::Util::HandlerId that can be used to remove the callback.
      */
-    virtual auto AddFrameTransmitHandler(FrameTransmitHandler handler, EthernetTransmitStatusMask transmitStatusMask =
-                                                                           SilKit_EthernetTransmitStatus_DefaultMask)
-        -> HandlerId = 0;
+    virtual auto AddFrameTransmitHandler(
+        FrameTransmitHandler handler,
+        EthernetTransmitStatusMask transmitStatusMask = SilKit_EthernetTransmitStatus_DefaultMask) -> HandlerId = 0;
 
     /*! \brief Remove a FrameTransmitHandler by \ref SilKit::Util::HandlerId on this controller
      *

@@ -25,7 +25,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 namespace SilKit {
 namespace Core {
 
-enum class VAsioMsgKind: uint8_t
+enum class VAsioMsgKind : uint8_t
 {
     Invalid = 0,
     SubscriptionAnnouncement = 1,

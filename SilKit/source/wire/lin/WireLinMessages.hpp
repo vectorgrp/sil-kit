@@ -167,11 +167,8 @@ bool operator==(const LinFrameResponseUpdate& lhs, const LinFrameResponseUpdate&
 //! \brief operator== for WireLinControllerConfig
 bool operator==(const WireLinControllerConfig& lhs, const WireLinControllerConfig& rhs)
 {
-    return lhs.baudRate == rhs.baudRate
-        && lhs.controllerMode == rhs.controllerMode
-        && lhs.frameResponses == rhs.frameResponses
-        && lhs.simulationMode == rhs.simulationMode
-        ;
+    return lhs.baudRate == rhs.baudRate && lhs.controllerMode == rhs.controllerMode
+           && lhs.frameResponses == rhs.frameResponses && lhs.simulationMode == rhs.simulationMode;
 }
 
 std::ostream& operator<<(std::ostream& out, const LinTransmission& transmission)
@@ -224,12 +221,10 @@ std::ostream& operator<<(std::ostream& out, const LinFrameResponseUpdate& frameR
 
 std::ostream& operator<<(std::ostream& out, const WireLinControllerConfig& config)
 {
-    out << "lin::WireLinControllerConfig{" << config.baudRate << ", "
-        << static_cast<int>(config.controllerMode) << ", "
-        << static_cast<int>(config.simulationMode) << ", "
-        ;
+    out << "lin::WireLinControllerConfig{" << config.baudRate << ", " << static_cast<int>(config.controllerMode) << ", "
+        << static_cast<int>(config.simulationMode) << ", ";
     out << "{";
-    for (auto&& response: config.frameResponses)
+    for (auto&& response : config.frameResponses)
     {
         out << "," << static_cast<uint16_t>(response.frame.id);
     }

@@ -52,14 +52,29 @@ std::ostream& operator<<(std::ostream& outStream, const Level& level)
 {
     switch (level)
     {
-    case Level::Trace: outStream << "Trace"; break;
-    case Level::Debug: outStream << "Debug"; break;
-    case Level::Info: outStream << "Info"; break;
-    case Level::Warn: outStream << "Warn"; break;
-    case Level::Error: outStream << "Error"; break;
-    case Level::Critical: outStream << "Critical"; break;
-    case Level::Off: outStream << "Off"; break;
-    default: outStream << "Invalid Logging::Level";
+    case Level::Trace:
+        outStream << "Trace";
+        break;
+    case Level::Debug:
+        outStream << "Debug";
+        break;
+    case Level::Info:
+        outStream << "Info";
+        break;
+    case Level::Warn:
+        outStream << "Warn";
+        break;
+    case Level::Error:
+        outStream << "Error";
+        break;
+    case Level::Critical:
+        outStream << "Critical";
+        break;
+    case Level::Off:
+        outStream << "Off";
+        break;
+    default:
+        outStream << "Invalid Logging::Level";
     }
     return outStream;
 }
@@ -67,10 +82,7 @@ std::ostream& operator<<(std::ostream& outStream, const Level& level)
 inline Level from_string(const std::string& levelStr)
 {
     auto lowerCase = [](auto s) {
-        std::transform(s.begin(),
-            s.end(),
-            s.begin(),
-            [](unsigned char c){ return (unsigned char)std::tolower(c);});
+        std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) { return (unsigned char)std::tolower(c); });
         return s;
     };
     auto logLevel = lowerCase(levelStr);

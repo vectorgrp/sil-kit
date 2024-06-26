@@ -47,7 +47,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
  * For implementing an extension in shared module form, refer to the
  * SilKitExtensionApi/ folder.
  */
-namespace SilKit { 
+namespace SilKit {
 
 //! \brief Lookup paths to consider when loading dynamic, shared modules
 using ExtensionPathHints = std::vector<std::string>;
@@ -57,15 +57,14 @@ using ExtensionPathHints = std::vector<std::string>;
 //         extensions.
 // The first match is loaded.
 auto LoadExtension(Services::Logging::ILogger* logger,
-    const std::string& undecorated_name) -> std::shared_ptr<ISilKitExtension>;
+                   const std::string& undecorated_name) -> std::shared_ptr<ISilKitExtension>;
 
 //! \brief Loads the extension by name and uses the additional search path hints from
 //         the extension configuration.
 //! NB: a path hint can contain the prefix "ENV:" to refer to an environment
 //! variable name.
-auto LoadExtension(Services::Logging::ILogger* logger,
-    const std::string& undecorated_name, const Config::Extensions& config)
-    -> std::shared_ptr<ISilKitExtension>;
+auto LoadExtension(Services::Logging::ILogger* logger, const std::string& undecorated_name,
+                   const Config::Extensions& config) -> std::shared_ptr<ISilKitExtension>;
 
 
-}//end namespace SilKit
+} //end namespace SilKit

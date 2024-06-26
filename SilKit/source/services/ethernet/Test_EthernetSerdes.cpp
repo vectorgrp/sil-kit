@@ -37,12 +37,13 @@ TEST(Test_EthernetSerdes, SimEthernet_EthMessage)
     WireEthernetFrameEvent in;
     WireEthernetFrameEvent out;
 
-    EthernetMac destinationMac{ 0x12, 0x23, 0x45, 0x67, 0x89, 0x9a };
-    EthernetMac sourceMac{ 0x9a, 0x89, 0x67, 0x45, 0x23, 0x12 };
-    EthernetEtherType etherType{ 0x0800 };
+    EthernetMac destinationMac{0x12, 0x23, 0x45, 0x67, 0x89, 0x9a};
+    EthernetMac sourceMac{0x9a, 0x89, 0x67, 0x45, 0x23, 0x12};
+    EthernetEtherType etherType{0x0800};
 
     in.timestamp = 13ns;
-    in.frame = CreateEthernetFrame(destinationMac, sourceMac, etherType,
+    in.frame = CreateEthernetFrame(
+        destinationMac, sourceMac, etherType,
         "Hello from ethernet writer!  msgId = 1 -------------------------------------------------------");
     in.direction = SilKit::Services::TransmitDirection::TX;
     in.userContext = reinterpret_cast<void *>(0x1234);

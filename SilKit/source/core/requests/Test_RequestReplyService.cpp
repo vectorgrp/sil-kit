@@ -47,8 +47,7 @@ using namespace SilKit::Util;
 
 using ::SilKit::Core::Tests::DummyParticipant;
 
-auto ARequestReplyCallWith(FunctionType functionType, std::vector<uint8_t> callData)
-    -> Matcher<const RequestReplyCall&>
+auto ARequestReplyCallWith(FunctionType functionType, std::vector<uint8_t> callData) -> Matcher<const RequestReplyCall&>
 {
     return AllOf(Field(&RequestReplyCall::callData, callData), Field(&RequestReplyCall::functionType, functionType));
 }
@@ -57,10 +56,12 @@ class MockParticipant : public DummyParticipant
 {
 public:
     MOCK_METHOD(void, SendMsg, (const IServiceEndpoint*, const RequestReplyCall&), (override));
-    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint*, const std::string& targetParticipantName, const RequestReplyCallReturn&), (override));
+    MOCK_METHOD(void, SendMsg,
+                (const IServiceEndpoint*, const std::string& targetParticipantName, const RequestReplyCallReturn&),
+                (override));
 
     std::vector<std::string> GetParticipantNamesOfRemoteReceivers(const IServiceEndpoint* /*service*/,
-        const std::string& /*msgTypeName*/) override
+                                                                  const std::string& /*msgTypeName*/) override
     {
         return {"P1", "P2"};
     }
@@ -69,16 +70,22 @@ public:
     {
         return 2;
     }
-
 };
 
-class MockParticipantReplies : public IRequestReplyProcedure, public IParticipantReplies
+class MockParticipantReplies
+    : public IRequestReplyProcedure
+    , public IParticipantReplies
 {
 public:
     // IRequestReplyProcedure
-    MOCK_METHOD(void, ReceiveCall, (IRequestReplyService * requestReplyService, Util::Uuid callUuid, std::vector<uint8_t> callData), (override));
-    MOCK_METHOD(void, ReceiveCallReturn, (std::string fromParticipant, Util::Uuid callUuid, std::vector<uint8_t> callReturnData, CallReturnStatus callReturnStatus), (override));
-    MOCK_METHOD(void, SetRequestReplyServiceEndpoint, (IServiceEndpoint* requestReplyServiceEndpoint), (override));
+    MOCK_METHOD(void, ReceiveCall,
+                (IRequestReplyService * requestReplyService, Util::Uuid callUuid, std::vector<uint8_t> callData),
+                (override));
+    MOCK_METHOD(void, ReceiveCallReturn,
+                (std::string fromParticipant, Util::Uuid callUuid, std::vector<uint8_t> callReturnData,
+                 CallReturnStatus callReturnStatus),
+                (override));
+    MOCK_METHOD(void, SetRequestReplyServiceEndpoint, (IServiceEndpoint * requestReplyServiceEndpoint), (override));
     // IParticipantReplies
     MOCK_METHOD(void, CallAfterAllParticipantsReplied, (std::function<void()> completionFunction), (override));
 };
@@ -87,13 +94,10 @@ public:
 class Test_RequestReplyService : public testing::Test
 {
 protected:
-    Test_RequestReplyService()
-    {
-    }
+    Test_RequestReplyService() {}
 
     MockParticipant _participant;
     MockParticipantReplies _participantReplies;
-
 };
 
 // RCP flow 1/4: Client: Call() sends out RequestReplyCall
@@ -110,7 +114,8 @@ TEST_F(Test_RequestReplyService, test_call)
 
     // Test that SendMsg fires on Call()
     // Matcher needed here to exclude UUID which is returned by Call() itself, thus unknown in EXPECT_CALL.
-    EXPECT_CALL(_participant, SendMsg(&reqReplService, ARequestReplyCallWith(reqReplCall.functionType, reqReplCall.callData)));
+    EXPECT_CALL(_participant,
+                SendMsg(&reqReplService, ARequestReplyCallWith(reqReplCall.functionType, reqReplCall.callData)));
     reqReplCall.callUuid = reqReplService.Call(reqReplCall.functionType, reqReplCall.callData);
 
     // Test that a call with FunctionType::Invalid throws
@@ -134,7 +139,7 @@ TEST_F(Test_RequestReplyService, test_functiontype_route_call_to_participantrepl
     EXPECT_CALL(_participantReplies, ReceiveCall(&reqReplService, reqReplCall.callUuid, reqReplCall.callData));
 
     // Initiate receive
-    MockServiceEndpoint from{"p1", "n1","c1", 2};
+    MockServiceEndpoint from{"p1", "n1", "c1", 2};
     reqReplService.ReceiveMsg(&from, reqReplCall);
 
     // Invalid function type should throw
@@ -142,7 +147,7 @@ TEST_F(Test_RequestReplyService, test_functiontype_route_call_to_participantrepl
     EXPECT_THROW(reqReplService.ReceiveMsg(&from, reqReplCall), SilKitError);
 }
 
-// RCP flow 3/4: Server: Reveice a RequestReplyCall; SubmitCallReturn() sends out RequestReplyCallReturn 
+// RCP flow 3/4: Server: Reveice a RequestReplyCall; SubmitCallReturn() sends out RequestReplyCallReturn
 TEST_F(Test_RequestReplyService, test_submitcallreturn)
 {
     EXPECT_CALL(_participantReplies, SetRequestReplyServiceEndpoint(_));
@@ -162,7 +167,7 @@ TEST_F(Test_RequestReplyService, test_submitcallreturn)
     reqReplCallReturn.callReturnStatus = CallReturnStatus::Success;
 
     // Receive a call, test reception
-    MockServiceEndpoint from{"p1", "n1","c1", 2};
+    MockServiceEndpoint from{"p1", "n1", "c1", 2};
     EXPECT_CALL(_participantReplies, ReceiveCall(&reqReplService, reqReplCall.callUuid, reqReplCall.callData));
     reqReplService.ReceiveMsg(&from, reqReplCall);
 
@@ -170,10 +175,13 @@ TEST_F(Test_RequestReplyService, test_submitcallreturn)
     EXPECT_THROW(reqReplService.ReceiveMsg(&from, reqReplCall), SilKitError);
 
     // Test that SubmitCallReturn with FunctionType::Invalid throws
-    EXPECT_THROW(reqReplService.SubmitCallReturn({}, FunctionType::Invalid, {}, CallReturnStatus::Success), SilKitError);
+    EXPECT_THROW(reqReplService.SubmitCallReturn({}, FunctionType::Invalid, {}, CallReturnStatus::Success),
+                 SilKitError);
 
     // Test that SubmitCallReturn with unknown UUID throws
-    EXPECT_THROW(reqReplService.SubmitCallReturn({1234, 1234}, FunctionType::ParticipantReplies, {}, CallReturnStatus::Success), SilKitError);
+    EXPECT_THROW(
+        reqReplService.SubmitCallReturn({1234, 1234}, FunctionType::ParticipantReplies, {}, CallReturnStatus::Success),
+        SilKitError);
 
     // Test that SendMsg fires on SubmitCallReturn()
     EXPECT_CALL(_participant,
@@ -197,11 +205,12 @@ TEST_F(Test_RequestReplyService, test_functiontype_route_callreturn_to_participa
     reqReplCallReturn.callReturnStatus = CallReturnStatus::Success;
 
     // Test that FunctionType::ParticipantReplies is routed to ParticipantReplies
-    EXPECT_CALL(_participantReplies, ReceiveCallReturn("p1", reqReplCallReturn.callUuid, reqReplCallReturn.callReturnData,
-                                                       reqReplCallReturn.callReturnStatus));
+    EXPECT_CALL(_participantReplies,
+                ReceiveCallReturn("p1", reqReplCallReturn.callUuid, reqReplCallReturn.callReturnData,
+                                  reqReplCallReturn.callReturnStatus));
 
     // Initiate receive
-    MockServiceEndpoint from{"p1", "n1","c1", 2};
+    MockServiceEndpoint from{"p1", "n1", "c1", 2};
     reqReplService.ReceiveMsg(&from, reqReplCallReturn);
 }
 
@@ -230,13 +239,13 @@ TEST_F(Test_RequestReplyService, test_disconnect_during_call)
     // Removing "P1" will trigger the CallReturn via disconnect
     EXPECT_CALL(_participantReplies,
                 ReceiveCallReturn("P1", reqReplCallReturn.callUuid, reqReplCallReturn.callReturnData,
-                                                       CallReturnStatus::RecipientDisconnected));
+                                  CallReturnStatus::RecipientDisconnected));
     reqReplService.OnParticpantRemoval("P1");
 
     // Removing "P2" will trigger the CallReturn via disconnect
     EXPECT_CALL(_participantReplies,
-                ReceiveCallReturn("P2" , reqReplCallReturn.callUuid, reqReplCallReturn.callReturnData,
-                                                       CallReturnStatus::RecipientDisconnected));
+                ReceiveCallReturn("P2", reqReplCallReturn.callUuid, reqReplCallReturn.callReturnData,
+                                  CallReturnStatus::RecipientDisconnected));
     reqReplService.OnParticpantRemoval("P2");
 }
 
@@ -258,13 +267,12 @@ TEST_F(Test_RequestReplyService, test_unknown_function_type)
     reqReplCallReturn.callReturnStatus = CallReturnStatus::UnknownFunctionType;
 
     // Initiate receive
-    MockServiceEndpoint from{"p1", "n1","c1", 2};
+    MockServiceEndpoint from{"p1", "n1", "c1", 2};
     // The unknown function type cannot be routed to a procedure, the CallReturn is directly
     // submitted with CallReturnStatus::UnknownFunctionType and empty data
     EXPECT_CALL(_participant,
                 SendMsg(&reqReplService, from.GetServiceDescriptor().GetParticipantName(), reqReplCallReturn));
     reqReplService.ReceiveMsg(&from, reqReplCall);
-
 }
 
-} // anonymous namespace for test
+} // namespace

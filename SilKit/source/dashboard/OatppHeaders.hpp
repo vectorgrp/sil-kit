@@ -7,9 +7,9 @@
 
 #ifdef _MSC_VER
 #pragma warning(push)
-#pragma warning(disable:4121)
-#pragma warning(disable:4244)
-#pragma warning(disable:4389)
+#pragma warning(disable : 4121)
+#pragma warning(disable : 4244)
+#pragma warning(disable : 4389)
 #endif
 
 #ifdef __GNUC__

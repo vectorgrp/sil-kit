@@ -110,8 +110,8 @@ MATCHER_P(RpcSpecMatcher, rpcSpecParam, "")
     MatchingLabelSet cLabels{};
     std::transform(cRpcSpec->labelList.labels, cRpcSpec->labelList.labels + cRpcSpec->labelList.numLabels,
                    std::inserter(cLabels, cLabels.begin()), [](const SilKit_Label& cLabel) {
-                       return MatchingLabel{cLabel.key, cLabel.value, static_cast<MatchingLabel::Kind>(cLabel.kind)};
-                   });
+        return MatchingLabel{cLabel.key, cLabel.value, static_cast<MatchingLabel::Kind>(cLabel.kind)};
+    });
 
     if (!std::equal(cppLabels.begin(), cppLabels.end(), cLabels.begin(), cLabels.end(), MatchingLabelEquals{}))
     {
@@ -160,8 +160,8 @@ TEST_F(Test_HourglassRpc, SilKit_RpcServer_Create)
 
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Rpc::RpcServer rpcServer{
         participant, serverName, rpcSpec, [](IRpcServer*, const RpcCallEvent&) {
-            // do nothing
-        }};
+        // do nothing
+    }};
 }
 
 TEST_F(Test_HourglassRpc, SilKit_RpcServer_SubmitResult)
@@ -169,8 +169,8 @@ TEST_F(Test_HourglassRpc, SilKit_RpcServer_SubmitResult)
     auto* const participant = reinterpret_cast<SilKit_Participant*>(uintptr_t(123456));
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Rpc::RpcServer rpcServer{
         participant, "RpcServer1", RpcSpec{"FunctionName1", "MediaType1"}, [](IRpcServer*, const RpcCallEvent&) {
-            // do nothing
-        }};
+        // do nothing
+    }};
 
     auto* const rpcCallHandle = reinterpret_cast<SilKit_RpcCallHandle*>(uintptr_t(654321));
 
@@ -187,8 +187,8 @@ TEST_F(Test_HourglassRpc, SilKit_RpcServer_SetCallHandler)
     auto* const participant = reinterpret_cast<SilKit_Participant*>(uintptr_t(123456));
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Rpc::RpcServer rpcServer{
         participant, "RpcServer1", RpcSpec{"FunctionName1", "MediaType1"}, [](IRpcServer*, const RpcCallEvent&) {
-            // do nothing
-        }};
+        // do nothing
+    }};
 
     EXPECT_CALL(capi, SilKit_RpcServer_SetCallHandler(mockRpcServer, testing::_, testing::_));
 
@@ -219,8 +219,8 @@ TEST_F(Test_HourglassRpc, SilKit_RpcClient_Create)
 
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Rpc::RpcClient rpcClient{
         participant, clientName, rpcSpec, [](IRpcClient*, const RpcCallResultEvent&) {
-            // do nothing
-        }};
+        // do nothing
+    }};
 }
 
 TEST_F(Test_HourglassRpc, SilKit_RpcClient_Call)
@@ -229,8 +229,8 @@ TEST_F(Test_HourglassRpc, SilKit_RpcClient_Call)
 
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Rpc::RpcClient rpcClient{
         participant, "RpcClient1", RpcSpec{"FunctionName1", "MediaType1"}, [](IRpcClient*, const RpcCallResultEvent&) {
-            // do nothing
-        }};
+        // do nothing
+    }};
 
     std::vector<uint8_t> bytes{1, 2, 3, 4, 5, 6, 7, 8, 9};
     const Span<uint8_t> byteSpan{bytes};
@@ -246,8 +246,8 @@ TEST_F(Test_HourglassRpc, SilKit_RpcClient_SetCallResultHandler)
 
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Rpc::RpcClient rpcClient{
         participant, "RpcClient1", RpcSpec{"FunctionName1", "MediaType1"}, [](IRpcClient*, const RpcCallResultEvent&) {
-            // do nothing
-        }};
+        // do nothing
+    }};
 
     EXPECT_CALL(capi, SilKit_RpcClient_SetCallResultHandler(mockRpcClient, testing::_, testing::_));
 

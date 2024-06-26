@@ -43,15 +43,15 @@ typedef struct SilKit_Experimental_SystemController SilKit_Experimental_SystemCo
 
 typedef int32_t SilKit_ReturnCode;
 
-#define SilKit_ReturnCode_SUCCESS            ((SilKit_ReturnCode) 0)
-#define SilKit_ReturnCode_UNSPECIFIEDERROR   ((SilKit_ReturnCode) 1)
-#define SilKit_ReturnCode_NOTSUPPORTED       ((SilKit_ReturnCode) 2)
-#define SilKit_ReturnCode_NOTIMPLEMENTED     ((SilKit_ReturnCode) 3)
-#define SilKit_ReturnCode_BADPARAMETER       ((SilKit_ReturnCode) 4)
-#define SilKit_ReturnCode_BUFFERTOOSMALL     ((SilKit_ReturnCode) 5)
-#define SilKit_ReturnCode_TIMEOUT            ((SilKit_ReturnCode) 6)
-#define SilKit_ReturnCode_UNSUPPORTEDSERVICE ((SilKit_ReturnCode) 7)
-#define SilKit_ReturnCode_WRONGSTATE         ((SilKit_ReturnCode) 8) // Returned on exception SilKit::StateError (CapiImpl.h)
+#define SilKit_ReturnCode_SUCCESS ((SilKit_ReturnCode)0)
+#define SilKit_ReturnCode_UNSPECIFIEDERROR ((SilKit_ReturnCode)1)
+#define SilKit_ReturnCode_NOTSUPPORTED ((SilKit_ReturnCode)2)
+#define SilKit_ReturnCode_NOTIMPLEMENTED ((SilKit_ReturnCode)3)
+#define SilKit_ReturnCode_BADPARAMETER ((SilKit_ReturnCode)4)
+#define SilKit_ReturnCode_BUFFERTOOSMALL ((SilKit_ReturnCode)5)
+#define SilKit_ReturnCode_TIMEOUT ((SilKit_ReturnCode)6)
+#define SilKit_ReturnCode_UNSUPPORTEDSERVICE ((SilKit_ReturnCode)7)
+#define SilKit_ReturnCode_WRONGSTATE ((SilKit_ReturnCode)8) // Returned on exception SilKit::StateError (CapiImpl.h)
 
 typedef uint64_t SilKit_NanosecondsTime;
 
@@ -72,9 +72,9 @@ typedef struct SilKit_ByteVector SilKit_ByteVector;
 /*! \brief Information level of log messages
 */
 typedef uint32_t SilKit_LabelKind;
-#define SilKit_LabelKind_Undefined ((uint32_t) 0) //!< Undefined
-#define SilKit_LabelKind_Optional ((uint32_t) 1) //!< If this label is available, its value must match
-#define SilKit_LabelKind_Mandatory ((uint32_t) 2) //!< This label must be available and its value must match
+#define SilKit_LabelKind_Undefined ((uint32_t)0) //!< Undefined
+#define SilKit_LabelKind_Optional ((uint32_t)1) //!< If this label is available, its value must match
+#define SilKit_LabelKind_Mandatory ((uint32_t)2) //!< This label must be available and its value must match
 
 /*! \brief Struct that contains a label as used in PubSub and RPC for matching publisher, subscribers, servers, and clients */
 typedef struct SilKit_Label
@@ -99,16 +99,16 @@ typedef struct SilKit_StringList
 } SilKit_StringList;
 
 typedef uint8_t SilKit_Bool;
-#define SilKit_True  ((SilKit_Bool)1)
+#define SilKit_True ((SilKit_Bool)1)
 #define SilKit_False ((SilKit_Bool)0)
 
 // NB: Should map to SilKit::Services::TransmitDirection
 /*! \brief An enum type defining the transmit direction within the simulation */
 typedef uint8_t SilKit_Direction;
-#define SilKit_Direction_Undefined      ((SilKit_Direction) 0)
-#define SilKit_Direction_Send           ((SilKit_Direction) 1)
-#define SilKit_Direction_Receive        ((SilKit_Direction) 2)
-#define SilKit_Direction_SendReceive    ((SilKit_Direction) 3)
+#define SilKit_Direction_Undefined ((SilKit_Direction)0)
+#define SilKit_Direction_Send ((SilKit_Direction)1)
+#define SilKit_Direction_Receive ((SilKit_Direction)2)
+#define SilKit_Direction_SendReceive ((SilKit_Direction)3)
 
 typedef uint64_t SilKit_HandlerId;
 

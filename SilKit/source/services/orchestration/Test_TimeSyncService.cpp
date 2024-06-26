@@ -67,22 +67,22 @@ protected: // CTor
     Test_TimeSyncService()
     {
         // this CTor calls CreateTimeSyncService implicitly
-        lifecycleService =
-            std::make_unique<LifecycleService>(&participant);
+        lifecycleService = std::make_unique<LifecycleService>(&participant);
         lifecycleService->SetLifecycleConfiguration(LifecycleConfiguration{OperationMode::Coordinated});
         timeSyncService =
             std::make_unique<TimeSyncService>(&participant, &timeProvider, healthCheckConfig, lifecycleService.get());
         lifecycleService->SetTimeSyncService(timeSyncService.get());
     }
+
 protected: // Methods
     void PrepareLifecycle()
     {
         lifecycleService->SetTimeSyncActive(true);
         (void)lifecycleService->StartLifecycle();
-        
+
         // Add other participant to lookup
         timeSyncService->GetTimeConfiguration()->AddSynchronizedParticipant("P1");
-        
+
         // skip uninteresting states
         lifecycleService->NewSystemState(SystemState::ServicesCreated);
         lifecycleService->NewSystemState(SystemState::CommunicationInitializing);
@@ -90,6 +90,7 @@ protected: // Methods
         lifecycleService->NewSystemState(SystemState::ReadyToRun);
         lifecycleService->NewSystemState(SystemState::Running);
     }
+
 protected:
     // ----------------------------------------
     // Members
@@ -107,35 +108,30 @@ protected:
 TEST_F(Test_TimeSyncService, async_simtask_once_without_complete_call)
 {
     auto numAsyncTaskCalled{0};
-    timeSyncService->SetSimulationStepHandlerAsync([&](auto, auto){
-        numAsyncTaskCalled++;
-    }, 1ms);
+    timeSyncService->SetSimulationStepHandlerAsync([&](auto, auto) { numAsyncTaskCalled++; }, 1ms);
 
     PrepareLifecycle();
 
     timeSyncService->ReceiveMsg(&endpoint, {0ms});
     timeSyncService->ReceiveMsg(&endpoint, {1ms});
     timeSyncService->ReceiveMsg(&endpoint, {2ms});
-    ASSERT_EQ(numAsyncTaskCalled, 1)
-        << "SimulationStepHandlerAsync should only be called once"
-        << " until completed with a call to CompleteSimulationStep().";
+    ASSERT_EQ(numAsyncTaskCalled, 1) << "SimulationStepHandlerAsync should only be called once"
+                                     << " until completed with a call to CompleteSimulationStep().";
 }
 
 TEST_F(Test_TimeSyncService, async_simtask_complete_lockstep)
 {
     auto numAsyncTaskCalled{0};
-    timeSyncService->SetSimulationStepHandlerAsync([&](auto, auto){
-        numAsyncTaskCalled++;
-    }, 1ms);
+    timeSyncService->SetSimulationStepHandlerAsync([&](auto, auto) { numAsyncTaskCalled++; }, 1ms);
 
     PrepareLifecycle();
 
     timeSyncService->ReceiveMsg(&endpoint, {0ms});
     timeSyncService->CompleteSimulationStep();
-    
+
     timeSyncService->ReceiveMsg(&endpoint, {1ms});
     timeSyncService->CompleteSimulationStep();
-    
+
     timeSyncService->ReceiveMsg(&endpoint, {2ms});
     timeSyncService->CompleteSimulationStep();
     ASSERT_EQ(numAsyncTaskCalled, 3)
@@ -146,9 +142,7 @@ TEST_F(Test_TimeSyncService, async_simtask_mismatching_number_of_complete_calls)
 {
     // What happens when the User calls CompleteSimulationStep() multiple times?
     auto numAsyncTaskCalled{0};
-    timeSyncService->SetSimulationStepHandlerAsync([&](auto, auto){
-        numAsyncTaskCalled++;
-    }, 1ms);
+    timeSyncService->SetSimulationStepHandlerAsync([&](auto, auto) { numAsyncTaskCalled++; }, 1ms);
 
     PrepareLifecycle();
 
@@ -164,8 +158,7 @@ TEST_F(Test_TimeSyncService, async_simtask_mismatching_number_of_complete_calls)
     timeSyncService->CompleteSimulationStep();
     timeSyncService->CompleteSimulationStep();
 
-    ASSERT_EQ(numAsyncTaskCalled, 3)
-        << "Calling too many CompleteSimulationStep() should not wreak havoc"; 
+    ASSERT_EQ(numAsyncTaskCalled, 3) << "Calling too many CompleteSimulationStep() should not wreak havoc";
 }
 
 } // namespace

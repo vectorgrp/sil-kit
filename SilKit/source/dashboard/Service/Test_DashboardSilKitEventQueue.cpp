@@ -35,7 +35,10 @@ namespace Dashboard {
 class Test_DashboardSilKitEventQueue : public Test
 {
 public:
-    std::shared_ptr<SilKitEventQueue> CreateService() { return std::make_shared<SilKitEventQueue>(); }
+    std::shared_ptr<SilKitEventQueue> CreateService()
+    {
+        return std::make_shared<SilKitEventQueue>();
+    }
 };
 
 TEST_F(Test_DashboardSilKitEventQueue, ManyProducersAndOneConsumer)

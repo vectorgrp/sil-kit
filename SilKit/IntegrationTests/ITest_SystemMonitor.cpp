@@ -46,12 +46,10 @@ protected:
     struct Callbacks
     {
         MOCK_METHOD(void, ParticipantConnectedHandler,
-                    (const SilKit::Services::Orchestration::ParticipantConnectionInformation&),
-                    (const));
+                    (const SilKit::Services::Orchestration::ParticipantConnectionInformation&), (const));
 
         MOCK_METHOD(void, ParticipantDisconnectedHandler,
                     (const SilKit::Services::Orchestration::ParticipantConnectionInformation&), (const));
-
     };
 
     struct SequencePoints
@@ -61,9 +59,7 @@ protected:
         MOCK_METHOD(void, C_AfterThirdParticipantDestroyed, ());
     };
 
-    ITest_SystemMonitor()
-    {
-    }
+    ITest_SystemMonitor() {}
 
     Callbacks callbacks;
     Callbacks secondCallbacks;
@@ -90,14 +86,14 @@ TEST_F(ITest_SystemMonitor, discover_services)
     auto* firstSystemMonitor = firstParticipant->CreateSystemMonitor();
     firstSystemMonitor->SetParticipantConnectedHandler(
         [this](const SilKit::Services::Orchestration::ParticipantConnectionInformation& participantInformation) {
-            callbacks.ParticipantConnectedHandler(participantInformation);
+        callbacks.ParticipantConnectedHandler(participantInformation);
     });
     firstSystemMonitor->SetParticipantDisconnectedHandler(
         [this](const SilKit::Services::Orchestration::ParticipantConnectionInformation& participantInformation) {
-            callbacks.ParticipantDisconnectedHandler(participantInformation);
+        callbacks.ParticipantDisconnectedHandler(participantInformation);
     });
 
-    SilKit::Services::Orchestration::ISystemMonitor * secondSystemMonitor = nullptr;
+    SilKit::Services::Orchestration::ISystemMonitor* secondSystemMonitor = nullptr;
 
     testing::Sequence sequence, secondSequence;
 
@@ -108,14 +104,11 @@ TEST_F(ITest_SystemMonitor, discover_services)
     std::promise<void> secondParticipantDisconnectedPromise;
     auto secondParticipantDisconnectedFuture = secondParticipantDisconnectedPromise.get_future();
 
-    EXPECT_CALL(callbacks, ParticipantConnectedHandler(secondParticipantConnection))
-        .Times(1);
+    EXPECT_CALL(callbacks, ParticipantConnectedHandler(secondParticipantConnection)).Times(1);
 
     EXPECT_CALL(sequencePoints, A_BeforeCreateThirdParticipant()).Times(1).InSequence(sequence, secondSequence);
     {
-        EXPECT_CALL(callbacks, ParticipantConnectedHandler(thirdParticipantConnection))
-            .Times(1)
-            .InSequence(sequence);
+        EXPECT_CALL(callbacks, ParticipantConnectedHandler(thirdParticipantConnection)).Times(1).InSequence(sequence);
         EXPECT_CALL(secondCallbacks, ParticipantConnectedHandler(thirdParticipantConnection))
             .Times(1)
             .InSequence(secondSequence);
@@ -126,19 +119,18 @@ TEST_F(ITest_SystemMonitor, discover_services)
             .Times(1)
             .InSequence(sequence)
             .WillOnce([&] {
-                ASSERT_FALSE(firstSystemMonitor->IsParticipantConnected(thirdParticipantConnection.participantName));
-              thirdParticipantDisconnectedPromiseA.set_value();
-            });
+            ASSERT_FALSE(firstSystemMonitor->IsParticipantConnected(thirdParticipantConnection.participantName));
+            thirdParticipantDisconnectedPromiseA.set_value();
+        });
 
         EXPECT_CALL(secondCallbacks, ParticipantDisconnectedHandler(thirdParticipantConnection))
             .Times(1)
             .InSequence(secondSequence)
             .WillOnce([&] {
-                ASSERT_NE(secondSystemMonitor, nullptr);
-                ASSERT_FALSE(
-                    secondSystemMonitor->IsParticipantConnected(thirdParticipantConnection.participantName));
-                thirdParticipantDisconnectedPromiseB.set_value();
-            });
+            ASSERT_NE(secondSystemMonitor, nullptr);
+            ASSERT_FALSE(secondSystemMonitor->IsParticipantConnected(thirdParticipantConnection.participantName));
+            thirdParticipantDisconnectedPromiseB.set_value();
+        });
     }
     EXPECT_CALL(sequencePoints, C_AfterThirdParticipantDestroyed()).Times(1).InSequence(sequence, secondSequence);
     {
@@ -146,9 +138,9 @@ TEST_F(ITest_SystemMonitor, discover_services)
             .Times(1)
             .InSequence(sequence)
             .WillOnce([&] {
-                ASSERT_FALSE(firstSystemMonitor->IsParticipantConnected(secondParticipantConnection.participantName));
-                secondParticipantDisconnectedPromise.set_value();
-            });
+            ASSERT_FALSE(firstSystemMonitor->IsParticipantConnected(secondParticipantConnection.participantName));
+            secondParticipantDisconnectedPromise.set_value();
+        });
     }
 
     ASSERT_FALSE(firstSystemMonitor->IsParticipantConnected(secondParticipantConnection.participantName));
@@ -161,12 +153,12 @@ TEST_F(ITest_SystemMonitor, discover_services)
         secondSystemMonitor->SetParticipantConnectedHandler(
             [this](const SilKit::Services::Orchestration::ParticipantConnectionInformation&
                        participantConnectionInformation) {
-                secondCallbacks.ParticipantConnectedHandler(participantConnectionInformation);
+            secondCallbacks.ParticipantConnectedHandler(participantConnectionInformation);
         });
         secondSystemMonitor->SetParticipantDisconnectedHandler(
             [this](const SilKit::Services::Orchestration::ParticipantConnectionInformation&
                        participantConnectionInformation) {
-                secondCallbacks.ParticipantDisconnectedHandler(participantConnectionInformation);
+            secondCallbacks.ParticipantDisconnectedHandler(participantConnectionInformation);
         });
 
         ASSERT_FALSE(firstSystemMonitor->IsParticipantConnected(thirdParticipantConnection.participantName));
@@ -175,9 +167,8 @@ TEST_F(ITest_SystemMonitor, discover_services)
         sequencePoints.A_BeforeCreateThirdParticipant();
 
         // Create the third participant which should trigger the callbacks of the first and second
-        auto&& thirdParticipant =
-            SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(),
-                                      thirdParticipantConnection.participantName, registryUri);
+        auto&& thirdParticipant = SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(),
+                                                            thirdParticipantConnection.participantName, registryUri);
 
         ASSERT_TRUE(firstSystemMonitor->IsParticipantConnected(thirdParticipantConnection.participantName));
         ASSERT_TRUE(secondSystemMonitor->IsParticipantConnected(thirdParticipantConnection.participantName));

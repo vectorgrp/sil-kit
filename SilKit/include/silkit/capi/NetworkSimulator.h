@@ -37,14 +37,17 @@ typedef struct SilKit_Experimental_SimulatedFlexRayController SilKit_Experimenta
 
 typedef struct SilKit_Experimental_SimulatedControllerFunctions SilKit_Experimental_SimulatedControllerFunctions;
 typedef struct SilKit_Experimental_SimulatedCanControllerFunctions SilKit_Experimental_SimulatedCanControllerFunctions;
-typedef struct SilKit_Experimental_SimulatedFlexRayControllerFunctions SilKit_Experimental_SimulatedFlexRayControllerFunctions;
+typedef struct SilKit_Experimental_SimulatedFlexRayControllerFunctions
+    SilKit_Experimental_SimulatedFlexRayControllerFunctions;
 
 struct SilKit_Experimental_SimulatedNetworkFunctions
 {
     SilKit_StructHeader structHeader;
     void (*ProvideSimulatedController)(void** outSimulatedController, const void** outSimulateControllerFunctions,
-                                       SilKit_Experimental_ControllerDescriptor controllerDescriptor, void* simulatedNetwork);
-    void (*SimulatedControllerRemoved)(SilKit_Experimental_ControllerDescriptor controllerDescriptor, void* simulatedNetwork);
+                                       SilKit_Experimental_ControllerDescriptor controllerDescriptor,
+                                       void* simulatedNetwork);
+    void (*SimulatedControllerRemoved)(SilKit_Experimental_ControllerDescriptor controllerDescriptor,
+                                       void* simulatedNetwork);
     void (*SetEventProducer)(void* eventProducer, void* simulatedNetwork);
 };
 
@@ -72,16 +75,18 @@ typedef struct SilKit_Experimental_NetSim_CanConfigureBaudrate SilKit_Experiment
 typedef int32_t SilKit_Experimental_NetSim_CanControllerModeFlags;
 
 #define SilKit_Experimental_NetSim_CanControllerModeFlags_ResetErrorHandling \
-    ((SilKit_Experimental_NetSim_CanControllerModeFlags)BIT(0)) //!< Reset the error counters to zero and the error state to error active.
+    ((SilKit_Experimental_NetSim_CanControllerModeFlags)BIT( \
+        0)) //!< Reset the error counters to zero and the error state to error active.
 
 #define SilKit_Experimental_NetSim_CanControllerModeFlags_CancelTransmitRequests \
-    ((SilKit_Experimental_NetSim_CanControllerModeFlags)BIT(1)) //!< Cancel all outstanding transmit requests (flush transmit queue of controller).
+    ((SilKit_Experimental_NetSim_CanControllerModeFlags)BIT( \
+        1)) //!< Cancel all outstanding transmit requests (flush transmit queue of controller).
 
 struct SilKit_Experimental_NetSim_CanControllerMode
 {
     SilKit_StructHeader structHeader; //!< The interface id specifying which version of this struct was obtained
     SilKit_Experimental_NetSim_CanControllerModeFlags canControllerModeFlags;
-    SilKit_CanControllerState state; 
+    SilKit_CanControllerState state;
 };
 typedef struct SilKit_Experimental_NetSim_CanControllerMode SilKit_Experimental_NetSim_CanControllerMode;
 
@@ -124,7 +129,8 @@ struct SilKit_Experimental_NetSim_FlexrayTxBufferConfigUpdate
     uint16_t txBufferIdx;
     SilKit_FlexrayTxBufferConfig* txBufferConfig;
 };
-typedef struct SilKit_Experimental_NetSim_FlexrayTxBufferConfigUpdate SilKit_Experimental_NetSim_FlexrayTxBufferConfigUpdate;
+typedef struct SilKit_Experimental_NetSim_FlexrayTxBufferConfigUpdate
+    SilKit_Experimental_NetSim_FlexrayTxBufferConfigUpdate;
 
 struct SilKit_Experimental_NetSim_FlexrayTxBufferUpdate
 {
@@ -144,8 +150,10 @@ struct SilKit_Experimental_SimulatedFlexRayControllerFunctions
 {
     SilKit_StructHeader structHeader;
     void (*OnHostCommand)(void* controller, const SilKit_Experimental_NetSim_FlexrayHostCommand* hostCommand);
-    void (*OnControllerConfig)(void* controller, const SilKit_Experimental_NetSim_FlexrayControllerConfig* controllerConfig);
-    void (*OnTxBufferConfigUpdate)(void* controller, const SilKit_Experimental_NetSim_FlexrayTxBufferConfigUpdate* txBufferConfigUpdate);
+    void (*OnControllerConfig)(void* controller,
+                               const SilKit_Experimental_NetSim_FlexrayControllerConfig* controllerConfig);
+    void (*OnTxBufferConfigUpdate)(void* controller,
+                                   const SilKit_Experimental_NetSim_FlexrayTxBufferConfigUpdate* txBufferConfigUpdate);
     void (*OnTxBufferUpdate)(void* controller, const SilKit_Experimental_NetSim_FlexrayTxBufferUpdate* txBufferUpdate);
 };
 
@@ -176,7 +184,8 @@ struct SilKit_Experimental_SimulatedEthernetControllerFunctions
 {
     SilKit_StructHeader structHeader;
     void (*OnFrameRequest)(void* controller, const SilKit_Experimental_NetSim_EthernetFrameRequest* frameRequest);
-    void (*OnSetControllerMode)(void* controller, const SilKit_Experimental_NetSim_EthernetControllerMode* controllerMode);
+    void (*OnSetControllerMode)(void* controller,
+                                const SilKit_Experimental_NetSim_EthernetControllerMode* controllerMode);
 };
 
 // --------------------------------
@@ -205,7 +214,7 @@ typedef struct SilKit_Experimental_NetSim_LinFrameHeaderRequest SilKit_Experimen
 struct SilKit_Experimental_NetSim_LinWakeupPulse
 {
     SilKit_StructHeader structHeader; //!< The interface id specifying which version of this struct was obtained
-    SilKit_NanosecondsTime timestamp; //!< Timestamp of the wakeup pulse 
+    SilKit_NanosecondsTime timestamp; //!< Timestamp of the wakeup pulse
 };
 typedef struct SilKit_Experimental_NetSim_LinWakeupPulse SilKit_Experimental_NetSim_LinWakeupPulse;
 
@@ -234,37 +243,46 @@ struct SilKit_Experimental_NetSim_LinControllerStatusUpdate
     SilKit_LinControllerStatus status;
     SilKit_NanosecondsTime timestamp; //!< Timestamp of the wakeup pulse
 };
-typedef struct SilKit_Experimental_NetSim_LinControllerStatusUpdate SilKit_Experimental_NetSim_LinControllerStatusUpdate;
+typedef struct SilKit_Experimental_NetSim_LinControllerStatusUpdate
+    SilKit_Experimental_NetSim_LinControllerStatusUpdate;
 
 struct SilKit_Experimental_SimulatedLinControllerFunctions
 {
     SilKit_StructHeader structHeader;
     void (*OnFrameRequest)(void* controller, const SilKit_Experimental_NetSim_LinFrameRequest* frameRequest);
-    void (*OnFrameHeaderRequest)(void* controller, const SilKit_Experimental_NetSim_LinFrameHeaderRequest* frameHeaderRequest);
+    void (*OnFrameHeaderRequest)(void* controller,
+                                 const SilKit_Experimental_NetSim_LinFrameHeaderRequest* frameHeaderRequest);
     void (*OnWakeupPulse)(void* controller, const SilKit_Experimental_NetSim_LinWakeupPulse* wakeupPulse);
-    void (*OnControllerConfig)(void* controller, const SilKit_Experimental_NetSim_LinControllerConfig* controllerConfig);
-    void (*OnFrameResponseUpdate)(void* controller, const SilKit_Experimental_NetSim_LinFrameResponseUpdate* frameResponseUpdate);
-    void (*OnControllerStatusUpdate)(void* controller, const SilKit_Experimental_NetSim_LinControllerStatusUpdate* statusUpdate);
+    void (*OnControllerConfig)(void* controller,
+                               const SilKit_Experimental_NetSim_LinControllerConfig* controllerConfig);
+    void (*OnFrameResponseUpdate)(void* controller,
+                                  const SilKit_Experimental_NetSim_LinFrameResponseUpdate* frameResponseUpdate);
+    void (*OnControllerStatusUpdate)(void* controller,
+                                     const SilKit_Experimental_NetSim_LinControllerStatusUpdate* statusUpdate);
 };
 
 // --------------------------------
 // NetworkSimulator
 // --------------------------------
 
-SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Experimental_NetworkSimulator_Create(SilKit_Experimental_NetworkSimulator** outNetworkSimulator,
-                                                                      SilKit_Participant* participant);
-typedef SilKit_ReturnCode(SilKitFPTR* SilKit_Experimental_NetworkSimulator_Create_t)(SilKit_Experimental_NetworkSimulator** outNetworkSimulator,
-                                                                        SilKit_Participant* participant);
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Experimental_NetworkSimulator_Create(
+    SilKit_Experimental_NetworkSimulator** outNetworkSimulator, SilKit_Participant* participant);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_Experimental_NetworkSimulator_Create_t)(
+    SilKit_Experimental_NetworkSimulator** outNetworkSimulator, SilKit_Participant* participant);
 
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Experimental_NetworkSimulator_SimulateNetwork(
-    SilKit_Experimental_NetworkSimulator* networkSimulator, const char* networkName, SilKit_Experimental_SimulatedNetworkType networkType,
-    void* simulatedNetwork, const SilKit_Experimental_SimulatedNetworkFunctions* simulatedNetworkFunctions);
+    SilKit_Experimental_NetworkSimulator* networkSimulator, const char* networkName,
+    SilKit_Experimental_SimulatedNetworkType networkType, void* simulatedNetwork,
+    const SilKit_Experimental_SimulatedNetworkFunctions* simulatedNetworkFunctions);
 typedef SilKit_ReturnCode(SilKitFPTR* SilKit_Experimental_NetworkSimulator_SimulateNetwork_t)(
-    SilKit_Experimental_NetworkSimulator* networkSimulator, const char* networkName, SilKit_Experimental_SimulatedNetworkType networkType,
-    void* simulatedNetwork, const SilKit_Experimental_SimulatedNetworkFunctions* simulatedNetworkFunctions);
+    SilKit_Experimental_NetworkSimulator* networkSimulator, const char* networkName,
+    SilKit_Experimental_SimulatedNetworkType networkType, void* simulatedNetwork,
+    const SilKit_Experimental_SimulatedNetworkFunctions* simulatedNetworkFunctions);
 
-SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Experimental_NetworkSimulator_Start(SilKit_Experimental_NetworkSimulator* networkSimulator);
-typedef SilKit_ReturnCode(SilKitFPTR* SilKit_Experimental_NetworkSimulator_Start_t)(SilKit_Experimental_NetworkSimulator* networkSimulator);
+SilKitAPI SilKit_ReturnCode SilKitCALL
+SilKit_Experimental_NetworkSimulator_Start(SilKit_Experimental_NetworkSimulator* networkSimulator);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_Experimental_NetworkSimulator_Start_t)(
+    SilKit_Experimental_NetworkSimulator* networkSimulator);
 
 SILKIT_END_DECLS
 

@@ -25,9 +25,9 @@
 
 
 #if SILKIT_ENABLE_TRACING_INSTRUMENTATION_AsioAcceptor
-#    define SILKIT_TRACE_METHOD_(logger, ...) SILKIT_TRACE_METHOD(logger, __VA_ARGS__)
+#define SILKIT_TRACE_METHOD_(logger, ...) SILKIT_TRACE_METHOD(logger, __VA_ARGS__)
 #else
-#    define SILKIT_TRACE_METHOD_(...)
+#define SILKIT_TRACE_METHOD_(...)
 #endif
 
 
@@ -130,17 +130,13 @@ void AsioAcceptor<T>::AsyncAccept(std::chrono::milliseconds timeout)
         throw InvalidStateError{};
     }
 
-    auto acceptCompletionHandler =
-        asio::bind_cancellation_slot(_acceptCancelSignal.slot(), [this](const auto& e, auto s) {
-            OnAsioAsyncAcceptComplete(e, std::move(s));
-        });
+    auto acceptCompletionHandler = asio::bind_cancellation_slot(
+        _acceptCancelSignal.slot(), [this](const auto& e, auto s) { OnAsioAsyncAcceptComplete(e, std::move(s)); });
 
     if (timeout.count() > 0)
     {
-        auto timeoutCompletionHandler =
-            asio::bind_cancellation_slot(_timeoutCancelSignal.slot(), [this](const auto& e) {
-                OnAsioAsyncWaitComplete(e);
-            });
+        auto timeoutCompletionHandler = asio::bind_cancellation_slot(
+            _timeoutCancelSignal.slot(), [this](const auto& e) { OnAsioAsyncWaitComplete(e); });
 
         _timeoutTimer.expires_after(timeout);
         _timeoutTimer.async_wait(timeoutCompletionHandler);

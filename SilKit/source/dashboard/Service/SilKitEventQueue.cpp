@@ -25,13 +25,9 @@ namespace SilKit {
 
 namespace Dashboard {
 
-SilKitEventQueue::SilKitEventQueue()
-{
-}
+SilKitEventQueue::SilKitEventQueue() {}
 
-SilKitEventQueue::~SilKitEventQueue()
-{
-}
+SilKitEventQueue::~SilKitEventQueue() {}
 
 void SilKitEventQueue::Enqueue(const SilKitEvent& obj)
 {
@@ -48,9 +44,7 @@ void SilKitEventQueue::Enqueue(const SilKitEvent& obj)
 bool SilKitEventQueue::DequeueAllInto(std::vector<SilKitEvent>& events)
 {
     std::unique_lock<decltype(_mutex)> lock{_mutex};
-    _cv.wait(lock, [this] {
-        return !_queue.empty() || _stop;
-    });
+    _cv.wait(lock, [this] { return !_queue.empty() || _stop; });
     std::move(_queue.begin(), _queue.end(), std::back_inserter(events));
     _queue.clear();
     return !events.empty();

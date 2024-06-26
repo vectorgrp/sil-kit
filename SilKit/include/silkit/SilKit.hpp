@@ -44,8 +44,8 @@ DETAIL_SILKIT_DETAIL_VN_NAMESPACE_BEGIN
  * \throw SilKit::SilKitError The participant could not be created.
  */
 DETAIL_SILKIT_CPP_API auto CreateParticipant(
-    std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig, const std::string& participantName)
-    -> std::unique_ptr<IParticipant>;
+    std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig,
+    const std::string& participantName) -> std::unique_ptr<IParticipant>;
 
 /*! \brief Create a participant and join the simulation.
  *

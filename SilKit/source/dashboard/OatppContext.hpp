@@ -44,7 +44,7 @@ class OatppContext : public SilKit::Dashboard::IDashboard
 {
 public:
     OatppContext(std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig,
-              const std::string& registryUri, const std::string& dashboardUri);
+                 const std::string& registryUri, const std::string& dashboardUri);
     ~OatppContext();
 
 private:

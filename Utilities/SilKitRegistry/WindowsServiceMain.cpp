@@ -7,17 +7,17 @@
 
 #if defined(HAS_SILKIT_REGISTRY_WINDOWS_SERVICE)
 
-#    include "silkit/participant/exception.hpp"
+#include "silkit/participant/exception.hpp"
 
-#    include <iostream>
-#    include <string>
-#    include <future>
-#    include <memory>
+#include <iostream>
+#include <string>
+#include <future>
+#include <memory>
 
-#    include <windows.h>
-#    include <accctrl.h>
-#    include <aclapi.h>
-#    include <sddl.h>
+#include <windows.h>
+#include <accctrl.h>
+#include <aclapi.h>
+#include <sddl.h>
 
 // USAGE AS WINDOWS SERVICE
 //
@@ -150,7 +150,8 @@ VOID WINAPI SvcControlHandler(DWORD controlCode)
         }
         break;
 
-    default: break;
+    default:
+        break;
     }
 }
 
@@ -204,9 +205,7 @@ using WinLocalPtr = std::unique_ptr<T, std::function<void(T *)>>;
 template <typename T>
 auto MakeWinLocalPtr(T *pointer) -> WinLocalPtr<T>
 {
-    return WinLocalPtr<T>(pointer, [](T *pointer) {
-        LocalFree(pointer);
-    });
+    return WinLocalPtr<T>(pointer, [](T *pointer) { LocalFree(pointer); });
 }
 
 // ============================================================

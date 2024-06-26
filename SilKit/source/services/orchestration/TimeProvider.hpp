@@ -58,7 +58,9 @@ struct ITimeProviderImplListener
     virtual void OnTick(std::chrono::nanoseconds now, std::chrono::nanoseconds duration) = 0;
 };
 
-class TimeProvider : public ITimeProvider, private ITimeProviderImplListener
+class TimeProvider
+    : public ITimeProvider
+    , private ITimeProviderImplListener
 {
 public:
     TimeProvider();

@@ -40,11 +40,20 @@ public:
     inline void AddLabel(const std::string& key, const std::string& value, SilKit::Services::MatchingLabel::Kind kind);
 
     //! Get the topic of the RpcSpec.
-    auto FunctionName() const -> const std::string& { return _functionName; }
+    auto FunctionName() const -> const std::string&
+    {
+        return _functionName;
+    }
     //! Get the media type of the RpcSpec.
-    auto MediaType() const -> const std::string& { return _mediaType; }
+    auto MediaType() const -> const std::string&
+    {
+        return _mediaType;
+    }
     //! Get the labels of the RpcSpec.
-    auto Labels() const -> const std::vector<SilKit::Services::MatchingLabel>& { return _labels; }
+    auto Labels() const -> const std::vector<SilKit::Services::MatchingLabel>&
+    {
+        return _labels;
+    }
 };
 
 void RpcSpec::AddLabel(const SilKit::Services::MatchingLabel& label)

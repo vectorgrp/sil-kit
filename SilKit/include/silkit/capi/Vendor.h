@@ -38,17 +38,17 @@ SILKIT_BEGIN_DECLS
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Vendor_Vector_SilKitRegistry_Create(
     SilKit_Vendor_Vector_SilKitRegistry** outRegistry, SilKit_ParticipantConfiguration* participantConfiguration);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_Vendor_Vector_SilKitRegistry_Create_t)(
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_Vendor_Vector_SilKitRegistry_Create_t)(
     SilKit_Vendor_Vector_SilKitRegistry** outRegistry, SilKit_ParticipantConfiguration* participantConfiguration);
 
 /*! \brief Destroy a registry.
  *
  * @param registry The registry to be destroyed.
  */
-SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Vendor_Vector_SilKitRegistry_Destroy(
-    SilKit_Vendor_Vector_SilKitRegistry* registry);
+SilKitAPI SilKit_ReturnCode SilKitCALL
+SilKit_Vendor_Vector_SilKitRegistry_Destroy(SilKit_Vendor_Vector_SilKitRegistry* registry);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_Vendor_Vector_SilKitRegistry_Destroy_t)(
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_Vendor_Vector_SilKitRegistry_Destroy_t)(
     SilKit_Vendor_Vector_SilKitRegistry* registry);
 
 /*! \brief The handler to be called when all participants have disconnected.
@@ -56,7 +56,7 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_Vendor_Vector_SilKitRegistry_Destr
  * \param context The user provided context passed in \ref SilKit_Vendor_Vector_SilKitRegistry_SetAllDisconnectedHandler.
  * \param registry The registry on which all participants have disconnected.
  */
-typedef void (SilKitFPTR *SilKit_Vendor_Vector_SilKitRegistry_AllDisconnectedHandler_t)(
+typedef void(SilKitFPTR* SilKit_Vendor_Vector_SilKitRegistry_AllDisconnectedHandler_t)(
     void* context, SilKit_Vendor_Vector_SilKitRegistry* registry);
 
 /*! \brief Register the handler that is called when all participants are disconnected
@@ -69,7 +69,7 @@ SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Vendor_Vector_SilKitRegistry_SetAl
     SilKit_Vendor_Vector_SilKitRegistry* registry, void* context,
     SilKit_Vendor_Vector_SilKitRegistry_AllDisconnectedHandler_t handler);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_Vendor_Vector_SilKitRegistry_SetAllDisconnectedHandler_t)(
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_Vendor_Vector_SilKitRegistry_SetAllDisconnectedHandler_t)(
     SilKit_Vendor_Vector_SilKitRegistry* registry, void* context,
     SilKit_Vendor_Vector_SilKitRegistry_AllDisconnectedHandler_t handler);
 
@@ -81,10 +81,10 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_Vendor_Vector_SilKitRegistry_SetAl
  * @param outLogger Pointer to the resulting logger instance (out parameter).
  * @param registry The registry whose logger should be returned.
  */
-SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Vendor_Vector_SilKitRegistry_GetLogger(
-    SilKit_Logger** outLogger, SilKit_Vendor_Vector_SilKitRegistry* registry);
+SilKitAPI SilKit_ReturnCode SilKitCALL
+SilKit_Vendor_Vector_SilKitRegistry_GetLogger(SilKit_Logger** outLogger, SilKit_Vendor_Vector_SilKitRegistry* registry);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_Vendor_Vector_SilKitRegistry_GetLogger_t)(
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_Vendor_Vector_SilKitRegistry_GetLogger_t)(
     SilKit_Logger** outLogger, SilKit_Vendor_Vector_SilKitRegistry* registry);
 
 /*! \brief Start to listen on the URI with scheme silkit://, e.g. silkit://localhost:8500, and return the URI with the
@@ -102,7 +102,7 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_Vendor_Vector_SilKitRegistry_GetLo
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Vendor_Vector_SilKitRegistry_StartListening(
     SilKit_Vendor_Vector_SilKitRegistry* registry, const char* listenUri, const char** outRegistryUri);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_Vendor_Vector_SilKitRegistry_StartListening_t)(
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_Vendor_Vector_SilKitRegistry_StartListening_t)(
     SilKit_Vendor_Vector_SilKitRegistry* registry, const char* listenUri, const char** outRegistryUri);
 
 SILKIT_END_DECLS

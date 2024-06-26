@@ -120,8 +120,10 @@ std::string to_string(EthernetMode value)
 {
     switch (value)
     {
-    case EthernetMode::Inactive: return "Inactive";
-    case EthernetMode::Active: return "Active";
+    case EthernetMode::Inactive:
+        return "Inactive";
+    case EthernetMode::Active:
+        return "Active";
     };
     throw SilKit::TypeConversionError{};
 }

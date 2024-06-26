@@ -33,10 +33,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <cstring>
 
 
-SilKit_ReturnCode SilKitCALL SilKit_DataPublisher_Create(SilKit_DataPublisher** outPublisher, SilKit_Participant* participant,
-                                           const char* controllerName,
-                                           SilKit_DataSpec* dataSpec,
-                                           uint8_t history)
+SilKit_ReturnCode SilKitCALL SilKit_DataPublisher_Create(SilKit_DataPublisher** outPublisher,
+                                                         SilKit_Participant* participant, const char* controllerName,
+                                                         SilKit_DataSpec* dataSpec, uint8_t history)
 try
 {
     ASSERT_VALID_OUT_PARAMETER(outPublisher);
@@ -68,10 +67,10 @@ try
 CAPI_CATCH_EXCEPTIONS
 
 
-SilKit_ReturnCode SilKitCALL SilKit_DataSubscriber_Create(SilKit_DataSubscriber** outSubscriber, SilKit_Participant* participant,
-                                               const char* controllerName, SilKit_DataSpec* dataSpec,
-                                               void* defaultDataHandlerContext,
-                                               SilKit_DataMessageHandler_t defaultDataHandler)
+SilKit_ReturnCode SilKitCALL SilKit_DataSubscriber_Create(SilKit_DataSubscriber** outSubscriber,
+                                                          SilKit_Participant* participant, const char* controllerName,
+                                                          SilKit_DataSpec* dataSpec, void* defaultDataHandlerContext,
+                                                          SilKit_DataMessageHandler_t defaultDataHandler)
 try
 {
     ASSERT_VALID_OUT_PARAMETER(outSubscriber);
@@ -91,19 +90,18 @@ try
         uint8_t* payloadPointer = nullptr;
         if (cppDataMessageEvent.data.size() > 0)
         {
-            payloadPointer = (uint8_t*) &(cppDataMessageEvent.data[0]);
+            payloadPointer = (uint8_t*)&(cppDataMessageEvent.data[0]);
         }
 
         SilKit_DataMessageEvent cDataMessageEvent;
         SilKit_Struct_Init(SilKit_DataMessageEvent, cDataMessageEvent);
         cDataMessageEvent.timestamp = cppDataMessageEvent.timestamp.count();
-        cDataMessageEvent.data = { payloadPointer, cppDataMessageEvent.data.size() };
+        cDataMessageEvent.data = {payloadPointer, cppDataMessageEvent.data.size()};
 
         defaultDataHandler(defaultDataHandlerContext, cSubscriber, &cDataMessageEvent);
     };
 
-    auto dataSubscriber = cppParticipant->CreateDataSubscriber(controllerName, cppDataNodeSpec,
-                                                           cppDefaultDataHandler);
+    auto dataSubscriber = cppParticipant->CreateDataSubscriber(controllerName, cppDataNodeSpec, cppDefaultDataHandler);
     *outSubscriber = reinterpret_cast<SilKit_DataSubscriber*>(dataSubscriber);
     return SilKit_ReturnCode_SUCCESS;
 }
@@ -111,7 +109,7 @@ CAPI_CATCH_EXCEPTIONS
 
 
 SilKit_ReturnCode SilKitCALL SilKit_DataSubscriber_SetDataMessageHandler(SilKit_DataSubscriber* self, void* context,
-                                                      SilKit_DataMessageHandler_t dataHandler)
+                                                                         SilKit_DataMessageHandler_t dataHandler)
 try
 {
     ASSERT_VALID_POINTER_PARAMETER(self);
@@ -119,21 +117,21 @@ try
 
     auto cppSubscriber = reinterpret_cast<SilKit::Services::PubSub::IDataSubscriber*>(self);
     cppSubscriber->SetDataMessageHandler(
-    [dataHandler, context](SilKit::Services::PubSub::IDataSubscriber* cppSubscriberHandler,
-        const SilKit::Services::PubSub::DataMessageEvent& cppDataMessageEvent) {
-            auto* cSubscriber = reinterpret_cast<SilKit_DataSubscriber*>(cppSubscriberHandler);
-            uint8_t* payloadPointer = nullptr;
-            if (cppDataMessageEvent.data.size() > 0)
-            {
-                payloadPointer = (uint8_t*)&(cppDataMessageEvent.data[0]);
-            }
-            SilKit_DataMessageEvent cDataMessageEvent;
-            SilKit_Struct_Init(SilKit_DataMessageEvent, cDataMessageEvent);
-            cDataMessageEvent.timestamp = cppDataMessageEvent.timestamp.count();
-            cDataMessageEvent.data = { payloadPointer, cppDataMessageEvent.data.size() };
+        [dataHandler, context](SilKit::Services::PubSub::IDataSubscriber* cppSubscriberHandler,
+                               const SilKit::Services::PubSub::DataMessageEvent& cppDataMessageEvent) {
+        auto* cSubscriber = reinterpret_cast<SilKit_DataSubscriber*>(cppSubscriberHandler);
+        uint8_t* payloadPointer = nullptr;
+        if (cppDataMessageEvent.data.size() > 0)
+        {
+            payloadPointer = (uint8_t*)&(cppDataMessageEvent.data[0]);
+        }
+        SilKit_DataMessageEvent cDataMessageEvent;
+        SilKit_Struct_Init(SilKit_DataMessageEvent, cDataMessageEvent);
+        cDataMessageEvent.timestamp = cppDataMessageEvent.timestamp.count();
+        cDataMessageEvent.data = {payloadPointer, cppDataMessageEvent.data.size()};
 
-            dataHandler(context, cSubscriber, &cDataMessageEvent);
-        });
+        dataHandler(context, cSubscriber, &cDataMessageEvent);
+    });
     return SilKit_ReturnCode_SUCCESS;
 }
 CAPI_CATCH_EXCEPTIONS

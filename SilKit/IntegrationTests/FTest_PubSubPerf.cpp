@@ -45,10 +45,7 @@ auto Now()
 class FTest_PubSubPerf : public testing::Test
 {
 protected:
-
-    FTest_PubSubPerf()
-    {
-    }
+    FTest_PubSubPerf() {}
 
     enum class TopicMode
     {
@@ -68,8 +65,8 @@ protected:
         PubFirst
     };
 
-    void ExecuteTest(std::vector<int> numberOfTopicsList, TopicMode topicModePub, LabelMode labelModePub, TopicMode topicModeSub,
-                     LabelMode labelModeSub, StartOrderMode startOrder)
+    void ExecuteTest(std::vector<int> numberOfTopicsList, TopicMode topicModePub, LabelMode labelModePub,
+                     TopicMode topicModeSub, LabelMode labelModeSub, StartOrderMode startOrder)
     {
         for (auto numberOfTopics : numberOfTopicsList)
         {
@@ -80,8 +77,7 @@ protected:
             auto registryUri = MakeTestRegistryUri();
             SilKit::Tests::SimTestHarness testHarness(syncParticipantNames, registryUri, true);
 
-            auto definePubSpec = [topicModePub, labelModePub](int i)
-            {
+            auto definePubSpec = [topicModePub, labelModePub](int i) {
                 std::string topic = "Topic";
                 if (topicModePub == TopicMode::IndividualTopics)
                 {
@@ -145,7 +141,7 @@ protected:
             bool allPublished = false;
             auto* timeSyncService = publisher->GetOrCreateTimeSyncService();
 
-            auto CreatePub = [timeSyncService , &allPublished, testData, &publisher, &pubController, definePubSpec,
+            auto CreatePub = [timeSyncService, &allPublished, testData, &publisher, &pubController, definePubSpec,
                               numberOfTopics]() {
                 for (auto i = 0; i < numberOfTopics; i++)
                 {
@@ -153,18 +149,16 @@ protected:
                     SilKit::Services::PubSub::PubSubSpec dataSpec = definePubSpec(i);
                     pubController.push_back(publisher->Participant()->CreateDataPublisher(controllerName, dataSpec, 0));
                 }
-                timeSyncService->SetSimulationStepHandler(
-                    [&allPublished, testData, pubController](auto, auto) {
-                        if (!allPublished)
+                timeSyncService->SetSimulationStepHandler([&allPublished, testData, pubController](auto, auto) {
+                    if (!allPublished)
+                    {
+                        for (auto p : pubController)
                         {
-                            for (auto p : pubController)
-                            {
-                                p->Publish(testData);
-                            }
-                            allPublished = true;
+                            p->Publish(testData);
                         }
-                    },
-                    1ms);
+                        allPublished = true;
+                    }
+                }, 1ms);
             };
 
             // Subscriber
@@ -180,15 +174,17 @@ protected:
                 {
                     const auto controllerName = "Sub-" + std::to_string(i);
                     SilKit::Services::PubSub::PubSubSpec dataSpec = defineSubSpec(i);
-                    (void)subscriber->Participant()->CreateDataSubscriber(controllerName, dataSpec,
+                    (void)subscriber->Participant()->CreateDataSubscriber(
+                        controllerName, dataSpec,
                         [&receptionCount, numberOfTopics, &subLifecycleService](
-                            SilKit::Services::PubSub::IDataSubscriber* /*subscriber*/, const SilKit::Services::PubSub::DataMessageEvent& /*data*/) {
-                            receptionCount++;
-                            if (receptionCount == numberOfTopics)
-                            {
-                                subLifecycleService->Stop("Reception complete");
-                            }
-                        });
+                            SilKit::Services::PubSub::IDataSubscriber* /*subscriber*/,
+                            const SilKit::Services::PubSub::DataMessageEvent& /*data*/) {
+                        receptionCount++;
+                        if (receptionCount == numberOfTopics)
+                        {
+                            subLifecycleService->Stop("Reception complete");
+                        }
+                    });
                 }
             };
 
@@ -219,7 +215,7 @@ TEST_F(FTest_PubSubPerf, test_pubsub_performance)
     TopicMode topicModeSub;
     LabelMode labelModeSub;
     StartOrderMode startOrder;
-    
+
     // Larger set for production
     //std::vector<int> testSetBadScaling{10, 100, 500};
     //std::vector<int> testSetGoodScaling{10, 100, 500, 1000, 5000, 10000};
@@ -231,40 +227,50 @@ TEST_F(FTest_PubSubPerf, test_pubsub_performance)
     std::cout << std::endl;
     std::cout << "# IndividualTopics + NoLabels + Pub first" << std::endl;
     std::cout << "# NumberOfTopics Runtime(s)" << std::endl;
-    topicModePub = TopicMode::IndividualTopics; labelModePub = LabelMode::NoLabels;
-    topicModeSub = TopicMode::IndividualTopics; labelModeSub = LabelMode::NoLabels;
+    topicModePub = TopicMode::IndividualTopics;
+    labelModePub = LabelMode::NoLabels;
+    topicModeSub = TopicMode::IndividualTopics;
+    labelModeSub = LabelMode::NoLabels;
     startOrder = StartOrderMode::PubFirst;
     ExecuteTest(testSetGoodScaling, topicModePub, labelModePub, topicModeSub, labelModeSub, startOrder);
 
     std::cout << std::endl;
     std::cout << "# IndividualTopics + NoLabels + Sub first" << std::endl;
     std::cout << "# NumberOfTopics Runtime(s)" << std::endl;
-    topicModePub = TopicMode::IndividualTopics; labelModePub = LabelMode::NoLabels;
-    topicModeSub = TopicMode::IndividualTopics; labelModeSub = LabelMode::NoLabels;
+    topicModePub = TopicMode::IndividualTopics;
+    labelModePub = LabelMode::NoLabels;
+    topicModeSub = TopicMode::IndividualTopics;
+    labelModeSub = LabelMode::NoLabels;
     startOrder = StartOrderMode::SubFirst;
     ExecuteTest(testSetGoodScaling, topicModePub, labelModePub, topicModeSub, labelModeSub, startOrder);
-    
+
     std::cout << std::endl;
     std::cout << "# IndividualTopics + IndividualLabels + Pub Mandatory + Sub Mandatory + Pub first" << std::endl;
     std::cout << "# NumberOfTopics Runtime(s)" << std::endl;
-    topicModePub = TopicMode::IndividualTopics; labelModePub = LabelMode::IndividualLabelsMandatory;
-    topicModeSub = TopicMode::IndividualTopics; labelModeSub = LabelMode::IndividualLabelsMandatory;
+    topicModePub = TopicMode::IndividualTopics;
+    labelModePub = LabelMode::IndividualLabelsMandatory;
+    topicModeSub = TopicMode::IndividualTopics;
+    labelModeSub = LabelMode::IndividualLabelsMandatory;
     startOrder = StartOrderMode::PubFirst;
     ExecuteTest(testSetGoodScaling, topicModePub, labelModePub, topicModeSub, labelModeSub, startOrder);
 
     std::cout << std::endl;
     std::cout << "# IndividualTopics + IndividualLabels + Pub Mandatory + Sub Mandatory + Sub first" << std::endl;
     std::cout << "# NumberOfTopics Runtime(s)" << std::endl;
-    topicModePub = TopicMode::IndividualTopics; labelModePub = LabelMode::IndividualLabelsMandatory;
-    topicModeSub = TopicMode::IndividualTopics; labelModeSub = LabelMode::IndividualLabelsMandatory;
+    topicModePub = TopicMode::IndividualTopics;
+    labelModePub = LabelMode::IndividualLabelsMandatory;
+    topicModeSub = TopicMode::IndividualTopics;
+    labelModeSub = LabelMode::IndividualLabelsMandatory;
     startOrder = StartOrderMode::SubFirst;
     ExecuteTest(testSetGoodScaling, topicModePub, labelModePub, topicModeSub, labelModeSub, startOrder);
-    
+
     std::cout << std::endl;
     std::cout << "# CommonTopic + NoLabels + Pub first" << std::endl;
     std::cout << "# NumberOfTopics Runtime(s)" << std::endl;
-    topicModePub = TopicMode::CommonTopic; labelModePub = LabelMode::NoLabels;
-    topicModeSub = TopicMode::CommonTopic; labelModeSub = LabelMode::NoLabels;
+    topicModePub = TopicMode::CommonTopic;
+    labelModePub = LabelMode::NoLabels;
+    topicModeSub = TopicMode::CommonTopic;
+    labelModeSub = LabelMode::NoLabels;
     startOrder = StartOrderMode::PubFirst;
     ExecuteTest(testSetBadScaling, topicModePub, labelModePub, topicModeSub, labelModeSub, startOrder);
 
@@ -281,67 +287,82 @@ TEST_F(FTest_PubSubPerf, test_pubsub_performance)
     std::cout << std::endl;
     std::cout << "# CommonTopic + IndividualLabels + Pub Optional + Sub Optional + Pub first" << std::endl;
     std::cout << "# NumberOfTopics Runtime(s)" << std::endl;
-    topicModePub = TopicMode::CommonTopic; labelModePub = LabelMode::IndividualLabelsOptional;
-    topicModeSub = TopicMode::CommonTopic; labelModeSub = LabelMode::IndividualLabelsOptional;
+    topicModePub = TopicMode::CommonTopic;
+    labelModePub = LabelMode::IndividualLabelsOptional;
+    topicModeSub = TopicMode::CommonTopic;
+    labelModeSub = LabelMode::IndividualLabelsOptional;
     startOrder = StartOrderMode::PubFirst;
     ExecuteTest(testSetGoodScaling, topicModePub, labelModePub, topicModeSub, labelModeSub, startOrder);
 
     std::cout << std::endl;
     std::cout << "# CommonTopic + IndividualLabels + Pub Optional + Sub Optional + Sub first" << std::endl;
     std::cout << "# NumberOfTopics Runtime(s)" << std::endl;
-    topicModePub = TopicMode::CommonTopic; labelModePub = LabelMode::IndividualLabelsOptional;
-    topicModeSub = TopicMode::CommonTopic; labelModeSub = LabelMode::IndividualLabelsOptional;
+    topicModePub = TopicMode::CommonTopic;
+    labelModePub = LabelMode::IndividualLabelsOptional;
+    topicModeSub = TopicMode::CommonTopic;
+    labelModeSub = LabelMode::IndividualLabelsOptional;
     startOrder = StartOrderMode::SubFirst;
     ExecuteTest(testSetGoodScaling, topicModePub, labelModePub, topicModeSub, labelModeSub, startOrder);
-    
+
     std::cout << std::endl;
     std::cout << "# CommonTopic + IndividualLabels + Pub Mandatory + Sub Mandatory + Pub first" << std::endl;
     std::cout << "# NumberOfTopics Runtime(s)" << std::endl;
-    topicModePub = TopicMode::CommonTopic; labelModePub = LabelMode::IndividualLabelsMandatory;
-    topicModeSub = TopicMode::CommonTopic; labelModeSub = LabelMode::IndividualLabelsMandatory;
+    topicModePub = TopicMode::CommonTopic;
+    labelModePub = LabelMode::IndividualLabelsMandatory;
+    topicModeSub = TopicMode::CommonTopic;
+    labelModeSub = LabelMode::IndividualLabelsMandatory;
     startOrder = StartOrderMode::PubFirst;
     ExecuteTest(testSetGoodScaling, topicModePub, labelModePub, topicModeSub, labelModeSub, startOrder);
 
     std::cout << std::endl;
     std::cout << "# CommonTopic + IndividualLabels + Pub Mandatory + Sub Mandatory + Sub first" << std::endl;
     std::cout << "# NumberOfTopics Runtime(s)" << std::endl;
-    topicModePub = TopicMode::CommonTopic; labelModePub = LabelMode::IndividualLabelsMandatory;
-    topicModeSub = TopicMode::CommonTopic; labelModeSub = LabelMode::IndividualLabelsMandatory;
+    topicModePub = TopicMode::CommonTopic;
+    labelModePub = LabelMode::IndividualLabelsMandatory;
+    topicModeSub = TopicMode::CommonTopic;
+    labelModeSub = LabelMode::IndividualLabelsMandatory;
     startOrder = StartOrderMode::SubFirst;
     ExecuteTest(testSetGoodScaling, topicModePub, labelModePub, topicModeSub, labelModeSub, startOrder);
 
     std::cout << std::endl;
     std::cout << "# CommonTopic + IndividualLabels + Pub Mandatory + Sub Optional + Pub first" << std::endl;
     std::cout << "# NumberOfTopics Runtime(s)" << std::endl;
-    topicModePub = TopicMode::CommonTopic; labelModePub = LabelMode::IndividualLabelsMandatory;
-    topicModeSub = TopicMode::CommonTopic; labelModeSub = LabelMode::IndividualLabelsOptional;
+    topicModePub = TopicMode::CommonTopic;
+    labelModePub = LabelMode::IndividualLabelsMandatory;
+    topicModeSub = TopicMode::CommonTopic;
+    labelModeSub = LabelMode::IndividualLabelsOptional;
     startOrder = StartOrderMode::PubFirst;
     ExecuteTest(testSetGoodScaling, topicModePub, labelModePub, topicModeSub, labelModeSub, startOrder);
 
     std::cout << std::endl;
     std::cout << "# CommonTopic + IndividualLabels + Pub Mandatory + Sub Optional + Sub first" << std::endl;
     std::cout << "# NumberOfTopics Runtime(s)" << std::endl;
-    topicModePub = TopicMode::CommonTopic; labelModePub = LabelMode::IndividualLabelsMandatory;
-    topicModeSub = TopicMode::CommonTopic; labelModeSub = LabelMode::IndividualLabelsOptional;
+    topicModePub = TopicMode::CommonTopic;
+    labelModePub = LabelMode::IndividualLabelsMandatory;
+    topicModeSub = TopicMode::CommonTopic;
+    labelModeSub = LabelMode::IndividualLabelsOptional;
     startOrder = StartOrderMode::SubFirst;
     ExecuteTest(testSetGoodScaling, topicModePub, labelModePub, topicModeSub, labelModeSub, startOrder);
 
     std::cout << std::endl;
     std::cout << "# CommonTopic + IndividualLabels + Pub Optional + Sub Mandatory + Pub first" << std::endl;
     std::cout << "# NumberOfTopics Runtime(s)" << std::endl;
-    topicModePub = TopicMode::CommonTopic; labelModePub = LabelMode::IndividualLabelsOptional;
-    topicModeSub = TopicMode::CommonTopic; labelModeSub = LabelMode::IndividualLabelsMandatory;
+    topicModePub = TopicMode::CommonTopic;
+    labelModePub = LabelMode::IndividualLabelsOptional;
+    topicModeSub = TopicMode::CommonTopic;
+    labelModeSub = LabelMode::IndividualLabelsMandatory;
     startOrder = StartOrderMode::PubFirst;
     ExecuteTest(testSetGoodScaling, topicModePub, labelModePub, topicModeSub, labelModeSub, startOrder);
 
     std::cout << std::endl;
     std::cout << "# CommonTopic + IndividualLabels + Pub Optional + Sub Mandatory + Sub first" << std::endl;
     std::cout << "# NumberOfTopics Runtime(s)" << std::endl;
-    topicModePub = TopicMode::CommonTopic; labelModePub = LabelMode::IndividualLabelsOptional;
-    topicModeSub = TopicMode::CommonTopic; labelModeSub = LabelMode::IndividualLabelsMandatory;
+    topicModePub = TopicMode::CommonTopic;
+    labelModePub = LabelMode::IndividualLabelsOptional;
+    topicModeSub = TopicMode::CommonTopic;
+    labelModeSub = LabelMode::IndividualLabelsMandatory;
     startOrder = StartOrderMode::SubFirst;
     ExecuteTest(testSetGoodScaling, topicModePub, labelModePub, topicModeSub, labelModeSub, startOrder);
-
 }
 
 } // anonymous namespace

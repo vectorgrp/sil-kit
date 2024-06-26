@@ -66,8 +66,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
         { \
             throw SilKit::CapiBadParameterError{"Parameter '" #p "' must not be null."}; \
         } \
-    } \
-    while (false)
+    } while (false)
 
 #define ASSERT_VALID_POINTER_TO_POINTER_PARAMETER(p) \
     do \
@@ -80,8 +79,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
         { \
             throw SilKit::CapiBadParameterError{"Parameter '" #p "' must not point to a null value."}; \
         } \
-    } \
-    while (false)
+    } while (false)
 
 #define ASSERT_VALID_OUT_PARAMETER(p) \
     do \
@@ -90,8 +88,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
         { \
             throw SilKit::CapiBadParameterError{"Return parameter '" #p "' must not be null."}; \
         } \
-    } \
-    while (false)
+    } while (false)
 
 #define kInvalidFunctionPointer "Handler function parameter must not be null."
 
@@ -102,8 +99,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
         { \
             throw SilKit::CapiBadParameterError{kInvalidFunctionPointer}; \
         } \
-    } \
-    while (false)
+    } while (false)
 
 #define ASSERT_VALID_BOOL_PARAMETER(b) \
     do \
@@ -112,8 +108,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
         { \
             throw SilKit::CapiBadParameterError{"The parameter '" #b "' is not a valid SilKit_Bool."}; \
         } \
-    } \
-    while (false)
+    } while (false)
 
 #define ASSERT_VALID_STRUCT_HEADER(p) \
     do \
@@ -123,16 +118,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
             throw SilKit::CapiBadParameterError{"The parameter '" #p \
                                                 "' has no valid SilKit_StructHeader. Check your library version"}; \
         } \
-    } \
-    while (false)
+    } while (false)
 
 #define ASSERT_VALID_PLAIN_STRUCT_HEADER(p) \
     do \
     { \
         if (!IsValidStructHeader(p)) \
         { \
-            throw SilKit::CapiBadParameterError{"The parameter '" #p \
-                                                "' is not a valid SilKit_StructHeader."}; \
+            throw SilKit::CapiBadParameterError{"The parameter '" #p "' is not a valid SilKit_StructHeader."}; \
         } \
     } while (false)
 
@@ -142,28 +135,28 @@ extern thread_local std::string SilKit_error_string;
 
 // Utility to verify a CAPI struct header
 
-namespace detail
+namespace detail {
+template <typename T, typename = void>
+struct HasStructHeader : std::false_type
 {
-    template<typename T, typename = void>
-    struct HasStructHeader: std::false_type
-    {
-    };
+};
 
-    template <typename T>
-    struct HasStructHeader<T, SilKit::Util::VoidT<decltype(std::declval<std::decay_t<T>>().structHeader = SilKit_StructHeader{})>>
+template <typename T>
+struct HasStructHeader<
+    T, SilKit::Util::VoidT<decltype(std::declval<std::decay_t<T>>().structHeader = SilKit_StructHeader{})>>
     : std::true_type
-    {
-    };
+{
+};
 } //namespace detail
 
-template<typename StructT>
+template <typename StructT>
 bool HasValidStructHeader(const StructT*, std::enable_if_t<!detail::HasStructHeader<StructT>::value, bool> = false)
 {
     //struct type has no header, ignored.
-   return false; 
+    return false;
 }
 
-template<typename StructT>
+template <typename StructT>
 bool HasValidStructHeader(const StructT* s, std::enable_if_t<detail::HasStructHeader<StructT>::value, bool> = true)
 {
     return SK_ID_IS_VALID(SilKit_Struct_GetId(*s));
@@ -173,4 +166,3 @@ inline bool IsValidStructHeader(const SilKit_StructHeader* s)
 {
     return SK_ID_IS_VALID(s->version);
 }
-

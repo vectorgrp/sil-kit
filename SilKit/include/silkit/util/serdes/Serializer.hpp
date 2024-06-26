@@ -54,7 +54,8 @@ public:
      *  \param bitSize The number of bits which shall be serialized.
      */
     template <typename T, typename std::enable_if<std::is_integral<T>::value
-        && !std::is_same<bool, typename std::decay<T>::type>::value, int>::type = 0>
+                                                      && !std::is_same<bool, typename std::decay<T>::type>::value,
+                                                  int>::type = 0>
     void Serialize(T data, std::size_t bitSize)
     {
         auto byteSize = bitSize / 8;
@@ -114,7 +115,10 @@ public:
     }
 
     /*! \brief Serializes the start of a struct. */
-    void BeginStruct() { Align(); }
+    void BeginStruct()
+    {
+        Align();
+    }
 
     /*! \brief Serializes the end of a struct. */
     void EndStruct() {}
@@ -139,13 +143,22 @@ public:
      *  \param isAvailable `true` if the optional value is set, otherwise `false`.
      *                     If `true`, the optional value must be serialized afterwards.
      */
-    void BeginOptional(bool isAvailable) { Serialize(isAvailable); }
+    void BeginOptional(bool isAvailable)
+    {
+        Serialize(isAvailable);
+    }
 
     /*! \brief Serializes the end of an optional value. */
     void EndOptional() {}
 
-    void BeginUnion(int) { throw SilKitError("Unions are currently not supported."); }
-    void EndUnion() { throw SilKitError("Unions are currently not supported."); }
+    void BeginUnion(int)
+    {
+        throw SilKitError("Unions are currently not supported.");
+    }
+    void EndUnion()
+    {
+        throw SilKitError("Unions are currently not supported.");
+    }
 
     /*! \brief Resets the buffer. */
     void Reset()

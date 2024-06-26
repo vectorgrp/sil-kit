@@ -62,7 +62,7 @@ public:
     CanController(const CanController&) = delete;
     CanController(CanController&&) = delete;
     CanController(Core::IParticipantInternal* participant, SilKit::Config::CanController config,
-                   Services::Orchestration::ITimeProvider* timeProvider);
+                  Services::Orchestration::ITimeProvider* timeProvider);
 
 public:
     // ----------------------------------------
@@ -95,9 +95,8 @@ public:
     HandlerId AddErrorStateChangeHandler(ErrorStateChangeHandler handler) override;
     void RemoveErrorStateChangeHandler(HandlerId handlerId) override;
 
-    HandlerId AddFrameTransmitHandler(
-        FrameTransmitHandler handler,
-        CanTransmitStatusMask statusMask = SilKit_CanTransmitStatus_DefaultMask) override;
+    HandlerId AddFrameTransmitHandler(FrameTransmitHandler handler,
+                                      CanTransmitStatusMask statusMask = SilKit_CanTransmitStatus_DefaultMask) override;
     void RemoveFrameTransmitHandler(HandlerId handlerId) override;
 
     // IMsgForCanController
@@ -110,10 +109,10 @@ public:
 
     // IServiceEndpoint
     inline void SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor) override;
-    inline auto GetServiceDescriptor() const -> const Core::ServiceDescriptor & override;
+    inline auto GetServiceDescriptor() const -> const Core::ServiceDescriptor& override;
 
     // IReplayDataController
-    void ReplayMessage(const SilKit::IReplayMessage *message) override;
+    void ReplayMessage(const SilKit::IReplayMessage* message) override;
 
 public:
     // ----------------------------------------
@@ -127,7 +126,7 @@ public:
 
     auto GetState() -> CanControllerState;
 
-    auto GetTracer() -> Tracer *;
+    auto GetTracer() -> Tracer*;
 
 private:
     // ----------------------------------------
@@ -172,8 +171,8 @@ private:
     inline void SendMsg(MsgT&& msg);
 
     // IReplayDataProvider Implementation
-    void ReplaySend(const IReplayMessage * replayMessage);
-    void ReplayReceive(const IReplayMessage * replayMessage);
+    void ReplaySend(const IReplayMessage* replayMessage);
+    void ReplayReceive(const IReplayMessage* replayMessage);
 
 private:
     // ----------------------------------------
@@ -189,17 +188,14 @@ private:
 
     CanControllerState _controllerState = CanControllerState::Uninit;
     CanErrorState _errorState = CanErrorState::NotAvailable;
-    CanConfigureBaudrate _baudRate = { 0, 0, 0 };
+    CanConfigureBaudrate _baudRate = {0, 0, 0};
 
     template <typename MsgT>
     using FilteredCallbacks = Util::SynchronizedHandlers<FilteredCallback<MsgT>>;
 
-    std::tuple<
-        FilteredCallbacks<CanFrameEvent>,
-        FilteredCallbacks<CanStateChangeEvent>,
-        FilteredCallbacks<CanErrorStateChangeEvent>,
-        FilteredCallbacks<CanFrameTransmitEvent>
-    > _callbacks;
+    std::tuple<FilteredCallbacks<CanFrameEvent>, FilteredCallbacks<CanStateChangeEvent>,
+               FilteredCallbacks<CanErrorStateChangeEvent>, FilteredCallbacks<CanFrameTransmitEvent>>
+        _callbacks;
 };
 
 // ================================================================================
@@ -221,7 +217,7 @@ auto CanController::GetServiceDescriptor() const -> const Core::ServiceDescripto
     return _serviceDescriptor;
 }
 
-inline auto CanController::GetTracer() -> Tracer *
+inline auto CanController::GetTracer() -> Tracer*
 {
     return &_tracer;
 }

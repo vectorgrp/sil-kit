@@ -42,10 +42,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 namespace {
 
 // Indentation helper
-class Indent {
+class Indent
+{
 public:
     Indent(int level)
-        : _level{ level }
+        : _level{level}
     {
     }
     int Level() const
@@ -61,7 +62,8 @@ public:
     void Dec()
     {
         _level -= _shift;
-        if (_level < 0) _level = 0;
+        if (_level < 0)
+            _level = 0;
     }
     std::size_t Row() const
     {
@@ -73,9 +75,9 @@ public:
     }
 
 private:
-    const int _shift{ 4 };
+    const int _shift{4};
     int _level;
-    std::size_t _row{ 0 };
+    std::size_t _row{0};
 };
 
 // The ostream_wrapper keeps track of lines and write position
@@ -95,7 +97,7 @@ inline YAML::ostream_wrapper& operator<<(YAML::ostream_wrapper& out, Indent& ind
 }
 
 // Ensure we can print any type that is supported by ostream::operator<<
-template<typename T>
+template <typename T>
 inline YAML::ostream_wrapper& operator<<(YAML::ostream_wrapper& out, const T& value)
 {
     std::stringstream buf;
@@ -109,12 +111,13 @@ void EmitScalar(YAML::ostream_wrapper& out, YAML::Node val)
 {
     if (!val.IsScalar())
     {
-        throw SilKit::SilKitError{ "YamlParser: EmitScalar on non-scalar type called" };
+        throw SilKit::SilKitError{"YamlParser: EmitScalar on non-scalar type called"};
     }
     //XXX we should be able to query the scalar's type, instead of
     //    exception bombing our way to the final value.
     //out ;
-    try {
+    try
+    {
         out << (val.as<bool>() ? "true" : "false");
     }
     catch (...)
@@ -130,9 +133,10 @@ void EmitScalar(YAML::ostream_wrapper& out, YAML::Node val)
         };
         const auto valStr = val.as<std::string>();
         //Warning: using the val.as<int> does truncate type to char
-        int intNumber{ 0 };
-        double floatNumber{ 0.0 };
-        if (emitAs(valStr, intNumber)) {
+        int intNumber{0};
+        double floatNumber{0.0};
+        if (emitAs(valStr, intNumber))
+        {
             out << intNumber;
         }
         else if (emitAs(valStr, floatNumber))
@@ -145,10 +149,10 @@ void EmitScalar(YAML::ostream_wrapper& out, YAML::Node val)
         }
     }
 }
-void EmitValidJson(YAML::ostream_wrapper& out, YAML::Node& node, 
-    YAML::NodeType::value parentType = YAML::NodeType::Undefined)
+void EmitValidJson(YAML::ostream_wrapper& out, YAML::Node& node,
+                   YAML::NodeType::value parentType = YAML::NodeType::Undefined)
 {
-    static Indent ind{ 0 };
+    static Indent ind{0};
     uint32_t seqNum = 0;
     const bool needComma = node.size() > 1;
     if (parentType == YAML::NodeType::Undefined)
@@ -179,18 +183,17 @@ void EmitValidJson(YAML::ostream_wrapper& out, YAML::Node& node,
         else if (kv.second.IsDefined())
         {
             // might be key:value kind of node
-            try {
-                out << ind <<  "\"" << kv.first.as<std::string>() << "\": ";
+            try
+            {
+                out << ind << "\"" << kv.first.as<std::string>() << "\": ";
             }
             catch (...)
             {
-
             }
             val = kv.second;
         }
         if (val.IsDefined())
         {
-
             if (val.IsSequence())
             {
                 out << ind << "[";
@@ -203,22 +206,21 @@ void EmitValidJson(YAML::ostream_wrapper& out, YAML::Node& node,
                 ind.Inc();
                 EmitValidJson(out, val, YAML::NodeType::Map);
                 ind.Dec();
-                out << ind <<  "}";
+                out << ind << "}";
             }
             else if (val.IsScalar())
             {
                 out << ind;
                 EmitScalar(out, val);
             }
-
         }
-        if (needComma && (seqNum < (node.size()-1)))
+        if (needComma && (seqNum < (node.size() - 1)))
         {
             out << ind << ", ";
-            if(parentType != YAML::NodeType::Sequence)
+            if (parentType != YAML::NodeType::Sequence)
             {
                 //break lines if in object (map or toplevel)
-                out << "\n"; 
+                out << "\n";
             }
         }
         else
@@ -259,7 +261,7 @@ std::ostream& operator<<(std::ostream& out, const YAML::Mark& mark)
 auto yaml_to_json(YAML::Node node) -> std::string
 {
     std::stringstream buf;
-    YAML::ostream_wrapper out{ buf };
+    YAML::ostream_wrapper out{buf};
     EmitValidJson(out, node);
     return buf.str();
 }

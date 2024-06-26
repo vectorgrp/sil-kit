@@ -36,9 +36,8 @@ class CanController;
 class SimBehaviorTrivial : public ISimBehavior
 {
 public:
-
     SimBehaviorTrivial(Core::IParticipantInternal* participant, CanController* canController,
-                      Services::Orchestration::ITimeProvider* timeProvider);
+                       Services::Orchestration::ITimeProvider* timeProvider);
 
     auto AllowReception(const Core::IServiceEndpoint* from) const -> bool override;
     void SendMsg(CanConfigureBaudrate&& /*baudRate*/) override;

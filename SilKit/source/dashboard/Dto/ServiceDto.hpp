@@ -32,10 +32,16 @@ class ServiceDto : public oatpp::DTO
 {
     DTO_INIT(ServiceDto, DTO)
 
-    DTO_FIELD_INFO(name) { info->description = "Name of the service"; }
+    DTO_FIELD_INFO(name)
+    {
+        info->description = "Name of the service";
+    }
     DTO_FIELD(String, name);
 
-    DTO_FIELD_INFO(networkName) { info->description = "Name of the network"; }
+    DTO_FIELD_INFO(networkName)
+    {
+        info->description = "Name of the network";
+    }
     DTO_FIELD(String, networkName);
 };
 

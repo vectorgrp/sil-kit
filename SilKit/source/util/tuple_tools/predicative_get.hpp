@@ -34,7 +34,7 @@ namespace tuple_tools {
  *  If no such element exists, predicative_get<Predicate>(tuple)
  *  returns void.
  */
-template<template <class> class Predicate, class Head, class... Tail>
+template <template <class> class Predicate, class Head, class... Tail>
 constexpr auto& predicative_get(std::tuple<Head, Tail...>& tuple);
 
 /*! Retrieve a tuple element identified by a boolean predicate.
@@ -44,7 +44,7 @@ constexpr auto& predicative_get(std::tuple<Head, Tail...>& tuple);
  *  no such element exists, predicative_get<Predicate>(tuple) returns
  *  void.
  */
-template<template <class> class Predicate, class Head, class... Tail>
+template <template <class> class Predicate, class Head, class... Tail>
 constexpr const auto& predicative_get(const std::tuple<Head, Tail...>& tuple);
 
 
@@ -54,21 +54,22 @@ constexpr const auto& predicative_get(const std::tuple<Head, Tail...>& tuple);
 
 // Primary template that also provides the terminal void get() method
 // that is called in the case that no element matches the predicate
-template<class Tuple, class IdxSeq, template<class> class Predicate, bool>
+template <class Tuple, class IdxSeq, template <class> class Predicate, bool>
 struct tuple_get
 {
     static void get(const Tuple&) {}
 };
 
 // recurse if the current index does not fulfill the predicate
-template<class Tuple, size_t I, size_t II, size_t... Tail, template<class> class Predicate>
+template <class Tuple, size_t I, size_t II, size_t... Tail, template <class> class Predicate>
 struct tuple_get<Tuple, std::index_sequence<I, II, Tail...>, Predicate, false>
-    :  tuple_get<Tuple, std::index_sequence<II, Tail...>, Predicate, Predicate<typename std::tuple_element_t<II, Tuple>>::value>
+    : tuple_get<Tuple, std::index_sequence<II, Tail...>, Predicate,
+                Predicate<typename std::tuple_element_t<II, Tuple>>::value>
 {
 };
 
 // Getters for the matching predicate
-template<class Tuple, size_t I, size_t... Tail, template<class> class Predicate>
+template <class Tuple, size_t I, size_t... Tail, template <class> class Predicate>
 struct tuple_get<Tuple, std::index_sequence<I, Tail...>, Predicate, true>
 {
     using HeadT = typename std::tuple_element_t<I, Tuple>;
@@ -84,7 +85,7 @@ struct tuple_get<Tuple, std::index_sequence<I, Tail...>, Predicate, true>
 };
 
 // Implementations of the convenience helper methods
-template<template <class> class Predicate, class Head, class... Tail>
+template <template <class> class Predicate, class Head, class... Tail>
 constexpr auto& predicative_get(std::tuple<Head, Tail...>& tuple)
 {
     using Tuple = std::tuple<Head, Tail...>;
@@ -93,7 +94,7 @@ constexpr auto& predicative_get(std::tuple<Head, Tail...>& tuple)
     return tuple_get<Tuple, tuple_indexes, Predicate, Predicate<Head>::value>::get(tuple);
 }
 
-template<template <class> class Predicate, class Head, class... Tail>
+template <template <class> class Predicate, class Head, class... Tail>
 constexpr const auto& predicative_get(const std::tuple<Head, Tail...>& tuple)
 {
     using Tuple = std::tuple<Head, Tail...>;

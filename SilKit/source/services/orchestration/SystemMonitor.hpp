@@ -69,7 +69,8 @@ public:
     void RemoveParticipantStatusHandler(HandlerId handlerId) override;
 
     auto SystemState() const -> Orchestration::SystemState override;
-    auto ParticipantStatus(const std::string& participantName) const -> const Orchestration::ParticipantStatus& override;
+    auto ParticipantStatus(const std::string& participantName) const
+        -> const Orchestration::ParticipantStatus& override;
 
     void ReceiveMsg(const IServiceEndpoint* from, const Orchestration::ParticipantStatus& msg) override;
     void ReceiveMsg(const IServiceEndpoint* from, const Orchestration::WorkflowConfiguration& msg) override;
@@ -81,7 +82,7 @@ public:
 
     // IServiceEndpoint
     inline void SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor) override;
-    inline auto GetServiceDescriptor() const -> const Core::ServiceDescriptor & override;
+    inline auto GetServiceDescriptor() const -> const Core::ServiceDescriptor& override;
 
 public:
     // ----------------------------------------

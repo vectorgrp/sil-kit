@@ -32,7 +32,10 @@ class SimulationEndDto : public oatpp::DTO
 {
     DTO_INIT(SimulationEndDto, DTO)
 
-    DTO_FIELD_INFO(stopped) { info->description = "Time when simulation ended"; }
+    DTO_FIELD_INFO(stopped)
+    {
+        info->description = "Time when simulation ended";
+    }
     DTO_FIELD(UInt64, stopped);
 };
 

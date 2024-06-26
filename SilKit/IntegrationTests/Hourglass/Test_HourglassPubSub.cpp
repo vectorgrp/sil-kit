@@ -110,8 +110,8 @@ MATCHER_P(PubSubSpecMatcher, pubSubSpecParam, "")
     MatchingLabelSet cLabels{};
     std::transform(cDataSpec->labelList.labels, cDataSpec->labelList.labels + cDataSpec->labelList.numLabels,
                    std::inserter(cLabels, cLabels.begin()), [](const SilKit_Label& cLabel) {
-                       return MatchingLabel{cLabel.key, cLabel.value, static_cast<MatchingLabel::Kind>(cLabel.kind)};
-                   });
+        return MatchingLabel{cLabel.key, cLabel.value, static_cast<MatchingLabel::Kind>(cLabel.kind)};
+    });
 
     if (!std::equal(cppLabels.begin(), cppLabels.end(), cLabels.begin(), cLabels.end(), MatchingLabelEquals{}))
     {
@@ -201,8 +201,8 @@ TEST_F(Test_HourglassPubSub, SilKit_DataSubscriber_Create)
 
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::PubSub::DataSubscriber subscriber{
         participant, subscriberName, pubSubSpec, [](IDataSubscriber*, const DataMessageEvent&) {
-            // do nothing
-        }};
+        // do nothing
+    }};
 }
 
 TEST_F(Test_HourglassPubSub, SilKit_DataSubscriber_SetDataMessageHandler)
@@ -212,8 +212,8 @@ TEST_F(Test_HourglassPubSub, SilKit_DataSubscriber_SetDataMessageHandler)
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::PubSub::DataSubscriber subscriber{
         participant, "DataSubscriber1", PubSubSpec{"Topic1", "MediaType1"},
         [](IDataSubscriber*, const DataMessageEvent&) {
-            // do nothing
-        }};
+        // do nothing
+    }};
 
     EXPECT_CALL(capi, SilKit_DataSubscriber_SetDataMessageHandler(mockDataSubscriber, testing::_, testing::_));
 

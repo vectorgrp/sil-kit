@@ -110,12 +110,8 @@ public:
         : _type{getTypeId<T>()}
         , _simulationName{std::move(simulationName)}
         , _data{new T{value}}
-        , _clone([](void* otherData) -> void* {
-            return new T(*static_cast<T*>(otherData));
-        })
-        , _destroy([](void* data) {
-            delete static_cast<T*>(data);
-        })
+        , _clone([](void* otherData) -> void* { return new T(*static_cast<T*>(otherData)); })
+        , _destroy([](void* data) { delete static_cast<T*>(data); })
     {
     }
 
@@ -147,11 +143,20 @@ public:
         return *this;
     }
 
-    auto Type() const -> SilKitEventType { return _type; }
+    auto Type() const -> SilKitEventType
+    {
+        return _type;
+    }
 
-    auto GetSimulationName() const -> const std::string& { return _simulationName; }
+    auto GetSimulationName() const -> const std::string&
+    {
+        return _simulationName;
+    }
 
-    auto GetSimulationStart() const -> const SimulationStart& { return Get<SimulationStart>(); }
+    auto GetSimulationStart() const -> const SimulationStart&
+    {
+        return Get<SimulationStart>();
+    }
 
     auto GetParticipantConnectionInformation() const -> const Services::Orchestration::ParticipantConnectionInformation&
     {
@@ -168,9 +173,15 @@ public:
         return Get<Services::Orchestration::SystemState>();
     }
 
-    auto GetServiceData() const -> const ServiceData& { return Get<ServiceData>(); }
+    auto GetServiceData() const -> const ServiceData&
+    {
+        return Get<ServiceData>();
+    }
 
-    auto GetSimulationEnd() const -> const SimulationEnd& { return Get<SimulationEnd>(); }
+    auto GetSimulationEnd() const -> const SimulationEnd&
+    {
+        return Get<SimulationEnd>();
+    }
 
 private:
     template <typename T>

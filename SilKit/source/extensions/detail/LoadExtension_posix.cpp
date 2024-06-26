@@ -35,15 +35,16 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "LoadExtension.hpp"
 
 
-namespace SilKit { namespace detail {
+namespace SilKit {
+namespace detail {
 
 //used by FindLibrary
 #if defined(__APPLE__)
-const std::string lib_file_extension=".dylib";
+const std::string lib_file_extension = ".dylib";
 #else
-const std::string lib_file_extension=".so";
+const std::string lib_file_extension = ".so";
 #endif
-const std::string lib_prefix="lib";
+const std::string lib_prefix = "lib";
 const std::string path_sep = "/";
 
 bool FileExists(const std::string& path)
@@ -54,7 +55,7 @@ bool FileExists(const std::string& path)
 LibraryHandle OpenLibrary(const std::string& path)
 {
     void* tmp = ::dlopen(path.c_str(), RTLD_NOW);
-    if(tmp == nullptr)
+    if (tmp == nullptr)
     {
         throw ExtensionError("::dlopen() failed: " + std::string{dlerror()});
     }
@@ -63,12 +64,10 @@ LibraryHandle OpenLibrary(const std::string& path)
 
 void* FindSymbol(LibraryHandle& hnd, const std::string& symbol_name)
 {
-    void* sym = dlsym(hnd, symbol_name.c_str()); 
-    if(sym == nullptr)
+    void* sym = dlsym(hnd, symbol_name.c_str());
+    if (sym == nullptr)
     {
-        throw ExtensionError("Calling dlsym() failed: Could not find \""
-                + symbol_name +"\"" + std::string{dlerror()}
-        );
+        throw ExtensionError("Calling dlsym() failed: Could not find \"" + symbol_name + "\"" + std::string{dlerror()});
     }
     return sym;
 }
@@ -90,7 +89,7 @@ std::string GetProcessPath()
     buf.resize(PATH_MAX);
     auto proc = std::string("/proc/") + std::to_string(getpid()) + "/exe";
     auto nb = readlink(proc.c_str(), buf.data(), buf.size());
-    if ( nb < 0)
+    if (nb < 0)
     {
         return ".";
     }
@@ -100,6 +99,6 @@ std::string GetProcessPath()
     return std::string{processDir};
 }
 
-}//detail
+} // namespace detail
 
-}//silkit
+} // namespace SilKit

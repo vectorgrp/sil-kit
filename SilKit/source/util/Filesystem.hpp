@@ -58,6 +58,7 @@ public:
     auto string() const -> std::string;
     auto c_str() const noexcept -> const value_type*;
     auto native() const noexcept -> const string_type&;
+
 private:
     string_type _path;
 };

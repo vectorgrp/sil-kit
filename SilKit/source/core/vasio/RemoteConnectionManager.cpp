@@ -29,9 +29,9 @@
 
 
 #if SILKIT_ENABLE_TRACING_INSTRUMENTATION_VAsioConnection
-#    define SILKIT_TRACE_METHOD_(logger, ...) SILKIT_TRACE_METHOD(logger, __VA_ARGS__)
+#define SILKIT_TRACE_METHOD_(logger, ...) SILKIT_TRACE_METHOD(logger, __VA_ARGS__)
 #else
-#    define SILKIT_TRACE_METHOD_(...)
+#define SILKIT_TRACE_METHOD_(...)
 #endif
 
 
@@ -79,10 +79,8 @@ void RemoteConnectionManager::Remove(const IConnectPeer &connectPeer)
 {
     std::lock_guard<decltype(_mutex)> lock{_mutex};
 
-    _connectPeers.erase(
-        std::remove_if(_connectPeers.begin(), _connectPeers.end(), [needle = &connectPeer](const auto &hay) {
-            return needle == hay.get();
-        }));
+    _connectPeers.erase(std::remove_if(_connectPeers.begin(), _connectPeers.end(),
+                                       [needle = &connectPeer](const auto &hay) { return needle == hay.get(); }));
 }
 
 

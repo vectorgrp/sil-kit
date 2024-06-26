@@ -54,7 +54,7 @@ using namespace SilKit::Services::Ethernet;
 using ::SilKit::Core::Tests::DummyParticipant;
 using ::SilKit::Tests::MockTraceSink;
 
-MATCHER_P(EthernetTransmitAckWithouthTransmitIdMatcher, truthAck, "") 
+MATCHER_P(EthernetTransmitAckWithouthTransmitIdMatcher, truthAck, "")
 {
     *result_listener << "matches EthernetTransmitAcks without checking the transmit id";
     auto frame1 = truthAck;
@@ -68,8 +68,8 @@ auto AnEthMessageWith(std::chrono::nanoseconds timestamp) -> testing::Matcher<co
     return testing::Field(&WireEthernetFrameEvent::timestamp, timestamp);
 }
 
-auto AnEthMessageWith(std::chrono::nanoseconds timestamp, size_t rawFrameSize)
-    -> testing::Matcher<const WireEthernetFrameEvent&>
+auto AnEthMessageWith(std::chrono::nanoseconds timestamp,
+                      size_t rawFrameSize) -> testing::Matcher<const WireEthernetFrameEvent&>
 {
     const auto frameHasCorrectSize = [rawFrameSize](const WireEthernetFrame& frame) -> bool {
         return frame.raw.AsSpan().size() == rawFrameSize;
@@ -91,7 +91,6 @@ auto AWireEthernetFrameEventWith(TransmitDirection direction) -> testing::Matche
 class MockParticipant : public DummyParticipant
 {
 public:
-
     MOCK_METHOD2(SendMsg, void(const IServiceEndpoint*, const WireEthernetFrameEvent&));
     MOCK_METHOD2(SendMsg, void(const IServiceEndpoint*, const EthernetFrameTransmitEvent&));
     MOCK_METHOD2(SendMsg, void(const IServiceEndpoint*, const EthernetStatus&));
@@ -123,8 +122,8 @@ protected:
     }
 
 protected:
-    const ServiceDescriptor controllerAddress{ "Participant1", "eth1", "EthController1", 8};
-    const ServiceDescriptor otherAddress{ "Participant1", "eth1", "EthController1", 2 };
+    const ServiceDescriptor controllerAddress{"Participant1", "eth1", "EthController1", 8};
+    const ServiceDescriptor otherAddress{"Participant1", "eth1", "EthController1", 2};
 
     MockTraceSink traceSink;
     MockParticipant participant;
@@ -139,8 +138,7 @@ protected:
 */
 TEST_F(Test_EthControllerTrivialSim, send_eth_frame)
 {
-    ON_CALL(participant.mockTimeProvider, Now())
-        .WillByDefault(testing::Return(42ns));
+    ON_CALL(participant.mockTimeProvider, Now()).WillByDefault(testing::Return(42ns));
 
     const auto now = 42ns;
     EXPECT_CALL(participant, SendMsg(&controller, AnEthMessageWith(now))).Times(1);
@@ -154,7 +152,7 @@ TEST_F(Test_EthControllerTrivialSim, send_eth_frame)
     EXPECT_CALL(participant.mockTimeProvider, Now()).Times(3);
 
     std::vector<uint8_t> rawFrame;
-    SetSourceMac(rawFrame, EthernetMac{ 0, 0, 0, 0, 0, 0 });
+    SetSourceMac(rawFrame, EthernetMac{0, 0, 0, 0, 0, 0});
 
     EthernetFrame frame{rawFrame};
     controller.Activate();
@@ -178,9 +176,7 @@ TEST_F(Test_EthControllerTrivialSim, send_short_eth_frame)
 
     std::vector<uint8_t> rawFrame;
     // destination and source MAC
-    std::generate_n(std::back_inserter(rawFrame), 6 + 6, []() -> uint8_t {
-        return 0xFF;
-    });
+    std::generate_n(std::back_inserter(rawFrame), 6 + 6, []() -> uint8_t { return 0xFF; });
     // EtherType
     rawFrame.push_back(0x00);
     rawFrame.push_back(0x00);
@@ -202,9 +198,7 @@ TEST_F(Test_EthControllerTrivialSim, send_short_eth_frame)
     const auto isFramePaddingZero = [&rawFrame](const WireEthernetFrameEvent& event) -> bool {
         const auto eventRawFrame = event.frame.raw.AsSpan();
         return std::all_of(std::next(eventRawFrame.begin(), rawFrame.size()), eventRawFrame.end(),
-                           [](const uint8_t byte) {
-                               return byte == 0;
-                           });
+                           [](const uint8_t byte) { return byte == 0; });
     };
 
     const testing::Matcher<const WireEthernetFrameEvent&> matcher{testing::AllOf(
@@ -235,7 +229,7 @@ TEST_F(Test_EthControllerTrivialSim, nack_on_inactive_controller)
     EXPECT_CALL(participant.mockTimeProvider, Now()).Times(2);
 
     std::vector<uint8_t> rawFrame;
-    SetSourceMac(rawFrame, EthernetMac{ 0, 0, 0, 0, 0, 0 });
+    SetSourceMac(rawFrame, EthernetMac{0, 0, 0, 0, 0, 0});
 
     EthernetFrame frame{rawFrame};
     controller.SendFrame(frame);
@@ -257,14 +251,13 @@ TEST_F(Test_EthControllerTrivialSim, linkup_controller_inactive_on_activate_deac
 TEST_F(Test_EthControllerTrivialSim, trigger_callback_on_receive_message)
 {
     std::vector<uint8_t> rawFrame;
-    SetSourceMac(rawFrame, EthernetMac{ 0, 0, 0, 0, 0, 0 });
+    SetSourceMac(rawFrame, EthernetMac{0, 0, 0, 0, 0, 0});
 
     WireEthernetFrameEvent msg{};
     msg.frame = WireEthernetFrame{rawFrame};
     msg.direction = TransmitDirection::RX;
 
-    EXPECT_CALL(callbacks, ReceiveMessage(&controller, ToEthernetFrameEvent(msg)))
-        .Times(1);
+    EXPECT_CALL(callbacks, ReceiveMessage(&controller, ToEthernetFrameEvent(msg))).Times(1);
 
     controller.Activate();
     controller.ReceiveMsg(&controllerOther, msg);
@@ -276,15 +269,14 @@ TEST_F(Test_EthControllerTrivialSim, trigger_callback_on_receive_message)
 TEST_F(Test_EthControllerTrivialSim, trigger_callback_on_receive_ack)
 {
     std::vector<uint8_t> rawFrame;
-    SetSourceMac(rawFrame, EthernetMac{ 1, 2, 3, 4, 5, 6 });
+    SetSourceMac(rawFrame, EthernetMac{1, 2, 3, 4, 5, 6});
 
     EthernetFrameEvent msg{};
     msg.frame.raw = rawFrame;
 
     EXPECT_CALL(participant, SendMsg(&controller, AnEthMessageWith(0ns))).Times(1);
-    EthernetFrameTransmitEvent ack{ 0ms, EthernetTransmitStatus::Transmitted, reinterpret_cast<void *>(0) };
-    EXPECT_CALL(callbacks, MessageAck(&controller, EthernetTransmitAckWithouthTransmitIdMatcher(ack)))
-        .Times(1);
+    EthernetFrameTransmitEvent ack{0ms, EthernetTransmitStatus::Transmitted, reinterpret_cast<void*>(0)};
+    EXPECT_CALL(callbacks, MessageAck(&controller, EthernetTransmitAckWithouthTransmitIdMatcher(ack))).Times(1);
 
     // once for activate and once for sending the frame
     EXPECT_CALL(participant.mockTimeProvider, Now()).Times(3);
@@ -302,7 +294,8 @@ TEST_F(Test_EthControllerTrivialSim, add_remove_handler)
     std::vector<SilKit::Services::HandlerId> handlerIds;
     for (int i = 0; i < numHandlers; i++)
     {
-        handlerIds.push_back(testController.AddFrameHandler(SilKit::Util::bind_method(&callbacks, &Callbacks::ReceiveMessage)));
+        handlerIds.push_back(
+            testController.AddFrameHandler(SilKit::Util::bind_method(&callbacks, &Callbacks::ReceiveMessage)));
     }
 
     std::vector<uint8_t> rawFrame;
@@ -346,7 +339,7 @@ TEST_F(Test_EthControllerTrivialSim, remove_handler_in_handler)
     msg.direction = TransmitDirection::RX;
 
     EXPECT_CALL(callbacks, ReceiveMessage(&testController, ToEthernetFrameEvent(msg))).Times(1);
-    // Calls testHandler and Callbacks::ReceiveMessage, the latter is removed in testHandler 
+    // Calls testHandler and Callbacks::ReceiveMessage, the latter is removed in testHandler
     testController.ReceiveMsg(&controllerOther, msg);
     EXPECT_CALL(callbacks, ReceiveMessage(&testController, ToEthernetFrameEvent(msg))).Times(0);
     // Call testHandler again, handlerIdToRemove is invalid now but should only result in a warning
@@ -356,8 +349,7 @@ TEST_F(Test_EthControllerTrivialSim, remove_handler_in_handler)
 TEST_F(Test_EthControllerTrivialSim, ethcontroller_uses_tracing)
 {
     const auto now = 1337ns;
-    ON_CALL(participant.mockTimeProvider, Now())
-        .WillByDefault(testing::Return(now));
+    ON_CALL(participant.mockTimeProvider, Now()).WillByDefault(testing::Return(now));
 
     EthController ethController{&participant, cfg, participant.GetTimeProvider()};
     auto controllerDescriptor = ethController.GetServiceDescriptor();
@@ -365,22 +357,20 @@ TEST_F(Test_EthControllerTrivialSim, ethcontroller_uses_tracing)
     ethController.Activate();
 
     std::vector<uint8_t> rawFrame;
-    SetDestinationMac(rawFrame, EthernetMac{ 1, 2, 3, 4, 5, 6 });
-    SetSourceMac(rawFrame, EthernetMac{ 9, 8, 7, 6, 5, 4 });
+    SetDestinationMac(rawFrame, EthernetMac{1, 2, 3, 4, 5, 6});
+    SetSourceMac(rawFrame, EthernetMac{9, 8, 7, 6, 5, 4});
 
     EthernetFrame ethernetFrame;
     ethernetFrame.raw = rawFrame;
     //Send direction
     EXPECT_CALL(participant.mockTimeProvider, Now()).Times(2);
-    EXPECT_CALL(traceSink,
-        Trace(SilKit::Services::TransmitDirection::TX, controllerDescriptor, now,ethernetFrame))
+    EXPECT_CALL(traceSink, Trace(SilKit::Services::TransmitDirection::TX, controllerDescriptor, now, ethernetFrame))
         .Times(1);
     EthernetFrame frame{rawFrame};
     ethController.SendFrame(frame);
 
     // Receive direction
-    EXPECT_CALL(traceSink,
-        Trace(SilKit::Services::TransmitDirection::RX, controllerDescriptor, now, ethernetFrame))
+    EXPECT_CALL(traceSink, Trace(SilKit::Services::TransmitDirection::RX, controllerDescriptor, now, ethernetFrame))
         .Times(1);
 
     WireEthernetFrameEvent wireEthernetFrame;
@@ -400,16 +390,14 @@ TEST_F(Test_EthControllerTrivialSim, receive_pads_with_zeros)
     auto expectedEvent = ToEthernetFrameEvent(msg);
     expectedEvent.frame.raw = SilKit::Util::Span<const uint8_t>{expectedRaw};
 
-    EXPECT_CALL(callbacks, ReceiveMessage(&controller, expectedEvent))
-        .Times(1);
+    EXPECT_CALL(callbacks, ReceiveMessage(&controller, expectedEvent)).Times(1);
 
     controller.ReceiveMsg(&controllerOther, msg);
 }
 
 TEST_F(Test_EthControllerTrivialSim, sendmsg_distributes_before_txreceive)
 {
-    ON_CALL(participant.mockTimeProvider, Now())
-        .WillByDefault(testing::Return(42ns));
+    ON_CALL(participant.mockTimeProvider, Now()).WillByDefault(testing::Return(42ns));
 
     testing::Sequence sequenceRxTx;
     testing::Sequence sequenceRxAck;
@@ -428,7 +416,7 @@ TEST_F(Test_EthControllerTrivialSim, sendmsg_distributes_before_txreceive)
         .InSequence(sequenceRxAck);
 
     std::vector<uint8_t> rawFrame;
-    SetSourceMac(rawFrame, EthernetMac{ 0, 0, 0, 0, 0, 0 });
+    SetSourceMac(rawFrame, EthernetMac{0, 0, 0, 0, 0, 0});
     EthernetFrame frame{rawFrame};
 
     controller.Activate();

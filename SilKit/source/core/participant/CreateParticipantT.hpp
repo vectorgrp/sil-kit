@@ -29,8 +29,8 @@ namespace Core {
 
 template <typename ConnectionT, typename... Args>
 auto CreateParticipantT(std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig,
-                                const std::string& participantName, const std::string& registryUri, Args&&... args)
-    -> std::unique_ptr<Participant<ConnectionT>>;
+                        const std::string& participantName, const std::string& registryUri,
+                        Args&&... args) -> std::unique_ptr<Participant<ConnectionT>>;
 
 // ================================================================================
 //  Inline Implementations
@@ -38,8 +38,8 @@ auto CreateParticipantT(std::shared_ptr<SilKit::Config::IParticipantConfiguratio
 
 template <typename ConnectionT, typename... Args>
 auto CreateParticipantT(std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig,
-                                const std::string& participantName, const std::string& registryUri, Args&&... args)
-    -> std::unique_ptr<Participant<ConnectionT>>
+                        const std::string& participantName, const std::string& registryUri,
+                        Args&&... args) -> std::unique_ptr<Participant<ConnectionT>>
 {
     auto&& result = ValidateAndSanitizeConfig(std::move(participantConfig), participantName, registryUri);
     auto&& participant = std::make_unique<Participant<ConnectionT>>(std::move(result.participantConfiguration),

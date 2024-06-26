@@ -57,11 +57,20 @@ public:
     inline void AddLabel(const std::string& key, const std::string& value, SilKit::Services::MatchingLabel::Kind kind);
 
     //! Get the topic of the PubSubSpec.
-    auto Topic() const -> const std::string& { return _topic; }
+    auto Topic() const -> const std::string&
+    {
+        return _topic;
+    }
     //! Get the media type of the PubSubSpec.
-    auto MediaType() const -> const std::string& { return _mediaType; }
+    auto MediaType() const -> const std::string&
+    {
+        return _mediaType;
+    }
     //! Get the labels of the PubSubSpec.
-    auto Labels() const -> const std::vector<SilKit::Services::MatchingLabel>& { return _labels; }
+    auto Labels() const -> const std::vector<SilKit::Services::MatchingLabel>&
+    {
+        return _labels;
+    }
 };
 
 void PubSubSpec::AddLabel(const SilKit::Services::MatchingLabel& label)

@@ -37,7 +37,10 @@ TEST_F(ITest_Internals_Rpc, test_1client_1server_sync)
     const uint32_t numCallsToReturn = defaultNumCalls;
 
     std::vector<RpcParticipant> rpcs;
-    rpcs.push_back({"Client1", {}, {{"ClientCtrl1", "TestFuncA", "A", {}, defaultMsgSize, defaultNumCalls, numCallsToReturn}}, {"TestFuncA"} });
+    rpcs.push_back({"Client1",
+                    {},
+                    {{"ClientCtrl1", "TestFuncA", "A", {}, defaultMsgSize, defaultNumCalls, numCallsToReturn}},
+                    {"TestFuncA"}});
     rpcs.push_back({"Server1", {{"ServerCtrl1", "TestFuncA", "A", {}, defaultMsgSize, numCallsToReceive}}, {}, {}});
 
     RunSyncTest(rpcs);
@@ -51,13 +54,15 @@ TEST_F(ITest_Internals_Rpc, test_2_mixed_participants)
     const uint32_t numCallsToReturn = defaultNumCalls;
 
     std::vector<RpcParticipant> rpcs;
-    rpcs.push_back({"Mixed1", 
-        {{"ServerCtrl1", "TestFuncB", "A", {}, defaultMsgSize, numCallsToReceive}},  // Server
-        {{"ClientCtrl1", "TestFuncA", "A", {}, defaultMsgSize, defaultNumCalls, numCallsToReturn}}, {"TestFuncA","TestFuncB"}}); // Client
+    rpcs.push_back({"Mixed1",
+                    {{"ServerCtrl1", "TestFuncB", "A", {}, defaultMsgSize, numCallsToReceive}}, // Server
+                    {{"ClientCtrl1", "TestFuncA", "A", {}, defaultMsgSize, defaultNumCalls, numCallsToReturn}},
+                    {"TestFuncA", "TestFuncB"}}); // Client
 
-    rpcs.push_back({"Mixed2", 
-        {{"ServerCtrl1", "TestFuncA", "A", {}, defaultMsgSize, numCallsToReceive}},  // Server
-        {{"ClientCtrl1", "TestFuncB", "A", {}, defaultMsgSize, defaultNumCalls, numCallsToReturn}}, {"TestFuncA","TestFuncB"}}); // Client
+    rpcs.push_back({"Mixed2",
+                    {{"ServerCtrl1", "TestFuncA", "A", {}, defaultMsgSize, numCallsToReceive}}, // Server
+                    {{"ClientCtrl1", "TestFuncB", "A", {}, defaultMsgSize, defaultNumCalls, numCallsToReturn}},
+                    {"TestFuncA", "TestFuncB"}}); // Client
 
     RunSyncTest(rpcs);
 }
@@ -67,10 +72,13 @@ TEST_F(ITest_Internals_Rpc, test_1client_1server_sync_largemsg)
 {
     const uint32_t numCallsToReceive = defaultNumCalls;
     const uint32_t numCallsToReturn = defaultNumCalls;
-    const size_t   messageSize = 250000;
+    const size_t messageSize = 250000;
 
     std::vector<RpcParticipant> rpcs;
-    rpcs.push_back({"Client1", {}, {{"ClientCtrl1", "TestFuncA", "A", {}, messageSize, defaultNumCalls, numCallsToReturn}}, {"TestFuncA"} });
+    rpcs.push_back({"Client1",
+                    {},
+                    {{"ClientCtrl1", "TestFuncA", "A", {}, messageSize, defaultNumCalls, numCallsToReturn}},
+                    {"TestFuncA"}});
     rpcs.push_back({"Server1", {{"ServerCtrl1", "TestFuncA", "A", {}, messageSize, numCallsToReceive}}, {}, {}});
 
     RunSyncTest(rpcs);
@@ -89,14 +97,15 @@ TEST_F(ITest_Internals_Rpc, test_1client_1server_sync_100functions)
     {
         expectedFunctionNames.push_back(std::to_string(i));
     }
-    rpcs.push_back({ "Client1", {}, {}, expectedFunctionNames });
-    rpcs.push_back({ "Server1", {}, {}, {} });
+    rpcs.push_back({"Client1", {}, {}, expectedFunctionNames});
+    rpcs.push_back({"Server1", {}, {}, {}});
     for (int i = 0; i < numFunctions; i++)
     {
         std::string functionName = std::to_string(i);
         std::string clientControllerName = "ClientCtrl" + std::to_string(i);
         std::string serverControllerName = "ServerCtrl" + std::to_string(i);
-        rpcs[0].AddRpcClient({clientControllerName, functionName, "A", {}, defaultMsgSize, defaultNumCalls, numCallsToReturn});
+        rpcs[0].AddRpcClient(
+            {clientControllerName, functionName, "A", {}, defaultMsgSize, defaultNumCalls, numCallsToReturn});
         rpcs[1].AddRpcServer({serverControllerName, functionName, "A", {}, defaultMsgSize, numCallsToReceive});
     }
 
@@ -117,10 +126,25 @@ TEST_F(ITest_Internals_Rpc, test_1client_1server_sync_samefunctionname)
         expectedReturnDataUnordered.emplace_back(std::vector<uint8_t>(defaultMsgSize, d + rpcFuncIncrement));
     }
 
-    rpcs.push_back({ "Client1", {},
-                       {{"ClientCtrl1", "TestFuncA", "A", {}, defaultMsgSize, defaultNumCalls, numCallsToReturn, expectedReturnDataUnordered},
-                        {"ClientCtrl2", "TestFuncA", "A", {}, defaultMsgSize, defaultNumCalls, numCallsToReturn, expectedReturnDataUnordered}},
-                       {"TestFuncA"}});
+    rpcs.push_back({"Client1",
+                    {},
+                    {{"ClientCtrl1",
+                      "TestFuncA",
+                      "A",
+                      {},
+                      defaultMsgSize,
+                      defaultNumCalls,
+                      numCallsToReturn,
+                      expectedReturnDataUnordered},
+                     {"ClientCtrl2",
+                      "TestFuncA",
+                      "A",
+                      {},
+                      defaultMsgSize,
+                      defaultNumCalls,
+                      numCallsToReturn,
+                      expectedReturnDataUnordered}},
+                    {"TestFuncA"}});
 
     std::vector<std::vector<uint8_t>> expectedDataUnordered;
     for (uint8_t d = 0; d < defaultNumCalls; d++)
@@ -130,8 +154,10 @@ TEST_F(ITest_Internals_Rpc, test_1client_1server_sync_samefunctionname)
     }
 
     rpcs.push_back({"Server1",
-                       {{"ServerCtrl1", "TestFuncA", "A", {}, defaultMsgSize, numCallsToReceive, expectedDataUnordered},
-                        {"ServerCtrl2", "TestFuncA", "A", {}, defaultMsgSize, numCallsToReceive, expectedDataUnordered}}, {}, {} });
+                    {{"ServerCtrl1", "TestFuncA", "A", {}, defaultMsgSize, numCallsToReceive, expectedDataUnordered},
+                     {"ServerCtrl2", "TestFuncA", "A", {}, defaultMsgSize, numCallsToReceive, expectedDataUnordered}},
+                    {},
+                    {}});
 
     RunSyncTest(rpcs);
 }
@@ -141,7 +167,7 @@ TEST_F(ITest_Internals_Rpc, test_1client_1server_sync_samefunctionname)
 TEST_F(ITest_Internals_Rpc, test_1client_2server_sync)
 {
     const uint32_t numCallsToReceive = defaultNumCalls;
-    const uint32_t numCallsToReturn = defaultNumCalls*2;
+    const uint32_t numCallsToReturn = defaultNumCalls * 2;
 
     std::vector<std::vector<uint8_t>> expectedReturnDataUnordered;
     for (uint8_t d = 0; d < defaultNumCalls; d++)
@@ -151,7 +177,17 @@ TEST_F(ITest_Internals_Rpc, test_1client_2server_sync)
     }
 
     std::vector<RpcParticipant> rpcs;
-    rpcs.push_back({"Client1", {}, {{"ClientCtrl1", "TestFuncA", "A", {}, defaultMsgSize, defaultNumCalls, numCallsToReturn, expectedReturnDataUnordered}}, {"TestFuncA"} });
+    rpcs.push_back({"Client1",
+                    {},
+                    {{"ClientCtrl1",
+                      "TestFuncA",
+                      "A",
+                      {},
+                      defaultMsgSize,
+                      defaultNumCalls,
+                      numCallsToReturn,
+                      expectedReturnDataUnordered}},
+                    {"TestFuncA"}});
     rpcs.push_back({"Server1", {{"ServerCtrl1", "TestFuncA", "A", {}, defaultMsgSize, numCallsToReceive}}, {}, {}});
     rpcs.push_back({"Server2", {{"ServerCtrl1", "TestFuncA", "A", {}, defaultMsgSize, numCallsToReceive}}, {}, {}});
 
@@ -168,13 +204,13 @@ TEST_F(ITest_Internals_Rpc, test_Nclient_1server_sync)
     std::vector<RpcParticipant> rpcs;
     for (uint32_t i = 0; i < numClients; i++)
     {
-        std::string participantName = "Client" + std::to_string(i+1);
+        std::string participantName = "Client" + std::to_string(i + 1);
         rpcs.push_back({participantName,
                         {},
                         {{"ClientCtrl1", "TestFuncA", "A", {}, defaultMsgSize, defaultNumCalls, numCallsToReturn}},
                         {"TestFuncA"}});
     }
-    
+
     std::vector<std::vector<uint8_t>> expectedDataUnordered;
     for (uint8_t d = 0; d < defaultNumCalls; d++)
     {
@@ -212,7 +248,7 @@ TEST_F(ITest_Internals_Rpc, test_1client_2server_sync_wrongFunctionName)
 TEST_F(ITest_Internals_Rpc, test_1client_1server_sync_wrongDataMediaType)
 {
     const uint32_t numCallsToReceive = defaultNumCalls;
-    const uint32_t numCallsToReturn = defaultNumCalls; 
+    const uint32_t numCallsToReturn = defaultNumCalls;
 
     std::vector<RpcParticipant> rpcs;
     rpcs.push_back({"Client1",
@@ -225,7 +261,7 @@ TEST_F(ITest_Internals_Rpc, test_1client_1server_sync_wrongDataMediaType)
     RunSyncTest(rpcs);
 }
 
-// Matching mandatory and optional labels on both sides 
+// Matching mandatory and optional labels on both sides
 TEST_F(ITest_Internals_Rpc, test_1client_1server_sync_labels)
 {
     const uint32_t numCallsToReceive = defaultNumCalls;
@@ -307,17 +343,18 @@ TEST_F(ITest_Internals_Rpc, test_1client_2server_sync_wrong_optional_label_value
     const uint32_t numCallsToReturn = defaultNumCalls;
 
     std::vector<RpcParticipant> rpcs;
-    rpcs.push_back({"Client1",
-                    {},
-                    {{"ClientCtrl1",
-                      "TestFuncA",
-                      "A",
-                      {{"KeyA", "ValWrong", SilKit::Services::MatchingLabel::Kind::Optional}, // Won't match Server1, but Server2
-                       {"KeyB", "ValB", SilKit::Services::MatchingLabel::Kind::Optional}},
-                      defaultMsgSize,
-                      defaultNumCalls,
-                      numCallsToReturn}},
-                    {"TestFuncA", "TestFuncA"}});
+    rpcs.push_back(
+        {"Client1",
+         {},
+         {{"ClientCtrl1",
+           "TestFuncA",
+           "A",
+           {{"KeyA", "ValWrong", SilKit::Services::MatchingLabel::Kind::Optional}, // Won't match Server1, but Server2
+            {"KeyB", "ValB", SilKit::Services::MatchingLabel::Kind::Optional}},
+           defaultMsgSize,
+           defaultNumCalls,
+           numCallsToReturn}},
+         {"TestFuncA", "TestFuncA"}});
     rpcs.push_back({"Server1",
                     {{"ServerCtrl1",
                       "TestFuncA",
@@ -348,7 +385,10 @@ TEST_F(ITest_Internals_Rpc, test_1client_1server_sync_wildcardDxf)
     const uint32_t numCallsToReturn = defaultNumCalls;
 
     std::vector<RpcParticipant> rpcs;
-    rpcs.push_back({"Client1", {}, {{"ClientCtrl1", "TestFuncA", "", {}, defaultMsgSize, defaultNumCalls, numCallsToReturn}}, {"TestFuncA"} });
+    rpcs.push_back({"Client1",
+                    {},
+                    {{"ClientCtrl1", "TestFuncA", "", {}, defaultMsgSize, defaultNumCalls, numCallsToReturn}},
+                    {"TestFuncA"}});
     rpcs.push_back({"Server1", {{"ServerCtrl1", "TestFuncA", "A", {}, defaultMsgSize, numCallsToReceive}}, {}, {}});
 
     RunSyncTest(rpcs);
@@ -365,9 +405,10 @@ TEST_F(ITest_Internals_Rpc, test_1_participant_selfdelivery)
     const uint32_t numCallsToReturn = defaultNumCalls;
 
     std::vector<RpcParticipant> rpcs;
-    rpcs.push_back({"Mixed1", 
-        {{"ServerCtrl1", "TestFuncA", "A", {}, defaultMsgSize, numCallsToReceive}},
-        {{"ClientCtrl1", "TestFuncA", "A", {}, defaultMsgSize, defaultNumCalls, numCallsToReturn}}, {"TestFuncA"}});
+    rpcs.push_back({"Mixed1",
+                    {{"ServerCtrl1", "TestFuncA", "A", {}, defaultMsgSize, numCallsToReceive}},
+                    {{"ClientCtrl1", "TestFuncA", "A", {}, defaultMsgSize, defaultNumCalls, numCallsToReturn}},
+                    {"TestFuncA"}});
 
     RunSyncTest(rpcs);
 }
@@ -394,8 +435,22 @@ TEST_F(ITest_Internals_Rpc, test_1_participant_selfdelivery_same_functionname)
     rpcs.push_back({"Mixed1",
                     {{"ServerCtrl1", "TestFuncA", "A", {}, defaultMsgSize, numCallsToReceive, expectedDataUnordered},
                      {"ServerCtrl2", "TestFuncA", "A", {}, defaultMsgSize, numCallsToReceive, expectedDataUnordered}},
-                    {{"ClientCtrl1", "TestFuncA", "A", {}, defaultMsgSize, defaultNumCalls, numCallsToReturn, expectedReturnDataUnordered},
-                     {"ClientCtrl2", "TestFuncA", "A", {}, defaultMsgSize, defaultNumCalls, numCallsToReturn, expectedReturnDataUnordered}},
+                    {{"ClientCtrl1",
+                      "TestFuncA",
+                      "A",
+                      {},
+                      defaultMsgSize,
+                      defaultNumCalls,
+                      numCallsToReturn,
+                      expectedReturnDataUnordered},
+                     {"ClientCtrl2",
+                      "TestFuncA",
+                      "A",
+                      {},
+                      defaultMsgSize,
+                      defaultNumCalls,
+                      numCallsToReturn,
+                      expectedReturnDataUnordered}},
                     {"TestFuncA", "TestFuncA"}});
 
     RunSyncTest(rpcs);

@@ -207,10 +207,9 @@ inline auto MakeSimulatedNetworkFunctions(SilKit::Experimental::NetworkSimulatio
     switch (networkType)
     {
     case SilKit::Experimental::NetworkSimulation::SimulatedNetworkType::CAN:
-        functions.ProvideSimulatedController = [](void** outSimulatedController,
-                                                  const void** outSimulatedControllerFunctions,
-                                                  SilKit_Experimental_ControllerDescriptor controllerDescriptor,
-                                                  void* simulatedNetwork) {
+        functions.ProvideSimulatedController =
+            [](void** outSimulatedController, const void** outSimulatedControllerFunctions,
+               SilKit_Experimental_ControllerDescriptor controllerDescriptor, void* simulatedNetwork) {
             static const auto userSimulatedCanControllerFunctions = MakeSimulatedCanControllerFunctions();
             *outSimulatedControllerFunctions = &userSimulatedCanControllerFunctions;
             auto* cppUserSimulatedNetwork =
@@ -227,10 +226,9 @@ inline auto MakeSimulatedNetworkFunctions(SilKit::Experimental::NetworkSimulatio
         };
         break;
     case SilKit::Experimental::NetworkSimulation::SimulatedNetworkType::FlexRay:
-        functions.ProvideSimulatedController = [](void** outSimulatedController,
-                                                  const void** outSimulatedControllerFunctions,
-                                                  SilKit_Experimental_ControllerDescriptor controllerDescriptor,
-                                                  void* simulatedNetwork) {
+        functions.ProvideSimulatedController =
+            [](void** outSimulatedController, const void** outSimulatedControllerFunctions,
+               SilKit_Experimental_ControllerDescriptor controllerDescriptor, void* simulatedNetwork) {
             static const auto userSimulatedFlexRayControllerFunctions = MakeSimulatedFlexRayControllerFunctions();
             *outSimulatedControllerFunctions = &userSimulatedFlexRayControllerFunctions;
             auto* cppUserSimulatedNetwork =

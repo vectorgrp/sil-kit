@@ -115,8 +115,10 @@ std::ostream& operator<<(std::ostream& out, const FunctionCallResponse::Status& 
 {
     switch (status)
     {
-    case FunctionCallResponse::Status::Success: return out << "FunctionCallResponse::Status::Success";
-    case FunctionCallResponse::Status::InternalError: return out << "FunctionCallResponse::Status::InternalError";
+    case FunctionCallResponse::Status::Success:
+        return out << "FunctionCallResponse::Status::Success";
+    case FunctionCallResponse::Status::InternalError:
+        return out << "FunctionCallResponse::Status::InternalError";
     }
 
     return out << "FunctionCallResponse::Status("
@@ -134,8 +136,7 @@ std::ostream& operator<<(std::ostream& out, const FunctionCallResponse& msg)
 {
     return out << "rpc::FunctionCallResponse{callUUID=" << msg.callUuid
                << ", data=" << Util::AsHexString(msg.data).WithSeparator(" ").WithMaxLength(16)
-               << ", size=" << msg.data.size()
-               << ", status=" << msg.status << "}";
+               << ", size=" << msg.data.size() << ", status=" << msg.status << "}";
 }
 
 } // namespace Rpc

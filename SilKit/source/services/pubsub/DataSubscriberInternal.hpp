@@ -43,36 +43,42 @@ public: //Ctor
     DataSubscriberInternal(Core::IParticipantInternal* participant,
                            Services::Orchestration::ITimeProvider* timeProvider, const std::string& topic,
                            const std::string& mediaType, const std::vector<SilKit::Services::MatchingLabel>& labels,
-                           DataMessageHandler defaultHandler,
-                           IDataSubscriber* parent);
+                           DataMessageHandler defaultHandler, IDataSubscriber* parent);
 
 public: //Methods
     void SetDataMessageHandler(DataMessageHandler handler);
-    
+
     //! \brief Accepts messages originating from SilKit communications.
     void ReceiveMsg(const IServiceEndpoint* from, const WireDataMessageEvent& dataMessageEvent) override;
 
     //SilKit::Services::Orchestration::ITimeConsumer
     void SetTimeProvider(Services::Orchestration::ITimeProvider* provider) override;
 
-    std::string GetMediaType() { return _mediaType; };
-    auto GetLabels() -> const std::vector<SilKit::Services::MatchingLabel>& { return _labels; };
+    std::string GetMediaType()
+    {
+        return _mediaType;
+    };
+    auto GetLabels() -> const std::vector<SilKit::Services::MatchingLabel>&
+    {
+        return _labels;
+    };
 
     // IServiceEndpoint
     inline void SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor) override;
-    inline auto GetServiceDescriptor() const -> const Core::ServiceDescriptor & override;
+    inline auto GetServiceDescriptor() const -> const Core::ServiceDescriptor& override;
 
     // IReplayDataProvider
     void ReplayMessage(const IReplayMessage* replayMessage) override;
 
 private: //Methods
     void ReceiveInternal(const WireDataMessageEvent& dataMessageEvent);
+
 private: // Member
     std::string _topic;
     std::string _mediaType;
     std::vector<SilKit::Services::MatchingLabel> _labels;
     DataMessageHandler _defaultHandler;
-    
+
     Config::Replay _replayConfig;
 
     IDataSubscriber* _parent{nullptr};

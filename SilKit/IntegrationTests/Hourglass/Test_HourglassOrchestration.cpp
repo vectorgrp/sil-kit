@@ -94,9 +94,8 @@ MATCHER_P(WorkflowConfigurationMatcher, workflowConfigurationParam, "")
     std::transform(cWorkflowConfiguration->requiredParticipantNames->strings,
                    cWorkflowConfiguration->requiredParticipantNames->strings
                        + cWorkflowConfiguration->requiredParticipantNames->numStrings,
-                   std::inserter(cRequiredParticipantNames, cRequiredParticipantNames.begin()), [](char* name) {
-                       return std::string{name};
-                   });
+                   std::inserter(cRequiredParticipantNames, cRequiredParticipantNames.begin()),
+                   [](char* name) { return std::string{name}; });
 
     if (cRequiredParticipantNames != cppRequiredParticipantNames)
     {
@@ -390,11 +389,9 @@ TEST_F(Test_HourglassOrchestration, SilKit_TimeSyncService_SetSimulationStepHand
     EXPECT_CALL(capi, SilKit_TimeSyncService_SetSimulationStepHandler(mockTimeSyncService, testing::_, testing::_,
                                                                       initialStepSize.count()));
 
-    timeSyncService.SetSimulationStepHandler(
-        [](std::chrono::nanoseconds, std::chrono::nanoseconds) {
-            // do nothing
-        },
-        initialStepSize);
+    timeSyncService.SetSimulationStepHandler([](std::chrono::nanoseconds, std::chrono::nanoseconds) {
+        // do nothing
+    }, initialStepSize);
 }
 
 TEST_F(Test_HourglassOrchestration, SilKit_TimeSyncService_SetSimulationStepHandlerAsync)
@@ -407,11 +404,9 @@ TEST_F(Test_HourglassOrchestration, SilKit_TimeSyncService_SetSimulationStepHand
     EXPECT_CALL(capi, SilKit_TimeSyncService_SetSimulationStepHandlerAsync(mockTimeSyncService, testing::_, testing::_,
                                                                            initialStepSize.count()));
 
-    timeSyncService.SetSimulationStepHandlerAsync(
-        [](std::chrono::nanoseconds, std::chrono::nanoseconds) {
-            // do nothing
-        },
-        initialStepSize);
+    timeSyncService.SetSimulationStepHandlerAsync([](std::chrono::nanoseconds, std::chrono::nanoseconds) {
+        // do nothing
+    }, initialStepSize);
 }
 
 TEST_F(Test_HourglassOrchestration, SilKit_TimeSyncService_CompleteSimulationStep)
@@ -516,8 +511,8 @@ TEST_F(Test_HourglassOrchestration, SilKit_SystemMonitor_AddParticipantStatusHan
 
     const auto cppHandlerId =
         systemMonitor.AddParticipantStatusHandler([](const SilKit::Services::Orchestration::ParticipantStatus&) {
-            // do nothing
-        });
+        // do nothing
+    });
     systemMonitor.RemoveParticipantStatusHandler(cppHandlerId);
 }
 
@@ -530,8 +525,8 @@ TEST_F(Test_HourglassOrchestration, SilKit_SystemMonitor_SetParticipantConnected
 
     systemMonitor.SetParticipantConnectedHandler(
         [](const SilKit::Services::Orchestration::ParticipantConnectionInformation&) {
-            // do nothing
-        });
+        // do nothing
+    });
 }
 
 TEST_F(Test_HourglassOrchestration, SilKit_SystemMonitor_SetParticipantDisconnectedHandler)
@@ -544,8 +539,8 @@ TEST_F(Test_HourglassOrchestration, SilKit_SystemMonitor_SetParticipantDisconnec
 
     systemMonitor.SetParticipantDisconnectedHandler(
         [](const SilKit::Services::Orchestration::ParticipantConnectionInformation&) {
-            // do nothing
-        });
+        // do nothing
+    });
 }
 
 TEST_F(Test_HourglassOrchestration, SilKit_SystemMonitor_IsParticipantConnected)

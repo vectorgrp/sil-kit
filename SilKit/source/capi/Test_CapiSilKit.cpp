@@ -65,115 +65,113 @@ const auto SILKIT_MALFORMED_CONFIG_STRING = R"aw(
 )aw";
 
 
-    using namespace SilKit::Services::Can;
+using namespace SilKit::Services::Can;
 
-    using SilKit::Core::Tests::DummyParticipant;
+using SilKit::Core::Tests::DummyParticipant;
 
-    class Test_CapiSilKit : public testing::Test
-    {
-    public: 
-        SilKit::Core::Tests::DummyParticipant mockParticipant;
-        Test_CapiSilKit()
-        {
-            
-        }
-    };
+class Test_CapiSilKit : public testing::Test
+{
+public:
+    SilKit::Core::Tests::DummyParticipant mockParticipant;
+    Test_CapiSilKit() {}
+};
 
-    TEST_F(Test_CapiSilKit, silkit_function_mapping)
-    {
-        SilKit_ReturnCode returnCode;
+TEST_F(Test_CapiSilKit, silkit_function_mapping)
+{
+    SilKit_ReturnCode returnCode;
 
-        SilKit_ParticipantConfiguration* participantConfiguration = nullptr;
-        returnCode = SilKit_ParticipantConfiguration_FromString(&participantConfiguration, SILKIT_CONFIG_STRING);
-        EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
-        EXPECT_NE(participantConfiguration, nullptr);
+    SilKit_ParticipantConfiguration* participantConfiguration = nullptr;
+    returnCode = SilKit_ParticipantConfiguration_FromString(&participantConfiguration, SILKIT_CONFIG_STRING);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
+    EXPECT_NE(participantConfiguration, nullptr);
 
-        SilKit_ParticipantConfiguration* participantConfigurationFromFile = nullptr;
-        returnCode = SilKit_ParticipantConfiguration_FromFile(&participantConfigurationFromFile, "ParticipantConfiguration_FullIncludes.yaml");
-        EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
-        EXPECT_NE(participantConfigurationFromFile, nullptr);
+    SilKit_ParticipantConfiguration* participantConfigurationFromFile = nullptr;
+    returnCode = SilKit_ParticipantConfiguration_FromFile(&participantConfigurationFromFile,
+                                                          "ParticipantConfiguration_FullIncludes.yaml");
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
+    EXPECT_NE(participantConfigurationFromFile, nullptr);
 
-        SilKit_Participant* participant = nullptr;
-        returnCode = SilKit_Participant_Create(&participant, participantConfiguration, "Participant1", "42");
-        // since there is no SIL Kit Registry, the call should fail
-        EXPECT_EQ(returnCode, SilKit_ReturnCode_UNSPECIFIEDERROR);
-        EXPECT_TRUE(participant == nullptr);
+    SilKit_Participant* participant = nullptr;
+    returnCode = SilKit_Participant_Create(&participant, participantConfiguration, "Participant1", "42");
+    // since there is no SIL Kit Registry, the call should fail
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_UNSPECIFIEDERROR);
+    EXPECT_TRUE(participant == nullptr);
 
-        // since there is no SIL Kit Registry with which one could create a Participant, we check against nullptr
-        returnCode = SilKit_Participant_Destroy(nullptr);
-        EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
+    // since there is no SIL Kit Registry with which one could create a Participant, we check against nullptr
+    returnCode = SilKit_Participant_Destroy(nullptr);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
-        // destory the participant configuration to satisfy ASAN
-        returnCode = SilKit_ParticipantConfiguration_Destroy(participantConfiguration);
-        EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
-        returnCode = SilKit_ParticipantConfiguration_Destroy(participantConfigurationFromFile);
-        EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
-    }
-
-
-    TEST_F(Test_CapiSilKit, silkit_bad_params)
-    {
-        SilKit_ReturnCode returnCode;
-
-        SilKit_ParticipantConfiguration* participantConfiguration = nullptr;
-
-        returnCode = SilKit_ParticipantConfiguration_FromString(&participantConfiguration, SILKIT_CONFIG_STRING);
-        EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
-        EXPECT_NE(participantConfiguration, nullptr);
-
-        SilKit_ParticipantConfiguration* participantConfigurationFromAFile = nullptr;
-        returnCode = SilKit_ParticipantConfiguration_FromFile(&participantConfigurationFromAFile, "ParticipantConfiguration_FullIncludes.yaml");
-        EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
-        EXPECT_NE(participantConfigurationFromAFile, nullptr);
-        returnCode = SilKit_ParticipantConfiguration_Destroy(participantConfigurationFromAFile);
-        EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
-
-
-        SilKit_Participant* participant = nullptr;
-        returnCode = SilKit_Participant_Create(nullptr, participantConfiguration, "Participant1", "42");
-        EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
-        returnCode = SilKit_Participant_Create(&participant, nullptr, "Participant1", "42");
-        EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
-        returnCode = SilKit_Participant_Create(&participant, participantConfiguration, nullptr, "42");
-        EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
-        returnCode = SilKit_Participant_Create(&participant, participantConfiguration, "Participant1", nullptr);
-        EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
-
-        // Bad Parameter ParticipantConfiguration_FromString
-        returnCode = SilKit_ParticipantConfiguration_FromString(&participantConfiguration, nullptr);
-        EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
-        returnCode = SilKit_ParticipantConfiguration_FromString(nullptr, SILKIT_CONFIG_STRING);
-        EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
-
-        // Bad Parameter ParticipantConfiguration_FromFile
-        returnCode = SilKit_ParticipantConfiguration_FromFile(&participantConfigurationFromAFile, nullptr);
-        EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
-        returnCode = SilKit_ParticipantConfiguration_FromFile(nullptr, "ParticipantConfiguration_FullIncludes.yaml");
-        EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
-
-        returnCode =
-            SilKit_Participant_Create(&participant, participantConfiguration, "ParticipantNotExisting", "42");
-        EXPECT_EQ(returnCode, SilKit_ReturnCode_UNSPECIFIEDERROR);
-
-        returnCode = SilKit_ParticipantConfiguration_Destroy(participantConfiguration);
-        EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
-
-        returnCode = SilKit_ParticipantConfiguration_Destroy(nullptr);
-        EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
-
-        participantConfiguration = nullptr;
-
-        returnCode = SilKit_ParticipantConfiguration_FromString(&participantConfiguration, SILKIT_MALFORMED_CONFIG_STRING);
-        EXPECT_EQ(returnCode, SilKit_ReturnCode_UNSPECIFIEDERROR);
-        EXPECT_EQ(participantConfiguration, nullptr);
-
-        returnCode = SilKit_ParticipantConfiguration_FromFile(&participantConfiguration, "this_file_does_not_exist.yaml");
-        EXPECT_EQ(returnCode, SilKit_ReturnCode_UNSPECIFIEDERROR);
-        EXPECT_EQ(participantConfiguration, nullptr);
-
-        // since there is no SIL Kit Registry with which one could create a Participant, we check against nullptr
-        returnCode = SilKit_Participant_Destroy(nullptr);
-        EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
-    }
-
+    // destory the participant configuration to satisfy ASAN
+    returnCode = SilKit_ParticipantConfiguration_Destroy(participantConfiguration);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
+    returnCode = SilKit_ParticipantConfiguration_Destroy(participantConfigurationFromFile);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 }
+
+
+TEST_F(Test_CapiSilKit, silkit_bad_params)
+{
+    SilKit_ReturnCode returnCode;
+
+    SilKit_ParticipantConfiguration* participantConfiguration = nullptr;
+
+    returnCode = SilKit_ParticipantConfiguration_FromString(&participantConfiguration, SILKIT_CONFIG_STRING);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
+    EXPECT_NE(participantConfiguration, nullptr);
+
+    SilKit_ParticipantConfiguration* participantConfigurationFromAFile = nullptr;
+    returnCode = SilKit_ParticipantConfiguration_FromFile(&participantConfigurationFromAFile,
+                                                          "ParticipantConfiguration_FullIncludes.yaml");
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
+    EXPECT_NE(participantConfigurationFromAFile, nullptr);
+    returnCode = SilKit_ParticipantConfiguration_Destroy(participantConfigurationFromAFile);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
+
+
+    SilKit_Participant* participant = nullptr;
+    returnCode = SilKit_Participant_Create(nullptr, participantConfiguration, "Participant1", "42");
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
+    returnCode = SilKit_Participant_Create(&participant, nullptr, "Participant1", "42");
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
+    returnCode = SilKit_Participant_Create(&participant, participantConfiguration, nullptr, "42");
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
+    returnCode = SilKit_Participant_Create(&participant, participantConfiguration, "Participant1", nullptr);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
+
+    // Bad Parameter ParticipantConfiguration_FromString
+    returnCode = SilKit_ParticipantConfiguration_FromString(&participantConfiguration, nullptr);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
+    returnCode = SilKit_ParticipantConfiguration_FromString(nullptr, SILKIT_CONFIG_STRING);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
+
+    // Bad Parameter ParticipantConfiguration_FromFile
+    returnCode = SilKit_ParticipantConfiguration_FromFile(&participantConfigurationFromAFile, nullptr);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
+    returnCode = SilKit_ParticipantConfiguration_FromFile(nullptr, "ParticipantConfiguration_FullIncludes.yaml");
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
+
+    returnCode = SilKit_Participant_Create(&participant, participantConfiguration, "ParticipantNotExisting", "42");
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_UNSPECIFIEDERROR);
+
+    returnCode = SilKit_ParticipantConfiguration_Destroy(participantConfiguration);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
+
+    returnCode = SilKit_ParticipantConfiguration_Destroy(nullptr);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
+
+    participantConfiguration = nullptr;
+
+    returnCode = SilKit_ParticipantConfiguration_FromString(&participantConfiguration, SILKIT_MALFORMED_CONFIG_STRING);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_UNSPECIFIEDERROR);
+    EXPECT_EQ(participantConfiguration, nullptr);
+
+    returnCode = SilKit_ParticipantConfiguration_FromFile(&participantConfiguration, "this_file_does_not_exist.yaml");
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_UNSPECIFIEDERROR);
+    EXPECT_EQ(participantConfiguration, nullptr);
+
+    // since there is no SIL Kit Registry with which one could create a Participant, we check against nullptr
+    returnCode = SilKit_Participant_Destroy(nullptr);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
+}
+
+} // namespace

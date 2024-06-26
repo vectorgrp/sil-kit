@@ -45,10 +45,7 @@ auto Now()
 class FTest_ServiceDiscoveryPerf : public testing::Test
 {
 protected:
-
-    FTest_ServiceDiscoveryPerf()
-    {
-    }
+    FTest_ServiceDiscoveryPerf() {}
 
     void ExecuteTest(int numberOfServices, std::chrono::seconds timeout)
     {
@@ -59,7 +56,7 @@ protected:
 
         SilKit::Tests::SimTestHarness testHarness(syncParticipantNames, registryUri, true);
         auto&& publisher = testHarness.GetParticipant("Publisher");
-        
+
         for (auto i = 0; i < numberOfServices; i++)
         {
             const auto topic = "TopicName-" + std::to_string(i);
@@ -76,9 +73,8 @@ protected:
             logger->Info("::::::::::: Sending STOP");
             lifecycleService->Stop("Test complete");
         }, 1ms);
-    
-        auto makeSubscriber = [&](auto subscriberName)
-        {
+
+        auto makeSubscriber = [&](auto subscriberName) {
             auto&& subscriber = testHarness.GetParticipant(subscriberName)->Participant();
 
             for (auto i = 0; i < numberOfServices; i++)
@@ -87,9 +83,10 @@ protected:
                 const auto controllerName = "SubCtrl" + std::to_string(i);
                 SilKit::Services::PubSub::PubSubSpec dataSpec{topic, {}};
 
-                (void)subscriber->CreateDataSubscriber(controllerName, dataSpec,
-                    [](SilKit::Services::PubSub::IDataSubscriber* /*subscriber*/, const SilKit::Services::PubSub::DataMessageEvent& /*data*/) {
-                    }); 
+                (void)subscriber->CreateDataSubscriber(
+                    controllerName, dataSpec,
+                    [](SilKit::Services::PubSub::IDataSubscriber* /*subscriber*/,
+                       const SilKit::Services::PubSub::DataMessageEvent& /*data*/) {});
             }
         };
         //ensure the subscriber is created after the publisher, to check announcements, not just incremental notifications
@@ -99,15 +96,15 @@ protected:
         makeSubscriber("Subscriber2");
 
         std::chrono::duration<double> duration = Now() - start;
-        std::cout << "Test with " << numberOfServices << " services startup time: " << duration.count() << "sec" << std::endl;
+        std::cout << "Test with " << numberOfServices << " services startup time: " << duration.count() << "sec"
+                  << std::endl;
 
         ASSERT_LT(duration, timeout) << "ServiceDiscovery should not have substantial impact on startup time"
-            << ": duration=" << duration.count();
+                                     << ": duration=" << duration.count();
 
         auto ok = testHarness.Run(timeout); // short timeout is significant for this test
-        ASSERT_TRUE(ok)
-            << " Expected a short startup time, not blocked by service discovery: timeout="
-            << timeout.count();
+        ASSERT_TRUE(ok) << " Expected a short startup time, not blocked by service discovery: timeout="
+                        << timeout.count();
     }
 };
 

@@ -84,7 +84,10 @@ public:
     {
     }
 
-    TraceMessageType Type() const { return _type; }
+    TraceMessageType Type() const
+    {
+        return _type;
+    }
 
     template <typename MsgT>
     const MsgT& Get() const

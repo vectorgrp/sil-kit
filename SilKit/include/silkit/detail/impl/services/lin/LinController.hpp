@@ -85,13 +85,15 @@ public:
 
     inline auto ExperimentalGetSlaveConfiguration() -> SilKit::Experimental::Services::Lin::LinSlaveConfiguration;
 
-    inline void ExperimentalInitDynamic(const SilKit::Experimental::Services::Lin::LinControllerDynamicConfig& dynamicConfig);
+    inline void ExperimentalInitDynamic(
+        const SilKit::Experimental::Services::Lin::LinControllerDynamicConfig &dynamicConfig);
 
-    inline auto ExperimentalAddFrameHeaderHandler(SilKit::Experimental::Services::Lin::LinFrameHeaderHandler handler) -> Util::HandlerId;
+    inline auto ExperimentalAddFrameHeaderHandler(SilKit::Experimental::Services::Lin::LinFrameHeaderHandler handler)
+        -> Util::HandlerId;
 
     inline void ExperimentalRemoveFrameHeaderHandler(Util::HandlerId handlerId);
 
-    inline void ExperimentalSendDynamicResponse(const SilKit::Services::Lin::LinFrame& linFrame);
+    inline void ExperimentalSendDynamicResponse(const SilKit::Services::Lin::LinFrame &linFrame);
 
 private:
     template <typename HandlerFunction>
@@ -159,22 +161,21 @@ void LinController::Init(SilKit::Services::Lin::LinControllerConfig config)
     std::vector<SilKit_LinFrameResponse> frameResponses;
     std::transform(config.frameResponses.begin(), config.frameResponses.end(), std::back_inserter(frameResponses),
                    [&frames](const SilKit::Services::Lin::LinFrameResponse &frameResponse) -> SilKit_LinFrameResponse {
-                       frames.emplace_back();
+        frames.emplace_back();
 
-                       SilKit_LinFrame &cFrame = frames.back();
-                       SilKit_Struct_Init(SilKit_LinFrame, cFrame);
-                       cFrame.id = frameResponse.frame.id;
-                       cFrame.checksumModel = static_cast<SilKit_LinChecksumModel>(frameResponse.frame.checksumModel);
-                       cFrame.dataLength = frameResponse.frame.dataLength;
-                       std::copy_n(frameResponse.frame.data.data(), frameResponse.frame.data.size(), cFrame.data);
+        SilKit_LinFrame &cFrame = frames.back();
+        SilKit_Struct_Init(SilKit_LinFrame, cFrame);
+        cFrame.id = frameResponse.frame.id;
+        cFrame.checksumModel = static_cast<SilKit_LinChecksumModel>(frameResponse.frame.checksumModel);
+        cFrame.dataLength = frameResponse.frame.dataLength;
+        std::copy_n(frameResponse.frame.data.data(), frameResponse.frame.data.size(), cFrame.data);
 
-                       SilKit_LinFrameResponse cFrameResponse;
-                       SilKit_Struct_Init(SilKit_LinFrameResponse, cFrameResponse);
-                       cFrameResponse.frame = &cFrame;
-                       cFrameResponse.responseMode =
-                           static_cast<SilKit_LinFrameResponseMode>(frameResponse.responseMode);
-                       return cFrameResponse;
-                   });
+        SilKit_LinFrameResponse cFrameResponse;
+        SilKit_Struct_Init(SilKit_LinFrameResponse, cFrameResponse);
+        cFrameResponse.frame = &cFrame;
+        cFrameResponse.responseMode = static_cast<SilKit_LinFrameResponseMode>(frameResponse.responseMode);
+        return cFrameResponse;
+    });
 
     SilKit_LinControllerConfig linControllerConfig;
     SilKit_Struct_Init(SilKit_LinControllerConfig, linControllerConfig);
@@ -417,8 +418,8 @@ auto LinController::ExperimentalAddLinSlaveConfigurationHandler(
 
 void LinController::ExperimentalRemoveLinSlaveConfigurationHandler(SilKit::Util::HandlerId handlerId)
 {
-    const auto returnCode =
-        SilKit_Experimental_LinController_RemoveLinSlaveConfigurationHandler(_linController, static_cast<SilKit_HandlerId>(handlerId));
+    const auto returnCode = SilKit_Experimental_LinController_RemoveLinSlaveConfigurationHandler(
+        _linController, static_cast<SilKit_HandlerId>(handlerId));
     ThrowOnError(returnCode);
 
     _wakeupHandlers.erase(handlerId);
@@ -429,10 +430,12 @@ auto LinController::ExperimentalGetSlaveConfiguration() -> SilKit::Experimental:
     SilKit_Experimental_LinSlaveConfiguration cSlaveConfiguration;
     SilKit_Struct_Init(SilKit_Experimental_LinSlaveConfiguration, cSlaveConfiguration);
 
-    const auto returnCode = SilKit_Experimental_LinController_GetSlaveConfiguration(_linController, &cSlaveConfiguration);
+    const auto returnCode =
+        SilKit_Experimental_LinController_GetSlaveConfiguration(_linController, &cSlaveConfiguration);
     ThrowOnError(returnCode);
 
-    constexpr size_t count = sizeof(cSlaveConfiguration.isLinIdResponding) / sizeof(cSlaveConfiguration.isLinIdResponding[0]);
+    constexpr size_t count =
+        sizeof(cSlaveConfiguration.isLinIdResponding) / sizeof(cSlaveConfiguration.isLinIdResponding[0]);
 
     SilKit::Experimental::Services::Lin::LinSlaveConfiguration cppSlaveConfiguration{};
     for (size_t index = 0; index != count; ++index)
@@ -446,7 +449,8 @@ auto LinController::ExperimentalGetSlaveConfiguration() -> SilKit::Experimental:
     return cppSlaveConfiguration;
 }
 
-void LinController::ExperimentalInitDynamic(const SilKit::Experimental::Services::Lin::LinControllerDynamicConfig& dynamicConfig)
+void LinController::ExperimentalInitDynamic(
+    const SilKit::Experimental::Services::Lin::LinControllerDynamicConfig &dynamicConfig)
 {
     SilKit_Experimental_LinControllerDynamicConfig cConfig;
     SilKit_Struct_Init(SilKit_Experimental_LinControllerDynamicConfig, cConfig);
@@ -457,7 +461,8 @@ void LinController::ExperimentalInitDynamic(const SilKit::Experimental::Services
     ThrowOnError(returnCode);
 }
 
-auto LinController::ExperimentalAddFrameHeaderHandler(SilKit::Experimental::Services::Lin::LinFrameHeaderHandler handler) -> Util::HandlerId
+auto LinController::ExperimentalAddFrameHeaderHandler(
+    SilKit::Experimental::Services::Lin::LinFrameHeaderHandler handler) -> Util::HandlerId
 {
     const auto cHandler = [](void *context, SilKit_LinController *controller,
                              const SilKit_Experimental_LinFrameHeaderEvent *headerEvent) {
@@ -467,7 +472,8 @@ auto LinController::ExperimentalAddFrameHeaderHandler(SilKit::Experimental::Serv
         event.timestamp = std::chrono::nanoseconds{headerEvent->timestamp};
         event.id = static_cast<SilKit::Services::Lin::LinId>(headerEvent->id);
 
-        const auto data = static_cast<HandlerData<SilKit::Experimental::Services::Lin::LinFrameHeaderHandler> *>(context);
+        const auto data =
+            static_cast<HandlerData<SilKit::Experimental::Services::Lin::LinFrameHeaderHandler> *>(context);
         data->handler(data->controller, event);
     };
 
@@ -477,8 +483,8 @@ auto LinController::ExperimentalAddFrameHeaderHandler(SilKit::Experimental::Serv
     handlerData->controller = this;
     handlerData->handler = std::move(handler);
 
-    const auto returnCode =
-        SilKit_Experimental_LinController_AddFrameHeaderHandler(_linController, handlerData.get(), cHandler, &handlerId);
+    const auto returnCode = SilKit_Experimental_LinController_AddFrameHeaderHandler(_linController, handlerData.get(),
+                                                                                    cHandler, &handlerId);
     ThrowOnError(returnCode);
 
     _frameHeaderHandlers.emplace(static_cast<SilKit::Util::HandlerId>(handlerId), std::move(handlerData));
@@ -488,14 +494,14 @@ auto LinController::ExperimentalAddFrameHeaderHandler(SilKit::Experimental::Serv
 
 void LinController::ExperimentalRemoveFrameHeaderHandler(Util::HandlerId handlerId)
 {
-    const auto returnCode =
-        SilKit_Experimental_LinController_RemoveFrameHeaderHandler(_linController, static_cast<SilKit_HandlerId>(handlerId));
+    const auto returnCode = SilKit_Experimental_LinController_RemoveFrameHeaderHandler(
+        _linController, static_cast<SilKit_HandlerId>(handlerId));
     ThrowOnError(returnCode);
 
     _frameHeaderHandlers.erase(handlerId);
 }
 
-void LinController::ExperimentalSendDynamicResponse(const SilKit::Services::Lin::LinFrame& linFrame)
+void LinController::ExperimentalSendDynamicResponse(const SilKit::Services::Lin::LinFrame &linFrame)
 {
     SilKit_LinFrame cLinFrame;
     CxxToC(linFrame, cLinFrame);

@@ -76,8 +76,8 @@ private:
 
 void Tracer::AddSink(const Core::ServiceDescriptor& serviceDescr, ITraceMessageSink& sink)
 {
-    auto sinkCallback = [serviceDescr, &sink](SilKit::Services::TransmitDirection direction, std::chrono::nanoseconds timestamp,
-                                    const TraceMessage& msg) {
+    auto sinkCallback = [serviceDescr, &sink](SilKit::Services::TransmitDirection direction,
+                                              std::chrono::nanoseconds timestamp, const TraceMessage& msg) {
         sink.Trace(direction, serviceDescr, timestamp, msg);
     };
     _sinks.emplace_back(std::move(sinkCallback));

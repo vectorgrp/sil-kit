@@ -46,7 +46,7 @@ public:
     inline void Call(SilKit::Util::Span<const uint8_t> data, void* userContext) override;
 
     inline void CallWithTimeout(SilKit::Util::Span<const uint8_t> data, std::chrono::nanoseconds timeout,
-        void* userContext) override;
+                                void* userContext) override;
 
     inline void SetCallResultHandler(SilKit::Services::Rpc::RpcCallResultHandler handler) override;
 
@@ -119,7 +119,8 @@ void RpcClient::Call(SilKit::Util::Span<const uint8_t> data, void* userContext)
     ThrowOnError(returnCode);
 }
 
-void RpcClient::CallWithTimeout(SilKit::Util::Span<const uint8_t> data, std::chrono::nanoseconds duration, void* userContext)
+void RpcClient::CallWithTimeout(SilKit::Util::Span<const uint8_t> data, std::chrono::nanoseconds duration,
+                                void* userContext)
 {
     const auto cData = SilKit::Util::ToSilKitByteVector(data);
 

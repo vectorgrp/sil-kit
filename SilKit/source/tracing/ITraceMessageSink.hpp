@@ -66,9 +66,8 @@ class ITraceMessageSinkFactory
 {
 public:
     virtual ~ITraceMessageSinkFactory() = default;
-    virtual auto Create(SilKit::Config::ParticipantConfiguration config,
-                        SilKit::Services::Logging::ILogger* logger, std::string participantName, std::string sinkName)
-        -> std::unique_ptr<ITraceMessageSink> = 0;
+    virtual auto Create(SilKit::Config::ParticipantConfiguration config, SilKit::Services::Logging::ILogger* logger,
+                        std::string participantName, std::string sinkName) -> std::unique_ptr<ITraceMessageSink> = 0;
 };
 
 } // namespace SilKit

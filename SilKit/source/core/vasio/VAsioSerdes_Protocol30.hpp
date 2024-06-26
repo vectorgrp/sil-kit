@@ -37,4 +37,3 @@ void DeserializeV30(MessageBuffer& buffer, KnownParticipants& reply);
 
 } // namespace Core
 } // namespace SilKit
-

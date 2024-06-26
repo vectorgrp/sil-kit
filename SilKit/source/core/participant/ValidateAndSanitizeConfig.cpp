@@ -28,8 +28,8 @@ namespace SilKit {
 namespace Core {
 
 auto ValidateAndSanitizeConfig(std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig,
-                               const std::string& participantName, const std::string& registryUri)
-    -> ValidateAndSanitizeConfigResult
+                               const std::string& participantName,
+                               const std::string& registryUri) -> ValidateAndSanitizeConfigResult
 {
     ValidateAndSanitizeConfigResult result;
 

@@ -38,31 +38,31 @@ namespace Orchestration {
 enum class ParticipantState : SilKit_ParticipantState
 {
     //! An invalid participant state
-    Invalid                     = SilKit_ParticipantState_Invalid,
+    Invalid = SilKit_ParticipantState_Invalid,
     //! The controllers created state
-    ServicesCreated             = SilKit_ParticipantState_ServicesCreated,
+    ServicesCreated = SilKit_ParticipantState_ServicesCreated,
     //! The communication initializing state
-    CommunicationInitializing   = SilKit_ParticipantState_CommunicationInitializing,
+    CommunicationInitializing = SilKit_ParticipantState_CommunicationInitializing,
     //! The communication initialized state
-    CommunicationInitialized    = SilKit_ParticipantState_CommunicationInitialized,
+    CommunicationInitialized = SilKit_ParticipantState_CommunicationInitialized,
     //! The initialized state
-    ReadyToRun                  = SilKit_ParticipantState_ReadyToRun,
+    ReadyToRun = SilKit_ParticipantState_ReadyToRun,
     //! The running state
-    Running                     = SilKit_ParticipantState_Running,
+    Running = SilKit_ParticipantState_Running,
     //! The paused state
-    Paused                      = SilKit_ParticipantState_Paused,
+    Paused = SilKit_ParticipantState_Paused,
     //! The stopping state
-    Stopping                    = SilKit_ParticipantState_Stopping,
+    Stopping = SilKit_ParticipantState_Stopping,
     //! The stopped state
-    Stopped                     = SilKit_ParticipantState_Stopped,
+    Stopped = SilKit_ParticipantState_Stopped,
     //! The error state
-    Error                       = SilKit_ParticipantState_Error,
+    Error = SilKit_ParticipantState_Error,
     //! The shutting down state
-    ShuttingDown                = SilKit_ParticipantState_ShuttingDown,
+    ShuttingDown = SilKit_ParticipantState_ShuttingDown,
     //! The shutdown state
-    Shutdown                    = SilKit_ParticipantState_Shutdown,
+    Shutdown = SilKit_ParticipantState_Shutdown,
     //! The aborting state
-    Aborting                    = SilKit_ParticipantState_Aborting,
+    Aborting = SilKit_ParticipantState_Aborting,
 };
 
 //! \brief Details about a participant state change.
@@ -80,31 +80,31 @@ struct ParticipantStatus
 enum class SystemState : SilKit_SystemState
 {
     //! An invalid participant state
-    Invalid                     = SilKit_SystemState_Invalid,
+    Invalid = SilKit_SystemState_Invalid,
     //! The controllers created state
-    ServicesCreated             = SilKit_SystemState_ServicesCreated,
+    ServicesCreated = SilKit_SystemState_ServicesCreated,
     //! The communication initializing state
-    CommunicationInitializing   = SilKit_SystemState_CommunicationInitializing,
+    CommunicationInitializing = SilKit_SystemState_CommunicationInitializing,
     //! The communication initialized state
-    CommunicationInitialized    = SilKit_SystemState_CommunicationInitialized,
+    CommunicationInitialized = SilKit_SystemState_CommunicationInitialized,
     //! The initialized state
-    ReadyToRun                  = SilKit_SystemState_ReadyToRun,
+    ReadyToRun = SilKit_SystemState_ReadyToRun,
     //! The running state
-    Running                     = SilKit_SystemState_Running,
+    Running = SilKit_SystemState_Running,
     //! The paused state
-    Paused                      = SilKit_SystemState_Paused,
+    Paused = SilKit_SystemState_Paused,
     //! The stopping state
-    Stopping                    = SilKit_SystemState_Stopping,
+    Stopping = SilKit_SystemState_Stopping,
     //! The stopped state
-    Stopped                     = SilKit_SystemState_Stopped,
+    Stopped = SilKit_SystemState_Stopped,
     //! The error state
-    Error                       = SilKit_SystemState_Error,
+    Error = SilKit_SystemState_Error,
     //! The shutting down state
-    ShuttingDown                = SilKit_SystemState_ShuttingDown,
+    ShuttingDown = SilKit_SystemState_ShuttingDown,
     //! The shutdown state
-    Shutdown                    = SilKit_SystemState_Shutdown,
+    Shutdown = SilKit_SystemState_Shutdown,
     //! The aborting state
-    Aborting                    = SilKit_SystemState_Aborting,
+    Aborting = SilKit_SystemState_Aborting,
 };
 
 //! \brief Details of the simulation workflow regarding lifecycle and participant coordination.
@@ -118,11 +118,11 @@ struct WorkflowConfiguration
 enum class OperationMode : SilKit_OperationMode
 {
     //! An invalid operation mode
-    Invalid     = SilKit_OperationMode_Invalid,
+    Invalid = SilKit_OperationMode_Invalid,
     //! The coordinated operation mode
     Coordinated = SilKit_OperationMode_Coordinated,
     //! The autonomous operation mode
-    Autonomous  = SilKit_OperationMode_Autonomous,
+    Autonomous = SilKit_OperationMode_Autonomous,
 };
 
 //! The lifecycle start configuration.

@@ -60,12 +60,12 @@ auto MakePubSubSpecView(const SilKit::Services::PubSub::PubSubSpec& pubSubSpec) 
     std::vector<SilKit_Label> labels;
     std::transform(pubSubSpec.Labels().begin(), pubSubSpec.Labels().end(), std::back_inserter(labels),
                    [](const SilKit::Services::MatchingLabel& matchingLabel) -> SilKit_Label {
-                       return {
-                           matchingLabel.key.c_str(),
-                           matchingLabel.value.c_str(),
-                           static_cast<SilKit_LabelKind>(matchingLabel.kind),
-                       };
-                   });
+        return {
+            matchingLabel.key.c_str(),
+            matchingLabel.value.c_str(),
+            static_cast<SilKit_LabelKind>(matchingLabel.kind),
+        };
+    });
     return labels;
 }
 

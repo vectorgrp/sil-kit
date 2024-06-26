@@ -38,6 +38,6 @@ void Deserialize(SilKit::Core::MessageBuffer& buffer, ParticipantStatus& out);
 void Deserialize(SilKit::Core::MessageBuffer& buffer, WorkflowConfiguration& out);
 void Deserialize(SilKit::Core::MessageBuffer& buffer, NextSimTask& out);
 
-} // namespace Orchestration    
+} // namespace Orchestration
 } // namespace Services
 } // namespace SilKit

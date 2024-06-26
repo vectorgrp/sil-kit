@@ -67,9 +67,8 @@ void SimulatedNetworkInternal::AddSimulatedController(const SilKit::Core::Servic
 
     _controllerDescriptors[fromParticipantName][serviceId] = controllerDescriptor;
 
-    auto userSimulatedController =
-        _userSimulatedNetwork->ProvideSimulatedController(controllerDescriptor);
-    
+    auto userSimulatedController = _userSimulatedNetwork->ProvideSimulatedController(controllerDescriptor);
+
     if (userSimulatedController)
     {
         _simulatedNetworkRouter->AddSimulatedController(fromParticipantName, controllerName, serviceId,
@@ -78,13 +77,13 @@ void SimulatedNetworkInternal::AddSimulatedController(const SilKit::Core::Servic
     else
     {
         SilKit::Services::Logging::Warn(
-            _logger, "NetworkSimulation: No simulated controller was provided for controller '{}' on participant '{}'", controllerName, fromParticipantName);
+            _logger, "NetworkSimulation: No simulated controller was provided for controller '{}' on participant '{}'",
+            controllerName, fromParticipantName);
     }
 }
 
-auto SimulatedNetworkInternal::LookupControllerDescriptor(const std::string& fromParticipantName,
-                                                          Core::EndpointId serviceId)
-    -> std::pair<bool, ControllerDescriptor>
+auto SimulatedNetworkInternal::LookupControllerDescriptor(
+    const std::string& fromParticipantName, Core::EndpointId serviceId) -> std::pair<bool, ControllerDescriptor>
 {
     auto it_controllerDescriptorsByParticipant = _controllerDescriptors.find(fromParticipantName);
     if (it_controllerDescriptorsByParticipant != _controllerDescriptors.end())
@@ -118,14 +117,16 @@ void SimulatedNetworkInternal::RemoveControllerDescriptor(const std::string& fro
     }
 }
 
-void SimulatedNetworkInternal::RemoveSimulatedController(const std::string& fromParticipantName, Core::EndpointId serviceId)
+void SimulatedNetworkInternal::RemoveSimulatedController(const std::string& fromParticipantName,
+                                                         Core::EndpointId serviceId)
 {
     auto controllerDescriptorLookup = LookupControllerDescriptor(fromParticipantName, serviceId);
     if (controllerDescriptorLookup.first)
     {
         _userSimulatedNetwork->SimulatedControllerRemoved(controllerDescriptorLookup.second);
         RemoveControllerDescriptor(fromParticipantName, serviceId);
-        _simulatedNetworkRouter->RemoveSimulatedController(fromParticipantName, serviceId, controllerDescriptorLookup.second);
+        _simulatedNetworkRouter->RemoveSimulatedController(fromParticipantName, serviceId,
+                                                           controllerDescriptorLookup.second);
     }
 }
 

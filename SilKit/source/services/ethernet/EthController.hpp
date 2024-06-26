@@ -59,7 +59,7 @@ public:
     EthController(const EthController&) = delete;
     EthController(EthController&&) = delete;
     EthController(Core::IParticipantInternal* participant, Config::EthernetController config,
-                   Services::Orchestration::ITimeProvider* timeProvider);
+                  Services::Orchestration::ITimeProvider* timeProvider);
 
 public:
     // ----------------------------------------
@@ -78,7 +78,8 @@ public:
     void SendFrame(EthernetFrame frame, void* userContext = nullptr) override;
 
     HandlerId AddFrameHandler(FrameHandler handler, DirectionMask directionMask = 0xFF) override;
-    HandlerId AddFrameTransmitHandler(FrameTransmitHandler handler, EthernetTransmitStatusMask transmitStatusMask = 0xFFFF'FFFF) override;
+    HandlerId AddFrameTransmitHandler(FrameTransmitHandler handler,
+                                      EthernetTransmitStatusMask transmitStatusMask = 0xFFFF'FFFF) override;
     HandlerId AddStateChangeHandler(StateChangeHandler handler) override;
     HandlerId AddBitrateChangeHandler(BitrateChangeHandler handler) override;
 
@@ -97,7 +98,7 @@ public:
 
     // IServiceEndpoint
     inline void SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor) override;
-    inline auto GetServiceDescriptor() const -> const Core::ServiceDescriptor & override;
+    inline auto GetServiceDescriptor() const -> const Core::ServiceDescriptor& override;
 
     // IReplayDataProvider
     void ReplayMessage(const IReplayMessage* message) override;
@@ -115,6 +116,7 @@ public:
     EthernetState GetState();
 
     inline auto GetTracer() -> Tracer*;
+
 private:
     // ----------------------------------------
     // private methods
@@ -139,18 +141,18 @@ private:
     void ReplayReceive(const IReplayMessage* replayMessage);
     void SendFrameInternal(EthernetFrame frame, void* userContext);
     void ReceiveMsgInternal(const IServiceEndpoint* from, const WireEthernetFrameEvent& msg);
-    
+
 private:
     // ----------------------------------------
     // private members
-    Core::IParticipantInternal* _participant{ nullptr };
+    Core::IParticipantInternal* _participant{nullptr};
     Config::EthernetController _config;
     ::SilKit::Core::ServiceDescriptor _serviceDescriptor;
     SimBehavior _simulationBehavior;
 
-    EthernetState _ethState{ EthernetState::Inactive };
-    uint32_t _ethBitRate{ 0 };
-    Orchestration::ITimeProvider* _timeProvider{ nullptr };
+    EthernetState _ethState{EthernetState::Inactive};
+    uint32_t _ethBitRate{0};
+    Orchestration::ITimeProvider* _timeProvider{nullptr};
     Tracer _tracer;
     bool _replayActive{false};
     Services::Logging::ILogger* _logger;
@@ -159,12 +161,9 @@ private:
     template <typename MsgT>
     using CallbacksT = Util::SynchronizedHandlers<CallbackT<MsgT>>;
 
-    std::tuple<
-        CallbacksT<EthernetFrameEvent>,
-        CallbacksT<EthernetFrameTransmitEvent>,
-        CallbacksT<EthernetStateChangeEvent>,
-        CallbacksT<EthernetBitrateChangeEvent>
-    > _callbacks;
+    std::tuple<CallbacksT<EthernetFrameEvent>, CallbacksT<EthernetFrameTransmitEvent>,
+               CallbacksT<EthernetStateChangeEvent>, CallbacksT<EthernetBitrateChangeEvent>>
+        _callbacks;
 };
 
 // ================================================================================

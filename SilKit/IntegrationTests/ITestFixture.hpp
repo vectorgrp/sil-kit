@@ -39,7 +39,7 @@ class ITest_SimTestHarness : public testing::Test
 {
 protected: //CTor and operators
     ITest_SimTestHarness()
-    : _registryUri{MakeTestRegistryUri()}
+        : _registryUri{MakeTestRegistryUri()}
     {
     }
 
@@ -55,7 +55,7 @@ protected: //CTor and operators
         _simTestHarness = std::make_unique<SimTestHarness>(participantNames, _registryUri, true);
     }
 
-protected:// members
+protected: // members
     std::string _registryUri;
     std::unique_ptr<SimTestHarness> _simTestHarness;
 };

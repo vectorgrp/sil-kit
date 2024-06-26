@@ -53,30 +53,21 @@ using testing::An;
 
 auto ACanMessage(const CanMessage& msg) -> testing::Matcher<const CanMessage&>
 {
-  using namespace testing;
-  return AllOf(
-    Field(&CanMessage::canId, Eq(msg.canId))
-    , Field(&CanMessage::dataField, Eq(msg.dataField))
-    , Field(&CanMessage::timestamp, Eq(msg.timestamp))
-  );
+    using namespace testing;
+    return AllOf(Field(&CanMessage::canId, Eq(msg.canId)), Field(&CanMessage::dataField, Eq(msg.dataField)),
+                 Field(&CanMessage::timestamp, Eq(msg.timestamp)));
 }
 
 auto AService(const IServiceEndpoint* service) -> testing::Matcher<const IServiceEndpoint*>
 {
-  using namespace testing;
-  return AllOf(
-    Property(&IServiceEndpoint::GetServiceDescriptor, Eq(service->GetServiceDescriptor()))
-  );
+    using namespace testing;
+    return AllOf(Property(&IServiceEndpoint::GetServiceDescriptor, Eq(service->GetServiceDescriptor())));
 }
 
 auto AnEthMessage(const EthernetFrame& msg) -> testing::Matcher<const EthernetFrameEvent&>
 {
     using namespace testing;
-    return Field(&EthernetFrameEvent::frame,
-        AllOf(
-            Field(&EthernetFrame::raw, ContainerEq(msg))
-        )
-    );
+    return Field(&EthernetFrameEvent::frame, AllOf(Field(&EthernetFrame::raw, ContainerEq(msg))));
 }
 
 
@@ -88,7 +79,6 @@ auto AGenericMessage(const GenericMessage& msg) -> testing::Matcher<const Generi
 
 TEST(Test_Replay, ensure_util_timer_works)
 {
-
     {
         //Make sure DTor is able to stop a running timer
         SilKit::Util::Timer timer;
@@ -150,8 +140,7 @@ struct Callbacks
     MOCK_METHOD2(ReceiveMessageCan, void(ICanController*, const CanMessage&));
 };
 
-struct MockReplayMessage
-    : public IReplayMessage
+struct MockReplayMessage : public IReplayMessage
 {
     auto Timestamp() const -> std::chrono::nanoseconds override
     {
@@ -168,18 +157,18 @@ struct MockReplayMessage
     }
 
     std::chrono::nanoseconds _timestamp{0};
-    SilKit::Services::TransmitDirection _direction{ SilKit::Services::TransmitDirection::RX};
+    SilKit::Services::TransmitDirection _direction{SilKit::Services::TransmitDirection::RX};
     TraceMessageType _type{TraceMessageType::InvalidReplayData};
 };
 
-struct MockEthFrame 
+struct MockEthFrame
     : public MockReplayMessage
     , public EthernetFrame
 {
     MockEthFrame()
     {
-        SetSourceMac(EthernetMac{1,2,3,4,5,6});
-        SetDestinationMac(EthernetMac{7,8,9,0xa,0xb,0xc});
+        SetSourceMac(EthernetMac{1, 2, 3, 4, 5, 6});
+        SetDestinationMac(EthernetMac{7, 8, 9, 0xa, 0xb, 0xc});
         _type = TraceMessageType::EthernetFrame;
     }
 };
@@ -199,8 +188,7 @@ TEST(Test_Replay, ethcontroller_replay_config_send)
 
         EthControllerReplay ctrl{&participant, cfg, participant.GetTimeProvider()};
         ctrl.SetServiceDescriptor(from_endpointAddress(msg._address));
-        EXPECT_CALL(participant, SendMsg_proxy(AService(&ctrl), AnEthMessage(msg)))
-            .Times(1);
+        EXPECT_CALL(participant, SendMsg_proxy(AService(&ctrl), AnEthMessage(msg))).Times(1);
         EXPECT_CALL(participant.mockTimeProvider.mockTime, Now()).Times(1);
         ctrl.ReplayMessage(&msg);
     }
@@ -211,24 +199,21 @@ TEST(Test_Replay, ethcontroller_replay_config_send)
         cfg.replay.direction = Config::Replay::Direction::Both;
         EthControllerReplay ctrl{&participant, cfg, participant.GetTimeProvider()};
         ctrl.SetServiceDescriptor(from_endpointAddress(msg._address));
-        EXPECT_CALL(participant, SendMsg_proxy(AService(&ctrl), AnEthMessage(msg)))
-            .Times(1);
+        EXPECT_CALL(participant, SendMsg_proxy(AService(&ctrl), AnEthMessage(msg))).Times(1);
         EXPECT_CALL(participant.mockTimeProvider.mockTime, Now()).Times(1);
         ctrl.ReplayMessage(&msg);
     }
 
-    // Block Send 
+    // Block Send
     {
         msg._direction = SilKit::Services::TransmitDirection::RX;
         cfg.replay.direction = Config::Replay::Direction::Send;
         EthControllerReplay ctrl{&participant, cfg, participant.GetTimeProvider()};
         ctrl.SetServiceDescriptor(from_endpointAddress(msg._address));
-        EXPECT_CALL(participant, SendMsg_proxy(AService(&ctrl), AnEthMessage(msg)))
-            .Times(0);
+        EXPECT_CALL(participant, SendMsg_proxy(AService(&ctrl), AnEthMessage(msg))).Times(0);
         EXPECT_CALL(participant.mockTimeProvider.mockTime, Now()).Times(0);
         ctrl.ReplayMessage(&msg);
     }
-
 }
 
 
@@ -242,7 +227,7 @@ TEST(Test_Replay, ethcontroller_replay_config_receive)
 
     MockEthFrame msg;
 
-    msg._address = {1,2};
+    msg._address = {1, 2};
 
 
     // Replay Receive / Receive
@@ -250,10 +235,9 @@ TEST(Test_Replay, ethcontroller_replay_config_receive)
         msg._direction = SilKit::Services::TransmitDirection::RX;
         cfg.replay.direction = Config::Replay::Direction::Receive;
         EthControllerReplay controller{&participant, cfg, participant.GetTimeProvider()};
-        controller.SetServiceDescriptor(from_endpointAddress({3,4}));
+        controller.SetServiceDescriptor(from_endpointAddress({3, 4}));
         controller.AddFrameHandler(SilKit::Util::bind_method(&callbacks, &Callbacks::ReceiveMessage));
-        EXPECT_CALL(callbacks, ReceiveMessage(A<IEthernetController*>(), AnEthMessage(msg)))
-            .Times(1);
+        EXPECT_CALL(callbacks, ReceiveMessage(A<IEthernetController*>(), AnEthMessage(msg))).Times(1);
         controller.ReplayMessage(&msg);
     }
 
@@ -262,21 +246,19 @@ TEST(Test_Replay, ethcontroller_replay_config_receive)
         msg._direction = SilKit::Services::TransmitDirection::RX;
         cfg.replay.direction = Config::Replay::Direction::Both;
         EthControllerReplay controller{&participant, cfg, participant.GetTimeProvider()};
-        controller.SetServiceDescriptor(from_endpointAddress({3,4}));
+        controller.SetServiceDescriptor(from_endpointAddress({3, 4}));
         controller.AddFrameHandler(SilKit::Util::bind_method(&callbacks, &Callbacks::ReceiveMessage));
-        EXPECT_CALL(callbacks, ReceiveMessage(A<IEthernetController*>(), AnEthMessage(msg)))
-            .Times(1);
+        EXPECT_CALL(callbacks, ReceiveMessage(A<IEthernetController*>(), AnEthMessage(msg))).Times(1);
         controller.ReplayMessage(&msg);
     }
-    // Block Receive 
+    // Block Receive
     {
         msg._direction = SilKit::Services::TransmitDirection::TX;
         cfg.replay.direction = Config::Replay::Direction::Receive;
         EthControllerReplay controller{&participant, cfg, participant.GetTimeProvider()};
-        controller.SetServiceDescriptor(from_endpointAddress({3,4}));
+        controller.SetServiceDescriptor(from_endpointAddress({3, 4}));
         controller.AddFrameHandler(SilKit::Util::bind_method(&callbacks, &Callbacks::ReceiveMessage));
-        EXPECT_CALL(callbacks, ReceiveMessage(A<IEthernetController*>(), AnEthMessage(msg)))
-            .Times(0);
+        EXPECT_CALL(callbacks, ReceiveMessage(A<IEthernetController*>(), AnEthMessage(msg))).Times(0);
         controller.ReplayMessage(&msg);
     }
 }
@@ -291,7 +273,7 @@ struct MockCanMessage
     {
         timestamp = std::chrono::nanoseconds{0};
         canId = 0;
-        
+
         dataField.resize(8);
         size_t i = 0u;
         for (auto& d : dataField)
@@ -308,16 +290,15 @@ TEST(Test_Replay, DISABLED_cancontroller_replay_config_send)
     Config::CanController cfg{};
 
     MockCanMessage msg;
-    msg._address = {1,2};
+    msg._address = {1, 2};
     // Replay Send / Send
     {
         msg._direction = SilKit::Services::TransmitDirection::TX;
         cfg.replay.direction = Config::Replay::Direction::Send;
-    
+
         CanControllerReplay can{&participant, cfg, participant.GetTimeProvider()};
         can.SetServiceDescriptor(from_endpointAddress(msg._address));
-        EXPECT_CALL(participant, SendMsg_proxy(AService(&can), ACanMessage(msg)))
-            .Times(1);
+        EXPECT_CALL(participant, SendMsg_proxy(AService(&can), ACanMessage(msg))).Times(1);
         EXPECT_CALL(participant.mockTimeProvider.mockTime, Now()).Times(1);
         can.ReplayMessage(&msg);
     }
@@ -325,11 +306,10 @@ TEST(Test_Replay, DISABLED_cancontroller_replay_config_send)
     {
         msg._direction = SilKit::Services::TransmitDirection::TX;
         cfg.replay.direction = Config::Replay::Direction::Both;
-    
+
         CanControllerReplay can{&participant, cfg, participant.GetTimeProvider()};
         can.SetServiceDescriptor(from_endpointAddress(msg._address));
-        EXPECT_CALL(participant, SendMsg_proxy(AService(&can), ACanMessage(msg)))
-            .Times(1);
+        EXPECT_CALL(participant, SendMsg_proxy(AService(&can), ACanMessage(msg))).Times(1);
         EXPECT_CALL(participant.mockTimeProvider.mockTime, Now()).Times(1);
         can.ReplayMessage(&msg);
     }
@@ -337,11 +317,10 @@ TEST(Test_Replay, DISABLED_cancontroller_replay_config_send)
     {
         msg._direction = SilKit::Services::TransmitDirection::TX;
         cfg.replay.direction = Config::Replay::Direction::Receive;
-    
+
         CanControllerReplay can{&participant, cfg, participant.GetTimeProvider()};
         can.SetServiceDescriptor(from_endpointAddress(msg._address));
-        EXPECT_CALL(participant, SendMsg_proxy(AService(&can), ACanMessage(msg)))
-            .Times(0);
+        EXPECT_CALL(participant, SendMsg_proxy(AService(&can), ACanMessage(msg))).Times(0);
         EXPECT_CALL(participant.mockTimeProvider.mockTime, Now()).Times(0);
         can.ReplayMessage(&msg);
     }
@@ -349,10 +328,9 @@ TEST(Test_Replay, DISABLED_cancontroller_replay_config_send)
     {
         msg._direction = SilKit::Services::TransmitDirection::RX;
         cfg.replay.direction = Config::Replay::Direction::Send;
-    
+
         CanControllerReplay can{&participant, cfg, participant.GetTimeProvider()};
-        EXPECT_CALL(participant, SendMsg_proxy(AService(&can), ACanMessage(msg)))
-            .Times(0);
+        EXPECT_CALL(participant, SendMsg_proxy(AService(&can), ACanMessage(msg))).Times(0);
         EXPECT_CALL(participant.mockTimeProvider.mockTime, Now()).Times(0);
         can.SetServiceDescriptor(from_endpointAddress(msg._address));
         can.ReplayMessage(&msg);
@@ -362,10 +340,9 @@ TEST(Test_Replay, DISABLED_cancontroller_replay_config_send)
         msg._direction = SilKit::Services::TransmitDirection::RX;
         cfg.replay.direction = Config::Replay::Direction::Receive;
         msg._address = tracing::ReplayEndpointAddress();
-    
+
         CanControllerReplay can{&participant, cfg, participant.GetTimeProvider()};
-        EXPECT_CALL(participant, SendMsg_proxy(AService(&can), ACanMessage(msg)))
-            .Times(0);
+        EXPECT_CALL(participant, SendMsg_proxy(AService(&can), ACanMessage(msg))).Times(0);
         EXPECT_CALL(participant.mockTimeProvider.mockTime, Now()).Times(1);
         can.SetServiceDescriptor(from_endpointAddress(msg._address));
         can.ReplayMessage(&msg);
@@ -382,40 +359,37 @@ TEST(Test_Replay, DISABLED_cancontroller_replay_config_receive)
 
     MockCanMessage msg;
 
-    msg._address = {1,2};
+    msg._address = {1, 2};
 
     // Replay Receive / Receive
     {
         msg._direction = SilKit::Services::TransmitDirection::RX;
         cfg.replay.direction = Config::Replay::Direction::Receive;
         CanControllerReplay controller{&participant, cfg, participant.GetTimeProvider()};
-        controller.SetServiceDescriptor(from_endpointAddress({3,4}));
+        controller.SetServiceDescriptor(from_endpointAddress({3, 4}));
         controller.AddFrameHandler(SilKit::Util::bind_method(&callbacks, &Callbacks::ReceiveMessageCan));
-        EXPECT_CALL(callbacks, ReceiveMessageCan(A<ICanController*>(), ACanMessage(msg)))
-            .Times(1);
+        EXPECT_CALL(callbacks, ReceiveMessageCan(A<ICanController*>(), ACanMessage(msg))).Times(1);
         controller.ReplayMessage(&msg);
     }
-    
+
     // Replay Receive / Both
     {
         msg._direction = SilKit::Services::TransmitDirection::RX;
         cfg.replay.direction = Config::Replay::Direction::Both;
         CanControllerReplay controller{&participant, cfg, participant.GetTimeProvider()};
-        controller.SetServiceDescriptor(from_endpointAddress({3,4}));
+        controller.SetServiceDescriptor(from_endpointAddress({3, 4}));
         controller.AddFrameHandler(SilKit::Util::bind_method(&callbacks, &Callbacks::ReceiveMessageCan));
-        EXPECT_CALL(callbacks, ReceiveMessageCan(A<ICanController*>(), ACanMessage(msg)))
-            .Times(1);
+        EXPECT_CALL(callbacks, ReceiveMessageCan(A<ICanController*>(), ACanMessage(msg))).Times(1);
         controller.ReplayMessage(&msg);
     }
-    // Block Receive 
+    // Block Receive
     {
         msg._direction = SilKit::Services::TransmitDirection::TX;
         cfg.replay.direction = Config::Replay::Direction::Receive;
         CanControllerReplay controller{&participant, cfg, participant.GetTimeProvider()};
-        controller.SetServiceDescriptor(from_endpointAddress({3,4}));
+        controller.SetServiceDescriptor(from_endpointAddress({3, 4}));
         controller.AddFrameHandler(SilKit::Util::bind_method(&callbacks, &Callbacks::ReceiveMessageCan));
-        EXPECT_CALL(callbacks, ReceiveMessageCan(A<ICanController*>(), ACanMessage(msg)))
-            .Times(0);
+        EXPECT_CALL(callbacks, ReceiveMessageCan(A<ICanController*>(), ACanMessage(msg))).Times(0);
         controller.ReplayMessage(&msg);
     }
 }
@@ -443,7 +417,7 @@ TEST(Test_Replay, genericpublisher_replay_config_send)
     Config::GenericPort cfg{};
 
     MockGenericMessage msg;
-    msg._address = {1,2};
+    msg._address = {1, 2};
 
     // Replay Send / Send
     {
@@ -452,8 +426,7 @@ TEST(Test_Replay, genericpublisher_replay_config_send)
 
         Services::generic::GenericPublisherReplay pub{&participant, cfg, participant.GetTimeProvider()};
         pub.SetServiceDescriptor(from_endpointAddress(msg._address));
-        EXPECT_CALL(participant, SendMsg_proxy(AService(&pub), AGenericMessage(msg)))
-            .Times(1);
+        EXPECT_CALL(participant, SendMsg_proxy(AService(&pub), AGenericMessage(msg))).Times(1);
         EXPECT_CALL(participant.mockTimeProvider.mockTime, Now()).Times(1);
         pub.ReplayMessage(&msg);
     }
@@ -464,8 +437,7 @@ TEST(Test_Replay, genericpublisher_replay_config_send)
 
         Services::generic::GenericPublisherReplay pub{&participant, cfg, participant.GetTimeProvider()};
         pub.SetServiceDescriptor(from_endpointAddress(msg._address));
-        EXPECT_CALL(participant, SendMsg_proxy(AService(&pub), AGenericMessage(msg)))
-            .Times(1);
+        EXPECT_CALL(participant, SendMsg_proxy(AService(&pub), AGenericMessage(msg))).Times(1);
         EXPECT_CALL(participant.mockTimeProvider.mockTime, Now()).Times(1);
         pub.ReplayMessage(&msg);
     }
@@ -475,8 +447,7 @@ TEST(Test_Replay, genericpublisher_replay_config_send)
         cfg.replay.direction = Config::Replay::Direction::Send;
 
         Services::generic::GenericPublisherReplay pub{&participant, cfg, participant.GetTimeProvider()};
-        EXPECT_CALL(participant, SendMsg_proxy(AService(&pub), AGenericMessage(msg)))
-            .Times(0);
+        EXPECT_CALL(participant, SendMsg_proxy(AService(&pub), AGenericMessage(msg))).Times(0);
         EXPECT_CALL(participant.mockTimeProvider.mockTime, Now()).Times(0);
         pub.SetServiceDescriptor(from_endpointAddress(msg._address));
         pub.ReplayMessage(&msg);
@@ -487,8 +458,7 @@ TEST(Test_Replay, genericpublisher_replay_config_send)
         cfg.replay.direction = Config::Replay::Direction::Receive;
 
         Services::generic::GenericPublisherReplay pub{&participant, cfg, participant.GetTimeProvider()};
-        EXPECT_CALL(participant, SendMsg_proxy(AService(&pub), AGenericMessage(msg)))
-            .Times(0);
+        EXPECT_CALL(participant, SendMsg_proxy(AService(&pub), AGenericMessage(msg))).Times(0);
         EXPECT_CALL(participant.mockTimeProvider.mockTime, Now()).Times(0);
         pub.SetServiceDescriptor(from_endpointAddress(msg._address));
         pub.ReplayMessage(&msg);
@@ -502,7 +472,7 @@ TEST(Test_Replay, genericsubscriber_replay_config_send)
     Config::GenericPort cfg{};
 
     MockGenericMessage msg;
-    msg._address = {1,2};
+    msg._address = {1, 2};
 
     // Replay Send / Send
     {
@@ -511,8 +481,7 @@ TEST(Test_Replay, genericsubscriber_replay_config_send)
 
         Services::generic::GenericSubscriberReplay sub{&participant, cfg, participant.GetTimeProvider()};
         sub.SetServiceDescriptor(from_endpointAddress(msg._address));
-        EXPECT_CALL(participant, ReceiveMsg(msg._address, AGenericMessage(msg)))
-            .Times(0);
+        EXPECT_CALL(participant, ReceiveMsg(msg._address, AGenericMessage(msg))).Times(0);
         EXPECT_CALL(participant.mockTimeProvider.mockTime, Now()).Times(0);
         sub.ReplayMessage(&msg);
     }
@@ -523,8 +492,7 @@ TEST(Test_Replay, genericsubscriber_replay_config_send)
 
         Services::generic::GenericSubscriberReplay sub{&participant, cfg, participant.GetTimeProvider()};
         sub.SetServiceDescriptor(from_endpointAddress(msg._address));
-        EXPECT_CALL(participant, ReceiveMsg(msg._address, AGenericMessage(msg)))
-            .Times(0);
+        EXPECT_CALL(participant, ReceiveMsg(msg._address, AGenericMessage(msg))).Times(0);
         EXPECT_CALL(participant.mockTimeProvider.mockTime, Now()).Times(0);
         sub.ReplayMessage(&msg);
     }
@@ -534,9 +502,8 @@ TEST(Test_Replay, genericsubscriber_replay_config_send)
         cfg.replay.direction = Config::Replay::Direction::Both;
 
         Services::generic::GenericSubscriberReplay sub{&participant, cfg, participant.GetTimeProvider()};
-        sub.SetServiceDescriptor(from_endpointAddress({1,3}));
-        EXPECT_CALL(participant, ReceiveMsg(msg._address, AGenericMessage(msg)))
-            .Times(0);
+        sub.SetServiceDescriptor(from_endpointAddress({1, 3}));
+        EXPECT_CALL(participant, ReceiveMsg(msg._address, AGenericMessage(msg))).Times(0);
         EXPECT_CALL(participant.mockTimeProvider.mockTime, Now()).Times(1);
         sub.ReplayMessage(&msg);
     }
@@ -546,9 +513,8 @@ TEST(Test_Replay, genericsubscriber_replay_config_send)
         cfg.replay.direction = Config::Replay::Direction::Receive;
 
         Services::generic::GenericSubscriberReplay sub{&participant, cfg, participant.GetTimeProvider()};
-        sub.SetServiceDescriptor(from_endpointAddress({1,3}));
-        EXPECT_CALL(participant, ReceiveMsg(msg._address, AGenericMessage(msg)))
-            .Times(0);
+        sub.SetServiceDescriptor(from_endpointAddress({1, 3}));
+        EXPECT_CALL(participant, ReceiveMsg(msg._address, AGenericMessage(msg))).Times(0);
         EXPECT_CALL(participant.mockTimeProvider.mockTime, Now()).Times(1);
         sub.ReplayMessage(&msg);
     }

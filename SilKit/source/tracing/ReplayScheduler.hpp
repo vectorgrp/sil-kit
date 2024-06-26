@@ -37,8 +37,7 @@ namespace Tracing {
 class ReplayScheduler
 {
 public:
-    ReplayScheduler(const Config::ParticipantConfiguration& participantConfig,
-                    Core::IParticipantInternal* participant);
+    ReplayScheduler(const Config::ParticipantConfiguration& participantConfig, Core::IParticipantInternal* participant);
 
     ~ReplayScheduler();
 
@@ -47,6 +46,7 @@ public:
     void ConfigureController(const std::string& controllerName, IReplayDataController* controller,
                              const Config::Replay& replayConfig, const std::string& networkName,
                              Config::NetworkType networkType);
+
 private:
     // Methods
 

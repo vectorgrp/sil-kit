@@ -47,7 +47,10 @@ inline namespace v1 {
 //! \brief Generic dummy for all internal controllers - do not make available to public API!
 struct InternalController
 {
-    static constexpr auto GetNetworkType() -> NetworkType { return NetworkType::Undefined; }
+    static constexpr auto GetNetworkType() -> NetworkType
+    {
+        return NetworkType::Undefined;
+    }
 
     std::string name;
     SilKit::Util::Optional<std::string> network;
@@ -60,7 +63,10 @@ struct InternalController
 //! \brief CAN controller service
 struct CanController
 {
-    static constexpr auto GetNetworkType() -> NetworkType { return NetworkType::CAN; }
+    static constexpr auto GetNetworkType() -> NetworkType
+    {
+        return NetworkType::CAN;
+    }
 
     std::string name;
     SilKit::Util::Optional<std::string> network;
@@ -76,7 +82,10 @@ struct CanController
 //! \brief LIN controller service
 struct LinController
 {
-    static constexpr auto GetNetworkType() -> NetworkType { return NetworkType::LIN; }
+    static constexpr auto GetNetworkType() -> NetworkType
+    {
+        return NetworkType::LIN;
+    }
 
     std::string name;
     SilKit::Util::Optional<std::string> network;
@@ -92,7 +101,10 @@ struct LinController
 //! \brief Ethernet controller service
 struct EthernetController
 {
-    static constexpr auto GetNetworkType() -> NetworkType { return NetworkType::Ethernet; }
+    static constexpr auto GetNetworkType() -> NetworkType
+    {
+        return NetworkType::Ethernet;
+    }
 
     std::string name;
     SilKit::Util::Optional<std::string> network;
@@ -108,7 +120,10 @@ struct EthernetController
 //! \brief FlexRay controller service
 struct FlexrayController
 {
-    static constexpr auto GetNetworkType() -> NetworkType { return NetworkType::FlexRay; }
+    static constexpr auto GetNetworkType() -> NetworkType
+    {
+        return NetworkType::FlexRay;
+    }
 
     std::string name;
     SilKit::Util::Optional<std::string> network;
@@ -128,13 +143,16 @@ struct FlexrayController
 //! \brief Publisher configuration for the Data communication service
 struct DataPublisher
 {
-    static constexpr auto GetNetworkType() -> NetworkType { return NetworkType::Data; }
+    static constexpr auto GetNetworkType() -> NetworkType
+    {
+        return NetworkType::Data;
+    }
 
     std::string name;
     SilKit::Util::Optional<std::string> topic;
 
     //! \brief History length of a DataPublisher.
-    SilKit::Util::Optional<size_t> history{ 0 };
+    SilKit::Util::Optional<size_t> history{0};
 
     std::vector<std::string> useTraceSinks;
     Replay replay;
@@ -143,7 +161,10 @@ struct DataPublisher
 //! \brief Subscriber configuration for the Data communication service
 struct DataSubscriber
 {
-    static constexpr auto GetNetworkType() -> NetworkType { return NetworkType::Data; }
+    static constexpr auto GetNetworkType() -> NetworkType
+    {
+        return NetworkType::Data;
+    }
 
     std::string name;
     SilKit::Util::Optional<std::string> topic;
@@ -159,7 +180,10 @@ struct DataSubscriber
 //! \brief Server configuration for the RPC communication service
 struct RpcServer
 {
-    static constexpr auto GetNetworkType() -> NetworkType { return NetworkType::RPC; }
+    static constexpr auto GetNetworkType() -> NetworkType
+    {
+        return NetworkType::RPC;
+    }
 
     std::string name;
     SilKit::Util::Optional<std::string> functionName;
@@ -171,7 +195,10 @@ struct RpcServer
 //! \brief Client configuration for the RPC communication service
 struct RpcClient
 {
-    static constexpr auto GetNetworkType() -> NetworkType { return NetworkType::RPC; }
+    static constexpr auto GetNetworkType() -> NetworkType
+    {
+        return NetworkType::RPC;
+    }
 
     std::string name;
     SilKit::Util::Optional<std::string> functionName;
@@ -220,17 +247,18 @@ struct Extensions
 struct Middleware
 {
     std::string registryUri{}; //!< Registry URI to connect to (configuration has priority)
-    int connectAttempts{ 1 }; //!<  Number of connection attempts to the registry a participant should perform.
-    int tcpReceiveBufferSize{ -1 };
-    int tcpSendBufferSize{ -1 };
-    bool tcpNoDelay{ false }; //!< Disables Nagle's algorithm.
-    bool tcpQuickAck{ false }; //!< Setting this Linux specific flag disables delayed TCP/IP acknowledgements.
-    bool enableDomainSockets{ true }; //!< By default local domain socket is preferred to TCP/IP sockets.
-    std::vector<std::string> acceptorUris{}; //!< Explicit list of endpoints this participant will accept connections on.
+    int connectAttempts{1}; //!<  Number of connection attempts to the registry a participant should perform.
+    int tcpReceiveBufferSize{-1};
+    int tcpSendBufferSize{-1};
+    bool tcpNoDelay{false}; //!< Disables Nagle's algorithm.
+    bool tcpQuickAck{false}; //!< Setting this Linux specific flag disables delayed TCP/IP acknowledgements.
+    bool enableDomainSockets{true}; //!< By default local domain socket is preferred to TCP/IP sockets.
+    std::vector<std::string>
+        acceptorUris{}; //!< Explicit list of endpoints this participant will accept connections on.
     //! By default, communication with other participants using the registry as a proxy is enabled.
-    bool registryAsFallbackProxy{ true };
+    bool registryAsFallbackProxy{true};
     //! By default, requesting connection of other participants, and honoring these requests by other participants is enabled.
-    bool experimentalRemoteParticipantConnection{ true };
+    bool experimentalRemoteParticipantConnection{true};
     //! Timeout for individual connection attempts (TCP, Local-Domain) and handshakes.
     double connectTimeoutSeconds{5.0};
 };
@@ -240,8 +268,7 @@ struct Middleware
 // ================================================================================
 
 //! \brief ParticipantConfiguration is the main configuration data object for a SILKIT participant.
-struct ParticipantConfiguration
-    : public IParticipantConfiguration
+struct ParticipantConfiguration : public IParticipantConfiguration
 {
     ParticipantConfiguration() = default;
 
@@ -249,7 +276,7 @@ struct ParticipantConfiguration
     //virtual auto ToJsonString() -> std::string override;
 
     //! \brief Version of the JSON/YAML schema.
-    std::string schemaVersion{ "1" };
+    std::string schemaVersion{"1"};
     //! \brief An optional user description for documentation purposes. Currently unused.
     std::string description;
     //! \brief An optional file path.

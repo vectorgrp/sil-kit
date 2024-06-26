@@ -43,9 +43,7 @@ inline constexpr auto CurrentProtocolVersion() -> ProtocolVersion
 
 inline bool operator==(const ProtocolVersion& lhs, const ProtocolVersion& rhs)
 {
-    return lhs.major == rhs.major
-        && lhs.minor == rhs.minor
-        ;
+    return lhs.major == rhs.major && lhs.minor == rhs.minor;
 }
 
 inline bool operator!=(const ProtocolVersion& lhs, const ProtocolVersion& rhs)

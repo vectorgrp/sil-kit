@@ -198,12 +198,18 @@ std::string to_string(FlexrayChiCommand command)
 {
     switch (command)
     {
-    case FlexrayChiCommand::RUN: return "RUN";
-    case FlexrayChiCommand::DEFERRED_HALT: return "DEFERRED_HALT";
-    case FlexrayChiCommand::FREEZE: return "FREEZE";
-    case FlexrayChiCommand::ALLOW_COLDSTART: return "ALLOW_COLDSTART";
-    case FlexrayChiCommand::ALL_SLOTS: return "ALL_SLOTS";
-    case FlexrayChiCommand::WAKEUP: return "WAKEUP";
+    case FlexrayChiCommand::RUN:
+        return "RUN";
+    case FlexrayChiCommand::DEFERRED_HALT:
+        return "DEFERRED_HALT";
+    case FlexrayChiCommand::FREEZE:
+        return "FREEZE";
+    case FlexrayChiCommand::ALLOW_COLDSTART:
+        return "ALLOW_COLDSTART";
+    case FlexrayChiCommand::ALL_SLOTS:
+        return "ALL_SLOTS";
+    case FlexrayChiCommand::WAKEUP:
+        return "WAKEUP";
     };
     throw SilKit::TypeConversionError{};
 }

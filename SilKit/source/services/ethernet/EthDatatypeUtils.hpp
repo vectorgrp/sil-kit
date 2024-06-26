@@ -40,14 +40,12 @@ inline bool operator==(const EthernetFrame& lhs, const EthernetFrame& rhs)
 
 inline bool operator==(const EthernetFrameEvent& lhs, const EthernetFrameEvent& rhs)
 {
-    return lhs.timestamp == rhs.timestamp
-        && lhs.frame == rhs.frame;
+    return lhs.timestamp == rhs.timestamp && lhs.frame == rhs.frame;
 }
 
 inline bool operator==(const EthernetFrameTransmitEvent& lhs, const EthernetFrameTransmitEvent& rhs)
 {
-    return lhs.timestamp == rhs.timestamp
-        && lhs.status == rhs.status;
+    return lhs.timestamp == rhs.timestamp && lhs.status == rhs.status;
 }
 
 inline bool operator==(const EthernetSetMode& lhs, const EthernetSetMode& rhs)
@@ -89,10 +87,9 @@ const size_t EthernetFrameHeaderSize = 2 * sizeof(EthernetMac) + sizeof(Ethernet
 
 //! \brief Build an Ethernet level 2 frame without VLAN tag
 inline auto CreateEthernetFrame(const SilKit::Services::Ethernet::EthernetMac& destinationMac,
-    const SilKit::Services::Ethernet::EthernetMac& sourceMac,
-    const SilKit::Services::Ethernet::EthernetEtherType& etherType,
-    const std::string& payload)
-    -> SilKit::Services::Ethernet::WireEthernetFrame
+                                const SilKit::Services::Ethernet::EthernetMac& sourceMac,
+                                const SilKit::Services::Ethernet::EthernetEtherType& etherType,
+                                const std::string& payload) -> SilKit::Services::Ethernet::WireEthernetFrame
 {
     std::vector<uint8_t> raw;
 
@@ -100,7 +97,7 @@ inline auto CreateEthernetFrame(const SilKit::Services::Ethernet::EthernetMac& d
     std::copy(destinationMac.begin(), destinationMac.end(), std::back_inserter(raw));
     std::copy(sourceMac.begin(), sourceMac.end(), std::back_inserter(raw));
     auto etherTypeBytes = reinterpret_cast<const uint8_t*>(&etherType);
-    raw.push_back(etherTypeBytes[1]);  // We assume our platform to be little-endian
+    raw.push_back(etherTypeBytes[1]); // We assume our platform to be little-endian
     raw.push_back(etherTypeBytes[0]);
     std::copy(payload.begin(), payload.end(), std::back_inserter(raw));
 
@@ -109,10 +106,9 @@ inline auto CreateEthernetFrame(const SilKit::Services::Ethernet::EthernetMac& d
 
 //! \brief Build an Ethernet level 2 frame with VLAN tag
 inline auto CreateEthernetFrameWithVlanTag(const SilKit::Services::Ethernet::EthernetMac& destinationMac,
-    const SilKit::Services::Ethernet::EthernetMac& sourceMac,
-    const SilKit::Services::Ethernet::EthernetEtherType& etherType,
-    const std::string& payload,
-    const EthernetVlanTagControlIdentifier& tci)
+                                           const SilKit::Services::Ethernet::EthernetMac& sourceMac,
+                                           const SilKit::Services::Ethernet::EthernetEtherType& etherType,
+                                           const std::string& payload, const EthernetVlanTagControlIdentifier& tci)
     -> SilKit::Services::Ethernet::WireEthernetFrame
 {
     std::vector<uint8_t> raw;
@@ -121,13 +117,13 @@ inline auto CreateEthernetFrameWithVlanTag(const SilKit::Services::Ethernet::Eth
     std::copy(destinationMac.begin(), destinationMac.end(), std::back_inserter(raw));
     std::copy(sourceMac.begin(), sourceMac.end(), std::back_inserter(raw));
     auto etherTypeVlanTagBytes = reinterpret_cast<const uint8_t*>(&EthernetEtherTypeVlanTag);
-    raw.push_back(etherTypeVlanTagBytes[1]);  // We assume our platform to be little-endian
+    raw.push_back(etherTypeVlanTagBytes[1]); // We assume our platform to be little-endian
     raw.push_back(etherTypeVlanTagBytes[0]);
     auto tciBytes = reinterpret_cast<const uint8_t*>(&tci);
-    raw.push_back(tciBytes[1]);  // We assume our platform to be little-endian
+    raw.push_back(tciBytes[1]); // We assume our platform to be little-endian
     raw.push_back(tciBytes[0]);
     auto etherTypeBytes = reinterpret_cast<const uint8_t*>(&etherType);
-    raw.push_back(etherTypeBytes[1]);  // We assume our platform to be little-endian
+    raw.push_back(etherTypeBytes[1]); // We assume our platform to be little-endian
     raw.push_back(etherTypeBytes[0]);
     std::copy(payload.begin(), payload.end(), std::back_inserter(raw));
 
@@ -157,6 +153,6 @@ inline void SetSourceMac(std::vector<uint8_t>& raw, const EthernetMac& source)
     std::copy(source.begin(), source.end(), raw.begin() + SourceMacStart);
 }
 
-} // namespace SilKit
-} // namespace Services
 } // namespace Ethernet
+} // namespace Services
+} // namespace SilKit

@@ -18,16 +18,16 @@ public:
 
     // IEthernetEventProducer
     void Produce(const SilKit::Services::Ethernet::EthernetFrameEvent& msg,
-                           const SilKit::Util::Span<const ControllerDescriptor>& receivers) override;
+                 const SilKit::Util::Span<const ControllerDescriptor>& receivers) override;
 
     void Produce(const SilKit::Services::Ethernet::EthernetFrameTransmitEvent& msg,
-                                   const SilKit::Util::Span<const ControllerDescriptor>& receivers) override;
+                 const SilKit::Util::Span<const ControllerDescriptor>& receivers) override;
 
     void Produce(const SilKit::Services::Ethernet::EthernetStateChangeEvent& msg,
-                                 const SilKit::Util::Span<const ControllerDescriptor>& receivers) override;
+                 const SilKit::Util::Span<const ControllerDescriptor>& receivers) override;
 
     void Produce(const SilKit::Services::Ethernet::EthernetBitrateChangeEvent& msg,
-                                      const SilKit::Util::Span<const ControllerDescriptor>& receivers) override;
+                 const SilKit::Util::Span<const ControllerDescriptor>& receivers) override;
 
 private:
     SimulatedNetworkRouter* _simulatedNetworkRouter;

@@ -18,7 +18,7 @@ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
 LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
-#pragma once 
+#pragma once
 #include <functional>
 #include <set>
 #include <string>
@@ -37,14 +37,15 @@ using namespace testing;
 class MockServiceEndpoint : public SilKit::Core::IServiceEndpoint
 {
 public:
-    MockServiceEndpoint(std::string participantName, std::string networkName,
-        std::string serviceName, EndpointId serviceId = 0)
+    MockServiceEndpoint(std::string participantName, std::string networkName, std::string serviceName,
+                        EndpointId serviceId = 0)
         : _serviceDescriptor{participantName, networkName, serviceName, serviceId}
     {
         ON_CALL(*this, GetServiceDescriptor()).WillByDefault(ReturnRef(_serviceDescriptor));
     }
-    MOCK_METHOD(void,SetServiceDescriptor, (const ServiceDescriptor& ), (override));
-    MOCK_METHOD(const ServiceDescriptor&, GetServiceDescriptor, (),(const,override));
+    MOCK_METHOD(void, SetServiceDescriptor, (const ServiceDescriptor&), (override));
+    MOCK_METHOD(const ServiceDescriptor&, GetServiceDescriptor, (), (const, override));
+
 public:
     ServiceDescriptor _serviceDescriptor;
 };

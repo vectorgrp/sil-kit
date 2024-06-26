@@ -43,8 +43,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 using namespace testing;
 
-namespace
-{
+namespace {
 std::string GetCurrentWorkingDir()
 {
     return SilKit::Filesystem::current_path().string();
@@ -55,7 +54,7 @@ void SetCurrentWorkingDir(const std::string& cwd)
     SilKit::Filesystem::current_path(cwd);
 }
 
-class StdoutLogger: public SilKit::Core::Tests::MockLogger 
+class StdoutLogger : public SilKit::Core::Tests::MockLogger
 {
 public:
     void Info(const std::string& msg) override
@@ -75,7 +74,7 @@ public:
         std::cout << "SilKitExtensionTest: Error: " << msg << std::endl;
     }
 };
-}
+} // namespace
 
 class Test_SilKitExtensions : public Test
 {
@@ -87,7 +86,7 @@ protected:
     }
 
     static void SetUpTestCase()
-    { 
+    {
         currentWorkingDir = GetCurrentWorkingDir();
     }
 
@@ -108,27 +107,21 @@ TEST_F(Test_SilKitExtensions, load_dummy_lib)
 
         {
             auto otherInstance = SilKit::LoadExtension(&logger, "DummyExtension");
-            std::cout <<" created second instance of DummyExtension" << std::endl;
+            std::cout << " created second instance of DummyExtension" << std::endl;
         }
         ASSERT_NE(dummyExtension, nullptr);
         std::string name{dummyExtension->GetExtensionName()};
-        ASSERT_EQ(name,  "DummyExtension");
+        ASSERT_EQ(name, "DummyExtension");
 
         std::string vendor{dummyExtension->GetVendorName()};
-        ASSERT_EQ(vendor,  "Vector");
+        ASSERT_EQ(vendor, "Vector");
 
 
         triple version;
-        triple reference{
-            SilKit::Version::Major(),
-            SilKit::Version::Minor(),
-            SilKit::Version::Patch()
-        };
+        triple reference{SilKit::Version::Major(), SilKit::Version::Minor(), SilKit::Version::Patch()};
 
-        dummyExtension->GetVersion(std::get<0>(version), std::get<1>(version),
-                         std::get<2>(version));
+        dummyExtension->GetVersion(std::get<0>(version), std::get<1>(version), std::get<2>(version));
         ASSERT_EQ(version, reference);
-
     }
     //must not crash when going out of scope
 }
@@ -152,25 +145,18 @@ TEST_F(Test_SilKitExtensions, wrong_version_number)
     {
         auto extension = SilKit::LoadExtension(&logger, "WrongVersionExtension");
         triple version;
-        triple reference{
-            SilKit::Version::Major(),
-            SilKit::Version::Minor(),
-            SilKit::Version::Patch()
-        };
-        extension->GetVersion(std::get<0>(version), std::get<1>(version),
-                std::get<2>(version));
+        triple reference{SilKit::Version::Major(), SilKit::Version::Minor(), SilKit::Version::Patch()};
+        extension->GetVersion(std::get<0>(version), std::get<1>(version), std::get<2>(version));
         ASSERT_EQ(version, reference);
     }
     catch (const SilKit::ExtensionError& error)
     {
         const std::string msg{error.what()};
-        std::cout << "OK: received expected version mismatch error"
-            << std::endl;
+        std::cout << "OK: received expected version mismatch error" << std::endl;
         return;
     }
     FAIL() << "expected an ExtensionError when loading a shared library with\
         wrong version number";
-
 }
 
 TEST_F(Test_SilKitExtensions, wrong_build_system)
@@ -207,6 +193,5 @@ TEST_F(Test_SilKitExtensions, load_from_envvar)
     auto* mod1 = dynamic_cast<DummyExtension*>(base1.get());
     mod1->SetDummyValue(1);
     EXPECT_EQ(mod1->GetDummyValue(), 1);
-
 }
 #endif

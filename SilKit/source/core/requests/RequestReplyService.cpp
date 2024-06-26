@@ -28,7 +28,8 @@ namespace SilKit {
 namespace Core {
 namespace RequestReply {
 
-RequestReplyService::RequestReplyService(IParticipantInternal* participant, const std::string& participantName, ProcedureMap prodecures)
+RequestReplyService::RequestReplyService(IParticipantInternal* participant, const std::string& participantName,
+                                         ProcedureMap prodecures)
     : _participant{participant}
     , _participantName{participantName}
     , _participantDisconnectCallReturns{}
@@ -60,8 +61,7 @@ Util::Uuid RequestReplyService::Call(FunctionType functionType, std::vector<uint
 
     // Get the participant names that receive the RequestReplyCall.
     // This is needed to locally trigger the RequestReplyCallReturn if a participant disconnects in between.
-    auto receivingParticipants =
-        _participant->GetParticipantNamesOfRemoteReceivers(this, "REQUESTREPLYCALL");
+    auto receivingParticipants = _participant->GetParticipantNamesOfRemoteReceivers(this, "REQUESTREPLYCALL");
 
     // Prepare RequestReplyCallReturn message for disconnects. There, we only have the name
     // of the disconnected participant, so we directly map name and reply

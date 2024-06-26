@@ -57,11 +57,8 @@ public:
 
 auto ALogMsgWith(std::string logger_name, Level level, std::string payload) -> Matcher<LogMsg&&>
 {
-    return AllOf(
-        Field(&LogMsg::logger_name, logger_name),
-        Field(&LogMsg::level, level),
-        Field(&LogMsg::payload, payload)
-    );
+    return AllOf(Field(&LogMsg::logger_name, logger_name), Field(&LogMsg::level, level),
+                 Field(&LogMsg::payload, payload));
 }
 
 TEST(Test_Logger, log_level_conversion)
@@ -77,12 +74,12 @@ TEST(Test_Logger, log_level_conversion)
 
 TEST(Test_Logger, send_log_message_with_sender)
 {
-    ServiceDescriptor controllerAddress { "P1", "N1", "C2", 8};
+    ServiceDescriptor controllerAddress{"P1", "N1", "C2", 8};
 
     MockParticipant mockParticipant;
 
     LogMsgSender logMsgSender(&mockParticipant);
-    
+
     logMsgSender.SetServiceDescriptor(controllerAddress);
 
     LogMsg msg;
@@ -90,8 +87,7 @@ TEST(Test_Logger, send_log_message_with_sender)
     msg.level = Level::Info;
     msg.payload = std::string{"some payload"};
 
-    EXPECT_CALL(mockParticipant, SendMsg(&logMsgSender, std::move(msg)))
-        .Times(1);
+    EXPECT_CALL(mockParticipant, SendMsg(&logMsgSender, std::move(msg))).Times(1);
 
     logMsgSender.SendLogMsg(std::move(msg));
 }
@@ -109,29 +105,23 @@ TEST(Test_Logger, send_log_message_from_logger)
 
     Logger logger{loggerName, config};
 
-    ServiceDescriptor controllerAddress { "P1", "N1", "C2" , 8};
+    ServiceDescriptor controllerAddress{"P1", "N1", "C2", 8};
     MockParticipant mockParticipant;
     LogMsgSender logMsgSender(&mockParticipant);
     logMsgSender.SetServiceDescriptor(controllerAddress);
 
 
     logger.RegisterRemoteLogging([&logMsgSender](LogMsg logMsg) {
-
         logMsgSender.SendLogMsg(std::move(logMsg));
-
     });
 
     std::string payload{"Test log message"};
 
-    EXPECT_CALL(mockParticipant, SendMsg(&logMsgSender,
-        ALogMsgWith(loggerName, Level::Info, payload)))
-        .Times(1);
+    EXPECT_CALL(mockParticipant, SendMsg(&logMsgSender, ALogMsgWith(loggerName, Level::Info, payload))).Times(1);
 
     logger.Info(payload);
 
-    EXPECT_CALL(mockParticipant, SendMsg(&logMsgSender,
-        ALogMsgWith(loggerName, Level::Critical, payload)))
-        .Times(1);
+    EXPECT_CALL(mockParticipant, SendMsg(&logMsgSender, ALogMsgWith(loggerName, Level::Critical, payload))).Times(1);
 
     logger.Critical(payload);
 }
@@ -160,9 +150,9 @@ TEST(Test_Logger, get_log_level)
 
 TEST(Test_Logger, LogOnceFlag_check_setter)
 {
-    LogOnceFlag  once;
+    LogOnceFlag once;
     EXPECT_EQ(once.WasCalled(), false);
     EXPECT_EQ(once.WasCalled(), true);
     EXPECT_EQ(once.WasCalled(), true);
 }
-}  // anonymous namespace
+} // anonymous namespace

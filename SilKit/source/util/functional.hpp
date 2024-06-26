@@ -26,13 +26,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 namespace SilKit {
 namespace Util {
 
-template<class C, typename RT, typename... Arg>
-auto bind_method(C* classPtr, RT(C::*method)(Arg...)) -> std::function<RT(Arg...)>
+template <class C, typename RT, typename... Arg>
+auto bind_method(C* classPtr, RT (C::*method)(Arg...)) -> std::function<RT(Arg...)>
 {
-    return [classPtr, method](Arg... arg)
-           {
-               return (classPtr->*method)(std::forward<Arg>(arg)...);
-           };
+    return [classPtr, method](Arg... arg) { return (classPtr->*method)(std::forward<Arg>(arg)...); };
 }
 
 } // namespace Util

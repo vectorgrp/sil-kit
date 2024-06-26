@@ -49,7 +49,8 @@ protected:
 
     struct DataPublisherInfo
     {
-        DataPublisherInfo(const std::string& newControllerName, const std::string& newTopic, const std::string& newMediaType,
+        DataPublisherInfo(const std::string& newControllerName, const std::string& newTopic,
+                          const std::string& newMediaType,
                           const std::vector<SilKit::Services::MatchingLabel>& newLabels, uint8_t newHistory,
                           size_t newMessageSizeInBytes, uint32_t newNumMsgToPublish)
         {
@@ -90,9 +91,9 @@ protected:
 
     struct DataSubscriberInfo
     {
-        DataSubscriberInfo(const std::string& newControllerName, const std::string& newTopic, const std::string& newMediaType,
-                           const std::vector<SilKit::Services::MatchingLabel>& newLabels,
-                           size_t newMessageSizeInBytes,
+        DataSubscriberInfo(const std::string& newControllerName, const std::string& newTopic,
+                           const std::string& newMediaType,
+                           const std::vector<SilKit::Services::MatchingLabel>& newLabels, size_t newMessageSizeInBytes,
                            uint32_t newNumMsgToReceive, uint32_t newExpectedSources)
         {
             expectIncreasingData = true;
@@ -104,8 +105,9 @@ protected:
             numMsgToReceive = newNumMsgToReceive;
             expectedSources = newExpectedSources;
         }
-        DataSubscriberInfo(const std::string& newControllerName, const std::string& newTopic, const std::string& newMediaType, const std::vector<SilKit::Services::MatchingLabel>& newLabels,
-                           size_t newMessageSizeInBytes,
+        DataSubscriberInfo(const std::string& newControllerName, const std::string& newTopic,
+                           const std::string& newMediaType,
+                           const std::vector<SilKit::Services::MatchingLabel>& newLabels, size_t newMessageSizeInBytes,
                            uint32_t newNumMsgToReceive, uint32_t newExpectedSources,
                            const std::vector<std::vector<uint8_t>>& newExpectedDataUnordered)
         {
@@ -150,8 +152,8 @@ protected:
                 {
                     auto foundDataIter = std::find_if(expectedDataUnordered.begin(), expectedDataUnordered.end(),
                                                       [&dataMessageEvent](const auto& expectedData) -> bool {
-                                                          return SilKit::Util::ItemsAreEqual(SilKit::Util::ToSpan(expectedData), dataMessageEvent.data);
-                                                      });
+                        return SilKit::Util::ItemsAreEqual(SilKit::Util::ToSpan(expectedData), dataMessageEvent.data);
+                    });
                     EXPECT_EQ(foundDataIter != expectedDataUnordered.end(), true);
                     if (foundDataIter != expectedDataUnordered.end())
                     {
@@ -167,7 +169,8 @@ protected:
             }
         }
 
-        void OnNewServiceDiscovery(const SilKit::Core::ServiceDescriptor /*sd*/) {
+        void OnNewServiceDiscovery(const SilKit::Core::ServiceDescriptor /*sd*/)
+        {
             newSourceCounter++;
             if (!allDiscovered)
             {
@@ -181,7 +184,10 @@ protected:
 
     struct PubSubParticipant
     {
-        PubSubParticipant(const std::string& newName) { name = newName; }
+        PubSubParticipant(const std::string& newName)
+        {
+            name = newName;
+        }
         PubSubParticipant(const std::string& newName, const std::vector<DataPublisherInfo>& newDataPublishers,
                           const std::vector<DataSubscriberInfo>& newDataSubscribers,
                           std::shared_ptr<SilKit::Config::IParticipantConfiguration> newConfig =
@@ -217,9 +223,8 @@ protected:
 
         void PrepareAllReceivedPromise()
         {
-            if (std::all_of(dataSubscribers.begin(), dataSubscribers.end(), [](const auto& dsInfo) {
-                    return dsInfo.numMsgToReceive == 0;
-                }))
+            if (std::all_of(dataSubscribers.begin(), dataSubscribers.end(),
+                            [](const auto& dsInfo) { return dsInfo.numMsgToReceive == 0; }))
             {
                 allReceived = true;
                 allReceivedPromise.set_value();
@@ -227,9 +232,8 @@ protected:
         }
         void PrepareAllDiscoveredPromise()
         {
-            if (std::all_of(dataSubscribers.begin(), dataSubscribers.end(), [](const auto& dsInfo) {
-                    return dsInfo.expectedSources == 0;
-                }))
+            if (std::all_of(dataSubscribers.begin(), dataSubscribers.end(),
+                            [](const auto& dsInfo) { return dsInfo.expectedSources == 0; }))
             {
                 allDiscovered = true;
                 allDiscoveredPromise.set_value();
@@ -239,8 +243,8 @@ protected:
         void CheckAllReceivedPromise()
         {
             if (!allReceived && std::all_of(dataSubscribers.begin(), dataSubscribers.end(), [](const auto& dsInfo) {
-                    return dsInfo.allReceived;
-                }))
+                return dsInfo.allReceived;
+            }))
             {
                 allReceived = true;
                 allReceivedPromise.set_value();
@@ -249,8 +253,8 @@ protected:
         void CheckAllDiscoveredPromise()
         {
             if (!allDiscovered && std::all_of(dataSubscribers.begin(), dataSubscribers.end(), [](const auto& dsInfo) {
-                    return dsInfo.allDiscovered;
-                }))
+                return dsInfo.allDiscovered;
+            }))
             {
                 allDiscovered = true;
                 allDiscoveredPromise.set_value();
@@ -258,9 +262,8 @@ protected:
         }
         void CheckAllSentPromise()
         {
-            if (!allSent && std::all_of(dataPublishers.begin(), dataPublishers.end(), [](const auto& dp) {
-                    return dp.allSent;
-                }))
+            if (!allSent
+                && std::all_of(dataPublishers.begin(), dataPublishers.end(), [](const auto& dp) { return dp.allSent; }))
             {
                 allSent = true;
                 allSentPromise.set_value();
@@ -270,7 +273,8 @@ protected:
         void WaitForCreateParticipant()
         {
             auto futureStatus = participantCreatedPromise.get_future().wait_for(communicationTimeout);
-            EXPECT_EQ(futureStatus, std::future_status::ready) << "Test Failure: Awaiting participant creation timed out";
+            EXPECT_EQ(futureStatus, std::future_status::ready)
+                << "Test Failure: Awaiting participant creation timed out";
         }
         void WaitForAllSent()
         {
@@ -315,14 +319,14 @@ protected:
 
                 participant.participantImpl->GetServiceDiscovery()->RegisterServiceDiscoveryHandler(
                     [&ds, &participant](auto type, auto&& serviceDescr) {
-                        if (type == SilKit::Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated)
+                    if (type == SilKit::Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated)
+                    {
+                        if (serviceDescr.GetNetworkType() == SilKit::Config::NetworkType::Data)
                         {
-                            if (serviceDescr.GetNetworkType() == SilKit::Config::NetworkType::Data)
-                            {
-                                ds.OnNewServiceDiscovery(serviceDescr);
-                                participant.CheckAllDiscoveredPromise();
-                            }
+                            ds.OnNewServiceDiscovery(serviceDescr);
+                            participant.CheckAllDiscoveredPromise();
                         }
+                    }
                 });
 
                 SilKit::Services::PubSub::PubSubSpec dataSpec{ds.topic, ds.mediaType};
@@ -332,16 +336,16 @@ protected:
                 }
 
                 // Create DataSubscriber with default handler
-                if(participant.delayedDefaultDataHandler)
+                if (participant.delayedDefaultDataHandler)
                 {
-                    ds.dataSubscriber = participant.participant->CreateDataSubscriber(
-                        ds.controllerName, dataSpec, nullptr);
+                    ds.dataSubscriber =
+                        participant.participant->CreateDataSubscriber(ds.controllerName, dataSpec, nullptr);
                     ds.dataSubscriber->SetDataMessageHandler(receptionHandler);
                 }
                 else
                 {
-                    ds.dataSubscriber = participant.participant->CreateDataSubscriber(
-                        ds.controllerName, dataSpec, receptionHandler);
+                    ds.dataSubscriber =
+                        participant.participant->CreateDataSubscriber(ds.controllerName, dataSpec, receptionHandler);
                 }
             }
 
@@ -353,7 +357,8 @@ protected:
                 {
                     dataSpec.AddLabel(label);
                 }
-                dp.dataPublisher = participant.participant->CreateDataPublisher(dp.controllerName, dataSpec, dp.history);
+                dp.dataPublisher =
+                    participant.participant->CreateDataPublisher(dp.controllerName, dataSpec, dp.history);
             }
             auto publishTask = [&participant]() {
                 for (auto& dp : participant.dataPublishers)
@@ -371,12 +376,12 @@ protected:
                 timeSyncService->SetSimulationStepHandler(
                     [&participant, publishTask](std::chrono::nanoseconds /*now*/,
                                                 std::chrono::nanoseconds /*duration*/) {
-                        if (!participant.dataPublishers.empty())
-                        {
-                            publishTask();
-                            participant.CheckAllSentPromise();
-                        }
-                    },
+                    if (!participant.dataPublishers.empty())
+                    {
+                        publishTask();
+                        participant.CheckAllSentPromise();
+                    }
+                },
                     1s);
                 auto finalStateFuture = lifecycleService->StartLifecycle();
                 finalStateFuture.get();
@@ -386,9 +391,7 @@ protected:
                 if (!participant.dataPublishers.empty())
                 {
                     while (std::none_of(participant.dataPublishers.begin(), participant.dataPublishers.end(),
-                                        [](const DataPublisherInfo& dp) {
-                                            return dp.allSent;
-                                        }))
+                                        [](const DataPublisherInfo& dp) { return dp.allSent; }))
                     {
                         publishTask();
                     }

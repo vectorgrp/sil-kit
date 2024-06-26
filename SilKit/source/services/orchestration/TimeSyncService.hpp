@@ -111,7 +111,7 @@ private:
     //! assigned before.
     bool SetupTimeSyncPolicy(bool isSynchronizingVirtualTime);
 
-    inline auto GetTimeSyncPolicy() const -> ITimeSyncPolicy *;
+    inline auto GetTimeSyncPolicy() const -> ITimeSyncPolicy*;
 
 private:
     // ----------------------------------------
@@ -138,7 +138,6 @@ private:
     Util::PerformanceMonitor _execTimeMonitor;
     Util::PerformanceMonitor _waitTimeMonitor;
     WatchDog _watchDog;
-
 };
 
 // ================================================================================

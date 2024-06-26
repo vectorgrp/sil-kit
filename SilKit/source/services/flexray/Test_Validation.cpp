@@ -72,7 +72,7 @@ TEST(Test_Validation, valid_cluster_params_lower_boundary_must_not_throw)
     clusterParams.gNumberOfStaticSlots = 2;
     clusterParams.gPayloadLengthStatic = 0;
     clusterParams.gSyncFrameIDCountMax = 2;
-    
+
     EXPECT_NO_THROW(Validate(clusterParams));
 }
 
@@ -99,7 +99,7 @@ TEST(Test_Validation, valid_cluster_params_upper_boundary_must_not_throw)
     clusterParams.gNumberOfStaticSlots = 1023;
     clusterParams.gPayloadLengthStatic = 127;
     clusterParams.gSyncFrameIDCountMax = 15;
-    
+
     EXPECT_NO_THROW(Validate(clusterParams));
 }
 

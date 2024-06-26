@@ -41,45 +41,46 @@ typedef struct SilKit_Experimental_EventReceivers SilKit_Experimental_EventRecei
 // CAN
 // --------------------------------
 
-SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Experimental_CanEventProducer_Produce(SilKit_Experimental_CanEventProducer* eventProducer,
-                                                                       SilKit_StructHeader* msg,
-                                                                       const SilKit_Experimental_EventReceivers* receivers);
-typedef SilKit_ReturnCode(SilKitFPTR* SilKit_Experimental_CanEventProducer_Produce_t)(SilKit_Experimental_CanEventProducer* eventProducer,
-                                                                         SilKit_StructHeader* msg,
-                                                                         const SilKit_Experimental_EventReceivers* receivers);
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Experimental_CanEventProducer_Produce(
+    SilKit_Experimental_CanEventProducer* eventProducer, SilKit_StructHeader* msg,
+    const SilKit_Experimental_EventReceivers* receivers);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_Experimental_CanEventProducer_Produce_t)(
+    SilKit_Experimental_CanEventProducer* eventProducer, SilKit_StructHeader* msg,
+    const SilKit_Experimental_EventReceivers* receivers);
 
 // --------------------------------
 // FlexRay
 // --------------------------------
 
-SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Experimental_FlexRayEventProducer_Produce(SilKit_Experimental_FlexRayEventProducer* eventProducer,
-                                                                           SilKit_StructHeader* msg,
-                                                                           const SilKit_Experimental_EventReceivers* receivers);
-typedef SilKit_ReturnCode(SilKitFPTR* SilKit_Experimental_FlexRayEventProducer_Produce_t)(SilKit_Experimental_FlexRayEventProducer* eventProducer,
-                                                                             SilKit_StructHeader* msg,
-                                                                             const SilKit_Experimental_EventReceivers* receivers);
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Experimental_FlexRayEventProducer_Produce(
+    SilKit_Experimental_FlexRayEventProducer* eventProducer, SilKit_StructHeader* msg,
+    const SilKit_Experimental_EventReceivers* receivers);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_Experimental_FlexRayEventProducer_Produce_t)(
+    SilKit_Experimental_FlexRayEventProducer* eventProducer, SilKit_StructHeader* msg,
+    const SilKit_Experimental_EventReceivers* receivers);
 
 // --------------------------------
 // Ethernet
 // --------------------------------
 
-SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Experimental_EthernetEventProducer_Produce(SilKit_Experimental_EthernetEventProducer* eventProducer,
-                                                                            SilKit_StructHeader* msg,
-                                                                            const SilKit_Experimental_EventReceivers* receivers);
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Experimental_EthernetEventProducer_Produce(
+    SilKit_Experimental_EthernetEventProducer* eventProducer, SilKit_StructHeader* msg,
+    const SilKit_Experimental_EventReceivers* receivers);
 typedef SilKit_ReturnCode(SilKitFPTR* SilKit_Experimental_EthernetEventProducer_Produce_t)(
-    SilKit_Experimental_EthernetEventProducer* eventProducer, SilKit_StructHeader* msg, const SilKit_Experimental_EventReceivers* receivers);
+    SilKit_Experimental_EthernetEventProducer* eventProducer, SilKit_StructHeader* msg,
+    const SilKit_Experimental_EventReceivers* receivers);
 
 
 // --------------------------------
 // Lin
 // --------------------------------
 
-SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Experimental_LinEventProducer_Produce(SilKit_Experimental_LinEventProducer* eventProducer,
-                                                                       SilKit_StructHeader* msg,
-                                                                       const SilKit_Experimental_EventReceivers* receivers);
-typedef SilKit_ReturnCode(SilKitFPTR* SilKit_Experimental_LinEventProducer_Produce_t)(SilKit_Experimental_LinEventProducer* eventProducer,
-                                                                         SilKit_StructHeader* msg,
-                                                                         const SilKit_Experimental_EventReceivers* receivers);
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Experimental_LinEventProducer_Produce(
+    SilKit_Experimental_LinEventProducer* eventProducer, SilKit_StructHeader* msg,
+    const SilKit_Experimental_EventReceivers* receivers);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_Experimental_LinEventProducer_Produce_t)(
+    SilKit_Experimental_LinEventProducer* eventProducer, SilKit_StructHeader* msg,
+    const SilKit_Experimental_EventReceivers* receivers);
 
 SILKIT_END_DECLS
 

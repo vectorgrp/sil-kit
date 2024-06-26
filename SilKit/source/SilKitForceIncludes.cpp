@@ -51,8 +51,7 @@ void __silkit_force_include_experimental()
     SILKIT_UNUSED_ARG(systemController);
 
     // LinController extensions
-    auto handlerId =
-        SilKit::Experimental::Services::Lin::AddLinSlaveConfigurationHandler(nullptr, nullptr);
+    auto handlerId = SilKit::Experimental::Services::Lin::AddLinSlaveConfigurationHandler(nullptr, nullptr);
     SILKIT_UNUSED_ARG(handlerId);
     SilKit::Experimental::Services::Lin::RemoveLinSlaveConfigurationHandler(nullptr, SilKit::Util::HandlerId{});
     auto slaveConfig = SilKit::Experimental::Services::Lin::GetSlaveConfiguration(nullptr);

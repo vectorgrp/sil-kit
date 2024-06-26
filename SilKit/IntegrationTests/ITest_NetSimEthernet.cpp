@@ -40,25 +40,23 @@ struct ITest_NetSimEthernet : ITest_NetSim
     {
         controller->AddFrameHandler(
             [&callCountsSilKitHandlerEthernet](IEthernetController*, const EthernetFrameEvent& /*msg*/) {
-                callCountsSilKitHandlerEthernet.FrameHandler++;
-            });
+            callCountsSilKitHandlerEthernet.FrameHandler++;
+        });
         controller->AddFrameTransmitHandler(
             [&callCountsSilKitHandlerEthernet](IEthernetController*, const EthernetFrameTransmitEvent& /*msg*/) {
-                callCountsSilKitHandlerEthernet.FrameTransmitHandler++;
-            });
+            callCountsSilKitHandlerEthernet.FrameTransmitHandler++;
+        });
         controller->AddStateChangeHandler(
             [&callCountsSilKitHandlerEthernet](IEthernetController*, const EthernetStateChangeEvent& /*msg*/) {
-                callCountsSilKitHandlerEthernet.StateChangeHandler++;
-            });
+            callCountsSilKitHandlerEthernet.StateChangeHandler++;
+        });
 
         controller->AddBitrateChangeHandler(
             [&callCountsSilKitHandlerEthernet](IEthernetController*, const EthernetBitrateChangeEvent& /*msg*/) {
-                callCountsSilKitHandlerEthernet.BitrateChangeHandler++;
-            });
-
-        lifecycleService->SetCommunicationReadyHandler([controller] {
-            controller->Activate();
+            callCountsSilKitHandlerEthernet.BitrateChangeHandler++;
         });
+
+        lifecycleService->SetCommunicationReadyHandler([controller] { controller->Activate(); });
     }
 };
 
@@ -113,7 +111,6 @@ void MySimulatedEthernetController::OnSetControllerMode(const EthernetController
     EthernetBitrateChangeEvent bitrateChangeEvent{};
     bitrateChangeEvent.bitrate = 223;
     _mySimulatedNetwork->GetEthernetEventProducer()->Produce(std::move(bitrateChangeEvent), receiver);
-
 }
 
 void MySimulatedEthernetController::OnFrameRequest(const EthernetFrameRequest& frameRequest)
@@ -182,16 +179,15 @@ TEST_F(ITest_NetSimEthernet, basic_networksimulation_ethernet)
 
         timeSyncService->SetSimulationStepHandler(
             [this, lifecycleService, ethernetController](auto now, const std::chrono::nanoseconds /*duration*/) {
-                if (now == _stopAtMs)
-                {
-                    lifecycleService->Stop("stopping the simulation");
-                }
-                else
-                {
-                    SendEthernetFrames(now, ethernetController, callCounts.silKitSentMsgEthernet.SentFramesSimulated);
-                }
-            },
-            _stepSize);
+            if (now == _stopAtMs)
+            {
+                lifecycleService->Stop("stopping the simulation");
+            }
+            else
+            {
+                SendEthernetFrames(now, ethernetController, callCounts.silKitSentMsgEthernet.SentFramesSimulated);
+            }
+        }, _stepSize);
     }
 
     {
@@ -211,9 +207,8 @@ TEST_F(ITest_NetSimEthernet, basic_networksimulation_ethernet)
 
             timeSyncService->SetSimulationStepHandler(
                 [this, ethernetController](auto now, const std::chrono::nanoseconds /*duration*/) {
-                    SendEthernetFrames(now, ethernetController, callCounts.silKitSentMsgEthernet.SentFramesSimulated);
-                },
-                _stepSize);
+                SendEthernetFrames(now, ethernetController, callCounts.silKitSentMsgEthernet.SentFramesSimulated);
+            }, _stepSize);
         }
     }
 
@@ -234,9 +229,8 @@ TEST_F(ITest_NetSimEthernet, basic_networksimulation_ethernet)
 
             timeSyncService->SetSimulationStepHandler(
                 [this, ethernetController](auto now, const std::chrono::nanoseconds /*duration*/) {
-                    SendEthernetFrames(now, ethernetController, callCounts.silKitSentMsgEthernet.SentFramesTrivial);
-                },
-                _stepSize);
+                SendEthernetFrames(now, ethernetController, callCounts.silKitSentMsgEthernet.SentFramesTrivial);
+            }, _stepSize);
         }
     }
 
@@ -251,8 +245,10 @@ TEST_F(ITest_NetSimEthernet, basic_networksimulation_ethernet)
     EXPECT_EQ(callCounts.simulatedNetwork.EventProducer, _numSimulatedNetworks);
     EXPECT_EQ(callCounts.simulatedNetwork.ProvideSimulatedController, numSimulatedEthernetControllers);
 
-    EXPECT_EQ(callCounts.silKitHandlersEthernetSimulated.FrameHandler, numSentFramesSimulated * numSimulatedEthernetControllers);
-    EXPECT_EQ(callCounts.silKitHandlersEthernetTrivial.FrameHandler, numSentFramesTrivial * (_numParticipantsTrivial - 1)); // FrameHandler filters messages from sender
+    EXPECT_EQ(callCounts.silKitHandlersEthernetSimulated.FrameHandler,
+              numSentFramesSimulated * numSimulatedEthernetControllers);
+    EXPECT_EQ(callCounts.silKitHandlersEthernetTrivial.FrameHandler,
+              numSentFramesTrivial * (_numParticipantsTrivial - 1)); // FrameHandler filters messages from sender
     EXPECT_EQ(callCounts.silKitHandlersEthernetSimulated.FrameTransmitHandler, numSentFramesSimulated);
     EXPECT_EQ(callCounts.silKitHandlersEthernetTrivial.FrameTransmitHandler, numSentFramesTrivial);
     EXPECT_EQ(callCounts.silKitHandlersEthernetSimulated.StateChangeHandler, numSimulatedEthernetControllers);

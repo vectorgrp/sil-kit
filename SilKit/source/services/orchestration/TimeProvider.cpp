@@ -94,9 +94,7 @@ public:
 
     void OnHandlerAdded() final
     {
-        _timer.WithPeriod(_tickPeriod, [this](const auto& now) {
-            NotifyListenerAboutTick(now, _tickPeriod);
-        });
+        _timer.WithPeriod(_tickPeriod, [this](const auto& now) { NotifyListenerAboutTick(now, _tickPeriod); });
     }
 
     auto Now() const -> std::chrono::nanoseconds override
@@ -123,9 +121,7 @@ public:
 
     void OnHandlerAdded() override
     {
-        _timer.WithPeriod(_tickPeriod, [this](const auto& now) {
-            NotifyListenerAboutTick(now, _tickPeriod);
-        });
+        _timer.WithPeriod(_tickPeriod, [this](const auto& now) { NotifyListenerAboutTick(now, _tickPeriod); });
     }
 
     auto Now() const -> std::chrono::nanoseconds override
@@ -197,7 +193,8 @@ void TimeProvider::ConfigureTimeProvider(Orchestration::TimeProviderKind timePro
             providerPtr = std::make_unique<WallclockProvider>(static_cast<ITimeProviderImplListener&>(*this), 1ms);
             break;
         case Orchestration::TimeProviderKind::SyncTime:
-            providerPtr = std::make_unique<SynchronizedVirtualTimeProvider>(static_cast<ITimeProviderImplListener&>(*this));
+            providerPtr =
+                std::make_unique<SynchronizedVirtualTimeProvider>(static_cast<ITimeProviderImplListener&>(*this));
             break;
         default:
             break;

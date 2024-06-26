@@ -32,8 +32,7 @@ const std::string controllerType = "controller.type";
 
 // simulatedController-specific keys
 // remark: simulated controllers have all attributes of regular controllers in addition to the following
-const std::string simulatedControllerOriginalParticipantName =
-    "controller.netsim.originalParticipantName";
+const std::string simulatedControllerOriginalParticipantName = "controller.netsim.originalParticipantName";
 
 // controllerType-specific values
 // Bus types

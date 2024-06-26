@@ -40,7 +40,6 @@ public:
     }
 
 public:
-
     OATPP_CREATE_COMPONENT(std::shared_ptr<oatpp::network::ServerConnectionProvider>, serverConnectionProvider)
     ([this] {
         return std::dynamic_pointer_cast<oatpp::network::ServerConnectionProvider>(
@@ -48,9 +47,7 @@ public:
     }());
 
     OATPP_CREATE_COMPONENT(std::shared_ptr<oatpp::web::server::HttpRouter>, httpRouter)
-    ([] {
-        return oatpp::web::server::HttpRouter::createShared();
-    }());
+    ([] { return oatpp::web::server::HttpRouter::createShared(); }());
 
     OATPP_CREATE_COMPONENT(std::shared_ptr<oatpp::network::ConnectionHandler>, serverConnectionHandler)
     ([] {
@@ -65,9 +62,7 @@ public:
     }());
 
     OATPP_CREATE_COMPONENT(std::shared_ptr<oatpp::data::mapping::ObjectMapper>, apiObjectMapper)
-    ([] {
-        return oatpp::parser::json::mapping::ObjectMapper::createShared();
-    }());
+    ([] { return oatpp::parser::json::mapping::ObjectMapper::createShared(); }());
 };
 
 } // namespace Dashboard

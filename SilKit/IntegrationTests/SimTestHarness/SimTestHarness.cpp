@@ -90,9 +90,8 @@ auto SimParticipant::GetOrCreateSystemController() -> Experimental::Services::Or
     return _systemController;
 }
 
-auto SimParticipant::GetOrCreateLifecycleService(
-    SilKit::Services::Orchestration::LifecycleConfiguration startConfiguration)
-    -> Services::Orchestration::ILifecycleService*
+auto SimParticipant::GetOrCreateLifecycleService(SilKit::Services::Orchestration::LifecycleConfiguration
+                                                     startConfiguration) -> Services::Orchestration::ILifecycleService*
 {
     if (!_lifecycleService)
     {
@@ -190,7 +189,7 @@ void SimTestHarness::CreateSystemController()
     }
 }
 
-bool SimTestHarness::Run(std::chrono::nanoseconds testRunTimeout) 
+bool SimTestHarness::Run(std::chrono::nanoseconds testRunTimeout)
 {
     return Run(testRunTimeout, {});
 }
@@ -321,14 +320,10 @@ void SimTestHarness::AddParticipant(const std::string& participantName, const st
     if (startConfiguration.operationMode == SilKit::Services::Orchestration::OperationMode::Coordinated)
     {
         auto* timeSyncService = participant->GetOrCreateTimeSyncService();
-        timeSyncService->SetSimulationStepHandler(
-            [](auto, auto) {
-            },
-            1ms);
+        timeSyncService->SetSimulationStepHandler([](auto, auto) {}, 1ms);
     }
 
-    lifecycleService->SetCommunicationReadyHandler([]() {
-    });
+    lifecycleService->SetCommunicationReadyHandler([]() {});
 
     _simParticipants[participantName] = std::move(participant);
 }

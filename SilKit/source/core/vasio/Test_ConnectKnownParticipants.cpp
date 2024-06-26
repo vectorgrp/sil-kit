@@ -134,9 +134,8 @@ TEST_F(Test_ConnectKnownParticipants, empty_known_participants_calls_success_han
 
 TEST_F(Test_ConnectKnownParticipants, successful_connection_initiates_waiting_for_replies)
 {
-    auto MakeSucceedingConnectPeer{[this](const VAsioPeerInfo& peerInfo) {
-        return MakeConnectPeerThatSucceeds(peerInfo);
-    }};
+    auto MakeSucceedingConnectPeer{
+        [this](const VAsioPeerInfo& peerInfo) { return MakeConnectPeerThatSucceeds(peerInfo); }};
 
     VAsioPeerInfo peerInfo;
     peerInfo.participantName = "A";
@@ -157,9 +156,9 @@ TEST_F(Test_ConnectKnownParticipants, successful_connection_initiates_waiting_fo
         EXPECT_CALL(connectionMethods, MakeVAsioPeer(WithRemoteEndpoint(peerInfo.acceptorUris.front())))
             .InSequence(s1)
             .WillOnce([](std::unique_ptr<IRawByteStream>) {
-                auto vAsioPeer{std::make_unique<NiceMock<MockVAsioPeer>>()};
-                return vAsioPeer;
-            });
+            auto vAsioPeer{std::make_unique<NiceMock<MockVAsioPeer>>()};
+            return vAsioPeer;
+        });
 
         EXPECT_CALL(connectionMethods, HandleConnectedPeer).InSequence(s1);
         EXPECT_CALL(connectionMethods, AddPeer).InSequence(s1);
@@ -182,9 +181,7 @@ TEST_F(Test_ConnectKnownParticipants, successful_connection_initiates_waiting_fo
 
 TEST_F(Test_ConnectKnownParticipants, direct_connect_fallback_to_remote_connect_fallback_to_proxy_triggers_failure)
 {
-    auto MakeFailingConnectPeer{[this](const VAsioPeerInfo& peerInfo) {
-        return MakeConnectPeerThatFails(peerInfo);
-    }};
+    auto MakeFailingConnectPeer{[this](const VAsioPeerInfo& peerInfo) { return MakeConnectPeerThatFails(peerInfo); }};
 
     VAsioPeerInfo peerInfo;
     peerInfo.participantName = "A";
@@ -227,9 +224,7 @@ TEST_F(Test_ConnectKnownParticipants, direct_connect_fallback_to_remote_connect_
 
 TEST_F(Test_ConnectKnownParticipants, remote_connect_timer_expiry_fallback_to_proxy)
 {
-    auto MakeFailingConnectPeer{[this](const VAsioPeerInfo& peerInfo) {
-        return MakeConnectPeerThatFails(peerInfo);
-    }};
+    auto MakeFailingConnectPeer{[this](const VAsioPeerInfo& peerInfo) { return MakeConnectPeerThatFails(peerInfo); }};
 
     VAsioPeerInfo peerInfo;
     peerInfo.participantName = "A";
@@ -284,9 +279,7 @@ TEST_F(Test_ConnectKnownParticipants, remote_connect_waits_for_replies_after_con
     // connection is actually attempted. The first message over the remote connection triggers the
     // REMOTE_PARTICIPANT_ANNOUNCEMENT notification.
 
-    auto MakeFailingConnectPeer{[this](const VAsioPeerInfo& peerInfo) {
-        return MakeConnectPeerThatFails(peerInfo);
-    }};
+    auto MakeFailingConnectPeer{[this](const VAsioPeerInfo& peerInfo) { return MakeConnectPeerThatFails(peerInfo); }};
 
     VAsioPeerInfo peerInfo;
     peerInfo.participantName = "A";
@@ -340,9 +333,7 @@ TEST_F(Test_ConnectKnownParticipants, remote_connect_waits_for_replies_after_ann
     // It is possible that the REMOTE_PARTICIPANT_ANNOUNCEMENT is received before the REMOTE_PARTICIPANT_IS_CONNECTING.
     // This might happen if connection establishment is really fast, and the registry is really slow for some reason.
 
-    auto MakeFailingConnectPeer{[this](const VAsioPeerInfo& peerInfo) {
-        return MakeConnectPeerThatFails(peerInfo);
-    }};
+    auto MakeFailingConnectPeer{[this](const VAsioPeerInfo& peerInfo) { return MakeConnectPeerThatFails(peerInfo); }};
 
     VAsioPeerInfo peerInfo;
     peerInfo.participantName = "A";
@@ -396,9 +387,7 @@ TEST_F(Test_ConnectKnownParticipants, remote_connect_fallback_to_proxy_after_fai
     // It is possible that the REMOTE_PARTICIPANT_ANNOUNCEMENT is received before the REMOTE_PARTICIPANT_IS_CONNECTING.
     // This might happen if connection establishment is really fast, and the registry is really slow for some reason.
 
-    auto MakeFailingConnectPeer{[this](const VAsioPeerInfo& peerInfo) {
-        return MakeConnectPeerThatFails(peerInfo);
-    }};
+    auto MakeFailingConnectPeer{[this](const VAsioPeerInfo& peerInfo) { return MakeConnectPeerThatFails(peerInfo); }};
 
     VAsioPeerInfo peerInfo;
     peerInfo.participantName = "A";

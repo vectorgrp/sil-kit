@@ -20,4 +20,4 @@ struct RegistryInstance
 };
 
 
-} //end SilKitRegistry
+} // namespace SilKitRegistry

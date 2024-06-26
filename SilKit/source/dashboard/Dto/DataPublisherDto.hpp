@@ -32,13 +32,22 @@ class DataPublisherDto : public oatpp::DTO
 {
     DTO_INIT(DataPublisherDto, DTO)
 
-    DTO_FIELD_INFO(name) { info->description = "Name of the service"; }
+    DTO_FIELD_INFO(name)
+    {
+        info->description = "Name of the service";
+    }
     DTO_FIELD(String, name);
 
-    DTO_FIELD_INFO(networkName) { info->description = "Name of the network"; }
+    DTO_FIELD_INFO(networkName)
+    {
+        info->description = "Name of the network";
+    }
     DTO_FIELD(String, networkName);
 
-    DTO_FIELD_INFO(spec) { info->description = "Data spec"; }
+    DTO_FIELD_INFO(spec)
+    {
+        info->description = "Data spec";
+    }
     DTO_FIELD(Object<DataSpecDto>, spec);
 };
 

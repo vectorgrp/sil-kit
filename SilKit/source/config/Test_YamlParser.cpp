@@ -221,13 +221,13 @@ TEST_F(Test_YamlParser, yaml_complete_configuration)
     EXPECT_TRUE(config.canControllers.at(0).name == "CAN1");
     EXPECT_TRUE(!config.canControllers.at(0).network.has_value());
     EXPECT_TRUE(config.canControllers.at(1).name == "MyCAN2");
-    EXPECT_TRUE(config.canControllers.at(1).network.has_value() && 
-        config.canControllers.at(1).network.value() == "CAN2");
+    EXPECT_TRUE(config.canControllers.at(1).network.has_value()
+                && config.canControllers.at(1).network.value() == "CAN2");
 
     EXPECT_TRUE(config.linControllers.size() == 1);
     EXPECT_TRUE(config.linControllers.at(0).name == "SimpleEcu1_LIN1");
-    EXPECT_TRUE(config.linControllers.at(0).network.has_value() && 
-        config.linControllers.at(0).network.value() == "LIN1");
+    EXPECT_TRUE(config.linControllers.at(0).network.has_value()
+                && config.linControllers.at(0).network.value() == "LIN1");
 
     EXPECT_TRUE(config.flexrayControllers.size() == 1);
     EXPECT_TRUE(config.flexrayControllers.at(0).name == "FlexRay1");
@@ -235,8 +235,8 @@ TEST_F(Test_YamlParser, yaml_complete_configuration)
 
     EXPECT_TRUE(config.dataPublishers.size() == 1);
     EXPECT_TRUE(config.dataPublishers.at(0).name == "Publisher1");
-    EXPECT_TRUE(config.dataPublishers.at(0).topic.has_value() && 
-        config.dataPublishers.at(0).topic.value() == "Temperature");
+    EXPECT_TRUE(config.dataPublishers.at(0).topic.has_value()
+                && config.dataPublishers.at(0).topic.value() == "Temperature");
 
     EXPECT_TRUE(config.logging.sinks.size() == 1);
     EXPECT_TRUE(config.logging.sinks.at(0).type == Sink::Type::File);
@@ -275,17 +275,19 @@ const auto emptyConfiguration = R"raw(
 TEST_F(Test_YamlParser, yaml_empty_configuration)
 {
     auto node = YAML::Load(emptyConfiguration);
-    EXPECT_THROW({
-        try
+    EXPECT_THROW(
         {
-            node.as<ParticipantConfiguration>();
-        }
-        catch (const YAML::TypedBadConversion<ParticipantConfiguration>& e)
-        {
-            EXPECT_STREQ("bad conversion", e.what());
-            throw;
-        }
-    }, YAML::TypedBadConversion<ParticipantConfiguration>);
+            try
+            {
+                node.as<ParticipantConfiguration>();
+            }
+            catch (const YAML::TypedBadConversion<ParticipantConfiguration>& e)
+            {
+                EXPECT_STREQ("bad conversion", e.what());
+                throw;
+            }
+        },
+        YAML::TypedBadConversion<ParticipantConfiguration>);
 }
 
 const auto minimalConfiguration = R"raw(
@@ -302,13 +304,13 @@ TEST_F(Test_YamlParser, yaml_minimal_configuration)
 TEST_F(Test_YamlParser, yaml_native_type_conversions)
 {
     {
-        uint16_t a{ 0x815 };
+        uint16_t a{0x815};
         auto node = to_yaml(a);
         uint16_t b = from_yaml<uint16_t>(node);
         EXPECT_TRUE(a == b);
     }
     {
-        std::vector<uint32_t> vec{ 0,1,3,4,5 };
+        std::vector<uint32_t> vec{0, 1, 3, 4, 5};
         auto node = to_yaml(vec);
         auto vec2 = from_yaml<std::vector<uint32_t>>(node);
         EXPECT_TRUE(vec == vec2);
@@ -380,8 +382,7 @@ TEST_F(Test_YamlParser, middleware_convert)
 TEST_F(Test_YamlParser, map_serdes)
 {
     std::map<std::string, std::string> mapin{
-        {"keya", "vala"}, {"keyb", "valb"}, {"keyc", ""}, {"", "vald"}, 
-        {"keye\nwithlinebreak", "vale\nwithlinebreak"}};
+        {"keya", "vala"}, {"keyb", "valb"}, {"keyc", ""}, {"", "vald"}, {"keye\nwithlinebreak", "vale\nwithlinebreak"}};
     auto mapstr = SilKit::Config::Serialize<std::map<std::string, std::string>>(mapin);
     auto mapout = SilKit::Config::Deserialize<std::map<std::string, std::string>>(mapstr);
     EXPECT_EQ(mapin, mapout);

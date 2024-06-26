@@ -29,7 +29,8 @@ TEST(Test_ServiceSerdes, Mw_Service)
 
     SilKit::Core::Discovery::ParticipantDiscoveryEvent in{};
     in.participantName = "Input";
-    for (auto i = 0; i < 10; i++) {
+    for (auto i = 0; i < 10; i++)
+    {
         SilKit::Core::SupplementalData supplementalData;
         supplementalData["hello"] = "world";
 
@@ -45,7 +46,7 @@ TEST(Test_ServiceSerdes, Mw_Service)
     }
 
     SilKit::Core::Discovery::ParticipantDiscoveryEvent out{};
-    
+
     Serialize(buffer, in);
     Deserialize(buffer, out);
 
@@ -57,4 +58,3 @@ TEST(Test_ServiceSerdes, Mw_Service)
     std::string dummy;
     EXPECT_EQ(out.services.at(9).GetSupplementalDataItem("Second", dummy), true);
 }
-

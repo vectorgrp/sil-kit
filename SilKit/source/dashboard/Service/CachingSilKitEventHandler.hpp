@@ -46,7 +46,6 @@ public:
     ~CachingSilKitEventHandler();
 
 public: //methods
-
     void OnLastParticipantDisconnected() override;
     void OnParticipantConnected(
         const Services::Orchestration::ParticipantConnectionInformation& participantInformation) override;

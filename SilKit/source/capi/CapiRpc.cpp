@@ -38,9 +38,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 namespace {
 
-SilKit::Services::Rpc::RpcCallResultHandler MakeRpcCallResultHandler(void* context, SilKit_RpcCallResultHandler_t handler)
+SilKit::Services::Rpc::RpcCallResultHandler MakeRpcCallResultHandler(void* context,
+                                                                     SilKit_RpcCallResultHandler_t handler)
 {
-    return [handler, context](SilKit::Services::Rpc::IRpcClient* cppClient, const SilKit::Services::Rpc::RpcCallResultEvent& event) {
+    return [handler, context](SilKit::Services::Rpc::IRpcClient* cppClient,
+                              const SilKit::Services::Rpc::RpcCallResultEvent& event) {
         auto* cClient = reinterpret_cast<SilKit_RpcClient*>(cppClient);
         SilKit_RpcCallResultEvent cEvent;
         SilKit_Struct_Init(SilKit_RpcCallResultEvent, cEvent);
@@ -54,7 +56,8 @@ SilKit::Services::Rpc::RpcCallResultHandler MakeRpcCallResultHandler(void* conte
 
 SilKit::Services::Rpc::RpcCallHandler MakeRpcCallHandler(void* context, SilKit_RpcCallHandler_t handler)
 {
-    return [handler, context](SilKit::Services::Rpc::IRpcServer* cppServer, const SilKit::Services::Rpc::RpcCallEvent& event) {
+    return [handler, context](SilKit::Services::Rpc::IRpcServer* cppServer,
+                              const SilKit::Services::Rpc::RpcCallEvent& event) {
         auto* cServer = reinterpret_cast<SilKit_RpcServer*>(cppServer);
         SilKit_RpcCallEvent cEvent;
         SilKit_Struct_Init(SilKit_RpcCallEvent, cEvent);
@@ -68,8 +71,9 @@ SilKit::Services::Rpc::RpcCallHandler MakeRpcCallHandler(void* context, SilKit_R
 } // namespace
 
 
-SilKit_ReturnCode SilKitCALL SilKit_RpcServer_Create(SilKit_RpcServer** out, SilKit_Participant* participant, const char* controllerName,
-    SilKit_RpcSpec* rpcSpec, void* context, SilKit_RpcCallHandler_t callHandler)
+SilKit_ReturnCode SilKitCALL SilKit_RpcServer_Create(SilKit_RpcServer** out, SilKit_Participant* participant,
+                                                     const char* controllerName, SilKit_RpcSpec* rpcSpec, void* context,
+                                                     SilKit_RpcCallHandler_t callHandler)
 try
 {
     ASSERT_VALID_OUT_PARAMETER(out);
@@ -81,8 +85,8 @@ try
     auto cppParticipant = reinterpret_cast<SilKit::IParticipant*>(participant);
     SilKit::Services::Rpc::RpcSpec cppDataSpec;
     assign(cppDataSpec, rpcSpec);
-    auto rcpServer = cppParticipant->CreateRpcServer(controllerName, cppDataSpec,
-                                                     MakeRpcCallHandler(context, callHandler));
+    auto rcpServer =
+        cppParticipant->CreateRpcServer(controllerName, cppDataSpec, MakeRpcCallHandler(context, callHandler));
 
     *out = reinterpret_cast<SilKit_RpcServer*>(rcpServer);
     return SilKit_ReturnCode_SUCCESS;
@@ -91,7 +95,7 @@ CAPI_CATCH_EXCEPTIONS
 
 
 SilKit_ReturnCode SilKitCALL SilKit_RpcServer_SubmitResult(SilKit_RpcServer* self, SilKit_RpcCallHandle* callHandle,
-                                         const SilKit_ByteVector* returnData)
+                                                           const SilKit_ByteVector* returnData)
 try
 {
     ASSERT_VALID_POINTER_PARAMETER(self);
@@ -106,7 +110,8 @@ try
 CAPI_CATCH_EXCEPTIONS
 
 
-SilKit_ReturnCode SilKitCALL SilKit_RpcServer_SetCallHandler(SilKit_RpcServer* self, void* context, SilKit_RpcCallHandler_t handler)
+SilKit_ReturnCode SilKitCALL SilKit_RpcServer_SetCallHandler(SilKit_RpcServer* self, void* context,
+                                                             SilKit_RpcCallHandler_t handler)
 try
 {
     ASSERT_VALID_POINTER_PARAMETER(self);
@@ -119,9 +124,9 @@ try
 CAPI_CATCH_EXCEPTIONS
 
 
-SilKit_ReturnCode SilKitCALL SilKit_RpcClient_Create(SilKit_RpcClient** out, SilKit_Participant* participant, const char* controllerName,
-                                   SilKit_RpcSpec* rpcSpec,
-                                   void* context, SilKit_RpcCallResultHandler_t resultHandler)
+SilKit_ReturnCode SilKitCALL SilKit_RpcClient_Create(SilKit_RpcClient** out, SilKit_Participant* participant,
+                                                     const char* controllerName, SilKit_RpcSpec* rpcSpec, void* context,
+                                                     SilKit_RpcCallResultHandler_t resultHandler)
 try
 {
     ASSERT_VALID_OUT_PARAMETER(out);
@@ -133,8 +138,8 @@ try
     auto cppParticipant = reinterpret_cast<SilKit::IParticipant*>(participant);
     SilKit::Services::Rpc::RpcSpec cppRpcSpec;
     assign(cppRpcSpec, rpcSpec);
-    auto rcpClient = cppParticipant->CreateRpcClient(controllerName, cppRpcSpec,
-                                                     MakeRpcCallResultHandler(context, resultHandler));
+    auto rcpClient =
+        cppParticipant->CreateRpcClient(controllerName, cppRpcSpec, MakeRpcCallResultHandler(context, resultHandler));
 
     *out = reinterpret_cast<SilKit_RpcClient*>(rcpClient);
     return SilKit_ReturnCode_SUCCESS;
@@ -142,7 +147,8 @@ try
 CAPI_CATCH_EXCEPTIONS
 
 
-SilKit_ReturnCode SilKitCALL SilKit_RpcClient_Call(SilKit_RpcClient* self, const SilKit_ByteVector* argumentData, void* userContext)
+SilKit_ReturnCode SilKitCALL SilKit_RpcClient_Call(SilKit_RpcClient* self, const SilKit_ByteVector* argumentData,
+                                                   void* userContext)
 try
 {
     ASSERT_VALID_POINTER_PARAMETER(self);
@@ -154,8 +160,9 @@ try
 }
 CAPI_CATCH_EXCEPTIONS
 
-SilKit_ReturnCode SilKitCALL SilKit_RpcClient_CallWithTimeout(SilKit_RpcClient* self, const SilKit_ByteVector* argumentData,
-    SilKit_NanosecondsTime duration, void* userContext)
+SilKit_ReturnCode SilKitCALL SilKit_RpcClient_CallWithTimeout(SilKit_RpcClient* self,
+                                                              const SilKit_ByteVector* argumentData,
+                                                              SilKit_NanosecondsTime duration, void* userContext)
 try
 {
     ASSERT_VALID_POINTER_PARAMETER(self);
@@ -168,7 +175,8 @@ try
 CAPI_CATCH_EXCEPTIONS
 
 
-SilKit_ReturnCode SilKitCALL SilKit_RpcClient_SetCallResultHandler(SilKit_RpcClient* self, void* context, SilKit_RpcCallResultHandler_t handler)
+SilKit_ReturnCode SilKitCALL SilKit_RpcClient_SetCallResultHandler(SilKit_RpcClient* self, void* context,
+                                                                   SilKit_RpcCallResultHandler_t handler)
 try
 {
     ASSERT_VALID_POINTER_PARAMETER(self);

@@ -41,7 +41,9 @@ namespace SilKit {
 namespace Core {
 
 // The protocol version is directly tied to the MessageBuffer for backward compatibility in Ser/Des
-struct end_of_buffer : public std::exception {};
+struct end_of_buffer : public std::exception
+{
+};
 
 
 class MessageBuffer;
@@ -52,7 +54,7 @@ class MessageBuffer;
 class MessageBufferPeeker
 {
 public:
-    inline MessageBufferPeeker(MessageBuffer & messageBuffer);
+    inline MessageBufferPeeker(MessageBuffer& messageBuffer);
     inline ~MessageBufferPeeker();
 
 private:
@@ -87,7 +89,7 @@ public:
     // Public methods for backward compatibility.
 
     // peek into raw data, e.g. for retrieving headers without modifying the buffer
-    inline auto PeekData() const  -> SilKit::Util::Span<const uint8_t>;
+    inline auto PeekData() const -> SilKit::Util::Span<const uint8_t>;
     inline auto ReadPos() const -> size_t;
 
     //! Set the format version to use for ser/des.
@@ -103,13 +105,14 @@ public:
     //! \brief Return the underlying data storage by std::move and reset pointers
     inline auto ReleaseStorage() -> std::vector<uint8_t>;
     inline auto RemainingBytesLeft() const noexcept -> size_t;
+
 public:
     // ----------------------------------------
     // Elementary streaming operators
 
     // ----------------------------------------
     // Integral Types
-    template<typename IntegerT, typename std::enable_if_t<std::is_integral<IntegerT>::value, int> = 0>
+    template <typename IntegerT, typename std::enable_if_t<std::is_integral<IntegerT>::value, int> = 0>
     inline MessageBuffer& operator<<(IntegerT t)
     {
         if (_wPos + sizeof(IntegerT) > _storage.size())
@@ -122,7 +125,7 @@ public:
 
         return *this;
     }
-    template<typename IntegerT, typename std::enable_if_t<std::is_integral<IntegerT>::value, int> = 0>
+    template <typename IntegerT, typename std::enable_if_t<std::is_integral<IntegerT>::value, int> = 0>
     inline MessageBuffer& operator>>(IntegerT& t)
     {
         if (_rPos + sizeof(IntegerT) > _storage.size())
@@ -136,10 +139,11 @@ public:
 
     // ----------------------------------------
     // Floating-Point Types
-    template<typename DoubleT, typename std::enable_if_t<std::is_floating_point<DoubleT>::value, int> = 0>
+    template <typename DoubleT, typename std::enable_if_t<std::is_floating_point<DoubleT>::value, int> = 0>
     inline MessageBuffer& operator<<(DoubleT t)
     {
-        static_assert(std::numeric_limits<double>::is_iec559, "This compiler does not support IEEE 754 standard for floating points.");
+        static_assert(std::numeric_limits<double>::is_iec559,
+                      "This compiler does not support IEEE 754 standard for floating points.");
 
         if (_wPos + sizeof(DoubleT) > _storage.size())
         {
@@ -151,10 +155,11 @@ public:
 
         return *this;
     }
-    template<typename DoubleT, typename std::enable_if_t<std::is_floating_point<DoubleT>::value, int> = 0>
+    template <typename DoubleT, typename std::enable_if_t<std::is_floating_point<DoubleT>::value, int> = 0>
     inline MessageBuffer& operator>>(DoubleT& t)
     {
-        static_assert(std::numeric_limits<double>::is_iec559, "This compiler does not support IEEE 754 standard for floating points.");
+        static_assert(std::numeric_limits<double>::is_iec559,
+                      "This compiler does not support IEEE 754 standard for floating points.");
 
         if (_rPos + sizeof(DoubleT) > _storage.size())
             throw end_of_buffer{};
@@ -167,12 +172,12 @@ public:
 
     // --------------------------------------------------------------------------------
     // Enums
-    template<typename T, typename std::enable_if_t<std::is_enum<T>::value, int> = 0>
+    template <typename T, typename std::enable_if_t<std::is_enum<T>::value, int> = 0>
     inline MessageBuffer& operator<<(T t)
     {
         return operator<<(static_cast<std::underlying_type_t<T>>(t));
     }
-    template<typename T, typename std::enable_if_t<std::is_enum<T>::value, int> = 0>
+    template <typename T, typename std::enable_if_t<std::is_enum<T>::value, int> = 0>
     inline MessageBuffer& operator>>(T& t)
     {
         return operator>>(reinterpret_cast<std::underlying_type_t<T>&>(t));
@@ -193,9 +198,9 @@ public:
     inline MessageBuffer& operator>>(std::vector<uint8_t>& vector);
     // --------------------------------------------------------------------------------
     // std::vector<T>
-    template<typename ValueT>
+    template <typename ValueT>
     inline MessageBuffer& operator<<(const std::vector<ValueT>& vector);
-    template<typename ValueT>
+    template <typename ValueT>
     inline MessageBuffer& operator>>(std::vector<ValueT>& vector);
     // --------------------------------------------------------------------------------
     // Util::SharedVector<T>
@@ -212,15 +217,15 @@ public:
     // --------------------------------------------------------------------------------
     // --------------------------------------------------------------------------------
     // std::array<uint8_t, SIZE>
-    template<size_t SIZE>
+    template <size_t SIZE>
     inline MessageBuffer& operator<<(const std::array<uint8_t, SIZE>& array);
-    template<size_t SIZE>
+    template <size_t SIZE>
     inline MessageBuffer& operator>>(std::array<uint8_t, SIZE>& array);
     // --------------------------------------------------------------------------------
     // std::array<T, SIZE>
-    template<typename ValueT, size_t SIZE>
+    template <typename ValueT, size_t SIZE>
     inline MessageBuffer& operator<<(const std::array<ValueT, SIZE>& array);
-    template<typename ValueT, size_t SIZE>
+    template <typename ValueT, size_t SIZE>
     inline MessageBuffer& operator>>(std::array<ValueT, SIZE>& array);
     // --------------------------------------------------------------------------------
     // std::chrono::duration<Rep, Period> and system_clock::time_point
@@ -250,8 +255,9 @@ public:
 public:
     void IncreaseCapacity(size_t capacity)
     {
-        _storage.reserve( _storage.size() + capacity);
+        _storage.reserve(_storage.size() + capacity);
     }
+
 private:
     // ----------------------------------------
     // private members
@@ -341,7 +347,7 @@ MessageBuffer& MessageBuffer::operator>>(std::vector<uint8_t>& vector)
 
 // --------------------------------------------------------------------------------
 // std::vector<T>
-template<typename ValueT>
+template <typename ValueT>
 MessageBuffer& MessageBuffer::operator<<(const std::vector<ValueT>& vector)
 {
     if (vector.size() > std::numeric_limits<uint32_t>::max())
@@ -358,7 +364,7 @@ MessageBuffer& MessageBuffer::operator<<(const std::vector<ValueT>& vector)
 
     return *this;
 }
-template<typename ValueT>
+template <typename ValueT>
 MessageBuffer& MessageBuffer::operator>>(std::vector<ValueT>& vector)
 {
     uint32_t vectorSize{0u};
@@ -445,7 +451,7 @@ inline MessageBuffer& MessageBuffer::operator>>(Util::SharedVector<ValueT>& shar
 
 // --------------------------------------------------------------------------------
 // std::array<uint8_t, SIZE>
-template<size_t SIZE>
+template <size_t SIZE>
 MessageBuffer& MessageBuffer::operator<<(const std::array<uint8_t, SIZE>& array)
 {
     if (array.size() > std::numeric_limits<uint32_t>::max())
@@ -461,7 +467,7 @@ MessageBuffer& MessageBuffer::operator<<(const std::array<uint8_t, SIZE>& array)
 
     return *this;
 }
-template<size_t SIZE>
+template <size_t SIZE>
 MessageBuffer& MessageBuffer::operator>>(std::array<uint8_t, SIZE>& array)
 {
     if (_rPos + array.size() > _storage.size())
@@ -475,7 +481,7 @@ MessageBuffer& MessageBuffer::operator>>(std::array<uint8_t, SIZE>& array)
 
 // --------------------------------------------------------------------------------
 // std::array<T, SIZE>
-template<typename ValueT, size_t SIZE>
+template <typename ValueT, size_t SIZE>
 MessageBuffer& MessageBuffer::operator<<(const std::array<ValueT, SIZE>& array)
 {
     if (array.size() > std::numeric_limits<uint32_t>::max())
@@ -486,7 +492,7 @@ MessageBuffer& MessageBuffer::operator<<(const std::array<ValueT, SIZE>& array)
 
     return *this;
 }
-template<typename ValueT, size_t SIZE>
+template <typename ValueT, size_t SIZE>
 MessageBuffer& MessageBuffer::operator>>(std::array<ValueT, SIZE>& array)
 {
     if (_rPos + array.size() > _storage.size())
@@ -564,17 +570,15 @@ inline MessageBuffer& MessageBuffer::operator<<(const std::map<std::string, std:
     *this << static_cast<uint32_t>(msg.size());
     for (auto&& kv : msg)
     {
-        *this << kv.first
-            << kv.second
-            ;
+        *this << kv.first << kv.second;
     }
     return *this;
 }
 
-inline MessageBuffer& MessageBuffer::operator>>(std::map<std::string,std::string>& updatedMsg)
+inline MessageBuffer& MessageBuffer::operator>>(std::map<std::string, std::string>& updatedMsg)
 {
-    std::map<std::string, std::string> tmp;// do not modify updatedMsg until we validated the input
-    uint32_t numElements{ 0 };
+    std::map<std::string, std::string> tmp; // do not modify updatedMsg until we validated the input
+    uint32_t numElements{0};
     *this >> numElements;
 
     for (auto i = 0u; i < numElements; i++)
@@ -620,7 +624,7 @@ inline auto MessageBuffer::GetProtocolVersion() -> ProtocolVersion
 }
 
 
-inline auto MessageBuffer::PeekData() const  -> SilKit::Util::Span<const uint8_t>
+inline auto MessageBuffer::PeekData() const -> SilKit::Util::Span<const uint8_t>
 {
     return _storage;
 }

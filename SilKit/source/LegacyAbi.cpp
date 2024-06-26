@@ -157,8 +157,8 @@ SilKitAPI auto GitHash() -> const char*
 namespace SilKit {
 
 SilKitAPI auto CreateParticipant(std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig,
-                                 const std::string& participantName, const std::string& registryUri)
-    -> std::unique_ptr<IParticipant>
+                                 const std::string& participantName,
+                                 const std::string& registryUri) -> std::unique_ptr<IParticipant>
 {
     return CreateParticipantImpl(std::move(participantConfig), participantName, registryUri);
 }

@@ -383,7 +383,8 @@ void SimulatedNetworkRouter::ReceiveMsg(const Core::IServiceEndpoint* from,
     }
 }
 
-void SimulatedNetworkRouter::ReceiveMsg(const Core::IServiceEndpoint* from, const SilKit::Services::Lin::LinWakeupPulse& msg)
+void SimulatedNetworkRouter::ReceiveMsg(const Core::IServiceEndpoint* from,
+                                        const SilKit::Services::Lin::LinWakeupPulse& msg)
 {
     if (!AllowReception(from))
     {

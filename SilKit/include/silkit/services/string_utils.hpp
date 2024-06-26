@@ -64,6 +64,6 @@ std::ostream& operator<<(std::ostream& out, TransmitDirection direction)
         return out << "TransmitDirection{" << static_cast<uint8_t>(direction) << "}";
     }
 }
-    
+
 } // namespace Services
 } // namespace SilKit

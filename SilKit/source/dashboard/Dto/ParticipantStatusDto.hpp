@@ -48,13 +48,22 @@ class ParticipantStatusDto : public oatpp::DTO
 {
     DTO_INIT(ParticipantStatusDto, DTO)
 
-    DTO_FIELD_INFO(state) { info->description = "Name of the state"; }
+    DTO_FIELD_INFO(state)
+    {
+        info->description = "Name of the state";
+    }
     DTO_FIELD(Enum<ParticipantState>::AsString, state);
 
-    DTO_FIELD_INFO(enterReason) { info->description = "Reason for entering the state"; }
+    DTO_FIELD_INFO(enterReason)
+    {
+        info->description = "Reason for entering the state";
+    }
     DTO_FIELD(String, enterReason);
 
-    DTO_FIELD_INFO(enterTime) { info->description = "Time when state got entered"; }
+    DTO_FIELD_INFO(enterTime)
+    {
+        info->description = "Time when state got entered";
+    }
     DTO_FIELD(UInt64, enterTime);
 };
 

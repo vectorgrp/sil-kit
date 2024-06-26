@@ -49,8 +49,8 @@ const size_t EthernetFrameHeaderSize = 2 * sizeof(EthernetMac) + sizeof(Ethernet
 
 //! \brief Build an Ethernet frame with specified destination and source MAC addresses, ether-type, and string payload.
 inline auto CreateEthernetFrameFromString(const EthernetMac& destinationMac, const EthernetMac& sourceMac,
-                                          const EthernetEtherType& etherType, const std::string& payload)
-    -> std::vector<uint8_t>
+                                          const EthernetEtherType& etherType,
+                                          const std::string& payload) -> std::vector<uint8_t>
 {
     std::vector<uint8_t> raw;
 
@@ -66,10 +66,9 @@ inline auto CreateEthernetFrameFromString(const EthernetMac& destinationMac, con
 }
 
 //! \brief Build an Ethernet frame with specified destination and source MAC addresses, VLAN tag, ether-type, and string payload.
-inline auto CreateEthernetFrameWithVlanTagFromString(const EthernetMac& destinationMac, const EthernetMac& sourceMac,
-                                                     const EthernetEtherType& etherType, const std::string& payload,
-                                                     const EthernetVlanTagControlIdentifier& tci)
-    -> std::vector<uint8_t>
+inline auto CreateEthernetFrameWithVlanTagFromString(
+    const EthernetMac& destinationMac, const EthernetMac& sourceMac, const EthernetEtherType& etherType,
+    const std::string& payload, const EthernetVlanTagControlIdentifier& tci) -> std::vector<uint8_t>
 {
     std::vector<uint8_t> raw;
 

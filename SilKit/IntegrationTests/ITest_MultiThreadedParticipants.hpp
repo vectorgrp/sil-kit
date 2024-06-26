@@ -320,10 +320,10 @@ protected:
             }
             else if (verbose)
             {
-                std::cout << ">> AwaitCommunicationInitialized of " << systemControllerParticipantName << " done" << std ::endl;
+                std::cout << ">> AwaitCommunicationInitialized of " << systemControllerParticipantName << " done"
+                          << std ::endl;
             }
         }
-
     };
 
     void SystemStateHandler(SystemState newState)
@@ -338,9 +338,11 @@ protected:
             systemControllerParticipant.systemController->AbortSimulation();
             break;
 
-        case SystemState::Running: break;
+        case SystemState::Running:
+            break;
 
-        default: break;
+        default:
+            break;
         }
     }
 
@@ -364,15 +366,13 @@ protected:
 
         auto systemMonitor = testParticipant.participant->CreateSystemMonitor();
         systemMonitor->AddParticipantStatusHandler([&testParticipant](ParticipantStatus status) {
-            if (status.participantName == testParticipant.name
-                    && status.state == ParticipantState::Paused
-                    && !testParticipant.i.pausedStateReached)
+            if (status.participantName == testParticipant.name && status.state == ParticipantState::Paused
+                && !testParticipant.i.pausedStateReached)
             {
                 testParticipant.i.pausedStateReached = true;
                 testParticipant.pausedStatePromise.set_value();
             }
-            if (status.participantName == testParticipant.name
-                && status.state == ParticipantState::Running
+            if (status.participantName == testParticipant.name && status.state == ParticipantState::Running
                 && !testParticipant.i.runningStateReached)
             {
                 testParticipant.i.runningStateReached = true;
@@ -389,45 +389,44 @@ protected:
             "TestSubscriber", matchingDataSpec,
             [timeSyncService, &testParticipant](IDataSubscriber* /*subscriber*/,
                                                 const DataMessageEvent& dataMessageEvent) {
-                auto participantId = dataMessageEvent.data[0];
+            auto participantId = dataMessageEvent.data[0];
 
-                if (testParticipant.i.allReceived || participantId == testParticipant.id)
-                    return;
+            if (testParticipant.i.allReceived || participantId == testParticipant.id)
+                return;
 
-                auto now = timeSyncService->Now();
-                if (participantIsSync[participantId] && now >= 0ns)
+            auto now = timeSyncService->Now();
+            if (participantIsSync[participantId] && now >= 0ns)
+            {
+                auto delta = now - dataMessageEvent.timestamp;
+                if (delta > simStepSize)
                 {
-                    auto delta = now - dataMessageEvent.timestamp;
-                    if (delta > simStepSize)
-                    {
-                        testParticipant.lifecycleService->Stop("Fail with chronology error");
+                    testParticipant.lifecycleService->Stop("Fail with chronology error");
 
-                        FAIL() << "Chronology error: Participant " << testParticipant.name << " received message from "
-                               << participantNames[participantId] << " with timestamp "
-                               << dataMessageEvent.timestamp.count() << " while this participant's time is " << now.count();
-                    }
+                    FAIL() << "Chronology error: Participant " << testParticipant.name << " received message from "
+                           << participantNames[participantId] << " with timestamp "
+                           << dataMessageEvent.timestamp.count() << " while this participant's time is " << now.count();
                 }
+            }
 
-                testParticipant.receivedIds.insert(dataMessageEvent.data[0]);
-                // No self delivery: Expect expectedReceptions-1 receptions
-                if (testParticipant.receivedIds.size() == expectedReceptions - 1)
-                {
-                    testParticipant.i.allReceived = true;
-                    testParticipant.allReceivedPromise.set_value();
-                }
-            });
+            testParticipant.receivedIds.insert(dataMessageEvent.data[0]);
+            // No self delivery: Expect expectedReceptions-1 receptions
+            if (testParticipant.receivedIds.size() == expectedReceptions - 1)
+            {
+                testParticipant.i.allReceived = true;
+                testParticipant.allReceivedPromise.set_value();
+            }
+        });
 
         timeSyncService->SetSimulationStepHandler(
-            [&testParticipant,this](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
-                testParticipant.now = now;
-                testParticipant.publisher->Publish(std::vector<uint8_t>{testParticipant.id});
-                if (!testParticipant.simtimePassed && now > simtimeToPass)
-                {
-                    testParticipant.simtimePassed = true;
-                    testParticipant.simtimePassedPromise.set_value();
-                }
-            },
-            simStepSize);
+            [&testParticipant, this](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
+            testParticipant.now = now;
+            testParticipant.publisher->Publish(std::vector<uint8_t>{testParticipant.id});
+            if (!testParticipant.simtimePassed && now > simtimeToPass)
+            {
+                testParticipant.simtimePassed = true;
+                testParticipant.simtimePassedPromise.set_value();
+            }
+        }, simStepSize);
         auto finalStateFuture = testParticipant.lifecycleService->StartLifecycle();
         finalStateFuture.get();
 
@@ -474,21 +473,21 @@ protected:
         testParticipant.subscriber = testParticipant.participant->CreateDataSubscriber(
             "TestSubscriber", matchingDataSpec,
             [&testParticipant](IDataSubscriber* /*subscriber*/, const DataMessageEvent& dataMessageEvent) {
-                if (!testParticipant.i.allReceived)
+            if (!testParticipant.i.allReceived)
+            {
+                auto participantId = dataMessageEvent.data[0];
+                if (participantId != testParticipant.id)
                 {
-                    auto participantId = dataMessageEvent.data[0];
-                    if (participantId != testParticipant.id)
+                    testParticipant.receivedIds.insert(dataMessageEvent.data[0]);
+                    // No self delivery: Expect expectedReceptions-1 receptions
+                    if (testParticipant.receivedIds.size() == expectedReceptions - 1)
                     {
-                        testParticipant.receivedIds.insert(dataMessageEvent.data[0]);
-                        // No self delivery: Expect expectedReceptions-1 receptions
-                        if (testParticipant.receivedIds.size() == expectedReceptions - 1)
-                        {
-                            testParticipant.i.allReceived = true;
-                            testParticipant.allReceivedPromise.set_value();
-                        }
+                        testParticipant.i.allReceived = true;
+                        testParticipant.allReceivedPromise.set_value();
                     }
                 }
-            });
+            }
+        });
 
         auto runTask = [&testParticipant]() {
             while (testParticipant.i.runAsync)
@@ -548,30 +547,29 @@ protected:
         systemControllerParticipant.systemMonitor = systemControllerParticipant.participant->CreateSystemMonitor();
         systemControllerParticipant.systemMonitor->AddParticipantStatusHandler(
             [this](const Services::Orchestration::ParticipantStatus& status) {
+            {
+                if (status.participantName == systemControllerParticipantName
+                    && status.state == ParticipantState::Running && !systemControllerParticipant.i.runningStateReached)
                 {
-                    if (status.participantName == systemControllerParticipantName
-                            && status.state == ParticipantState::Running
-                            && !systemControllerParticipant.i.runningStateReached)
-                    {
-                        systemControllerParticipant.i.runningStateReached = true;
-                        systemControllerParticipant.runningStatePromise.set_value();
-                    }
-                    else if (status.participantName == systemControllerParticipantName
-                             && status.state == ParticipantState::Paused
-                             && !systemControllerParticipant.i.pausedStateReached)
-                    {
-                        systemControllerParticipant.i.pausedStateReached = true;
-                        systemControllerParticipant.pausedStatePromise.set_value();
-                    }
-                    else if (status.participantName == systemControllerParticipantName
-                             && status.state == ParticipantState::CommunicationInitialized
-                             && !systemControllerParticipant.i.communicationInitializedStateReached)
-                    {
-                        systemControllerParticipant.i.communicationInitializedStateReached = true;
-                        systemControllerParticipant.communicationInitializedStatePromise.set_value();
-                    }
+                    systemControllerParticipant.i.runningStateReached = true;
+                    systemControllerParticipant.runningStatePromise.set_value();
                 }
-            });
+                else if (status.participantName == systemControllerParticipantName
+                         && status.state == ParticipantState::Paused
+                         && !systemControllerParticipant.i.pausedStateReached)
+                {
+                    systemControllerParticipant.i.pausedStateReached = true;
+                    systemControllerParticipant.pausedStatePromise.set_value();
+                }
+                else if (status.participantName == systemControllerParticipantName
+                         && status.state == ParticipantState::CommunicationInitialized
+                         && !systemControllerParticipant.i.communicationInitializedStateReached)
+                {
+                    systemControllerParticipant.i.communicationInitializedStateReached = true;
+                    systemControllerParticipant.communicationInitializedStatePromise.set_value();
+                }
+            }
+        });
         systemControllerParticipant.lifecycleService = systemControllerParticipant.participant->CreateLifecycleService(
             {SilKit::Services::Orchestration::OperationMode::Coordinated});
 
@@ -579,9 +577,8 @@ protected:
             SilKit::Util::bind_method(&callbacks, &Callbacks::AbortHandler));
         systemControllerParticipant.systemController->SetWorkflowConfiguration({required});
 
-        systemControllerParticipant.systemMonitor->AddSystemStateHandler([this](SystemState newState) {
-            SystemStateHandler(newState);
-        });
+        systemControllerParticipant.systemMonitor->AddSystemStateHandler(
+            [this](SystemState newState) { SystemStateHandler(newState); });
 
         if (verbose)
         {
@@ -656,7 +653,10 @@ protected:
         registry->StartListening(registryUri);
     }
 
-    void StopRegistry() { registry.reset(); }
+    void StopRegistry()
+    {
+        registry.reset();
+    }
 
     void RunParticipants(std::list<TestParticipant>& participants, std::string set = "A")
     {
@@ -668,51 +668,37 @@ protected:
 
                 if (p.lifeCycleOperationMode == OperationMode::Invalid)
                 {
-                    participantThreads_Async_Invalid.emplace_back([this, &p] {
-                        AsyncParticipantThread(p);
-                    });
+                    participantThreads_Async_Invalid.emplace_back([this, &p] { AsyncParticipantThread(p); });
                 }
                 else if (p.lifeCycleOperationMode == OperationMode::Autonomous)
                 {
-                    participantThreads_Async_Autonomous.emplace_back([this, &p] {
-                        AsyncParticipantThread(p);
-                    });
+                    participantThreads_Async_Autonomous.emplace_back([this, &p] { AsyncParticipantThread(p); });
                 }
                 else if (p.lifeCycleOperationMode == OperationMode::Coordinated)
                 {
-                    participantThreads_Async_Coordinated.emplace_back([this, &p] {
-                        AsyncParticipantThread(p);
-                    });
+                    participantThreads_Async_Coordinated.emplace_back([this, &p] { AsyncParticipantThread(p); });
                 }
             }
             else if (p.timeMode == TimeMode::Sync)
             {
                 if (p.lifeCycleOperationMode == OperationMode::Invalid)
                 {
-                    participantThreads_Sync_Invalid.emplace_back([this, &p] {
-                        SyncParticipantThread(p);
-                    });
+                    participantThreads_Sync_Invalid.emplace_back([this, &p] { SyncParticipantThread(p); });
                 }
                 else if (p.lifeCycleOperationMode == OperationMode::Autonomous)
                 {
                     if (set == "A")
                     {
-                        participantThreads_Sync_AutonomousA.emplace_back([this, &p] {
-                            SyncParticipantThread(p);
-                        });
+                        participantThreads_Sync_AutonomousA.emplace_back([this, &p] { SyncParticipantThread(p); });
                     }
                     else if (set == "B")
                     {
-                        participantThreads_Sync_AutonomousB.emplace_back([this, &p] {
-                            SyncParticipantThread(p);
-                        });
+                        participantThreads_Sync_AutonomousB.emplace_back([this, &p] { SyncParticipantThread(p); });
                     }
                 }
                 else if (p.lifeCycleOperationMode == OperationMode::Coordinated)
                 {
-                    participantThreads_Sync_Coordinated.emplace_back([this, &p] {
-                        SyncParticipantThread(p);
-                    });
+                    participantThreads_Sync_Coordinated.emplace_back([this, &p] { SyncParticipantThread(p); });
                 }
             }
         }
@@ -830,11 +816,12 @@ protected:
         threads.clear();
     }
 
-    void SetUp() override { 
+    void SetUp() override
+    {
         globalParticipantIndex = 0;
         participantNames.clear();
         participantIsSync.clear();
-        registryUri = MakeTestRegistryUri(); 
+        registryUri = MakeTestRegistryUri();
     }
 
 protected:

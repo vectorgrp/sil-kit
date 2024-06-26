@@ -23,7 +23,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 namespace SilKit {
 namespace Services {
-namespace Lin { 
+namespace Lin {
 
 struct LinFrame;
 struct LinFrameResponse;

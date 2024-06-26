@@ -37,7 +37,7 @@ using namespace SilKit::Services::Can;
 class Test_CanControllerConfig : public testing::Test
 {
 public:
-    Test_CanControllerConfig(){};
+    Test_CanControllerConfig() {};
 };
 
 auto PrepareParticipantConfiguration() -> std::shared_ptr<SilKit::Config::ParticipantConfiguration>
@@ -89,4 +89,4 @@ TEST(Test_CanControllerConfig, create_controller_configured_with_network)
     EXPECT_EQ(serviceDescr.GetNetworkName(), expectedNetworkName);
 }
 
-}  // anonymous namespace
+} // anonymous namespace

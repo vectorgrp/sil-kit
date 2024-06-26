@@ -29,7 +29,8 @@ using SilKit::Services::Ethernet::EthernetTransmitStatus;
 
 auto ControllerStateToTransmitStatus(const EthernetState ethernetState) -> EthernetTransmitStatus
 {
-    switch (ethernetState) {
+    switch (ethernetState)
+    {
     case EthernetState::LinkUp:
         return EthernetTransmitStatus::Transmitted;
     case EthernetState::LinkDown:
@@ -48,7 +49,7 @@ namespace Services {
 namespace Ethernet {
 
 SimBehaviorTrivial::SimBehaviorTrivial(Core::IParticipantInternal* participant, EthController* ethController,
-                    Services::Orchestration::ITimeProvider* timeProvider)
+                                       Services::Orchestration::ITimeProvider* timeProvider)
     : _participant{participant}
     , _parentController{ethController}
     , _parentServiceEndpoint{dynamic_cast<Core::IServiceEndpoint*>(ethController)}
@@ -60,13 +61,13 @@ SimBehaviorTrivial::SimBehaviorTrivial(Core::IParticipantInternal* participant, 
 template <typename MsgT>
 void SimBehaviorTrivial::ReceiveMsg(const MsgT& msg)
 {
-    auto receivingController = static_cast<Core::IMessageReceiver<MsgT> *>(_parentController);
+    auto receivingController = static_cast<Core::IMessageReceiver<MsgT>*>(_parentController);
     receivingController->ReceiveMsg(_parentServiceEndpoint, msg);
 }
 
-auto SimBehaviorTrivial::AllowReception(const Core::IServiceEndpoint* /*from*/) const -> bool 
-{ 
-    return true; 
+auto SimBehaviorTrivial::AllowReception(const Core::IServiceEndpoint* /*from*/) const -> bool
+{
+    return true;
 }
 
 void SimBehaviorTrivial::SendMsg(WireEthernetFrameEvent&& ethFrameEvent)
@@ -111,9 +112,7 @@ void SimBehaviorTrivial::SendMsg(EthernetSetMode&& ethSetMode)
     ReceiveMsg(statusReply);
 }
 
-void SimBehaviorTrivial::OnReceiveAck(const EthernetFrameTransmitEvent& /*msg*/)
-{
-}
+void SimBehaviorTrivial::OnReceiveAck(const EthernetFrameTransmitEvent& /*msg*/) {}
 
 } // namespace Ethernet
 } // namespace Services

@@ -36,12 +36,11 @@ class LinController;
 class SimBehaviorTrivial : public ISimBehavior
 {
 public:
-
     SimBehaviorTrivial(Core::IParticipantInternal* participant, LinController* linController,
                        Services::Orchestration::ITimeProvider* timeProvider);
 
     auto AllowReception(const Core::IServiceEndpoint* from) const -> bool override;
-    
+
     void SendMsg(LinSendFrameRequest&& sendFrameRequest) override;
     void SendMsg(LinTransmission&& transmission) override;
     void SendMsg(WireLinControllerConfig&& controllerConfig) override;

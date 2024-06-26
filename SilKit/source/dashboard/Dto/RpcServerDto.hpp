@@ -32,10 +32,16 @@ class RpcServerDto : public oatpp::DTO
 {
     DTO_INIT(RpcServerDto, DTO)
 
-    DTO_FIELD_INFO(name) { info->description = "Name of the service"; }
+    DTO_FIELD_INFO(name)
+    {
+        info->description = "Name of the service";
+    }
     DTO_FIELD(String, name);
 
-    DTO_FIELD_INFO(spec) { info->description = "Rpc spec"; }
+    DTO_FIELD_INFO(spec)
+    {
+        info->description = "Rpc spec";
+    }
     DTO_FIELD(Object<RpcSpecDto>, spec);
 };
 

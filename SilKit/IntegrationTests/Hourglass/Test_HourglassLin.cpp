@@ -78,9 +78,7 @@ MATCHER_P(LinControllerDynamicConfigMatcher, controlFrame, "")
 
     const auto sameControllerMode =
         static_cast<uint8_t>(config1.controllerMode) == static_cast<uint8_t>(config2->controllerMode);
-    if ((config1.baudRate != config2->baudRate)
-        || !sameControllerMode
-        )
+    if ((config1.baudRate != config2->baudRate) || !sameControllerMode)
     {
         return false;
     }
@@ -162,7 +160,8 @@ TEST_F(Test_HourglassLin, SilKit_LinController_InitDynamic)
     controllerConfig.baudRate = 1234;
     controllerConfig.controllerMode = LinControllerMode::Master;
 
-    EXPECT_CALL(capi, SilKit_Experimental_LinController_InitDynamic(mockLinController, LinControllerDynamicConfigMatcher(controllerConfig)))
+    EXPECT_CALL(capi, SilKit_Experimental_LinController_InitDynamic(
+                          mockLinController, LinControllerDynamicConfigMatcher(controllerConfig)))
         .Times(1);
     LinController.ExperimentalInitDynamic(controllerConfig);
 }

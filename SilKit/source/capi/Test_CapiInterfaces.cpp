@@ -32,15 +32,15 @@ namespace {
 
 TEST(Test_CapiInterfaces, compile_test_capi_interface_ids)
 {
-	constexpr const auto foo = SilKit_CanStateChangeEvent_STRUCT_VERSION;
+    constexpr const auto foo = SilKit_CanStateChangeEvent_STRUCT_VERSION;
     static_assert(SK_ID_GET_SERVICE(foo) == SK_ID_SERVICE_Can, "service id extraction");
-	static_assert(SK_ID_GET_DATATYPE(foo) == SilKit_CanStateChangeEvent_DATATYPE_ID, "datatype id extraction");
-	static_assert(SK_ID_GET_VERSION(foo) == SilKit_CanStateChangeEvent_VERSION, "datatype version extraction");
-	ASSERT_TRUE(SK_ID_IS_VALID(foo));
+    static_assert(SK_ID_GET_DATATYPE(foo) == SilKit_CanStateChangeEvent_DATATYPE_ID, "datatype id extraction");
+    static_assert(SK_ID_GET_VERSION(foo) == SilKit_CanStateChangeEvent_VERSION, "datatype version extraction");
+    ASSERT_TRUE(SK_ID_IS_VALID(foo));
 }
 
 // Generate this table by script, to verify that there are no copy-pastos.
-constexpr uint64_t allSilkidIds[]= {
+constexpr uint64_t allSilkidIds[] = {
     SilKit_CanFrame_STRUCT_VERSION,
     SilKit_CanFrameTransmitEvent_STRUCT_VERSION,
     SilKit_CanFrameEvent_STRUCT_VERSION,
@@ -126,4 +126,4 @@ TEST(Test_CapiInterfaces, silkit_struct_init_zeros_whole_structure)
     EXPECT_EQ(value.userContext, nullptr);
 }
 
-}//namespace
+} //namespace

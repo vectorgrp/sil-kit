@@ -34,9 +34,9 @@
 
 
 #if SILKIT_ENABLE_TRACING_INSTRUMENTATION_VAsioConnection
-#    define SILKIT_TRACE_METHOD_(logger, ...) SILKIT_TRACE_METHOD(logger, __VA_ARGS__)
+#define SILKIT_TRACE_METHOD_(logger, ...) SILKIT_TRACE_METHOD(logger, __VA_ARGS__)
 #else
-#    define SILKIT_TRACE_METHOD_(...)
+#define SILKIT_TRACE_METHOD_(...)
 #endif
 
 

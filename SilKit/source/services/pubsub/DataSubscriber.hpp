@@ -46,9 +46,9 @@ class DataSubscriber
     , public ITraceMessageSource
 {
 public:
-    DataSubscriber(Core::IParticipantInternal* participant, Config::DataSubscriber config, Services::Orchestration::ITimeProvider* timeProvider,
-                   const SilKit::Services::PubSub::PubSubSpec& dataSpec,
-                   DataMessageHandler defaultDataHandler);
+    DataSubscriber(Core::IParticipantInternal* participant, Config::DataSubscriber config,
+                   Services::Orchestration::ITimeProvider* timeProvider,
+                   const SilKit::Services::PubSub::PubSubSpec& dataSpec, DataMessageHandler defaultDataHandler);
 
 public: //methods
     void RegisterServiceDiscovery();
@@ -56,10 +56,10 @@ public: //methods
 
     // SilKit::Services::Orchestration::ITimeConsumer
     inline void SetTimeProvider(Services::Orchestration::ITimeProvider* provider) override;
-    
+
     // IServiceEndpoint
     inline void SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor) override;
-    inline auto GetServiceDescriptor() const -> const Core::ServiceDescriptor & override;
+    inline auto GetServiceDescriptor() const -> const Core::ServiceDescriptor& override;
 
 
     //ITraceMessageSource
@@ -73,11 +73,12 @@ public: //methods
 
 private: //methods
     void AddInternalSubscriber(const std::string& pubUUID, const std::string& joinedMediaType,
-        const std::vector<SilKit::Services::MatchingLabel>& publisherLabels);
+                               const std::vector<SilKit::Services::MatchingLabel>& publisherLabels);
 
     void RemoveInternalSubscriber(const std::string& pubUUID);
 
     DataMessageHandler WrapTracingCallback(DataMessageHandler callback);
+
 private: //members
     std::string _topic;
     std::string _mediaType;

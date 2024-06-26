@@ -42,7 +42,6 @@ class IMsgForEthSimulator
 {
 public:
     virtual ~IMsgForEthSimulator() = default;
-
 };
 
 } // namespace Ethernet

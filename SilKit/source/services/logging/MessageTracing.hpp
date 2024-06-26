@@ -28,17 +28,17 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 namespace SilKit {
 namespace Services {
 
-template<class SilKitMessageT>
+template <class SilKitMessageT>
 void TraceRx(Logging::ILogger* logger, const Core::IServiceEndpoint* addr, const SilKitMessageT& msg,
              const Core::ServiceDescriptor& from)
 {
     Logging::Trace(logger, "Recv on {} from {}: {}", addr->GetServiceDescriptor(), from.GetParticipantName(), msg);
 }
 
-template<class SilKitMessageT>
+template <class SilKitMessageT>
 void TraceTx(Logging::ILogger* logger, const Core::IServiceEndpoint* addr, const SilKitMessageT& msg)
 {
-  Logging::Trace(logger, "Send from {}: {}", addr->GetServiceDescriptor(), msg);
+    Logging::Trace(logger, "Send from {}: {}", addr->GetServiceDescriptor(), msg);
 }
 
 // Don't trace LogMessages - this could cause cycles!
@@ -47,4 +47,3 @@ inline void TraceTx(Logging::ILogger* /*logger*/, Core::IServiceEndpoint* /*addr
 
 } // namespace Services
 } // namespace SilKit
-

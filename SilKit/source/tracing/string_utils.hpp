@@ -58,12 +58,18 @@ std::string to_string(TraceMessageType type)
 {
     switch (type)
     {
-    case TraceMessageType::EthernetFrame: return "EthernetFrame";
-    case TraceMessageType::CanFrameEvent: return "CanFrameEvent";
-    case TraceMessageType::LinFrame: return "LinFrame";
-    case TraceMessageType::DataMessageEvent: return "DataMessageEvent";
-    case TraceMessageType::FlexrayFrameEvent: return "FlaxrayFrameEvent";
-    default: throw SilKitError("Unknown TraceMessage::Type in operator<<!");
+    case TraceMessageType::EthernetFrame:
+        return "EthernetFrame";
+    case TraceMessageType::CanFrameEvent:
+        return "CanFrameEvent";
+    case TraceMessageType::LinFrame:
+        return "LinFrame";
+    case TraceMessageType::DataMessageEvent:
+        return "DataMessageEvent";
+    case TraceMessageType::FlexrayFrameEvent:
+        return "FlaxrayFrameEvent";
+    default:
+        throw SilKitError("Unknown TraceMessage::Type in operator<<!");
     }
 }
 

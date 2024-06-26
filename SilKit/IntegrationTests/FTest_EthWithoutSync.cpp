@@ -50,7 +50,6 @@ constexpr std::size_t MINIMUM_ETHERNET_FRAME_LENGTH = 60;
 class FTest_EthWithoutSync : public testing::Test
 {
 protected:
-
     FTest_EthWithoutSync()
     {
         _registryUri = MakeTestRegistryUri();
@@ -71,27 +70,27 @@ protected:
             auto& frameEvent = _testFrames[index].expectedFrameEvent;
             auto& frameData = _testFrames[index].expectedFrameData;
 
-            EthernetMac destinationMac{ 0x12, 0x23, 0x45, 0x67, 0x89, 0x9a };
-            EthernetMac sourceMac{ 0x9a, 0x89, 0x67, 0x45, 0x23, 0x12 };
-            EthernetEtherType etherType{ 0x0800 };
-            EthernetVlanTagControlIdentifier tci{ 0x0000 };
+            EthernetMac destinationMac{0x12, 0x23, 0x45, 0x67, 0x89, 0x9a};
+            EthernetMac sourceMac{0x9a, 0x89, 0x67, 0x45, 0x23, 0x12};
+            EthernetEtherType etherType{0x0800};
+            EthernetVlanTagControlIdentifier tci{0x0000};
 
             frameData =
                 CreateEthernetFrameWithVlanTagFromString(destinationMac, sourceMac, etherType, messageString, tci);
             frameEvent.frame = SilKit::Services::Ethernet::EthernetFrame{frameData};
 
             EXPECT_GE(frameEvent.frame.raw.size(), MINIMUM_ETHERNET_FRAME_LENGTH);
-            frameEvent.userContext = reinterpret_cast<void *>(static_cast<uintptr_t>(index + 1));
+            frameEvent.userContext = reinterpret_cast<void*>(static_cast<uintptr_t>(index + 1));
 
             auto& ethack = _testFrames[index].expectedAck;
-            ethack.userContext = reinterpret_cast<void *>(static_cast<uintptr_t>(index + 1));
+            ethack.userContext = reinterpret_cast<void*>(static_cast<uintptr_t>(index + 1));
             ethack.status = SilKit::Services::Ethernet::EthernetTransmitStatus::Transmitted;
         }
     }
 
     void EthWriter()
     {
-        unsigned numSent{ 0 }, numAcks{ 0 };
+        unsigned numSent{0}, numAcks{0};
         std::promise<void> ethWriterAllAcksReceivedPromiseLocal;
 
         const auto participant = SilKit::CreateParticipant(SilKit::Config::ParticipantConfigurationFromString(""),
@@ -100,16 +99,17 @@ protected:
 
         controller->Activate();
 
-        controller->AddFrameTransmitHandler(
-            [this, &ethWriterAllAcksReceivedPromiseLocal, &numAcks](SilKit::Services::Ethernet::IEthernetController* /*ctrl*/, const SilKit::Services::Ethernet::EthernetFrameTransmitEvent& ack) {
-                _testFrames.at(numAcks++).receivedAck = ack;
-                if (numAcks >= _testFrames.size())
-                {
-                    std::cout << "All eth acks received" << std::endl;
-                    _ethWriterAllAcksReceivedPromise.set_value(); // Promise for ethReader
-                    ethWriterAllAcksReceivedPromiseLocal.set_value(); // Promise for this thread
-                }
-            });
+        controller->AddFrameTransmitHandler([this, &ethWriterAllAcksReceivedPromiseLocal, &numAcks](
+                                                SilKit::Services::Ethernet::IEthernetController* /*ctrl*/,
+                                                const SilKit::Services::Ethernet::EthernetFrameTransmitEvent& ack) {
+            _testFrames.at(numAcks++).receivedAck = ack;
+            if (numAcks >= _testFrames.size())
+            {
+                std::cout << "All eth acks received" << std::endl;
+                _ethWriterAllAcksReceivedPromise.set_value(); // Promise for ethReader
+                ethWriterAllAcksReceivedPromiseLocal.set_value(); // Promise for this thread
+            }
+        });
 
         _ethReaderRegisteredPromise.get_future().wait_for(10s);
 
@@ -127,7 +127,7 @@ protected:
 
     void EthReader()
     {
-        unsigned numReceived{ 0 };
+        unsigned numReceived{0};
         std::promise<void> ethReaderAllReceivedPromiseLocal;
         const auto participant = SilKit::CreateParticipant(SilKit::Config::ParticipantConfigurationFromString(""),
                                                            "EthReader", _registryUri);
@@ -135,24 +135,25 @@ protected:
 
         controller->Activate();
 
-        controller->AddFrameHandler(
-            [this, &ethReaderAllReceivedPromiseLocal, &numReceived](SilKit::Services::Ethernet::IEthernetController*, const SilKit::Services::Ethernet::EthernetFrameEvent& msg) {
-                unsigned frameIndex = numReceived++;
+        controller->AddFrameHandler([this, &ethReaderAllReceivedPromiseLocal, &numReceived](
+                                        SilKit::Services::Ethernet::IEthernetController*,
+                                        const SilKit::Services::Ethernet::EthernetFrameEvent& msg) {
+            unsigned frameIndex = numReceived++;
 
-                auto& frameData = _testFrames.at(frameIndex).receivedFrameData;
-                auto& frameEvent = _testFrames.at(frameIndex).receivedFrameEvent;
+            auto& frameData = _testFrames.at(frameIndex).receivedFrameData;
+            auto& frameEvent = _testFrames.at(frameIndex).receivedFrameEvent;
 
-                frameEvent = msg;
-                frameData = ToStdVector(msg.frame.raw);
-                frameEvent.frame = SilKit::Services::Ethernet::EthernetFrame{frameData};
+            frameEvent = msg;
+            frameData = ToStdVector(msg.frame.raw);
+            frameEvent.frame = SilKit::Services::Ethernet::EthernetFrame{frameData};
 
-                if (numReceived >= _testFrames.size())
-                {
-                    std::cout << "All eth messages received" << std::endl;
-                    _ethReaderAllReceivedPromise.set_value(); // Promise for ethWriter
-                    ethReaderAllReceivedPromiseLocal.set_value(); // Promise for this thread
-                }
-            });
+            if (numReceived >= _testFrames.size())
+            {
+                std::cout << "All eth messages received" << std::endl;
+                _ethReaderAllReceivedPromise.set_value(); // Promise for ethWriter
+                ethReaderAllReceivedPromiseLocal.set_value(); // Promise for this thread
+            }
+        });
 
         _ethReaderRegisteredPromise.set_value();
 
@@ -163,8 +164,8 @@ protected:
 
     void ExecuteTest()
     {
-        std::thread ethReaderThread{ [this] { EthReader(); } };
-        std::thread ethWriterThread{ [this] { EthWriter(); } };
+        std::thread ethReaderThread{[this] { EthReader(); }};
+        std::thread ethWriterThread{[this] { EthWriter(); }};
         ethReaderThread.join();
         ethWriterThread.join();
         for (auto&& message : _testFrames)
@@ -191,7 +192,7 @@ protected:
         SilKit::Services::Ethernet::EthernetFrameTransmitEvent receivedAck;
     };
 
-    std::string  _registryUri;
+    std::string _registryUri;
     std::vector<TestFrame> _testFrames;
     std::promise<void> _ethReaderRegisteredPromise;
     std::promise<void> _ethReaderAllReceivedPromise;

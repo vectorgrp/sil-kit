@@ -29,10 +29,14 @@ namespace Dashboard {
 class MockSilKitToOatppMapper : public ISilKitToOatppMapper
 {
 public:
-    MOCK_METHOD(oatpp::Object<SilKit::Dashboard::SimulationCreationRequestDto>, CreateSimulationCreationRequestDto, (const std::string&, uint64_t), (override));
-    MOCK_METHOD(oatpp::Object<SilKit::Dashboard::SystemStatusDto>, CreateSystemStatusDto, (SilKit::Services::Orchestration::SystemState), (override));
-    MOCK_METHOD(oatpp::Object<SilKit::Dashboard::ParticipantStatusDto>, CreateParticipantStatusDto, (const SilKit::Services::Orchestration::ParticipantStatus&), (override));
-    MOCK_METHOD(oatpp::Object<SilKit::Dashboard::ServiceDto>, CreateServiceDto, (const SilKit::Core::ServiceDescriptor&), (override));
+    MOCK_METHOD(oatpp::Object<SilKit::Dashboard::SimulationCreationRequestDto>, CreateSimulationCreationRequestDto,
+                (const std::string&, uint64_t), (override));
+    MOCK_METHOD(oatpp::Object<SilKit::Dashboard::SystemStatusDto>, CreateSystemStatusDto,
+                (SilKit::Services::Orchestration::SystemState), (override));
+    MOCK_METHOD(oatpp::Object<SilKit::Dashboard::ParticipantStatusDto>, CreateParticipantStatusDto,
+                (const SilKit::Services::Orchestration::ParticipantStatus&), (override));
+    MOCK_METHOD(oatpp::Object<SilKit::Dashboard::ServiceDto>, CreateServiceDto,
+                (const SilKit::Core::ServiceDescriptor&), (override));
     MOCK_METHOD(oatpp::Object<SilKit::Dashboard::DataPublisherDto>, CreateDataPublisherDto,
                 (const SilKit::Core::ServiceDescriptor&), (override));
     MOCK_METHOD(oatpp::Object<SilKit::Dashboard::DataSubscriberDto>, CreateDataSubscriberDto,

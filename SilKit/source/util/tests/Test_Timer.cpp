@@ -42,12 +42,12 @@ TEST(Test_Timer, ensure_util_timer_works)
         SilKit::Util::Timer timer;
         auto numCalls = 0u;
         auto cb = [&](const auto) {
-          numCalls++;
-          if (numCalls == 5)
-          {
-              timer.Stop();
-              done.set_value();
-          }
+            numCalls++;
+            if (numCalls == 5)
+            {
+                timer.Stop();
+                done.set_value();
+            }
         };
         timer.WithPeriod(std::chrono::milliseconds(50), cb);
         ASSERT_TRUE(timer.IsActive());
@@ -57,4 +57,4 @@ TEST(Test_Timer, ensure_util_timer_works)
     }
 }
 
-}
+} // namespace

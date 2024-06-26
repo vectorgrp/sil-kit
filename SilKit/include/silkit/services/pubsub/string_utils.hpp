@@ -48,10 +48,8 @@ std::string to_string(const DataMessageEvent& msg)
 
 std::ostream& operator<<(std::ostream& out, const DataMessageEvent& msg)
 {
-    return out << "PubSub::DataMessageEvent{data="
-               << Util::AsHexString(msg.data).WithSeparator(" ").WithMaxLength(16)
-               << ", size=" << msg.data.size()
-               << "}";
+    return out << "PubSub::DataMessageEvent{data=" << Util::AsHexString(msg.data).WithSeparator(" ").WithMaxLength(16)
+               << ", size=" << msg.data.size() << "}";
 }
 
 } // namespace PubSub

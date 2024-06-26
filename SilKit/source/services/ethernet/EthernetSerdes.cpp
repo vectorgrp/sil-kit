@@ -41,61 +41,40 @@ inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buff
 
 inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const WireEthernetFrameEvent& msg)
 {
-    buffer
-        << msg.timestamp
-        << msg.frame
-        << msg.direction
-        << msg.userContext
-        ;
+    buffer << msg.timestamp << msg.frame << msg.direction << msg.userContext;
 
     return buffer;
 }
 
 inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, WireEthernetFrameEvent& msg)
 {
-    buffer
-        >> msg.timestamp
-        >> msg.frame
-        >> msg.direction
-        >> msg.userContext
-        ;
+    buffer >> msg.timestamp >> msg.frame >> msg.direction >> msg.userContext;
 
     return buffer;
 }
 
-inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const EthernetFrameTransmitEvent& ack)
+inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer,
+                                               const EthernetFrameTransmitEvent& ack)
 {
-    buffer
-        << ack.timestamp
-        << ack.status
-        << ack.userContext
-        ;
+    buffer << ack.timestamp << ack.status << ack.userContext;
     return buffer;
 }
 
 inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, EthernetFrameTransmitEvent& ack)
 {
-    buffer
-        >> ack.timestamp
-        >> ack.status
-        >> ack.userContext
-        ;
+    buffer >> ack.timestamp >> ack.status >> ack.userContext;
     return buffer;
 }
 
 inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const EthernetStatus& msg)
 {
-    buffer << msg.timestamp
-           << msg.state
-           << msg.bitrate;
+    buffer << msg.timestamp << msg.state << msg.bitrate;
     return buffer;
 }
 
 inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, EthernetStatus& msg)
 {
-    buffer >> msg.timestamp
-           >> msg.state
-           >> msg.bitrate;
+    buffer >> msg.timestamp >> msg.state >> msg.bitrate;
     return buffer;
 }
 

@@ -61,25 +61,25 @@ struct TestFrameEvent
 // String Utils
 //////////////////////////////////////////////////////////////////////
 
-namespace  Version1 {
-inline std::ostream& operator<<(std::ostream& out , const TestMessage& msg)
+namespace Version1 {
+inline std::ostream& operator<<(std::ostream& out, const TestMessage& msg)
 {
-    out <<"version1:TestMessage{" << msg.integer <<",\"" << msg.str << "\"}";
+    out << "version1:TestMessage{" << msg.integer << ",\"" << msg.str << "\"}";
     return out;
 }
 } // namespace Version1
 
 inline namespace Version2 {
-inline std::ostream& operator<<(std::ostream& out , const TestMessage& msg)
+inline std::ostream& operator<<(std::ostream& out, const TestMessage& msg)
 {
-    out <<"version2:TestMessage{" << msg.integer <<",\"" << msg.str << "\"}";
+    out << "version2:TestMessage{" << msg.integer << ",\"" << msg.str << "\"}";
     return out;
 }
 } // namespace Version2
 
-inline std::ostream& operator<<(std::ostream& out , const TestFrameEvent& msg)
+inline std::ostream& operator<<(std::ostream& out, const TestFrameEvent& msg)
 {
-    out <<"TestFrameEvent{" << msg.integer <<",\"" << msg.str << "\"}";
+    out << "TestFrameEvent{" << msg.integer << ",\"" << msg.str << "\"}";
     return out;
 }
 

@@ -107,7 +107,8 @@ CachingSilKitEventHandler::CachingSilKitEventHandler(const std::string& connectU
                     }
                     simulationId = 0;
                     break;
-                default: _logger->Error("Dashboard: unexpected SilKitEventType");
+                default:
+                    _logger->Error("Dashboard: unexpected SilKitEventType");
                 }
             }
             events.clear();

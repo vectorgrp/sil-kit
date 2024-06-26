@@ -9,7 +9,6 @@
 
 class MySimulatedCanController : public SilKit::Experimental::NetworkSimulation::Can::ISimulatedCanController
 {
-    
 public:
     MySimulatedCanController(MySimulatedNetwork* mySimulatedNetwork,
                              SilKit::Experimental::NetworkSimulation::ControllerDescriptor controllerDescriptor);
@@ -21,7 +20,6 @@ public:
     void OnSetControllerMode(const SilKit::Experimental::NetworkSimulation::Can::CanControllerMode& msg) override;
 
 private:
-
     MySimulatedNetwork* _mySimulatedNetwork;
     Scheduler* _scheduler;
 
@@ -31,5 +29,4 @@ private:
     SilKit::Services::Can::CanControllerState _controllerMode;
 
     SilKit::Services::Logging::ILogger* _logger;
-
 };

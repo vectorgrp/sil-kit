@@ -21,9 +21,8 @@ MySimulatedCanController::MySimulatedCanController(MySimulatedNetwork* mySimulat
 
     _logger = _mySimulatedNetwork->GetLogger();
     std::stringstream logMsg;
-    logMsg << "Registered SimulatedCanController #" << controllerDescriptorStr  << " on network '"
-           << _mySimulatedNetwork->GetNetworkName() << "' of type '"
-        << _mySimulatedNetwork->GetNetworkType() << "'";
+    logMsg << "Registered SimulatedCanController #" << controllerDescriptorStr << " on network '"
+           << _mySimulatedNetwork->GetNetworkName() << "' of type '" << _mySimulatedNetwork->GetNetworkType() << "'";
     _logger->Info(logMsg.str());
 
     _scheduler = _mySimulatedNetwork->GetScheduler();
@@ -35,7 +34,7 @@ void MySimulatedCanController::OnSetControllerMode(const CanControllerMode& cont
 {
     std::stringstream logMsg;
     logMsg << "Received 'CanControllerMode' on network '" << _mySimulatedNetwork->GetNetworkName() << "' of type '"
-        << _mySimulatedNetwork->GetNetworkType() << "'";
+           << _mySimulatedNetwork->GetNetworkType() << "'";
     _logger->Info(logMsg.str());
 
     _controllerMode = controllerMode.state;
@@ -55,7 +54,7 @@ void MySimulatedCanController::OnFrameRequest(const CanFrameRequest& frameReques
 {
     std::stringstream logMsg;
     logMsg << "Received 'CanFrameRequest' on network '" << _mySimulatedNetwork->GetNetworkName() << "' of type '"
-        << _mySimulatedNetwork->GetNetworkType() << "'";
+           << _mySimulatedNetwork->GetNetworkType() << "'";
     _logger->Info(logMsg.str());
 
     // Send acknowledge back to the sending CAN controller
@@ -79,7 +78,7 @@ void MySimulatedCanController::OnFrameRequest(const CanFrameRequest& frameReques
     _scheduler->ScheduleEvent(2ms, [this, frameEvent, payloadBytes = std::move(payloadBytes)]() mutable {
         frameEvent.frame.dataField = SilKit::Util::ToSpan(payloadBytes);
         frameEvent.timestamp = _scheduler->Now();
-        _mySimulatedNetwork->GetCanEventProducer()->Produce(
-            frameEvent, _mySimulatedNetwork->GetAllControllerDescriptors());
+        _mySimulatedNetwork->GetCanEventProducer()->Produce(frameEvent,
+                                                            _mySimulatedNetwork->GetAllControllerDescriptors());
     });
 }

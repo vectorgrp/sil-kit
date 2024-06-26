@@ -51,37 +51,36 @@ class RequestReplyService
     , public IServiceEndpoint
     , public IRequestReplyService
 {
-public: 
-
+public:
     RequestReplyService(IParticipantInternal* participant, const std::string& participantName, ProcedureMap procedures);
     virtual ~RequestReplyService() noexcept;
-  
+
     // Disconnect handler
     void OnParticpantRemoval(const std::string& participantName);
 
     // IRequestReplyService
     Util::Uuid Call(FunctionType functionType, std::vector<uint8_t> callData) override;
-    void SubmitCallReturn(Util::Uuid callUuid, FunctionType functionType, std::vector<uint8_t> callReturnData, CallReturnStatus callReturnStatus) override;
+    void SubmitCallReturn(Util::Uuid callUuid, FunctionType functionType, std::vector<uint8_t> callReturnData,
+                          CallReturnStatus callReturnStatus) override;
 
     // IServiceEndpoint
     void SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor) override;
-    auto GetServiceDescriptor() const -> const Core::ServiceDescriptor & override;
+    auto GetServiceDescriptor() const -> const Core::ServiceDescriptor& override;
 
     // IReceiver
     void ReceiveMsg(const IServiceEndpoint* from, const RequestReplyCall& msg) override;
     void ReceiveMsg(const IServiceEndpoint* from, const RequestReplyCallReturn& msg) override;
 
 private:
-
     void RemovePartcipantFromDisconnectLookup(Util::Uuid callUuid, const std::string& participantName);
     void ForwardCallToProcedure(const RequestReplyCall& msg);
     void ForwardCallReturnToProcedure(std::string fromParticipant, const RequestReplyCallReturn& msg);
-    
+
 private:
     IParticipantInternal* _participant{nullptr};
     std::string _participantName;
     ServiceDescriptor _serviceDescriptor;
-    
+
     mutable std::recursive_mutex _requestReplyMx;
     std::atomic<bool> _shuttingDown{false};
 
@@ -95,4 +94,3 @@ private:
 } // namespace RequestReply
 } // namespace Core
 } // namespace SilKit
-

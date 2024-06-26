@@ -96,16 +96,16 @@ inline constexpr auto ExtractFileNameFromFileMacro(fmt::string_view s) -> fmt::s
 
 #ifdef SILKIT_ENABLE_TRACING_INSTRUMENTATION
 
-#    define DETAILS_VSILKIT_TRACE_EVENT(logger, object, ...) \
-        ::VSilKit::TraceEvent(logger, ::VSilKit::Details::ExtractFileNameFromFileMacro(__FILE__), __LINE__, __func__, \
-                              object, __VA_ARGS__)
+#define DETAILS_VSILKIT_TRACE_EVENT(logger, object, ...) \
+    ::VSilKit::TraceEvent(logger, ::VSilKit::Details::ExtractFileNameFromFileMacro(__FILE__), __LINE__, __func__, \
+                          object, __VA_ARGS__)
 
 #else
 
-#    define DETAILS_VSILKIT_TRACE_EVENT(logger, object, ...) \
-        do \
-        { \
-        } while (false)
+#define DETAILS_VSILKIT_TRACE_EVENT(logger, object, ...) \
+    do \
+    { \
+    } while (false)
 
 #endif
 

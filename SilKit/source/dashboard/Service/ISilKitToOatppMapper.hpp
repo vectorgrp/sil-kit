@@ -45,13 +45,16 @@ class ISilKitToOatppMapper
 {
 public:
     virtual ~ISilKitToOatppMapper() = default;
-    virtual oatpp::Object<SimulationCreationRequestDto> CreateSimulationCreationRequestDto(const std::string& connectUri, uint64_t start) = 0;
+    virtual oatpp::Object<SimulationCreationRequestDto> CreateSimulationCreationRequestDto(
+        const std::string& connectUri, uint64_t start) = 0;
     virtual oatpp::Object<SystemStatusDto> CreateSystemStatusDto(Services::Orchestration::SystemState systemState) = 0;
     virtual oatpp::Object<ParticipantStatusDto> CreateParticipantStatusDto(
         const Services::Orchestration::ParticipantStatus& participantStatus) = 0;
     virtual oatpp::Object<ServiceDto> CreateServiceDto(const Core::ServiceDescriptor& serviceDescriptor) = 0;
-    virtual oatpp::Object<DataPublisherDto> CreateDataPublisherDto(const Core::ServiceDescriptor& serviceDescriptor) = 0;
-    virtual oatpp::Object<DataSubscriberDto> CreateDataSubscriberDto(const Core::ServiceDescriptor& serviceDescriptor) = 0;
+    virtual oatpp::Object<DataPublisherDto> CreateDataPublisherDto(
+        const Core::ServiceDescriptor& serviceDescriptor) = 0;
+    virtual oatpp::Object<DataSubscriberDto> CreateDataSubscriberDto(
+        const Core::ServiceDescriptor& serviceDescriptor) = 0;
     virtual oatpp::Object<RpcClientDto> CreateRpcClientDto(const Core::ServiceDescriptor& serviceDescriptor) = 0;
     virtual oatpp::Object<RpcServerDto> CreateRpcServerDto(const Core::ServiceDescriptor& serviceDescriptor) = 0;
     virtual oatpp::Object<SimulationEndDto> CreateSimulationEndDto(uint64_t stop) = 0;

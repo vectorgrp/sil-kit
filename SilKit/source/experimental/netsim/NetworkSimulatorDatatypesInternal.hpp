@@ -11,7 +11,8 @@ namespace SilKit {
 namespace Experimental {
 namespace NetworkSimulation {
 
-inline auto ConvertNetworkTypeFromConfig(Config::v1::NetworkType configNetworkType) -> Experimental::NetworkSimulation::SimulatedNetworkType
+inline auto ConvertNetworkTypeFromConfig(Config::v1::NetworkType configNetworkType)
+    -> Experimental::NetworkSimulation::SimulatedNetworkType
 {
     switch (configNetworkType)
     {
@@ -28,8 +29,7 @@ inline auto ConvertNetworkTypeFromConfig(Config::v1::NetworkType configNetworkTy
     }
 }
 
-inline auto ConvertNetworkTypeToConfig(NetworkSimulation::SimulatedNetworkType networkType)
-    -> Config::v1::NetworkType
+inline auto ConvertNetworkTypeToConfig(NetworkSimulation::SimulatedNetworkType networkType) -> Config::v1::NetworkType
 {
     switch (networkType)
     {

@@ -52,7 +52,10 @@ struct Link
 {
     std::string type;
     std::string name;
-    bool operator<(const Link& rhs) const { return type < rhs.type || (type == rhs.type && name < rhs.name); }
+    bool operator<(const Link& rhs) const
+    {
+        return type < rhs.type || (type == rhs.type && name < rhs.name);
+    }
 };
 
 struct SimulationData

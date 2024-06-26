@@ -34,7 +34,7 @@ void Validate(const FlexrayClusterParameters& clusterParameters)
 
     if (clusterParameters.gCycleCountMax % 2 != 1)
         throw SilKit::ConfigurationError{"gCycleCountMax must be an odd value"};
-        
+
     if (clusterParameters.gCycleCountMax < 7 || clusterParameters.gCycleCountMax > 63)
         throw SilKit::ConfigurationError{"gCycleCountMax must be in range 7, 9, ..., 63"};
 
@@ -77,7 +77,8 @@ void Validate(const FlexrayClusterParameters& clusterParameters)
     if (clusterParameters.gMaxWithoutClockCorrectionFatal < 1 || clusterParameters.gMaxWithoutClockCorrectionFatal > 15)
         throw SilKit::ConfigurationError{"gMaxWithoutClockCorrectionFatal must be in range 1 - 15"};
 
-    if (clusterParameters.gMaxWithoutClockCorrectionPassive < 1 || clusterParameters.gMaxWithoutClockCorrectionPassive > 15)
+    if (clusterParameters.gMaxWithoutClockCorrectionPassive < 1
+        || clusterParameters.gMaxWithoutClockCorrectionPassive > 15)
         throw SilKit::ConfigurationError{"gMaxWithoutClockCorrectionPassive must be in range 1 - 15"};
 
     if (clusterParameters.gNumberOfMiniSlots > 7988)

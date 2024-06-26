@@ -27,8 +27,8 @@ namespace SilKit {
 namespace Dashboard {
 
 auto CreateDashboard(std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig,
-                     const std::string& registryUri, const std::string& dashboardUri)
-    -> std::unique_ptr<SilKit::Dashboard::IDashboard>
+                     const std::string& registryUri,
+                     const std::string& dashboardUri) -> std::unique_ptr<SilKit::Dashboard::IDashboard>
 {
     SILKIT_UNUSED_ARG(participantConfig);
     SILKIT_UNUSED_ARG(registryUri);
@@ -37,8 +37,8 @@ auto CreateDashboard(std::shared_ptr<SilKit::Config::IParticipantConfiguration> 
 }
 
 auto RunDashboardTest(std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig,
-                      const std::string& registryUri, const std::string& dashboardUri, std::function<void()> testCode)
-    -> TestResult
+                      const std::string& registryUri, const std::string& dashboardUri,
+                      std::function<void()> testCode) -> TestResult
 {
     SILKIT_UNUSED_ARG(participantConfig);
     SILKIT_UNUSED_ARG(registryUri);

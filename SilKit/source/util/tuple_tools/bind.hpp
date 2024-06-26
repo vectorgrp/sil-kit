@@ -31,10 +31,10 @@ namespace tuple_tools {
  * and declare a new class template as /type/ that has sizeof...(Arg)
  * fewer template arguments.
  */
-template<template<class...> class Ctmp, class... Arg>
+template <template <class...> class Ctmp, class... Arg>
 struct bind
 {
-    template<class T>
+    template <class T>
     using type = Ctmp<Arg..., T>;
 };
 
@@ -44,10 +44,10 @@ struct bind
  * and declare a new class template as /type/ that has sizeof...(Arg)
  * fewer template arguments.
  */
-template<template<class...> class Ctmp, class... Arg>
+template <template <class...> class Ctmp, class... Arg>
 struct rbind
 {
-    template<class T>
+    template <class T>
     using type = Ctmp<T, Arg...>;
 };
 

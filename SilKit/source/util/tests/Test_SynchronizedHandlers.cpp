@@ -48,9 +48,7 @@ TEST(Test_SynchronizedHandlers, add_and_remove_functions_during_calling)
 
     Callbacks callbacks;
 
-    const auto hA = callables.Add([&callbacks] {
-        callbacks.TestA();
-    });
+    const auto hA = callables.Add([&callbacks] { callbacks.TestA(); });
 
     const auto hB = callables.Add([&callables, &callbacks, hA] {
         callbacks.TestB();
@@ -61,9 +59,7 @@ TEST(Test_SynchronizedHandlers, add_and_remove_functions_during_calling)
         callbacks.TestC();
         callables.Remove(hB);
 
-        callables.Add([&callbacks] {
-            callbacks.TestD();
-        });
+        callables.Add([&callbacks] { callbacks.TestD(); });
     });
 
     EXPECT_CALL(callbacks, TestA).Times(1);
@@ -99,9 +95,7 @@ TEST(Test_SynchronizedHandlers, add_and_remove_functions_during_calling_two_args
 
     CallbacksTwoArgs callbacks;
 
-    const auto hA = callables.Add([&callbacks](int i, float f) {
-        callbacks.TestA(i, f);
-    });
+    const auto hA = callables.Add([&callbacks](int i, float f) { callbacks.TestA(i, f); });
 
     const auto hB = callables.Add([&callables, &callbacks, hA](int i, float f) {
         callbacks.TestB(i, f);
@@ -112,9 +106,7 @@ TEST(Test_SynchronizedHandlers, add_and_remove_functions_during_calling_two_args
         callbacks.TestC(i, f);
         callables.Remove(hB);
 
-        callables.Add([&callbacks](int i, float f) {
-            callbacks.TestD(i, f);
-        });
+        callables.Add([&callbacks](int i, float f) { callbacks.TestD(i, f); });
     });
 
     const int i = 1;
@@ -228,13 +220,9 @@ TEST(Test_SynchronizedHandlers, swap_transfers_handlers)
 
     std::set<SilKit::Util::HandlerId> ids;
 
-    ids.insert(b.Add([&callCounter] {
-        ++callCounter;
-    }));
+    ids.insert(b.Add([&callCounter] { ++callCounter; }));
 
-    ids.insert(b.Add([&callCounter] {
-        ++callCounter;
-    }));
+    ids.insert(b.Add([&callCounter] { ++callCounter; }));
 
     ASSERT_EQ(ids.size(), 2);
 
@@ -252,9 +240,7 @@ TEST(Test_SynchronizedHandlers, swap_transfers_handlers)
     b.InvokeAll();
     ASSERT_EQ(callCounter, 4);
 
-    ids.insert(a.Add([&callCounter] {
-        ++callCounter;
-    }));
+    ids.insert(a.Add([&callCounter] { ++callCounter; }));
 
     ASSERT_EQ(ids.size(), 3);
 

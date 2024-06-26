@@ -52,9 +52,7 @@ std::ostream& operator<<(std::ostream& out, const NextSimTask& nextTask)
 {
     auto tp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(nextTask.timePoint);
     auto duration = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(nextTask.duration);
-    out << "Orchestration::NextSimTask{tp=" << tp.count()
-        << "ms, duration=" << duration.count()
-        << "ms}";
+    out << "Orchestration::NextSimTask{tp=" << tp.count() << "ms, duration=" << duration.count() << "ms}";
     return out;
 }
 
@@ -62,8 +60,10 @@ std::string to_string(SystemCommand::Kind command)
 {
     switch (command)
     {
-    case SystemCommand::Kind::Invalid: return "Invalid";
-    case SystemCommand::Kind::AbortSimulation: return "AbortSimulation";
+    case SystemCommand::Kind::Invalid:
+        return "Invalid";
+    case SystemCommand::Kind::AbortSimulation:
+        return "AbortSimulation";
     }
     throw SilKit::TypeConversionError{};
 }

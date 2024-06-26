@@ -27,9 +27,9 @@
 
 // Check if MSVC is used, since MINGW32/64 don't need these workarounds
 #ifdef _MSC_VER
-#    define NOMINMAX
-#    define WIN32_LEAN_AND_MEAN
-#    include "Windows.h"
+#define NOMINMAX
+#define WIN32_LEAN_AND_MEAN
+#include "Windows.h"
 #endif
 
 namespace SilKit {

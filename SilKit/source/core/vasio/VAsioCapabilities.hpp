@@ -30,19 +30,20 @@ namespace Core {
 // Protocol Capability literals
 struct CapabilityLiteral
 {
-  std::string _value;
-  explicit CapabilityLiteral(const char* capabilityString)
-    : _value{ capabilityString }
-  {}
+    std::string _value;
+    explicit CapabilityLiteral(const char* capabilityString)
+        : _value{capabilityString}
+    {
+    }
 
-  operator const char* () const 
-  {
-    return _value.c_str();
-  }
-  operator const std::string& () const
-  {
-    return _value;
-  }
+    operator const char*() const
+    {
+        return _value.c_str();
+    }
+    operator const std::string&() const
+    {
+        return _value;
+    }
 };
 
 

@@ -38,7 +38,7 @@ class IFlexrayController
 public:
     /*! \brief Generic FleyRay callback method
     */
-    template<typename MsgT>
+    template <typename MsgT>
     using CallbackT = std::function<void(IFlexrayController* controller, const MsgT& msg)>;
 
     /*! Callback type to indicate that a FlexRay message has been received.

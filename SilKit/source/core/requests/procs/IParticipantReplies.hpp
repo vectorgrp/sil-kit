@@ -32,10 +32,9 @@ namespace RequestReply {
 class IParticipantReplies
 {
 public:
-
     virtual ~IParticipantReplies() = default;
-    
-    //! Send a RequestReplyCall to all participants. They will immediately respond with a RequestReplyCallReturn. 
+
+    //! Send a RequestReplyCall to all participants. They will immediately respond with a RequestReplyCallReturn.
     //! If all replies arrived, trigger the completionFunction.
     virtual void CallAfterAllParticipantsReplied(std::function<void()> completionFunction) = 0;
 };
