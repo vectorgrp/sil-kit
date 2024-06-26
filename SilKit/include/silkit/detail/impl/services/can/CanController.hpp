@@ -130,7 +130,6 @@ void CanController::SetBaudRate(uint32_t rate, uint32_t fdRate, uint32_t xlRate)
 
 void CanController::Reset()
 {
-    // TODO: SILKIT_HOURGLASS_NOT_UNDER_TEST
     const auto returnCode = SilKit_CanController_Reset(_canController);
     ThrowOnError(returnCode);
 }
@@ -143,14 +142,12 @@ void CanController::Start()
 
 void CanController::Stop()
 {
-    // TODO: SILKIT_HOURGLASS_NOT_UNDER_TEST
     const auto returnCode = SilKit_CanController_Stop(_canController);
     ThrowOnError(returnCode);
 }
 
 void CanController::Sleep()
 {
-    // TODO: SILKIT_HOURGLASS_NOT_UNDER_TEST
     const auto returnCode = SilKit_CanController_Sleep(_canController);
     ThrowOnError(returnCode);
 }
@@ -219,8 +216,6 @@ void CanController::RemoveFrameHandler(Util::HandlerId handlerId)
 
 auto CanController::AddStateChangeHandler(StateChangeHandler handler) -> Util::HandlerId
 {
-    // TODO: SILKIT_HOURGLASS_NOT_UNDER_TEST
-
     const auto cHandler = [](void *context, SilKit_CanController *controller,
                              SilKit_CanStateChangeEvent *stateChangeEvent) {
         SILKIT_UNUSED_ARG(controller);
@@ -250,8 +245,6 @@ auto CanController::AddStateChangeHandler(StateChangeHandler handler) -> Util::H
 
 void CanController::RemoveStateChangeHandler(Util::HandlerId handlerId)
 {
-    // TODO: SILKIT_HOURGLASS_NOT_UNDER_TEST
-
     const auto returnCode =
         SilKit_CanController_RemoveStateChangeHandler(_canController, static_cast<SilKit_HandlerId>(handlerId));
     ThrowOnError(returnCode);

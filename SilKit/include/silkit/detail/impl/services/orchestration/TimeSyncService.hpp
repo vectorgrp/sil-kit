@@ -130,7 +130,6 @@ auto TimeSyncService::Now() const -> std::chrono::nanoseconds
 {
     SilKit_NanosecondsTime nanosecondsTime;
 
-    // TODO: SILKIT_HOURGLASS_NOT_UNDER_TEST
     const auto returnCode = SilKit_TimeSyncService_Now(_timeSyncService, &nanosecondsTime);
     ThrowOnError(returnCode);
 
