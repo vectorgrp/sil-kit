@@ -28,12 +28,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <thread>
 #include <vector>
 
-#ifdef SILKIT_HOURGLASS
-#include "silkit/hourglass/SilKit.hpp"
-#include "silkit/hourglass/config/IParticipantConfiguration.hpp"
-#else
 #include "silkit/SilKit.hpp"
-#endif
 #include "silkit/SilKitVersion.hpp"
 
 #include "silkit/services/all.hpp"
@@ -198,13 +193,8 @@ int main(int argc, char** argv)
             }
         }
 
-#ifdef SILKIT_HOURGLASS
-        using SilKit::Hourglass::CreateParticipant;
-        using SilKit::Hourglass::Config::ParticipantConfigurationFromFile;
-#else
         using SilKit::CreateParticipant;
         using SilKit::Config::ParticipantConfigurationFromFile;
-#endif
 
         auto participantConfiguration = ParticipantConfigurationFromFile(participantConfigurationFilename);
 
