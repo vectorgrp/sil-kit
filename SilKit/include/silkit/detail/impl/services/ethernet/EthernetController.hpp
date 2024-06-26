@@ -122,7 +122,6 @@ void EthernetController::Activate()
 
 void EthernetController::Deactivate()
 {
-    // TODO: SILKIT_HOURGLASS_NOT_UNDER_TEST
     const auto returnCode = SilKit_EthernetController_Deactivate(_ethernetController);
     ThrowOnError(returnCode);
 }

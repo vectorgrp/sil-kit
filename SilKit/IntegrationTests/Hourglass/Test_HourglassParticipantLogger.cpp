@@ -143,7 +143,6 @@ TEST_F(Test_HourglassParticipantLogger, SilKit_Participant_GetLogger)
 TEST_F(Test_HourglassParticipantLogger, SilKit_Logger_Log)
 {
     std::string name = "Participant1";
-    std::string registryUri = "silkit://localhost:1234";
     std::string configString = "";
     std::string logMessage = "This is a test message.";
     auto config = SilKit::Config::ParticipantConfigurationFromString(configString);
@@ -154,6 +153,110 @@ TEST_F(Test_HourglassParticipantLogger, SilKit_Logger_Log)
     auto participant = SilKit::CreateParticipant(config, name);
     auto logger = participant->GetLogger();
     logger->Log(Level::Critical, logMessage);
+}
+
+TEST_F(Test_HourglassParticipantLogger, SilKit_Logger_Trace)
+{
+    std::string name = "Participant1";
+    std::string configString = "";
+    std::string logMessage = "This is a test message.";
+    auto config = SilKit::Config::ParticipantConfigurationFromString(configString);
+
+    EXPECT_CALL(capi, SilKit_Logger_Log(testing::_, SilKit_LoggingLevel_Trace, testing::StrEq(logMessage.c_str())))
+        .Times(1);
+
+    auto participant = SilKit::CreateParticipant(config, name);
+    auto logger = participant->GetLogger();
+    logger->Trace(logMessage);
+}
+
+TEST_F(Test_HourglassParticipantLogger, SilKit_Logger_Debug)
+{
+    std::string name = "Participant1";
+    std::string configString = "";
+    std::string logMessage = "This is a test message.";
+    auto config = SilKit::Config::ParticipantConfigurationFromString(configString);
+
+    EXPECT_CALL(capi, SilKit_Logger_Log(testing::_, SilKit_LoggingLevel_Debug, testing::StrEq(logMessage.c_str())))
+        .Times(1);
+
+    auto participant = SilKit::CreateParticipant(config, name);
+    auto logger = participant->GetLogger();
+    logger->Debug(logMessage);
+}
+
+TEST_F(Test_HourglassParticipantLogger, SilKit_Logger_Info)
+{
+    std::string name = "Participant1";
+    std::string configString = "";
+    std::string logMessage = "This is a test message.";
+    auto config = SilKit::Config::ParticipantConfigurationFromString(configString);
+
+    EXPECT_CALL(capi, SilKit_Logger_Log(testing::_, SilKit_LoggingLevel_Info, testing::StrEq(logMessage.c_str())))
+        .Times(1);
+
+    auto participant = SilKit::CreateParticipant(config, name);
+    auto logger = participant->GetLogger();
+    logger->Info(logMessage);
+}
+
+TEST_F(Test_HourglassParticipantLogger, SilKit_Logger_Warn)
+{
+    std::string name = "Participant1";
+    std::string configString = "";
+    std::string logMessage = "This is a test message.";
+    auto config = SilKit::Config::ParticipantConfigurationFromString(configString);
+
+    EXPECT_CALL(capi, SilKit_Logger_Log(testing::_, SilKit_LoggingLevel_Warn, testing::StrEq(logMessage.c_str())))
+        .Times(1);
+
+    auto participant = SilKit::CreateParticipant(config, name);
+    auto logger = participant->GetLogger();
+    logger->Warn(logMessage);
+}
+
+TEST_F(Test_HourglassParticipantLogger, SilKit_Logger_Error)
+{
+    std::string name = "Participant1";
+    std::string configString = "";
+    std::string logMessage = "This is a test message.";
+    auto config = SilKit::Config::ParticipantConfigurationFromString(configString);
+
+    EXPECT_CALL(capi, SilKit_Logger_Log(testing::_, SilKit_LoggingLevel_Error, testing::StrEq(logMessage.c_str())))
+        .Times(1);
+
+    auto participant = SilKit::CreateParticipant(config, name);
+    auto logger = participant->GetLogger();
+    logger->Error(logMessage);
+}
+
+TEST_F(Test_HourglassParticipantLogger, SilKit_Logger_Critical)
+{
+    std::string name = "Participant1";
+    std::string configString = "";
+    std::string logMessage = "This is a test message.";
+    auto config = SilKit::Config::ParticipantConfigurationFromString(configString);
+
+    EXPECT_CALL(capi, SilKit_Logger_Log(testing::_, SilKit_LoggingLevel_Critical, testing::StrEq(logMessage.c_str())))
+        .Times(1);
+
+    auto participant = SilKit::CreateParticipant(config, name);
+    auto logger = participant->GetLogger();
+    logger->Critical(logMessage);
+}
+
+TEST_F(Test_HourglassParticipantLogger, SilKit_Logger_GetLogLevel)
+{
+    std::string name = "Participant1";
+    std::string configString = "";
+    auto config = SilKit::Config::ParticipantConfigurationFromString(configString);
+
+    EXPECT_CALL(capi, SilKit_Logger_GetLogLevel(testing::_, testing::_))
+        .Times(1);
+
+    auto participant = SilKit::CreateParticipant(config, name);
+    auto logger = participant->GetLogger();
+    (void)logger->GetLogLevel();
 }
 
 } //namespace

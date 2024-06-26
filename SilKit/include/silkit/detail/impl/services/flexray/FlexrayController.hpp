@@ -153,8 +153,6 @@ inline void CToCxx(const SilKit_FlexrayHeader &cFlexrayHeader,
 FlexrayController::FlexrayController(SilKit_Participant *participant, const std::string &canonicalName,
                                      const std::string &networkName)
 {
-    // TODO: SILKIT_HOURGLASS_NOT_UNDER_TEST
-
     const auto returnCode =
         SilKit_FlexrayController_Create(&_flexrayController, participant, canonicalName.c_str(), networkName.c_str());
     ThrowOnError(returnCode);
@@ -162,8 +160,6 @@ FlexrayController::FlexrayController(SilKit_Participant *participant, const std:
 
 void FlexrayController::Configure(SilKit::Services::Flexray::FlexrayControllerConfig const &config)
 {
-    // TODO: SILKIT_HOURGLASS_NOT_UNDER_TEST
-
     SilKit_FlexrayClusterParameters cFlexrayClusterParameters;
     CxxToC(config.clusterParams, cFlexrayClusterParameters);
 
@@ -193,8 +189,6 @@ void FlexrayController::Configure(SilKit::Services::Flexray::FlexrayControllerCo
 void FlexrayController::ReconfigureTxBuffer(
     uint16_t txBufferIdx, SilKit::Services::Flexray::FlexrayTxBufferConfig const &cxxFlexrayTxBufferConfig)
 {
-    // TODO: SILKIT_HOURGLASS_NOT_UNDER_TEST
-
     SilKit_FlexrayTxBufferConfig cFlexrayTxBufferConfig;
     CxxToC(cxxFlexrayTxBufferConfig, cFlexrayTxBufferConfig);
 
@@ -205,8 +199,6 @@ void FlexrayController::ReconfigureTxBuffer(
 
 void FlexrayController::UpdateTxBuffer(const SilKit::Services::Flexray::FlexrayTxBufferUpdate &cxxFlexrayTxBufferUpdate)
 {
-    // TODO: SILKIT_HOURGLASS_NOT_UNDER_TEST
-
     SilKit_FlexrayTxBufferUpdate cFlexrayTxBufferUpdate;
     CxxToC(cxxFlexrayTxBufferUpdate, cFlexrayTxBufferUpdate);
 
@@ -216,14 +208,12 @@ void FlexrayController::UpdateTxBuffer(const SilKit::Services::Flexray::FlexrayT
 
 void FlexrayController::Run()
 {
-    // TODO: SILKIT_HOURGLASS_NOT_UNDER_TEST
     const auto returnCode = SilKit_FlexrayController_ExecuteCmd(_flexrayController, SilKit_FlexrayChiCommand_RUN);
     ThrowOnError(returnCode);
 }
 
 void FlexrayController::DeferredHalt()
 {
-    // TODO: SILKIT_HOURGLASS_NOT_UNDER_TEST
     const auto returnCode =
         SilKit_FlexrayController_ExecuteCmd(_flexrayController, SilKit_FlexrayChiCommand_DEFERRED_HALT);
     ThrowOnError(returnCode);
@@ -231,14 +221,12 @@ void FlexrayController::DeferredHalt()
 
 void FlexrayController::Freeze()
 {
-    // TODO: SILKIT_HOURGLASS_NOT_UNDER_TEST
     const auto returnCode = SilKit_FlexrayController_ExecuteCmd(_flexrayController, SilKit_FlexrayChiCommand_FREEZE);
     ThrowOnError(returnCode);
 }
 
 void FlexrayController::AllowColdstart()
 {
-    // TODO: SILKIT_HOURGLASS_NOT_UNDER_TEST
     const auto returnCode =
         SilKit_FlexrayController_ExecuteCmd(_flexrayController, SilKit_FlexrayChiCommand_ALLOW_COLDSTART);
     ThrowOnError(returnCode);
@@ -246,22 +234,18 @@ void FlexrayController::AllowColdstart()
 
 void FlexrayController::AllSlots()
 {
-    // TODO: SILKIT_HOURGLASS_NOT_UNDER_TEST
     const auto returnCode = SilKit_FlexrayController_ExecuteCmd(_flexrayController, SilKit_FlexrayChiCommand_ALL_SLOTS);
     ThrowOnError(returnCode);
 }
 
 void FlexrayController::Wakeup()
 {
-    // TODO: SILKIT_HOURGLASS_NOT_UNDER_TEST
     const auto returnCode = SilKit_FlexrayController_ExecuteCmd(_flexrayController, SilKit_FlexrayChiCommand_WAKEUP);
     ThrowOnError(returnCode);
 }
 
 auto FlexrayController::AddFrameHandler(FrameHandler handler) -> Util::HandlerId
 {
-    // TODO: SILKIT_HOURGLASS_NOT_UNDER_TEST
-
     const auto cHandler = [](void *context, SilKit_FlexrayController *controller,
                              const SilKit_FlexrayFrameEvent *message) {
         SILKIT_UNUSED_ARG(controller);
@@ -293,8 +277,6 @@ auto FlexrayController::AddFrameHandler(FrameHandler handler) -> Util::HandlerId
 
 void FlexrayController::RemoveFrameHandler(Util::HandlerId handlerId)
 {
-    // TODO: SILKIT_HOURGLASS_NOT_UNDER_TEST
-
     const auto returnCode =
         SilKit_FlexrayController_RemoveFrameHandler(_flexrayController, static_cast<SilKit_HandlerId>(handlerId));
     ThrowOnError(returnCode);
@@ -304,8 +286,6 @@ void FlexrayController::RemoveFrameHandler(Util::HandlerId handlerId)
 
 auto FlexrayController::AddFrameTransmitHandler(FrameTransmitHandler handler) -> Util::HandlerId
 {
-    // TODO: SILKIT_HOURGLASS_NOT_UNDER_TEST
-
     const auto cHandler = [](void *context, SilKit_FlexrayController *controller,
                              const SilKit_FlexrayFrameTransmitEvent *cEvent) {
         SILKIT_UNUSED_ARG(controller);
@@ -338,8 +318,6 @@ auto FlexrayController::AddFrameTransmitHandler(FrameTransmitHandler handler) ->
 
 void FlexrayController::RemoveFrameTransmitHandler(Util::HandlerId handlerId)
 {
-    // TODO: SILKIT_HOURGLASS_NOT_UNDER_TEST
-
     const auto returnCode = SilKit_FlexrayController_RemoveFrameTransmitHandler(
         _flexrayController, static_cast<SilKit_HandlerId>(handlerId));
     ThrowOnError(returnCode);
@@ -349,8 +327,6 @@ void FlexrayController::RemoveFrameTransmitHandler(Util::HandlerId handlerId)
 
 auto FlexrayController::AddWakeupHandler(WakeupHandler handler) -> Util::HandlerId
 {
-    // TODO: SILKIT_HOURGLASS_NOT_UNDER_TEST
-
     const auto cHandler = [](void *context, SilKit_FlexrayController *controller,
                              const SilKit_FlexrayWakeupEvent *cEvent) {
         SILKIT_UNUSED_ARG(controller);
@@ -381,8 +357,6 @@ auto FlexrayController::AddWakeupHandler(WakeupHandler handler) -> Util::Handler
 
 void FlexrayController::RemoveWakeupHandler(Util::HandlerId handlerId)
 {
-    // TODO: SILKIT_HOURGLASS_NOT_UNDER_TEST
-
     const auto returnCode =
         SilKit_FlexrayController_RemoveWakeupHandler(_flexrayController, static_cast<SilKit_HandlerId>(handlerId));
     ThrowOnError(returnCode);
@@ -392,8 +366,6 @@ void FlexrayController::RemoveWakeupHandler(Util::HandlerId handlerId)
 
 auto FlexrayController::AddPocStatusHandler(PocStatusHandler handler) -> Util::HandlerId
 {
-    // TODO: SILKIT_HOURGLASS_NOT_UNDER_TEST
-
     const auto cHandler = [](void *context, SilKit_FlexrayController *controller,
                              const SilKit_FlexrayPocStatusEvent *cEvent) {
         SILKIT_UNUSED_ARG(controller);
@@ -431,8 +403,6 @@ auto FlexrayController::AddPocStatusHandler(PocStatusHandler handler) -> Util::H
 
 void FlexrayController::RemovePocStatusHandler(Util::HandlerId handlerId)
 {
-    // TODO: SILKIT_HOURGLASS_NOT_UNDER_TEST
-
     const auto returnCode =
         SilKit_FlexrayController_RemovePocStatusHandler(_flexrayController, static_cast<SilKit_HandlerId>(handlerId));
     ThrowOnError(returnCode);
@@ -442,8 +412,6 @@ void FlexrayController::RemovePocStatusHandler(Util::HandlerId handlerId)
 
 auto FlexrayController::AddSymbolHandler(SymbolHandler handler) -> Util::HandlerId
 {
-    // TODO: SILKIT_HOURGLASS_NOT_UNDER_TEST
-
     const auto cHandler = [](void *context, SilKit_FlexrayController *controller,
                              const SilKit_FlexraySymbolEvent *cEvent) {
         SILKIT_UNUSED_ARG(controller);
@@ -474,8 +442,6 @@ auto FlexrayController::AddSymbolHandler(SymbolHandler handler) -> Util::Handler
 
 void FlexrayController::RemoveSymbolHandler(Util::HandlerId handlerId)
 {
-    // TODO: SILKIT_HOURGLASS_NOT_UNDER_TEST
-
     const auto returnCode =
         SilKit_FlexrayController_RemoveSymbolHandler(_flexrayController, static_cast<SilKit_HandlerId>(handlerId));
     ThrowOnError(returnCode);
@@ -485,8 +451,6 @@ void FlexrayController::RemoveSymbolHandler(Util::HandlerId handlerId)
 
 auto FlexrayController::AddSymbolTransmitHandler(SymbolTransmitHandler handler) -> Util::HandlerId
 {
-    // TODO: SILKIT_HOURGLASS_NOT_UNDER_TEST
-
     const auto cHandler = [](void *context, SilKit_FlexrayController *controller,
                              const SilKit_FlexraySymbolTransmitEvent *cEvent) {
         SILKIT_UNUSED_ARG(controller);
@@ -517,8 +481,6 @@ auto FlexrayController::AddSymbolTransmitHandler(SymbolTransmitHandler handler) 
 
 void FlexrayController::RemoveSymbolTransmitHandler(Util::HandlerId handlerId)
 {
-    // TODO: SILKIT_HOURGLASS_NOT_UNDER_TEST
-
     const auto returnCode = SilKit_FlexrayController_RemoveSymbolTransmitHandler(
         _flexrayController, static_cast<SilKit_HandlerId>(handlerId));
     ThrowOnError(returnCode);
@@ -528,8 +490,6 @@ void FlexrayController::RemoveSymbolTransmitHandler(Util::HandlerId handlerId)
 
 auto FlexrayController::AddCycleStartHandler(CycleStartHandler handler) -> Util::HandlerId
 {
-    // TODO: SILKIT_HOURGLASS_NOT_UNDER_TEST
-
     const auto cHandler = [](void *context, SilKit_FlexrayController *controller,
                              const SilKit_FlexrayCycleStartEvent *cEvent) {
         SILKIT_UNUSED_ARG(controller);
@@ -559,8 +519,6 @@ auto FlexrayController::AddCycleStartHandler(CycleStartHandler handler) -> Util:
 
 void FlexrayController::RemoveCycleStartHandler(Util::HandlerId handlerId)
 {
-    // TODO: SILKIT_HOURGLASS_NOT_UNDER_TEST
-
     const auto returnCode =
         SilKit_FlexrayController_RemoveCycleStartHandler(_flexrayController, static_cast<SilKit_HandlerId>(handlerId));
     ThrowOnError(returnCode);

@@ -81,22 +81,18 @@ namespace Logging {
 
 Logger::Logger(SilKit_Participant *participant)
 {
-    // TODO: SILKIT_HOURGLASS_NOT_UNDER_TEST
     const auto returnCode = SilKit_Participant_GetLogger(&_logger, participant);
     ThrowOnError(returnCode);
 }
 
 Logger::Logger(SilKit_Vendor_Vector_SilKitRegistry *silKitRegistry)
 {
-    // TODO: SILKIT_HOURGLASS_NOT_UNDER_TEST
     const auto returnCode = SilKit_Vendor_Vector_SilKitRegistry_GetLogger(&_logger, silKitRegistry);
     ThrowOnError(returnCode);
 }
 
 void Logger::Log(SilKit::Services::Logging::Level level, std::string const &msg)
 {
-    // TODO: SILKIT_HOURGLASS_NOT_UNDER_TEST
-
     const auto loggingLevel = static_cast<SilKit_LoggingLevel>(level);
 
     const auto returnCode = SilKit_Logger_Log(_logger, loggingLevel, msg.c_str());
@@ -105,50 +101,42 @@ void Logger::Log(SilKit::Services::Logging::Level level, std::string const &msg)
 
 void Logger::Trace(const std::string &msg)
 {
-    // TODO: SILKIT_HOURGLASS_NOT_UNDER_TEST
     const auto returnCode = SilKit_Logger_Log(_logger, SilKit_LoggingLevel_Trace, msg.c_str());
     ThrowOnError(returnCode);
 }
 
 void Logger::Debug(const std::string &msg)
 {
-    // TODO: SILKIT_HOURGLASS_NOT_UNDER_TEST
     const auto returnCode = SilKit_Logger_Log(_logger, SilKit_LoggingLevel_Debug, msg.c_str());
     ThrowOnError(returnCode);
 }
 
 void Logger::Info(const std::string &msg)
 {
-    // TODO: SILKIT_HOURGLASS_NOT_UNDER_TEST
     const auto returnCode = SilKit_Logger_Log(_logger, SilKit_LoggingLevel_Info, msg.c_str());
     ThrowOnError(returnCode);
 }
 
 void Logger::Warn(const std::string &msg)
 {
-    // TODO: SILKIT_HOURGLASS_NOT_UNDER_TEST
     const auto returnCode = SilKit_Logger_Log(_logger, SilKit_LoggingLevel_Warn, msg.c_str());
     ThrowOnError(returnCode);
 }
 
 void Logger::Error(const std::string &msg)
 {
-    // TODO: SILKIT_HOURGLASS_NOT_UNDER_TEST
     const auto returnCode = SilKit_Logger_Log(_logger, SilKit_LoggingLevel_Error, msg.c_str());
     ThrowOnError(returnCode);
 }
 
 void Logger::Critical(const std::string &msg)
 {
-    // TODO: SILKIT_HOURGLASS_NOT_UNDER_TEST
     const auto returnCode = SilKit_Logger_Log(_logger, SilKit_LoggingLevel_Critical, msg.c_str());
     ThrowOnError(returnCode);
 }
 
 auto Logger::GetLogLevel() const -> SilKit::Services::Logging::Level
 {
-    // TODO: SILKIT_HOURGLASS_NOT_UNDER_TEST
-
     SilKit_LoggingLevel loggingLevel{SilKit_LoggingLevel_Info};
 
     const auto returnCode = SilKit_Logger_GetLogLevel(_logger, &loggingLevel);
