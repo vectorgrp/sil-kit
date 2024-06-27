@@ -211,15 +211,12 @@ void LinController::SendFrame(SilKit::Services::Lin::LinFrame frame,
 
 void LinController::SendFrameHeader(SilKit::Services::Lin::LinId linId)
 {
-    // TODO: SILKIT_HOURGLASS_NOT_UNDER_TEST
     const auto returnCode = SilKit_LinController_SendFrameHeader(_linController, static_cast<SilKit_LinId>(linId));
     ThrowOnError(returnCode);
 }
 
 void LinController::UpdateTxBuffer(SilKit::Services::Lin::LinFrame frame)
 {
-    // TODO: SILKIT_HOURGLASS_NOT_UNDER_TEST
-
     SilKit_LinFrame linFrame;
     CxxToC(frame, linFrame);
 
@@ -229,8 +226,6 @@ void LinController::UpdateTxBuffer(SilKit::Services::Lin::LinFrame frame)
 
 void LinController::SetFrameResponse(SilKit::Services::Lin::LinFrameResponse response)
 {
-    // TODO: SILKIT_HOURGLASS_NOT_UNDER_TEST
-
     SilKit_LinFrame linFrame;
     CxxToC(response.frame, linFrame);
 

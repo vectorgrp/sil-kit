@@ -110,6 +110,21 @@ MATCHER_P(LinFrameMatcher, controlFrame, "")
     return true;
 }
 
+MATCHER_P(LinFrameResponseMatcher, controlFrameResponse, "")
+{
+    *result_listener << "matches Lin frame responses of the c-api to the cpp api";
+
+    LinFrameResponse frameResponse1 = controlFrameResponse;
+    const SilKit_LinFrameResponse* frameResponse2 = arg;
+
+    if (static_cast<SilKit_LinFrameResponseMode>(frameResponse1.responseMode) != frameResponse2->responseMode)
+    {
+        return false;
+    }
+
+    return testing::Matches(LinFrameMatcher(frameResponse1.frame))(frameResponse2->frame);
+}
+
 class Test_HourglassLin : public SilKitHourglassTests::MockCapiTest
 {
 public:
@@ -214,6 +229,25 @@ TEST_F(Test_HourglassLin, SilKit_LinController_UpdateTxBuffer)
 
     EXPECT_CALL(capi, SilKit_LinController_UpdateTxBuffer(mockLinController, LinFrameMatcher(frame))).Times(1);
     LinController.UpdateTxBuffer(frame);
+}
+
+TEST_F(Test_HourglassLin, SilKit_LinController_SetFrameResponse)
+{
+    SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Lin::LinController LinController(
+        nullptr, "LinController1", "LinNetwork1");
+
+    LinFrame frame{};
+    frame.checksumModel = LinChecksumModel::Enhanced;
+    frame.id = 123;
+    frame.dataLength = 3;
+    frame.data = {1, 2, 3, 0, 0, 0, 0, 0};
+
+    LinFrameResponse frameResponse{};
+    frameResponse.frame = frame;
+    frameResponse.responseMode = LinFrameResponseMode::Rx;
+
+    EXPECT_CALL(capi, SilKit_LinController_SetFrameResponse(mockLinController, LinFrameResponseMatcher(frameResponse))).Times(1);
+    LinController.SetFrameResponse(frameResponse);
 }
 
 TEST_F(Test_HourglassLin, SilKit_LinController_GoToSleep)

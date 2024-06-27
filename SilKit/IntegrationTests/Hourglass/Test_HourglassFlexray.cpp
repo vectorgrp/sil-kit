@@ -352,7 +352,27 @@ TEST_F(Test_HourglassFlexray, SilKit_FlexrayController_UpdateTxBuffer)
     FlexrayController.UpdateTxBuffer(bufferUpdate);
 }
 
-TEST_F(Test_HourglassFlexray, SilKit_FlexrayController_ExecuteCmd)
+TEST_F(Test_HourglassFlexray, SilKit_FlexrayController_ExecuteCmd_Run)
+{
+    SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Flexray::FlexrayController FlexrayController(
+        nullptr, "FlexrayController1", "FlexrayNetwork1");
+
+    EXPECT_CALL(capi, SilKit_FlexrayController_ExecuteCmd(mockFlexrayController, SilKit_FlexrayChiCommand_RUN))
+        .Times(1);
+    FlexrayController.Run();
+}
+
+TEST_F(Test_HourglassFlexray, SilKit_FlexrayController_ExecuteCmd_DeferredHalt)
+{
+    SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Flexray::FlexrayController FlexrayController(
+        nullptr, "FlexrayController1", "FlexrayNetwork1");
+
+    EXPECT_CALL(capi, SilKit_FlexrayController_ExecuteCmd(mockFlexrayController, SilKit_FlexrayChiCommand_DEFERRED_HALT))
+        .Times(1);
+    FlexrayController.DeferredHalt();
+}
+
+TEST_F(Test_HourglassFlexray, SilKit_FlexrayController_ExecuteCmd_Freeze)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Flexray::FlexrayController FlexrayController(
         nullptr, "FlexrayController1", "FlexrayNetwork1");
@@ -360,6 +380,36 @@ TEST_F(Test_HourglassFlexray, SilKit_FlexrayController_ExecuteCmd)
     EXPECT_CALL(capi, SilKit_FlexrayController_ExecuteCmd(mockFlexrayController, SilKit_FlexrayChiCommand_FREEZE))
         .Times(1);
     FlexrayController.Freeze();
+}
+
+TEST_F(Test_HourglassFlexray, SilKit_FlexrayController_ExecuteCmd_AllowColdstart)
+{
+    SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Flexray::FlexrayController FlexrayController(
+        nullptr, "FlexrayController1", "FlexrayNetwork1");
+
+    EXPECT_CALL(capi, SilKit_FlexrayController_ExecuteCmd(mockFlexrayController, SilKit_FlexrayChiCommand_ALLOW_COLDSTART))
+        .Times(1);
+    FlexrayController.AllowColdstart();
+}
+
+TEST_F(Test_HourglassFlexray, SilKit_FlexrayController_ExecuteCmd_AllSlots)
+{
+    SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Flexray::FlexrayController FlexrayController(
+        nullptr, "FlexrayController1", "FlexrayNetwork1");
+
+    EXPECT_CALL(capi, SilKit_FlexrayController_ExecuteCmd(mockFlexrayController, SilKit_FlexrayChiCommand_ALL_SLOTS))
+        .Times(1);
+    FlexrayController.AllSlots();
+}
+
+TEST_F(Test_HourglassFlexray, SilKit_FlexrayController_ExecuteCmd_Wakeup)
+{
+    SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Flexray::FlexrayController FlexrayController(
+        nullptr, "FlexrayController1", "FlexrayNetwork1");
+
+    EXPECT_CALL(capi, SilKit_FlexrayController_ExecuteCmd(mockFlexrayController, SilKit_FlexrayChiCommand_WAKEUP))
+        .Times(1);
+    FlexrayController.Wakeup();
 }
 
 TEST_F(Test_HourglassFlexray, SilKit_FlexrayController_AddFrameHandler)
