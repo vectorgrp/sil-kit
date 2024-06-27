@@ -152,7 +152,7 @@ TEST(Test_RingBuffer, writeMultiple_resizeAllowed)
 
     std::vector<uint8_t> currentDataBlock;
 
-    for (int i = 0; i < numBlockSets; i++)
+    for (size_t i = 0; i < numBlockSets; i++)
     {
         auto dataBlocks = GenerateDataBlocks(capacity, numDataBlocks);
 
@@ -193,7 +193,7 @@ TEST(Test_RingBuffer, writeMultiple_fixedCapacity)
 
     std::vector<uint8_t> currentDataBlock;
 
-    for (int i = 0; i < numBlockSets; i++)
+    for (size_t i = 0; i < numBlockSets; i++)
     {
         auto dataBlocks = GenerateDataBlocks(maxSizeDataBlock, numDataBlocks);
 
