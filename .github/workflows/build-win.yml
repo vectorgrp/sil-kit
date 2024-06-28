@@ -41,6 +41,7 @@ jobs:
         preset-name: vs141-x64-release
         do-package: ${{ inputs.do_package }}
         retention-days: ${{ inputs.retention_days }}
+        build-arch: x64
 
   build-win-x32:
     runs-on: windows-2019
@@ -56,3 +57,4 @@ jobs:
         preset-name: vs141-x86-release
         do-package: ${{ inputs.do_package }}
         retention-days: ${{ inputs.retention_days }}
+        build-arch: x86
