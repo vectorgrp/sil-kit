@@ -87,6 +87,8 @@ struct ConfigIncludeData
     std::map<std::string, SilKit::Config::RpcClient> rpcClientCache;
     std::map<std::string, SilKit::Config::TraceSink> traceSinkCache;
     std::map<std::string, SilKit::Config::TraceSource> traceSourceCache;
+    std::map<std::string, SilKit::Config::MetricsSink> metricsSinkCache;
+    SilKit::Util::Optional<bool> metricsCollectFromRemoteCache;
 };
 
 
@@ -365,6 +367,15 @@ void PopulateCaches(const YAML::Node& config, ConfigIncludeData& configIncludeDa
         CacheLoggingOptions(config["Logging"], configIncludeData.logCache);
         CacheLoggingSinks(config["Logging"], configIncludeData.logCache);
     }
+
+    if (config["Metrics"])
+    {
+        // TODO: Refactor the caching into it's own method and do it properly
+        if (config["Metrics"]["CollectFromRemote"])
+        {
+            configIncludeData.metricsCollectFromRemoteCache = config["Metrics"]["CollectFromRemote"].as<bool>();
+        }
+    }
 }
 
 // =========================================================================================================================
@@ -479,6 +490,9 @@ auto MergeConfigs(ConfigIncludeData& configIncludeData) -> SilKit::Config::Parti
                                                           config.tracing.traceSources,
                                                           configIncludeData.traceSourceCache);
 
+        MergeNamedVector<SilKit::Config::v1::MetricsSink>(include.second.metrics.sinks, "Metrics/Sinks",
+                                                          config.metrics.sinks, configIncludeData.metricsSinkCache);
+
         // Merge "scalar" config fields
         MergeExtensions(include.second.extensions, config.extensions);
         MergeHealthCheck(include.second.healthCheck, config.healthCheck);
@@ -487,6 +501,7 @@ auto MergeConfigs(ConfigIncludeData& configIncludeData) -> SilKit::Config::Parti
 
     MergeMiddleware(configIncludeData.middlewareCache, config.middleware);
     MergeLogCache(configIncludeData.logCache, config.logging);
+    MergeCacheField(configIncludeData.metricsCollectFromRemoteCache, config.metrics.collectFromRemote);
 
     return config;
 }
@@ -623,6 +638,16 @@ bool operator==(const HealthCheck& lhs, const HealthCheck& rhs)
 bool operator==(const Tracing& lhs, const Tracing& rhs)
 {
     return lhs.traceSinks == rhs.traceSinks && lhs.traceSources == rhs.traceSources;
+}
+
+bool operator==(const MetricsSink& lhs, const MetricsSink& rhs)
+{
+    return lhs.type == rhs.type && lhs.name == rhs.name && lhs.path == rhs.path;
+}
+
+bool operator==(const Metrics& lhs, const Metrics& rhs)
+{
+    return lhs.sinks == rhs.sinks && lhs.collectFromRemote == rhs.collectFromRemote;
 }
 
 bool operator==(const Extensions& lhs, const Extensions& rhs)

@@ -51,6 +51,21 @@ auto MakeYamlSchema() -> YamlSchemaElem
                                                     {"InputPath"},
                                                     {"Type"},
                                                 });
+
+    YamlSchemaElem metricsFilters{"Filters",
+                                  {
+                                      {"Name"},
+                                      {"Origin"},
+                                      {"Metric"},
+                                  }};
+    YamlSchemaElem metricsSinks{"Sinks",
+                                {
+                                    {"Type"},
+                                    {"Filters"},
+                                    {"Name"},
+                                    {"Path"},
+                                }};
+
     YamlSchemaElem logging("Logging", {
                                           {"LogFromRemotes"},
                                           {"FlushLevel"},
@@ -180,6 +195,12 @@ auto MakeYamlSchema() -> YamlSchemaElem
              {"HardResponseTimeout"},
          }},
         {"Tracing", {traceSinks, traceSources}},
+        {"Metrics",
+         {
+             metricsFilters,
+             metricsSinks,
+             {"CollectFromRemote"},
+         }},
         {"Extensions", {{"SearchPathHints"}}},
         {"Middleware",
          {

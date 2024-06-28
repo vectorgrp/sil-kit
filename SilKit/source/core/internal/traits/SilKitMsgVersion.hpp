@@ -45,6 +45,8 @@ struct SilKitMsgTraitVersion
     }
 
 DefineSilKitMsgTrait_Version(SilKit::Services::Logging::LogMsg, 1);
+DefineSilKitMsgTrait_Version(VSilKit::MetricsRegistration, 1);
+DefineSilKitMsgTrait_Version(VSilKit::MetricsUpdate, 1);
 DefineSilKitMsgTrait_Version(SilKit::Services::Orchestration::SystemCommand, 1);
 DefineSilKitMsgTrait_Version(SilKit::Services::Orchestration::ParticipantStatus, 1);
 DefineSilKitMsgTrait_Version(SilKit::Services::Orchestration::WorkflowConfiguration, 1);

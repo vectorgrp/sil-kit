@@ -230,6 +230,31 @@ struct Tracing
 };
 
 // ================================================================================
+//  Metrics service
+// ================================================================================
+
+struct MetricsSink
+{
+    enum class Type
+    {
+        Undefined,
+        JsonFile,
+        Remote,
+    };
+
+    Type type{Type::Undefined};
+    std::string name;
+    std::string path;
+};
+
+//! \brief Metrics configuration
+struct Metrics
+{
+    std::vector<MetricsSink> sinks;
+    bool collectFromRemote{false};
+};
+
+// ================================================================================
 //  Extensions
 // ================================================================================
 
@@ -299,6 +324,7 @@ struct ParticipantConfiguration : public IParticipantConfiguration
     Logging logging;
     HealthCheck healthCheck;
     Tracing tracing;
+    Metrics metrics;
     Extensions extensions;
     Middleware middleware;
 };
@@ -313,6 +339,8 @@ bool operator==(const RpcServer& lhs, const RpcServer& rhs);
 bool operator==(const RpcClient& lhs, const RpcClient& rhs);
 bool operator==(const HealthCheck& lhs, const HealthCheck& rhs);
 bool operator==(const Tracing& lhs, const Tracing& rhs);
+bool operator==(const MetricsSink& lhs, const MetricsSink& rhs);
+bool operator==(const Metrics& lhs, const Metrics& rhs);
 bool operator==(const Extensions& lhs, const Extensions& rhs);
 bool operator==(const Middleware& lhs, const Middleware& rhs);
 bool operator==(const ParticipantConfiguration& lhs, const ParticipantConfiguration& rhs);

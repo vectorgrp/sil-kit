@@ -82,3 +82,8 @@ class RpcServerInternal;
 
 } // namespace Services
 } // namespace SilKit
+
+namespace VSilKit {
+class MetricsManager;
+class MetricsSender;
+} // namespace VSilKit

@@ -1,0 +1,34 @@
+// SPDX-FileCopyrightText: 2024 Vector Informatik GmbH
+//
+// SPDX-License-Identifier: MIT
+
+#pragma once
+
+#include "IMetricsTimerThread.hpp"
+
+#include <functional>
+#include <future>
+#include <thread>
+
+namespace VSilKit {
+
+class MetricsTimerThread : public IMetricsTimerThread
+{
+    std::promise<void> _go;
+    std::promise<void> _done;
+    std::function<void()> _callback;
+
+    std::thread _thread;
+
+public:
+    explicit MetricsTimerThread(std::function<void()> callback);
+
+    ~MetricsTimerThread() override;
+
+    void Start() override;
+
+private:
+    auto MakeThread() -> std::thread;
+};
+
+} // namespace VSilKit

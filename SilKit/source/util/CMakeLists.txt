@@ -22,6 +22,17 @@
 add_library(I_SilKit_Util INTERFACE)
 target_include_directories(I_SilKit_Util INTERFACE ${CMAKE_CURRENT_LIST_DIR})
 
+add_Library(O_SilKit_Util OBJECT
+    ExecutionEnvironment.cpp
+)
+target_link_libraries(O_SilKit_Util
+    PUBLIC I_SilKit_Util
+    PRIVATE SilKitInterface
+    PRIVATE asio
+    PRIVATE fmt-header-only
+)
+
+
 add_subdirectory(tests)
 
 

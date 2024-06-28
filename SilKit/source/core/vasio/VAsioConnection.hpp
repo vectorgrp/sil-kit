@@ -61,6 +61,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "VAsioCapabilities.hpp"
 #include "WireLinMessages.hpp"
 #include "Uri.hpp"
+#include "Metrics.hpp"
 
 #include "IIoContext.hpp"
 #include "IConnectionMethods.hpp"
@@ -89,7 +90,8 @@ public:
     // Constructors and Destructor
     VAsioConnection(const VAsioConnection&) = delete;
     VAsioConnection(VAsioConnection&&) = delete;
-    VAsioConnection(IParticipantInternal* participant, SilKit::Config::ParticipantConfiguration config,
+    VAsioConnection(IParticipantInternal* participant, IMetricsManager* metricsManager,
+                    SilKit::Config::ParticipantConfiguration config,
                     std::string participantName, ParticipantId participantId,
                     Services::Orchestration::ITimeProvider* timeProvider,
                     ProtocolVersion version = CurrentProtocolVersion());
@@ -249,7 +251,7 @@ private: // data types
         Services::Flexray::FlexrayTxBufferConfigUpdate, Services::Flexray::WireFlexrayTxBufferUpdate,
         Services::Flexray::FlexrayPocStatusEvent, Core::Discovery::ParticipantDiscoveryEvent,
         Core::Discovery::ServiceDiscoveryEvent, Core::RequestReply::RequestReplyCall,
-        Core::RequestReply::RequestReplyCallReturn,
+        Core::RequestReply::RequestReplyCallReturn, VSilKit::MetricsRegistration, VSilKit::MetricsUpdate,
 
         // Private testing data types
         Core::Tests::Version1::TestMessage, Core::Tests::Version2::TestMessage, Core::Tests::TestFrameEvent>;
@@ -562,6 +564,9 @@ private:
     // unit testing support
     ProtocolVersion _version;
     friend class Test_VAsioConnection;
+
+    // metrics
+    IMetricsManager* _metricsManager;
 
     // for debugging purposes:
     IParticipantInternal* _participant{nullptr};
