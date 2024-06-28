@@ -346,6 +346,10 @@ public:
 
     std::string GetServiceDescriptorString(
         SilKit::Experimental::NetworkSimulation::ControllerDescriptor controllerDescriptor) override;
+    auto GetLoggerInternal() -> Services::Logging::ILoggerInternal* override
+    {
+        return _logger.get();
+    }
 
 public:
     // ----------------------------------------
@@ -436,7 +440,7 @@ private:
 
     Services::Orchestration::TimeProvider _timeProvider;
 
-    std::unique_ptr<Services::Logging::ILogger> _logger;
+    std::unique_ptr<Services::Logging::ILoggerInternal> _logger;
     std::vector<std::unique_ptr<ITraceMessageSink>> _traceSinks;
     std::unique_ptr<Tracing::ReplayScheduler> _replayScheduler;
     std::unique_ptr<RequestReply::ParticipantReplies> _participantReplies;

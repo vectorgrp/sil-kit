@@ -627,6 +627,11 @@ public:
         return "";
     }
 
+    Services::Logging::ILoggerInternal* GetLoggerInternal() override
+    {
+        return nullptr; // todo fix
+    }
+
     const std::string _name = "MockParticipant";
     const std::string _registryUri = "silkit://mock.participant.silkit:0";
     testing::NiceMock<MockLogger> logger;

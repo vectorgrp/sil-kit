@@ -22,6 +22,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <chrono>
 #include <iomanip>
 #include <sstream>
+#include <unordered_map>
+#include <string>
 
 #include "Logger.hpp"
 
@@ -29,6 +31,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "fmt/format.h"
 #include "spdlog/spdlog.h"
 #include "spdlog/sinks/null_sink.h"
+#include "spdlog/mdc.h"
+
 // NB: we do not use the windows color sink, as that will open "CONOUT$" and
 //     we won't be able to trivially capture its output in SilKitLauncher.
 #include "spdlog/sinks/ansicolor_sink.h"
@@ -36,11 +40,186 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "spdlog/sinks/basic_file_sink.h"
 
 #include "SpdlogTypeConversion.hpp"
+#include "spdlog/pattern_formatter.h"
+#include "spdlog/fmt/ostr.h"  // support for user defined types
+#include "spdlog/cfg/env.h"   // support for loading levels from the environment variable
 
 
 namespace SilKit {
 namespace Services {
 namespace Logging {
+
+class LoggerMessage;
+
+struct SimpleLogMessage
+{
+    SimpleLogMessage(LoggerMessage& m)
+        : m(m)
+    {
+    }
+    const LoggerMessage& m;
+};
+
+struct JsonLogMessage
+{
+    JsonLogMessage(LoggerMessage& m)
+        : m(m)
+    {
+    }
+    LoggerMessage& m;
+};
+
+struct JsonString
+{
+    JsonString(const std::string& m)
+        : m(m)
+    {
+    }
+    const std::string& m;
+};
+
+} // namespace Logging
+} // namespace Services
+} // namespace SilKit
+
+
+std::string escapeSpecialCharacters(const std::string& input)
+{
+    std::string result;
+    result.reserve(input.size() * 2); // Reserve enough memory for the result
+
+    size_t i = 0;
+    while (i < input.size())
+    {
+        if (input[i] == '\\')
+        {
+            // Check if it is a single backslash or already double one
+            if (i + 1 < input.size() && input[i + 1] == '\\')
+            {
+                result += "\\\\";
+                i += 2;
+            }
+            else
+            {
+                // Single backslash needs to be escaped
+                result += "\\\\";
+                ++i;
+            }
+        }
+        else if (input[i] == '\"')
+        {
+            result += "\\\""; 
+            ++i;
+        }
+        else
+        {
+            result += input[i];
+            ++i;
+        }
+    }
+    return result;
+}
+
+
+std::string KeyValuesToSimpleString(const std::unordered_map<std::string, std::string>& input)
+{
+    std::string result;
+    result.reserve(input.size() * 2); // Reserviere genug Speicher für das Ergebnis
+
+    std::unordered_map<std::string, std::string>::const_iterator it = input.begin();
+
+    while (it != input.end())
+    {
+        if (it != input.begin())
+        {
+            result.append(", ");
+        }
+        result.append( escapeSpecialCharacters(it->first)  + ": " + escapeSpecialCharacters(it->second));
+        ++it;
+    }
+    return result;
+}
+
+std::string KeyValuesToJsonString(const std::unordered_map<std::string, std::string>& input)
+{
+    std::string result;
+    result.reserve(input.size() * 2); // Reserviere genug Speicher für das Ergebnis
+
+    std::unordered_map<std::string, std::string>::const_iterator it = input.begin();
+    result.append("{");
+    while (it != input.end())
+    {
+        if (it != input.begin())
+        {
+            result.append(",");
+        }
+        result.append("\"" + escapeSpecialCharacters(it->first) + "\"" + ":" + "\"" + escapeSpecialCharacters(it->second) + "\"");
+        ++it;
+    }
+    result.append("}");
+
+    return result;
+}
+
+
+template <>
+struct fmt::formatter<SilKit::Services::Logging::SimpleLogMessage>
+{
+    constexpr auto parse(fmt::format_parse_context& ctx)
+    {
+        return ctx.begin();
+    }
+
+    template <typename FormatContext>
+    auto format(const SilKit::Services::Logging::SimpleLogMessage& msg, FormatContext& ctx)
+    {
+        return fmt::format_to(ctx.out(), "{}, {}", msg.m.getMsgString(), KeyValuesToSimpleString(msg.m.getKeyValues()));
+    }
+};
+
+
+template <>
+struct fmt::formatter<SilKit::Services::Logging::JsonLogMessage>
+{
+    constexpr auto parse(fmt::format_parse_context& ctx)
+    {
+        return ctx.begin();
+    }
+
+    template <typename FormatContext>
+    auto format(const SilKit::Services::Logging::JsonLogMessage& msg, FormatContext& ctx)
+    {
+        // format the message output string l
+        // "msg": "This is the log message", "kv":{ "key1": "value1", key2: "value2"}
+        // the message, key and value strings needed to be escaped
+        return fmt::format_to(ctx.out(), "\"msg\": \"{}\", \"kv\": {}", escapeSpecialCharacters(msg.m.getMsgString()), KeyValuesToJsonString(msg.m.getKeyValues()));
+    }
+};
+
+
+template <>
+struct fmt::formatter<SilKit::Services::Logging::JsonString>
+{
+    constexpr auto parse(fmt::format_parse_context& ctx)
+    {
+        return ctx.begin();
+    }
+
+    template <typename FormatContext>
+    auto format(const SilKit::Services::Logging::JsonString& msg, FormatContext& ctx)
+    {
+        // format the message output string l
+        // "msg": "This is the log message", "kv":{ "key1": "value1", key2: "value2"}
+        // the message, key and value strings needed to be escaped
+        return fmt::format_to(ctx.out(), "\"msg\": \"{}\"", escapeSpecialCharacters(msg.m));
+    }
+};
+
+
+namespace SilKit {
+namespace Services {
+namespace Logging {
+
 
 namespace {
 class SilKitRemoteSink : public spdlog::sinks::base_sink<spdlog::details::null_mutex>
@@ -83,7 +262,19 @@ Logger::Logger(const std::string& participantName, Config::Logging config)
 {
     // NB: do not create the _logger in the initializer list. If participantName is empty,
     //  this will cause a fairly unintuitive exception in spdlog.
-    _logger = spdlog::create<spdlog::sinks::null_sink_st>(participantName);
+    for (auto sink : _config.sinks)
+    {
+        if (sink.format == Config::Sink::Format::Json && nullptr == _loggerJson )
+        {
+            _loggerJson = spdlog::create<spdlog::sinks::null_sink_st>(participantName + "_Json");
+        }
+        if (sink.format == Config::Sink::Format::String && nullptr == _loggerSimple)
+        {
+            _loggerSimple = spdlog::create<spdlog::sinks::null_sink_st>(participantName + "_Simple");
+        }
+    }
+
+   // auto _logger = std::make_shared<spdlog::loggerWithKv>(participantName);
 
     // NB: logger gets dropped from registry immediately after creating so that two participant with the same
     // participantName won't lead to a spdlog exception because a logger with this name does already exist.
@@ -102,15 +293,25 @@ Logger::Logger(const std::string& participantName, Config::Logging config)
 #endif
 
     // Defined JSON pattern for the logger output
-    std::string jsonpattern = {"{\"ts\": \"T%H:%M:%S.%f%z\", \"log\": \"%n\", \"lvl\": "
-                    "\"%^%l%$\", \"msg\": \"%v\"}"};
-
+    std::string jsonpattern  {R"({"ts":"%Y-%m-%dT%H:%M:%S.%e%z","log":"%n","lvl":"%l", %v })"}; 
 
     for (auto sink : _config.sinks)
     {
         auto log_level = to_spdlog(sink.level);
-        if (log_level < _logger->level())
-            _logger->set_level(log_level);
+        if (sink.format == Config::Sink::Format::Json)
+        {
+            if (log_level < _loggerJson->level())
+            {
+                _loggerJson->set_level(log_level);
+            }
+        }
+        if (sink.format == Config::Sink::Format::String)
+        {  
+            if (log_level < _loggerSimple->level())
+            {
+                _loggerSimple->set_level(log_level);
+            }
+        }
 
         switch (sink.type)
         {
@@ -123,16 +324,27 @@ Logger::Logger(const std::string& participantName, Config::Logging config)
         {
 #if _WIN32
             auto stdoutSink = std::make_shared<spdlog::sinks::stdout_sink_mt>();
+
 #else
             auto stdoutSink = std::make_shared<spdlog::sinks::ansicolor_stdout_sink_mt>();
 #endif
 
             if (sink.format == Config::Sink::Format::Json)
             {
-                stdoutSink->set_pattern(jsonpattern);
+                using spdlog::details::make_unique; // for pre c++14
+                auto formatter = make_unique<spdlog::pattern_formatter>();
+
+                formatter->set_pattern(jsonpattern);
+                stdoutSink->set_formatter(std::move(formatter));
+                stdoutSink->set_level(log_level);
+                _loggerJson->sinks().emplace_back(std::move(stdoutSink));
             }
-            stdoutSink->set_level(log_level);
-            _logger->sinks().emplace_back(std::move(stdoutSink));
+            else
+            {
+                stdoutSink->set_level(log_level);
+                _loggerSimple->sinks().emplace_back(std::move(stdoutSink));
+            }
+
             break;
         }
         case Config::Sink::Type::File:
@@ -141,25 +353,59 @@ Logger::Logger(const std::string& participantName, Config::Logging config)
             auto fileSink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(filename);
 
             if (sink.format == Config::Sink::Format::Json)
-            {
+            {   
+                using spdlog::details::make_unique; // for pre c++14
+                auto formatter = make_unique<spdlog::pattern_formatter>();
+                formatter->set_pattern(jsonpattern);
                 fileSink->set_pattern(jsonpattern);
+                fileSink->set_level(log_level);
+                _loggerJson->sinks().push_back(fileSink);
             }
-
-            fileSink->set_level(log_level);
-            _logger->sinks().push_back(fileSink);
+            else
+            {
+                fileSink->set_level(log_level);
+                _loggerSimple->sinks().push_back(fileSink);
+            }
         }
         }
     }
+    if (_loggerSimple != nullptr)
+    {
+        _loggerSimple->flush_on(to_spdlog(_config.flushLevel));
+    }
+    if (_loggerJson != nullptr)
+    {
+        _loggerJson->flush_on(to_spdlog(_config.flushLevel));
+    }
+}
 
-    _logger->flush_on(to_spdlog(_config.flushLevel));
+void Logger::Log(LoggerMessage& msg)
+{
+    if (_loggerJson != nullptr)
+    {
+        JsonLogMessage myJsonMsg(msg);
+        _loggerJson->log(to_spdlog(msg.getLevel()), fmt::format("{}", myJsonMsg));
+    }
+
+    if (_loggerSimple != nullptr)
+    {
+        SimpleLogMessage myMsg(msg);
+        _loggerSimple->log(to_spdlog(msg.getLevel()), fmt::format("{}", myMsg));
+    }
 }
 
 void Logger::Log(Level level, const std::string& msg)
 {
-    _logger->log(to_spdlog(level), msg);
+    if (_loggerJson != nullptr)
+    {
+        JsonString myJsonString(msg);
+        _loggerJson->log(to_spdlog(level), fmt::format("{}", myJsonString));
+    }
+    if (_loggerSimple != nullptr)
+    {
+        _loggerSimple->log(to_spdlog(level), msg);
+    }
 }
-
-
 
 void Logger::Trace(const std::string& msg)
 {
@@ -200,13 +446,13 @@ void Logger::RegisterRemoteLogging(const LogMsgHandler& handler)
     {
         _remoteSink = std::make_shared<SilKitRemoteSink>(handler);
         _remoteSink->set_level(to_spdlog(remoteSinkRef->level));
-        _logger->sinks().push_back(_remoteSink);
+        _loggerSimple->sinks().push_back(_remoteSink);// todo : also for jsonLogger
     }
 }
 
 void Logger::DisableRemoteLogging()
 {
-    for (auto sink : _logger->sinks())
+    for (auto sink : _loggerSimple->sinks())// todo : also for jsonLogger
     {
         auto* remoteSink = dynamic_cast<SilKitRemoteSink*>(sink.get());
         if (remoteSink)
@@ -220,7 +466,7 @@ void Logger::LogReceivedMsg(const LogMsg& msg)
 {
     auto spdlog_msg = to_spdlog(msg);
 
-    for (auto&& sink : _logger->sinks())
+    for (auto&& sink : _loggerSimple->sinks()) // todo : also for jsonLogger
     {
         if (to_spdlog(msg.level) < sink->level())
             continue;
@@ -237,7 +483,7 @@ void Logger::LogReceivedMsg(const LogMsg& msg)
 
 Level Logger::GetLogLevel() const
 {
-    return from_spdlog(_logger->level());
+    return from_spdlog(_loggerSimple->level()); // todo : also for jsonLogger
 }
 
 } // namespace Logging

@@ -42,7 +42,7 @@ namespace Logging {
 
 struct LogMsg;
 
-class Logger : public ILogger
+class Logger : public ILoggerInternal
 {
 public:
     using LogMsgHandler = std::function<void(LogMsg)>;
@@ -56,6 +56,8 @@ public:
     // Public interface methods
     //
     // ILogger
+    void Log(LoggerMessage& msg) override;
+
     void Log(Level level, const std::string& msg) override;
 
     void Trace(const std::string& msg) override;
@@ -81,7 +83,8 @@ private:
     // Private members
     Config::Logging _config;
 
-    std::shared_ptr<spdlog::logger> _logger;
+    std::shared_ptr<spdlog::logger> _loggerJson;
+    std::shared_ptr<spdlog::logger> _loggerSimple;
     std::shared_ptr<spdlog::sinks::sink> _remoteSink;
 };
 
