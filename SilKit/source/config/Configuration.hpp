@@ -75,11 +75,11 @@ struct Sink
 =======
     enum class Format : uint8_t
     {
-        String,
+        Simple,
         Json
     };
 
-    Format format{Format::String};
+    Format format{Format::Simple};
     Type type{ Type::Remote };
     Services::Logging::Level level{ Services::Logging::Level::Info };
 >>>>>>> a7cc89c66 (SILKIT-1535 Logger: Add configuration option for JSON logging)

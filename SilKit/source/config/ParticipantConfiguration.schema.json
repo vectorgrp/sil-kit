@@ -438,7 +438,7 @@
               },
               "Format": {
                 "type": "string",
-                "enum": [ "String", "Json" ]
+                "enum": [ "Simple", "Json" ]
               },
               "Level": {
                 "type": "string",
