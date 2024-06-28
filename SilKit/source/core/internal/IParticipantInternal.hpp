@@ -48,6 +48,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 // forwards
 namespace SilKit {
+namespace Services {
+namespace Logging{
+struct ILoggerInternal;
+}
+}
 namespace Tracing {
 class ReplayScheduler;
 } // end Tracing
@@ -256,6 +261,7 @@ public:
     virtual bool ParticipantHasCapability(const std::string& participantName, const std::string& capability) const = 0;
 
     virtual std::string GetServiceDescriptorString(SilKit::Experimental::NetworkSimulation::ControllerDescriptor controllerDescriptor) = 0;
+    virtual auto GetLoggerInternal() -> Services::Logging::ILoggerInternal* = 0;
 };
 
 } // namespace Core

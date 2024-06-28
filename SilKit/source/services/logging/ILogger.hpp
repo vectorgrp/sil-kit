@@ -27,10 +27,90 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "SilKitFmtFormatters.hpp"
 #include "fmt/format.h"
+#include <unordered_map>
+#include <string>
+
+
+
 
 namespace SilKit {
 namespace Services {
 namespace Logging {
+
+class LoggerMessage;
+
+
+struct ILoggerInternal : ILogger
+{
+    virtual void Log(LoggerMessage& msg) = 0;
+};
+
+
+
+template <typename... Args>
+void Log(ILogger* logger, Level level, const char* fmt, const Args&... args);
+
+
+class LoggerMessage
+{
+public:
+    LoggerMessage(ILoggerInternal* logger, Level level)
+        : logger(logger)
+        , level(level)
+        , minlevel(logger->GetLogLevel())
+    {}
+
+    template <typename... Args>
+    void setMessage(const char* fmt, const Args&... args)
+    {
+        msg = fmt::format(fmt, args...);
+    }
+
+    void setMessage(std::string newMsg)
+    {
+        msg = newMsg;
+    }
+
+    void addKeyValue(std::string key, std::string value)
+    {       
+        keyValues[key] = value;
+    }
+
+    Level getLevel() const
+    {
+        return level;
+    }
+
+    std::unordered_map<std::string, std::string> getKeyValues() const
+    {
+        return keyValues;
+    }
+
+    std::string getMsgString() const
+    {
+        return msg;
+    }
+
+    ILoggerInternal* getLogger() const
+    {
+        return logger;
+    }
+
+    void dispatch()
+    {
+        if ((minlevel <= level))
+        {
+            logger->Log(*this);
+        }
+    }
+
+private:
+    ILoggerInternal* logger;
+    std::unordered_map<std::string, std::string> keyValues;
+    Level level;
+    Level minlevel;
+    std::string msg;
+};
 
 
 class LogOnceFlag
