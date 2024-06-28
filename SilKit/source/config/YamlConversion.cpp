@@ -132,8 +132,8 @@ Node Converter::encode(const Sink::Format& obj)
     Node node;
     switch (obj)
     {
-    case Sink::Format::String:
-        node = "String";
+    case Sink::Format::Simple:
+        node = "Simple";
         break;
     case Sink::Format::Json:
         node = "Json";
@@ -149,12 +149,12 @@ bool Converter::decode(const Node& node, Sink::Format& obj)
 {
     if (!node.IsScalar())
     {
-        throw ConversionError(node, "Sink::Format should be a string of String|Json.");
+        throw ConversionError(node, "Sink::Format should be a string of Simple|Json.");
     }
     auto&& str = parse_as<std::string>(node);
-    if (str == "String" || str == "")
+    if (str == "Simple" || str == "")
     {
-        obj = Sink::Format::String;
+        obj = Sink::Format::Simple;
     }
     else if (str == "Json")
     {

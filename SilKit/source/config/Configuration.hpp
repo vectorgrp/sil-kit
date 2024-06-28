@@ -70,11 +70,11 @@ struct Sink
 
     enum class Format : uint8_t
     {
-        String,
+        Simple,
         Json
     };
 
-    Format format{Format::String};
+    Format format{Format::Simple};
     Type type{ Type::Remote };
     Services::Logging::Level level{ Services::Logging::Level::Info };
     std::string logName;
