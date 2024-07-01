@@ -74,11 +74,6 @@ RingBuffer<T>::RingBuffer(size_t capacity)
 template <class T>
 void RingBuffer<T>::AdvanceWPos(size_t numBytes)
 {
-    if (numBytes <= 0)
-    {
-        throw SilKitError{"Only positive number of bytes allowed."};
-    }
-
     _wPos = (_wPos + numBytes) % _capacity;
     _size += numBytes;
 
@@ -89,11 +84,6 @@ void RingBuffer<T>::AdvanceWPos(size_t numBytes)
 template <class T>
 void RingBuffer<T>::AdvanceRPos(size_t numBytes)
 {
-    if (numBytes <= 0)
-    {
-        throw SilKitError{"Only positive number of bytes allowed."};
-    }
-
     _rPos = (_rPos + numBytes) % _capacity;
     _size -= numBytes;
 
