@@ -99,7 +99,6 @@ Participant<SilKitConnectionT>::Participant(Config::ParticipantConfiguration par
     _logger = std::make_unique<Services::Logging::Logger>(GetParticipantName(), _participantConfig.logging);
     _connection.SetLogger(_logger.get());
 
-
     Logging::Info(_logger.get(), "Creating participant '{}' at '{}', SIL Kit version: {}", GetParticipantName(),
                   _participantConfig.middleware.registryUri, Version::StringImpl());
 }
