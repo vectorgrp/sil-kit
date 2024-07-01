@@ -273,9 +273,6 @@ Logger::Logger(const std::string& participantName, Config::Logging config)
             _loggerSimple = spdlog::create<spdlog::sinks::null_sink_st>(participantName + "_Simple");
         }
     }
-
-   // auto _logger = std::make_shared<spdlog::loggerWithKv>(participantName);
-
     // NB: logger gets dropped from registry immediately after creating so that two participant with the same
     // participantName won't lead to a spdlog exception because a logger with this name does already exist.
     spdlog::drop(participantName);
