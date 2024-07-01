@@ -268,7 +268,7 @@ Logger::Logger(const std::string& participantName, Config::Logging config)
         {
             _loggerJson = spdlog::create<spdlog::sinks::null_sink_st>(participantName + "_Json");
         }
-        if (sink.format == Config::Sink::Format::String && nullptr == _loggerSimple)
+        if (sink.format == Config::Sink::Format::Simple && nullptr == _loggerSimple)
         {
             _loggerSimple = spdlog::create<spdlog::sinks::null_sink_st>(participantName + "_Simple");
         }
@@ -305,7 +305,7 @@ Logger::Logger(const std::string& participantName, Config::Logging config)
                 _loggerJson->set_level(log_level);
             }
         }
-        if (sink.format == Config::Sink::Format::String)
+        if (sink.format == Config::Sink::Format::Simple)
         {  
             if (log_level < _loggerSimple->level())
             {
