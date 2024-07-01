@@ -54,7 +54,6 @@ private:
     // member variables
     std::vector<T> _buffer;
 
-    size_t _capacity;
     size_t _size{0};
 
     size_t _wPos{0};
@@ -63,7 +62,6 @@ private:
 
 template <class T>
 RingBuffer<T>::RingBuffer(size_t capacity)
-    : _capacity{capacity}
 {
     _buffer.resize(capacity);
 }
@@ -71,7 +69,7 @@ RingBuffer<T>::RingBuffer(size_t capacity)
 template <class T>
 void RingBuffer<T>::AdvanceWPos(size_t numBytes)
 {
-    _wPos = (_wPos + numBytes) % _capacity;
+    _wPos = (_wPos + numBytes) % Capacity();
     _size += numBytes;
 
     // size checks
@@ -81,7 +79,7 @@ void RingBuffer<T>::AdvanceWPos(size_t numBytes)
 template <class T>
 void RingBuffer<T>::AdvanceRPos(size_t numBytes)
 {
-    _rPos = (_rPos + numBytes) % _capacity;
+    _rPos = (_rPos + numBytes) % Capacity();
     _size -= numBytes;
 
     // size checks
@@ -98,7 +96,7 @@ bool RingBuffer<T>::Read(std::vector<T>& elem, bool advanceRPos)
     }
 
     // copy data from first contiguous array
-    size_t numBytesArrayOne = std::min((_capacity - _rPos), elem.size());
+    size_t numBytesArrayOne = std::min((Capacity() - _rPos), elem.size());
     std::memcpy(elem.data(), _buffer.data() + _rPos, numBytesArrayOne);
 
     // copy data from second contiguous array (if necessary)
@@ -118,12 +116,12 @@ bool RingBuffer<T>::Read(std::vector<T>& elem, bool advanceRPos)
 template <class T>
 size_t RingBuffer<T>::GetSizeArrayOne()
 {
-    size_t arrayOneSize = std::min(_capacity - _wPos, _capacity - _size);
+    size_t arrayOneSize = std::min(Capacity() - _wPos, Capacity() - _size);
 
     // handle edge cases
     if (Empty())
     {
-        arrayOneSize = _capacity - _wPos;
+        arrayOneSize = Capacity() - _wPos;
     }
 
     return arrayOneSize;
@@ -132,7 +130,7 @@ size_t RingBuffer<T>::GetSizeArrayOne()
 template <class T>
 size_t RingBuffer<T>::GetSizeArrayTwo()
 {
-    size_t arrayTwoSize = (_capacity - _size) - GetSizeArrayOne();
+    size_t arrayTwoSize = (Capacity() - _size) - GetSizeArrayOne();
 
     // handle edge cases
     if (Empty())
@@ -160,7 +158,7 @@ auto RingBuffer<T>::GetArrayTwo() -> RingBuffer<T>::BufArray
 template <class T>
 size_t RingBuffer<T>::Capacity()
 {
-    return _capacity;
+    return _buffer.size();
 }
 
 template <class T>
@@ -185,7 +183,7 @@ void RingBuffer<T>::SizeCheck()
     }
 
     // size must not exceed buffer capacity
-    if (_size > _capacity)
+    if (_size > Capacity())
     {
         throw SilKitError{"Buffer size must not exceed capacity!"};
     }
@@ -195,7 +193,7 @@ template <class T>
 void RingBuffer<T>::Reserve(size_t newCapacity)
 {
     // no need for increase if capacity is already large enough
-    if (newCapacity <= _capacity)
+    if (newCapacity <= Capacity())
     {
         return;
     }
@@ -207,7 +205,6 @@ void RingBuffer<T>::Reserve(size_t newCapacity)
     _buffer = std::move(newBuffer);
     _buffer.resize(newCapacity);
 
-    _capacity = newCapacity;
     _rPos = 0;
     _wPos = _size;
 }
