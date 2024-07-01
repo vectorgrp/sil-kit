@@ -53,7 +53,7 @@ VAsioPeer::VAsioPeer(IVAsioPeerListener* listener, IIoContext* ioContext, std::u
     , _ioContext{ioContext}
     , _socket{std::move(stream)}
     , _logger{logger}
-    , _msgBuffer(4096)
+    , _msgBuffer{4096}
 {
     _socket->SetListener(*this);
 }

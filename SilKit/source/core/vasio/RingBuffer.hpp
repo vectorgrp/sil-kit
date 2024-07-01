@@ -55,18 +55,15 @@ private:
     std::vector<T> _buffer;
 
     size_t _capacity;
-    size_t _size;
+    size_t _size{0};
 
-    size_t _wPos;
-    size_t _rPos;
+    size_t _wPos{0};
+    size_t _rPos{0};
 };
 
 template <class T>
 RingBuffer<T>::RingBuffer(size_t capacity)
     : _capacity{capacity}
-    , _size{0}
-    , _wPos{0}
-    , _rPos{0}
 {
     _buffer.resize(capacity);
 }
