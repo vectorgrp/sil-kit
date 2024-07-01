@@ -230,6 +230,15 @@
             }
         },
         {
+            "name": "mixin-gcc",
+            "description": "Target System GCC",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "gcc",
+                "CMAKE_CXX_COMPILER": "g++"
+            }
+        },
+        {
             "name": "mixin-gcc7",
             "description": "Target GCC-7",
             "hidden": true,
@@ -258,6 +267,15 @@
         },
 
 
+        {
+            "name": "mixin-clang",
+            "description": "Target generic clang",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "clang",
+                "CMAKE_CXX_COMPILER": "clang++"
+            }
+        },
         {
             "name": "mixin-clang10",
             "description": "Target clang 10",
@@ -292,15 +310,6 @@
             "cacheVariables": {
                 "CMAKE_C_COMPILER": "clang-15",
                 "CMAKE_CXX_COMPILER": "clang++-15"
-            }
-        },
-        {
-            "name": "mixin-clang",
-            "description": "Target clang",
-            "hidden": true,
-            "cacheVariables": {
-                "CMAKE_C_COMPILER": "clang",
-                "CMAKE_CXX_COMPILER": "clang++"
             }
         },
 
@@ -448,6 +457,20 @@
         },
 
         {
+            "name": "gcc-debug",
+            "inherits": [ "mixin-posix", "mixin-dirs", "mixin-ninja", "mixin-debug", "mixin-gcc", "mixin-werror" ]
+        },
+
+        {
+            "name": "gcc-release",
+            "inherits": [ "mixin-release", "gcc-debug", "mixin-build-docs" ]
+        },
+
+        {
+            "name": "gcc-relwithdebinfo",
+            "inherits": [ "mixin-relwithdebinfo", "gcc-debug", "mixin-build-docs" ]
+        },
+        {
             "name": "gcc7-debug",
             "inherits": [ "mixin-posix", "mixin-dirs", "mixin-ninja", "mixin-debug", "mixin-gcc7", "mixin-werror" ]
         },
@@ -483,6 +506,19 @@
         {
             "name": "gcc9-relwithdebinfo",
             "inherits": [ "mixin-relwithdebinfo", "gcc9-debug", "mixin-build-docs" ]
+        },
+
+        {
+            "name": "clang-debug",
+            "inherits": [ "mixin-clang", "gcc9-debug" ]
+        },
+        {
+            "name": "clang-release",
+            "inherits": [ "mixin-release", "clang-debug" ]
+        },
+        {
+            "name": "clang-relwithdebinfo",
+            "inherits": [ "mixin-relwithdebinfo", "clang-debug" ]
         },
         {
             "name": "clang10-debug",
@@ -528,19 +564,6 @@
         {
             "name": "clang15-relwithdebinfo",
             "inherits": [ "mixin-relwithdebinfo", "clang15-debug" ]
-        },
-
-        {
-            "name": "clang-debug",
-            "inherits": [ "mixin-clang", "gcc9-debug" ]
-        },
-        {
-            "name": "clang-release",
-            "inherits": [ "mixin-release", "clang-debug" ]
-        },
-        {
-            "name": "clang-relwithdebinfo",
-            "inherits": [ "mixin-relwithdebinfo", "clang-debug" ]
         },
 
         {
@@ -686,6 +709,18 @@
         },
 
         {
+            "name": "gcc-debug",
+            "configurePreset": "gcc-debug"
+        },
+        {
+            "name": "gcc-release",
+            "configurePreset": "gcc-release"
+        },
+        {
+            "name": "gcc-relwithdebinfo",
+            "configurePreset": "gcc-relwithdebinfo"
+        },
+        {
             "name": "gcc7-debug",
             "configurePreset": "gcc7-debug"
         },
@@ -730,6 +765,18 @@
 
 
         {
+            "name": "clang-debug",
+            "configurePreset": "clang-debug"
+        },
+        {
+            "name": "clang-release",
+            "configurePreset": "clang-release"
+        },
+        {
+            "name": "clang-relwithdebinfo",
+            "configurePreset": "clang-relwithdebinfo"
+        },
+        {
             "name": "clang12-debug",
             "configurePreset": "clang12-debug"
         },
@@ -765,18 +812,6 @@
         {
             "name": "clang15-relwithdebinfo",
             "configurePreset": "clang15-relwithdebinfo"
-        },
-        {
-            "name": "clang-debug",
-            "configurePreset": "clang-debug"
-        },
-        {
-            "name": "clang-release",
-            "configurePreset": "clang-release"
-        },
-        {
-            "name": "clang-relwithdebinfo",
-            "configurePreset": "clang-relwithdebinfo"
         },
         {
             "name": "clang12-asan-debug",
@@ -929,6 +964,18 @@
         },
 
         {
+            "name": "gcc-debug",
+            "configurePreset": "gcc-debug"
+        },
+        {
+            "name": "gcc-release",
+            "configurePreset": "gcc-release"
+        },
+        {
+            "name": "gcc-relwithdebinfo",
+            "configurePreset": "gcc-relwithdebinfo"
+        },
+        {
             "name": "gcc7-debug",
             "configurePreset": "gcc7-debug"
         },
@@ -973,6 +1020,18 @@
 
 
         {
+            "name": "clang-debug",
+            "configurePreset": "clang-debug"
+        },
+        {
+            "name": "clang-release",
+            "configurePreset": "clang-release"
+        },
+        {
+            "name": "clang-relwithdebinfo",
+            "configurePreset": "clang-relwithdebinfo"
+        },
+        {
             "name": "clang12-debug",
             "configurePreset": "clang12-debug"
         },
@@ -1009,18 +1068,6 @@
         {
             "name": "clang15-relwithdebinfo",
             "configurePreset": "clang15-relwithdebinfo"
-        },
-        {
-            "name": "clang-debug",
-            "configurePreset": "clang-debug"
-        },
-        {
-            "name": "clang-release",
-            "configurePreset": "clang-release"
-        },
-        {
-            "name": "clang-relwithdebinfo",
-            "configurePreset": "clang-relwithdebinfo"
         },
         {
             "name": "clang12-asan-debug",
