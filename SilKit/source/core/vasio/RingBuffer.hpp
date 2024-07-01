@@ -176,12 +176,6 @@ bool RingBuffer<T>::Empty()
 template <class T>
 void RingBuffer<T>::SizeCheck()
 {
-    // size must be non-negative
-    if (_size < 0)
-    {
-        throw SilKitError{"Buffer size must be non-negative!"};
-    }
-
     // size must not exceed buffer capacity
     if (_size > Capacity())
     {
