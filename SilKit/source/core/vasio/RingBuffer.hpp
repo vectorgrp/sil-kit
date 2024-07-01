@@ -30,16 +30,7 @@ public:
     size_t Capacity();
     size_t Size();
 
-    bool Empty();
-    bool Full();
-
-    bool Write(const T& elem);
-    bool Read(T& elem);
-
-    bool Write(const std::vector<T>& elem);
     bool Read(std::vector<T>& elem, bool advanceRPos = true);
-
-    void PrintRingBuffer(); // physical memory representation
 
     // write perspective (arrays of free memory in ring buffer)
     auto GetArrayOne() -> BufArray; // first physically contiguous array (starting at index _wPos)
@@ -51,6 +42,7 @@ public:
 
 private:
     // private member fcns
+    bool Empty();
     void AdvanceRPos(size_t numBytes);
     void SizeCheck(); // sanity checks
 
@@ -107,58 +99,6 @@ void RingBuffer<T>::AdvanceRPos(size_t numBytes)
 
     // size checks
     SizeCheck();
-}
-
-template <class T>
-bool RingBuffer<T>::Write(const T& elem)
-{
-    if (Full()) // we don't allow overwriting
-    {
-        return false;
-    }
-
-    _buffer.at(_wPos) = elem;
-    AdvanceWPos(1);
-
-    return true;
-}
-
-template <class T>
-bool RingBuffer<T>::Read(T& elem)
-{
-    if (Empty()) // no data to read
-    {
-        return false;
-    }
-
-    elem = _buffer.at(_rPos);
-    AdvanceRPos(1);
-
-    return true;
-}
-
-template <class T>
-bool RingBuffer<T>::Write(const std::vector<T>& elem)
-{
-    // we don't allow overwriting
-    if (elem.size() > (_capacity - _size))
-    {
-        return false;
-    }
-
-    // copy data to first contiguous array
-    size_t numBytesArrayOne = std::min((_capacity - _wPos), elem.size());
-    std::memcpy(_buffer.data() + _wPos, elem.data(), numBytesArrayOne);
-
-    // copy data to second contiguous array (if necessary)
-    if (numBytesArrayOne < elem.size())
-    {
-        std::memcpy(_buffer.data(), elem.data() + numBytesArrayOne, elem.size() - numBytesArrayOne);
-    }
-
-    AdvanceWPos(elem.size());
-
-    return true;
 }
 
 template <class T>
@@ -249,12 +189,6 @@ bool RingBuffer<T>::Empty()
 }
 
 template <class T>
-bool RingBuffer<T>::Full()
-{
-    return _size == _capacity;
-}
-
-template <class T>
 void RingBuffer<T>::SizeCheck()
 {
     // size must be non-negative
@@ -289,46 +223,6 @@ void RingBuffer<T>::SetCapacity(size_t newCapacity)
     _capacity = newCapacity;
     _rPos = 0;
     _wPos = _size;
-}
-
-template <class T>
-void RingBuffer<T>::PrintRingBuffer()
-{
-    std::vector<std::string> bufferValues(_capacity, "-");
-
-    if ((_rPos + _size) <= _capacity) // written data is contiguous
-    {
-        for (size_t i = _rPos; i < (_rPos + _size); i++)
-        {
-            bufferValues.at(i) = std::to_string(_buffer.at(i));
-        }
-    }
-    else // non-contiguous case
-    {
-        // array one
-        size_t sizeArrayTwo{_size};
-        for (size_t i = _rPos; i < _capacity; i++)
-        {
-            bufferValues.at(i) = std::to_string(_buffer.at(i));
-            sizeArrayTwo--;
-        }
-
-        // array two
-        for (size_t i = 0; i < sizeArrayTwo; i++)
-        {
-            bufferValues.at(i) = std::to_string(_buffer.at(i));
-        }
-    }
-
-    // print index, value (if present), memory address
-    std::cout << "----- buffer start (current size: " << Size() << ", current capacity: " << Capacity() << ") -----"
-              << std::endl;
-    for (size_t i = 0; i < bufferValues.capacity(); i++)
-    {
-        std::cout << "Index: " << i << ", Value: " << bufferValues.at(i)
-                  << ", Memory Address: " << static_cast<void*>(_buffer.data() + i) << std::endl;
-    }
-    std::cout << "----- buffer end -----" << std::endl;
 }
 
 } // namespace Core

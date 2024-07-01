@@ -37,8 +37,8 @@ std::vector<std::vector<uint8_t> > GenerateDataBlocks(const size_t maxSize, cons
     return dataBlocks;
 }
 
-// mimic use of ring buffer in VAsioPeer
-void WriteViaDirectMemoryAccess(RingBuffer<uint8_t>& ringBuffer, const std::vector<uint8_t>& dataBlock)
+// mimic use of ring buffer in VAsioPeer (writing into ring buffer)
+void Write(RingBuffer<uint8_t>& ringBuffer, const std::vector<uint8_t>& dataBlock)
 {
     auto arrayOne = ringBuffer.GetArrayOne();
     size_t numBytesForArrayOne = std::min(arrayOne.second, dataBlock.size());
@@ -53,29 +53,8 @@ void WriteViaDirectMemoryAccess(RingBuffer<uint8_t>& ringBuffer, const std::vect
     ringBuffer.AdvanceWPos(dataBlock.size());
 }
 
-// alternating write and read, write via dedicated function
-TEST(Test_RingBuffer, writeStandard)
-{
-    const size_t capacity{1000};
-    RingBuffer<uint8_t> ringBuffer(capacity);
-
-    const size_t numDataBlocks{500};
-    auto dataBlocks = GenerateDataBlocks(capacity, numDataBlocks);
-
-    // write to ring buffer - read from ring buffer - compare
-    for (const auto& elem : dataBlocks)
-    {
-        ringBuffer.Write(elem);
-
-        std::vector<uint8_t> readData(ringBuffer.Size());
-        ringBuffer.Read(readData);        
-
-        ASSERT_EQ(elem, readData);
-    }
-}
-
-// alternating write and read, write via direct memory access
-TEST(Test_RingBuffer, writeDirectMemoryAccess)
+// alternating write and read
+TEST(Test_RingBuffer, writeSingle)
 {
     const size_t capacity{1000};
     RingBuffer<uint8_t> ringBuffer(capacity);
@@ -85,7 +64,7 @@ TEST(Test_RingBuffer, writeDirectMemoryAccess)
 
     for (const auto& elem : dataBlocks)
     {
-        WriteViaDirectMemoryAccess(ringBuffer, elem);
+        Write(ringBuffer, elem);
 
         std::vector<uint8_t> readData(ringBuffer.Size());
         ringBuffer.Read(readData);
@@ -114,7 +93,7 @@ TEST(Test_RingBuffer, resizeRingBuffer)
             {
                 ringBuffer.SetCapacity(elem.size());
             }
-            WriteViaDirectMemoryAccess(ringBuffer, elem);
+            Write(ringBuffer, elem);
 
             std::vector<uint8_t> readData(ringBuffer.Size());
             ringBuffer.Read(readData);
@@ -148,7 +127,7 @@ TEST(Test_RingBuffer, writeMultiple_resizeAllowed)
                 ringBuffer.SetCapacity(ringBuffer.Size() + elem.size());
             }
 
-            WriteViaDirectMemoryAccess(ringBuffer, elem);
+            Write(ringBuffer, elem);
 
             // append current data block for comparison
             currentDataBlock.insert(currentDataBlock.end(), elem.begin(), elem.end());            
@@ -192,7 +171,7 @@ TEST(Test_RingBuffer, writeMultiple_fixedCapacity)
                 
                 if (elem.size() <= remainingSpace) // write current block, if there is enough space
                 {
-                    WriteViaDirectMemoryAccess(ringBuffer, elem);
+                    Write(ringBuffer, elem);
 
                     // append current data block for comparison
                     currentDataBlock.insert(currentDataBlock.end(), elem.begin(), elem.end());
