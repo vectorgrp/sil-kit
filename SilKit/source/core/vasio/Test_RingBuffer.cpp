@@ -73,7 +73,7 @@ TEST(Test_RingBuffer, writeSingle)
     }
 }
 
-// resizing of ring buffer (via SetCapacity)
+// resizing of ring buffer (via Reserve)
 TEST(Test_RingBuffer, resizeRingBuffer)
 {
     const size_t capacity{1000};
@@ -91,7 +91,7 @@ TEST(Test_RingBuffer, resizeRingBuffer)
             // resize if necessary
             if (elem.size() > ringBuffer.Capacity())
             {
-                ringBuffer.SetCapacity(elem.size());
+                ringBuffer.Reserve(elem.size());
             }
             Write(ringBuffer, elem);
 
@@ -124,7 +124,7 @@ TEST(Test_RingBuffer, writeMultiple_resizeAllowed)
             auto remainingSpace = ringBuffer.Capacity() - ringBuffer.Size(); 
             if (elem.size() > remainingSpace)
             {
-                ringBuffer.SetCapacity(ringBuffer.Size() + elem.size());
+                ringBuffer.Reserve(ringBuffer.Size() + elem.size());
             }
 
             Write(ringBuffer, elem);

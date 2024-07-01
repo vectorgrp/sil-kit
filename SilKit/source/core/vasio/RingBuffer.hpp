@@ -38,7 +38,7 @@ public:
 
     void AdvanceWPos(size_t numBytes); // public for access from VAsioPeer
 
-    void SetCapacity(size_t newCapacity);
+    void Reserve(size_t newCapacity);
 
 private:
     // private member fcns
@@ -192,7 +192,7 @@ void RingBuffer<T>::SizeCheck()
 }
 
 template <class T>
-void RingBuffer<T>::SetCapacity(size_t newCapacity)
+void RingBuffer<T>::Reserve(size_t newCapacity)
 {
     // no need for increase if capacity is already large enough
     if (newCapacity <= _capacity)

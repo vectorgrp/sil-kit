@@ -222,7 +222,7 @@ void VAsioPeer::DispatchBuffer()
         // Make the buffer large enough and wait until we have more data.
         if (_msgBuffer.Capacity() < _currentMsgSize)
         {
-            _msgBuffer.SetCapacity(_currentMsgSize);
+            _msgBuffer.Reserve(_currentMsgSize);
         }
 
         ReadSomeAsync();
