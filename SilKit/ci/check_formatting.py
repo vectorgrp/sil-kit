@@ -73,7 +73,7 @@ def main():
                 if formatResult.returncode != 0:
                     formattingCorrect = False
                     totalWarnings = totalWarnings + 1
-                    warn("File not formatted correctly: {}!", file)
+                    warn("File not formatted correctly: {}", file)
 
     info("{} files checked, {} produced a warning!", totalFiles, totalWarnings)
     if formattingCorrect is False:

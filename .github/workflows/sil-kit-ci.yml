@@ -67,15 +67,6 @@ jobs:
         run: |
           python3 ./SilKit/ci/check_formatting.py
         shell: bash
-      - name: Upload Log
-        if: always()
-        id: format-result-upload
-        uses: actions/upload-artifact@v4
-        with:
-          name: FormatLog
-          path: FormatLog.txt
-          if-no-files-found: 'ignore'
-          compression-level: 5
 
   clang14-tsan:
     name: Thread Sanitizer Tests
