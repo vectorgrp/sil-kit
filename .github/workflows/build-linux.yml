@@ -51,6 +51,5 @@ jobs:
         id: build
         with:
           preset-name: gcc8-release
-          do-package: ${{ inputs.do_package }}
-          retention-days: ${{ env.retention_days }}
-
+          do-package: false
+          upload-testlog: false
