@@ -42,6 +42,15 @@ jobs:
       image: ghcr.io/mariusbgm/sil-kit-ci-ubuntu-18.04:main
     if: inputs.run_build == true
     steps:
+      - name: install node20
+        shell: bash
+        run: |
+          touch ~/.bash_profile
+          wget -q -O - https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+          source ~/.bash_profile
+          nvm install 20
+          node -v
+
       - name: git checkout
         uses: actions/checkout@v1
         with:
