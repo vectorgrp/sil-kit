@@ -23,10 +23,57 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "YamlParser.hpp"
 
+#include <string>
+#include <type_traits>
+
 namespace SilKit {
 namespace Dashboard {
 
 using namespace std::chrono_literals;
+
+namespace {
+
+constexpr bool u64_is_ul = std::is_same<std::uint64_t, unsigned long>::value;
+constexpr bool u64_is_ull = std::is_same<std::uint64_t, unsigned long long>::value;
+
+auto ToUInt64(const std::string& value) -> std::uint64_t
+{
+    static_assert(u64_is_ul || u64_is_ull, "");
+
+    if (u64_is_ul)
+    {
+        return std::stoul(value);
+    }
+
+    if (u64_is_ull)
+    {
+        return std::stoull(value);
+    }
+}
+
+auto GetSupplementalDataValue(const Core::ServiceDescriptor& serviceDescriptor, const std::string& key) -> oatpp::String
+{
+    std::string str;
+    if (!serviceDescriptor.GetSupplementalDataItem(key, str))
+    {
+        throw SilKitError{"Missing key " + key + " in supplementalData"};
+    }
+    return str;
+}
+
+auto GetControllerType(const SilKit::Core::ServiceDescriptor& serviceDescriptor) -> std::string
+{
+    return GetSupplementalDataValue(serviceDescriptor, Core::Discovery::controllerType);
+}
+
+auto GetSupplementalDataValueAsEndpointId(const SilKit::Core::ServiceDescriptor& serviceDescriptor,
+                                          const std::string& key) -> SilKit::Core::EndpointId
+{
+    auto value = GetSupplementalDataValue(serviceDescriptor, key);
+    return ToUInt64(*value.get());
+}
+
+} // namespace
 
 oatpp::Object<SimulationConfigurationDto> CreateSimulationConfigurationDto(const std::string& connectUri)
 {
@@ -155,16 +202,6 @@ oatpp::Object<MatchingLabelDto> CreateMatchingLabelDto(const Services::MatchingL
     return label;
 }
 
-oatpp::String GetSupplementalDataValue(const Core::ServiceDescriptor& serviceDescriptor, const std::string& key)
-{
-    std::string str;
-    if (!serviceDescriptor.GetSupplementalDataItem(key, str))
-    {
-        throw SilKitError{"Missing key " + key + " in supplementalData"};
-    }
-    return str;
-}
-
 oatpp::Vector<oatpp::Object<MatchingLabelDto>> CreateMatchingLabels(const Core::ServiceDescriptor& serviceDescriptor,
                                                                     const std::string& labelsKey)
 {
@@ -264,6 +301,260 @@ oatpp::Object<SimulationEndDto> SilKitToOatppMapper::CreateSimulationEndDto(uint
     simulationEnd->stopped = stop;
     return simulationEnd;
 }
+
+auto SilKitToOatppMapper::CreateBulkControllerDto(const ServiceDescriptor& serviceDescriptor)
+    -> Object<BulkControllerDto>
+{
+    auto dto = BulkControllerDto::createShared();
+
+    dto->id = serviceDescriptor.GetServiceId();
+    dto->name = serviceDescriptor.GetServiceName();
+    dto->networkName = serviceDescriptor.GetNetworkName();
+
+    return dto;
+}
+
+auto SilKitToOatppMapper::CreateBulkDataServiceDto(const ServiceDescriptor& serviceDescriptor)
+    -> Object<BulkDataServiceDto>
+{
+    auto dto = BulkDataServiceDto::createShared();
+
+    dto->id = serviceDescriptor.GetServiceId();
+    dto->name = serviceDescriptor.GetServiceName();
+    dto->networkName = serviceDescriptor.GetNetworkName();
+
+    const auto controllerType = GetControllerType(serviceDescriptor);
+    if (controllerType == SilKit::Core::Discovery::controllerTypeDataSubscriber)
+    {
+        dto->spec = CreateDataSpecDto(serviceDescriptor, SilKit::Core::Discovery::supplKeyDataSubscriberTopic,
+                                      SilKit::Core::Discovery::supplKeyDataSubscriberMediaType,
+                                      SilKit::Core::Discovery::supplKeyDataSubscriberSubLabels);
+    }
+    else if (controllerType == SilKit::Core::Discovery::controllerTypeDataPublisher)
+    {
+        dto->spec = CreateDataSpecDto(serviceDescriptor, SilKit::Core::Discovery::supplKeyDataPublisherTopic,
+                                      SilKit::Core::Discovery::supplKeyDataPublisherMediaType,
+                                      SilKit::Core::Discovery::supplKeyDataPublisherPubLabels);
+    }
+    else
+    {
+        throw SilKitError{"Unexpected controller type " + controllerType};
+    }
+
+    return dto;
+}
+
+auto SilKitToOatppMapper::CreateBulkRpcServiceDto(const ServiceDescriptor& serviceDescriptor)
+    -> Object<BulkRpcServiceDto>
+{
+    auto dto = BulkRpcServiceDto::createShared();
+
+    dto->id = serviceDescriptor.GetServiceId();
+    dto->name = serviceDescriptor.GetServiceName();
+    dto->networkName = serviceDescriptor.GetNetworkName();
+
+    const auto controllerType = GetControllerType(serviceDescriptor);
+    if (controllerType == SilKit::Core::Discovery::controllerTypeRpcClient)
+    {
+        dto->spec = CreateRpcSpecDto(serviceDescriptor, SilKit::Core::Discovery::supplKeyRpcClientFunctionName,
+                                     SilKit::Core::Discovery::supplKeyRpcClientMediaType,
+                                     SilKit::Core::Discovery::supplKeyRpcClientLabels);
+    }
+    else if (controllerType == SilKit::Core::Discovery::controllerTypeRpcServer)
+    {
+        dto->spec = CreateRpcSpecDto(serviceDescriptor, SilKit::Core::Discovery::supplKeyRpcServerFunctionName,
+                                     SilKit::Core::Discovery::supplKeyRpcServerMediaType,
+                                     SilKit::Core::Discovery::supplKeyRpcServerLabels);
+    }
+    else
+    {
+        throw SilKitError{"Unexpected controller type " + controllerType};
+    }
+
+    return dto;
+}
+
+auto SilKitToOatppMapper::CreateBulkServiceInternalDto(const ServiceDescriptor& serviceDescriptor)
+    -> Object<BulkServiceInternalDto>
+{
+    auto dto = BulkServiceInternalDto::createShared();
+
+    dto->id = serviceDescriptor.GetServiceId();
+    dto->name = serviceDescriptor.GetServiceName();
+    dto->networkName = serviceDescriptor.GetNetworkName();
+
+    const auto controllerType = GetControllerType(serviceDescriptor);
+    if (controllerType == SilKit::Core::Discovery::controllerTypeDataSubscriberInternal)
+    {
+        dto->parentId = GetSupplementalDataValueAsEndpointId(
+            serviceDescriptor, SilKit::Core::Discovery::supplKeyDataSubscriberInternalParentServiceID);
+    }
+    else if (controllerType == SilKit::Core::Discovery::controllerTypeRpcServerInternal)
+    {
+        dto->parentId = GetSupplementalDataValueAsEndpointId(
+            serviceDescriptor, SilKit::Core::Discovery::supplKeyRpcServerInternalParentServiceID);
+    }
+    else
+    {
+        throw SilKitError{"Unexpected controller type " + controllerType};
+    }
+
+    return dto;
+}
+
+auto SilKitToOatppMapper::CreateBulkSimulationDto(const DashboardBulkUpdate& bulkUpdate) -> Object<BulkSimulationDto>
+{
+    auto bulkSimulationDto = BulkSimulationDto::CreateEmpty();
+
+    if (bulkUpdate.stopped)
+    {
+        bulkSimulationDto->stopped = static_cast<std::int64_t>(*bulkUpdate.stopped);
+    }
+
+    for (const auto& systemState : bulkUpdate.systemStates)
+    {
+        bulkSimulationDto->system->statuses->emplace_back(CreateSystemStatusDto(systemState));
+    }
+
+    std::unordered_map<std::string, BulkParticipantDto::Wrapper> nameToBulkParticipantDto;
+
+    const auto getOrCreateParticipantDto = [&nameToBulkParticipantDto](const std::string& name) -> BulkParticipantDto& {
+        auto it = nameToBulkParticipantDto.find(name);
+        if (it == nameToBulkParticipantDto.end())
+        {
+            auto dto = BulkParticipantDto::CreateEmpty();
+            dto->name = name;
+
+            it = nameToBulkParticipantDto.emplace(name, std::move(dto)).first;
+        }
+        return *it->second.get();
+    };
+
+    for (const auto& participantConnectionInformation : bulkUpdate.participantConnectionInformations)
+    {
+        (void)getOrCreateParticipantDto(participantConnectionInformation.participantName);
+    }
+
+    for (const auto& participantStatus : bulkUpdate.participantStatuses)
+    {
+        auto& dto = getOrCreateParticipantDto(participantStatus.participantName);
+        dto.statuses->emplace_back(CreateParticipantStatusDto(participantStatus));
+    }
+
+    for (const auto& serviceData : bulkUpdate.serviceDatas)
+    {
+        if (serviceData.discoveryType != Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated)
+        {
+            continue;
+        }
+
+        const auto& serviceDescriptor = serviceData.serviceDescriptor;
+        auto& dto = getOrCreateParticipantDto(serviceDescriptor.GetParticipantName());
+
+        ProcessServiceDiscovery(dto, serviceDescriptor);
+    }
+
+    for (auto& pair : nameToBulkParticipantDto)
+    {
+        bulkSimulationDto->participants->emplace_back(pair.second);
+    }
+
+    return bulkSimulationDto;
+}
+
+// SilKitToOatppMapper Private Methods
+
+void SilKitToOatppMapper::ProcessServiceDiscovery(BulkParticipantDto& dto, const ServiceDescriptor& serviceDescriptor)
+{
+    switch (serviceDescriptor.GetServiceType())
+    {
+    case SilKit::Core::ServiceType::Controller:
+        ProcessControllerDiscovery(dto, serviceDescriptor);
+        break;
+    case SilKit::Core::ServiceType::Link:
+        ProcessLinkDiscovery(dto, serviceDescriptor);
+        break;
+    default:
+        break;
+    }
+}
+
+void SilKitToOatppMapper::ProcessControllerDiscovery(BulkParticipantDto& dto,
+                                                     const ServiceDescriptor& serviceDescriptor)
+{
+    const auto controllerType = GetControllerType(serviceDescriptor);
+
+    // Bus Controllers
+    if (controllerType == SilKit::Core::Discovery::controllerTypeCan)
+    {
+        dto.canControllers->emplace_back(CreateBulkControllerDto(serviceDescriptor));
+    }
+    else if (controllerType == SilKit::Core::Discovery::controllerTypeEthernet)
+    {
+        dto.ethernetControllers->emplace_back(CreateBulkControllerDto(serviceDescriptor));
+    }
+    else if (controllerType == SilKit::Core::Discovery::controllerTypeFlexray)
+    {
+        dto.flexrayControllers->emplace_back(CreateBulkControllerDto(serviceDescriptor));
+    }
+    else if (controllerType == SilKit::Core::Discovery::controllerTypeLin)
+    {
+        dto.linControllers->emplace_back(CreateBulkControllerDto(serviceDescriptor));
+    }
+    // PubSub Services
+    else if (controllerType == SilKit::Core::Discovery::controllerTypeDataPublisher)
+    {
+        dto.dataPublishers->emplace_back(CreateBulkDataServiceDto(serviceDescriptor));
+    }
+    else if (controllerType == SilKit::Core::Discovery::controllerTypeDataSubscriber)
+    {
+        dto.dataSubscribers->emplace_back(CreateBulkDataServiceDto(serviceDescriptor));
+    }
+    else if (controllerType == SilKit::Core::Discovery::controllerTypeDataSubscriberInternal)
+    {
+        dto.dataSubscriberInternals->emplace_back(CreateBulkServiceInternalDto(serviceDescriptor));
+    }
+    // RPC Services
+    else if (controllerType == SilKit::Core::Discovery::controllerTypeRpcClient)
+    {
+        dto.rpcClients->emplace_back(CreateBulkRpcServiceDto(serviceDescriptor));
+    }
+    else if (controllerType == SilKit::Core::Discovery::controllerTypeRpcServer)
+    {
+        dto.rpcServers->emplace_back(CreateBulkRpcServiceDto(serviceDescriptor));
+    }
+    else if (controllerType == SilKit::Core::Discovery::controllerTypeRpcServerInternal)
+    {
+        dto.rpcServerInternals->emplace_back(CreateBulkServiceInternalDto(serviceDescriptor));
+    }
+    // Everything Else
+    else
+    {
+        throw SilKitError{"Unexpected controller type " + controllerType};
+    }
+}
+
+void SilKitToOatppMapper::ProcessLinkDiscovery(BulkParticipantDto& dto, const ServiceDescriptor& serviceDescriptor)
+{
+    switch (serviceDescriptor.GetNetworkType())
+    {
+    case SilKit::Config::NetworkType::CAN:
+        dto.canNetworks->emplace_back(serviceDescriptor.GetNetworkName());
+        break;
+    case SilKit::Config::NetworkType::Ethernet:
+        dto.ethernetNetworks->emplace_back(serviceDescriptor.GetNetworkName());
+        break;
+    case SilKit::Config::NetworkType::FlexRay:
+        dto.flexrayNetworks->emplace_back(serviceDescriptor.GetNetworkName());
+        break;
+    case SilKit::Config::NetworkType::LIN:
+        dto.linNetworks->emplace_back(serviceDescriptor.GetNetworkName());
+        break;
+    default:
+        break;
+    }
+}
+
 
 } // namespace Dashboard
 } // namespace SilKit

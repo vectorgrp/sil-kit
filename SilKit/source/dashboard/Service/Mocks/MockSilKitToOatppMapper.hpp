@@ -28,6 +28,11 @@ namespace SilKit {
 namespace Dashboard {
 class MockSilKitToOatppMapper : public ISilKitToOatppMapper
 {
+    using ServiceDescriptor = SilKit::Core::ServiceDescriptor;
+
+    template <typename T>
+    using Object = oatpp::Object<T>;
+
 public:
     MOCK_METHOD(oatpp::Object<SilKit::Dashboard::SimulationCreationRequestDto>, CreateSimulationCreationRequestDto,
                 (const std::string&, uint64_t), (override));
@@ -46,6 +51,12 @@ public:
     MOCK_METHOD(oatpp::Object<SilKit::Dashboard::RpcServerDto>, CreateRpcServerDto,
                 (const SilKit::Core::ServiceDescriptor&), (override));
     MOCK_METHOD(oatpp::Object<SimulationEndDto>, CreateSimulationEndDto, (uint64_t), (override));
+
+    MOCK_METHOD(Object<BulkControllerDto>, CreateBulkControllerDto, (const ServiceDescriptor&), (override));
+    MOCK_METHOD(Object<BulkDataServiceDto>, CreateBulkDataServiceDto, (const ServiceDescriptor&), (override));
+    MOCK_METHOD(Object<BulkRpcServiceDto>, CreateBulkRpcServiceDto, (const ServiceDescriptor&), (override));
+    MOCK_METHOD(Object<BulkServiceInternalDto>, CreateBulkServiceInternalDto, (const ServiceDescriptor&), (override));
+    MOCK_METHOD(Object<BulkSimulationDto>, CreateBulkSimulationDto, (const DashboardBulkUpdate&), (override));
 };
 } // namespace Dashboard
 } // namespace SilKit

@@ -44,6 +44,8 @@ public:
     oatpp::Object<SimulationCreationResponseDto> CreateSimulation(
         oatpp::Object<SimulationCreationRequestDto> simulation) override;
 
+    void UpdateSimulation(oatpp::UInt64 simulationId, oatpp::Object<BulkSimulationDto> bulkSimulation) override;
+
     void AddParticipantToSimulation(oatpp::UInt64 simulationId, oatpp::String participantName) override;
 
     void AddParticipantStatusForSimulation(oatpp::UInt64 simulationId, oatpp::String participantName,

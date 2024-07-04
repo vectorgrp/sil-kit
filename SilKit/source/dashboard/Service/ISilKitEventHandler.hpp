@@ -21,11 +21,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #pragma once
 
-#include "silkit/services/orchestration/OrchestrationDatatypes.hpp"
-#include "ServiceDatatypes.hpp"
+#include "DashboardBulkUpdate.hpp"
+
+#include <string>
 
 namespace SilKit {
 namespace Dashboard {
+
 class ISilKitEventHandler
 {
 public:
@@ -41,6 +43,9 @@ public:
     virtual void OnServiceDiscoveryEvent(uint64_t simulationId,
                                          Core::Discovery::ServiceDiscoveryEvent::Type discoveryType,
                                          const Core::ServiceDescriptor& serviceDescriptor) = 0;
+
+    virtual void OnBulkUpdate(uint64_t simulationId, const DashboardBulkUpdate& bulkUpdate) = 0;
 };
+
 } // namespace Dashboard
 } // namespace SilKit

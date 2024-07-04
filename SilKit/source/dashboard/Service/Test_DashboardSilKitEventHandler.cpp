@@ -691,5 +691,33 @@ TEST_F(Test_DashboardSilKitEventHandler, OnServiceDiscoveryEvent_Invalid_Ignore)
                                      descriptor);
 }
 
+TEST_F(Test_DashboardSilKitEventHandler, OnBulkUpdate)
+{
+    constexpr uint64_t expectedSimulationId{123};
+    const auto expectedBulkSimulationDto = SilKit::Dashboard::BulkSimulationDto::CreateEmpty();
+
+    // Arrange
+    const auto service = CreateService();
+
+    using testing::_;
+    EXPECT_CALL(*_mockSilKitToOatppMapper, CreateBulkSimulationDto(_)).WillOnce(Return(expectedBulkSimulationDto));
+
+    oatpp::UInt64 simulationId;
+    oatpp::Object<BulkSimulationDto> bulkSimulationDto;
+    EXPECT_CALL(*_mockDashboardSystemServiceClient, UpdateSimulation)
+        .WillOnce(WithArgs<0, 1>([&](oatpp::UInt64 simulationId_, oatpp::Object<BulkSimulationDto> bulkSimulation_) {
+        simulationId = std::move(simulationId_);
+        bulkSimulationDto = std::move(bulkSimulation_);
+    }));
+
+    // Act
+    service->OnBulkUpdate(expectedSimulationId, SilKit::Dashboard::DashboardBulkUpdate{});
+
+    // Assert
+    ASSERT_EQ(simulationId.getValue(0), expectedSimulationId);
+    ASSERT_NE(bulkSimulationDto.getPtr(), nullptr);
+    ASSERT_EQ(bulkSimulationDto, expectedBulkSimulationDto);
+}
+
 } // namespace Dashboard
 } // namespace SilKit

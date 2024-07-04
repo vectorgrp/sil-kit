@@ -28,6 +28,11 @@ namespace Dashboard {
 
 class SilKitToOatppMapper : public ISilKitToOatppMapper
 {
+    using ServiceDescriptor = SilKit::Core::ServiceDescriptor;
+
+    template <typename T>
+    using Object = oatpp::Object<T>;
+
 public:
     oatpp::Object<SimulationCreationRequestDto> CreateSimulationCreationRequestDto(const std::string& connectUri,
                                                                                    uint64_t start) override;
@@ -40,6 +45,18 @@ public:
     oatpp::Object<RpcClientDto> CreateRpcClientDto(const Core::ServiceDescriptor& serviceDescriptor) override;
     oatpp::Object<RpcServerDto> CreateRpcServerDto(const Core::ServiceDescriptor& serviceDescriptor) override;
     oatpp::Object<SimulationEndDto> CreateSimulationEndDto(uint64_t stop) override;
+
+    auto CreateBulkControllerDto(const ServiceDescriptor& serviceDescriptor) -> Object<BulkControllerDto> override;
+    auto CreateBulkDataServiceDto(const ServiceDescriptor& serviceDescriptor) -> Object<BulkDataServiceDto> override;
+    auto CreateBulkRpcServiceDto(const ServiceDescriptor& serviceDescriptor) -> Object<BulkRpcServiceDto> override;
+    auto CreateBulkServiceInternalDto(const ServiceDescriptor& serviceDescriptor)
+        -> Object<BulkServiceInternalDto> override;
+    auto CreateBulkSimulationDto(const DashboardBulkUpdate& bulkUpdate) -> Object<BulkSimulationDto> override;
+
+private:
+    void ProcessServiceDiscovery(BulkParticipantDto& dto, const ServiceDescriptor& serviceDescriptor);
+    void ProcessControllerDiscovery(BulkParticipantDto& dto, const ServiceDescriptor& serviceDescriptor);
+    void ProcessLinkDiscovery(BulkParticipantDto& dto, const ServiceDescriptor& serviceDescriptor);
 };
 
 } // namespace Dashboard

@@ -95,6 +95,8 @@ if(SILKIT_BUILD_DASHBOARD)
         CreateDashboard.cpp
         Dashboard.cpp
         Dashboard.hpp
+        DashboardBulkUpdate.cpp
+        DashboardBulkUpdate.hpp
         DashboardParticipant.cpp
         DashboardParticipant.hpp
         IDashboard.hpp
