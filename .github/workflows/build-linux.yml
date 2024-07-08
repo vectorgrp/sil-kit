@@ -39,7 +39,7 @@ jobs:
     environment: public-github-runners
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/mariusbgm/sil-kit-ci-ubuntu-18.04:main
+      image: ghcr.io/mariusbgm/sil-kit-ci-ubuntu-22.04:main
     if: inputs.run_build == true
     steps:
       - name: git checkout
