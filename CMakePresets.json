@@ -3,152 +3,23 @@
     "configurePresets": [
         {
             "name": "base-env",
-            "description": "Basic preset that defines global variables",
             "hidden": true,
-            "generator": "Ninja",
-            "binaryDir": "${sourceDir}/_build/$env{SILKIT_CMAKE_PRESET_NAME}",
-            "installDir": "${sourceDir}/_install/$env{SILKIT_CMAKE_PRESET_NAME}",
-            "environment": {
-                "SILKIT_CMAKE_PRESET_NAME": "$env{SILKIT_CMAKE_PRESET_BUILD_PLATFORM}-$env{SILKIT_CMAKE_PRESET_ARCHITECTURE}-$env{SILKIT_CMAKE_PRESET_BUILD_TYPE}"
-            },
-            "cacheVariables": { "CMAKE_BUILD_TYPE": "$env{SILKIT_CMAKE_PRESET_BUILD_TYPE}" }
-        },
-        {
-            "name": "linux-base",
-            "displayName": "Linux Base Configuration",
-            "description": "Target the Windows Subsystem for Linux (WSL) or a remote Linux system.",
-            "inherits": "base-env",
-            "hidden": true,
-            "environment": {
-                "SILKIT_CMAKE_PRESET_ARCHITECTURE": "x86_64",
-                "SILKIT_CMAKE_PRESET_BUILD_PLATFORM": "linux"
-            },
-            "condition": {
-                "type": "equals",
-                "lhs": "${hostSystemName}",
-                "rhs": "Linux"
-            },
-            "vendor": {
-                "microsoft.com/VisualStudioRemoteSettings/CMake/1.0": {
-                    "sourceDir": "$env{HOME}/.vs/$ms{projectDirName}",
-                    "rsyncCommandArgs": [ "--exclude", "_build" ]
-                }
-            }
-        },
-        {
-            "name": "linux-debug",
-            "displayName": "Linux Debug",
-            "description": "Target the Windows Subsystem for Linux (WSL) or a remote Linux system.",
-            "inherits": "linux-base",
-            "environment": {
-                "SILKIT_CMAKE_PRESET_BUILD_TYPE": "Debug"
-            }
-        },
-        {
-            "name": "linux-release",
-            "displayName": "Linux Release",
-            "description": "Target the Windows Subsystem for Linux (WSL) or a remote Linux system.",
-            "inherits": "linux-base",
-            "environment": {
-                "SILKIT_CMAKE_PRESET_BUILD_TYPE": "Release"
-            }
-        },
-        {
-            "name": "linux-relwithdebinfo",
-            "displayName": "Linux Release with Debug Info",
-            "description": "Target the Windows Subsystem for Linux (WSL) or a remote Linux system.",
-            "inherits": "linux-base",
-            "environment": {
-                "SILKIT_CMAKE_PRESET_BUILD_TYPE": "RelWithDebInfo"
+            "inherits": ["mixin-dirs", "mixin-ninja"],
+            "architecture": {
+                "value": "x64",
+                "strategy": "external"
             }
         },
         {
             "name": "windows-base",
-            "description": "Target Windows with the Visual Studio development environment.",
             "inherits": "base-env",
             "hidden": true,
-            "cacheVariables": {
-                "CMAKE_C_COMPILER": "cl.exe",
-                "CMAKE_CXX_COMPILER": "cl.exe"
-            },
-            "environment": {
-                "SILKIT_CMAKE_PRESET_BUILD_PLATFORM": "win"
-            },
             "condition": {
                 "type": "equals",
                 "lhs": "${hostSystemName}",
                 "rhs": "Windows"
             }
         },
-        {
-            "name": "x64-debug",
-            "displayName": "x64 Debug",
-            "description": "Target Windows (64-bit) with the Visual Studio development environment. (Debug)",
-            "inherits": "windows-base",
-            "architecture": {
-                "value": "x64",
-                "strategy": "external"
-            },
-            "environment": {
-                "SILKIT_CMAKE_PRESET_BUILD_TYPE": "Debug",
-                "SILKIT_CMAKE_PRESET_ARCHITECTURE": "x64"
-            }
-        },
-        {
-            "name": "x64-release",
-            "displayName": "x64 Release",
-            "description": "Target Windows (64-bit) with the Visual Studio development environment. (Release)",
-            "inherits": "x64-debug",
-            "environment": {
-                "SILKIT_CMAKE_PRESET_BUILD_TYPE": "Release"
-            }
-        },
-        {
-            "name": "x64-relwithdebinfo",
-            "description": "Target Windows (64-bit) with the Visual Studio development environment. (RelWithDebInfo)",
-            "inherits": "x64-debug",
-            "environment": {
-                "SILKIT_CMAKE_PRESET_BUILD_TYPE": "RelWithDebInfo"
-            },
-            "cacheVariables": {
-                "SILKIT_PACKAGE_SYMBOLS": "OFF"
-            }
-        },
-        {
-            "name": "x86-debug",
-            "displayName": "x86 Debug",
-            "description": "Target Windows (32-bit) with the Visual Studio development environment. (Debug)",
-            "inherits": "windows-base",
-            "architecture": {
-                "value": "x86",
-                "strategy": "external"
-            },
-            "environment": {
-                "SILKIT_CMAKE_PRESET_BUILD_TYPE": "Debug",
-                "SILKIT_CMAKE_PRESET_ARCHITECTURE": "x86"
-            }
-        },
-        {
-            "name": "x86-release",
-            "displayName": "x86 Release",
-            "description": "Target Windows (32-bit) with the Visual Studio development environment. (Release)",
-            "inherits": "x86-debug",
-            "environment": {
-                "SILKIT_CMAKE_PRESET_BUILD_TYPE": "Release"
-            }
-        },
-        {
-            "name": "x86-relwithdebinfo",
-            "displayName": "x86 Release with Debug Info",
-            "description": "Target Windows (32-bit) with the Visual Studio development environment. (RelWithDebInfo)",
-            "inherits": "x86-debug",
-            "environment": {
-                "SILKIT_CMAKE_PRESET_BUILD_TYPE": "RelWithDebInfo"
-            }
-        },
-
-
-
         {
             "name": "mixin-ninja",
             "description": "Use Ninja Generator",
@@ -166,43 +37,6 @@
                     "sourceDir": "$env{HOME}/.vs/$ms{projectDirName}",
                     "rsyncCommandArgs": [ "--copy-links", "--exclude", "_build" ]
                 }
-            }
-        },
-        {
-            "name": "mixin-posix",
-            "description": "Target Posix like",
-            "hidden": true,
-            "condition": {
-                "type": "notEquals",
-                "lhs": "${hostSystemName}",
-                "rhs": "Windows"
-            }
-        },
-
-        {
-            "name": "mixin-asan",
-            "description": "Enable Adress sanitizer",
-            "hidden": true,
-            "cacheVariables": {
-                "SILKIT_ENABLE_ASAN": "ON"
-            }
-        },
-        {
-            "name": "mixin-ubsan",
-            "description": "Enable UB sanitizer",
-            "hidden": true,
-            "cacheVariables": {
-                "SILKIT_ENABLE_UBSAN": "ON"
-            }
-        },
-
-        {
-            "name": "mixin-tsan",
-            "description": "Enable Thread sanitizer, don't split symbols",
-            "hidden": true,
-            "cacheVariables": {
-                "SILKIT_ENABLE_THREADSAN": "ON",
-                "SILKIT_PACKAGE_SYMBOLS": "OFF"
             }
         },
 
@@ -231,81 +65,6 @@
                 "SILKIT_BUILD_DOCS": "ON"
             }
         },
-        {
-            "name": "mixin-gcc",
-            "description": "Target GCC",
-            "hidden": true,
-            "cacheVariables": {
-                "CMAKE_C_COMPILER": "gcc",
-                "CMAKE_CXX_COMPILER": "g++"
-            }
-        },
-        {
-            "name": "mixin-gcc8",
-            "description": "Target GCC-8",
-            "hidden": true,
-            "cacheVariables": {
-                "CMAKE_C_COMPILER": "gcc-8",
-                "CMAKE_CXX_COMPILER": "g++-8"
-            }
-        },
-        {
-            "name": "mixin-gcc9",
-            "description": "Target GCC-9",
-            "hidden": true,
-            "cacheVariables": {
-                "CMAKE_C_COMPILER": "gcc-9",
-                "CMAKE_CXX_COMPILER": "g++-9"
-            }
-        },
-
-
-        {
-            "name": "mixin-clang10",
-            "description": "Target clang 10",
-            "hidden": true,
-            "cacheVariables": {
-                "CMAKE_C_COMPILER": "clang-10",
-                "CMAKE_CXX_COMPILER": "clang++-10"
-            }
-        },
-        {
-            "name": "mixin-clang12",
-            "description": "Target clang 12",
-            "hidden": true,
-            "cacheVariables": {
-                "CMAKE_C_COMPILER": "clang-12",
-                "CMAKE_CXX_COMPILER": "clang++-12"
-            }
-        },
-        {
-            "name": "mixin-clang14",
-            "description": "Target clang 14",
-            "hidden": true,
-            "cacheVariables": {
-                "CMAKE_C_COMPILER": "clang-14",
-                "CMAKE_CXX_COMPILER": "clang++-14"
-            }
-        },
-        {
-            "name": "mixin-clang15",
-            "description": "Target clang 15",
-            "hidden": true,
-            "cacheVariables": {
-                "CMAKE_C_COMPILER": "clang-15",
-                "CMAKE_CXX_COMPILER": "clang++-15"
-            }
-        },
-        {
-            "name": "mixin-clang",
-            "description": "Target clang",
-            "hidden": true,
-            "cacheVariables": {
-                "CMAKE_C_COMPILER": "clang",
-                "CMAKE_CXX_COMPILER": "clang++"
-            }
-        },
-
         {
             "name": "mixin-windows",
             "description": "Target Windows with the Visual Studio development environment.",
@@ -369,306 +128,112 @@
             }
         },
         {
-            "name": "mixin-arch-x64",
-            "description": "Set MSVC arch x64",
-            "hidden": true,
-            "architecture": {
-                "value": "x64",
-                "strategy": "external"
-            }
-        },
-        {
-            "name": "mixin-arch-x86",
-            "description": "Set MSVC arch x86",
-            "hidden": true,
+            "name": "vs141-x86-debug",
+            "inherits": [ "mixin-windows", "base-env",  "mixin-toolset-v141", "mixin-debug", "mixin-werror" ],
             "architecture": {
                 "value": "x86",
                 "strategy": "external"
             }
         },
         {
-            "name": "mixin-crossarmeabihf",
-            "description": "Crossbuild with toolchain file",
-            "hidden": true,
-            "toolchainFile": "${sourceDir}/SilKit/cmake/toolchain-arm-linux-gnueabihf.cmake"
-        },
-
-        {
-            "name": "mixin-crossarmeabi",
-            "description": "Crossbuild with toolchain file",
-            "hidden": true,
-            "toolchainFile": "${sourceDir}/SilKit/cmake/toolchain-arm-linux-gnueabi.cmake"
-        },
-        {
-            "name": "vs140-x86-debug",
-            "inherits": [ "mixin-windows", "mixin-dirs", "mixin-ninja", "mixin-arch-x86", "mixin-toolset-v140", "mixin-debug", "mixin-werror" ]
-        },
-        {
-            "name": "vs140-x86-release",
-            "inherits": [ "mixin-release", "vs140-x86-debug" ]
-        },
-        {
-            "name": "vs140-x86-relwithdebinfo",
-            "inherits": [ "mixin-relwithdebinfo", "vs140-x86-debug" ]
-        },
-        {
-            "name": "vs140-x64-debug",
-            "inherits": [ "mixin-arch-x64", "vs140-x86-debug" ]
-        },
-        {
-            "name": "vs140-x64-release",
-            "inherits": [ "mixin-release", "vs140-x64-debug" ]
-        },
-        {
-            "name": "vs140-x64-relwithdebinfo",
-            "inherits": [ "mixin-relwithdebinfo", "vs140-x64-debug" ]
-        },
-
-        {
-            "name": "vs141-x86-debug",
-            "inherits": [ "mixin-windows", "mixin-dirs", "mixin-ninja", "mixin-arch-x86", "mixin-toolset-v141", "mixin-debug", "mixin-werror" ]
-        },
-        {
             "name": "vs141-x86-release",
-            "inherits": [ "mixin-release", "vs141-x86-debug" ]
+            "inherits": [ "mixin-release", "vs141-x86-debug", "mixin-werror" ],
+            "architecture": {
+                "value": "x86",
+                "strategy": "external"
+            }
         },
         {
             "name": "vs141-x86-relwithdebinfo",
-            "inherits": [ "mixin-relwithdebinfo", "vs141-x86-debug" ]
+            "inherits": [ "mixin-relwithdebinfo", "vs141-x86-debug", "mixin-werror" ],
+            "architecture": {
+                "value": "x86",
+                "strategy": "external"
+            }
         },
         {
             "name": "vs141-x64-debug",
-            "inherits": [ "mixin-arch-x64", "vs141-x86-debug" ]
+            "inherits": [ "vs141-x86-debug" ],
+            "architecture": {
+                "value": "x64",
+                "strategy": "external"
+            }
         },
         {
             "name": "vs141-x64-release",
-            "inherits": [ "mixin-release", "vs141-x64-debug" ]
+            "inherits": [ "mixin-release", "vs141-x64-debug", "mixin-werror" ],
+            "architecture": {
+                "value": "x64",
+                "strategy": "external"
+            }
         },
         {
             "name": "vs141-x64-relwithdebinfo",
-            "inherits": [ "mixin-relwithdebinfo", "vs141-x64-debug" ]
+            "inherits": [ "mixin-relwithdebinfo", "vs141-x64-debug", "mixin-werror" ],
+            "architecture": {
+                "value": "x64",
+                "strategy": "external"
+            }
         },
 
         {
-            "name": "gcc-debug",
-            "inherits": [ "mixin-posix", "mixin-dirs", "mixin-ninja", "mixin-debug", "mixin-gcc", "mixin-werror" ]
-        },
-
-        {
-            "name": "gcc-release",
-            "inherits": [ "mixin-release", "gcc-debug", "mixin-build-docs" ]
-        },
-
-        {
-            "name": "gcc8-debug",
-            "inherits": [ "mixin-posix", "mixin-dirs", "mixin-ninja", "mixin-debug", "mixin-gcc8", "mixin-werror" ]
-        },
-
-        {
-            "name": "gcc8-release",
-            "inherits": [ "mixin-release", "gcc8-debug", "mixin-build-docs" ]
-        },
-
-        {
-            "name": "gcc8-relwithdebinfo",
-            "inherits": [ "mixin-relwithdebinfo", "gcc8-debug", "mixin-build-docs" ]
-        },
-
-        {
-            "name": "gcc9-debug",
-            "inherits": [ "mixin-posix", "mixin-dirs", "mixin-ninja", "mixin-debug", "mixin-gcc9" ]
+            "name": "debug",
+            "inherits": [ "base-env", "mixin-debug" ]
         },
         {
-            "name": "gcc9-release",
-            "inherits": [ "mixin-release", "gcc9-debug", "mixin-build-docs" ]
+            "name": "release",
+            "inherits": [ "mixin-release", "debug", "mixin-build-docs", "mixin-werror" ]
         },
         {
-            "name": "gcc9-relwithdebinfo",
-            "inherits": [ "mixin-relwithdebinfo", "gcc9-debug", "mixin-build-docs" ]
+            "name": "relwithdebinfo",
+            "inherits": [ "mixin-relwithdebinfo", "debug", "mixin-build-docs", "mixin-werror" ]
         },
         {
-            "name": "clang10-debug",
-            "inherits": [ "mixin-clang10", "gcc9-debug" ]
-        },
-        {
-            "name": "clang10-release",
-            "inherits": [ "mixin-release", "clang10-debug" ]
-        },
-        {
-            "name": "clang12-debug",
-            "inherits": [ "mixin-clang12", "gcc9-debug" ]
-        },
-        {
-            "name": "clang12-release",
-            "inherits": [ "mixin-release", "clang12-debug" ]
-        },
-        {
-            "name": "clang12-relwithdebinfo",
-            "inherits": [ "mixin-relwithdebinfo", "clang12-debug" ]
-        },
-        {
-            "name": "clang14-debug",
-            "inherits": [ "mixin-clang14", "gcc9-debug" ]
-        },
-        {
-            "name": "clang14-release",
-            "inherits": [ "mixin-release", "clang14-debug" ]
-        },
-        {
-            "name": "clang14-relwithdebinfo",
-            "inherits": [ "mixin-relwithdebinfo", "clang14-debug" ]
-        },
-
-        {
-            "name": "clang15-debug",
-            "inherits": [ "mixin-clang15", "gcc9-debug" ]
-        },
-        {
-            "name": "clang15-release",
-            "inherits": [ "mixin-release", "clang15-debug" ]
-        },
-        {
-            "name": "clang15-relwithdebinfo",
-            "inherits": [ "mixin-relwithdebinfo", "clang15-debug" ]
-        },
-
-        {
-            "name": "clang-debug",
-            "inherits": [ "mixin-clang", "gcc9-debug" ]
-        },
-        {
-            "name": "clang-release",
-            "inherits": [ "mixin-release", "clang-debug" ]
-        },
-        {
-            "name": "clang-relwithdebinfo",
-            "inherits": [ "mixin-relwithdebinfo", "clang-debug" ]
-        },
-
-        {
-            "name": "clang12-asan-debug",
-            "inherits": [ "clang12-debug", "mixin-asan", "mixin-nosplitdebug" ]
-        },
-        {
-            "name": "clang12-tsan-debug",
-            "inherits": [ "clang12-debug", "mixin-tsan", "mixin-nosplitdebug" ]
-        },
-        {
-            "name": "clang12-ubsan-debug",
-            "inherits": [ "clang12-debug", "mixin-ubsan", "mixin-nosplitdebug" ]
-        },
-        {
-            "name": "clang15-asan-debug",
-            "inherits": [ "clang15-debug", "mixin-asan", "mixin-nosplitdebug" ]
-        },
-        {
-            "name": "clang15-tsan-debug",
-            "inherits": [ "clang15-debug", "mixin-tsan", "mixin-nosplitdebug" ]
-        },
-        {
-            "name": "clang15-ubsan-debug",
-            "inherits": [ "clang15-debug", "mixin-ubsan", "mixin-nosplitdebug" ]
-        },
-        {
-            "name": "cross-armeabihf-debug",
-            "inherits": [ "mixin-crossarmeabihf", "gcc9-debug" ],
-            "displayName": "Debian cross build for GNU arm eabihf"
-        },
-        {
-            "name": "cross-armeabi-debug",
-            "inherits": [ "mixin-crossarmeabi", "gcc9-debug", "mixin-nosplitdebug" ],
-            "displayName": "Debian cross build for GNU arm eabi"
-        },
-        {
-            "name": "cross-qnx-x86_64",
-            "displayName": "QNX cross-build x86_64",
-            "generator": "Unix Makefiles",
-            "environment": {
-                "SILKIT_CMAKE_PRESET_BUILD_PLATFORM": "qnx"
-            },
-            "toolchainFile": "${sourceDir}/SilKit/cmake/toolchain-qnx-x86_64.cmake",
-            "binaryDir": "${sourceDir}/_build/${presetName}",
-            "cacheVariables": {
-                "SILKIT_BUILD_DASHBOARD": "OFF"
-            },
-            "vendor": {
-                "microsoft.com/VisualStudioRemoteSettings/CMake/1.0": {
-                    "sourceDir": "$env{HOME}/.vs/$ms{projectDirName}",
-                    "rsyncCommandArgs": [ "--exclude", "_build" ]
-                }
+            "name": "debug-x86",
+            "inherits": ["mixin-debug","windows-base"],
+            "architecture": {
+                "value": "x86",
+                "strategy": "external"
             }
         },
         {
-            "inherits": "cross-qnx-x86_64",
-            "name": "cross-qnx-armv7",
-            "displayName": "QNX cross-build armv7",
-            "toolchainFile": "${sourceDir}/SilKit/cmake/toolchain-qnx-armv7.cmake"
+            "name": "release-x86",
+            "inherits": ["mixin-release", "debug-x86", "mixin-werror"]
         },
         {
-            "inherits": "cross-qnx-x86_64",
-            "name": "cross-qnx-aarch64",
-            "displayName": "QNX cross-build aarch64",
-            "toolchainFile": "${sourceDir}/SilKit/cmake/toolchain-qnx-aarch64.cmake"
+            "name": "relwithdebinfo-x86",
+            "inherits": ["mixin-relwithdebinfo", "debug-x86", "mixin-werror"]
+        },
+
+        {
+            "name": "addresssan",
+            "inherits": [ "mixin-debug", "mixin-dirs",  "mixin-nosplitdebug" ],
+            "cacheVariables": { "SILKIT_ENABLE_ASAN": "ON","SILKIT_BUILD_DASHBOARD": "OFF"  }
+        },
+        {
+            "name": "threadsan",
+            "inherits": [ "mixin-debug", "mixin-dirs", "mixin-nosplitdebug" ],
+            "cacheVariables": { "SILKIT_ENABLE_THREADSAN": "ON", "SILKIT_PACKAGE_SYMBOLS": "OFF", "SILKIT_BUILD_DASHBOARD": "OFF" }
+        },
+        {
+            "name": "ubsan",
+            "inherits": [ "mixin-debug", "mixin-dirs", "mixin-nosplitdebug" ],
+            "cacheVariables": { "SILKIT_ENABLE_UBSAN": "ON", "SILKIT_BUILD_DASHBOARD": "OFF" }
         }
     ],
+
     "buildPresets": [
         {
-            "name": "linux-base",
-            "hidden": true,
-            "condition": {
-                "type": "equals",
-                "lhs": "${hostSystemName}",
-                "rhs": "Linux"
-            }
+            "name": "debug",
+            "configurePreset": "debug"
         },
         {
-            "name": "windows-base",
-            "hidden": true,
-            "condition": {
-                "type": "equals",
-                "lhs": "${hostSystemName}",
-                "rhs": "Windows"
-            }
-        },
-
-        {
-            "name": "linux-debug",
-            "inherits": "linux-base",
-            "configurePreset": "linux-debug"
+            "name": "release",
+            "configurePreset": "release"
         },
         {
-            "name": "linux-release",
-            "inherits": "linux-base",
-            "configurePreset": "linux-release"
-        },
-        {
-            "name": "linux-relwithdebinfo",
-            "inherits": "linux-base",
-            "configurePreset": "linux-relwithdebinfo"
-        },
-        {
-            "displayName": "1: x64-debug",
-            "name": "x64-debug",
-            "inherits": "windows-base",
-            "configurePreset": "x64-debug"
-        },
-        {
-            "displayName": "1: x64-release",
-            "name": "x64-release",
-            "inherits": "windows-base",
-            "configurePreset": "x64-release"
-        },
-        {
-            "displayName": "2: x86-debug",
-            "name": "x86-debug",
-            "inherits": "windows-base",
-            "configurePreset": "x86-debug"
-        },
-        {
-            "displayName": "2: x86-release",
-            "name": "x86-release",
-            "inherits": "windows-base",
-            "configurePreset": "x86-release"
+            "name": "relwithdebinfo",
+            "configurePreset": "relwithdebinfo"
         },
         {
             "name": "vs141-x86-debug",
@@ -688,222 +253,31 @@
         },
 
         {
-            "name": "gcc-debug",
-            "configurePreset": "gcc-debug"
+            "name": "ubsan",
+            "configurePreset": "ubsan"
         },
         {
-            "name": "gcc-release",
-            "configurePreset": "gcc-release"
-        },
-
-        {
-            "name": "gcc8-debug",
-            "configurePreset": "gcc8-debug"
+            "name": "threadsan",
+            "configurePreset": "threadsan"
         },
         {
-            "name": "gcc8-release",
-            "configurePreset": "gcc8-release"
-        },
-        {
-            "name": "gcc8-relwithdebinfo",
-            "configurePreset": "gcc8-relwithdebinfo"
-        },
-        {
-            "name": "gcc9-debug",
-            "configurePreset": "gcc9-debug"
-        },
-        {
-            "name": "gcc9-release",
-            "configurePreset": "gcc9-release"
-        },
-        {
-            "name": "gcc9-relwithdebinfo",
-            "configurePreset": "gcc9-relwithdebinfo"
-        },
-
-        {
-            "name": "clang10-debug",
-            "configurePreset": "clang10-debug"
-        },
-        {
-            "name": "clang10-release",
-            "configurePreset": "clang10-release"
-        },
-
-
-        {
-            "name": "clang12-debug",
-            "configurePreset": "clang12-debug"
-        },
-        {
-            "name": "clang12-release",
-            "configurePreset": "clang12-release"
-        },
-        {
-            "name": "clang12-relwithdebinfo",
-            "configurePreset": "clang12-relwithdebinfo"
-        },
-
-        {
-            "name": "clang14-debug",
-            "configurePreset": "clang14-debug"
-        },
-        {
-            "name": "clang14-release",
-            "configurePreset": "clang14-release"
-        },
-        {
-            "name": "clang14-relwithdebinfo",
-            "configurePreset": "clang14-relwithdebinfo"
-        },
-        {
-            "name": "clang15-debug",
-            "configurePreset": "clang15-debug"
-        },
-        {
-            "name": "clang15-release",
-            "configurePreset": "clang15-release"
-        },
-        {
-            "name": "clang15-relwithdebinfo",
-            "configurePreset": "clang15-relwithdebinfo"
-        },
-        {
-            "name": "clang-debug",
-            "configurePreset": "clang-debug"
-        },
-        {
-            "name": "clang-release",
-            "configurePreset": "clang-release"
-        },
-        {
-            "name": "clang-relwithdebinfo",
-            "configurePreset": "clang-relwithdebinfo"
-        },
-        {
-            "name": "clang12-asan-debug",
-            "configurePreset": "clang12-asan-debug"
-        },
-        {
-            "name": "clang12-tsan-debug",
-            "configurePreset": "clang12-tsan-debug"
-        },
-        {
-            "name": "clang12-ubsan-debug",
-            "configurePreset": "clang12-ubsan-debug"
-        },
-        {
-            "name": "clang15-asan-debug",
-            "configurePreset": "clang15-asan-debug"
-        },
-        {
-            "name": "clang15-tsan-debug",
-            "configurePreset": "clang15-tsan-debug"
-        },
-        {
-            "name": "clang15-ubsan-debug",
-            "configurePreset": "clang15-ubsan-debug"
-        },
-        {
-            "name": "cross-qnx-x86_64",
-            "configurePreset": "cross-qnx-x86_64"
-        },
-        {
-            "name": "cross-qnx-armv7",
-            "configurePreset": "cross-qnx-armv7"
-        },
-        {
-            "name": "cross-qnx-aarch64",
-            "configurePreset": "cross-qnx-aarch64"
-        },
-        {
-            "name": "cross-armeabihf-debug",
-            "configurePreset": "cross-armeabihf-debug"
-        },
-        {
-            "name": "cross-armeabi-debug",
-            "configurePreset": "cross-armeabi-debug"
+            "name": "addresssan",
+            "configurePreset": "addresssan"
         }
     ],
 
     "testPresets": [
         {
-            "name": "linux-base",
-            "hidden": true,
-            "condition": {
-                "type": "equals",
-                "lhs": "${hostSystemName}",
-                "rhs": "Linux"
-            }
-        },
-
-        {
-            "name": "windows-base",
-            "hidden": true,
-            "condition": {
-                "type": "equals",
-                "lhs": "${hostSystemName}",
-                "rhs": "Windows"
-            }
+            "name": "debug",
+            "configurePreset": "debug"
         },
         {
-            "name": "linux-debug",
-            "inherits": "linux-base",
-            "configurePreset": "linux-debug"
+            "name": "release",
+            "configurePreset": "release"
         },
         {
-            "name": "linux-release",
-            "inherits": "linux-base",
-            "configurePreset": "linux-release"
-        },
-        {
-            "name": "linux-relwithdebinfo",
-            "inherits": "linux-base",
-            "configurePreset": "linux-relwithdebinfo"
-        },
-        {
-            "name": "x64-debug",
-            "inherits": "windows-base",
-            "configurePreset": "x64-debug"
-        },
-        {
-            "name": "x64-release",
-            "inherits": "windows-base",
-            "configurePreset": "x64-release"
-        },
-        {
-            "name": "x86-debug",
-            "inherits": "windows-base",
-            "configurePreset": "x86-debug"
-        },
-        {
-            "name": "x86-release",
-            "inherits": "windows-base",
-            "configurePreset": "x86-release"
-        },
-        {
-            "name": "vs140-x86-debug",
-            "configurePreset": "vs140-x86-debug"
-        },
-        {
-            "name": "vs140-x86-release",
-            "configurePreset": "vs140-x86-release"
-        },
-        {
-            "name": "vs140-x86-relwithdebinfo",
-            "configurePreset": "vs140-x86-relwithdebinfo"
-        },
-        {
-            "name": "vs140-x64-debug",
-            "configurePreset": "vs140-x64-debug"
-        },
-        {
-            "name": "vs140-x64-release",
-            "configurePreset": "vs140-x64-release"
-        },
-        {
-            "name": "vs140-x64-relwithdebinfo",
-            "configurePreset": "vs140-x64-relwithdebinfo"
+            "name": "relwithdebinfo",
+            "configurePreset": "relwithdebinfo"
         },
         {
             "name": "vs141-x86-debug",
@@ -914,10 +288,6 @@
             "configurePreset": "vs141-x86-release"
         },
         {
-            "name": "vs141-x86-relwithdebinfo",
-            "configurePreset": "vs141-x86-relwithdebinfo"
-        },
-        {
             "name": "vs141-x64-debug",
             "configurePreset": "vs141-x64-debug"
         },
@@ -926,150 +296,16 @@
             "configurePreset": "vs141-x64-release"
         },
         {
-            "name": "vs141-x64-relwithdebinfo",
-            "configurePreset": "vs141-x64-relwithdebinfo"
-        },
-
-        {
-            "name": "gcc-debug",
-            "configurePreset": "gcc-debug"
+            "name": "addresssan",
+            "configurePreset": "addresssan"
         },
         {
-            "name": "gcc-release",
-            "configurePreset": "gcc-release"
-        },
-
-        {
-            "name": "gcc8-debug",
-            "configurePreset": "gcc8-debug"
+            "name": "threadsan",
+            "configurePreset": "threadsan"
         },
         {
-            "name": "gcc8-release",
-            "configurePreset": "gcc8-release"
-        },
-        {
-            "name": "gcc8-relwithdebinfo",
-            "configurePreset": "gcc8-relwithdebinfo"
-        },
-        {
-            "name": "gcc9-debug",
-            "configurePreset": "gcc9-debug"
-        },
-        {
-            "name": "gcc9-release",
-            "configurePreset": "gcc9-release"
-        },
-        {
-            "name": "gcc9-relwithdebinfo",
-            "configurePreset": "gcc9-relwithdebinfo"
-        },
-
-        {
-            "name": "clang10-debug",
-            "configurePreset": "clang10-debug"
-        },
-        {
-            "name": "clang10-release",
-            "configurePreset": "clang10-release"
-        },
-
-
-        {
-            "name": "clang12-debug",
-            "configurePreset": "clang12-debug"
-        },
-        {
-            "name": "clang12-release",
-            "configurePreset": "clang12-release"
-        },
-        {
-            "name": "clang12-relwithdebinfo",
-            "configurePreset": "clang12-relwithdebinfo"
-        },
-
-        {
-            "name": "clang14-debug",
-            "configurePreset": "clang14-debug"
-        },
-        {
-            "name": "clang14-release",
-            "configurePreset": "clang14-release"
-        },
-        {
-            "name": "clang14-relwithdebinfo",
-            "configurePreset": "clang14-relwithdebinfo"
-        },
-
-        {
-            "name": "clang15-debug",
-            "configurePreset": "clang15-debug"
-        },
-        {
-            "name": "clang15-release",
-            "configurePreset": "clang15-release"
-        },
-        {
-            "name": "clang15-relwithdebinfo",
-            "configurePreset": "clang15-relwithdebinfo"
-        },
-        {
-            "name": "clang-debug",
-            "configurePreset": "clang-debug"
-        },
-        {
-            "name": "clang-release",
-            "configurePreset": "clang-release"
-        },
-        {
-            "name": "clang-relwithdebinfo",
-            "configurePreset": "clang-relwithdebinfo"
-        },
-        {
-            "name": "clang12-asan-debug",
-            "configurePreset": "clang12-asan-debug"
-        },
-        {
-            "name": "clang12-tsan-debug",
-            "configurePreset": "clang12-tsan-debug"
-        },
-        {
-            "name": "clang12-ubsan-debug",
-            "configurePreset": "clang12-ubsan-debug"
-        },
-        {
-            "name": "clang15-asan-debug",
-            "configurePreset": "clang15-asan-debug"
-        },
-        {
-            "name": "clang15-tsan-debug",
-            "configurePreset": "clang15-tsan-debug"
-        },
-        {
-            "name": "clang15-ubsan-debug",
-            "configurePreset": "clang15-ubsan-debug"
-        },
-        {
-            "name": "cross-qnx-x86_64",
-            "configurePreset": "cross-qnx-x86_64"
-        },
-        {
-            "name": "cross-qnx-armv7",
-            "configurePreset": "cross-qnx-armv7"
-        },
-        {
-            "name": "cross-qnx-aarch64",
-            "configurePreset": "cross-qnx-aarch64"
-        },
-
-
-
-        {
-            "name": "cross-armeabihf-debug",
-            "configurePreset": "cross-armeabihf-debug"
-        },
-        {
-            "name": "cross-armeabi-debug",
-            "configurePreset": "cross-armeabi-debug"
+            "name": "ubsan",
+            "configurePreset": "ubsan"
         }
     ]
 }

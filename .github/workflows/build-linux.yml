@@ -30,7 +30,8 @@ jobs:
           submodules: true
       - uses: ./.github/actions/build-cmake-preset
         with:
-          preset-name: clang14-release
+          preset-name: release
+          cmake-args: "-D CMAKE_C_COMPILER=clang-14 -D CMAKE_CXX_COMPILER=clang++-14"
           do-package: ${{ inputs.do_package }}
           retention-days: ${{ inputs.retention_days }}
 
@@ -50,7 +51,7 @@ jobs:
         uses: ./.github/actions/build-cmake-preset
         id: build
         with:
-          preset-name: gcc-release
+          preset-name: release
           do-package: ${{ inputs.do_package }}
           retention-days: ${{ env.retention_days }}
 
