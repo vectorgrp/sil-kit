@@ -25,6 +25,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <iostream>
 #include <stdexcept>
 #include <string>
+#include <tuple>
 #include <vector>
 
 #include "silkit/participant/exception.hpp"
@@ -219,7 +220,7 @@ bool operator==(const Sink& lhs, const Sink& rhs)
 
 bool operator<(const Sink& lhs, const Sink& rhs)
 {
-    return lhs.logName.compare(rhs.logName) < 0;
+    return std::make_tuple(lhs.type, lhs.logName) < std::make_tuple(rhs.type, rhs.logName);
 }
 
 bool operator>(const Sink& lhs, const Sink& rhs)
