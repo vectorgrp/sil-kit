@@ -56,7 +56,9 @@ public:
     // Public interface methods
     //
     // ILogger
-    void Log(LoggerMessage& msg) override;
+    void Log( LoggerMessage& msg) override;
+
+    void Log(const LogMsg& msg) override;
 
     void Log(Level level, const std::string& msg) override;
 
@@ -85,7 +87,7 @@ private:
 
     std::shared_ptr<spdlog::logger> _loggerJson;
     std::shared_ptr<spdlog::logger> _loggerSimple;
-    std::shared_ptr<spdlog::sinks::sink> _remoteSink;
+    std::function<void(const LogMsg&)> _remoteSink;
 };
 
 } // namespace Logging

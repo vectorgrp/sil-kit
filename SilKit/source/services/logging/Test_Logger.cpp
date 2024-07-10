@@ -55,7 +55,7 @@ public:
     MOCK_METHOD((void), SendMsg, (const IServiceEndpoint*, LogMsg&&));
 };
 
-auto ALogMsgWith(std::string logger_name, Level level, std::string payload) -> Matcher<LogMsg&&>
+auto ALogMsgWith(std::string loggerName, Level level, std::string payload) -> Matcher<LogMsg&&>
 {
     return AllOf(Field(&LogMsg::logger_name, logger_name), Field(&LogMsg::level, level),
                  Field(&LogMsg::payload, payload));
@@ -83,7 +83,7 @@ TEST(Test_Logger, send_log_message_with_sender)
     logMsgSender.SetServiceDescriptor(controllerAddress);
 
     LogMsg msg;
-    msg.logger_name = "Logger";
+    msg.loggerName = "Logger";
     msg.level = Level::Info;
     msg.payload = std::string{"some payload"};
 

@@ -100,7 +100,7 @@ Participant<SilKitConnectionT>::Participant(Config::ParticipantConfiguration par
     _connection.SetLogger(_logger.get());
 
     Logging::Info(_logger.get(), "Creating participant '{}' at '{}', SIL Kit version: {}", GetParticipantName(),
-                  _participantConfig.middleware.registryUri, Version::StringImpl());
+                 _participantConfig.middleware.registryUri, Version::StringImpl());
 }
 
 
@@ -177,8 +177,10 @@ void Participant<SilKitConnectionT>::SetupRemoteLogging()
             auto&& logMsgSender =
                 CreateController<Services::Logging::LogMsgSender>(config, std::move(supplementalData), true, true);
 
-            logger->RegisterRemoteLogging(
-                [logMsgSender](Services::Logging::LogMsg logMsg) { logMsgSender->SendLogMsg(std::move(logMsg)); });
+            logger->RegisterRemoteLogging([logMsgSender, this](Services::Logging::LogMsg logMsg) {
+               _connection.SendMsg(logMsgSender, std::move(logMsg));
+            });
+
         }
     }
     else

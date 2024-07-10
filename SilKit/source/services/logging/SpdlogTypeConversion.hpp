@@ -97,7 +97,7 @@ inline auto from_spdlog(const spdlog::details::log_msg& spdMsg) -> LogMsg
 {
     LogMsg msg;
     if (spdMsg.logger_name.size() > 0)
-        msg.logger_name = std::string{spdMsg.logger_name.data(), spdMsg.logger_name.size()};
+        msg.loggerName = std::string{spdMsg.logger_name.data(), spdMsg.logger_name.size()};
     msg.level = from_spdlog(spdMsg.level);
     msg.time = spdMsg.time;
     msg.source = from_spdlog(spdMsg.source);
@@ -113,7 +113,12 @@ inline auto to_spdlog(const SourceLoc& loc) -> spdlog::source_loc
 
 inline auto to_spdlog(const LogMsg& msg) -> spdlog::details::log_msg
 {
-    return spdlog::details::log_msg{to_spdlog(msg.source), msg.logger_name, to_spdlog(msg.level), msg.payload};
+    return spdlog::details::log_msg{
+        to_spdlog(msg.source),
+        msg.loggerName,
+        to_spdlog(msg.level),
+        msg.payload
+    };
 }
 
 } // namespace Logging
