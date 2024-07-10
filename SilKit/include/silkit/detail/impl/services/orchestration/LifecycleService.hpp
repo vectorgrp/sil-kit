@@ -173,8 +173,6 @@ void LifecycleService::CompleteCommunicationReadyHandlerAsync()
 
 void LifecycleService::SetStartingHandler(SilKit::Services::Orchestration::StartingHandler handler)
 {
-    // TODO: SILKIT_HOURGLASS_NOT_UNDER_TEST
-
     auto ownedHandlerPtr = std::make_unique<StartingHandler>(std::move(handler));
 
     const auto cHandler = [](void *context, SilKit_LifecycleService *lifecycleService) {
@@ -228,8 +226,6 @@ void LifecycleService::SetShutdownHandler(SilKit::Services::Orchestration::Shutd
 
 void LifecycleService::SetAbortHandler(SilKit::Services::Orchestration::AbortHandler handler)
 {
-    // TODO: SILKIT_HOURGLASS_NOT_UNDER_TEST
-
     auto ownedHandlerPtr = std::make_unique<AbortHandler>(std::move(handler));
 
     const auto cHandler = [](void *context, SilKit_LifecycleService *lifecycleService,
@@ -278,21 +274,18 @@ auto LifecycleService::StartLifecycle() -> std::future<ParticipantState>
 
 void LifecycleService::ReportError(std::string errorMsg)
 {
-    // TODO: SILKIT_HOURGLASS_NOT_UNDER_TEST
     const auto returnCode = SilKit_LifecycleService_ReportError(_lifecycleService, errorMsg.c_str());
     ThrowOnError(returnCode);
 }
 
 void LifecycleService::Pause(std::string reason)
 {
-    // TODO: SILKIT_HOURGLASS_NOT_UNDER_TEST
     const auto returnCode = SilKit_LifecycleService_Pause(_lifecycleService, reason.c_str());
     ThrowOnError(returnCode);
 }
 
 void LifecycleService::Continue()
 {
-    // TODO: SILKIT_HOURGLASS_NOT_UNDER_TEST
     const auto returnCode = SilKit_LifecycleService_Continue(_lifecycleService);
     ThrowOnError(returnCode);
 }
@@ -305,8 +298,6 @@ void LifecycleService::Stop(std::string reason)
 
 auto LifecycleService::State() const -> SilKit::Services::Orchestration::ParticipantState
 {
-    // TODO: SILKIT_HOURGLASS_NOT_UNDER_TEST
-
     SilKit_ParticipantState participantState;
 
     const auto returnCode = SilKit_LifecycleService_State(&participantState, _lifecycleService);
@@ -317,8 +308,6 @@ auto LifecycleService::State() const -> SilKit::Services::Orchestration::Partici
 
 auto LifecycleService::Status() const -> SilKit::Services::Orchestration::ParticipantStatus const &
 {
-    // TODO: SILKIT_HOURGLASS_NOT_UNDER_TEST
-
     using time_point = decltype(SilKit::Services::Orchestration::ParticipantStatus::enterTime);
     using time_point_duration = typename time_point::duration;
     using duration = std::chrono::nanoseconds;

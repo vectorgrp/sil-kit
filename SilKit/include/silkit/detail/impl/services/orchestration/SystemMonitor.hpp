@@ -150,8 +150,6 @@ void SystemMonitor::RemoveSystemStateHandler(Util::HandlerId handlerId)
 
 auto SystemMonitor::AddParticipantStatusHandler(ParticipantStatusHandler handler) -> Util::HandlerId
 {
-    // TODO: SILKIT_HOURGLASS_NOT_UNDER_TEST
-
     using time_point = decltype(SilKit::Services::Orchestration::ParticipantStatus::enterTime);
     using time_point_duration = typename time_point::duration;
     using duration = std::chrono::nanoseconds;
@@ -192,8 +190,6 @@ auto SystemMonitor::AddParticipantStatusHandler(ParticipantStatusHandler handler
 
 void SystemMonitor::RemoveParticipantStatusHandler(Util::HandlerId handlerId)
 {
-    // TODO: SILKIT_HOURGLASS_NOT_UNDER_TEST
-
     const auto returnCode =
         SilKit_SystemMonitor_RemoveParticipantStatusHandler(_systemMonitor, static_cast<SilKit_HandlerId>(handlerId));
     ThrowOnError(returnCode);
@@ -203,8 +199,6 @@ void SystemMonitor::RemoveParticipantStatusHandler(Util::HandlerId handlerId)
 
 auto SystemMonitor::SystemState() const -> SilKit::Services::Orchestration::SystemState
 {
-    // TODO: SILKIT_HOURGLASS_NOT_UNDER_TEST
-
     SilKit_SystemState systemState;
 
     const auto returnCode = SilKit_SystemMonitor_GetSystemState(&systemState, _systemMonitor);
@@ -216,8 +210,6 @@ auto SystemMonitor::SystemState() const -> SilKit::Services::Orchestration::Syst
 auto SystemMonitor::ParticipantStatus(const std::string &participantName) const
     -> SilKit::Services::Orchestration::ParticipantStatus const &
 {
-    // TODO: SILKIT_HOURGLASS_NOT_UNDER_TEST
-
     SilKit_ParticipantStatus cParticipantStatus;
     SilKit_Struct_Init(SilKit_ParticipantStatus, cParticipantStatus);
 
@@ -252,8 +244,6 @@ auto SystemMonitor::ParticipantStatus(const std::string &participantName) const
 
 void SystemMonitor::SetParticipantConnectedHandler(ParticipantConnectedHandler handler)
 {
-    // TODO: SILKIT_HOURGLASS_NOT_UNDER_TEST
-
     auto ownedHandlerPtr = std::make_unique<ParticipantConnectedHandler>(std::move(handler));
 
     const auto cHandler = [](void *context, SilKit_SystemMonitor *systemMonitor,
@@ -276,8 +266,6 @@ void SystemMonitor::SetParticipantConnectedHandler(ParticipantConnectedHandler h
 
 void SystemMonitor::SetParticipantDisconnectedHandler(ParticipantDisconnectedHandler handler)
 {
-    // TODO: SILKIT_HOURGLASS_NOT_UNDER_TEST
-
     auto ownedHandlerPtr = std::make_unique<ParticipantDisconnectedHandler>(std::move(handler));
 
     const auto cHandler = [](void *context, SilKit_SystemMonitor *,
@@ -298,8 +286,6 @@ void SystemMonitor::SetParticipantDisconnectedHandler(ParticipantDisconnectedHan
 
 auto SystemMonitor::IsParticipantConnected(const std::string &participantName) const -> bool
 {
-    // TODO: SILKIT_HOURGLASS_NOT_UNDER_TEST
-
     SilKit_Bool result;
 
     const auto returnCode =
