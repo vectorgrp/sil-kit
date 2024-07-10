@@ -66,7 +66,8 @@ struct GlobalLogCache
     SilKit::Util::Optional<bool> logFromRemotes;
     SilKit::Util::Optional<Services::Logging::Level> flushLevel;
     std::set<Sink> fileSinks;
-    std::set<Sink> sinks;
+    SilKit::Util::Optional<Sink> stdOutSink;
+    SilKit::Util::Optional<Sink> remoteSink;
     std::set<std::string> fileNames;
 };
 
@@ -306,11 +307,11 @@ void CacheLoggingSinks(const YAML::Node& config, GlobalLogCache& cache)
         auto sink = parse_as<Sink>(sinkNode);
         if (sink.type == Sink::Type::Stdout)
         {
-            if (cache.sinks.count(sink) == 0)
+            if (!cache.stdOutSink.has_value())
             {
                 // Replace the already included sink with this one
                 // since we have not set it yet
-                cache.sinks.insert(sink);
+                cache.stdOutSink = sink;
             }
             else
             {
@@ -321,11 +322,11 @@ void CacheLoggingSinks(const YAML::Node& config, GlobalLogCache& cache)
         }
         else if (sink.type == Sink::Type::Remote)
         {
-            if (cache.sinks.count(sink) == 0)
+            if (!cache.remoteSink.has_value())
             {
                 // Replace the already included sink with this one
                 // since we have not set it yet
-                cache.sinks.insert(sink);
+                cache.remoteSink = sink;
             }
             else
             {
@@ -443,8 +444,17 @@ void MergeLogCache(const GlobalLogCache& cache, Logging& logging)
 {
     MergeCacheField(cache.flushLevel, logging.flushLevel);
     MergeCacheField(cache.logFromRemotes, logging.logFromRemotes);
-    MergeCacheSet(cache.sinks, logging.sinks);
     MergeCacheSet(cache.fileSinks, logging.sinks);
+
+    if (cache.stdOutSink.has_value())
+    {
+        logging.sinks.push_back(cache.stdOutSink.value());
+    }
+
+    if (cache.remoteSink.has_value())
+    {
+        logging.sinks.push_back(cache.remoteSink.value());
+    }
 }
 
 
