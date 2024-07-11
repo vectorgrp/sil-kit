@@ -230,12 +230,12 @@
             }
         },
         {
-            "name": "mixin-gcc7",
-            "description": "Target GCC-7",
+            "name": "mixin-gcc",
+            "description": "Target GCC",
             "hidden": true,
             "cacheVariables": {
-                "CMAKE_C_COMPILER": "gcc-7",
-                "CMAKE_CXX_COMPILER": "g++-7"
+                "CMAKE_C_COMPILER": "gcc",
+                "CMAKE_CXX_COMPILER": "g++"
             }
         },
         {
@@ -448,13 +448,13 @@
         },
 
         {
-            "name": "gcc7-debug",
-            "inherits": [ "mixin-posix", "mixin-dirs", "mixin-ninja", "mixin-debug", "mixin-gcc7", "mixin-werror" ]
+            "name": "gcc-debug",
+            "inherits": [ "mixin-posix", "mixin-dirs", "mixin-ninja", "mixin-debug", "mixin-gcc", "mixin-werror" ]
         },
 
         {
-            "name": "gcc7-release",
-            "inherits": [ "mixin-release", "gcc7-debug", "mixin-build-docs" ]
+            "name": "gcc-release",
+            "inherits": [ "mixin-release", "gcc-debug", "mixin-build-docs" ]
         },
 
         {
@@ -686,12 +686,12 @@
         },
 
         {
-            "name": "gcc7-debug",
-            "configurePreset": "gcc7-debug"
+            "name": "gcc-debug",
+            "configurePreset": "gcc-debug"
         },
         {
-            "name": "gcc7-release",
-            "configurePreset": "gcc7-release"
+            "name": "gcc-release",
+            "configurePreset": "gcc-release"
         },
 
         {
@@ -929,12 +929,12 @@
         },
 
         {
-            "name": "gcc7-debug",
-            "configurePreset": "gcc7-debug"
+            "name": "gcc-debug",
+            "configurePreset": "gcc-debug"
         },
         {
-            "name": "gcc7-release",
-            "configurePreset": "gcc7-release"
+            "name": "gcc-release",
+            "configurePreset": "gcc-release"
         },
 
         {

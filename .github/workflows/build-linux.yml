@@ -50,7 +50,7 @@ jobs:
         uses: ./.github/actions/build-cmake-preset
         id: build
         with:
-          preset-name: linux-release
+          preset-name: gcc-release
           do-package: ${{ inputs.do_package }}
           retention-days: ${{ env.retention_days }}
 
