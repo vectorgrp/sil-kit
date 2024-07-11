@@ -140,6 +140,8 @@ Logging:
   - Type: File
     Level: Critical
     LogName: MyLog1
+  - Type: Remote
+    Level: Trace
   FlushLevel: Warn
   LogFromRemotes: false
 HealthCheck:

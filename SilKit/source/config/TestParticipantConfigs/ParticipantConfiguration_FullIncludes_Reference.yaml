@@ -160,6 +160,8 @@ Logging:
     LogName: MyLog1
   - Type: Stdout
     Level: Trace
+  - Type: Remote
+    Level: Trace
   - Type: File
     Level: Critical
     LogName: MyLog2
