@@ -207,6 +207,39 @@ CanControllers:
     ASSERT_TRUE(config == configRef);
 }
 
+TEST_F(Test_ParticipantConfiguration, participant_config_logging_sinks)
+{
+    const auto configString = R"raw(
+---
+Description: Example include configuration for CAN Controllers
+Includes:
+  Files:
+      - LoggingIncludes.yaml
+Logging:
+  Sinks:
+    - Type: Stdout
+      Level: Info
+CanControllers:
+- Name: CAN1
+  Replay:
+    UseTraceSource: Source1
+    Direction: Both
+    MdfChannel:
+      ChannelName: MyTestChannel1
+      ChannelPath: path/to/myTestChannel1
+      ChannelSource: MyTestChannel
+      GroupName: MyTestGroup
+      GroupPath: path/to/myTestGroup1
+      GroupSource: MyTestGroup
+  UseTraceSinks:
+  - Sink1
+- Name: MyCAN2
+  Network: CAN2
+    )raw";
+
+    EXPECT_THROW(SilKit::Config::ParticipantConfigurationFromStringImpl(configString), SilKit::ConfigurationError);
+}
+
 /*
     Test whether json and yaml configurations are parsed equivalently
 */
