@@ -69,7 +69,7 @@ public:
 
     LoggerMessage(ILoggerInternal* logger, const LogMsg& msg)
         : _logger(logger)
-        ,  _level(msg.level)
+        , _level(msg.level)
         , _msg(msg.payload)
         , _keyValues(msg.keyValues)
     {}
