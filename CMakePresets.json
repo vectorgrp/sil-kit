@@ -4,72 +4,22 @@
         {
             "name": "base-env",
             "hidden": true,
-            "inherits": ["mixin-dirs", "mixin-ninja"]
-        },
-        {
-            "name": "linux-base",
-            "inherits": "base-env",
-            "hidden": true,
-            "condition": {
-                "type": "equals",
-                "lhs": "${hostSystemName}",
-                "rhs": "Linux"
-            },
-            "vendor": {
-                "microsoft.com/VisualStudioRemoteSettings/CMake/1.0": {
-                    "sourceDir": "$env{HOME}/.vs/$ms{projectDirName}",
-                    "rsyncCommandArgs": [ "--exclude", "_build" ]
-                }
-            }
-        },
-        {
-            "name": "windows-base",
-            "description": "Target Windows with the Visual Studio development environment.",
-            "inherits": "base-env",
-            "hidden": true,
-            "cacheVariables": {
-                "CMAKE_C_COMPILER": "cl.exe",
-                "CMAKE_CXX_COMPILER": "cl.exe"
-            },
-            "condition": {
-                "type": "equals",
-                "lhs": "${hostSystemName}",
-                "rhs": "Windows"
-            }
-        },
-        {
-            "name": "x64-debug",
-            "inherits": ["mixin-debug", "windows-base" ],
+            "inherits": ["mixin-dirs", "mixin-ninja"],
             "architecture": {
                 "value": "x64",
                 "strategy": "external"
             }
         },
         {
-            "name": "x64-release",
-            "inherits": ["mixin-release", "x64-debug" ]
-        },
-        {
-            "name": "x64-relwithdebinfo",
-            "inherits": ["mixin-relwithdebinfo", "x64-debug"]
-        },
-        {
-            "name": "x86-debug",
-            "inherits": ["mixin-debug","windows-base"],
-            "architecture": {
-                "value": "x86",
-                "strategy": "external"
+            "name": "windows-base",
+            "inherits": "base-env",
+            "hidden": true,
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Windows"
             }
         },
-        {
-            "name": "x86-release",
-            "inherits": ["mixin-release", "x86-debug"]
-        },
-        {
-            "name": "x86-relwithdebinfo",
-            "inherits": ["mixin-relwithdebinfo", "x86-debug"]
-        },
-
 
 
         {
@@ -228,19 +178,35 @@
             }
         },
 
+        {
+            "name": "debug",
+            "inherits": [ "base-env", "mixin-debug" ]
+        },
+        {
+            "name": "release",
+            "inherits": [ "mixin-release", "debug", "mixin-build-docs" ]
+        },
+        {
+            "name": "relwithdebinfo",
+            "inherits": [ "mixin-relwithdebinfo", "debug", "mixin-build-docs" ]
+        },
+        {
+            "name": "debug-x86",
+            "inherits": ["mixin-debug","windows-base"],
+            "architecture": {
+                "value": "x86",
+                "strategy": "external"
+            }
+        },
+        {
+            "name": "release-x86",
+            "inherits": ["mixin-release", "debug-x86"]
+        },
+        {
+            "name": "relwithdebinfo-x86",
+            "inherits": ["mixin-relwithdebinfo", "debug-x86"]
+        },
 
-        {
-            "name": "linux-debug",
-            "inherits": [ "linux-base", "mixin-debug" ]
-        },
-        {
-            "name": "linux-release",
-            "inherits": [ "mixin-release", "linux-debug", "mixin-build-docs" ]
-        },
-        {
-            "name": "linux-relwithdebinfo",
-            "inherits": [ "mixin-relwithdebinfo", "linux-debug", "mixin-build-docs" ]
-        },
         {
             "name": "addresssan",
             "inherits": [ "mixin-debug", "mixin-dirs",  "mixin-nosplitdebug" ],
@@ -260,16 +226,16 @@
 
     "buildPresets": [
         {
-            "name": "linux-debug",
-            "configurePreset": "linux-debug"
+            "name": "debug",
+            "configurePreset": "debug"
         },
         {
-            "name": "linux-release",
-            "configurePreset": "linux-release"
+            "name": "release",
+            "configurePreset": "release"
         },
         {
-            "name": "linux-relwithdebinfo",
-            "configurePreset": "linux-relwithdebinfo"
+            "name": "relwithdebinfo",
+            "configurePreset": "relwithdebinfo"
         },
         {
             "name": "vs141-x86-debug",
@@ -304,12 +270,16 @@
 
     "testPresets": [
         {
-            "name": "linux-debug",
-            "configurePreset": "linux-debug"
+            "name": "debug",
+            "configurePreset": "debug"
         },
         {
-            "name": "linux-release",
-            "configurePreset": "linux-release"
+            "name": "release",
+            "configurePreset": "release"
+        },
+        {
+            "name": "relwithdebinfo",
+            "configurePreset": "relwithdebinfo"
         },
         {
             "name": "vs141-x86-debug",
