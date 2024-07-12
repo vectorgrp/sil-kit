@@ -170,6 +170,7 @@ Middleware:
 Experimental:
   TimeSynchronization:
     AnimationFactor: 1.5
+    EnableMessageAggregation: Auto
   Metrics:
     CollectFromRemote: false
     Sinks:

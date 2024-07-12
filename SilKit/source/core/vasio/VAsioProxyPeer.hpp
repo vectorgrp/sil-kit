@@ -55,6 +55,7 @@ public: // IVAsioPeer
     auto GetLocalAddress() const -> std::string override;
     void StartAsyncRead() override;
     void Shutdown() override;
+    void EnableAggregation() override;
     void SetProtocolVersion(ProtocolVersion v) override;
     auto GetProtocolVersion() const -> ProtocolVersion override;
     void SetSimulationName(const std::string& simulationName) override;

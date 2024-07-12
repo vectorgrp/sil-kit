@@ -1236,6 +1236,11 @@ void VAsioConnection::AddPeer(std::unique_ptr<IVAsioPeer> newPeer)
 {
     newPeer->StartAsyncRead();
 
+    if (_useAggregation)
+    {
+        newPeer->EnableAggregation();
+    }
+
     std::unique_lock<std::mutex> lock{_peersLock};
 
     auto* const proxyPeer = dynamic_cast<VAsioProxyPeer*>(newPeer.get());
@@ -1360,6 +1365,18 @@ void VAsioConnection::RemovePeerFromConnection(IVAsioPeer* peer)
 void VAsioConnection::NotifyShutdown()
 {
     _isShuttingDown = true;
+}
+
+void VAsioConnection::EnableAggregation()
+{
+    // pass information to all existing peers
+    for (auto& peer : _peers)
+    {
+        peer->EnableAggregation();
+    }
+
+    // keep information for peers joining in the future
+    _useAggregation = true;
 }
 
 void VAsioConnection::OnSocketData(IVAsioPeer* from, SerializedMessage&& buffer)

@@ -110,6 +110,7 @@ public:
     void SetTimeSyncService(TimeSyncService* timeSyncService);
 
     void NewSystemState(SystemState systemState);
+    void NewParticipantStatus(const ParticipantStatus& participantStatus);
 
     bool IsTimeSyncActive() const;
 

@@ -147,6 +147,13 @@ struct ProxyMessage
     std::vector<uint8_t> payload;
 };
 
+enum class MessageAggregationKind : uint8_t
+{
+    UserDataMessage = 0,
+    FlushAggregationMessage = 1,
+    Other = 2,
+};
+
 // ================================================================================
 //  Inline Implementations
 // ================================================================================
