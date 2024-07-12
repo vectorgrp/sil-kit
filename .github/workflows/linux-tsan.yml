@@ -21,6 +21,6 @@ jobs:
           submodules: true
       - uses: ./.github/actions/build-cmake-preset
         with:
-          preset-name: clang14-relwithdebinfo
-          cmake-args: "-D SILKIT_ENABLE_THREADSAN=ON -D SILKIT_BUILD_DASHBOARD=OFF"
+          preset-name: threadsan
+          cmake-args: "-D CMAKE_C_COMPILER=clang-14 -D CMAKE_CXX_COMPILER=clang++-14"
           do-package: false

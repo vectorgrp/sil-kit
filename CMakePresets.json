@@ -210,17 +210,17 @@
         {
             "name": "addresssan",
             "inherits": [ "mixin-debug", "mixin-dirs",  "mixin-nosplitdebug" ],
-            "cacheVariables": { "SILKIT_ENABLE_ASAN": "ON" }
+            "cacheVariables": { "SILKIT_ENABLE_ASAN": "ON","SILKIT_BUILD_DASHBOARD": "OFF"  }
         },
         {
             "name": "threadsan",
             "inherits": [ "mixin-debug", "mixin-dirs", "mixin-nosplitdebug" ],
-            "cacheVariables": { "SILKIT_ENABLE_THREADSAN": "ON", "SILKIT_PACKAGE_SYMBOLS": "OFF" }
+            "cacheVariables": { "SILKIT_ENABLE_THREADSAN": "ON", "SILKIT_PACKAGE_SYMBOLS": "OFF", "SILKIT_BUILD_DASHBOARD": "OFF" }
         },
         {
             "name": "ubsan",
             "inherits": [ "mixin-debug", "mixin-dirs", "mixin-nosplitdebug" ],
-            "cacheVariables": { "SILKIT_ENABLE_UBSAN": "ON" }
+            "cacheVariables": { "SILKIT_ENABLE_UBSAN": "ON", "SILKIT_BUILD_DASHBOARD": "OFF" }
         }
     ],
 
