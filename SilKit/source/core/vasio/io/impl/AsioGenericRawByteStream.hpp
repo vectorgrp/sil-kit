@@ -10,7 +10,7 @@
 #include "AsioSocketOptions.hpp"
 #include "util/Atomic.hpp"
 
-#include "ILogger.hpp"
+#include "ILoggerInternal.hpp"
 
 #include <memory>
 #include <mutex>

@@ -42,7 +42,7 @@ class LoggerMessage;
 
 struct ILoggerInternal : ILogger
 {
-    virtual void Log(LoggerMessage& msg) = 0;
+    virtual void Log(const LoggerMessage& msg) = 0;
     virtual void Log(const LogMsg& msg) = 0;
 };
 
@@ -123,17 +123,6 @@ public:
         }
     }
 
-    const LogMsg ToLogMsg(log_clock::time_point time)
-    {
-        LogMsg logmsg;
-        logmsg.loggerName = "MyDefaultLoggerName";
-        logmsg.level = _level;
-        logmsg.time = time;
-        logmsg.source = {"filename", 0, "funcname"};
-        logmsg.payload = _msg;
-        logmsg.keyValues = _keyValues;
-        return logmsg;
-    }
 
 private:
     ILoggerInternal* _logger;

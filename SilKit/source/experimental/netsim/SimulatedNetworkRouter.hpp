@@ -18,7 +18,7 @@
 #include "WireFlexrayMessages.hpp"
 #include "WireLinMessages.hpp"
 
-#include "ILogger.hpp"
+#include "ILoggerInternal.hpp"
 
 namespace SilKit {
 namespace Experimental {

@@ -7,7 +7,7 @@
 #include "silkit/participant/exception.hpp"
 #include "silkit/services/orchestration/string_utils.hpp"
 
-#include "ILogger.hpp"
+#include "ILoggerInternal.hpp"
 
 #include <fmt/format.h>
 
@@ -176,6 +176,11 @@ auto SystemStateTracker::UpdateParticipantStatus(const ParticipantStatus& newPar
     {
         result.participantStateChanged = true;
 
+      /* Log::LoggerMessage lm{_logger, Log::Level::Trace};
+        lm.SetMessage("The participant state has changed for {}", participantName);
+        lm.AddKeyValue("MyKey2", "MyValue2");
+        lm.Dispatch();
+*/
         Log::Debug(_logger, "The participant state has changed for {}", participantName);
 
         if (IsRequiredParticipant(participantName))

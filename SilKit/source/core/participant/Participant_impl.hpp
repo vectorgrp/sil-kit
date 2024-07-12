@@ -63,7 +63,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "Uuid.hpp"
 #include "Assert.hpp"
 
-#include "ILogger.hpp"
+#include "ILoggerInternal.hpp"
 
 
 namespace SilKit {

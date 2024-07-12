@@ -37,7 +37,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "SimBehavior.hpp"
 #include "SynchronizedHandlers.hpp"
 #include "WireLinMessages.hpp"
-#include "ILogger.hpp"
+#include "ILoggerInternal.hpp"
 
 namespace SilKit {
 namespace Services {

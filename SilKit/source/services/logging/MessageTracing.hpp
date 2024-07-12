@@ -21,7 +21,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #pragma once
 
-#include "ILogger.hpp"
+#include "ILoggerInternal.hpp"
 #include "IServiceEndpoint.hpp"
 #include "ServiceDescriptor.hpp"
 

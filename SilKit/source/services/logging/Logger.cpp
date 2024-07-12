@@ -55,8 +55,8 @@ struct SimpleLogMessage
 {
     SimpleLogMessage(const LoggerMessage& m)
         : m(m)
-    {
-    }
+    {}
+
     const LoggerMessage& m;
 };
 
@@ -64,13 +64,11 @@ struct JsonLogMessage
 {
     JsonLogMessage(const LoggerMessage& m)
         : m(m)
-    {
-    }
+    {}
 
     JsonLogMessage(LoggerMessage&& m)
         : m(m)
-    {
-    }
+    {}
 
     const LoggerMessage& m;
 };
@@ -79,8 +77,8 @@ struct JsonString
 {
     JsonString(const std::string& m)
         : m(m)
-    {
-    }
+    {}
+
     const std::string& m;
 };
 
@@ -284,17 +282,22 @@ Logger::Logger(const std::string& participantName, Config::Logging config)
     //  this will cause a fairly unintuitive exception in spdlog.
     for (auto sink : _config.sinks)
     {
-        if (sink.format == Config::Sink::Format::Json 
-            && nullptr == _loggerJson
-            && sink.type != Config::Sink::Type::Remote)
+        if (sink.type == Config::Sink::Type::Remote)
         {
-            _loggerJson = spdlog::create<spdlog::sinks::null_sink_st>(participantName + "_Json");
+            _loggerRemote = std::make_shared<RemoteLogger>(sink.level, participantName); 
         }
-        if (sink.format == Config::Sink::Format::Simple 
-            && nullptr == _loggerSimple
-            && sink.type != Config::Sink::Type::Remote)
+        else
         {
-            _loggerSimple = spdlog::create<spdlog::sinks::null_sink_st>(participantName + "_Simple");
+            if (sink.format == Config::Sink::Format::Json 
+                && nullptr == _loggerJson)
+            {
+                _loggerJson = spdlog::create<spdlog::sinks::null_sink_st>(participantName + "_Json");
+            }
+            if (sink.format == Config::Sink::Format::Simple 
+                && nullptr == _loggerSimple)
+            {
+                _loggerSimple = spdlog::create<spdlog::sinks::null_sink_st>(participantName + "_Simple");
+            }
         }
     }
 
@@ -401,7 +404,7 @@ Logger::Logger(const std::string& participantName, Config::Logging config)
     }
 }
 
-void Logger::Log(LoggerMessage& msg)
+void Logger::Log(const LoggerMessage& msg)
 {
     const auto now = log_clock::now();
     if (nullptr != _loggerJson)
@@ -415,12 +418,9 @@ void Logger::Log(LoggerMessage& msg)
         SimpleLogMessage myMsg(msg);
         _loggerSimple->log(now, spdlog::source_loc{}, to_spdlog(msg.GetLevel()), fmt::format("{}", myMsg));
     }
-
-    if (nullptr != _remoteSink)
+    if (nullptr != _loggerRemote)
     {
-        // convert LoggerMessage to LogMsg
-        const LogMsg logmsg = msg.ToLogMsg(now);
-        _remoteSink(logmsg);
+        _loggerRemote->Log(now, msg);
     }
 }
 
@@ -441,6 +441,10 @@ void Logger::Log(const LogMsg& msg)
         _loggerSimple->log(msg.time, spdlog::source_loc{}, to_spdlog(simpleMsg.m.GetLevel()),
                             fmt::format("{}", simpleMsg));
     }
+    if (nullptr != _loggerRemote)
+    {
+        _loggerRemote->Log(msg);
+    }
 }
 
 
@@ -456,16 +460,9 @@ void Logger::Log(Level level, const std::string& msg)
     {
         _loggerSimple->log(now, spdlog::source_loc{}, to_spdlog(level), msg);
     }
-    if (nullptr != _remoteSink)
+    if (nullptr != _loggerRemote)
     {
-        // convert LoggerMessage to LogMsg
-        LogMsg logmsg;
-        logmsg.loggerName = "MyDefaultLoggerName";
-        logmsg.level = level;
-        logmsg.time = now;
-        logmsg.source = {"filename", 0, "funcname"};
-        logmsg.payload = msg;
-        _remoteSink(logmsg);
+        _loggerRemote->Log(now, level, msg);
     }
 }
 
@@ -503,15 +500,17 @@ void Logger::Critical(const std::string& msg)
 
 void Logger::RegisterRemoteLogging(const LogMsgHandler& handler)
 {
-    _remoteSink = handler;
+    if (nullptr != _loggerRemote)
+    {
+        _loggerRemote->RegisterRemoteLogging(handler);
+    }
 }
 
-
-void Logger::DisableRemoteLogging()
+void Logger::DisableRemoteLogging() 
 {
-    if (nullptr != _remoteSink)
+    if (nullptr != _loggerRemote)
     {
-        _remoteSink = nullptr;
+        _loggerRemote->DisableRemoteLogging();
     }
 }
 
@@ -523,16 +522,19 @@ void Logger::LogReceivedMsg(const LogMsg& msg)
 
 Level Logger::GetLogLevel() const
 {   
-    auto lvl = to_spdlog(Level::Trace);
-
+    auto lvl = to_spdlog(Level::Critical);
 
     if (nullptr != _loggerSimple)
     {
-        lvl = lvl > _loggerSimple->level() ? lvl : _loggerSimple->level();
+        lvl = lvl < _loggerSimple->level() ? lvl : _loggerSimple->level();
     }
-    if (nullptr != _loggerSimple)
+    if (nullptr != _loggerJson)
     {
-        lvl = lvl > _loggerSimple->level() ? lvl : _loggerSimple->level();
+        lvl = lvl < _loggerJson->level() ? lvl : _loggerJson->level();
+    }
+    if (nullptr != _loggerRemote)
+    {
+        lvl = lvl <  to_spdlog(_loggerRemote->level()) ? lvl : to_spdlog(_loggerRemote->level());
     }
 
     return from_spdlog(lvl);

@@ -28,7 +28,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "TimeSyncService.hpp"
 #include "IServiceDiscovery.hpp"
-#include "ILogger.hpp"
+#include "ILoggerInternal.hpp"
 #include "SynchronizedHandlers.hpp"
 #include "Assert.hpp"
 #include "VAsioCapabilities.hpp"

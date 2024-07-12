@@ -27,7 +27,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "SystemMonitor.hpp"
 #include "IServiceDiscovery.hpp"
-#include "ILogger.hpp"
+#include "ILoggerInternal.hpp"
 #include "LifecycleService.hpp"
 #include "OrchestrationDatatypes.hpp"
 #include "VAsioConstants.hpp"
