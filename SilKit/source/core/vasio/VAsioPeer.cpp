@@ -110,17 +110,57 @@ auto VAsioPeer::GetSimulationName() const -> const std::string&
 
 void VAsioPeer::SendSilKitMsg(SerializedMessage buffer)
 {
+    auto blob = buffer.ReleaseStorage();
+
+    if (_useAggregation && buffer.GetAggregationKind() == MessageAggregationKind::UserDataMessage)
+    {
+        Aggregate(blob);
+    }
+    else if (_useAggregation && buffer.GetAggregationKind() == MessageAggregationKind::FlushAggregationMessage)
+    {
+        Aggregate(blob); // don't forget to send (current) time sync message
+        Flush();
+    }
+    else
+    {
+        SendSilKitMsgInternal(blob);
+    }
+}
+
+void VAsioPeer::SendSilKitMsgInternal(const std::vector<uint8_t>& blob)
+{
     // Prevent sending when shutting down
     if (!_isShuttingDown && _socket != nullptr)
     {
         std::unique_lock<std::mutex> lock{_sendingQueueMutex};
 
-        _sendingQueue.push_back(buffer.ReleaseStorage());
+        _sendingQueue.push_back(blob);
 
         lock.unlock();
 
         _ioContext->Dispatch([this] { StartAsyncWrite(); });
     }
+}
+
+void VAsioPeer::Aggregate(const std::vector<uint8_t>& blob)
+{
+    _aggregatedMessages.insert(_aggregatedMessages.end(), blob.begin(), blob.end());
+
+    // ensure that the aggregation buffer does not exceed a certain size
+    if (_aggregatedMessages.size() > _aggregationBufferThreshold)
+    {
+        Services::Logging::Debug(_logger,
+                                 "VAsioPeer: Automated flush of aggregation buffer has been triggered, since the "
+                                 "maximum buffer size of {}Byte has been exceeded.",
+                                 _aggregationBufferThreshold);
+        Flush();
+    }
+}
+
+void VAsioPeer::Flush()
+{
+    SendSilKitMsgInternal(_aggregatedMessages);
+    _aggregatedMessages.clear();
 }
 
 void VAsioPeer::StartAsyncWrite()
@@ -283,6 +323,11 @@ void VAsioPeer::OnShutdown(IRawByteStream& stream)
     _listener->OnPeerShutdown(this);
 }
 
+void VAsioPeer::EnableAggregation()
+{
+    _useAggregation = true;
+    SilKit::Services::Logging::Debug(_logger, "VAsioPeer: Enable aggregation for peer {}", _info.participantName);
+}
 
 } // namespace Core
 } // namespace SilKit

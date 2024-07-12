@@ -87,6 +87,7 @@ DEFINE_SILKIT_CONVERT(Extensions);
 
 DEFINE_SILKIT_CONVERT(Experimental);
 DEFINE_SILKIT_CONVERT(TimeSynchronization);
+DEFINE_SILKIT_CONVERT(Aggregation);
 
 DEFINE_SILKIT_CONVERT(ParticipantConfiguration);
 

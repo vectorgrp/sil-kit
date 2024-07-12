@@ -53,6 +53,11 @@ auto SerializedMessage::GetRegistryKind() const -> RegistryMessageKind
     return _registryKind;
 }
 
+auto SerializedMessage::GetAggregationKind() const -> MessageAggregationKind
+{
+    return _aggregationKind;
+}
+
 auto SerializedMessage::GetRemoteIndex() const -> EndpointId
 {
     if (!IsMwOrSim(_messageKind))
@@ -156,6 +161,11 @@ void SerializedMessage::ReadNetworkHeaders()
         _remoteIndex = ExtractEndpointId(_buffer);
         _endpointAddress = ExtractEndpointAddress(_buffer);
     }
+}
+
+void SerializedMessage::SetAggregationKind(MessageAggregationKind msgAggregationKind)
+{
+    _aggregationKind = msgAggregationKind;
 }
 
 } // namespace Core

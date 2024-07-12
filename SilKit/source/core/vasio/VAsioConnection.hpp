@@ -207,6 +207,8 @@ public:
 
     void NotifyShutdown();
 
+    void EnableAggregation();
+
     // Register handlers for completion of async service creation
     void AddAsyncSubscriptionsCompletionHandler(std::function<void()> handler);
 
@@ -572,6 +574,8 @@ private:
     IParticipantInternal* _participant{nullptr};
 
     friend class ::SilKit::Core::RemoteConnectionManager;
+
+    bool _useAggregation{false};
 };
 
 

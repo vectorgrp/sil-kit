@@ -118,7 +118,7 @@ Participant<SilKitConnectionT>::Participant(Config::ParticipantConfiguration par
     _connection.SetLogger(_logger.get());
 
     Logging::Info(_logger.get(), "Creating participant '{}' at '{}', SIL Kit version: {}", GetParticipantName(),
-                 _participantConfig.middleware.registryUri, Version::StringImpl());
+                  _participantConfig.middleware.registryUri, Version::StringImpl());
 }
 
 
@@ -204,9 +204,8 @@ void Participant<SilKitConnectionT>::SetupRemoteLogging()
                 CreateController<Services::Logging::LogMsgSender>(config, std::move(supplementalData), true, true);
 
             logger->RegisterRemoteLogging([logMsgSender, this](Services::Logging::LogMsg logMsg) {
-               _connection.SendMsg(logMsgSender, std::move(logMsg));
+                _connection.SendMsg(logMsgSender, std::move(logMsg));
             });
-
         }
     }
     else
@@ -243,7 +242,8 @@ void Participant<SilKitConnectionT>::SetupMetrics()
         SilKit::Config::InternalController config;
         config.name = "MetricsReceiver";
         config.network = "default";
-        CreateController<VSilKit::MetricsReceiver>(config, std::move(supplementalData), true, true, *_logger, processor);
+        CreateController<VSilKit::MetricsReceiver>(config, std::move(supplementalData), true, true, *_logger,
+                                                   processor);
     }
 }
 
@@ -1847,6 +1847,31 @@ template <class SilKitConnectionT>
 void Participant<SilKitConnectionT>::NotifyShutdown()
 {
     _connection.NotifyShutdown();
+}
+
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::EvaluateAggregationInfo(bool isSyncSimStepHandler)
+{
+    // tell connection, if aggregation should be done or not
+    // determine by information from TimeSyncService AND information from ParticipantConfig
+
+    switch (_participantConfig.experimental.timeSynchronization.enableMessageAggregation)
+    {
+    case SilKit::Config::v1::Aggregation::Off:
+        // nothing to do
+        break;
+    case SilKit::Config::v1::Aggregation::On:
+        // aggregate in both blocking and non-blocking case
+        _connection.EnableAggregation();
+        break;
+    case SilKit::Config::v1::Aggregation::Auto:
+        // aggregate in blocking case only
+        if (isSyncSimStepHandler)
+            _connection.EnableAggregation();
+        break;
+    default:
+        throw SilKitError{"Unknown aggregation type."};
+    }
 }
 
 template <class SilKitConnectionT>

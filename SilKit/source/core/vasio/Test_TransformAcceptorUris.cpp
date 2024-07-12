@@ -158,6 +158,11 @@ struct DummyVAsioPeerBase : IVAsioPeer
         throw MethodNotImplementedError{};
     }
 
+    void EnableAggregation() final
+    {
+        throw MethodNotImplementedError{};
+    }
+
     void SetProtocolVersion(ProtocolVersion) final
     {
         throw MethodNotImplementedError{};

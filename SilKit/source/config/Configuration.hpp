@@ -23,16 +23,19 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include <algorithm>
 #include <iostream>
+#include <sstream>
 #include <stdexcept>
 #include <string>
 #include <tuple>
 #include <vector>
+#include <cctype>
 
 #include "silkit/participant/exception.hpp"
 #include "silkit/SilKitMacros.hpp"
 #include "silkit/services/logging/LoggingDatatypes.hpp"
 
 #include "Optional.hpp"
+#include "StringHelpers.hpp"
 
 namespace SilKit {
 namespace Config {
@@ -57,6 +60,21 @@ enum class NetworkType
 inline auto to_string(NetworkType networkType) -> std::string;
 
 // ================================================================================
+//  Message aggregation declarations
+// ================================================================================
+
+enum class Aggregation : uint32_t
+{
+    Off = 0, // disable aggregation
+    On = 1, // enable aggregation for time synchronization (synchronous and asynchronous case)
+    Auto = 2 // enable aggregation for time synchronization (synchronous case)
+};
+
+inline std::string to_string(const Aggregation& aggregation);
+inline Aggregation from_string(const std::string& aggregationStr);
+inline std::ostream& operator<<(std::ostream& out, const Aggregation& aggregation);
+
+// ================================================================================
 //  Logging service
 // ================================================================================
 
@@ -70,7 +88,6 @@ struct Sink
     };
 
 
-
     enum class Format : uint8_t
     {
         Simple,
@@ -78,8 +95,8 @@ struct Sink
     };
 
     Format format{Format::Simple};
-    Type type{ Type::Remote };
-    Services::Logging::Level level{ Services::Logging::Level::Info };
+    Type type{Type::Remote};
+    Services::Logging::Level level{Services::Logging::Level::Info};
     std::string logName;
 };
 
@@ -225,10 +242,7 @@ auto to_string(NetworkType networkType) -> std::string
 
 bool operator==(const Sink& lhs, const Sink& rhs)
 {
-    return lhs.type == rhs.type
-        && lhs.level == rhs.level
-        && lhs.format == rhs.format
-        && lhs.logName == rhs.logName;
+    return lhs.type == rhs.type && lhs.level == rhs.level && lhs.format == rhs.format && lhs.logName == rhs.logName;
 }
 
 bool operator<(const Sink& lhs, const Sink& rhs)
@@ -267,6 +281,45 @@ bool operator==(const MdfChannel& lhs, const MdfChannel& rhs)
     return lhs.channelName == rhs.channelName && lhs.channelSource == rhs.channelSource
            && lhs.channelPath == rhs.channelPath && lhs.groupName == rhs.groupName && lhs.groupSource == rhs.groupSource
            && lhs.groupPath == rhs.groupPath;
+}
+
+std::string to_string(const Aggregation& aggregation)
+{
+    std::stringstream outStream;
+    outStream << aggregation;
+    return outStream.str();
+}
+
+std::ostream& operator<<(std::ostream& outStream, const Aggregation& aggregation)
+{
+    switch (aggregation)
+    {
+    case Aggregation::Off:
+        outStream << "Off";
+        break;
+    case Aggregation::On:
+        outStream << "On";
+        break;
+    case Aggregation::Auto:
+        outStream << "Auto";
+        break;
+    default:
+        outStream << "Invalid Aggregation";
+    }
+    return outStream;
+}
+
+inline Aggregation from_string(const std::string& aggregationStr)
+{
+    auto aggregation = SilKit::Util::LowerCase(aggregationStr);
+    if (aggregation == "off")
+        return Aggregation::Off;
+    if (aggregation == "on")
+        return Aggregation::On;
+    if (aggregation == "auto")
+        return Aggregation::Auto;
+    // default to Auto
+    return Aggregation::Auto;
 }
 
 } // namespace v1

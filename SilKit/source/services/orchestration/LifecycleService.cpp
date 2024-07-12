@@ -156,6 +156,9 @@ auto LifecycleService::StartLifecycle() -> std::future<ParticipantState>
     _participant->GetSystemMonitor()->AddSystemStateHandler(
         [&](auto systemState) { this->NewSystemState(systemState); });
 
+    _participant->GetSystemMonitor()->AddParticipantStatusHandler(
+        [&](auto participantStatus) { this->NewParticipantStatus(participantStatus); });
+
     // Initialize switches to ServicesCreated. In parallel, the reception of an invalid WorkflowConfiguration could
     // lead to ErrorState, so we need to defer this to the IO-Worker Thread
     _participant->ExecuteDeferred(
@@ -544,6 +547,20 @@ void LifecycleService::NewSystemState(SystemState systemState)
         break;
     case SystemState::Error:
         break;
+    }
+}
+
+void LifecycleService::NewParticipantStatus(const ParticipantStatus& participantStatus)
+{
+    if (participantStatus.participantName == _participant->GetParticipantName())
+    {
+        if (participantStatus.state == ParticipantState::ReadyToRun)
+        {
+            if (IsTimeSyncActive())
+            {
+                _participant->EvaluateAggregationInfo(_timeSyncService->IsBlocking());
+            }
+        }
     }
 }
 

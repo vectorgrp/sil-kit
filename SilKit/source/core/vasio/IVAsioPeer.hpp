@@ -61,6 +61,8 @@ public:
     //! Version management for backward compatibility on network ser/des level
     virtual void SetProtocolVersion(ProtocolVersion v) = 0;
     virtual auto GetProtocolVersion() const -> ProtocolVersion = 0;
+
+    virtual void EnableAggregation() = 0;
 };
 
 

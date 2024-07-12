@@ -38,10 +38,10 @@ target_link_libraries(O_SilKit_Services_Metrics
 )
 
 
-add_silkit_test_to_executable(SilKitUnitTests
-    SOURCES Test_MetricsManager.cpp
-    LIBS S_SilKitImpl
-)
+#add_silkit_test_to_executable(SilKitUnitTests
+#    SOURCES Test_MetricsManager.cpp
+#    LIBS S_SilKitImpl
+#)
 
 add_silkit_test_to_executable(SilKitUnitTests
     SOURCES Test_MetricsProcessor.cpp

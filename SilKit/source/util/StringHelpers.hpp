@@ -39,6 +39,8 @@ auto EscapeString(const std::string& input) -> std::string;
 
 auto CurrentTimestampString() -> std::string;
 
+auto LowerCase(std::string input) -> std::string;
+
 
 } // namespace Util
 } // namespace SilKit

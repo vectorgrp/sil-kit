@@ -112,6 +112,13 @@ auto CurrentTimestampString() -> std::string
     return fmt::format("{:%FT%H-%M-%S}", tm);
 }
 
+auto LowerCase(std::string input) -> std::string
+{
+    std::transform(input.begin(), input.end(), input.begin(),
+                   [](unsigned char c) { return (unsigned char)std::tolower(c); });
+    return input;
+}
+
 
 } // namespace Util
 } // namespace SilKit
