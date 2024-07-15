@@ -346,10 +346,8 @@ public:
 
     std::string GetServiceDescriptorString(
         SilKit::Experimental::NetworkSimulation::ControllerDescriptor controllerDescriptor) override;
-    auto GetLoggerInternal() -> Services::Logging::ILoggerInternal* override
-    {
-        return _logger.get();
-    }
+    auto GetLoggerInternal() -> Services::Logging::ILoggerInternal* override;
+
 
 public:
     // ----------------------------------------

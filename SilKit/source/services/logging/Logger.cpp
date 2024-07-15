@@ -31,7 +31,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "fmt/format.h"
 #include "spdlog/spdlog.h"
 #include "spdlog/sinks/null_sink.h"
-#include "spdlog/mdc.h"
 
 // NB: we do not use the windows color sink, as that will open "CONOUT$" and
 //     we won't be able to trivially capture its output in SilKitLauncher.

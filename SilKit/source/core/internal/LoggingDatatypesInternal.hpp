@@ -146,7 +146,7 @@ std::ostream& operator<<(std::ostream& out, const LogMsg& msg)
 {
     out << "LogMsg{logger=" << msg.loggerName << ", level=" << msg.level
         << ", time=" << msg.time.time_since_epoch().count() << ", source=" << msg.source << ", payload=\""
-        << msg.payload << msg.keyValues << "\""
+        << msg.payload << "\"" << msg.keyValues 
         << "}";
     return out;
 }

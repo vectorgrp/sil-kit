@@ -126,10 +126,10 @@ public:
 
 private:
     ILoggerInternal* _logger;
-    std::unordered_map<std::string, std::string> _keyValues;
     Level _level;
     Level _minlevel;
     std::string _msg;
+    std::unordered_map<std::string, std::string> _keyValues;
 };
 
 
