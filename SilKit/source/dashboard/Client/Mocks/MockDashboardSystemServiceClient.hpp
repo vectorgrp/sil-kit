@@ -35,6 +35,8 @@ public:
     MOCK_METHOD(oatpp::Object<SimulationCreationResponseDto>, CreateSimulation,
                 (oatpp::Object<SimulationCreationRequestDto>), (override));
 
+    MOCK_METHOD(void, UpdateSimulation, (oatpp::UInt64, oatpp::Object<BulkSimulationDto>), (override));
+
     MOCK_METHOD(void, AddParticipantToSimulation, (oatpp::UInt64, oatpp::String), (override));
 
     MOCK_METHOD(void, AddParticipantStatusForSimulation,

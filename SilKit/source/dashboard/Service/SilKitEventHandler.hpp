@@ -52,6 +52,7 @@ public: //methods
     void OnSystemStateChanged(uint64_t simulationId, Services::Orchestration::SystemState systemState) override;
     void OnServiceDiscoveryEvent(uint64_t simulationId, Core::Discovery::ServiceDiscoveryEvent::Type discoveryType,
                                  const Core::ServiceDescriptor& serviceDescriptor) override;
+    void OnBulkUpdate(uint64_t simulationId, const DashboardBulkUpdate& bulkUpdate) override;
 
 private: //methods
     void OnControllerCreated(uint64_t simulationId, const Core::ServiceDescriptor& serviceDescriptor);

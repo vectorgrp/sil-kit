@@ -32,6 +32,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "RpcClientDto.hpp"
 #include "RpcServerDto.hpp"
 #include "SimulationEndDto.hpp"
+#include "BulkUpdateDto.hpp"
 
 #include OATPP_CODEGEN_BEGIN(ApiClient)
 
@@ -155,6 +156,10 @@ class DashboardSystemApiClient : public oatpp::web::client::ApiClient
     // notify the end of a simulation
     API_CALL("POST", "system-service/v1.0/simulations/{simulationId}", setSimulationEnd, PATH(UInt64, simulationId),
              BODY_DTO(Object<SimulationEndDto>, simulation))
+
+    // bulk update of a simulation
+    API_CALL("POST", "system-service/v1.1/simulations/{simulationId}", updateSimulation,
+             PATH(UInt64, simulationId), BODY_DTO(Object<BulkSimulationDto>, simulation))
 };
 
 } // namespace Dashboard

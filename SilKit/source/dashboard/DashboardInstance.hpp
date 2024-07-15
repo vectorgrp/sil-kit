@@ -37,7 +37,7 @@ class DashboardInstance final
     };
 
 public:
-    DashboardInstance();
+    explicit DashboardInstance();
 
     DashboardInstance(const DashboardInstance&) = delete;
     DashboardInstance(DashboardInstance&&) = delete;
@@ -56,6 +56,7 @@ private:
 
 private:
     void RunEventQueueWorkerThread();
+    void RunBulkUpdateEventQueueWorkerThread();
 
 private: // SilKit::Core::IRegistryEventListener
     void OnLoggerCreated(SilKit::Services::Logging::ILogger* logger) override;

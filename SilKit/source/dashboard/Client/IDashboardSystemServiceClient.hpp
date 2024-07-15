@@ -31,6 +31,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "RpcClientDto.hpp"
 #include "RpcServerDto.hpp"
 #include "SimulationEndDto.hpp"
+#include "BulkUpdateDto.hpp"
 
 namespace SilKit {
 namespace Dashboard {
@@ -42,6 +43,8 @@ public:
 
     virtual oatpp::Object<SimulationCreationResponseDto> CreateSimulation(
         oatpp::Object<SimulationCreationRequestDto> simulation) = 0;
+
+    virtual void UpdateSimulation(oatpp::UInt64 simulationId, oatpp::Object<BulkSimulationDto> bulkSimulation) = 0;
 
     virtual void AddParticipantToSimulation(oatpp::UInt64 simulationId, oatpp::String participantName) = 0;
 

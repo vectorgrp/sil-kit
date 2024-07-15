@@ -12,7 +12,8 @@ The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <
 Added
 ~~~~~
 
-- Network Simulation event flow documentation 
+- Network Simulation event flow documentation
+- Registry (Dashboard): Automatically use bulk-endpoint if it is available
 
 
 [4.0.50] - 2024-05-15

@@ -114,15 +114,162 @@ void DashboardInstance::SetupDashboardConnection(std::string const &dashboardUri
 struct EventQueueWorkerThread
 {
     SilKit::Services::Logging::ILogger *logger{nullptr};
+    std::shared_ptr<SilKit::Dashboard::DashboardSystemApiClient> apiClient;
     std::shared_ptr<SilKit::Dashboard::ISilKitEventHandler> eventHandler;
     std::shared_ptr<SilKit::Dashboard::ISilKitEventQueue> eventQueue;
     std::future<void> abort;
 
-    void operator()() const
-    try
+    auto DetectBulkUpdate() const -> bool
     {
-        SilKit::Util::SetThreadName("SK-Dash-Cons");
+        auto bulkSimulationDto = SilKit::Dashboard::BulkSimulationDto::createShared();
+        const auto response =
+            apiClient->updateSimulation(oatpp::UInt64{std::uint64_t{0}}, std::move(bulkSimulationDto));
+        const auto statusCode = response->getStatusCode();
+        const bool bulkUpdateAvailable = 200 <= statusCode && statusCode < 300;
 
+        if (bulkUpdateAvailable)
+        {
+            logger->Debug("Dashboard bulk-updates are available");
+        }
+        else
+        {
+            logger->Debug("Dashboard bulk-updates are not available, falling back to individual requests");
+        }
+
+        return bulkUpdateAvailable;
+    }
+
+    void ProcessEventsWithBulkUpdates() const
+    {
+        using SilKitEventType = SilKit::Dashboard::SilKitEventType;
+
+        std::unordered_map<std::string, uint64_t> simulationNameToId;
+        std::unordered_map<uint64_t, SilKit::Dashboard::DashboardBulkUpdate> simulationBulkUpdates;
+
+        std::vector<SilKit::Dashboard::SilKitEvent> events;
+        while (eventQueue->DequeueAllInto(events))
+        {
+            const auto ProcessAllAccumulatedBulkUpdates = [this, &simulationBulkUpdates] {
+                for (auto &pair : simulationBulkUpdates)
+                {
+                    const auto simulationId = pair.first;
+                    auto &bulkUpdate = pair.second;
+
+                    if (bulkUpdate.Empty())
+                    {
+                        continue;
+                    }
+
+                    eventHandler->OnBulkUpdate(simulationId, bulkUpdate);
+                    bulkUpdate.Clear();
+                }
+            };
+
+            for (const auto &event : events)
+            {
+                if (!abort.valid() || abort.wait_for(std::chrono::seconds{}) != std::future_status::timeout)
+                {
+                    return;
+                }
+
+                // process OnSimulationStart separately, which creates the simulation-id for a simulation name
+
+                if (event.Type() == SilKitEventType::OnSimulationStart)
+                {
+                    ProcessAllAccumulatedBulkUpdates();
+
+                    const auto it{simulationNameToId.find(event.GetSimulationName())};
+                    if (it != simulationNameToId.end())
+                    {
+                        // it is possible that multiple SimulationStart events are created (due to the queuing)
+                        Log::Debug(logger, "Dashboard: Simulation {} already has id {}", event.GetSimulationName(),
+                                   it->second);
+                        continue;
+                    }
+
+                    const auto &simulationStart = event.GetSimulationStart();
+                    const auto simulationId =
+                        eventHandler->OnSimulationStart(simulationStart.connectUri, simulationStart.time);
+
+                    if (simulationId == 0)
+                    {
+                        Log::Warn(logger, "Dashboard: Simulation {} could not be created", event.GetSimulationName());
+                        continue;
+                    }
+
+                    simulationNameToId.emplace(event.GetSimulationName(), simulationId);
+
+                    continue;
+                }
+
+                // fetch the simulation id for the given name
+
+                const auto it{simulationNameToId.find(event.GetSimulationName())};
+                if (it == simulationNameToId.end())
+                {
+                    Log::Warn(logger, "Dashboard: Simulation {} is unknown", event.GetSimulationName());
+                    continue;
+                }
+
+                const auto simulationId{it->second};
+                auto &bulkUpdate{simulationBulkUpdates[simulationId]};
+
+                // process all event types, except OnSimulationStart
+
+                switch (event.Type())
+                {
+                case SilKitEventType::OnParticipantConnected:
+                {
+                    const auto &participantConnectionInformation = event.GetParticipantConnectionInformation();
+                    bulkUpdate.participantConnectionInformations.emplace_back(participantConnectionInformation);
+                }
+                break;
+
+                case SilKitEventType::OnSystemStateChanged:
+                {
+                    const auto &systemState = event.GetSystemState();
+                    bulkUpdate.systemStates.emplace_back(systemState);
+                }
+                break;
+
+                case SilKitEventType::OnParticipantStatusChanged:
+                {
+                    const auto &participantStatus = event.GetParticipantStatus();
+                    bulkUpdate.participantStatuses.emplace_back(participantStatus);
+                }
+                break;
+
+                case SilKitEventType::OnServiceDiscoveryEvent:
+                {
+                    const auto &serviceData = event.GetServiceData();
+                    bulkUpdate.serviceDatas.emplace_back(serviceData);
+                }
+                break;
+
+                case SilKitEventType::OnSimulationEnd:
+                {
+                    const auto &simulationEnd = event.GetSimulationEnd();
+                    bulkUpdate.stopped = std::make_unique<uint64_t>(simulationEnd.time);
+
+                    simulationNameToId.erase(it);
+                }
+                break;
+
+                default:
+                {
+                    Log::Error(logger, "Dashboard: unexpected SilKitEventType");
+                }
+                break;
+                }
+            }
+
+            events.clear();
+            ProcessAllAccumulatedBulkUpdates();
+        }
+    }
+
+    void ProcessEventsWithIndividualRequests() const
+    {
         using SilKitEventType = SilKit::Dashboard::SilKitEventType;
 
         std::unordered_map<std::string, uint64_t> simulationNameToId;
@@ -227,6 +374,23 @@ struct EventQueueWorkerThread
             events.clear();
         }
     }
+
+    void operator()() const
+    try
+    {
+        SilKit::Util::SetThreadName("SK-Dash-Cons");
+
+        const bool bulkUpdateAvailable = DetectBulkUpdate();
+
+        if (bulkUpdateAvailable)
+        {
+            ProcessEventsWithBulkUpdates();
+        }
+        else
+        {
+            ProcessEventsWithIndividualRequests();
+        }
+    }
     catch (const std::exception &exception)
     {
         Log::Error(logger, "Dashboard: event queue worker failed: {}", exception.what());
@@ -243,13 +407,14 @@ void DashboardInstance::RunEventQueueWorkerThread()
 
     _eventQueueWorkerThreadAbort = std::promise<void>{};
 
-    EventQueueWorkerThread eventQueueWorkerThread;
-    eventQueueWorkerThread.logger = _logger;
-    eventQueueWorkerThread.eventHandler = _silKitEventHandler;
-    eventQueueWorkerThread.eventQueue = _silKitEventQueue;
-    eventQueueWorkerThread.abort = _eventQueueWorkerThreadAbort.get_future();
+    EventQueueWorkerThread workerThread;
+    workerThread.logger = _logger;
+    workerThread.apiClient = _apiClient;
+    workerThread.eventHandler = _silKitEventHandler;
+    workerThread.eventQueue = _silKitEventQueue;
+    workerThread.abort = _eventQueueWorkerThreadAbort.get_future();
 
-    _eventQueueWorkerThread = std::thread{std::move(eventQueueWorkerThread)};
+    _eventQueueWorkerThread = std::thread{std::move(workerThread)};
 }
 
 auto DashboardInstance::GetOrCreateSimulationData(const std::string &simulationName) -> SimulationData &

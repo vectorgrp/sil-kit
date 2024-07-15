@@ -41,6 +41,13 @@ DashboardSystemServiceClient::DashboardSystemServiceClient(
 
 DashboardSystemServiceClient::~DashboardSystemServiceClient() {}
 
+void DashboardSystemServiceClient::UpdateSimulation(oatpp::UInt64 simulationId,
+                                                    oatpp::Object<BulkSimulationDto> bulkSimulation)
+{
+    auto response = _dashboardSystemApiClient->updateSimulation(simulationId, bulkSimulation);
+    Log(response, "updating simulation");
+}
+
 oatpp::Object<SimulationCreationResponseDto> DashboardSystemServiceClient::CreateSimulation(
     oatpp::Object<SimulationCreationRequestDto> simulation)
 {

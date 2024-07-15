@@ -105,6 +105,12 @@ void SilKitEventHandler::OnServiceDiscoveryEvent(uint64_t simulationId,
     }
 }
 
+void SilKitEventHandler::OnBulkUpdate(uint64_t simulationId, const DashboardBulkUpdate& bulkUpdate)
+{
+    _dashboardSystemServiceClient->UpdateSimulation(simulationId,
+                                                    _silKitToOatppMapper->CreateBulkSimulationDto(bulkUpdate));
+}
+
 void SilKitEventHandler::OnControllerCreated(uint64_t simulationId, const Core::ServiceDescriptor& serviceDescriptor)
 {
     Services::Logging::Debug(_logger, "Dashboard: adding service for simulation {} {}", simulationId,

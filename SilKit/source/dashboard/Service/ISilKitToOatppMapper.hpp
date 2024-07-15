@@ -37,12 +37,20 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "SimulationCreationRequestDto.hpp"
 #include "SimulationEndDto.hpp"
 #include "SystemStatusDto.hpp"
+#include "BulkUpdateDto.hpp"
+
+#include "DashboardBulkUpdate.hpp"
 
 
 namespace SilKit {
 namespace Dashboard {
 class ISilKitToOatppMapper
 {
+    using ServiceDescriptor = SilKit::Core::ServiceDescriptor;
+
+    template <typename T>
+    using Object = oatpp::Object<T>;
+
 public:
     virtual ~ISilKitToOatppMapper() = default;
     virtual oatpp::Object<SimulationCreationRequestDto> CreateSimulationCreationRequestDto(
@@ -58,6 +66,13 @@ public:
     virtual oatpp::Object<RpcClientDto> CreateRpcClientDto(const Core::ServiceDescriptor& serviceDescriptor) = 0;
     virtual oatpp::Object<RpcServerDto> CreateRpcServerDto(const Core::ServiceDescriptor& serviceDescriptor) = 0;
     virtual oatpp::Object<SimulationEndDto> CreateSimulationEndDto(uint64_t stop) = 0;
+
+    virtual auto CreateBulkControllerDto(const ServiceDescriptor& serviceDescriptor) -> Object<BulkControllerDto> = 0;
+    virtual auto CreateBulkDataServiceDto(const ServiceDescriptor& serviceDescriptor) -> Object<BulkDataServiceDto> = 0;
+    virtual auto CreateBulkRpcServiceDto(const ServiceDescriptor& serviceDescriptor) -> Object<BulkRpcServiceDto> = 0;
+    virtual auto CreateBulkServiceInternalDto(const ServiceDescriptor& serviceDescriptor)
+        -> Object<BulkServiceInternalDto> = 0;
+    virtual auto CreateBulkSimulationDto(const DashboardBulkUpdate& bulkUpdate) -> Object<BulkSimulationDto> = 0;
 };
 } // namespace Dashboard
 } // namespace SilKit
