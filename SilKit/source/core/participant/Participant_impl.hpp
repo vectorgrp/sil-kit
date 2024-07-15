@@ -969,6 +969,12 @@ auto Participant<SilKitConnectionT>::GetLogger() -> Services::Logging::ILogger*
 }
 
 template <class SilKitConnectionT>
+auto Participant<SilKitConnectionT>::GetLoggerInternal() -> Services::Logging::ILoggerInternal*
+{
+    return _logger.get();
+}
+
+template <class SilKitConnectionT>
 void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const Can::WireCanFrameEvent& msg)
 {
     SendMsgImpl(from, msg);

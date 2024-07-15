@@ -127,7 +127,7 @@ std::string escapeSpecialCharacters(const std::string& input)
 std::string KeyValuesToSimpleString(const std::unordered_map<std::string, std::string>& input)
 {
     std::string result;
-    result.reserve(input.size() * 2); // Reserviere genug Speicher für das Ergebnis
+    result.reserve(input.size() * 2);
 
     std::unordered_map<std::string, std::string>::const_iterator it = input.begin();
 
@@ -146,7 +146,7 @@ std::string KeyValuesToSimpleString(const std::unordered_map<std::string, std::s
 std::string KeyValuesToJsonString(const std::unordered_map<std::string, std::string>& input)
 {
     std::string result;
-    result.reserve(input.size() * 2); // Reserviere genug Speicher für das Ergebnis
+    result.reserve(input.size() * 2);
 
     std::unordered_map<std::string, std::string>::const_iterator it = input.begin();
     result.append("{");
@@ -286,23 +286,23 @@ Logger::Logger(const std::string& participantName, Config::Logging config)
             _loggerRemote = std::make_shared<RemoteLogger>(sink.level, participantName); 
         }
         else
-        {
+        {   
+            // NB: logger gets dropped from registry immediately after creating so that two participant with the same
+            // participantName won't lead to a spdlog exception because a logger with this name does already exist.
             if (sink.format == Config::Sink::Format::Json 
                 && nullptr == _loggerJson)
             {
-                _loggerJson = spdlog::create<spdlog::sinks::null_sink_st>(participantName + "_Json");
+                _loggerJson = spdlog::create<spdlog::sinks::null_sink_st>(participantName);
+                spdlog::drop(participantName);
             }
             if (sink.format == Config::Sink::Format::Simple 
                 && nullptr == _loggerSimple)
             {
-                _loggerSimple = spdlog::create<spdlog::sinks::null_sink_st>(participantName + "_Simple");
+                _loggerSimple = spdlog::create<spdlog::sinks::null_sink_st>(participantName);
+                spdlog::drop(participantName);
             }
         }
     }
-
-    // NB: logger gets dropped from registry immediately after creating so that two participant with the same
-    // participantName won't lead to a spdlog exception because a logger with this name does already exist.
-    spdlog::drop(participantName);
 
     // set_default_logger should not be used here, as there can only be one default logger and if another participant
     // gets created, the first default logger will be dropped from the registry as well.
