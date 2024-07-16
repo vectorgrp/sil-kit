@@ -76,7 +76,7 @@ add_library(O_SilKit_Services_Logging OBJECT
 
 target_link_libraries(O_SilKit_Services_Logging
     PUBLIC I_SilKit_Services_Logging
-
+    PRIVATE I_SilKit_Util_StringHelpers
     PRIVATE spdlog
 )
 

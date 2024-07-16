@@ -27,6 +27,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "Logger.hpp"
 
+#include "StringHelpers.hpp"
+
 #include "fmt/chrono.h"
 #include "fmt/format.h"
 #include "spdlog/spdlog.h"
@@ -86,43 +88,6 @@ struct JsonString
 } // namespace SilKit
 
 
-std::string escapeSpecialCharacters(const std::string& input)
-{
-    std::string result;
-    result.reserve(input.size() * 2); // Reserve enough memory for the result
-
-    size_t i = 0;
-    while (i < input.size())
-    {
-        if (input[i] == '\\')
-        {
-            // Check if it is a single backslash or already double one
-            if (i + 1 < input.size() && input[i + 1] == '\\')
-            {
-                result += "\\\\";
-                i += 2;
-            }
-            else
-            {
-                // Single backslash needs to be escaped
-                result += "\\\\";
-                ++i;
-            }
-        }
-        else if (input[i] == '\"')
-        {
-            result += "\\\""; 
-            ++i;
-        }
-        else
-        {
-            result += input[i];
-            ++i;
-        }
-    }
-    return result;
-}
-
 
 std::string KeyValuesToSimpleString(const std::unordered_map<std::string, std::string>& input)
 {
@@ -137,7 +102,7 @@ std::string KeyValuesToSimpleString(const std::unordered_map<std::string, std::s
         {
             result.append(", ");
         }
-        result.append( escapeSpecialCharacters(it->first)  + ": " + escapeSpecialCharacters(it->second));
+        result.append(SilKit::Util::EscapeString(it->first) + ": " + SilKit::Util::EscapeString(it->second));
         ++it;
     }
     return result;
@@ -156,7 +121,8 @@ std::string KeyValuesToJsonString(const std::unordered_map<std::string, std::str
         {
             result.append(",");
         }
-        result.append("\"" + escapeSpecialCharacters(it->first) + "\"" + ":" + "\"" + escapeSpecialCharacters(it->second) + "\"");
+        result.append("\"" + SilKit::Util::EscapeString(it->first) + "\"" + ":" + "\"" + SilKit::Util::EscapeString(it->second)
+                      + "\"");
         ++it;
     }
     result.append("}");
@@ -203,16 +169,15 @@ struct fmt::formatter<SilKit::Services::Logging::JsonLogMessage>
         if (msg.m.HasKeyValues())
         {
             return fmt::format_to(ctx.out(), "\"msg\": \"{}\", \"kv\": {}",
-                                  escapeSpecialCharacters(msg.m.GetMsgString()),
+                                  SilKit::Util::EscapeString(msg.m.GetMsgString()),
                                   KeyValuesToJsonString(msg.m.GetKeyValues()));
         }
         else
         {
-            return fmt::format_to(ctx.out(), "\"msg\": \"{}\"", escapeSpecialCharacters(msg.m.GetMsgString()));
+            return fmt::format_to(ctx.out(), "\"msg\": \"{}\"", SilKit::Util::EscapeString(msg.m.GetMsgString()));
         }
     }
 };
-
 
 template <>
 struct fmt::formatter<SilKit::Services::Logging::JsonString>
@@ -228,7 +193,7 @@ struct fmt::formatter<SilKit::Services::Logging::JsonString>
         // format the message output string l
         // "msg": "This is the log message", "kv":{ "key1": "value1", key2: "value2"}
         // the message, key and value strings needed to be escaped
-        return fmt::format_to(ctx.out(), "\"msg\": \"{}\"", escapeSpecialCharacters(msg.m));
+        return fmt::format_to(ctx.out(), "\"msg\": \"{}\"", SilKit::Util::EscapeString(msg.m));
     }
 };
 
