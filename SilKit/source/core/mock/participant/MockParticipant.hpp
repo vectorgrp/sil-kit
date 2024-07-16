@@ -629,7 +629,7 @@ public:
 
     Services::Logging::ILoggerInternal* GetLoggerInternal() override
     {
-        return nullptr; // todo fix
+        return &logger;
     }
 
     const std::string _name = "MockParticipant";
