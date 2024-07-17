@@ -101,7 +101,7 @@ jobs:
 
   mingw-release-builds:
     uses: ./.github/workflows/build-mingw64.yml
-    needs: [check-licenses, check-run-builds]
+    needs: [check-licenses, check-run-builds, check-formatting]
     with:
       do_package: ${{ github.event_name == 'push' && true || false }}
       retention_days: ${{ github.event_name == 'push' && 90 || 14 }}
