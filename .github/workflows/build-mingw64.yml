@@ -42,7 +42,7 @@ jobs:
         run: |
           export PATH="/mingw64/bin/:$PATH"
           echo "PATH: $PATH"
-          cmake --preset gcc-release
+          cmake --preset gcc-release -DSILKIT_BUILD_DOCS=OFF
         shell:  C:\shells\msys2bash.cmd {0}
       - name: Build
         id: cmake-build-mingw64
