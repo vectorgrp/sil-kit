@@ -47,30 +47,45 @@ jobs:
             python3 ./SilKit/ci/check_files_changed.py ${{ github.repository }} ${{ github.event.number }}; \
           fi
 
+  check-formatting:
+    name: Format checks for SIL Kit sources
+    runs-on: ubuntu-22.04
+    container:
+      image: ghcr.io/mariusbgm/sil-kit-ci-clangformat-22.04:dev_clangformat_ubuntu
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: false
+      - name: Check Formatting
+        id: formatting-check
+        run: |
+          python3 ./SilKit/ci/check_formatting.py
+        shell: bash
+
   clang14-tsan:
     name: Thread Sanitizer Tests
-    needs: [check-licenses, check-run-builds]
+    needs: [check-licenses, check-run-builds, check-formatting]
     uses: ./.github/workflows/linux-tsan.yml
     with:
       run_build: ${{ needs.check-run-builds.outputs.run_builds == 'true' }}
 
   clang14-ubsan:
     name: Undefined Behavior Sanitizer Tests
-    needs: [check-licenses, check-run-builds]
+    needs: [check-licenses, check-run-builds, check-formatting]
     uses: ./.github/workflows/linux-ubsan.yml
     with:
       run_build: ${{ needs.check-run-builds.outputs.run_builds == 'true' }}
 
   clang14-asan:
     name: Address Sanitizer Tests
-    needs: [check-licenses, check-run-builds]
+    needs: [check-licenses, check-run-builds, check-formatting]
     uses: ./.github/workflows/linux-asan.yml
     with:
       run_build: ${{ needs.check-run-builds.outputs.run_builds == 'true' }}
 
   ubuntu-release-builds:
     uses: ./.github/workflows/build-linux.yml
-    needs: [check-licenses, check-run-builds]
+    needs: [check-licenses, check-run-builds, check-formatting]
     with:
       do_package: ${{ github.event_name == 'push' && true || false }}
       retention_days: ${{ github.event_name == 'push' && 90 || 14 }}
@@ -78,7 +93,7 @@ jobs:
 
   windows-release-builds:
     uses: ./.github/workflows/build-win.yml
-    needs: [check-licenses, check-run-builds]
+    needs: [check-licenses, check-run-builds, check-formatting]
     with:
       do_package: ${{ github.event_name == 'push' && true || false }}
       retention_days: ${{ github.event_name == 'push' && 90 || 14 }}
