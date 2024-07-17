@@ -78,6 +78,9 @@ public:
     */
     virtual void JoinSilKitSimulation() = 0;
 
+    // Register subscriptions for the time sync service only when the user actually calls CreateTimeSyncService.
+    virtual void RegisterTimeSyncService(SilKit::Services::Orchestration::TimeSyncService* controllerPtr) = 0;
+
     // For NetworkSimulator integration:
     virtual void RegisterSimulator(ISimulator* busSim, std::string networkName,
                                    SilKit::Experimental::NetworkSimulation::SimulatedNetworkType networkType) = 0;

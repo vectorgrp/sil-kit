@@ -71,6 +71,16 @@ struct GlobalLogCache
     std::set<std::string> fileNames;
 };
 
+struct TimeSynchronizationCache
+{
+    SilKit::Util::Optional<double> animationFactor;
+};
+
+struct ExperimentalCache
+{
+    TimeSynchronizationCache timeSynchronizationCache;
+};
+
 struct ConfigIncludeData
 {
     std::set<std::string> searchPaths;
@@ -78,6 +88,7 @@ struct ConfigIncludeData
     std::vector<ConfigInclude> configBuffer;
     MiddlewareCache middlewareCache;
     GlobalLogCache logCache;
+    ExperimentalCache experimentalCache;
     std::map<std::string, SilKit::Config::CanController> canCache;
     std::map<std::string, SilKit::Config::LinController> linCache;
     std::map<std::string, SilKit::Config::EthernetController> ethCache;
@@ -352,6 +363,16 @@ void CacheLoggingSinks(const YAML::Node& config, GlobalLogCache& cache)
     }
 }
 
+void CacheTimeSynchronization(const YAML::Node& root, TimeSynchronizationCache& cache)
+{
+    PopulateCacheField(root["TimeSynchronization"], "TimeSynchronization", "AnimationFactor", cache.animationFactor);
+}
+
+void CacheExperimental(const YAML::Node& root, ExperimentalCache& cache)
+{
+    CacheTimeSynchronization(root, cache.timeSynchronizationCache);
+}
+
 void PopulateCaches(const YAML::Node& config, ConfigIncludeData& configIncludeData)
 {
     // Cache those config options that need to be default constructed, since we lose the information
@@ -365,6 +386,11 @@ void PopulateCaches(const YAML::Node& config, ConfigIncludeData& configIncludeDa
     {
         CacheLoggingOptions(config["Logging"], configIncludeData.logCache);
         CacheLoggingSinks(config["Logging"], configIncludeData.logCache);
+    }
+
+    if (config["Experimental"])
+    {
+        CacheExperimental(config["Experimental"], configIncludeData.experimentalCache);
     }
 }
 
@@ -457,6 +483,16 @@ void MergeLogCache(const GlobalLogCache& cache, Logging& logging)
     }
 }
 
+void MergeTimeSynchronizationCache(const TimeSynchronizationCache& cache, TimeSynchronization& timeSynchronization)
+{
+    MergeCacheField(cache.animationFactor, timeSynchronization.animationFactor);
+}
+
+void MergeExperimentalCache(const ExperimentalCache& cache, Experimental& experimental)
+{
+    MergeTimeSynchronizationCache(cache.timeSynchronizationCache, experimental.timeSynchronization);
+}
+
 
 auto MergeConfigs(ConfigIncludeData& configIncludeData) -> SilKit::Config::ParticipantConfiguration
 {
@@ -497,6 +533,7 @@ auto MergeConfigs(ConfigIncludeData& configIncludeData) -> SilKit::Config::Parti
 
     MergeMiddleware(configIncludeData.middlewareCache, config.middleware);
     MergeLogCache(configIncludeData.logCache, config.logging);
+    MergeExperimentalCache(configIncludeData.experimentalCache, config.experimental);
 
     return config;
 }
@@ -657,6 +694,16 @@ bool operator==(const ParticipantConfiguration& lhs, const ParticipantConfigurat
            && lhs.dataSubscribers == rhs.dataSubscribers && lhs.rpcClients == rhs.rpcClients
            && lhs.rpcServers == rhs.rpcServers && lhs.logging == rhs.logging && lhs.healthCheck == rhs.healthCheck
            && lhs.tracing == rhs.tracing && lhs.extensions == rhs.extensions;
+}
+
+bool operator==(const TimeSynchronization& lhs, const TimeSynchronization& rhs)
+{
+    return lhs.animationFactor == rhs.animationFactor;
+}
+
+bool operator==(const Experimental& lhs, const Experimental& rhs)
+{
+    return lhs.timeSynchronization == rhs.timeSynchronization;
 }
 
 } // namespace v1

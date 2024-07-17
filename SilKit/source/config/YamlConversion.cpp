@@ -978,6 +978,35 @@ bool Converter::decode(const Node& node, Middleware& obj)
 }
 
 template <>
+Node Converter::encode(const TimeSynchronization& obj)
+{
+    Node node;
+    node["AnimationFactor"] = obj.animationFactor;
+    return node;
+}
+template <>
+bool Converter::decode(const Node& node, TimeSynchronization& obj)
+{
+    obj.animationFactor = parse_as<decltype(obj.animationFactor)>(node["AnimationFactor"]);
+    return true;
+}
+
+template <>
+Node Converter::encode(const Experimental& obj)
+{
+    Node node;
+    node["TimeSynchronization"] = obj.timeSynchronization;
+    return node;
+}
+template <>
+bool Converter::decode(const Node& node, Experimental& obj)
+{
+    obj.timeSynchronization = parse_as<decltype(obj.timeSynchronization)>(node["TimeSynchronization"]);
+    return true;
+}
+
+
+template<>
 Node Converter::encode(const ParticipantConfiguration& obj)
 {
     static const ParticipantConfiguration defaultObj{};
@@ -1006,6 +1035,7 @@ Node Converter::encode(const ParticipantConfiguration& obj)
     non_default_encode(obj.tracing, node, "Extensions", defaultObj.tracing);
     non_default_encode(obj.extensions, node, "Extensions", defaultObj.extensions);
     non_default_encode(obj.middleware, node, "Middleware", defaultObj.middleware);
+    non_default_encode(obj.experimental, node, "Experimental", defaultObj.experimental);
     return node;
 }
 template <>
@@ -1029,6 +1059,7 @@ bool Converter::decode(const Node& node, ParticipantConfiguration& obj)
     optional_decode(obj.tracing, node, "Tracing");
     optional_decode(obj.extensions, node, "Extensions");
     optional_decode(obj.middleware, node, "Middleware");
+    optional_decode(obj.experimental, node, "Experimental");
     return true;
 }
 

@@ -12,7 +12,10 @@ The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <
 Added
 ~~~~~
 
-- Network Simulation event flow documentation
+- Couple the virtual time to the wall clock. 
+  An animation factor can be configured that describes how fast the simulation is allowed to run relative to the local wall clock.
+  Accessible via a new experimental section in the Participant Configuration (Experimental | TimeSynchronization | AnimationFactor).
+- Event flow documentation for the Network Simulation API.
 - Registry (Dashboard): Automatically use bulk-endpoint if it is available
 
 

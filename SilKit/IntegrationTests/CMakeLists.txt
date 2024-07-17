@@ -154,6 +154,14 @@ add_silkit_test_to_executable(SilKitIntegrationTests
     SilKit
 )
 
+add_silkit_test_to_executable(SilKitFunctionalTests
+    SOURCES
+    FTest_WallClockCoupling.cpp
+
+    LIBS
+    S_ITests_STH
+)
+
 # Windows specific tests
 if(MSVC)
     add_silkit_test_to_executable(SilKitIntegrationTests

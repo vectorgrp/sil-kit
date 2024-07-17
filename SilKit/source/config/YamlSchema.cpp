@@ -194,7 +194,11 @@ auto MakeYamlSchema() -> YamlSchemaElem
              {"RegistryAsFallbackProxy"},
              {"ExperimentalRemoteParticipantConnection"},
              {"ConnectTimeoutSeconds"},
-         }}};
+         }},
+        {"Experimental", 
+            { {"TimeSynchronization", {{"AnimationFactor"}} }
+         }},
+       };
     return yamlSchema;
 }
 
