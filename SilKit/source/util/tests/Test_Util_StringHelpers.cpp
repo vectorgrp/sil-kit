@@ -27,9 +27,7 @@
 namespace {
 
 const std::string content{R"(This is the " sample content for the StringHelpers \ StringEscape tests. )"};
-
 const std::string result{R"(This is the \" sample content for the StringHelpers \\ StringEscape tests. )"};
-
 
 
 TEST(Test_Util_StringHelpers, EscapeString)

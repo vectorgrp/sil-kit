@@ -218,12 +218,12 @@ TEST(Test_Logger, send_loggermessage_from_logger)
 
     LoggerMessage lm{&logger, Level::Debug};
     lm.SetMessage(payload);
-    lm.AddKeyValue(key, value);
+    lm.SetKeyValue(key, value);
     lm.Dispatch();
 
     LoggerMessage lm2{&logger, Level::Critical};
     lm2.SetMessage(payload);
-    lm2.AddKeyValue(key, value);
+    lm2.SetKeyValue(key, value);
     lm2.Dispatch();
 }
 

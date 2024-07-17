@@ -77,13 +77,12 @@ public:
         {
             if (_level <= msg.GetLevel())
             {
-                LogMsg logmsg{};
-                logmsg.loggerName = _participantName;
-                logmsg.level =msg.GetLevel();
-                logmsg.time = logTime;
-                logmsg.payload = msg.GetMsgString();
-                logmsg.keyValues = msg.GetKeyValues();
-
+                LogMsg logmsg{ _participantName
+                            , msg.GetLevel()
+                            , logTime
+                            , {}
+                            , msg.GetMsgString()
+                            , msg.GetKeyValues() };
                 // dispatch msg
                 _remoteSink(logmsg);
             }
@@ -139,10 +138,6 @@ public:
     // Public interface methods
     //
     // ILogger
-    void Log(const LoggerMessage& msg) override;
-
-    void Log(const LogMsg& msg) override;
-
     void Log(Level level, const std::string& msg) override;
 
     void Trace(const std::string& msg) override;
@@ -159,9 +154,14 @@ public:
 
     void RegisterRemoteLogging(const LogMsgHandler& handler);
     void DisableRemoteLogging();
-    void LogReceivedMsg(const LogMsg& msg);
+    //void LogReceivedMsg(const LogMsg& msg);
 
-    Level GetLogLevel() const override;
+     auto GetLogLevel() const -> Level override;
+
+    // ILoggerInternal
+    void ProcessLoggerMessage(const LoggerMessage& msg) override;
+
+    void LogReceivedMsg(const LogMsg& msg) override;
 
 private:
     // ----------------------------------------

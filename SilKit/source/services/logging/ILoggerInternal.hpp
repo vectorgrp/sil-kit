@@ -42,8 +42,8 @@ class LoggerMessage;
 
 struct ILoggerInternal : ILogger
 {
-    virtual void Log(const LoggerMessage& msg) = 0;
-    virtual void Log(const LogMsg& msg) = 0;
+    virtual void ProcessLoggerMessage(const LoggerMessage& msg) = 0;
+    virtual void LogReceivedMsg(const LogMsg& msg) = 0;
 };
 
 
@@ -58,13 +58,11 @@ public:
     LoggerMessage(ILoggerInternal* logger, Level level)
         : _logger(logger)
         , _level(level)
-        , _minlevel(logger->GetLogLevel())
     {}
 
     LoggerMessage(ILoggerInternal* logger)
         : _logger(logger)
         , _level(Level::Trace)
-        , _minlevel(logger->GetLogLevel())
     {}
 
     LoggerMessage(ILoggerInternal* logger, const LogMsg& msg)
@@ -75,51 +73,52 @@ public:
     {}
 
     template <typename... Args>
-    void SetMessage(const char* fmt, const Args&... args)
+    void SetMessage(fmt::format_string<Args...> fmt, Args&&... args)
     {
-        _msg = fmt::format(fmt, args...);
+        _msg = fmt::format(fmt, std::forward<Args>(args)...);
     }
 
     void SetMessage(std::string newMsg)
     {
-        _msg = newMsg;
+        _msg = std::move(newMsg);
     }
 
-    void AddKeyValue(std::string key, std::string value)
-    {       
-        _keyValues[key] = value;
+    template<typename Key, typename Value>
+    void SetKeyValue(Key&& key, Value&& value)
+    {
+        _keyValues[std::forward<Key>(key)] = std::forward<Value>(value);
     }
 
-    Level GetLevel() const
+    auto GetLevel() const -> Level
     {
         return _level;
     }
 
-    std::unordered_map<std::string, std::string> GetKeyValues() const
+    auto GetKeyValues() const -> const std::unordered_map<std::string, std::string>&
     {
         return _keyValues;
     }
 
     bool HasKeyValues() const
     {
-        return _keyValues.size() > 0 ? true : false;
+        return !_keyValues.empty();
     }
 
-    std::string GetMsgString() const
+    auto GetMsgString() const -> const std::string&
     {
         return _msg;
     }
 
-    ILoggerInternal* GetLogger() const
+    auto GetLogger() const -> ILoggerInternal*
     {
         return _logger;
     }
 
     void Dispatch()
     {
-        if ((_minlevel <= _level))
+        if (_logger->GetLogLevel() <= _level)
         {
-            _logger->Log(*this);
+            _logger->ProcessLoggerMessage(*this);
         }
     }
 
@@ -127,7 +126,6 @@ public:
 private:
     ILoggerInternal* _logger;
     Level _level;
-    Level _minlevel;
     std::string _msg;
     std::unordered_map<std::string, std::string> _keyValues;
 };

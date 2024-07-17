@@ -46,8 +46,8 @@ public:
 
 public:
     MOCK_METHOD(void, Log, (Level level, const std::string& msg), (override));
-    MOCK_METHOD(void, Log, (const LoggerMessage& msg), (override));
-    MOCK_METHOD(void, Log, (const LogMsg& msg), (override));
+    MOCK_METHOD(void, ProcessLoggerMessage, (const LoggerMessage& msg), (override));
+    MOCK_METHOD(void, LogReceivedMsg, (const LogMsg& msg), (override));
 
     void Trace(const std::string& msg) override
     {

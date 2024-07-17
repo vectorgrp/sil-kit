@@ -42,8 +42,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "SpdlogTypeConversion.hpp"
 #include "spdlog/pattern_formatter.h"
-#include "spdlog/fmt/ostr.h"  // support for user defined types
-#include "spdlog/cfg/env.h"   // support for loading levels from the environment variable
 
 
 namespace SilKit {
@@ -54,32 +52,16 @@ class LoggerMessage;
 
 struct SimpleLogMessage
 {
-    SimpleLogMessage(const LoggerMessage& m)
-        : m(m)
-    {}
-
     const LoggerMessage& m;
 };
 
 struct JsonLogMessage
 {
-    JsonLogMessage(const LoggerMessage& m)
-        : m(m)
-    {}
-
-    JsonLogMessage(LoggerMessage&& m)
-        : m(m)
-    {}
-
     const LoggerMessage& m;
 };
 
 struct JsonString
 {
-    JsonString(const std::string& m)
-        : m(m)
-    {}
-
     const std::string& m;
 };
 
@@ -87,6 +69,25 @@ struct JsonString
 } // namespace Services
 } // namespace SilKit
 
+
+
+// Custom flag handler to print the UNIX epoch timestamp
+class epoch_formatter_flag : public spdlog::custom_flag_formatter
+{
+public:
+    void format(const spdlog::details::log_msg& msg, const std::tm& tm_time, spdlog::memory_buf_t& dest) override
+    {
+        using namespace std::chrono;
+        auto now = system_clock::now();
+        auto epoch_time = duration_cast<microseconds>(now.time_since_epoch()).count();
+        fmt::format_to(std::back_inserter(dest), "{}", epoch_time);
+    }
+
+    std::unique_ptr<spdlog::custom_flag_formatter> clone() const override
+    {
+        return spdlog::details::make_unique<epoch_formatter_flag>();
+    }
+};
 
 
 std::string KeyValuesToSimpleString(const std::unordered_map<std::string, std::string>& input)
@@ -282,7 +283,7 @@ Logger::Logger(const std::string& participantName, Config::Logging config)
 #endif
 
     // Defined JSON pattern for the logger output
-    std::string jsonpattern  {R"({"ts":"%Y-%m-%dT%H:%M:%S.%e%z","log":"%n","lvl":"%l", %v })"}; 
+    std::string jsonpattern{R"({"ts":"%E","log":"%n","lvl":"%l", %v })"};
 
     for (auto sink : _config.sinks)
     {
@@ -322,7 +323,7 @@ Logger::Logger(const std::string& participantName, Config::Logging config)
             {
                 using spdlog::details::make_unique; // for pre c++14
                 auto formatter = make_unique<spdlog::pattern_formatter>();
-
+                formatter->add_flag<epoch_formatter_flag>('E').set_pattern("[%E] [%^%l%$] %v");
                 formatter->set_pattern(jsonpattern);
                 stdoutSink->set_formatter(std::move(formatter));
                 stdoutSink->set_level(log_level);
@@ -333,7 +334,6 @@ Logger::Logger(const std::string& participantName, Config::Logging config)
                 stdoutSink->set_level(log_level);
                 _loggerSimple->sinks().emplace_back(std::move(stdoutSink));
             }
-
             break;
         }
         case Config::Sink::Type::File:
@@ -345,8 +345,9 @@ Logger::Logger(const std::string& participantName, Config::Logging config)
             {   
                 using spdlog::details::make_unique; // for pre c++14
                 auto formatter = make_unique<spdlog::pattern_formatter>();
+                formatter->add_flag<epoch_formatter_flag>('E').set_pattern("[%E] [%^%l%$] %v");
                 formatter->set_pattern(jsonpattern);
-                fileSink->set_pattern(jsonpattern);
+                fileSink->set_formatter(std::move(formatter));
                 fileSink->set_level(log_level);
                 _loggerJson->sinks().push_back(fileSink);
             }
@@ -368,18 +369,18 @@ Logger::Logger(const std::string& participantName, Config::Logging config)
     }
 }
 
-void Logger::Log(const LoggerMessage& msg)
+void Logger::ProcessLoggerMessage(const LoggerMessage& msg)
 {
     const auto now = log_clock::now();
     if (nullptr != _loggerJson)
     {
-        JsonLogMessage myJsonMsg(msg);
+        JsonLogMessage myJsonMsg{msg};
         _loggerJson->log(now, spdlog::source_loc{}, to_spdlog(msg.GetLevel()), fmt::format("{}", myJsonMsg));
     }
 
     if (nullptr != _loggerSimple)
     {
-        SimpleLogMessage myMsg(msg);
+        SimpleLogMessage myMsg{msg};
         _loggerSimple->log(now, spdlog::source_loc{}, to_spdlog(msg.GetLevel()), fmt::format("{}", myMsg));
     }
     if (nullptr != _loggerRemote)
@@ -388,7 +389,7 @@ void Logger::Log(const LoggerMessage& msg)
     }
 }
 
-void Logger::Log(const LogMsg& msg)
+void Logger::LogReceivedMsg(const LogMsg& msg)
 {
     LoggerMessage loggerMsg{this, msg};
     if (nullptr != _loggerJson)
@@ -417,8 +418,8 @@ void Logger::Log(Level level, const std::string& msg)
     const auto now = log_clock::now();
     if (nullptr != _loggerJson)
     {
-        JsonString myJsonString(msg);
-        _loggerJson->log(now, spdlog::source_loc{}, to_spdlog(level), fmt::format("{}", myJsonString));
+        JsonString jsonString{msg};
+        _loggerJson->log(now, spdlog::source_loc{}, to_spdlog(level), fmt::format("{}", jsonString));
     }
     if (nullptr != _loggerSimple)
     {
@@ -478,11 +479,11 @@ void Logger::DisableRemoteLogging()
     }
 }
 
-
+/*
 void Logger::LogReceivedMsg(const LogMsg& msg)
 {
     Log(msg);
-}
+}*/
 
 Level Logger::GetLogLevel() const
 {   
