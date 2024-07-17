@@ -157,6 +157,7 @@ function(silkit_enable_warnings isOn)
             -Wcast-align
             -Wpacked
             -Wno-implicit-fallthrough
+            -Wno-error=dangling-reference
 
             -Wno-shadow                 # Appears in ThirdParty/spdlog/include/spdlog/common.h:214:9
             -Wno-format                 # MinGW-gcc does not recognize %zu
