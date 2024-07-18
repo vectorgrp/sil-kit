@@ -479,12 +479,6 @@ void Logger::DisableRemoteLogging()
     }
 }
 
-/*
-void Logger::LogReceivedMsg(const LogMsg& msg)
-{
-    Log(msg);
-}*/
-
 Level Logger::GetLogLevel() const
 {   
     auto lvl = to_spdlog(Level::Critical);
