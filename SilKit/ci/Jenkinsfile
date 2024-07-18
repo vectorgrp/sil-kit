@@ -31,7 +31,6 @@ def buildConfigs = [
         MsvcVersion:"14.1",
         PublishArtifacts: true,
         CmakePreset: "vs141-x64-release",
-        BuildDocs: true,
     ]
     ,[
         Name: "VS2017-Win32",
@@ -40,7 +39,6 @@ def buildConfigs = [
         MsvcVersion:"14.1",
         PublishArtifacts: true,
         CmakePreset: "vs141-x86-release",
-        BuildDocs: true,
     ]
 
     // Linux builds:
@@ -138,8 +136,8 @@ def isFullBuildRequired(branchName) {
     if(branchName == 'main-mirror' || branchName.startsWith("PR-")) {
         return true;
     }
-    // A user requests a fullbuild by adding a "/full" suffix
-    if(branchName.contains("/full")) {
+    // A user requests a fullbuild by adding a "-full" suffix
+    if(branchName.contains("-full")) {
         return true;
     }
     return false
@@ -385,6 +383,8 @@ def doBuild(Map config) {
         }
         if(buildDocs) {
             buildCmakeArgs +=" -DSILKIT_BUILD_DOCS=ON "
+        }
+        if(publishArtifacts || buildDocs) {
             buildCmakeArgs +=" -DSILKIT_INSTALL_SOURCE=ON "
         }
 
@@ -399,22 +399,28 @@ def doBuild(Map config) {
                 run("cmake --version")
             }
             stage("${buildName}: cmake configure for preset ${buildPreset}") {
-                    // Install dependencies for documentation
-                    configFileProvider([
-                        configFile(fileId: 'PYPI_MIRROR', variable: 'PYPI_MIRROR'),
-                    ]) {
-                        def pypiMirror = readFile(file: PYPI_MIRROR).trim()
-                        print("Using pipenv to install docs dependencies")
-                        if(!isUnix()) {
-                            run("python -m pip install pipenv==2022.9.8")
+                    if(buildDocs) {
+                        // Install dependencies for documentation
+                        configFileProvider([
+                            configFile(fileId: 'PYPI_MIRROR', variable: 'PYPI_MIRROR'),
+                        ]) {
+                            def pypiMirror = readFile(file: PYPI_MIRROR).trim()
+                            print("Using pipenv to install docs dependencies")
+                            if(!isUnix()) {
+                                run("python -m pip install pipenv==2022.9.8")
+                            }
+                            run("python -m pipenv install --pypi-mirror  ${pypiMirror} -r SilKit/ci/docker/docs_requirements.txt")
                         }
-                        run("python -m pipenv install --pypi-mirror  ${pypiMirror} -r SilKit/ci/docker/docs_requirements.txt")
                     }
                     run("cmake --preset ${buildPreset} ${buildCmakeArgs}")
             }
 
             stage("${buildName}: cmake build for preset ${buildPreset}") {
-                run("python -m pipenv run cmake --build --preset ${buildPreset}")
+                if(buildDocs) {
+                    run("python -m pipenv run cmake --build --preset ${buildPreset}")
+                } else {
+                    run("cmake --build --preset ${buildPreset}")
+                }
             }
 
             stage("${buildName}: ctest for preset ${buildPreset}") {
