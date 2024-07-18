@@ -671,7 +671,7 @@ void TimeSyncService::StartWallClockCouplingThread()
     _wallClockCouplingThreadRunning = true;
     _wallClockCouplingThread = std::thread{[this]() {
 
-        SilKit::Util::SetThreadName("SK-WallClockSync");
+        SilKit::Util::SetThreadName("SK-WallClckSync");
 
         const auto startTime = std::chrono::steady_clock::now();
         auto nextAnimatedWallClockSyncPoint = _timeConfiguration.NextSimStep().duration * _animationFactor;
