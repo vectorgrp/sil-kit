@@ -122,7 +122,6 @@ public:
         }
     }
 
-
 private:
     ILoggerInternal* _logger;
     Level _level;

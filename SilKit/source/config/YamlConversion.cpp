@@ -138,8 +138,6 @@ Node Converter::encode(const Sink::Format& obj)
     case Sink::Format::Json:
         node = "Json";
         break;
-    default:
-        break;
     }
     return node;
 }
@@ -182,8 +180,6 @@ Node Converter::encode(const Sink::Type& obj)
         break;
     case Sink::Type::File:
         node = "File";
-        break;
-    default:
         break;
     }
     return node;
