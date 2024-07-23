@@ -30,6 +30,7 @@ def buildConfigs = [
         Arch:"x64",
         MsvcVersion:"14.1",
         PublishArtifacts: true,
+        BuildDocs: true,
         CmakePreset: "vs141-x64-release",
     ]
     ,[
@@ -38,6 +39,7 @@ def buildConfigs = [
         Arch:"x64_x86",
         MsvcVersion:"14.1",
         PublishArtifacts: true,
+        BuildDocs: true,
         CmakePreset: "vs141-x86-release",
     ]
 
@@ -339,6 +341,7 @@ def doBuild(Map config) {
         def buildTestDebug = config.getOrDefault("TestDebug", false) 
         def triggerAbiCheck = config.getOrDefault("TriggerAbiCheck", false)
         def checkLicenses = config.getOrDefault("checkLicenses", false)
+        def pipenvExtraArgs = ""
 
         def buildEnv = []
         def scmVars = [:]
@@ -407,9 +410,10 @@ def doBuild(Map config) {
                             def pypiMirror = readFile(file: PYPI_MIRROR).trim()
                             print("Using pipenv to install docs dependencies")
                             if(!isUnix()) {
-                                run("python -m pip install pipenv==2022.9.8")
+                                run("py -3.9 -m pip install pipenv==2022.9.8")
+                                pipenvExtraArgs = "--python 3.9"
                             }
-                            run("python -m pipenv install --pypi-mirror  ${pypiMirror} -r SilKit/ci/docker/docs_requirements.txt")
+                            run("python -m pipenv ${pipenvExtraArgs} install --pypi-mirror  ${pypiMirror} -r SilKit/ci/docker/docs_requirements.txt")
                         }
                     }
                     run("cmake --preset ${buildPreset} ${buildCmakeArgs}")
@@ -417,7 +421,7 @@ def doBuild(Map config) {
 
             stage("${buildName}: cmake build for preset ${buildPreset}") {
                 if(buildDocs) {
-                    run("python -m pipenv run cmake --build --preset ${buildPreset}")
+                    run("python -m pipenv ${pipenvExtraArgs} run cmake --build --preset ${buildPreset}")
                 } else {
                     run("cmake --build --preset ${buildPreset}")
                 }
