@@ -342,6 +342,7 @@ def doBuild(Map config) {
         def triggerAbiCheck = config.getOrDefault("TriggerAbiCheck", false)
         def checkLicenses = config.getOrDefault("checkLicenses", false)
         def pipenvExtraArgs = ""
+        def pythonExe = isUnix() ? "python" : "py -3.9"
 
         def buildEnv = []
         def scmVars = [:]
@@ -413,7 +414,7 @@ def doBuild(Map config) {
                                 run("py -3.9 -m pip install pipenv==2022.9.8")
                                 pipenvExtraArgs = "--python 3.9"
                             }
-                            run("python -m pipenv ${pipenvExtraArgs} install --pypi-mirror  ${pypiMirror} -r SilKit/ci/docker/docs_requirements.txt")
+                            run("${pythonExe} -m pipenv ${pipenvExtraArgs} install --pypi-mirror  ${pypiMirror} -r SilKit/ci/docker/docs_requirements.txt")
                         }
                     }
                     run("cmake --preset ${buildPreset} ${buildCmakeArgs}")
@@ -421,7 +422,7 @@ def doBuild(Map config) {
 
             stage("${buildName}: cmake build for preset ${buildPreset}") {
                 if(buildDocs) {
-                    run("python -m pipenv ${pipenvExtraArgs} run cmake --build --preset ${buildPreset}")
+                    run("${pythonExe} -m pipenv ${pipenvExtraArgs} run cmake --build --preset ${buildPreset}")
                 } else {
                     run("cmake --build --preset ${buildPreset}")
                 }
