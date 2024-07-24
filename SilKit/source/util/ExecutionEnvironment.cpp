@@ -22,6 +22,8 @@
 
 #ifdef __linux__
 #include <sys/sysinfo.h>
+#include <sys/types.h>
+#include <pwd.h>
 #endif
 
 #ifdef _WIN32
@@ -41,9 +43,14 @@ constexpr const char* UNKNOWN_VALUE = "<unknown>";
 
 auto GetUsername() -> std::string
 {
-    std::array<char, 512> username{};
-    SILKIT_ASSERT(::getlogin_r(username.data(), sizeof(username) - 1) == 0);
-    return std::string{username.data()};
+    const auto uid = ::getuid();
+    const auto pwd = ::getpwuid(uid);
+    if (pwd == nullptr)
+    {
+        return "<unknown>";
+    }
+
+    return pwd->pw_name;
 }
 
 #ifdef __linux__
