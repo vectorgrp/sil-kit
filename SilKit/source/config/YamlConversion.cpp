@@ -994,14 +994,16 @@ bool Converter::decode(const Node& node, TimeSynchronization& obj)
 template <>
 Node Converter::encode(const Experimental& obj)
 {
+    static const Experimental defaultObj{};
+
     Node node;
-    node["TimeSynchronization"] = obj.timeSynchronization;
+    non_default_encode(obj.timeSynchronization, node, "TimeSynchronization", defaultObj.timeSynchronization);
     return node;
 }
 template <>
 bool Converter::decode(const Node& node, Experimental& obj)
 {
-    obj.timeSynchronization = parse_as<decltype(obj.timeSynchronization)>(node["TimeSynchronization"]);
+    optional_decode(obj.timeSynchronization, node, "TimeSynchronization");
     return true;
 }
 
