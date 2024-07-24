@@ -121,6 +121,12 @@ inline auto to_spdlog(const LogMsg& msg) -> spdlog::details::log_msg
     };
 }
 
+inline auto to_spdlog(const LogMsg& msg, const std::string& payload) -> spdlog::details::log_msg
+{
+    return spdlog::details::log_msg{msg.time, to_spdlog(msg.source), msg.loggerName, to_spdlog(msg.level), payload};
+}
+
+
 } // namespace Logging
 } // namespace Services
 } // namespace SilKit

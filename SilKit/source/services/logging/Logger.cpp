@@ -52,12 +52,14 @@ class LoggerMessage;
 
 struct SimpleLogMessage
 {
-    const LoggerMessage& m;
+    const std::string& msg;
+    const std::unordered_map<std::string, std::string>& kv;
 };
 
 struct JsonLogMessage
 {
-    const LoggerMessage& m;
+    const std::string& msg;
+    const std::unordered_map<std::string, std::string>& kv;
 };
 
 struct JsonString
@@ -75,11 +77,10 @@ struct JsonString
 class epoch_formatter_flag : public spdlog::custom_flag_formatter
 {
 public:
-    void format(const spdlog::details::log_msg&, const std::tm&, spdlog::memory_buf_t& dest) override
+    void format(const spdlog::details::log_msg& msg, const std::tm&, spdlog::memory_buf_t& dest) override
     {
         using namespace std::chrono;
-        auto now = system_clock::now();
-        auto epoch_time = duration_cast<microseconds>(now.time_since_epoch()).count();
+        auto epoch_time = duration_cast<microseconds>(msg.time.time_since_epoch()).count();
         fmt::format_to(std::back_inserter(dest), "{}", epoch_time);
     }
 
@@ -143,14 +144,13 @@ struct fmt::formatter<SilKit::Services::Logging::SimpleLogMessage>
     template <typename FormatContext>
     auto format(const SilKit::Services::Logging::SimpleLogMessage& msg, FormatContext& ctx)
     {
-        if (msg.m.HasKeyValues())
+        if (!msg.kv.empty())
         {
-            return fmt::format_to(ctx.out(), "{}, {}", msg.m.GetMsgString(),
-                                  KeyValuesToSimpleString(msg.m.GetKeyValues()));
+            return fmt::format_to(ctx.out(), "{}, {}", msg.msg, KeyValuesToSimpleString(msg.kv));
         }
         else
         {
-            return fmt::format_to(ctx.out(), "{}", msg.m.GetMsgString());
+            return fmt::format_to(ctx.out(), "{}", msg.msg);
         }
     }
 };
@@ -167,15 +167,15 @@ struct fmt::formatter<SilKit::Services::Logging::JsonLogMessage>
     template <typename FormatContext>
     auto format(const SilKit::Services::Logging::JsonLogMessage& msg, FormatContext& ctx)
     {
-        if (msg.m.HasKeyValues())
+        if (!msg.kv.empty())
         {
             return fmt::format_to(ctx.out(), "\"msg\": \"{}\", \"kv\": {}",
-                                  SilKit::Util::EscapeString(msg.m.GetMsgString()),
-                                  KeyValuesToJsonString(msg.m.GetKeyValues()));
+                                  SilKit::Util::EscapeString(msg.msg),
+                                  KeyValuesToJsonString(msg.kv));
         }
         else
         {
-            return fmt::format_to(ctx.out(), "\"msg\": \"{}\"", SilKit::Util::EscapeString(msg.m.GetMsgString()));
+            return fmt::format_to(ctx.out(), "\"msg\": \"{}\"", SilKit::Util::EscapeString(msg.msg));
         }
     }
 };
@@ -191,7 +191,7 @@ struct fmt::formatter<SilKit::Services::Logging::JsonString>
     template <typename FormatContext>
     auto format(const SilKit::Services::Logging::JsonString& msg, FormatContext& ctx)
     {
-        // format the message output string l
+        // format the message output string
         // "msg": "This is the log message", "kv":{ "key1": "value1", key2: "value2"}
         // the message, key and value strings needed to be escaped
         return fmt::format_to(ctx.out(), "\"msg\": \"{}\"", SilKit::Util::EscapeString(msg.m));
@@ -374,13 +374,14 @@ void Logger::ProcessLoggerMessage(const LoggerMessage& msg)
     const auto now = log_clock::now();
     if (nullptr != _loggerJson)
     {
-        JsonLogMessage myJsonMsg{msg};
+        JsonLogMessage myJsonMsg{msg.GetMsgString(), msg.GetKeyValues()};
+
         _loggerJson->log(now, spdlog::source_loc{}, to_spdlog(msg.GetLevel()), fmt::format("{}", myJsonMsg));
     }
 
     if (nullptr != _loggerSimple)
     {
-        SimpleLogMessage myMsg{msg};
+        SimpleLogMessage myMsg{msg.GetMsgString(), msg.GetKeyValues()};
         _loggerSimple->log(now, spdlog::source_loc{}, to_spdlog(msg.GetLevel()), fmt::format("{}", myMsg));
     }
     if (nullptr != _loggerRemote)
@@ -391,24 +392,45 @@ void Logger::ProcessLoggerMessage(const LoggerMessage& msg)
 
 void Logger::LogReceivedMsg(const LogMsg& msg)
 {
-    LoggerMessage loggerMsg{this, msg};
+
     if (nullptr != _loggerJson)
     {
-            
-        JsonLogMessage jsonMsg{loggerMsg};
-        _loggerJson->log(msg.time, spdlog::source_loc{}, to_spdlog(jsonMsg.m.GetLevel()),
-                            fmt::format("{}", jsonMsg));
+       JsonLogMessage jsonMsg{msg.payload, msg.keyValues};
+
+        auto fmt{fmt::format("{}", jsonMsg)};
+        auto spdlog_msg = to_spdlog(msg, fmt);
+      
+
+        for (auto&& sink : _loggerJson->sinks())
+        {
+            if (to_spdlog(msg.level) < sink->level())
+                continue;
+
+            sink->log(spdlog_msg);
+
+            if (_config.flushLevel <= msg.level)
+                sink->flush();
+        }
     }
 
     if (nullptr != _loggerSimple)
     {
-        SimpleLogMessage simpleMsg{loggerMsg};
-        _loggerSimple->log(msg.time, spdlog::source_loc{}, to_spdlog(simpleMsg.m.GetLevel()),
-                            fmt::format("{}", simpleMsg));
-    }
-    if (nullptr != _loggerRemote)
-    {
-        _loggerRemote->Log(msg);
+
+        SimpleLogMessage simpleMsg{msg.payload, msg.keyValues};
+
+        auto fmt{fmt::format("{}", simpleMsg)};
+        auto spdlog_msg = to_spdlog(msg, fmt);
+
+        for (auto&& sink : _loggerSimple->sinks())
+        {
+            if (to_spdlog(msg.level) < sink->level())
+                continue;
+
+            sink->log(spdlog_msg);
+
+            if (_config.flushLevel <= msg.level)
+                sink->flush();
+        }
     }
 }
 
