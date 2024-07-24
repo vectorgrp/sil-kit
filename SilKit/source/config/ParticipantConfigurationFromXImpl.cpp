@@ -365,12 +365,15 @@ void CacheLoggingSinks(const YAML::Node& config, GlobalLogCache& cache)
 
 void CacheTimeSynchronization(const YAML::Node& root, TimeSynchronizationCache& cache)
 {
-    PopulateCacheField(root["TimeSynchronization"], "TimeSynchronization", "AnimationFactor", cache.animationFactor);
+    PopulateCacheField(root, "TimeSynchronization", "AnimationFactor", cache.animationFactor);
 }
 
 void CacheExperimental(const YAML::Node& root, ExperimentalCache& cache)
 {
-    CacheTimeSynchronization(root, cache.timeSynchronizationCache);
+    if (root["TimeSynchronization"])
+    {
+        CacheTimeSynchronization(root, cache.timeSynchronizationCache);
+    }
 }
 
 void PopulateCaches(const YAML::Node& config, ConfigIncludeData& configIncludeData)
