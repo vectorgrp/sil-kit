@@ -338,11 +338,12 @@ Logger::Logger(const std::string& participantName, Config::Logging config)
         }
         case Config::Sink::Type::File:
         {
-            auto filename = fmt::format("{}_{:%FT%H-%M-%S}.txt", sink.logName, tmBuffer);
-            auto fileSink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(filename);
+
 
             if (sink.format == Config::Sink::Format::Json)
-            {   
+            {
+                auto filename = fmt::format("{}_{:%FT%H-%M-%S}.jsonl", sink.logName, tmBuffer);
+                auto fileSink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(filename);
                 using spdlog::details::make_unique; // for pre c++14
                 auto formatter = make_unique<spdlog::pattern_formatter>();
                 formatter->add_flag<epoch_formatter_flag>('E').set_pattern("[%E] [%^%l%$] %v");
@@ -353,6 +354,8 @@ Logger::Logger(const std::string& participantName, Config::Logging config)
             }
             else
             {
+                auto filename = fmt::format("{}_{:%FT%H-%M-%S}.txt", sink.logName, tmBuffer);
+                auto fileSink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(filename);
                 fileSink->set_level(log_level);
                 _loggerSimple->sinks().push_back(fileSink);
             }
