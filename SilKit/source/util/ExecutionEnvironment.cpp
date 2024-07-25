@@ -43,28 +43,39 @@ constexpr const char* UNKNOWN_VALUE = "<unknown>";
 
 auto GetUsername() -> std::string
 {
-    const auto uid = ::getuid();
-    const auto pwd = ::getpwuid(uid);
-    if (pwd == nullptr)
-    {
-        return "<unknown>";
-    }
+    static const auto result = []() -> std::string {
+        const auto uid = ::getuid();
+        const auto pwd = ::getpwuid(uid);
+        if (pwd == nullptr)
+        {
+            return UNKNOWN_VALUE;
+        }
 
-    return pwd->pw_name;
+        return pwd->pw_name;
+    }();
+
+    return result;
 }
 
 #ifdef __linux__
 
 auto GetProcessExecutable() -> std::string
 {
-    std::vector<char> buffer;
-    buffer.resize(4096, '\0');
+    static const auto result = []() -> std::string {
+        std::vector<char> buffer;
+        buffer.resize(4096, '\0');
 
-    auto pathLength = ::readlink("/proc/self/exe", buffer.data(), buffer.size() - 1);
-    SILKIT_ASSERT(pathLength > 0);
+        auto pathLength = ::readlink("/proc/self/exe", buffer.data(), buffer.size() - 1);
+        if (pathLength <= 0)
+        {
+            return UNKNOWN_VALUE;
+        }
 
-    buffer.resize(static_cast<std::size_t>(pathLength));
-    return std::string{buffer.begin(), buffer.end()};
+        buffer.resize(static_cast<std::size_t>(pathLength));
+        return std::string{buffer.begin(), buffer.end()};
+    }();
+
+    return result;
 }
 
 #else
@@ -98,6 +109,7 @@ auto GetPhysicalMemoryMB() -> std::string
         const auto physicalMemoryMiB = ((pageCount / 1024) * static_cast<std::uint64_t>(pageSize)) / 1024;
         return std::to_string(physicalMemoryMiB);
     }();
+
     return result;
 }
 
@@ -137,10 +149,13 @@ auto GetOperatingSystem() -> std::string
 
 auto GetUsername() -> std::string
 {
-    static const auto result = [] {
+    static const auto result = []() -> std::string {
         std::array<char, UNLEN + 1> username{};
         auto usernameLength = static_cast<DWORD>(username.size());
-        SILKIT_ASSERT(::GetUserNameA(username.data(), &usernameLength) != 0);
+        if (::GetUserNameA(username.data(), &usernameLength) == 0)
+        {
+            return UNKNOWN_VALUE;
+        }
         return std::string{username.data()};
     }();
 
@@ -149,13 +164,15 @@ auto GetUsername() -> std::string
 
 auto GetProcessExecutable() -> std::string
 {
-    static const auto result = [] {
+    static const auto result = []() -> std::string {
         std::vector<char> buffer;
         buffer.resize(4096, '\0');
 
         const auto pathLength = ::GetModuleFileNameA(NULL, buffer.data(), static_cast<DWORD>(buffer.size()));
-        SILKIT_ASSERT(pathLength != 0);
-        SILKIT_ASSERT(pathLength <= buffer.size());
+        if (pathLength <= 0 || pathLength > buffer.size())
+        {
+            return UNKNOWN_VALUE;
+        }
 
         buffer.resize(static_cast<std::size_t>(pathLength));
         return std::string{buffer.begin(), buffer.end()};
@@ -225,11 +242,15 @@ auto GetPageSize() -> std::string
 
 auto GetPhysicalMemoryMB() -> std::string
 {
-    const auto result = [] {
+    const auto result = []() -> std::string {
         ULONGLONG value{};
-        SILKIT_ASSERT(::GetPhysicallyInstalledSystemMemory(&value) == TRUE);
+        if (::GetPhysicallyInstalledSystemMemory(&value) != TRUE)
+        {
+            return UNKNOWN_VALUE;
+        }
         return std::to_string(value / 1024);
     }();
+
     return result;
 }
 
