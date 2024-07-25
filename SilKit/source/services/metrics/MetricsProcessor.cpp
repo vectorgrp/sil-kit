@@ -17,6 +17,24 @@ namespace Log = SilKit::Services::Logging;
 
 namespace VSilKit {
 
+namespace {
+
+auto CurrentTimestamp() -> std::string
+{
+    auto time = std::time(nullptr);
+
+    std::tm tm{};
+#if defined(_WIN32)
+    localtime_s(&tmBuffer, &timeNow);
+#else
+    localtime_r(&time, &tm);
+#endif
+
+    return fmt::format("{:%FT%H-%M-%S}", tm);
+}
+
+} // namespace
+
 MetricsProcessor::MetricsProcessor(std::string participantName)
     : _participantName{std::move(participantName)}
 {
@@ -42,22 +60,15 @@ void MetricsProcessor::SetupSinks(const SilKit::Config::ParticipantConfiguration
         return;
     }
 
+    auto timestamp = CurrentTimestamp();
+
     for (const auto &config : participantConfiguration.experimental.metrics.sinks)
     {
         std::unique_ptr<IMetricsSink> sink;
 
         if (config.type == SilKit::Config::MetricsSink::Type::JsonFile)
         {
-            // Generate a tm object for the timestamp once, so that all file loggers will have the very same timestamp.
-            auto timeNow = std::time(nullptr);
-            std::tm tmBuffer{};
-#if defined(_WIN32)
-            localtime_s(&tmBuffer, &timeNow);
-#else
-            localtime_r(&timeNow, &tmBuffer);
-#endif
-
-            auto filename = fmt::format("{}_{:%FT%H-%M-%S}.txt", config.name, tmBuffer);
+            auto filename = fmt::format("{}_{}.txt", config.name, timestamp);
             auto realSink = std::make_unique<MetricsJsonFileSink>(filename);
             sink = std::move(realSink);
         }
