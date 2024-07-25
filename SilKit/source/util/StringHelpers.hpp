@@ -26,7 +26,7 @@ namespace SilKit {
 namespace Util {
 
 
- auto EscapeString(const std::string& input) -> std::string;
+auto EscapeString(const std::string& input) -> std::string;
 
 
 } // namespace Util
