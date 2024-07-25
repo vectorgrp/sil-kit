@@ -37,6 +37,36 @@ auto EscapeString(const std::string& input) -> std::string
         char character = input[i];
         switch (character)
         {
+            case '\b':
+            {
+                result += "\\";
+                result += 'b';
+                break;
+            }
+            case '\t':
+            {
+                result += "\\";
+                result += 't';
+                break;
+            }
+            case '\n':
+            {
+                result += "\\";
+                result += 'n';
+                break;
+            }
+            case '\f':
+            {
+                result += "\\";
+                result += 'f';
+                break;
+            }
+            case '\r':
+            {
+                result += "\\";
+                result += 'r';
+                break;
+            }
             case '\\':
             {
                 result += "\\";
