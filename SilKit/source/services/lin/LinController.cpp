@@ -29,7 +29,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "ServiceDatatypes.hpp"
 #include "Tracing.hpp"
 
-#include "ILogger.hpp"
+#include "ILoggerInternal.hpp"
 #include "WireLinMessages.hpp"
 
 namespace {

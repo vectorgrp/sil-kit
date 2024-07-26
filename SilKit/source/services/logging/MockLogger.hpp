@@ -22,7 +22,7 @@
 #pragma once
 
 
-#include "silkit/services/logging/ILogger.hpp"
+#include "ILoggerInternal.hpp"
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
@@ -33,10 +33,11 @@ namespace Services {
 namespace Logging {
 
 
-class MockLogger : public ::SilKit::Services::Logging::ILogger
+class MockLogger : public ::SilKit::Services::Logging::ILoggerInternal
 {
     using Level = ::SilKit::Services::Logging::Level;
-
+    using LoggerMessage = ::SilKit::Services::Logging::LoggerMessage;
+    using LogMsg = ::SilKit::Services::Logging::LogMsg;
 public:
     MockLogger()
     {
@@ -45,6 +46,8 @@ public:
 
 public:
     MOCK_METHOD(void, Log, (Level level, const std::string& msg), (override));
+    MOCK_METHOD(void, ProcessLoggerMessage, (const LoggerMessage& msg), (override));
+    MOCK_METHOD(void, LogReceivedMsg, (const LogMsg& msg), (override));
 
     void Trace(const std::string& msg) override
     {

@@ -112,6 +112,7 @@ bool Converter::decode(const Node& node, Sink& obj)
 {
     optional_decode(obj.type, node, "Type");
     optional_decode(obj.level, node, "Level");
+    optional_decode(obj.format, node, "Format");
 
     if (obj.type == Sink::Type::File)
     {
@@ -124,7 +125,48 @@ bool Converter::decode(const Node& node, Sink& obj)
     return true;
 }
 
+
 template <>
+Node Converter::encode(const Sink::Format& obj)
+{
+    Node node;
+    switch (obj)
+    {
+    case Sink::Format::Simple:
+        node = "Simple";
+        break;
+    case Sink::Format::Json:
+        node = "Json";
+        break;
+    }
+    return node;
+}
+
+template <>
+bool Converter::decode(const Node& node, Sink::Format& obj)
+{
+    if (!node.IsScalar())
+    {
+        throw ConversionError(node, "Sink::Format should be a string of Simple|Json.");
+    }
+    auto&& str = parse_as<std::string>(node);
+    if (str == "Simple" || str == "")
+    {
+        obj = Sink::Format::Simple;
+    }
+    else if (str == "Json")
+    {
+        obj = Sink::Format::Json;
+    }
+    else
+    {
+        throw ConversionError(node, "Unknown Sink::Format: " + str + ".");
+    }
+    return true;
+}
+
+
+template<>
 Node Converter::encode(const Sink::Type& obj)
 {
     Node node;
@@ -138,8 +180,6 @@ Node Converter::encode(const Sink::Type& obj)
         break;
     case Sink::Type::File:
         node = "File";
-        break;
-    default:
         break;
     }
     return node;

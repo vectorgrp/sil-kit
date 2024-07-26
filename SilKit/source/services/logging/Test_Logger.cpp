@@ -22,6 +22,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <chrono>
 #include <functional>
 #include <string>
+#include<unordered_map>
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
@@ -52,13 +53,38 @@ using SilKit::Core::Tests::DummyParticipant;
 class MockParticipant : public DummyParticipant
 {
 public:
-    MOCK_METHOD((void), SendMsg, (const IServiceEndpoint*, LogMsg&&));
+    MOCK_METHOD((void), SendMsg_LogMsg, (const IServiceEndpoint*, LogMsg));
+    void SendMsg(const IServiceEndpoint* from, Services::Logging::LogMsg&& msg) override 
+    {
+        SendMsg_LogMsg(from, msg);
+    }
+    void SendMsg(const IServiceEndpoint* from, const Services::Logging::LogMsg& msg) override 
+    {
+        SendMsg_LogMsg(from, msg);
+    }
 };
 
-auto ALogMsgWith(std::string logger_name, Level level, std::string payload) -> Matcher<LogMsg&&>
+
+
+auto ALogMsgWith(std::string loggerName, Level level, std::string payload) -> Matcher<LogMsg>
 {
-    return AllOf(Field(&LogMsg::logger_name, logger_name), Field(&LogMsg::level, level),
-                 Field(&LogMsg::payload, payload));
+    return AllOf(
+        Field(&LogMsg::loggerName, loggerName),
+        Field(&LogMsg::level, level),
+        Field(&LogMsg::payload, payload)
+
+    );
+}
+
+auto ALogMsgWith(std::string loggerName, Level level, std::string payload,
+                 std::unordered_map<std::string, std::string> keyValues ) -> Matcher<LogMsg>
+{
+    return AllOf(
+        Field(&LogMsg::loggerName, loggerName), 
+        Field(&LogMsg::level, level), 
+        Field(&LogMsg::payload, payload),
+        Field(&LogMsg::keyValues, keyValues)
+    );
 }
 
 TEST(Test_Logger, log_level_conversion)
@@ -83,13 +109,13 @@ TEST(Test_Logger, send_log_message_with_sender)
     logMsgSender.SetServiceDescriptor(controllerAddress);
 
     LogMsg msg;
-    msg.logger_name = "Logger";
+    msg.loggerName = "Logger";
     msg.level = Level::Info;
     msg.payload = std::string{"some payload"};
 
-    EXPECT_CALL(mockParticipant, SendMsg(&logMsgSender, std::move(msg))).Times(1);
+    EXPECT_CALL(mockParticipant, SendMsg_LogMsg(&logMsgSender, msg)).Times(1);
 
-    logMsgSender.SendLogMsg(std::move(msg));
+    logMsgSender.SendLogMsg(msg);
 }
 
 TEST(Test_Logger, send_log_message_from_logger)
@@ -98,7 +124,7 @@ TEST(Test_Logger, send_log_message_from_logger)
 
     Config::Logging config;
     auto sink = Config::Sink{};
-    sink.level = Level::Debug;
+    sink.level = Level::Info;
     sink.type = Config::Sink::Type::Remote;
 
     config.sinks.push_back(sink);
@@ -117,12 +143,15 @@ TEST(Test_Logger, send_log_message_from_logger)
 
     std::string payload{"Test log message"};
 
-    EXPECT_CALL(mockParticipant, SendMsg(&logMsgSender, ALogMsgWith(loggerName, Level::Info, payload))).Times(1);
+    EXPECT_CALL(mockParticipant, SendMsg_LogMsg(testing::_,
+        ALogMsgWith(loggerName, Level::Info, payload)))
+        .Times(1);
+
+    EXPECT_CALL(mockParticipant, SendMsg_LogMsg(testing::_,
+        ALogMsgWith(loggerName, Level::Critical, payload)))
+        .Times(1);
 
     logger.Info(payload);
-
-    EXPECT_CALL(mockParticipant, SendMsg(&logMsgSender, ALogMsgWith(loggerName, Level::Critical, payload))).Times(1);
-
     logger.Critical(payload);
 }
 
@@ -133,7 +162,7 @@ TEST(Test_Logger, get_log_level)
     Config::Logging config;
     auto sink1 = Config::Sink{};
     sink1.level = Level::Debug;
-    sink1.type = Config::Sink::Type::Remote;
+    sink1.type = Config::Sink::Type::Stdout;
 
     auto sink2 = Config::Sink{};
     sink2.level = Level::Critical;
@@ -155,4 +184,47 @@ TEST(Test_Logger, LogOnceFlag_check_setter)
     EXPECT_EQ(once.WasCalled(), true);
     EXPECT_EQ(once.WasCalled(), true);
 }
-} // anonymous namespace
+
+
+TEST(Test_Logger, send_loggermessage_from_logger)
+{
+    std::string loggerName{"ParticipantAndLogger"};
+
+    Config::Logging config;
+    auto sink1 = Config::Sink{};
+    sink1.level = Level::Debug;
+    sink1.type = Config::Sink::Type::Remote;
+
+    config.sinks.push_back(sink1);
+
+    Logger logger{loggerName, config};
+
+    ServiceDescriptor controllerAddress{"P1", "N1", "C2", 8};
+    MockParticipant mockParticipant;
+    LogMsgSender logMsgSender(&mockParticipant);
+    logMsgSender.SetServiceDescriptor(controllerAddress);
+
+    logger.RegisterRemoteLogging([&logMsgSender](LogMsg logMsg) {
+        logMsgSender.SendLogMsg(std::move(logMsg));
+    });
+
+    std::string payload{"Test log message"};
+    std::string key{"TestKey"};
+    std::string value{"TestValue"};
+    std::unordered_map<std::string, std::string> keyValue{{key, value}};
+
+    EXPECT_CALL(mockParticipant, SendMsg_LogMsg(&logMsgSender, ALogMsgWith(loggerName, Level::Debug, payload, keyValue))).Times(1);
+    EXPECT_CALL(mockParticipant, SendMsg_LogMsg(&logMsgSender, ALogMsgWith(loggerName, Level::Critical, payload, keyValue))).Times(1);
+
+    LoggerMessage lm{&logger, Level::Debug};
+    lm.SetMessage(payload);
+    lm.SetKeyValue(key, value);
+    lm.Dispatch();
+
+    LoggerMessage lm2{&logger, Level::Critical};
+    lm2.SetMessage(payload);
+    lm2.SetKeyValue(key, value);
+    lm2.Dispatch();
+}
+
+}  // anonymous namespace

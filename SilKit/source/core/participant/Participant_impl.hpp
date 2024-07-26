@@ -63,7 +63,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "Uuid.hpp"
 #include "Assert.hpp"
 
-#include "ILogger.hpp"
+#include "ILoggerInternal.hpp"
 
 
 namespace SilKit {
@@ -100,7 +100,7 @@ Participant<SilKitConnectionT>::Participant(Config::ParticipantConfiguration par
     _connection.SetLogger(_logger.get());
 
     Logging::Info(_logger.get(), "Creating participant '{}' at '{}', SIL Kit version: {}", GetParticipantName(),
-                  _participantConfig.middleware.registryUri, Version::StringImpl());
+                 _participantConfig.middleware.registryUri, Version::StringImpl());
 }
 
 
@@ -177,8 +177,10 @@ void Participant<SilKitConnectionT>::SetupRemoteLogging()
             auto&& logMsgSender =
                 CreateController<Services::Logging::LogMsgSender>(config, std::move(supplementalData), true, true);
 
-            logger->RegisterRemoteLogging(
-                [logMsgSender](Services::Logging::LogMsg logMsg) { logMsgSender->SendLogMsg(std::move(logMsg)); });
+            logger->RegisterRemoteLogging([logMsgSender, this](Services::Logging::LogMsg logMsg) {
+               _connection.SendMsg(logMsgSender, std::move(logMsg));
+            });
+
         }
     }
     else
@@ -962,6 +964,12 @@ auto Participant<SilKitConnectionT>::CreateNetworkSimulator() -> Experimental::N
 
 template <class SilKitConnectionT>
 auto Participant<SilKitConnectionT>::GetLogger() -> Services::Logging::ILogger*
+{
+    return _logger.get();
+}
+
+template <class SilKitConnectionT>
+auto Participant<SilKitConnectionT>::GetLoggerInternal() -> Services::Logging::ILoggerInternal*
 {
     return _logger.get();
 }

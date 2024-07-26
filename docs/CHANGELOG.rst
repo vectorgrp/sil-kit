@@ -17,6 +17,7 @@ Added
   Accessible via a new experimental section in the Participant Configuration (Experimental | TimeSynchronization | AnimationFactor).
 - Event flow documentation for the Network Simulation API.
 - Registry (Dashboard): Automatically use bulk-endpoint if it is available
+- Configuration option for structured logging in JSON format
 
 
 [4.0.50] - 2024-05-15

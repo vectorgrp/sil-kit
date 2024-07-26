@@ -8,7 +8,7 @@
 #include "NetworkSimulatorDatatypesInternal.hpp"
 #include "silkit/experimental/netsim/string_utils.hpp"
 
-#include "ILogger.hpp"
+#include "ILoggerInternal.hpp"
 #include "procs/IParticipantReplies.hpp"
 
 namespace SilKit {

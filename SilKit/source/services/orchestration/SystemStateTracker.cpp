@@ -7,7 +7,7 @@
 #include "silkit/participant/exception.hpp"
 #include "silkit/services/orchestration/string_utils.hpp"
 
-#include "ILogger.hpp"
+#include "ILoggerInternal.hpp"
 
 #include <fmt/format.h>
 

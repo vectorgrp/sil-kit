@@ -69,8 +69,17 @@ struct Sink
         File
     };
 
-    Type type{Type::Remote};
-    Services::Logging::Level level{Services::Logging::Level::Info};
+
+
+    enum class Format : uint8_t
+    {
+        Simple,
+        Json
+    };
+
+    Format format{Format::Simple};
+    Type type{ Type::Remote };
+    Services::Logging::Level level{ Services::Logging::Level::Info };
     std::string logName;
 };
 
@@ -215,7 +224,10 @@ auto to_string(NetworkType networkType) -> std::string
 
 bool operator==(const Sink& lhs, const Sink& rhs)
 {
-    return lhs.type == rhs.type && lhs.level == rhs.level && lhs.logName == rhs.logName;
+    return lhs.type == rhs.type
+        && lhs.level == rhs.level
+        && lhs.format == rhs.format
+        && lhs.logName == rhs.logName;
 }
 
 bool operator<(const Sink& lhs, const Sink& rhs)

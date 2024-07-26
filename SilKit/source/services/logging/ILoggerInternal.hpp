@@ -27,10 +27,107 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "SilKitFmtFormatters.hpp"
 #include "fmt/format.h"
+#include <unordered_map>
+#include <string>
+
+
+
 
 namespace SilKit {
 namespace Services {
 namespace Logging {
+
+class LoggerMessage;
+
+
+struct ILoggerInternal : ILogger
+{
+    virtual void ProcessLoggerMessage(const LoggerMessage& msg) = 0;
+    virtual void LogReceivedMsg(const LogMsg& msg) = 0;
+};
+
+
+
+template <typename... Args>
+void Log(ILogger* logger, Level level, const char* fmt, const Args&... args);
+
+
+class LoggerMessage
+{
+public:
+    LoggerMessage(ILoggerInternal* logger, Level level)
+        : _logger(logger)
+        , _level(level)
+    {}
+
+    LoggerMessage(ILoggerInternal* logger)
+        : _logger(logger)
+        , _level(Level::Trace)
+    {}
+
+    LoggerMessage(ILoggerInternal* logger, const LogMsg& msg)
+        : _logger(logger)
+        , _level(msg.level)
+        , _msg(msg.payload)
+        , _keyValues(msg.keyValues)
+    {}
+
+    template <typename... Args>
+    void SetMessage(fmt::format_string<Args...> fmt, Args&&... args)
+    {
+        _msg = fmt::format(fmt, std::forward<Args>(args)...);
+    }
+
+    void SetMessage(std::string newMsg)
+    {
+        _msg = std::move(newMsg);
+    }
+
+    template<typename Key, typename Value>
+    void SetKeyValue(Key&& key, Value&& value)
+    {
+        _keyValues[std::forward<Key>(key)] = std::forward<Value>(value);
+    }
+
+    auto GetLevel() const -> Level
+    {
+        return _level;
+    }
+
+    auto GetKeyValues() const -> const std::unordered_map<std::string, std::string>&
+    {
+        return _keyValues;
+    }
+
+    bool HasKeyValues() const
+    {
+        return !_keyValues.empty();
+    }
+
+    auto GetMsgString() const -> const std::string&
+    {
+        return _msg;
+    }
+
+    auto GetLogger() const -> ILoggerInternal*
+    {
+        return _logger;
+    }
+
+    void Dispatch()
+    {
+        if (_logger->GetLogLevel() <= _level)
+        {
+            _logger->ProcessLoggerMessage(*this);
+        }
+    }
+
+private:
+    ILoggerInternal* _logger;
+    Level _level;
+    std::string _msg;
+    std::unordered_map<std::string, std::string> _keyValues;
+};
 
 
 class LogOnceFlag

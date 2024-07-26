@@ -14,7 +14,7 @@
 
 #include "IParticipantInternal.hpp"
 #include "IServiceDiscovery.hpp"
-#include "ILogger.hpp"
+#include "ILoggerInternal.hpp"
 
 #include "SimulatedNetworkRouter.hpp"
 #include "SimulatedNetworkInternal.hpp"

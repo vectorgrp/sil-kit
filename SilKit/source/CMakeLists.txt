@@ -185,6 +185,7 @@ list(APPEND SilKitImplObjectLibraries
     O_SilKit_Services_Rpc
     O_SilKit_Tracing
     O_SilKit_Util_FileHelpers
+    O_SilKit_Util_StringHelpers
     O_SilKit_Util_Filesystem
     O_SilKit_Util_SetThreadName
     O_SilKit_Util_SignalHandler

@@ -23,7 +23,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include <chrono>
 
-#include "ILogger.hpp"
+#include "ILoggerInternal.hpp"
 #include "SetThreadName.hpp"
 
 namespace SilKit {

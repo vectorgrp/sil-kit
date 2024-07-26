@@ -21,7 +21,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "SilKitEventHandler.hpp"
 
-#include "ILogger.hpp"
+#include "ILoggerInternal.hpp"
 #include "silkit/services/orchestration/string_utils.hpp"
 #include "silkit/SilKit.hpp"
 #include "Uri.hpp"

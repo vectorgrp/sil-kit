@@ -32,7 +32,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <cctype>
 #include <map>
 
-#include "ILogger.hpp"
+#include "ILoggerInternal.hpp"
 #include "VAsioConstants.hpp"
 #include "VAsioPeer.hpp"
 #include "VAsioProxyPeer.hpp"

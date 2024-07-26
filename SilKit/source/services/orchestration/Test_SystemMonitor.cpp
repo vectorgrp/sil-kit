@@ -67,7 +67,8 @@ protected:
         monitor.UpdateRequiredParticipantNames(syncParticipantNames);
         monitor.SetServiceDescriptor(addr);
 
-        ON_CALL(participant.logger, Log)
+        ON_CALL(participant.logger,
+                Log(testing::An<::SilKit::Services::Logging::Level>(), testing::An<const std::string&>()))
             .WillByDefault([](SilKit::Services::Logging::Level level, const std::string& message) {
             std::ostringstream ss;
             ss << "[" << to_string(level) << "] " << message << '\n';

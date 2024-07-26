@@ -9,7 +9,7 @@
 #include "IConnector.hpp"
 #include "ITimer.hpp"
 
-#include "ILogger.hpp"
+#include "ILoggerInternal.hpp"
 
 #include <functional>
 #include <memory>

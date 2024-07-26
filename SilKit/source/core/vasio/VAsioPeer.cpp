@@ -25,7 +25,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <sstream>
 #include <thread>
 
-#include "ILogger.hpp"
+#include "ILoggerInternal.hpp"
 #include "VAsioMsgKind.hpp"
 #include "VAsioConnection.hpp"
 #include "Uri.hpp"

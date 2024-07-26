@@ -28,7 +28,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "LifecycleService.hpp"
 #include "TimeSyncService.hpp"
 #include "IServiceDiscovery.hpp"
-#include "ILogger.hpp"
+#include "ILoggerInternal.hpp"
 #include "LifecycleManagement.hpp"
 
 using namespace std::chrono_literals;
