@@ -8,6 +8,8 @@
 
 namespace VSilKit {
 
+struct MetricsUpdate;
+
 struct IMetricsProcessor
 {
     virtual ~IMetricsProcessor() = default;
