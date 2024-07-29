@@ -8,32 +8,13 @@
 #include "MetricsJsonFileSink.hpp"
 #include "MetricsRemoteSink.hpp"
 #include "ILoggerInternal.hpp"
+#include "StringHelpers.hpp"
 
 #include "silkit/util/Span.hpp"
-
-#include "fmt/chrono.h"
 
 namespace Log = SilKit::Services::Logging;
 
 namespace VSilKit {
-
-namespace {
-
-auto CurrentTimestamp() -> std::string
-{
-    auto time = std::time(nullptr);
-
-    std::tm tm{};
-#if defined(_WIN32)
-    localtime_s(&tm, &time);
-#else
-    localtime_r(&time, &tm);
-#endif
-
-    return fmt::format("{:%FT%H-%M-%S}", tm);
-}
-
-} // namespace
 
 MetricsProcessor::MetricsProcessor(std::string participantName)
     : _participantName{std::move(participantName)}
@@ -60,7 +41,7 @@ void MetricsProcessor::SetupSinks(const SilKit::Config::ParticipantConfiguration
         return;
     }
 
-    auto timestamp = CurrentTimestamp();
+    auto metricsFileTimestamp = SilKit::Util::CurrentTimestampString();
 
     for (const auto &config : participantConfiguration.experimental.metrics.sinks)
     {
@@ -68,7 +49,7 @@ void MetricsProcessor::SetupSinks(const SilKit::Config::ParticipantConfiguration
 
         if (config.type == SilKit::Config::MetricsSink::Type::JsonFile)
         {
-            auto filename = fmt::format("{}_{}.txt", config.name, timestamp);
+            auto filename = fmt::format("{}_{}.txt", config.name, metricsFileTimestamp);
             auto realSink = std::make_unique<MetricsJsonFileSink>(filename);
             sink = std::move(realSink);
         }

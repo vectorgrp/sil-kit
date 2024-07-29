@@ -30,6 +30,8 @@ namespace Util {
 
 auto EscapeString(const std::string& input) -> std::string;
 
+auto CurrentTimestampString() -> std::string;
+
 
 } // namespace Util
 } // namespace SilKit

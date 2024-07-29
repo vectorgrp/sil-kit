@@ -21,6 +21,10 @@
 
 #include "StringHelpers.hpp"
 
+#include <chrono>
+
+#include "fmt/chrono.h"
+
 
 namespace SilKit {
 namespace Util {
@@ -89,6 +93,22 @@ auto EscapeString(const std::string& input) -> std::string
     }
     return result;
 }
+
+
+auto CurrentTimestamp() -> std::string
+{
+    auto time = std::time(nullptr);
+
+    std::tm tm{};
+#if defined(_WIN32)
+    localtime_s(&tm, &time);
+#else
+    localtime_r(&time, &tm);
+#endif
+
+    return fmt::format("{:%FT%H-%M-%S}", tm);
+}
+
 
 } // namespace Util
 } // namespace SilKit

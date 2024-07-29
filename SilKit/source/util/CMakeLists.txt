@@ -74,7 +74,10 @@ add_library(O_SilKit_Util_StringHelpers OBJECT
     StringHelpers.cpp
 )
 target_include_directories(O_SilKit_Util_StringHelpers INTERFACE ${CMAKE_CURRENT_LIST_DIR})
-target_link_libraries(O_SilKit_Util_StringHelpers PUBLIC I_SilKit_Util_StringHelpers)
+target_link_libraries(O_SilKit_Util_StringHelpers
+    PUBLIC I_SilKit_Util_StringHelpers
+    PRIVATE fmt::fmt-header-only
+)
 
 
 
