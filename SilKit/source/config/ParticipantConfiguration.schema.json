@@ -414,6 +414,31 @@
       "type": "string",
       "description": "Name of the RPC function called by RpcClients on RpcServers"
     },
+    "MatchingLabel": {
+      "type": "object",
+      "properties": {
+        "Key": {
+          "type": "string",
+          "description": "Label key"
+        },
+        "Value": {
+          "type": "string",
+          "description": "Label value"
+        },
+        "Kind": {
+          "type": "string",
+          "description": "Label kind",
+          "enum": ["Mandatory", "Optional"]
+        }
+      }
+    },
+    "Labels": {
+      "type": "array",
+      "description": "Override the matching labels assigned to the controller",
+      "items": {
+        "$ref": "#/definitions/MatchingLabel"
+      }
+    },
     "Logging": {
       "type": "object",
       "description": "Configures the properties of the SIL Kit Logging Service",
@@ -573,6 +598,9 @@
           },
           "Topic": {
             "$ref": "#/definitions/Topic"
+          },
+          "Labels": {
+            "$ref": "#/definitions/Labels"
           }
         },
         "additionalProperties": false,
@@ -590,6 +618,9 @@
           },
           "Topic": {
             "$ref": "#/definitions/Topic"
+          },
+          "Labels": {
+            "$ref": "#/definitions/Labels"
           }
         },
         "additionalProperties": false,
@@ -607,6 +638,9 @@
           },
           "FunctionName": {
             "$ref": "#/definitions/RpcFunctionName"
+          },
+          "Labels": {
+            "$ref": "#/definitions/Labels"
           }
         },
         "additionalProperties": false,
@@ -624,6 +658,9 @@
           },
           "FunctionName": {
             "$ref": "#/definitions/RpcFunctionName"
+          },
+          "Labels": {
+            "$ref": "#/definitions/Labels"
           }
         },
         "additionalProperties": false,
