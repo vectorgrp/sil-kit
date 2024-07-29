@@ -34,3 +34,8 @@ target_link_libraries(O_SilKit_Services_Metrics
     PUBLIC I_SilKit_Services_Metrics
     PRIVATE I_SilKit_Util_StringHelpers
 )
+
+add_silkit_test_to_executable(SilKitUnitTests
+    SOURCES Test_MetricsManager.cpp
+    LIBS S_SilKitImpl
+)
