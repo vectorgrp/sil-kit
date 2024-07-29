@@ -49,6 +49,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "WireRpcMessages.hpp"
 #include "WireDataMessages.hpp"
 
+#include "ParticipantConfiguration.hpp"
+
 #include "TestDataTypes.hpp" // for operator<<
 #include "IServiceEndpoint.hpp" // for operator<<(... ServiceDescriptor)
 
@@ -112,6 +114,11 @@ MAKE_FORMATTER(SilKit::Services::PubSub::WireDataMessageEvent);
 MAKE_FORMATTER(SilKit::Services::Rpc::FunctionCall);
 MAKE_FORMATTER(SilKit::Services::Rpc::FunctionCallResponse);
 
+MAKE_FORMATTER(SilKit::Services::MatchingLabel::Kind);
+MAKE_FORMATTER(SilKit::Services::MatchingLabel);
+
+MAKE_FORMATTER(SilKit::Config::v1::Label::Kind);
+MAKE_FORMATTER(SilKit::Config::v1::Label);
 
 MAKE_FORMATTER(SilKit::Core::ServiceDescriptor);
 MAKE_FORMATTER(SilKit::Core::ProtocolVersion);

@@ -813,6 +813,29 @@ bool operator>(const MetricsSink& lhs, const MetricsSink& rhs)
     return !(lhs < rhs);
 }
 
+bool operator==(const Label& lhs, const Label& rhs)
+{
+    return lhs.key == rhs.key && lhs.value == rhs.value && lhs.kind == rhs.kind;
+}
+
+auto operator<<(std::ostream& out, const Label::Kind& kind) -> std::ostream&
+{
+    switch (kind)
+    {
+    case Label::Kind::Mandatory:
+        return out << "Mandatory";
+    case Label::Kind::Optional:
+        return out << "Optional";
+    default:
+        return out << "MatchingLabel::Kind(" << static_cast<std::underlying_type_t<Label::Kind>>(kind) << ")";
+    }
+}
+
+auto operator<<(std::ostream& out, const Label& label) -> std::ostream&
+{
+    return out << "MatchingLabel{" << label.key << ", " << label.value << ", " << label.kind << "}";
+}
+
 } // namespace v1
 
 
