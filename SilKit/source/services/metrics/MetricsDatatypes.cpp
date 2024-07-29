@@ -36,19 +36,11 @@ auto operator<<(std::ostream& os, const MetricsUpdate& metricsUpdate) -> std::os
 {
     os << "MetricsUpdate{metrics=[";
 
-    bool first{true};
+    const char * separator = "";
     for (const auto& metricData : metricsUpdate.metrics)
     {
-        if (first)
-        {
-            first = false;
-        }
-        else
-        {
-            os << ", ";
-        }
-
-        os << metricData;
+        os << separator << metricData;
+        separator = ", ";
     }
 
     os << "]}";
