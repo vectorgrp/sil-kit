@@ -95,7 +95,7 @@ auto EscapeString(const std::string& input) -> std::string
 }
 
 
-auto CurrentTimestamp() -> std::string
+auto CurrentTimestampString() -> std::string
 {
     auto time = std::time(nullptr);
 
