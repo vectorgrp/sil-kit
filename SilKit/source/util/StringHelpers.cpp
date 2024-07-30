@@ -22,6 +22,7 @@
 #include "StringHelpers.hpp"
 
 #include <chrono>
+#include <sstream>
 
 #include "fmt/chrono.h"
 
@@ -30,68 +31,70 @@ namespace SilKit {
 namespace Util {
 
 
+namespace {
+
+template <typename F>
+void DoEscape(const std::string& string, F f)
+{
+    for (const char ch : string)
+    {
+        switch (ch)
+        {
+        case '\b':
+            f('\\');
+            f('b');
+            break;
+        case '\t':
+            f('\\');
+            f('t');
+            break;
+        case '\n':
+            f('\\');
+            f('n');
+            break;
+        case '\f':
+            f('\\');
+            f('f');
+            break;
+        case '\r':
+            f('\\');
+            f('r');
+            break;
+        case '"':
+            f('\\');
+            f('"');
+            break;
+        case '\\':
+            f('\\');
+            f('\\');
+            break;
+        default:
+            f(ch);
+            break;
+        }
+    }
+}
+
+} // namespace
+
+
 auto EscapeString(const std::string& input) -> std::string
 {
-    std::string result;
-    result.reserve(input.size() * 2); // Reserve enough memory for the result
+    std::size_t count{0};
+    DoEscape(input, [&count](const auto) { ++count; });
 
-    size_t i = 0;
-    while (i < input.size())
-    {
-        char character = input[i];
-        switch (character)
-        {
-            case '\b':
-            {
-                result += "\\";
-                result += 'b';
-                break;
-            }
-            case '\t':
-            {
-                result += "\\";
-                result += 't';
-                break;
-            }
-            case '\n':
-            {
-                result += "\\";
-                result += 'n';
-                break;
-            }
-            case '\f':
-            {
-                result += "\\";
-                result += 'f';
-                break;
-            }
-            case '\r':
-            {
-                result += "\\";
-                result += 'r';
-                break;
-            }
-            case '\\':
-            {
-                result += "\\";
-                result += character;
-                break;
-            }
-            case '\"':
-            {
-                result += "\\";
-                result += character;
-                break;
-            }
-            default:
-            {
-                result += character;
-                break;
-            }
-        }
-        i++;
-    }
+    std::string result;
+    result.reserve(count);
+    DoEscape(input, [&result](const auto ch) { result.push_back(ch); });
+
     return result;
+}
+
+
+auto operator<<(std::ostream& ostream, const EscapedJsonString& self) -> std::ostream&
+{
+    DoEscape(self.string, [&ostream](const auto ch) { ostream.put(ch); });
+    return ostream;
 }
 
 

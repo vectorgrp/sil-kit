@@ -4,12 +4,14 @@
 
 #include "CreateMetricsSinksFromParticipantConfiguration.hpp"
 
-#include "MetricsJsonFileSink.hpp"
+#include "MetricsJsonSink.hpp"
 #include "MetricsRemoteSink.hpp"
 
 #include "Assert.hpp"
 #include "StringHelpers.hpp"
 #include "ILoggerInternal.hpp"
+
+#include <fstream>
 
 #include "fmt/format.h"
 
@@ -32,7 +34,8 @@ auto CreateMetricsSinksFromParticipantConfiguration(
         if (config.type == SilKit::Config::MetricsSink::Type::JsonFile)
         {
             auto filename = fmt::format("{}_{}.txt", config.name, metricsFileTimestamp);
-            auto realSink = std::make_unique<MetricsJsonFileSink>(filename);
+            auto ostream = std::make_unique<std::ofstream>(filename);
+            auto realSink = std::make_unique<MetricsJsonSink>(std::move(ostream));
             sink = std::move(realSink);
         }
 

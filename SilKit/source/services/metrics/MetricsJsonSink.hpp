@@ -6,19 +6,20 @@
 
 #include "IMetricsSink.hpp"
 
-#include <fstream>
+#include <memory>
 #include <mutex>
+#include <ostream>
 #include <string>
 
 namespace VSilKit {
 
-class MetricsJsonFileSink : public IMetricsSink
+class MetricsJsonSink : public IMetricsSink
 {
     std::mutex _mx;
-    std::ofstream _ofstream;
+    std::unique_ptr<std::ostream> _ostream;
 
 public:
-    explicit MetricsJsonFileSink(const std::string& path);
+    explicit MetricsJsonSink(std::unique_ptr<std::ostream> ostream);
 
     void Process(const std::string& origin, const MetricsUpdate& metricsUpdate) override;
 };

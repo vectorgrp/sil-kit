@@ -24,7 +24,7 @@ add_library(O_SilKit_Services_Metrics OBJECT
     MetricsSender.cpp
     MetricsSerdes.cpp
 
-    MetricsJsonFileSink.cpp
+    MetricsJsonSink.cpp
     MetricsRemoteSink.cpp
 
     MetricsTimerThread.cpp
@@ -50,5 +50,10 @@ add_silkit_test_to_executable(SilKitUnitTests
 
 add_silkit_test_to_executable(SilKitUnitTests
     SOURCES Test_MetricsSerdes.cpp
+    LIBS S_SilKitImpl
+)
+
+add_silkit_test_to_executable(SilKitUnitTests
+    SOURCES Test_MetricsJsonSink.cpp
     LIBS S_SilKitImpl
 )
