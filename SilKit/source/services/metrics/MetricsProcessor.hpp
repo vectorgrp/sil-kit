@@ -8,19 +8,11 @@
 #include "MetricsDatatypes.hpp"
 #include "MetricsReceiver.hpp"
 
-#include "ParticipantConfiguration.hpp"
-
 #include <atomic>
 #include <memory>
 #include <mutex>
 #include <unordered_map>
 #include <vector>
-
-namespace SilKit {
-namespace Core {
-class IParticipantInternal;
-} // namespace Core
-} // namespace SilKit
 
 namespace VSilKit {
 
@@ -32,7 +24,6 @@ class MetricsProcessor
 
     std::string _participantName;
     SilKit::Services::Logging::ILogger* _logger{nullptr};
-    IMetricsSender* _sender{nullptr};
 
     std::atomic<bool> _sinksSetUp{false};
     std::vector<std::unique_ptr<IMetricsSink>> _sinks;
@@ -44,9 +35,7 @@ public:
 
 public:
     void SetLogger(SilKit::Services::Logging::ILogger& logger);
-    void SetSender(IMetricsSender& sender);
-
-    void SetupSinks(const SilKit::Config::ParticipantConfiguration& participantConfiguration);
+    void SetSinks(std::vector<std::unique_ptr<IMetricsSink>> sinks);
 
 public: // IMetricsProcessor
     void Process(const std::string& origin, const MetricsUpdate& metricsUpdate) override;

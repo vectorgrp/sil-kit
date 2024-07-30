@@ -11,6 +11,12 @@
 namespace VSilKit {
 
 
+auto operator==(const MetricData& lhs, const MetricData& rhs) -> bool
+{
+    return lhs.timestamp == rhs.timestamp && lhs.name == rhs.name && lhs.kind == rhs.kind && lhs.value == rhs.value;
+}
+
+
 auto operator<<(std::ostream& os, const MetricKind& metricKind) -> std::ostream&
 {
     switch (metricKind)
@@ -36,7 +42,7 @@ auto operator<<(std::ostream& os, const MetricsUpdate& metricsUpdate) -> std::os
 {
     os << "MetricsUpdate{metrics=[";
 
-    const char * separator = "";
+    const char* separator = "";
     for (const auto& metricData : metricsUpdate.metrics)
     {
         os << separator << metricData;

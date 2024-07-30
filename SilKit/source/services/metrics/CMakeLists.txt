@@ -28,6 +28,8 @@ add_library(O_SilKit_Services_Metrics OBJECT
     MetricsRemoteSink.cpp
 
     MetricsTimerThread.cpp
+
+    CreateMetricsSinksFromParticipantConfiguration.cpp
 )
 
 target_link_libraries(O_SilKit_Services_Metrics
@@ -35,7 +37,13 @@ target_link_libraries(O_SilKit_Services_Metrics
     PRIVATE I_SilKit_Util_StringHelpers
 )
 
+
 add_silkit_test_to_executable(SilKitUnitTests
     SOURCES Test_MetricsManager.cpp
+    LIBS S_SilKitImpl
+)
+
+add_silkit_test_to_executable(SilKitUnitTests
+    SOURCES Test_MetricsProcessor.cpp
     LIBS S_SilKitImpl
 )

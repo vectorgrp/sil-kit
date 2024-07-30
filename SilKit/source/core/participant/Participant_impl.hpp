@@ -53,6 +53,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "MetricsManager.hpp"
 #include "MetricsSender.hpp"
 #include "MetricsTimerThread.hpp"
+#include "CreateMetricsSinksFromParticipantConfiguration.hpp"
 
 #include "tuple_tools/bind.hpp"
 #include "tuple_tools/for_each.hpp"
@@ -219,8 +220,11 @@ void Participant<SilKitConnectionT>::SetupMetrics()
     auto sender = GetOrCreateMetricsSender();
 
     auto& processor = dynamic_cast<VSilKit::MetricsProcessor&>(*_metricsProcessor);
-    processor.SetSender(*sender);
-    processor.SetupSinks(_participantConfig);
+    {
+        auto sinks = VSilKit::CreateMetricsSinksFromParticipantConfiguration(
+            _logger.get(), sender, GetParticipantName(), _participantConfig.experimental.metrics.sinks);
+        processor.SetSinks(std::move(sinks));
+    }
 
     // NB: Create the metrics manager prior to anything that might need it (possibly needs to be split into
     //     manager/sender explicitly)

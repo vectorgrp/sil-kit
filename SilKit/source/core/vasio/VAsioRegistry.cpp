@@ -31,6 +31,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "MetricsReceiver.hpp"
 #include "MetricsProcessor.hpp"
 #include "MetricsManager.hpp"
+#include "CreateMetricsSinksFromParticipantConfiguration.hpp"
 
 #include "traits/SilKitServiceConfigTraits.hpp"
 
@@ -323,8 +324,12 @@ bool VAsioRegistry::AllParticipantsAreConnected() const
 void VAsioRegistry::SetupMetrics()
 {
     auto& processor = dynamic_cast<VSilKit::MetricsProcessor&>(*_metricsProcessor);
-    // there is no MetricsSender
-    processor.SetupSinks(*_vasioConfig);
+    {
+        // the registry has no MetricsSender
+        auto sinks = VSilKit::CreateMetricsSinksFromParticipantConfiguration(
+            _logger.get(), nullptr, REGISTRY_PARTICIPANT_NAME, _vasioConfig->experimental.metrics.sinks);
+        processor.SetSinks(std::move(sinks));
+    }
 
     if (_vasioConfig->experimental.metrics.collectFromRemote)
     {

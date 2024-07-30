@@ -5,12 +5,7 @@
 #include "MetricsProcessor.hpp"
 
 #include "IParticipantInternal.hpp"
-#include "MetricsJsonFileSink.hpp"
-#include "MetricsRemoteSink.hpp"
 #include "ILoggerInternal.hpp"
-#include "StringHelpers.hpp"
-
-#include "silkit/util/Span.hpp"
 
 namespace Log = SilKit::Services::Logging;
 
@@ -26,12 +21,7 @@ void MetricsProcessor::SetLogger(SilKit::Services::Logging::ILogger &logger)
     _logger = &logger;
 }
 
-void MetricsProcessor::SetSender(IMetricsSender &sender)
-{
-    _sender = &sender;
-}
-
-void MetricsProcessor::SetupSinks(const SilKit::Config::ParticipantConfiguration &participantConfiguration)
+void MetricsProcessor::SetSinks(std::vector<std::unique_ptr<IMetricsSink>> sinks)
 {
     std::lock_guard<decltype(_mutex)> lock{_mutex};
 
@@ -41,39 +31,16 @@ void MetricsProcessor::SetupSinks(const SilKit::Config::ParticipantConfiguration
         return;
     }
 
-    auto metricsFileTimestamp = SilKit::Util::CurrentTimestampString();
+    _sinks = std::move(sinks);
 
-    for (const auto &config : participantConfiguration.experimental.metrics.sinks)
+    for (const auto &sink : _sinks)
     {
-        std::unique_ptr<IMetricsSink> sink;
-
-        if (config.type == SilKit::Config::MetricsSink::Type::JsonFile)
-        {
-            auto filename = fmt::format("{}_{}.txt", config.name, metricsFileTimestamp);
-            auto realSink = std::make_unique<MetricsJsonFileSink>(filename);
-            sink = std::move(realSink);
-        }
-
-        if (config.type == SilKit::Config::MetricsSink::Type::Remote)
-        {
-            auto realSink = std::make_unique<MetricsRemoteSink>(_participantName, *_sender);
-            sink = std::move(realSink);
-        }
-
-        if (sink == nullptr)
-        {
-            Log::Error(_logger, "Failed to create metrics sink {}", config.name);
-            continue;
-        }
-
         for (const auto &pair : _updateCache)
         {
             const auto &origin = pair.first;
             const auto &update = pair.second;
             sink->Process(origin, update);
         }
-
-        _sinks.emplace_back(std::move(sink));
     }
 
     _updateCache.clear();
@@ -106,6 +73,11 @@ void MetricsProcessor::Process(const std::string &origin, const VSilKit::Metrics
 
 void MetricsProcessor::OnMetricsUpdate(const std::string &participantName, const MetricsUpdate &metricsUpdate)
 {
+    if (participantName == _participantName)
+    {
+        return; // ignore metrics received from ourself (avoids infinite loops)
+    }
+
     Process(participantName, metricsUpdate);
 }
 

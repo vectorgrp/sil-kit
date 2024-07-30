@@ -41,6 +41,9 @@ struct MetricsUpdate
 };
 
 
+auto operator==(const MetricData& lhs, const MetricData& rhs) -> bool;
+
+
 auto operator<<(std::ostream& os, const MetricKind& metricKind) -> std::ostream&;
 
 auto operator<<(std::ostream& os, const MetricData& metricData) -> std::ostream&;
