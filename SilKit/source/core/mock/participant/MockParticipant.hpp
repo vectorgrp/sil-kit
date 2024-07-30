@@ -178,7 +178,7 @@ public:
     void Start() override {}
 };
 
-class MockMetricsManager : public IMetricsManager
+class DummyMetricsManager : public IMetricsManager
 {
     class MockCounterMetric : public ICounterMetric
     {
@@ -728,7 +728,7 @@ public:
     MockRequestReplyService mockRequestReplyService;
     MockParticipantReplies mockParticipantReplies;
     DummyNetworkSimulator mockNetworkSimulator;
-    MockMetricsManager mockMetricsManager;
+    DummyMetricsManager mockMetricsManager;
 };
 
 // ================================================================================

@@ -181,7 +181,7 @@ protected:
     }
 
     Tests::MockLogger _dummyLogger;
-    Tests::MockMetricsManager _mockMetricsManager;
+    Tests::DummyMetricsManager _mockMetricsManager;
     Services::Orchestration::TimeProvider _timeProvider;
     VAsioConnection _connection;
     MockVAsioPeer _from;
