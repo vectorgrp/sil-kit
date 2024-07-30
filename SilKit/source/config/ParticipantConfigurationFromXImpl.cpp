@@ -372,7 +372,7 @@ void CacheExperimental(const YAML::Node& root, ExperimentalCache& cache)
 {
     if (root["TimeSynchronization"])
     {
-        CacheTimeSynchronization(root, cache.timeSynchronizationCache);
+        CacheTimeSynchronization(root["TimeSynchronization"], cache.timeSynchronizationCache);
     }
 }
 
