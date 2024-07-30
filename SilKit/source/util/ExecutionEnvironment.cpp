@@ -9,6 +9,7 @@
 
 #include <array>
 #include <string>
+#include <thread>
 #include <vector>
 
 #include "asio.hpp"
@@ -39,88 +40,10 @@ namespace {
 
 constexpr const char* UNKNOWN_VALUE = "<unknown>";
 
+
+// Utilities
+
 #ifdef __unix__
-
-auto GetUsername() -> std::string
-{
-    static const auto result = []() -> std::string {
-        const auto uid = ::getuid();
-        const auto pwd = ::getpwuid(uid);
-        if (pwd == nullptr)
-        {
-            return UNKNOWN_VALUE;
-        }
-
-        return pwd->pw_name;
-    }();
-
-    return result;
-}
-
-#ifdef __linux__
-
-auto GetProcessExecutable() -> std::string
-{
-    static const auto result = []() -> std::string {
-        std::vector<char> buffer;
-        buffer.resize(4096, '\0');
-
-        auto pathLength = ::readlink("/proc/self/exe", buffer.data(), buffer.size() - 1);
-        if (pathLength <= 0)
-        {
-            return UNKNOWN_VALUE;
-        }
-
-        buffer.resize(static_cast<std::size_t>(pathLength));
-        return std::string{buffer.begin(), buffer.end()};
-    }();
-
-    return result;
-}
-
-#else
-
-auto GetProcessExecutable() -> std::string
-{
-    return UNKNOWN_VALUE;
-}
-
-#endif
-
-auto GetProcessorCount() -> std::string
-{
-    static const auto result = std::to_string(::get_nprocs());
-    return result;
-}
-
-auto GetPageSize() -> std::string
-{
-    static const auto result = std::to_string(::sysconf(_SC_PAGESIZE));
-    return result;
-}
-
-#ifdef __linux__
-
-auto GetPhysicalMemoryMB() -> std::string
-{
-    static const auto result = [] {
-        const auto pageSize = static_cast<std::uint64_t>(::sysconf(_SC_PAGESIZE));
-        const auto pageCount = static_cast<std::uint64_t>(::sysconf(_SC_PHYS_PAGES));
-        const auto physicalMemoryMiB = ((pageCount / 1024) * static_cast<std::uint64_t>(pageSize)) / 1024;
-        return std::to_string(physicalMemoryMiB);
-    }();
-
-    return result;
-}
-
-#else
-
-auto GetPhysicalMemoryMB() -> std::string
-{
-    return UNKNOWN_VALUE;
-}
-
-#endif
 
 auto GetUtsname() -> const struct ::utsname&
 {
@@ -133,58 +56,13 @@ auto GetUtsname() -> const struct ::utsname&
     return result;
 }
 
-auto GetProcessorArchitecture() -> std::string
-{
-    return GetUtsname().machine;
-}
-
-auto GetOperatingSystem() -> std::string
-{
-    return fmt::format("{} {}", GetUtsname().sysname, GetUtsname().release);
-}
-
 #endif
 
 #ifdef _WIN32
 
-auto GetUsername() -> std::string
-{
-    static const auto result = []() -> std::string {
-        std::array<char, UNLEN + 1> username{};
-        auto usernameLength = static_cast<DWORD>(username.size());
-        if (::GetUserNameA(username.data(), &usernameLength) == 0)
-        {
-            return UNKNOWN_VALUE;
-        }
-        return std::string{username.data()};
-    }();
-
-    return result;
-}
-
-auto GetProcessExecutable() -> std::string
-{
-    static const auto result = []() -> std::string {
-        std::vector<char> buffer;
-        buffer.resize(4096, '\0');
-
-        const auto pathLength = ::GetModuleFileNameA(NULL, buffer.data(), static_cast<DWORD>(buffer.size()));
-        if (pathLength <= 0 || pathLength > buffer.size())
-        {
-            return UNKNOWN_VALUE;
-        }
-
-        buffer.resize(static_cast<std::size_t>(pathLength));
-        return std::string{buffer.begin(), buffer.end()};
-    }();
-
-    return result;
-}
-
 struct Win32ProcessorInformation
 {
     std::string pageSize;
-    std::string processorCount;
     std::string architecture;
 
     static auto Get() -> const Win32ProcessorInformation&
@@ -216,8 +94,6 @@ struct Win32ProcessorInformation
                 break;
             }
 
-            info.processorCount = std::to_string(systemInfo.dwNumberOfProcessors);
-
             return info;
         }();
 
@@ -225,20 +101,160 @@ struct Win32ProcessorInformation
     }
 };
 
-auto GetProcessorCount() -> std::string
+#endif
+
+
+// Function: GetUsername
+
+#ifdef __unix__
+
+auto GetUsername() -> std::string
 {
-    return Win32ProcessorInformation::Get().processorCount;
+    static const auto result = []() -> std::string {
+        const auto uid = ::getuid();
+        const auto pwd = ::getpwuid(uid);
+        if (pwd == nullptr)
+        {
+            return UNKNOWN_VALUE;
+        }
+
+        return pwd->pw_name;
+    }();
+
+    return result;
 }
 
-auto GetProcessorArchitecture() -> std::string
+#endif
+
+#ifdef _WIN32
+
+auto GetUsername() -> std::string
 {
-    return Win32ProcessorInformation::Get().architecture;
+    static const auto result = []() -> std::string {
+        std::array<char, UNLEN + 1> username{};
+        auto usernameLength = static_cast<DWORD>(username.size());
+        if (::GetUserNameA(username.data(), &usernameLength) == 0)
+        {
+            return UNKNOWN_VALUE;
+        }
+        return std::string{username.data()};
+    }();
+
+    return result;
 }
+
+#endif
+
+
+// Function: GetProcessExecutable
+
+#ifdef __unix__
+#ifdef __linux__
+
+auto GetProcessExecutable() -> std::string
+{
+    static const auto result = []() -> std::string {
+        std::vector<char> buffer;
+        buffer.resize(4096, '\0');
+
+        auto pathLength = ::readlink("/proc/self/exe", buffer.data(), buffer.size() - 1);
+        if (pathLength <= 0)
+        {
+            return UNKNOWN_VALUE;
+        }
+
+        buffer.resize(static_cast<std::size_t>(pathLength));
+        return std::string{buffer.begin(), buffer.end()};
+    }();
+
+    return result;
+}
+
+#else
+
+auto GetProcessExecutable() -> std::string
+{
+    // should be getprogname on xBSD and macOS, and qh_get_progname on QNX
+    return UNKNOWN_VALUE;
+}
+
+#endif
+#endif
+
+#ifdef _WIN32
+
+auto GetProcessExecutable() -> std::string
+{
+    static const auto result = []() -> std::string {
+        std::vector<char> buffer;
+        buffer.resize(4096, '\0');
+
+        const auto pathLength = ::GetModuleFileNameA(NULL, buffer.data(), static_cast<DWORD>(buffer.size()));
+        if (pathLength <= 0 || pathLength > buffer.size())
+        {
+            return UNKNOWN_VALUE;
+        }
+
+        buffer.resize(static_cast<std::size_t>(pathLength));
+        return std::string{buffer.begin(), buffer.end()};
+    }();
+
+    return result;
+}
+
+#endif
+
+
+// Function: GetPageSize
+
+#ifdef __unix__
+
+auto GetPageSize() -> std::string
+{
+    static const auto result = std::to_string(::sysconf(_SC_PAGESIZE));
+    return result;
+}
+
+#endif
+
+#ifdef _WIN32
 
 auto GetPageSize() -> std::string
 {
     return Win32ProcessorInformation::Get().pageSize;
 }
+
+#endif
+
+
+// Function: GetPhysicalMemoryMB
+
+#ifdef __unix__
+#ifdef __linux__
+
+auto GetPhysicalMemoryMB() -> std::string
+{
+    static const auto result = [] {
+        const auto pageSize = static_cast<std::uint64_t>(::sysconf(_SC_PAGESIZE));
+        const auto pageCount = static_cast<std::uint64_t>(::sysconf(_SC_PHYS_PAGES));
+        const auto physicalMemoryMiB = ((pageCount / 1024) * static_cast<std::uint64_t>(pageSize)) / 1024;
+        return std::to_string(physicalMemoryMiB);
+    }();
+
+    return result;
+}
+
+#else
+
+auto GetPhysicalMemoryMB() -> std::string
+{
+    return UNKNOWN_VALUE;
+}
+
+#endif
+#endif
+
+#ifdef _WIN32
 
 auto GetPhysicalMemoryMB() -> std::string
 {
@@ -254,6 +270,43 @@ auto GetPhysicalMemoryMB() -> std::string
     return result;
 }
 
+#endif
+
+
+// Function: GetProcessorArchitecture
+
+#ifdef __unix__
+
+auto GetProcessorArchitecture() -> std::string
+{
+    return GetUtsname().machine;
+}
+
+#endif
+
+#ifdef _WIN32
+
+auto GetProcessorArchitecture() -> std::string
+{
+    return Win32ProcessorInformation::Get().architecture;
+}
+
+#endif
+
+
+// Function: GetProcessorArchitecture
+
+#ifdef __unix__
+
+auto GetOperatingSystem() -> std::string
+{
+    return fmt::format("{} {}", GetUtsname().sysname, GetUtsname().release);
+}
+
+#endif
+
+#ifdef _WIN32
+
 auto GetOperatingSystem() -> std::string
 {
     return "Windows";
@@ -261,7 +314,18 @@ auto GetOperatingSystem() -> std::string
 
 #endif
 
+
+// Function: GetProcessorCount
+
+auto GetProcessorCount() -> std::string
+{
+    static const auto result = std::to_string(std::thread::hardware_concurrency());
+    return result;
+}
+
+
 } // namespace
+
 
 auto GetExecutionEnvironment() -> ExecutionEnvironment
 {
@@ -277,5 +341,6 @@ auto GetExecutionEnvironment() -> ExecutionEnvironment
 
     return ee;
 }
+
 
 } // namespace VSilKit
