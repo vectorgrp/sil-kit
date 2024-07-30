@@ -15,11 +15,10 @@ using VSilKit::MetricsUpdate;
 using VSilKit::MetricData;
 using VSilKit::MetricKind;
 
-using testing::_;
 using testing::ContainerEq;
 
 
-TEST(Test_MetricsSerdes, todo)
+TEST(Test_MetricsSerdes, serialize_deserialize_roundtrip)
 {
     MetricsUpdate original;
     original.metrics.emplace_back(MetricData{1, "1", MetricKind::COUNTER, "1"});
