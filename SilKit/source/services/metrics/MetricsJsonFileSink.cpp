@@ -57,9 +57,6 @@ struct MetricKindString
 
 } // namespace
 
-// NOTE: Since storing the origin as a string is quite wasteful, map it uniquely to an integer and store that.
-//       Similar to how the MetricsManager generates the metric IDs.
-
 namespace VSilKit {
 
 MetricsJsonFileSink::MetricsJsonFileSink(const std::string& path)
