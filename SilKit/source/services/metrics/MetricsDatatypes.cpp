@@ -16,6 +16,11 @@ auto operator==(const MetricData& lhs, const MetricData& rhs) -> bool
     return lhs.timestamp == rhs.timestamp && lhs.name == rhs.name && lhs.kind == rhs.kind && lhs.value == rhs.value;
 }
 
+auto operator==(const MetricsUpdate& lhs, const MetricsUpdate& rhs) -> bool
+{
+    return lhs.metrics == rhs.metrics;
+}
+
 
 auto operator<<(std::ostream& os, const MetricKind& metricKind) -> std::ostream&
 {

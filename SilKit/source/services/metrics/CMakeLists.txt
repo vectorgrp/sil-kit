@@ -57,3 +57,8 @@ add_silkit_test_to_executable(SilKitUnitTests
     SOURCES Test_MetricsJsonSink.cpp
     LIBS S_SilKitImpl
 )
+
+add_silkit_test_to_executable(SilKitUnitTests
+    SOURCES Test_MetricsRemoteSink.cpp
+    LIBS S_SilKitImpl
+)
