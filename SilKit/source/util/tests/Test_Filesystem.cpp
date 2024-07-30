@@ -33,7 +33,8 @@ namespace {
 
 auto FixSep(std::string path) -> std::string
 {
-    std::replace(path.begin(), path.end(), '/', Filesystem::path::preferred_separator);
+    static const char sep = Filesystem::path::preferred_separator;
+    std::replace(path.begin(), path.end(), '/', sep);
     return path;
 }
 
