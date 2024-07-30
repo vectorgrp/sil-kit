@@ -486,7 +486,11 @@ void TimeSyncService::ExecuteSimStep(std::chrono::nanoseconds timePoint, std::ch
     const auto waitingDurationS = std::chrono::duration_cast<DoubleSecs>(waitingDuration);
 
     Trace(_logger, "Starting next Simulation Task. Waiting time was: {}ms", waitingDurationMs.count());
-    _simStepWaitingTimeStatisticMetric->Take(waitingDurationS.count());
+    if (_waitTimeMonitor.SampleCount() > 1)
+    {
+        // skip the first sample, since it was never 'started' (it is always the current epoch of the underlying clock)
+        _simStepWaitingTimeStatisticMetric->Take(waitingDurationS.count());
+    }
 
     _timeProvider->SetTime(timePoint, duration);
 
