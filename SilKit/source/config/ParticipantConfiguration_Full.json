@@ -233,6 +233,19 @@
   "Experimental": {
     "TimeSynchronization": {
       "AnimationFactor": 1.5
+    },
+    "Metrics": {
+      "CollectFromRemote": false,
+      "Sinks": [
+        {
+          "Type": "JsonFile",
+          "Name": "MyJsonMetrics"
+        },
+        {
+          "Type": "Remote",
+          "Name": "MyRemoteMetricsSink"
+        }
+      ]
     }
   }
 }

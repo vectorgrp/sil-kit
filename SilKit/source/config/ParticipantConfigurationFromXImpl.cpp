@@ -787,7 +787,7 @@ bool operator==(const ParticipantConfiguration& lhs, const ParticipantConfigurat
            && lhs.flexrayControllers == rhs.flexrayControllers && lhs.dataPublishers == rhs.dataPublishers
            && lhs.dataSubscribers == rhs.dataSubscribers && lhs.rpcClients == rhs.rpcClients
            && lhs.rpcServers == rhs.rpcServers && lhs.logging == rhs.logging && lhs.healthCheck == rhs.healthCheck
-           && lhs.tracing == rhs.tracing && lhs.extensions == rhs.extensions;
+           && lhs.tracing == rhs.tracing && lhs.extensions == rhs.extensions && lhs.experimental == rhs.experimental;
 }
 
 bool operator==(const TimeSynchronization& lhs, const TimeSynchronization& rhs)
