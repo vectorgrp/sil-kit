@@ -47,3 +47,8 @@ add_silkit_test_to_executable(SilKitUnitTests
     SOURCES Test_MetricsProcessor.cpp
     LIBS S_SilKitImpl
 )
+
+add_silkit_test_to_executable(SilKitUnitTests
+    SOURCES Test_MetricsSerdes.cpp
+    LIBS S_SilKitImpl
+)
