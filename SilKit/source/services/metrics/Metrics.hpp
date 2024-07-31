@@ -15,16 +15,6 @@
 #include "IMetricsProcessor.hpp"
 
 
-namespace VSilKit {
-
-
-using MetricClock = std::chrono::steady_clock;
-using MetricTimePoint = MetricClock::time_point;
-
-
-} // namespace VSilKit
-
-
 namespace SilKit {
 namespace Core {
 using VSilKit::ICounterMetric;

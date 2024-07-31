@@ -28,6 +28,9 @@
 
 namespace VSilKit {
 
+using MetricClock = std::chrono::steady_clock;
+using MetricTimePoint = MetricClock::time_point;
+
 
 class MetricsManager : public IMetricsManager
 {
