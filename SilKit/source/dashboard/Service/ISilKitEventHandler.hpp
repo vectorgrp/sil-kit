@@ -22,6 +22,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #pragma once
 
 #include "DashboardBulkUpdate.hpp"
+#include "MetricsDatatypes.hpp"
 
 #include <string>
 
@@ -45,6 +46,9 @@ public:
                                          const Core::ServiceDescriptor& serviceDescriptor) = 0;
 
     virtual void OnBulkUpdate(uint64_t simulationId, const DashboardBulkUpdate& bulkUpdate) = 0;
+
+    virtual void OnMetricsUpdate(uint64_t simulationId, const std::string &origin,
+                                 const VSilKit::MetricsUpdate& metricsUpdate) = 0;
 };
 
 } // namespace Dashboard

@@ -60,6 +60,8 @@ struct IRegistryEventListener
     virtual void OnServiceDiscoveryEvent(
         const std::string& simulationName, const std::string& participantName,
         const SilKit::Core::Discovery::ServiceDiscoveryEvent& serviceDiscoveryEvent) = 0;
+    virtual void OnMetricsUpdate(const std::string& simulationName, const std::string& origin,
+                                 const VSilKit::MetricsUpdate& metricsUpdate) = 0;
 };
 
 class VAsioRegistry
