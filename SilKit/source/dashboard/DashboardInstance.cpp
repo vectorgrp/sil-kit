@@ -260,6 +260,13 @@ struct EventQueueWorkerThread
                 }
                 break;
 
+                case SilKitEventType::OnMetricUpdate:
+                {
+                    const auto &data = event.GetMetricsUpdate();
+                    eventHandler->OnMetricsUpdate(simulationId, data.first, data.second);
+                }
+                break;
+
                 default:
                 {
                     Log::Error(logger, "Dashboard: unexpected SilKitEventType");
@@ -549,6 +556,17 @@ void DashboardInstance::OnServiceDiscoveryEvent(
 
     _silKitEventQueue->Enqueue(
         SilKitEvent{simulationName, ServiceData{serviceDiscoveryEvent.type, serviceDiscoveryEvent.serviceDescriptor}});
+}
+
+void DashboardInstance::OnMetricsUpdate(const std::string &simulationName, const std::string &origin,
+                                        const VSilKit::MetricsUpdate &metricsUpdate)
+{
+    Log::Trace(_logger, "DashboardInstance::OnMetricsUpdate: simulationName={} origin={} metricsUpdate={}",
+               simulationName, origin, metricsUpdate);
+
+    std::pair<std::string, VSilKit::MetricsUpdate> data{origin, metricsUpdate};
+
+    _silKitEventQueue->Enqueue(SilKitEvent{simulationName, std::move(data)});
 }
 
 
