@@ -180,20 +180,20 @@ public:
 
 class DummyMetricsManager : public IMetricsManager
 {
-    class MockCounterMetric : public ICounterMetric
+    class DummyCounterMetric : public ICounterMetric
     {
     public:
         void Add(uint64_t /* delta */) override {}
         void Set(uint64_t /* value */) override {}
     };
 
-    class MockStatisticMetric : public IStatisticMetric
+    class DummyStatisticMetric : public IStatisticMetric
     {
     public:
         void Take(double /* value */) override {}
     };
 
-    class MockStringListMetric : public IStringListMetric
+    class DummyStringListMetric : public IStringListMetric
     {
     public:
         void Clear() override {}
@@ -234,9 +234,9 @@ public:
     void SubmitUpdates() override {}
 
 private:
-    std::unordered_map<std::string, MockCounterMetric> _counters;
-    std::unordered_map<std::string, MockStatisticMetric> _statistics;
-    std::unordered_map<std::string, MockStringListMetric> _stringLists;
+    std::unordered_map<std::string, DummyCounterMetric> _counters;
+    std::unordered_map<std::string, DummyStatisticMetric> _statistics;
+    std::unordered_map<std::string, DummyStringListMetric> _stringLists;
 };
 
 class DummyParticipant : public IParticipantInternal
