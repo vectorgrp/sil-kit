@@ -163,7 +163,10 @@ void Participant<SilKitConnectionT>::OnSilKitSimulationJoined()
 
     CreateSystemInformationMetrics();
 
-    _metricsTimerThread->Start();
+    if (_metricsTimerThread)
+    {
+        _metricsTimerThread->Start();
+    }
 }
 
 template <class SilKitConnectionT>
@@ -1955,6 +1958,11 @@ void Participant<SilKitConnectionT>::CreateSystemInformationMetrics()
 template <class SilKitConnectionT>
 auto Participant<SilKitConnectionT>::MakeTimerThread() -> std::unique_ptr<IMetricsTimerThread>
 {
+    if (_participantConfig.experimental.metrics.sinks.empty())
+    {
+        return nullptr;
+    }
+
     return std::make_unique<VSilKit::MetricsTimerThread>(
         [this] { ExecuteDeferred([this] { GetMetricsManager()->SubmitUpdates(); }); });
 }
