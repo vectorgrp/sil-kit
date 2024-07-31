@@ -153,6 +153,7 @@ auto MakeYamlSchema() -> YamlSchemaElem
          {
              {"Name"},
              {"Topic"},
+             {"Labels"},
              {"UseTraceSinks"},
              replay,
          }},
@@ -160,6 +161,7 @@ auto MakeYamlSchema() -> YamlSchemaElem
          {
              {"Name"},
              {"Topic"},
+             {"Labels"},
              {"UseTraceSinks"},
              replay,
          }},
@@ -167,6 +169,7 @@ auto MakeYamlSchema() -> YamlSchemaElem
          {
              {"Name"},
              {"FunctionName"},
+             {"Labels"},
              {"UseTraceSinks"},
              replay,
          }},
@@ -174,6 +177,7 @@ auto MakeYamlSchema() -> YamlSchemaElem
          {
              {"Name"},
              {"FunctionName"},
+             {"Labels"},
              {"UseTraceSinks"},
              replay,
          }},
