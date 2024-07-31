@@ -181,6 +181,17 @@ function(silkit_enable_warnings isOn)
             )
 
     endif()
+
+    # Suppress flaky dangling-reference warning
+    # see https://gcc.gnu.org/git/gitweb.cgi?p=gcc.git;h=6b927b1297e66e26e62e722bf15c921dcbbd25b9
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "13")
+            set(_flags ${_flags}
+                -Wno-dangling-reference
+                )
+        endif()
+    endif()
+
     add_compile_options(${_flags})
 endfunction()
 
