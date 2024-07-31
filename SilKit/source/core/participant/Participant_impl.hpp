@@ -50,6 +50,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "YamlParser.hpp"
 #include "NetworkSimulatorInternal.hpp"
 
+#include "MetricsManager.hpp"
+#include "MetricsSender.hpp"
+#include "MetricsTimerThread.hpp"
+#include "CreateMetricsSinksFromParticipantConfiguration.hpp"
+
 #include "tuple_tools/bind.hpp"
 #include "tuple_tools/for_each.hpp"
 #include "tuple_tools/predicative_get.hpp"
@@ -62,6 +67,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "MessageTracing.hpp"
 #include "Uuid.hpp"
 #include "Assert.hpp"
+#include "ExecutionEnvironment.hpp"
 
 #include "ILoggerInternal.hpp"
 
@@ -92,11 +98,23 @@ template <class SilKitConnectionT>
 Participant<SilKitConnectionT>::Participant(Config::ParticipantConfiguration participantConfig, ProtocolVersion version)
     : _participantConfig{participantConfig}
     , _participantId{Util::Hash::Hash(participantConfig.participantName)}
-    , _connection{this, _participantConfig, participantConfig.participantName, _participantId, &_timeProvider, version}
+    , _metricsProcessor{std::make_unique<VSilKit::MetricsProcessor>(GetParticipantName())}
+    , _metricsManager{std::make_unique<VSilKit::MetricsManager>(GetParticipantName(), *_metricsProcessor)}
+    , _connection{this,
+                  _metricsManager.get(),
+                  _participantConfig,
+                  participantConfig.participantName,
+                  _participantId,
+                  &_timeProvider,
+                  version}
+    , _metricsTimerThread{MakeTimerThread()}
 {
     // NB: do not create the _logger in the initializer list. If participantName is empty,
     //  this will cause a fairly unintuitive exception in spdlog.
     _logger = std::make_unique<Services::Logging::Logger>(GetParticipantName(), _participantConfig.logging);
+
+    dynamic_cast<VSilKit::MetricsProcessor&>(*_metricsProcessor).SetLogger(*_logger);
+    dynamic_cast<VSilKit::MetricsManager&>(*_metricsManager).SetLogger(*_logger);
     _connection.SetLogger(_logger.get());
 
     Logging::Info(_logger.get(), "Creating participant '{}' at '{}', SIL Kit version: {}", GetParticipantName(),
@@ -115,6 +133,7 @@ template <class SilKitConnectionT>
 void Participant<SilKitConnectionT>::OnSilKitSimulationJoined()
 {
     SetupRemoteLogging();
+    SetupMetrics();
 
     // NB: Create the systemController to abort the simulation already in the startup phase
     (void)GetSystemController();
@@ -140,6 +159,13 @@ void Participant<SilKitConnectionT>::OnSilKitSimulationJoined()
         _replayScheduler = std::make_unique<Tracing::ReplayScheduler>(_participantConfig, this);
         _replayScheduler->ConfigureTimeProvider(&_timeProvider);
         _logger->Info("Replay Scheduler active.");
+    }
+
+    CreateSystemInformationMetrics();
+
+    if (_metricsTimerThread)
+    {
+        _metricsTimerThread->Start();
     }
 }
 
@@ -188,6 +214,36 @@ void Participant<SilKitConnectionT>::SetupRemoteLogging()
         Logging::Warn(GetLogger(),
                       "Failed to setup remote logging. Participant {} will not send and receive remote logs.",
                       GetParticipantName());
+    }
+}
+
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SetupMetrics()
+{
+    auto sender = GetOrCreateMetricsSender();
+
+    auto& processor = dynamic_cast<VSilKit::MetricsProcessor&>(*_metricsProcessor);
+    {
+        auto sinks = VSilKit::CreateMetricsSinksFromParticipantConfiguration(
+            _logger.get(), sender, GetParticipantName(), _participantConfig.experimental.metrics.sinks);
+        processor.SetSinks(std::move(sinks));
+    }
+
+    // NB: Create the metrics manager prior to anything that might need it (possibly needs to be split into
+    //     manager/sender explicitly)
+    (void)GetMetricsManager();
+
+    // NB: Create the metrics receiver if enabled in the configuration
+    if (_participantConfig.experimental.metrics.collectFromRemote)
+    {
+        Core::SupplementalData supplementalData;
+        supplementalData[SilKit::Core::Discovery::controllerType] =
+            SilKit::Core::Discovery::controllerTypeMetricsReceiver;
+
+        SilKit::Config::InternalController config;
+        config.name = "MetricsReceiver";
+        config.network = "default";
+        CreateController<VSilKit::MetricsReceiver>(config, std::move(supplementalData), true, true, *_logger, processor);
     }
 }
 
@@ -905,6 +961,12 @@ auto Participant<SilKitConnectionT>::GetParticipantRepliesProcedure() -> Request
 }
 
 template <class SilKitConnectionT>
+auto Participant<SilKitConnectionT>::GetMetricsManager() -> IMetricsManager*
+{
+    return _metricsManager.get();
+}
+
+template <class SilKitConnectionT>
 bool Participant<SilKitConnectionT>::GetIsSystemControllerCreated()
 {
     return _isSystemControllerCreated;
@@ -1220,6 +1282,12 @@ void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, Servi
 }
 
 template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const VSilKit::MetricsUpdate& msg)
+{
+    SendMsgImpl(from, msg);
+}
+
+template <class SilKitConnectionT>
 void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from,
                                              const Discovery::ParticipantDiscoveryEvent& msg)
 {
@@ -1511,6 +1579,13 @@ void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const
                                              Services::Logging::LogMsg&& msg)
 {
     SendMsgImpl(from, targetParticipantName, std::move(msg));
+}
+
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName,
+                                             const VSilKit::MetricsUpdate& msg)
+{
+    SendMsgImpl(from, targetParticipantName, msg);
 }
 
 template <class SilKitConnectionT>
@@ -1807,6 +1882,89 @@ std::string Participant<SilKitConnectionT>::GetServiceDescriptorString(
         return "";
     }
     return _networkSimulatorInternal->GetServiceDescriptorString(controllerDescriptor);
+}
+
+
+template <class SilKitConnectionT>
+auto Participant<SilKitConnectionT>::GetMetricsProcessor() -> IMetricsProcessor*
+{
+    return _metricsProcessor.get();
+}
+
+
+template <class SilKitConnectionT>
+auto Participant<SilKitConnectionT>::GetMetricsSender() -> VSilKit::IMetricsSender*
+{
+    return _metricsSender;
+}
+
+
+template <class SilKitConnectionT>
+auto Participant<SilKitConnectionT>::GetOrCreateMetricsSender() -> VSilKit::IMetricsSender*
+{
+    if (_metricsSender == nullptr)
+    {
+        bool hasRemoteSinks{false};
+        for (const auto& config : _participantConfig.experimental.metrics.sinks)
+        {
+            hasRemoteSinks = hasRemoteSinks || (config.type == Config::MetricsSink::Type::Remote);
+        }
+
+        if (hasRemoteSinks)
+        {
+            auto* sender = GetController<IMsgForMetricsSender>(SilKit::Core::Discovery::controllerTypeMetricsSender);
+
+            if (sender == nullptr)
+            {
+                Core::SupplementalData supplementalData;
+                supplementalData[SilKit::Core::Discovery::controllerType] =
+                    SilKit::Core::Discovery::controllerTypeMetricsSender;
+
+                Config::InternalController config;
+                config.name = SilKit::Core::Discovery::controllerTypeMetricsSender;
+                config.network = "default";
+
+                sender = CreateController<VSilKit::MetricsSender>(config, std::move(supplementalData), true, true);
+            }
+
+            _metricsSender = static_cast<IMetricsSender*>(static_cast<VSilKit::MetricsSender*>(sender));
+        }
+        else
+        {
+            _logger->Debug("Refusing to create MetricsSender because no remote sinks are configured");
+        }
+    }
+
+    return _metricsSender;
+}
+
+
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::CreateSystemInformationMetrics()
+{
+    auto ee = VSilKit::GetExecutionEnvironment();
+
+    GetMetricsManager()->GetStringList("SilKit/System/OperatingSystem")->Add(ee.operatingSystem);
+    GetMetricsManager()->GetStringList("SilKit/System/Hostname")->Add(ee.hostname);
+    GetMetricsManager()->GetStringList("SilKit/System/PageSize")->Add(ee.pageSize);
+    GetMetricsManager()->GetStringList("SilKit/System/ProcessorCount")->Add(ee.processorCount);
+    GetMetricsManager()->GetStringList("SilKit/System/ProcessorArchitecture")->Add(ee.processorArchitecture);
+    GetMetricsManager()->GetStringList("SilKit/System/PhysicalMemory")->Add(ee.physicalMemoryMiB + " MiB");
+    GetMetricsManager()->GetStringList("SilKit/Process/Executable")->Add(ee.executable);
+    GetMetricsManager()->GetStringList("SilKit/Process/Username")->Add(ee.username);
+}
+
+
+template <class SilKitConnectionT>
+auto Participant<SilKitConnectionT>::MakeTimerThread() -> std::unique_ptr<IMetricsTimerThread>
+{
+    if (_participantConfig.experimental.metrics.sinks.empty())
+    {
+        return nullptr;
+    }
+
+    return std::make_unique<VSilKit::MetricsTimerThread>(
+        [this] { ExecuteDeferred([this] { GetMetricsManager()->SubmitUpdates(); }); });
 }
 
 

@@ -230,6 +230,30 @@ struct Tracing
 };
 
 // ================================================================================
+//  Metrics service
+// ================================================================================
+
+struct MetricsSink
+{
+    enum class Type
+    {
+        Undefined,
+        JsonFile,
+        Remote,
+    };
+
+    Type type{Type::Undefined};
+    std::string name;
+};
+
+//! \brief Metrics configuration
+struct Metrics
+{
+    std::vector<MetricsSink> sinks;
+    bool collectFromRemote{false};
+};
+
+// ================================================================================
 //  Extensions
 // ================================================================================
 
@@ -283,6 +307,7 @@ struct TimeSynchronization
 struct Experimental
 {
     TimeSynchronization timeSynchronization;
+    Metrics metrics;
 };
 
 // ================================================================================
@@ -336,11 +361,16 @@ bool operator==(const RpcServer& lhs, const RpcServer& rhs);
 bool operator==(const RpcClient& lhs, const RpcClient& rhs);
 bool operator==(const HealthCheck& lhs, const HealthCheck& rhs);
 bool operator==(const Tracing& lhs, const Tracing& rhs);
+bool operator==(const MetricsSink& lhs, const MetricsSink& rhs);
+bool operator==(const Metrics& lhs, const Metrics& rhs);
 bool operator==(const Extensions& lhs, const Extensions& rhs);
 bool operator==(const Middleware& lhs, const Middleware& rhs);
 bool operator==(const ParticipantConfiguration& lhs, const ParticipantConfiguration& rhs);
 bool operator==(const TimeSynchronization& lhs, const TimeSynchronization& rhs);
 bool operator==(const Experimental& lhs, const Experimental& rhs);
+
+bool operator<(const MetricsSink& lhs, const MetricsSink& rhs);
+bool operator>(const MetricsSink& lhs, const MetricsSink& rhs);
 
 } // namespace v1
 } // namespace Config

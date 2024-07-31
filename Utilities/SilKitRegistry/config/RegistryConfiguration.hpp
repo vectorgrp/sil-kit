@@ -25,6 +25,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 // Internal SIL Kit Headers
 #include "Configuration.hpp"
+#include "ParticipantConfiguration.hpp"
 
 
 namespace SilKitRegistry {
@@ -36,6 +37,11 @@ constexpr inline auto GetSchemaVersion() -> const char*
     return "1";
 }
 
+struct Experimental
+{
+    SilKit::Config::v1::Metrics metrics;
+};
+
 struct RegistryConfiguration
 {
     std::string description{""};
@@ -43,7 +49,10 @@ struct RegistryConfiguration
     SilKit::Util::Optional<bool> enableDomainSockets;
     SilKit::Util::Optional<std::string> dashboardUri;
     SilKit::Config::Logging logging{};
+    Experimental experimental{};
 };
+
+bool operator==(const Experimental& lhs, const Experimental& rhs);
 
 } // namespace V1
 } // namespace Config

@@ -31,6 +31,18 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "fmt/format.h"
 #include "yaml-cpp/yaml.h"
 
+namespace SilKitRegistry {
+namespace Config {
+namespace V1 {
+
+bool operator==(const Experimental& lhs, const Experimental& rhs)
+{
+    return lhs.metrics == rhs.metrics;
+}
+
+} // namespace V1
+} // namespace Config
+} // namespace SilKitRegistry
 
 namespace SilKitRegistry {
 namespace Config {

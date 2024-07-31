@@ -31,6 +31,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "ProtocolVersion.hpp"
 #include "TimeProvider.hpp"
 
+#include "MetricsReceiver.hpp"
+
 namespace SilKit {
 namespace Core {
 
@@ -58,12 +60,15 @@ struct IRegistryEventListener
     virtual void OnServiceDiscoveryEvent(
         const std::string& simulationName, const std::string& participantName,
         const SilKit::Core::Discovery::ServiceDiscoveryEvent& serviceDiscoveryEvent) = 0;
+    virtual void OnMetricsUpdate(const std::string& simulationName, const std::string& origin,
+                                 const VSilKit::MetricsUpdate& metricsUpdate) = 0;
 };
 
 class VAsioRegistry
     : public SilKit::Vendor::Vector::ISilKitRegistry
     , public IMsgForVAsioRegistry
     , public Core::IServiceEndpoint
+    , public VSilKit::IMetricsReceiverListener
 {
 public: // CTor
     VAsioRegistry() = delete;
@@ -102,6 +107,8 @@ private:
 
     bool AllParticipantsAreConnected() const;
 
+    void SetupMetrics();
+
 private: // IReceiver<...>
     void ReceiveMsg(const IServiceEndpoint* from,
                     const SilKit::Services::Orchestration::ParticipantStatus& msg) override;
@@ -113,6 +120,9 @@ private: // IServiceEndpoint
     void SetServiceDescriptor(const ServiceDescriptor& serviceDescriptor) override;
     auto GetServiceDescriptor() const -> const ServiceDescriptor& override;
 
+private: // IMetricsReceiverListener
+    void OnMetricsUpdate(const std::string& participantName, const VSilKit::MetricsUpdate& metricsUpdate) override;
+
 private:
     // ----------------------------------------
     // private members
@@ -123,7 +133,12 @@ private:
     std::function<void()> _onAllParticipantsDisconnected;
     std::shared_ptr<SilKit::Config::ParticipantConfiguration> _vasioConfig;
     Services::Orchestration::TimeProvider _timeProvider;
+    std::unique_ptr<IMsgForMetricsReceiver> _metricsReceiver;
+    std::unique_ptr<IMetricsProcessor> _metricsProcessor;
+    std::unique_ptr<IMetricsManager> _metricsManager;
     VAsioConnection _connection;
+
+    std::atomic<EndpointId> _localEndpointId{1};
 
     ServiceDescriptor _serviceDescriptor;
 };

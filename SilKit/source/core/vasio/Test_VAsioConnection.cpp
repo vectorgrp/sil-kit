@@ -175,12 +175,13 @@ class Test_VAsioConnection : public testing::Test
 {
 protected:
     Test_VAsioConnection()
-        : _connection(nullptr, {}, "Test_VAsioConnection", 1, &_timeProvider)
+        : _connection(nullptr, &_dummyMetricsManager, {}, "Test_VAsioConnection", 1, &_timeProvider)
     {
         _connection.SetLogger(&_dummyLogger);
     }
 
     Tests::MockLogger _dummyLogger;
+    Tests::DummyMetricsManager _dummyMetricsManager;
     Services::Orchestration::TimeProvider _timeProvider;
     VAsioConnection _connection;
     MockVAsioPeer _from;

@@ -20,6 +20,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "Filesystem.hpp"
 
+#include <algorithm>
 #include <iostream>
 
 #include "gtest/gtest.h"
@@ -28,25 +29,33 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 namespace SilKit {
 namespace Util {
 namespace tests {
+namespace {
 
-TEST(UtilsFilesystemTest, get_parent_path)
+auto FixSep(std::string path) -> std::string
 {
-    const auto some_path = Filesystem::path("/This/Is/Some/Path/To/A/File/");
+    static const char sep = Filesystem::path::preferred_separator;
+    std::replace(path.begin(), path.end(), '/', sep);
+    return path;
+}
+
+TEST(Test_UtilsFilesystem, get_parent_path)
+{
+    const auto some_path = Filesystem::path{FixSep("/This/Is/Some/Path/To/A/File/")};
     auto parent_path = Filesystem::parent_path(some_path);
 
-    const auto parent_path_ref1 = std::string("/This/Is/Some/Path/To/A/File");
+    const auto parent_path_ref1 = FixSep("/This/Is/Some/Path/To/A/File");
     ASSERT_EQ(parent_path_ref1, parent_path.string());
 
     parent_path = Filesystem::parent_path(parent_path.string());
-    const auto parent_path_ref2 = std::string("/This/Is/Some/Path/To/A");
+    const auto parent_path_ref2 = FixSep("/This/Is/Some/Path/To/A");
     ASSERT_EQ(parent_path_ref2, parent_path.string());
 
     parent_path = Filesystem::parent_path(parent_path.string());
-    const auto parent_path_ref3 = std::string("/This/Is/Some/Path/To");
+    const auto parent_path_ref3 = FixSep("/This/Is/Some/Path/To");
     ASSERT_EQ(parent_path_ref3, parent_path.string());
 }
 
-TEST(UtilsFilesystemTest, test_root_parent)
+TEST(Test_UtilsFilesystem, test_root_parent)
 {
     const Filesystem::path root_path{"RootFile"};
     const auto parent_path = Filesystem::parent_path(root_path);
@@ -54,21 +63,23 @@ TEST(UtilsFilesystemTest, test_root_parent)
     ASSERT_EQ("", parent_path.string());
 }
 
-TEST(UtilsFilesystemTest, test_concat_paths)
+TEST(Test_UtilsFilesystem, test_concat_paths)
 {
     const Filesystem::path file_name{"File"};
-    const Filesystem::path root_path{"/Path/To/"};
+    const Filesystem::path root_path{FixSep("/Path/To/")};
     const auto file_path = Filesystem::concatenate_paths(root_path, file_name);
 
-    ASSERT_EQ("/Path/To/File", file_path.string());
+    ASSERT_EQ(FixSep("/Path/To/File"), file_path.string());
 }
 
-TEST(UtilsFilesystemTest, test_concat_path_strings)
+TEST(Test_UtilsFilesystem, test_concat_path_strings)
 {
-    const auto file_path = Filesystem::concatenate_paths("/Path/To", "File");
+    const auto file_path = Filesystem::concatenate_paths(FixSep("/Path/To"), "File");
 
-    ASSERT_EQ("/Path/To/File", file_path.string());
+    ASSERT_EQ(FixSep("/Path/To/File"), file_path.string());
 }
+
+} // namespace
 } // namespace tests
 } // namespace Util
 } // namespace SilKit

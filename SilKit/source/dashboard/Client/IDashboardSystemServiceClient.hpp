@@ -108,6 +108,8 @@ public:
                                                  oatpp::Object<SystemStatusDto> systemStatus) = 0;
 
     virtual void SetSimulationEnd(oatpp::UInt64 simulationId, oatpp::Object<SimulationEndDto> simulation) = 0;
+
+    virtual void UpdateSimulationMetrics(oatpp::UInt64 simulationId, oatpp::Object<MetricsUpdateDto> metrics) = 0;
 };
 
 } // namespace Dashboard

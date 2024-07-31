@@ -274,13 +274,7 @@ Logger::Logger(const std::string& participantName, Config::Logging config)
     // gets created, the first default logger will be dropped from the registry as well.
 
     // Generate a tm object for the timestamp once, so that all file loggers will have the very same timestamp.
-    auto timeNow = std::time(nullptr);
-    std::tm tmBuffer{};
-#if defined(_WIN32)
-    localtime_s(&tmBuffer, &timeNow);
-#else
-    localtime_r(&timeNow, &tmBuffer);
-#endif
+    const auto logFileTimestamp = SilKit::Util::CurrentTimestampString();
 
     // Defined JSON pattern for the logger output
     std::string jsonpattern{R"({"ts":"%E","log":"%n","lvl":"%l", %v })"};
@@ -296,7 +290,7 @@ Logger::Logger(const std::string& participantName, Config::Logging config)
             }
         }
         if (sink.format == Config::Sink::Format::Simple && sink.type != Config::Sink::Type::Remote)
-        {  
+        {
             if (log_level < _loggerSimple->level())
             {
                 _loggerSimple->set_level(log_level);
@@ -342,7 +336,7 @@ Logger::Logger(const std::string& participantName, Config::Logging config)
 
             if (sink.format == Config::Sink::Format::Json)
             {
-                auto filename = fmt::format("{}_{:%FT%H-%M-%S}.jsonl", sink.logName, tmBuffer);
+                auto filename = fmt::format("{}_{}.jsonl", sink.logName, logFileTimestamp);
                 auto fileSink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(filename);
                 using spdlog::details::make_unique; // for pre c++14
                 auto formatter = make_unique<spdlog::pattern_formatter>();
@@ -354,7 +348,7 @@ Logger::Logger(const std::string& participantName, Config::Logging config)
             }
             else
             {
-                auto filename = fmt::format("{}_{:%FT%H-%M-%S}.txt", sink.logName, tmBuffer);
+                auto filename = fmt::format("{}_{}.txt", sink.logName, logFileTimestamp);
                 auto fileSink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(filename);
                 fileSink->set_level(log_level);
                 _loggerSimple->sinks().push_back(fileSink);

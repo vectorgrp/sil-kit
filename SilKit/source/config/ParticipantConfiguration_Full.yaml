@@ -167,3 +167,13 @@ Middleware:
   TcpReceiveBufferSize: 3456
   RegistryAsFallbackProxy: false
   ConnectTimeoutSeconds: 1.234
+Experimental:
+  TimeSynchronization:
+    AnimationFactor: 1.5
+  Metrics:
+    CollectFromRemote: false
+    Sinks:
+      - Type: JsonFile
+        Name: MyJsonMetrics
+      - Type: Remote
+        Name: MyRemoteMetricsSink

@@ -31,6 +31,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 namespace YAML {
 
+DEFINE_SILKIT_CONVERT(SilKitRegistry::Config::V1::Experimental);
 DEFINE_SILKIT_CONVERT(SilKitRegistry::Config::V1::RegistryConfiguration);
 
 } // namespace YAML

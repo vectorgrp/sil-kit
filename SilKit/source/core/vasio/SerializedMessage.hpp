@@ -37,6 +37,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "RequestReplySerdes.hpp"
 #include "LoggingSerdes.hpp"
 #include "DataSerdes.hpp"
+#include "MetricsSerdes.hpp"
 
 namespace SilKit {
 namespace Core {

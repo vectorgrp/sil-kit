@@ -38,6 +38,34 @@ using SilKit::Config::non_default_encode;
 namespace YAML {
 
 template <>
+Node Converter::encode(const V1::Experimental& obj)
+{
+    static const V1::Experimental defaultObj{};
+
+    Node node;
+
+    non_default_encode(obj.metrics, node, "Metrics", defaultObj.metrics);
+
+    return node;
+}
+
+template <>
+bool Converter::decode(const Node& node, V1::Experimental& obj)
+{
+    optional_decode(obj.metrics, node, "Metrics");
+
+    for (const auto& sink : obj.metrics.sinks)
+    {
+        if (sink.type == SilKit::Config::MetricsSink::Type::Remote)
+        {
+            throw SilKit::ConfigurationError{"SIL Kit Registry does not support remote metrics sinks"};
+        }
+    }
+
+    return true;
+}
+
+template <>
 Node Converter::encode(const V1::RegistryConfiguration& obj)
 {
     static const V1::RegistryConfiguration defaultObj{};
@@ -50,6 +78,7 @@ Node Converter::encode(const V1::RegistryConfiguration& obj)
     optional_encode(obj.enableDomainSockets, node, "EnableDomainSockets");
     optional_encode(obj.dashboardUri, node, "DashboardUri");
     non_default_encode(obj.logging, node, "Logging", defaultObj.logging);
+    non_default_encode(obj.experimental, node, "Experimental", defaultObj.experimental);
 
     return node;
 }
@@ -62,6 +91,7 @@ bool Converter::decode(const Node& node, V1::RegistryConfiguration& obj)
     optional_decode(obj.enableDomainSockets, node, "EnableDomainSockets");
     optional_decode(obj.dashboardUri, node, "DashboardUri");
     optional_decode(obj.logging, node, "Logging");
+    optional_decode(obj.experimental, node, "Experimental");
 
     if (obj.logging.logFromRemotes)
     {

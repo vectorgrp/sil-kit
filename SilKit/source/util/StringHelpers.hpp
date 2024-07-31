@@ -28,7 +28,16 @@ namespace SilKit {
 namespace Util {
 
 
+struct EscapedJsonString
+{
+    const std::string& string;
+
+    friend auto operator<<(std::ostream& ostream, const EscapedJsonString& self) -> std::ostream&;
+};
+
 auto EscapeString(const std::string& input) -> std::string;
+
+auto CurrentTimestampString() -> std::string;
 
 
 } // namespace Util

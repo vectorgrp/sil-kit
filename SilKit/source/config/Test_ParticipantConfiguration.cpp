@@ -255,4 +255,17 @@ TEST_F(Test_ParticipantConfiguration, full_configuration_file_json_yaml_equal)
     ASSERT_TRUE(participantConfigJson == participantConfigYaml);
 }
 
+TEST_F(Test_ParticipantConfiguration, remote_metric_sink_collect_from_remote_fails)
+{
+    constexpr auto configurationString = R"(
+Metrics:
+  CollectFromRemote: true
+  Sinks:
+    - Type: Remote
+)";
+
+    ASSERT_THROW(SilKit::Config::ParticipantConfigurationFromStringImpl(configurationString),
+                 SilKit::ConfigurationError);
+}
+
 } // anonymous namespace
