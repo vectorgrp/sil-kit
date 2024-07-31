@@ -54,6 +54,9 @@ public: //methods
                                  const Core::ServiceDescriptor& serviceDescriptor) override;
     void OnBulkUpdate(uint64_t simulationId, const DashboardBulkUpdate& bulkUpdate) override;
 
+    void OnMetricsUpdate(uint64_t simulationId, const std::string& origin,
+                         const VSilKit::MetricsUpdate& metricsUpdate) override;
+
 private: //methods
     void OnControllerCreated(uint64_t simulationId, const Core::ServiceDescriptor& serviceDescriptor);
     void OnLinkCreated(uint64_t simulationId, const Core::ServiceDescriptor& serviceDescriptor);
