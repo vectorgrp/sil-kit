@@ -4,6 +4,8 @@
 
 #include "MetricsTimerThread.hpp"
 
+#include "SetThreadName.hpp"
+
 namespace VSilKit {
 
 MetricsTimerThread::MetricsTimerThread(std::function<void()> callback)
@@ -58,19 +60,35 @@ auto MetricsTimerThread::MakeThread() -> std::thread
     auto go = _go.get_future();
     auto done = _done.get_future();
     return std::thread{[go = std::move(go), done = std::move(done), callback = &_callback]() mutable {
-        go.get();
-
-        while (true)
+        try
         {
-            if (done.wait_for(std::chrono::seconds{1}) != std::future_status::timeout)
-            {
-                break;
-            }
+            SilKit::Util::SetThreadName("SK Metrics");
 
-            if (*callback)
+            go.get();
+
+            while (true)
             {
-                (*callback)();
+                if (done.wait_for(std::chrono::seconds{1}) != std::future_status::timeout)
+                {
+                    break;
+                }
+
+                if (*callback)
+                {
+                    try
+                    {
+                        (*callback)();
+                    }
+                    catch (...)
+                    {
+                        // ignore exceptions thrown in the callback
+                    }
+                }
             }
+        }
+        catch (...)
+        {
+            // leaking an exception here can result in a hard crash
         }
     }};
 }
