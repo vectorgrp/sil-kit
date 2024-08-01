@@ -129,6 +129,7 @@ struct SilKitMsgTraits
     }
 
 DefineSilKitMsgTrait_TypeName(SilKit::Services::Logging, LogMsg);
+DefineSilKitMsgTrait_TypeName(VSilKit, MetricsUpdate);
 DefineSilKitMsgTrait_TypeName(SilKit::Services::Orchestration, SystemCommand);
 DefineSilKitMsgTrait_TypeName(SilKit::Services::Orchestration, ParticipantStatus);
 DefineSilKitMsgTrait_TypeName(SilKit::Services::Orchestration, WorkflowConfiguration);

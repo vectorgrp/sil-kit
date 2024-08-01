@@ -80,6 +80,8 @@ const std::string controllerTypeSystemMonitor = "SystemMonitor";
 const std::string controllerTypeSystemController = "SystemController";
 const std::string controllerTypeLifecycleService = "LifecycleService";
 const std::string controllerTypeTimeSyncService = "TimeSyncService";
+const std::string controllerTypeMetricsReceiver = "MetricsReceiver";
+const std::string controllerTypeMetricsSender = "MetricsSender";
 
 // misc / legacy controllers
 const std::string controllerTypeOther = "Other";

@@ -38,6 +38,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "string_utils_internal.hpp"
 #include "ServiceDatatypes.hpp"
 #include "LoggingDatatypesInternal.hpp"
+#include "MetricsDatatypes.hpp"
 
 #include "RequestReplyDatatypes.hpp"
 
@@ -95,6 +96,9 @@ MAKE_FORMATTER(SilKit::Services::Lin::LinWakeupPulse);
 MAKE_FORMATTER(SilKit::Services::Lin::WireLinControllerConfig);
 
 MAKE_FORMATTER(SilKit::Services::Logging::LogMsg);
+
+MAKE_FORMATTER(VSilKit::MetricKind);
+MAKE_FORMATTER(VSilKit::MetricsUpdate);
 
 MAKE_FORMATTER(SilKit::Services::Orchestration::NextSimTask);
 MAKE_FORMATTER(SilKit::Services::Orchestration::ParticipantState);

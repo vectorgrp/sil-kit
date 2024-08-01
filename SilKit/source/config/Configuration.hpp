@@ -168,6 +168,7 @@ struct SimulatedNetwork
 inline bool operator==(const Sink& lhs, const Sink& rhs);
 inline bool operator<(const Sink& lhs, const Sink& rhs);
 inline bool operator>(const Sink& lhs, const Sink& rhs);
+
 inline bool operator==(const Logging& lhs, const Logging& rhs);
 inline bool operator==(const TraceSink& lhs, const TraceSink& rhs);
 inline bool operator==(const TraceSource& lhs, const TraceSource& rhs);

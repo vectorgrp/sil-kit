@@ -287,6 +287,9 @@ TimeSyncService::TimeSyncService(Core::IParticipantInternal* participant, ITimeP
     , _logger{participant->GetLogger()}
     , _timeProvider{timeProvider}
     , _timeConfiguration{participant->GetLogger()}
+    , _simStepCounterMetric{participant->GetMetricsManager()->GetCounter("SimStepCount")}
+    , _simStepExecutionTimeStatisticMetric{participant->GetMetricsManager()->GetStatistic("SimStepExecutionDuration")}
+    , _simStepWaitingTimeStatisticMetric{participant->GetMetricsManager()->GetStatistic("SimStepWaitingDuration")}
     , _watchDog{healthCheckConfig}
     , _animationFactor{animationFactor}
 {
@@ -475,10 +478,19 @@ void TimeSyncService::ExecuteSimStep(std::chrono::nanoseconds timePoint, std::ch
 {
     SILKIT_ASSERT(_simTask);
     using DoubleMSecs = std::chrono::duration<double, std::milli>;
+    using DoubleSecs = std::chrono::duration<double>;
 
     _waitTimeMonitor.StopMeasurement();
-    Trace(_logger, "Starting next Simulation Task. Waiting time was: {}ms",
-          std::chrono::duration_cast<DoubleMSecs>(_waitTimeMonitor.CurrentDuration()).count());
+    const auto waitingDuration = _waitTimeMonitor.CurrentDuration();
+    const auto waitingDurationMs = std::chrono::duration_cast<DoubleMSecs>(waitingDuration);
+    const auto waitingDurationS = std::chrono::duration_cast<DoubleSecs>(waitingDuration);
+
+    Trace(_logger, "Starting next Simulation Task. Waiting time was: {}ms", waitingDurationMs.count());
+    if (_waitTimeMonitor.SampleCount() > 1)
+    {
+        // skip the first sample, since it was never 'started' (it is always the current epoch of the underlying clock)
+        _simStepWaitingTimeStatisticMetric->Take(waitingDurationS.count());
+    }
 
     _timeProvider->SetTime(timePoint, duration);
 
@@ -488,8 +500,14 @@ void TimeSyncService::ExecuteSimStep(std::chrono::nanoseconds timePoint, std::ch
     _watchDog.Reset();
     _execTimeMonitor.StopMeasurement();
 
-    Trace(_logger, "Finished Simulation Step. Execution time was: {}ms",
-          std::chrono::duration_cast<DoubleMSecs>(_execTimeMonitor.CurrentDuration()).count());
+    const auto executionDuration = _execTimeMonitor.CurrentDuration();
+    const auto executionDurationMs = std::chrono::duration_cast<DoubleMSecs>(executionDuration);
+    const auto executionDurationS = std::chrono::duration_cast<DoubleSecs>(executionDuration);
+
+    _simStepCounterMetric->Add(1);
+    _simStepExecutionTimeStatisticMetric->Take(executionDurationS.count());
+
+    Trace(_logger, "Finished Simulation Step. Execution time was: {}ms", executionDurationMs.count());
     _waitTimeMonitor.StartMeasurement();
 }
 

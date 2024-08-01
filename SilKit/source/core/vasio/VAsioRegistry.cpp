@@ -28,6 +28,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "TransformAcceptorUris.hpp"
 #include "VAsioConstants.hpp"
 
+#include "MetricsReceiver.hpp"
+#include "MetricsProcessor.hpp"
+#include "MetricsManager.hpp"
+#include "CreateMetricsSinksFromParticipantConfiguration.hpp"
+
+#include "traits/SilKitServiceConfigTraits.hpp"
+
 
 namespace Log = SilKit::Services::Logging;
 
@@ -45,7 +52,15 @@ VAsioRegistry::VAsioRegistry(std::shared_ptr<SilKit::Config::IParticipantConfigu
                              IRegistryEventListener* registryEventListener, ProtocolVersion version)
     : _registryEventListener{registryEventListener}
     , _vasioConfig{std::dynamic_pointer_cast<SilKit::Config::ParticipantConfiguration>(cfg)}
-    , _connection{nullptr, *_vasioConfig, REGISTRY_PARTICIPANT_NAME, REGISTRY_PARTICIPANT_ID, &_timeProvider, version}
+    , _metricsProcessor{std::make_unique<VSilKit::MetricsProcessor>(REGISTRY_PARTICIPANT_NAME)}
+    , _metricsManager{std::make_unique<VSilKit::MetricsManager>(REGISTRY_PARTICIPANT_NAME, *_metricsProcessor)}
+    , _connection{nullptr,
+                  _metricsManager.get(),
+                  *_vasioConfig,
+                  REGISTRY_PARTICIPANT_NAME,
+                  REGISTRY_PARTICIPANT_ID,
+                  &_timeProvider,
+                  version}
 {
     _logger = std::make_unique<Services::Logging::Logger>(REGISTRY_PARTICIPANT_NAME, _vasioConfig->logging);
 
@@ -54,6 +69,8 @@ VAsioRegistry::VAsioRegistry(std::shared_ptr<SilKit::Config::IParticipantConfigu
         _registryEventListener->OnLoggerCreated(_logger.get());
     }
 
+    dynamic_cast<VSilKit::MetricsProcessor&>(*_metricsProcessor).SetLogger(*_logger);
+    dynamic_cast<VSilKit::MetricsManager&>(*_metricsManager).SetLogger(*_logger);
     _connection.SetLogger(_logger.get());
 
     _connection.RegisterMessageReceiver([this](IVAsioPeer* from, const ParticipantAnnouncement& announcement) {
@@ -65,6 +82,9 @@ VAsioRegistry::VAsioRegistry(std::shared_ptr<SilKit::Config::IParticipantConfigu
     _serviceDescriptor.SetParticipantNameAndComputeId(REGISTRY_PARTICIPANT_NAME);
     _serviceDescriptor.SetParticipantId(REGISTRY_PARTICIPANT_ID);
     _serviceDescriptor.SetNetworkName("default");
+    _serviceDescriptor.SetServiceId(_localEndpointId++);
+
+    SetupMetrics();
 }
 
 auto VAsioRegistry::StartListening(const std::string& listenUri) -> std::string
@@ -155,6 +175,10 @@ auto VAsioRegistry::StartListening(const std::string& listenUri) -> std::string
     _connection.StartIoWorker();
 
     _connection.RegisterSilKitService(this);
+    if (_vasioConfig->experimental.metrics.collectFromRemote)
+    {
+        _connection.RegisterSilKitService(_metricsReceiver.get());
+    }
 
     return uri.EncodedString();
 }
@@ -297,6 +321,40 @@ bool VAsioRegistry::AllParticipantsAreConnected() const
     return false;
 }
 
+void VAsioRegistry::SetupMetrics()
+{
+    auto& processor = dynamic_cast<VSilKit::MetricsProcessor&>(*_metricsProcessor);
+    {
+        // the registry has no MetricsSender
+        auto sinks = VSilKit::CreateMetricsSinksFromParticipantConfiguration(
+            _logger.get(), nullptr, REGISTRY_PARTICIPANT_NAME, _vasioConfig->experimental.metrics.sinks);
+        processor.SetSinks(std::move(sinks));
+    }
+
+    if (_vasioConfig->experimental.metrics.collectFromRemote)
+    {
+        auto metricsReceiver = std::make_unique<VSilKit::MetricsReceiver>(nullptr, *_logger, processor);
+
+        SilKit::Core::SupplementalData supplementalData;
+        supplementalData[SilKit::Core::Discovery::controllerType] =
+            SilKit::Core::Discovery::controllerTypeMetricsReceiver;
+
+        auto sd = metricsReceiver->GetServiceDescriptor();
+        sd.SetParticipantNameAndComputeId(_serviceDescriptor.GetParticipantName());
+        sd.SetParticipantId(_serviceDescriptor.GetParticipantId());
+        sd.SetNetworkName("default");
+        sd.SetNetworkType(SilKit::Config::NetworkType::Undefined);
+        sd.SetServiceName("MetricsReceiver");
+        sd.SetServiceId(_localEndpointId++);
+        sd.SetServiceType(SilKitServiceTraitServiceType<VSilKit::MetricsReceiver>::GetServiceType());
+        sd.SetSupplementalData(std::move(supplementalData));
+
+        metricsReceiver->SetServiceDescriptor(sd);
+
+        _metricsReceiver = std::move(metricsReceiver);
+    }
+}
+
 void VAsioRegistry::ReceiveMsg(const SilKit::Core::IServiceEndpoint* from,
                                const SilKit::Services::Orchestration::ParticipantStatus& msg)
 {
@@ -347,6 +405,17 @@ void VAsioRegistry::SetServiceDescriptor(const ServiceDescriptor& serviceDescrip
 auto VAsioRegistry::GetServiceDescriptor() const -> const ServiceDescriptor&
 {
     return _serviceDescriptor;
+}
+
+
+void VAsioRegistry::OnMetricsUpdate(const std::string& participantName, const VSilKit::MetricsUpdate& metricsUpdate)
+{
+    Log::Info(GetLogger(), "Participant {} updates {} metrics", participantName, metricsUpdate.metrics.size());
+    for (const auto& data : metricsUpdate.metrics)
+    {
+        Log::Info(GetLogger(), "Metric Update: {} {} {} {} ({})", data.name, data.kind, data.value, data.timestamp,
+                  participantName);
+    }
 }
 
 

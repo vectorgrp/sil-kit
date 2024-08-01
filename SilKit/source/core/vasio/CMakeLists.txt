@@ -41,6 +41,7 @@ target_link_libraries(I_SilKit_Core_VAsio
     INTERFACE I_SilKit_Services_Flexray
     INTERFACE I_SilKit_Services_Lin
     INTERFACE I_SilKit_Services_Logging
+    INTERFACE I_SilKit_Services_Metrics
     INTERFACE I_SilKit_Services_Orchestration
     INTERFACE I_SilKit_Services_PubSub
     INTERFACE I_SilKit_Services_Rpc
