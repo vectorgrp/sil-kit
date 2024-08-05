@@ -27,10 +27,11 @@ public:
 
 public:
     // public methods
-    size_t Capacity();
-    size_t Size();
+    size_t Capacity() const;
+    size_t Size() const;
 
-    bool Read(std::vector<T>& elem, bool advanceRPos = true);
+    bool Peek(std::vector<T>& elem);
+    bool Read(std::vector<T>& elem);
 
     // write perspective (arrays of free memory in ring buffer)
     auto GetArrayOne() -> BufArray; // first physically contiguous array (starting at index _wPos)
@@ -41,10 +42,10 @@ public:
     void Reserve(size_t newCapacity);
 
 private:
-    // private member fcns
-    bool Empty();
+    // private methods
+    bool Empty() const;
     void AdvanceRPos(size_t numBytes);
-    void SizeCheck(); // sanity checks
+    void SizeCheck() const; // sanity checks
 
     // write perspective (size of arrays of free memory in ring buffer)
     size_t GetSizeArrayOne() const;
@@ -87,7 +88,7 @@ void RingBuffer<T>::AdvanceRPos(size_t numBytes)
 }
 
 template <class T>
-bool RingBuffer<T>::Read(std::vector<T>& elem, bool advanceRPos)
+bool RingBuffer<T>::Peek(std::vector<T>& elem)
 {
     // make sure, we only copy as many bytes as are contained in the buffer
     if (elem.size() > _size)
@@ -105,10 +106,18 @@ bool RingBuffer<T>::Read(std::vector<T>& elem, bool advanceRPos)
         std::memcpy(elem.data() + numBytesArrayOne, _buffer.data(), elem.size() - numBytesArrayOne);
     }
 
-    if (advanceRPos)
+    return true;
+}
+
+template <class T>
+bool RingBuffer<T>::Read(std::vector<T>& elem)
+{
+    if (!Peek(elem))
     {
-        AdvanceRPos(elem.size());
+        return false;
     }
+
+    AdvanceRPos(elem.size());
 
     return true;
 }
@@ -156,25 +165,25 @@ auto RingBuffer<T>::GetArrayTwo() -> RingBuffer<T>::BufArray
 }
 
 template <class T>
-size_t RingBuffer<T>::Capacity()
+size_t RingBuffer<T>::Capacity() const
 {
     return _buffer.size();
 }
 
 template <class T>
-size_t RingBuffer<T>::Size()
+size_t RingBuffer<T>::Size() const
 {
     return _size;
 }
 
 template <class T>
-bool RingBuffer<T>::Empty()
+bool RingBuffer<T>::Empty() const
 {
     return _size == 0;
 }
 
 template <class T>
-void RingBuffer<T>::SizeCheck()
+void RingBuffer<T>::SizeCheck() const
 {
     // size must not exceed buffer capacity
     if (_size > Capacity())
@@ -194,7 +203,7 @@ void RingBuffer<T>::Reserve(size_t newCapacity)
 
     // copy all data available to temporary vector (we aim at contiguous memory)
     std::vector<T> newBuffer(_size);
-    Read(newBuffer, false);
+    Peek(newBuffer);
 
     _buffer = std::move(newBuffer);
     _buffer.resize(newCapacity);

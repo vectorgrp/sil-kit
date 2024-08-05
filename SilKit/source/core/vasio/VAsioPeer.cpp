@@ -194,7 +194,7 @@ void VAsioPeer::DispatchBuffer()
         if (_msgBuffer.Size() >= sizeof(uint32_t))
         {
             std::vector<uint8_t> msgSizeInBytes(sizeof(uint32_t));
-            if (!_msgBuffer.Read(msgSizeInBytes, false))
+            if (!_msgBuffer.Peek(msgSizeInBytes))
             {
                 throw SilKitError("Reading message size from ring buffer failed.");
             }
