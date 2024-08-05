@@ -105,6 +105,7 @@ add_library(O_SilKit_Core_VAsio OBJECT
     RemoteConnectionManager.cpp
 
     RingBuffer.hpp
+    RingBuffer.cpp
 )
 
 target_link_libraries(O_SilKit_Core_VAsio

@@ -38,7 +38,7 @@ std::vector<std::vector<uint8_t> > GenerateDataBlocks(const size_t maxSize, cons
 }
 
 // mimic use of ring buffer in VAsioPeer (writing into ring buffer)
-void Write(RingBuffer<uint8_t>& ringBuffer, const std::vector<uint8_t>& dataBlock)
+void Write(RingBuffer& ringBuffer, const std::vector<uint8_t>& dataBlock)
 {
     auto arrayOne = ringBuffer.GetArrayOne();
     size_t numBytesForArrayOne = std::min(arrayOne.second, dataBlock.size());
@@ -57,7 +57,7 @@ void Write(RingBuffer<uint8_t>& ringBuffer, const std::vector<uint8_t>& dataBloc
 TEST(Test_RingBuffer, writeSingle)
 {
     const size_t capacity{1000};
-    RingBuffer<uint8_t> ringBuffer(capacity);
+    RingBuffer ringBuffer(capacity);
 
     const size_t numDataBlocks{500};
     auto dataBlocks = GenerateDataBlocks(capacity, numDataBlocks);
@@ -77,7 +77,7 @@ TEST(Test_RingBuffer, writeSingle)
 TEST(Test_RingBuffer, resizeRingBuffer)
 {
     const size_t capacity{1000};
-    RingBuffer<uint8_t> ringBuffer(capacity);
+    RingBuffer ringBuffer(capacity);
 
     const size_t numDataBlocks{500};
     std::vector<size_t> blockSizes{2000, 3000, 4000, 5000};
@@ -107,7 +107,7 @@ TEST(Test_RingBuffer, resizeRingBuffer)
 TEST(Test_RingBuffer, writeMultiple_resizeAllowed)
 {
     const size_t capacity{1000};
-    RingBuffer<uint8_t> ringBuffer(capacity);
+    RingBuffer ringBuffer(capacity);
 
     const size_t numBlockSets = 100;
     const size_t numDataBlocks = 500; // same number of data blocks for every group
@@ -147,7 +147,7 @@ TEST(Test_RingBuffer, writeMultiple_resizeAllowed)
 TEST(Test_RingBuffer, writeMultiple_fixedCapacity) 
 {
     const size_t capacity{1000};
-    RingBuffer<uint8_t> ringBuffer(capacity);
+    RingBuffer ringBuffer(capacity);
 
     const size_t numBlockSets = 100;
     const size_t numDataBlocks = 500; // same number of data blocks for every group

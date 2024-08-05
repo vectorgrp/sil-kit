@@ -122,7 +122,7 @@ private:
 
     // receiving
     std::atomic<uint32_t> _currentMsgSize{0u};
-    RingBuffer<uint8_t> _msgBuffer;
+    RingBuffer _msgBuffer;
     std::vector<MutableBuffer> _currentReceivingBuffers;
 
     // sending
