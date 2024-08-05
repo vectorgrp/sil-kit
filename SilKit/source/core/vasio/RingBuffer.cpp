@@ -43,11 +43,11 @@ bool RingBuffer::Peek(std::vector<uint8_t>& elem)
         return false;
     }
 
-    // copy data from first contiguous array
+    // copy data from first contiguous array (of occupied memory)
     size_t numBytesArrayOne = std::min((Capacity() - _rPos), elem.size());
     std::memcpy(elem.data(), _buffer.data() + _rPos, numBytesArrayOne);
 
-    // copy data from second contiguous array (if necessary)
+    // copy data from second contiguous array (of occupied memory)
     if (numBytesArrayOne < elem.size())
     {
         std::memcpy(elem.data() + numBytesArrayOne, _buffer.data(), elem.size() - numBytesArrayOne);
@@ -68,7 +68,7 @@ bool RingBuffer::Read(std::vector<uint8_t>& elem)
     return true;
 }
 
-size_t RingBuffer::GetSizeArrayOne() const
+size_t RingBuffer::GetFreeMemorySizeArrayOne() const
 {
     size_t arrayOneSize = std::min(Capacity() - _wPos, Capacity() - _size);
 
@@ -81,9 +81,9 @@ size_t RingBuffer::GetSizeArrayOne() const
     return arrayOneSize;
 }
 
-size_t RingBuffer::GetSizeArrayTwo() const
+size_t RingBuffer::GetFreeMemorySizeArrayTwo() const
 {
-    size_t arrayTwoSize = (Capacity() - _size) - GetSizeArrayOne();
+    size_t arrayTwoSize = (Capacity() - _size) - GetFreeMemorySizeArrayOne();
 
     // handle edge cases
     if (Empty())
@@ -95,15 +95,15 @@ size_t RingBuffer::GetSizeArrayTwo() const
 }
 
 // get first contiguous array contained in _buffer (free slots)
-RingBuffer::BufArray RingBuffer::GetArrayOne()
+RingBuffer::BufArray RingBuffer::GetFreeMemoryArrayOne()
 {
-    return BufArray{_buffer.data() + _wPos, GetSizeArrayOne()};
+    return BufArray{_buffer.data() + _wPos, GetFreeMemorySizeArrayOne()};
 }
 
 // get second contiguous array contained in _buffer (free slots)
-RingBuffer::BufArray RingBuffer::GetArrayTwo()
+RingBuffer::BufArray RingBuffer::GetFreeMemoryArrayTwo()
 {
-    return BufArray{_buffer.data(), GetSizeArrayTwo()};
+    return BufArray{_buffer.data(), GetFreeMemorySizeArrayTwo()};
 }
 
 size_t RingBuffer::Capacity() const

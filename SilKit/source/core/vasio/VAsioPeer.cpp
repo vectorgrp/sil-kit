@@ -171,10 +171,10 @@ void VAsioPeer::ReadSomeAsync()
 
     _currentReceivingBuffers.clear();
 
-    auto arrayOne = _msgBuffer.GetArrayOne();
+    auto arrayOne = _msgBuffer.GetFreeMemoryArrayOne();
     _currentReceivingBuffers.push_back(MutableBuffer{arrayOne.first, arrayOne.second});
 
-    auto arrayTwo = _msgBuffer.GetArrayTwo();
+    auto arrayTwo = _msgBuffer.GetFreeMemoryArrayTwo();
     if (arrayTwo.second > 0)
     {
         _currentReceivingBuffers.push_back(MutableBuffer{arrayTwo.first, arrayTwo.second});
