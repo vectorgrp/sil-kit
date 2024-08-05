@@ -48,7 +48,7 @@ private:
 
     // write perspective (size of arrays of free memory in ring buffer)
     size_t GetSizeArrayOne() const;
-    size_t GetSizeArrayTwo();
+    size_t GetSizeArrayTwo() const;
 
 private:
     // member variables
