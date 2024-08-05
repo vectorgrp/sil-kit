@@ -26,7 +26,7 @@ public:
     RingBuffer(size_t capacity);
 
 public:
-    // public member fcns
+    // public methods
     size_t Capacity();
     size_t Size();
 
