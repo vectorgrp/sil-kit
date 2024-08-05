@@ -47,7 +47,7 @@ private:
     void SizeCheck(); // sanity checks
 
     // write perspective (size of arrays of free memory in ring buffer)
-    size_t GetSizeArrayOne();
+    size_t GetSizeArrayOne() const;
     size_t GetSizeArrayTwo();
 
 private:
