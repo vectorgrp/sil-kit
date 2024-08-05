@@ -114,7 +114,7 @@ bool RingBuffer<T>::Read(std::vector<T>& elem, bool advanceRPos)
 }
 
 template <class T>
-size_t RingBuffer<T>::GetSizeArrayOne()
+size_t RingBuffer<T>::GetSizeArrayOne() const
 {
     size_t arrayOneSize = std::min(Capacity() - _wPos, Capacity() - _size);
 
@@ -128,7 +128,7 @@ size_t RingBuffer<T>::GetSizeArrayOne()
 }
 
 template <class T>
-size_t RingBuffer<T>::GetSizeArrayTwo()
+size_t RingBuffer<T>::GetSizeArrayTwo() const
 {
     size_t arrayTwoSize = (Capacity() - _size) - GetSizeArrayOne();
 
