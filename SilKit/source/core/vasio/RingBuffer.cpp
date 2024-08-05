@@ -5,7 +5,6 @@
 #include "RingBuffer.hpp"
 
 #include <algorithm>
-#include <cstring>
 
 #include "silkit/participant/exception.hpp"
 
@@ -45,12 +44,12 @@ bool RingBuffer::Peek(std::vector<uint8_t>& elem)
 
     // copy data from first contiguous array (of occupied memory)
     size_t numBytesArrayOne = std::min((Capacity() - _rPos), elem.size());
-    std::memcpy(elem.data(), _buffer.data() + _rPos, numBytesArrayOne);
+    memcpy(elem.data(), _buffer.data() + _rPos, numBytesArrayOne);
 
     // copy data from second contiguous array (of occupied memory)
     if (numBytesArrayOne < elem.size())
     {
-        std::memcpy(elem.data() + numBytesArrayOne, _buffer.data(), elem.size() - numBytesArrayOne);
+        memcpy(elem.data() + numBytesArrayOne, _buffer.data(), elem.size() - numBytesArrayOne);
     }
 
     return true;
