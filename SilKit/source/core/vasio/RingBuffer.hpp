@@ -29,8 +29,8 @@ public:
     bool Read(std::vector<uint8_t>& elem);
 
     // write perspective (arrays of free memory in ring buffer)
-    auto GetFreeMemoryArrayOne() -> BufArray; // first physically contiguous array (starting at index _wPos)
-    auto GetFreeMemoryArrayTwo() -> BufArray; // second physically contiguous array (starting at index 0)
+    BufArray GetFreeMemoryArrayOne(); // first physically contiguous array (starting at index _wPos)
+    BufArray GetFreeMemoryArrayTwo(); // second physically contiguous array (starting at index 0)
 
     void AdvanceWPos(std::size_t numBytes); // public for access from VAsioPeer
 
