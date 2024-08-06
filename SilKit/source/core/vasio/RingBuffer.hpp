@@ -5,6 +5,7 @@
 #pragma once
 
 #include <vector>
+#include <stdint.h>
 
 namespace SilKit {
 namespace Core {
@@ -13,16 +14,16 @@ class RingBuffer
 {
 public:
     // types
-    using BufArray = std::pair<uint8_t*, size_t>;
+    using BufArray = std::pair<uint8_t*, std::size_t>;
 
 public:
     // constructors and destructors
-    RingBuffer(size_t capacity);
+    RingBuffer(std::size_t capacity);
 
 public:
     // public methods
-    size_t Capacity() const;
-    size_t Size() const;
+    std::size_t Capacity() const;
+    std::size_t Size() const;
 
     bool Peek(std::vector<uint8_t>& elem);
     bool Read(std::vector<uint8_t>& elem);
@@ -31,28 +32,28 @@ public:
     auto GetFreeMemoryArrayOne() -> BufArray; // first physically contiguous array (starting at index _wPos)
     auto GetFreeMemoryArrayTwo() -> BufArray; // second physically contiguous array (starting at index 0)
 
-    void AdvanceWPos(size_t numBytes); // public for access from VAsioPeer
+    void AdvanceWPos(std::size_t numBytes); // public for access from VAsioPeer
 
-    void Reserve(size_t newCapacity);
+    void Reserve(std::size_t newCapacity);
 
 private:
     // private methods
     bool Empty() const;
-    void AdvanceRPos(size_t numBytes);
+    void AdvanceRPos(std::size_t numBytes);
     void SizeCheck() const; // sanity checks
 
     // write perspective (size of arrays of free memory in ring buffer)
-    size_t GetFreeMemorySizeArrayOne() const;
-    size_t GetFreeMemorySizeArrayTwo() const;
+    std::size_t GetFreeMemorySizeArrayOne() const;
+    std::size_t GetFreeMemorySizeArrayTwo() const;
 
 private:
     // member variables
     std::vector<uint8_t> _buffer;
 
-    size_t _size{0};
+    std::size_t _size{0};
 
-    size_t _wPos{0};
-    size_t _rPos{0};
+    std::size_t _wPos{0};
+    std::size_t _rPos{0};
 };
 
 } // namespace Core

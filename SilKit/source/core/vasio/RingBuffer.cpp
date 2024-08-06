@@ -5,6 +5,7 @@
 #include "RingBuffer.hpp"
 
 #include <algorithm>
+#include <cstring>
 
 #include "silkit/participant/exception.hpp"
 

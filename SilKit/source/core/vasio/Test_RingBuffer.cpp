@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 #include <random>
+#include <cstring>
 
 #include "RingBuffer.hpp"
 
