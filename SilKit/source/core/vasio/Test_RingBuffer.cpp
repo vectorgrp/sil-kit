@@ -42,12 +42,12 @@ void Write(RingBuffer& ringBuffer, const std::vector<uint8_t>& dataBlock)
 {
     auto arrayOne = ringBuffer.GetFreeMemoryArrayOne();
     size_t numBytesForArrayOne = std::min(arrayOne.second, dataBlock.size());
-    std::memcpy(arrayOne.first, dataBlock.data(), numBytesForArrayOne);
+    memcpy(arrayOne.first, dataBlock.data(), numBytesForArrayOne);
 
     if (numBytesForArrayOne != dataBlock.size())
     {
         auto arrayTwo = ringBuffer.GetFreeMemoryArrayTwo();
-        std::memcpy(arrayTwo.first, dataBlock.data() + numBytesForArrayOne, dataBlock.size() - numBytesForArrayOne);
+        memcpy(arrayTwo.first, dataBlock.data() + numBytesForArrayOne, dataBlock.size() - numBytesForArrayOne);
     }
 
     ringBuffer.AdvanceWPos(dataBlock.size());
