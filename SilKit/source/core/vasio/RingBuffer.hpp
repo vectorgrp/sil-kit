@@ -40,7 +40,7 @@ private:
     // private methods
     bool Empty() const;
     void AdvanceRPos(std::size_t numBytes);
-    void SizeCheck() const; // sanity checks
+    void SizeCheck() const;
 
     // write perspective (size of arrays of free memory in ring buffer)
     std::size_t GetFreeMemorySizeArrayOne() const;

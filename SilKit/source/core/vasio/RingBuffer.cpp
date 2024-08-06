@@ -22,7 +22,6 @@ void RingBuffer::AdvanceWPos(size_t numBytes)
     _wPos = (_wPos + numBytes) % Capacity();
     _size += numBytes;
 
-    // size checks
     SizeCheck();
 }
 
@@ -31,7 +30,6 @@ void RingBuffer::AdvanceRPos(size_t numBytes)
     _rPos = (_rPos + numBytes) % Capacity();
     _size -= numBytes;
 
-    // size checks
     SizeCheck();
 }
 
@@ -123,7 +121,6 @@ bool RingBuffer::Empty() const
 
 void RingBuffer::SizeCheck() const
 {
-    // size must not exceed buffer capacity
     if (_size > Capacity())
     {
         throw SilKitError{"Buffer size must not exceed capacity!"};
