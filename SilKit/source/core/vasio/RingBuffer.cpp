@@ -35,7 +35,7 @@ void RingBuffer::AdvanceRPos(size_t numBytes)
     SizeCheck();
 }
 
-bool RingBuffer::Peek(std::vector<uint8_t>& elem)
+bool RingBuffer::Peek(std::vector<uint8_t>& elem) const
 {
     // make sure, we only copy as many bytes as are contained in the buffer
     if (elem.size() > _size)

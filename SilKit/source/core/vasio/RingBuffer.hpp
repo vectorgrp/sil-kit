@@ -25,7 +25,7 @@ public:
     std::size_t Capacity() const;
     std::size_t Size() const;
 
-    bool Peek(std::vector<uint8_t>& elem);
+    bool Peek(std::vector<uint8_t>& elem) const;
     bool Read(std::vector<uint8_t>& elem);
 
     // write perspective (arrays of free memory in ring buffer)
