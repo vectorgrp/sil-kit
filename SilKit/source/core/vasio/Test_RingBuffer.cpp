@@ -41,13 +41,20 @@ std::vector<std::vector<uint8_t> > GenerateDataBlocks(const size_t maxSize, cons
 // mimic use of ring buffer in VAsioPeer (writing into ring buffer)
 void Write(RingBuffer& ringBuffer, const std::vector<uint8_t>& dataBlock)
 {
-    auto arrayOne = ringBuffer.GetFreeMemoryArrayOne();
+    auto bufferArrays = ringBuffer.GetWritingBuffers();
+
+    if (bufferArrays.empty())
+    {
+        return;
+    }
+
+    auto arrayOne = bufferArrays.front();
     size_t numBytesForArrayOne = std::min(arrayOne.second, dataBlock.size());
     memcpy(arrayOne.first, dataBlock.data(), numBytesForArrayOne);
 
-    if (numBytesForArrayOne != dataBlock.size())
+    if (bufferArrays.size() > 1)
     {
-        auto arrayTwo = ringBuffer.GetFreeMemoryArrayTwo();
+        auto arrayTwo = bufferArrays.back();
         memcpy(arrayTwo.first, dataBlock.data() + numBytesForArrayOne, dataBlock.size() - numBytesForArrayOne);
     }
 

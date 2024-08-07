@@ -28,9 +28,7 @@ public:
     bool Peek(std::vector<uint8_t>& elem) const;
     bool Read(std::vector<uint8_t>& elem);
 
-    // write perspective (arrays of free memory in ring buffer)
-    BufArray GetFreeMemoryArrayOne(); // first physically contiguous array (starting at index _wPos)
-    BufArray GetFreeMemoryArrayTwo(); // second physically contiguous array (starting at index 0)
+    std::vector<BufArray> GetWritingBuffers();
 
     void AdvanceWPos(std::size_t numBytes); // public for access from VAsioPeer
 
@@ -45,6 +43,10 @@ private:
     // write perspective (size of arrays of free memory in ring buffer)
     std::size_t GetFreeMemorySizeArrayOne() const;
     std::size_t GetFreeMemorySizeArrayTwo() const;
+
+    // write perspective (arrays of free memory in ring buffer)
+    BufArray GetFreeMemoryArrayOne(); // first physically contiguous array (starting at index _wPos)
+    BufArray GetFreeMemoryArrayTwo(); // second physically contiguous array (starting at index 0)
 
 private:
     // member variables

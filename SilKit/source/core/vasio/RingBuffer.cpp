@@ -66,6 +66,29 @@ bool RingBuffer::Read(std::vector<uint8_t>& elem)
     return true;
 }
 
+std::vector<RingBuffer::BufArray> RingBuffer::GetWritingBuffers()
+{
+    std::vector<BufArray> buffers;
+
+    auto arrayOne = GetFreeMemoryArrayOne();
+    if (arrayOne.second > 0)
+    {
+        buffers.push_back(std::move(arrayOne));
+    }
+    else
+    {
+        return buffers;
+    }
+
+    auto arrayTwo = GetFreeMemoryArrayTwo();
+    if (arrayTwo.second > 0)
+    {
+        buffers.push_back(std::move(arrayTwo));
+    }
+
+    return buffers;
+}
+
 size_t RingBuffer::GetFreeMemorySizeArrayOne() const
 {
     size_t arrayOneSize = std::min(Capacity() - _wPos, Capacity() - _size);

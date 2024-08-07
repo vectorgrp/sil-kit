@@ -171,14 +171,13 @@ void VAsioPeer::ReadSomeAsync()
 
     _currentReceivingBuffers.clear();
 
-    auto arrayOne = _msgBuffer.GetFreeMemoryArrayOne();
-    _currentReceivingBuffers.push_back(MutableBuffer{arrayOne.first, arrayOne.second});
+    auto bufferSequence = _msgBuffer.GetWritingBuffers();
 
-    auto arrayTwo = _msgBuffer.GetFreeMemoryArrayTwo();
-    if (arrayTwo.second > 0)
-    {
-        _currentReceivingBuffers.push_back(MutableBuffer{arrayTwo.first, arrayTwo.second});
-    }
+    _currentReceivingBuffers.resize(bufferSequence.size());
+
+    std::transform(
+        bufferSequence.begin(), bufferSequence.end(), _currentReceivingBuffers.begin(),
+        [](const RingBuffer::BufArray& buffer) -> MutableBuffer { return MutableBuffer{buffer.first, buffer.second}; });
 
     _socket->AsyncReadSome(MutableBufferSequence{_currentReceivingBuffers.data(), _currentReceivingBuffers.size()});
 }
