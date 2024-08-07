@@ -17,7 +17,31 @@
 
 #include "fmt/format.h"
 
+namespace {
 
+// On Windows builds with optimization, std::chrono::steady_clock sometimes returns the same values,
+// when called too fast. We make sure that calls to ::now are strict monotonically increasing:
+#ifdef _WIN32
+auto MetricClockNow() -> VSilKit::MetricTimePoint
+{
+    static thread_local auto sLastTimePoint = VSilKit::MetricClock::now();
+    const auto now = VSilKit::MetricClock::now();
+    if (now == sLastTimePoint)
+    {
+        sLastTimePoint = sLastTimePoint + std::chrono::nanoseconds{1};
+        return sLastTimePoint;
+    }
+    sLastTimePoint = now;
+    return now;
+}
+#else
+// we need no overhead on other systems
+auto MetricClockNow() -> VSilKit::MetricTimePoint
+{
+    return VSilKit::MetricClock::now();
+}
+#endif
+}
 namespace VSilKit {
 
 
@@ -38,7 +62,7 @@ public: // MetricsManager::IMetric
     auto FormatValue() const -> std::string override;
 
 private:
-    TimePoint _timestamp;
+    MetricTimePoint _timestamp;
     uint64_t _value{0};
 };
 
@@ -59,7 +83,7 @@ public: // MetricsManager::IMetric
     auto FormatValue() const -> std::string override;
 
 private:
-    TimePoint _timestamp;
+    MetricTimePoint _timestamp;
     double _mean{0.0};
     double _variance{0.0};
     double _minimum{std::numeric_limits<double>::max()};
@@ -88,7 +112,7 @@ public: // MetricsManager::IMetric
     auto FormatValue() const -> std::string override;
 
 private:
-    TimePoint _timestamp;
+    MetricTimePoint _timestamp;
     std::vector<std::string> _strings;
 };
 
@@ -96,6 +120,7 @@ private:
 MetricsManager::MetricsManager(std::string participantName, IMetricsProcessor &processor)
     : _participantName{std::move(participantName)}
     , _processor{&processor}
+    ,_lastSubmitUpdate{MetricClockNow()}
 {
 }
 
@@ -138,7 +163,7 @@ void MetricsManager::SubmitUpdates()
             msg.metrics.emplace_back(std::move(data));
         }
 
-        _lastSubmitUpdate = Clock::now();
+        _lastSubmitUpdate = MetricClockNow();
     }
 
     if (!msg.metrics.empty())
@@ -209,13 +234,13 @@ MetricsManager::CounterMetric::CounterMetric() = default;
 
 void MetricsManager::CounterMetric::Add(uint64_t delta)
 {
-    _timestamp = MetricsManager::Clock::now();
+    _timestamp = MetricClockNow();
     _value += delta;
 }
 
 void MetricsManager::CounterMetric::Set(uint64_t value)
 {
-    _timestamp = MetricsManager::Clock::now();
+    _timestamp = MetricClockNow();
     _value = value;
 }
 
@@ -241,7 +266,7 @@ MetricsManager::StatisticMetric::StatisticMetric() = default;
 
 void MetricsManager::StatisticMetric::Take(double value)
 {
-    _timestamp = MetricsManager::Clock::now();
+    _timestamp = MetricClockNow();
 
     constexpr double alpha = 0.5;
 
@@ -276,13 +301,13 @@ MetricsManager::StringListMetric::StringListMetric() = default;
 
 void MetricsManager::StringListMetric::Clear()
 {
-    _timestamp = MetricsManager::Clock::now();
+    _timestamp = MetricClockNow();
     _strings.clear();
 }
 
 void MetricsManager::StringListMetric::Add(std::string const &value)
 {
-    _timestamp = MetricsManager::Clock::now();
+    _timestamp = MetricClockNow();
     _strings.emplace_back(value);
 }
 

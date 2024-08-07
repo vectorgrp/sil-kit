@@ -34,16 +34,12 @@ using MetricTimePoint = MetricClock::time_point;
 
 class MetricsManager : public IMetricsManager
 {
-public:
-    using Clock = MetricClock;
-    using TimePoint = MetricTimePoint;
-
 private:
     struct IMetric
     {
         virtual ~IMetric() = default;
         virtual auto GetMetricKind() const -> MetricKind = 0;
-        virtual auto GetUpdateTime() const -> TimePoint = 0;
+        virtual auto GetUpdateTime() const -> MetricTimePoint = 0;
         virtual auto FormatValue() const -> std::string = 0;
     };
 
@@ -74,7 +70,7 @@ private:
 
     std::mutex _mutex;
     std::unordered_map<std::string, std::unique_ptr<IMetric>> _metrics;
-    TimePoint _lastSubmitUpdate{Clock::now()};
+    MetricTimePoint _lastSubmitUpdate;
 };
 
 
