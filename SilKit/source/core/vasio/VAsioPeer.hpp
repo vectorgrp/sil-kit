@@ -92,6 +92,8 @@ public:
 
     void Shutdown() override;
 
+    void EnableAggregation() override;
+
 private:
     // ----------------------------------------
     // Private Methods
@@ -99,6 +101,9 @@ private:
     void WriteSomeAsync();
     void ReadSomeAsync();
     void DispatchBuffer();
+    void SendSilKitMsgInternal(const std::vector<uint8_t>& blob);
+    void Aggregate(const std::vector<uint8_t>& blob);
+    void Flush();
 
 private: // IRawByteStreamListener
     void OnAsyncReadSomeDone(IRawByteStream& stream, size_t bytesTransferred) override;
@@ -130,9 +135,13 @@ private:
     std::deque<std::vector<uint8_t>> _sendingQueue;
     ConstBuffer _currentSendingBuffer;
     std::vector<uint8_t> _currentSendingBufferData;
+    std::vector<uint8_t> _aggregatedMessages;
 
     std::atomic_bool _sending{false};
     Core::ServiceDescriptor _serviceDescriptor;
+
+    bool _useAggregation{false};
+    const size_t _aggregationBufferThreshold{100 * 1000};
 };
 
 // ================================================================================

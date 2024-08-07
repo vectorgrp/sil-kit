@@ -684,6 +684,7 @@ public:
     }
 
     void NotifyShutdown() override {};
+    void EvaluateAggregationInfo(bool /*isSyncSimStepHandler*/) override {};
     void RegisterReplayController(SilKit::Tracing::IReplayDataController*, const std::string&,
                                   const SilKit::Config::SimulatedNetwork&) override
     {

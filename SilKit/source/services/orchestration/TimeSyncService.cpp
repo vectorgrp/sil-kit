@@ -735,6 +735,11 @@ void TimeSyncService::StopWallClockCouplingThread()
     }
 }
 
+bool TimeSyncService::IsBlocking() const
+{
+    return _timeConfiguration.IsBlocking();
+}
+
 } // namespace Orchestration
 } // namespace Services
 } // namespace SilKit

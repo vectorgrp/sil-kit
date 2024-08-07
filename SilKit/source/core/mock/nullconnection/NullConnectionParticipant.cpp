@@ -67,6 +67,7 @@ struct NullConnection
     void FlushSendBuffers() {}
     void ExecuteDeferred(std::function<void()> /*callback*/) {}
     void NotifyShutdown() {}
+    void EnableAggregation() {}
 
     void RegisterMessageReceiver(std::function<void(IVAsioPeer* /*peer*/, ParticipantAnnouncement)> /*callback*/) {}
     void RegisterPeerShutdownCallback(std::function<void(IVAsioPeer* peer)> /*callback*/) {}

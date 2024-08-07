@@ -114,6 +114,7 @@ struct MockConnection
     void FlushSendBuffers() {}
     void ExecuteDeferred(std::function<void()> /*callback*/) {}
     void NotifyShutdown() {}
+    void EnableAggregation() {}
 
     void RegisterMessageReceiver(
         std::function<void(SilKit::Core::IVAsioPeer* /*peer*/, SilKit::Core::ParticipantAnnouncement)> /*callback*/)

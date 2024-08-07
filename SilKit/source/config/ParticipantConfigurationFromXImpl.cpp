@@ -74,6 +74,7 @@ struct GlobalLogCache
 struct TimeSynchronizationCache
 {
     SilKit::Util::Optional<double> animationFactor;
+    SilKit::Util::Optional<Aggregation> enableMessageAggregation;
 };
 
 struct MetricsCache
@@ -375,6 +376,7 @@ void CacheLoggingSinks(const YAML::Node& config, GlobalLogCache& cache)
 void CacheTimeSynchronization(const YAML::Node& root, TimeSynchronizationCache& cache)
 {
     PopulateCacheField(root, "TimeSynchronization", "AnimationFactor", cache.animationFactor);
+    PopulateCacheField(root, "TimeSynchronization", "EnableMessageAggregation", cache.enableMessageAggregation);
 }
 
 void CacheMetrics(const YAML::Node& root, MetricsCache& cache)
@@ -552,6 +554,7 @@ void MergeLogCache(const GlobalLogCache& cache, Logging& logging)
 void MergeTimeSynchronizationCache(const TimeSynchronizationCache& cache, TimeSynchronization& timeSynchronization)
 {
     MergeCacheField(cache.animationFactor, timeSynchronization.animationFactor);
+    MergeCacheField(cache.enableMessageAggregation, timeSynchronization.enableMessageAggregation);
 }
 
 void MergeMetricsCache(const MetricsCache& cache, Metrics& metrics)
@@ -792,7 +795,7 @@ bool operator==(const ParticipantConfiguration& lhs, const ParticipantConfigurat
 
 bool operator==(const TimeSynchronization& lhs, const TimeSynchronization& rhs)
 {
-    return lhs.animationFactor == rhs.animationFactor;
+    return lhs.animationFactor == rhs.animationFactor && lhs.enableMessageAggregation == rhs.enableMessageAggregation;
 }
 
 bool operator==(const Experimental& lhs, const Experimental& rhs)

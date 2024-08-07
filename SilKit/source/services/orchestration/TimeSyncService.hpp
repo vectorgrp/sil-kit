@@ -109,6 +109,8 @@ public:
     auto IsCoupledToWallClock() const -> bool;
     auto GetCurrentWallClockSyncPoint() const -> std::chrono::nanoseconds;
 
+    bool IsBlocking() const;
+
 private:
     // ----------------------------------------
     // private methods

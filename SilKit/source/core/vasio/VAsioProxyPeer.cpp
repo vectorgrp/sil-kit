@@ -58,7 +58,11 @@ void VAsioProxyPeer::SendSilKitMsg(SerializedMessage buffer)
 
     Log::Trace(_logger, "VAsioProxyPeer ({}): SendSilKitMsg({})", _peerInfo.participantName, msg.payload.size());
 
-    _peer->SendSilKitMsg(SerializedMessage{msg});
+    // keep track of aggregation kind
+    auto bufferProxy = SerializedMessage{msg};
+    bufferProxy.SetAggregationKind(buffer.GetAggregationKind());
+
+    _peer->SendSilKitMsg(std::move(bufferProxy));
 }
 
 void VAsioProxyPeer::Subscribe(VAsioMsgSubscriber subscriber)
@@ -97,6 +101,11 @@ void VAsioProxyPeer::StartAsyncRead()
 void VAsioProxyPeer::Shutdown()
 {
     Log::Debug(_logger, "VAsioProxyPeer ({}): Shutdown: Ignored", _peerInfo.participantName);
+}
+
+void VAsioProxyPeer::EnableAggregation()
+{
+    Log::Debug(_logger, "VAsioProxyPeer ({}): EnableAggregation: Ignored", _peerInfo.participantName);
 }
 
 void VAsioProxyPeer::SetProtocolVersion(ProtocolVersion v)
