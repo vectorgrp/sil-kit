@@ -49,13 +49,13 @@ void Write(RingBuffer& ringBuffer, const std::vector<uint8_t>& dataBlock)
     }
 
     auto arrayOne = bufferArrays.front();
-    size_t numBytesForArrayOne = std::min(arrayOne.second, dataBlock.size());
-    memcpy(arrayOne.first, dataBlock.data(), numBytesForArrayOne);
+    size_t numBytesForArrayOne = std::min(arrayOne.GetSize(), dataBlock.size());
+    memcpy(arrayOne.GetData(), dataBlock.data(), numBytesForArrayOne);
 
     if (bufferArrays.size() > 1)
     {
         auto arrayTwo = bufferArrays.back();
-        memcpy(arrayTwo.first, dataBlock.data() + numBytesForArrayOne, dataBlock.size() - numBytesForArrayOne);
+        memcpy(arrayTwo.GetData(), dataBlock.data() + numBytesForArrayOne, dataBlock.size() - numBytesForArrayOne);
     }
 
     ringBuffer.AdvanceWPos(dataBlock.size());

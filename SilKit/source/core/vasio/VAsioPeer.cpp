@@ -170,14 +170,7 @@ void VAsioPeer::ReadSomeAsync()
     SILKIT_ASSERT(_msgBuffer.Capacity() - _msgBuffer.Size() > 0);
 
     _currentReceivingBuffers.clear();
-
-    auto bufferSequence = _msgBuffer.GetWritingBuffers();
-
-    _currentReceivingBuffers.resize(bufferSequence.size());
-
-    std::transform(
-        bufferSequence.begin(), bufferSequence.end(), _currentReceivingBuffers.begin(),
-        [](const RingBuffer::BufArray& buffer) -> MutableBuffer { return MutableBuffer{buffer.first, buffer.second}; });
+    _currentReceivingBuffers = _msgBuffer.GetWritingBuffers();
 
     _socket->AsyncReadSome(MutableBufferSequence{_currentReceivingBuffers.data(), _currentReceivingBuffers.size()});
 }

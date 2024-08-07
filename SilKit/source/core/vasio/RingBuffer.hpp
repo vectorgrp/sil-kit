@@ -7,15 +7,13 @@
 #include <vector>
 #include <stdint.h>
 
+#include "util/Buffer.hpp"
+
 namespace SilKit {
 namespace Core {
 
 class RingBuffer
 {
-public:
-    // types
-    using BufArray = std::pair<uint8_t*, std::size_t>;
-
 public:
     // constructors and destructors
     RingBuffer(std::size_t capacity);
@@ -28,7 +26,7 @@ public:
     bool Peek(std::vector<uint8_t>& elem) const;
     bool Read(std::vector<uint8_t>& elem);
 
-    std::vector<BufArray> GetWritingBuffers();
+    std::vector<MutableBuffer> GetWritingBuffers();
 
     void AdvanceWPos(std::size_t numBytes); // public for access from VAsioPeer
 
@@ -45,8 +43,8 @@ private:
     std::size_t GetFreeMemorySizeArrayTwo() const;
 
     // write perspective (arrays of free memory in ring buffer)
-    BufArray GetFreeMemoryArrayOne(); // first physically contiguous array (starting at index _wPos)
-    BufArray GetFreeMemoryArrayTwo(); // second physically contiguous array (starting at index 0)
+    MutableBuffer GetFreeMemoryArrayOne(); // first physically contiguous array (starting at index _wPos)
+    MutableBuffer GetFreeMemoryArrayTwo(); // second physically contiguous array (starting at index 0)
 
 private:
     // member variables

@@ -66,12 +66,12 @@ bool RingBuffer::Read(std::vector<uint8_t>& elem)
     return true;
 }
 
-std::vector<RingBuffer::BufArray> RingBuffer::GetWritingBuffers()
+std::vector<MutableBuffer> RingBuffer::GetWritingBuffers()
 {
-    std::vector<BufArray> buffers;
+    std::vector<MutableBuffer> buffers;
 
     auto arrayOne = GetFreeMemoryArrayOne();
-    if (arrayOne.second > 0)
+    if (arrayOne.GetSize() > 0)
     {
         buffers.push_back(std::move(arrayOne));
     }
@@ -81,7 +81,7 @@ std::vector<RingBuffer::BufArray> RingBuffer::GetWritingBuffers()
     }
 
     auto arrayTwo = GetFreeMemoryArrayTwo();
-    if (arrayTwo.second > 0)
+    if (arrayTwo.GetSize() > 0)
     {
         buffers.push_back(std::move(arrayTwo));
     }
@@ -116,15 +116,15 @@ size_t RingBuffer::GetFreeMemorySizeArrayTwo() const
 }
 
 // get first contiguous array contained in _buffer (free slots)
-RingBuffer::BufArray RingBuffer::GetFreeMemoryArrayOne()
+MutableBuffer RingBuffer::GetFreeMemoryArrayOne()
 {
-    return BufArray{_buffer.data() + _wPos, GetFreeMemorySizeArrayOne()};
+    return MutableBuffer{_buffer.data() + _wPos, GetFreeMemorySizeArrayOne()};
 }
 
 // get second contiguous array contained in _buffer (free slots)
-RingBuffer::BufArray RingBuffer::GetFreeMemoryArrayTwo()
+MutableBuffer RingBuffer::GetFreeMemoryArrayTwo()
 {
-    return BufArray{_buffer.data(), GetFreeMemorySizeArrayTwo()};
+    return MutableBuffer{_buffer.data(), GetFreeMemorySizeArrayTwo()};
 }
 
 size_t RingBuffer::Capacity() const
