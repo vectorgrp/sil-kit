@@ -32,6 +32,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "IVAsioPeer.hpp"
 #include "EndpointAddress.hpp"
 #include "MessageBuffer.hpp"
+#include "RingBuffer.hpp"
 #include "VAsioPeerInfo.hpp"
 #include "ProtocolVersion.hpp"
 
@@ -121,9 +122,8 @@ private:
 
     // receiving
     std::atomic<uint32_t> _currentMsgSize{0u};
-    std::vector<uint8_t> _msgBuffer;
-    size_t _wPos{0};
-    MutableBuffer _currentReceivingBuffer;
+    RingBuffer _msgBuffer;
+    std::vector<MutableBuffer> _currentReceivingBuffers;
 
     // sending
     mutable std::mutex _sendingQueueMutex;

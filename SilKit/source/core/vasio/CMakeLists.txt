@@ -104,6 +104,9 @@ add_library(O_SilKit_Core_VAsio OBJECT
     ConnectPeer.cpp
     ConnectKnownParticipants.cpp
     RemoteConnectionManager.cpp
+
+    RingBuffer.hpp
+    RingBuffer.cpp
 )
 
 target_link_libraries(O_SilKit_Core_VAsio
@@ -158,6 +161,8 @@ add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_VAsioSerdes.cpp LIBS 
 add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_SerializedMessage.cpp LIBS S_SilKitImpl)
 add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_TransformAcceptorUris.cpp LIBS S_SilKitImpl)
 add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_VAsioCapabilities.cpp LIBS S_SilKitImpl)
+
+add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_RingBuffer.cpp LIBS S_SilKitImpl)
 
 add_silkit_test_to_executable(SilKitUnitTests SOURCES io/Test_IoContext.cpp LIBS S_SilKitImpl)
 add_silkit_test_to_executable(SilKitUnitTests SOURCES io/Test_AsioIoContext.cpp LIBS S_SilKitImpl)
