@@ -121,11 +121,16 @@ struct EventQueueWorkerThread
 
     auto DetectBulkUpdate() const -> bool
     {
+        bool bulkUpdateAvailable = false;
+
         auto bulkSimulationDto = SilKit::Dashboard::BulkSimulationDto::createShared();
-        const auto response =
-            apiClient->updateSimulation(oatpp::UInt64{std::uint64_t{0}}, std::move(bulkSimulationDto));
-        const auto statusCode = response->getStatusCode();
-        const bool bulkUpdateAvailable = 200 <= statusCode && statusCode < 300;
+        const auto response = apiClient->updateSimulation(oatpp::UInt64{std::uint64_t{0}}, bulkSimulationDto);
+
+        if (response)
+        {
+            const auto statusCode = response->getStatusCode();
+            bulkUpdateAvailable = 200 <= statusCode && statusCode < 300;
+        }
 
         if (bulkUpdateAvailable)
         {
