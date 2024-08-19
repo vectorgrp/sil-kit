@@ -9,6 +9,10 @@ The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <
 [4.0.52] - UNRELEASED 
 ---------------------
 
+Fixed
+~~~~~
+
+- Fixed crash in ``sil-kit-registry`` utility that happened when the dashboard is enabled, but not actually available.
 
 
 [4.0.51] - 2024-07-18 
