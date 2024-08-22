@@ -53,6 +53,7 @@ VAsioPeer::VAsioPeer(IVAsioPeerListener* listener, IIoContext* ioContext, std::u
     , _ioContext{ioContext}
     , _socket{std::move(stream)}
     , _logger{logger}
+    , _msgBuffer{4096}
 {
     _socket->SetListener(*this);
 }
@@ -161,21 +162,17 @@ void VAsioPeer::StartAsyncRead()
 {
     _currentMsgSize = 0u;
 
-    _msgBuffer.resize(4096);
-    _wPos = {0u};
-
     ReadSomeAsync();
 }
 
 void VAsioPeer::ReadSomeAsync()
 {
-    SILKIT_ASSERT(_msgBuffer.size() > 0);
-    auto* wPtr = _msgBuffer.data() + _wPos;
-    auto size = _msgBuffer.size() - _wPos;
+    SILKIT_ASSERT(_msgBuffer.Capacity() - _msgBuffer.Size() > 0);
 
-    _currentReceivingBuffer = MutableBuffer{wPtr, size};
+    _currentReceivingBuffers.clear();
+    _msgBuffer.GetWritingBuffers(_currentReceivingBuffers);
 
-    _socket->AsyncReadSome(MutableBufferSequence{&_currentReceivingBuffer, 1});
+    _socket->AsyncReadSome(MutableBufferSequence{_currentReceivingBuffers.data(), _currentReceivingBuffers.size()});
 }
 
 void VAsioPeer::DispatchBuffer()
@@ -186,17 +183,19 @@ void VAsioPeer::DispatchBuffer()
         {
             return;
         }
-        if (_wPos >= sizeof(uint32_t))
+        if (_msgBuffer.Size() >= sizeof(uint32_t))
         {
-            _currentMsgSize = *reinterpret_cast<uint32_t*>(_msgBuffer.data());
+            std::vector<uint8_t> msgSizeInBytes(sizeof(uint32_t));
+            if (!_msgBuffer.Peek(msgSizeInBytes))
+            {
+                throw SilKitError("Reading message size from ring buffer failed.");
+            }
+            _currentMsgSize = *reinterpret_cast<uint32_t*>(msgSizeInBytes.data());
         }
         else
         {
             // not enough data to even determine the message size...
-            // make sure the buffer can store some data
-            if (_msgBuffer.size() < sizeof(uint32_t))
-                _msgBuffer.resize(4096);
-            // and restart the async read operation
+            // restart the async read operation
             ReadSomeAsync();
             return;
         }
@@ -210,34 +209,29 @@ void VAsioPeer::DispatchBuffer()
     }
 
 
-    if (_wPos < _currentMsgSize)
+    if (_msgBuffer.Size() < _currentMsgSize)
     {
         // Make the buffer large enough and wait until we have more data.
-        _msgBuffer.resize(_currentMsgSize);
+        if (_msgBuffer.Capacity() < _currentMsgSize)
+        {
+            _msgBuffer.Reserve(_currentMsgSize);
+        }
+
         ReadSomeAsync();
         return;
     }
     else
     {
-        auto newBuffer = std::vector<uint8_t>{_msgBuffer.begin() + _currentMsgSize, _msgBuffer.end()};
-        auto newWPos = _wPos - _currentMsgSize;
-
-        // manually extract the message size so we can adjust the MessageBuffer size
-        uint32_t msgSize{0u};
-        if (_msgBuffer.size() < sizeof msgSize)
+        std::vector<uint8_t> currentMsg(_currentMsgSize);
+        if (!_msgBuffer.Read(currentMsg))
         {
-            throw SilKitError{"DispatchBuffer: Received message is too small to contain message size header"};
+            throw SilKitError("Reading data from ring buffer failed.");
         }
-        memcpy(&msgSize, _msgBuffer.data(), sizeof msgSize);
-        //ensure buffer does not contain data from contiguous messages
-        _msgBuffer.resize(msgSize);
-        SerializedMessage message{std::move(_msgBuffer)};
+
+        SerializedMessage message{std::move(currentMsg)};
         message.SetProtocolVersion(GetProtocolVersion());
         _listener->OnSocketData(this, std::move(message));
 
-        // keep trailing data in the buffer
-        _msgBuffer = std::move(newBuffer);
-        _wPos = newWPos;
         _currentMsgSize = 0u;
 
         DispatchBuffer();
@@ -253,7 +247,7 @@ void VAsioPeer::OnAsyncReadSomeDone(IRawByteStream& stream, size_t bytesTransfer
     SILKIT_UNUSED_ARG(stream);
     SILKIT_TRACE_METHOD_(_logger, "({}, {})", static_cast<const void*>(&stream), bytesTransferred);
 
-    _wPos += bytesTransferred;
+    _msgBuffer.AdvanceWPos(bytesTransferred);
     DispatchBuffer();
 }
 
