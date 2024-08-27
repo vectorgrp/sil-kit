@@ -34,7 +34,9 @@ TEST_F(ITest_MessageAggregation, receive_msg_after_lifecycle_has_been_stopped)
 
     {
         std::string participantName = "Publisher";
-        auto&& simParticipant = _simTestHarness->GetParticipant(participantName);
+        std::string participantConfig(
+            R"({"Experimental": {"TimeSynchronization": {"EnableMessageAggregation": "Auto"}}})");
+        auto&& simParticipant = _simTestHarness->GetParticipant(participantName, participantConfig);
         auto&& participant = simParticipant->Participant();
         auto&& lifecycleService = simParticipant->GetOrCreateLifecycleService();
         auto&& timeSyncService = simParticipant->GetOrCreateTimeSyncService();

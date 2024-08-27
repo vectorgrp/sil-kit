@@ -25,7 +25,7 @@ TimeSynchronization
     Experimental:
         TimeSynchronization:
             AnimationFactor: 1.0
-            EnableMessageAggregation: Auto
+            EnableMessageAggregation: Off
 
 .. list-table:: TimeSynchronization Configuration
    :widths: 15 85
