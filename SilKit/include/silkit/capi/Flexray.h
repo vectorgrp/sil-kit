@@ -515,21 +515,21 @@ struct SilKit_FlexrayPocStatusEvent
     SilKit_StructHeader structHeader; //!< The interface id specifying which version of this struct was obtained
     SilKit_NanosecondsTime timestamp; //!< SIL Kit timestamp
     SilKit_FlexrayPocState state;
-        /* = SilKit_FlexrayPocState_DefaultConfig; */ //!< Status of the Protocol Operation Control (POC).
+    /* = SilKit_FlexrayPocState_DefaultConfig; */ //!< Status of the Protocol Operation Control (POC).
     SilKit_Bool chiHaltRequest; /* = false; */ //!< indicates whether a halt request was received from the CHI
     SilKit_Bool coldstartNoise; /* = false; */ //!< indicates noisy channel conditions during coldstart
     SilKit_Bool freeze;
-        /* = false; */ //!< indicates that the POC entered a halt state due to an error condition requiring immediate halt.
+    /* = false; */ //!< indicates that the POC entered a halt state due to an error condition requiring immediate halt.
     SilKit_Bool chiReadyRequest;
-        /* = false; */ //!< indicates that the CHI requested to enter ready state at the end of the communication cycle.
+    /* = false; */ //!< indicates that the CHI requested to enter ready state at the end of the communication cycle.
     SilKit_FlexrayErrorModeType errorMode;
-        /* = SilKit_FlexrayErrorModeType_Active; */ //!< indicates the error mode of the POC
+    /* = SilKit_FlexrayErrorModeType_Active; */ //!< indicates the error mode of the POC
     SilKit_FlexraySlotModeType slotMode;
-        /* = SilKit_FlexraySlotModeType_KeySlot; */ //!< indicates the slot mode of the POC
+    /* = SilKit_FlexraySlotModeType_KeySlot; */ //!< indicates the slot mode of the POC
     SilKit_FlexrayStartupStateType startupState;
-        /* = SilKit_FlexrayStartupStateType_Undefined; */ //!< indicates states within the STARTUP mechanism
+    /* = SilKit_FlexrayStartupStateType_Undefined; */ //!< indicates states within the STARTUP mechanism
     SilKit_FlexrayWakeupStatusType wakeupStatus;
-        /* = SilKit_FlexrayWakeupStatusType_Undefined; */ //!< outcome of the execution of the WAKEUP mechanism
+    /* = SilKit_FlexrayWakeupStatusType_Undefined; */ //!< outcome of the execution of the WAKEUP mechanism
 };
 typedef struct SilKit_FlexrayPocStatusEvent SilKit_FlexrayPocStatusEvent;
 

@@ -44,8 +44,8 @@ namespace Tests {
 struct MockConnection
 {
     MockConnection(SilKit::Core::IParticipantInternal*, VSilKit::IMetricsManager*,
-                   SilKit::Config::ParticipantConfiguration /*config*/,
-                   std::string /*participantName*/, SilKit::Core::ParticipantId /*participantId*/,
+                   SilKit::Config::ParticipantConfiguration /*config*/, std::string /*participantName*/,
+                   SilKit::Core::ParticipantId /*participantId*/,
                    SilKit::Services::Orchestration::ITimeProvider* /*timeProvider*/, SilKit::Core::ProtocolVersion)
     {
     }

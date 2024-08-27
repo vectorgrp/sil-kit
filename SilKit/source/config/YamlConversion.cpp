@@ -166,7 +166,7 @@ bool Converter::decode(const Node& node, Sink::Format& obj)
 }
 
 
-template<>
+template <>
 Node Converter::encode(const Sink::Type& obj)
 {
     Node node;
@@ -1148,7 +1148,8 @@ Node Converter::encode(const TimeSynchronization& obj)
     Node node;
     static const TimeSynchronization defaultObj;
     non_default_encode(obj.animationFactor, node, "AnimationFactor", defaultObj.animationFactor);
-    non_default_encode(obj.enableMessageAggregation, node, "EnableMessageAggregation", defaultObj.enableMessageAggregation);
+    non_default_encode(obj.enableMessageAggregation, node, "EnableMessageAggregation",
+                       defaultObj.enableMessageAggregation);
     return node;
 }
 template <>
@@ -1178,7 +1179,7 @@ bool Converter::decode(const Node& node, Experimental& obj)
 }
 
 
-template<>
+template <>
 Node Converter::encode(const ParticipantConfiguration& obj)
 {
     static const ParticipantConfiguration defaultObj{};

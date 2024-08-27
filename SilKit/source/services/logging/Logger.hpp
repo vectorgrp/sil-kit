@@ -51,7 +51,8 @@ public:
     RemoteLogger(Level level, std::string participantName)
         : _level(level)
         , _participantName(participantName)
-    {}
+    {
+    }
 
     void Log(log_clock::time_point logTime, Level msgLevel, std::string msg)
     {
@@ -77,12 +78,7 @@ public:
         {
             if (_level <= msg.GetLevel())
             {
-                LogMsg logmsg{ _participantName
-                            , msg.GetLevel()
-                            , logTime
-                            , {}
-                            , msg.GetMsgString()
-                            , msg.GetKeyValues() };
+                LogMsg logmsg{_participantName, msg.GetLevel(), logTime, {}, msg.GetMsgString(), msg.GetKeyValues()};
                 // dispatch msg
                 _remoteSink(logmsg);
             }
@@ -117,7 +113,8 @@ public:
     {
         return _level;
     }
-    private:
+
+private:
     Level _level;
     std::function<void(const LogMsg&)> _remoteSink;
     std::string _participantName;
@@ -156,7 +153,7 @@ public:
     void DisableRemoteLogging();
     //void LogReceivedMsg(const LogMsg& msg);
 
-     auto GetLogLevel() const -> Level override;
+    auto GetLogLevel() const -> Level override;
 
     // ILoggerInternal
     void ProcessLoggerMessage(const LoggerMessage& msg) override;

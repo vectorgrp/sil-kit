@@ -43,16 +43,14 @@ TEST_F(ITest_MessageAggregation, receive_msg_after_lifecycle_has_been_stopped)
         auto&& dataPublisher = participant->CreateDataPublisher("PubCtrl", dataSpec);
 
         timeSyncService->SetSimulationStepHandler(
-            [dataPublisher, lifecycleService](std::chrono::nanoseconds /*now*/,
-                                                std::chrono::nanoseconds /*duration*/) {
+            [dataPublisher, lifecycleService](std::chrono::nanoseconds /*now*/, std::chrono::nanoseconds /*duration*/) {
             uint32_t messageSizeInBytes = 1;
             std::vector<uint8_t> data(messageSizeInBytes, '*');
             dataPublisher->Publish(std::move(data));
 
             // stop lifecycle immediately (one message is sent and should be received by subscriber)
             lifecycleService->Stop("Stop and check if message of current time step is transmitted.");
-        },
-            1ms);
+        }, 1ms);
     }
 
     {

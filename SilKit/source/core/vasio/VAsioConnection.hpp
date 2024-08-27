@@ -91,9 +91,8 @@ public:
     VAsioConnection(const VAsioConnection&) = delete;
     VAsioConnection(VAsioConnection&&) = delete;
     VAsioConnection(IParticipantInternal* participant, IMetricsManager* metricsManager,
-                    SilKit::Config::ParticipantConfiguration config,
-                    std::string participantName, ParticipantId participantId,
-                    Services::Orchestration::ITimeProvider* timeProvider,
+                    SilKit::Config::ParticipantConfiguration config, std::string participantName,
+                    ParticipantId participantId, Services::Orchestration::ITimeProvider* timeProvider,
                     ProtocolVersion version = CurrentProtocolVersion());
     ~VAsioConnection() override;
 

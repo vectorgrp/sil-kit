@@ -113,12 +113,7 @@ inline auto to_spdlog(const SourceLoc& loc) -> spdlog::source_loc
 
 inline auto to_spdlog(const LogMsg& msg) -> spdlog::details::log_msg
 {
-    return spdlog::details::log_msg{
-        to_spdlog(msg.source),
-        msg.loggerName,
-        to_spdlog(msg.level),
-        msg.payload
-    };
+    return spdlog::details::log_msg{to_spdlog(msg.source), msg.loggerName, to_spdlog(msg.level), msg.payload};
 }
 
 inline auto to_spdlog(const LogMsg& msg, const std::string& payload) -> spdlog::details::log_msg

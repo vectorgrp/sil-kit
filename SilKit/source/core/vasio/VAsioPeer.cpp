@@ -157,7 +157,7 @@ void VAsioPeer::Aggregate(const std::vector<uint8_t>& blob)
         _flushTimer->AsyncWaitFor(_flushTimeout);
         _initialTimerStarted = true;
     }
-    
+
     _aggregatedMessages.insert(_aggregatedMessages.end(), blob.begin(), blob.end());
 
     // ensure that the aggregation buffer does not exceed a certain size
@@ -178,7 +178,7 @@ void VAsioPeer::Flush()
     SendSilKitMsgInternal(std::move(blob));
 
     // reset timer when flush is triggered
-	_flushTimer->AsyncWaitFor(_flushTimeout);
+    _flushTimer->AsyncWaitFor(_flushTimeout);
 }
 
 void VAsioPeer::StartAsyncWrite()

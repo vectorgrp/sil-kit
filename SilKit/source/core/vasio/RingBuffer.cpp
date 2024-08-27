@@ -74,7 +74,7 @@ void RingBuffer::GetWritingBuffers(std::vector<MutableBuffer>& buffers)
     {
         buffers.push_back(std::move(arrayOne));
     }
-    
+
     auto arrayTwo = GetFreeMemoryArrayTwo();
     if (arrayTwo.GetSize() > 0)
     {

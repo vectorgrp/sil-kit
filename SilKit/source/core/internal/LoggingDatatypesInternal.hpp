@@ -68,8 +68,7 @@ inline std::ostream& operator<<(std::ostream& out, const LogMsg& msg);
 
 
 inline std::string to_string(const std::unordered_map<std::string, std::string>& kv);
-inline std::ostream& operator<<(std::ostream& out,
-    const std::unordered_map<std::string, std::string>& kv);
+inline std::ostream& operator<<(std::ostream& out, const std::unordered_map<std::string, std::string>& kv);
 
 // ================================================================================
 //  Inline Implementations
@@ -83,7 +82,7 @@ bool operator==(const SourceLoc& lhs, const SourceLoc& rhs)
 inline bool operator==(const LogMsg& lhs, const LogMsg& rhs)
 {
     return lhs.loggerName == rhs.loggerName && lhs.level == rhs.level && lhs.time == rhs.time
-           && lhs.source == rhs.source && lhs.payload == rhs.payload && lhs.keyValues == rhs.keyValues ;
+           && lhs.source == rhs.source && lhs.payload == rhs.payload && lhs.keyValues == rhs.keyValues;
 }
 
 std::string to_string(const SourceLoc& sourceLoc)
@@ -124,8 +123,7 @@ inline std::ostream& operator<<(std::ostream& out, const std::unordered_map<std:
             {
                 result.append(",");
             }
-            result.append("\"" + it->first + "\"" + ":" + "\""
-                          + it->second + "\"");
+            result.append("\"" + it->first + "\"" + ":" + "\"" + it->second + "\"");
             ++it;
         }
         result.append("}");
@@ -145,9 +143,8 @@ std::string to_string(const LogMsg& msg)
 std::ostream& operator<<(std::ostream& out, const LogMsg& msg)
 {
     out << "LogMsg{logger=" << msg.loggerName << ", level=" << msg.level
-        << ", time=" << std::chrono::duration_cast<std::chrono::microseconds>(msg.time.time_since_epoch()).count() << ", source=" << msg.source << ", payload=\""
-        << msg.payload << "\"" << msg.keyValues 
-        << "}";
+        << ", time=" << std::chrono::duration_cast<std::chrono::microseconds>(msg.time.time_since_epoch()).count()
+        << ", source=" << msg.source << ", payload=\"" << msg.payload << "\"" << msg.keyValues << "}";
     return out;
 }
 

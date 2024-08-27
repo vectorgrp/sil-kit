@@ -11,10 +11,10 @@
 
 using namespace SilKit::Core;
 
-static std::mt19937 generator{0}; // constant seed for deterministic behaviour 
+static std::mt19937 generator{0}; // constant seed for deterministic behaviour
 
 std::vector<std::vector<uint8_t> > GenerateDataBlocks(const size_t maxSize, const size_t numDataBlocks)
-{    
+{
     std::vector<std::vector<uint8_t> > dataBlocks;
 
     // configure random number generators
@@ -108,7 +108,7 @@ TEST(Test_RingBuffer, resizeRingBuffer)
             ringBuffer.Read(readData);
 
             ASSERT_EQ(elem, readData);
-        }    
+        }
     }
 }
 
@@ -130,7 +130,7 @@ TEST(Test_RingBuffer, writeMultiple_resizeAllowed)
         // write all data blocks at once (resize capacity if necessary)
         for (const auto& elem : dataBlocks)
         {
-            auto remainingSpace = ringBuffer.Capacity() - ringBuffer.Size(); 
+            auto remainingSpace = ringBuffer.Capacity() - ringBuffer.Size();
             if (elem.size() > remainingSpace)
             {
                 ringBuffer.Reserve(ringBuffer.Size() + elem.size());
@@ -139,10 +139,10 @@ TEST(Test_RingBuffer, writeMultiple_resizeAllowed)
             Write(ringBuffer, elem);
 
             // append current data block for comparison
-            currentDataBlock.insert(currentDataBlock.end(), elem.begin(), elem.end());            
+            currentDataBlock.insert(currentDataBlock.end(), elem.begin(), elem.end());
         }
 
-        // read all data available 
+        // read all data available
         std::vector<uint8_t> readData(ringBuffer.Size());
         ringBuffer.Read(readData);
 
@@ -153,7 +153,7 @@ TEST(Test_RingBuffer, writeMultiple_resizeAllowed)
 }
 
 // write and read of multiple data blocks at once (fixed capacity)
-TEST(Test_RingBuffer, writeMultiple_fixedCapacity) 
+TEST(Test_RingBuffer, writeMultiple_fixedCapacity)
 {
     const size_t capacity{1000};
     RingBuffer ringBuffer(capacity);
@@ -177,7 +177,7 @@ TEST(Test_RingBuffer, writeMultiple_fixedCapacity)
             for (const auto& elem : dataBlocks)
             {
                 auto remainingSpace = ringBuffer.Capacity() - ringBuffer.Size();
-                
+
                 if (elem.size() <= remainingSpace) // write current block, if there is enough space
                 {
                     Write(ringBuffer, elem);
@@ -190,7 +190,7 @@ TEST(Test_RingBuffer, writeMultiple_fixedCapacity)
                 else // stop writing
                 {
                     break;
-                }                
+                }
             }
 
             dataBlocks.erase(dataBlocks.begin(), dataBlocks.begin() + numWrittenBlocks);

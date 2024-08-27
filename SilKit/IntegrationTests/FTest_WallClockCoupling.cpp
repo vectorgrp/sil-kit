@@ -44,8 +44,7 @@ using namespace SilKit::Tests;
 TEST(FTest_WallClockCoupling, test_wallclock_sync_simtask)
 {
     double animationFactor = 2.0;
-    std::string configWithAnimFactor =
-        R"({"Experimental": {"TimeSynchronization": { "AnimationFactor": 2.0 } }})";
+    std::string configWithAnimFactor = R"({"Experimental": {"TimeSynchronization": { "AnimationFactor": 2.0 } }})";
 
     SimTestHarness testHarness({"P1", "P2", "P3"}, MakeTestRegistryUri(), true);
 
@@ -93,7 +92,8 @@ TEST(FTest_WallClockCoupling, test_wallclock_sync_simtask)
     ASSERT_TRUE(testHarness.Run(5s)) << "TestSim Harness should not reach timeout";
 
     std::chrono::nanoseconds acceptedDeviation = 20ms;
-    auto evalWallClockDeviation = [animationFactor, acceptedDeviation, simDuration](std::chrono::nanoseconds wallClock) {
+    auto evalWallClockDeviation = [animationFactor, acceptedDeviation,
+                                   simDuration](std::chrono::nanoseconds wallClock) {
         auto wallClockDeviationFromVirtualTime = std::abs(wallClock.count() / animationFactor - simDuration.count());
         std::cout << "Wall clock deviation from virtual time: " << wallClockDeviationFromVirtualTime / 1e6 << "ms"
                   << std::endl;
@@ -113,8 +113,7 @@ std::condition_variable cv;
 TEST(FTest_WallClockCoupling, test_wallclock_mixed_simtask)
 {
     double animationFactor = 2.0;
-    std::string configWithAnimFactor =
-        R"({"Experimental": {"TimeSynchronization": { "AnimationFactor": 2.0 } }})";
+    std::string configWithAnimFactor = R"({"Experimental": {"TimeSynchronization": { "AnimationFactor": 2.0 } }})";
 
     SimTestHarness testHarness({"P1", "P2", "P3"}, MakeTestRegistryUri(), true);
 
@@ -135,7 +134,7 @@ TEST(FTest_WallClockCoupling, test_wallclock_mixed_simtask)
     std::atomic<bool> done{false};
     timeSyncService_P1->SetSimulationStepHandlerAsync(
         [&done, simDuration, &wc_P1, &lifeCycleService_P1](std::chrono::nanoseconds now,
-                                                    std::chrono::nanoseconds /*duration*/) {
+                                                           std::chrono::nanoseconds /*duration*/) {
         static auto timeSimStart_P1 = std::chrono::system_clock::now();
         if (now <= simDuration)
         {
@@ -156,8 +155,8 @@ TEST(FTest_WallClockCoupling, test_wallclock_mixed_simtask)
         {
             return;
         }
-
-    }, stepSize);
+    },
+        stepSize);
 
     timeSyncService_P2->SetSimulationStepHandler(
         [simDuration, &wc_P2](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
@@ -172,7 +171,7 @@ TEST(FTest_WallClockCoupling, test_wallclock_mixed_simtask)
             wc_P3 = std::chrono::system_clock::now() - timeSimStart_P3;
     }, stepSize);
 
-    
+
     auto completer = std::thread{[&done, timeSyncService_P1]() {
         while (!done)
         {

@@ -251,8 +251,7 @@ TEST_F(Test_HourglassParticipantLogger, SilKit_Logger_GetLogLevel)
     std::string configString = "";
     auto config = SilKit::Config::ParticipantConfigurationFromString(configString);
 
-    EXPECT_CALL(capi, SilKit_Logger_GetLogLevel(testing::_, testing::_))
-        .Times(1);
+    EXPECT_CALL(capi, SilKit_Logger_GetLogLevel(testing::_, testing::_)).Times(1);
 
     auto participant = SilKit::CreateParticipant(config, name);
     auto logger = participant->GetLogger();

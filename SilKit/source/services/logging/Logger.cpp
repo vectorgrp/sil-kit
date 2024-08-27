@@ -72,7 +72,6 @@ struct JsonString
 } // namespace SilKit
 
 
-
 // Custom flag handler to print the UNIX epoch timestamp
 class epoch_formatter_flag : public spdlog::custom_flag_formatter
 {
@@ -123,8 +122,8 @@ std::string KeyValuesToJsonString(const std::unordered_map<std::string, std::str
         {
             result.append(",");
         }
-        result.append("\"" + SilKit::Util::EscapeString(it->first) + "\"" + ":" + "\"" + SilKit::Util::EscapeString(it->second)
-                      + "\"");
+        result.append("\"" + SilKit::Util::EscapeString(it->first) + "\"" + ":" + "\""
+                      + SilKit::Util::EscapeString(it->second) + "\"");
         ++it;
     }
     result.append("}");
@@ -169,8 +168,7 @@ struct fmt::formatter<SilKit::Services::Logging::JsonLogMessage>
     {
         if (!msg.kv.empty())
         {
-            return fmt::format_to(ctx.out(), "\"msg\": \"{}\", \"kv\": {}",
-                                  SilKit::Util::EscapeString(msg.msg),
+            return fmt::format_to(ctx.out(), "\"msg\": \"{}\", \"kv\": {}", SilKit::Util::EscapeString(msg.msg),
                                   KeyValuesToJsonString(msg.kv));
         }
         else
@@ -242,27 +240,25 @@ private:
 
 Logger::Logger(const std::string& participantName, Config::Logging config)
     : _config{std::move(config)}
-{  
+{
     // NB: do not create the _logger in the initializer list. If participantName is empty,
     //  this will cause a fairly unintuitive exception in spdlog.
     for (auto sink : _config.sinks)
     {
         if (sink.type == Config::Sink::Type::Remote)
         {
-            _loggerRemote = std::make_shared<RemoteLogger>(sink.level, participantName); 
+            _loggerRemote = std::make_shared<RemoteLogger>(sink.level, participantName);
         }
         else
-        {   
+        {
             // NB: logger gets dropped from registry immediately after creating so that two participant with the same
             // participantName won't lead to a spdlog exception because a logger with this name does already exist.
-            if (sink.format == Config::Sink::Format::Json 
-                && nullptr == _loggerJson)
+            if (sink.format == Config::Sink::Format::Json && nullptr == _loggerJson)
             {
                 _loggerJson = spdlog::create<spdlog::sinks::null_sink_st>(participantName);
                 spdlog::drop(participantName);
             }
-            if (sink.format == Config::Sink::Format::Simple 
-                && nullptr == _loggerSimple)
+            if (sink.format == Config::Sink::Format::Simple && nullptr == _loggerSimple)
             {
                 _loggerSimple = spdlog::create<spdlog::sinks::null_sink_st>(participantName);
                 spdlog::drop(participantName);
@@ -323,7 +319,7 @@ Logger::Logger(const std::string& participantName, Config::Logging config)
                 stdoutSink->set_level(log_level);
                 _loggerJson->sinks().emplace_back(std::move(stdoutSink));
             }
-            else if(sink.type != Config::Sink::Type::Remote)
+            else if (sink.type != Config::Sink::Type::Remote)
             {
                 stdoutSink->set_level(log_level);
                 _loggerSimple->sinks().emplace_back(std::move(stdoutSink));
@@ -332,8 +328,6 @@ Logger::Logger(const std::string& participantName, Config::Logging config)
         }
         case Config::Sink::Type::File:
         {
-
-
             if (sink.format == Config::Sink::Format::Json)
             {
                 auto filename = fmt::format("{}_{}.jsonl", sink.logName, logFileTimestamp);
@@ -389,14 +383,13 @@ void Logger::ProcessLoggerMessage(const LoggerMessage& msg)
 
 void Logger::LogReceivedMsg(const LogMsg& msg)
 {
-
     if (nullptr != _loggerJson)
     {
-       JsonLogMessage jsonMsg{msg.payload, msg.keyValues};
+        JsonLogMessage jsonMsg{msg.payload, msg.keyValues};
 
         auto fmt{fmt::format("{}", jsonMsg)};
         auto spdlog_msg = to_spdlog(msg, fmt);
-      
+
 
         for (auto&& sink : _loggerJson->sinks())
         {
@@ -412,7 +405,6 @@ void Logger::LogReceivedMsg(const LogMsg& msg)
 
     if (nullptr != _loggerSimple)
     {
-
         SimpleLogMessage simpleMsg{msg.payload, msg.keyValues};
 
         auto fmt{fmt::format("{}", simpleMsg)};
@@ -490,7 +482,7 @@ void Logger::RegisterRemoteLogging(const LogMsgHandler& handler)
     }
 }
 
-void Logger::DisableRemoteLogging() 
+void Logger::DisableRemoteLogging()
 {
     if (nullptr != _loggerRemote)
     {
@@ -499,7 +491,7 @@ void Logger::DisableRemoteLogging()
 }
 
 Level Logger::GetLogLevel() const
-{   
+{
     auto lvl = to_spdlog(Level::Critical);
 
     if (nullptr != _loggerSimple)
@@ -512,7 +504,7 @@ Level Logger::GetLogLevel() const
     }
     if (nullptr != _loggerRemote)
     {
-        lvl = lvl <  to_spdlog(_loggerRemote->level()) ? lvl : to_spdlog(_loggerRemote->level());
+        lvl = lvl < to_spdlog(_loggerRemote->level()) ? lvl : to_spdlog(_loggerRemote->level());
     }
 
     return from_spdlog(lvl);
