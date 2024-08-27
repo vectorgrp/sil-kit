@@ -32,6 +32,13 @@ target_link_libraries(O_SilKit_Util
     PRIVATE fmt-header-only
 )
 
+if (MSVC)
+    target_compile_definitions(I_SilKit_Util INTERFACE _WIN32_WINNT=0x0601)
+endif()
+if(MINGW)
+    target_compile_definitions(I_SilKit_Util INTERFACE _WIN32_WINNT=0x0601)
+endif()
+
 
 add_subdirectory(tests)
 
