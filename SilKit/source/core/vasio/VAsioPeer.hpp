@@ -148,8 +148,9 @@ private:
     bool _useAggregation{false};
     const size_t _aggregationBufferThreshold{100 * 1000};
 
+    // we trigger a flush of aggregated messages, if too much time has passed since the last flush
     std::unique_ptr<ITimer> _flushTimer;
-    std::chrono::milliseconds _flushTimeout{50};
+    const std::chrono::milliseconds _flushTimeout{50};
     bool _initialTimerStarted{false};
 };
 
