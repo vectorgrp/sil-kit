@@ -238,8 +238,6 @@ private:
 
 class ITest_DifferentPeriods : public testing::Test
 {
-protected:
-    ITest_DifferentPeriods() = default;
 };
 
 

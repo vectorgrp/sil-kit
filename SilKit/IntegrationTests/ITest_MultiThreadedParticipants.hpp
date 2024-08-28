@@ -79,8 +79,6 @@ enum class TimeMode
 class ITest_MultiThreadedParticipants : public testing::Test
 {
 protected:
-    ITest_MultiThreadedParticipants() {}
-
     struct Callbacks
     {
         MOCK_METHOD(void, AbortHandler, (ParticipantState));
@@ -826,6 +824,7 @@ protected:
 protected:
     std::unique_ptr<SilKit::Vendor::Vector::ISilKitRegistry> _registry;
 
+    SystemControllerParticipant systemControllerParticipant;
     ParticipantThread participantThread_SystemController;
 
     std::vector<ParticipantThread> _participantThreads_Sync_Invalid;
@@ -842,7 +841,5 @@ protected:
 
     std::string _registryUri{"undefined registry uri"};
 
-    // used in derived tests
-    SystemControllerParticipant systemControllerParticipant;
     Callbacks callbacks;
 };

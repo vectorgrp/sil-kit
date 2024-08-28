@@ -38,9 +38,6 @@ namespace Tests {
 class ITest_SimTestHarness : public testing::Test
 {
 protected: //CTor and operators
-    ITest_SimTestHarness()
-    {
-    }
 
     auto TestHarness() -> SimTestHarness&
     {
