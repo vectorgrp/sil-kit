@@ -502,9 +502,9 @@ protected:
         participantThreads.clear();
     }
 
-    auto SetupSystem(const std::string& registryUri, std::vector<TestParticipant>& participants) -> std::string
+    auto SetupSystem(const std::string& requestedRegistryUri, std::vector<TestParticipant>& participants) -> std::string
     {
-        auto newRegistryUri = RunRegistry(registryUri);
+        auto registryUri = RunRegistry(requestedRegistryUri);
 
         for (auto&& p : participants)
         {
@@ -524,7 +524,7 @@ protected:
         {
             systemController.active = false;
         }
-        return newRegistryUri;
+        return registryUri;
     }
 
     void SystemCleanup()

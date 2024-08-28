@@ -78,8 +78,10 @@ protected:
     {
         // create test harness with deferred participant and controller creation.
         // Will only create the SIL Kit Registry and tell the SystemController the participantNames
-        _simTestHarness = std::make_unique<SimTestHarness>(coordinatedParticipantNames, _registryUri, true, true,
+        _simTestHarness =
+            std::make_unique<SimTestHarness>(coordinatedParticipantNames, "silkit://localhost:0", true, true,
                                                            autonomousParticipantNames);
+        _registryUri = _simTestHarness->GetRegistryUri();
     }
 
 protected: // members
