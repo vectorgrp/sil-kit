@@ -51,16 +51,21 @@ public:
     {
         try
         {
-            RunRegistry(registryUri);
+            _registryUri = RunRegistry(registryUri);
             if (sync)
             {
-                RunSystemMaster(registryUri, std::move(requiredParticipantNames));
+                RunSystemMaster(_registryUri, std::move(requiredParticipantNames));
             }
         }
         catch (const std::exception& error)
         {
             ShutdownOnException(error);
         }
+    }
+
+    auto GetRegistryUri() -> std::string
+    {
+        return _registryUri;
     }
 
     void SystemMasterStop()
@@ -77,10 +82,10 @@ public:
     }
 
 private:
-    void RunRegistry(const std::string& registryUri)
+    auto RunRegistry(const std::string& registryUri) -> std::string
     {
         _registry = SilKit::Vendor::Vector::CreateSilKitRegistry(SilKit::Config::MakeEmptyParticipantConfiguration());
-        _registry->StartListening(registryUri);
+        return _registry->StartListening(registryUri);
     }
 
     void RunSystemMaster(const std::string& registryUri, std::vector<std::string> requiredParticipantNames)
@@ -133,6 +138,7 @@ private:
     }
 
     std::unique_ptr<SilKit::Vendor::Vector::ISilKitRegistry> _registry;
+    std::string _registryUri{"not yet defined"};
     const std::string systemMasterName{"SystemMaster"};
 
     struct SystemMaster

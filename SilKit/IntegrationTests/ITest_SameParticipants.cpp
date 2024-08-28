@@ -42,10 +42,9 @@ TEST(ITest_SameParticipants, test_participants_with_unique_name)
     std::unique_ptr<SilKit::IParticipant> participant2;
 
     // start registry
-    auto registryUri = MakeTestRegistryUri();
     auto registry =
         SilKit::Vendor::Vector::CreateSilKitRegistry(SilKit::Config::ParticipantConfigurationFromString(""));
-    registry->StartListening(registryUri);
+    auto registryUri = registry->StartListening("silkit://localhost:0");
 
     auto pCfg = SilKit::Config::ParticipantConfigurationFromString("");
     EXPECT_NO_THROW(participant1 = SilKit::CreateParticipant(pCfg, "Participant1", registryUri));
@@ -60,10 +59,9 @@ TEST(ITest_SameParticipants, test_participants_with_same_name)
     std::unique_ptr<SilKit::IParticipant> participant2;
 
     // start registry
-    auto registryUri = MakeTestRegistryUri();
     auto registry =
         SilKit::Vendor::Vector::CreateSilKitRegistry(SilKit::Config::ParticipantConfigurationFromString(""));
-    registry->StartListening(registryUri);
+    auto registryUri = registry->StartListening("silkit://localhost:0");
 
     auto pCfg = SilKit::Config::ParticipantConfigurationFromString("");
     EXPECT_NO_THROW(participant1 = SilKit::CreateParticipant(pCfg, "Participant", registryUri));

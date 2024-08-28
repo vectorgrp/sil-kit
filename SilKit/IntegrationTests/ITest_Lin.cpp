@@ -403,9 +403,8 @@ protected:
 
 TEST_F(ITest_Lin, sync_lin_simulation)
 {
-    auto registryUri = MakeTestRegistryUri();
     std::vector<std::string> participantNames = {"LinMaster", "LinSlave"};
-    _simTestHarness = std::make_unique<SimTestHarness>(participantNames, registryUri, false);
+    _simTestHarness = std::make_unique<SimTestHarness>(participantNames, "silkit://localhost:0", false);
 
     std::vector<std::unique_ptr<LinNode>> linNodes;
     //Create a simulation setup with 2 participants

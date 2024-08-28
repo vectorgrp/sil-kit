@@ -89,7 +89,7 @@ protected:
             participant.canController = participant.participant->CreateCanController("CAN", "CAN");
             participant.canController->Start();
 
-            while (runAsync)
+            while (_runAsync)
             {
                 CanFrame frame{};
                 frame.canId = increasingCanId++;
@@ -131,7 +131,7 @@ protected:
                 }
             };
 
-            while (runAsync)
+            while (_runAsync)
             {
                 std::vector<SilKit::Services::HandlerId> handlerIds{};
                 for (int i = 0; i < numHandlersPerLoop; i++)
@@ -161,13 +161,14 @@ protected:
         participant.participant.reset();
     }
 
-    void RunRegistry(const std::string& registryUri)
+    auto RunRegistry() -> std::string
     {
+        std::string registryUri;
         try
         {
             registry =
                 SilKit::Vendor::Vector::CreateSilKitRegistry(SilKit::Config::ParticipantConfigurationFromString(""));
-            registry->StartListening(registryUri);
+            registryUri = registry->StartListening("silkit://localhost:0");
         }
         catch (const SilKit::ConfigurationError& error)
         {
@@ -181,12 +182,13 @@ protected:
             ss << "Something went wrong: " << error.what() << std::endl;
             ShutdownAndFailTest(ss.str());
         }
+        return registryUri;
     }
 
 
     void RunAsyncCanWriter(TestParticipant& participant, const std::string& registryUri)
     {
-        runAsync = true;
+        _runAsync = true;
 
         try
         {
@@ -209,7 +211,7 @@ protected:
 
     void RunAsyncCanReader(TestParticipant& participant, const std::string& registryUri)
     {
-        runAsync = true;
+        _runAsync = true;
 
         try
         {
@@ -238,7 +240,7 @@ protected:
 
     void StopAsyncParticipants()
     {
-        runAsync = false;
+        _runAsync = false;
         for (auto&& thread : asyncParticipantThreads)
         {
             thread.join();
@@ -255,19 +257,18 @@ protected:
 protected:
     std::unique_ptr<SilKit::Vendor::Vector::ISilKitRegistry> registry;
     std::vector<std::thread> asyncParticipantThreads;
-    bool runAsync{true};
+    bool _runAsync{true};
 };
 
 
 TEST_F(FTest_CanControllerThreadSafety, DISABLED_add_remove_handler_during_reception)
 {
     numParticipants = 0;
-    auto registryUri = MakeTestRegistryUri();
 
     TestParticipant canWriterParticipant{"CanWriterParticipant"};
     TestParticipant canReaderParticipant{"CanReaderParticipant"};
 
-    RunRegistry(registryUri);
+    auto registryUri = RunRegistry();
 
     RunAsyncCanWriter(canWriterParticipant, registryUri);
     RunAsyncCanReader(canReaderParticipant, registryUri);

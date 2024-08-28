@@ -114,8 +114,7 @@ protected:
 
     void ExecuteTest()
     {
-        auto registryUri = MakeTestRegistryUri();
-        SilKit::Tests::SimTestHarness testHarness(syncParticipantNames, registryUri);
+        SilKit::Tests::SimTestHarness testHarness(syncParticipantNames, "silkit://localhost:0");
 
         auto* canWriter = testHarness.GetParticipant("CanWriter");
         SetupWriter(canWriter);

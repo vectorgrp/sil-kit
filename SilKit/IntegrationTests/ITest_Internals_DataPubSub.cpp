@@ -737,10 +737,9 @@ TEST_F(ITest_Internals_DataPubSub, test_1pub_1sub_async_rejoin)
                                expectedDataUnordered,
                            }}});
 
-    auto registryUri = MakeTestRegistryUri();
 
-    _testSystem.SetupRegistryAndSystemMaster(registryUri, false, {});
-    RunParticipants(subscribers, registryUri, false);
+    _testSystem.SetupRegistryAndSystemMaster("silkit://localhost:0", false, {});
+    RunParticipants(subscribers, _testSystem.GetRegistryUri(), false);
     for (auto& s : subscribers)
     {
         s.WaitForCreateParticipant();
@@ -749,7 +748,7 @@ TEST_F(ITest_Internals_DataPubSub, test_1pub_1sub_async_rejoin)
     for (uint32_t i = 0; i < numRejoins; i++)
     {
         // Start publishers
-        RunParticipants(publishers, registryUri, false);
+        RunParticipants(publishers, _testSystem.GetRegistryUri(), false);
         for (auto& p : publishers)
         {
             p.WaitForAllSent();

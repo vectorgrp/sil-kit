@@ -52,9 +52,8 @@ protected:
         auto start = Now();
 
         std::vector<std::string> syncParticipantNames = {"Publisher", "Subscriber", "Subscriber2"};
-        auto registryUri = MakeTestRegistryUri();
 
-        SilKit::Tests::SimTestHarness testHarness(syncParticipantNames, registryUri, true);
+        SilKit::Tests::SimTestHarness testHarness(syncParticipantNames, "silkit://localhost:0", true);
         auto&& publisher = testHarness.GetParticipant("Publisher");
 
         for (auto i = 0; i < numberOfServices; i++)

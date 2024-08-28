@@ -70,14 +70,13 @@ protected:
 // All created should be removed as well if a participant leaves
 TEST_F(ITest_SystemMonitor, discover_services)
 {
-    auto registryUri = MakeTestRegistryUri();
     const SilKit::Services::Orchestration::ParticipantConnectionInformation& firstParticipantConnection{"First"};
     const SilKit::Services::Orchestration::ParticipantConnectionInformation& secondParticipantConnection{"Second"};
     const SilKit::Services::Orchestration::ParticipantConnectionInformation& thirdParticipantConnection{"Third"};
 
     // Registry
     auto registry = SilKit::Vendor::Vector::CreateSilKitRegistry(SilKit::Config::MakeEmptyParticipantConfiguration());
-    registry->StartListening(registryUri);
+    auto registryUri = registry->StartListening("silkit://localhost:0");
 
     // Create the first participant and register the connect and disconnect callbacks
     auto&& firstParticipant = SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(),

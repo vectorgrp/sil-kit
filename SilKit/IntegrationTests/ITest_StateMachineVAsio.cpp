@@ -100,12 +100,11 @@ protected:
 
 TEST_F(ITest_StateMachineVAsio, DISABLED_vasio_state_machine)
 {
-    auto registryUri = MakeTestRegistryUri();
     std::vector<std::string> syncParticipantNames{"TestUnit"};
 
     auto registry =
         SilKit::Vendor::Vector::CreateSilKitRegistry(SilKit::Config::ParticipantConfigurationFromString(""));
-    registry->StartListening(registryUri);
+    auto registryUri = registry->StartListening("silkit://localhost:0");
 
     // Setup Participant for TestController
     auto participant = SilKit::CreateParticipant(SilKit::Config::ParticipantConfigurationFromString(""),

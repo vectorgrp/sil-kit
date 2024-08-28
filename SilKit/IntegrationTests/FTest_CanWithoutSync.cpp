@@ -50,7 +50,6 @@ class FTest_CanWithoutSync : public testing::Test
 protected:
     FTest_CanWithoutSync()
     {
-        _registryUri = MakeTestRegistryUri();
         SetupTestData();
     }
 
@@ -214,7 +213,7 @@ TEST_F(FTest_CanWithoutSync, can_communication_no_simulation_flow_vasio)
 {
     auto registry =
         SilKit::Vendor::Vector::CreateSilKitRegistry(SilKit::Config::ParticipantConfigurationFromString(""));
-    registry->StartListening(_registryUri);
+    _registryUri = registry->StartListening("silkit://localhost:0");
     ExecuteTest();
 }
 

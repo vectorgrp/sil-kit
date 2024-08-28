@@ -663,10 +663,9 @@ protected:
 //! \brief Dynamically respond to a frame header event by sending a previously unconfigured response
 TEST_F(ITest_LinDynamicResponse, deferred_simstep_response)
 {
-    auto registryUri = MakeTestRegistryUri();
     auto participantNames = std::vector<std::string>{"LinMaster", "LinSlave1"};
 
-    _simTestHarness = std::make_unique<SimTestHarness>(participantNames, registryUri, false);
+    _simTestHarness = std::make_unique<SimTestHarness>(participantNames, "silkit://localhost:0", false);
 
     LinFrame slaveResponseFrame;
     slaveResponseFrame.id = 34;
@@ -771,9 +770,8 @@ TEST_F(ITest_LinDynamicResponse, deferred_simstep_response)
 
 TEST_F(ITest_LinDynamicResponse, normal_master_dynamic_slave)
 {
-    auto registryUri = MakeTestRegistryUri();
     std::vector<std::string> participantNames = {"LinMaster", "LinSlave"};
-    _simTestHarness = std::make_unique<SimTestHarness>(participantNames, registryUri, false);
+    _simTestHarness = std::make_unique<SimTestHarness>(participantNames, "silkit://localhost:0", false);
 
     std::vector<std::unique_ptr<LinNode>> linNodes;
     //Create a simulation setup with 2 participants
@@ -961,9 +959,8 @@ TEST_F(ITest_LinDynamicResponse, normal_master_dynamic_slave)
 
 TEST_F(ITest_LinDynamicResponse, normal_master_two_dynamic_slave_collision)
 {
-    auto registryUri = MakeTestRegistryUri();
     std::vector<std::string> participantNames = {"LinMaster", "LinSlave1", "LinSlave2"};
-    _simTestHarness = std::make_unique<SimTestHarness>(participantNames, registryUri, false);
+    _simTestHarness = std::make_unique<SimTestHarness>(participantNames, "silkit://localhost:0", false);
 
     std::vector<std::unique_ptr<LinNode>> linNodes;
     //Create a simulation setup with 2 participants
@@ -1205,9 +1202,8 @@ TEST_F(ITest_LinDynamicResponse, normal_master_two_dynamic_slave_collision)
 
 TEST_F(ITest_LinDynamicResponse, dynamic_master_normal_slave)
 {
-    auto registryUri = MakeTestRegistryUri();
     std::vector<std::string> participantNames = {"LinMaster", "LinSlave"};
-    _simTestHarness = std::make_unique<SimTestHarness>(participantNames, registryUri, false);
+    _simTestHarness = std::make_unique<SimTestHarness>(participantNames, "silkit://localhost:0", false);
 
     std::vector<std::unique_ptr<LinNode>> linNodes;
     //Create a simulation setup with 2 participants
@@ -1398,9 +1394,8 @@ TEST_F(ITest_LinDynamicResponse, dynamic_master_normal_slave)
 
 TEST_F(ITest_LinDynamicResponse, dynamic_master_dynamic_slave)
 {
-    auto registryUri = MakeTestRegistryUri();
     std::vector<std::string> participantNames = {"LinMaster", "LinSlave"};
-    _simTestHarness = std::make_unique<SimTestHarness>(participantNames, registryUri, false);
+    _simTestHarness = std::make_unique<SimTestHarness>(participantNames, "silkit://localhost:0", false);
 
     std::vector<std::unique_ptr<LinNode>> linNodes;
     //Create a simulation setup with 2 participants
@@ -1723,9 +1718,8 @@ private:
 
 TEST_F(ITest_LinDynamicResponse, normal_master_dynamic_slave_response_resets)
 {
-    auto registryUri = MakeTestRegistryUri();
     std::vector<std::string> participantNames = {"LinMaster", "LinSlave"};
-    _simTestHarness = std::make_unique<SimTestHarness>(participantNames, registryUri, false);
+    _simTestHarness = std::make_unique<SimTestHarness>(participantNames, "silkit://localhost:0", false);
 
     std::vector<std::unique_ptr<LinNode>> linNodes;
     //Create a simulation setup with 2 participants
@@ -1849,9 +1843,8 @@ TEST_F(ITest_LinDynamicResponse, normal_master_dynamic_slave_response_resets)
 
 TEST_F(ITest_LinDynamicResponse, normal_master_dynamic_slave_out_of_band_response_does_nothing)
 {
-    auto registryUri = MakeTestRegistryUri();
     std::vector<std::string> participantNames = {"LinMaster", "LinSlave", "LinSlaveDynamic"};
-    _simTestHarness = std::make_unique<SimTestHarness>(participantNames, registryUri, false);
+    _simTestHarness = std::make_unique<SimTestHarness>(participantNames, "silkit://localhost:0", false);
 
     std::vector<std::unique_ptr<LinNode>> linNodes;
     //Create a simulation setup with 2 participants

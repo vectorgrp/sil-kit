@@ -53,9 +53,8 @@ protected:
 TEST_F(ITest_Internals_RequestReply, participant_replies)
 {
     // Registry
-    auto registryUri = MakeTestRegistryUri();
     auto registry = SilKit::Vendor::Vector::CreateSilKitRegistry(SilKit::Config::MakeEmptyParticipantConfiguration());
-    registry->StartListening(registryUri);
+    auto registryUri = registry->StartListening("silkit://localhost:0");
 
     // Create participants
     auto&& p1 =

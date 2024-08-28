@@ -235,13 +235,7 @@ private:
 class ITest_DeterministicSimVAsio : public testing::Test
 {
 protected:
-    ITest_DeterministicSimVAsio()
-    {
-        registryUri = MakeTestRegistryUri();
-    }
-
-protected:
-    std::string registryUri;
+    ITest_DeterministicSimVAsio() = default;
 };
 
 TEST_F(ITest_DeterministicSimVAsio, deterministic_simulation_vasio)
@@ -258,7 +252,7 @@ TEST_F(ITest_DeterministicSimVAsio, deterministic_simulation_vasio)
 
     auto registry =
         SilKit::Vendor::Vector::CreateSilKitRegistry(SilKit::Config::ParticipantConfigurationFromString(""));
-    registry->StartListening(registryUri);
+    auto registryUri = registry->StartListening("silkit://localhost:0");
 
     // The subscriber assumes the role of the system controller and initiates simulation state changes
     Subscriber subscriber(subscriberName, registryUri, publisherCount, testSize);

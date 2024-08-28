@@ -74,8 +74,7 @@ protected:
             auto start = Now();
 
             std::vector<std::string> syncParticipantNames = {"Publisher", "Subscriber"};
-            auto registryUri = MakeTestRegistryUri();
-            SilKit::Tests::SimTestHarness testHarness(syncParticipantNames, registryUri, true);
+            SilKit::Tests::SimTestHarness testHarness(syncParticipantNames, "silkit://localhost:0", true);
 
             auto definePubSpec = [topicModePub, labelModePub](int i) {
                 std::string topic = "Topic";

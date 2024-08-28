@@ -39,7 +39,6 @@ class ITest_SimTestHarness : public testing::Test
 {
 protected: //CTor and operators
     ITest_SimTestHarness()
-        : _registryUri{MakeTestRegistryUri()}
     {
     }
 
@@ -52,11 +51,12 @@ protected: //CTor and operators
     {
         // create test harness with deferred participant creation.
         // Will only create the SIL Kit Registry and tell the SystemController the participantNames
-        _simTestHarness = std::make_unique<SimTestHarness>(participantNames, _registryUri, true);
+        _simTestHarness = std::make_unique<SimTestHarness>(participantNames, "silkit://localhost:0", true);
+        _registryUri = _simTestHarness->GetRegistryUri();
     }
 
 protected: // members
-    std::string _registryUri;
+    std::string _registryUri{};
     std::unique_ptr<SimTestHarness> _simTestHarness;
 };
 

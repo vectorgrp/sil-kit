@@ -71,14 +71,14 @@ TEST_F(ITest_HopOnHopOff, test_GracefulShutdown)
     StopSystemController();
 
     // Wait for coordinated to end
-    JoinParticipantThreads(participantThreads_Sync_Coordinated);
+    JoinParticipantThreads(_participantThreads_Sync_Coordinated);
 
     // Expect shutdown state
     EXPECT_EQ(monitorParticipants.front().participantStates["SyncParticipant1"], ParticipantState::Shutdown);
     EXPECT_EQ(monitorParticipants.front().participantStates["SyncParticipant2"], ParticipantState::Shutdown);
 
     monitorParticipants.front().i.stopRequested = true;
-    JoinParticipantThreads(participantThreads_Async_Autonomous);
+    JoinParticipantThreads(_participantThreads_Async_Autonomous);
 
     StopRegistry();
 }
@@ -145,8 +145,8 @@ TEST_F(ITest_HopOnHopOff, test_Async_HopOnHopOff_ToSynced)
         }
         // Hop off: Stop while-loop of async participants
         for (auto& p : asyncParticipants)
-            p.i.runAsync = false;
-        JoinParticipantThreads(participantThreads_Async_Invalid);
+            p.i._runAsync = false;
+        JoinParticipantThreads(_participantThreads_Async_Invalid);
 
         // Reset communication and wait for reception once more for remaining sync participants
         expectedReceptions = syncParticipants.size();
@@ -175,7 +175,7 @@ TEST_F(ITest_HopOnHopOff, test_Async_HopOnHopOff_ToSynced)
     // Shutdown coordinated participants
     for (auto& p : syncParticipants)
         p.lifecycleService->Stop("Hop Off");
-    JoinParticipantThreads(participantThreads_Sync_Coordinated);
+    JoinParticipantThreads(_participantThreads_Sync_Coordinated);
 
     StopSystemController();
     StopRegistry();
@@ -213,8 +213,8 @@ TEST_F(ITest_HopOnHopOff, test_Async_reconnect_first_joined)
             p.ResetReception();
 
         // Hop off with asyncParticipants1
-        asyncParticipants1.front().i.runAsync = false;
-        participantThreads_Async_Invalid[0].WaitForThreadExit();
+        asyncParticipants1.front().i._runAsync = false;
+        _participantThreads_Async_Invalid[0].WaitForThreadExit();
 
         // Reconnect with asyncParticipant1
         RunParticipants(asyncParticipants1);
@@ -234,11 +234,11 @@ TEST_F(ITest_HopOnHopOff, test_Async_reconnect_first_joined)
 
         // Disconnect with both
         for (auto& p : asyncParticipants1)
-            p.i.runAsync = false;
+            p.i._runAsync = false;
         for (auto& p : asyncParticipants2)
-            p.i.runAsync = false;
+            p.i._runAsync = false;
 
-        JoinParticipantThreads(participantThreads_Async_Invalid);
+        JoinParticipantThreads(_participantThreads_Async_Invalid);
     }
 
     StopRegistry();
@@ -276,8 +276,8 @@ TEST_F(ITest_HopOnHopOff, test_Async_reconnect_second_joined)
             p.ResetReception();
 
         // Hop off with asyncParticipants2
-        asyncParticipants2.front().i.runAsync = false;
-        participantThreads_Async_Invalid[1].WaitForThreadExit();
+        asyncParticipants2.front().i._runAsync = false;
+        _participantThreads_Async_Invalid[1].WaitForThreadExit();
         //participantThreads_Async_Invalid.erase(participantThreads_Async_Invalid.begin()+1);
 
         // Reconnect with asyncParticipant2
@@ -298,11 +298,11 @@ TEST_F(ITest_HopOnHopOff, test_Async_reconnect_second_joined)
 
         // Disconnect with both
         for (auto& p : asyncParticipants1)
-            p.i.runAsync = false;
+            p.i._runAsync = false;
         for (auto& p : asyncParticipants2)
-            p.i.runAsync = false;
+            p.i._runAsync = false;
 
-        JoinParticipantThreads(participantThreads_Async_Invalid);
+        JoinParticipantThreads(_participantThreads_Async_Invalid);
     }
 
     StopRegistry();
@@ -328,9 +328,9 @@ TEST_F(ITest_HopOnHopOff, test_Async_HopOnHopOff_ToEmpty)
 
         // Hop off async participants
         for (auto& p : asyncParticipants)
-            p.i.runAsync = false;
+            p.i._runAsync = false;
 
-        JoinParticipantThreads(participantThreads_Async_Invalid);
+        JoinParticipantThreads(_participantThreads_Async_Invalid);
 
         // Reset communication to repeat the cycle
         for (auto& p : asyncParticipants)
@@ -424,7 +424,7 @@ TEST_F(ITest_HopOnHopOff, test_HopOnHopOff_Autonomous_To_Coordinated)
         for (auto& p : syncParticipantsAutonomous)
             p.lifecycleService->Stop("Hop Off");
 
-        JoinParticipantThreads(participantThreads_Sync_AutonomousA);
+        JoinParticipantThreads(_participantThreads_Sync_AutonomousA);
 
         // Reset communication to repeat the cycle
         expectedReceptions = syncParticipantsCoordinated.size() + asyncParticipants.size();
@@ -438,13 +438,13 @@ TEST_F(ITest_HopOnHopOff, test_HopOnHopOff_Autonomous_To_Coordinated)
 
     // Shutdown async participants
     for (auto& p : asyncParticipants)
-        p.i.runAsync = false;
-    JoinParticipantThreads(participantThreads_Async_Invalid);
+        p.i._runAsync = false;
+    JoinParticipantThreads(_participantThreads_Async_Invalid);
 
     // Shutdown coordinated participants
     for (auto& p : syncParticipantsCoordinated)
         p.lifecycleService->Stop("Hop Off");
-    JoinParticipantThreads(participantThreads_Sync_Coordinated);
+    JoinParticipantThreads(_participantThreads_Sync_Coordinated);
 
     StopSystemController();
     StopRegistry();
@@ -533,7 +533,7 @@ TEST_F(ITest_HopOnHopOff, test_HopOnHopOff_Autonomous_To_Autonomous)
         // Shutdown autonomous B participants
         for (auto& p : syncParticipantsAutonomousB)
             p.lifecycleService->Stop("Hop Off");
-        JoinParticipantThreads(participantThreads_Sync_AutonomousB);
+        JoinParticipantThreads(_participantThreads_Sync_AutonomousB);
 
         // Reset communication to repeat the cycle
         expectedReceptions = syncParticipantsAutonomousA.size() + asyncParticipants.size();
@@ -547,13 +547,13 @@ TEST_F(ITest_HopOnHopOff, test_HopOnHopOff_Autonomous_To_Autonomous)
 
     // Shutdown async participants
     for (auto& p : asyncParticipants)
-        p.i.runAsync = false;
-    JoinParticipantThreads(participantThreads_Async_Invalid);
+        p.i._runAsync = false;
+    JoinParticipantThreads(_participantThreads_Async_Invalid);
 
     // Shutdown autonomous A participants
     for (auto& p : syncParticipantsAutonomousA)
         p.lifecycleService->Stop("End Test Off");
-    JoinParticipantThreads(participantThreads_Sync_AutonomousA);
+    JoinParticipantThreads(_participantThreads_Sync_AutonomousA);
 
     StopRegistry();
 }

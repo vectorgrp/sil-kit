@@ -239,13 +239,7 @@ private:
 class ITest_DifferentPeriods : public testing::Test
 {
 protected:
-    ITest_DifferentPeriods()
-    {
-        registryUri = MakeTestRegistryUri();
-    }
-
-protected:
-    std::string registryUri;
+    ITest_DifferentPeriods() = default;
 };
 
 
@@ -269,7 +263,7 @@ TEST_F(ITest_DifferentPeriods, different_simtask_periods)
 
     auto registry =
         SilKit::Vendor::Vector::CreateSilKitRegistry(SilKit::Config::ParticipantConfigurationFromString(""));
-    registry->StartListening(registryUri);
+    auto registryUri = registry->StartListening("silkit://localhost:0");
 
     // The subscriber assumes the role of the system controller and initiates simulation state changes
     Subscriber subscriber(syncParticipantNames, subscriberName, registryUri, publisherCount, numMessages);
