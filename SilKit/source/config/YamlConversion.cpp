@@ -166,7 +166,7 @@ bool Converter::decode(const Node& node, Sink::Format& obj)
 }
 
 
-template<>
+template <>
 Node Converter::encode(const Sink::Type& obj)
 {
     Node node;
@@ -1106,16 +1106,57 @@ bool Converter::decode(const Node& node, Middleware& obj)
 }
 
 template <>
+Node Converter::encode(const Aggregation& obj)
+{
+    Node node;
+    switch (obj)
+    {
+    case Aggregation::Off:
+        node = "Off";
+        break;
+    case Aggregation::On:
+        node = "On";
+        break;
+    case Aggregation::Auto:
+        node = "Auto";
+        break;
+    default:
+        throw ConfigurationError{"Unknown Aggregation Type"};
+    }
+    return node;
+}
+template <>
+bool Converter::decode(const Node& node, Aggregation& obj)
+{
+    auto&& str = parse_as<std::string>(node);
+    if (str == "Off" || str == "")
+        obj = Aggregation::Off;
+    else if (str == "On")
+        obj = Aggregation::On;
+    else if (str == "Auto")
+        obj = Aggregation::Auto;
+    else
+    {
+        throw ConversionError(node, "Unknown Aggregation: " + str + ".");
+    }
+    return true;
+}
+
+template <>
 Node Converter::encode(const TimeSynchronization& obj)
 {
     Node node;
-    node["AnimationFactor"] = obj.animationFactor;
+    static const TimeSynchronization defaultObj;
+    non_default_encode(obj.animationFactor, node, "AnimationFactor", defaultObj.animationFactor);
+    non_default_encode(obj.enableMessageAggregation, node, "EnableMessageAggregation",
+                       defaultObj.enableMessageAggregation);
     return node;
 }
 template <>
 bool Converter::decode(const Node& node, TimeSynchronization& obj)
 {
-    obj.animationFactor = parse_as<decltype(obj.animationFactor)>(node["AnimationFactor"]);
+    optional_decode(obj.animationFactor, node, "AnimationFactor");
+    optional_decode(obj.enableMessageAggregation, node, "EnableMessageAggregation");
     return true;
 }
 
@@ -1138,7 +1179,7 @@ bool Converter::decode(const Node& node, Experimental& obj)
 }
 
 
-template<>
+template <>
 Node Converter::encode(const ParticipantConfiguration& obj)
 {
     static const ParticipantConfiguration defaultObj{};

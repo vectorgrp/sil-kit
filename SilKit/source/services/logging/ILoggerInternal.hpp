@@ -31,8 +31,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <string>
 
 
-
-
 namespace SilKit {
 namespace Services {
 namespace Logging {
@@ -47,7 +45,6 @@ struct ILoggerInternal : ILogger
 };
 
 
-
 template <typename... Args>
 void Log(ILogger* logger, Level level, const char* fmt, const Args&... args);
 
@@ -58,19 +55,22 @@ public:
     LoggerMessage(ILoggerInternal* logger, Level level)
         : _logger(logger)
         , _level(level)
-    {}
+    {
+    }
 
     LoggerMessage(ILoggerInternal* logger)
         : _logger(logger)
         , _level(Level::Trace)
-    {}
+    {
+    }
 
     LoggerMessage(ILoggerInternal* logger, const LogMsg& msg)
         : _logger(logger)
         , _level(msg.level)
         , _msg(msg.payload)
         , _keyValues(msg.keyValues)
-    {}
+    {
+    }
 
     template <typename... Args>
     void SetMessage(fmt::format_string<Args...> fmt, Args&&... args)
@@ -83,7 +83,7 @@ public:
         _msg = std::move(newMsg);
     }
 
-    template<typename Key, typename Value>
+    template <typename Key, typename Value>
     void SetKeyValue(Key&& key, Value&& value)
     {
         _keyValues[std::forward<Key>(key)] = std::forward<Value>(value);

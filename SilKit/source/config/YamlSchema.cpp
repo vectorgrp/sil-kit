@@ -205,7 +205,7 @@ auto MakeYamlSchema() -> YamlSchemaElem
          }},
         {"Experimental",
          {
-             {"TimeSynchronization", {{"AnimationFactor"}}},
+             {"TimeSynchronization", {{"AnimationFactor"}, {"EnableMessageAggregation"}}},
              {"Metrics",
               {
                   metricsSinks,

@@ -22,6 +22,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "VAsioMsgKind.hpp"
 #include "VAsioDatatypes.hpp"
 #include "SerializedMessageTraits.hpp"
+#include "AggregationMessageTraits.hpp"
 #include "MessageBuffer.hpp"
 
 // Component specific Serialize/Deserialize functions
@@ -95,11 +96,14 @@ public: // Receiving a SerializedMessage: from binary blob to SilKitMessage<T>
 
     auto GetMessageKind() const -> VAsioMsgKind;
     auto GetRegistryKind() const -> RegistryMessageKind;
+    auto GetAggregationKind() const -> MessageAggregationKind;
     auto GetRemoteIndex() const -> EndpointId;
     auto GetEndpointAddress() const -> EndpointAddress;
     void SetProtocolVersion(ProtocolVersion version);
     auto GetProxyMessageHeader() const -> ProxyMessageHeader;
     auto GetRegistryMessageHeader() const -> RegistryMsgHeader;
+
+    void SetAggregationKind(MessageAggregationKind msgAggregationKind);
 
 private:
     void WriteNetworkHeaders();
@@ -108,6 +112,7 @@ private:
     uint32_t _messageSize{0};
     VAsioMsgKind _messageKind{VAsioMsgKind::Invalid};
     RegistryMessageKind _registryKind{RegistryMessageKind::Invalid};
+    MessageAggregationKind _aggregationKind{MessageAggregationKind::Other};
     // For simMsg
     EndpointAddress _endpointAddress{};
     EndpointId _remoteIndex{0};
@@ -130,6 +135,7 @@ SerializedMessage::SerializedMessage(const MessageT& message)
 
     _messageKind = messageKind<MessageT>();
     _registryKind = registryMessageKind<MessageT>();
+    _aggregationKind = aggregationKind<MessageT>();
     WriteNetworkHeaders();
     Serialize(_buffer, message);
     //Ensure we can directly Deserialize in unit tests by reading the header in again
@@ -144,6 +150,7 @@ SerializedMessage::SerializedMessage(ProtocolVersion version, const MessageT& me
 
     _messageKind = messageKind<MessageT>();
     _registryKind = registryMessageKind<MessageT>();
+    _aggregationKind = aggregationKind<MessageT>();
     _buffer.SetProtocolVersion(version);
     WriteNetworkHeaders();
     Serialize(_buffer, message);
@@ -161,6 +168,7 @@ SerializedMessage::SerializedMessage(const MessageT& message, EndpointAddress en
     _endpointAddress = endpointAddress;
     _messageKind = messageKind<MessageT>();
     _registryKind = registryMessageKind<MessageT>();
+    _aggregationKind = aggregationKind<MessageT>();
     WriteNetworkHeaders();
     Serialize(_buffer, message);
     //Ensure we can directly Deserialize in unit tests by reading the header in again

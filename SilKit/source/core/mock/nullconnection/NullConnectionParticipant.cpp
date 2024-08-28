@@ -33,8 +33,8 @@ namespace {
 struct NullConnection
 {
     NullConnection(SilKit::Core::IParticipantInternal*, VSilKit::IMetricsManager*,
-                   SilKit::Config::ParticipantConfiguration /*config*/,
-                   std::string /*participantName*/, SilKit::Core::ParticipantId /*participantId*/,
+                   SilKit::Config::ParticipantConfiguration /*config*/, std::string /*participantName*/,
+                   SilKit::Core::ParticipantId /*participantId*/,
                    SilKit::Core::Orchestration::ITimeProvider* /*timeProvider*/, ProtocolVersion)
     {
     }
@@ -67,6 +67,7 @@ struct NullConnection
     void FlushSendBuffers() {}
     void ExecuteDeferred(std::function<void()> /*callback*/) {}
     void NotifyShutdown() {}
+    void EnableAggregation() {}
 
     void RegisterMessageReceiver(std::function<void(IVAsioPeer* /*peer*/, ParticipantAnnouncement)> /*callback*/) {}
     void RegisterPeerShutdownCallback(std::function<void(IVAsioPeer* peer)> /*callback*/) {}

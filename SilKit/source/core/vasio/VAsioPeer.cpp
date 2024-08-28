@@ -56,6 +56,10 @@ VAsioPeer::VAsioPeer(IVAsioPeerListener* listener, IIoContext* ioContext, std::u
     , _msgBuffer{4096}
 {
     _socket->SetListener(*this);
+
+    // set up timer (guarantees working communication in case of message aggregation)
+    _flushTimer = _ioContext->MakeTimer();
+    _flushTimer->SetListener(*this);
 }
 
 VAsioPeer::~VAsioPeer()
@@ -74,6 +78,7 @@ void VAsioPeer::Shutdown()
     }
 
     _socket->Shutdown();
+    _flushTimer->Shutdown();
 }
 
 
@@ -111,17 +116,69 @@ auto VAsioPeer::GetSimulationName() const -> const std::string&
 
 void VAsioPeer::SendSilKitMsg(SerializedMessage buffer)
 {
+    auto blob = buffer.ReleaseStorage();
+
+    if (_useAggregation && buffer.GetAggregationKind() == MessageAggregationKind::UserDataMessage)
+    {
+        Aggregate(blob);
+    }
+    else if (_useAggregation && buffer.GetAggregationKind() == MessageAggregationKind::FlushAggregationMessage)
+    {
+        Aggregate(blob); // don't forget to send (current) time sync message
+        Flush();
+    }
+    else
+    {
+        SendSilKitMsgInternal(std::move(blob));
+    }
+}
+
+void VAsioPeer::SendSilKitMsgInternal(std::vector<uint8_t> blob)
+{
     // Prevent sending when shutting down
     if (!_isShuttingDown && _socket != nullptr)
     {
         std::unique_lock<std::mutex> lock{_sendingQueueMutex};
 
-        _sendingQueue.push_back(buffer.ReleaseStorage());
+        _sendingQueue.emplace_back(std::move(blob));
 
         lock.unlock();
 
         _ioContext->Dispatch([this] { StartAsyncWrite(); });
     }
+}
+
+void VAsioPeer::Aggregate(const std::vector<uint8_t>& blob)
+{
+    // start initial timer
+    // NB: resetting timer in every Aggregate() is costly
+    if (!_initialTimerStarted)
+    {
+        _flushTimer->AsyncWaitFor(_flushTimeout);
+        _initialTimerStarted = true;
+    }
+
+    _aggregatedMessages.insert(_aggregatedMessages.end(), blob.begin(), blob.end());
+
+    // ensure that the aggregation buffer does not exceed a certain size
+    if (_aggregatedMessages.size() > _aggregationBufferThreshold)
+    {
+        Services::Logging::Debug(_logger,
+                                 "VAsioPeer: Automated flush of aggregation buffer has been triggered, since the "
+                                 "maximum buffer size of {}Byte has been exceeded.",
+                                 _aggregationBufferThreshold);
+        Flush();
+    }
+}
+
+void VAsioPeer::Flush()
+{
+    decltype(_aggregatedMessages) blob;
+    blob.swap(_aggregatedMessages);
+    SendSilKitMsgInternal(std::move(blob));
+
+    // reset timer when flush is triggered
+    _flushTimer->AsyncWaitFor(_flushTimeout);
 }
 
 void VAsioPeer::StartAsyncWrite()
@@ -277,6 +334,29 @@ void VAsioPeer::OnShutdown(IRawByteStream& stream)
     _listener->OnPeerShutdown(this);
 }
 
+void VAsioPeer::OnTimerExpired(ITimer& timer)
+{
+    SILKIT_UNUSED_ARG(timer);
+    SILKIT_TRACE_METHOD_(_logger, "({})", static_cast<const void*>(&timer));
+
+    if (!_aggregatedMessages.empty())
+    {
+        Services::Logging::Warn(
+            _logger,
+            "VAsioPeer: Automated flush of aggregation buffer has been triggered, since the "
+            "maximum allowed time step duration of {}milliseconds has been exceeded. Consider switching off the "
+            "message aggregation via the config option 'EnableMessageAggregation'.",
+            _flushTimeout.count());
+
+        Flush();
+    }
+}
+
+void VAsioPeer::EnableAggregation()
+{
+    _useAggregation = true;
+    SilKit::Services::Logging::Debug(_logger, "VAsioPeer: Enable aggregation for peer {}", _info.participantName);
+}
 
 } // namespace Core
 } // namespace SilKit

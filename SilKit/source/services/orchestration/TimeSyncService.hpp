@@ -53,7 +53,6 @@ class TimeSyncService
     , public IMsgForTimeSyncService
     , public Core::IServiceEndpoint
 {
-
 public:
     // ----------------------------------------
     // Public Data Types
@@ -61,7 +60,8 @@ public:
     // ----------------------------------------
     // Constructors, Destructor, and Assignment
     TimeSyncService(Core::IParticipantInternal* participant, ITimeProvider* timeProvider,
-                    const Config::HealthCheck& healthCheckConfig, LifecycleService* lifecycleService, double animationFactor = 0);
+                    const Config::HealthCheck& healthCheckConfig, LifecycleService* lifecycleService,
+                    double animationFactor = 0);
 
     ~TimeSyncService();
 
@@ -88,7 +88,7 @@ public:
     void ConfigureTimeProvider(Orchestration::TimeProviderKind timeProviderKind);
     void StartTime();
     void StopTime();
-    
+
     // IServiceEndpoint
     inline void SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor) override;
     inline auto GetServiceDescriptor() const -> const Core::ServiceDescriptor& override;
@@ -109,6 +109,8 @@ public:
     auto IsCoupledToWallClock() const -> bool;
     auto GetCurrentWallClockSyncPoint() const -> std::chrono::nanoseconds;
 
+    bool IsBlocking() const;
+
 private:
     // ----------------------------------------
     // private methods
@@ -118,7 +120,7 @@ private:
     bool SetupTimeSyncPolicy(bool isSynchronizingVirtualTime);
 
     inline auto GetTimeSyncPolicy() const -> ITimeSyncPolicy*;
-    
+
     void StopWallClockCouplingThread();
     void StartWallClockCouplingThread();
     void HybridWait(std::chrono::nanoseconds targetWaitDuration);
@@ -152,14 +154,13 @@ private:
     Util::PerformanceMonitor _execTimeMonitor;
     Util::PerformanceMonitor _waitTimeMonitor;
     WatchDog _watchDog;
-    bool _isCoupledToWallClock{false}; 
+    bool _isCoupledToWallClock{false};
     std::thread _wallClockCouplingThread;
     mutable std::mutex _mx;
     std::atomic<std::chrono::nanoseconds::rep> _currentWallClockSyncPointNs{0};
     double _animationFactor{0};
     std::atomic<bool> _wallClockCouplingThreadRunning{false};
     std::atomic<bool> _wallClockReachedBeforeCompletion{false};
-    
 };
 
 // ================================================================================

@@ -22,7 +22,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <chrono>
 #include <functional>
 #include <string>
-#include<unordered_map>
+#include <unordered_map>
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
@@ -54,37 +54,29 @@ class MockParticipant : public DummyParticipant
 {
 public:
     MOCK_METHOD((void), SendMsg_LogMsg, (const IServiceEndpoint*, LogMsg));
-    void SendMsg(const IServiceEndpoint* from, Services::Logging::LogMsg&& msg) override 
+    void SendMsg(const IServiceEndpoint* from, Services::Logging::LogMsg&& msg) override
     {
         SendMsg_LogMsg(from, msg);
     }
-    void SendMsg(const IServiceEndpoint* from, const Services::Logging::LogMsg& msg) override 
+    void SendMsg(const IServiceEndpoint* from, const Services::Logging::LogMsg& msg) override
     {
         SendMsg_LogMsg(from, msg);
     }
 };
 
 
-
 auto ALogMsgWith(std::string loggerName, Level level, std::string payload) -> Matcher<LogMsg>
 {
-    return AllOf(
-        Field(&LogMsg::loggerName, loggerName),
-        Field(&LogMsg::level, level),
-        Field(&LogMsg::payload, payload)
+    return AllOf(Field(&LogMsg::loggerName, loggerName), Field(&LogMsg::level, level), Field(&LogMsg::payload, payload)
 
     );
 }
 
 auto ALogMsgWith(std::string loggerName, Level level, std::string payload,
-                 std::unordered_map<std::string, std::string> keyValues ) -> Matcher<LogMsg>
+                 std::unordered_map<std::string, std::string> keyValues) -> Matcher<LogMsg>
 {
-    return AllOf(
-        Field(&LogMsg::loggerName, loggerName), 
-        Field(&LogMsg::level, level), 
-        Field(&LogMsg::payload, payload),
-        Field(&LogMsg::keyValues, keyValues)
-    );
+    return AllOf(Field(&LogMsg::loggerName, loggerName), Field(&LogMsg::level, level), Field(&LogMsg::payload, payload),
+                 Field(&LogMsg::keyValues, keyValues));
 }
 
 TEST(Test_Logger, log_level_conversion)
@@ -137,18 +129,13 @@ TEST(Test_Logger, send_log_message_from_logger)
     logMsgSender.SetServiceDescriptor(controllerAddress);
 
 
-    logger.RegisterRemoteLogging([&logMsgSender](LogMsg logMsg) {
-        logMsgSender.SendLogMsg(std::move(logMsg));
-    });
+    logger.RegisterRemoteLogging([&logMsgSender](LogMsg logMsg) { logMsgSender.SendLogMsg(std::move(logMsg)); });
 
     std::string payload{"Test log message"};
 
-    EXPECT_CALL(mockParticipant, SendMsg_LogMsg(testing::_,
-        ALogMsgWith(loggerName, Level::Info, payload)))
-        .Times(1);
+    EXPECT_CALL(mockParticipant, SendMsg_LogMsg(testing::_, ALogMsgWith(loggerName, Level::Info, payload))).Times(1);
 
-    EXPECT_CALL(mockParticipant, SendMsg_LogMsg(testing::_,
-        ALogMsgWith(loggerName, Level::Critical, payload)))
+    EXPECT_CALL(mockParticipant, SendMsg_LogMsg(testing::_, ALogMsgWith(loggerName, Level::Critical, payload)))
         .Times(1);
 
     logger.Info(payload);
@@ -204,17 +191,19 @@ TEST(Test_Logger, send_loggermessage_from_logger)
     LogMsgSender logMsgSender(&mockParticipant);
     logMsgSender.SetServiceDescriptor(controllerAddress);
 
-    logger.RegisterRemoteLogging([&logMsgSender](LogMsg logMsg) {
-        logMsgSender.SendLogMsg(std::move(logMsg));
-    });
+    logger.RegisterRemoteLogging([&logMsgSender](LogMsg logMsg) { logMsgSender.SendLogMsg(std::move(logMsg)); });
 
     std::string payload{"Test log message"};
     std::string key{"TestKey"};
     std::string value{"TestValue"};
     std::unordered_map<std::string, std::string> keyValue{{key, value}};
 
-    EXPECT_CALL(mockParticipant, SendMsg_LogMsg(&logMsgSender, ALogMsgWith(loggerName, Level::Debug, payload, keyValue))).Times(1);
-    EXPECT_CALL(mockParticipant, SendMsg_LogMsg(&logMsgSender, ALogMsgWith(loggerName, Level::Critical, payload, keyValue))).Times(1);
+    EXPECT_CALL(mockParticipant,
+                SendMsg_LogMsg(&logMsgSender, ALogMsgWith(loggerName, Level::Debug, payload, keyValue)))
+        .Times(1);
+    EXPECT_CALL(mockParticipant,
+                SendMsg_LogMsg(&logMsgSender, ALogMsgWith(loggerName, Level::Critical, payload, keyValue)))
+        .Times(1);
 
     LoggerMessage lm{&logger, Level::Debug};
     lm.SetMessage(payload);
@@ -227,4 +216,4 @@ TEST(Test_Logger, send_loggermessage_from_logger)
     lm2.Dispatch();
 }
 
-}  // anonymous namespace
+} // anonymous namespace

@@ -28,6 +28,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <cctype>
 
 #include "LoggingDatatypes.hpp"
+#include "StringHelpers.hpp"
 
 namespace SilKit {
 namespace Services {
@@ -81,12 +82,7 @@ std::ostream& operator<<(std::ostream& outStream, const Level& level)
 
 inline Level from_string(const std::string& levelStr)
 {
-    auto lowerCase = [](auto s) {
-        std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) { return (unsigned char)std::tolower(c); });
-        return s;
-    };
-    auto logLevel = lowerCase(levelStr);
-
+    auto logLevel = SilKit::Util::LowerCase(levelStr);
     if (logLevel == "trace")
         return Level::Trace;
     if (logLevel == "debug")

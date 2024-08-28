@@ -91,9 +91,8 @@ public:
     VAsioConnection(const VAsioConnection&) = delete;
     VAsioConnection(VAsioConnection&&) = delete;
     VAsioConnection(IParticipantInternal* participant, IMetricsManager* metricsManager,
-                    SilKit::Config::ParticipantConfiguration config,
-                    std::string participantName, ParticipantId participantId,
-                    Services::Orchestration::ITimeProvider* timeProvider,
+                    SilKit::Config::ParticipantConfiguration config, std::string participantName,
+                    ParticipantId participantId, Services::Orchestration::ITimeProvider* timeProvider,
                     ProtocolVersion version = CurrentProtocolVersion());
     ~VAsioConnection() override;
 
@@ -206,6 +205,8 @@ public:
     void RegisterPeerShutdownCallback(std::function<void(IVAsioPeer* peer)> callback);
 
     void NotifyShutdown();
+
+    void EnableAggregation();
 
     // Register handlers for completion of async service creation
     void AddAsyncSubscriptionsCompletionHandler(std::function<void()> handler);
@@ -572,6 +573,8 @@ private:
     IParticipantInternal* _participant{nullptr};
 
     friend class ::SilKit::Core::RemoteConnectionManager;
+
+    bool _useAggregation{false};
 };
 
 

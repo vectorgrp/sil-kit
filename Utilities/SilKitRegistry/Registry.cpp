@@ -35,6 +35,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "SignalHandler.hpp"
 #include "WindowsServiceMain.hpp"
 #include "RegistryConfiguration.hpp"
+#include "StringHelpers.hpp"
 
 #include "CommandlineParser.hpp"
 #include "ParticipantConfiguration.hpp"
@@ -56,14 +57,9 @@ using namespace SilKit::Util;
 using CliParser = SilKit::Util::CommandlineParser;
 
 namespace {
-auto lowerCase(std::string s)
-{
-    std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) { return (unsigned char)std::tolower(c); });
-    return s;
-}
 auto isValidLogLevel(const std::string& levelStr)
 {
-    auto logLevel = lowerCase(levelStr);
+    auto logLevel = SilKit::Util::LowerCase(levelStr);
     return logLevel == "trace" || logLevel == "debug" || logLevel == "warn" || logLevel == "info" || logLevel == "error"
            || logLevel == "critical" || logLevel == "off";
 }

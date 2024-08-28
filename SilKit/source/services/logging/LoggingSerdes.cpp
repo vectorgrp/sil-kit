@@ -41,21 +41,12 @@ inline MessageBuffer& operator>>(MessageBuffer& buffer, SourceLoc& sourceLoc)
 
 inline MessageBuffer& operator<<(MessageBuffer& buffer, const LogMsg& msg)
 {
-    buffer << msg.loggerName
-           << msg.level
-           << msg.time
-           << msg.source
-           << msg.payload
-           << msg.keyValues;
+    buffer << msg.loggerName << msg.level << msg.time << msg.source << msg.payload << msg.keyValues;
     return buffer;
 }
 inline MessageBuffer& operator>>(MessageBuffer& buffer, LogMsg& msg)
 {
-    buffer >> msg.loggerName
-           >> msg.level
-           >> msg.time
-           >> msg.source
-           >> msg.payload;
+    buffer >> msg.loggerName >> msg.level >> msg.time >> msg.source >> msg.payload;
     if (buffer.RemainingBytesLeft() > 0)
     {
         buffer >> msg.keyValues;

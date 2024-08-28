@@ -296,8 +296,8 @@ struct Middleware
 struct TimeSynchronization
 {
     double animationFactor{0.0};
+    Aggregation enableMessageAggregation{Aggregation::Off};
 };
-
 
 // ================================================================================
 //  Experimental

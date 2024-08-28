@@ -333,6 +333,7 @@ public:
                                                                           const std::string& msgTypeName) = 0;
 
     virtual void NotifyShutdown() = 0;
+    virtual void EvaluateAggregationInfo(bool isSyncSimStepHandler) = 0;
 
     virtual void RegisterReplayController(SilKit::Tracing::IReplayDataController* replayController,
                                           const std::string& controllerName,

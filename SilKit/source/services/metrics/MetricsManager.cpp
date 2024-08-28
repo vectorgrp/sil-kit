@@ -41,7 +41,7 @@ auto MetricClockNow() -> VSilKit::MetricTimePoint
     return VSilKit::MetricClock::now();
 }
 #endif
-}
+} // namespace
 namespace VSilKit {
 
 
@@ -120,7 +120,7 @@ private:
 MetricsManager::MetricsManager(std::string participantName, IMetricsProcessor &processor)
     : _participantName{std::move(participantName)}
     , _processor{&processor}
-    ,_lastSubmitUpdate{MetricClockNow()}
+    , _lastSubmitUpdate{MetricClockNow()}
 {
 }
 

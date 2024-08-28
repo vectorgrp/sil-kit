@@ -786,6 +786,12 @@
               "description": "The animation factor describes how fast the simulation is allowed to run, relative to the local wall clock. For example, if the value is 0.1, SIL Kit will try to run the simulation 10 times faster than the wall clock. The default value 0.0 runs the simulation as fast as possible, i.e., the current behavior.",
               "minimum": 0.0,
               "default": 0.0
+            },
+            "EnableMessageAggregation": {
+              "type": "string",
+              "enum": [ "Off", "On", "Auto" ],
+              "description": "Decide for simulations with time synchronization, if a message aggregation is performed. In case of the Auto mode, the message aggregation is enabled for simulations using the synchronous simulation step handler.",
+              "default": "Off"
             }
           },
           "additionalProperties": false

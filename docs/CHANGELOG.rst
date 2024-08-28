@@ -14,6 +14,12 @@ Fixed
 
 - Fixed crash in ``sil-kit-registry`` utility that happened when the dashboard is enabled, but not actually available.
 
+Added
+~~~~~
+
+- Message aggregation for simulations with time synchronization.
+  Accessible via the experimental section in the Participant Configuration (Experimental | TimeSynchronization | EnableMessageAggregation).
+
 
 [4.0.51] - 2024-07-18 
 ---------------------

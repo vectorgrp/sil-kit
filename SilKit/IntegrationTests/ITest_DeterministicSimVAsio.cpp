@@ -157,9 +157,8 @@ public:
             });
         }
 
-        timeSyncService->SetSimulationStepHandler([this](const nanoseconds now, nanoseconds /*duration*/) {
-            _currentTick = now;
-        }, period);
+        timeSyncService->SetSimulationStepHandler(
+            [this](const nanoseconds now, nanoseconds /*duration*/) { _currentTick = now; }, period);
     }
 
     std::future<ParticipantState> RunAsync() const

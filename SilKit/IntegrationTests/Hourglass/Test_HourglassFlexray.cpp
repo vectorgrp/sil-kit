@@ -367,7 +367,8 @@ TEST_F(Test_HourglassFlexray, SilKit_FlexrayController_ExecuteCmd_DeferredHalt)
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Flexray::FlexrayController FlexrayController(
         nullptr, "FlexrayController1", "FlexrayNetwork1");
 
-    EXPECT_CALL(capi, SilKit_FlexrayController_ExecuteCmd(mockFlexrayController, SilKit_FlexrayChiCommand_DEFERRED_HALT))
+    EXPECT_CALL(capi,
+                SilKit_FlexrayController_ExecuteCmd(mockFlexrayController, SilKit_FlexrayChiCommand_DEFERRED_HALT))
         .Times(1);
     FlexrayController.DeferredHalt();
 }
@@ -387,7 +388,8 @@ TEST_F(Test_HourglassFlexray, SilKit_FlexrayController_ExecuteCmd_AllowColdstart
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Flexray::FlexrayController FlexrayController(
         nullptr, "FlexrayController1", "FlexrayNetwork1");
 
-    EXPECT_CALL(capi, SilKit_FlexrayController_ExecuteCmd(mockFlexrayController, SilKit_FlexrayChiCommand_ALLOW_COLDSTART))
+    EXPECT_CALL(capi,
+                SilKit_FlexrayController_ExecuteCmd(mockFlexrayController, SilKit_FlexrayChiCommand_ALLOW_COLDSTART))
         .Times(1);
     FlexrayController.AllowColdstart();
 }

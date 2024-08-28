@@ -37,17 +37,17 @@ using namespace std::chrono_literals;
 
 namespace {
 #ifdef _WIN32
-    auto GetDefaultTimerResolution() -> std::chrono::nanoseconds
-    {
-        return 16ms;
-    }
-#else
-    auto GetDefaultTimerResolution() -> std::chrono::nanoseconds
-    {
-        return 1ms;
-    }
-#endif
+auto GetDefaultTimerResolution() -> std::chrono::nanoseconds
+{
+    return 16ms;
 }
+#else
+auto GetDefaultTimerResolution() -> std::chrono::nanoseconds
+{
+    return 1ms;
+}
+#endif
+} // namespace
 
 namespace SilKit {
 namespace Services {
@@ -104,7 +104,7 @@ public:
         _isExecutingSimStep = false;
     }
 
-    auto IsExecutingSimStep() -> bool override 
+    auto IsExecutingSimStep() -> bool override
     {
         return _isExecutingSimStep;
     }
@@ -112,11 +112,11 @@ public:
     void RequestNextStep() override
     {
         // ensure that calls to Stop()/Pause() in a SimTask won't send out a new step and eventually call the SimTask again
-        if (_controller.State() == ParticipantState::Running 
-            && !_controller.StopRequested()
+        if (_controller.State() == ParticipantState::Running && !_controller.StopRequested()
             && !_controller.PauseRequested())
         {
-            if (_lastSentNextSimTask != _configuration->NextSimStep().timePoint) // Prevent sending same step more than once
+            if (_lastSentNextSimTask
+                != _configuration->NextSimStep().timePoint) // Prevent sending same step more than once
             {
                 _lastSentNextSimTask = _configuration->NextSimStep().timePoint;
                 _controller.SendMsg(_configuration->NextSimStep());
@@ -281,7 +281,8 @@ private:
 };
 
 TimeSyncService::TimeSyncService(Core::IParticipantInternal* participant, ITimeProvider* timeProvider,
-                                 const Config::HealthCheck& healthCheckConfig, LifecycleService* lifecycleService, double animationFactor)
+                                 const Config::HealthCheck& healthCheckConfig, LifecycleService* lifecycleService,
+                                 double animationFactor)
     : _participant{participant}
     , _lifecycleService{lifecycleService}
     , _logger{participant->GetLogger()}
@@ -298,7 +299,7 @@ TimeSyncService::TimeSyncService(Core::IParticipantInternal* participant, ITimeP
     {
         Debug(_logger, "TimeSyncService: Coupled to the local wall clock with animation factor {}", _animationFactor);
     }
-    
+
     _watchDog.SetWarnHandler([logger = _logger](std::chrono::milliseconds timeout) {
         Warn(logger, "SimStep did not finish within soft time limit. Timeout detected after {} ms",
              std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(timeout).count());
@@ -409,7 +410,7 @@ auto TimeSyncService::PauseRequested() const -> bool
 }
 
 auto TimeSyncService::IsCoupledToWallClock() const -> bool
-{   
+{
     return _isCoupledToWallClock;
 }
 
@@ -516,9 +517,9 @@ void TimeSyncService::CompleteSimulationStep()
     _logger->Debug("CompleteSimulationStep: calling _timeSyncPolicy->RequestNextStep");
     _participant->ExecuteDeferred([this] {
         GetTimeSyncPolicy()->SetSimStepCompleted();
-        
+
         // With real-time sync, the next step is requested in the real-time thread. If lagging behind, request also here to catch up.
-        if (!_isCoupledToWallClock || _wallClockReachedBeforeCompletion) 
+        if (!_isCoupledToWallClock || _wallClockReachedBeforeCompletion)
         {
             _wallClockReachedBeforeCompletion = false;
             GetTimeSyncPolicy()->RequestNextStep();
@@ -595,7 +596,7 @@ void TimeSyncService::StartTime()
     }
 }
 
-void TimeSyncService::StopTime() 
+void TimeSyncService::StopTime()
 {
     if (_isCoupledToWallClock)
     {
@@ -665,7 +666,7 @@ void TimeSyncService::HybridWait(std::chrono::nanoseconds targetWaitDuration)
 
     // By default, Windows timer have a resolution of 15.6ms
     // The effective time that wait_for or sleep_for actually waits will be a step function with steps every 15.6ms
-    const auto defaultTimerResolution = GetDefaultTimerResolution(); 
+    const auto defaultTimerResolution = GetDefaultTimerResolution();
 
     if (targetWaitDuration < defaultTimerResolution)
     {
@@ -675,7 +676,7 @@ void TimeSyncService::HybridWait(std::chrono::nanoseconds targetWaitDuration)
     {
         auto timeBeforeSleep = std::chrono::steady_clock::now();
         // Wait the share of the targetWaitDuration that we can precisely achieve with the low timer resolution
-        auto sleepDuration = targetWaitDuration - defaultTimerResolution; 
+        auto sleepDuration = targetWaitDuration - defaultTimerResolution;
         std::this_thread::sleep_for(sleepDuration);
         // Busy-wait the remainder
         auto remainder = targetWaitDuration - (std::chrono::steady_clock::now() - timeBeforeSleep);
@@ -688,7 +689,6 @@ void TimeSyncService::StartWallClockCouplingThread()
 {
     _wallClockCouplingThreadRunning = true;
     _wallClockCouplingThread = std::thread{[this]() {
-
         SilKit::Util::SetThreadName("SK-WallClkSync");
 
         const auto startTime = std::chrono::steady_clock::now();
@@ -700,7 +700,7 @@ void TimeSyncService::StartWallClockCouplingThread()
             auto currentRunDuration = std::chrono::steady_clock::now() - startTime;
             auto durationUntilNextWallClockSyncPoint = nextAnimatedWallClockSyncPoint - currentRunDuration;
             HybridWait(std::chrono::duration_cast<std::chrono::nanoseconds>(durationUntilNextWallClockSyncPoint));
-            
+
             if (State() == ParticipantState::Running)
             {
                 auto duration =
@@ -733,6 +733,11 @@ void TimeSyncService::StopWallClockCouplingThread()
             _wallClockCouplingThread.join();
         }
     }
+}
+
+bool TimeSyncService::IsBlocking() const
+{
+    return _timeConfiguration.IsBlocking();
 }
 
 } // namespace Orchestration

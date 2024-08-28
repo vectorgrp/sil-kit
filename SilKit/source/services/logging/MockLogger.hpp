@@ -38,6 +38,7 @@ class MockLogger : public ::SilKit::Services::Logging::ILoggerInternal
     using Level = ::SilKit::Services::Logging::Level;
     using LoggerMessage = ::SilKit::Services::Logging::LoggerMessage;
     using LogMsg = ::SilKit::Services::Logging::LogMsg;
+
 public:
     MockLogger()
     {

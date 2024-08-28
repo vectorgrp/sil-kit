@@ -246,7 +246,8 @@ TEST_F(Test_HourglassLin, SilKit_LinController_SetFrameResponse)
     frameResponse.frame = frame;
     frameResponse.responseMode = LinFrameResponseMode::Rx;
 
-    EXPECT_CALL(capi, SilKit_LinController_SetFrameResponse(mockLinController, LinFrameResponseMatcher(frameResponse))).Times(1);
+    EXPECT_CALL(capi, SilKit_LinController_SetFrameResponse(mockLinController, LinFrameResponseMatcher(frameResponse)))
+        .Times(1);
     LinController.SetFrameResponse(frameResponse);
 }
 

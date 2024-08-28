@@ -158,8 +158,8 @@ class DashboardSystemApiClient : public oatpp::web::client::ApiClient
              BODY_DTO(Object<SimulationEndDto>, simulation))
 
     // bulk update of a simulation
-    API_CALL("POST", "system-service/v1.1/simulations/{simulationId}", updateSimulation,
-             PATH(UInt64, simulationId), BODY_DTO(Object<BulkSimulationDto>, simulation))
+    API_CALL("POST", "system-service/v1.1/simulations/{simulationId}", updateSimulation, PATH(UInt64, simulationId),
+             BODY_DTO(Object<BulkSimulationDto>, simulation))
 };
 
 } // namespace Dashboard
