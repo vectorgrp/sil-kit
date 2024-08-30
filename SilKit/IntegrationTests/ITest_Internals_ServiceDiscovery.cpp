@@ -29,7 +29,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "functional.hpp"
 
 #include "SimTestHarness.hpp"
-#include "GetTestPid.hpp"
 #include "ServiceDiscovery.hpp"
 #include "ConfigurationTestUtils.hpp"
 #include "VAsioRegistry.hpp"

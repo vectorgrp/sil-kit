@@ -28,7 +28,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "functional.hpp"
 
 #include "SimTestHarness.hpp"
-#include "GetTestPid.hpp"
 #include "ConfigurationTestUtils.hpp"
 #include "SyncDatatypeUtils.hpp"
 

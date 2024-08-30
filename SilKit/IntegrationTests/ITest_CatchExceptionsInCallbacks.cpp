@@ -32,8 +32,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-#include "GetTestPid.hpp"
-
 namespace {
 
 using namespace std::chrono_literals;

@@ -31,7 +31,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "IRequestReplyService.hpp"
 #include "procs/IParticipantReplies.hpp"
 
-#include "GetTestPid.hpp"
 #include "ConfigurationTestUtils.hpp"
 #include "VAsioRegistry.hpp"
 #include "CreateParticipantImpl.hpp"

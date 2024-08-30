@@ -30,7 +30,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "IServiceDiscovery.hpp"
 #include "ServiceDatatypes.hpp"
 
-#include "GetTestPid.hpp"
 #include "IntegrationTestInfrastructure.hpp"
 
 using namespace std::chrono_literals;

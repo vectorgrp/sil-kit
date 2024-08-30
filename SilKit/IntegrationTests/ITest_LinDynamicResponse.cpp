@@ -35,8 +35,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "SimTestHarness.hpp"
 #include "ITestThreadSafeLogger.hpp"
 
-#include "GetTestPid.hpp"
-
 #include "gtest/gtest.h"
 
 namespace {
