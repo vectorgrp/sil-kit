@@ -36,7 +36,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-#include "GetTestPid.hpp"
 #include "InternalHelpers.hpp"
 
 namespace {
@@ -46,13 +45,11 @@ using namespace SilKit::Services::Orchestration;
 
 TEST(ITest_Internals_TargetedMessaging, targeted_messaging)
 {
-    auto registryUri = MakeTestRegistryUri();
-
     std::vector<std::string> syncParticipantNames{"Sender", "TargetReceiver", "OtherReceiver"};
 
     auto receiveCount = 0;
 
-    SilKit::Tests::SimTestHarness testHarness(syncParticipantNames, registryUri, false);
+    SilKit::Tests::SimTestHarness testHarness(syncParticipantNames, "silkit://localhost:0", false);
 
     auto* senderComSimPart = testHarness.GetParticipant("Sender");
     auto* senderCom = &SilKit::Tests::ToParticipantInternal(*senderComSimPart->Participant());

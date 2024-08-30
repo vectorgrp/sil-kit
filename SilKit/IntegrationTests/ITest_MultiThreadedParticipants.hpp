@@ -31,8 +31,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <list>
 #include <vector>
 
-#include "GetTestPid.hpp"
-
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
@@ -79,8 +77,6 @@ enum class TimeMode
 class ITest_MultiThreadedParticipants : public testing::Test
 {
 protected:
-    ITest_MultiThreadedParticipants() {}
-
     struct Callbacks
     {
         MOCK_METHOD(void, AbortHandler, (ParticipantState));
@@ -109,7 +105,7 @@ protected:
 
             ImmovableMembers(ImmovableMembers&& other) noexcept
                 : allReceived{other.allReceived.load()}
-                , runAsync{other.runAsync.load()}
+                , _runAsync{other._runAsync.load()}
                 , stopRequested{other.stopRequested.load()}
                 , runningStateReached{other.runningStateReached.load()}
                 , pausedStateReached{other.pausedStateReached.load()}
@@ -122,7 +118,7 @@ protected:
                 if (this != &other)
                 {
                     allReceived = other.allReceived.load();
-                    runAsync = other.runAsync.load();
+                    _runAsync = other._runAsync.load();
                     stopRequested = other.stopRequested.load();
                     runningStateReached = other.runningStateReached.load();
                     pausedStateReached = other.pausedStateReached.load();
@@ -134,7 +130,7 @@ protected:
 
             mutable std::mutex mutex;
             std::atomic<bool> allReceived{false};
-            std::atomic<bool> runAsync{true};
+            std::atomic<bool> _runAsync{true};
             std::atomic<bool> stopRequested{false};
             std::atomic<bool> runningStateReached{false};
             std::atomic<bool> pausedStateReached{false};
@@ -358,7 +354,7 @@ protected:
             config = SilKit::Config::MakeEmptyParticipantConfiguration();
         }
 
-        testParticipant.participant = SilKit::CreateParticipant(config, testParticipant.name, registryUri);
+        testParticipant.participant = SilKit::CreateParticipant(config, testParticipant.name, _registryUri);
         testParticipant.lifecycleService =
             testParticipant.participant->CreateLifecycleService({testParticipant.lifeCycleOperationMode});
         testParticipant.lifecycleService->SetAbortHandler(
@@ -421,7 +417,7 @@ protected:
             [&testParticipant, this](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
             testParticipant.now = now;
             testParticipant.publisher->Publish(std::vector<uint8_t>{testParticipant.id});
-            if (!testParticipant.simtimePassed && now > simtimeToPass)
+            if (!testParticipant.simtimePassed && now > _simtimeToPass)
             {
                 testParticipant.simtimePassed = true;
                 testParticipant.simtimePassedPromise.set_value();
@@ -445,7 +441,7 @@ protected:
             config = SilKit::Config::MakeEmptyParticipantConfiguration();
         }
 
-        testParticipant.participant = SilKit::CreateParticipant(config, testParticipant.name, registryUri);
+        testParticipant.participant = SilKit::CreateParticipant(config, testParticipant.name, _registryUri);
         if (testParticipant.lifeCycleOperationMode != OperationMode::Invalid)
         {
             testParticipant.lifecycleService =
@@ -490,7 +486,7 @@ protected:
         });
 
         auto runTask = [&testParticipant]() {
-            while (testParticipant.i.runAsync)
+            while (testParticipant.i._runAsync)
             {
                 testParticipant.publisher->Publish(std::vector<uint8_t>{testParticipant.id});
                 std::this_thread::sleep_for(asyncDelayBetweenPublication);
@@ -539,7 +535,7 @@ protected:
         }
 
         systemControllerParticipant.participant =
-            SilKit::CreateParticipant(config, systemControllerParticipantName, registryUri);
+            SilKit::CreateParticipant(config, systemControllerParticipantName, _registryUri);
 
         systemControllerParticipant.systemController =
             SilKit::Experimental::Participant::CreateSystemController(systemControllerParticipant.participant.get());
@@ -649,13 +645,13 @@ protected:
     {
         std::shared_ptr<SilKit::Config::IParticipantConfiguration> config{nullptr};
         config = SilKit::Config::MakeEmptyParticipantConfiguration();
-        registry = SilKit::Vendor::Vector::CreateSilKitRegistry(config);
-        registry->StartListening(registryUri);
+        _registry = SilKit::Vendor::Vector::CreateSilKitRegistry(config);
+        _registryUri = _registry->StartListening("silkit://127.0.0.1:0");
     }
 
     void StopRegistry()
     {
-        registry.reset();
+        _registry.reset();
     }
 
     void RunParticipants(std::list<TestParticipant>& participants, std::string set = "A")
@@ -664,41 +660,41 @@ protected:
         {
             if (p.timeMode == TimeMode::Async)
             {
-                p.i.runAsync = true;
+                p.i._runAsync = true;
 
                 if (p.lifeCycleOperationMode == OperationMode::Invalid)
                 {
-                    participantThreads_Async_Invalid.emplace_back([this, &p] { AsyncParticipantThread(p); });
+                    _participantThreads_Async_Invalid.emplace_back([this, &p] { AsyncParticipantThread(p); });
                 }
                 else if (p.lifeCycleOperationMode == OperationMode::Autonomous)
                 {
-                    participantThreads_Async_Autonomous.emplace_back([this, &p] { AsyncParticipantThread(p); });
+                    _participantThreads_Async_Autonomous.emplace_back([this, &p] { AsyncParticipantThread(p); });
                 }
                 else if (p.lifeCycleOperationMode == OperationMode::Coordinated)
                 {
-                    participantThreads_Async_Coordinated.emplace_back([this, &p] { AsyncParticipantThread(p); });
+                    _participantThreads_Async_Coordinated.emplace_back([this, &p] { AsyncParticipantThread(p); });
                 }
             }
             else if (p.timeMode == TimeMode::Sync)
             {
                 if (p.lifeCycleOperationMode == OperationMode::Invalid)
                 {
-                    participantThreads_Sync_Invalid.emplace_back([this, &p] { SyncParticipantThread(p); });
+                    _participantThreads_Sync_Invalid.emplace_back([this, &p] { SyncParticipantThread(p); });
                 }
                 else if (p.lifeCycleOperationMode == OperationMode::Autonomous)
                 {
                     if (set == "A")
                     {
-                        participantThreads_Sync_AutonomousA.emplace_back([this, &p] { SyncParticipantThread(p); });
+                        _participantThreads_Sync_AutonomousA.emplace_back([this, &p] { SyncParticipantThread(p); });
                     }
                     else if (set == "B")
                     {
-                        participantThreads_Sync_AutonomousB.emplace_back([this, &p] { SyncParticipantThread(p); });
+                        _participantThreads_Sync_AutonomousB.emplace_back([this, &p] { SyncParticipantThread(p); });
                     }
                 }
                 else if (p.lifeCycleOperationMode == OperationMode::Coordinated)
                 {
-                    participantThreads_Sync_Coordinated.emplace_back([this, &p] { SyncParticipantThread(p); });
+                    _participantThreads_Sync_Coordinated.emplace_back([this, &p] { SyncParticipantThread(p); });
                 }
             }
         }
@@ -821,27 +817,27 @@ protected:
         globalParticipantIndex = 0;
         participantNames.clear();
         participantIsSync.clear();
-        registryUri = MakeTestRegistryUri();
     }
 
 protected:
-    std::unique_ptr<SilKit::Vendor::Vector::ISilKitRegistry> registry;
+    std::unique_ptr<SilKit::Vendor::Vector::ISilKitRegistry> _registry;
 
     SystemControllerParticipant systemControllerParticipant;
     ParticipantThread participantThread_SystemController;
 
-    std::vector<ParticipantThread> participantThreads_Sync_Invalid;
-    std::vector<ParticipantThread> participantThreads_Sync_AutonomousA;
-    std::vector<ParticipantThread> participantThreads_Sync_AutonomousB;
-    std::vector<ParticipantThread> participantThreads_Sync_Coordinated;
+    std::vector<ParticipantThread> _participantThreads_Sync_Invalid;
+    std::vector<ParticipantThread> _participantThreads_Sync_AutonomousA;
+    std::vector<ParticipantThread> _participantThreads_Sync_AutonomousB;
+    std::vector<ParticipantThread> _participantThreads_Sync_Coordinated;
 
-    std::vector<ParticipantThread> participantThreads_Async_Invalid;
-    std::vector<ParticipantThread> participantThreads_Async_Autonomous;
-    std::vector<ParticipantThread> participantThreads_Async_Coordinated;
+    std::vector<ParticipantThread> _participantThreads_Async_Invalid;
+    std::vector<ParticipantThread> _participantThreads_Async_Autonomous;
+    std::vector<ParticipantThread> _participantThreads_Async_Coordinated;
 
-    std::chrono::seconds simtimeToPass{3s};
-    bool runAsync{true};
+    std::chrono::seconds _simtimeToPass{3s};
+    bool _runAsync{true};
 
-    std::string registryUri;
+    std::string _registryUri{"undefined registry uri"};
+
     Callbacks callbacks;
 };

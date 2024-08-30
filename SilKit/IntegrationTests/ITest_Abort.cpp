@@ -102,7 +102,7 @@ TEST_F(ITest_Abort, test_Abort_Paused_Simulation_Sync)
     AbortSystemController();
 
     // Wait for coordinated to end
-    JoinParticipantThreads(participantThreads_Sync_Coordinated);
+    JoinParticipantThreads(_participantThreads_Sync_Coordinated);
 
     // Expect shutdown state, which should happen after the abort handlers are called.
     for (const auto& participant : monitorParticipants.front().CopyMonitoredParticipantStates())
@@ -114,7 +114,7 @@ TEST_F(ITest_Abort, test_Abort_Paused_Simulation_Sync)
     }
 
     monitorParticipants.front().i.stopRequested = true;
-    JoinParticipantThreads(participantThreads_Async_Autonomous);
+    JoinParticipantThreads(_participantThreads_Async_Autonomous);
 
     StopRegistry();
 }
@@ -174,7 +174,7 @@ TEST_F(ITest_Abort, test_Abort_Running_Simulation_Sync)
     AbortSystemController();
 
     // Wait for coordinated to end
-    JoinParticipantThreads(participantThreads_Sync_Coordinated);
+    JoinParticipantThreads(_participantThreads_Sync_Coordinated);
 
     // Expect shutdown state, which should happen after the abort handlers are called.
     for (const auto& participant : monitorParticipants.front().CopyMonitoredParticipantStates())
@@ -186,7 +186,7 @@ TEST_F(ITest_Abort, test_Abort_Running_Simulation_Sync)
     }
 
     monitorParticipants.front().i.stopRequested = true;
-    JoinParticipantThreads(participantThreads_Async_Autonomous);
+    JoinParticipantThreads(_participantThreads_Async_Autonomous);
 
     StopRegistry();
 }
@@ -260,7 +260,7 @@ TEST_F(ITest_Abort, test_Abort_Stopped_Simulation_Sync)
     StopSystemController();
 
     // Wait for coordinated to end
-    JoinParticipantThreads(participantThreads_Sync_Coordinated);
+    JoinParticipantThreads(_participantThreads_Sync_Coordinated);
 
     // Expect shutdown state, which should happen after the abort handlers are called.
     for (const auto& participant : monitorParticipants.front().CopyMonitoredParticipantStates())
@@ -272,7 +272,7 @@ TEST_F(ITest_Abort, test_Abort_Stopped_Simulation_Sync)
     }
 
     monitorParticipants.front().i.stopRequested = true;
-    JoinParticipantThreads(participantThreads_Async_Autonomous);
+    JoinParticipantThreads(_participantThreads_Async_Autonomous);
 
     StopRegistry();
 }
@@ -338,10 +338,10 @@ TEST_F(ITest_Abort, test_Abort_Communication_Ready_Simulation_Sync)
     systemControllerParticipant.AwaitCommunicationInitialized();
 
     // Wait for coordinated to end
-    JoinParticipantThreads(participantThreads_Sync_Coordinated);
+    JoinParticipantThreads(_participantThreads_Sync_Coordinated);
 
     monitorParticipants.front().i.stopRequested = true;
-    JoinParticipantThreads(participantThreads_Async_Autonomous);
+    JoinParticipantThreads(_participantThreads_Async_Autonomous);
 
     // Expect shutdown state, which should happen after the abort handlers are called.
     for (const auto& participant : monitorParticipants.front().CopyMonitoredParticipantStates())

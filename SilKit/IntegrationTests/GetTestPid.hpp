@@ -29,16 +29,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <unistd.h>
 #endif
 
-inline auto MakeTestRegistryUri()
-{
-    std::stringstream ss;
-    int port = 8500;
-    int pid = getpid();
-    port += pid % 1000; // clamp to [8500, 9500)
-    // add a random offset to prevent two tests listening on the same port
-    ss << "silkit://localhost:" << port;
-    return ss.str();
-}
 
 inline auto MakeTestDashboardUri()
 {

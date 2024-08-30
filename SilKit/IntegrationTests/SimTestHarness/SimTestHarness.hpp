@@ -132,6 +132,8 @@ public:
     //! \brief Get the SimParticipant by name. If it does not exist yet, create a SimParticipant with the specified name and provide its ParticipantConfiguration as a string.
     SimParticipant* GetParticipant(const std::string& participantName, const std::string& participantConfiguration);
 
+    auto GetRegistryUri() const -> std::string;
+
     // clear everything and destroy participants:
     void Reset();
     void ResetRegistry();

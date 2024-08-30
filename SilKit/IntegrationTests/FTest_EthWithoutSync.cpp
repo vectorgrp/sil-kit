@@ -31,7 +31,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-#include "GetTestPid.hpp"
 #include "EthernetHelpers.hpp"
 
 namespace {
@@ -52,7 +51,6 @@ class FTest_EthWithoutSync : public testing::Test
 protected:
     FTest_EthWithoutSync()
     {
-        _registryUri = MakeTestRegistryUri();
         SetupTestData();
     }
 
@@ -203,7 +201,7 @@ TEST_F(FTest_EthWithoutSync, eth_communication_no_simulation_flow_vasio)
 {
     auto registry =
         SilKit::Vendor::Vector::CreateSilKitRegistry(SilKit::Config::ParticipantConfigurationFromString(""));
-    registry->StartListening(_registryUri);
+    _registryUri = registry->StartListening("silkit://localhost:0");
     ExecuteTest();
 }
 

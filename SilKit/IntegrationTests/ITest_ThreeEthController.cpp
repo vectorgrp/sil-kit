@@ -26,7 +26,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "SimTestHarness.hpp"
 
 #include "EthernetHelpers.hpp"
-#include "GetTestPid.hpp"
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -71,7 +70,6 @@ protected:
 protected:
     ITest_ThreeEthController()
     {
-        registryUri = MakeTestRegistryUri();
 
         testMessages.resize(5);
         for (auto index = 0u; index < testMessages.size(); index++)
@@ -160,7 +158,7 @@ protected:
 
     void ExecuteTest()
     {
-        SilKit::Tests::SimTestHarness testHarness(syncParticipantNames, registryUri);
+        SilKit::Tests::SimTestHarness testHarness(syncParticipantNames, "silkit://localhost:0");
 
         //participant setup
         auto* ethWriter = testHarness.GetParticipant("EthWriter");
@@ -196,7 +194,6 @@ protected:
     }
 
 protected:
-    std::string registryUri;
     std::vector<std::string> syncParticipantNames;
 
     struct TestMessage

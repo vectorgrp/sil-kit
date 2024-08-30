@@ -29,7 +29,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "ConfigurationTestUtils.hpp"
 
-#include "GetTestPid.hpp"
 #include "IntegrationTestInfrastructure.hpp"
 #include "IParticipantInternal.hpp"
 #include "IServiceDiscovery.hpp"
@@ -607,16 +606,14 @@ protected:
 
     void RunSyncTest(std::vector<RpcParticipant>& rpcs)
     {
-        auto registryUri = MakeTestRegistryUri();
-
         std::vector<std::string> requiredParticipantNames;
         for (const auto& p : rpcs)
         {
             requiredParticipantNames.push_back(p.name);
         }
 
-        _testSystem.SetupRegistryAndSystemMaster(registryUri, true, std::move(requiredParticipantNames));
-        RunParticipants(rpcs, registryUri, true);
+        _testSystem.SetupRegistryAndSystemMaster("silkit://localhost:0", true, std::move(requiredParticipantNames));
+        RunParticipants(rpcs, _testSystem.GetRegistryUri(), true);
         WaitForAllServersDiscovered(rpcs);
         StopSimOnallCalledAndReceived(rpcs, true);
         JoinRpcThreads();
@@ -625,10 +622,8 @@ protected:
 
     void RunAsyncTest(std::vector<RpcParticipant>& rpcs)
     {
-        auto registryUri = MakeTestRegistryUri();
-
-        _testSystem.SetupRegistryAndSystemMaster(registryUri, false, {});
-        RunParticipants(rpcs, registryUri, false);
+        _testSystem.SetupRegistryAndSystemMaster("silkit://localhost:0", false, {});
+        RunParticipants(rpcs, _testSystem.GetRegistryUri(), false);
         WaitForAllServersDiscovered(rpcs);
         JoinRpcThreads();
         ShutdownSystem();

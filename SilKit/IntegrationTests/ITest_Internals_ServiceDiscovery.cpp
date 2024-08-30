@@ -29,7 +29,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "functional.hpp"
 
 #include "SimTestHarness.hpp"
-#include "GetTestPid.hpp"
 #include "ServiceDiscovery.hpp"
 #include "ConfigurationTestUtils.hpp"
 #include "VAsioRegistry.hpp"
@@ -54,14 +53,13 @@ protected:
 // All created should be removed as well if a participant leaves
 TEST_F(ITest_Internals_ServiceDiscovery, discover_services)
 {
-    auto registryUri = MakeTestRegistryUri();
     size_t numberOfServices = 5;
     std::string subscriberName = "Subscriber";
     std::string publisherName = "Publisher";
 
     // Registry
     auto registry = SilKit::Vendor::Vector::CreateSilKitRegistry(SilKit::Config::MakeEmptyParticipantConfiguration());
-    registry->StartListening(registryUri);
+    auto registryUri = registry->StartListening("silkit://localhost:0");
 
     // Publisher that will leave the simulation and trigger service removal
     auto&& publisher = SilKit::CreateParticipantImpl(SilKit::Config::MakeEmptyParticipantConfigurationImpl(),
@@ -146,14 +144,13 @@ TEST_F(ITest_Internals_ServiceDiscovery, discover_services)
 // All created should be removed as well if a participant leaves
 TEST_F(ITest_Internals_ServiceDiscovery, discover_specific_services)
 {
-    auto registryUri = MakeTestRegistryUri();
     size_t numberOfServices = 5;
     std::string subscriberName = "Subscriber";
     std::string publisherName = "Publisher";
 
     // Registry
     auto registry = SilKit::Vendor::Vector::CreateSilKitRegistry(SilKit::Config::MakeEmptyParticipantConfiguration());
-    registry->StartListening(registryUri);
+    auto registryUri = registry->StartListening("silkit://localhost:0");
 
     // Publisher that will leave the simulation and trigger service removal
     auto&& publisher = SilKit::CreateParticipantImpl(SilKit::Config::MakeEmptyParticipantConfigurationImpl(),

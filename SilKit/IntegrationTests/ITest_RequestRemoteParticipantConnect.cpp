@@ -21,9 +21,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include <stdexcept>
 #include <thread>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
-#include "GetTestPid.hpp"
 #include "silkit/SilKit.hpp"
 #include "SimTestHarness.hpp"
 

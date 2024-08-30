@@ -30,7 +30,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "IServiceDiscovery.hpp"
 #include "ServiceDatatypes.hpp"
 
-#include "GetTestPid.hpp"
 #include "IntegrationTestInfrastructure.hpp"
 
 using namespace std::chrono_literals;
@@ -485,7 +484,6 @@ protected:
 
     void RunSyncTest(std::vector<PubSubParticipant>& pubsubs)
     {
-        auto registryUri = MakeTestRegistryUri();
 
         std::vector<std::string> requiredParticipantNames;
         for (const auto& p : pubsubs)
@@ -493,8 +491,8 @@ protected:
             requiredParticipantNames.push_back(p.name);
         }
 
-        _testSystem.SetupRegistryAndSystemMaster(registryUri, true, std::move(requiredParticipantNames));
-        RunParticipants(pubsubs, registryUri, true);
+        _testSystem.SetupRegistryAndSystemMaster("silkit://localhost:0", true, std::move(requiredParticipantNames));
+        RunParticipants(pubsubs, _testSystem.GetRegistryUri(), true);
         WaitForAllDiscovered(pubsubs);
         StopSimOnAllSentAndReceived(pubsubs, true);
         JoinPubSubThreads();
@@ -503,18 +501,16 @@ protected:
 
     void RunAsyncTest(std::vector<PubSubParticipant>& publishers, std::vector<PubSubParticipant>& subscribers)
     {
-        auto registryUri = MakeTestRegistryUri();
-
-        _testSystem.SetupRegistryAndSystemMaster(registryUri, false, {});
+        _testSystem.SetupRegistryAndSystemMaster("silkit://localhost:0", false, {});
 
         //Start publishers first
-        RunParticipants(publishers, registryUri, false);
+        RunParticipants(publishers, _testSystem.GetRegistryUri(), false);
         for (auto& p : publishers)
         {
             p.WaitForAllSent();
         }
         //Start subscribers afterwards
-        RunParticipants(subscribers, registryUri, false);
+        RunParticipants(subscribers, _testSystem.GetRegistryUri(), false);
         JoinPubSubThreads();
         ShutdownSystem();
     }

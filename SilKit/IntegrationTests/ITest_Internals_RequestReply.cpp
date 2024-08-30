@@ -31,7 +31,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "IRequestReplyService.hpp"
 #include "procs/IParticipantReplies.hpp"
 
-#include "GetTestPid.hpp"
 #include "ConfigurationTestUtils.hpp"
 #include "VAsioRegistry.hpp"
 #include "CreateParticipantImpl.hpp"
@@ -53,9 +52,8 @@ protected:
 TEST_F(ITest_Internals_RequestReply, participant_replies)
 {
     // Registry
-    auto registryUri = MakeTestRegistryUri();
     auto registry = SilKit::Vendor::Vector::CreateSilKitRegistry(SilKit::Config::MakeEmptyParticipantConfiguration());
-    registry->StartListening(registryUri);
+    auto registryUri = registry->StartListening("silkit://localhost:0");
 
     // Create participants
     auto&& p1 =

@@ -26,8 +26,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <thread>
 #include <list>
 
-#include "GetTestPid.hpp"
-
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
@@ -182,7 +180,7 @@ protected:
             config = SilKit::Config::MakeEmptyParticipantConfigurationImpl();
         }
 
-        auto participant = SilKit::CreateParticipantImpl(config, testParticipant.name, registryUri);
+        auto participant = SilKit::CreateParticipantImpl(config, testParticipant.name, _registryUri);
         auto* logger = participant->GetLogger();
 
         ILifecycleService* lifecycleService{};
@@ -259,7 +257,7 @@ protected:
             std::stringstream ss;
             ss << "now=" << now.count() / 1e9 << "s";
             logger->Info(ss.str());
-            if (!testParticipant.simtimePassed && now > simtimeToPass)
+            if (!testParticipant.simtimePassed && now > _simtimeToPass)
             {
                 testParticipant.simtimePassed = true;
                 testParticipant.simtimePassedPromise.set_value();
@@ -291,7 +289,7 @@ protected:
             config = SilKit::Config::MakeEmptyParticipantConfigurationImpl();
         }
 
-        auto participant = SilKit::CreateParticipantImpl(config, testParticipant.name, registryUri);
+        auto participant = SilKit::CreateParticipantImpl(config, testParticipant.name, _registryUri);
         auto* logger = participant->GetLogger();
 
         ILifecycleService* lifecycleService{};
@@ -414,7 +412,7 @@ protected:
         }
 
         auto systemControllerParticipant =
-            SilKit::CreateParticipantImpl(config, systemControllerParticipantName, registryUri);
+            SilKit::CreateParticipantImpl(config, systemControllerParticipantName, _registryUri);
 
         auto participantInternal = dynamic_cast<SilKit::Core::IParticipantInternal*>(systemControllerParticipant.get());
         auto systemController = participantInternal->GetSystemController();
@@ -526,7 +524,7 @@ protected:
         std::shared_ptr<SilKit::Config::IParticipantConfiguration> config;
         config = SilKit::Config::MakeEmptyParticipantConfiguration();
         registry = SilKit::Vendor::Vector::CreateSilKitRegistry(config);
-        registry->StartListening(registryUri);
+        _registryUri = registry->StartListening("silkit://localhost:0");
     }
 
     void StopRegistry()
@@ -542,22 +540,22 @@ protected:
             {
                 if (p.lifeCycleOperationMode == OperationMode::Invalid)
                 {
-                    participantThreads_Async_Invalid.emplace_back([this, &p] { AsyncParticipantThread(p); });
+                    _participantThreads_Async_Invalid.emplace_back([this, &p] { AsyncParticipantThread(p); });
                 }
                 else if (p.lifeCycleOperationMode == OperationMode::Autonomous)
                 {
-                    participantThreads_Async_Autonomous.emplace_back([this, &p] { AsyncParticipantThread(p); });
+                    _participantThreads_Async_Autonomous.emplace_back([this, &p] { AsyncParticipantThread(p); });
                 }
                 else if (p.lifeCycleOperationMode == OperationMode::Coordinated)
                 {
-                    participantThreads_Async_Coordinated.emplace_back([this, &p] { AsyncParticipantThread(p); });
+                    _participantThreads_Async_Coordinated.emplace_back([this, &p] { AsyncParticipantThread(p); });
                 }
             }
             else if (p.timeMode == TimeMode::Sync)
             {
                 if (p.lifeCycleOperationMode == OperationMode::Invalid)
                 {
-                    participantThreads_Sync_Invalid.emplace_back([this, &p] { SyncParticipantThread(p); });
+                    _participantThreads_Sync_Invalid.emplace_back([this, &p] { SyncParticipantThread(p); });
                 }
                 else if (p.lifeCycleOperationMode == OperationMode::Autonomous)
                 {
@@ -565,7 +563,7 @@ protected:
                 }
                 else if (p.lifeCycleOperationMode == OperationMode::Coordinated)
                 {
-                    participantThreads_Sync_Coordinated.emplace_back([this, &p] { SyncParticipantThread(p); });
+                    _participantThreads_Sync_Coordinated.emplace_back([this, &p] { SyncParticipantThread(p); });
                 }
             }
         }
@@ -651,7 +649,6 @@ protected:
     void SetUp() override
     {
         globalParticipantIndex = 0;
-        registryUri = MakeTestRegistryUri();
     }
 
 protected:
@@ -660,21 +657,22 @@ protected:
 
     ParticipantThread participantThread_SystemController;
 
-    std::vector<ParticipantThread> participantThreads_Sync_Invalid;
+    std::vector<ParticipantThread> _participantThreads_Sync_Invalid;
     std::vector<ParticipantThread> participantThreads_Sync_Autonomous;
-    std::vector<ParticipantThread> participantThreads_Sync_Coordinated;
+    std::vector<ParticipantThread> _participantThreads_Sync_Coordinated;
 
-    std::vector<ParticipantThread> participantThreads_Async_Invalid;
-    std::vector<ParticipantThread> participantThreads_Async_Autonomous;
-    std::vector<ParticipantThread> participantThreads_Async_Coordinated;
+    std::vector<ParticipantThread> _participantThreads_Async_Invalid;
+    std::vector<ParticipantThread> _participantThreads_Async_Autonomous;
+    std::vector<ParticipantThread> _participantThreads_Async_Coordinated;
 
-    std::chrono::seconds simtimeToPass{3s};
+    std::chrono::seconds _simtimeToPass{3s};
 
     const bool verbose = true;
     const bool logging = false;
     const Services::Logging::Level logLevel = Services::Logging::Level::Trace;
 
-    std::string registryUri;
+    std::string _registryUri{"not yet defined"};
+
 };
 
 // --------------------------
@@ -708,7 +706,7 @@ TEST_F(ITest_Internals_ParticipantModes, test_AsyncCoordinatedNonReq_disallowed)
         p.Stop();
 
     // Shutdown
-    JoinParticipantThreads(participantThreads_Async_Coordinated);
+    JoinParticipantThreads(_participantThreads_Async_Coordinated);
     AbortSystemController();
     StopRegistry();
 }
@@ -735,7 +733,7 @@ TEST_F(ITest_Internals_ParticipantModes, test_SyncCoordinatedNonReq_disallowed)
         p.Stop();
 
     // Shutdown
-    JoinParticipantThreads(participantThreads_Sync_Coordinated);
+    JoinParticipantThreads(_participantThreads_Sync_Coordinated);
     AbortSystemController();
     StopRegistry();
 }
@@ -751,7 +749,7 @@ TEST_F(ITest_Internals_ParticipantModes, test_SyncInvalid_disallowed)
 
     RunParticipants(testParticipants);
     // Cannot create lifecycle service with OperationMode::Invalid
-    EXPECT_THROW(JoinParticipantThreads(participantThreads_Sync_Invalid), SilKit::ConfigurationError);
+    EXPECT_THROW(JoinParticipantThreads(_participantThreads_Sync_Invalid), SilKit::ConfigurationError);
 
     StopRegistry();
 }
@@ -798,7 +796,7 @@ TEST_F(ITest_Internals_ParticipantModes, test_AsyncInvalidNonReq)
         p.Stop();
 
     // Shutdown
-    JoinParticipantThreads(participantThreads_Async_Invalid);
+    JoinParticipantThreads(_participantThreads_Async_Invalid);
     StopRegistry();
 }
 
@@ -826,7 +824,7 @@ TEST_F(ITest_Internals_ParticipantModes, test_AsyncAutonomousNonReq)
         p.Stop();
 
     // Shutdown
-    JoinParticipantThreads(participantThreads_Async_Autonomous);
+    JoinParticipantThreads(_participantThreads_Async_Autonomous);
 
     StopRegistry();
 }
@@ -863,7 +861,7 @@ TEST_F(ITest_Internals_ParticipantModes, test_AsyncAutonomousReq)
         p.Stop();
 
     // Shutdown
-    JoinParticipantThreads(participantThreads_Async_Autonomous);
+    JoinParticipantThreads(_participantThreads_Async_Autonomous);
     AbortSystemController();
     StopRegistry();
 }
@@ -903,7 +901,7 @@ TEST_F(ITest_Internals_ParticipantModes, test_AsyncCoordinatedReq)
     testParticipants.front().Stop();
 
     // Shutdown
-    JoinParticipantThreads(participantThreads_Async_Coordinated);
+    JoinParticipantThreads(_participantThreads_Async_Coordinated);
 
     AbortSystemController();
     StopRegistry();
@@ -1011,7 +1009,7 @@ TEST_F(ITest_Internals_ParticipantModes, test_SyncCoordinatedReq)
         p.Stop();
 
     // Shutdown
-    JoinParticipantThreads(participantThreads_Sync_Coordinated);
+    JoinParticipantThreads(_participantThreads_Sync_Coordinated);
 
     AbortSystemController();
     StopRegistry();
@@ -1056,8 +1054,8 @@ TEST_F(ITest_Internals_ParticipantModes, test_AsyncAutonomousReq_with_SyncCoordi
         p.Stop();
 
     // Shutdown
-    JoinParticipantThreads(participantThreads_Async_Autonomous);
-    JoinParticipantThreads(participantThreads_Sync_Coordinated);
+    JoinParticipantThreads(_participantThreads_Async_Autonomous);
+    JoinParticipantThreads(_participantThreads_Sync_Coordinated);
 
     AbortSystemController();
     StopRegistry();
@@ -1094,7 +1092,7 @@ TEST_F(ITest_Internals_ParticipantModes, test_AsyncInvalid_with_SyncAutonomous)
     }
 
     // Shutdown
-    JoinParticipantThreads(participantThreads_Async_Invalid);
+    JoinParticipantThreads(_participantThreads_Async_Invalid);
     JoinParticipantThreads(participantThreads_Sync_Autonomous);
 
     StopRegistry();
@@ -1220,29 +1218,29 @@ TEST_F(ITest_Internals_ParticipantModes, test_Combinations)
                     }
 
                     // Shutdown
-                    if (!participantThreads_Sync_Invalid.empty())
+                    if (!_participantThreads_Sync_Invalid.empty())
                     {
-                        JoinParticipantThreads(participantThreads_Sync_Invalid);
+                        JoinParticipantThreads(_participantThreads_Sync_Invalid);
                     }
                     if (!participantThreads_Sync_Autonomous.empty())
                     {
                         JoinParticipantThreads(participantThreads_Sync_Autonomous);
                     }
-                    if (!participantThreads_Sync_Coordinated.empty())
+                    if (!_participantThreads_Sync_Coordinated.empty())
                     {
-                        JoinParticipantThreads(participantThreads_Sync_Coordinated);
+                        JoinParticipantThreads(_participantThreads_Sync_Coordinated);
                     }
-                    if (!participantThreads_Async_Invalid.empty())
+                    if (!_participantThreads_Async_Invalid.empty())
                     {
-                        JoinParticipantThreads(participantThreads_Async_Invalid);
+                        JoinParticipantThreads(_participantThreads_Async_Invalid);
                     }
-                    if (!participantThreads_Async_Autonomous.empty())
+                    if (!_participantThreads_Async_Autonomous.empty())
                     {
-                        JoinParticipantThreads(participantThreads_Async_Autonomous);
+                        JoinParticipantThreads(_participantThreads_Async_Autonomous);
                     }
-                    if (!participantThreads_Async_Coordinated.empty())
+                    if (!_participantThreads_Async_Coordinated.empty())
                     {
-                        JoinParticipantThreads(participantThreads_Async_Coordinated);
+                        JoinParticipantThreads(_participantThreads_Async_Coordinated);
                     }
                     if (!required.empty())
                     {

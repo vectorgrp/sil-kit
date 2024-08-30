@@ -31,8 +31,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "SimTestHarness.hpp"
 
-#include "GetTestPid.hpp"
-
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
@@ -54,7 +52,7 @@ TEST(ITest_AsyncSimTask, test_async_simtask_lockstep)
     // Async may not start a new SimTask before calling CompleteSimulationtask to complete the current one.
 
 
-    SimTestHarness testHarness({"Sync", "Async"}, MakeTestRegistryUri());
+    SimTestHarness testHarness({"Sync", "Async"}, "silkit://localhost:0");
 
     std::atomic<std::chrono::nanoseconds> syncTimeNs{0ns};
     std::atomic<bool> done{false};
@@ -142,7 +140,7 @@ TEST(ITest_AsyncSimTask, test_async_simtask_nodeadlock)
     // The async participant uses the CompleteSimTask calls to request next simulation step.
     // The sync participant will be used to check the time progress
 
-    SimTestHarness testHarness({"Sync", "Async"}, MakeTestRegistryUri());
+    SimTestHarness testHarness({"Sync", "Async"}, "silkit://localhost:0");
 
     auto syncTimeNs{0ns};
 
@@ -179,7 +177,7 @@ TEST(ITest_AsyncSimTask, test_async_simtask_different_periods)
     // The async and sync participant use different time periods to validate the that a slower participant does
     // not execute its simtask too often.
 
-    SimTestHarness testHarness({"Sync", "Async"}, MakeTestRegistryUri());
+    SimTestHarness testHarness({"Sync", "Async"}, "silkit://localhost:0");
 
     auto syncTime{0ns};
     auto asyncTime{0ns};
@@ -214,7 +212,7 @@ TEST(ITest_AsyncSimTask, test_async_simtask_multiple_completion_calls)
 {
     // Verify that multiple CompleteSimTask calls do not trigger malicious behaviour
 
-    SimTestHarness testHarness({"Sync", "Async"}, MakeTestRegistryUri());
+    SimTestHarness testHarness({"Sync", "Async"}, "silkit://localhost:0");
 
     auto syncTime{0ns};
     auto asyncTime{0ns};

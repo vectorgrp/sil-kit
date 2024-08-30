@@ -24,7 +24,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-#include "GetTestPid.hpp"
 #include "silkit/config/IParticipantConfiguration.hpp"
 #include "silkit/experimental/participant/ParticipantExtensions.hpp"
 #include "silkit/participant/IParticipant.hpp"
@@ -42,10 +41,9 @@ TEST(ITest_SameParticipants, test_participants_with_unique_name)
     std::unique_ptr<SilKit::IParticipant> participant2;
 
     // start registry
-    auto registryUri = MakeTestRegistryUri();
     auto registry =
         SilKit::Vendor::Vector::CreateSilKitRegistry(SilKit::Config::ParticipantConfigurationFromString(""));
-    registry->StartListening(registryUri);
+    auto registryUri = registry->StartListening("silkit://localhost:0");
 
     auto pCfg = SilKit::Config::ParticipantConfigurationFromString("");
     EXPECT_NO_THROW(participant1 = SilKit::CreateParticipant(pCfg, "Participant1", registryUri));
@@ -60,10 +58,9 @@ TEST(ITest_SameParticipants, test_participants_with_same_name)
     std::unique_ptr<SilKit::IParticipant> participant2;
 
     // start registry
-    auto registryUri = MakeTestRegistryUri();
     auto registry =
         SilKit::Vendor::Vector::CreateSilKitRegistry(SilKit::Config::ParticipantConfigurationFromString(""));
-    registry->StartListening(registryUri);
+    auto registryUri = registry->StartListening("silkit://localhost:0");
 
     auto pCfg = SilKit::Config::ParticipantConfigurationFromString("");
     EXPECT_NO_THROW(participant1 = SilKit::CreateParticipant(pCfg, "Participant", registryUri));

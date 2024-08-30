@@ -27,8 +27,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "SimTestHarness.hpp"
 
-#include "GetTestPid.hpp"
-
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
@@ -184,8 +182,7 @@ protected:
 
     void ExecuteTest()
     {
-        auto registryUri = MakeTestRegistryUri();
-        SilKit::Tests::SimTestHarness testHarness(syncParticipantNames, registryUri);
+        SilKit::Tests::SimTestHarness testHarness(syncParticipantNames, "silkit://localhost:0");
 
         auto* canWriter = testHarness.GetParticipant("CanWriter");
         SetupWriter(canWriter);

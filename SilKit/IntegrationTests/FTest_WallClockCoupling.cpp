@@ -31,8 +31,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "SimTestHarness.hpp"
 
-#include "GetTestPid.hpp"
-
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
@@ -46,7 +44,7 @@ TEST(FTest_WallClockCoupling, test_wallclock_sync_simtask)
     double animationFactor = 2.0;
     std::string configWithAnimFactor = R"({"Experimental": {"TimeSynchronization": { "AnimationFactor": 2.0 } }})";
 
-    SimTestHarness testHarness({"P1", "P2", "P3"}, MakeTestRegistryUri(), true);
+    SimTestHarness testHarness({"P1", "P2", "P3"}, "silkit://localhost:0", true);
 
     auto wc_P1{0ns};
     auto wc_P2{0ns};
@@ -115,7 +113,7 @@ TEST(FTest_WallClockCoupling, test_wallclock_mixed_simtask)
     double animationFactor = 2.0;
     std::string configWithAnimFactor = R"({"Experimental": {"TimeSynchronization": { "AnimationFactor": 2.0 } }})";
 
-    SimTestHarness testHarness({"P1", "P2", "P3"}, MakeTestRegistryUri(), true);
+    SimTestHarness testHarness({"P1", "P2", "P3"}, "silkit://localhost:0", true);
 
     auto wc_P1{0ns};
     auto wc_P2{0ns};

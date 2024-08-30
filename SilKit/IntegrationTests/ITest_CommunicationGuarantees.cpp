@@ -26,8 +26,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <string>
 #include <thread>
 
-#include "GetTestPid.hpp"
-
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
@@ -453,10 +451,10 @@ protected:
         FAIL() << reason;
     }
 
-    void RunRegistry(const std::string& registryUri)
+    auto RunRegistry(const std::string& registryUri) -> std::string
     {
         registry = SilKit::Vendor::Vector::CreateSilKitRegistry(SilKit::Config::ParticipantConfigurationFromString(""));
-        registry->StartListening(registryUri);
+        return registry->StartListening(registryUri);
     }
 
     void RunSystemMaster(const std::string& registryUri)
@@ -502,9 +500,9 @@ protected:
         participantThreads.clear();
     }
 
-    void SetupSystem(const std::string& registryUri, std::vector<TestParticipant>& participants)
+    auto SetupSystem(const std::string& requestedRegistryUri, std::vector<TestParticipant>& participants) -> std::string
     {
-        RunRegistry(registryUri);
+        auto registryUri = RunRegistry(requestedRegistryUri);
 
         for (auto&& p : participants)
         {
@@ -524,6 +522,7 @@ protected:
         {
             systemController.active = false;
         }
+        return registryUri;
     }
 
     void SystemCleanup()
@@ -538,8 +537,7 @@ protected:
     {
         try
         {
-            auto registryUri = MakeTestRegistryUri();
-            SetupSystem(registryUri, participants);
+            auto registryUri = SetupSystem("silkit://localhost:0", participants);
             RunParticipantThreads(participants, registryUri);
             Log() << ">> Await all done";
             for (auto& p : participants)
@@ -598,8 +596,7 @@ protected:
             participants.push_back({"Sub", {}, {topic1}, OperationMode::Autonomous, TimeMode::Async});
             auto& subParticipant = participants.at(1);
 
-            auto registryUri = MakeTestRegistryUri();
-            SetupSystem(registryUri, participants);
+            auto registryUri = SetupSystem("silkit://localhost:0", participants);
             RunParticipantThreads(participants, registryUri);
 
             for (auto& p : participants)
@@ -684,8 +681,7 @@ TEST_F(ITest_CommunicationGuarantees, test_receive_in_comm_ready_handler_autonom
 
     try
     {
-        auto registryUri = MakeTestRegistryUri();
-        RunRegistry(registryUri);
+        auto registryUri = RunRegistry("silkit://localhost:0");
         RunParticipantThreads(autonomousAsyncParticipantsSub, registryUri);
         // If we would start all participants at once, we cannot guarantee communication because
         // the publish might happen even before the subscriber created it's controllers.
@@ -794,9 +790,8 @@ TEST_F(ITest_CommunicationGuarantees, test_receive_in_comm_ready_handler_mixed)
 
     try
     {
-        auto registryUri = MakeTestRegistryUri();
 
-        SetupSystem(registryUri, coordinatedSyncParticipantsSub);
+        auto registryUri = SetupSystem("silkit://localhost:0", coordinatedSyncParticipantsSub);
 
         // Start the coordinated participants
         RunParticipantThreads(coordinatedSyncParticipantsSub, registryUri);

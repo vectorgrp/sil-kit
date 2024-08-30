@@ -300,6 +300,11 @@ SimParticipant* SimTestHarness::GetParticipant(const std::string& participantNam
     return _simParticipants[participantName].get();
 }
 
+auto SimTestHarness::GetRegistryUri() const -> std::string
+{
+    return _registryUri;
+}
+
 SimParticipant* SimTestHarness::GetParticipant(const std::string& participantName)
 {
     return GetParticipant(participantName, "");
