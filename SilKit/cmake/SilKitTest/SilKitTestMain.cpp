@@ -7,8 +7,14 @@
 
 int main(int argc, char** argv)
 {
-    std::cout << "Running main() from SIlKitTestMain.cpp with SIL Kit version " << SilKit::Version::String() << " from "
-              << SilKit::Version::GitHash() << std::endl;
+    std::cout << "Running main() from SIlKitTestMain.cpp" << std::endl;
+
     testing::InitGoogleMock(&argc, argv);
+
+#ifndef SIL_KIT_TEST_MAIN_DO_NOT_PRINT_VERSION
+    std::cout << "Running with SIL Kit version '" << SilKit::Version::String() << "' with git hash '"
+              << SilKit::Version::GitHash() << "'" << std::endl;
+#endif
+
     return RUN_ALL_TESTS();
 }

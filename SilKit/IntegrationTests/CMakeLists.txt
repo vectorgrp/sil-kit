@@ -29,6 +29,7 @@ add_library(ITest_Utils INTERFACE)
 target_include_directories(ITest_Utils
     INTERFACE ${CMAKE_CURRENT_LIST_DIR})
 
+
 target_link_libraries(SilKitIntegrationTests
     PRIVATE SilKit
     PRIVATE S_ITests_STH
@@ -40,151 +41,100 @@ target_link_libraries(SilKitInternalIntegrationTests
 )
 
 target_link_libraries(SilKitFunctionalTests
+    PRIVATE SilKit
+    PRIVATE S_ITests_STH
+)
+
+target_link_libraries(SilKitInternalFunctionalTests
     PRIVATE S_SilKitImpl
     PRIVATE S_ITests_STH_Internals
 )
 
-add_silkit_test_to_executable(SilKitIntegrationTests
-    SOURCES
-    ITest_CatchExceptionsInCallbacks.cpp
 
-    LIBS
-    SilKit
+add_silkit_test_to_executable(SilKitIntegrationTests
+    SOURCES ITest_CatchExceptionsInCallbacks.cpp
 )
 
 add_silkit_test_to_executable(SilKitInternalIntegrationTests
     SOURCES ITest_HopOnHopOff.cpp
-    LIBS S_SilKitImpl
 )
 
 add_silkit_test_to_executable(SilKitInternalIntegrationTests
     SOURCES ITest_Abort.cpp
-    LIBS S_SilKitImpl
 )
 
 add_silkit_test_to_executable(SilKitInternalIntegrationTests
     SOURCES ITest_Internals_ParticipantModes.cpp
-    LIBS S_SilKitImpl
 )
 
 add_silkit_test_to_executable(SilKitIntegrationTests
-    SOURCES
-    ITest_CommunicationGuarantees.cpp
-
-    LIBS
-    SilKit
+    SOURCES ITest_CommunicationGuarantees.cpp
 )
 
 add_silkit_test_to_executable(SilKitInternalIntegrationTests
-    SOURCES
-    ITest_Internals_DataPubSub.cpp
-
-    LIBS
-    S_SilKitImpl
+    SOURCES ITest_Internals_DataPubSub.cpp
 )
 
 add_silkit_test_to_executable(SilKitInternalIntegrationTests
     SOURCES ITest_Internals_TargetedMessaging.cpp
-    LIBS S_ITests_STH_Internals
 )
 
 add_silkit_test_to_executable(SilKitIntegrationTests
-    SOURCES
-    ITest_StateMachineVAsio.cpp
-
-    LIBS
-    SilKit
+    SOURCES ITest_StateMachineVAsio.cpp
 )
 
 add_silkit_test_to_executable(SilKitIntegrationTests
-    SOURCES
-    ITest_DeterministicSimVAsio.cpp
-
-    LIBS
-    SilKit
+    SOURCES ITest_DeterministicSimVAsio.cpp
 )
 
 add_silkit_test_to_executable(SilKitIntegrationTests
-    SOURCES
-    ITest_DifferentPeriods.cpp
-
-    LIBS
-    SilKit
+    SOURCES ITest_DifferentPeriods.cpp
 )
 
 add_silkit_test_to_executable(SilKitIntegrationTests
-    SOURCES
-    ITest_SingleParticipant.cpp
-
-    LIBS
-    S_ITests_STH
+    SOURCES ITest_SingleParticipant.cpp
 )
 
 add_silkit_test_to_executable(SilKitIntegrationTests
-    SOURCES
-    ITest_SameParticipants.cpp
-
-    LIBS
-    S_ITests_STH
+    SOURCES ITest_SameParticipants.cpp
 )
 
 add_silkit_test_to_executable(SilKitInternalIntegrationTests
     SOURCES ITest_Internals_ServiceDiscovery.cpp
-    LIBS S_ITests_STH_Internals
 )
 
 add_silkit_test_to_executable(SilKitInternalIntegrationTests
     SOURCES ITest_Internals_RequestReply.cpp
-    LIBS S_SilKitImpl
 )
 
-add_silkit_test_to_executable(SilKitFunctionalTests
+add_silkit_test_to_executable(SilKitInternalFunctionalTests
     SOURCES FTest_ServiceDiscoveryPerf.cpp
-    LIBS S_ITests_STH_Internals
 )
 
 add_silkit_test_to_executable(SilKitInternalIntegrationTests
     SOURCES ITest_SystemMonitor.cpp
-    LIBS S_ITests_STH_Internals
 )
 
 add_silkit_test_to_executable(SilKitFunctionalTests
     SOURCES FTest_PubSubPerf.cpp
-    LIBS S_ITests_STH
 )
 
 add_silkit_test_to_executable(SilKitIntegrationTests
-    SOURCES
-    ITest_AsyncSimTask.cpp
-
-    LIBS
-    S_ITests_STH
+    SOURCES ITest_AsyncSimTask.cpp
 )
 
 add_silkit_test_to_executable(SilKitIntegrationTests
-    SOURCES
-    ITest_SimTask.cpp
-
-    LIBS
-    SilKit
+    SOURCES ITest_SimTask.cpp
 )
 
 add_silkit_test_to_executable(SilKitFunctionalTests
-    SOURCES
-    FTest_WallClockCoupling.cpp
-
-    LIBS
-    S_ITests_STH
+    SOURCES FTest_WallClockCoupling.cpp
 )
 
 # Windows specific tests
 if(MSVC)
     add_silkit_test_to_executable(SilKitInternalIntegrationTests
-        SOURCES
-        ITest_CompatibilityWithWindowsHeaders.cpp
-
-        LIBS
-        S_SilKitImpl
+        SOURCES ITest_CompatibilityWithWindowsHeaders.cpp
     )
 endif()
 
@@ -193,123 +143,67 @@ endif()
 # ============================================================
 
 add_silkit_test_to_executable(SilKitFunctionalTests
-    SOURCES
-    FTest_VendorVectorRegistry.cpp
-
-    LIBS
-    SilKit
+    SOURCES FTest_VendorVectorRegistry.cpp
 )
 
 
 # CAN
 
 add_silkit_test_to_executable(SilKitFunctionalTests
-    SOURCES
-    FTest_CanWithoutSync.cpp
-
-    LIBS
-    SilKit
+    SOURCES FTest_CanWithoutSync.cpp
 )
 
 add_silkit_test_to_executable(SilKitIntegrationTests
-    SOURCES
-    ITest_ThreeCanController.cpp
-
-    LIBS
-    S_ITests_STH
+    SOURCES ITest_ThreeCanController.cpp
 )
 
 add_silkit_test_to_executable(SilKitFunctionalTests
     SOURCES FTest_CanControllerThreadSafety.cpp
-    LIBS SilKit
 )
 
 # Ethernet
 
 add_silkit_test_to_executable(SilKitIntegrationTests
-    SOURCES
-    ITest_ThreeEthController.cpp
-
-    LIBS
-    S_ITests_STH
+    SOURCES ITest_ThreeEthController.cpp
 )
 
 add_silkit_test_to_executable(SilKitFunctionalTests
-    SOURCES
-    FTest_EthWithoutSync.cpp
-
-    LIBS
-    SilKit
+    SOURCES FTest_EthWithoutSync.cpp
 )
 
 # LIN
 
 add_silkit_test_to_executable(SilKitIntegrationTests
-    SOURCES
-    ITest_Lin.cpp
-
-    LIBS
-    S_ITests_STH
+    SOURCES ITest_Lin.cpp
 )
 add_silkit_test_to_executable(SilKitIntegrationTests
-    SOURCES
-    ITest_LinDynamicResponse.cpp
-
-    LIBS
-    S_ITests_STH
+    SOURCES ITest_LinDynamicResponse.cpp
 )
 
 # RPC
 
 add_silkit_test_to_executable(SilKitInternalIntegrationTests
-    SOURCES
-    ITest_Internals_Rpc.cpp
-    ITest_Internals_Rpc.hpp
-
-    LIBS
-    S_SilKitImpl
-    I_SilKit_Core_Internal
-    I_SilKit_Config_TestUtils
+    SOURCES ITest_Internals_Rpc.cpp ITest_Internals_Rpc.hpp
 )
 
 # ============================================================
-#  Integration Tests for NetworkSimulaton
+#  Integration Tests for Network Simulator API
 # ============================================================
 
 add_silkit_test_to_executable(SilKitIntegrationTests
-    SOURCES
-    ITest_NetSimCan.cpp
-    ITest_NetSim.hpp
-
-    LIBS
-    S_ITests_STH
+    SOURCES ITest_NetSimCan.cpp
 )
 
 add_silkit_test_to_executable(SilKitIntegrationTests
-    SOURCES
-    ITest_NetSimEthernet.cpp
-    ITest_NetSim.hpp
-
-    LIBS
-    S_ITests_STH
+    SOURCES ITest_NetSimEthernet.cpp
 )
 
 add_silkit_test_to_executable(SilKitIntegrationTests
-    SOURCES
-    ITest_NetSimLin.cpp
-    ITest_NetSim.hpp
-
-    LIBS
-    S_ITests_STH
+    SOURCES ITest_NetSimLin.cpp
 )
 
 add_silkit_test_to_executable(SilKitIntegrationTests
-    SOURCES
-    ITest_NetSimFlexRay.cpp
-    ITest_NetSim.hpp
-
-    LIBS
-    S_ITests_STH
+    SOURCES ITest_NetSimFlexRay.cpp
 )
 
 
@@ -320,93 +214,50 @@ add_silkit_test_to_executable(SilKitIntegrationTests
 # CAN
 
 add_silkit_test_to_executable(SilKitIntegrationTests
-    SOURCES
-    ITest_CanDemo.cpp
-
-    LIBS
-    S_ITests_STH
+    SOURCES ITest_CanDemo.cpp
 )
 
 # Ethernet
 
 add_silkit_test_to_executable(SilKitIntegrationTests
-    SOURCES
-    ITest_EthernetDemo.cpp
-
-    LIBS
-    S_ITests_STH
+    SOURCES ITest_EthernetDemo.cpp
 )
 
 # LIN
 
 add_silkit_test_to_executable(SilKitIntegrationTests
-    SOURCES
-    ITest_LinDemo.cpp
-
-    LIBS
-    S_ITests_STH
+    SOURCES ITest_LinDemo.cpp
 )
 
 add_silkit_test_to_executable(SilKitIntegrationTests
-    SOURCES
-    ITest_Orchestration.cpp
-
-    LIBS
-    S_ITests_STH
+    SOURCES ITest_Orchestration.cpp
 )
 
 add_silkit_test_to_executable(SilKitIntegrationTests
-    SOURCES
-    ITest_MessageAggregation.cpp
-
-    LIBS
-    S_ITests_STH
+    SOURCES ITest_MessageAggregation.cpp
 )
 
 add_silkit_test_to_executable(SilKitIntegrationTests
-    SOURCES
-    ITest_RequestRemoteParticipantConnect.cpp
-
-    LIBS
-    S_ITests_STH
+    SOURCES ITest_RequestRemoteParticipantConnect.cpp
 )
 
 add_silkit_test_to_executable(SilKitIntegrationTests
-    SOURCES
-    ITest_MultiSim.cpp
-
-    LIBS
-    S_ITests_STH
+    SOURCES ITest_MultiSim.cpp
 )
 
 if(SILKIT_BUILD_DASHBOARD)
     add_silkit_test_to_executable(SilKitInternalIntegrationTests
-        SOURCES
-        ITest_Dashboard.cpp
-
-        LIBS
-        S_ITests_STH_Internals
-        O_SilKit_Dashboard
-        I_SilKit_Core_Internal
-        I_SilKit_Config_TestUtils
-        I_SilKit_Services_Ethernet
+        SOURCES ITest_Dashboard.cpp
+        LIBS O_SilKit_Dashboard
     )
 
     add_silkit_test_to_executable(SilKitInternalIntegrationTests
-        SOURCES
-        ITest_DashboardServerUnavailable.cpp
-
-        LIBS
-        S_ITests_STH_Internals
-        O_SilKit_Dashboard
+        SOURCES ITest_DashboardServerUnavailable.cpp
+        LIBS O_SilKit_Dashboard
     )
 
     add_silkit_test_to_executable(SilKitInternalIntegrationTests
-        SOURCES
-        ITest_DashboardServerTimeout.cpp
-
-        LIBS
-        S_ITests_STH_Internals
-        O_SilKit_Dashboard
+        SOURCES ITest_DashboardServerTimeout.cpp
+        LIBS O_SilKit_Dashboard
     )
 endif()
