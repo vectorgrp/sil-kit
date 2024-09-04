@@ -29,6 +29,21 @@ add_library(ITest_Utils INTERFACE)
 target_include_directories(ITest_Utils
     INTERFACE ${CMAKE_CURRENT_LIST_DIR})
 
+target_link_libraries(SilKitIntegrationTests
+    PRIVATE SilKit
+    PRIVATE S_ITests_STH
+)
+
+target_link_libraries(SilKitInternalIntegrationTests
+    PRIVATE S_SilKitImpl
+    PRIVATE S_ITests_STH_Internals
+)
+
+target_link_libraries(SilKitFunctionalTests
+    PRIVATE S_SilKitImpl
+    PRIVATE S_ITests_STH_Internals
+)
+
 add_silkit_test_to_executable(SilKitIntegrationTests
     SOURCES
     ITest_CatchExceptionsInCallbacks.cpp
@@ -37,17 +52,17 @@ add_silkit_test_to_executable(SilKitIntegrationTests
     SilKit
 )
 
-add_silkit_test_to_executable(SilKitIntegrationTests
+add_silkit_test_to_executable(SilKitInternalIntegrationTests
     SOURCES ITest_HopOnHopOff.cpp
     LIBS S_SilKitImpl
 )
 
-add_silkit_test_to_executable(SilKitIntegrationTests
+add_silkit_test_to_executable(SilKitInternalIntegrationTests
     SOURCES ITest_Abort.cpp
     LIBS S_SilKitImpl
 )
 
-add_silkit_test_to_executable(SilKitIntegrationTests
+add_silkit_test_to_executable(SilKitInternalIntegrationTests
     SOURCES ITest_Internals_ParticipantModes.cpp
     LIBS S_SilKitImpl
 )
@@ -60,7 +75,7 @@ add_silkit_test_to_executable(SilKitIntegrationTests
     SilKit
 )
 
-add_silkit_test_to_executable(SilKitIntegrationTests
+add_silkit_test_to_executable(SilKitInternalIntegrationTests
     SOURCES
     ITest_Internals_DataPubSub.cpp
 
@@ -68,7 +83,7 @@ add_silkit_test_to_executable(SilKitIntegrationTests
     S_SilKitImpl
 )
 
-add_silkit_test_to_executable(SilKitIntegrationTests
+add_silkit_test_to_executable(SilKitInternalIntegrationTests
     SOURCES ITest_Internals_TargetedMessaging.cpp
     LIBS S_ITests_STH_Internals
 )
@@ -113,12 +128,12 @@ add_silkit_test_to_executable(SilKitIntegrationTests
     S_ITests_STH
 )
 
-add_silkit_test_to_executable(SilKitIntegrationTests
+add_silkit_test_to_executable(SilKitInternalIntegrationTests
     SOURCES ITest_Internals_ServiceDiscovery.cpp
     LIBS S_ITests_STH_Internals
 )
 
-add_silkit_test_to_executable(SilKitIntegrationTests
+add_silkit_test_to_executable(SilKitInternalIntegrationTests
     SOURCES ITest_Internals_RequestReply.cpp
     LIBS S_SilKitImpl
 )
@@ -128,7 +143,7 @@ add_silkit_test_to_executable(SilKitFunctionalTests
     LIBS S_ITests_STH_Internals
 )
 
-add_silkit_test_to_executable(SilKitIntegrationTests
+add_silkit_test_to_executable(SilKitInternalIntegrationTests
     SOURCES ITest_SystemMonitor.cpp
     LIBS S_ITests_STH_Internals
 )
@@ -164,7 +179,7 @@ add_silkit_test_to_executable(SilKitFunctionalTests
 
 # Windows specific tests
 if(MSVC)
-    add_silkit_test_to_executable(SilKitIntegrationTests
+    add_silkit_test_to_executable(SilKitInternalIntegrationTests
         SOURCES
         ITest_CompatibilityWithWindowsHeaders.cpp
 
@@ -246,7 +261,7 @@ add_silkit_test_to_executable(SilKitIntegrationTests
 
 # RPC
 
-add_silkit_test_to_executable(SilKitIntegrationTests
+add_silkit_test_to_executable(SilKitInternalIntegrationTests
     SOURCES
     ITest_Internals_Rpc.cpp
     ITest_Internals_Rpc.hpp
@@ -365,7 +380,7 @@ add_silkit_test_to_executable(SilKitIntegrationTests
 )
 
 if(SILKIT_BUILD_DASHBOARD)
-    add_silkit_test_to_executable(SilKitIntegrationTests
+    add_silkit_test_to_executable(SilKitInternalIntegrationTests
         SOURCES
         ITest_Dashboard.cpp
 
@@ -377,7 +392,7 @@ if(SILKIT_BUILD_DASHBOARD)
         I_SilKit_Services_Ethernet
     )
 
-    add_silkit_test_to_executable(SilKitIntegrationTests
+    add_silkit_test_to_executable(SilKitInternalIntegrationTests
         SOURCES
         ITest_DashboardServerUnavailable.cpp
 
@@ -386,7 +401,7 @@ if(SILKIT_BUILD_DASHBOARD)
         O_SilKit_Dashboard
     )
 
-    add_silkit_test_to_executable(SilKitIntegrationTests
+    add_silkit_test_to_executable(SilKitInternalIntegrationTests
         SOURCES
         ITest_DashboardServerTimeout.cpp
 

@@ -23,17 +23,26 @@
 # Helper Functions
 ################################################################################
 
+set(_SilKitTest_BASE_DIR "${CMAKE_CURRENT_LIST_DIR}" CACHE INTERNAL "" FORCE)
+
 function(add_silkit_test_executable SILKIT_TEST_EXECUTABLE_NAME)
     if(NOT ${SILKIT_BUILD_TESTS})
         return()
     endif()
 
-    add_executable("${SILKIT_TEST_EXECUTABLE_NAME}")
+    # If we can bump our required CMake version to 3.17 we can use
+    # CMAKE_CURRENT_FUNCTION_LIST_DIR
+    # to get the directory this file (SilKitTest.cmake) resides in.
+
+    add_executable(
+        "${SILKIT_TEST_EXECUTABLE_NAME}"
+        "${_SilKitTest_BASE_DIR}/SilKitTest/SilKitTestMain.cpp"
+    )
 
     target_link_libraries("${SILKIT_TEST_EXECUTABLE_NAME}"
         PRIVATE SilKitInterface
         PRIVATE gtest
-        PRIVATE gmock_main
+        PRIVATE gmock
     )
 
     target_compile_definitions("${SILKIT_TEST_EXECUTABLE_NAME}"
