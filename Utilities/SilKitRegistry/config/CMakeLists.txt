@@ -34,9 +34,11 @@ target_link_libraries(O_SilKitRegistry_Config
 
 add_silkit_test_executable(SilKitRegistryTests)
 
-target_compile_definitions(SilKitRegistryTests
-    PRIVATE EXPORT_SilKitAPI
-)
+if(TARGET SilKitRegistryTests)
+    target_compile_definitions(SilKitRegistryTests
+        PRIVATE EXPORT_SilKitAPI
+    )
+endif()
 
 add_silkit_test_to_executable(SilKitRegistryTests
     SOURCES
