@@ -14,7 +14,6 @@
 #include "gtest/gtest.h"
 
 #include "ITestFixture.hpp"
-#include "ConfigurationTestUtils.hpp"
 
 #include "silkit/SilKit.hpp"
 #include "silkit/experimental/netsim/all.hpp"

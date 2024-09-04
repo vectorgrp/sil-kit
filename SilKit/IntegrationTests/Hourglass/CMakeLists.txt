@@ -32,6 +32,11 @@ target_include_directories(
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
+target_compile_definitions(
+    S_Test_Hourglass
+    PRIVATE EXPORT_SilKitAPI
+)
+
 target_link_libraries(
     S_Test_Hourglass
     PUBLIC SilKitInterface
@@ -45,6 +50,10 @@ endif ()
 
 
 add_silkit_test_executable(SilKitHourglassTests)
+
+target_compile_definitions(SilKitHourglassTests
+    PRIVATE SIL_KIT_TEST_MAIN_DO_NOT_PRINT_VERSION
+)
 
 
 add_silkit_test_to_executable(SilKitHourglassTests
