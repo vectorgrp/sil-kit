@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Vector Informatik GmbH
+//
+// SPDX-License-Identifier: MIT
+
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
