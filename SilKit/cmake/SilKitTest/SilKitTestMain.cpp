@@ -12,7 +12,7 @@ int main(int argc, char** argv)
     testing::InitGoogleMock(&argc, argv);
 
 #ifndef SIL_KIT_TEST_MAIN_DO_NOT_PRINT_VERSION
-    std::cout << "Running with SIL Kit version '" << SilKit::Version::String() << "' with git hash '"
+    std::cout << "Running with SIL Kit version '" << SilKit::Version::String() << "' and git hash '"
               << SilKit::Version::GitHash() << "'" << std::endl;
 #endif
 
