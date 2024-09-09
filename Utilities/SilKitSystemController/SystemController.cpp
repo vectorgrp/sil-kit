@@ -234,7 +234,7 @@ int main(int argc, char** argv)
     commandlineParser.Add<CliParser::Flag>("version", "v", "[--version]", "-v, --version: Get version info.");
     commandlineParser.Add<CliParser::Flag>("help", "h", "[--help]", "-h, --help: Get this help.");
     commandlineParser.Add<CliParser::Flag>("interactive", "i", "[--interactive]",
-                                           "-i, --interactive: Await user interaction before process ends.");
+                                           "-i,--interactive: Await user interaction before process ends.");
     commandlineParser.Add<CliParser::Option>(
         "connect-uri", "u", "silkit://localhost:8500", "[--connect-uri <silkitUri>]",
         "-u, --connect-uri <silkitUri>: The registry URI to connect to. Defaults to 'silkit://localhost:8500'.");
@@ -242,8 +242,8 @@ int main(int argc, char** argv)
                                              "-n, --name <participantName>: The participant name used to take "
                                              "part in the simulation. Defaults to 'SystemController'.");
     commandlineParser.Add<CliParser::Option>(
-        "configuration", "c", "", "[--configuration <configuration>]",
-        "-c, --configuration <configuration>: Path and filename of the Participant configuration YAML or JSON file. "
+        "configuration", "c", "", "[--configuration <filePath>]",
+        "-c, --configuration <filePath>: Path to the Participant configuration YAML or JSON file. "
         "Note that the format was changed in v3.6.11. Cannot be used together with the '--log' option.");
     commandlineParser.Add<CliParser::Option>(
         "log", "l", "info", "[--log <level>]",
@@ -253,6 +253,11 @@ int main(int argc, char** argv)
     commandlineParser.Add<CliParser::PositionalList>(
         "participantNames", "<participantName1> [<participantName2> ...]",
         "<participantName1>, <participantName2>, ...: Names of participants to wait for before starting simulation.");
+
+    // ignored and deprecated
+    commandlineParser.Add<CliParser::Flag>("non-interactive", "ni", "[--non-interactive]",
+                                           "--non-interactive: Run without awaiting any user interactions at any time.",
+                                           CliParser::Hidden);
 
     std::cout << "Vector SIL Kit -- System Controller, SIL Kit version: " << SilKit::Version::String() << std::endl
               << std::endl;

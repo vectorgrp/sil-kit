@@ -329,7 +329,7 @@ int main(int argc, char** argv)
     commandlineParser.Add<CommandlineParser::Flag>("interactive", "i", "[--interactive]",
                                                    "-i, --interactive: Await user interaction before process ends.");
     commandlineParser.Add<CliParser::Option>("listen-uri", "u", "silkit://localhost:8500", "[--listen-uri <uri>]",
-                                             "-u, --listen-uri <silkit-uri>: The silkit:// URI the registry should "
+                                             "-u, --listen-uri <silkit-uri>: The 'silkit://' URI the registry should "
                                              "listen on. Defaults to 'silkit://localhost:8500'.");
     commandlineParser.Add<CliParser::Option>(
         "generate-configuration", "g", "", "[--generate-configuration <configuration>]",
@@ -337,13 +337,14 @@ int main(int argc, char** argv)
         "registry listens on. ");
     commandlineParser.Add<CliParser::Option>(
         "dashboard-uri", "d", "http://localhost:8082", "[--dashboard-uri <uri>]",
-        "-d, --dashboard-uri <dashboard-uri>: The http:// URI the data should be sent to.");
+        "-d, --dashboard-uri <dashboard-uri>: The 'http://' URI the data should be sent to.");
     commandlineParser.Add<CliParser::Option>("log", "l", "info", "[--log <level>]",
                                              "-l, --log <level>: Log to stdout with level 'off', 'critical', 'error', "
                                              "'warn', 'info', 'debug', or 'trace'. Defaults to 'info'.");
-    commandlineParser.Add<CliParser::Option>("registry-configuration", "c", "", "[--registry-configuration <path>]",
-                                             "-c, --registry-configuration: The configuration read from this file "
-                                             "overrides the values specified on the command line.");
+    commandlineParser.Add<CliParser::Option>(
+        "registry-configuration", "c", "", "[--registry-configuration <filePath>]",
+        "-c, --registry-configuration <filePath>: The configuration read from this file "
+        "overrides the values specified on the command line.");
     commandlineParser.Add<CliParser::Option>(
         "directory", "C", "", "[--directory <path>]",
         "-C, --directory <path>: Change the working directory to the specified path before doing anything else.",

@@ -67,8 +67,8 @@ int main(int argc, char** argv)
         "-n, --name <participantName>: The participant name used to take part in the simulation. Defaults to "
         "'SystemMonitor'.");
     commandlineParser.Add<CliParser::Option>(
-        "configuration", "c", "", "[--configuration <configuration>]",
-        "-c, --configuration <configuration>: Path and filename of the Participant configuration YAML or JSON file.");
+        "configuration", "c", "", "[--configuration <filePath>]",
+        "-c, --configuration <filePath>: Path to the Participant configuration YAML or JSON file.");
     commandlineParser.Add<CliParser::Flag>("autonomous", "a", "[--autonomous]",
                                            "-a, --autonomous: Run with an autonomous lifecycle");
     commandlineParser.Add<CliParser::Flag>("coordinated", "r", "[--coordinated]",
@@ -209,7 +209,11 @@ int main(int argc, char** argv)
             RegisterSignalHandler([&](auto sigNum) { signalPromise.set_value(sigNum); });
             signalValue.wait();
 
-            std::cout << "Signal " << signalValue.get() << " received, exiting..." << std::endl;
+            {
+                std::stringstream buffer;
+                buffer << "Signal " << signalValue.get() << " received, exiting...";
+                logger->Info(buffer.str());
+            }
             lifecycle->Stop("Stopping the System Monitor");
 
             if (interactiveMode)
@@ -230,7 +234,11 @@ int main(int argc, char** argv)
             RegisterSignalHandler([&](auto sigNum) { signalPromise.set_value(sigNum); });
             signalValue.wait();
 
-            std::cout << "Signal " << signalValue.get() << " received, exiting..." << std::endl;
+            {
+                std::stringstream buffer;
+                buffer << "Signal " << signalValue.get() << " received, exiting...";
+                logger->Info(buffer.str());
+            }
 
             if (interactiveMode)
             {
