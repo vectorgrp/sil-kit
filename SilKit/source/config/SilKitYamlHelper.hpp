@@ -186,9 +186,9 @@ void optional_decode(ConfigT& value, const YAML::Node& node, const std::string& 
     }
 }
 
-template <typename ConfigT>
+template <typename ConfigT, size_t N>
 void optional_decode_deprecated_alternative(ConfigT& value, const YAML::Node& node, const std::string& fieldName,
-                                            std::initializer_list<std::string> deprecatedFieldNames)
+                                            std::array<std::string, N> deprecatedFieldNames)
 {
     if (node.IsMap())
     {
