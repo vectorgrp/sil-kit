@@ -43,6 +43,7 @@ master_doc = 'contents'
 extensions = [ 
     'sphinx_rtd_theme',
     #'sphinx.ext.autosectionlabel',
+    'myst_parser',
     "breathe" ]
 
 # For automatic creation of labels per section
@@ -94,3 +95,4 @@ html_static_path = ['_static']
 html_css_files = [
     'custom.css'
 ]
+source_suffix = [ '.rst', '.md']

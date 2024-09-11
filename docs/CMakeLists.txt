@@ -93,6 +93,9 @@ add_custom_command(OUTPUT ${DOXYGEN_INDEX_FILE}
                    )
 
 add_custom_target(Doxygen ALL DEPENDS ${DOXYGEN_INDEX_FILE})
+add_custom_target(docs ALL)
+add_dependencies(docs Doxygen)
+
 install(DIRECTORY ${SPHINX_BUILD}/
         DESTINATION ${INSTALL_DOC_DIR}
         COMPONENT docs
