@@ -72,12 +72,6 @@ runs:
       shell: powershell
 
     - name: Setup host
-      if: runner.os == 'Linux'
-      run: sudo apt install -y ninja-build doxygen
-      id: setup-host-linux
-      shell: bash
-
-    - name: Setup host
       if: runner.os == 'macOS'
       run: brew install ninja doxygen
       id: setup-host-macos
