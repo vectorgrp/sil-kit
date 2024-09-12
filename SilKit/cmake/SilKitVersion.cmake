@@ -27,7 +27,7 @@
 macro(configure_silkit_version project_name)
     set(SILKIT_VERSION_MAJOR 4)
     set(SILKIT_VERSION_MINOR 0)
-    set(SILKIT_VERSION_PATCH 52)
+    set(SILKIT_VERSION_PATCH 53)
     set(SILKIT_BUILD_NUMBER 0 CACHE STRING "The build number")
     set(SILKIT_VERSION_SUFFIX "")
 
