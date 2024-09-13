@@ -51,7 +51,7 @@ jobs:
     name: Format checks for SIL Kit sources
     runs-on: ubuntu-22.04
     container:
-      image: ghcr.io/mariusbgm/sil-kit-ci-clangformat-22.04:dev_clangformat_ubuntu
+      image: ghcr.io/vectorgrp/sil-kit-docker-build/sil-kit-ci-public-runner:main
     steps:
       - uses: actions/checkout@v4
         with:
