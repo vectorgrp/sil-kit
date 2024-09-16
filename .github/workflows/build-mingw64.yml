@@ -30,10 +30,10 @@ jobs:
           echo "C:\msys64" >> $GITHUB_PATH
           echo "C:\msys64\mingw64\bin\" >> $GITHUB_PATH
       - name: Install Dependencies
-        shell:  C:\shells\msys2bash.cmd {0}
         run: |
           pacman -S mingw-w64-x86_64-gcc mingw-w64-x86_64-cmake mingw-w64-x86_64-ninja --noconfirm
           export PATH="/mingw64/bin/:$PATH"
+        shell:  C:\shells\msys2bash.cmd {0}
       - uses: actions/checkout@v4
         with:
           submodules: true
