@@ -1047,6 +1047,18 @@
             "configurePreset": "clang15-ubsan-debug"
         },
         {
+            "name": "clang-debug",
+            "configurePreset": "clang-debug"
+        },
+        {
+            "name": "clang-release",
+            "configurePreset": "clang-release"
+        },
+        {
+            "name": "clang-relwithdebinfo",
+            "configurePreset": "clang-relwithdebinfo"
+        },
+        {
             "name": "cross-qnx-x86_64",
             "configurePreset": "cross-qnx-x86_64"
         },
