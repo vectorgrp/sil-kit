@@ -233,8 +233,6 @@ int main(int argc, char** argv)
     CliParser commandlineParser;
     commandlineParser.Add<CliParser::Flag>("version", "v", "[--version]", "-v, --version: Get version info.");
     commandlineParser.Add<CliParser::Flag>("help", "h", "[--help]", "-h, --help: Get this help.");
-    commandlineParser.Add<CliParser::Flag>("interactive", "i", "[--interactive]",
-                                           "-i,--interactive: Await user interaction before process ends.");
     commandlineParser.Add<CliParser::Option>(
         "connect-uri", "u", "silkit://localhost:8500", "[--connect-uri <silkitUri>]",
         "-u, --connect-uri <silkitUri>: The registry URI to connect to. Defaults to 'silkit://localhost:8500'.");
@@ -307,7 +305,7 @@ int main(int argc, char** argv)
     }
 
     const auto participantName{commandlineParser.Get<CliParser::Option>("name").Value()};
-    const auto interactiveMode = (commandlineParser.Get<CliParser::Flag>("interactive").Value());
+    const auto nonInteractiveMode = (commandlineParser.Get<CliParser::Flag>("non-interactive").Value());
 
     const bool hasLogOption{commandlineParser.Get<CliParser::Option>("log").HasValue()};
     const bool hasCfgOption{commandlineParser.Get<CliParser::Option>("configuration").HasValue()};
@@ -329,6 +327,13 @@ int main(int argc, char** argv)
                      "'critical', or 'off'"
                   << std::endl;
         return -1;
+    }
+
+    if (nonInteractiveMode)
+    {
+        std::cerr << "Warning: Flag '--non-interactive', '-ni' became obsolete with v4.0.53, the default behavior "
+                     "is non-interactive since then."
+                  << std::endl;
     }
 
     std::shared_ptr<SilKit::Config::IParticipantConfiguration> configuration;
@@ -380,27 +385,13 @@ int main(int argc, char** argv)
         expectedParticipantNames.push_back(participantName);
         SilKitController controller(participant.get(), configuration, expectedParticipantNames);
 
-        if (interactiveMode)
-        {
-            std::cout << "Press Ctrl-C to end the simulation..." << std::endl;
-        }
+        std::cout << "Press Ctrl-C to end the simulation..." << std::endl;
         controller.RegisterSignalHandler();
         controller.WaitForFinalState();
-
-        if (interactiveMode)
-        {
-            std::cout << "Press enter to end the process..." << std::endl;
-            std::cin.ignore();
-        }
     }
     catch (const std::exception& error)
     {
         std::cerr << "Something went wrong: " << error.what() << std::endl;
-        if (interactiveMode)
-        {
-            std::cout << "Press enter to end the process..." << std::endl;
-            std::cin.ignore();
-        }
 
         return -3;
     }

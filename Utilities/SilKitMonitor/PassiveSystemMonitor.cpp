@@ -57,8 +57,6 @@ int main(int argc, char** argv)
     CliParser commandlineParser;
     commandlineParser.Add<CliParser::Flag>("version", "v", "[--version]", "-v, --version: Get version info.");
     commandlineParser.Add<CliParser::Flag>("help", "h", "[--help]", "-h, --help: Get this help.");
-    commandlineParser.Add<CliParser::Flag>("interactive", "i", "[--interactive]",
-                                           "-i, --interactive: Await user interaction before process ends.");
     commandlineParser.Add<CliParser::Option>(
         "connect-uri", "u", "silkit://localhost:8500", "[--connect-uri <silkitUri>]",
         "-u, --connect-uri <silkitUri>: The registry URI to connect to. Defaults to 'silkit://localhost:8500'.");
@@ -66,15 +64,15 @@ int main(int argc, char** argv)
         "name", "n", "SystemMonitor", "[--name <participantName>]",
         "-n, --name <participantName>: The participant name used to take part in the simulation. Defaults to "
         "'SystemMonitor'.");
-    commandlineParser.Add<CliParser::Option>(
-        "configuration", "c", "", "[--configuration <filePath>]",
-        "-c, --configuration <filePath>: Path to the Participant configuration YAML or JSON file.");
+    commandlineParser.Add<CliParser::Option>("configuration", "c", "", "[--configuration <filePath>]",
+                                             "-c, --configuration <filePath>: Path to the Participant configuration "
+                                             "YAML or JSON file. Note that the format was changed in v3.6.11.");
     commandlineParser.Add<CliParser::Flag>("autonomous", "a", "[--autonomous]",
-                                           "-a, --autonomous: Run with an autonomous lifecycle");
+                                           "-a, --autonomous: Run with an autonomous lifecycle.");
     commandlineParser.Add<CliParser::Flag>("coordinated", "r", "[--coordinated]",
-                                           "-r, --coordinated: Run with a coordinated lifecycle");
+                                           "-r, --coordinated: Run with a coordinated lifecycle.");
     commandlineParser.Add<CliParser::Flag>("sync", "s", "[--sync]",
-                                           "-s, --sync: Run with virtual time synchronization");
+                                           "-s, --sync: Run with virtual time synchronization.");
 
     std::cout << "Vector SIL Kit -- System Monitor, SIL Kit version: " << SilKit::Version::String() << std::endl
               << std::endl;
@@ -115,7 +113,6 @@ int main(int argc, char** argv)
         return 0;
     }
 
-    const auto interactiveMode{commandlineParser.Get<CliParser::Flag>("interactive").Value()};
     const auto connectUri{commandlineParser.Get<CliParser::Option>("connect-uri").Value()};
     const auto participantName{commandlineParser.Get<CliParser::Option>("name").Value()};
     const auto configurationFilename{commandlineParser.Get<CliParser::Option>("configuration").Value()};
@@ -148,11 +145,6 @@ int main(int argc, char** argv)
     {
         std::cerr << "Error: Failed to load configuration '" << configurationFilename << "', " << error.what()
                   << std::endl;
-        if (interactiveMode)
-        {
-            std::cout << "Press enter to end the process..." << std::endl;
-            std::cin.ignore();
-        }
 
         return -2;
     }
@@ -199,10 +191,7 @@ int main(int argc, char** argv)
             }
             auto finalStateFuture = lifecycle->StartLifecycle();
 
-            if (interactiveMode)
-            {
-                std::cout << "Press Ctrl-C to terminate..." << std::endl;
-            }
+            std::cout << "Press Ctrl-C to terminate..." << std::endl;
 
             std::promise<int> signalPromise;
             auto signalValue = signalPromise.get_future();
@@ -215,19 +204,10 @@ int main(int argc, char** argv)
                 logger->Info(buffer.str());
             }
             lifecycle->Stop("Stopping the System Monitor");
-
-            if (interactiveMode)
-            {
-                std::cout << "Press enter to end the process..." << std::endl;
-                std::cin.ignore();
-            }
         }
         else
         {
-            if (interactiveMode)
-            {
-                std::cout << "Press Ctrl-C to terminate..." << std::endl;
-            }
+            std::cout << "Press Ctrl-C to terminate..." << std::endl;
 
             std::promise<int> signalPromise;
             auto signalValue = signalPromise.get_future();
@@ -239,22 +219,11 @@ int main(int argc, char** argv)
                 buffer << "Signal " << signalValue.get() << " received, exiting...";
                 logger->Info(buffer.str());
             }
-
-            if (interactiveMode)
-            {
-                std::cout << "Press enter to end the process..." << std::endl;
-                std::cin.ignore();
-            }
         }
     }
     catch (const std::exception& error)
     {
         std::cerr << "Something went wrong: " << error.what() << std::endl;
-        if (interactiveMode)
-        {
-            std::cout << "Press enter to end the process..." << std::endl;
-            std::cin.ignore();
-        }
 
         return -3;
     }

@@ -32,12 +32,12 @@ sil-kit-registry
    *  - Parameters
       - -v, --version                            Get version info.
         -h, --help                               Show the help of the SIL Kit Registry.
-        -i, --interactive                        Await user interaction before process ends.
-        -u, --listen-uri <silkit-uri>            The ``silkit://`` URI the registry should listen on. Defaults to ``silkit://localhost:8500``.
+        -u, --listen-uri <silkitUri>             The ``silkit://`` URI the registry should listen on. Defaults to ``silkit://localhost:8500``.
         -g, --generate-configuration <path>      Generate a configuration file which includes the URI the registry listens on.
-        -d, --dashboard-uri <dashboard-uri>      The ``http://`` URI the data should be sent to.
+        -d, --dashboard-uri <uri>                The ``http://`` URI of the SIL Kit Dashboard to which data is sent.
         -l, --log <level>                        Log to stdout with level ``off``, ``critical``, ``error``, ``warn``, ``info``, ``debug``, or ``trace``. Defaults to ``info``.
         -c, --registry-configuration <filePath>  The configuration read from this file overrides the values specified on the command line.
+        -s, --use-signal-handler                 Terminate when an OS signal is received. **Deprecated:** Since v4.0.53, this is the default behavior.
 
    *  - Usage Example
       - .. code-block:: powershell
@@ -78,11 +78,11 @@ sil-kit-system-controller
    *  -  Parameters
       -  -v, --version                                Get version info.
          -h, --help                                   Show the help of the SIL Kit System Controller.
-         -i, --interactive                            Await user interaction before process ends.
          -u, --connect-uri <silkitUri>                The registry URI to connect to. Defaults to ``silkit://localhost:8500``.
          -n, --name <participantName>                 The participant name used to take part in the simulation. Defaults to ``SystemController``.
          -c, --configuration <filePath>               Path to the Participant configuration YAML or JSON file. Note that the format was changed in v3.6.11. Cannot be used together with the ``--log`` option.
          -l, --log <level>                            Log to stdout with level ``trace``, ``debug``, ``warn``, ``info``, ``error``, ``critical`` or ``off``. Defaults to ``info`` if the ``--configuration`` option is not specified. Cannot be used together with the ``--configuration`` option.
+         -ni, --non-interactive                       Never prompt the user. *Deprecated:* Since v4.0.53, this is the default behavior.
 
          | **<participantName1>, <participantName2> ...**
          |  Names of participants to wait for before starting simulation.
@@ -116,13 +116,12 @@ sil-kit-monitor
    *  -  Parameters
       -  -v, --version                           Get version info.
          -h, --help                              Show the help of the SIL Kit Monitor.
-         -i, --interactive                       Await user interaction before process ends.
          -u, --connect-uri <silkitUri>           The registry URI to connect to. Defaults to ``silkit://localhost:8500``.
          -n, --name <participantName>            The participant name used to take part in the simulation. Defaults to ``SystemMonitor``.
          -c, --configuration <filePath>          Path to the Participant configuration YAML or JSON file.
-         -a, --autonomous                        Run with an autonomous lifecycle
-         -r, --coordinated                       Run with a coordinated lifecycle
-         -s, --sync                              Run with virtual time synchronization
+         -a, --autonomous                        Run with an autonomous lifecycle.
+         -r, --coordinated                       Run with a coordinated lifecycle.
+         -s, --sync                              Run with virtual time synchronization.
 
    *  -  Usage Example
       -  .. code-block:: powershell

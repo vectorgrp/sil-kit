@@ -20,10 +20,10 @@ Changed
   - Old: Monitor and Registry wait for the user to press `[Enter]`` to shutdown.
   - New: Monitor and Registry can be requested to shutdown via ``[Ctrl]-[C]``. Registry option '-s, --use-signal-handler' is deprecated.
 
-  Interactive mode is off by default.
+  All utilities no longer require user interaction.
 
-  - Old: All utilities prompt the user by default to press `[Enter]`` to end process after shutdown.
-  - New: Option '-i, --interactive' can be used to activate the old behavior. SystemController option '-ni, --non-interactive' is deprecated.
+  - Old: Registry, Monitor and System Controller prompt the user by default to press `[Enter]`` to end process after shutdown.
+  - New: All utilities terminate without prompting for user input. SystemController option '-ni, --non-interactive' is deprecated.
 
 
 [4.0.52] - 2024-09-02 

@@ -326,18 +326,16 @@ int main(int argc, char** argv)
     CliParser commandlineParser;
     commandlineParser.Add<CliParser::Flag>("version", "v", "[--version]", "-v, --version: Get version info.");
     commandlineParser.Add<CliParser::Flag>("help", "h", "[--help]", "-h, --help: Get this help.");
-    commandlineParser.Add<CommandlineParser::Flag>("interactive", "i", "[--interactive]",
-                                                   "-i, --interactive: Await user interaction before process ends.");
-    commandlineParser.Add<CliParser::Option>("listen-uri", "u", "silkit://localhost:8500", "[--listen-uri <uri>]",
-                                             "-u, --listen-uri <silkit-uri>: The 'silkit://' URI the registry should "
+    commandlineParser.Add<CliParser::Option>("listen-uri", "u", "silkit://localhost:8500", "[--listen-uri <silkitUri>]",
+                                             "-u, --listen-uri <silkitUri>: The 'silkit://' URI the registry should "
                                              "listen on. Defaults to 'silkit://localhost:8500'.");
     commandlineParser.Add<CliParser::Option>(
-        "generate-configuration", "g", "", "[--generate-configuration <configuration>]",
-        "-g, --generate-configuration <configuration>: Generate a configuration file which includes the URI the "
+        "generate-configuration", "g", "", "[--generate-configuration <filePath>]",
+        "-g, --generate-configuration <filePath>: Generate a configuration file which includes the URI the "
         "registry listens on. ");
     commandlineParser.Add<CliParser::Option>(
         "dashboard-uri", "d", "http://localhost:8082", "[--dashboard-uri <uri>]",
-        "-d, --dashboard-uri <dashboard-uri>: The 'http://' URI the data should be sent to.");
+        "-d, --dashboard-uri <uri>: The 'http://' URI of the SIL Kit Dashboard to which data is sent.");
     commandlineParser.Add<CliParser::Option>("log", "l", "info", "[--log <level>]",
                                              "-l, --log <level>: Log to stdout with level 'off', 'critical', 'error', "
                                              "'warn', 'info', 'debug', or 'trace'. Defaults to 'info'.");
@@ -422,10 +420,10 @@ int main(int argc, char** argv)
         return 0;
     }
 
-    const auto interactiveMode{commandlineParser.Get<CliParser::Flag>("interactive").Value()};
     const auto listenUri{commandlineParser.Get<CliParser::Option>("listen-uri").Value()};
     const auto logLevel{commandlineParser.Get<SilKit::Util::CommandlineParser::Option>("log").Value()};
     auto dashboardUri{commandlineParser.Get<CliParser::Option>("dashboard-uri").Value()};
+    const auto useSignalHandler{commandlineParser.Get<CliParser::Flag>("use-signal-handler").Value()};
     auto enableDashboard{commandlineParser.Get<CliParser::Option>("dashboard-uri").HasValue()};
 
     if (commandlineParser.Get<CliParser::Flag>("enable-dashboard").Value())
@@ -452,10 +450,11 @@ int main(int argc, char** argv)
         return -1;
     }
 
-    if (interactiveMode && windowsService)
+    if (useSignalHandler)
     {
-        std::cerr << "Error: Conflicting flags --windows-service / -W and --interactive-mode / -i." << std::endl;
-        return -1;
+        std::cerr << "Warning: Flag '--use-signal-handler', '-s' became obsolete with v4.0.53, signal handling is "
+                     "always used since then."
+                  << std::endl;
     }
 
     try
@@ -501,10 +500,7 @@ int main(int argc, char** argv)
             const auto registry = StartRegistry(configuration, configuredListenUri, dashboardUri, enableDashboard,
                                                 generatedConfigurationPathOpt);
 
-            if (interactiveMode)
-            {
-                std::cout << "Press Ctrl-C to terminate..." << std::endl;
-            }
+            std::cout << "Press Ctrl-C to terminate..." << std::endl;
 
             std::promise<int> signalPromise;
             auto signalValue = signalPromise.get_future();
@@ -512,33 +508,17 @@ int main(int argc, char** argv)
             signalValue.wait();
 
             std::cout << "Signal " << signalValue.get() << " received, exiting..." << std::endl;
-
-            if (interactiveMode)
-            {
-                std::cout << "Press enter to end the process..." << std::endl;
-                std::cin.ignore();
-            }
         }
     }
     catch (const SilKit::ConfigurationError& error)
     {
         std::cerr << "Error in configuration: " << error.what() << std::endl;
-        if (interactiveMode)
-        {
-            std::cout << "Press enter to end the process..." << std::endl;
-            std::cin.ignore();
-        }
 
         return -2;
     }
     catch (const std::exception& error)
     {
         std::cerr << "Something went wrong: " << error.what() << std::endl;
-        if (interactiveMode)
-        {
-            std::cout << "Press enter to end the process..." << std::endl;
-            std::cin.ignore();
-        }
 
         return -3;
     }
