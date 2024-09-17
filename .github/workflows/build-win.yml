@@ -42,6 +42,7 @@ jobs:
         do-package: ${{ inputs.do_package }}
         retention-days: ${{ inputs.retention_days }}
         build-arch: x64
+        testlog-name: ${{ github.job }}
 
   build-win-x32:
     runs-on: windows-2019
@@ -58,3 +59,4 @@ jobs:
         do-package: ${{ inputs.do_package }}
         retention-days: ${{ inputs.retention_days }}
         build-arch: x86
+        testlog-name: ${{ github.job }}

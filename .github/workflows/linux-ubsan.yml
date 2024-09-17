@@ -10,7 +10,7 @@ on:
     branches: [ 'main' ]
 
 jobs:
-  clang14-ubsan:
+  clang-ubsan:
     name: Undefined Behavior Sanitizer Tests
     runs-on: ubuntu-latest
     container:
@@ -27,3 +27,4 @@ jobs:
           cmake-args: "-D SILKIT_ENABLE_UBSAN=ON -D SILKIT_BUILD_DASHBOARD=OFF \
                        -DCMAKE_C_COMPILER=clang-18 \
                        -DCMAKE_CXX_COMPILER=clang++-18"
+          testlog-name: ${{ github.job }}

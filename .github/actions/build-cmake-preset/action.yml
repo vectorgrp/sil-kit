@@ -41,6 +41,11 @@ inputs:
     default: "x64"
     description: "MSVC build architecture to use"
     required: false
+  testlog-name:
+    type: string
+    default: ""
+    description: "Name of the testlog to upload"
+    required: true
  
 outputs:
   package-name:
@@ -102,10 +107,10 @@ runs:
       shell: bash
 
     - name: stash test reports ${{ inputs.preset-name }}
-      if: ${{ inputs.upload-testlog  == 'true' }}
-      uses: actions/upload-artifact@v3
+      if: ${{ (inputs.upload-testlog  == 'true') && (inputs.testlog-name != '') }}
+      uses: actions/upload-artifact@v4
       with:
-        name: "${{ inputs.preset-name }}-test-results"
+        name: "${{ inputs.testlog-name }}-test-results"
         path: '_build/**/*gtestresults.xml'
         retention-days: ${{ inputs.retention-days }}
 
@@ -123,7 +128,7 @@ runs:
 
     - name: upload package ${{ inputs.preset-name }}
       if: ${{ inputs.do-package  == 'true' }}
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ steps.cmake-package.outputs.package-name }}
         path: ${{ steps.cmake-package.outputs.package-path }}
@@ -132,7 +137,7 @@ runs:
 
     - name: upload symbols package ${{ inputs.preset-name }}
       if: ${{ inputs.do-package-symbols  == 'true' }}
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ steps.cmake-package.outputs.symbols-package-name }}
         path: ${{ steps.cmake-package.outputs.symbols-package-path}}

@@ -32,3 +32,4 @@ jobs:
         do_package: ${{ inputs.do_package }}
         do_package_symbols: ${{ inputs.do_package_symbols }}
         retention_days: ${{ inputs.retention_days }}
+        testlog-name: ${{ github.job }}
