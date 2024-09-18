@@ -50,7 +50,8 @@ outputs:
  
 runs:
   env:
-    - RETENTION_DAYS: 2
+    RETENTION_DAYS: 2
+  
   using: composite
   steps:
 
