@@ -5,7 +5,7 @@ on:
     branches: [ 'main' ]
 
   push:
-    branches: [ 'main' ]
+    branches: [ 'main' , 'dev_fix_linux-release_dirs']
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
