@@ -49,10 +49,9 @@ outputs:
     value: "${{ steps.cmake-package.outputs.symbols-package-name }}"
  
 runs:
+  using: composite
   env:
     RETENTION_DAYS: 2
-  
-  using: composite
   steps:
 
     - name: Setup host
