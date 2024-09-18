@@ -8,7 +8,7 @@ on:
         default: true
 
   push:
-    branches: [ 'main', 'dev_fix_linux-release_dirs']
+    branches: [ 'main']
 
 jobs:
   clang-tsan:
