@@ -32,7 +32,7 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/vectorgrp/sil-kit-docker-build/sil-kit-ci-public-runner:main
-    if: inputs.run_build == true
+    if: (inputs.run_build == true) || (github.event_name == 'push')
     steps:
       - uses: actions/checkout@v4
         with:

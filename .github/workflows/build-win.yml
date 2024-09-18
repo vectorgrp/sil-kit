@@ -30,7 +30,7 @@ jobs:
   build-win-x64:
     runs-on: windows-2019
     environment: public-github-runners
-    if: inputs.run_build == true
+    if: (inputs.run_build == true) || (github.event_name == 'push')
     steps:
     - uses: actions/checkout@v4
       with:
