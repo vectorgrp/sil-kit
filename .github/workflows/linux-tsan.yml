@@ -5,9 +5,15 @@ on:
       run_build:
         required: true
         type: boolean
+        default: true
+  workflow_dispatch:
+    inputs:
+      run_build:
+        required: true
+        type: boolean
 
   push:
-    branches: [ 'main' ]
+    branches: [ 'main', 'dev_fix_linux-release_dirs']
 
 jobs:
   clang-tsan:
@@ -15,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/vectorgrp/sil-kit-docker-build/sil-kit-ci-public-runner:main
-    if: inputs.run_build == true
+    if: (inputs.run_builds == true) || (github.event_name == 'push')
     steps:
       - uses: actions/checkout@v4
         with:
