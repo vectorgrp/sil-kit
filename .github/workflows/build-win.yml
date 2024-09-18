@@ -11,10 +11,6 @@ on:
         required: false
         type: boolean
         default: false
-      retention_days:
-        required: false
-        type: number
-        default: 14
       run_build:
         required: true
         type: boolean
@@ -39,8 +35,6 @@ jobs:
     - uses: ./.github/actions/build-cmake-preset
       with:
         preset-name: vs141-x64-release
-        do-package: ${{ inputs.do_package }}
-        retention-days: ${{ inputs.retention_days }}
         build-arch: x64
         testlog-name: ${{ github.job }}
 
@@ -56,7 +50,5 @@ jobs:
     - uses: ./.github/actions/build-cmake-preset
       with:
         preset-name: vs141-x86-release
-        do-package: ${{ inputs.do_package }}
-        retention-days: ${{ inputs.retention_days }}
         build-arch: x86
         testlog-name: ${{ github.job }}

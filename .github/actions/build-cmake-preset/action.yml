@@ -13,19 +13,6 @@ inputs:
   cmake-args:
     description: "Additional CMake arguments"
     required: false
-  do-package-symbols:
-    description: "In Debug builds, split symbols and provide a zip package"
-    required: false
-    type: boolean
-  do-package:
-    description: "Run `cmake --target package` and upload artifact"
-    required: false
-    type: boolean
-  retention-days:
-    description: "How long we keep the artifacts"
-    required: false
-    type: number
-    default: 14
   run-tests:
     description: "Run tests"
     required: false
@@ -62,6 +49,8 @@ outputs:
     value: "${{ steps.cmake-package.outputs.symbols-package-name }}"
  
 runs:
+  env:
+    - RETENTION_DAYS: 2
   using: composite
   steps:
 
@@ -112,10 +101,9 @@ runs:
       with:
         name: "${{ inputs.testlog-name }}-test-results"
         path: '_build/**/*gtestresults.xml'
-        retention-days: ${{ inputs.retention-days }}
+        retention-days: ${{ env.RETENTION_DAYS }}
 
     - name: create cmake package for ${{ inputs.preset-name }}
-      if: ${{ inputs.do-package  == 'true' }}
       id: cmake-package
       run: |
         cmake --build --preset ${{ inputs.preset-name }} --target package
@@ -127,19 +115,9 @@ runs:
       shell: bash
 
     - name: upload package ${{ inputs.preset-name }}
-      if: ${{ inputs.do-package  == 'true' }}
       uses: actions/upload-artifact@v4
       with:
         name: ${{ steps.cmake-package.outputs.package-name }}
         path: ${{ steps.cmake-package.outputs.package-path }}
         if-no-files-found: 'error'
-        retention-days: ${{ inputs.retention-days }}
-
-    - name: upload symbols package ${{ inputs.preset-name }}
-      if: ${{ inputs.do-package-symbols  == 'true' }}
-      uses: actions/upload-artifact@v4
-      with:
-        name: ${{ steps.cmake-package.outputs.symbols-package-name }}
-        path: ${{ steps.cmake-package.outputs.symbols-package-path}}
-        if-no-files-found: 'error'
-        retention-days: ${{ inputs.retention-days }}
+        retention-days: ${{ env.RETENTION_DAYS }}

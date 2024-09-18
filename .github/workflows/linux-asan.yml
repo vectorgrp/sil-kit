@@ -22,7 +22,6 @@ jobs:
       - uses: ./.github/actions/build-cmake-preset
         with:
           preset-name: clang-relwithdebinfo
-          do-package: false
           cmake-args: "-D SILKIT_ENABLE_ASAN=ON -D SILKIT_BUILD_DASHBOARD=OFF \
                        -DCMAKE_C_COMPILER=clang-18 \
                        -DCMAKE_CXX_COMPILER=clang++-18"
