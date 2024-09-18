@@ -50,8 +50,6 @@ outputs:
  
 runs:
   using: composite
-  env:
-    RETENTION_DAYS: 2
   steps:
 
     - name: Setup host
@@ -101,7 +99,7 @@ runs:
       with:
         name: "${{ inputs.testlog-name }}-test-results"
         path: '_build/**/*gtestresults.xml'
-        retention-days: ${{ env.RETENTION_DAYS }}
+        retention-days: 2
 
     - name: create cmake package for ${{ inputs.preset-name }}
       id: cmake-package
@@ -120,4 +118,4 @@ runs:
         name: ${{ steps.cmake-package.outputs.package-name }}
         path: ${{ steps.cmake-package.outputs.package-path }}
         if-no-files-found: 'error'
-        retention-days: ${{ env.RETENTION_DAYS }}
+        retention-days: 2
