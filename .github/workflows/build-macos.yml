@@ -7,7 +7,7 @@ jobs:
   build-macos:
     if: ${{ false }} #disabled for now
     runs-on: macos-latest
-    environment: public-github-runners
+
     steps:
     - uses: actions/checkout@v3
       with:
@@ -16,4 +16,4 @@ jobs:
     - uses: ./.github/actions/build-cmake-preset
       with:
         preset-name: clang-release
-        testlog-name: ${{ github.job }}
+        artifact-label: ${{ github.job }}

@@ -16,7 +16,7 @@ jobs:
           - cc: gcc
             cxx: g++
     name: ${{ matrix.toolchain.cc }} release Builds for Ubuntu
-    environment: public-github-runners
+
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/vectorgrp/sil-kit-docker-build/sil-kit-ci-public-runner:main
@@ -30,4 +30,4 @@ jobs:
           preset-name: linux-release
           cmake-args: "-DCMAKE_C_COMPILER=${{ matrix.toolchain.cc }} \
                        -DCMAKE_CXX_COMPILER=${{ matrix.toolchain.cxx }}"
-          testlog-name: "${{ github.job }}-${{ matrix.toolchain.cc }}"
+          artifact-label: "${{ github.job }}-${{ matrix.toolchain.cc }}"

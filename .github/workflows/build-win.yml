@@ -25,7 +25,7 @@ concurrency:
 jobs:
   build-win-x64:
     runs-on: windows-2019
-    environment: public-github-runners
+
     if: (inputs.run_build == true) || (github.event_name == 'push')
     steps:
     - uses: actions/checkout@v4
@@ -36,11 +36,11 @@ jobs:
       with:
         preset-name: vs141-x64-release
         build-arch: x64
-        testlog-name: ${{ github.job }}
+        artifact-label: ${{ github.job }}
 
   build-win-x32:
     runs-on: windows-2019
-    environment: public-github-runners
+
     if: inputs.run_build == true
     steps:
     - uses: actions/checkout@v4
@@ -51,4 +51,4 @@ jobs:
       with:
         preset-name: vs141-x86-release
         build-arch: x86
-        testlog-name: ${{ github.job }}
+        artifact-label: ${{ github.job }}

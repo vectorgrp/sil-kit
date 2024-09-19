@@ -14,7 +14,7 @@ jobs:
           - cc: clang-18
             cxx: clang++-18
     name: ${{ matrix.toolchain.cc }} release Builds for Ubuntu ARM64
-    environment: public-github-runners
+
     runs-on: [ ubuntu-24.04arm-8core ]
     container:
       image: ghcr.io/vectorgrp/sil-kit-docker-build/sil-kit-ci-public-runner:main
@@ -28,4 +28,4 @@ jobs:
           preset-name: linux-release
           cmake-args: "-DCMAKE_C_COMPILER=${{ matrix.toolchain.cc }} \
                        -DCMAKE_CXX_COMPILER=${{ matrix.toolchain.cxx }}"
-          testlog-name: ${{ github.job }}
+          artifact-label: ${{ github.job }}

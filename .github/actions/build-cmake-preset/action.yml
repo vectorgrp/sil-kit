@@ -5,11 +5,6 @@ inputs:
   preset-name:
     description: "The preset name from CMakePresets.json."
     required: true
-  upload-testlog:
-    description: "Upload gtest log with same name as preset-name"
-    required: false
-    default: true
-    type: boolean
   cmake-args:
     description: "Additional CMake arguments"
     required: false
@@ -28,10 +23,10 @@ inputs:
     default: "x64"
     description: "MSVC build architecture to use"
     required: false
-  testlog-name:
+  artifact-label:
     type: string
     default: ""
-    description: "Name of the testlog to upload"
+    description: "Name of the artifact label to attach to uploads"
     required: true
  
 outputs:
@@ -94,10 +89,9 @@ runs:
       shell: bash
 
     - name: stash test reports ${{ inputs.preset-name }}
-      if: ${{ (inputs.upload-testlog  == 'true') && (inputs.testlog-name != '') }}
       uses: actions/upload-artifact@v4
       with:
-        name: "${{ inputs.testlog-name }}-test-results"
+        name: "${{ inputs.artifact-label }}-test-results"
         path: '_build/**/*gtestresults.xml'
         retention-days: 2
 
@@ -105,7 +99,7 @@ runs:
       id: cmake-package
       run: |
         cmake --build --preset ${{ inputs.preset-name }} --target package
-        echo "package-name=$(basename _build/${{inputs.preset-name}}/_CPack_Packages/*/ZIP/SilKit-*-*/)-${{ inputs.testlog-name }}" >> $GITHUB_OUTPUT
+        echo "package-name=$(basename _build/${{inputs.preset-name}}/_CPack_Packages/*/ZIP/SilKit-*-*/)-${{ inputs.artifact-label }}" >> $GITHUB_OUTPUT
         # keep our original zip, otherwise the execute bits are lost
         echo "package-path=$(echo _build/${{inputs.preset-name}}/_CPack_Packages/*/ZIP/SilKit-*-*.zip)" >> $GITHUB_OUTPUT
       shell: bash
