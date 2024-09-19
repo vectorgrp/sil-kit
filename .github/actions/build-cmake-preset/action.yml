@@ -105,11 +105,9 @@ runs:
       id: cmake-package
       run: |
         cmake --build --preset ${{ inputs.preset-name }} --target package
-        echo "package-name=$(basename _build/${{inputs.preset-name}}/_CPack_Packages/*/ZIP/SilKit-*-*/)" >> $GITHUB_OUTPUT
+        echo "package-name=$(basename _build/${{inputs.preset-name}}/_CPack_Packages/*/ZIP/SilKit-*-*/)-${{ inputs.testlog-name }}" >> $GITHUB_OUTPUT
         # keep our original zip, otherwise the execute bits are lost
         echo "package-path=$(echo _build/${{inputs.preset-name}}/_CPack_Packages/*/ZIP/SilKit-*-*.zip)" >> $GITHUB_OUTPUT
-        echo "symbols-package-name=$(basename _build/${{inputs.preset-name}}/SilKit-*-*-SYMBOLS.zip)" >> $GITHUB_OUTPUT
-        echo "symbols-package-path=$(echo _build/${{inputs.preset-name}}/SilKit-*-*-SYMBOLS.zip)" >> $GITHUB_OUTPUT
       shell: bash
 
     - name: upload package ${{ inputs.preset-name }}
