@@ -1,13 +1,8 @@
+.. include:: /substitutions.rst
+
 ==============================
 User Guide
 ==============================
-
-..
-  macros for internal use
-..
-  General macros
-.. |ProductName| replace:: SIL Kit
-..
 
 The following section explains how to bring together Vector |ProductName| enabled applications and how to successfully run a simulation.
 
@@ -64,7 +59,7 @@ The following steps are required to set up a simulation and run it:
 2. Start the |ProductName| enabled application(s) with the desired arguments.
    Participants without a lifecycle and autonomous participants will start directly.
    For example, the applications to start in :numref:`Figure %s <label:users-setup-simple-example>` are both `SilKitDemoCan`` with their respective participant name `CanWriter` and `CanReader` as arguments.
-   See :doc:`demo applications<../usage/demos>` for informatio of how to build and start the sample applications.
+   See :doc:`demo applications<../demos/demos>` for informatio of how to build and start the sample applications.
    If you have access to the registry's log, you should see log entries stating that the participant(s) connected.
 3. Depending of the needs of your SIL Kit simulation, it may be necessary to start the :ref:`System Controller Utility<sec:util-system-controller>` (see :ref:`Configuring the Lifecycle Service<subsec:sim-configuring-lifecycle>` for more information).
    Once all required simulation participants have joined the simulation, the coordinated participants within the simulation will start.
@@ -72,7 +67,7 @@ The following steps are required to set up a simulation and run it:
 
 .. admonition:: Note
 
-  If you encounter any problems during the initial setup (e.g., you started the registry and the participants but nothing happens), refer to :doc:`Troubleshooting<../usage/troubleshooting>`.
+  If you encounter any problems during the initial setup (e.g., you started the registry and the participants but nothing happens), refer to :doc:`Troubleshooting<../troubleshooting/troubleshooting>`.
 
 .. _sec:users-participants:
 

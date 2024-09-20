@@ -1,3 +1,5 @@
+.. include:: /substitutions.rst
+
 =================
 Memory Management
 =================
@@ -60,7 +62,7 @@ Examples
 Within this section examples of how and how not to use the SIL Kit API regarding memory management are shown.
 
 .. literalinclude::
-   ./examples/memory/Memory_Dos_Donts.cpp
+   /code-samples/memory/Memory_Dos_Donts.cpp
    :language: cpp
    :lines: 24-44
 

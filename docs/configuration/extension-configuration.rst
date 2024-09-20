@@ -1,10 +1,10 @@
+.. include:: /substitutions.rst
+
 .. _sec:cfg-participant-extensions:
 
 ===================================================
 Extensions Configuration
 ===================================================
-
-.. |ProductName| replace:: SIL Kit
 
 .. contents:: :local:
    :depth: 3
