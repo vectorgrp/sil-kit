@@ -46,14 +46,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "CreateSilKitRegistryImpl.hpp"
 #include "CreateSilKitRegistryWithDashboard.hpp"
 
-//dashboard
+// Dashboard
 #include "CreateDashboard.hpp"
 #include "ValidateAndSanitizeConfig.hpp"
 #include "CreateDashboardInstance.hpp"
 
 using namespace SilKit::Core;
-
 using namespace SilKit::Util;
+
 using CliParser = SilKit::Util::CommandlineParser;
 
 namespace {
@@ -240,12 +240,12 @@ auto StartRegistry(std::shared_ptr<SilKit::Config::IParticipantConfiguration> co
     }
     catch (const std::exception& exception)
     {
-        std::cerr << "error during registry creation: " << exception.what() << std::endl;
+        std::cerr << "Error during registry creation: " << exception.what() << std::endl;
         throw;
     }
     catch (...)
     {
-        std::cerr << "unknown error during registry creation" << std::endl;
+        std::cerr << "Unknown error during registry creation" << std::endl;
         throw;
     }
 
@@ -258,12 +258,12 @@ auto StartRegistry(std::shared_ptr<SilKit::Config::IParticipantConfiguration> co
     }
     catch (const std::exception& exception)
     {
-        std::cerr << "error during connection to dashboard backend: " << exception.what() << std::endl;
+        std::cerr << "Error during connection to dashboard backend: " << exception.what() << std::endl;
         throw;
     }
     catch (...)
     {
-        std::cerr << "unknown error during connection to dashboard backend" << std::endl;
+        std::cerr << "Unknown error during connection to dashboard backend" << std::endl;
         throw;
     }
 
@@ -321,31 +321,28 @@ auto StartRegistry(std::shared_ptr<SilKit::Config::IParticipantConfiguration> co
 
 } // namespace
 
-std::promise<int> signalPromise;
 int main(int argc, char** argv)
 {
     CliParser commandlineParser;
     commandlineParser.Add<CliParser::Flag>("version", "v", "[--version]", "-v, --version: Get version info.");
     commandlineParser.Add<CliParser::Flag>("help", "h", "[--help]", "-h, --help: Get this help.");
-    commandlineParser.Add<CliParser::Flag>("use-signal-handler", "s", "[--use-signal-handler]",
-                                           "-s, --use-signal-handler: Exit this process when a signal is received. If "
-                                           "not set, the process runs infinitely.");
-    commandlineParser.Add<CliParser::Option>("listen-uri", "u", "silkit://localhost:8500", "[--listen-uri <uri>]",
-                                             "-u, --listen-uri <silkit-uri>: The silkit:// URI the registry should "
+    commandlineParser.Add<CliParser::Option>("listen-uri", "u", "silkit://localhost:8500", "[--listen-uri <silkitUri>]",
+                                             "-u, --listen-uri <silkitUri>: The 'silkit://' URI the registry should "
                                              "listen on. Defaults to 'silkit://localhost:8500'.");
     commandlineParser.Add<CliParser::Option>(
-        "generate-configuration", "g", "", "[--generate-configuration <configuration>]",
-        "-g, --generate-configuration <configuration>: Generate a configuration file which includes the URI the "
+        "generate-configuration", "g", "", "[--generate-configuration <filePath>]",
+        "-g, --generate-configuration <filePath>: Generate a configuration file which includes the URI the "
         "registry listens on. ");
     commandlineParser.Add<CliParser::Option>(
         "dashboard-uri", "d", "http://localhost:8082", "[--dashboard-uri <uri>]",
-        "-d, --dashboard-uri <dashboard-uri>: The http:// URI the data should be sent to.");
+        "-d, --dashboard-uri <uri>: The 'http://' URI of the SIL Kit Dashboard to which data is sent.");
     commandlineParser.Add<CliParser::Option>("log", "l", "info", "[--log <level>]",
                                              "-l, --log <level>: Log to stdout with level 'off', 'critical', 'error', "
                                              "'warn', 'info', 'debug', or 'trace'. Defaults to 'info'.");
-    commandlineParser.Add<CliParser::Option>("registry-configuration", "c", "", "[--registry-configuration <path>]",
-                                             "-c, --registry-configuration: The configuration read from this file "
-                                             "overrides the values specified on the command line.");
+    commandlineParser.Add<CliParser::Option>(
+        "registry-configuration", "c", "", "[--registry-configuration <filePath>]",
+        "-c, --registry-configuration <filePath>: The configuration read from this file "
+        "overrides the values specified on the command line.");
     commandlineParser.Add<CliParser::Option>(
         "directory", "C", "", "[--directory <path>]",
         "-C, --directory <path>: Change the working directory to the specified path before doing anything else.",
@@ -355,7 +352,10 @@ int main(int argc, char** argv)
     commandlineParser.Add<CliParser::Flag>(
         "enable-dashboard", "Q", "[--enable-dashboard]",
         "-Q, --enable-dashboard: Enable the built-in dashboard REST client (experimental).", CliParser::Hidden);
-
+    commandlineParser.Add<CliParser::Flag>("use-signal-handler", "s", "[--use-signal-handler]",
+                                           "-s, --use-signal-handler: Exit this process when a signal is received. If "
+                                           "not set, the process runs infinitely.",
+                                           CliParser::Hidden);
 
     if (SilKitRegistry::HasWindowsServiceSupport())
     {
@@ -420,10 +420,10 @@ int main(int argc, char** argv)
         return 0;
     }
 
-    auto useSignalHandler{commandlineParser.Get<CliParser::Flag>("use-signal-handler").Value()};
-    auto listenUri{commandlineParser.Get<CliParser::Option>("listen-uri").Value()};
-    auto logLevel{commandlineParser.Get<SilKit::Util::CommandlineParser::Option>("log").Value()};
+    const auto listenUri{commandlineParser.Get<CliParser::Option>("listen-uri").Value()};
+    const auto logLevel{commandlineParser.Get<SilKit::Util::CommandlineParser::Option>("log").Value()};
     auto dashboardUri{commandlineParser.Get<CliParser::Option>("dashboard-uri").Value()};
+    const auto useSignalHandler{commandlineParser.Get<CliParser::Flag>("use-signal-handler").Value()};
     auto enableDashboard{commandlineParser.Get<CliParser::Option>("dashboard-uri").HasValue()};
 
     if (commandlineParser.Get<CliParser::Flag>("enable-dashboard").Value())
@@ -450,10 +450,11 @@ int main(int argc, char** argv)
         return -1;
     }
 
-    if (useSignalHandler && windowsService)
+    if (useSignalHandler)
     {
-        std::cerr << "Error: Conflicting flags --windows-service / -W and --use-signal-handler / -s." << std::endl;
-        return -1;
+        std::cerr << "Warning: Flag '--use-signal-handler', '-s' became obsolete with v4.0.53, signal handling is "
+                     "always used since then."
+                  << std::endl;
     }
 
     try
@@ -483,7 +484,7 @@ int main(int argc, char** argv)
 
         SanitizeConfiguration(configuration, listenUri);
 
-        listenUri = ExtractRegistryUriFromConfiguration(configuration);
+        const auto configuredListenUri = ExtractRegistryUriFromConfiguration(configuration);
 
         const auto generatedConfigurationPathOpt = commandlineParser.Get<CliParser::Option>("generate-configuration");
 
@@ -496,41 +497,28 @@ int main(int argc, char** argv)
         }
         else
         {
-            const auto registry =
-                StartRegistry(configuration, listenUri, dashboardUri, enableDashboard, generatedConfigurationPathOpt);
+            const auto registry = StartRegistry(configuration, configuredListenUri, dashboardUri, enableDashboard,
+                                                generatedConfigurationPathOpt);
 
-            if (useSignalHandler)
-            {
-                using namespace SilKit::Util;
+            std::cout << "Press Ctrl-C to terminate..." << std::endl;
 
-                auto signalValue = signalPromise.get_future();
-                RegisterSignalHandler([](auto sigNum) { signalPromise.set_value(sigNum); });
-                std::cout << "Registered signal handler" << std::endl;
+            std::promise<int> signalPromise;
+            auto signalValue = signalPromise.get_future();
+            RegisterSignalHandler([&](auto sigNum) { signalPromise.set_value(sigNum); });
+            signalValue.wait();
 
-                signalValue.wait();
-
-                std::cout << "Signal " << signalValue.get() << " received, exiting..." << std::endl;
-            }
-            else
-            {
-                std::cout << "Press enter to shutdown registry..." << std::endl;
-                std::cin.ignore();
-            }
+            std::cout << "Signal " << signalValue.get() << " received, exiting..." << std::endl;
         }
     }
     catch (const SilKit::ConfigurationError& error)
     {
         std::cerr << "Error in configuration: " << error.what() << std::endl;
-        std::cout << "Press enter to stop the process..." << std::endl;
-        std::cin.ignore();
 
         return -2;
     }
     catch (const std::exception& error)
     {
         std::cerr << "Something went wrong: " << error.what() << std::endl;
-        std::cout << "Press enter to stop the process..." << std::endl;
-        std::cin.ignore();
 
         return -3;
     }

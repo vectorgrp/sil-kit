@@ -41,8 +41,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "SignalHandler.hpp"
 
 using namespace SilKit;
+using namespace SilKit::Util;
 using namespace SilKit::Services::Orchestration;
 using namespace SilKit::Services::Logging;
+
+using CliParser = SilKit::Util::CommandlineParser;
 
 using namespace std::chrono_literals;
 
@@ -119,7 +122,7 @@ public:
         }
         else
         {
-            LogInfo("Simulation ended, SystemController is shut down.");
+            LogInfo("Simulation ended, System Controller is shut down.");
         }
     }
 
@@ -129,7 +132,7 @@ private:
         _isStopRequested = true;
         if (_monitor->SystemState() == SystemState::Running || _monitor->SystemState() == SystemState::Paused)
         {
-            LogInfo("System controller stops the simulation...");
+            LogInfo("System Controller stops the simulation...");
             _lifecycleService->Stop("Stop via interaction in sil-kit-system-controller");
         }
         else if (_monitor->SystemState() == SystemState::Aborting)
@@ -227,31 +230,32 @@ auto IsValidLogLevel(const std::string& levelStr) -> bool
 
 int main(int argc, char** argv)
 {
-    using namespace SilKit::Util;
-    CommandlineParser commandlineParser;
-    commandlineParser.Add<CommandlineParser::Flag>("version", "v", "[--version]", "-v, --version: Get version info.");
-    commandlineParser.Add<CommandlineParser::Flag>("help", "h", "[--help]", "-h, --help: Get this help.");
-    commandlineParser.Add<CommandlineParser::Flag>(
-        "non-interactive", "ni", "[--non-interactive]",
-        "--non-interactive: Run without awaiting any user interactions at any time.");
-    commandlineParser.Add<CommandlineParser::Option>(
+    CliParser commandlineParser;
+    commandlineParser.Add<CliParser::Flag>("version", "v", "[--version]", "-v, --version: Get version info.");
+    commandlineParser.Add<CliParser::Flag>("help", "h", "[--help]", "-h, --help: Get this help.");
+    commandlineParser.Add<CliParser::Option>(
         "connect-uri", "u", "silkit://localhost:8500", "[--connect-uri <silkitUri>]",
         "-u, --connect-uri <silkitUri>: The registry URI to connect to. Defaults to 'silkit://localhost:8500'.");
-    commandlineParser.Add<CommandlineParser::Option>("name", "n", "SystemController", "[--name <participantName>]",
-                                                     "-n, --name <participantName>: The participant name used to take "
-                                                     "part in the simulation. Defaults to 'SystemController'.");
-    commandlineParser.Add<CommandlineParser::Option>(
-        "configuration", "c", "", "[--configuration <configuration>]",
-        "-c, --configuration <configuration>: Path and filename of the Participant configuration YAML or JSON file. "
+    commandlineParser.Add<CliParser::Option>("name", "n", "SystemController", "[--name <participantName>]",
+                                             "-n, --name <participantName>: The participant name used to take "
+                                             "part in the simulation. Defaults to 'SystemController'.");
+    commandlineParser.Add<CliParser::Option>(
+        "configuration", "c", "", "[--configuration <filePath>]",
+        "-c, --configuration <filePath>: Path to the Participant configuration YAML or JSON file. "
         "Note that the format was changed in v3.6.11. Cannot be used together with the '--log' option.");
-    commandlineParser.Add<CommandlineParser::Option>(
+    commandlineParser.Add<CliParser::Option>(
         "log", "l", "info", "[--log <level>]",
         "-l, --log <level>: Log to stdout with level 'trace', 'debug', 'warn', 'info', 'error', 'critical' or 'off'. "
         "Defaults to 'info' if the '--configuration' option is not specified. Cannot be used together with the "
         "'--configuration' option.");
-    commandlineParser.Add<CommandlineParser::PositionalList>(
+    commandlineParser.Add<CliParser::PositionalList>(
         "participantNames", "<participantName1> [<participantName2> ...]",
         "<participantName1>, <participantName2>, ...: Names of participants to wait for before starting simulation.");
+
+    // ignored and deprecated
+    commandlineParser.Add<CliParser::Flag>("non-interactive", "ni", "[--non-interactive]",
+                                           "--non-interactive: Run without awaiting any user interactions at any time.",
+                                           CliParser::Hidden);
 
     std::cout << "Vector SIL Kit -- System Controller, SIL Kit version: " << SilKit::Version::String() << std::endl
               << std::endl;
@@ -275,14 +279,14 @@ int main(int argc, char** argv)
         return -1;
     }
 
-    if (commandlineParser.Get<CommandlineParser::Flag>("help").Value())
+    if (commandlineParser.Get<CliParser::Flag>("help").Value())
     {
         commandlineParser.PrintUsageInfo(std::cout, argv[0]);
 
         return 0;
     }
 
-    if (commandlineParser.Get<CommandlineParser::Flag>("version").Value())
+    if (commandlineParser.Get<CliParser::Flag>("version").Value())
     {
         std::string hash{SilKit::Version::GitHash()};
         auto shortHash = hash.substr(0, 7);
@@ -292,7 +296,7 @@ int main(int argc, char** argv)
         return 0;
     }
 
-    if (!commandlineParser.Get<CommandlineParser::PositionalList>("participantNames").HasValues())
+    if (!commandlineParser.Get<CliParser::PositionalList>("participantNames").HasValues())
     {
         std::cerr << "Error: Arguments '<participantName1> [<participantName2> ...]' are missing" << std::endl;
         commandlineParser.PrintUsageInfo(std::cerr, argv[0]);
@@ -300,10 +304,11 @@ int main(int argc, char** argv)
         return -1;
     }
 
-    auto participantName{commandlineParser.Get<CommandlineParser::Option>("name").Value()};
+    const auto participantName{commandlineParser.Get<CliParser::Option>("name").Value()};
+    const auto nonInteractiveMode = (commandlineParser.Get<CliParser::Flag>("non-interactive").Value());
 
-    const bool hasLogOption{commandlineParser.Get<CommandlineParser::Option>("log").HasValue()};
-    const bool hasCfgOption{commandlineParser.Get<CommandlineParser::Option>("configuration").HasValue()};
+    const bool hasLogOption{commandlineParser.Get<CliParser::Option>("log").HasValue()};
+    const bool hasCfgOption{commandlineParser.Get<CliParser::Option>("configuration").HasValue()};
     if (hasLogOption && hasCfgOption)
     {
         std::cerr << "Error: Options '--log' and '--configuration' cannot be used simultaneously" << std::endl;
@@ -311,12 +316,11 @@ int main(int argc, char** argv)
         return -1;
     }
 
-    auto configurationFilename{commandlineParser.Get<CommandlineParser::Option>("configuration").Value()};
-    auto expectedParticipantNames{
-        commandlineParser.Get<CommandlineParser::PositionalList>("participantNames").Values()};
-    auto connectUri{commandlineParser.Get<CommandlineParser::Option>("connect-uri").Value()};
+    const auto configurationFilename{commandlineParser.Get<CliParser::Option>("configuration").Value()};
+    const auto participantNames{commandlineParser.Get<CliParser::PositionalList>("participantNames").Values()};
+    const auto connectUri{commandlineParser.Get<CliParser::Option>("connect-uri").Value()};
 
-    const auto logLevel{commandlineParser.Get<CommandlineParser::Option>("log").Value()};
+    const auto logLevel{commandlineParser.Get<CliParser::Option>("log").Value()};
     if (!IsValidLogLevel(logLevel))
     {
         std::cerr << "Error: Argument of the '--log' option must be one of 'trace', 'debug', 'warn', 'info', 'error', "
@@ -325,8 +329,12 @@ int main(int argc, char** argv)
         return -1;
     }
 
-    const bool nonInteractiveMode =
-        (commandlineParser.Get<CommandlineParser::Flag>("non-interactive").Value()) ? true : false;
+    if (nonInteractiveMode)
+    {
+        std::cerr << "Warning: Flag '--non-interactive', '-ni' became obsolete with v4.0.53, the default behavior "
+                     "is non-interactive since then."
+                  << std::endl;
+    }
 
     std::shared_ptr<SilKit::Config::IParticipantConfiguration> configuration;
     try
@@ -365,38 +373,25 @@ int main(int argc, char** argv)
         auto* logger{participant->GetLogger()};
         {
             std::ostringstream ss;
-            ss << "System controller is expecting " << expectedParticipantNames.size() << " participant"
-               << (expectedParticipantNames.size() > 1 ? "s" : "") << ": '";
-            std::copy(expectedParticipantNames.begin(), std::prev(expectedParticipantNames.end()),
+            ss << "System controller is expecting " << participantNames.size() << " participant"
+               << (participantNames.size() > 1 ? "s" : "") << ": '";
+            std::copy(participantNames.begin(), std::prev(participantNames.end()),
                       std::ostream_iterator<std::string>(ss, "', '"));
-            ss << expectedParticipantNames.back() << "'";
+            ss << participantNames.back() << "'";
             logger->Info(ss.str());
         }
 
+        auto expectedParticipantNames{participantNames};
         expectedParticipantNames.push_back(participantName);
         SilKitController controller(participant.get(), configuration, expectedParticipantNames);
 
-        if (!nonInteractiveMode)
-        {
-            std::cout << "Press Ctrl-C to end the simulation..." << std::endl;
-        }
+        std::cout << "Press Ctrl-C to end the simulation..." << std::endl;
         controller.RegisterSignalHandler();
         controller.WaitForFinalState();
-
-        if (!nonInteractiveMode)
-        {
-            std::cout << "Press enter to end the process..." << std::endl;
-            std::cin.ignore();
-        }
     }
     catch (const std::exception& error)
     {
         std::cerr << "Something went wrong: " << error.what() << std::endl;
-        if (!nonInteractiveMode)
-        {
-            std::cout << "Press enter to end the process..." << std::endl;
-            std::cin.ignore();
-        }
 
         return -3;
     }
