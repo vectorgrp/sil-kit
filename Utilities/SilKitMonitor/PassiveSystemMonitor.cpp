@@ -37,9 +37,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/services/logging/ILogger.hpp"
 
 #include "CommandlineParser.hpp"
+#include "SignalHandler.hpp"
 
 using namespace SilKit;
+using namespace SilKit::Util;
 using namespace std::chrono_literals;
+
+using CliParser = SilKit::Util::CommandlineParser;
 
 std::ostream& operator<<(std::ostream& out, std::chrono::nanoseconds timestamp)
 {
@@ -50,27 +54,25 @@ std::ostream& operator<<(std::ostream& out, std::chrono::nanoseconds timestamp)
 
 int main(int argc, char** argv)
 {
-    SilKit::Util::CommandlineParser commandlineParser;
-    commandlineParser.Add<SilKit::Util::CommandlineParser::Flag>("version", "v", "[--version]",
-                                                                 "-v, --version: Get version info.");
-    commandlineParser.Add<SilKit::Util::CommandlineParser::Flag>("help", "h", "[--help]", "-h, --help: Get this help.");
-
-    commandlineParser.Add<SilKit::Util::CommandlineParser::Option>(
+    CliParser commandlineParser;
+    commandlineParser.Add<CliParser::Flag>("version", "v", "[--version]", "-v, --version: Get version info.");
+    commandlineParser.Add<CliParser::Flag>("help", "h", "[--help]", "-h, --help: Get this help.");
+    commandlineParser.Add<CliParser::Option>(
         "connect-uri", "u", "silkit://localhost:8500", "[--connect-uri <silkitUri>]",
         "-u, --connect-uri <silkitUri>: The registry URI to connect to. Defaults to 'silkit://localhost:8500'.");
-    commandlineParser.Add<SilKit::Util::CommandlineParser::Option>(
+    commandlineParser.Add<CliParser::Option>(
         "name", "n", "SystemMonitor", "[--name <participantName>]",
         "-n, --name <participantName>: The participant name used to take part in the simulation. Defaults to "
         "'SystemMonitor'.");
-    commandlineParser.Add<SilKit::Util::CommandlineParser::Option>(
-        "configuration", "c", "", "[--configuration <configuration>]",
-        "-c, --configuration <configuration>: Path and filename of the Participant configuration YAML or JSON file.");
-    commandlineParser.Add<SilKit::Util::CommandlineParser::Flag>("autonomous", "a", "[--autonomous]",
-                                                                 "-a, --autonomous: Run with an autonomous lifecycle");
-    commandlineParser.Add<SilKit::Util::CommandlineParser::Flag>("coordinated", "r", "[--coordinated]",
-                                                                 "-r, --coordinated: Run with a coordinated lifecycle");
-    commandlineParser.Add<SilKit::Util::CommandlineParser::Flag>("sync", "s", "[--sync]",
-                                                                 "-s, --sync: Run with virtual time synchronization");
+    commandlineParser.Add<CliParser::Option>("configuration", "c", "", "[--configuration <filePath>]",
+                                             "-c, --configuration <filePath>: Path to the Participant configuration "
+                                             "YAML or JSON file. Note that the format was changed in v3.6.11.");
+    commandlineParser.Add<CliParser::Flag>("autonomous", "a", "[--autonomous]",
+                                           "-a, --autonomous: Run with an autonomous lifecycle.");
+    commandlineParser.Add<CliParser::Flag>("coordinated", "r", "[--coordinated]",
+                                           "-r, --coordinated: Run with a coordinated lifecycle.");
+    commandlineParser.Add<CliParser::Flag>("sync", "s", "[--sync]",
+                                           "-s, --sync: Run with virtual time synchronization.");
 
     std::cout << "Vector SIL Kit -- System Monitor, SIL Kit version: " << SilKit::Version::String() << std::endl
               << std::endl;
@@ -94,14 +96,14 @@ int main(int argc, char** argv)
         return -1;
     }
 
-    if (commandlineParser.Get<SilKit::Util::CommandlineParser::Flag>("help").Value())
+    if (commandlineParser.Get<CliParser::Flag>("help").Value())
     {
         commandlineParser.PrintUsageInfo(std::cout, argv[0]);
 
         return 0;
     }
 
-    if (commandlineParser.Get<SilKit::Util::CommandlineParser::Flag>("version").Value())
+    if (commandlineParser.Get<CliParser::Flag>("version").Value())
     {
         std::string hash{SilKit::Version::GitHash()};
         auto shortHash = hash.substr(0, 7);
@@ -111,15 +113,13 @@ int main(int argc, char** argv)
         return 0;
     }
 
-    auto connectUri{commandlineParser.Get<SilKit::Util::CommandlineParser::Option>("connect-uri").Value()};
-    auto participantName{commandlineParser.Get<SilKit::Util::CommandlineParser::Option>("name").Value()};
-    auto configurationFilename{commandlineParser.Get<SilKit::Util::CommandlineParser::Option>("configuration").Value()};
+    const auto connectUri{commandlineParser.Get<CliParser::Option>("connect-uri").Value()};
+    const auto participantName{commandlineParser.Get<CliParser::Option>("name").Value()};
+    const auto configurationFilename{commandlineParser.Get<CliParser::Option>("configuration").Value()};
 
-    bool autonomousMode =
-        (commandlineParser.Get<SilKit::Util::CommandlineParser::Flag>("autonomous").Value()) ? true : false;
-    bool coordinatedMode =
-        (commandlineParser.Get<SilKit::Util::CommandlineParser::Flag>("coordinated").Value()) ? true : false;
-    bool sync = (commandlineParser.Get<SilKit::Util::CommandlineParser::Flag>("sync").Value()) ? true : false;
+    bool autonomousMode = (commandlineParser.Get<CliParser::Flag>("autonomous").Value()) ? true : false;
+    bool coordinatedMode = (commandlineParser.Get<CliParser::Flag>("coordinated").Value()) ? true : false;
+    bool sync = (commandlineParser.Get<CliParser::Flag>("sync").Value()) ? true : false;
 
     if (autonomousMode && coordinatedMode)
     {
@@ -145,8 +145,6 @@ int main(int argc, char** argv)
     {
         std::cerr << "Error: Failed to load configuration '" << configurationFilename << "', " << error.what()
                   << std::endl;
-        std::cout << "Press enter to stop the process..." << std::endl;
-        std::cin.ignore();
 
         return -2;
     }
@@ -173,7 +171,6 @@ int main(int argc, char** argv)
             logger->Info(buffer.str());
         });
 
-        std::cout << "Press enter to terminate the SystemMonitor..." << std::endl;
         if (autonomousMode || coordinatedMode)
         {
             auto opMode = autonomousMode ? Services::Orchestration::OperationMode::Autonomous
@@ -184,30 +181,49 @@ int main(int argc, char** argv)
             if (sync)
             {
                 auto* timeSyncService = lifecycle->CreateTimeSyncService();
-                timeSyncService->SetSimulationStepHandler([logger](auto now, auto) {
+                timeSyncService->SetSimulationStepHandler(
+                    [logger](auto now, auto) {
                     std::stringstream buffer;
                     buffer << "now=" << now;
                     logger->Info(buffer.str());
-                }, 1ms);
+                    },
+                    1ms);
             }
             auto finalStateFuture = lifecycle->StartLifecycle();
 
-            std::cin.ignore();
+            std::cout << "Press Ctrl-C to terminate..." << std::endl;
 
-            lifecycle->Stop("Stopping the SystemMonitor");
-            auto finalState = finalStateFuture.get();
-            std::cout << "SystemMonitor stopped. Final State: " << finalState << std::endl;
+            std::promise<int> signalPromise;
+            auto signalValue = signalPromise.get_future();
+            RegisterSignalHandler([&](auto sigNum) { signalPromise.set_value(sigNum); });
+            signalValue.wait();
+
+            {
+                std::stringstream buffer;
+                buffer << "Signal " << signalValue.get() << " received, exiting...";
+                logger->Info(buffer.str());
+            }
+            lifecycle->Stop("Stopping the System Monitor");
         }
         else
         {
-            std::cin.ignore();
+            std::cout << "Press Ctrl-C to terminate..." << std::endl;
+
+            std::promise<int> signalPromise;
+            auto signalValue = signalPromise.get_future();
+            RegisterSignalHandler([&](auto sigNum) { signalPromise.set_value(sigNum); });
+            signalValue.wait();
+
+            {
+                std::stringstream buffer;
+                buffer << "Signal " << signalValue.get() << " received, exiting...";
+                logger->Info(buffer.str());
+            }
         }
     }
     catch (const std::exception& error)
     {
         std::cerr << "Something went wrong: " << error.what() << std::endl;
-        std::cout << "Press enter to stop the process..." << std::endl;
-        std::cin.ignore();
 
         return -3;
     }

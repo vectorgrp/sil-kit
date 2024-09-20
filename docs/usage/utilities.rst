@@ -30,14 +30,14 @@ sil-kit-registry
    *  - Requirements
       - None
    *  - Parameters
-      - -v, --version                        Get version info.
-        -h, --help                           Show the help of the SIL Kit Registry.
-        -s, --use-signal-handler             Exit this process when a signal is received. If not set, the process runs infinitely.
-        -u, --listen-uri <silkit-uri>        The ``silkit://`` URI the registry should listen on. Defaults to ``silkit://localhost:8500``.
-        -l, --log <level>                    Log to stdout with level ``off``, ``critical``, ``error``, ``warn``, ``info``, ``debug``, or ``trace``. Defaults to ``info``.
-        -g, --generate-configuration <path>  Path and filename of a participant configuration file to generate containing the URI the registry is using.
-        -d, --dashboard-uri <dashboard-uri>  The ``http://`` URI the data should be sent to. Defaults to ``http://localhost:8082``.
-        -c, --registry-configuration <path>  Path to the registry configuration file (YAML).
+      - -v, --version                            Get version info.
+        -h, --help                               Show the help of the SIL Kit Registry.
+        -u, --listen-uri <silkitUri>             The ``silkit://`` URI the registry should listen on. Defaults to ``silkit://localhost:8500``.
+        -g, --generate-configuration <path>      Generate a configuration file which includes the URI the registry listens on.
+        -d, --dashboard-uri <uri>                The ``http://`` URI of the SIL Kit Dashboard to which data is sent.
+        -l, --log <level>                        Log to stdout with level ``off``, ``critical``, ``error``, ``warn``, ``info``, ``debug``, or ``trace``. Defaults to ``info``.
+        -c, --registry-configuration <filePath>  The configuration read from this file overrides the values specified on the command line.
+        -s, --use-signal-handler                 Terminate when an OS signal is received. **Deprecated:** Since v4.0.53, this is the default behavior.
 
    *  - Usage Example
       - .. code-block:: powershell
@@ -77,13 +77,13 @@ sil-kit-system-controller
          Furthermore, it requires a list of synchronized participants that are needed to start the simulation as input.
    *  -  Parameters
       -  -v, --version                                Get version info.
-         -h, --help                                   Show the help of ``sil-kit-system-controller``.
-         -u, --connect-uri <silkitUri>                The registry's URI to connect to. Defaults to ``silkit://localhost:8500``.
+         -h, --help                                   Show the help of the SIL Kit System Controller.
+         -u, --connect-uri <silkitUri>                The registry URI to connect to. Defaults to ``silkit://localhost:8500``.
          -n, --name <participantName>                 The participant name used to take part in the simulation. Defaults to ``SystemController``.
-         -l, --log <level>                            Log to stdout with level ``trace``, ``debug``, ``warn``, ``info``, ``error``, ``critical`` or ``off``. Defaults to ``info``. Cannot be used together with ``--configuration``.
-         -c, --configuration <configuration>          Path and filename of the participant configuration YAML file. Cannot be used together with ``--log``.
-         -ni, --non-interactive                       Run without awaiting any user interactions at any time.
-         
+         -c, --configuration <filePath>               Path to the Participant configuration YAML or JSON file. Note that the format was changed in v3.6.11. Cannot be used together with the ``--log`` option.
+         -l, --log <level>                            Log to stdout with level ``trace``, ``debug``, ``warn``, ``info``, ``error``, ``critical`` or ``off``. Defaults to ``info`` if the ``--configuration`` option is not specified. Cannot be used together with the ``--configuration`` option.
+         -ni, --non-interactive                       Never prompt the user. *Deprecated:* Since v4.0.53, this is the default behavior.
+
          | **<participantName1>, <participantName2> ...**
          |  Names of participants to wait for before starting simulation.
    
@@ -115,10 +115,13 @@ sil-kit-monitor
       -  Requires a running ``sil-kit-registry`` to connect to.
    *  -  Parameters
       -  -v, --version                           Get version info.
-         -h, --help                              Show the help of the ``sil-kit-monitor``.
-         -u, --connect-uri <silkitUri>           The registry's URI to connect to. Defaults to ``silkit://localhost:8500``.
-         -n, --name <participantName>            The participant name used to take part in the simulation. Defaults to '``SystemMonitor``'.
-         -c, --configuration  <configuration>    Path and filename of the participant configuration YAML file.
+         -h, --help                              Show the help of the SIL Kit Monitor.
+         -u, --connect-uri <silkitUri>           The registry URI to connect to. Defaults to ``silkit://localhost:8500``.
+         -n, --name <participantName>            The participant name used to take part in the simulation. Defaults to ``SystemMonitor``.
+         -c, --configuration <filePath>          Path to the Participant configuration YAML or JSON file.
+         -a, --autonomous                        Run with an autonomous lifecycle.
+         -r, --coordinated                       Run with a coordinated lifecycle.
+         -s, --sync                              Run with virtual time synchronization.
 
    *  -  Usage Example
       -  .. code-block:: powershell
