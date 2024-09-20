@@ -1,3 +1,5 @@
+.. include:: /substitutions.rst
+
 =============
 Participant
 =============
@@ -15,7 +17,9 @@ Creating the Participant
 ~~~~~~~~~~~~~~~~~~~~~~~~
 To create an |IParticipant| you have to include the 
 :ref:`silkit/SilKit.hpp<sec:header>` and call the Participant API
-factory function::
+factory function:
+
+.. code-block:: c++
 
     auto config = SilKit::Config::ParticipantConfigurationFromFile("my_config.yaml");
     auto participant = SilKit::CreateParticipant(config, "ParticipantName", registryUri);
