@@ -18,10 +18,6 @@ on:
   push:
     branches: [ 'main' ]
 
-concurrency:
-  group: ${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
-
 jobs:
   build-win-x64:
     runs-on: windows-2019
