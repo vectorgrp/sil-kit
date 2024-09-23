@@ -5,6 +5,8 @@ on:
       run_build:
         required: true
         type: boolean
+  push:
+    branches: [ 'main' ]
 
 jobs:
   ubuntu-arm-release:
