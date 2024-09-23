@@ -2,18 +2,6 @@ name: 'Linux Release Builds For ARM64'
 on:
   workflow_call:
     inputs:
-      do_package:
-        required: false
-        type: boolean
-        default: false
-      do_package_symbols:
-        required: false
-        type: boolean
-        default: false
-      retention_days:
-        required: false
-        type: number
-        default: 14
       run_build:
         required: true
         type: boolean
@@ -26,11 +14,11 @@ jobs:
           - cc: clang-18
             cxx: clang++-18
     name: ${{ matrix.toolchain.cc }} release Builds for Ubuntu ARM64
-    environment: public-github-runners
+
     runs-on: [ ubuntu-24.04arm-8core ]
     container:
       image: ghcr.io/vectorgrp/sil-kit-docker-build/sil-kit-ci-public-runner:main
-    if: inputs.run_build == true
+    if: (inputs.run_build == true) || (github.event_name == 'push')
     steps:
       - uses: actions/checkout@v4
         with:
@@ -38,8 +26,6 @@ jobs:
       - uses: ./.github/actions/build-cmake-preset
         with:
           preset-name: linux-release
-          do-package: ${{ inputs.do_package }}
-          retention-days: ${{ inputs.retention_days }}
           cmake-args: "-DCMAKE_C_COMPILER=${{ matrix.toolchain.cc }} \
                        -DCMAKE_CXX_COMPILER=${{ matrix.toolchain.cxx }}"
-          testlog-name: ${{ github.job }}
+          artifact-label: ${{ github.job }}

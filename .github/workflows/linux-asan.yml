@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/vectorgrp/sil-kit-docker-build/sil-kit-ci-public-runner:main
-    if: inputs.run_build == true
+    if: (inputs.run_build == true) || (github.event_name == 'push')
     steps:
       - uses: actions/checkout@v4
         with:
@@ -22,8 +22,7 @@ jobs:
       - uses: ./.github/actions/build-cmake-preset
         with:
           preset-name: clang-relwithdebinfo
-          do-package: false
           cmake-args: "-D SILKIT_ENABLE_ASAN=ON -D SILKIT_BUILD_DASHBOARD=OFF \
                        -DCMAKE_C_COMPILER=clang-18 \
                        -DCMAKE_CXX_COMPILER=clang++-18"
-          testlog-name: ${{ github.job }}
+          artifact-label: ${{ github.job }}

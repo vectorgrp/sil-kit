@@ -5,34 +5,20 @@
             "name": "base-env",
             "description": "Basic preset that defines global variables",
             "hidden": true,
-            "generator": "Ninja",
-            "binaryDir": "${sourceDir}/_build/$env{SILKIT_CMAKE_PRESET_NAME}",
-            "installDir": "${sourceDir}/_install/$env{SILKIT_CMAKE_PRESET_NAME}",
-            "environment": {
-                "SILKIT_CMAKE_PRESET_NAME": "$env{SILKIT_CMAKE_PRESET_BUILD_PLATFORM}-$env{SILKIT_CMAKE_PRESET_ARCHITECTURE}-$env{SILKIT_CMAKE_PRESET_BUILD_TYPE}"
-            },
+            "inherits": "mixin-dirs",
             "cacheVariables": { "CMAKE_BUILD_TYPE": "$env{SILKIT_CMAKE_PRESET_BUILD_TYPE}" }
         },
         {
             "name": "linux-base",
             "displayName": "Linux Base Configuration",
             "description": "Target the Windows Subsystem for Linux (WSL) or a remote Linux system.",
-            "inherits": "base-env",
+            "inherits": ["mixin-dirs", "base-env"],
             "hidden": true,
-            "environment": {
-                "SILKIT_CMAKE_PRESET_ARCHITECTURE": "x86_64",
-                "SILKIT_CMAKE_PRESET_BUILD_PLATFORM": "linux"
-            },
+            "generator": "Ninja",
             "condition": {
                 "type": "equals",
                 "lhs": "${hostSystemName}",
                 "rhs": "Linux"
-            },
-            "vendor": {
-                "microsoft.com/VisualStudioRemoteSettings/CMake/1.0": {
-                    "sourceDir": "$env{HOME}/.vs/$ms{projectDirName}",
-                    "rsyncCommandArgs": [ "--exclude", "_build" ]
-                }
             }
         },
         {
@@ -40,27 +26,17 @@
             "displayName": "Linux Debug",
             "description": "Target the Windows Subsystem for Linux (WSL) or a remote Linux system.",
             "inherits": "linux-base",
-            "environment": {
-                "SILKIT_CMAKE_PRESET_BUILD_TYPE": "Debug"
-            }
+            "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug" }
         },
         {
             "name": "linux-release",
-            "displayName": "Linux Release",
-            "description": "Target the Windows Subsystem for Linux (WSL) or a remote Linux system.",
             "inherits": "linux-base",
-            "environment": {
-                "SILKIT_CMAKE_PRESET_BUILD_TYPE": "Release"
-            }
+            "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" }
         },
         {
             "name": "linux-relwithdebinfo",
-            "displayName": "Linux Release with Debug Info",
-            "description": "Target the Windows Subsystem for Linux (WSL) or a remote Linux system.",
             "inherits": "linux-base",
-            "environment": {
-                "SILKIT_CMAKE_PRESET_BUILD_TYPE": "RelWithDebInfo"
-            }
+            "cacheVariables": { "CMAKE_BUILD_TYPE": "RelWithDebInfo" }
         },
         {
             "name": "windows-base",
@@ -70,9 +46,6 @@
             "cacheVariables": {
                 "CMAKE_C_COMPILER": "cl.exe",
                 "CMAKE_CXX_COMPILER": "cl.exe"
-            },
-            "environment": {
-                "SILKIT_CMAKE_PRESET_BUILD_PLATFORM": "win"
             },
             "condition": {
                 "type": "equals",
@@ -89,64 +62,43 @@
                 "value": "x64",
                 "strategy": "external"
             },
-            "environment": {
-                "SILKIT_CMAKE_PRESET_BUILD_TYPE": "Debug",
-                "SILKIT_CMAKE_PRESET_ARCHITECTURE": "x64"
-            }
+            "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug" }
         },
         {
             "name": "x64-release",
             "displayName": "x64 Release",
             "description": "Target Windows (64-bit) with the Visual Studio development environment. (Release)",
             "inherits": "x64-debug",
-            "environment": {
-                "SILKIT_CMAKE_PRESET_BUILD_TYPE": "Release"
-            }
+            "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" }
         },
         {
             "name": "x64-relwithdebinfo",
             "description": "Target Windows (64-bit) with the Visual Studio development environment. (RelWithDebInfo)",
             "inherits": "x64-debug",
-            "environment": {
-                "SILKIT_CMAKE_PRESET_BUILD_TYPE": "RelWithDebInfo"
-            },
             "cacheVariables": {
-                "SILKIT_PACKAGE_SYMBOLS": "OFF"
+                "SILKIT_PACKAGE_SYMBOLS": "OFF",
+                "CMAKE_BUILD_TYPE": "RelWithDebInfo"
             }
         },
         {
             "name": "x86-debug",
-            "displayName": "x86 Debug",
-            "description": "Target Windows (32-bit) with the Visual Studio development environment. (Debug)",
             "inherits": "windows-base",
             "architecture": {
                 "value": "x86",
                 "strategy": "external"
             },
-            "environment": {
-                "SILKIT_CMAKE_PRESET_BUILD_TYPE": "Debug",
-                "SILKIT_CMAKE_PRESET_ARCHITECTURE": "x86"
-            }
+            "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug" }
         },
         {
             "name": "x86-release",
-            "displayName": "x86 Release",
-            "description": "Target Windows (32-bit) with the Visual Studio development environment. (Release)",
             "inherits": "x86-debug",
-            "environment": {
-                "SILKIT_CMAKE_PRESET_BUILD_TYPE": "Release"
-            }
+            "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" }
         },
         {
             "name": "x86-relwithdebinfo",
-            "displayName": "x86 Release with Debug Info",
-            "description": "Target Windows (32-bit) with the Visual Studio development environment. (RelWithDebInfo)",
             "inherits": "x86-debug",
-            "environment": {
-                "SILKIT_CMAKE_PRESET_BUILD_TYPE": "RelWithDebInfo"
-            }
+            "cacheVariables": { "CMAKE_BUILD_TYPE": "RelWithDebInfo" }
         },
-
 
 
         {
@@ -879,6 +831,11 @@
             "configurePreset": "x64-release"
         },
         {
+            "name": "x64-relwithdebinfo",
+            "inherits": "windows-base",
+            "configurePreset": "x64-relwithdebinfo"
+        },
+        {
             "name": "x86-debug",
             "inherits": "windows-base",
             "configurePreset": "x86-debug"
@@ -887,6 +844,11 @@
             "name": "x86-release",
             "inherits": "windows-base",
             "configurePreset": "x86-release"
+        },
+        {
+            "name": "x86-relwithdebinfo",
+            "inherits": "windows-base",
+            "configurePreset": "x86-relwithdebinfo"
         },
         {
             "name": "vs140-x86-debug",
