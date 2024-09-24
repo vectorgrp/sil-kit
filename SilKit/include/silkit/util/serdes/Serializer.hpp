@@ -38,6 +38,8 @@ inline namespace v1 {
 
 class Serializer
 {
+    using UnionDiscriminator = uint32_t;
+
 public:
     // ----------------------------------------
     // CTOR, DTOR, Copy Operators
@@ -151,13 +153,24 @@ public:
     /*! \brief Serializes the end of an optional value. */
     void EndOptional() {}
 
-    void BeginUnion(int)
+    /*! \brief Serialize the start of a union with a particular discriminator.
+     * Only the active union member must be serialized prior to calling EndUnion.
+     * \param discriminator index of the active union member
+     */
+    void BeginUnion(const int discriminator)
     {
-        throw SilKitError("Unions are currently not supported.");
+#ifndef NDEBUG
+        if (discriminator < 0)
+            throw SilKitError{"Union discriminator is negative"};
+        if (static_cast<unsigned>(discriminator) > (std::numeric_limits<UnionDiscriminator>::max)())
+            throw LengthError{"Union discriminator is too big"};
+#endif
+        SerializeAligned<UnionDiscriminator>(static_cast<UnionDiscriminator>(discriminator), sizeof(UnionDiscriminator));
     }
+
+    /*! \brief Serialize the end of a union. */
     void EndUnion()
     {
-        throw SilKitError("Unions are currently not supported.");
     }
 
     /*! \brief Resets the buffer. */

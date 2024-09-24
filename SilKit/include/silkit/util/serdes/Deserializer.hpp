@@ -37,6 +37,8 @@ inline namespace v1 {
 
 class Deserializer
 {
+    using UnionDiscriminator = uint32_t;
+
 public:
     // ----------------------------------------
     // CTOR, DTOR, Copy Operators
@@ -157,13 +159,19 @@ public:
     /*! \brief Deserializes the end of an optional value. */
     void EndOptional() {}
 
+    /*! \brief Deserializes the start of a union and returns the discriminator.
+     * Only the active union member must be deserialized before calling EndUnion.
+     * \returns index of the active union member
+     */
     auto BeginUnion() -> int
     {
-        throw SilKitError("Unions are currently not supported.");
+        const auto discriminator = DeserializeAligned<UnionDiscriminator>(sizeof(UnionDiscriminator));
+        return static_cast<int>(discriminator);
     }
+
+    /*! \brief Deserializes the end of a union. */
     void EndUnion()
     {
-        throw SilKitError("Unions are currently not supported.");
     }
 
     /*! \brief Resets the buffer and replaces it with another one.
