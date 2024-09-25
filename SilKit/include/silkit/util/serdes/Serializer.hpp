@@ -155,13 +155,15 @@ public:
 
     /*! \brief Serialize the start of a union with a particular discriminator.
      * Only the active union member must be serialized prior to calling EndUnion.
-     * \param discriminator index of the active union member
+     * \param discriminator 1-based index of the active union member
      */
     void BeginUnion(const int discriminator)
     {
 #ifndef NDEBUG
         if (discriminator < 0)
             throw SilKitError{"Union discriminator is negative"};
+        if (discriminator == 0)
+            throw SilKitError{"Union discriminator is zero"};
         if (static_cast<unsigned>(discriminator) > (std::numeric_limits<UnionDiscriminator>::max)())
             throw LengthError{"Union discriminator is too big"};
 #endif
