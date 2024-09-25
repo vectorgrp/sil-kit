@@ -287,4 +287,18 @@ TEST(Test_SilSerDes, serdes_array)
     deserializer.EndArray();
 }
 
+TEST(Test_SilSerDes, serdes_union)
+{
+    Serializer serializer;
+    serializer.BeginUnion(124);
+    serializer.Serialize(1001, 32);
+    serializer.EndUnion();
+
+    Deserializer deserializer;
+    deserializer.Reset(serializer.ReleaseBuffer());
+    EXPECT_EQ(124, deserializer.BeginUnion());
+    EXPECT_EQ(1001, deserializer.Deserialize<int32_t>(32));
+    deserializer.EndUnion();
+}
+
 } // anonymous namespace
