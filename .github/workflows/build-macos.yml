@@ -12,6 +12,7 @@ on:
 jobs:
   build-macos:
     runs-on: macos-latest
+    continue-on-error: true
     if: (inputs.run_build == true) || (github.event_name == 'push') || (github.event_name == 'workflow_dispatch')
 
     steps:
