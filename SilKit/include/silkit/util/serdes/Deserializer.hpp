@@ -161,7 +161,7 @@ public:
 
     /*! \brief Deserializes the start of a union and returns the discriminator.
      * Only the active union member must be deserialized before calling EndUnion.
-     * \returns 1-based index of the active union member
+     * \returns 1-based index of the active union member or 0 for an invalid 'empty' union
      */
     auto BeginUnion() -> int
     {
