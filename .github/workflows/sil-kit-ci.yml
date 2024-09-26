@@ -103,3 +103,9 @@ jobs:
     needs: [check-licenses, check-run-builds, check-formatting]
     with:
       run_build: ${{ needs.check-run-builds.outputs.run_builds == 'true' }}
+
+  macos-release-builds:
+    uses: ./.github/workflows/build-macos.yml
+    needs: [check-licenses, check-run-builds, check-formatting]
+    with:
+      run_build: ${{ needs.check-run-builds.outputs.run_builds == 'true' }}
