@@ -23,6 +23,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <string>
 #include <sstream>
 #include <map>
+#include <unordered_map>
 
 #include "ServiceConfigKeys.hpp"
 #include "Configuration.hpp"
@@ -70,6 +71,8 @@ public:
     inline bool operator==(const ServiceDescriptor& rhs) const;
     inline bool operator!=(const ServiceDescriptor& rhs) const;
     inline std::string to_string() const;
+    inline std::unordered_map<std::string, std::string> to_keyValues() const;
+
     inline Core::EndpointAddress to_endpointAddress() const;
 
 public:
@@ -303,6 +306,46 @@ std::string ServiceDescriptor::to_string() const
     }
     return ss.str();
 }
+
+
+std::unordered_map<std::string, std::string> ServiceDescriptor::to_keyValues() const
+{
+    std::unordered_map<std::string, std::string> kv;
+    std::string controllerTypeName;
+    std::stringstream ss;
+
+    kv.insert({"ParticipantName", GetParticipantName()});
+    kv.insert({"ServiceType", SilKit::Core::to_string(GetServiceType())});
+
+    switch (GetServiceType())
+    {
+    case ServiceType::Link:
+        kv.insert({"NetworkType", Config::to_string(GetNetworkType())});
+        kv.insert({"NetworkName", GetNetworkName()});
+        break;
+    case ServiceType::Controller:
+    case ServiceType::SimulatedController:
+        if (!GetSupplementalDataItem(SilKit::Core::Discovery::controllerType, controllerTypeName))
+        {
+            throw LogicError("supplementalData.size() > 0");
+        }
+        kv.insert({"ControllerTypeName", controllerTypeName});
+        kv.insert({"NetworkType", Config::to_string(GetNetworkType())});
+        kv.insert({"NetworkName", GetNetworkName()});
+        kv.insert({"ServiceName", GetServiceName()});
+        break;
+    case ServiceType::InternalController:
+        kv.insert({"ServiceName", GetServiceName()});
+        break;
+    case ServiceType::Undefined:
+        kv.insert({"NetworkName", GetNetworkName()});
+        kv.insert({"ServiceName", GetServiceName()});
+        break;
+    }
+    return kv;
+}
+
+
 
 EndpointAddress ServiceDescriptor::to_endpointAddress() const
 {

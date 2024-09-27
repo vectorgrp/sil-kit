@@ -178,7 +178,7 @@ protected:
     Test_VAsioConnection()
         : _connection(nullptr, &_dummyMetricsManager, {}, "Test_VAsioConnection", 1, &_timeProvider)
     {
-        _connection.SetLogger(&_dummyLogger);
+        _connection.SetLoggerInternal(&_dummyLogger);
     }
 
     Tests::MockLogger _dummyLogger;
