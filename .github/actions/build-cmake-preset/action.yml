@@ -13,21 +13,21 @@ inputs:
     required: false
     default: true
     type: boolean
-  toolset:
-    type: string
-    default: '14.1'
-    description: "MSVC tool set to use"
-    required: false
-  build-arch:
-    type: string
-    default: "x64"
-    description: "MSVC build architecture to use"
-    required: false
   artifact-label:
     type: string
     default: ""
     description: "Name of the artifact label to attach to uploads"
     required: true
+  shell:
+    type: string
+    default: "bash"
+    required: false
+    description: "Explicitly set the shell to use for running cmake"
+  extra-path:
+    type: string
+    default: ""
+    required: false
+    description: "Prepends this string to $PATH"
  
 outputs:
   package-name:
@@ -42,51 +42,32 @@ outputs:
   symbols-package-name:
     description: artifact name of the symbols zip
     value: "${{ steps.cmake-package.outputs.symbols-package-name }}"
- 
+
 runs:
   using: composite
   steps:
 
-    - name: Setup host
-      if: runner.os == 'Windows'
-      run: |
-        choco install -y ninja
-        choco install -y doxygen.install
-        pip install breathe==4.34.0
-        pip install sphinx==5.1.1
-        pip install sphinx-rtd-theme==1.0.0
-      id: setup-host-windows
-      shell: powershell
-
-    - name: Setup host
-      if: runner.os == 'macOS'
-      run: brew install ninja doxygen
-      id: setup-host-macos
-      shell: bash
-
-    - name: Prepare build env on Windows
-      if: runner.os == 'Windows'
-      uses: ilammy/msvc-dev-cmd@v1.12.0
-      with:
-        arch: ${{ inputs.build-arch }}
-        toolset: ${{ inputs.toolset }}
-      id: setup-env-windows
-
     - name: Configure ${{ inputs.preset-name }}
-      run: cmake --preset ${{ inputs.preset-name }} ${{ inputs.cmake-args }}
-      id: cmake-configure
-      shell: bash
+      run: |
+        export PATH=${{ inputs.extra-path }}$PATH
+        cmake --preset ${{ inputs.preset-name }} ${{ inputs.cmake-args }}
+      shell: ${{ inputs.shell }}
 
     - name: Build ${{ inputs.preset-name }}
-      id: cmake-build
-      run: cmake --build --preset ${{ inputs.preset-name }}
-      shell: bash
+      run: |
+        export PATH=${{ inputs.extra-path }}$PATH
+        cmake --build --preset ${{ inputs.preset-name }}
+
+      shell: ${{ inputs.shell }}
 
     - name: test ${{ inputs.preset-name }}
       if: ${{ inputs.run-tests == 'true' }}
       id: ctests
-      run: ctest --preset ${{ inputs.preset-name }} --output-on-failure -R '^(I|T)'
-      shell: bash
+      run: |
+        export PATH=${{ inputs.extra-path }}$PATH
+        ctest --preset ${{ inputs.preset-name }} --output-on-failure -R '^(I|T)'
+
+      shell: ${{ inputs.shell }}
 
     - name: stash test reports ${{ inputs.preset-name }}
       uses: actions/upload-artifact@v4
@@ -98,11 +79,12 @@ runs:
     - name: create cmake package for ${{ inputs.preset-name }}
       id: cmake-package
       run: |
+        export PATH=${{ inputs.extra-path }}$PATH
         cmake --build --preset ${{ inputs.preset-name }} --target package
         echo "package-name=$(basename _build/${{inputs.preset-name}}/_CPack_Packages/*/ZIP/SilKit-*-*/)-${{ inputs.artifact-label }}" >> $GITHUB_OUTPUT
         # keep our original zip, otherwise the execute bits are lost
         echo "package-path=$(echo _build/${{inputs.preset-name}}/_CPack_Packages/*/ZIP/SilKit-*-*.zip)" >> $GITHUB_OUTPUT
-      shell: bash
+      shell: ${{ inputs.shell }}
 
     - name: upload package ${{ inputs.preset-name }}
       uses: actions/upload-artifact@v4
