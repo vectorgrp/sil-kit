@@ -40,6 +40,7 @@ struct NullConnection
     }
 
     void SetLogger(Services::Logging::ILogger* /*logger*/) {}
+    void SetLoggerInternal(Services::Logging::ILoggerInternal* /*logger*/) {}
     void SetTimeSyncService(Orchestration::TimeSyncService* /*timeSyncService*/) {}
     void JoinSimulation(std::string /*registryUri*/) {}
 
