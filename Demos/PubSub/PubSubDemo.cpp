@@ -232,7 +232,7 @@ int main(int argc, char** argv)
                         PublishData(gpsPublisher, temperaturePublisher);
                     }
                     std::this_thread::sleep_for(1s);
-                },
+                    },
                     1s);
             }
             else
@@ -242,7 +242,8 @@ int main(int argc, char** argv)
                     auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
                     std::cout << "now=" << nowMs.count() << "ms" << std::endl;
                     std::this_thread::sleep_for(1s);
-                }, 1s);
+                    },
+                    1s);
             }
 
             auto finalStateFuture = lifecycleService->StartLifecycle();

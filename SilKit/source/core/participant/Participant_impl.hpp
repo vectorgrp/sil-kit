@@ -112,10 +112,9 @@ Participant<SilKitConnectionT>::Participant(Config::ParticipantConfiguration par
     // NB: do not create the _logger in the initializer list. If participantName is empty,
     //  this will cause a fairly unintuitive exception in spdlog.
     _logger = std::make_unique<Services::Logging::Logger>(GetParticipantName(), _participantConfig.logging);
-
     dynamic_cast<VSilKit::MetricsProcessor&>(*_metricsProcessor).SetLogger(*_logger);
     dynamic_cast<VSilKit::MetricsManager&>(*_metricsManager).SetLogger(*_logger);
-    _connection.SetLogger(_logger.get());
+    _connection.SetLoggerInternal(_logger.get());
 
     Logging::Info(_logger.get(), "Creating participant '{}' at '{}', SIL Kit version: {}", GetParticipantName(),
                   _participantConfig.middleware.registryUri, Version::StringImpl());
@@ -1333,7 +1332,7 @@ template <class SilKitConnectionT>
 template <typename SilKitMessageT>
 void Participant<SilKitConnectionT>::SendMsgImpl(const IServiceEndpoint* from, SilKitMessageT&& msg)
 {
-    TraceTx(GetLogger(), from, msg);
+    TraceTx(GetLoggerInternal(), from, msg);
     _connection.SendMsg(from, std::forward<SilKitMessageT>(msg));
 }
 
@@ -1637,7 +1636,7 @@ template <typename SilKitMessageT>
 void Participant<SilKitConnectionT>::SendMsgImpl(const IServiceEndpoint* from, const std::string& targetParticipantName,
                                                  SilKitMessageT&& msg)
 {
-    TraceTx(GetLogger(), from, msg);
+    TraceTx(GetLoggerInternal(), from, msg);
     _connection.SendMsg(from, targetParticipantName, std::forward<SilKitMessageT>(msg));
 }
 

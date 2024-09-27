@@ -26,7 +26,8 @@ namespace SilKit {
 namespace Services {
 namespace Orchestration {
 
-TimeConfiguration::TimeConfiguration(Logging::ILogger* logger)
+
+TimeConfiguration::TimeConfiguration(Logging::ILoggerInternal* logger)
     : _blocking(false)
     , _logger(logger)
 

@@ -31,6 +31,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <string>
 
 
+
 namespace SilKit {
 namespace Services {
 namespace Logging {
@@ -78,12 +79,24 @@ public:
         _msg = fmt::format(fmt, std::forward<Args>(args)...);
     }
 
+    template <typename... Args>
+    void FormatMessage(fmt::format_string<Args...> fmt, Args&&... args)
+    {
+        msg = fmt::format(fmt, args...);
+    }
+
     void SetMessage(std::string newMsg)
     {
         _msg = std::move(newMsg);
     }
 
-    template <typename Key, typename Value>
+    template <typename Key, typename... Value>
+    void FormatKeyValue(Key&& key, fmt::format_string<Value...> fmt)
+    {
+        _keyValues[std::forward<Key>(key)] = fmt::format(value);
+    }
+
+    template<typename Key, typename Value>
     void SetKeyValue(Key&& key, Value&& value)
     {
         _keyValues[std::forward<Key>(key)] = std::forward<Value>(value);

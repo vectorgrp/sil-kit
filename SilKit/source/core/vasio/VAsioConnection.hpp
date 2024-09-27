@@ -105,8 +105,11 @@ public:
 public:
     // ----------------------------------------
     // Public methods
-    void SetLogger(Services::Logging::ILogger* logger);
-    auto GetLogger() -> SilKit::Services::Logging::ILogger*;
+  //  void SetLoggerSetLogger(Services::Logging::ILogger* logger);
+  //  auto GetLogger() -> SilKit::Services::Logging::ILogger*;
+
+    void SetLoggerInternal(Services::Logging::ILoggerInternal* logger);
+    auto GetLoggerInternal() -> SilKit::Services::Logging::ILoggerInternal*;
 
     void JoinSimulation(std::string registryUri);
 
@@ -411,7 +414,7 @@ private:
     void SendMsgImpl(const IServiceEndpoint* from, SilKitMessageT&& msg)
     {
         const auto& key = from->GetServiceDescriptor().GetNetworkName();
-
+       // TraceTx(GetLoggerInternal(), from, msg);
         auto& linkMap = std::get<SilKitServiceToLinkMap<std::decay_t<SilKitMessageT>>>(_serviceToLinkMap);
         if (linkMap.count(key) < 1)
         {
@@ -487,7 +490,7 @@ private:
     SilKit::Config::ParticipantConfiguration _config;
     std::string _participantName;
     ParticipantId _participantId{0};
-    Services::Logging::ILogger* _logger{nullptr};
+    Services::Logging::ILoggerInternal* _logger{nullptr};
     Services::Orchestration::ITimeProvider* _timeProvider{nullptr};
 
     std::string _simulationName;

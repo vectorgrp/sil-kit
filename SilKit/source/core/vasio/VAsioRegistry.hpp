@@ -48,7 +48,8 @@ struct IRegistryEventListener
 {
     virtual ~IRegistryEventListener() = default;
 
-    virtual void OnLoggerCreated(SilKit::Services::Logging::ILogger* logger) = 0;
+   // virtual void OnLoggerCreated(SilKit::Services::Logging::ILogger* logger) = 0;
+    virtual void OnLoggerInternalCreated(SilKit::Services::Logging::ILoggerInternal* logger) = 0;
     virtual void OnRegistryUri(const std::string& registryUri) = 0;
     virtual void OnParticipantConnected(const std::string& simulationName, const std::string& participantName) = 0;
     virtual void OnParticipantDisconnected(const std::string& simulationName, const std::string& participantName) = 0;
@@ -124,7 +125,7 @@ private: // IMetricsReceiverListener
 private:
     // ----------------------------------------
     // private members
-    std::unique_ptr<Services::Logging::ILogger> _logger;
+    std::unique_ptr<Services::Logging::ILoggerInternal> _logger;
     IRegistryEventListener* _registryEventListener{nullptr};
     std::unordered_map<std::string, std::unordered_map<std::string, ConnectedParticipantInfo>> _connectedParticipants;
     std::function<void()> _onAllParticipantsConnected;
