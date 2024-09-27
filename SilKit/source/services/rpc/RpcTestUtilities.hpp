@@ -51,6 +51,7 @@ struct MockConnection
     }
 
     void SetLogger(SilKit::Services::Logging::ILogger* /*logger*/) {}
+    void SetLoggerInternal(SilKit::Services::Logging::ILoggerInternal* /*logger*/) {}
     void SetTimeSyncService(SilKit::Services::Orchestration::TimeSyncService* /*timeSyncService*/) {}
     void JoinSimulation(std::string /*registryUri*/) {}
     template <class SilKitServiceT>
