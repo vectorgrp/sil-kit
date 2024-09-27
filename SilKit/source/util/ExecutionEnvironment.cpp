@@ -16,15 +16,15 @@
 
 #include "fmt/format.h"
 
-#ifdef __unix__
+#if defined(__unix__) || defined(__APPLE__)
 #include <unistd.h>
 #include <sys/utsname.h>
+#include <pwd.h>
 #endif
 
 #ifdef __linux__
 #include <sys/sysinfo.h>
 #include <sys/types.h>
-#include <pwd.h>
 #endif
 
 #ifdef _WIN32
@@ -43,7 +43,7 @@ constexpr const char* UNKNOWN_VALUE = "<unknown>";
 
 // Utilities
 
-#ifdef __unix__
+#if defined(__unix__) || defined(__APPLE__)
 
 auto GetUtsname() -> const struct ::utsname&
 {
@@ -106,7 +106,7 @@ struct Win32ProcessorInformation
 
 // Function: GetUsername
 
-#ifdef __unix__
+#if defined(__unix__) || defined(__APPLE__)
 
 auto GetUsername() -> std::string
 {
@@ -169,7 +169,6 @@ auto GetProcessExecutable() -> std::string
 
     return result;
 }
-
 #else
 
 auto GetProcessExecutable() -> std::string
@@ -179,6 +178,15 @@ auto GetProcessExecutable() -> std::string
 }
 
 #endif
+#endif
+
+
+#if defined(__APPLE__)
+
+auto GetProcessExecutable() -> std::string
+{
+    return {getprogname()};
+}
 #endif
 
 #ifdef _WIN32
@@ -207,7 +215,7 @@ auto GetProcessExecutable() -> std::string
 
 // Function: GetPageSize
 
-#ifdef __unix__
+#if defined(__unix__) || defined(__APPLE__)
 
 auto GetPageSize() -> std::string
 {
@@ -229,8 +237,8 @@ auto GetPageSize() -> std::string
 
 // Function: GetPhysicalMemoryMB
 
-#ifdef __unix__
-#ifdef __linux__
+#if defined(__unix__) || defined(__APPLE__)
+#if defined(__linux__)
 
 auto GetPhysicalMemoryMB() -> std::string
 {
@@ -275,7 +283,7 @@ auto GetPhysicalMemoryMB() -> std::string
 
 // Function: GetProcessorArchitecture
 
-#ifdef __unix__
+#if defined(__unix__) || defined(__APPLE__)
 
 auto GetProcessorArchitecture() -> std::string
 {
@@ -296,7 +304,7 @@ auto GetProcessorArchitecture() -> std::string
 
 // Function: GetProcessorArchitecture
 
-#ifdef __unix__
+#if defined(__unix__) || defined(__APPLE__)
 
 auto GetOperatingSystem() -> std::string
 {

@@ -132,8 +132,11 @@ namespace {
 
 using namespace SilKit::Util;
 
+using SignalHandlerT = void(*)(int);
+
 //forward
-static inline void setSignalAction(int sigNum, __sighandler_t action);
+static inline void setSignalAction(int sigNum, SignalHandlerT action);
+
 void systemHandler(int sigNum);
 
 auto ErrorMessage()
@@ -171,8 +174,8 @@ public:
     ~SignalMonitor()
     {
         // Restore default actio0ns
-        setSignalAction(SIGINT, SIG_DFL);
-        setSignalAction(SIGTERM, SIG_DFL);
+        setSignalAction(SIGINT, nullptr);
+        setSignalAction(SIGTERM, nullptr);
         Notify(INVALID_SIGNAL_NUMBER);
         _worker.join();
         ::close(_pipe[0]);
@@ -210,7 +213,7 @@ private:
     int _signalNumber{INVALID_SIGNAL_NUMBER};
 };
 
-static inline void setSignalAction(int sigNum, __sighandler_t action)
+static inline void setSignalAction(int sigNum, SignalHandlerT action)
 {
     // Check current signal handler action to see if it's set to SIGNAL IGNORE
     struct sigaction oldAction
@@ -226,7 +229,15 @@ static inline void setSignalAction(int sigNum, __sighandler_t action)
     struct sigaction newAction
     {
     };
-    newAction.sa_handler = action;
+    if(action == nullptr)
+    {
+        newAction.sa_handler = SIG_DFL;
+    }
+    else
+    {
+        newAction.sa_handler = action;
+    }
+
     auto ret = sigaction(sigNum, &newAction, NULL);
     if (ret == -1)
     {
