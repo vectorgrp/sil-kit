@@ -89,7 +89,7 @@ void SetThreadName(const std::string& threadName)
 
     pthread_t thisThread = pthread_self();
 
-#if defined(__linux__) || defined(__QNX__)
+#if defined(__linux__) || defined(__QNX__) || defined(__FreeBSD__)
     rc = pthread_setname_np(thisThread, threadName.c_str());
 #elif defined(__NetBSD__)
     rc = pthread_setname_np(thisThread, threadName.c_str(), nullptr);

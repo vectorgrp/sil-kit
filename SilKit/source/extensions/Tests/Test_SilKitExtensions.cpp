@@ -127,13 +127,13 @@ TEST_F(Test_SilKitExtensions, load_dummy_lib)
 }
 
 
-TEST_F(Test_SilKitExtensions, dynamic_cast)
+TEST_F(Test_SilKitExtensions, static_cast)
 {
     const auto testDir = SilKit::Filesystem::path{"silkit_library_test"};
     SilKit::Filesystem::current_path(testDir);
     // test if dynamic cast of dynamic extension works
     auto extensionBase = SilKit::LoadExtension(&logger, "DummyExtension");
-    auto* dummy = dynamic_cast<DummyExtension*>(extensionBase.get());
+    auto* dummy = static_cast<DummyExtension*>(extensionBase.get());
     ASSERT_NE(dummy, nullptr);
     dummy->SetDummyValue(12345L);
     ASSERT_EQ(dummy->GetDummyValue(), 12345L);
@@ -173,8 +173,8 @@ TEST_F(Test_SilKitExtensions, multiple_extensions_loaded)
     auto base1 = SilKit::LoadExtension(&logger, "DummyExtension");
     auto base2 = SilKit::LoadExtension(&logger, "DummyExtension");
 
-    auto* mod1 = dynamic_cast<DummyExtension*>(base1.get());
-    auto* mod2 = dynamic_cast<DummyExtension*>(base2.get());
+    auto* mod1 = static_cast<DummyExtension*>(base1.get());
+    auto* mod2 = static_cast<DummyExtension*>(base2.get());
 
     mod1->SetDummyValue(1);
     EXPECT_NE(mod2->GetDummyValue(), 1);
@@ -190,7 +190,7 @@ TEST_F(Test_SilKitExtensions, load_from_envvar)
     SilKit::Config::Extensions config;
     config.searchPathHints.emplace_back("ENV:TEST_VAR");
     auto base1 = SilKit::LoadExtension(&logger, "DummyExtension", config);
-    auto* mod1 = dynamic_cast<DummyExtension*>(base1.get());
+    auto* mod1 = static_cast<DummyExtension*>(base1.get());
     mod1->SetDummyValue(1);
     EXPECT_EQ(mod1->GetDummyValue(), 1);
 }
