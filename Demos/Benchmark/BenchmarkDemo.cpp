@@ -63,7 +63,7 @@ void PrintUsage(const std::string& executableName)
         << " [registryURi]" << std::endl
         << "If no arguments are given, default values will be used." << std::endl
         << "\t--help\tshow this message." << std::endl
-        << "\t--registry-uri\tThe URI of the registry to start. Default: silkit://localhost:8600" << std::endl
+        << "\t--registry-uri\tThe URI of the registry to start. Default: silkit://localhost:0" << std::endl
         << "\t--message-size\tSets the message size to BYTES. Default: 1000" << std::endl
         << "\t--message-count\tSets the number of messages to be send per participant in each simulation step to "
            "NUM. Default: 50"
@@ -83,7 +83,7 @@ struct BenchmarkConfig
     uint32_t numberOfParticipants = 2;
     uint32_t messageCount = 50;
     uint32_t messageSizeInBytes = 1000;
-    std::string registryUri = "silkit://localhost:8600";
+    std::string registryUri = "silkit://localhost:0";
     std::string silKitConfigPath = "";
     std::string writeCsv = "";
 };
@@ -401,7 +401,7 @@ int main(int argc, char** argv)
 
         std::unique_ptr<SilKit::Vendor::Vector::ISilKitRegistry> registry =
             SilKit::Vendor::Vector::CreateSilKitRegistry(config);
-        registry->StartListening(benchmark.registryUri);
+        benchmark.registryUri = registry->StartListening(benchmark.registryUri);
 
         std::vector<size_t> messageCounts;
         std::vector<std::chrono::nanoseconds> measuredRealDurations;
