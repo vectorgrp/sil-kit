@@ -11,9 +11,9 @@ Demos
 .. |SystemController| replace::  |UtilDir|/sil-kit-system-controller
 
 .. |DemoAbstractCAN| replace:: 
-  The `CanWriter` application sends CAN frames to the `CanReader` application including frame acknowledgement handling.
+  The `CanWriter` application sends CAN frames to the `CanReader` application including frame acknowledgment handling.
 .. |DemoAbstractETH| replace:: 
-  The `EthernetWriter` application sends Ethernet frames to the `EthernetReader` application including frame acknowledgement handling.
+  The `EthernetWriter` application sends Ethernet frames to the `EthernetReader` application including frame acknowledgment handling.
 .. |DemoAbstractLIN| replace:: 
   A two-node LIN Setup with a `LinMaster` and a `LinSlave` application. 
   Includes a simple scheduling mechanism and demonstrates controller sleep / wakeup handling.
@@ -21,18 +21,18 @@ Demos
   A two-node FlexRay Setup with a full cluster and node parametrization. Includes POC Status handling, buffer updates and reconfiguration.
   This Demo requires a separate `Network Simulator` application to simulate the details of the FlexRay cluster, which is not included in the |ProductName|.
 .. |DemoAbstractPubSub| replace:: 
-  One application publishes GPS and temperature data, another application subscibes to these topics.
+  One application publishes GPS and temperature data, another application subscribes to these topics.
   Including (de-)serialization of the C++ structures into a transmittable format.
 .. |DemoAbstractRPC| replace:: 
   The RPC server application provides two simple functions which are called by a RPC client application.
   Includes (de-)serialization of the function parameters.
 .. |DemoAbstractBenchmark| replace:: 
   This demo sets up a simulation with various command line arguments for benchmarking purposes.
-  A configurable amount of partipants are spawned by a single process on different threads.
-  The demo calculates averaged runtimes, throughput, speed-up and message rates for performance evaluation.
+  A configurable amount of participants are spawned by a single process on different threads.
+  The demo calculates averaged running times, throughput, speed-up and message rates for performance evaluation.
 .. |DemoAbstractLatency| replace:: 
-  A sender and a receiver application use the Publish/Subscribe services and measure the roundtrip time of the communication.
-  This setup is uesful to evaluate the performance of a |ProductName| setup running on different platforms.
+  A sender and a receiver application use the Publish/Subscribe services and measure the round trip time of the communication.
+  This setup is useful to evaluate the performance of a |ProductName| setup running on different platforms.
   E.g., between a local host, a virtual machine, a remote network, etc.
 .. |DemoAbstractNetSim| replace:: 
   Demonstrates the usage of the experimental |ProductName| NetworkSimulator API.
@@ -76,7 +76,7 @@ Building the Demos
 The |ProductName| Demos are not available as pre-built binaries and have to be compiled from source first.
 
 * If you plan to use the demos as a starting point for further development, start by cloning the `SIL Kit git repository <https://github.com/vectorgrp/sil-kit>`_.
-  Don't forget to call ``git submodule update --init --recursive`` after cloning the repo for the first time.
+  Don't forget to call ``git submodule update --init --recursive`` after cloning the repository for the first time.
   Using the build instructions below will build the complete |ProductName| library including the Demos.
 * If you just want to try out the demos, download a `SIL Kit release package <https://github.com/vectorgrp/sil-kit/releases>`_ which also includes all sources.
   Using the build instructions below will only build the |ProductName| Demos and use the precompiled library of the package.
@@ -99,7 +99,7 @@ VS Code
    b. For a |ProductName| package: open the `SilKit-Demos` folder
 #. Opening the folder automatically starts the CMake configuration step.
    You can also manually call this step in the CMake extension page under `Project Status | Configure`.
-#. In the CMake extention page, build the project under `Project Status | Build`
+#. In the CMake extension page, build the project under `Project Status | Build`
 #. Locate the binaries
 
    a. For the git repository: The binaries reside in ``_build/<build config>/<build type, e.g. Debug, Release>/``
@@ -666,7 +666,7 @@ System Examples
 Notes
     * This latency demo produces timings of a configurable simulation setup. 
       Two participants exchange <M> messages of <B> bytes without time synchronization.
-    * The demo uses publish/subscribe controllers performing a message roundtrip (ping-pong) to calculate latency and throughput timings.
+    * The demo uses publish/subscribe controllers performing a message round trip (ping-pong) to calculate latency and throughput timings.
     * Note that the two participants must use the same parameters for valid measurement and one participant must use the ``--isReceiver`` flag.
 
 
@@ -694,7 +694,7 @@ Parameters
 Parameter Example
     .. parsed-literal:: 
        
-       # Start the Network Simulator Demo with the given config and participant name
+       # Start the Network Simulator Demo with the given configuration file and participant name
        |DemoDir|/SilKitDemoNetSim ./SilKit-Demos/NetworkSimulator/DemoNetSim.silkit.silkit.yaml NetworkSimulator
 System Example
     Interplay with the CAN Demo:
@@ -721,6 +721,6 @@ System Example
     
 Notes
     * The CAN Reader and Writer configure their controller on the network "CAN1", which is simulated by the network simulator demo.
-    * In the simple bus logic of the network simulation demo (see ``Demos\NetworkSimulator\src\Can\MySimulatedCanController.cpp``), the acknowledgement (CanFrameTransmitEvent) is sent directly to the CAN Writer. 
+    * In the simple bus logic of the network simulation demo (see ``Demos\NetworkSimulator\src\Can\MySimulatedCanController.cpp``), the acknowledgment (CanFrameTransmitEvent) is sent directly to the CAN Writer. 
       The frame itself (CanFrameEvent) is sent with a delay of 2ms.
 

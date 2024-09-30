@@ -37,7 +37,7 @@ Step-by-step Solution
    
    a. If you have started the registry yourself, check if the provided ``--listen-uri`` is correct.
       The registry can also use a configuration file which specify the listen URI.
-      The configuration faile takes precedence over the previously mentioned command line argument.
+      The configuration file takes precedence over the previously mentioned command line argument.
    b. If you have used the |ProductName| MSI installer, check if the Windows service `VectorSilKitRegistry` is running.
 
 #. Check if ``localhost`` in the connect URI makes sense

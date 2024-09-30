@@ -103,7 +103,7 @@ An optional second parameter of |AddFrameTransmitHandler| allows to specify the 
 Receiving CAN Frame Events
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-A |CanFrame| is received as a |CanFrameEvent| consisting of a ``transmitId`` used to identify the acknowledgement of the 
+A |CanFrame| is received as a |CanFrameEvent| consisting of a ``transmitId`` used to identify the acknowledgment of the 
 frame, a timestamp and the actual |CanFrame|. The handler is called whenever a |CanFrame| is received::
 
   auto frameHandler = [](ICanController*, const CanFrameEvent& frameEvent) 

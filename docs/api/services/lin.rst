@@ -136,7 +136,7 @@ initiation of the slave-to-slave communication.
 Initiating LIN Transmissions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Data is transferred in the form of a |LinFrame|, reception and acknowledgement is handled in the |FrameStatusHandler|.
+Data is transferred in the form of a |LinFrame|, reception and acknowledgment is handled in the |FrameStatusHandler|.
 A LIN master can initiate the transmission of a frame using the AUTOSAR API |SendFrame| or the non-AUTOSAR API 
 |SendFrameHeader|. If a LIN slave provides the response, |SendFrame| requires that a corresponding frame 
 response was configured before at a LIN slave using |Init| or |SetFrameResponse|.
@@ -202,8 +202,8 @@ and will configure itself for reception (|LinFrameResponseMode_Rx|).
         // Transmit the frame header, the response will be provided by the slave.
         master->SendFrameHeader(0x11);
 
-Transmission acknowledgement
-____________________________
+Transmission acknowledgment
+___________________________
 
 To be notified for the success or failure of the transmission, a |FrameStatusHandler| should be registered using 
 |AddFrameStatusHandler|::
@@ -227,7 +227,7 @@ which is indicated by |LinFrameStatus_LIN_TX_ERROR|.
 Receiving data from a slave
 ___________________________
 
-Beside transmission acknowledgements, the |FrameStatusHandler| is also used for reception. To receive data, the 
+Beside transmission acknowledgment, the |FrameStatusHandler| is also used for reception. To receive data, the 
 |FrameStatusHandler| must be registered using |AddFrameStatusHandler|, which is called by the LIN controller when 
 a frame is received and the LIN node is configured for reception with |LinFrameResponseMode_Rx| on that LIN ID::
 

@@ -163,7 +163,7 @@ Communication guarantees
 """"""""""""""""""""""""
 
 The following communication guarantees apply to participants that utilize a Lifecycle Service and are limited to RPC and Publish/Subscribe services.
-Bus systems have definitions on the protocol level for message acknowledgement.
+Bus systems have definitions on the protocol level for message acknowledgment.
 For RPC or Publish/Subscribe however, communication guarantees depend on the implementation.
 In the SIL Kit, the |CommunicationReadyHandler| handler is the first point at which guarantees can be given.
 This implies that |StartLifecycle| has already been called.

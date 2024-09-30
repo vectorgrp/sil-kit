@@ -122,7 +122,7 @@ Receiving Ethernet Frame Events
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 An |EthernetFrame| is received as an |EthernetFrameEvent| consisting of a ``transmitId`` used to identify
-the acknowledgement of the frame, a timestamp and the actual |EthernetFrame|.
+the acknowledgment of the frame, a timestamp and the actual |EthernetFrame|.
 
 To receive Ethernet frames, a frame handler must be registered using |AddFrameHandler|. The handler is called whenever 
 an Ethernet frame is received::
