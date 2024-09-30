@@ -6,11 +6,7 @@ C/C++ API
 
 This document describes the user available programming interfaces of the Vector |ProductName|.
 If you are not yet familiar with the |ProductName|, have a look at the :doc:`Developers Guide<../for-developers/developers>`.
-
-API Organization
-----------------
-
-Information on header organization and memory management in the |ProductName|.
+Information on API organization in the |ProductName|:
 
 .. toctree::
    :maxdepth: 1
@@ -18,8 +14,11 @@ Information on header organization and memory management in the |ProductName|.
    header
    memory-management
 
+C++ API
+-------
+
 Participant
------------
+~~~~~~~~~~~
 
 The Participant constitutes the main entry point into the |ProductName| API.
 
@@ -30,13 +29,13 @@ The Participant constitutes the main entry point into the |ProductName| API.
 
 .. _sec:api-services:
 
-Services API
-------------
+Services
+~~~~~~~~
 
 The services API includes common data types, supports various vehicular networks, and provides generic publish/subscribe and RPC facilities.
 
 Logging
-~~~~~~~
++++++++
 
 The Logging service can be used for writing log messages of specified log levels to various types of sinks.
 
@@ -46,7 +45,8 @@ The Logging service can be used for writing log messages of specified log levels
    services/logging
 
 Vehicle Network Controller
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+++++++++++++++++++++++++++
+
 Several different vehicular networks are supported by corresponding controller interfaces.
 
 .. toctree::
@@ -58,7 +58,7 @@ Several different vehicular networks are supported by corresponding controller i
   services/ethernet
 
 Data Publish/Subscribe and RPC
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+++++++++++++++++++++++++++++++
 
 These services do not model a real-world bus and can be used for generic programming and interoperability tasks.
 
@@ -76,7 +76,8 @@ These services do not model a real-world bus and can be used for generic program
   serdes
 
 State Handling and Synchronization
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+++++++++++++++++++++++++++++++++++
+
 The following services provide time synchronization and orchestrated state management.
 
 .. toctree::
@@ -87,7 +88,8 @@ The following services provide time synchronization and orchestrated state manag
 
 
 System Utilities
-----------------
+++++++++++++++++
+
 These system utilities can be used to control and monitor the simulation as a whole.
 
 .. toctree::
@@ -97,7 +99,8 @@ These system utilities can be used to control and monitor the simulation as a wh
   system-utilities/systemmonitor
 
 Common Data Types
------------------
++++++++++++++++++
+
 Some data types are shared between services of the |ProductName|.
 
 .. toctree::
@@ -106,7 +109,7 @@ Some data types are shared between services of the |ProductName|.
   common-data-types
 
 Custom Network Simulator
-------------------------
+++++++++++++++++++++++++
 
 .. toctree::
   :maxdepth: 1
@@ -126,7 +129,7 @@ with the C programming language:
   capi/capi-main
 
 Services
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~
 
 Vehicle Network Controller
 ++++++++++++++++++++++++++

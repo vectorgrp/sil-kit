@@ -98,8 +98,8 @@ Parameters
       Cannot be used together with the ``--configuration`` option.
     * ``-ni, --non-interactive``                       
       Never prompt the user. *Deprecated:* Since v4.0.53, this is the default behavior.
-    * **<participantName1>, <participantName2> ...**
-      Names of participants to wait for before starting simulation.
+    * ``<participantName1>, <participantName2> ...``
+      Names of participants to wait for before starting the simulation.
 Usage Example
     .. code-block:: powershell
     
