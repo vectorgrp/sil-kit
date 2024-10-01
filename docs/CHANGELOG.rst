@@ -27,7 +27,7 @@ Changed
 
 - Implemented the union (de-)serialization stubs in the ``silkit/util/serdes`` headers.
 
-Fxed
+Fixed
 ~~~~~
 
 - If using the ``SimStepHandlerAsync``, the log message that reports the end of the simulation step is now printed after the call to ``CompleteSimulationStep``.
