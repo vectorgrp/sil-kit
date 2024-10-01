@@ -27,6 +27,8 @@ Changed
 
 - Implemented the union (de-)serialization stubs in the ``silkit/util/serdes`` headers.
 
+- Revised the documentation (demos, troubleshooting, doxygen output, file structure)
+
 
 [4.0.52] - 2024-09-02 
 ---------------------
