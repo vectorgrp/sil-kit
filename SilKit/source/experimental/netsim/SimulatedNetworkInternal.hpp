@@ -35,6 +35,8 @@ private:
                                     Core::EndpointId serviceId) -> std::pair<bool, ControllerDescriptor>;
     void RemoveControllerDescriptor(const std::string& fromParticipantName, Core::EndpointId serviceId);
 
+    auto ExtractControllerTypeName(const SilKit::Core::ServiceDescriptor& serviceDescriptor) -> std::string;
+
     Core::IParticipantInternal* _participant = nullptr;
     SilKit::Services::Logging::ILogger* _logger;
 

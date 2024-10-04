@@ -289,7 +289,7 @@ std::string ServiceDescriptor::to_string() const
     case ServiceType::SimulatedController:
         if (!GetSupplementalDataItem(SilKit::Core::Discovery::controllerType, controllerTypeName))
         {
-            throw LogicError("supplementalData.size() > 0");
+            throw LogicError("ServiceDescriptor::to_string() failed: No controller type defined in supplemental data.");
         }
 
         ss << separator << controllerTypeName << separator << GetNetworkName() << separator << GetServiceName();

@@ -93,6 +93,7 @@ public:
     inline auto GetServiceDescriptor() const -> const Core::ServiceDescriptor& override;
 
     void AddSimulatedController(const std::string& fromParticipantName, const std::string& controllerName,
+                                const std::string& controllerTypeName,
                                 Core::EndpointId serviceId, ControllerDescriptor controllerDescriptor,
                                 ISimulatedController* userSimulatedController);
     void RemoveSimulatedController(const std::string& fromParticipantName, Core::EndpointId serviceId,
