@@ -28,6 +28,21 @@ jobs:
       with:
         submodules: true
 
+    - name: Setup host
+      run: |
+        choco install -y ninja
+        choco install -y doxygen.install
+        pip install breathe==4.34.0
+        pip install sphinx==5.1.1
+        pip install sphinx-rtd-theme==1.0.0
+      shell: powershell
+
+    - name: Prepare build env on Windows
+      uses: ilammy/msvc-dev-cmd@v1.12.0
+      with:
+        arch: x64
+        toolset: 14.1
+
     - uses: ./.github/actions/build-cmake-preset
       with:
         preset-name: vs141-x64-release
@@ -43,8 +58,22 @@ jobs:
       with:
         submodules: true
 
+    - name: Setup host
+      run: |
+        choco install -y ninja
+        choco install -y doxygen.install
+        pip install breathe==4.34.0
+        pip install sphinx==5.1.1
+        pip install sphinx-rtd-theme==1.0.0
+      shell: powershell
+
+    - name: Prepare build env on Windows
+      uses: ilammy/msvc-dev-cmd@v1.12.0
+      with:
+        arch: x86
+        toolset: 14.1
+
     - uses: ./.github/actions/build-cmake-preset
       with:
         preset-name: vs141-x86-release
-        build-arch: x86
         artifact-label: ${{ github.job }}

@@ -13,6 +13,9 @@ jobs:
       with:
         submodules: true
 
+    - name: Setup host
+      run: brew install ninja doxygen
+
     - uses: ./.github/actions/build-cmake-preset
       with:
         preset-name: clang-release

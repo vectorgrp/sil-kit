@@ -1,60 +1,45 @@
-name: 'mingw64 release Builds'
+name: 'mingw64-x86_64'
 on:
   workflow_call:
     inputs:
-      do_package:
-        required: false
-        type: boolean
-        default: false
-      do_package_symbols:
-        required: false
-        type: boolean
-        default: false
-      retention_days:
-        required: false
-        type: number
-        default: 14
       run_build:
         required: true
         type: boolean
-
+  workflow_dispatch:
+    inputs:
+      run_build:
+        default: true
 jobs:
-  gcc13-release:
-    name: GCC 13.2 release Builds for mingw64
+  mingw:
+    name: msys2/mingw64 ${{ matrix.builds.arch }}
+    defaults:
+      run:
+        shell:  C:\shells\msys2bash.cmd {0}
+
+    strategy:
+      matrix:
+        builds:
+          - arch: x86_64
+            bin: /mingw64/bin
+          #- arch: i686
+          #  bin: /mingw32/bin
 
     runs-on: windows-latest
     if: inputs.run_build == true
     steps:
-      - name: setup
-        run: |
-          echo "C:\msys64" >> $GITHUB_PATH
-          echo "C:\msys64\mingw64\bin\" >> $GITHUB_PATH
-      - name: Install Dependencies
-        run: |
-          pacman -S mingw-w64-x86_64-gcc mingw-w64-x86_64-cmake mingw-w64-x86_64-ninja --noconfirm
-          export PATH="/mingw64/bin/:$PATH"
-        shell:  C:\shells\msys2bash.cmd {0}
-      - uses: actions/checkout@v4
-        with:
-          submodules: true
-      - name: Configure
-        id: cmake-configure-mingw64
-        run: |
-          export PATH="/mingw64/bin/:$PATH"
-          echo "PATH: $PATH"
-          cmake --preset gcc-release -DSILKIT_BUILD_DOCS=OFF
-        shell:  C:\shells\msys2bash.cmd {0}
-      - name: Build
-        id: cmake-build-mingw64
-        run: |
-          export PATH="/mingw64/bin/:$PATH"
-          echo "PATH: $PATH"
-          cmake --build --preset gcc-release
-        shell:  C:\shells\msys2bash.cmd {0}
-      - name: Test
-        id: cmake-test-mingw64
-        run: |
-          export PATH="/mingw64/bin/:$PATH"
-          echo "PATH: $PATH"
-          ctest --preset gcc-release --output-on-failure
-        shell:  C:\shells\msys2bash.cmd {0}
+    - name: Setup host
+      run: |
+        pacman -S mingw-w64-${{ matrix.builds.arch }}-gcc mingw-w64-${{ matrix.builds.arch }}-cmake mingw-w64-${{ matrix.builds.arch }}-ninja --noconfirm
+
+
+    - uses: actions/checkout@v4
+      with:
+        submodules: true
+
+    - uses: ./.github/actions/build-cmake-preset
+      with:
+        preset-name: gcc-release
+        artifact-label: ${{ github.job }}-${{ matrix.builds.arch }}
+        cmake-args: -D SILKIT_BUILD_DOCS=OFF
+        extra-path: "${{ matrix.builds.bin }}:"
+        shell: C:\shells\msys2bash.cmd {0}
