@@ -28,6 +28,11 @@ Changed
 - Implemented the union (de-)serialization stubs in the ``silkit/util/serdes`` headers.
 
 
+Fixed
+~~~~~
+
+- Fixed an issue with the NetSim API that caused an exception when used with log level `trace`.
+
 [4.0.52] - 2024-09-02 
 ---------------------
 
