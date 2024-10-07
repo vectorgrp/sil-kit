@@ -10,8 +10,11 @@ This chapter provides instructions for specific connection scenarios between var
    :depth: 2
 
 
-Windows and WSL2: Registry running in WSL
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Windows and WSL
+~~~~~~~~~~~~~~~
+
+Registry running in WSL
++++++++++++++++++++++++
 
 #. If needed, get the precompiled registry from a Ubuntu build of the |ProductName| at https://github.com/vectorgrp/sil-kit/releases.
 #. On WSL, use ``ip addr show eth0`` and note down the IP address displayed at ``inet``, e.g., ``172.19.71.101``.
@@ -29,11 +32,22 @@ Windows and WSL2: Registry running in WSL
 
      [SilKitRegistry] [info] Sending known participant message to SystemMonitor, protocol version 3.1
 
+Registry running in Windows
++++++++++++++++++++++++++++
 
-..
-    Windows and WSL2: Registry running in Windows
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+This setup is possible but requires either 
 
-    #. If not already started, e.g., as a Windows System Service, launch a |ProductName| registry
-       A ``listen-uri`` like the default ``silkit://localhost:8500`` can be used.
-    #. From WSL, the Windows localhost can be accessed by ?
+- network mirroring mode for WSL (available for WSL2) or
+- reconfiguration of the WSL and Windows network adapters and possible adaption of firewall settings.
+
+However, the configuration is error-prone and out of scope for this documentation.
+The more convenient setup is to run the registry in the WSL instance, as described in the previous section.
+
+.. TODO
+   Windows and Linux VM
+   Windows and Docker
+   Linux and Docker
+   Windows and OpenSSH-Server 
+
+
+

@@ -53,7 +53,6 @@ Step-by-step Solution
    Often, issues within your network will lead to this error message. 
    Test if your host running the |ProductName| participant is able to establish a TCP connection to the registry. 
    
-   
    .. code-block:: powershell
    
        # Use your IP (here 172.19.71.101) and port (here 8501) of the registry

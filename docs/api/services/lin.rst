@@ -172,7 +172,7 @@ The transmission of a frame can be initiated using |SendFrame| or |SendFrameHead
 2. When using |SendFrame| with |LinFrameResponseType_SlaveResponse| or |LinFrameResponseType_SlaveToSlave|, 
    a slave has to be preconfigured with |LinFrameResponseMode_Tx| on that ID. With these response types, only the 
    ID of the |LinFrame| used in |SendFrame| is taken into account. The actual payload and frame settings are provided
-   by the Tx buffer of the responing slave. The following example assumes that a slave is configured as seen in 
+   by the TX buffer of the responding slave. The following example assumes that a slave is configured as seen in 
    :ref:`Initialization<sec:lin-initialization>`::
 
         // The slave is configured to respond on ID 0x11
@@ -187,7 +187,7 @@ and will configure itself for reception (|LinFrameResponseMode_Rx|).
 
 3. When using |SendFrameHeader|, the transmission is initiated by sending the header. The node (either master or slave) configured with
    |LinFrameResponseMode_Tx| will provide the response. The actual payload and frame settings are 
-   provided by the Tx buffer of the responing LIN node. The following example also assumes that a slave is 
+   provided by the TX buffer of the responding LIN node. The following example also assumes that a slave is 
    configured as seen in :ref:`Initialization<sec:lin-initialization>`::
 
         // Slave:
@@ -253,12 +253,12 @@ see |LinFrameStatus_LIN_TX_ERROR|.
 Data length and checksum model
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-A |LinDataLength| and |LinChecksumModel| can be provided for a given ID when configuring a reception or initiating a 
-transmission. A frame will arrive with |LinFrameStatus_LIN_RX_ERROR| if there is a mismatch between configured and 
-received data length or checksum model. However, a LIN node configured for reception might not know beforehand about the
-data length or checksum model provided in the response. In this case, the reception can be configured with the 
-wildcards |LinDataLengthUnknown| or |LinChecksumModel_Undefined| in the respective paramters of the |LinFrame| and the 
-data length or checksum model provided by the sender is used in the |FrameStatusHandler|.
+A |LinDataLength| and |LinChecksumModel| can be provided for a given ID when configuring a reception or initiating a transmission. 
+A frame will arrive with |LinFrameStatus_LIN_RX_ERROR| if there is a mismatch between configured and received data length or checksum model. 
+However, a LIN node configured for reception might not know beforehand about the data length or checksum model provided in the response. 
+In this case, the reception can be configured with the wildcards |LinDataLengthUnknown| (255) or |LinChecksumModel_Undefined| in the respective parameters of the |LinFrame|.
+If the wildcards are used, the validation of the incoming data length or checksum model are skipped.
+The values provided by the sender are then used in the |FrameStatusHandler|.
 
 Managing the event handlers
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -357,7 +357,7 @@ LIN master.
 Erroneous Transmission from Master to Slave - Multiple Responses
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This example shows what happens when a master attempts to send a Frame while there is slave that has configured a Tx 
+This example shows what happens when a master attempts to send a Frame while there is slave that has configured a TX 
 response for the same LIN ID.
 
 .. literalinclude::
@@ -367,7 +367,7 @@ response for the same LIN ID.
 Erroneous Transmission from Slave to Master - No Response
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This example shows what happens when a master initiates a transmission and no slave has configured a Tx response for 
+This example shows what happens when a master initiates a transmission and no slave has configured a TX response for 
 this LIN ID.
 
 .. literalinclude::
@@ -378,7 +378,7 @@ this LIN ID.
 Erroneous Transmission from Slave to Master - Multiple Responses
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This example shows what happens when a master initiates a transmission where multiple slaves have configured Tx 
+This example shows what happens when a master initiates a transmission where multiple slaves have configured TX 
 responses for the same LIN ID.
 
 .. literalinclude::
