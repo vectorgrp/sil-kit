@@ -43,6 +43,7 @@ endif()
 #Replace variables inside @@ with the current values
 configure_file(${DOXYFILE_IN} ${DOXYFILE_OUT} @ONLY)
 
+
 #Doxygen won't create this for us
 file(MAKE_DIRECTORY ${DOXYGEN_OUTPUT_DIR})
 
@@ -56,6 +57,7 @@ set(SPHINX_INDEX_FILE ${SPHINX_BUILD}/index.html)
 # - The Sphinx config has been updated
 file(GLOB_RECURSE SPHINX_SOURCE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.rst)
 file(GLOB_RECURSE SVG_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.svg)
+list(APPEND SPHINX_SOURCE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/_static/custom.css)
 
 if (UNIX)
   if (${SILKIT_WARNINGS_AS_ERRORS})
@@ -106,5 +108,5 @@ install(
     COMPONENT docs
     )
 #add sample code so it shows in the IDE, but don't build or install it
-add_executable(sample_silkit_new_config EXCLUDE_FROM_ALL usage/sample_silkit/simple.cpp)
+add_executable(sample_silkit_new_config EXCLUDE_FROM_ALL code-samples/simple/simple.cpp)
 target_link_libraries(sample_silkit_new_config PRIVATE SilKit)

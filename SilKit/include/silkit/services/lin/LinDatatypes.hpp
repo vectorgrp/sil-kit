@@ -68,7 +68,7 @@ enum class LinChecksumModel : SilKit_LinChecksumModel
  */
 using LinDataLength = SilKit_LinDataLength;
 
-//! \brief If configured with this value, the data length of the first reception will be used.
+//! \brief If configured for reception with this value, the data length validation of incoming frames is skipped.
 const LinDataLength LinDataLengthUnknown = SilKit_LinDataLengthUnknown;
 
 /*! \brief A LIN LinFrame

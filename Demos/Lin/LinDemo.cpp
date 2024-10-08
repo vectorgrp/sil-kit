@@ -506,7 +506,7 @@ try
                     {
                         master.DoAction(now);
                         now += 1ms;
-                        std::this_thread::sleep_for(200ms);
+                        std::this_thread::sleep_for(100ms);
                     }
                     if (!isStopRequested)
                     {
@@ -587,7 +587,7 @@ try
                     {
                         slave.DoAction(now);
                         now += 1ms;
-                        std::this_thread::sleep_for(200ms);
+                        std::this_thread::sleep_for(100ms);
                     }
                     if (!isStopRequested)
                     {

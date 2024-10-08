@@ -1,10 +1,10 @@
+.. include:: /substitutions.rst
+
 .. _sec:cfg-participant-includes:
 
 ======================
 Includes Configuration
 ======================
-
-.. |ProductName| replace:: SIL Kit
 
 .. |ParticipantConfigurationFromFile| replace:: :cpp:func:`ParticipantConfigurationFromFile()<SilKit::Config::ParticipantConfigurationFromFile()>`
 .. |ParticipantConfigurationFromString| replace:: :cpp:func:`ParticipantConfigurationFromString()<SilKit::Config::ParticipantConfigurationFromString()>`

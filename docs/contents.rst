@@ -10,11 +10,10 @@ Contents
   for-developers/developers
   simulation/simulation
   api/api
-  usage/demos
+  demos/demos
   configuration/configuration
-  netsim/netsim
-  usage/utilities
-  usage/troubleshooting
+  utilities/utilities
+  troubleshooting/troubleshooting
   faq/faq
   licenses/license
   CHANGELOG

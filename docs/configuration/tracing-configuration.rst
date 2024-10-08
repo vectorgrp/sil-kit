@@ -1,3 +1,5 @@
+.. include:: /substitutions.rst
+
 ================================
 Tracing and Replay Configuration
 ================================

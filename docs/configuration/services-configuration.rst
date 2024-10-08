@@ -1,3 +1,5 @@
+.. include:: /substitutions.rst
+
 ===============================================================
 Communication Services (CAN, LIN, FlexRay, Ethernet, Data, RPC)
 ===============================================================

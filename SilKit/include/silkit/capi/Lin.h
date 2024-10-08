@@ -160,7 +160,7 @@ typedef uint8_t SilKit_LinFrameStatus;
  */
 typedef uint8_t SilKit_LinDataLength;
 
-//! \brief If configured with this value, the data length of the first reception will be used.
+//! \brief If configured for reception with this value, the data length validation of incoming frames is skipped.
 const SilKit_LinDataLength SilKit_LinDataLengthUnknown = 255u;
 
 /*! \brief A LIN SilKit_LinFrame

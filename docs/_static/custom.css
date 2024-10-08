@@ -13,6 +13,7 @@
     max-width: 1240px;
 }
 
+/* custom styling for literals: center properly and change color */
 .rst-content code.literal {
 	position: relative;
 	top: -0.08rem;
@@ -21,10 +22,53 @@
 	background: none;
 }
 
+/* custom styling for literals + links: center properly and change color */
 .rst-content code.xref {
 	position: relative;
 	top: -0.08rem;
 	color: #062873;
 	font-weight: 700;
 	background: none;
+}
+
+/* custom doxygenfunction style */
+
+:root {
+	--doxygen-font-family: Lato, proxima-nova, Helvetica Neue, Arial, sans-serif;
+	--codeblock-font-family: SFMono-Regular,Menlo,Monaco,Consolas,Liberation Mono,Courier New,Courier,monospace;
+}
+
+/* Font, size, weight for the function signature */
+.cpp dt.sig.sig-object.cpp {
+	font-family: var(--doxygen-font-family) !important;
+	font-size: 14px !important;
+	font-weight: 400;
+}
+
+/* Color for function namespace in function signature */
+/*.cpp dt.sig.sig-object.cpp span.sig-prename.descclassname {
+	color: #00008B
+}*/
+
+/* Color for function name in function signature */
+.cpp dt.sig.sig-object.cpp span.sig-name.descname {
+	color: #00008B !important;
+	font-weight: 700;
+}
+
+/* Color for function parameters in function signature */
+.cpp dt.sig.sig-object.cpp span.n.sig-param {
+	color: #00008B
+}
+
+/* Font and color for function parameters in list */
+.cpp.function strong {
+	font-family: var(--doxygen-font-family);
+	color: #0047AB
+}
+
+/* Font and color for exceptions in list */
+.cpp.function .cpp-expr.sig.sig-inline.cpp {
+	font-family: var(--doxygen-font-family);
+	color: #E97451
 }
