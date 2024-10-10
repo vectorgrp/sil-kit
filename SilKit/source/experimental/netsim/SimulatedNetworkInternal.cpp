@@ -8,6 +8,7 @@
 #include "eventproducers/FlexRayEventProducer.hpp"
 #include "eventproducers/EthernetEventProducer.hpp"
 #include "eventproducers/LinEventProducer.hpp"
+#include "ServiceConfigKeys.hpp"
 
 namespace SilKit {
 namespace Experimental {
@@ -57,13 +58,23 @@ void SimulatedNetworkInternal::CreateAndSetEventProducer()
     }
 }
 
+auto SimulatedNetworkInternal::ExtractControllerTypeName(const SilKit::Core::ServiceDescriptor& serviceDescriptor)
+    -> std::string
+{
+    std::string controllerTypeName = "";
+    if (!serviceDescriptor.GetSupplementalDataItem(SilKit::Core::Discovery::controllerType, controllerTypeName))
+    {
+        throw LogicError("No controller type defined in supplemental data.");
+    }
+    return controllerTypeName;
+}
+
 void SimulatedNetworkInternal::AddSimulatedController(const SilKit::Core::ServiceDescriptor& serviceDescriptor,
                                                       ControllerDescriptor controllerDescriptor)
 {
     auto controllerName = serviceDescriptor.GetServiceName();
     auto fromParticipantName = serviceDescriptor.GetParticipantName();
     auto serviceId = serviceDescriptor.GetServiceId();
-    auto serviceDescriptorStr = serviceDescriptor.to_string();
 
     _controllerDescriptors[fromParticipantName][serviceId] = controllerDescriptor;
 
@@ -71,7 +82,9 @@ void SimulatedNetworkInternal::AddSimulatedController(const SilKit::Core::Servic
 
     if (userSimulatedController)
     {
-        _simulatedNetworkRouter->AddSimulatedController(fromParticipantName, controllerName, serviceId,
+        std::string controllerTypeName = ExtractControllerTypeName(serviceDescriptor);
+        _simulatedNetworkRouter->AddSimulatedController(fromParticipantName, controllerName,
+                                                        controllerTypeName, serviceId,
                                                         controllerDescriptor, userSimulatedController);
     }
     else
