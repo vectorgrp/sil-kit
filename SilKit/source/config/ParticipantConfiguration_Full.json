@@ -150,6 +150,13 @@
     {
       "Name": "Publisher1",
       "Topic": "Temperature",
+      "Labels": [
+        {
+          "Key": "A",
+          "Value": "B",
+          "Kind": "Optional"
+        }
+      ],
       "UseTraceSinks": [
         "Sink1"
       ]
@@ -159,6 +166,13 @@
     {
       "Name": "Subscriber1",
       "Topic": "Temperature",
+      "Labels": [
+        {
+          "Key": "C",
+          "Value": "D",
+          "Kind": "Mandatory"
+        }
+      ],
       "UseTraceSinks": [
         "Sink1"
       ]
@@ -168,6 +182,13 @@
     {
       "Name": "Server1",
       "FunctionName": "Function1",
+      "Labels": [
+        {
+          "Key": "E",
+          "Value": "F",
+          "Kind": "Optional"
+        }
+      ],
       "UseTraceSinks": [
         "Sink1"
       ]
@@ -177,6 +198,13 @@
     {
       "Name": "Client1",
       "FunctionName": "Function1",
+      "Labels": [
+        {
+          "Key": "G",
+          "Value": "H",
+          "Kind": "Mandatory"
+        }
+      ],
       "UseTraceSinks": [
         "Sink1"
       ]

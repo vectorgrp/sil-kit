@@ -20,3 +20,65 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "ParticipantConfiguration.hpp"
+
+#include <string>
+#include <type_traits>
+
+namespace SilKit {
+namespace Config {
+namespace v1 {
+
+auto Label::ToPublicApi() const -> SilKit::Services::MatchingLabel
+{
+    SilKit::Services::MatchingLabel result;
+
+    result.key = key;
+    result.value = value;
+
+    switch (kind)
+    {
+    case Kind::Mandatory:
+        result.kind = SilKit::Services::MatchingLabel::Kind::Mandatory;
+        break;
+    case Kind::Optional:
+        result.kind = SilKit::Services::MatchingLabel::Kind::Optional;
+        break;
+    default:
+        throw SilKit::ConfigurationError{
+            "Invalid SilKit::Config::v1::MatchingLabel::Kind("
+            + std::to_string(static_cast<std::underlying_type_t<Label::Kind>>(kind)) + ")"};
+    }
+
+    return result;
+}
+
+
+auto Label::FromPublicApi(const SilKit::Services::MatchingLabel& label) -> Label
+{
+    Label result;
+
+    result.key = label.key;
+    result.value = label.value;
+
+    switch (label.kind)
+    {
+    case SilKit::Services::MatchingLabel::Kind::Mandatory:
+        result.kind = Label::Kind::Mandatory;
+        break;
+    case SilKit::Services::MatchingLabel::Kind::Optional:
+        result.kind = Label::Kind::Optional;
+        break;
+    default:
+        throw SilKit::ConfigurationError{
+            "Invalid SilKit::Services::MatchingLabel::Kind("
+            + std::to_string(static_cast<std::underlying_type_t<SilKit::Services::MatchingLabel::Kind>>(label.kind))
+            + ")"};
+    }
+
+    return result;
+}
+
+
+} // namespace v1
+} // namespace Config
+} // namespace SilKit
