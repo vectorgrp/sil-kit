@@ -125,6 +125,8 @@ private:
     void StartWallClockCouplingThread();
     void HybridWait(std::chrono::nanoseconds targetWaitDuration);
 
+    void LogicalSimStepCompleted(std::chrono::duration<double, std::milli> logicalSimStepExecutionTimeMs);
+
 private:
     // ----------------------------------------
     // private members
@@ -136,8 +138,10 @@ private:
     TimeConfiguration _timeConfiguration;
 
     VSilKit::ICounterMetric* _simStepCounterMetric;
-    VSilKit::IStatisticMetric* _simStepExecutionTimeStatisticMetric;
+    VSilKit::IStatisticMetric* _simStepHandlerExecutionTimeStatisticMetric;
+    VSilKit::IStatisticMetric* _simStepCompletionTimeStatisticMetric;
     VSilKit::IStatisticMetric* _simStepWaitingTimeStatisticMetric;
+    std::chrono::duration<double, std::milli> _lastHandlerExecutionTimeMs;
 
     mutable std::mutex _timeSyncPolicyMx;
     std::shared_ptr<ITimeSyncPolicy> _timeSyncPolicy{nullptr};
@@ -151,7 +155,8 @@ private:
     SimulationStepHandler _simTask;
     std::future<void> _asyncResult;
 
-    Util::PerformanceMonitor _execTimeMonitor;
+    Util::PerformanceMonitor _simStepHandlerExecTimeMonitor;
+    Util::PerformanceMonitor _simStepCompletionTimeMonitor;
     Util::PerformanceMonitor _waitTimeMonitor;
     WatchDog _watchDog;
     bool _isCoupledToWallClock{false};

@@ -225,7 +225,7 @@ private:
         // If paused, don't request the next sim step. This happens in LifecycleService::Continue()
         if (!_controller.PauseRequested())
         {
-            // With real-time sync, the participant must sigal his readiness for the next step only if the real-time has actually passed.
+            // With real-time sync, the participant must signal his readiness for the next step only if the real-time has actually passed.
             if (!_controller.IsCoupledToWallClock())
             {
                 // The synchronous SimStep API creates the nextSimTask message automatically after the callback.
@@ -289,7 +289,8 @@ TimeSyncService::TimeSyncService(Core::IParticipantInternal* participant, ITimeP
     , _timeProvider{timeProvider}
     , _timeConfiguration{participant->GetLogger()}
     , _simStepCounterMetric{participant->GetMetricsManager()->GetCounter("SimStepCount")}
-    , _simStepExecutionTimeStatisticMetric{participant->GetMetricsManager()->GetStatistic("SimStepExecutionDuration")}
+    , _simStepHandlerExecutionTimeStatisticMetric{participant->GetMetricsManager()->GetStatistic("SimStepHandlerExecutionDuration")}
+    , _simStepCompletionTimeStatisticMetric{participant->GetMetricsManager()->GetStatistic("SimStepCompletionDuration")}
     , _simStepWaitingTimeStatisticMetric{participant->GetMetricsManager()->GetStatistic("SimStepWaitingDuration")}
     , _watchDog{healthCheckConfig}
     , _animationFactor{animationFactor}
@@ -495,27 +496,63 @@ void TimeSyncService::ExecuteSimStep(std::chrono::nanoseconds timePoint, std::ch
 
     _timeProvider->SetTime(timePoint, duration);
 
-    _execTimeMonitor.StartMeasurement();
+    _simStepHandlerExecTimeMonitor.StartMeasurement();
     _watchDog.Start();
     _simTask(timePoint, duration);
     _watchDog.Reset();
-    _execTimeMonitor.StopMeasurement();
 
-    const auto executionDuration = _execTimeMonitor.CurrentDuration();
+    _simStepHandlerExecTimeMonitor.StopMeasurement();
+    if (!IsBlocking())
+    {
+        _simStepCompletionTimeMonitor.StartMeasurement();
+    }
+
+    // Timing and metrics of the handler execution time
+    const auto executionDuration = _simStepHandlerExecTimeMonitor.CurrentDuration();
     const auto executionDurationMs = std::chrono::duration_cast<DoubleMSecs>(executionDuration);
     const auto executionDurationS = std::chrono::duration_cast<DoubleSecs>(executionDuration);
+    _simStepHandlerExecutionTimeStatisticMetric->Take(executionDurationS.count());
+    _lastHandlerExecutionTimeMs = executionDurationMs;
 
+    if (IsBlocking())
+    {
+        // With the blocking SimulationStepHandler, the logical sim step ends here
+        LogicalSimStepCompleted(executionDurationMs);
+    }
+}
+
+void TimeSyncService::LogicalSimStepCompleted(std::chrono::duration<double, std::milli> logicalSimStepTimeMs)
+{    
     _simStepCounterMetric->Add(1);
-    _simStepExecutionTimeStatisticMetric->Take(executionDurationS.count());
-
-    Trace(_logger, "Finished Simulation Step. Execution time was: {}ms", executionDurationMs.count());
+    Trace(_logger, "Finished Simulation Step. Execution time was: {}ms", logicalSimStepTimeMs.count());
     _waitTimeMonitor.StartMeasurement();
 }
 
 void TimeSyncService::CompleteSimulationStep()
 {
-    _logger->Debug("CompleteSimulationStep: calling _timeSyncPolicy->RequestNextStep");
+    if (!GetTimeSyncPolicy()->IsExecutingSimStep())
+    {
+        _logger->Warn("CompleteSimulationStep() was called before the simulation step handler was invoked.");
+    }
+    else
+    {
+        _logger->Debug("CompleteSimulationStep()");
+    }
+
     _participant->ExecuteDeferred([this] {
+
+        // Timing and metrics of the completion time
+        using DoubleMSecs = std::chrono::duration<double, std::milli>;
+        using DoubleSecs = std::chrono::duration<double>;
+        _simStepCompletionTimeMonitor.StopMeasurement();
+        const auto completionDuration = _simStepCompletionTimeMonitor.CurrentDuration();
+        const auto completionDurationMs = std::chrono::duration_cast<DoubleMSecs>(completionDuration);
+        const auto completionDurationS = std::chrono::duration_cast<DoubleSecs>(completionDuration);
+        _simStepCompletionTimeStatisticMetric->Take(completionDurationS.count());
+
+        // With the SimulationStepHandlerAsync, the sim step ends here
+        LogicalSimStepCompleted(_lastHandlerExecutionTimeMs + completionDurationMs);
+
         GetTimeSyncPolicy()->SetSimStepCompleted();
 
         // With real-time sync, the next step is requested in the real-time thread. If lagging behind, request also here to catch up.
