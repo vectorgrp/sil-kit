@@ -38,20 +38,20 @@ such as emulators, virtual machines and simulation tools.
 
 The SIL Kit ecosystem comprises the following turn-key solutions:
 
-* The `SIL Kit Adapters for QEMU <https://github.com/vectorgrp/sil-kit-adapters-qemu>`_
+* The `SIL Kit Adapter for QEMU <https://github.com/vectorgrp/sil-kit-adapters-qemu>`_
   integrates with QEMU to support co-simulation with emulated targets.
 
-* The `SIL Kit Adapters for TAP devices <https://github.com/vectorgrp/sil-kit-adapters-tap>`_
+* The `SIL Kit Adapter for TAP devices <https://github.com/vectorgrp/sil-kit-adapters-tap>`_
   project provides first-class support for TAP devices of the host operating system.
 
-* The `SIL Kit Adapter for SocketCAN <https://github.com/vectorgrp/sil-kit-adapters-vcan>`_
+* The `SIL Kit Adapter for virtual CAN <https://github.com/vectorgrp/sil-kit-adapters-vcan>`_
   can be used to attach a virtual CAN (Controller Area Network) interface (SocketCAN) to a Vector SIL Kit CAN bus.
+
+* The `SIL Kit Adapter for Generic Linux IO <https://github.com/vectorgrp/sil-kit-adapters-generic-linux-io>`_
+  allows to attach SIL Kit to a generic Linux IO device, such as character devices or GPIOs.
 
 * The `SIL Kit FMU Importer <https://github.com/vectorgrp/sil-kit-fmu-importer>`_
   allows to import Functional Mockup Units (FMUs) as SIL Kit participants.
-
-* The `Vector SIL Kit Adapter for Generic Linux IO <https://github.com/vectorgrp/sil-kit-adapters-generic-linux-io>`_
-  allows to attach SIL Kit to a generic Linux IO device, such as character devices or GPIOs.
 
 Related Applications
 --------------------
