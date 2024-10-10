@@ -406,6 +406,10 @@ private:
     void LogMismatchBetweenConfigAndPassedValue(const std::string& controllerName, const ValueT& passedValue,
                                                 const ValueT& configuredValue);
 
+    template <typename ValueT>
+    void LogMismatchBetweenConfigAndPassedValue(const std::string& controllerName, const std::vector<ValueT>& passedValue,
+                                                const std::vector<ValueT>& configuredValue);
+
     void OnSilKitSimulationJoined();
 
     void SetupRemoteLogging();
