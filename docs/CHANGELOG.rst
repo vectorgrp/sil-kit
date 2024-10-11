@@ -7,7 +7,7 @@ All notable changes to the Vector SIL Kit project shall be documented in this fi
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
 
-[4.0.53] - UNRELEASED
+[4.0.53] - 2024-10-11
 ---------------------
 
 Changed
@@ -17,13 +17,13 @@ Changed
 
   All utilities listen to OS signals to detect termination request.
 
-  - Old: Monitor and Registry wait for the user to press `[Enter]`` to shutdown.
-  - New: Monitor and Registry can be requested to shutdown via ``[Ctrl]-[C]``. Registry option '-s, --use-signal-handler' is deprecated.
+  - Old: Monitor and Registry wait for the user to press ``[Enter]`` to shutdown.
+  - New: Monitor and Registry can be requested to shutdown via ``[Ctrl]-[C]``. Registry option ``-s, --use-signal-handler`` is deprecated.
 
   All utilities no longer require user interaction.
 
-  - Old: Registry, Monitor and System Controller prompt the user by default to press `[Enter]`` to end process after shutdown.
-  - New: All utilities terminate without prompting for user input. SystemController option '-ni, --non-interactive' is deprecated.
+  - Old: Registry, Monitor and System Controller prompt the user by default to press ``[Enter]`` to end process after shutdown.
+  - New: All utilities terminate without prompting for user input. SystemController option ``-ni, --non-interactive`` is deprecated.
 
 - Implemented the union (de-)serialization stubs in the ``silkit/util/serdes`` headers.
 
@@ -32,10 +32,7 @@ Fixed
 
 - If using the ``SimStepHandlerAsync``, the log message that reports the end of the simulation step is now printed after the call to ``CompleteSimulationStep``.
 
-Fixed
-~~~~~
-
-- Fixed an issue with the NetSim API that caused an exception when used with log level `trace`.
+- Fixed an issue with the NetSim API that caused an exception when used with log level ``trace``.
 
 [4.0.52] - 2024-09-02 
 ---------------------
