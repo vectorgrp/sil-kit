@@ -41,6 +41,8 @@ auto CurrentTimestampString() -> std::string;
 
 auto LowerCase(std::string input) -> std::string;
 
+auto PrintableString(const std::string& input) -> std::string;
+
 
 } // namespace Util
 } // namespace SilKit
