@@ -74,4 +74,4 @@ logs to a file, the following configuration could be used:
        *Error*, *Warn*, *Info*, *Debug*, *Trace*, and *Off*.
    * - LogName
      - The filename used by sinks of type *File*. The
-       resulting filename is ``<LogName>_<ISO-TimeStamp>.txt``.
+       resulting filename is ``<LogName>_<Sanitized-Participant-Name>_<ISO-TimeStamp>.txt``.
