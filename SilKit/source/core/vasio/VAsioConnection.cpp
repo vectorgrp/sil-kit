@@ -41,6 +41,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "Uri.hpp"
 #include "Assert.hpp"
 #include "TransformAcceptorUris.hpp"
+#include "StringHelpers.hpp"
 
 #include "ConnectPeer.hpp"
 #include "util/TracingMacros.hpp"
@@ -63,27 +64,6 @@ namespace fs = SilKit::Filesystem;
 
 namespace {
 
-auto printableName(const std::string& participantName) -> std::string
-{
-    std::string safeName;
-    for (const auto& ch : participantName)
-    {
-        // do not use std::isalnum, as it may sensitive to the current locale
-        const bool isAlphaNumeric{('a' <= ch && ch <= 'z') || ('A' <= ch && ch <= 'Z') || ('0' <= ch && ch <= '9')
-                                  || (ch == '_' || ch == '-' || ch == '.' || ch == '~')};
-
-        if (isAlphaNumeric)
-        {
-            safeName.push_back(ch);
-        }
-        else
-        {
-            safeName += fmt::format("{:02X}", static_cast<unsigned char>(ch));
-        }
-    }
-    return safeName;
-}
-
 //Debug  print of given peer infos
 
 auto printUris(const std::vector<std::string>& uris)
@@ -99,7 +79,7 @@ auto makeLocalEndpoint(const std::string& participantName, const SilKit::Core::P
 {
     asio::local::stream_protocol::endpoint result;
     // Ensure the participantName is in a useful encoding
-    const auto safe_name = printableName(participantName);
+    const auto safe_name = SilKit::Util::PrintableString(participantName);
     const auto bounded_name = safe_name.substr(0, std::min<size_t>(safe_name.size(), 10));
 
     // We hash the participant name, ID and the current working directory
