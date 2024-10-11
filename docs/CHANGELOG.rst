@@ -32,6 +32,11 @@ Fixed
 
 - If using the ``SimStepHandlerAsync``, the log message that reports the end of the simulation step is now printed after the call to ``CompleteSimulationStep``.
 
+Fixed
+~~~~~
+
+- Fixed an issue with the NetSim API that caused an exception when used with log level `trace`.
+
 [4.0.52] - 2024-09-02 
 ---------------------
 

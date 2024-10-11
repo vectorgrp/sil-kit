@@ -7,6 +7,7 @@
 #include "NetworkSimulatorDatatypesInternal.hpp"
 #include "Configuration.hpp"
 #include "silkit/experimental/netsim/string_utils.hpp"
+#include "ServiceConfigKeys.hpp"
 
 namespace SilKit {
 namespace Experimental {
@@ -52,7 +53,8 @@ bool SimulatedNetworkRouter::AllowReception(const SilKit::Core::IServiceEndpoint
 }
 
 void SimulatedNetworkRouter::AddSimulatedController(const std::string& fromParticipantName,
-                                                    const std::string& controllerName, Core::EndpointId serviceId,
+                                                    const std::string& controllerName,
+                                                    const std::string& controllerTypeName, Core::EndpointId serviceId,
                                                     ControllerDescriptor controllerDescriptor,
                                                     ISimulatedController* userSimulatedController)
 {
@@ -65,7 +67,8 @@ void SimulatedNetworkRouter::AddSimulatedController(const std::string& fromParti
     fromCopy.SetServiceId(serviceId);
     fromCopy.SetServiceType(Core::ServiceType::SimulatedController);
     fromCopy.SetServiceName(controllerName);
-
+    fromCopy.SetSupplementalDataItem(SilKit::Core::Discovery::controllerType, controllerTypeName);
+    
     targetController->SetServiceDescriptor(std::move(fromCopy));
     _targetControllers.insert({controllerDescriptor, std::move(targetController)});
 }
