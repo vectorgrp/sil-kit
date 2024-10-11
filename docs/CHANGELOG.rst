@@ -24,6 +24,8 @@ Changed
 
   - Old: Registry, Monitor and System Controller prompt the user by default to press ``[Enter]`` to end process after shutdown.
   - New: All utilities terminate without prompting for user input. SystemController option ``-ni, --non-interactive`` is deprecated.
+ 
+- The Logger now adds the participant's name (as a normalized string) to the user-defined ``LogName`` for file sinks.
 
 - Implemented the union (de-)serialization stubs in the ``silkit/util/serdes`` headers.
 
