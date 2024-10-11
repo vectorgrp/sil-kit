@@ -330,7 +330,7 @@ Logger::Logger(const std::string& participantName, Config::Logging config)
         {
             if (sink.format == Config::Sink::Format::Json)
             {
-                auto filename = fmt::format("{}_{}.jsonl", sink.logName, logFileTimestamp);
+                auto filename = fmt::format("{}_{}_{}.jsonl", sink.logName, participantName logFileTimestamp);
                 auto fileSink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(filename);
                 using spdlog::details::make_unique; // for pre c++14
                 auto formatter = make_unique<spdlog::pattern_formatter>();
