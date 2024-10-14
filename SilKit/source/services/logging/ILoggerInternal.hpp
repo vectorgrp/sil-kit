@@ -82,7 +82,7 @@ public:
     template <typename... Args>
     void FormatMessage(fmt::format_string<Args...> fmt, Args&&... args)
     {
-        msg = fmt::format(fmt, args...);
+        _msg = fmt::format(fmt, args...);
     }
 
     void SetMessage(std::string newMsg)
