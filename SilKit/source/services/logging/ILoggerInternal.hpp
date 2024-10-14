@@ -93,7 +93,7 @@ public:
     template <typename Key, typename... Value>
     void FormatKeyValue(Key&& key, fmt::format_string<Value...> fmt)
     {
-        _keyValues[std::forward<Key>(key)] = fmt::format(value);
+        _keyValues[std::forward<Key>(key)] = fmt::format(fmt);
     }
 
     template<typename Key, typename Value>
