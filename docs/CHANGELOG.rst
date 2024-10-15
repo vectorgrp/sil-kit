@@ -9,6 +9,10 @@ The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <
 [4.0.54] - Unreleased
 ---------------------
 
+Changed
+~~~~~~~
+
+- Revised the documentation (demos, troubleshooting, doxygen output, file structure)
 
 [4.0.53] - 2024-10-11
 ---------------------
@@ -1608,7 +1612,7 @@ Changed
   The command line tools were updated to accept a new parameter for this.
 - The command line tools were modified to use lower case names with dashes:
   E.g., the ``IbRegistry`` is now called ``sil-kit-registry``.
-  See  :doc:`./usage/utilities`  for details.
+  See  :doc:`./utilities/utilities`  for details.
 
 - The trivial simulation and the detailed simulation have been made more consistent:
 
@@ -3997,7 +4001,7 @@ Removed
 Changed
 ~~~~~~~
 
-- Updated documentation of :doc:`./usage/demos`, :doc:`./usage/utilities` and :doc:`./configuration/configuration`
+- Updated documentation of :doc:`./demos/demos`, :doc:`./utilities/utilities` and :doc:`./configuration/configuration`
 
 
 - Participant (formerly 'ComAdapter') methods to create DataPublisher, DataSubscriber, RpcClient and RpcServer now have an additional 
@@ -6392,7 +6396,7 @@ This is a Quality Assured Release.
 
 Added
 ~~~~~
-- Documentation for the CAN controller API: :doc:`CAN Vehicle Network Controllers <api/can>`.
+- Documentation for the CAN controller API: :doc:`CAN Vehicle Network Controllers <api/services/can>`.
 - Documentation for the Participant Controller API: :ref:`changelog-outdated-reference` (``api/participantcontroller``) (AFTMAGT-206).
 - Documentation for the IO Port services (AFTMAGT-201).
 - Documented Generic Messages API: (AFTMAGT-204).
@@ -6400,9 +6404,9 @@ Added
 - Added docs for the ComAdapter:
 - Added quick start guide: usage/quickstart
 - Elaborate the user APIs and overview pages: :doc:`api/api`
-- Add docs for :doc:`api/systemcontroller` (AFTMAGT-242).
-- Add docs for :doc:`api/systemmonitor` (AFTMAGT-242).
-- Add docs for :doc:`api/ethernet` (AFTMAGT-239).
+- Add docs for :doc:`api/system-utilities/systemcontroller` (AFTMAGT-242).
+- Add docs for :doc:`api/system-utilities/systemmonitor` (AFTMAGT-242).
+- Add docs for :doc:`api/services/ethernet` (AFTMAGT-239).
 
 Changed
 ~~~~~~~
@@ -6686,7 +6690,7 @@ Changed
 - The LIN API was redesigned to provide a clearer and simpler interface. To make
   the transition to the new API as simple as possible, we provided extensive
   documentation on the new API itself including usage examples and information
-  about what changed in the new API: :doc:`../api/lin`
+  about what changed in the new API: :doc:`../api/services/lin`
 - Removed spdlog from the public IB API. Spdlog is still used internally but it
   has been removed from the public API to avoid conflicts with user specific
   spdlog installations.

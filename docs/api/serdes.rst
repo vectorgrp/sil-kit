@@ -1,3 +1,5 @@
+.. include:: /substitutions.rst
+
 ======================================
 Data Serialization/Deserialization API
 ======================================
@@ -15,7 +17,7 @@ Using the Data Serialization/Deserialization API
 The `Data Serialization/Deserialization (SerDes) API` provides serialization and deserialization of data using a simple serialization scheme.
 Both `Data Publish/Subscribe API` and `RPC API` support any serialization format for the transmission of the data or arguments for maximum flexibility.
 However, to ensure compatibility with other simulation participants, it is strongly recommended to use `SerDes` for all data transferred via the 
-:doc:`Data Publish/Subscribe API</api/pubsub>` and the :doc:`RPC API</api/rpc>`.
+:doc:`Data Publish/Subscribe API</api/services/pubsub>` and the :doc:`RPC API</api/services/rpc>`.
 
 .. admonition:: Caution
 
@@ -37,9 +39,9 @@ Unions are currently not supported.
 Usage Example
 ~~~~~~~~~~~~~
 
-Consider an example type from the :ref:`Publish/Subscribe Demo<sec:UTIL-pubsub-demo>`:
+Consider an example type from the :ref:`Publish/Subscribe Demo<sec:pubsub-demo>`:
 
-.. code-block:: cpp
+.. code-block:: c++
 
     struct GpsData
     {
@@ -50,7 +52,7 @@ Consider an example type from the :ref:`Publish/Subscribe Demo<sec:UTIL-pubsub-d
 
 Functions to serialize and deserialize this type can be written this way:
 
-.. code-block:: cpp
+.. code-block:: c++
 
     std::vector<uint8_t> Serialize(const GpsData& gpsData)
     {
@@ -64,7 +66,7 @@ Functions to serialize and deserialize this type can be written this way:
         return serializer.ReleaseBuffer();
     }
 
-.. code-block:: cpp
+.. code-block:: c++
 
     GpsData Deserialize(const std::vector<uint8_t>& data)
     {

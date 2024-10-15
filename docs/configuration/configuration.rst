@@ -1,8 +1,8 @@
+.. include:: /substitutions.rst
+
 ========================================
 Configuration
 ========================================
-
-.. |ProductName| replace:: SIL Kit
 
 .. _sec:sil-kit-config-yaml:
 

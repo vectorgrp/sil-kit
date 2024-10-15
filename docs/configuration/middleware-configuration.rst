@@ -1,3 +1,5 @@
+.. include:: /substitutions.rst
+
 .. _sec:cfg-participant-middleware:
 
 .. |NormalOperationNotice| replace:: It is *not* required to set this field under normal circumstances.

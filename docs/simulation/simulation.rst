@@ -1,12 +1,9 @@
+.. include:: /substitutions.rst
 
-==========
-Simulation
-==========
-..
-  macros for internal use
-..
-  General macros
-.. |ProductName| replace:: SIL Kit
+===================
+Simulation Concepts
+===================
+
 ..
   API references
 .. |ILifecycleService| replace:: :cpp:class:`ILifecycleService<SilKit::Services::Orchestration::ILifecycleService>`
@@ -142,7 +139,7 @@ System Controller
 
 The |ISystemController| interface allows users to set system-wide simulation parameters, such as which participants 
 are required for a simulation, as well as signal commands that are processed by all participants with a 
-lifecycle (see :doc:`System Controller<../api/systemcontroller>` for details).
+lifecycle (see :doc:`System Controller</api/system-utilities/systemcontroller>` for details).
 
 .. admonition:: Note
 

@@ -1,9 +1,8 @@
+.. include:: /substitutions.rst
+
 =============================
 Developer Guide
 =============================
-
-.. |ProductName| replace:: SIL Kit
-
 
 The following sections explain, how to consume the Vector |ProductName| library in your own application and how to use the |ProductName| API to communicate with other participants of a simulation.
 
@@ -53,7 +52,7 @@ From CMake this can be consumed via the ``find_package(SilKit CONFIG)`` mechanis
 For example, the following CMakeLists.txt imports the |ProductName| library based on its file system path.
 
 .. literalinclude::
-   ../usage/sample_silkit/CMakeLists.txt
+   ../code-samples/simple/CMakeLists.txt
    :language: cmake
    :lines: 22-31
 
@@ -64,11 +63,11 @@ If you use another method to build your software you can directly use the ``SilK
 
 A simple Publish / Subscribe application
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-We'll create a simple, self-contained |ProductName| application that uses :doc:`Publish/Subscribe<../api/pubsub>` to exchange user-defined data between two participants.
+We'll create a simple, self-contained |ProductName| application that uses :doc:`Publish/Subscribe</api/services/pubsub>` to exchange user-defined data between two participants.
 In our C++ file ``simple.cpp``, we include the headers and define namespaces and constants:
 
 .. literalinclude::
-   ../usage/sample_silkit/simple.cpp
+   ../code-samples/simple/simple.cpp
    :language: cpp
    :lines: 22-31
 
@@ -84,7 +83,7 @@ This can be done by loading an existing :ref:`YAML file<sec:sil-kit-config-yaml>
 Here, we use the configuration file ``simple.yaml`` to configure a logger that logs all error messages to a file:
 
 .. literalinclude::
-   ../usage/sample_silkit/simple.yaml
+   ../code-samples/simple/simple.yaml
    :language: yaml
 
 We load it in the main function of our code::
@@ -99,12 +98,12 @@ The application will run two participants concurrently, each in its own thread.
 One thread will act as a publisher by sending a test string to its subscribers:
 
 .. literalinclude::
-   ../usage/sample_silkit/simple.cpp
+   ../code-samples/simple/simple.cpp
    :language: cpp
    :lines: 33-69
 
 Initially, the simulation is joined by creating the participant called "PublisherParticipant".
-This properly initializes the |ProductName| library; enables the instantiation of :doc:`Services<../api/api>` and offers access to the :doc:`Lifecycle Service<../api/lifecycleService>`, which controls the orchestration of our simulation.
+This properly initializes the |ProductName| library; enables the instantiation of :doc:`Services</api/services/lifecycle>` and offers access to the :doc:`Lifecycle Service</api/services/lifecycle>`, which controls the orchestration of our simulation.
 Next, we create a :cpp:class:`publisher<SilKit::Services::PubSub::IDataPublisher>` for the ``DataService`` topic.
 Later, we subscribe to the same topic name in our subscriber to enable communication between the participants.
 The actual simulation is performed in the simulation task.
@@ -115,7 +114,7 @@ We hand over the publisher object in the capture list of our simulation task and
 The subscriber runs in its own thread, too:
 
 .. literalinclude::
-   ../usage/sample_silkit/simple.cpp
+   ../code-samples/simple/simple.cpp
    :language: cpp
    :lines: 71-102
 
@@ -127,7 +126,7 @@ We extend our main function to spawn both threads and join them again once finis
 Also, we use a try-catch block here to get proper error handling e.g., if the configuration file cannot be loaded.
 
 .. literalinclude::
-   ../usage/sample_silkit/simple.cpp
+   ../code-samples/simple/simple.cpp
    :language: cpp
    :lines: 104-127
 
@@ -157,6 +156,6 @@ The final simulation setup can be run through the following commands:
       # Make sure that the SilKit.dll and simple.yaml are available 
       ./SampleSilKit.exe
 
-The complete source code of this sample can be found here: :download:`CMakeLists.txt<../usage/sample_silkit/CMakeLists.txt>`
-:download:`simple.cpp<../usage/sample_silkit/simple.cpp>` :download:`simple.yaml<../usage/sample_silkit/simple.yaml>`
+The complete source code of this sample can be found here: :download:`CMakeLists.txt<../code-samples/simple/CMakeLists.txt>`
+:download:`simple.cpp<../code-samples/simple/simple.cpp>` :download:`simple.yaml<../code-samples/simple/simple.yaml>`
 
