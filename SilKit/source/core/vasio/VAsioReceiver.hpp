@@ -28,6 +28,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "MessageTracing.hpp"
 #include "IServiceEndpoint.hpp"
 #include "SerializedMessage.hpp"
+#include "ILoggerInternal.hpp"
 
 namespace SilKit {
 namespace Core {
@@ -74,7 +75,8 @@ public:
     // ----------------------------------------
     // Constructors and Destructor
     VAsioReceiver(VAsioMsgSubscriber subscriberInfo, std::shared_ptr<SilKitLink<MsgT>> link,
-                  Services::Logging::ILogger* logger);
+                  Services::Logging::ILoggerInternal* logger);
+
 
 public:
     // ----------------------------------------
@@ -95,7 +97,7 @@ private:
     // private members
     VAsioMsgSubscriber _subscriptionInfo;
     std::shared_ptr<SilKitLink<MsgT>> _link;
-    Services::Logging::ILogger* _logger;
+    Services::Logging::ILoggerInternal* _logger;
     ServiceDescriptor _serviceDescriptor;
 };
 
@@ -104,7 +106,7 @@ private:
 // ================================================================================
 template <class MsgT>
 VAsioReceiver<MsgT>::VAsioReceiver(VAsioMsgSubscriber subscriberInfo, std::shared_ptr<SilKitLink<MsgT>> link,
-                                   Services::Logging::ILogger* logger)
+                                   Services::Logging::ILoggerInternal* logger)
     : _subscriptionInfo{std::move(subscriberInfo)}
     , _link{link}
     , _logger{logger}

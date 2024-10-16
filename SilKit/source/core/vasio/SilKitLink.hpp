@@ -42,8 +42,9 @@ public:
 public:
     // ----------------------------------------
     // Constructors and Destructor
-    SilKitLink(std::string name, Services::Logging::ILogger* logger,
+    SilKitLink(std::string name, Services::Logging::ILoggerInternal* logger,
                Services::Orchestration::ITimeProvider* timeProvider);
+
 
 public:
     // ----------------------------------------
@@ -85,7 +86,7 @@ private:
     // ----------------------------------------
     // private members
     std::string _name;
-    Services::Logging::ILogger* _logger;
+    Services::Logging::ILoggerInternal* _logger;
     Services::Orchestration::ITimeProvider* _timeProvider;
 
     std::vector<ReceiverT*> _localReceivers;
@@ -96,8 +97,9 @@ private:
 //  Inline Implementations
 // ================================================================================
 template <class MsgT>
-SilKitLink<MsgT>::SilKitLink(std::string name, Services::Logging::ILogger* logger,
+SilKitLink<MsgT>::SilKitLink(std::string name, Services::Logging::ILoggerInternal* logger,
                              Services::Orchestration::ITimeProvider* timeProvider)
+
     : _name{std::move(name)}
     , _logger{logger}
     , _timeProvider{timeProvider}

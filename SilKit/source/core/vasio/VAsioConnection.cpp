@@ -300,7 +300,20 @@ VAsioConnection::~VAsioConnection()
     }
 }
 
-void VAsioConnection::SetLogger(Services::Logging::ILogger* logger)
+void VAsioConnection::SetLoggerInternal(Services::Logging::ILoggerInternal* logger)
+{
+    _logger = logger;
+
+    _ioContext->SetLogger(*_logger);
+    _connectKnownParticipants.SetLogger(*_logger);
+}
+
+auto VAsioConnection::GetLoggerInternal() -> SilKit::Services::Logging::ILoggerInternal*
+{
+    return _logger;
+}
+/*
+void VAsioConnection::SetLogger(Services::Logging::ILoggerInternal* logger)
 {
     _logger = logger;
 
@@ -312,6 +325,7 @@ auto VAsioConnection::GetLogger() -> SilKit::Services::Logging::ILogger*
 {
     return _logger;
 }
+*/
 
 auto VAsioConnection::PrepareAcceptorEndpointUris(const std::string& connectUri) -> std::vector<std::string>
 {
