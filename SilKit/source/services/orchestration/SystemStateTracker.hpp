@@ -6,7 +6,6 @@
 
 
 #include "silkit/services/orchestration/OrchestrationDatatypes.hpp"
-//#include "silkit/services/logging/ILoggerInternal.hpp"
 #include "ILoggerInternal.hpp"
 
 #include "silkit/util/Span.hpp"

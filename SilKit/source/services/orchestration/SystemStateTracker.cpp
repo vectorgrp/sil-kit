@@ -145,14 +145,9 @@ auto SystemStateTracker::UpdateParticipantStatus(const ParticipantStatus& newPar
     lm.SetKeyValue("ParticipantName", participantName);
     lm.SetKeyValue("OldParticipantState", fmt::format("{}", oldParticipantState));
     lm.SetKeyValue("NewParticipantState", fmt::format("{}", newParticipantState));
-   // lm.SetKeyValue("MYInt", 1122334455); todo intager values
     lm.Dispatch();
 
-    //Log::Debug(_logger, "Updating participant status for {} from {} to {}", participantName, oldParticipantState,
-        //       newParticipantState);
-
     // Check if transition from the old to the new participant state is valid
-
     if (!ValidateParticipantStateUpdate(oldParticipantState, newParticipantState))
     {
         const auto logLevel = IsRequiredParticipant(participantName) ? Log::Level::Warn : Log::Level::Debug;
@@ -204,7 +199,6 @@ auto SystemStateTracker::UpdateParticipantStatus(const ParticipantStatus& newPar
             lm.SetKeyValue("OldSystemState", fmt::format("{}", oldSystemState));
             lm.SetKeyValue("NewSystemState", fmt::format("{}", newSystemState));
             lm.Dispatch();
-            //Log::Debug(_logger, "Computed new system state update from {} to {}", oldSystemState, newSystemState);
 
             if (oldSystemState != newSystemState)
             {
@@ -214,8 +208,6 @@ auto SystemStateTracker::UpdateParticipantStatus(const ParticipantStatus& newPar
                 lm.SetKeyValue("OldSystemState", fmt::format("{}", oldSystemState));
                 lm.SetKeyValue("NewSystemState", fmt::format("{}", newSystemState));
                 lm.Dispatch();
-
-                //Log::Debug(_logger, "The system state has changed from {} to {}", oldSystemState, newSystemState);
 
                 _systemState = newSystemState;
                 result.systemStateChanged = true;
