@@ -139,14 +139,14 @@ auto SystemStateTracker::UpdateParticipantStatus(const ParticipantStatus& newPar
 
     const auto oldParticipantState{participantStatus.state};
     const auto newParticipantState{newParticipantStatus.state};
-
-    Log::LoggerMessage lm{_logger, Log::Level::Debug};
-    lm.SetMessage("Updating participant status");
-    lm.SetKeyValue("ParticipantName", participantName);
-    lm.SetKeyValue("OldParticipantState", fmt::format("{}", oldParticipantState));
-    lm.SetKeyValue("NewParticipantState", fmt::format("{}", newParticipantState));
-    lm.Dispatch();
-
+    {
+        Log::LoggerMessage lm{_logger, Log::Level::Debug};
+        lm.SetMessage("Updating participant status");
+        lm.SetKeyValue("ParticipantName", participantName);
+        lm.SetKeyValue("OldParticipantState", fmt::format("{}", oldParticipantState));
+        lm.SetKeyValue("NewParticipantState", fmt::format("{}", newParticipantState));
+        lm.Dispatch();
+    }
     // Check if transition from the old to the new participant state is valid
     if (!ValidateParticipantStateUpdate(oldParticipantState, newParticipantState))
     {
