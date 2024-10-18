@@ -6,7 +6,8 @@
 
 
 #include "silkit/services/orchestration/OrchestrationDatatypes.hpp"
-#include "silkit/services/logging/ILogger.hpp"
+#include "ILoggerInternal.hpp"
+
 #include "silkit/util/Span.hpp"
 
 #include <unordered_map>
@@ -42,7 +43,7 @@ public:
     };
 
 public:
-    void SetLogger(SilKit::Services::Logging::ILogger* logger);
+    void SetLogger(SilKit::Services::Logging::ILoggerInternal* logger);
 
     auto IsEmpty() const -> bool;
 
@@ -66,7 +67,7 @@ private:
 private:
     mutable std::recursive_mutex _mutex;
 
-    SilKit::Services::Logging::ILogger* _logger{nullptr};
+    SilKit::Services::Logging::ILoggerInternal* _logger{nullptr};
     std::unordered_set<std::string> _requiredParticipants;
     SystemState _systemState{};
 

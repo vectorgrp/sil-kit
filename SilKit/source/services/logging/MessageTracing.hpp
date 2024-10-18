@@ -24,26 +24,80 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "ILoggerInternal.hpp"
 #include "IServiceEndpoint.hpp"
 #include "ServiceDescriptor.hpp"
+#include "traits/SilKitMsgTraits.hpp"
+
 
 namespace SilKit {
 namespace Services {
 
+
+template <typename MsgT>
+std::chrono::nanoseconds GetTimestamp(MsgT& msg,
+                                      std::enable_if_t<Core::HasTimestamp<MsgT>::value, bool> = true)
+{
+    return msg.timestamp;
+}
+
+template <typename MsgT>
+std::chrono::nanoseconds GetTimestamp(MsgT& /*msg*/,
+                  std::enable_if_t<!Core::HasTimestamp<MsgT>::value, bool> = false)
+{
+    return std::chrono::nanoseconds::duration::min();
+}
+
+
+
+
 template <class SilKitMessageT>
-void TraceRx(Logging::ILogger* logger, const Core::IServiceEndpoint* addr, const SilKitMessageT& msg,
+void TraceRx(Logging::ILoggerInternal* logger, const Core::IServiceEndpoint* addr, const SilKitMessageT& msg,
+
              const Core::ServiceDescriptor& from)
 {
-    Logging::Trace(logger, "Recv on {} from {}: {}", addr->GetServiceDescriptor(), from.GetParticipantName(), msg);
+    Logging::LoggerMessage lm{logger, Logging::Level::Trace};
+    lm.SetMessage("Recv event");
+
+    std::unordered_map<std::string, std::string> serviceDescriptorKVs{addr->GetServiceDescriptor().to_keyValues()};
+    for (const auto& pair : serviceDescriptorKVs)
+    {
+        lm.SetKeyValue(pair.first, pair.second);
+    }
+    lm.SetKeyValue("msg", (fmt::format("{}", msg)));
+
+    auto virtualTimeStamp = GetTimestamp(msg);
+    if (virtualTimeStamp != std::chrono::nanoseconds::duration::min())
+    {
+        lm.SetKeyValue("VirtualTimeNS", (fmt::format("{}", virtualTimeStamp.count() )));
+    }
+    lm.SetKeyValue("From", from.GetParticipantName());
+    lm.Dispatch();
+    //Logging::Trace(logger, "Recv on {} from {}: {}", addr->GetServiceDescriptor(), from.GetParticipantName(), msg);
 }
 
 template <class SilKitMessageT>
-void TraceTx(Logging::ILogger* logger, const Core::IServiceEndpoint* addr, const SilKitMessageT& msg)
+void TraceTx(Logging::ILoggerInternal* logger, const Core::IServiceEndpoint* addr, const SilKitMessageT& msg)
 {
-    Logging::Trace(logger, "Send from {}: {}", addr->GetServiceDescriptor(), msg);
+    Logging::LoggerMessage lm{logger, Logging::Level::Trace};
+    lm.SetMessage("Send event");
+    std::unordered_map<std::string, std::string> serviceDescriptorKVs{addr->GetServiceDescriptor().to_keyValues()};
+    for (const auto& pair : serviceDescriptorKVs)
+    {
+        lm.SetKeyValue(pair.first, pair.second);
+    }
+    lm.SetKeyValue("msg", (fmt::format("{}", msg)));
+
+    auto virtualTimeStamp = GetTimestamp(msg);
+    if (virtualTimeStamp != std::chrono::nanoseconds::duration::min())
+    {
+        lm.SetKeyValue("VirtualTimeNS", (fmt::format("{}", virtualTimeStamp.count() )));
+    }
+    lm.Dispatch();
 }
 
 // Don't trace LogMessages - this could cause cycles!
-inline void TraceRx(Logging::ILogger* /*logger*/, Core::IServiceEndpoint* /*addr*/, const Logging::LogMsg& /*msg*/) {}
-inline void TraceTx(Logging::ILogger* /*logger*/, Core::IServiceEndpoint* /*addr*/, const Logging::LogMsg& /*msg*/) {}
+inline void TraceRx(Logging::ILoggerInternal* /*logger*/, Core::IServiceEndpoint* /*addr*/, const Logging::LogMsg& /*msg*/) {}
+inline void TraceTx(Logging::ILoggerInternal* /*logger*/, Core::IServiceEndpoint* /*addr*/, const Logging::LogMsg& /*msg*/) {}
 
+inline void TraceRx(Logging::ILoggerInternal* /*logger*/, Core::IServiceEndpoint* /*addr*/, Logging::LogMsg&& /*msg*/) {}
+inline void TraceTx(Logging::ILoggerInternal* /*logger*/, Core::IServiceEndpoint* /*addr*/, Logging::LogMsg&& /*msg*/) {}
 } // namespace Services
 } // namespace SilKit

@@ -133,7 +133,7 @@ private:
     Core::IParticipantInternal* _participant{nullptr};
     Core::ServiceDescriptor _serviceDescriptor{};
     LifecycleService* _lifecycleService{nullptr};
-    Services::Logging::ILogger* _logger{nullptr};
+    Services::Logging::ILoggerInternal* _logger{nullptr};
     ITimeProvider* _timeProvider{nullptr};
     TimeConfiguration _timeConfiguration;
 
