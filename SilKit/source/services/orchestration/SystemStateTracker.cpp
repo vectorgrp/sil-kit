@@ -180,13 +180,12 @@ auto SystemStateTracker::UpdateParticipantStatus(const ParticipantStatus& newPar
     if (oldParticipantState != newParticipantState)
     {
         result.participantStateChanged = true;
-
-        Log::LoggerMessage lm{_logger, Log::Level::Debug};
-        lm.SetMessage("The participant state has changed!");
-        lm.SetKeyValue("ParticipantName", participantName);
-        lm.Dispatch();
-
-        //Log::Debug(_logger, "The participant state has changed for {}", participantName);
+        {
+            Log::LoggerMessage lm{_logger, Log::Level::Debug};
+            lm.SetMessage("The participant state has changed!");
+            lm.SetKeyValue("ParticipantName", participantName);
+            lm.Dispatch();
+        }
 
         if (IsRequiredParticipant(participantName))
         {
