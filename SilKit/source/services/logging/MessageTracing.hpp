@@ -24,9 +24,29 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "ILoggerInternal.hpp"
 #include "IServiceEndpoint.hpp"
 #include "ServiceDescriptor.hpp"
+#include "traits/SilKitMsgTraits.hpp"
+
 
 namespace SilKit {
 namespace Services {
+
+
+template <typename MsgT>
+std::chrono::nanoseconds GetTimestamp(MsgT& msg,
+                                      std::enable_if_t<Core::HasTimestamp<MsgT>::value, bool> = true)
+{
+    return msg.timestamp;
+}
+
+template <typename MsgT>
+std::chrono::nanoseconds GetTimestamp(MsgT& /*msg*/,
+                  std::enable_if_t<!Core::HasTimestamp<MsgT>::value, bool> = false)
+{
+    return std::chrono::nanoseconds::duration::min();
+}
+
+
+
 
 template <class SilKitMessageT>
 void TraceRx(Logging::ILoggerInternal* logger, const Core::IServiceEndpoint* addr, const SilKitMessageT& msg,
@@ -43,8 +63,11 @@ void TraceRx(Logging::ILoggerInternal* logger, const Core::IServiceEndpoint* add
     }
     lm.SetKeyValue("msg", (fmt::format("{}", msg)));
 
-    //lm.SetKeyValue("msg", ("{}", msg));
-    //lm.SetKeyValue("ServiceDescriptor", addr->GetServiceDescriptor().to_string());
+    auto virtualTimeStamp = GetTimestamp(msg);
+    if (virtualTimeStamp != std::chrono::nanoseconds::duration::min())
+    {
+        lm.SetKeyValue("VirtualTimeNS", (fmt::format("{}", virtualTimeStamp.count() )));
+    }
     lm.SetKeyValue("From", from.GetParticipantName());
     lm.Dispatch();
     //Logging::Trace(logger, "Recv on {} from {}: {}", addr->GetServiceDescriptor(), from.GetParticipantName(), msg);
@@ -62,10 +85,12 @@ void TraceTx(Logging::ILoggerInternal* logger, const Core::IServiceEndpoint* add
     }
     lm.SetKeyValue("msg", (fmt::format("{}", msg)));
 
-    //lm.SetKeyValue("ServiceDescriptor", addr->GetServiceDescriptor().to_string());
-   // lm.SetKeyValue("Message", msg.to_string());
+    auto virtualTimeStamp = GetTimestamp(msg);
+    if (virtualTimeStamp != std::chrono::nanoseconds::duration::min())
+    {
+        lm.SetKeyValue("VirtualTimeNS", (fmt::format("{}", virtualTimeStamp.count() )));
+    }
     lm.Dispatch();
- //Logging::Trace(logger, "Send from {}: {}", addr->GetServiceDescriptor(), msg);
 }
 
 // Don't trace LogMessages - this could cause cycles!
