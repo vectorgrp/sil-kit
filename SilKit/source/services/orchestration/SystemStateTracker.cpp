@@ -193,12 +193,14 @@ auto SystemStateTracker::UpdateParticipantStatus(const ParticipantStatus& newPar
             const auto oldSystemState{_systemState};
             const auto newSystemState{ComputeSystemState(newParticipantState)};
 
-            Log::LoggerMessage lm{_logger, Log::Level::Debug};
-            lm.SetMessage("Computed new system state update!");
-            lm.SetKeyValue("ParticipantName", participantName);
-            lm.SetKeyValue("OldSystemState", fmt::format("{}", oldSystemState));
-            lm.SetKeyValue("NewSystemState", fmt::format("{}", newSystemState));
-            lm.Dispatch();
+            {
+                Log::LoggerMessage lm{_logger, Log::Level::Debug};
+                lm.SetMessage("Computed new system state update!");
+                lm.SetKeyValue("ParticipantName", participantName);
+                lm.SetKeyValue("OldSystemState", fmt::format("{}", oldSystemState));
+                lm.SetKeyValue("NewSystemState", fmt::format("{}", newSystemState));
+                lm.Dispatch();
+            }
 
             if (oldSystemState != newSystemState)
             {
