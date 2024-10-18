@@ -491,8 +491,9 @@ void TimeSyncService::ExecuteSimStep(std::chrono::nanoseconds timePoint, std::ch
 
     {
         Logging::LoggerMessage lm{_logger, Logging::Level::Trace};
-        lm.SetMessage("Starting next Simulation Task.");
+        lm.SetMessage("Starting next Simulation Step.");
         lm.SetKeyValue("WaitingTime", fmt::format("{}", std::chrono::duration_cast<DoubleMSecs>(_waitTimeMonitor.CurrentDuration()).count()));
+        lm.SetKeyValue("VirtualTimeNS", fmt::format("{}", timePoint.count()));
         lm.Dispatch();
     }
 
@@ -536,6 +537,7 @@ void TimeSyncService::LogicalSimStepCompleted(std::chrono::duration<double, std:
     Logging::LoggerMessage lm{_logger, Logging::Level::Trace};
     lm.SetMessage("Finished Simulation Step.");
     lm.SetKeyValue("ExecutionTime", fmt::format("{}", logicalSimStepTimeMs.count()));
+    lm.SetKeyValue("VirtualTimeNS", fmt::format("{}", Now().count()));
     lm.Dispatch();
     _waitTimeMonitor.StartMeasurement();
 }
@@ -678,12 +680,6 @@ bool TimeSyncService::ParticipantHasAutonomousSynchronousCapability(const std::s
               "and virtual time synchronization. Please consider upgrading Participant. Aborting simulation...");
         lm.SetKeyValue("ParticipantName", participantName);
         lm.Dispatch();
-
-
-   //     Error(_participant->GetLogger(),
-      //        "Participant \'{}\' does not support simulations with participants that use an autonomous lifecycle "
-       //       "and virtual time synchronization. Please consider upgrading Participant \'{}\'. Aborting simulation...",
-       //       participantName, participantName);
         return false;
     }
     return true;
@@ -701,9 +697,6 @@ bool TimeSyncService::AbortHopOnForCoordinatedParticipants() const
             lm.SetKeyValue("ParticipantName", _participant->GetParticipantName());
             lm.Dispatch();
 
-           // Error(_participant->GetLogger(),
-           //       "This participant is running with a coordinated lifecycle and virtual time synchronization and wants "
-           //       "to join an already running simulation. This is not allowed, aborting simulation...");
             _participant->GetSystemController()->AbortSimulation();
             return true;
         }
