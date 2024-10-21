@@ -158,6 +158,18 @@ void optional_encode(const SilKit::Util::Optional<ConfigT>& value, YAML::Node& n
     }
 }
 
+template <typename ConfigT,
+          typename std::enable_if<!(std::is_fundamental<ConfigT>::value || std::is_same<ConfigT, std::string>::value),
+                                  bool>::type = true>
+void optional_encode(const SilKit::Util::Optional<std::vector<ConfigT>>& value, YAML::Node& node,
+                     const std::string& fieldName)
+{
+    if (value.has_value())
+    {
+        node[fieldName] = value.value();
+    }
+}
+
 template <typename ConfigT>
 void optional_encode(const std::vector<ConfigT>& value, YAML::Node& node, const std::string& fieldName)
 {

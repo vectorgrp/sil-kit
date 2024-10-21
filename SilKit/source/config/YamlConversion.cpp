@@ -712,12 +712,64 @@ bool Converter::decode(const Node& node, FlexrayController& obj)
 }
 
 template <>
+Node Converter::encode(const Label::Kind& obj)
+{
+    Node node;
+    node = static_cast<std::underlying_type_t<Label::Kind>>(obj);
+    switch (obj)
+    {
+    case Label::Kind::Mandatory:
+        node = "Mandatory";
+        break;
+    case Label::Kind::Optional:
+        node = "Optional";
+        break;
+    default:
+        throw ConfigurationError{"Unknown MatchingLabel::Kind"};
+    }
+    return node;
+}
+template <>
+bool Converter::decode(const Node& node, Label::Kind& obj)
+{
+    auto&& str = parse_as<std::string>(node);
+    if (str == "Mandatory")
+        obj = Label::Kind::Mandatory;
+    else if (str == "Optional")
+        obj = Label::Kind::Optional;
+    else
+    {
+        throw ConversionError(node, "Unknown MatchingLabel::Kind: " + str + ".");
+    }
+    return true;
+}
+
+template <>
+Node Converter::encode(const Label& obj)
+{
+    Node node;
+    node["Key"] = obj.key;
+    node["Value"] = obj.value;
+    node["Kind"] = encode(obj.kind);
+    return node;
+}
+template <>
+bool Converter::decode(const Node& node, Label& obj)
+{
+    optional_decode(obj.key, node, "Key");
+    optional_decode(obj.value, node, "Value");
+    optional_decode(obj.kind, node, "Kind");
+    return true;
+}
+
+template <>
 Node Converter::encode(const DataPublisher& obj)
 {
     static const DataPublisher defaultObj{};
     Node node;
     node["Name"] = obj.name;
     optional_encode(obj.topic, node, "Topic");
+    optional_encode(obj.labels, node, "Labels");
     //optional_encode(obj.history, node, "History");
     optional_encode(obj.useTraceSinks, node, "UseTraceSinks");
     optional_encode(obj.replay, node, "Replay");
@@ -728,6 +780,7 @@ bool Converter::decode(const Node& node, DataPublisher& obj)
 {
     obj.name = parse_as<std::string>(node["Name"]);
     optional_decode(obj.topic, node, "Topic");
+    optional_decode(obj.labels, node, "Labels");
     //optional_decode(obj.history, node, "Replay");
     optional_decode(obj.useTraceSinks, node, "UseTraceSinks");
     optional_decode(obj.replay, node, "Replay");
@@ -741,6 +794,7 @@ Node Converter::encode(const DataSubscriber& obj)
     Node node;
     node["Name"] = obj.name;
     optional_encode(obj.topic, node, "Topic");
+    optional_encode(obj.labels, node, "Labels");
     optional_encode(obj.useTraceSinks, node, "UseTraceSinks");
     optional_encode(obj.replay, node, "Replay");
     return node;
@@ -750,6 +804,7 @@ bool Converter::decode(const Node& node, DataSubscriber& obj)
 {
     obj.name = parse_as<std::string>(node["Name"]);
     optional_decode(obj.topic, node, "Topic");
+    optional_decode(obj.labels, node, "Labels");
     optional_decode(obj.useTraceSinks, node, "UseTraceSinks");
     optional_decode(obj.replay, node, "Replay");
     return true;
@@ -762,6 +817,7 @@ Node Converter::encode(const RpcServer& obj)
     Node node;
     node["Name"] = obj.name;
     optional_encode(obj.functionName, node, "FunctionName");
+    optional_encode(obj.labels, node, "Labels");
     optional_encode(obj.useTraceSinks, node, "UseTraceSinks");
     optional_encode(obj.replay, node, "Replay");
     return node;
@@ -771,6 +827,7 @@ bool Converter::decode(const Node& node, RpcServer& obj)
 {
     obj.name = parse_as<std::string>(node["Name"]);
     optional_decode_deprecated_alternative(obj.functionName, node, "FunctionName", {"Channel", "RpcChannel"});
+    optional_decode(obj.labels, node, "Labels");
     optional_decode(obj.useTraceSinks, node, "UseTraceSinks");
     optional_decode(obj.replay, node, "Replay");
     return true;
@@ -783,6 +840,7 @@ Node Converter::encode(const RpcClient& obj)
     Node node;
     node["Name"] = obj.name;
     optional_encode(obj.functionName, node, "Channel");
+    optional_encode(obj.labels, node, "Labels");
     optional_encode(obj.useTraceSinks, node, "UseTraceSinks");
     optional_encode(obj.replay, node, "Replay");
     return node;
@@ -792,6 +850,7 @@ bool Converter::decode(const Node& node, RpcClient& obj)
 {
     obj.name = parse_as<std::string>(node["Name"]);
     optional_decode_deprecated_alternative(obj.functionName, node, "FunctionName", {"Channel", "RpcChannel"});
+    optional_decode(obj.labels, node, "Labels");
     optional_decode(obj.useTraceSinks, node, "UseTraceSinks");
     optional_decode(obj.replay, node, "Replay");
     return true;
@@ -1235,6 +1294,8 @@ bool Converter::decode(const Node& node, ParticipantConfiguration& obj)
     optional_decode(obj.experimental, node, "Experimental");
     return true;
 }
+
+// Conversions for ServiceDiscovery Supplemental Data
 
 template <>
 Node Converter::encode(const SilKit::Services::MatchingLabel::Kind& obj)
