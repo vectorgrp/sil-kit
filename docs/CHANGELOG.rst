@@ -13,6 +13,12 @@ Changed
 ~~~~~~~
 
 - Revised the documentation (demos, troubleshooting, doxygen output, file structure)
+- Improved platform/compiler/architecture detection
+
+Fixed
+~~~~~
+
+- Failure to configure and package cross-builds to QNX on Windows
 
 [4.0.53] - 2024-10-11
 ---------------------
