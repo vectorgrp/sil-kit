@@ -84,7 +84,7 @@ function(get_compiler_arch outCompiler outArch outPlatform  )
 
     if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
         set(SYSTEM_BITNESS "64")
-    elseif("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
+    elseif("${CMAKE_SIZEOF_VOID_P}" STREQUAL "4")
         set(SYSTEM_BITNESS "32")
     else()
         message(FATAL_ERROR "Unsupported pointer size: ${CMAKE_SIZEOF_VOID_P}")
