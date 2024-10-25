@@ -109,7 +109,6 @@ function(get_compiler_arch outCompiler outArch outPlatform  )
             set(_system_arch "x86")
         endif()
     elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "QNX")
-        set(_platform "QNX")
         set(_system_arch "${SILKIT_TARGET_ARCHITECTURE}")
     elseif(UNIX)
         # generic unix has uname
