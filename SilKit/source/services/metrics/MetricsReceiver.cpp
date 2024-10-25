@@ -13,10 +13,8 @@ namespace Log = SilKit::Services::Logging;
 namespace VSilKit {
 
 
-MetricsReceiver::MetricsReceiver(SilKit::Core::IParticipantInternal *, SilKit::Services::Logging::ILogger &logger,
-                                 IMetricsReceiverListener &listener)
-    : _logger{&logger}
-    , _listener{&listener}
+MetricsReceiver::MetricsReceiver(SilKit::Core::IParticipantInternal *, IMetricsReceiverListener &listener)
+    : _listener{&listener}
 {
     _serviceDescriptor.SetNetworkName("default");
 }

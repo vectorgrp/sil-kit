@@ -242,8 +242,7 @@ void Participant<SilKitConnectionT>::SetupMetrics()
         SilKit::Config::InternalController config;
         config.name = "MetricsReceiver";
         config.network = "default";
-        CreateController<VSilKit::MetricsReceiver>(config, std::move(supplementalData), true, true, *_logger,
-                                                   processor);
+        CreateController<VSilKit::MetricsReceiver>(config, std::move(supplementalData), true, true, processor);
     }
 }
 
