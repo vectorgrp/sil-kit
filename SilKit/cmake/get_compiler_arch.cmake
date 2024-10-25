@@ -80,73 +80,92 @@ function(get_linux_distro outDistroName outDistroVersion)
 endfunction()
 
 function(get_compiler_arch outCompiler outArch outPlatform  )
-    #get arch
+    # compute bitness
+
     if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
         set(SYSTEM_BITNESS "64")
     elseif("${CMAKE_SIZEOF_VOID_P}" STREQUAL "4")
         set(SYSTEM_BITNESS "32")
     else()
-        message(FATAL_ERROR "Bitness is not supported: \"${CMAKE_SIZEOF_VOID_P}\"")
+        message(FATAL_ERROR "Unsupported pointer size: ${CMAKE_SIZEOF_VOID_P}")
     endif()
-    message(STATUS "SIL Kit using ${SYSTEM_BITNESS}-Bit build")
 
-    #get OS
+    message(STATUS "SIL Kit using ${SYSTEM_BITNESS}-bit build")
+    message(STATUS "SIL Kit using compiler version ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
+
+    # compute platform and architecture
+
+    set(_platform "${CMAKE_SYSTEM_NAME}")
+    set(_system_arch "UNKNOWN")
+
     if("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
         set(_platform "Win")
 
-        set(_system_arch "x86")
+        # building on (or for) Windows-on-ARM will lead to invalid architecture values
+
         if("${SYSTEM_BITNESS}" STREQUAL "64")
             set(_system_arch "x86_64")
+        else()
+            set(_system_arch "x86")
         endif()
+    elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "QNX")
+        set(_system_arch "${SILKIT_TARGET_ARCHITECTURE}")
     elseif(UNIX)
         # generic unix has uname
         get_uname(_un_name _un_machine)
         set(_platform "${_un_name}")
         set(_system_arch "${_un_machine}")
-    else()
-        set(_system_arch "${CMAKE_SYSTEM_NAME}")
     endif()
 
     if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
+        # on linux the platform tag is used for the distribution name and version
         get_linux_distro(_distro_name _distro_version)
         if( DEFINED _distro_name AND DEFINED _distro_version)
             set(_platform "${_distro_name}-${_distro_version}")
         endif()
     endif()
 
-    # get toolset/compiler id + version
+    # compute compiler name
+
     set(_tool_tag "UNKNOWN")
-    if(UNIX)
-        set(_id "${CMAKE_CXX_COMPILER_ID}")
-        if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-            set(_id "gcc")
-        elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-            set(_id "clang")
-        endif()
-        message(STATUS "Using compiler version: ${_id}-${CMAKE_CXX_COMPILER_VERSION}")
-        set(_tool_tag ${_id})
-    elseif(MINGW)
+
+    if(MINGW)
+        # currently any mingw compiler uses the tag MinGW for the compiler
         set(_tool_tag "MinGW")
-    elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
-        silkit_validate_preset_toolset()
-        if(CMAKE_VS_PLATFORM_TOOLSET MATCHES "v140")
-            set(_tool_tag "VS2015")
-        elseif(CMAKE_VS_PLATFORM_TOOLSET MATCHES "v141")
-            set(_tool_tag "VS2017")
-        elseif(CMAKE_VS_PLATFORM_TOOLSET MATCHES "v142")
-            set(_tool_tag "VS2019")
-        elseif(MSVC_TOOLSET_VERSION MATCHES "142")
-            set(_tool_tag "VS2019")
-        elseif(MSVC_TOOLSET_VERSION MATCHES "141")
-            set(_tool_tag "VS2017")
-        elseif(MSVC_TOOLSET_VERSION MATCHES "140")
-            set(_tool_tag "VS2015")
+    else()
+        if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+            set(_tool_tag "gcc")
+        elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+            set(_tool_tag "clang")
+        elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+            silkit_validate_preset_toolset()
+
+            if("${MSVC_TOOLSET_VERSION}" STREQUAL "140")
+                set(_tool_tag "VS2015")
+            elseif("${MSVC_TOOLSET_VERSION}" STREQUAL "141")
+                set(_tool_tag "VS2017")
+            elseif("${MSVC_TOOLSET_VERSION}" STREQUAL "142")
+                set(_tool_tag "VS2019")
+            elseif("${MSVC_TOOLSET_VERSION}" STREQUAL "143")
+                set(_tool_tag "VS2022")
+            elseif("${MSVC_TOOLSET_VERSION}" STREQUAL "144")
+                set(_tool_tag "VS2022")
+            elseif("${CMAKE_GENERATOR}" MATCHES "Visual Studio ")
+                # fallback for VS generators
+                string(REGEX REPLACE "Visual Studio [0-9]+ ([0-9]+) *.*" "\\1" vers "${CMAKE_GENERATOR}")
+                set(_tool_tag "VS${vers}")
+            else()
+                # fallback for 'unhandled' MSVC toolset versions
+                set(_tool_tag "MSVC${MSVC_TOOLSET_VERSION}")
+            endif()
         else()
-            string(REGEX REPLACE "Visual Studio [0-9]+ ([0-9]+) *.*" "\\1" vers "${CMAKE_GENERATOR}")
-            set(_tool_tag "VS${vers}")
+            # generic fallback
+            set(_tool_tag "${CMAKE_CXX_COMPILER_ID}")
         endif()
     endif()
-    #return  triple
+
+    # set output variables
+
     set(${outPlatform} "${_platform}" PARENT_SCOPE)
     set(${outCompiler} "${_tool_tag}" PARENT_SCOPE)
     set(${outArch} "${_system_arch}" PARENT_SCOPE)
