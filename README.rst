@@ -45,7 +45,7 @@ The SIL Kit ecosystem comprises the following turn-key solutions:
   project provides first-class support for TAP devices of the host operating system.
 
 * The `SIL Kit Adapter for virtual CAN <https://github.com/vectorgrp/sil-kit-adapters-vcan>`_
-  can be used to attach a virtual CAN (Controller Area Network) interface (SocketCAN) to a Vector SIL Kit CAN bus.
+  can be used to attach a virtual CAN interface (SocketCAN) to a Vector SIL Kit CAN bus.
 
 * The `SIL Kit Adapter for Generic Linux IO <https://github.com/vectorgrp/sil-kit-adapters-generic-linux-io>`_
   allows to attach SIL Kit to a generic Linux IO device, such as character devices or GPIOs.
