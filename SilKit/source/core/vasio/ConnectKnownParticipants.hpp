@@ -139,7 +139,7 @@ private:
     IConnectKnownParticipantsListener* _listener{nullptr};
     ConnectKnownParticipantsSettings _settings;
 
-    SilKit::Services::Logging::ILoggerInternal* _logger{nullptr};
+    SilKit::Services::Logging::ILogger* _logger{nullptr};
     std::promise<std::vector<VAsioPeerInfo>> _knownParticipants;
 
     std::atomic<ConnectStage> _connectStage{ConnectStage::INVALID};
@@ -152,7 +152,7 @@ public:
                                       IConnectKnownParticipantsListener& listener,
                                       const ConnectKnownParticipantsSettings& settings);
 
-    void SetLogger(SilKit::Services::Logging::ILoggerInternal& logger);
+    void SetLogger(SilKit::Services::Logging::ILogger& logger);
 
     void SetKnownParticipants(const std::vector<VAsioPeerInfo>& peerInfos);
     void StartConnecting();

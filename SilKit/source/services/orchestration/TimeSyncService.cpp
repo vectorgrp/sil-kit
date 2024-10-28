@@ -473,7 +473,7 @@ void TimeSyncService::ReceiveMsg(const IServiceEndpoint* from, const NextSimTask
     {
         Logging::LoggerMessage lm{_logger, Logging::Level::Debug};
         lm.SetMessage("Received NextSimTask from participant \'{}\' but TimeSyncPolicy is not yet configured");
-        lm.SetKeyValue("ParticipantName", from->GetServiceDescriptor().GetParticipantName());
+        lm.SetKeyValue(Logging::Keys::PARTICIPANT_NAME, from->GetServiceDescriptor().GetParticipantName());
         lm.Dispatch();
     }
 }
@@ -492,8 +492,8 @@ void TimeSyncService::ExecuteSimStep(std::chrono::nanoseconds timePoint, std::ch
     {
         Logging::LoggerMessage lm{_logger, Logging::Level::Trace};
         lm.SetMessage("Starting next Simulation Step.");
-        lm.SetKeyValue("WaitingTime", fmt::format("{}", std::chrono::duration_cast<DoubleMSecs>(_waitTimeMonitor.CurrentDuration()).count()));
-        lm.SetKeyValue("VirtualTimeNS", fmt::format("{}", timePoint.count()));
+        lm.SetKeyValue(Logging::Keys::WAITING_TIME, fmt::format("{}", std::chrono::duration_cast<DoubleMSecs>(_waitTimeMonitor.CurrentDuration()).count()));
+        lm.SetKeyValue(Logging::Keys::VIRTUAL_TIME_NS, fmt::format("{}", timePoint.count()));
         lm.Dispatch();
     }
 
@@ -536,8 +536,8 @@ void TimeSyncService::LogicalSimStepCompleted(std::chrono::duration<double, std:
     _simStepCounterMetric->Add(1);
     Logging::LoggerMessage lm{_logger, Logging::Level::Trace};
     lm.SetMessage("Finished Simulation Step.");
-    lm.SetKeyValue("ExecutionTime", fmt::format("{}", logicalSimStepTimeMs.count()));
-    lm.SetKeyValue("VirtualTimeNS", fmt::format("{}", Now().count()));
+    lm.SetKeyValue(Logging::Keys::EXECUTION_TIME, fmt::format("{}", logicalSimStepTimeMs.count()));
+    lm.SetKeyValue(Logging::Keys::VIRTUAL_TIME_NS, fmt::format("{}", Now().count()));
     lm.Dispatch();
     _waitTimeMonitor.StartMeasurement();
 }
@@ -678,7 +678,7 @@ bool TimeSyncService::ParticipantHasAutonomousSynchronousCapability(const std::s
         Logging::LoggerMessage lm{_participant->GetLoggerInternal(), Logging::Level::Error};
         lm.SetMessage("Participant does not support simulations with participants that use an autonomous lifecycle "
               "and virtual time synchronization. Please consider upgrading Participant. Aborting simulation...");
-        lm.SetKeyValue("ParticipantName", participantName);
+        lm.SetKeyValue(Logging::Keys::PARTICIPANT_NAME, participantName);
         lm.Dispatch();
         return false;
     }
@@ -694,7 +694,7 @@ bool TimeSyncService::AbortHopOnForCoordinatedParticipants() const
             Logging::LoggerMessage lm{_participant->GetLoggerInternal(), Logging::Level::Error};
             lm.SetMessage("This participant is running with a coordinated lifecycle and virtual time synchronization and wants "
                 "to join an already running simulation. This is not allowed, aborting simulation...");
-            lm.SetKeyValue("ParticipantName", _participant->GetParticipantName());
+            lm.SetKeyValue(Logging::Keys::PARTICIPANT_NAME, _participant->GetParticipantName());
             lm.Dispatch();
 
             _participant->GetSystemController()->AbortSimulation();
@@ -771,7 +771,7 @@ void TimeSyncService::StartWallClockCouplingThread()
                     // AsyncSimStepHandler not completed? Execution is lagging behind. Don't send the NextSimStep now, but after completion.
                     Logging::LoggerMessage lm{_participant->GetLoggerInternal(), Logging::Level::Warn};
                     lm.SetMessage("Simulation step was not completed in time to achieve wall clock coupling.");
-                    lm.SetKeyValue("ParticipantName", _participant->GetParticipantName());
+                    lm.SetKeyValue(Logging::Keys::PARTICIPANT_NAME, _participant->GetParticipantName());
                     lm.Dispatch();
 
                     _wallClockReachedBeforeCompletion = true;
@@ -797,7 +797,6 @@ void TimeSyncService::StopWallClockCouplingThread()
     }
 }
 
-// todo: evtl weg
 bool TimeSyncService::IsBlocking() const
 {
     return _timeConfiguration.IsBlocking();

@@ -61,7 +61,7 @@ ConnectKnownParticipants::ConnectKnownParticipants(IIoContext& ioContext, IConne
 }
 
 
-void ConnectKnownParticipants::SetLogger(SilKit::Services::Logging::ILoggerInternal& logger)
+void ConnectKnownParticipants::SetLogger(SilKit::Services::Logging::ILogger& logger)
 {
     SILKIT_ASSERT(_logger == nullptr);
     _logger = &logger;

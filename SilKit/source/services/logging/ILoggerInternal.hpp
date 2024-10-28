@@ -25,6 +25,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "silkit/services/logging/ILogger.hpp"
 
+#include "StructuredLoggingKeys.hpp"
+
 #include "SilKitFmtFormatters.hpp"
 #include "fmt/format.h"
 #include <unordered_map>
@@ -88,12 +90,6 @@ public:
     void SetMessage(std::string newMsg)
     {
         _msg = std::move(newMsg);
-    }
-
-    template <typename Key, typename... Value>
-    void FormatKeyValue(Key&& key, fmt::format_string<Value...> fmt)
-    {
-        _keyValues[std::forward<Key>(key)] = fmt::format(fmt);
     }
 
     template<typename Key, typename Value>

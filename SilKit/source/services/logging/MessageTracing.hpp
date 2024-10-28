@@ -54,41 +54,40 @@ void TraceRx(Logging::ILoggerInternal* logger, const Core::IServiceEndpoint* add
              const Core::ServiceDescriptor& from)
 {
     Logging::LoggerMessage lm{logger, Logging::Level::Trace};
-    lm.SetMessage("Recv event");
+    lm.SetMessage("Recv message");
 
-    std::unordered_map<std::string, std::string> serviceDescriptorKVs{addr->GetServiceDescriptor().to_keyValues()};
-    for (const auto& pair : serviceDescriptorKVs)
+    for (const auto& pair : addr->GetServiceDescriptor().to_keyValues())
     {
         lm.SetKeyValue(pair.first, pair.second);
     }
-    lm.SetKeyValue("msg", (fmt::format("{}", msg)));
+    lm.SetKeyValue(Logging::Keys::MSG, (fmt::format("{}", msg)));
 
     auto virtualTimeStamp = GetTimestamp(msg);
     if (virtualTimeStamp != std::chrono::nanoseconds::duration::min())
     {
-        lm.SetKeyValue("VirtualTimeNS", (fmt::format("{}", virtualTimeStamp.count() )));
+        lm.SetKeyValue(Logging::Keys::VIRTUAL_TIME_NS, (fmt::format("{}", virtualTimeStamp.count())));
     }
-    lm.SetKeyValue("From", from.GetParticipantName());
+    lm.SetKeyValue(Logging::Keys::FROM, from.GetParticipantName());
     lm.Dispatch();
-    //Logging::Trace(logger, "Recv on {} from {}: {}", addr->GetServiceDescriptor(), from.GetParticipantName(), msg);
 }
 
 template <class SilKitMessageT>
 void TraceTx(Logging::ILoggerInternal* logger, const Core::IServiceEndpoint* addr, const SilKitMessageT& msg)
 {
     Logging::LoggerMessage lm{logger, Logging::Level::Trace};
-    lm.SetMessage("Send event");
-    std::unordered_map<std::string, std::string> serviceDescriptorKVs{addr->GetServiceDescriptor().to_keyValues()};
-    for (const auto& pair : serviceDescriptorKVs)
+    lm.SetMessage("Send message");
+   
+    for (const auto& pair : addr->GetServiceDescriptor().to_keyValues())
     {
         lm.SetKeyValue(pair.first, pair.second);
     }
-    lm.SetKeyValue("msg", (fmt::format("{}", msg)));
+
+    lm.SetKeyValue(Logging::Keys::MSG, (fmt::format("{}", msg)));
 
     auto virtualTimeStamp = GetTimestamp(msg);
     if (virtualTimeStamp != std::chrono::nanoseconds::duration::min())
     {
-        lm.SetKeyValue("VirtualTimeNS", (fmt::format("{}", virtualTimeStamp.count() )));
+        lm.SetKeyValue(Logging::Keys::VIRTUAL_TIME_NS, (fmt::format("{}", virtualTimeStamp.count())));
     }
     lm.Dispatch();
 }

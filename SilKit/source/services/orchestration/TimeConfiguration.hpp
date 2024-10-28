@@ -25,7 +25,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <mutex>
 
 #include "OrchestrationDatatypes.hpp"
-//#include "silkit/services/logging/ILogger.hpp"
 #include "ILoggerInternal.hpp"
 
 namespace SilKit {
