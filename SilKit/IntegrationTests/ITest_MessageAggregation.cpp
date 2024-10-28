@@ -106,7 +106,7 @@ TEST_F(ITest_MessageAggregation, timeout_in_case_of_deadlock_when_using_async_si
 
         timeSyncService->SetSimulationStepHandlerAsync(
             [dataPublisher, lifecycleService, &msgReceived](std::chrono::nanoseconds /*now*/,
-                                                                  std::chrono::nanoseconds /*duration*/) {
+                                                            std::chrono::nanoseconds /*duration*/) {
             // send ping
             std::vector<uint8_t> ping(1, '?');
             dataPublisher->Publish(std::move(ping));
