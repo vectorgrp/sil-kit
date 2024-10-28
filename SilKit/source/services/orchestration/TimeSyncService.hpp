@@ -148,7 +148,6 @@ private:
 
     std::vector<std::string> _requiredParticipants;
 
-    bool _isRunning{false};
     bool _isSynchronizingVirtualTime{false};
     bool _timeSyncConfigured{false};
 

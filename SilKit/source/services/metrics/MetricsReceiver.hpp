@@ -26,8 +26,7 @@ class MetricsReceiver
     , public SilKit::Core::IServiceEndpoint
 {
 public:
-    MetricsReceiver(SilKit::Core::IParticipantInternal*, SilKit::Services::Logging::ILogger& logger,
-                    IMetricsReceiverListener& listener);
+    MetricsReceiver(SilKit::Core::IParticipantInternal*, IMetricsReceiverListener& listener);
 
     // NB: The first constructor argument is present to enable using the CreateController function template. It is
     //     allowed to be nullptr.
@@ -40,7 +39,6 @@ public: // IServiceEndpoint
     auto GetServiceDescriptor() const -> const SilKit::Core::ServiceDescriptor& override;
 
 private:
-    SilKit::Services::Logging::ILogger* _logger{nullptr};
     IMetricsReceiverListener* _listener{nullptr};
 
     SilKit::Core::ServiceDescriptor _serviceDescriptor;
