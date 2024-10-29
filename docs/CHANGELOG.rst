@@ -9,6 +9,11 @@ The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <
 [4.0.54] - Unreleased
 ---------------------
 
+Added
+~~~~~
+
+- Override the labels of ``DataPublisher``, ``DataSubscriber``, ``RpcClient``, and ``RpcServer`` instances through the participant configuration, extending the already possible override of the topic / function name.
+
 Changed
 ~~~~~~~
 
