@@ -135,6 +135,13 @@ DataPublishers
   DataPublishers: 
   - Name: DataPublisher1
     Topic: SomeTopic1
+    Labels:
+      - Key: SomeKey
+        Value: SomeValue
+        Kind: Mandatory
+      - Key: AnotherKey
+        Value: AnotherValue
+        Kind: Optional
 
 
 .. list-table:: DataPublisher Configuration
@@ -147,6 +154,8 @@ DataPublishers
      - The name of the data publisher.
    * - Topic
      - The topic on which the data publisher publishes its information. (optional)
+   * - Labels
+     - The labels determining matching subscribers with the same topic and media type. (optional)
 
 
 .. _sec:cfg-participant-data-subscribers:
@@ -159,6 +168,13 @@ DataSubscribers
   DataSubscribers: 
   - Name: DataSubscriber1
     Topic: SomeTopic1
+    Labels:
+      - Key: SomeKey
+        Value: SomeValue
+        Kind: Mandatory
+      - Key: AnotherKey
+        Value: AnotherValue
+        Kind: Optional
 
 
 .. list-table:: DataSubscriber Configuration
@@ -171,6 +187,8 @@ DataSubscribers
      - The name of the data subscriber.
    * - Topic
      - The topic on which the data subscriber publishes its information. (optional)
+   * - Labels
+     - The labels determining matching publishers with the same topic and media type. (optional)
 
 
 .. _sec:cfg-participant-rpc-servers:
@@ -184,6 +202,13 @@ RpcServers
   RpcServers:
   - Name: RpcServer1
     FunctionName: SomeFunction1
+    Labels:
+      - Key: SomeKey
+        Value: SomeValue
+        Kind: Mandatory
+      - Key: AnotherKey
+        Value: AnotherValue
+        Kind: Optional
 
 
 .. list-table:: RPC Server Configuration
@@ -196,6 +221,8 @@ RpcServers
      - The name of the RPC server.
    * - FunctionName
      - The function name on which the RPC server offers its service. (optional)
+   * - Labels
+     - The labels determining matching clients with the same function name and media type. (optional)
 
 
 .. _sec:cfg-participant-rpc-clients:
@@ -208,6 +235,13 @@ RpcClients
   RpcClients: 
   - Name: RpcClient1
     FunctionName: SomeFunction1
+    Labels:
+      - Key: SomeKey
+        Value: SomeValue
+        Kind: Mandatory
+      - Key: AnotherKey
+        Value: AnotherValue
+        Kind: Optional
 
 
 .. list-table:: RPC Clients Configuration
@@ -220,3 +254,5 @@ RpcClients
      - The name of the RPC client.
    * - FunctionName
      - The function name to which the RPC client wants to connect to. (optional)
+   * - Labels
+     - The labels determining matching servers with the same function name and media type. (optional)
