@@ -26,10 +26,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/services/logging/ILogger.hpp"
 
 #include "StructuredLoggingKeys.hpp"
-
 #include "SilKitFmtFormatters.hpp"
 #include "fmt/format.h"
-#include <unordered_map>
 #include <string>
 
 
@@ -95,7 +93,7 @@ public:
     template<typename Key, typename Value>
     void SetKeyValue(Key&& key, Value&& value)
     {
-        _keyValues[std::forward<Key>(key)] = std::forward<Value>(value);
+        _keyValues.push_back({std::forward<Key>(key), std::forward<Value>(value)});
     }
 
     auto GetLevel() const -> Level
@@ -103,7 +101,7 @@ public:
         return _level;
     }
 
-    auto GetKeyValues() const -> const std::unordered_map<std::string, std::string>&
+    auto GetKeyValues() const -> const std::vector<std::pair<std::string, std::string>>&
     {
         return _keyValues;
     }
@@ -135,7 +133,7 @@ private:
     ILoggerInternal* _logger;
     Level _level;
     std::string _msg;
-    std::unordered_map<std::string, std::string> _keyValues;
+    std::vector<std::pair<std::string, std::string>> _keyValues;
 };
 
 

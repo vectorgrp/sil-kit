@@ -60,14 +60,15 @@ void TraceRx(Logging::ILoggerInternal* logger, const Core::IServiceEndpoint* add
     {
         lm.SetKeyValue(pair.first, pair.second);
     }
-    lm.SetKeyValue(Logging::Keys::MSG, (fmt::format("{}", msg)));
+    lm.SetKeyValue(Logging::Keys::from, from.GetParticipantName());
+    lm.SetKeyValue(Logging::Keys::msg, (fmt::format("{}", msg)));
 
     auto virtualTimeStamp = GetTimestamp(msg);
     if (virtualTimeStamp != std::chrono::nanoseconds::duration::min())
     {
-        lm.SetKeyValue(Logging::Keys::VIRTUAL_TIME_NS, (fmt::format("{}", virtualTimeStamp.count())));
+        lm.SetKeyValue(Logging::Keys::virtualTimeNS, (fmt::format("{}", virtualTimeStamp.count())));
     }
-    lm.SetKeyValue(Logging::Keys::FROM, from.GetParticipantName());
+
     lm.Dispatch();
 }
 
@@ -82,12 +83,12 @@ void TraceTx(Logging::ILoggerInternal* logger, const Core::IServiceEndpoint* add
         lm.SetKeyValue(pair.first, pair.second);
     }
 
-    lm.SetKeyValue(Logging::Keys::MSG, (fmt::format("{}", msg)));
+    lm.SetKeyValue(Logging::Keys::msg, (fmt::format("{}", msg)));
 
     auto virtualTimeStamp = GetTimestamp(msg);
     if (virtualTimeStamp != std::chrono::nanoseconds::duration::min())
     {
-        lm.SetKeyValue(Logging::Keys::VIRTUAL_TIME_NS, (fmt::format("{}", virtualTimeStamp.count())));
+        lm.SetKeyValue(Logging::Keys::virtualTimeNS, (fmt::format("{}", virtualTimeStamp.count())));
     }
     lm.Dispatch();
 }

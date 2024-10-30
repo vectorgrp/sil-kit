@@ -22,7 +22,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <chrono>
 #include <iomanip>
 #include <sstream>
-#include <unordered_map>
 #include <string>
 
 #include "Logger.hpp"
@@ -53,13 +52,13 @@ class LoggerMessage;
 struct SimpleLogMessage
 {
     const std::string& msg;
-    const std::unordered_map<std::string, std::string>& kv;
+    const std::vector<std::pair<std::string, std::string>>& kv;
 };
 
 struct JsonLogMessage
 {
     const std::string& msg;
-    const std::unordered_map<std::string, std::string>& kv;
+    const std::vector<std::pair<std::string, std::string>>& kv;
 };
 
 struct JsonString
@@ -90,12 +89,12 @@ public:
 };
 
 
-std::string KeyValuesToSimpleString(const std::unordered_map<std::string, std::string>& input)
+std::string KeyValuesToSimpleString(const std::vector<std::pair<std::string, std::string>>& input)
 {
     std::string result;
     result.reserve(input.size() * 2);
 
-    std::unordered_map<std::string, std::string>::const_iterator it = input.begin();
+    std::vector<std::pair<std::string, std::string>>::const_iterator it = input.begin();
 
     while (it != input.end())
     {
@@ -109,12 +108,12 @@ std::string KeyValuesToSimpleString(const std::unordered_map<std::string, std::s
     return result;
 }
 
-std::string KeyValuesToJsonString(const std::unordered_map<std::string, std::string>& input)
+std::string KeyValuesToJsonString(const std::vector<std::pair<std::string, std::string>>& input)
 {
     std::string result;
     result.reserve(input.size() * 2);
 
-    std::unordered_map<std::string, std::string>::const_iterator it = input.begin();
+    std::vector<std::pair<std::string, std::string>>::const_iterator it = input.begin();
     result.append("{");
     while (it != input.end())
     {
@@ -130,6 +129,7 @@ std::string KeyValuesToJsonString(const std::unordered_map<std::string, std::str
 
     return result;
 }
+
 
 
 template <>

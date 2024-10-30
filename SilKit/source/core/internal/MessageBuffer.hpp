@@ -204,6 +204,10 @@ public:
     template <typename ValueT>
     inline MessageBuffer& operator>>(std::vector<ValueT>& vector);
     // --------------------------------------------------------------------------------
+    // std::vector<std::pair<std::string, std::string>>
+    inline MessageBuffer& operator<<(const std::vector<std::pair<std::string, std::string>>& msg);
+    inline MessageBuffer& operator>>(std::vector<std::pair<std::string, std::string>>& updatedMsg);
+    // --------------------------------------------------------------------------------
     // Util::SharedVector<T>
     template <typename ValueT>
     inline MessageBuffer& operator<<(const Util::SharedVector<ValueT>& sharedData);
@@ -626,11 +630,45 @@ inline MessageBuffer& MessageBuffer::operator>>(std::unordered_map<std::string, 
     }
     if (numElements != tmp.size())
     {
-        throw SilKitError("MessageBuffer unable to deserialize std::unordered_map<std::string, std::string>");
+        throw SilKitError("MessageBuffer unable to deserialize std::vector<std::pair<std::string, std::string>>");
     }
     updatedMsg = std::move(tmp);
     return *this;
 }
+
+
+inline MessageBuffer& MessageBuffer::operator<<(const std::vector<std::pair<std::string, std::string>>& msg)
+{
+    *this << static_cast<uint32_t>(msg.size());
+    for (auto&& kv : msg)
+    {
+        *this << kv.first << kv.second;
+    }
+    return *this;
+}
+
+
+inline MessageBuffer& MessageBuffer::operator>>(std::vector<std::pair<std::string, std::string>>& updatedMsg)
+{
+    std::vector<std::pair<std::string, std::string>> tmp; // do not modify updatedMsg until we validated the input
+    uint32_t numElements{0};
+    *this >> numElements;
+
+    for (auto i = 0u; i < numElements; i++)
+    {
+        std::string key;
+        std::string value;
+        *this >> key >> value;
+        tmp.push_back({std::move(key), std::move(value)});
+    }
+    if (numElements != tmp.size())
+    {
+        throw SilKitError("MessageBuffer unable to deserialize std::vector<std::pair<std::string, std::string>>");
+    }
+    updatedMsg = std::move(tmp);
+    return *this;
+}
+
 
 // --------------------------------------------------------------------------------
 // Uuid

@@ -33,20 +33,24 @@ namespace Services {
 namespace Logging {
 namespace Keys {
 
-const std::string VIRTUAL_TIME_NS{"VirtualTimeNS"};
-const std::string MSG{"msg"};
-const std::string FROM{"From"};
+const std::string virtualTimeNS{"VirtualTimeNS"};
+const std::string msg{"Msg"};
+const std::string from{"From"};
 
-const std::string WAITING_TIME{"WaitingTime"};
-const std::string EXECUTION_TIME{"ExecutionTime"};
+const std::string waitingTime{"WaitingTime"};
+const std::string executionTime{"ExecutionTime"};
 
-const std::string PARTICIPANT_NAME{"ParticipantName"};
-const std::string NEW_PARTICIPANT_STATE{"NewParticipantState"};
-const std::string OLD_PARTICIPANT_STATE{"OldParticipantState"};
-const std::string ENTER_TIME{"EnterTime"};
-const std::string ENTER_REASON{"EnterReason"};
+const std::string participantName{"ParticipantName"};
+const std::string newParticipantState{"NewParticipantState"};
+const std::string oldParticipantState{"OldParticipantState"};
+const std::string enterTime{"EnterTime"};
+const std::string enterReason{"EnterReason"};
 
-
+const std::string serviceType{"ServiceType"};
+const std::string serviceName{"ServiceName"};
+const std::string networkType{"NetworkType"};
+const std::string networkName{"NetworkName"};
+const std::string controllerTypeName{"ControllerTypeName"};
 
 
 } // namespace Keys
