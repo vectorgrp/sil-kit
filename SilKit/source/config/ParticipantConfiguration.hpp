@@ -156,6 +156,7 @@ struct Label
 
     auto ToPublicApi() const -> SilKit::Services::MatchingLabel;
     static auto FromPublicApi(const SilKit::Services::MatchingLabel& label) -> Label;
+    static auto VectorFromPublicApi(const std::vector<SilKit::Services::MatchingLabel>& labels) -> std::vector<Label>;
 };
 
 // ================================================================================

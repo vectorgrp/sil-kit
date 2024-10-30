@@ -79,6 +79,14 @@ auto Label::FromPublicApi(const SilKit::Services::MatchingLabel& label) -> Label
 }
 
 
+auto Label::VectorFromPublicApi(const std::vector<SilKit::Services::MatchingLabel>& labels) -> std::vector<Label>
+{
+    std::vector<SilKit::Config::v1::Label> result;
+    std::transform(labels.begin(), labels.end(), std::back_inserter(result), Label::FromPublicApi);
+    return result;
+}
+
+
 } // namespace v1
 } // namespace Config
 } // namespace SilKit

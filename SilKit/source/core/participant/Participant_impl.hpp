@@ -513,14 +513,6 @@ static inline auto FormatLabelsForLogging(const std::vector<MatchingLabel>& labe
     return os.str();
 }
 
-static inline auto PublicApiToConfigLabels(const std::vector<SilKit::Services::MatchingLabel>& labels)
-    -> std::vector<SilKit::Config::v1::Label>
-{
-    std::vector<SilKit::Config::v1::Label> result;
-    std::transform(labels.begin(), labels.end(), std::back_inserter(result), SilKit::Config::v1::Label::FromPublicApi);
-    return result;
-}
-
 template <class SilKitConnectionT>
 auto Participant<SilKitConnectionT>::CreateDataPublisher(const std::string& canonicalName,
                                                          const SilKit::Services::PubSub::PubSubSpec& dataSpec,
@@ -537,7 +529,8 @@ auto Participant<SilKitConnectionT>::CreateDataPublisher(const std::string& cano
     SilKit::Config::DataPublisher controllerConfig =
         GetConfigByControllerName(_participantConfig.dataPublishers, canonicalName);
     UpdateOptionalConfigValue(canonicalName, controllerConfig.topic, dataSpec.Topic());
-    UpdateOptionalConfigValue(canonicalName, controllerConfig.labels, PublicApiToConfigLabels(dataSpec.Labels()));
+    UpdateOptionalConfigValue(canonicalName, controllerConfig.labels,
+                              SilKit::Config::v1::Label::VectorFromPublicApi(dataSpec.Labels()));
 
     auto sortedConfigLabels = controllerConfig.labels.value();
     std::sort(sortedConfigLabels.begin(), sortedConfigLabels.end(),
@@ -602,7 +595,8 @@ auto Participant<SilKitConnectionT>::CreateDataSubscriber(
     SilKit::Config::DataSubscriber controllerConfig =
         GetConfigByControllerName(_participantConfig.dataSubscribers, canonicalName);
     UpdateOptionalConfigValue(canonicalName, controllerConfig.topic, dataSpec.Topic());
-    UpdateOptionalConfigValue(canonicalName, controllerConfig.labels, PublicApiToConfigLabels(dataSpec.Labels()));
+    UpdateOptionalConfigValue(canonicalName, controllerConfig.labels,
+                              SilKit::Config::v1::Label::VectorFromPublicApi(dataSpec.Labels()));
 
     auto sortedConfigLabels = controllerConfig.labels.value();
     std::sort(sortedConfigLabels.begin(), sortedConfigLabels.end(),
@@ -687,7 +681,8 @@ auto Participant<SilKitConnectionT>::CreateRpcClient(
     SilKit::Config::RpcClient controllerConfig =
         GetConfigByControllerName(_participantConfig.rpcClients, canonicalName);
     UpdateOptionalConfigValue(canonicalName, controllerConfig.functionName, dataSpec.FunctionName());
-    UpdateOptionalConfigValue(canonicalName, controllerConfig.labels, PublicApiToConfigLabels(dataSpec.Labels()));
+    UpdateOptionalConfigValue(canonicalName, controllerConfig.labels,
+                              SilKit::Config::v1::Label::VectorFromPublicApi(dataSpec.Labels()));
 
     auto sortedConfigLabels = controllerConfig.labels.value();
     std::sort(sortedConfigLabels.begin(), sortedConfigLabels.end(),
@@ -740,7 +735,8 @@ auto Participant<SilKitConnectionT>::CreateRpcServer(
     SilKit::Config::RpcServer controllerConfig =
         GetConfigByControllerName(_participantConfig.rpcServers, canonicalName);
     UpdateOptionalConfigValue(canonicalName, controllerConfig.functionName, dataSpec.FunctionName());
-    UpdateOptionalConfigValue(canonicalName, controllerConfig.labels, PublicApiToConfigLabels(dataSpec.Labels()));
+    UpdateOptionalConfigValue(canonicalName, controllerConfig.labels,
+                              SilKit::Config::v1::Label::VectorFromPublicApi(dataSpec.Labels()));
 
     auto sortedConfigLabels = controllerConfig.labels.value();
     std::sort(sortedConfigLabels.begin(), sortedConfigLabels.end(),
