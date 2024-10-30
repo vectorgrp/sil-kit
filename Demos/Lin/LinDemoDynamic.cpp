@@ -466,21 +466,24 @@ try
             std::thread workerThread;
             auto now = 0ms;
 
-            lifecycleService->StartLifecycle();
+            lifecycleService->SetStartingHandler([&] {
+                workerThread = std::thread{[&]() {
+                    while (lifecycleService->State() == ParticipantState::ReadyToRun
+                           || lifecycleService->State() == ParticipantState::Running)
+                    {
+                        master.DoAction(now);
+                        now += 1ms;
+                        std::this_thread::sleep_for(200ms);
+                    }
 
-            workerThread = std::thread{[&]() {
-                while (lifecycleService->State() == ParticipantState::ReadyToRun
-                       || lifecycleService->State() == ParticipantState::Running)
-                {
-                    master.DoAction(now);
-                    now += 1ms;
-                    std::this_thread::sleep_for(200ms);
-                }
-                if (!isStopRequested)
-                {
-                    std::cout << "Press enter to end the process..." << std::endl;
-                }
-            }};
+                    if (!isStopRequested)
+                    {
+                        std::cout << "Press enter to end the process..." << std::endl;
+                    }
+                }};
+            });
+
+            lifecycleService->StartLifecycle();
 
             std::cout << "Press enter to leave the simulation..." << std::endl;
             std::cin.ignore();
@@ -552,21 +555,24 @@ try
             std::thread workerThread;
             auto now = 0ms;
 
-            lifecycleService->StartLifecycle();
+            lifecycleService->SetStartingHandler([&] {
+                workerThread = std::thread{[&]() {
+                    while (lifecycleService->State() == ParticipantState::ReadyToRun
+                           || lifecycleService->State() == ParticipantState::Running)
+                    {
+                        slave.DoAction(now);
+                        now += 1ms;
+                        std::this_thread::sleep_for(200ms);
+                    }
 
-            workerThread = std::thread{[&]() {
-                while (lifecycleService->State() == ParticipantState::ReadyToRun
-                       || lifecycleService->State() == ParticipantState::Running)
-                {
-                    slave.DoAction(now);
-                    now += 1ms;
-                    std::this_thread::sleep_for(200ms);
-                }
-                if (!isStopRequested)
-                {
-                    std::cout << "Press enter to end the process..." << std::endl;
-                }
-            }};
+                    if (!isStopRequested)
+                    {
+                        std::cout << "Press enter to end the process..." << std::endl;
+                    }
+                }};
+            });
+
+            lifecycleService->StartLifecycle();
 
             std::cout << "Press enter to leave the simulation..." << std::endl;
             std::cin.ignore();
