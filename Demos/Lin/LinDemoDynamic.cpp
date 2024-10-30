@@ -396,8 +396,20 @@ try
 
     std::cout << "Creating participant '" << participantName << "' with registry " << registryUri << std::endl;
     auto participant = SilKit::CreateParticipant(participantConfiguration, participantName, registryUri);
-    auto* lifecycleService = participant->CreateLifecycleService({OperationMode::Coordinated});
-    auto* timeSyncService = lifecycleService->CreateTimeSyncService();
+
+    ILifecycleService* lifecycleService{nullptr};
+    ITimeSyncService* timeSyncService{nullptr};
+
+    if (runSync)
+    {
+        lifecycleService = participant->CreateLifecycleService({OperationMode::Coordinated});
+        timeSyncService = lifecycleService->CreateTimeSyncService();
+    }
+    else
+    {
+        lifecycleService = participant->CreateLifecycleService({OperationMode::Autonomous});
+    }
+
     auto* linController = participant->CreateLinController("LIN1", "LIN1");
 
     // Set a Stop and Shutdown Handler
@@ -409,8 +421,12 @@ try
 
     if (participantName == "LinMaster")
     {
-        lifecycleService->SetCommunicationReadyHandler(
-            [&participantName, linController]() { InitLinMaster(linController, participantName); });
+        if (runSync)
+        {
+            lifecycleService->SetCommunicationReadyHandler(
+                [&participantName, linController]() { InitLinMaster(linController, participantName); });
+        }
+
         linController->AddFrameStatusHandler(
             [&master](ILinController* linController, const LinFrameStatusEvent& frameStatusEvent) {
             master.FrameStatusHandler(linController, frameStatusEvent);
@@ -450,6 +466,8 @@ try
             std::thread workerThread;
             auto now = 0ms;
 
+            lifecycleService->StartLifecycle();
+
             workerThread = std::thread{[&]() {
                 while (lifecycleService->State() == ParticipantState::ReadyToRun
                        || lifecycleService->State() == ParticipantState::Running)
@@ -464,7 +482,6 @@ try
                 }
             }};
 
-            lifecycleService->StartLifecycle();
             std::cout << "Press enter to leave the simulation..." << std::endl;
             std::cin.ignore();
 
@@ -485,8 +502,11 @@ try
     }
     else if (participantName == "LinSlave")
     {
-        lifecycleService->SetCommunicationReadyHandler(
-            [&participantName, linController]() { InitLinSlave(linController, participantName); });
+        if (runSync)
+        {
+            lifecycleService->SetCommunicationReadyHandler(
+                [&participantName, linController]() { InitLinSlave(linController, participantName); });
+        }
 
         linController->AddFrameStatusHandler(
             [&slave](ILinController* linController, const LinFrameStatusEvent& frameStatusEvent) {
@@ -532,6 +552,8 @@ try
             std::thread workerThread;
             auto now = 0ms;
 
+            lifecycleService->StartLifecycle();
+
             workerThread = std::thread{[&]() {
                 while (lifecycleService->State() == ParticipantState::ReadyToRun
                        || lifecycleService->State() == ParticipantState::Running)
@@ -546,7 +568,6 @@ try
                 }
             }};
 
-            lifecycleService->StartLifecycle();
             std::cout << "Press enter to leave the simulation..." << std::endl;
             std::cin.ignore();
 
