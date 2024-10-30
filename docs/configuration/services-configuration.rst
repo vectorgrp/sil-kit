@@ -156,6 +156,7 @@ DataPublishers
      - The topic on which the data publisher publishes its information. (optional)
    * - Labels
      - The labels determining matching subscribers with the same topic and media type. (optional)
+        Note that these labels will replace all programmatically provided labels.
 
 
 .. _sec:cfg-participant-data-subscribers:

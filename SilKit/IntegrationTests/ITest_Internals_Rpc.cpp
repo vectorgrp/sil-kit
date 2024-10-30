@@ -297,7 +297,7 @@ TEST_F(ITest_Internals_Rpc, test_1client_1server_sync_labels)
     RunSyncTest(rpcs);
 }
 
-// Matching mandatory and optional labels on both sides
+// Matching mandatory and optional labels on both sides provided by a participant configuration
 TEST_F(ITest_Internals_Rpc, test_1client_1server_sync_label_override)
 {
     const uint32_t numCallsToReceive = defaultNumCalls;

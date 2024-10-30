@@ -501,7 +501,7 @@ TEST_F(ITest_Internals_DataPubSub, test_1pub_1sub_sync_mixed_labels)
     RunSyncTest(pubsubs);
 }
 
-// Matching mandatory labels
+// Matching mandatory labels provided by a participant configuration
 TEST_F(ITest_Internals_DataPubSub, test_1pub_1sub_sync_label_override)
 {
     const uint32_t numMsgToPublish = defaultNumMsgToPublish;
