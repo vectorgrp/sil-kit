@@ -24,6 +24,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "ITest_Internals_Rpc.hpp"
 
+#include "ParticipantConfigurationFromXImpl.hpp"
+
 namespace {
 
 //--------------------------------------
@@ -291,6 +293,63 @@ TEST_F(ITest_Internals_Rpc, test_1client_1server_sync_labels)
                       numCallsToReceive}},
                     {},
                     {}});
+
+    RunSyncTest(rpcs);
+}
+
+// Matching mandatory and optional labels on both sides provided by a participant configuration
+TEST_F(ITest_Internals_Rpc, test_1client_1server_sync_label_override)
+{
+    const uint32_t numCallsToReceive = defaultNumCalls;
+    const uint32_t numCallsToReturn = defaultNumCalls;
+
+    auto client1Config = SilKit::Config::ParticipantConfigurationFromStringImpl(R"(
+RpcClients:
+  - Name: ClientCtrl1
+    Labels:
+      - Key: OverrideKeyA
+        Value: OverrideValueA
+        Kind: Mandatory
+      - Key: OverrideKeyB
+        Value: OverrideValueB
+        Kind: Optional
+)");
+
+    auto server1Config = SilKit::Config::ParticipantConfigurationFromStringImpl(R"(
+RpcServers:
+  - Name: ServerCtrl1
+    Labels:
+      - Key: OverrideKeyA
+        Value: OverrideValueA
+        Kind: Optional
+      - Key: OverrideKeyB
+        Value: OverrideValueB
+        Kind: Mandatory
+)");
+
+    std::vector<RpcParticipant> rpcs;
+    rpcs.push_back({"Client1",
+                    {},
+                    {{"ClientCtrl1",
+                      "TestFuncA",
+                      "A",
+                      {{"KeyA", "ValA", SilKit::Services::MatchingLabel::Kind::Mandatory},
+                       {"KeyB", "ValB", SilKit::Services::MatchingLabel::Kind::Mandatory}},
+                      defaultMsgSize,
+                      defaultNumCalls,
+                      numCallsToReturn}},
+                    {"TestFuncA"},
+                    client1Config});
+    rpcs.push_back({"Server1",
+                    {{"ServerCtrl1",
+                      "TestFuncA",
+                      "A",
+                      {{"KeyA", "ValA2", SilKit::Services::MatchingLabel::Kind::Optional}},
+                      defaultMsgSize,
+                      numCallsToReceive}},
+                    {},
+                    {},
+                    server1Config});
 
     RunSyncTest(rpcs);
 }

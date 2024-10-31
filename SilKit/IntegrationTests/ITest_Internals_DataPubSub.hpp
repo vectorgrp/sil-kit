@@ -184,27 +184,27 @@ protected:
     struct PubSubParticipant
     {
         PubSubParticipant(const std::string& newName)
+            : PubSubParticipant(newName, {}, {})
         {
-            name = newName;
         }
         PubSubParticipant(const std::string& newName, const std::vector<DataPublisherInfo>& newDataPublishers,
                           const std::vector<DataSubscriberInfo>& newDataSubscribers,
                           std::shared_ptr<SilKit::Config::IParticipantConfiguration> newConfig =
                               SilKit::Config::MakeEmptyParticipantConfigurationImpl())
+            : config{std::move(newConfig)}
+            , name{newName}
+            , dataSubscribers{newDataSubscribers}
+            , dataPublishers{newDataPublishers}
         {
-            config = newConfig;
-            name = newName;
-            dataSubscribers = newDataSubscribers;
-            dataPublishers = newDataPublishers;
         }
 
-        std::shared_ptr<SilKit::Config::IParticipantConfiguration> config = MakeEmptyParticipantConfigurationImpl();
+        std::shared_ptr<SilKit::Config::IParticipantConfiguration> config;
         bool delayedDefaultDataHandler = false;
         std::string name;
         std::vector<DataSubscriberInfo> dataSubscribers;
         std::vector<DataPublisherInfo> dataPublishers;
         std::unique_ptr<SilKit::IParticipant> participant;
-        SilKit::Core::IParticipantInternal* participantImpl;
+        SilKit::Core::IParticipantInternal* participantImpl = nullptr;
 
         // Common
         std::promise<void> participantCreatedPromise;

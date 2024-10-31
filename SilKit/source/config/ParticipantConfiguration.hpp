@@ -24,6 +24,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <array>
 #include <chrono>
 #include <iostream>
+#include <ostream>
 #include <string>
 #include <vector>
 
@@ -32,6 +33,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/services/logging/LoggingDatatypes.hpp"
 #include "silkit/services/pubsub/PubSubDatatypes.hpp"
 #include "silkit/services/rpc/RpcDatatypes.hpp"
+#include "silkit/services/datatypes.hpp"
 
 #include "Configuration.hpp"
 #include "Optional.hpp"
@@ -137,6 +139,27 @@ struct FlexrayController
 };
 
 // ================================================================================
+//  Labels for Data Publisher/Subscriber and Rpc Servcer/Client service
+// ================================================================================
+
+struct Label
+{
+    enum struct Kind
+    {
+        Optional,
+        Mandatory,
+    };
+
+    std::string key;
+    std::string value;
+    Kind kind;
+
+    auto ToPublicApi() const -> SilKit::Services::MatchingLabel;
+    static auto FromPublicApi(const SilKit::Services::MatchingLabel& label) -> Label;
+    static auto VectorFromPublicApi(const std::vector<SilKit::Services::MatchingLabel>& labels) -> std::vector<Label>;
+};
+
+// ================================================================================
 //  Data Publisher/Subscriber service
 // ================================================================================
 
@@ -150,6 +173,7 @@ struct DataPublisher
 
     std::string name;
     SilKit::Util::Optional<std::string> topic;
+    SilKit::Util::Optional<std::vector<Label>> labels;
 
     //! \brief History length of a DataPublisher.
     SilKit::Util::Optional<size_t> history{0};
@@ -168,6 +192,7 @@ struct DataSubscriber
 
     std::string name;
     SilKit::Util::Optional<std::string> topic;
+    SilKit::Util::Optional<std::vector<Label>> labels;
 
     std::vector<std::string> useTraceSinks;
     Replay replay;
@@ -187,6 +212,7 @@ struct RpcServer
 
     std::string name;
     SilKit::Util::Optional<std::string> functionName;
+    SilKit::Util::Optional<std::vector<Label>> labels;
 
     std::vector<std::string> useTraceSinks;
     Replay replay;
@@ -202,6 +228,7 @@ struct RpcClient
 
     std::string name;
     SilKit::Util::Optional<std::string> functionName;
+    SilKit::Util::Optional<std::vector<Label>> labels;
 
     std::vector<std::string> useTraceSinks;
     Replay replay;
@@ -368,6 +395,10 @@ bool operator==(const Middleware& lhs, const Middleware& rhs);
 bool operator==(const ParticipantConfiguration& lhs, const ParticipantConfiguration& rhs);
 bool operator==(const TimeSynchronization& lhs, const TimeSynchronization& rhs);
 bool operator==(const Experimental& lhs, const Experimental& rhs);
+bool operator==(const Label& lhs, const Label& rhs);
+
+auto operator<<(std::ostream& out, const Label::Kind& kind) -> std::ostream&;
+auto operator<<(std::ostream& out, const Label& label) -> std::ostream&;
 
 bool operator<(const MetricsSink& lhs, const MetricsSink& rhs);
 bool operator>(const MetricsSink& lhs, const MetricsSink& rhs);

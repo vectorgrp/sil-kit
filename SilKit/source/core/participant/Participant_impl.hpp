@@ -529,13 +529,17 @@ auto Participant<SilKitConnectionT>::CreateDataPublisher(const std::string& cano
     SilKit::Config::DataPublisher controllerConfig =
         GetConfigByControllerName(_participantConfig.dataPublishers, canonicalName);
     UpdateOptionalConfigValue(canonicalName, controllerConfig.topic, dataSpec.Topic());
+    UpdateOptionalConfigValue(canonicalName, controllerConfig.labels,
+                              SilKit::Config::v1::Label::VectorFromPublicApi(dataSpec.Labels()));
+
+    auto sortedConfigLabels = controllerConfig.labels.value();
+    std::sort(sortedConfigLabels.begin(), sortedConfigLabels.end(),
+              [](const auto& v1, const auto& v2) { return v1.key < v2.key; });
+
     SilKit::Services::PubSub::PubSubSpec configuredDataNodeSpec{controllerConfig.topic.value(), dataSpec.MediaType()};
-    auto labels = dataSpec.Labels();
-    std::sort(labels.begin(), labels.end(),
-              [](const MatchingLabel& v1, const MatchingLabel& v2) { return v1.key < v2.key; });
-    for (auto label : labels)
+    for (const auto& label : sortedConfigLabels)
     {
-        configuredDataNodeSpec.AddLabel(label);
+        configuredDataNodeSpec.AddLabel(label.ToPublicApi());
     }
 
     SilKit::Core::SupplementalData supplementalData;
@@ -543,8 +547,8 @@ auto Participant<SilKitConnectionT>::CreateDataPublisher(const std::string& cano
     supplementalData[SilKit::Core::Discovery::supplKeyDataPublisherTopic] = configuredDataNodeSpec.Topic();
     supplementalData[SilKit::Core::Discovery::supplKeyDataPublisherPubUUID] = network;
     supplementalData[SilKit::Core::Discovery::supplKeyDataPublisherMediaType] = configuredDataNodeSpec.MediaType();
-    auto labelStr = SilKit::Config::Serialize<std::decay_t<decltype(labels)>>(labels);
-    supplementalData[SilKit::Core::Discovery::supplKeyDataPublisherPubLabels] = labelStr;
+    supplementalData[SilKit::Core::Discovery::supplKeyDataPublisherPubLabels] =
+        SilKit::Config::Serialize(configuredDataNodeSpec.Labels());
 
     auto controller = CreateController<Services::PubSub::DataPublisher>(
         controllerConfig, network, std::move(supplementalData), true, true, &_timeProvider, configuredDataNodeSpec,
@@ -559,7 +563,7 @@ auto Participant<SilKitConnectionT>::CreateDataPublisher(const std::string& cano
             "Created DataPublisher '{}' with topic '{}' and media type '{}' for network '{}' with service name "
             "'{}' and labels: {}",
             controllerConfig.name, controllerConfig.topic.value(), dataSpec.MediaType(), network,
-            controller->GetServiceDescriptor().to_string(), FormatLabelsForLogging(dataSpec.Labels()));
+            controller->GetServiceDescriptor().to_string(), FormatLabelsForLogging(configuredDataNodeSpec.Labels()));
     }
 
     auto* traceSource = dynamic_cast<ITraceMessageSource*>(controller);
@@ -591,22 +595,25 @@ auto Participant<SilKitConnectionT>::CreateDataSubscriber(
     SilKit::Config::DataSubscriber controllerConfig =
         GetConfigByControllerName(_participantConfig.dataSubscribers, canonicalName);
     UpdateOptionalConfigValue(canonicalName, controllerConfig.topic, dataSpec.Topic());
+    UpdateOptionalConfigValue(canonicalName, controllerConfig.labels,
+                              SilKit::Config::v1::Label::VectorFromPublicApi(dataSpec.Labels()));
+
+    auto sortedConfigLabels = controllerConfig.labels.value();
+    std::sort(sortedConfigLabels.begin(), sortedConfigLabels.end(),
+              [](const auto& v1, const auto& v2) { return v1.key < v2.key; });
 
     SilKit::Services::PubSub::PubSubSpec configuredDataNodeSpec{controllerConfig.topic.value(), dataSpec.MediaType()};
-    auto labels = dataSpec.Labels();
-    std::sort(labels.begin(), labels.end(),
-              [](const MatchingLabel& v1, const MatchingLabel& v2) { return v1.key < v2.key; });
-    for (auto label : labels)
+    for (const auto& label : sortedConfigLabels)
     {
-        configuredDataNodeSpec.AddLabel(label);
+        configuredDataNodeSpec.AddLabel(label.ToPublicApi());
     }
 
     Core::SupplementalData supplementalData;
     supplementalData[SilKit::Core::Discovery::controllerType] = SilKit::Core::Discovery::controllerTypeDataSubscriber;
     supplementalData[SilKit::Core::Discovery::supplKeyDataSubscriberTopic] = configuredDataNodeSpec.Topic();
     supplementalData[SilKit::Core::Discovery::supplKeyDataSubscriberMediaType] = configuredDataNodeSpec.MediaType();
-    auto labelStr = SilKit::Config::Serialize<std::decay_t<decltype(labels)>>(labels);
-    supplementalData[SilKit::Core::Discovery::supplKeyDataSubscriberSubLabels] = labelStr;
+    supplementalData[SilKit::Core::Discovery::supplKeyDataSubscriberSubLabels] =
+        SilKit::Config::Serialize(configuredDataNodeSpec.Labels());
 
     auto controller = CreateController<Services::PubSub::DataSubscriber>(
         controllerConfig, network, std::move(supplementalData), true, true, controllerConfig, &_timeProvider,
@@ -621,7 +628,7 @@ auto Participant<SilKitConnectionT>::CreateDataSubscriber(
             "Created DataSubscriber '{}' with topic '{}' and media type '{}' for network '{}' with service name "
             "'{}' and labels: {}",
             controllerConfig.name, controllerConfig.topic.value(), dataSpec.MediaType(), network,
-            controller->GetServiceDescriptor().to_string(), FormatLabelsForLogging(dataSpec.Labels()));
+            controller->GetServiceDescriptor().to_string(), FormatLabelsForLogging(configuredDataNodeSpec.Labels()));
     }
 
     auto* traceSource = dynamic_cast<ITraceMessageSource*>(controller);
@@ -674,26 +681,31 @@ auto Participant<SilKitConnectionT>::CreateRpcClient(
     SilKit::Config::RpcClient controllerConfig =
         GetConfigByControllerName(_participantConfig.rpcClients, canonicalName);
     UpdateOptionalConfigValue(canonicalName, controllerConfig.functionName, dataSpec.FunctionName());
+    UpdateOptionalConfigValue(canonicalName, controllerConfig.labels,
+                              SilKit::Config::v1::Label::VectorFromPublicApi(dataSpec.Labels()));
+
+    auto sortedConfigLabels = controllerConfig.labels.value();
+    std::sort(sortedConfigLabels.begin(), sortedConfigLabels.end(),
+              [](const auto& v1, const auto& v2) { return v1.key < v2.key; });
+
+    SilKit::Services::Rpc::RpcSpec configuredRpcSpec{controllerConfig.functionName.value(), dataSpec.MediaType()};
+    for (const auto& label : sortedConfigLabels)
+    {
+        configuredRpcSpec.AddLabel(label.ToPublicApi());
+    }
 
     // RpcClient gets discovered by RpcServer which creates RpcServerInternal on a matching connection
     Core::SupplementalData supplementalData;
     supplementalData[SilKit::Core::Discovery::controllerType] = SilKit::Core::Discovery::controllerTypeRpcClient;
     supplementalData[SilKit::Core::Discovery::supplKeyRpcClientFunctionName] = controllerConfig.functionName.value();
     supplementalData[SilKit::Core::Discovery::supplKeyRpcClientMediaType] = dataSpec.MediaType();
-    const auto& labels = dataSpec.Labels();
-    auto labelStr = SilKit::Config::Serialize<std::decay_t<decltype(labels)>>(labels);
-    supplementalData[SilKit::Core::Discovery::supplKeyRpcClientLabels] = labelStr;
+    supplementalData[SilKit::Core::Discovery::supplKeyRpcClientLabels] =
+        SilKit::Config::Serialize(configuredRpcSpec.Labels());
     supplementalData[SilKit::Core::Discovery::supplKeyRpcClientUUID] = network;
-
-    SilKit::Services::Rpc::RpcSpec configuredDataSpec{controllerConfig.functionName.value(), dataSpec.MediaType()};
-    for (auto label : dataSpec.Labels())
-    {
-        configuredDataSpec.AddLabel(label);
-    }
 
     auto controller =
         CreateController<Services::Rpc::RpcClient>(controllerConfig, network, std::move(supplementalData), true, true,
-                                                   &_timeProvider, configuredDataSpec, network, handler);
+                                                   &_timeProvider, configuredRpcSpec, network, handler);
 
     // RpcClient discovers RpcServerInternal and is ready to dispatch calls
     controller->RegisterServiceDiscovery();
@@ -723,24 +735,29 @@ auto Participant<SilKitConnectionT>::CreateRpcServer(
     SilKit::Config::RpcServer controllerConfig =
         GetConfigByControllerName(_participantConfig.rpcServers, canonicalName);
     UpdateOptionalConfigValue(canonicalName, controllerConfig.functionName, dataSpec.FunctionName());
+    UpdateOptionalConfigValue(canonicalName, controllerConfig.labels,
+                              SilKit::Config::v1::Label::VectorFromPublicApi(dataSpec.Labels()));
+
+    auto sortedConfigLabels = controllerConfig.labels.value();
+    std::sort(sortedConfigLabels.begin(), sortedConfigLabels.end(),
+              [](const auto& v1, const auto& v2) { return v1.key < v2.key; });
+
+    SilKit::Services::Rpc::RpcSpec configuredRpcSpec{controllerConfig.functionName.value(), dataSpec.MediaType()};
+    for (const auto& label : sortedConfigLabels)
+    {
+        configuredRpcSpec.AddLabel(label.ToPublicApi());
+    }
 
     Core::SupplementalData supplementalData;
     supplementalData[SilKit::Core::Discovery::controllerType] = SilKit::Core::Discovery::controllerTypeRpcServer;
     // Needed for RpcServer discovery in tests
     supplementalData[SilKit::Core::Discovery::supplKeyRpcServerFunctionName] = controllerConfig.functionName.value();
     supplementalData[SilKit::Core::Discovery::supplKeyRpcServerMediaType] = dataSpec.MediaType();
-    const auto& labels = dataSpec.Labels();
-    auto labelStr = SilKit::Config::Serialize<std::decay_t<decltype(labels)>>(labels);
-    supplementalData[SilKit::Core::Discovery::supplKeyRpcServerLabels] = labelStr;
-
-    SilKit::Services::Rpc::RpcSpec configuredDataSpec{controllerConfig.functionName.value(), dataSpec.MediaType()};
-    for (auto label : dataSpec.Labels())
-    {
-        configuredDataSpec.AddLabel(label);
-    }
+    supplementalData[SilKit::Core::Discovery::supplKeyRpcServerLabels] =
+        SilKit::Config::Serialize(configuredRpcSpec.Labels());
 
     auto controller = CreateController<Services::Rpc::RpcServer>(controllerConfig, network, supplementalData, true,
-                                                                 true, &_timeProvider, configuredDataSpec, handler);
+                                                                 true, &_timeProvider, configuredRpcSpec, handler);
 
     // RpcServer discovers RpcClient and creates RpcServerInternal on a matching connection
     controller->RegisterServiceDiscovery();
@@ -1818,6 +1835,22 @@ void Participant<SilKitConnectionT>::LogMismatchBetweenConfigAndPassedValue(cons
        << "Controller name: " << canonicalName << std::endl
        << "Passed value: " << passedValue << std::endl
        << "Configured value: " << configuredValue << std::endl;
+
+    _logger->Info(ss.str());
+}
+
+template <class SilKitConnectionT>
+template <typename ValueT>
+void Participant<SilKitConnectionT>::LogMismatchBetweenConfigAndPassedValue(const std::string& canonicalName,
+                                                                            const std::vector<ValueT>& passedValue,
+                                                                            const std::vector<ValueT>& configuredValue)
+{
+    std::stringstream ss;
+    ss << "Mismatch between a configured and programmatically passed value. The configured value will be used."
+       << std::endl
+       << "Controller name: " << canonicalName << std::endl
+       << "Passed value: " << fmt::format("{}", fmt::join(passedValue, ", ")) << std::endl
+       << "Configured value: " << fmt::format("{}", fmt::join(configuredValue, ", ")) << std::endl;
 
     _logger->Info(ss.str());
 }

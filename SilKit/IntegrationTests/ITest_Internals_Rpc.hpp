@@ -260,22 +260,24 @@ protected:
     struct RpcParticipant
     {
         RpcParticipant(const std::string& newName, const std::vector<std::string>& newExpectedFunctionNames)
+            : RpcParticipant(newName, {}, {}, newExpectedFunctionNames)
         {
-            name = newName;
-            expectedFunctionNames = newExpectedFunctionNames;
         }
 
         RpcParticipant(const std::string& newName, std::vector<RpcServerInfo> newRpcServers,
-                       std::vector<RpcClientInfo> newRpcClients, std::vector<std::string> newExpectedFunctionNames)
-            : expectedFunctionNames{std::move(newExpectedFunctionNames)}
+                       std::vector<RpcClientInfo> newRpcClients, std::vector<std::string> newExpectedFunctionNames,
+                       std::shared_ptr<SilKit::Config::IParticipantConfiguration> newConfig =
+                           SilKit::Config::MakeEmptyParticipantConfigurationImpl())
+            : config{std::move(newConfig)}
+            , name{newName}
+            , expectedFunctionNames{std::move(newExpectedFunctionNames)}
         {
-            name = newName;
-
             std::for_each(newRpcServers.begin(), newRpcServers.end(), [this](const auto& info) { AddRpcServer(info); });
 
             std::for_each(newRpcClients.begin(), newRpcClients.end(), [this](const auto& info) { AddRpcClient(info); });
         }
 
+        std::shared_ptr<SilKit::Config::IParticipantConfiguration> config;
         std::string name;
         std::vector<std::unique_ptr<RpcClientState>> rpcClients;
         std::vector<std::unique_ptr<RpcServerState>> rpcServers;
@@ -395,9 +397,7 @@ protected:
     {
         try
         {
-            participant.participant = SilKit::CreateParticipantImpl(
-                SilKit::Config::MakeParticipantConfigurationWithLoggingImpl(SilKit::Services::Logging::Level::Warn),
-                participant.name, registryUri);
+            participant.participant = SilKit::CreateParticipantImpl(participant.config, participant.name, registryUri);
             participant.participantImpl =
                 dynamic_cast<SilKit::Core::IParticipantInternal*>(participant.participant.get());
 

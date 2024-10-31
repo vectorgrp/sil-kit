@@ -501,6 +501,60 @@ TEST_F(ITest_Internals_DataPubSub, test_1pub_1sub_sync_mixed_labels)
     RunSyncTest(pubsubs);
 }
 
+// Matching mandatory labels provided by a participant configuration
+TEST_F(ITest_Internals_DataPubSub, test_1pub_1sub_sync_label_override)
+{
+    const uint32_t numMsgToPublish = defaultNumMsgToPublish;
+    const uint32_t numMsgToReceive = numMsgToPublish;
+
+    auto pub1Config = SilKit::Config::ParticipantConfigurationFromStringImpl(R"(
+DataPublishers:
+  - Name: PubCtrl1
+    Labels:
+      - Key: OverrideKeyA
+        Value: OverrideValueA
+        Kind: Optional
+      - Key: OverrideKeyB
+        Value: OverrideValueB
+        Kind: Mandatory
+)");
+
+    auto sub1Config = SilKit::Config::ParticipantConfigurationFromStringImpl(R"(
+DataSubscribers:
+  - Name: SubCtrl1
+    Labels:
+      - Key: OverrideKeyA
+        Value: OverrideValueA
+        Kind: Mandatory
+      - Key: OverrideKeyB
+        Value: OverrideValueB
+        Kind: Optional
+)");
+
+    std::vector<PubSubParticipant> pubsubs;
+    pubsubs.push_back({"Pub1",
+                       {{"PubCtrl1",
+                         "TopicA",
+                         {"A"},
+                         {{"kA", "vA", MatchingLabel::Kind::Mandatory}, {"kB", "vB", MatchingLabel::Kind::Mandatory}},
+                         0,
+                         defaultMsgSize,
+                         numMsgToPublish}},
+                       {},
+                       pub1Config});
+    pubsubs.push_back({"Sub1",
+                       {},
+                       {{"SubCtrl1",
+                         "TopicA",
+                         {"A"},
+                         {{"kA", "NOT vA", MatchingLabel::Kind::Mandatory}},
+                         defaultMsgSize,
+                         numMsgToReceive,
+                         1}},
+                       sub1Config});
+
+    RunSyncTest(pubsubs);
+}
 
 // Wrong mandatory label value -> Expect no reception
 TEST_F(ITest_Internals_DataPubSub, test_1pub_1sub_sync_wrong_mandatory_label_value)
