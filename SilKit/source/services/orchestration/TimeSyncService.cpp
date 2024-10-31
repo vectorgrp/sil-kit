@@ -676,7 +676,7 @@ bool TimeSyncService::ParticipantHasAutonomousSynchronousCapability(const std::s
         // We are a participant with autonomous lifecycle and virtual time sync.
         // The remote participant must support this, otherwise Hop-On / Hop-Off will fail.
         Logging::LoggerMessage lm{_participant->GetLoggerInternal(), Logging::Level::Error};
-        lm.SetMessage("Participant does not support simulations with participants that use an autonomous lifecycle "
+        lm.SetMessage("This participant does not support simulations with participants that use an autonomous lifecycle "
               "and virtual time synchronization. Please consider upgrading Participant. Aborting simulation...");
         lm.SetKeyValue(Logging::Keys::participantName, participantName);
         lm.Dispatch();

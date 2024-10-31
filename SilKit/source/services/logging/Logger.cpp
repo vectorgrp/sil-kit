@@ -102,7 +102,7 @@ std::string KeyValuesToSimpleString(const std::vector<std::pair<std::string, std
         {
             result.append(", ");
         }
-        result.append(SilKit::Util::EscapeString(it->first) + ": " + SilKit::Util::EscapeString(it->second));
+        result.append(it->first + ": " + it->second);
         ++it;
     }
     return result;

@@ -299,7 +299,7 @@ auto AsioIoContext::Resolve(const std::string& name) -> std::vector<std::string>
 }
 
 
-void AsioIoContext::SetLogger(SilKit::Services::Logging::ILoggerInternal& logger)
+void AsioIoContext::SetLogger(SilKit::Services::Logging::ILogger& logger)
 {
     SILKIT_TRACE_METHOD_(&logger, "({})", static_cast<const void*>(&logger));
     _logger = &logger;

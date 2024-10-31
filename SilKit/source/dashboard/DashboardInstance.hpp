@@ -7,7 +7,6 @@
 #include "IDashboardInstance.hpp"
 #include "VAsioRegistry.hpp"
 
-//#include "silkit/services/logging/ILogger.hpp"
 #include "ILoggerInternal.hpp"
 
 #include "silkit/config/IParticipantConfiguration.hpp"
@@ -61,7 +60,6 @@ private:
     void RunBulkUpdateEventQueueWorkerThread();
 
 private: // SilKit::Core::IRegistryEventListener
-    //void OnLoggerCreated(SilKit::Services::Logging::ILogger* logger) = delete;
     void OnLoggerInternalCreated(SilKit::Services::Logging::ILoggerInternal* logger) override;
     void OnRegistryUri(const std::string& registryUri) override;
     void OnParticipantConnected(std::string const& simulationName, std::string const& participantName) override;

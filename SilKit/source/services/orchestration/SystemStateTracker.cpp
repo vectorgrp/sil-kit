@@ -165,8 +165,7 @@ auto SystemStateTracker::UpdateParticipantStatus(const ParticipantStatus& newPar
         //     invalid transition
     }
 
-    // Ignores transition if ParticipantState is Shutdown alread
-
+    // Ignores transition if ParticipantState is Shutdown already
     if (oldParticipantState == ParticipantState::Shutdown)
     {
         return UpdateParticipantStatusResult{};

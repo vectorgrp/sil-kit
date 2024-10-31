@@ -204,10 +204,6 @@ public:
     template <typename ValueT>
     inline MessageBuffer& operator>>(std::vector<ValueT>& vector);
     // --------------------------------------------------------------------------------
-    // std::vector<std::pair<std::string, std::string>>
-    inline MessageBuffer& operator<<(const std::vector<std::pair<std::string, std::string>>& msg);
-    inline MessageBuffer& operator>>(std::vector<std::pair<std::string, std::string>>& updatedMsg);
-    // --------------------------------------------------------------------------------
     // Util::SharedVector<T>
     template <typename ValueT>
     inline MessageBuffer& operator<<(const Util::SharedVector<ValueT>& sharedData);
@@ -232,6 +228,12 @@ public:
     inline MessageBuffer& operator<<(const std::array<ValueT, SIZE>& array);
     template <typename ValueT, size_t SIZE>
     inline MessageBuffer& operator>>(std::array<ValueT, SIZE>& array);
+    // --------------------------------------------------------------------------------
+    // std::pair<T, U>
+    template <typename T, typename U>
+    inline MessageBuffer& operator<<(const std::pair<T, U>& pair);
+    template <typename T, typename U>
+    inline MessageBuffer& operator>>(std::pair<T, U>& pair);
     // --------------------------------------------------------------------------------
     // std::chrono::duration<Rep, Period> and system_clock::time_point
     template <class Rep, class Period>
@@ -636,36 +638,17 @@ inline MessageBuffer& MessageBuffer::operator>>(std::unordered_map<std::string, 
     return *this;
 }
 
-
-inline MessageBuffer& MessageBuffer::operator<<(const std::vector<std::pair<std::string, std::string>>& msg)
+template <typename T, typename U>
+inline MessageBuffer& MessageBuffer::operator<<(const std::pair<T, U>& pair)
 {
-    *this << static_cast<uint32_t>(msg.size());
-    for (auto&& kv : msg)
-    {
-        *this << kv.first << kv.second;
-    }
+    *this << pair.first << pair.second;
     return *this;
 }
 
-
-inline MessageBuffer& MessageBuffer::operator>>(std::vector<std::pair<std::string, std::string>>& updatedMsg)
+template <typename T, typename U>
+inline MessageBuffer& MessageBuffer::operator>>(std::pair<T, U>& pair)
 {
-    std::vector<std::pair<std::string, std::string>> tmp; // do not modify updatedMsg until we validated the input
-    uint32_t numElements{0};
-    *this >> numElements;
-
-    for (auto i = 0u; i < numElements; i++)
-    {
-        std::string key;
-        std::string value;
-        *this >> key >> value;
-        tmp.push_back({std::move(key), std::move(value)});
-    }
-    if (numElements != tmp.size())
-    {
-        throw SilKitError("MessageBuffer unable to deserialize std::vector<std::pair<std::string, std::string>>");
-    }
-    updatedMsg = std::move(tmp);
+    *this >> pair.first >> pair.second;
     return *this;
 }
 

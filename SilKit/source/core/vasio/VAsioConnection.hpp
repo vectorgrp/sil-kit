@@ -105,9 +105,6 @@ public:
 public:
     // ----------------------------------------
     // Public methods
-  //  void SetLoggerSetLogger(Services::Logging::ILogger* logger);
-  //  auto GetLogger() -> SilKit::Services::Logging::ILogger*;
-
     void SetLoggerInternal(Services::Logging::ILoggerInternal* logger);
     auto GetLoggerInternal() -> SilKit::Services::Logging::ILoggerInternal*;
 
@@ -414,7 +411,7 @@ private:
     void SendMsgImpl(const IServiceEndpoint* from, SilKitMessageT&& msg)
     {
         const auto& key = from->GetServiceDescriptor().GetNetworkName();
-       // TraceTx(GetLoggerInternal(), from, msg);
+
         auto& linkMap = std::get<SilKitServiceToLinkMap<std::decay_t<SilKitMessageT>>>(_serviceToLinkMap);
         if (linkMap.count(key) < 1)
         {
