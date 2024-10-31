@@ -41,7 +41,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "SystemMonitor.hpp"
 #include "LogMsgSender.hpp"
 #include "LogMsgReceiver.hpp"
-#include "Logger.hpp"
+#include "ILoggerInternal.hpp"
+#include "StructuredLoggingKeys.hpp"
 #include "TimeProvider.hpp"
 #include "TimeSyncService.hpp"
 #include "ServiceDiscovery.hpp"
@@ -116,8 +117,12 @@ Participant<SilKitConnectionT>::Participant(Config::ParticipantConfiguration par
     dynamic_cast<VSilKit::MetricsManager&>(*_metricsManager).SetLogger(*_logger);
     _connection.SetLoggerInternal(_logger.get());
 
-    Logging::Info(_logger.get(), "Creating participant '{}' at '{}', SIL Kit version: {}", GetParticipantName(),
-                  _participantConfig.middleware.registryUri, Version::StringImpl());
+    Logging::LoggerMessage lm{_logger.get(), Logging::Level::Info};
+    lm.SetMessage("Creating participant");
+    lm.SetKeyValue(Logging::Keys::participantName, GetParticipantName());
+    lm.SetKeyValue(Logging::Keys::registryUri, _participantConfig.middleware.registryUri);
+    lm.SetKeyValue(Logging::Keys::silKitVersion, Version::StringImpl());
+    lm.Dispatch();
 }
 
 
@@ -316,9 +321,13 @@ auto Participant<SilKitConnectionT>::CreateCanController(const std::string& cano
 
     controller->RegisterServiceDiscovery();
 
-    Logging::Trace(GetLogger(), "Created CAN controller '{}' for network '{}' with service name '{}'",
-                   controllerConfig.name, controllerConfig.network.value(),
-                   controller->GetServiceDescriptor().to_string());
+    Logging::LoggerMessage lm{_logger.get(), Logging::Level::Trace};
+    lm.SetMessage("Created controller");
+    lm.SetKeyValue(Logging::Keys::controllerType, supplementalData[SilKit::Core::Discovery::controllerType]);
+    lm.SetKeyValue(Logging::Keys::controllerName, controllerConfig.name);
+    lm.SetKeyValue(Logging::Keys::network, controllerConfig.network.value());
+    lm.SetKeyValue(Logging::Keys::serviceName, controller->GetServiceDescriptor().to_string());
+    lm.Dispatch();
 
     if (_replayScheduler)
     {
@@ -351,9 +360,13 @@ auto Participant<SilKitConnectionT>::CreateEthernetController(
 
     controller->RegisterServiceDiscovery();
 
-    Logging::Trace(GetLogger(), "Created Ethernet controller '{}' for network '{}' with service name '{}'",
-                   controllerConfig.name, controllerConfig.network.value(),
-                   controller->GetServiceDescriptor().to_string());
+    Logging::LoggerMessage lm{_logger.get(), Logging::Level::Trace};
+    lm.SetMessage("Created controller");
+    lm.SetKeyValue(Logging::Keys::controllerType, supplementalData[SilKit::Core::Discovery::controllerType]);
+    lm.SetKeyValue(Logging::Keys::controllerName, controllerConfig.name);
+    lm.SetKeyValue(Logging::Keys::network, controllerConfig.network.value());
+    lm.SetKeyValue(Logging::Keys::serviceName, controller->GetServiceDescriptor().to_string());
+    lm.Dispatch();
 
     if (_replayScheduler)
     {
@@ -386,9 +399,13 @@ auto Participant<SilKitConnectionT>::CreateFlexrayController(
 
     controller->RegisterServiceDiscovery();
 
-    Logging::Trace(GetLogger(), "Created FlexRay controller '{}' for network '{}' with service name '{}'",
-                   controllerConfig.name, controllerConfig.network.value(),
-                   controller->GetServiceDescriptor().to_string());
+    Logging::LoggerMessage lm{_logger.get(), Logging::Level::Trace};
+    lm.SetMessage("Created controller");
+    lm.SetKeyValue(Logging::Keys::controllerType, supplementalData[SilKit::Core::Discovery::controllerType]);
+    lm.SetKeyValue(Logging::Keys::controllerName, controllerConfig.name);
+    lm.SetKeyValue(Logging::Keys::network, controllerConfig.network.value());
+    lm.SetKeyValue(Logging::Keys::serviceName, controller->GetServiceDescriptor().to_string());
+    lm.Dispatch();
 
     auto* traceSource = dynamic_cast<ITraceMessageSource*>(controller);
     if (traceSource)
@@ -415,9 +432,13 @@ auto Participant<SilKitConnectionT>::CreateLinController(const std::string& cano
 
     controller->RegisterServiceDiscovery();
 
-    Logging::Trace(GetLogger(), "Created LIN controller '{}' for network '{}' with service name '{}'",
-                   controllerConfig.name, controllerConfig.network.value(),
-                   controller->GetServiceDescriptor().to_string());
+    Logging::LoggerMessage lm{_logger.get(), Logging::Level::Trace};
+    lm.SetMessage("Created controller");
+    lm.SetKeyValue(Logging::Keys::controllerType, supplementalData[SilKit::Core::Discovery::controllerType]);
+    lm.SetKeyValue(Logging::Keys::controllerName, controllerConfig.name);
+    lm.SetKeyValue(Logging::Keys::network, controllerConfig.network.value());
+    lm.SetKeyValue(Logging::Keys::serviceName, controller->GetServiceDescriptor().to_string());
+    lm.Dispatch();
 
     if (_replayScheduler)
     {
@@ -557,12 +578,17 @@ auto Participant<SilKitConnectionT>::CreateDataPublisher(const std::string& cano
 
     if (GetLogger()->GetLogLevel() <= Logging::Level::Trace)
     {
-        Logging::Trace(
-            GetLogger(),
-            "Created DataPublisher '{}' with topic '{}' and media type '{}' for network '{}' with service name "
-            "'{}' and labels: {}",
-            controllerConfig.name, controllerConfig.topic.value(), dataSpec.MediaType(), network,
-            controller->GetServiceDescriptor().to_string(), FormatLabelsForLogging(configuredDataNodeSpec.Labels()));
+
+        Logging::LoggerMessage lm{_logger.get(), Logging::Level::Trace};
+        lm.SetMessage("Created controller");
+        lm.SetKeyValue(Logging::Keys::controllerType, supplementalData[SilKit::Core::Discovery::controllerType]);
+        lm.SetKeyValue(Logging::Keys::controllerName, controllerConfig.name);
+        lm.SetKeyValue(Logging::Keys::pubSubTopic, configuredDataNodeSpec.Topic());
+        lm.SetKeyValue(Logging::Keys::mediaType, configuredDataNodeSpec.MediaType());
+        lm.SetKeyValue(Logging::Keys::network, network);
+        lm.SetKeyValue(Logging::Keys::serviceName, controller->GetServiceDescriptor().to_string());
+        lm.SetKeyValue(Logging::Keys::label, FormatLabelsForLogging(configuredDataNodeSpec.Labels()));
+        lm.Dispatch();
     }
 
     auto* traceSource = dynamic_cast<ITraceMessageSource*>(controller);
@@ -622,12 +648,16 @@ auto Participant<SilKitConnectionT>::CreateDataSubscriber(
 
     if (GetLogger()->GetLogLevel() <= Logging::Level::Trace)
     {
-        Logging::Trace(
-            GetLogger(),
-            "Created DataSubscriber '{}' with topic '{}' and media type '{}' for network '{}' with service name "
-            "'{}' and labels: {}",
-            controllerConfig.name, controllerConfig.topic.value(), dataSpec.MediaType(), network,
-            controller->GetServiceDescriptor().to_string(), FormatLabelsForLogging(configuredDataNodeSpec.Labels()));
+        Logging::LoggerMessage lm{_logger.get(), Logging::Level::Trace};
+        lm.SetMessage("Created controller");
+        lm.SetKeyValue(Logging::Keys::controllerType, supplementalData[SilKit::Core::Discovery::controllerType]);
+        lm.SetKeyValue(Logging::Keys::controllerName, controllerConfig.name);
+        lm.SetKeyValue(Logging::Keys::pubSubTopic, configuredDataNodeSpec.Topic());
+        lm.SetKeyValue(Logging::Keys::mediaType, configuredDataNodeSpec.MediaType());
+        lm.SetKeyValue(Logging::Keys::network, network);
+        lm.SetKeyValue(Logging::Keys::serviceName, controller->GetServiceDescriptor().to_string());
+        lm.SetKeyValue(Logging::Keys::label, FormatLabelsForLogging(configuredDataNodeSpec.Labels()));
+        lm.Dispatch();
     }
 
     auto* traceSource = dynamic_cast<ITraceMessageSource*>(controller);
@@ -711,12 +741,16 @@ auto Participant<SilKitConnectionT>::CreateRpcClient(
 
     if (GetLogger()->GetLogLevel() <= Logging::Level::Trace)
     {
-        Logging::Trace(
-            GetLogger(),
-            "Created RPC Client '{}' with function name '{}' and media type '{}' for network '{}' with service name "
-            "'{}' and labels: {}",
-            controllerConfig.name, controllerConfig.functionName.value(), dataSpec.MediaType(), network,
-            controller->GetServiceDescriptor().to_string(), FormatLabelsForLogging(dataSpec.Labels()));
+        Logging::LoggerMessage lm{_logger.get(), Logging::Level::Trace};
+        lm.SetMessage("Created controller");
+        lm.SetKeyValue(Logging::Keys::controllerType, supplementalData[SilKit::Core::Discovery::controllerType]);
+        lm.SetKeyValue(Logging::Keys::controllerName, controllerConfig.name);
+        lm.SetKeyValue(Logging::Keys::controllerFuncName, controllerConfig.functionName.value());
+        lm.SetKeyValue(Logging::Keys::mediaType, dataSpec.MediaType());
+        lm.SetKeyValue(Logging::Keys::network, network);
+        lm.SetKeyValue(Logging::Keys::serviceName, controller->GetServiceDescriptor().to_string());
+        lm.SetKeyValue(Logging::Keys::label, FormatLabelsForLogging(dataSpec.Labels()));
+        lm.Dispatch();
     }
 
     return controller;

@@ -22,11 +22,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #pragma once
 
 #include <atomic>
-
-
 #include <string>
-
-
 
 namespace SilKit {
 namespace Services {
@@ -41,6 +37,9 @@ const std::string waitingTime{"WaitingTime"};
 const std::string executionTime{"ExecutionTime"};
 
 const std::string participantName{"ParticipantName"};
+const std::string registryUri{"RegistryUri"};
+const std::string silKitVersion{"SilKitVersion"};
+
 const std::string newParticipantState{"NewParticipantState"};
 const std::string oldParticipantState{"OldParticipantState"};
 const std::string enterTime{"EnterTime"};
@@ -51,6 +50,15 @@ const std::string serviceName{"ServiceName"};
 const std::string networkType{"NetworkType"};
 const std::string networkName{"NetworkName"};
 const std::string controllerTypeName{"ControllerTypeName"};
+
+
+const std::string controllerName{"ControllerName"};
+const std::string controllerType{"ControllerType"};
+const std::string pubSubTopic{"PubSubTopic"};
+const std::string controllerFuncName{"ControllerFuncName"};
+const std::string mediaType{"MediaType"};
+const std::string network{"Network"};
+const std::string label{"Label"};
 
 
 } // namespace Keys
