@@ -17,7 +17,6 @@ macro(silkit_split_debugsymbols targetName)
     )
 endmacro()
 
-
 macro(silkit_package_debugsymbols targetName)
     if(MSVC)
         message(STATUS "Creating symbol package ${SILKIT_SYMBOLS_DIR_NAME}")
@@ -33,6 +32,11 @@ macro(silkit_package_debugsymbols targetName)
         return()
     endif()
     if(UNIX AND CMAKE_BUILD_TYPE MATCHES "Debug")
+        get_target_property(targetType ${targetName} TYPE)
+        if(targetType STREQUAL STATIC_LIBRARY)
+            message(STATUS "SIL Kit: splitting debug symbols on static libraries is not supported")
+            return()
+        endif()
 
         silkit_split_debugsymbols("${targetName}")
 
