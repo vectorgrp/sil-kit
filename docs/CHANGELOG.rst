@@ -9,8 +9,6 @@ The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <
 [4.0.55] - Unreleased
 ---------------------
 
-Fixed
-~~~~~
 
 - **Important** ``SilKit_LinDataLengthUnknown`` in the C header ``Lin.h`` used to be a ``const`` global, which could cause
   linker issues if the header file is used in multiple translation units in the same binary.
@@ -27,6 +25,33 @@ Fixed
 
   Before, all execptions ended up as ``SilKitError`` on the user side.
 
+- Overhaul of SIL Kit demos
+
+  - Restructured into categories communication, api and tools
+
+  - Communication demos: Can, Ethernet, Lin, Flexray, PubSub and Rpc demos
+  
+    - These demos are split into one participant per executable
+    - Basic SIL Kit features are implemented in a base class used by the demos
+    - No command line arguments needed for basic execution (with time synchronization and coordinated start)
+    - Useful command line arguments are provided for all demos (e.g. rename the participant or network, logging, execution modes)
+    - The old ``--async`` mode of the demos now is accessible by ``--async --autonomous`` (or short form ``-aA``)
+ 
+- Aligned C API error return codes ``SilKit_ReturnCode_<ERRORTYPE>`` and SIL Kit specific exceptions.
+  All exceptions are now forwarded through the hourglass and thrown in the C++ API.
+  For users of the C API, a more detailed error handling is possible with the extended error return codes.
+
+  Before, all exceptions ended up as ``SilKitError`` on the user side.
+
+Added
+~~~~~
+ 
+- New demos for basic API usage
+
+  - SimpleCan
+  - Orchestration demos  
+
+- Sample participant configurations  
 
 [4.0.54] - 2024-11-11
 ---------------------

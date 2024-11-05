@@ -36,7 +36,6 @@ Simulation Concepts
   Section references 
 .. |LifecycleService| replace:: :ref:`Lifecycle Service<subsubsec:sim-lifecycle-lifecycleService>`
 .. |TimeSyncService| replace:: :ref:`Time Synchronization Service<subsubsec:sim-lifecycle-timeSyncService>`
-.. |SystemController| replace:: :ref:`System Controller<subsubsec:sim-lifecycle-systemController>`
 .. |SystemMonitor| replace:: :ref:`System Monitor<subsubsec:sim-lifecycle-systemMonitor>`
 
 ..

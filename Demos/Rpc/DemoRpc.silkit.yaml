@@ -1,5 +1,0 @@
-Description: Sample configuration for RPC
-Logging:
-  Sinks:
-    - Level: Info
-      Type: Stdout
