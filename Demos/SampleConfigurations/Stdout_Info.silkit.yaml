@@ -1,5 +1,7 @@
-Description: Sample configuration for CAN
+Description: Logging to Stdout with Info level
 Logging:
   Sinks:
     - Level: Info
       Type: Stdout
+
+
