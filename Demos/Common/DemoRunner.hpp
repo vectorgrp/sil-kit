@@ -25,17 +25,21 @@ using namespace SilKit::Services::Logging;
 
 namespace SilKitDemo {
 
-int Run(std::string participantName, IDemo& demo, int argc, char** argv)
+int Run(std::string defaultParticipantName, IDemo& demo, int argc, char** argv)
 {
     try
     {
-        const std::string registryUri = "silkit://localhost:8500";
         const auto stepSize = 1ms;
 
-        auto runArgs = SilKitDemo::ParseCommandLineArguments(argc, argv);
+        RunArgs runArgs{};
+        auto returnCode = SilKitDemo::ParseCommandLineArguments2(argc, argv, defaultParticipantName, runArgs);
+        if (returnCode <= 0)
+        {
+            return returnCode;
+        }
 
         auto participant =
-            SilKit::CreateParticipant(runArgs.participantConfiguration, participantName, registryUri);
+            SilKit::CreateParticipant(runArgs.participantConfiguration, runArgs.participantName, runArgs.registryUri);
         auto* logger = participant->GetLogger();
         auto operationMode = (runArgs.runSync ? OperationMode::Coordinated : OperationMode::Autonomous);
         auto* lifecycleService = participant->CreateLifecycleService({operationMode});
@@ -46,8 +50,8 @@ int Run(std::string participantName, IDemo& demo, int argc, char** argv)
         lifecycleService->SetStopHandler([logger]() { logger->Info("Stopped"); });
         lifecycleService->SetShutdownHandler([logger]() { logger->Info("Shutdown"); });
         lifecycleService->SetAbortHandler([logger](auto lastState) { logger->Warn("Aborted"); });
-        lifecycleService->SetCommunicationReadyHandler([participantName , &context, logger, runArgs, &demo]() {
-            std::cout << participantName << " is ready for communication" << std::endl;
+        lifecycleService->SetCommunicationReadyHandler([runArgs, &context, logger, &demo]() {
+            std::cout << runArgs.participantName << " is ready for communication" << std::endl;
             demo.InitControllers(context);
         });
 
