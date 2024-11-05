@@ -25,3 +25,7 @@ target_sources(SilKitDemoCan
     PRIVATE DemoCan.silkit.yaml
     PRIVATE NetworkSimulatorConfig.yaml
 )
+
+make_silkit_demo(SilKitDemoCanReader CanReaderDemo.cpp)
+
+make_silkit_demo(SilKitDemoCanWriter CanWriterDemo.cpp)
