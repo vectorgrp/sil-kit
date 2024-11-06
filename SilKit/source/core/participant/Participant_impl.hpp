@@ -745,11 +745,11 @@ auto Participant<SilKitConnectionT>::CreateRpcClient(
         lm.SetMessage("Created controller");
         lm.SetKeyValue(Logging::Keys::controllerType, supplementalData[SilKit::Core::Discovery::controllerType]);
         lm.SetKeyValue(Logging::Keys::controllerName, controllerConfig.name);
-        lm.SetKeyValue(Logging::Keys::controllerFuncName, controllerConfig.functionName.value());
-        lm.SetKeyValue(Logging::Keys::mediaType, dataSpec.MediaType());
+        lm.SetKeyValue(Logging::Keys::controllerFuncName, configuredRpcSpec.FunctionName());
+        lm.SetKeyValue(Logging::Keys::mediaType, configuredRpcSpec.MediaType());
         lm.SetKeyValue(Logging::Keys::network, network);
         lm.SetKeyValue(Logging::Keys::serviceName, controller->GetServiceDescriptor().to_string());
-        lm.SetKeyValue(Logging::Keys::label, FormatLabelsForLogging(dataSpec.Labels()));
+        lm.SetKeyValue(Logging::Keys::label, FormatLabelsForLogging(configuredRpcSpec.Labels()));
         lm.Dispatch();
     }
 
@@ -801,11 +801,11 @@ auto Participant<SilKitConnectionT>::CreateRpcServer(
         lm.SetMessage("Created controller");
         lm.SetKeyValue(Logging::Keys::controllerType, supplementalData[SilKit::Core::Discovery::controllerType]);
         lm.SetKeyValue(Logging::Keys::controllerName, controllerConfig.name);
-        lm.SetKeyValue(Logging::Keys::controllerFuncName, controllerConfig.functionName.value());
-        lm.SetKeyValue(Logging::Keys::mediaType, dataSpec.MediaType());
+        lm.SetKeyValue(Logging::Keys::controllerFuncName, configuredRpcSpec.FunctionName());
+        lm.SetKeyValue(Logging::Keys::mediaType, configuredRpcSpec.MediaType());
         lm.SetKeyValue(Logging::Keys::network, network);
         lm.SetKeyValue(Logging::Keys::serviceName, controller->GetServiceDescriptor().to_string());
-        lm.SetKeyValue(Logging::Keys::label, FormatLabelsForLogging(dataSpec.Labels()));
+        lm.SetKeyValue(Logging::Keys::label, FormatLabelsForLogging(configuredRpcSpec.Labels()));
         lm.Dispatch();
     }
 
