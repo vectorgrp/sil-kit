@@ -726,8 +726,8 @@ auto Participant<SilKitConnectionT>::CreateRpcClient(
     // RpcClient gets discovered by RpcServer which creates RpcServerInternal on a matching connection
     Core::SupplementalData supplementalData;
     supplementalData[SilKit::Core::Discovery::controllerType] = SilKit::Core::Discovery::controllerTypeRpcClient;
-    supplementalData[SilKit::Core::Discovery::supplKeyRpcClientFunctionName] = controllerConfig.functionName.value();
-    supplementalData[SilKit::Core::Discovery::supplKeyRpcClientMediaType] = dataSpec.MediaType();
+    supplementalData[SilKit::Core::Discovery::supplKeyRpcClientFunctionName] = configuredRpcSpec.FunctionName();
+    supplementalData[SilKit::Core::Discovery::supplKeyRpcClientMediaType] = configuredRpcSpec.MediaType();
     supplementalData[SilKit::Core::Discovery::supplKeyRpcClientLabels] =
         SilKit::Config::Serialize(configuredRpcSpec.Labels());
     supplementalData[SilKit::Core::Discovery::supplKeyRpcClientUUID] = network;
@@ -784,8 +784,8 @@ auto Participant<SilKitConnectionT>::CreateRpcServer(
     Core::SupplementalData supplementalData;
     supplementalData[SilKit::Core::Discovery::controllerType] = SilKit::Core::Discovery::controllerTypeRpcServer;
     // Needed for RpcServer discovery in tests
-    supplementalData[SilKit::Core::Discovery::supplKeyRpcServerFunctionName] = controllerConfig.functionName.value();
-    supplementalData[SilKit::Core::Discovery::supplKeyRpcServerMediaType] = dataSpec.MediaType();
+    supplementalData[SilKit::Core::Discovery::supplKeyRpcServerFunctionName] = configuredRpcSpec.FunctionName();
+    supplementalData[SilKit::Core::Discovery::supplKeyRpcServerMediaType] = configuredRpcSpec.MediaType();
     supplementalData[SilKit::Core::Discovery::supplKeyRpcServerLabels] =
         SilKit::Config::Serialize(configuredRpcSpec.Labels());
 
@@ -797,12 +797,16 @@ auto Participant<SilKitConnectionT>::CreateRpcServer(
 
     if (GetLogger()->GetLogLevel() <= Logging::Level::Trace)
     {
-        Logging::Trace(
-            GetLogger(),
-            "Created RPC Server '{}' with function name '{}' and media type '{}' for network '{}' with service name "
-            "'{}' and labels: {}",
-            controllerConfig.name, controllerConfig.functionName.value(), dataSpec.MediaType(), network,
-            controller->GetServiceDescriptor().to_string(), FormatLabelsForLogging(dataSpec.Labels()));
+        Logging::LoggerMessage lm{_logger.get(), Logging::Level::Trace};
+        lm.SetMessage("Created controller");
+        lm.SetKeyValue(Logging::Keys::controllerType, supplementalData[SilKit::Core::Discovery::controllerType]);
+        lm.SetKeyValue(Logging::Keys::controllerName, controllerConfig.name);
+        lm.SetKeyValue(Logging::Keys::controllerFuncName, controllerConfig.functionName.value());
+        lm.SetKeyValue(Logging::Keys::mediaType, dataSpec.MediaType());
+        lm.SetKeyValue(Logging::Keys::network, network);
+        lm.SetKeyValue(Logging::Keys::serviceName, controller->GetServiceDescriptor().to_string());
+        lm.SetKeyValue(Logging::Keys::label, FormatLabelsForLogging(dataSpec.Labels()));
+        lm.Dispatch();
     }
 
     return controller;
