@@ -632,7 +632,7 @@ inline MessageBuffer& MessageBuffer::operator>>(std::unordered_map<std::string, 
     }
     if (numElements != tmp.size())
     {
-        throw SilKitError("MessageBuffer unable to deserialize std::vector<std::pair<std::string, std::string>>");
+        throw SilKitError("MessageBuffer unable to deserialize std::unordered_map<std::string, std::string>");
     }
     updatedMsg = std::move(tmp);
     return *this;
