@@ -49,7 +49,6 @@ struct ILoggerInternal : ILogger
 template <typename... Args>
 void Log(ILogger* logger, Level level, const char* fmt, const Args&... args);
 
-
 class LoggerMessage
 {
 public:
@@ -74,26 +73,39 @@ public:
     }
 
     template <typename... Args>
-    void SetMessage(fmt::format_string<Args...> fmt, Args&&... args)
-    {
-        _msg = fmt::format(fmt, std::forward<Args>(args)...);
-    }
-
-    template <typename... Args>
     void FormatMessage(fmt::format_string<Args...> fmt, Args&&... args)
     {
-        _msg = fmt::format(fmt, args...);
+        if (_logger->GetLogLevel() <= _level)
+        {
+            _msg = fmt::format(fmt, std::forward<Args>(args)...);
+        }
     }
 
     void SetMessage(std::string newMsg)
     {
-        _msg = std::move(newMsg);
+        if (_logger->GetLogLevel() <= _level)
+        {
+            _msg = std::move(newMsg);
+        }
     }
 
     template<typename Key, typename Value>
     void SetKeyValue(Key&& key, Value&& value)
     {
-        _keyValues.push_back({std::forward<Key>(key), std::forward<Value>(value)});
+        if (_logger->GetLogLevel() <= _level)
+        {
+            _keyValues.emplace_back(std::forward<Key>(key), std::forward<Value>(value));
+        }
+    }
+
+    template<typename Key, typename... Args>
+    void FormatKeyValue(Key&& key, fmt::format_string<Args...> fmt, Args&&... args)
+    {
+        if (_logger->GetLogLevel() <= _level)
+        {
+            auto&& formattedValue  = fmt::format(fmt, std::forward<Args>(args)...);
+            _keyValues.emplace_back(std::forward<Key>(key), formattedValue);
+        }
     }
 
     auto GetLevel() const -> Level
@@ -106,20 +118,24 @@ public:
         return _keyValues;
     }
 
+    /*
     bool HasKeyValues() const
     {
         return !_keyValues.empty();
     }
+    */
 
     auto GetMsgString() const -> const std::string&
     {
         return _msg;
     }
 
+    /*
     auto GetLogger() const -> ILoggerInternal*
     {
         return _logger;
     }
+    */
 
     void Dispatch()
     {
@@ -168,6 +184,7 @@ void Trace(ILogger* logger, const char* fmt, const Args&... args)
 {
     Log(logger, Level::Trace, fmt, args...);
 }
+
 template <typename... Args>
 void Debug(ILogger* logger, const char* fmt, const Args&... args)
 {

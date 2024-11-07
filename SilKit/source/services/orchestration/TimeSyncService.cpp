@@ -492,8 +492,10 @@ void TimeSyncService::ExecuteSimStep(std::chrono::nanoseconds timePoint, std::ch
     {
         Logging::LoggerMessage lm{_logger, Logging::Level::Trace};
         lm.SetMessage("Starting next Simulation Step.");
-        lm.SetKeyValue(Logging::Keys::waitingTime, fmt::format("{}", std::chrono::duration_cast<DoubleMSecs>(_waitTimeMonitor.CurrentDuration()).count()));
-        lm.SetKeyValue(Logging::Keys::virtualTimeNS, fmt::format("{}", timePoint.count()));
+        //lm.SetKeyValue(Logging::Keys::waitingTime, fmt::format("{}", std::chrono::duration_cast<DoubleMSecs>(_waitTimeMonitor.CurrentDuration()).count()));
+        //lm.SetKeyValue(Logging::Keys::virtualTimeNS, fmt::format("{}", timePoint.count()));
+        lm.FormatKeyValue(Logging::Keys::waitingTime, "{}", _waitTimeMonitor.CurrentDuration().count());
+        lm.FormatKeyValue(Logging::Keys::virtualTimeNS, "{}", timePoint.count());
         lm.Dispatch();
     }
 
