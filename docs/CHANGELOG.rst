@@ -17,6 +17,7 @@ Added
 Changed
 ~~~~~~~
 
+- Changed log messages for controller and participant creation, message tracing, system state tracker and time sync service
 - Revised the documentation (demos, troubleshooting, doxygen output, file structure)
 - Improved platform/compiler/architecture detection
 
