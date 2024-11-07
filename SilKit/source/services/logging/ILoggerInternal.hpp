@@ -82,18 +82,38 @@ public:
     template <typename... Args>
     void FormatMessage(fmt::format_string<Args...> fmt, Args&&... args)
     {
-        _msg = fmt::format(fmt, args...);
+        if (_logger->GetLogLevel() <= _level)
+        {
+            _msg = fmt::format(fmt, std::forward<Args>(args)...);
+        }
     }
 
     void SetMessage(std::string newMsg)
     {
-        _msg = std::move(newMsg);
+        if (_logger->GetLogLevel() <= _level)
+        {
+            _msg = std::move(newMsg);
+        }
     }
 
-    template<typename Key, typename Value>
+
+    template <typename Key, typename... Args>
+    void FormatKeyValue(Key&& key, fmt::format_string<Args...> fmt, Args&&... args)
+    {
+        if (_logger->GetLogLevel() <= _level)
+        {
+            auto&& formattedValue = fmt::format(fmt, std::forward<Args>(args)...);
+            _keyValues.emplace_back(std::forward<Key>(key), formattedValue);
+        }
+    }
+
+    template <typename Key, typename Value>
     void SetKeyValue(Key&& key, Value&& value)
     {
-        _keyValues.push_back({std::forward<Key>(key), std::forward<Value>(value)});
+        if (_logger->GetLogLevel() <= _level)
+        {
+            _keyValues.emplace_back(std::forward<Key>(key), std::forward<Value>(value));
+        }
     }
 
     auto GetLevel() const -> Level
