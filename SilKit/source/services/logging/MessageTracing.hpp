@@ -50,38 +50,42 @@ std::chrono::nanoseconds GetTimestamp(MsgT& /*msg*/,
 
 template <class SilKitMessageT>
 void TraceRx(Logging::ILoggerInternal* logger, const Core::IServiceEndpoint* addr, const SilKitMessageT& msg,
-
              const Core::ServiceDescriptor& from)
 {
-    Logging::LoggerMessage lm{logger, Logging::Level::Trace};
-    lm.SetMessage("Recv message");
-    lm.SetKeyValue(addr->GetServiceDescriptor());
-    lm.SetKeyValue(Logging::Keys::from, from.GetParticipantName());
-    lm.FormatKeyValue(Logging::Keys::msg, "{}", msg);
-
-    auto virtualTimeStamp = GetTimestamp(msg);
-    if (virtualTimeStamp != std::chrono::nanoseconds::duration::min())
+    if (logger->GetLogLevel() == Logging::Level::Trace)
     {
-        lm.FormatKeyValue(Logging::Keys::virtualTimeNS, "{}", virtualTimeStamp.count());
-    }
+        Logging::LoggerMessage lm{logger, Logging::Level::Trace};
+        lm.SetMessage("Recv message");
+        lm.SetKeyValue(addr->GetServiceDescriptor());
+        lm.SetKeyValue(Logging::Keys::from, from.GetParticipantName());
+        lm.FormatKeyValue(Logging::Keys::msg, "{}", msg);
 
+        auto virtualTimeStamp = GetTimestamp(msg);
+        if (virtualTimeStamp != std::chrono::nanoseconds::duration::min())
+        {
+            lm.FormatKeyValue(Logging::Keys::virtualTimeNS, "{}", virtualTimeStamp.count());
+        }
     lm.Dispatch();
+    }
 }
 
 template <class SilKitMessageT>
 void TraceTx(Logging::ILoggerInternal* logger, const Core::IServiceEndpoint* addr, const SilKitMessageT& msg)
 {
-    Logging::LoggerMessage lm{logger, Logging::Level::Trace};
-    lm.SetMessage("Send message");
-    lm.SetKeyValue(addr->GetServiceDescriptor());
-    lm.FormatKeyValue(Logging::Keys::msg, "{}", msg);
-
-    auto virtualTimeStamp = GetTimestamp(msg);
-    if (virtualTimeStamp != std::chrono::nanoseconds::duration::min())
+    if (logger->GetLogLevel() == Logging::Level::Trace)
     {
-        lm.FormatKeyValue(Logging::Keys::virtualTimeNS, "{}", virtualTimeStamp.count());
+        Logging::LoggerMessage lm{logger, Logging::Level::Trace};
+        lm.SetMessage("Send message");
+        lm.SetKeyValue(addr->GetServiceDescriptor());
+        lm.FormatKeyValue(Logging::Keys::msg, "{}", msg);
+
+        auto virtualTimeStamp = GetTimestamp(msg);
+        if (virtualTimeStamp != std::chrono::nanoseconds::duration::min())
+        {
+                lm.FormatKeyValue(Logging::Keys::virtualTimeNS, "{}", virtualTimeStamp.count());
+        }
+        lm.Dispatch();
     }
-    lm.Dispatch();
 }
 
 // Don't trace LogMessages - this could cause cycles!
