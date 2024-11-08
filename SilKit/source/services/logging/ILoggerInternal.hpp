@@ -46,9 +46,10 @@ struct ILoggerInternal : ILogger
 };
 
 
+// forwards
 template <typename... Args>
 void Log(ILogger* logger, Level level, const char* fmt, const Args&... args);
-
+inline auto FormatLabelsForLogging(const std::vector<MatchingLabel>& labels) -> std::string;
 
 class LoggerMessage
 {
@@ -102,6 +103,25 @@ public:
         }
     }
 
+
+    void SetKeyValue(const std::vector<Services::MatchingLabel>& labels)
+    {
+        if (_logger->GetLogLevel() <= _level)
+        {
+            SetKeyValue(Keys::label, FormatLabelsForLogging(labels));
+        }
+    }
+
+    void SetKeyValue(const Core::ServiceDescriptor& descriptor)
+    {
+        if (_logger->GetLogLevel() <= _level)
+        {
+            for (const auto& pair :  descriptor.to_keyValues())
+            {
+                SetKeyValue(pair.first, pair.second);
+            }
+        }
+    }
     template <typename Key, typename Value>
     void SetKeyValue(Key&& key, Value&& value)
     {
@@ -221,6 +241,49 @@ template <typename... Args>
 void Critical(ILogger* logger, const char* fmt, const Args&... args)
 {
     Log(logger, Level::Critical, fmt, args...);
+}
+
+
+inline auto FormatLabelsForLogging(const std::vector<MatchingLabel>& labels) -> std::string
+{
+    std::ostringstream os;
+
+    if (labels.empty())
+    {
+        os << "(no labels)";
+    }
+
+    bool first = true;
+
+    for (const auto& label : labels)
+    {
+        if (first)
+        {
+            first = false;
+        }
+        else
+        {
+            os << ", ";
+        }
+
+        switch (label.kind)
+        {
+        case MatchingLabel::Kind::Optional:
+            os << "Optional";
+            break;
+        case MatchingLabel::Kind::Mandatory:
+            os << "Mandatory";
+            break;
+        default:
+            os << "MatchingLabel::Kind(" << static_cast<std::underlying_type_t<MatchingLabel::Kind>>(label.kind)
+               << ")";
+            break;
+        }
+
+        os << " '" << label.key << "': '" << label.value << "'";
+    }
+
+    return os.str();
 }
 } // namespace Logging
 } // namespace Services

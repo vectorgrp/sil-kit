@@ -492,46 +492,6 @@ auto Participant<SilKitConnectionT>::CreateDataSubscriberInternal(
     return controller;
 }
 
-static inline auto FormatLabelsForLogging(const std::vector<MatchingLabel>& labels) -> std::string
-{
-    std::ostringstream os;
-
-    if (labels.empty())
-    {
-        os << "(no labels)";
-    }
-
-    bool first = true;
-
-    for (const auto& label : labels)
-    {
-        if (first)
-        {
-            first = false;
-        }
-        else
-        {
-            os << ", ";
-        }
-
-        switch (label.kind)
-        {
-        case MatchingLabel::Kind::Optional:
-            os << "Optional";
-            break;
-        case MatchingLabel::Kind::Mandatory:
-            os << "Mandatory";
-            break;
-        default:
-            os << "MatchingLabel::Kind(" << static_cast<std::underlying_type_t<MatchingLabel::Kind>>(label.kind) << ")";
-            break;
-        }
-
-        os << " '" << label.key << "': '" << label.value << "'";
-    }
-
-    return os.str();
-}
 
 template <class SilKitConnectionT>
 auto Participant<SilKitConnectionT>::CreateDataPublisher(const std::string& canonicalName,
@@ -587,7 +547,7 @@ auto Participant<SilKitConnectionT>::CreateDataPublisher(const std::string& cano
         lm.SetKeyValue(Logging::Keys::mediaType, configuredDataNodeSpec.MediaType());
         lm.SetKeyValue(Logging::Keys::network, network);
         lm.SetKeyValue(Logging::Keys::serviceName, controller->GetServiceDescriptor().to_string());
-        lm.SetKeyValue(Logging::Keys::label, FormatLabelsForLogging(configuredDataNodeSpec.Labels()));
+        lm.SetKeyValue(configuredDataNodeSpec.Labels());
         lm.Dispatch();
     }
 
@@ -656,7 +616,7 @@ auto Participant<SilKitConnectionT>::CreateDataSubscriber(
         lm.SetKeyValue(Logging::Keys::mediaType, configuredDataNodeSpec.MediaType());
         lm.SetKeyValue(Logging::Keys::network, network);
         lm.SetKeyValue(Logging::Keys::serviceName, controller->GetServiceDescriptor().to_string());
-        lm.SetKeyValue(Logging::Keys::label, FormatLabelsForLogging(configuredDataNodeSpec.Labels()));
+        lm.SetKeyValue(configuredDataNodeSpec.Labels());
         lm.Dispatch();
     }
 
@@ -749,7 +709,7 @@ auto Participant<SilKitConnectionT>::CreateRpcClient(
         lm.SetKeyValue(Logging::Keys::mediaType, configuredRpcSpec.MediaType());
         lm.SetKeyValue(Logging::Keys::network, network);
         lm.SetKeyValue(Logging::Keys::serviceName, controller->GetServiceDescriptor().to_string());
-        lm.SetKeyValue(Logging::Keys::label, FormatLabelsForLogging(configuredRpcSpec.Labels()));
+        lm.SetKeyValue(configuredRpcSpec.Labels());
         lm.Dispatch();
     }
 
@@ -805,7 +765,7 @@ auto Participant<SilKitConnectionT>::CreateRpcServer(
         lm.SetKeyValue(Logging::Keys::mediaType, configuredRpcSpec.MediaType());
         lm.SetKeyValue(Logging::Keys::network, network);
         lm.SetKeyValue(Logging::Keys::serviceName, controller->GetServiceDescriptor().to_string());
-        lm.SetKeyValue(Logging::Keys::label, FormatLabelsForLogging(configuredRpcSpec.Labels()));
+        lm.SetKeyValue(configuredRpcSpec.Labels());
         lm.Dispatch();
     }
 

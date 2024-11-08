@@ -55,11 +55,7 @@ void TraceRx(Logging::ILoggerInternal* logger, const Core::IServiceEndpoint* add
 {
     Logging::LoggerMessage lm{logger, Logging::Level::Trace};
     lm.SetMessage("Recv message");
-
-    for (const auto& pair : addr->GetServiceDescriptor().to_keyValues())
-    {
-        lm.SetKeyValue(pair.first, pair.second);
-    }
+    lm.SetKeyValue(addr->GetServiceDescriptor());
     lm.SetKeyValue(Logging::Keys::from, from.GetParticipantName());
     lm.FormatKeyValue(Logging::Keys::msg, "{}", msg);
 
@@ -77,12 +73,7 @@ void TraceTx(Logging::ILoggerInternal* logger, const Core::IServiceEndpoint* add
 {
     Logging::LoggerMessage lm{logger, Logging::Level::Trace};
     lm.SetMessage("Send message");
-   
-    for (const auto& pair : addr->GetServiceDescriptor().to_keyValues())
-    {
-        lm.SetKeyValue(pair.first, pair.second);
-    }
-
+    lm.SetKeyValue(addr->GetServiceDescriptor());
     lm.FormatKeyValue(Logging::Keys::msg, "{}", msg);
 
     auto virtualTimeStamp = GetTimestamp(msg);
