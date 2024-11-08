@@ -435,11 +435,7 @@ void DashboardInstance::RemoveSimulationData(const std::string &simulationName)
     _simulationEventHandlers.erase(simulationName);
 }
 
-
-// SilKit::Core::IRegistryEventListener
-
-
-void DashboardInstance::OnLoggerCreated(SilKit::Services::Logging::ILogger *logger)
+void DashboardInstance::OnLoggerInternalCreated(SilKit::Services::Logging::ILoggerInternal *logger)
 {
     SILKIT_ASSERT(_logger == nullptr);
     _logger = logger;

@@ -22,7 +22,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <chrono>
 #include <functional>
 #include <string>
-#include <unordered_map>
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
@@ -72,8 +71,9 @@ auto ALogMsgWith(std::string loggerName, Level level, std::string payload) -> Ma
     );
 }
 
+
 auto ALogMsgWith(std::string loggerName, Level level, std::string payload,
-                 std::unordered_map<std::string, std::string> keyValues) -> Matcher<LogMsg>
+                 std::vector<std::pair<std::string, std::string>> keyValues) -> Matcher<LogMsg>
 {
     return AllOf(Field(&LogMsg::loggerName, loggerName), Field(&LogMsg::level, level), Field(&LogMsg::payload, payload),
                  Field(&LogMsg::keyValues, keyValues));
@@ -135,8 +135,7 @@ TEST(Test_Logger, send_log_message_from_logger)
 
     EXPECT_CALL(mockParticipant, SendMsg_LogMsg(testing::_, ALogMsgWith(loggerName, Level::Info, payload))).Times(1);
 
-    EXPECT_CALL(mockParticipant, SendMsg_LogMsg(testing::_, ALogMsgWith(loggerName, Level::Critical, payload)))
-        .Times(1);
+    EXPECT_CALL(mockParticipant, SendMsg_LogMsg(testing::_, ALogMsgWith(loggerName, Level::Critical, payload))).Times(1);
 
     logger.Info(payload);
     logger.Critical(payload);
@@ -172,7 +171,6 @@ TEST(Test_Logger, LogOnceFlag_check_setter)
     EXPECT_EQ(once.WasCalled(), true);
 }
 
-
 TEST(Test_Logger, send_loggermessage_from_logger)
 {
     std::string loggerName{"ParticipantAndLogger"};
@@ -196,7 +194,7 @@ TEST(Test_Logger, send_loggermessage_from_logger)
     std::string payload{"Test log message"};
     std::string key{"TestKey"};
     std::string value{"TestValue"};
-    std::unordered_map<std::string, std::string> keyValue{{key, value}};
+    std::vector<std::pair<std::string, std::string>> keyValue{{key, value}};
 
     EXPECT_CALL(mockParticipant,
                 SendMsg_LogMsg(&logMsgSender, ALogMsgWith(loggerName, Level::Debug, payload, keyValue)))

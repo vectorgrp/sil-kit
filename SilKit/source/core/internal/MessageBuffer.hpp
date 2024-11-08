@@ -229,6 +229,12 @@ public:
     template <typename ValueT, size_t SIZE>
     inline MessageBuffer& operator>>(std::array<ValueT, SIZE>& array);
     // --------------------------------------------------------------------------------
+    // std::pair<T, U>
+    template <typename T, typename U>
+    inline MessageBuffer& operator<<(const std::pair<T, U>& pair);
+    template <typename T, typename U>
+    inline MessageBuffer& operator>>(std::pair<T, U>& pair);
+    // --------------------------------------------------------------------------------
     // std::chrono::duration<Rep, Period> and system_clock::time_point
     template <class Rep, class Period>
     inline MessageBuffer& operator<<(std::chrono::duration<Rep, Period> duration);
@@ -631,6 +637,21 @@ inline MessageBuffer& MessageBuffer::operator>>(std::unordered_map<std::string, 
     updatedMsg = std::move(tmp);
     return *this;
 }
+
+template <typename T, typename U>
+inline MessageBuffer& MessageBuffer::operator<<(const std::pair<T, U>& pair)
+{
+    *this << pair.first << pair.second;
+    return *this;
+}
+
+template <typename T, typename U>
+inline MessageBuffer& MessageBuffer::operator>>(std::pair<T, U>& pair)
+{
+    *this >> pair.first >> pair.second;
+    return *this;
+}
+
 
 // --------------------------------------------------------------------------------
 // Uuid

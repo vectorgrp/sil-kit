@@ -72,6 +72,7 @@ add_library(O_SilKit_Services_Logging OBJECT
 
     LoggingSerdes.hpp
     LoggingSerdes.cpp
+    StructuredLoggingKeys.hpp
 )
 
 target_link_libraries(O_SilKit_Services_Logging

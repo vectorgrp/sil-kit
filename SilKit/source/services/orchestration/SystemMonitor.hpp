@@ -112,7 +112,7 @@ private:
     // ----------------------------------------
     // private members
     Core::ServiceDescriptor _serviceDescriptor{};
-    Services::Logging::ILogger* _logger{nullptr};
+    Services::Logging::ILoggerInternal* _logger{nullptr};
     Core::IParticipantInternal* _participant{nullptr};
 
     VSilKit::SystemStateTracker _systemStateTracker;

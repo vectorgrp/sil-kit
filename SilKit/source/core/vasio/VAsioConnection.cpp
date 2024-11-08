@@ -300,7 +300,7 @@ VAsioConnection::~VAsioConnection()
     }
 }
 
-void VAsioConnection::SetLogger(Services::Logging::ILogger* logger)
+void VAsioConnection::SetLoggerInternal(Services::Logging::ILoggerInternal* logger)
 {
     _logger = logger;
 
@@ -308,7 +308,7 @@ void VAsioConnection::SetLogger(Services::Logging::ILogger* logger)
     _connectKnownParticipants.SetLogger(*_logger);
 }
 
-auto VAsioConnection::GetLogger() -> SilKit::Services::Logging::ILogger*
+auto VAsioConnection::GetLoggerInternal() -> SilKit::Services::Logging::ILoggerInternal*
 {
     return _logger;
 }

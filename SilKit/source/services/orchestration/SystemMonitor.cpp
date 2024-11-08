@@ -37,7 +37,7 @@ namespace Services {
 namespace Orchestration {
 
 SystemMonitor::SystemMonitor(Core::IParticipantInternal* participant)
-    : _logger{participant->GetLogger()}
+    : _logger{participant->GetLoggerInternal()}
     , _participant{participant}
 {
     _systemStateTracker.SetLogger(_logger);

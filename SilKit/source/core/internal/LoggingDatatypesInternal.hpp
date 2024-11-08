@@ -25,7 +25,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <string>
 #include <sstream>
 #include <ostream>
-#include <unordered_map>
+#include <vector>
 
 #include "silkit/services/logging/LoggingDatatypes.hpp"
 #include "silkit/services/logging/string_utils.hpp"
@@ -54,7 +54,7 @@ struct LogMsg
     log_clock::time_point time;
     SourceLoc source;
     std::string payload;
-    std::unordered_map<std::string, std::string> keyValues;
+    std::vector<std::pair<std::string, std::string>> keyValues;
 };
 
 inline bool operator==(const SourceLoc& lhs, const SourceLoc& rhs);
@@ -67,8 +67,8 @@ inline std::string to_string(const LogMsg& msg);
 inline std::ostream& operator<<(std::ostream& out, const LogMsg& msg);
 
 
-inline std::string to_string(const std::unordered_map<std::string, std::string>& kv);
-inline std::ostream& operator<<(std::ostream& out, const std::unordered_map<std::string, std::string>& kv);
+inline std::string to_string(const std::vector<std::pair<std::string, std::string>>& kv);
+inline std::ostream& operator<<(std::ostream& out, const std::vector<std::pair<std::string, std::string>>& kv);
 
 // ================================================================================
 //  Inline Implementations
@@ -98,7 +98,8 @@ std::ostream& operator<<(std::ostream& out, const SourceLoc& sourceLoc)
                << "line=" << sourceLoc.line << ", funcname={\"" << sourceLoc.funcname << "\"}";
 }
 
-inline std::string to_string(const std::unordered_map<std::string, std::string>& kv)
+
+inline std::string to_string(const std::vector<std::pair<std::string, std::string>>& kv)
 {
     std::stringstream outStream;
     outStream << kv;
@@ -106,7 +107,7 @@ inline std::string to_string(const std::unordered_map<std::string, std::string>&
 }
 
 
-inline std::ostream& operator<<(std::ostream& out, const std::unordered_map<std::string, std::string>& kv)
+inline std::ostream& operator<<(std::ostream& out, const std::vector<std::pair<std::string, std::string>>& kv)
 {
     std::string result;
     result.reserve(kv.size() * 2);
@@ -115,7 +116,7 @@ inline std::ostream& operator<<(std::ostream& out, const std::unordered_map<std:
     {
         result.append(", kv: ");
 
-        std::unordered_map<std::string, std::string>::const_iterator it = kv.begin();
+        std::vector<std::pair<std::string, std::string>>::const_iterator it = kv.begin();
         result.append("{");
         while (it != kv.end())
         {

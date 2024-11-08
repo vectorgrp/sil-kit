@@ -66,12 +66,12 @@ VAsioRegistry::VAsioRegistry(std::shared_ptr<SilKit::Config::IParticipantConfigu
 
     if (_registryEventListener != nullptr)
     {
-        _registryEventListener->OnLoggerCreated(_logger.get());
+        _registryEventListener->OnLoggerInternalCreated(_logger.get());
     }
 
     dynamic_cast<VSilKit::MetricsProcessor&>(*_metricsProcessor).SetLogger(*_logger);
     dynamic_cast<VSilKit::MetricsManager&>(*_metricsManager).SetLogger(*_logger);
-    _connection.SetLogger(_logger.get());
+    _connection.SetLoggerInternal(_logger.get());
 
     _connection.RegisterMessageReceiver([this](IVAsioPeer* from, const ParticipantAnnouncement& announcement) {
         this->OnParticipantAnnouncement(from, announcement);

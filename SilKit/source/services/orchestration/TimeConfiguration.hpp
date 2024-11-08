@@ -25,7 +25,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <mutex>
 
 #include "OrchestrationDatatypes.hpp"
-#include "silkit/services/logging/ILogger.hpp"
+#include "ILoggerInternal.hpp"
 
 namespace SilKit {
 namespace Services {
@@ -35,7 +35,7 @@ using namespace std::chrono_literals;
 class TimeConfiguration
 {
 public: //Ctor
-    TimeConfiguration(Logging::ILogger* logger);
+    TimeConfiguration(Logging::ILoggerInternal* logger);
 
 public: //Methods
     void SetBlockingMode(bool blocking);
@@ -66,7 +66,7 @@ private: //Members
     bool _blocking;
 
     bool _hoppedOn = false;
-    Logging::ILogger* _logger;
+    Logging::ILoggerInternal* _logger;
 };
 
 } // namespace Orchestration
