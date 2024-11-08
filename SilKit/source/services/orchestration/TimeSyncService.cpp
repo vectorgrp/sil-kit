@@ -492,8 +492,8 @@ void TimeSyncService::ExecuteSimStep(std::chrono::nanoseconds timePoint, std::ch
     {
         Logging::LoggerMessage lm{_logger, Logging::Level::Trace};
         lm.SetMessage("Starting next Simulation Step.");
-        lm.SetKeyValue(Logging::Keys::waitingTime, fmt::format("{}", std::chrono::duration_cast<DoubleMSecs>(_waitTimeMonitor.CurrentDuration()).count()));
-        lm.SetKeyValue(Logging::Keys::virtualTimeNS, fmt::format("{}", timePoint.count()));
+        lm.FormatKeyValue(Logging::Keys::waitingTime, "{}", std::chrono::duration_cast<DoubleMSecs>(_waitTimeMonitor.CurrentDuration()).count());
+        lm.FormatKeyValue(Logging::Keys::virtualTimeNS, "{}", timePoint.count());
         lm.Dispatch();
     }
 
@@ -536,8 +536,8 @@ void TimeSyncService::LogicalSimStepCompleted(std::chrono::duration<double, std:
     _simStepCounterMetric->Add(1);
     Logging::LoggerMessage lm{_logger, Logging::Level::Trace};
     lm.SetMessage("Finished Simulation Step.");
-    lm.SetKeyValue(Logging::Keys::executionTime, fmt::format("{}", logicalSimStepTimeMs.count()));
-    lm.SetKeyValue(Logging::Keys::virtualTimeNS, fmt::format("{}", Now().count()));
+    lm.FormatKeyValue(Logging::Keys::executionTime, "{}", logicalSimStepTimeMs.count());
+    lm.FormatKeyValue(Logging::Keys::virtualTimeNS, "{}", Now().count());
     lm.Dispatch();
     _waitTimeMonitor.StartMeasurement();
 }

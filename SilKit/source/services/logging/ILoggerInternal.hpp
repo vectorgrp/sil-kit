@@ -73,11 +73,6 @@ public:
     {
     }
 
-    template <typename... Args>
-    void SetMessage(fmt::format_string<Args...> fmt, Args&&... args)
-    {
-        _msg = fmt::format(fmt, std::forward<Args>(args)...);
-    }
 
     template <typename... Args>
     void FormatMessage(fmt::format_string<Args...> fmt, Args&&... args)
@@ -126,19 +121,9 @@ public:
         return _keyValues;
     }
 
-    bool HasKeyValues() const
-    {
-        return !_keyValues.empty();
-    }
-
     auto GetMsgString() const -> const std::string&
     {
         return _msg;
-    }
-
-    auto GetLogger() const -> ILoggerInternal*
-    {
-        return _logger;
     }
 
     void Dispatch()
