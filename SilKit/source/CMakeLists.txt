@@ -243,7 +243,7 @@ if (MSVC)
             PDB_OUTPUT_DIRECTORY_DEBUG ${SILKIT_SYMBOLS_DIR}/Debug
             LINK_FLAGS "/DEBUG" #make sure the resulting .dll has a .pdb file
     )
-elseif(UNIX AND NOT APPLE)
+elseif(UNIX AND NOT APPLE AND NOT (CMAKE_SYSTEM_NAME MATCHES Android))
     #for reproducible builds
     if(SILKIT_BUILD_REPRODUCIBLE)
         target_link_options(SilKit
