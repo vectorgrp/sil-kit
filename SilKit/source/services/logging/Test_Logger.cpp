@@ -171,7 +171,6 @@ TEST(Test_Logger, LogOnceFlag_check_setter)
     EXPECT_EQ(once.WasCalled(), true);
 }
 
-
 TEST(Test_Logger, send_loggermessage_from_logger)
 {
     std::string loggerName{"ParticipantAndLogger"};

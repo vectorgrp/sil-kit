@@ -518,7 +518,6 @@ void TimeSyncService::ExecuteSimStep(std::chrono::nanoseconds timePoint, std::ch
 
     // Timing and metrics of the handler execution time
     const auto executionDuration = _simStepHandlerExecTimeMonitor.CurrentDuration();
-
     const auto executionDurationMs = std::chrono::duration_cast<DoubleMSecs>(executionDuration);
     const auto executionDurationS = std::chrono::duration_cast<DoubleSecs>(executionDuration);
     _simStepHandlerExecutionTimeStatisticMetric->Take(executionDurationS.count());
@@ -555,6 +554,7 @@ void TimeSyncService::CompleteSimulationStep()
     {
         _logger->Debug("CompleteSimulationStep()");
     }
+
     _participant->ExecuteDeferred([this] {
 
         // Timing and metrics of the completion time
@@ -733,7 +733,7 @@ void TimeSyncService::HybridWait(std::chrono::nanoseconds targetWaitDuration)
     {
         auto timeBeforeSleep = std::chrono::steady_clock::now();
         // Wait the share of the targetWaitDuration that we can precisely achieve with the low timer resolution
-        auto sleepDuration = targetWaitDuration - defaultTimerResolution; 
+        auto sleepDuration = targetWaitDuration - defaultTimerResolution;
         std::this_thread::sleep_for(sleepDuration);
         // Busy-wait the remainder
         auto remainder = targetWaitDuration - (std::chrono::steady_clock::now() - timeBeforeSleep);

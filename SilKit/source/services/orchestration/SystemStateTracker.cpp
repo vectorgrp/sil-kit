@@ -147,6 +147,7 @@ auto SystemStateTracker::UpdateParticipantStatus(const ParticipantStatus& newPar
         lm.FormatKeyValue(Log::Keys::newParticipantState, "{}", newParticipantState);
         lm.Dispatch();
     }
+
     // Check if transition from the old to the new participant state is valid
     if (!ValidateParticipantStateUpdate(oldParticipantState, newParticipantState))
     {
