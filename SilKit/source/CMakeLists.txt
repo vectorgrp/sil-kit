@@ -243,7 +243,7 @@ if (MSVC)
             PDB_OUTPUT_DIRECTORY_DEBUG ${SILKIT_SYMBOLS_DIR}/Debug
             LINK_FLAGS "/DEBUG" #make sure the resulting .dll has a .pdb file
     )
-elseif(UNIX AND NOT APPLE AND NOT (CMAKE_SYSTEM_NAME MATCHES Android))
+elseif(UNIX AND NOT APPLE)
     #for reproducible builds
     if(SILKIT_BUILD_REPRODUCIBLE)
         target_link_options(SilKit
@@ -257,7 +257,9 @@ elseif(UNIX AND NOT APPLE AND NOT (CMAKE_SYSTEM_NAME MATCHES Android))
 		    PRIVATE -Wl,--build-id=sha1)
 	    endif()
     endif()
-    target_link_options(SilKit PRIVATE "LINKER:--version-script=${CMAKE_CURRENT_SOURCE_DIR}/silkit.map")
+    if(NOT (CMAKE_SYSTEM_NAME MATCHES Android))
+        target_link_options(SilKit PRIVATE "LINKER:--version-script=${CMAKE_CURRENT_SOURCE_DIR}/silkit.map")
+    endif()
 endif()
 
 if ((CMAKE_CXX_COMPILER_ID STREQUAL GNU OR CMAKE_CXX_COMPILER_ID STREQUAL Clang) AND NOT SILKIT_USE_SYSTEM_LIBRARIES)
