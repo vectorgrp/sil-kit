@@ -43,15 +43,32 @@ typedef struct SilKit_Experimental_SystemController SilKit_Experimental_SystemCo
 
 typedef int32_t SilKit_ReturnCode;
 
-#define SilKit_ReturnCode_SUCCESS ((SilKit_ReturnCode)0)
-#define SilKit_ReturnCode_UNSPECIFIEDERROR ((SilKit_ReturnCode)1)
-#define SilKit_ReturnCode_NOTSUPPORTED ((SilKit_ReturnCode)2)
-#define SilKit_ReturnCode_NOTIMPLEMENTED ((SilKit_ReturnCode)3)
-#define SilKit_ReturnCode_BADPARAMETER ((SilKit_ReturnCode)4)
-#define SilKit_ReturnCode_BUFFERTOOSMALL ((SilKit_ReturnCode)5)
-#define SilKit_ReturnCode_TIMEOUT ((SilKit_ReturnCode)6)
-#define SilKit_ReturnCode_UNSUPPORTEDSERVICE ((SilKit_ReturnCode)7)
-#define SilKit_ReturnCode_WRONGSTATE ((SilKit_ReturnCode)8) // Returned on exception SilKit::StateError (CapiImpl.h)
+#define SilKit_ReturnCode_SUCCESS ((SilKit_ReturnCode)0)               
+#define SilKit_ReturnCode_UNSPECIFIEDERROR ((SilKit_ReturnCode)1)      
+#define SilKit_ReturnCode_NOTSUPPORTED ((SilKit_ReturnCode)2)          
+#define SilKit_ReturnCode_NOTIMPLEMENTED ((SilKit_ReturnCode)3)        
+#define SilKit_ReturnCode_BADPARAMETER ((SilKit_ReturnCode)4)          
+#define SilKit_ReturnCode_BUFFERTOOSMALL ((SilKit_ReturnCode)5)        
+#define SilKit_ReturnCode_TIMEOUT ((SilKit_ReturnCode)6)               
+#define SilKit_ReturnCode_UNSUPPORTEDSERVICE ((SilKit_ReturnCode)7)    
+
+// The following return codes have an corresponding specific SIL Kit exception.
+// If an error occurs and a specific exception is thrown, it is catched in 
+// CapiImpl.hpp and the code defined here is returned.
+// This completes the error handling for the usage of the C-API.
+
+// For the C++-Api, the return code is translated back to the specific SIL Kit 
+// exception and thrown in ThrowOnError.hpp.
+
+#define SilKit_ReturnCode_WRONGSTATE ((SilKit_ReturnCode)8)             // SilKit::StateError
+#define SilKit_ReturnCode_TYPECONVERSION_ERROR ((SilKit_ReturnCode)9)   // SilKit::TypeConversionError
+#define SilKit_ReturnCode_CONFIGURATION_ERROR ((SilKit_ReturnCode)10)   // SilKit::ConfigurationError
+#define SilKit_ReturnCode_PROTOCOL_ERROR ((SilKit_ReturnCode)11)        // SilKit::ProtocolError
+#define SilKit_ReturnCode_ASSERTION_ERROR ((SilKit_ReturnCode)12)       // SilKit::AssertionError
+#define SilKit_ReturnCode_EXTENSION_ERROR ((SilKit_ReturnCode)13)       // SilKit::ExtensionError
+#define SilKit_ReturnCode_LOGIC_ERROR ((SilKit_ReturnCode)14)           // SilKit::LogicError
+#define SilKit_ReturnCode_LENGTH_ERROR ((SilKit_ReturnCode)15)          // SilKit::LengthError
+#define SilKit_ReturnCode_OUTOFRANGE_ERROR ((SilKit_ReturnCode)16)      // SilKit::OutOfRangeError
 
 typedef uint64_t SilKit_NanosecondsTime;
 
