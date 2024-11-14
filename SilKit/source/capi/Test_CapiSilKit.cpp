@@ -25,44 +25,29 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "MockParticipant.hpp"
 
 namespace {
-const auto SILKIT_CONFIG_STRING = R"aw(
+
+//const auto SILKIT_CONFIG_STRING = R"(
+//{ "ParticipantName: "Participant1" }
+//)";
+const auto SILKIT_CONFIG_STRING = R"(
 {
-    "ConfigVersion": "0.0.1",
-    "ConfigName" : "ConfigDemo",
-    "Description" : "Sample configuration for testing purposes",
+    "ParticipantName": "Participant1", 
+    "Logging":{
+        "Sinks":[{"Type":"Stdout","Level":"Info"}]
+    }
+})";
 
-    "SimulationSetup" : {
-        "Participants": [
-            {
-                "Name": "Participant1",
-                "Description" : "Demo Participant with nothing going on"
-            }
-        ]
-    },
-
-    "MiddlewareConfig": {
-        "ActiveMiddleware": "VAsio"
+const auto SILKIT_MALFORMED_CONFIG_STRING = R"(
+{
+{
+{
+    "ParticipantName: "Participant1", 
+    "Logging": {
+        "Sinks":[{"Type":"Stdout","Level":"Info"}]
     }
 }
-)aw";
+)";
 
-const auto SILKIT_MALFORMED_CONFIG_STRING = R"aw(
-"ConfigVersion": "0.0.1","
-"ConfigName" : "ConfigDemo","
-"Description" : "Sample configuration for testing purposes",
-"SimulationSetup" : {
-    "Participants": [
-        {
-            "Name": "Participant1",
-            "Description" : "Demo Participant with nothing going on",
-        }
-    ],
-},
-"MiddlewareConfig": {
-    "ActiveMiddleware": "VAsio"
-}
-}
-)aw";
 
 
 using namespace SilKit::Services::Can;
@@ -92,8 +77,8 @@ TEST_F(Test_CapiSilKit, silkit_function_mapping)
     EXPECT_NE(participantConfigurationFromFile, nullptr);
 
     SilKit_Participant* participant = nullptr;
-    returnCode = SilKit_Participant_Create(&participant, participantConfiguration, "Participant1", "42");
-    // since there is no SIL Kit Registry, the call should fail
+    returnCode = SilKit_Participant_Create(&participant, participantConfiguration, "Participant1", "silkit://localhost:7");
+    // there is no SIL Kit Registry running on port 7, the call should fail
     EXPECT_EQ(returnCode, SilKit_ReturnCode_UNSPECIFIEDERROR);
     EXPECT_TRUE(participant == nullptr);
 
@@ -129,11 +114,11 @@ TEST_F(Test_CapiSilKit, silkit_bad_params)
 
 
     SilKit_Participant* participant = nullptr;
-    returnCode = SilKit_Participant_Create(nullptr, participantConfiguration, "Participant1", "42");
+    returnCode = SilKit_Participant_Create(nullptr, participantConfiguration, "Participant1", "silkit://localhost:7");
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
-    returnCode = SilKit_Participant_Create(&participant, nullptr, "Participant1", "42");
+    returnCode = SilKit_Participant_Create(&participant, nullptr, "Participant1", "silkit://localhost:7");
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
-    returnCode = SilKit_Participant_Create(&participant, participantConfiguration, nullptr, "42");
+    returnCode = SilKit_Participant_Create(&participant, participantConfiguration, nullptr, "silkit://localhost:7");
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
     returnCode = SilKit_Participant_Create(&participant, participantConfiguration, "Participant1", nullptr);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
@@ -150,9 +135,6 @@ TEST_F(Test_CapiSilKit, silkit_bad_params)
     returnCode = SilKit_ParticipantConfiguration_FromFile(nullptr, "ParticipantConfiguration_FullIncludes.yaml");
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
-    returnCode = SilKit_Participant_Create(&participant, participantConfiguration, "ParticipantNotExisting", "42");
-    EXPECT_EQ(returnCode, SilKit_ReturnCode_UNSPECIFIEDERROR);
-
     returnCode = SilKit_ParticipantConfiguration_Destroy(participantConfiguration);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 
@@ -162,11 +144,11 @@ TEST_F(Test_CapiSilKit, silkit_bad_params)
     participantConfiguration = nullptr;
 
     returnCode = SilKit_ParticipantConfiguration_FromString(&participantConfiguration, SILKIT_MALFORMED_CONFIG_STRING);
-    EXPECT_EQ(returnCode, SilKit_ReturnCode_UNSPECIFIEDERROR);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_CONFIGURATION_ERROR);
     EXPECT_EQ(participantConfiguration, nullptr);
 
     returnCode = SilKit_ParticipantConfiguration_FromFile(&participantConfiguration, "this_file_does_not_exist.yaml");
-    EXPECT_EQ(returnCode, SilKit_ReturnCode_UNSPECIFIEDERROR);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_CONFIGURATION_ERROR);
     EXPECT_EQ(participantConfiguration, nullptr);
 
     // since there is no SIL Kit Registry with which one could create a Participant, we check against nullptr
