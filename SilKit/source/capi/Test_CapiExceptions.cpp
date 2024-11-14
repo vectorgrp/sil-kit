@@ -161,7 +161,8 @@ TEST_F(Test_CapiExceptions, catch_exception_macro)
 // Test that the C-API return code results in the correct exception
 TEST_F(Test_CapiExceptions, throw_on_error)
 {
-    EXPECT_THROW(SilKit::_detail_v1::Impl::ThrowOnError(SilKit_ReturnCode_TYPECONVERSION_ERROR), SilKit::SilKitError);
+    EXPECT_THROW(SilKit::_detail_v1::Impl::ThrowOnError(SilKit_ReturnCode_TYPECONVERSION_ERROR),
+                 SilKit::TypeConversionError);
     EXPECT_THROW(SilKit::_detail_v1::Impl::ThrowOnError(SilKit_ReturnCode_CONFIGURATION_ERROR), SilKit::ConfigurationError);
     EXPECT_THROW(SilKit::_detail_v1::Impl::ThrowOnError(SilKit_ReturnCode_WRONGSTATE), SilKit::StateError);
     EXPECT_THROW(SilKit::_detail_v1::Impl::ThrowOnError(SilKit_ReturnCode_PROTOCOL_ERROR), SilKit::ProtocolError);
