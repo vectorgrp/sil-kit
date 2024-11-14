@@ -122,7 +122,7 @@ CAPI_CATCH_EXCEPTIONS
 SilKit_ReturnCode throw_std_exception()
 try
 {
-    throw std::exception{"error msg"};
+    throw std::exception();
 }
 CAPI_CATCH_EXCEPTIONS
 
