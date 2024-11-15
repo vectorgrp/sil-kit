@@ -35,9 +35,8 @@ public:
 class UnknownException : public std::exception
 {
 public:
-    UnknownException(const char* message)
-    {
-    }
+    UnknownException() {}
+    UnknownException(const char* /*message*/) {}
 };
 
 template <typename T>
@@ -47,6 +46,15 @@ try
     throw T{"error msg"};
 }
 CAPI_CATCH_EXCEPTIONS
+
+// Not all compilers support std::exception with const char* initialization, so treat that std::exception separately
+SilKit_ReturnCode TestStdExceptionToErrorCode()
+try
+{
+    throw std::exception();
+}
+CAPI_CATCH_EXCEPTIONS
+
 
 // Each catch branch of CapiImpl.hpp CAPI_CATCH_EXCEPTIONS is tested for the expected return code
 TEST_F(Test_CapiExceptions, catch_exception_macro)
@@ -65,8 +73,8 @@ TEST_F(Test_CapiExceptions, catch_exception_macro)
 
     EXPECT_EQ(TestExceptionToErrorCode<SilKit::SilKitError>(), SilKit_ReturnCode_UNSPECIFIEDERROR);
     EXPECT_EQ(TestExceptionToErrorCode<std::runtime_error>(), SilKit_ReturnCode_UNSPECIFIEDERROR);
-    EXPECT_EQ(TestExceptionToErrorCode<std::exception>(), SilKit_ReturnCode_UNSPECIFIEDERROR);
     EXPECT_EQ(TestExceptionToErrorCode<UnknownException>(), SilKit_ReturnCode_UNSPECIFIEDERROR);
+    EXPECT_EQ(TestStdExceptionToErrorCode(), SilKit_ReturnCode_UNSPECIFIEDERROR);
 }
 
 // Test that the C-API return code results in the correct exception
