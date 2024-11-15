@@ -32,130 +32,41 @@ public:
     Test_CapiExceptions() {}
 };
 
-SilKit_ReturnCode throw_SilKitError()
-try
-{
-    throw SilKit::SilKitError{"error msg"};
-}
-CAPI_CATCH_EXCEPTIONS
-
-SilKit_ReturnCode throw_TypeConversionError()
-try
-{
-    throw SilKit::TypeConversionError{"error msg"};
-}
-CAPI_CATCH_EXCEPTIONS
-
-SilKit_ReturnCode throw_ConfigurationError()
-try
-{
-    throw SilKit::ConfigurationError{"error msg"};
-}
-CAPI_CATCH_EXCEPTIONS
-
-SilKit_ReturnCode throw_StateError()
-try
-{
-    throw SilKit::StateError{"error msg"};
-}
-CAPI_CATCH_EXCEPTIONS
-
-SilKit_ReturnCode throw_ProtocolError()
-try
-{
-    throw SilKit::ProtocolError{"error msg"};
-}
-CAPI_CATCH_EXCEPTIONS
-
-SilKit_ReturnCode throw_AssertionError()
-try
-{
-    throw SilKit::AssertionError{"error msg"};
-}
-CAPI_CATCH_EXCEPTIONS
-
-SilKit_ReturnCode throw_ExtensionError()
-try
-{
-    throw SilKit::ExtensionError{"error msg"};
-}
-CAPI_CATCH_EXCEPTIONS
-
-SilKit_ReturnCode throw_LogicError()
-try
-{
-    throw SilKit::LogicError{"error msg"};
-}
-CAPI_CATCH_EXCEPTIONS
-
-SilKit_ReturnCode throw_LengthError()
-try
-{
-    throw SilKit::LengthError{"error msg"};
-}
-CAPI_CATCH_EXCEPTIONS
-
-SilKit_ReturnCode throw_OutOfRangeError()
-try
-{
-    throw SilKit::OutOfRangeError{"error msg"};
-}
-CAPI_CATCH_EXCEPTIONS
-
-
-SilKit_ReturnCode throw_CapiBadParameterError()
-try
-{
-    throw SilKit::CapiBadParameterError{"error msg"};
-}
-CAPI_CATCH_EXCEPTIONS
-
-
-SilKit_ReturnCode throw_std_runtime_error()
-try
-{
-    throw std::runtime_error{"error msg"};
-}
-CAPI_CATCH_EXCEPTIONS
-
-
-SilKit_ReturnCode throw_std_exception()
-try
-{
-    throw std::exception();
-}
-CAPI_CATCH_EXCEPTIONS
-
-
 class UnknownException : public std::exception
 {
+public:
+    UnknownException(const char* message)
+    {
+    }
 };
-SilKit_ReturnCode throw_unknown_exception()
+
+template <typename T>
+SilKit_ReturnCode TestExceptionToErrorCode()
 try
 {
-    throw UnknownException();
+    throw T{"error msg"};
 }
 CAPI_CATCH_EXCEPTIONS
 
 // Each catch branch of CapiImpl.hpp CAPI_CATCH_EXCEPTIONS is tested for the expected return code
 TEST_F(Test_CapiExceptions, catch_exception_macro)
 {
-    EXPECT_EQ(throw_CapiBadParameterError(), SilKit_ReturnCode_BADPARAMETER);
+    EXPECT_EQ(TestExceptionToErrorCode<SilKit::CapiBadParameterError>(), SilKit_ReturnCode_BADPARAMETER);
 
-    EXPECT_EQ(throw_TypeConversionError(), SilKit_ReturnCode_TYPECONVERSION_ERROR);
-    EXPECT_EQ(throw_ConfigurationError(), SilKit_ReturnCode_CONFIGURATION_ERROR);
-    EXPECT_EQ(throw_StateError(), SilKit_ReturnCode_WRONGSTATE);
-    EXPECT_EQ(throw_ProtocolError(), SilKit_ReturnCode_PROTOCOL_ERROR);
-    EXPECT_EQ(throw_AssertionError(), SilKit_ReturnCode_ASSERTION_ERROR);
-    EXPECT_EQ(throw_ExtensionError(), SilKit_ReturnCode_EXTENSION_ERROR);
-    EXPECT_EQ(throw_LogicError(), SilKit_ReturnCode_LOGIC_ERROR);
-    EXPECT_EQ(throw_LengthError(), SilKit_ReturnCode_LENGTH_ERROR);
-    EXPECT_EQ(throw_OutOfRangeError(), SilKit_ReturnCode_OUTOFRANGE_ERROR);
+    EXPECT_EQ(TestExceptionToErrorCode<SilKit::TypeConversionError>(), SilKit_ReturnCode_TYPECONVERSION_ERROR);
+    EXPECT_EQ(TestExceptionToErrorCode<SilKit::ConfigurationError>(), SilKit_ReturnCode_CONFIGURATION_ERROR);
+    EXPECT_EQ(TestExceptionToErrorCode<SilKit::StateError>(), SilKit_ReturnCode_WRONGSTATE);
+    EXPECT_EQ(TestExceptionToErrorCode<SilKit::ProtocolError>(), SilKit_ReturnCode_PROTOCOL_ERROR);
+    EXPECT_EQ(TestExceptionToErrorCode<SilKit::AssertionError>(), SilKit_ReturnCode_ASSERTION_ERROR);
+    EXPECT_EQ(TestExceptionToErrorCode<SilKit::ExtensionError>(), SilKit_ReturnCode_EXTENSION_ERROR);
+    EXPECT_EQ(TestExceptionToErrorCode<SilKit::LogicError>(), SilKit_ReturnCode_LOGIC_ERROR);
+    EXPECT_EQ(TestExceptionToErrorCode<SilKit::LengthError>(), SilKit_ReturnCode_LENGTH_ERROR);
+    EXPECT_EQ(TestExceptionToErrorCode<SilKit::OutOfRangeError>(), SilKit_ReturnCode_OUTOFRANGE_ERROR);
 
-    EXPECT_EQ(throw_SilKitError(), SilKit_ReturnCode_UNSPECIFIEDERROR);
-    EXPECT_EQ(throw_std_runtime_error(), SilKit_ReturnCode_UNSPECIFIEDERROR);
-    EXPECT_EQ(throw_std_exception(), SilKit_ReturnCode_UNSPECIFIEDERROR);
-    EXPECT_EQ(throw_unknown_exception(), SilKit_ReturnCode_UNSPECIFIEDERROR);
+    EXPECT_EQ(TestExceptionToErrorCode<SilKit::SilKitError>(), SilKit_ReturnCode_UNSPECIFIEDERROR);
+    EXPECT_EQ(TestExceptionToErrorCode<std::runtime_error>(), SilKit_ReturnCode_UNSPECIFIEDERROR);
+    EXPECT_EQ(TestExceptionToErrorCode<std::exception>(), SilKit_ReturnCode_UNSPECIFIEDERROR);
+    EXPECT_EQ(TestExceptionToErrorCode<UnknownException>(), SilKit_ReturnCode_UNSPECIFIEDERROR);
 }
 
 // Test that the C-API return code results in the correct exception
