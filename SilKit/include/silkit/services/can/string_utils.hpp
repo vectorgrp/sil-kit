@@ -215,7 +215,7 @@ std::ostream& operator<<(std::ostream& out, const CanFrameEvent& msg)
 std::ostream& operator<<(std::ostream& out, const CanFrameTransmitEvent& status)
 {
     auto timestamp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(status.timestamp);
-    return out << "Can::CanTtransmitAcknowledge{status=" << status.status << " @" << timestamp.count() << "ms}";
+    return out << "Can::CanTransmitAcknowledge{status=" << status.status << " @" << timestamp.count() << "ms}";
 }
 
 } // namespace Can
