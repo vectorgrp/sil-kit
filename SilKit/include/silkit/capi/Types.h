@@ -53,7 +53,7 @@ typedef int32_t SilKit_ReturnCode;
 #define SilKit_ReturnCode_UNSUPPORTEDSERVICE ((SilKit_ReturnCode)7)    
 
 // The following return codes have an corresponding specific SIL Kit exception.
-// If an error occurs and a specific exception is thrown, it is catched in 
+// If an error occurs and a specific exception is thrown, it is caught in 
 // CapiImpl.hpp and the code defined here is returned.
 // This completes the error handling for the usage of the C-API.
 
