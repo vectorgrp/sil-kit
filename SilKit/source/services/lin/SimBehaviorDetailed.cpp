@@ -41,29 +41,35 @@ void SimBehaviorDetailed::SendMsgImpl(MsgT&& msg)
     _participant->SendMsg(_parentServiceEndpoint, std::forward<MsgT>(msg));
 }
 
+template <typename MsgT>
+void SimBehaviorDetailed::SendTargettedMsgImpl(MsgT&& msg)
+{
+    _participant->SendMsg(_parentServiceEndpoint, _simulatedLink.GetParticipantName(), std::forward<MsgT>(msg));
+}
+
 void SimBehaviorDetailed::SendMsg(LinSendFrameRequest&& msg)
 {
-    SendMsgImpl(msg);
+    SendTargettedMsgImpl(msg);
 }
 void SimBehaviorDetailed::SendMsg(LinTransmission&& msg)
 {
-    SendMsgImpl(msg);
+    SendTargettedMsgImpl(msg);
 }
 void SimBehaviorDetailed::SendMsg(WireLinControllerConfig&& msg)
 {
-    SendMsgImpl(msg);
+    SendMsgImpl(msg); 
 }
 void SimBehaviorDetailed::SendMsg(LinSendFrameHeaderRequest&& msg)
 {
-    SendMsgImpl(msg);
+    SendTargettedMsgImpl(msg);
 }
 void SimBehaviorDetailed::SendMsg(LinFrameResponseUpdate&& msg)
 {
-    SendMsgImpl(msg);
+    SendMsgImpl(msg); 
 }
 void SimBehaviorDetailed::SendMsg(LinControllerStatusUpdate&& msg)
 {
-    SendMsgImpl(msg);
+    SendMsgImpl(msg); 
 }
 
 void SimBehaviorDetailed::ProcessFrameHeaderRequest(const LinSendFrameHeaderRequest& /*header*/)
