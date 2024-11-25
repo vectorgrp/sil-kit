@@ -38,13 +38,20 @@ namespace Tests {
 class LinMockParticipant : public Core::Tests::DummyParticipant
 {
 public:
-    MOCK_METHOD(void, SendMsg, (const Core::IServiceEndpoint*, const LinSendFrameRequest&));
-    MOCK_METHOD(void, SendMsg, (const Core::IServiceEndpoint*, const LinSendFrameHeaderRequest&));
-    MOCK_METHOD(void, SendMsg, (const Core::IServiceEndpoint*, const LinTransmission&));
+
     MOCK_METHOD(void, SendMsg, (const Core::IServiceEndpoint*, const LinFrameResponseUpdate&));
     MOCK_METHOD(void, SendMsg, (const Core::IServiceEndpoint*, const WireLinControllerConfig&));
     MOCK_METHOD(void, SendMsg, (const Core::IServiceEndpoint*, const LinControllerStatusUpdate&));
+
+    MOCK_METHOD(void, SendMsg, (const Core::IServiceEndpoint*, const LinSendFrameRequest&));
+    MOCK_METHOD(void, SendMsg, (const Core::IServiceEndpoint*, const LinSendFrameHeaderRequest&));
+    MOCK_METHOD(void, SendMsg, (const Core::IServiceEndpoint*, const LinTransmission&));
     MOCK_METHOD(void, SendMsg, (const Core::IServiceEndpoint*, const LinWakeupPulse&));
+
+    MOCK_METHOD(void, SendMsg, (const Core::IServiceEndpoint*, const std::string&, const LinSendFrameRequest&));
+    MOCK_METHOD(void, SendMsg, (const Core::IServiceEndpoint*, const std::string&, const LinSendFrameHeaderRequest&));
+    MOCK_METHOD(void, SendMsg, (const Core::IServiceEndpoint*, const std::string&, const LinTransmission&));
+    MOCK_METHOD(void, SendMsg, (const Core::IServiceEndpoint*, const std::string&, const LinWakeupPulse&));
 };
 
 inline auto MakeControllerConfig(LinControllerMode mode) -> LinControllerConfig

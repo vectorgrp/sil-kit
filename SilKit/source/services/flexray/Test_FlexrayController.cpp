@@ -145,10 +145,10 @@ auto GetDummyConfigWithValues() -> SilKit::Config::FlexrayController
 class MockParticipant : public DummyParticipant
 {
 public:
-    MOCK_METHOD2(SendMsg, void(const IServiceEndpoint *, const FlexrayHostCommand &));
-    MOCK_METHOD2(SendMsg, void(const IServiceEndpoint *, const FlexrayControllerConfig &));
-    MOCK_METHOD2(SendMsg, void(const IServiceEndpoint *, const FlexrayTxBufferConfigUpdate &));
-    MOCK_METHOD2(SendMsg, void(const IServiceEndpoint *, const WireFlexrayTxBufferUpdate &));
+    MOCK_METHOD3(SendMsg, void(const IServiceEndpoint *, const std::string&, const FlexrayHostCommand &));
+    MOCK_METHOD3(SendMsg, void(const IServiceEndpoint *, const std::string&, const FlexrayControllerConfig &));
+    MOCK_METHOD3(SendMsg, void(const IServiceEndpoint *, const std::string&, const FlexrayTxBufferConfigUpdate &));
+    MOCK_METHOD3(SendMsg, void(const IServiceEndpoint *, const std::string&, const WireFlexrayTxBufferUpdate &));
 };
 
 class Test_FlexrayController : public testing::Test
@@ -173,15 +173,20 @@ protected:
     {
         controller.SetServiceDescriptor(controllerAddress);
         controller.SetDetailedBehavior(busSimAddress);
+        controllerConfigured.SetServiceDescriptor(controllerConfiguredAddress);
+        controllerConfigured.SetDetailedBehavior(busSimAddress);
+        controllerBusSim.SetServiceDescriptor(busSimAddress);
+
         referencePayload.resize(20);
         std::iota(referencePayload.begin(), referencePayload.end(), '\000');
 
-        controllerBusSim.SetServiceDescriptor(busSimAddress);
     }
 
 protected:
+    const std::string netsimName = "bussim";
     const ServiceDescriptor controllerAddress{"p1", "n1", "c1", 5};
-    const ServiceDescriptor busSimAddress{"bussim", "n1", "c1", 5};
+    const ServiceDescriptor controllerConfiguredAddress{"p2", "n1", "c1", 5};
+    const ServiceDescriptor busSimAddress{netsimName, "n1", "c1", 5};
 
     std::vector<uint8_t> referencePayload;
 
@@ -203,7 +208,7 @@ TEST_F(Test_FlexrayController, send_controller_config)
 
     controllerCfg.bufferConfigs.push_back(MakeValidTxBufferConfig());
 
-    EXPECT_CALL(participant, SendMsg(&controller, controllerCfg)).Times(1);
+    EXPECT_CALL(participant, SendMsg(&controller, netsimName, controllerCfg)).Times(1);
 
     controller.Configure(controllerCfg);
 }
@@ -222,7 +227,7 @@ TEST_F(Test_FlexrayController, send_controller_config_override_identical)
     testControllerCfg.nodeParams = MakeValidNodeParams();
     testControllerCfg.bufferConfigs.push_back(MakeValidTxBufferConfig());
 
-    EXPECT_CALL(participant, SendMsg(&controllerConfigured, configuredControllerCfg)).Times(1);
+    EXPECT_CALL(participant, SendMsg(&controllerConfigured, netsimName, configuredControllerCfg)).Times(1);
     controllerConfigured.Configure(testControllerCfg);
 }
 
@@ -245,7 +250,7 @@ TEST_F(Test_FlexrayController, send_controller_config_override_cluster_params)
     testControllerCfg.nodeParams = MakeValidNodeParams();
     testControllerCfg.bufferConfigs.push_back(MakeValidTxBufferConfig());
 
-    EXPECT_CALL(participant, SendMsg(&controllerConfigured, configuredControllerCfg)).Times(1);
+    EXPECT_CALL(participant, SendMsg(&controllerConfigured, netsimName, configuredControllerCfg)).Times(1);
     controllerConfigured.Configure(testControllerCfg);
 }
 
@@ -268,7 +273,7 @@ TEST_F(Test_FlexrayController, send_controller_config_override_node_params)
     testControllerCfg.clusterParams = MakeValidClusterParams();
     testControllerCfg.bufferConfigs.push_back(MakeValidTxBufferConfig());
 
-    EXPECT_CALL(participant, SendMsg(&controllerConfigured, configuredControllerCfg)).Times(1);
+    EXPECT_CALL(participant, SendMsg(&controllerConfigured, netsimName, configuredControllerCfg)).Times(1);
     controllerConfigured.Configure(testControllerCfg);
 }
 
@@ -291,7 +296,7 @@ TEST_F(Test_FlexrayController, send_controller_config_override_tx_buffer)
     testControllerCfg.clusterParams = MakeValidClusterParams();
     testControllerCfg.nodeParams = MakeValidNodeParams();
 
-    EXPECT_CALL(participant, SendMsg(&controllerConfigured, configuredControllerCfg)).Times(1);
+    EXPECT_CALL(participant, SendMsg(&controllerConfigured, netsimName, configuredControllerCfg)).Times(1);
     controllerConfigured.Configure(testControllerCfg);
 }
 
@@ -310,7 +315,7 @@ TEST_F(Test_FlexrayController, send_txbuffer_configupdate)
     controllerCfg.nodeParams = MakeValidNodeParams();
     controllerCfg.bufferConfigs.push_back(bufferCfg);
 
-    EXPECT_CALL(participant, SendMsg(&controller, controllerCfg)).Times(1);
+    EXPECT_CALL(participant, SendMsg(&controller, netsimName, controllerCfg)).Times(1);
     controller.Configure(controllerCfg);
 
     // Reconfigure TxBuffer 0
@@ -325,7 +330,7 @@ TEST_F(Test_FlexrayController, send_txbuffer_configupdate)
     expectedUpdate.txBufferIndex = 0;
     expectedUpdate.txBufferConfig = bufferCfg;
 
-    EXPECT_CALL(participant, SendMsg(&controller, expectedUpdate)).Times(1);
+    EXPECT_CALL(participant, SendMsg(&controller, netsimName, expectedUpdate)).Times(1);
     controller.ReconfigureTxBuffer(0, bufferCfg);
 }
 
@@ -336,12 +341,13 @@ TEST_F(Test_FlexrayController, throw_on_unconfigured_tx_buffer_configupdate)
     controllerCfg.nodeParams = MakeValidNodeParams();
     controllerCfg.bufferConfigs.resize(5);
 
-    EXPECT_CALL(participant, SendMsg(&controller, controllerCfg)).Times(1);
+    EXPECT_CALL(participant, SendMsg(&controller, netsimName, controllerCfg)).Times(1);
     controller.Configure(controllerCfg);
 
     // Attempt to reconfigure TxBuffer 6, which should be out of range
     FlexrayTxBufferConfig bufferCfg{};
-    EXPECT_CALL(participant, SendMsg(An<const IServiceEndpoint *>(), A<const FlexrayTxBufferConfigUpdate &>()))
+    EXPECT_CALL(participant,
+                SendMsg(An<const IServiceEndpoint *>(), netsimName, A<const FlexrayTxBufferConfigUpdate &>()))
         .Times(0);
     EXPECT_THROW(controller.ReconfigureTxBuffer(6, bufferCfg), SilKit::OutOfRangeError);
 }
@@ -356,7 +362,7 @@ TEST_F(Test_FlexrayController, send_txbuffer_update)
     controllerCfg.nodeParams = MakeValidNodeParams();
     controllerCfg.bufferConfigs.push_back(bufferCfg);
 
-    EXPECT_CALL(participant, SendMsg(&controller, controllerCfg)).Times(1);
+    EXPECT_CALL(participant, SendMsg(&controller, netsimName, controllerCfg)).Times(1);
     controller.Configure(controllerCfg);
 
     WireFlexrayTxBufferUpdate update{};
@@ -364,7 +370,7 @@ TEST_F(Test_FlexrayController, send_txbuffer_update)
     update.payload = referencePayload;
     update.payloadDataValid = true;
 
-    EXPECT_CALL(participant, SendMsg(&controller, update)).Times(1);
+    EXPECT_CALL(participant, SendMsg(&controller, netsimName, update)).Times(1);
 
     controller.UpdateTxBuffer(ToFlexrayTxBufferUpdate(update));
 }
@@ -377,40 +383,43 @@ TEST_F(Test_FlexrayController, throw_on_unconfigured_tx_buffer_update)
     controllerCfg.nodeParams = MakeValidNodeParams();
     controllerCfg.bufferConfigs.resize(1);
 
-    EXPECT_CALL(participant, SendMsg(&controller, controllerCfg)).Times(1);
+    EXPECT_CALL(participant, SendMsg(&controller, netsimName, controllerCfg)).Times(1);
     controller.Configure(controllerCfg);
 
     FlexrayTxBufferUpdate update;
     update.txBufferIndex = 7; // only txBufferIdx = 0 is configured
-    EXPECT_CALL(participant, SendMsg(An<const IServiceEndpoint *>(), A<const FlexrayTxBufferConfigUpdate &>()))
+    EXPECT_CALL(participant,
+                SendMsg(An<const IServiceEndpoint *>(), netsimName, A<const FlexrayTxBufferConfigUpdate &>()))
         .Times(0);
     EXPECT_THROW(controller.UpdateTxBuffer(update), SilKit::OutOfRangeError);
 }
 
 TEST_F(Test_FlexrayController, send_run_command)
 {
-    EXPECT_CALL(participant, SendMsg(&controller, FlexrayHostCommand{FlexrayChiCommand::RUN})).Times(1);
+    EXPECT_CALL(participant, SendMsg(&controller, netsimName, FlexrayHostCommand{FlexrayChiCommand::RUN})).Times(1);
 
     controller.Run();
 }
 
 TEST_F(Test_FlexrayController, send_deferred_halt_command)
 {
-    EXPECT_CALL(participant, SendMsg(&controller, FlexrayHostCommand{FlexrayChiCommand::DEFERRED_HALT})).Times(1);
+    EXPECT_CALL(participant, SendMsg(&controller, netsimName, FlexrayHostCommand{FlexrayChiCommand::DEFERRED_HALT}))
+        .Times(1);
 
     controller.DeferredHalt();
 }
 
 TEST_F(Test_FlexrayController, send_freeze_command)
 {
-    EXPECT_CALL(participant, SendMsg(&controller, FlexrayHostCommand{FlexrayChiCommand::FREEZE})).Times(1);
+    EXPECT_CALL(participant, SendMsg(&controller, netsimName, FlexrayHostCommand{FlexrayChiCommand::FREEZE})).Times(1);
 
     controller.Freeze();
 }
 
 TEST_F(Test_FlexrayController, send_allow_coldstart_command)
 {
-    EXPECT_CALL(participant, SendMsg(&controller, FlexrayHostCommand{FlexrayChiCommand::ALLOW_COLDSTART})).Times(1);
+    EXPECT_CALL(participant, SendMsg(&controller, netsimName, FlexrayHostCommand{FlexrayChiCommand::ALLOW_COLDSTART}))
+        .Times(1);
 
     controller.AllowColdstart();
 }
@@ -420,14 +429,14 @@ TEST_F(Test_FlexrayController, send_all_slots_command)
     FlexrayHostCommand cmd;
     cmd.command = FlexrayChiCommand::ALL_SLOTS;
 
-    EXPECT_CALL(participant, SendMsg(&controller, cmd)).Times(1);
+    EXPECT_CALL(participant, SendMsg(&controller, netsimName, cmd)).Times(1);
 
     controller.AllSlots();
 }
 
 TEST_F(Test_FlexrayController, send_wakeup_command)
 {
-    EXPECT_CALL(participant, SendMsg(&controller, FlexrayHostCommand{FlexrayChiCommand::WAKEUP})).Times(1);
+    EXPECT_CALL(participant, SendMsg(&controller, netsimName, FlexrayHostCommand{FlexrayChiCommand::WAKEUP})).Times(1);
 
     controller.Wakeup();
 }
