@@ -333,7 +333,7 @@ void VAsioRegistry::SetupMetrics()
 
     if (_vasioConfig->experimental.metrics.collectFromRemote)
     {
-        auto metricsReceiver = std::make_unique<VSilKit::MetricsReceiver>(nullptr, processor);
+        auto metricsReceiver = std::make_unique<VSilKit::MetricsReceiver>(nullptr, *this);
 
         SilKit::Core::SupplementalData supplementalData;
         supplementalData[SilKit::Core::Discovery::controllerType] =
