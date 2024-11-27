@@ -71,6 +71,7 @@ private: // SilKit::Core::IRegistryEventListener
         SilKit::Services::Orchestration::ParticipantStatus const& participantStatus) override;
     void OnServiceDiscoveryEvent(std::string const& simulationName, std::string const& participantName,
                                  SilKit::Core::Discovery::ServiceDiscoveryEvent const& serviceDiscoveryEvent) override;
+    void OnMetricsUpdate(const std::string &simulationName, const std::string &origin, const VSilKit::MetricsUpdate &metricsUpdate) override;
 
 private:
     /// Assigned in OnLoggerCreated
