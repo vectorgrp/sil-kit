@@ -145,10 +145,10 @@ auto GetDummyConfigWithValues() -> SilKit::Config::FlexrayController
 class MockParticipant : public DummyParticipant
 {
 public:
-    MOCK_METHOD3(SendMsg, void(const IServiceEndpoint *, const std::string&, const FlexrayHostCommand &));
-    MOCK_METHOD3(SendMsg, void(const IServiceEndpoint *, const std::string&, const FlexrayControllerConfig &));
-    MOCK_METHOD3(SendMsg, void(const IServiceEndpoint *, const std::string&, const FlexrayTxBufferConfigUpdate &));
-    MOCK_METHOD3(SendMsg, void(const IServiceEndpoint *, const std::string&, const WireFlexrayTxBufferUpdate &));
+    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint *, const std::string&, const FlexrayHostCommand &), (override));
+    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint *, const std::string&, const FlexrayControllerConfig &), (override));
+    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint *, const std::string&, const FlexrayTxBufferConfigUpdate &), (override));
+    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint *, const std::string&, const WireFlexrayTxBufferUpdate &), (override));
 };
 
 class Test_FlexrayController : public testing::Test

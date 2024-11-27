@@ -52,10 +52,10 @@ class MockParticipant : public DummyParticipant
 {
 
 public:
-    MOCK_METHOD3(SendMsg, void(const IServiceEndpoint *, const std::string &, const WireCanFrameEvent &));
-    MOCK_METHOD3(SendMsg, void(const IServiceEndpoint *, const std::string &, const CanFrameTransmitEvent &));
-    MOCK_METHOD3(SendMsg, void(const IServiceEndpoint *, const std::string &, const CanConfigureBaudrate &));
-    MOCK_METHOD3(SendMsg, void(const IServiceEndpoint *, const std::string &, const CanSetControllerMode &));
+    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint *, const std::string &, const WireCanFrameEvent &), (override));
+    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint *, const std::string &, const CanFrameTransmitEvent &), (override));
+    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint *, const std::string &, const CanConfigureBaudrate &), (override));
+    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint *, const std::string &, const CanSetControllerMode &), (override));
 };
 
 class CanControllerCallbacks
