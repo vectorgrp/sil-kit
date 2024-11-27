@@ -9,6 +9,16 @@ The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <
 [4.0.55] - Unreleased
 ---------------------
 
+Fixed
+~~~~~
+
+- **Important** ``SilKit_LinDataLengthUnknown`` in the C header ``Lin.h`` used to be a ``const`` global, which could cause
+  linker issues if the header file is used in multiple translation units in the same binary.
+
+  It has been turned into a ``#define``, like all the other constants in the C header files.
+
+  The symbol was not present in the dynamic symbol table of the ``SilKit.dll`` / ``.so``, so this change
+  does not break the ABI of the shared libraries.
 
 
 [4.0.54] - 2024-11-11
