@@ -1,23 +1,6 @@
-/* Copyright (c) 2022 Vector Informatik GmbH
- 
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
-
-The above copyright notice and this permission notice shall be
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
+// SPDX-FileCopyrightText: 2022 Vector Informatik GmbH
+//
+// SPDX-License-Identifier: MIT
 
 #ifdef _MSC_VER
 #pragma warning(push)
@@ -147,58 +130,6 @@ TEST_F(Test_DashboardSystemServiceClient, CreateSimulation_Failure)
     ASSERT_TRUE(response == nullptr);
     ASSERT_STREQ(actualMethod->c_str(), "POST");
     ASSERT_STREQ(actualPath->c_str(), "system-service/v1.0/simulations");
-}
-
-TEST_F(Test_DashboardSystemServiceClient, SetSimulationEnd_Success)
-{
-    // Arrange
-    EXPECT_CALL(*_mockObjectMapper, write);
-    oatpp::String actualPath;
-    oatpp::String actualMethod;
-    SetupExecuteRequest(Status::CODE_204,
-                        [&actualPath, &actualMethod](auto currentMethod, auto pathTemplate, auto map) {
-        actualMethod = currentMethod;
-        actualPath = pathTemplate.format(map);
-    });
-    EXPECT_CALL(_dummyLogger, Log(Services::Logging::Level::Debug, "Dashboard: setting simulation end returned 204"));
-
-    // Act
-    {
-        const auto service = CreateService();
-        const oatpp::UInt64 expectedSimulationId = 123;
-        auto request = SimulationEndDto::createShared();
-        service->SetSimulationEnd(expectedSimulationId, request);
-    }
-
-    // Assert
-    ASSERT_STREQ(actualMethod->c_str(), "POST");
-    ASSERT_STREQ(actualPath->c_str(), "system-service/v1.0/simulations/123");
-}
-
-TEST_F(Test_DashboardSystemServiceClient, SetSimulationEnd_Failure)
-{
-    // Arrange
-    EXPECT_CALL(*_mockObjectMapper, write);
-    oatpp::String actualPath;
-    oatpp::String actualMethod;
-    SetupExecuteRequest(Status::CODE_500,
-                        [&actualPath, &actualMethod](auto currentMethod, auto pathTemplate, auto map) {
-        actualMethod = currentMethod;
-        actualPath = pathTemplate.format(map);
-    });
-    EXPECT_CALL(_dummyLogger, Log(Services::Logging::Level::Error, "Dashboard: setting simulation end returned 500"));
-
-    // Act
-    {
-        const auto service = CreateService();
-        const oatpp::UInt64 expectedSimulationId = 123;
-        auto request = SimulationEndDto::createShared();
-        service->SetSimulationEnd(expectedSimulationId, request);
-    }
-
-    // Assert
-    ASSERT_STREQ(actualMethod->c_str(), "POST");
-    ASSERT_STREQ(actualPath->c_str(), "system-service/v1.0/simulations/123");
 }
 
 } // namespace Dashboard

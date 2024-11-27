@@ -30,7 +30,6 @@ namespace Dashboard {
 class MockDashboardSystemServiceClient : public IDashboardSystemServiceClient
 {
 public:
-    MockDashboardSystemServiceClient() {}
 
     MOCK_METHOD(oatpp::Object<SimulationCreationResponseDto>, CreateSimulation,
                 (oatpp::Object<SimulationCreationRequestDto>), (override));
@@ -38,53 +37,6 @@ public:
     MOCK_METHOD(void, UpdateSimulation, (oatpp::UInt64, oatpp::Object<BulkSimulationDto>), (override));
 
     MOCK_METHOD(void, UpdateSimulationMetrics, (oatpp::UInt64, oatpp::Object<MetricsUpdateDto>), (override));
-
-    MOCK_METHOD(void, AddParticipantToSimulation, (oatpp::UInt64, oatpp::String), (override));
-
-    MOCK_METHOD(void, AddParticipantStatusForSimulation,
-                (oatpp::UInt64, oatpp::String, oatpp::Object<ParticipantStatusDto>), (override));
-
-    MOCK_METHOD(void, AddCanControllerForParticipantOfSimulation,
-                (oatpp::UInt64, oatpp::String, oatpp::UInt64, oatpp::Object<ServiceDto>), (override));
-
-    MOCK_METHOD(void, AddEthernetControllerForParticipantOfSimulation,
-                (oatpp::UInt64, oatpp::String, oatpp::UInt64, oatpp::Object<ServiceDto>), (override));
-
-    MOCK_METHOD(void, AddFlexrayControllerForParticipantOfSimulation,
-                (oatpp::UInt64, oatpp::String, oatpp::UInt64, oatpp::Object<ServiceDto>), (override));
-
-    MOCK_METHOD(void, AddLinControllerForParticipantOfSimulation,
-                (oatpp::UInt64, oatpp::String, oatpp::UInt64, oatpp::Object<ServiceDto>), (override));
-
-    MOCK_METHOD(void, AddDataPublisherForParticipantOfSimulation,
-                (oatpp::UInt64, oatpp::String, oatpp::UInt64, oatpp::Object<DataPublisherDto>), (override));
-
-    MOCK_METHOD(void, AddDataSubscriberForParticipantOfSimulation,
-                (oatpp::UInt64, oatpp::String, oatpp::UInt64, oatpp::Object<DataSubscriberDto>), (override));
-
-    MOCK_METHOD(void, AddDataSubscriberInternalForParticipantOfSimulation,
-                (oatpp::UInt64, oatpp::String, oatpp::String, oatpp::UInt64, oatpp::Object<ServiceDto>), (override));
-
-    MOCK_METHOD(void, AddRpcClientForParticipantOfSimulation,
-                (oatpp::UInt64, oatpp::String, oatpp::UInt64, oatpp::Object<RpcClientDto>), (override));
-
-    MOCK_METHOD(void, AddRpcServerForParticipantOfSimulation,
-                (oatpp::UInt64, oatpp::String, oatpp::UInt64, oatpp::Object<RpcServerDto>), (override));
-
-    MOCK_METHOD(void, AddRpcServerInternalForParticipantOfSimulation,
-                (oatpp::UInt64, oatpp::String, oatpp::String, oatpp::UInt64, oatpp::Object<ServiceDto>), (override));
-
-    MOCK_METHOD(void, AddCanNetworkToSimulation, (oatpp::UInt64, oatpp::String, oatpp::String), (override));
-
-    MOCK_METHOD(void, AddEthernetNetworkToSimulation, (oatpp::UInt64, oatpp::String, oatpp::String), (override));
-
-    MOCK_METHOD(void, AddFlexrayNetworkToSimulation, (oatpp::UInt64, oatpp::String, oatpp::String), (override));
-
-    MOCK_METHOD(void, AddLinNetworkToSimulation, (oatpp::UInt64, oatpp::String, oatpp::String), (override));
-
-    MOCK_METHOD(void, UpdateSystemStatusForSimulation, (oatpp::UInt64, oatpp::Object<SystemStatusDto>), (override));
-
-    MOCK_METHOD(void, SetSimulationEnd, (oatpp::UInt64, oatpp::Object<SimulationEndDto>), (override));
 };
 } // namespace Dashboard
 } // namespace SilKit

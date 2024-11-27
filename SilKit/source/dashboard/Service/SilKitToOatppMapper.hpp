@@ -40,11 +40,6 @@ public:
     oatpp::Object<ParticipantStatusDto> CreateParticipantStatusDto(
         const Services::Orchestration::ParticipantStatus& participantStatus) override;
     oatpp::Object<ServiceDto> CreateServiceDto(const Core::ServiceDescriptor& serviceDescriptor) override;
-    oatpp::Object<DataPublisherDto> CreateDataPublisherDto(const Core::ServiceDescriptor& serviceDescriptor) override;
-    oatpp::Object<DataSubscriberDto> CreateDataSubscriberDto(const Core::ServiceDescriptor& serviceDescriptor) override;
-    oatpp::Object<RpcClientDto> CreateRpcClientDto(const Core::ServiceDescriptor& serviceDescriptor) override;
-    oatpp::Object<RpcServerDto> CreateRpcServerDto(const Core::ServiceDescriptor& serviceDescriptor) override;
-    oatpp::Object<SimulationEndDto> CreateSimulationEndDto(uint64_t stop) override;
 
     auto CreateBulkControllerDto(const ServiceDescriptor& serviceDescriptor) -> Object<BulkControllerDto> override;
     auto CreateBulkDataServiceDto(const ServiceDescriptor& serviceDescriptor) -> Object<BulkDataServiceDto> override;

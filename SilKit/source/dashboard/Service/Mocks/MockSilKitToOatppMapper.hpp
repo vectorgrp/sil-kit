@@ -42,15 +42,6 @@ public:
                 (const SilKit::Services::Orchestration::ParticipantStatus&), (override));
     MOCK_METHOD(oatpp::Object<SilKit::Dashboard::ServiceDto>, CreateServiceDto,
                 (const SilKit::Core::ServiceDescriptor&), (override));
-    MOCK_METHOD(oatpp::Object<SilKit::Dashboard::DataPublisherDto>, CreateDataPublisherDto,
-                (const SilKit::Core::ServiceDescriptor&), (override));
-    MOCK_METHOD(oatpp::Object<SilKit::Dashboard::DataSubscriberDto>, CreateDataSubscriberDto,
-                (const SilKit::Core::ServiceDescriptor&), (override));
-    MOCK_METHOD(oatpp::Object<SilKit::Dashboard::RpcClientDto>, CreateRpcClientDto,
-                (const SilKit::Core::ServiceDescriptor&), (override));
-    MOCK_METHOD(oatpp::Object<SilKit::Dashboard::RpcServerDto>, CreateRpcServerDto,
-                (const SilKit::Core::ServiceDescriptor&), (override));
-    MOCK_METHOD(oatpp::Object<SimulationEndDto>, CreateSimulationEndDto, (uint64_t), (override));
 
     MOCK_METHOD(Object<BulkControllerDto>, CreateBulkControllerDto, (const ServiceDescriptor&), (override));
     MOCK_METHOD(Object<BulkDataServiceDto>, CreateBulkDataServiceDto, (const ServiceDescriptor&), (override));

@@ -224,28 +224,6 @@ oatpp::Object<DataSpecDto> CreateDataSpecDto(const Core::ServiceDescriptor& serv
     return dataSpec;
 }
 
-oatpp::Object<DataPublisherDto> SilKitToOatppMapper::CreateDataPublisherDto(
-    const Core::ServiceDescriptor& serviceDescriptor)
-{
-    auto dataPublisher = DataPublisherDto::createShared();
-    dataPublisher->name = serviceDescriptor.GetServiceName();
-    dataPublisher->networkName = serviceDescriptor.GetNetworkName();
-    dataPublisher->spec = CreateDataSpecDto(serviceDescriptor, Core::Discovery::supplKeyDataPublisherTopic,
-                                            Core::Discovery::supplKeyDataPublisherMediaType,
-                                            Core::Discovery::supplKeyDataPublisherPubLabels);
-    return dataPublisher;
-}
-
-oatpp::Object<DataSubscriberDto> SilKitToOatppMapper::CreateDataSubscriberDto(
-    const Core::ServiceDescriptor& serviceDescriptor)
-{
-    auto dataSubscriber = DataSubscriberDto::createShared();
-    dataSubscriber->name = serviceDescriptor.GetServiceName();
-    dataSubscriber->spec = CreateDataSpecDto(serviceDescriptor, Core::Discovery::supplKeyDataSubscriberTopic,
-                                             Core::Discovery::supplKeyDataSubscriberMediaType,
-                                             Core::Discovery::supplKeyDataSubscriberSubLabels);
-    return dataSubscriber;
-}
 
 oatpp::Object<RpcSpecDto> CreateRpcSpecDto(const Core::ServiceDescriptor& serviceDescriptor,
                                            const std::string& functionNameKey, const std::string& mediaTypeKey,
@@ -256,34 +234,6 @@ oatpp::Object<RpcSpecDto> CreateRpcSpecDto(const Core::ServiceDescriptor& servic
     rpcSpec->mediaType = GetSupplementalDataValue(serviceDescriptor, mediaTypeKey);
     rpcSpec->labels = CreateMatchingLabels(serviceDescriptor, labelsKey);
     return rpcSpec;
-}
-
-oatpp::Object<RpcClientDto> SilKitToOatppMapper::CreateRpcClientDto(const Core::ServiceDescriptor& serviceDescriptor)
-{
-    auto rpcClient = RpcClientDto::createShared();
-    rpcClient->name = serviceDescriptor.GetServiceName();
-    rpcClient->networkName = serviceDescriptor.GetNetworkName();
-    rpcClient->spec =
-        CreateRpcSpecDto(serviceDescriptor, Core::Discovery::supplKeyRpcClientFunctionName,
-                         Core::Discovery::supplKeyRpcClientMediaType, Core::Discovery::supplKeyRpcClientLabels);
-    return rpcClient;
-}
-
-oatpp::Object<RpcServerDto> SilKitToOatppMapper::CreateRpcServerDto(const Core::ServiceDescriptor& serviceDescriptor)
-{
-    auto rpcServer = RpcServerDto::createShared();
-    rpcServer->name = serviceDescriptor.GetServiceName();
-    rpcServer->spec =
-        CreateRpcSpecDto(serviceDescriptor, Core::Discovery::supplKeyRpcServerFunctionName,
-                         Core::Discovery::supplKeyRpcServerMediaType, Core::Discovery::supplKeyRpcServerLabels);
-    return rpcServer;
-}
-
-oatpp::Object<SimulationEndDto> SilKitToOatppMapper::CreateSimulationEndDto(uint64_t stop)
-{
-    auto simulationEnd = SimulationEndDto::createShared();
-    simulationEnd->stopped = stop;
-    return simulationEnd;
 }
 
 auto SilKitToOatppMapper::CreateBulkControllerDto(const ServiceDescriptor& serviceDescriptor)

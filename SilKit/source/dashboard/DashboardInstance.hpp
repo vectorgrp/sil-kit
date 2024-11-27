@@ -9,15 +9,14 @@
 
 #include "LoggerMessage.hpp"
 
-#include "silkit/config/IParticipantConfiguration.hpp"
-
-#include "CachingSilKitEventHandler.hpp"
-#include "IDashboard.hpp"
 #include "OatppHeaders.hpp"
 #include "Client/DashboardSystemApiClient.hpp"
 #include "Service/ISilKitToOatppMapper.hpp"
 #include "SystemStateTracker.hpp"
-#include "DashboardRetryPolicy.hpp"
+#include "IRestClient.hpp"
+
+#include "LockedQueue.hpp"
+#include "SilKitEvent.hpp"
 
 #include <chrono>
 #include <string>
@@ -57,10 +56,9 @@ private:
 
 private:
     void RunEventQueueWorkerThread();
-    void RunBulkUpdateEventQueueWorkerThread();
 
 private: // SilKit::Core::IRegistryEventListener
-    void OnLoggerInternalCreated(SilKit::Services::Logging::ILoggerInternal* logger) override;
+    void OnLoggerCreated(SilKit::Services::Logging::ILogger* logger) override;
     void OnRegistryUri(const std::string& registryUri) override;
     void OnParticipantConnected(std::string const& simulationName, std::string const& participantName) override;
     void OnParticipantDisconnected(std::string const& simulationName, std::string const& participantName) override;
@@ -75,16 +73,12 @@ private: // SilKit::Core::IRegistryEventListener
 
 private:
     /// Assigned in OnLoggerCreated
-    SilKit::Services::Logging::ILoggerInternal* _logger{nullptr};
+    SilKit::Services::Logging::ILogger* _logger{nullptr};
     /// Assigned in OnRegistryUri
     std::unique_ptr<SilKit::Core::Uri> _registryUri;
 
-    std::shared_ptr<oatpp::data::mapping::ObjectMapper> _objectMapper;
-    std::shared_ptr<SilKit::Dashboard::DashboardRetryPolicy> _retryPolicy;
-    std::shared_ptr<SilKit::Dashboard::DashboardSystemApiClient> _apiClient;
-    std::shared_ptr<SilKit::Dashboard::ISilKitToOatppMapper> _silKitToOatppMapper;
-    std::shared_ptr<SilKit::Dashboard::ISilKitEventHandler> _silKitEventHandler;
-    std::shared_ptr<SilKit::Dashboard::ISilKitEventQueue> _silKitEventQueue;
+    std::shared_ptr<IRestClient> _dashboardRestClient;
+    LockedQueue<SilKitEvent> _silKitEventQueue;
 
     std::thread _eventQueueWorkerThread;
     std::promise<void> _eventQueueWorkerThreadAbort;

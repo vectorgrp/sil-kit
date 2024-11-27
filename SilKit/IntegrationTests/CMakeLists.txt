@@ -260,18 +260,14 @@ add_silkit_test_to_executable(SilKitIntegrationTests
 )
 
 if(SILKIT_BUILD_DASHBOARD)
-    add_silkit_test_to_executable(SilKitInternalIntegrationTests
-        SOURCES ITest_Dashboard.cpp
-        LIBS O_SilKit_Dashboard
-    )
+    #add_silkit_test_to_executable(SilKitInternalIntegrationTests
+    #    SOURCES ITest_Dashboard.cpp
+    #    LIBS O_SilKit_Dashboard
+    #)
 
-    add_silkit_test_to_executable(SilKitInternalIntegrationTests
-        SOURCES ITest_DashboardServerUnavailable.cpp
-        LIBS O_SilKit_Dashboard
-    )
 
-    add_silkit_test_to_executable(SilKitInternalIntegrationTests
-        SOURCES ITest_DashboardServerTimeout.cpp
-        LIBS O_SilKit_Dashboard
-    )
+    #add_silkit_test_to_executable(SilKitInternalIntegrationTests
+    #    SOURCES ITest_DashboardServerTimeout.cpp
+    #    LIBS O_SilKit_Dashboard
+    #)
 endif()

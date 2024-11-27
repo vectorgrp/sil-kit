@@ -25,8 +25,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "ServiceDatatypes.hpp"
 #include "MetricsDatatypes.hpp"
 
-namespace SilKit {
-namespace Dashboard {
+namespace VSilKit {
 
 struct SimulationStart
 {
@@ -36,8 +35,8 @@ struct SimulationStart
 
 struct ServiceData
 {
-    Core::Discovery::ServiceDiscoveryEvent::Type discoveryType;
-    Core::ServiceDescriptor serviceDescriptor;
+    SilKit::Core::Discovery::ServiceDiscoveryEvent::Type discoveryType;
+    SilKit::Core::ServiceDescriptor serviceDescriptor;
 };
 
 struct SimulationEnd
@@ -74,9 +73,9 @@ struct SilKitEventTrait;
 using MetricsUpdatePair = std::pair<std::string, VSilKit::MetricsUpdate>;
 
 SILKIT_EVENT(SimulationStart, OnSimulationStart)
-SILKIT_EVENT(Services::Orchestration::ParticipantConnectionInformation, OnParticipantConnected)
-SILKIT_EVENT(Services::Orchestration::SystemState, OnSystemStateChanged)
-SILKIT_EVENT(Services::Orchestration::ParticipantStatus, OnParticipantStatusChanged)
+SILKIT_EVENT(SilKit::Services::Orchestration::ParticipantConnectionInformation, OnParticipantConnected)
+SILKIT_EVENT(SilKit::Services::Orchestration::SystemState, OnSystemStateChanged)
+SILKIT_EVENT(SilKit::Services::Orchestration::ParticipantStatus, OnParticipantStatusChanged)
 SILKIT_EVENT(ServiceData, OnServiceDiscoveryEvent)
 SILKIT_EVENT(SimulationEnd, OnSimulationEnd)
 SILKIT_EVENT(MetricsUpdatePair, OnMetricUpdate)
@@ -163,19 +162,19 @@ public:
         return Get<SimulationStart>();
     }
 
-    auto GetParticipantConnectionInformation() const -> const Services::Orchestration::ParticipantConnectionInformation&
+    auto GetParticipantConnectionInformation() const -> const SilKit::Services::Orchestration::ParticipantConnectionInformation&
     {
-        return Get<Services::Orchestration::ParticipantConnectionInformation>();
+        return Get<SilKit::Services::Orchestration::ParticipantConnectionInformation>();
     }
 
-    auto GetParticipantStatus() const -> const Services::Orchestration::ParticipantStatus&
+    auto GetParticipantStatus() const -> const SilKit::Services::Orchestration::ParticipantStatus&
     {
-        return Get<Services::Orchestration::ParticipantStatus>();
+        return Get<SilKit::Services::Orchestration::ParticipantStatus>();
     }
 
-    auto GetSystemState() const -> const Services::Orchestration::SystemState&
+    auto GetSystemState() const -> const SilKit::Services::Orchestration::SystemState&
     {
-        return Get<Services::Orchestration::SystemState>();
+        return Get<SilKit::Services::Orchestration::SystemState>();
     }
 
     auto GetServiceData() const -> const ServiceData&
@@ -219,7 +218,7 @@ const T& SilKitEvent::Get() const
     const auto tag = getTypeId<T>();
     if (tag != _type)
     {
-        throw SilKitError("SilKitEvent::Get() Requested type does not match stored type.");
+        throw SilKit::SilKitError("SilKitEvent::Get() Requested type does not match stored type.");
     }
 
     return *(reinterpret_cast<const T*>(_data));
@@ -235,6 +234,4 @@ void SilKitEvent::swap(SilKitEvent& other) noexcept
     swap(_destroy, other._destroy);
 }
 
-} // namespace Dashboard
-
-} // namespace SilKit
+} // namespace VSilKit
