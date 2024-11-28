@@ -50,11 +50,12 @@ using ::SilKit::Core::Tests::DummyParticipant;
 
 class MockParticipant : public DummyParticipant
 {
+
 public:
-    MOCK_METHOD2(SendMsg, void(const IServiceEndpoint *, const WireCanFrameEvent &));
-    MOCK_METHOD2(SendMsg, void(const IServiceEndpoint *, const CanFrameTransmitEvent &));
-    MOCK_METHOD2(SendMsg, void(const IServiceEndpoint *, const CanConfigureBaudrate &));
-    MOCK_METHOD2(SendMsg, void(const IServiceEndpoint *, const CanSetControllerMode &));
+    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint *, const std::string &, const WireCanFrameEvent &), (override));
+    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint *, const std::string &, const CanFrameTransmitEvent &), (override));
+    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint *, const std::string &, const CanConfigureBaudrate &), (override));
+    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint *, const std::string &, const CanSetControllerMode &), (override));
 };
 
 class CanControllerCallbacks
@@ -66,16 +67,18 @@ public:
     MOCK_METHOD2(FrameTransmitHandler, void(ICanController *, CanFrameTransmitEvent));
 };
 
+const std::string netsimName = "bussim";
+
 TEST(Test_CanControllerDetailedSim, send_can_message)
 {
     MockParticipant mockParticipant;
     CanController canController(&mockParticipant, {}, mockParticipant.GetTimeProvider());
-    canController.SetDetailedBehavior({"bussim", "n1", "c1", 8});
+    canController.SetDetailedBehavior({netsimName, "n1", "c1", 8});
     canController.SetServiceDescriptor({"p1", "n1", "c1", 8});
 
     WireCanFrameEvent testFrameEvent{};
 
-    EXPECT_CALL(mockParticipant, SendMsg(&canController, testFrameEvent)).Times(1);
+    EXPECT_CALL(mockParticipant, SendMsg(&canController, netsimName, testFrameEvent)).Times(1);
 
     canController.SendFrame(ToCanFrame(testFrameEvent.frame));
 }
@@ -84,7 +87,7 @@ TEST(Test_CanControllerDetailedSim, receive_can_message)
 {
     using namespace std::placeholders;
 
-    ServiceDescriptor busSimAddress{"bussim", "n1", "c1", 8};
+    ServiceDescriptor busSimAddress{netsimName, "n1", "c1", 8};
 
     MockParticipant mockParticipant;
     CanControllerCallbacks callbackProvider;
@@ -110,7 +113,7 @@ TEST(Test_CanControllerDetailedSim, start_stop_sleep_reset)
     MockParticipant mockParticipant;
 
     CanController canController(&mockParticipant, {}, mockParticipant.GetTimeProvider());
-    canController.SetDetailedBehavior({"bussim", "n1", "c1", 8});
+    canController.SetDetailedBehavior({netsimName, "n1", "c1", 8});
     canController.SetServiceDescriptor({"p1", "n1", "c1", 8});
 
     CanSetControllerMode startCommand = {{0, 0}, CanControllerState::Started};
@@ -118,10 +121,10 @@ TEST(Test_CanControllerDetailedSim, start_stop_sleep_reset)
     CanSetControllerMode sleepCommand = {{0, 0}, CanControllerState::Sleep};
     CanSetControllerMode resetCommand = {{1, 1}, CanControllerState::Uninit};
 
-    EXPECT_CALL(mockParticipant, SendMsg(&canController, startCommand)).Times(1);
-    EXPECT_CALL(mockParticipant, SendMsg(&canController, stopCommand)).Times(1);
-    EXPECT_CALL(mockParticipant, SendMsg(&canController, sleepCommand)).Times(1);
-    EXPECT_CALL(mockParticipant, SendMsg(&canController, resetCommand)).Times(1);
+    EXPECT_CALL(mockParticipant, SendMsg(&canController, netsimName, startCommand)).Times(1);
+    EXPECT_CALL(mockParticipant, SendMsg(&canController, netsimName, stopCommand)).Times(1);
+    EXPECT_CALL(mockParticipant, SendMsg(&canController, netsimName, sleepCommand)).Times(1);
+    EXPECT_CALL(mockParticipant, SendMsg(&canController, netsimName, resetCommand)).Times(1);
 
     canController.Start();
     canController.Stop();
@@ -134,14 +137,14 @@ TEST(Test_CanControllerDetailedSim, set_baudrate)
     MockParticipant mockParticipant;
 
     CanController canController(&mockParticipant, {}, mockParticipant.GetTimeProvider());
-    canController.SetDetailedBehavior({"bussim", "n1", "c1", 8});
+    canController.SetDetailedBehavior({netsimName, "n1", "c1", 8});
     canController.SetServiceDescriptor({"p1", "n1", "c1", 8});
 
     CanConfigureBaudrate baudrate1 = {3000, 0, 0};
     CanConfigureBaudrate baudrate2 = {3000, 500000, 0};
 
-    EXPECT_CALL(mockParticipant, SendMsg(&canController, baudrate1)).Times(1);
-    EXPECT_CALL(mockParticipant, SendMsg(&canController, baudrate2)).Times(1);
+    EXPECT_CALL(mockParticipant, SendMsg(&canController, netsimName, baudrate1)).Times(1);
+    EXPECT_CALL(mockParticipant, SendMsg(&canController, netsimName, baudrate2)).Times(1);
 
     canController.SetBaudRate(baudrate1.baudRate, baudrate1.fdBaudRate, baudrate1.xlBaudRate);
     canController.SetBaudRate(baudrate2.baudRate, baudrate2.fdBaudRate, baudrate2.xlBaudRate);
@@ -151,7 +154,7 @@ TEST(Test_CanControllerDetailedSim, receive_new_controller_state)
 {
     using namespace std::placeholders;
 
-    ServiceDescriptor busSimAddress{"bussim", "n1", "c1", 8};
+    ServiceDescriptor busSimAddress{netsimName, "n1", "c1", 8};
 
     MockParticipant mockParticipant;
 
@@ -197,7 +200,7 @@ TEST(Test_CanControllerDetailedSim, receive_new_controller_state)
 TEST(Test_CanControllerDetailedSim, receive_ack)
 {
     using namespace std::placeholders;
-    ServiceDescriptor busSimAddress{"bussim", "n1", "c1", 8};
+    ServiceDescriptor busSimAddress{netsimName, "n1", "c1", 8};
 
     MockParticipant mockParticipant;
 
@@ -245,7 +248,9 @@ TEST(Test_CanControllerDetailedSim, must_not_generate_ack)
     canController.SetServiceDescriptor(controllerAddress);
 
     WireCanFrameEvent msg{};
-    EXPECT_CALL(mockParticipant, SendMsg(An<const IServiceEndpoint *>(), A<const CanFrameTransmitEvent &>())).Times(0);
+    EXPECT_CALL(mockParticipant,
+                SendMsg(An<const IServiceEndpoint *>(), netsimName, A<const CanFrameTransmitEvent &>()))
+        .Times(0);
 
     CanController canControllerFrom(&mockParticipant, {}, mockParticipant.GetTimeProvider());
     canControllerFrom.SetServiceDescriptor(busSimAddress);

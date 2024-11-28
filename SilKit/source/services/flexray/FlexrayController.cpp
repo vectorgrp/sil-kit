@@ -340,7 +340,7 @@ void FlexrayController::ReceiveMsg(const IServiceEndpoint* from, const FlexrayPo
 template <typename MsgT>
 void FlexrayController::SendMsg(MsgT&& msg)
 {
-    _participant->SendMsg(this, std::forward<MsgT>(msg));
+    _participant->SendMsg(this, _simulatedLink.GetParticipantName(), std::forward<MsgT>(msg));
 }
 
 //------------------------

@@ -36,34 +36,41 @@ SimBehaviorDetailed::SimBehaviorDetailed(Core::IParticipantInternal* participant
 }
 
 template <typename MsgT>
-void SimBehaviorDetailed::SendMsgImpl(MsgT&& msg)
+void SimBehaviorDetailed::SendBroadcastMsgImpl(MsgT&& msg)
 {
     _participant->SendMsg(_parentServiceEndpoint, std::forward<MsgT>(msg));
 }
 
+template <typename MsgT>
+void SimBehaviorDetailed::SendTargettedMsgImpl(MsgT&& msg)
+{
+    _participant->SendMsg(_parentServiceEndpoint, _simulatedLink.GetParticipantName(), std::forward<MsgT>(msg));
+}
+
 void SimBehaviorDetailed::SendMsg(LinSendFrameRequest&& msg)
 {
-    SendMsgImpl(msg);
+    SendTargettedMsgImpl(msg);
 }
 void SimBehaviorDetailed::SendMsg(LinTransmission&& msg)
 {
-    SendMsgImpl(msg);
-}
-void SimBehaviorDetailed::SendMsg(WireLinControllerConfig&& msg)
-{
-    SendMsgImpl(msg);
+    SendTargettedMsgImpl(msg);
 }
 void SimBehaviorDetailed::SendMsg(LinSendFrameHeaderRequest&& msg)
 {
-    SendMsgImpl(msg);
+    SendTargettedMsgImpl(msg);
+}
+
+void SimBehaviorDetailed::SendMsg(WireLinControllerConfig&& msg)
+{
+    SendBroadcastMsgImpl(msg);
 }
 void SimBehaviorDetailed::SendMsg(LinFrameResponseUpdate&& msg)
 {
-    SendMsgImpl(msg);
+    SendBroadcastMsgImpl(msg);
 }
 void SimBehaviorDetailed::SendMsg(LinControllerStatusUpdate&& msg)
 {
-    SendMsgImpl(msg);
+    SendBroadcastMsgImpl(msg);
 }
 
 void SimBehaviorDetailed::ProcessFrameHeaderRequest(const LinSendFrameHeaderRequest& /*header*/)
@@ -78,7 +85,7 @@ void SimBehaviorDetailed::UpdateTxBuffer(const LinFrame& frame)
     response.frame = frame;
     response.responseMode = LinFrameResponseMode::TxUnconditional;
     responseUpdate.frameResponses.push_back(response);
-    SendMsgImpl(responseUpdate);
+    SendBroadcastMsgImpl(responseUpdate);
 }
 
 void SimBehaviorDetailed::GoToSleep()
@@ -87,7 +94,7 @@ void SimBehaviorDetailed::GoToSleep()
     gotosleepFrame.frame = GoToSleepFrame();
     gotosleepFrame.responseType = LinFrameResponseType::MasterResponse;
 
-    SendMsgImpl(gotosleepFrame);
+    SendTargettedMsgImpl(gotosleepFrame);
 
     // We signal SleepPending to the network simulator, so it will be able
     // to finish sleep frame transmissions before entering Sleep state.
@@ -101,7 +108,7 @@ void SimBehaviorDetailed::Wakeup()
 {
     // Send without direction, netsim will distribute with correct directions
     LinWakeupPulse pulse{};
-    SendMsgImpl(pulse);
+    SendTargettedMsgImpl(pulse);
     _parentController->WakeupInternal();
 }
 

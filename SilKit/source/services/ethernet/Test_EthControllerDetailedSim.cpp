@@ -61,10 +61,10 @@ auto AnEthMessageWith(std::chrono::nanoseconds timestamp) -> testing::Matcher<co
 class MockParticipant : public DummyParticipant
 {
 public:
-    MOCK_METHOD2(SendMsg, void(const IServiceEndpoint *, const WireEthernetFrameEvent &));
-    MOCK_METHOD2(SendMsg, void(const IServiceEndpoint *, const EthernetFrameTransmitEvent &));
-    MOCK_METHOD2(SendMsg, void(const IServiceEndpoint *, const EthernetStatus &));
-    MOCK_METHOD2(SendMsg, void(const IServiceEndpoint *, const EthernetSetMode &));
+    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint *,const std::string&, const WireEthernetFrameEvent &), (override));
+    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint *,const std::string&, const EthernetFrameTransmitEvent &), (override));
+    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint *,const std::string&, const EthernetStatus &), (override));
+    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint *,const std::string&, const EthernetSetMode &), (override));
 };
 
 class Test_EthControllerDetailedSim : public testing::Test
@@ -96,8 +96,10 @@ protected:
     }
 
 protected:
+    const std::string netsimName = "bussim";
+
     ServiceDescriptor controllerAddress{"controller", "n1", "c1", 8};
-    ServiceDescriptor busSimAddress{"bussim", "n1", "c1", 8};
+    ServiceDescriptor busSimAddress{netsimName, "n1", "c1", 8};
 
     MockParticipant participant;
     Callbacks callbacks;
@@ -127,9 +129,9 @@ TEST_F(Test_EthControllerDetailedSim, keep_track_of_state)
     EthernetSetMode Activate{EthernetMode::Active};
     EthernetSetMode Deactivate{EthernetMode::Inactive};
 
-    EXPECT_CALL(participant, SendMsg(&controller, Activate)).Times(1);
+    EXPECT_CALL(participant, SendMsg(&controller, netsimName, Activate)).Times(1);
 
-    EXPECT_CALL(participant, SendMsg(&controller, Deactivate)).Times(1);
+    EXPECT_CALL(participant, SendMsg(&controller, netsimName, Deactivate)).Times(1);
 
     controller.Deactivate();
     controller.Activate();
@@ -143,7 +145,7 @@ TEST_F(Test_EthControllerDetailedSim, keep_track_of_state)
 
 TEST_F(Test_EthControllerDetailedSim, send_eth_message)
 {
-    EXPECT_CALL(participant, SendMsg(&controller, AnEthMessageWith(0ns))).Times(1);
+    EXPECT_CALL(participant, SendMsg(&controller, netsimName, AnEthMessageWith(0ns))).Times(1);
 
     EXPECT_CALL(participant.mockTimeProvider, Now()).Times(1);
 
@@ -155,7 +157,7 @@ TEST_F(Test_EthControllerDetailedSim, send_eth_message)
  */
 TEST_F(Test_EthControllerDetailedSim, send_eth_frame)
 {
-    EXPECT_CALL(participant, SendMsg(&controller, AnEthMessageWith(0ns))).Times(1);
+    EXPECT_CALL(participant, SendMsg(&controller, netsimName, AnEthMessageWith(0ns))).Times(1);
 
     EXPECT_CALL(participant.mockTimeProvider, Now()).Times(1);
 
@@ -199,7 +201,9 @@ TEST_F(Test_EthControllerDetailedSim, must_not_generate_ack)
     WireEthernetFrameEvent msg{};
     msg.userContext = reinterpret_cast<void *>(17);
 
-    EXPECT_CALL(participant, SendMsg(An<const IServiceEndpoint *>(), A<const EthernetFrameTransmitEvent &>())).Times(0);
+    EXPECT_CALL(participant,
+                SendMsg(An<const IServiceEndpoint *>(), netsimName, A<const EthernetFrameTransmitEvent &>()))
+        .Times(0);
 
     controller.ReceiveMsg(&controllerBusSim, msg);
 }

@@ -59,7 +59,10 @@ public:
 
 private:
     template <typename MsgT>
-    void SendMsgImpl(MsgT&& msg);
+    void SendBroadcastMsgImpl(MsgT&& msg);
+    
+    template <typename MsgT>
+    void SendTargettedMsgImpl(MsgT&& msg);
 
     Core::IParticipantInternal* _participant{nullptr};
     LinController* _parentController{nullptr};

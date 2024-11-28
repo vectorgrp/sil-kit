@@ -38,13 +38,20 @@ namespace Tests {
 class LinMockParticipant : public Core::Tests::DummyParticipant
 {
 public:
-    MOCK_METHOD(void, SendMsg, (const Core::IServiceEndpoint*, const LinSendFrameRequest&));
-    MOCK_METHOD(void, SendMsg, (const Core::IServiceEndpoint*, const LinSendFrameHeaderRequest&));
-    MOCK_METHOD(void, SendMsg, (const Core::IServiceEndpoint*, const LinTransmission&));
+
     MOCK_METHOD(void, SendMsg, (const Core::IServiceEndpoint*, const LinFrameResponseUpdate&));
     MOCK_METHOD(void, SendMsg, (const Core::IServiceEndpoint*, const WireLinControllerConfig&));
     MOCK_METHOD(void, SendMsg, (const Core::IServiceEndpoint*, const LinControllerStatusUpdate&));
-    MOCK_METHOD(void, SendMsg, (const Core::IServiceEndpoint*, const LinWakeupPulse&));
+
+    MOCK_METHOD(void, SendMsg, (const Core::IServiceEndpoint*, const LinSendFrameRequest&), (override));
+    MOCK_METHOD(void, SendMsg, (const Core::IServiceEndpoint*, const LinSendFrameHeaderRequest&), (override));
+    MOCK_METHOD(void, SendMsg, (const Core::IServiceEndpoint*, const LinTransmission&), (override));
+    MOCK_METHOD(void, SendMsg, (const Core::IServiceEndpoint*, const LinWakeupPulse&), (override));
+
+    MOCK_METHOD(void, SendMsg, (const Core::IServiceEndpoint*, const std::string&, const LinSendFrameRequest&), (override));
+    MOCK_METHOD(void, SendMsg, (const Core::IServiceEndpoint*, const std::string&, const LinSendFrameHeaderRequest&), (override));
+    MOCK_METHOD(void, SendMsg, (const Core::IServiceEndpoint*, const std::string&, const LinTransmission&), (override));
+    MOCK_METHOD(void, SendMsg, (const Core::IServiceEndpoint*, const std::string&, const LinWakeupPulse&), (override));
 };
 
 inline auto MakeControllerConfig(LinControllerMode mode) -> LinControllerConfig
