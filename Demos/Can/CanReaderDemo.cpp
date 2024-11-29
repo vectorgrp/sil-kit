@@ -5,8 +5,6 @@
 #include "ApplicationBase.hpp"
 #include "CanDemoCommon.hpp"
 
-using namespace std::chrono_literals;
-
 class CanReader: public ApplicationBase
 {
 public:
@@ -15,23 +13,23 @@ public:
 
 private:
     ICanController* _canController{nullptr};
+    std::string _networkName = "CAN1";
 
-    std::string networkName = "CAN1";
     void AddCommandLineArgs() override
     {
         GetCommandLineParser()->Add<CommandlineParser::Option>(
-            "network", "n", networkName, "[--network <name>]",
-            "-n, --network: Name of the CAN network to use. Defaults to '" + networkName + "'.");
+            "network", "n", _networkName, "-n, --network <name>",
+            std::vector<std::string>{"Name of the CAN network to use.", "Defaults to '" + _networkName + "'."});
     }
 
     void EvaluateCommandLineArgs() override
     {
-        networkName = GetCommandLineParser()->Get<CommandlineParser::Option>("network").Value();
+        _networkName = GetCommandLineParser()->Get<CommandlineParser::Option>("network").Value();
     }
 
     void CreateControllers() override
     {
-        _canController = GetParticipant()->CreateCanController("CanController1", networkName);
+        _canController = GetParticipant()->CreateCanController("CanController1", _networkName);
 
         _canController->AddFrameTransmitHandler([this](ICanController* /*ctrl*/, const CanFrameTransmitEvent& ack) {
             CanDemoCommon::FrameTransmitHandler(ack, GetLogger());
@@ -64,7 +62,7 @@ int main(int argc, char** argv)
     args.participantName = "CanReader";
     args.duration = 5ms;
     CanReader app{args};
-    app.SetupCommandLineArgs(argc, argv);
+    app.SetupCommandLineArgs(argc, argv, "SIL Kit Demo - Can: Log received frames");
     
     return app.Run();
 }

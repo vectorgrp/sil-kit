@@ -23,6 +23,7 @@ static std::unique_ptr<SignalMonitor> gSignalMonitor;
 // Inline Platform Specific Implementations
 ////////////////////////////////////////////
 #if WIN32
+#define NOMINMAX
 #include <windows.h>
 
 namespace {

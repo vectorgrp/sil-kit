@@ -9,7 +9,7 @@
 #include <iostream>
 #include <algorithm>
 #include <memory>
-
+#include <iomanip>
 
 namespace SilKit {
 namespace Util {
@@ -20,6 +20,12 @@ class CommandlineParser
 public:
     CommandlineParser() = default;
 
+    //! \brief Set the application description
+    void SetDescription(const std::string& description)
+    {
+        _appDescription = description;
+    }
+
     //! \brief Declare a new argument
     template <class TArgument, typename... Args>
     auto& Add(Args&&... args)
@@ -28,6 +34,10 @@ public:
         if (NameExists(argument->Name()))
         {
             throw std::runtime_error("Argument '" + argument->Name() + "' already exists");
+        }
+        if (argument->Usage().size() > _longestUsage)
+        {
+            _longestUsage = argument->Usage().size();
         }
         _arguments.push_back(std::move(argument));
         return *this;
@@ -51,21 +61,44 @@ public:
      */
     void PrintUsageInfo(std::ostream& out, const std::string& executableName)
     {
-        out << "Usage: " << executableName;
-        for (auto& argument : _arguments)
-        {
-            if (argument->IsHidden())
-                continue;
-            out << " " << argument->Usage();
-        }
         out << std::endl;
+        //out << std::setw(_longestUsage + 1) << std::left << "Description: " << _appDescription << std::endl;
+        out << _appDescription << std::endl;
+        out << std::endl;
+
+        //out << std::setw(_longestUsage + 1) << std::left << "Usage: " << executableName;
+        //for (auto& argument : _arguments)
+        //{
+        //    if (argument->IsHidden())
+        //        continue;
+
+        //    out << " [" << argument->Usage() << "]";
+        //}
+        //out << std::endl << std::endl;
+
         out << "Arguments:" << std::endl;
         for (auto& argument : _arguments)
         {
             if (argument->IsHidden())
                 continue;
-            out << argument->Description() << std::endl;
+
+            if (argument->DescriptionLines().size() > 0)
+            {
+                out << std::setw(_longestUsage + 1) << std::left << argument->Usage() << ": "
+                    << argument->DescriptionLines()[0] << std::endl;
+            }
+            bool skipFirst = true;
+            for (auto& l : argument->DescriptionLines())
+            {
+                if (skipFirst)
+                {
+                    skipFirst = false;
+                    continue;
+                }
+                std::cout << std::setw(_longestUsage + 3) << " " << l << std::endl;
+            }
         }
+        out << std::endl;
     }
 
     /*! \brief Parse arguments based on argc/argv parameters from a main function
@@ -177,17 +210,17 @@ public:
         virtual auto Kind() const -> ArgumentKind = 0;
         virtual auto Name() const -> std::string = 0;
         virtual auto Usage() const -> std::string = 0;
-        virtual auto Description() const -> std::string = 0;
+        virtual auto DescriptionLines() const -> std::vector<std::string> = 0;
         virtual bool IsHidden() const = 0;
     };
 
     template <class Derived, class T>
     struct Argument : public IArgument
     {
-        Argument(std::string name, std::string usage, std::string description, bool hidden = false)
+        Argument(std::string name, std::string usage, std::vector<std::string> descriptionLines, bool hidden = false)
             : _name(std::move(name))
             , _usage(std::move(usage))
-            , _description(std::move(description))
+            , _descriptionLines(std::move(descriptionLines))
             , _hidden{hidden}
         {
         }
@@ -204,9 +237,9 @@ public:
         {
             return _usage;
         }
-        auto Description() const -> std::string override
+        auto DescriptionLines() const -> std::vector<std::string> override
         {
-            return _description;
+            return _descriptionLines;
         }
         bool IsHidden() const override
         {
@@ -216,7 +249,7 @@ public:
     private:
         std::string _name;
         std::string _usage;
-        std::string _description;
+        std::vector<std::string> _descriptionLines;
         bool _hidden{false};
     };
 
@@ -229,8 +262,8 @@ public:
         friend class CommandlineParser;
         static constexpr auto kind = ArgumentKind::Positional;
 
-        Positional(std::string name, std::string usage, std::string description)
-            : Argument(std::move(name), std::move(usage), std::move(description))
+        Positional(std::string name, std::string usage, std::vector<std::string> descriptionLines)
+            : Argument(std::move(name), std::move(usage), std::move(descriptionLines))
             , _value()
         {
         }
@@ -258,8 +291,8 @@ public:
         friend class CommandlineParser;
         static constexpr auto kind = ArgumentKind::PositionalList;
 
-        PositionalList(std::string name, std::string usage, std::string description)
-            : Argument(std::move(name), std::move(usage), std::move(description))
+        PositionalList(std::string name, std::string usage, std::vector<std::string> descriptionLines)
+            : Argument(std::move(name), std::move(usage), std::move(descriptionLines))
             , _values()
         {
         }
@@ -289,8 +322,8 @@ public:
         static constexpr auto kind = ArgumentKind::Option;
 
         Option(std::string name, std::string shortName, std::string defaultValue, std::string usage,
-               std::string description)
-            : Argument(std::move(name), std::move(usage), std::move(description))
+               std::vector<std::string> descriptionLines)
+            : Argument(std::move(name), std::move(usage), std::move(descriptionLines))
             , _shortName(std::move(shortName))
             , _defaultValue(std::move(defaultValue))
             , _value()
@@ -298,8 +331,8 @@ public:
         }
 
         Option(std::string name, std::string shortName, std::string defaultValue, std::string usage,
-               std::string description, decltype(Hidden))
-            : Argument(std::move(name), std::move(usage), std::move(description), true)
+               std::vector<std::string> descriptionLines, decltype(Hidden))
+            : Argument(std::move(name), std::move(usage), std::move(descriptionLines), true)
             , _shortName(std::move(shortName))
             , _defaultValue(std::move(defaultValue))
             , _value()
@@ -340,15 +373,15 @@ public:
         friend class CommandlineParser;
         static constexpr auto kind = ArgumentKind::Flag;
 
-        Flag(std::string name, std::string shortName, std::string usage, std::string description)
-            : Argument(std::move(name), std::move(usage), std::move(description))
+        Flag(std::string name, std::string shortName, std::string usage, std::vector<std::string> descriptionLines)
+            : Argument(std::move(name), std::move(usage), std::move(descriptionLines))
             , _shortName(std::move(shortName))
             , _value(false)
         {
         }
 
-        Flag(std::string name, std::string shortName, std::string usage, std::string description, decltype(Hidden))
-            : Argument(std::move(name), std::move(usage), std::move(description), true)
+        Flag(std::string name, std::string shortName, std::string usage, std::vector<std::string> descriptionLines, decltype(Hidden))
+            : Argument(std::move(name), std::move(usage), std::move(descriptionLines), true)
             , _shortName(std::move(shortName))
             , _value(false)
         {
@@ -394,14 +427,15 @@ private:
 
     auto NameExists(std::string name) -> bool
     {
-        auto it = std::find_if(_arguments.begin(), _arguments.end(), [&name](const auto& el) {
-            return el->Name() == name;
-        });
+        auto it =
+            std::find_if(_arguments.begin(), _arguments.end(), [&name](const auto& el) { return el->Name() == name; });
         return it != _arguments.end();
     }
 
 private:
+    std::string _appDescription;
     std::vector<std::unique_ptr<IArgument>> _arguments;
+    size_t _longestUsage = 0;
 };
 
 } // namespace Util

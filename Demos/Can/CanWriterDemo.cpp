@@ -5,32 +5,31 @@
 #include "ApplicationBase.hpp"
 #include "CanDemoCommon.hpp"
 
-using namespace std::chrono_literals;
-
-class CanWriter: public ApplicationBase
+class CanWriter : public ApplicationBase
 {
 public:
     // Inherit constructors
-    using ApplicationBase::ApplicationBase; 
+    using ApplicationBase::ApplicationBase;
 
 private:
     ICanController* _canController{nullptr};
+    std::string _networkName = "CAN1";
 
-    std::string networkName = "CAN1";
     void AddCommandLineArgs() override
     {
         GetCommandLineParser()->Add<CommandlineParser::Option>(
-            "network", "n", networkName, "[--network <name>]", "-n, --network: Name of the CAN network to use. Defaults to '" + networkName + "'.");
+            "network", "n", _networkName, "-n, --network <name>",
+            std::vector<std::string>{"Name of the CAN network to use.", "Defaults to '" + _networkName + "'."});
     }
 
-    void EvaluateCommandLineArgs() override 
+    void EvaluateCommandLineArgs() override
     {
-        networkName = GetCommandLineParser()->Get<CommandlineParser::Option>("network").Value();
+        _networkName = GetCommandLineParser()->Get<CommandlineParser::Option>("network").Value();
     }
 
     void CreateControllers() override
     {
-        _canController = GetParticipant()->CreateCanController("CanController1", networkName);
+        _canController = GetParticipant()->CreateCanController("CanController1", _networkName);
 
         _canController->AddFrameTransmitHandler([this](ICanController* /*ctrl*/, const CanFrameTransmitEvent& ack) {
             CanDemoCommon::FrameTransmitHandler(ack, GetLogger());
@@ -52,18 +51,15 @@ private:
         static uint64_t messageId = 0;
         messageId++;
 
-        // Build a CAN frame
+        // Build a CAN FD frame
         CanFrame canFrame{};
         canFrame.canId = 3;
-
-        // Cycle between normal and FD frames
         canFrame.flags = static_cast<CanFrameFlagMask>(CanFrameFlag::Fdf) // FD Format Indicator
-                            | static_cast<CanFrameFlagMask>(CanFrameFlag::Brs); // Bit Rate Switch (for FD Format only)
-        
+                         | static_cast<CanFrameFlagMask>(CanFrameFlag::Brs); // Bit Rate Switch (for FD Format only)
 
         // Build a payload with the message Id
         std::stringstream payloadBuilder;
-        payloadBuilder << "CAN " << messageId;
+        payloadBuilder << "CAN " << messageId % 10000;
         auto payloadStr = payloadBuilder.str();
         std::vector<uint8_t> payloadBytes(payloadStr.begin(), payloadStr.end());
         canFrame.dataField = payloadBytes;
@@ -71,8 +67,7 @@ private:
 
         // Log
         std::stringstream buffer;
-        buffer << "Send CAN FD frame, canId=" << canFrame.canId << ", data='" << payloadStr
-               << "' ";
+        buffer << "Send CAN FD frame, canId=" << canFrame.canId << ", data='" << payloadStr << "' ";
         GetLogger()->Info(buffer.str());
 
         // Send
@@ -88,7 +83,6 @@ private:
     {
         SendFrame();
     }
-
 };
 
 int main(int argc, char** argv)
@@ -97,8 +91,7 @@ int main(int argc, char** argv)
     args.participantName = "CanWriter";
     args.duration = 5ms;
     CanWriter app{args};
-    app.SetupCommandLineArgs(argc, argv);
+    app.SetupCommandLineArgs(argc, argv, "SIL Kit Demo - Can: Send CanFd frames");
 
     return app.Run();
 }
-

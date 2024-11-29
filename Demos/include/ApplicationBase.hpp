@@ -71,10 +71,7 @@ protected:
     // When running with time synchronization (no '--async' flag), this is called in the SimulationStepHandler.
     virtual void DoWorkSync(std::chrono::nanoseconds now) = 0;
 
-private:
-    // Command line parser
-    std::shared_ptr<CommandlineParser> _commandLineParser;
-
+public:
     // Default command line argument identifiers (to allow exclusion)
     enum struct DefaultArg
     {
@@ -86,6 +83,11 @@ private:
         Duration,
         AsFastAsPossible
     };
+
+private:
+    // Command line parser
+    std::shared_ptr<CommandlineParser> _commandLineParser;
+
     // Names of the default command line arguments.
     // Note that the 'short name' (e.g. -n) and description are defined at runtime.
     const std::unordered_map<DefaultArg, std::string> defaultArgName = {{DefaultArg::Name, "name"},
@@ -127,7 +129,8 @@ private:
 private:
     void AddDefaultArgs(std::unordered_set<DefaultArg> excludedCommandLineArgs = {})
     {
-        _commandLineParser->Add<CommandlineParser::Flag>("help", "h", "[--help]", "-h, --help: Get this help.");
+        _commandLineParser->Add<CommandlineParser::Flag>("help", "h", "-h, --help",
+                                                         std::vector<std::string>{"Get this help."});
 
         Arguments defaultArgs{};
 
@@ -135,81 +138,69 @@ private:
         {
             _commandLineParser->Add<CommandlineParser::Option>(
                 defaultArgName.at(DefaultArg::Name), "n", defaultArgs.participantName,
-                "[--" + defaultArgName.at(DefaultArg::Name) + " <participantName>]",
-                "-n, --" + defaultArgName.at(DefaultArg::Name)
-                    + " <participantName>: The participant name used to take "
-                      "part in the simulation. Defaults to '"
-                    + _arguments.participantName + "'.");
+                "-n, --" + defaultArgName.at(DefaultArg::Name) + " <name>",
+                std::vector<std::string>{"The participant name used to take part in the simulation.",
+                                         "Defaults to '" + _arguments.participantName + "'."});
         }
 
         if (!excludedCommandLineArgs.count(DefaultArg::Uri))
         {
             _commandLineParser->Add<CommandlineParser::Option>(
                 defaultArgName.at(DefaultArg::Uri), "u", defaultArgs.registryUri,
-                "[--" + defaultArgName.at(DefaultArg::Uri) + " <silkitUri>]",
-                "-u, --" + defaultArgName.at(DefaultArg::Uri)
-                    + " <silkitUri>: The registry URI to connect to. Defaults to '" + _arguments.registryUri + "'.");
+                "-u, --" + defaultArgName.at(DefaultArg::Uri) + " <uri>",
+                std::vector<std::string>{"The registry URI to connect to.",
+                                         "Defaults to '" + _arguments.registryUri + "'."});
         }
 
         if (!excludedCommandLineArgs.count(DefaultArg::Log))
         {
             _commandLineParser->Add<CommandlineParser::Option>(
                 defaultArgName.at(DefaultArg::Log), "l", "info",
-                "[--" + defaultArgName.at(DefaultArg::Log) + " <level>]",
-                "-l, --" + defaultArgName.at(DefaultArg::Log)
-                    + " <level>: Log to stdout with level 'trace', 'debug', 'warn', 'info', 'error', 'critical' or "
-                      "'off'. "
-                      "Defaults to 'info' if the '--"
-                    + defaultArgName.at(DefaultArg::Config)
-                    + "' option is not specified. "
-                      "Set to 'off' to explicitly turn off stdout logging. "
-                      "Cannot be used together with '--"
-                    + defaultArgName.at(DefaultArg::Config) + "'.");
+                "-l, --" + defaultArgName.at(DefaultArg::Log) + " <level>",
+                std::vector<std::string>{
+                    "Log to stdout with level 'trace', 'debug', 'warn', 'info', 'error', 'critical' or 'off'.",
+                    "Defaults to 'info'.",
+                    "Cannot be used together with '--" + defaultArgName.at(DefaultArg::Config) + "'."});
         }
 
         if (!excludedCommandLineArgs.count(DefaultArg::Config))
         {
             _commandLineParser->Add<CommandlineParser::Option>(
                 defaultArgName.at(DefaultArg::Config), "c", "",
-                "[--" + defaultArgName.at(DefaultArg::Config) + " <filePath>]",
-                "-c, --" + defaultArgName.at(DefaultArg::Config)
-                    + " <filePath>: Path to the Participant configuration YAML or JSON file. "
-                      "Cannot be used together with '--"
-                    + defaultArgName.at(DefaultArg::Log) + "'. Will always run as fast as possible.");
+                "-c, --" + defaultArgName.at(DefaultArg::Config) + " <filePath>",
+                std::vector<std::string>{"Path to the Participant configuration YAML or JSON file.",
+                                         "Cannot be used together with '--" + defaultArgName.at(DefaultArg::Log) + "'.",
+                                         "Will always run as fast as possible."});
         }
 
         if (!excludedCommandLineArgs.count(DefaultArg::Async))
         {
-            _commandLineParser->Add<CommandlineParser::Flag>(defaultArgName.at(DefaultArg::Async), "a",
-                                                             "[--" + defaultArgName.at(DefaultArg::Async) + "]",
-                                                             "-a, --" + defaultArgName.at(DefaultArg::Async)
-                                                                 + ": run in asynchronous mode. "
-                                                                   "Cannot be used together with '--"
-                                                                 + defaultArgName.at(DefaultArg::Duration) + "'.");
+            _commandLineParser->Add<CommandlineParser::Flag>(
+                defaultArgName.at(DefaultArg::Async), "a", "-a, --" + defaultArgName.at(DefaultArg::Async),
+                std::vector<std::string>{
+                    "Run in asynchronous mode.",
+                    "Cannot be used together with '--" + defaultArgName.at(DefaultArg::Duration) + "'."});
         }
 
         if (!excludedCommandLineArgs.count(DefaultArg::Duration))
         {
             _commandLineParser->Add<CommandlineParser::Option>(
                 defaultArgName.at(DefaultArg::Duration), "d", std::to_string(defaultArgs.duration.count() / 1000000),
-                "[--" + defaultArgName.at(DefaultArg::Duration) + " <sim step duration in us>]",
-                "-d, --" + defaultArgName.at(DefaultArg::Duration)
-                    + " <sim step duration in us>: The step size in microseconds of the participant. "
-                      "Defaults to 1000us. "
-                      "Cannot be used together with '--"
-                    + defaultArgName.at(DefaultArg::Async) + "'.");
+                "-d, --" + defaultArgName.at(DefaultArg::Duration) + " <us>",
+                std::vector<std::string>{
+                    "The step size in microseconds of the participant.", "Defaults to 1000us.",
+                    "Cannot be used together with '--" + defaultArgName.at(DefaultArg::Async) + "'."});
         }
 
         if (!excludedCommandLineArgs.count(DefaultArg::AsFastAsPossible))
         {
             _commandLineParser->Add<CommandlineParser::Flag>(
                 defaultArgName.at(DefaultArg::AsFastAsPossible), "f",
-                "[--" + defaultArgName.at(DefaultArg::AsFastAsPossible) + "]",
-                "-f, --" + defaultArgName.at(DefaultArg::AsFastAsPossible)
-                    + ": Run the simulation as fast as possible. By default, the execution is slowed down "
-                      "to a single work cycle per second. "
-                      "Cannot be used together with '--"
-                    + defaultArgName.at(DefaultArg::Config) + "'.");
+                "-f, --" + defaultArgName.at(DefaultArg::AsFastAsPossible),
+                std::vector<std::string>{
+                    "Run the simulation as fast as possible.",
+                    "By default, the execution is slowed down to two work cycles per second.",
+                    "Cannot be used together with '--" + defaultArgName.at(DefaultArg::Config) + "'."});
         }
     }
 
@@ -377,10 +368,10 @@ private:
 
             if (!_arguments.runAsync && !_arguments.asFastAsPossible)
             {
-                // For async: sleep 1s per cycle
-                // For sync: set the animation factor to 1/duration(s) here, resulting in one simulation step per second
+                // For async: sleep 0.5s per cycle
+                // For sync: set the animation factor to 0.5/duration(s) here, resulting in two simulation step per second
                 double animationFactor =
-                    (_arguments.duration.count() > 0) ? 1.0 / (1e-9 * _arguments.duration.count()) : 1.0;
+                    (_arguments.duration.count() > 0) ? 0.5 / (1e-9 * _arguments.duration.count()) : 1.0;
                 ss << R"(,"Experimental":{"TimeSynchronization":{"AnimationFactor":)" << animationFactor << R"(}})";
             }
             ss << "}";
@@ -424,7 +415,7 @@ private:
             DoWorkAsync();
             if (!_arguments.asFastAsPossible)
             {
-                std::this_thread::sleep_for(1s);
+                std::this_thread::sleep_for(500ms);
             }
         }
     }
@@ -573,10 +564,11 @@ public:
     }
 
     // Setup of default and application command line arguments
-    void SetupCommandLineArgs(int argc, char** argv, std::unordered_set<DefaultArg> excludedCommandLineArgs = {})
+    void SetupCommandLineArgs(int argc, char** argv, const std::string& appDescription,
+                              std::unordered_set<DefaultArg> excludedCommandLineArgs = {})
     {
+        _commandLineParser->SetDescription(appDescription);
         std::string executableName = argv[0];
-
         AddDefaultArgs(excludedCommandLineArgs);
         try
         {
