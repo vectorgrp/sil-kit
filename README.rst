@@ -139,3 +139,54 @@ call CMake in your build directory as follows::
     cmake -D SILKIT_BUILD_DOCS=ON -B _build
     cmake --build _build --target Doxygen
 
+5. Platform support
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+SIL Kit provides 3 targets of plfatform support. A platform hereby is defined by
+a architecture-operating compiler ABI triple. An example would be
+`x86_64-ubuntu20.04-clang`, which is currently our default target for Linux
+builds.
+
+.. list-table:: Tier Definitions
+
+   * - Tier 1
+     - Official Supported Platform, build and tested in CI
+   * - Tier 2
+     - Unofficial/incomplete build support. Build and Tests verified by individual contributors/users. Not guaranteed to work after a version update.
+   * - No Tier
+     - Not supported, not known whether SIL Kit even builds for this platform. Anything not in `Tier 1` or `Tier 2`
+
+5.1 Tier 1
+----------------------------------------
+.. list-table:: Platform Support
+   :header-rows: 1
+
+   * - Platform
+   * - x86_64-windows-msvc
+     - X86 64bit Windows builds with MSVC ABI
+   * - x86_32-windows-msvc
+     - X86 32bit Windows builds with MSVC ABI
+   * - x86_64-windows-mingw
+     - X86 64bit Windows builds with GNU ABI
+   * - x86_64-ubuntu20.04-gnu
+     - X86 64bit Ubuntu 22.04 with GNU ABI
+   * - x86_64-ubuntu22.04-gnu
+     - X86 64bit Ubuntu 22.04 with GNU ABI
+   * - aarch64-ubuntu24.04-gnu
+     - ARM64 Ubuntu 24.04 build with GNU ABI
+   * - arm64-macos14-darwin
+     - ARM64 tests on M1 MacOS 14
+
+5.1 Tier 2
+----------------------------------------
+.. list-table:: Platform Support
+   :header-rows: 1
+
+   * - Platform
+     - Notes
+   * - x86_64-nto-qnx710
+     - X86 64bit QNX 7.1 RTOS builds
+   * - x86_64-freebsd14-llvm
+     - X86 64bit FreeBSD14 with LLVM ABI
+   * - aarch64-linux-android
+     - X86 64bit ANDROID 15 NDK
