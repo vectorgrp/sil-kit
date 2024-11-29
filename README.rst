@@ -162,6 +162,7 @@ builds.
    :header-rows: 1
 
    * - Platform
+     - Notes
    * - x86_64-windows-msvc
      - X86 64bit Windows builds with MSVC ABI
    * - x86_32-windows-msvc
