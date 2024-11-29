@@ -1,0 +1,7 @@
+Description: Logging to file with Trace Level from remotes
+Logging:
+  LogFromRemotes: True
+  Sinks:
+    - Level: Trace
+      Type: File
+      LogName: TraceLogFromRemotes

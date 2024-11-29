@@ -1,12 +1,19 @@
-Description: Network simulator configuration for a detailed simulation of the Ethernet Demo
-SchemaVersion: '1'
+SchemaVersion: 1
+Description: Small sample configuration for testing purposes, with Link names from the SILKIT Demos
+SimulationStepSizeNanoseconds: 1000000
 SimulatedNetworks:
+  - Name: CAN1
+    Type: CAN
+  - Name: LIN1
+    Type: LIN
   - Name: Eth1
     Type: Ethernet
   - Name: FS-Port0
     Type: Ethernet
   - Name: FS-Port1
     Type: Ethernet
+  - Name: PowerTrain1
+    Type: FlexRay
 Switches:
   - Name: FrontSwitch
     Ports:

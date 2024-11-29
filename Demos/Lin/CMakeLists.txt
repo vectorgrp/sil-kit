@@ -19,11 +19,6 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-make_silkit_demo(SilKitDemoLin LinDemo.cpp)
-target_sources(SilKitDemoLin 
-	PRIVATE DemoLin.silkit.yaml
-    PRIVATE NetworkSimulatorConfig.yaml
-)
 
 make_silkit_demo(SilKitDemoLinDynamic LinDemoDynamic.cpp)
 target_sources(SilKitDemoLinDynamic
@@ -31,3 +26,8 @@ target_sources(SilKitDemoLinDynamic
     PRIVATE NetworkSimulatorConfig.yaml
 )
 
+make_silkit_demo(SilKitDemoLinSlave LinSlaveDemo.cpp)
+make_silkit_demo(SilKitDemoLinMaster LinMasterDemo.cpp)
+
+make_silkit_demo(SilKitDemoLinSlaveDynamic LinSlaveDynamicDemo.cpp)
+make_silkit_demo(SilKitDemoLinMasterDynamic LinMasterDynamicDemo.cpp)

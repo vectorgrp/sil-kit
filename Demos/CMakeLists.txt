@@ -97,6 +97,8 @@ else()
     set(_DEMO_OUTPUT_DIR "${CMAKE_BINARY_DIR}/$<CONFIG>")
 endif()
 
+set(SILKIT_DEMO_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+
 macro(make_silkit_demo executableName demoSourceFile)
     add_executable(${executableName}
         ${demoSourceFile}
@@ -124,7 +126,7 @@ macro(make_silkit_demo executableName demoSourceFile)
             SilKit::SilKit 
             Threads::Threads
     )
-
+    target_include_directories(${executableName} PRIVATE ${SILKIT_DEMO_DIR}/include)
     if(MSVC)
         target_compile_options(${executableName} PRIVATE /wd4996)
     endif()

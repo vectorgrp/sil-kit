@@ -1,0 +1,5 @@
+Description: Logging to Remote with Trace level 
+Logging:
+  Sinks:
+    - Level: Trace
+      Type: Remote

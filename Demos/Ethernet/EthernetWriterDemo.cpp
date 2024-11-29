@@ -1,0 +1,108 @@
+// SPDX-FileCopyrightText: 2024 Vector Informatik GmbH
+//
+// SPDX-License-Identifier: MIT
+
+#include "ApplicationBase.hpp"
+#include "EthernetDemoCommon.hpp"
+
+class EthernetWriter : public ApplicationBase
+{
+public:
+    // Inherit constructors
+    using ApplicationBase::ApplicationBase;
+
+private:
+    IEthernetController* _ethernetController{nullptr};
+    std::string _networkName = "Eth1";
+
+    void AddCommandLineArgs() override
+    {
+        GetCommandLineParser()->Add<CommandlineParser::Option>(
+            "network", "n", _networkName, "-n, --network <name>",
+            std::vector<std::string>{"Name of the Ethernet network to use.", "Defaults to '" + _networkName + "'."});
+    }
+
+    void EvaluateCommandLineArgs() override
+    {
+        _networkName = GetCommandLineParser()->Get<CommandlineParser::Option>("network").Value();
+    }
+
+    void CreateControllers() override
+    {
+        _ethernetController = GetParticipant()->CreateEthernetController("EthernetController1", _networkName);
+
+        _ethernetController->AddFrameTransmitHandler(
+            [this](IEthernetController* /*ctrl*/, const EthernetFrameTransmitEvent& ack) {
+            EthernetDemoCommon::FrameTransmitHandler(ack, GetLogger());
+        });
+        _ethernetController->AddFrameHandler(
+            [this](IEthernetController* /*ctrl*/, const EthernetFrameEvent& frameEvent) {
+            EthernetDemoCommon::FrameHandler(frameEvent, GetLogger());
+        });
+    }
+
+    void InitControllers() override
+    {
+        _ethernetController->Activate();
+    }
+
+    std::vector<uint8_t> CreateFrame(const EthernetDemoCommon::EthernetMac& destinationAddress,
+                                     const EthernetDemoCommon::EthernetMac& sourceAddress,
+                                     const std::vector<uint8_t>& payload)
+    {
+        const uint16_t etherType = 0x0000; // no protocol
+        std::vector<uint8_t> raw;
+        std::copy(destinationAddress.begin(), destinationAddress.end(), std::back_inserter(raw));
+        std::copy(sourceAddress.begin(), sourceAddress.end(), std::back_inserter(raw));
+        auto etherTypeBytes = reinterpret_cast<const uint8_t*>(&etherType);
+        raw.push_back(etherTypeBytes[1]); // We assume our platform to be little-endian
+        raw.push_back(etherTypeBytes[0]);
+        std::copy(payload.begin(), payload.end(), std::back_inserter(raw));
+        return raw;
+    }
+
+    void SendFrame()
+    {
+        EthernetDemoCommon::EthernetMac WriterMacAddr = {0xF6, 0x04, 0x68, 0x71, 0xAA, 0xC1};
+        EthernetDemoCommon::EthernetMac BroadcastMacAddr = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+
+        static int frameId = 0;
+        std::stringstream stream;
+        // Ensure that the payload is long enough to constitute a valid Ethernet frame
+        stream << "Hello from Ethernet writer! (frameId=" << frameId++
+               << ")"
+                  "----------------------------------------------------";
+
+        auto payloadString = stream.str();
+        std::vector<uint8_t> payload(payloadString.size() + 1);
+        memcpy(payload.data(), payloadString.c_str(), payloadString.size() + 1);
+
+        const auto userContext = reinterpret_cast<void*>(static_cast<intptr_t>(frameId));
+
+        auto frame = CreateFrame(BroadcastMacAddr, WriterMacAddr, payload);
+        _ethernetController->SendFrame(EthernetFrame{frame}, userContext);
+        std::stringstream ss;
+        ss << "<< ETH Frame sent with userContext=" << userContext;
+        GetLogger()->Info(ss.str());
+    }
+
+    void DoWorkSync(std::chrono::nanoseconds /*now*/) override
+    {
+        SendFrame();
+    }
+
+    void DoWorkAsync() override
+    {
+        SendFrame();
+    }
+};
+
+int main(int argc, char** argv)
+{
+    Arguments args;
+    args.participantName = "EthernetWriter";
+    EthernetWriter app{args};
+    app.SetupCommandLineArgs(argc, argv, "SIL Kit Demo - Ethernet: Broadcast test frames");
+
+    return app.Run();
+}
