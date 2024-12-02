@@ -26,8 +26,8 @@
 #   they will be accessible from public headers.
 macro(configure_silkit_version project_name)
     set(SILKIT_VERSION_MAJOR 4)
-    set(SILKIT_VERSION_MINOR 0)
-    set(SILKIT_VERSION_PATCH 55)
+    set(SILKIT_VERSION_MINOR 1)
+    set(SILKIT_VERSION_PATCH 0)
     set(SILKIT_BUILD_NUMBER 0 CACHE STRING "The build number")
     set(SILKIT_VERSION_SUFFIX "")
 
