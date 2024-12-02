@@ -14,8 +14,14 @@ The Vector SIL Kit
    :target: https://github.com/vectorgrp/sil-kit/actions/workflows/linux-ubsan.yml
 .. |TsanBadge| image:: https://github.com/vectorgrp/sil-kit/actions/workflows/linux-tsan.yml/badge.svg
    :target: https://github.com/vectorgrp/sil-kit/actions/workflows/linux-tsan.yml
+.. |LinuxARM64| image:: https://github.com/vectorgrp/sil-kit/actions/workflows/build-linux-arm64.yml/badge.svg
+   :target: https://github.com/vectorgrp/sil-kit/actions/workflows/build-linux-arm64.yml
 .. |WinBadge| image:: https://github.com/vectorgrp/sil-kit/actions/workflows/build-win.yml/badge.svg
    :target: https://github.com/vectorgrp/sil-kit/actions/workflows/build-win.yml
+.. |MingwBadge| image:: https://github.com/vectorgrp/sil-kit/actions/workflows/build-mingw64.yml/badge.svg
+   :target: https://github.com/vectorgrp/sil-kit/actions/workflows/build-mingw64.yml
+.. |MacOS| image:: https://github.com/vectorgrp/sil-kit/actions/workflows/build-macos.yml/badge.svg
+   :target: https://github.com/vectorgrp/sil-kit/actions/workflows/build-macos.yml
 | |ReleaseBadge| |LicenseBadge| |DocsBadge| 
 | |AsanBadge| |UbsanBadge| |TsanBadge| |WinBadge| 
 
@@ -165,34 +171,41 @@ Supported, automatically tested and provided as binary packages.
    * - OS
      - Architecture
      - Notes
+     - Status
    * - Windows
      - 64bit (x86_64)
-     - Using MSVC 19 with Toolset 14.1
+     - MSVC 19 with Toolset 14.1
+     - |WinBadge|
    * - Windows
      - 32bit (x86)
-     - Using MSVC 19 with Toolset 14.1
+     - MSVC 19 with Toolset 14.1
+     - |WinBadge|
    * - Windows
      - 64bit (x86_64)
      - MSYS2/Mingw: GCC 14
+     - |MingwBadge|
    * - Ubuntu
      - amd64
      - | 18.04 LTS: GCC 8
        | 20.04 LTS: Clang 10
        | 22.04 LTS: GCC11/Clang 18
+     - |  |AsanBadge|
+       | |UbsanBadge|
+       | |TsanBadge|
    * - Ubuntu
      - ARM64
      - 22.04 LTS: Clang 18
+     - |LinuxARM64|
    * - MAC OS
      - ARM64/M1
      - AppleClang 15
+     - |MacOS|
 
 Tier 2
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Build and tested by individual contributors or users.
-
-.. warning::
-   Not guaranteed to work after a version update
+Not guaranteed to work after a version update!
 
 .. list-table:: Platform Support
    :header-rows: 1
