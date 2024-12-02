@@ -139,7 +139,7 @@ call CMake in your build directory as follows::
     cmake -D SILKIT_BUILD_DOCS=ON -B _build
     cmake --build _build --target Doxygen
 
-5. Platform support
+Platform support
 ----------------------------------------
 
 SIL Kit provides 3 targets of plfatform support. A platform hereby is defined by
@@ -176,9 +176,9 @@ Supported, automatically tested and provided as binary packages.
      - MSYS2/Mingw: GCC 14
    * - Ubuntu
      - amd64
-     - 18.04 LTS: GCC 8
-       20.04 LTS: Clang 10
-       22.04 LTS: GCC11/Clang 18
+     - | 18.04 LTS: GCC 8
+       | 20.04 LTS: Clang 10
+       | 22.04 LTS: GCC11/Clang 18
    * - Ubuntu
      - ARM64
      - 22.04 LTS: Clang 18
