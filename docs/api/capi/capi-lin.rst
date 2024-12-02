@@ -83,7 +83,7 @@ Enumerations and Typedefs
 .. doxygentypedef:: SilKit_LinFrameResponseType
 .. doxygentypedef:: SilKit_LinFrameStatus
 .. doxygentypedef:: SilKit_LinDataLength
-.. doxygenvariable:: SilKit_LinDataLengthUnknown
+.. doxygendefine:: SilKit_LinDataLengthUnknown
 
 .. doxygentypedef:: SilKit_LinFrameStatusHandler_t
 .. doxygentypedef:: SilKit_LinGoToSleepHandler_t
