@@ -186,13 +186,13 @@ Supported, automatically tested and provided as binary packages.
      - ARM64/M1
      - AppleClang 15
 
-Tier
+Tier 2
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Build and tested by individual contributors or users.
 
 .. warning::
-Not guaranteed to work after a version update
+   Not guaranteed to work after a version update
 
 .. list-table:: Platform Support
    :header-rows: 1
