@@ -149,24 +149,20 @@ Platform support
 ----------------------------------------
 
 SIL Kit provides two tiers of platform support:
-1. Officially build, continuously tested targets for which we provide binary
-   packages, and 
-2. Targets for which we have (limited) build support but which
-   are not continuously tested and no packages are provided from us. A platform
-   hereby is defined by a combination of the used operating system (OS), the CPU
-   Architecture (eg. x86 or ARM64) and the compiler/toolchain used. An example
-   would be `Ubuntu 20.04 x86_64 Clang 10`. SIL Kit should compile and run on
-   any POSIX platform. If you have feedback for different targets or platforms
-   please report via the GitHub issues, thanks! A target may be upgraded to
-   `Tier 1` once we have continuous testing for it in place and we have binary
-   packages available for it.
+    1. Officially build, continuously tested targets for which we provide binary
+       packages, and
+    2. Targets for which we have (limited) build support but which
+        are not continuously tested and no packages are provided from us.
 
-.. list-table:: Tier Definitions
+A platform
+hereby is defined by a combination of the used operating system (OS), the CPU
+Architecture (eg. x86 or ARM64) and the compiler/toolchain used. An example
+would be `Ubuntu 20.04 x86_64 Clang 10`. SIL Kit should compile and run on
+any POSIX platform. If you have feedback for different targets or platforms
+please report via the GitHub issues, thanks! A target may be upgraded to
+`Tier 1` once we have continuous testing for it in place and we have binary
+packages available for it.
 
-   * - Tier 1
-     - Official Supported Platform, build and tested in CI
-   * - Tier 2
-     - Unofficial/incomplete build support. Build and Tests verified by individual contributors/users. Not guaranteed to work after a version update.
 
 Tier 1
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -179,35 +175,33 @@ Supported, automatically tested and provided as binary packages.
    * - OS
      - Architecture
      - Notes
-     - Status
    * - Windows
      - 64bit (x86_64)
      - MSVC 19 with Toolset 14.1
-     - |WinBadge|
    * - Windows
      - 32bit (x86)
      - MSVC 19 with Toolset 14.1
-     - |WinBadge|
    * - Windows
      - 64bit (x86_64)
      - MSYS2/Mingw: GCC 14
-     - |MingwBadge|
-   * - Ubuntu
+   * - Ubuntu 18.04
      - amd64
-     - | 18.04 LTS: GCC 8
-       | 20.04 LTS: Clang 10
-       | 22.04 LTS: GCC11/Clang 18
-     - | |AsanBadge|
-       | |UbsanBadge|
-       | |TsanBadge|
+     - GCC 8
+   * - Ubuntu 20.04
+     - amd64
+     - Clang 10
+   * - Ubuntu 22.04
+     - amd64
+     - | GCC11/Clang 18
+       | + Address Sanitizer
+       | + Undefined Behaviour Sanitizer
+       | + Thread Sanitizer
    * - Ubuntu
      - ARM64
      - 22.04 LTS: Clang 18
-     - |LinuxARM64|
    * - MAC OS
      - ARM64/M1
      - AppleClang 15
-     - |MacOS|
 
 Tier 2
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
