@@ -148,10 +148,18 @@ call CMake in your build directory as follows::
 Platform support
 ----------------------------------------
 
-SIL Kit provides 3 targets of plfatform support. A platform hereby is defined by
-a architecture-operating compiler ABI triple. An example would be
-`x86_64-ubuntu20.04-clang`, which is currently our default target for Linux
-builds.
+SIL Kit provides two tiers of platform support:
+1. Officially build, continuously tested targets for which we provide binary
+   packages, and 
+2. Targets for which we have (limited) build support but which
+   are not continuously tested and no packages are provided from us. A platform
+   hereby is defined by a combination of the used operating system (OS), the CPU
+   Architecture (eg. x86 or ARM64) and the compiler/toolchain used. An example
+   would be `Ubuntu 20.04 x86_64 Clang 10`. SIL Kit should compile and run on
+   any POSIX platform. If you have feedback for different targets or platforms
+   please report via the GitHub issues, thanks! A target may be upgraded to
+   `Tier 1` once we have continuous testing for it in place and we have binary
+   packages available for it.
 
 .. list-table:: Tier Definitions
 
@@ -189,7 +197,7 @@ Supported, automatically tested and provided as binary packages.
      - | 18.04 LTS: GCC 8
        | 20.04 LTS: Clang 10
        | 22.04 LTS: GCC11/Clang 18
-     - |  |AsanBadge|
+     - | |AsanBadge|
        | |UbsanBadge|
        | |TsanBadge|
    * - Ubuntu
