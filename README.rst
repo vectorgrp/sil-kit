@@ -148,18 +148,27 @@ call CMake in your build directory as follows::
 Platform support
 ----------------------------------------
 
-SIL Kit provides two tiers of platform support:
-    1. Officially build, continuously tested targets for which we provide binary
-       packages, and
-    2. Targets for which we have (limited) build support but which
-        are not continuously tested and no packages are provided from us.
+SIL Kit provides two tiers of platform support
+
+.. list-table:: Support Tiers
+
+   * - Tier 1
+     - Officially build, continuously tested targets for which we provide binary
+       packages
+   * - Tier 2
+     - | Targets for which we have (limited) build support but which
+       | are not continuously tested and no packages are provided from us
 
 A platform
 hereby is defined by a combination of the used operating system (OS), the CPU
 Architecture (eg. x86 or ARM64) and the compiler/toolchain used. An example
-would be `Ubuntu 20.04 x86_64 Clang 10`. SIL Kit should compile and run on
+would be `Ubuntu 20.04 x86_64 Clang 10`.
+
+SIL Kit should compile and run on
 any POSIX platform. If you have feedback for different targets or platforms
-please report via the GitHub issues, thanks! A target may be upgraded to
+please report via the GitHub issues, thanks!
+
+A target may be upgraded to
 `Tier 1` once we have continuous testing for it in place and we have binary
 packages available for it.
 
@@ -207,7 +216,7 @@ Tier 2
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Build and tested by individual contributors or users.
-Not guaranteed to work after a version update!
+Since these are not part of the CI pipeline, compatibility with these platforms can be broken at any time!
 
 .. list-table:: Platform Support
    :header-rows: 1
