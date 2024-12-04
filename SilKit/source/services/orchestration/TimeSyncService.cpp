@@ -662,6 +662,29 @@ auto TimeSyncService::Now() const -> std::chrono::nanoseconds
     return _timeProvider->Now();
 }
 
+void TimeSyncService::SetPrecisionTime(std::chrono::nanoseconds precisionTime)
+{
+    const auto duration = _timeConfiguration.CurrentSimStep().duration;
+    const auto now = _timeProvider->Now();
+    // TODO: This check must correspond to the time sync. semantic of the interval to be simulated, i.e. [T,t+dt[ vs. ]T,T+dt]
+    // For the current evaluation, we use ]T,T+dt].
+    // Using this interval has the advantage that the right border is an integer
+
+    if (precisionTime <= now || precisionTime > now + duration)
+    {
+        auto intervalLeftMs = std::chrono::duration_cast<std::chrono::milliseconds>(now).count();
+        auto intervalRightMs = std::chrono::duration_cast<std::chrono::milliseconds>(now + duration).count();
+
+        std::stringstream errormsg;
+        errormsg << "Precision timestamp out of valid interval. Must be in the interval ]" << intervalLeftMs << ", "
+                 << intervalRightMs << "] (ms).";
+        throw SilKit::OutOfRangeError(errormsg.str());
+    }
+
+    _timeProvider->SetTime(precisionTime, _timeConfiguration.CurrentSimStep().duration);
+}
+
+
 auto TimeSyncService::GetTimeConfiguration() -> TimeConfiguration*
 {
     return &_timeConfiguration;

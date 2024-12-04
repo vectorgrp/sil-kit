@@ -544,6 +544,23 @@ SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_TimeSyncService_Now(SilKit_TimeSyn
 typedef SilKit_ReturnCode(SilKitFPTR* SilKit_TimeSyncService_Now_t)(SilKit_TimeSyncService* timeSyncService,
                                                                     SilKit_NanosecondsTime* outNanosecondsTime);
 
+/*! \brief Get the current simulation time
+ *
+ * \param timeSyncService The time sync service obtained via \ref SilKit_TimeSyncService_Create.
+ * \param outNanosecondsTime The simulation time in nanoseconds.
+ */
+
+/*! \brief Sets the precision timestamp of the current simulation step
+ * 
+ * \param timeSyncService The time sync service obtained via \ref SilKit_TimeSyncService_Create.
+ * \param now The precision timestamp in nanoseconds.
+ */
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_TimeSyncService_SetPrecisionTime(SilKit_TimeSyncService* timeSyncService,
+                                                                               SilKit_NanosecondsTime now);
+
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_TimeSyncService_SetPrecisionTime_t)(
+    SilKit_TimeSyncService* timeSyncService, SilKit_NanosecondsTime now);
+
 
 /*
  *

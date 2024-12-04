@@ -658,6 +658,12 @@ extern "C"
         return globalCapi->SilKit_TimeSyncService_Now(timeSyncService, outNanosecondsTime);
     }
 
+    SilKit_ReturnCode SilKitCALL SilKit_TimeSyncService_SetPrecisionTime(SilKit_TimeSyncService* timeSyncService,
+                                                            SilKit_NanosecondsTime now)
+    {
+        return globalCapi->SilKit_TimeSyncService_SetPrecisionTime(timeSyncService, now);
+    }
+
     // SystemMonitor
 
     SilKit_ReturnCode SilKitCALL SilKit_SystemMonitor_Create(SilKit_SystemMonitor** outSystemMonitor,

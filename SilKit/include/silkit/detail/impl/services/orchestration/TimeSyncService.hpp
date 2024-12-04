@@ -49,6 +49,8 @@ public:
 
     inline auto Now() const -> std::chrono::nanoseconds override;
 
+    inline void SetPrecisionTime(std::chrono::nanoseconds now) override;
+
 private:
     SilKit_TimeSyncService* _timeSyncService{nullptr};
 
@@ -135,6 +137,13 @@ auto TimeSyncService::Now() const -> std::chrono::nanoseconds
 
     return std::chrono::nanoseconds{nanosecondsTime};
 }
+
+void TimeSyncService::SetPrecisionTime(std::chrono::nanoseconds now)
+{
+    const auto returnCode = SilKit_TimeSyncService_SetPrecisionTime(_timeSyncService, now.count());
+    ThrowOnError(returnCode);
+}
+
 
 } // namespace Orchestration
 } // namespace Services

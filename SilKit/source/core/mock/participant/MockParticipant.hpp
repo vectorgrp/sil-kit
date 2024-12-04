@@ -99,6 +99,7 @@ public:
                 (SimulationStepHandler task, std::chrono::nanoseconds initialStepSize), (override));
     MOCK_METHOD(void, CompleteSimulationStep, (), (override));
     MOCK_METHOD(std::chrono::nanoseconds, Now, (), (override, const));
+    MOCK_METHOD(void, SetPrecisionTime, (std::chrono::nanoseconds now), (override));
 };
 
 class MockSystemMonitor : public Services::Orchestration::ISystemMonitor

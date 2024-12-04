@@ -76,6 +76,7 @@ public:
     void SetPeriod(std::chrono::nanoseconds period);
     void ReceiveMsg(const IServiceEndpoint* from, const NextSimTask& task) override;
     auto Now() const -> std::chrono::nanoseconds override;
+    void SetPrecisionTime(std::chrono::nanoseconds) override;
 
     // Used by Policies
     template <class MsgT>
@@ -165,6 +166,8 @@ private:
     double _animationFactor{0};
     std::atomic<bool> _wallClockCouplingThreadRunning{false};
     std::atomic<bool> _wallClockReachedBeforeCompletion{false};
+
+    std::chrono::nanoseconds _precisionTime;
 };
 
 // ================================================================================
