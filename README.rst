@@ -14,8 +14,14 @@ The Vector SIL Kit
    :target: https://github.com/vectorgrp/sil-kit/actions/workflows/linux-ubsan.yml
 .. |TsanBadge| image:: https://github.com/vectorgrp/sil-kit/actions/workflows/linux-tsan.yml/badge.svg
    :target: https://github.com/vectorgrp/sil-kit/actions/workflows/linux-tsan.yml
+.. |LinuxARM64| image:: https://github.com/vectorgrp/sil-kit/actions/workflows/build-linux-arm64.yml/badge.svg
+   :target: https://github.com/vectorgrp/sil-kit/actions/workflows/build-linux-arm64.yml
 .. |WinBadge| image:: https://github.com/vectorgrp/sil-kit/actions/workflows/build-win.yml/badge.svg
    :target: https://github.com/vectorgrp/sil-kit/actions/workflows/build-win.yml
+.. |MingwBadge| image:: https://github.com/vectorgrp/sil-kit/actions/workflows/build-mingw64.yml/badge.svg
+   :target: https://github.com/vectorgrp/sil-kit/actions/workflows/build-mingw64.yml
+.. |MacOS| image:: https://github.com/vectorgrp/sil-kit/actions/workflows/build-macos.yml/badge.svg
+   :target: https://github.com/vectorgrp/sil-kit/actions/workflows/build-macos.yml
 | |ReleaseBadge| |LicenseBadge| |DocsBadge| 
 | |AsanBadge| |UbsanBadge| |TsanBadge| |WinBadge| 
 
@@ -139,3 +145,91 @@ call CMake in your build directory as follows::
     cmake -D SILKIT_BUILD_DOCS=ON -B _build
     cmake --build _build --target Doxygen
 
+Platform support
+----------------------------------------
+
+SIL Kit provides two tiers of platform support
+
+.. list-table:: Support Tiers
+
+   * - Tier 1
+     - Officially build, continuously tested targets for which we provide binary
+       packages
+   * - Tier 2
+     - | Targets for which we have (limited) build support but which
+       | are not continuously tested and no packages are provided from us
+
+A platform
+hereby is defined by a combination of the used operating system (OS), the CPU
+Architecture (eg. x86 or ARM64) and the compiler/toolchain used. An example
+would be `Ubuntu 20.04 x86_64 Clang 10`.
+
+SIL Kit should compile and run on
+any POSIX platform. If you have feedback for different targets or platforms
+please report via the GitHub issues, thanks!
+
+A target may be upgraded to
+`Tier 1` once we have continuous testing for it in place and we have binary
+packages available for it.
+
+
+Tier 1
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Supported, automatically tested and provided as binary packages.
+
+.. list-table:: Platform Support
+   :header-rows: 1
+
+   * - OS
+     - Architecture
+     - Notes
+   * - Windows
+     - 64bit (x86_64)
+     - MSVC 19 with Toolset 14.1
+   * - Windows
+     - 32bit (x86)
+     - MSVC 19 with Toolset 14.1
+   * - Windows
+     - 64bit (x86_64)
+     - MSYS2/Mingw: GCC 14
+   * - Ubuntu 18.04
+     - amd64
+     - GCC 8
+   * - Ubuntu 20.04
+     - amd64
+     - Clang 10
+   * - Ubuntu 22.04
+     - amd64
+     - | GCC11/Clang 18
+       | + Address Sanitizer
+       | + Undefined Behaviour Sanitizer
+       | + Thread Sanitizer
+   * - Ubuntu
+     - ARM64
+     - 22.04 LTS: Clang 18
+   * - MAC OS
+     - ARM64/M1
+     - AppleClang 15
+
+Tier 2
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Build and tested by individual contributors or users.
+Since these are not part of the CI pipeline, compatibility with these platforms can be broken at any time!
+
+.. list-table:: Platform Support
+   :header-rows: 1
+
+   * - Platform
+     - Architecture
+     - Notes
+   * - QNX 7.1 RTOS
+     - X86 64bit
+     - QNX GCC 8
+   * - FreeBSD 14
+     - X86 64bit
+     - FreeBSD Clang 18
+   * - Android
+     - ARM64
+     - NDK builds with default compiler, libc++_shared
