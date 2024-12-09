@@ -6,7 +6,7 @@
 
 #include "IMsgForMetricsSender.hpp"
 
-#include "ILoggerInternal.hpp"
+#include "LoggerMessage.hpp"
 #include "IServiceEndpoint.hpp"
 #include "IParticipantInternal.hpp"
 

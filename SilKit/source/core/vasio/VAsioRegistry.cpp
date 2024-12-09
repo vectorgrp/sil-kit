@@ -23,7 +23,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "Logger.hpp"
 #include "Uri.hpp"
-#include "ILoggerInternal.hpp"
+#include "LoggerMessage.hpp"
 #include "Optional.hpp"
 #include "TransformAcceptorUris.hpp"
 #include "VAsioConstants.hpp"

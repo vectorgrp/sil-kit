@@ -21,7 +21,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include <fmt/format.h>
 
-#include "ILoggerInternal.hpp"
+#include "LoggerMessage.hpp"
 #include "LifecycleStates.hpp"
 #include "LifecycleService.hpp"
 #include "LifecycleManagement.hpp"

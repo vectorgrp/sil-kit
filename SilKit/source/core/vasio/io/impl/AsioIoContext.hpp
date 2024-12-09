@@ -9,7 +9,7 @@
 
 #include "MakeAsioIoContext.hpp"
 
-#include "ILoggerInternal.hpp"
+#include "LoggerMessage.hpp"
 
 #include "asio.hpp"
 

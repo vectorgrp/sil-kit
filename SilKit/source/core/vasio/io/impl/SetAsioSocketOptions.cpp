@@ -4,7 +4,7 @@
 
 #include "SetAsioSocketOptions.hpp"
 
-#include "ILoggerInternal.hpp"
+#include "LoggerMessage.hpp"
 
 
 namespace {

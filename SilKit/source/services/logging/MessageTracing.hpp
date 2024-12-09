@@ -21,7 +21,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #pragma once
 
-#include "ILoggerInternal.hpp"
+#include "LoggerMessage.hpp"
 #include "IServiceEndpoint.hpp"
 #include "ServiceDescriptor.hpp"
 #include "traits/SilKitMsgTraits.hpp"
@@ -52,6 +52,7 @@ template <class SilKitMessageT>
 void TraceRx(Logging::ILoggerInternal* logger, const Core::IServiceEndpoint* addr, const SilKitMessageT& msg,
              const Core::ServiceDescriptor& from)
 {
+
     if (logger->GetLogLevel() == Logging::Level::Trace)
     {
         Logging::LoggerMessage lm{logger, Logging::Level::Trace};

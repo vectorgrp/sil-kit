@@ -28,7 +28,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "MessageTracing.hpp"
 #include "IServiceEndpoint.hpp"
 #include "SerializedMessage.hpp"
-#include "ILoggerInternal.hpp"
+#include "LoggerMessage.hpp"
 
 namespace SilKit {
 namespace Core {

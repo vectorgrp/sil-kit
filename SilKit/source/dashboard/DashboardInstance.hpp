@@ -7,7 +7,7 @@
 #include "IDashboardInstance.hpp"
 #include "VAsioRegistry.hpp"
 
-#include "ILoggerInternal.hpp"
+#include "LoggerMessage.hpp"
 
 #include "silkit/config/IParticipantConfiguration.hpp"
 
