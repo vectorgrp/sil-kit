@@ -22,7 +22,7 @@
 
 #include "ConnectKnownParticipants.hpp"
 
-#include "ILoggerInternal.hpp"
+#include "LoggerMessage.hpp"
 #include "VAsioConnection.hpp"
 #include "VAsioPeer.hpp"
 #include "util/TracingMacros.hpp"

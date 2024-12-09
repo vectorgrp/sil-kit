@@ -8,7 +8,7 @@
 #include "IIoContext.hpp"
 #include "AsioSocketOptions.hpp"
 
-#include "ILoggerInternal.hpp"
+#include "LoggerMessage.hpp"
 
 #include <memory>
 

@@ -5,7 +5,7 @@
 #include "MetricsProcessor.hpp"
 
 #include "IParticipantInternal.hpp"
-#include "ILoggerInternal.hpp"
+#include "LoggerMessage.hpp"
 
 namespace Log = SilKit::Services::Logging;
 

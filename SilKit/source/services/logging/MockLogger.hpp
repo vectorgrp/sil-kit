@@ -22,7 +22,7 @@
 #pragma once
 
 
-#include "ILoggerInternal.hpp"
+#include "LoggerMessage.hpp"
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
