@@ -35,7 +35,6 @@ namespace Logging {
 
 
 class LoggerMessage;
-class LogMsg;
 
 struct ILoggerInternal : ILogger
 {
