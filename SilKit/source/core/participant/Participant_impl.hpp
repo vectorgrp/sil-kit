@@ -41,7 +41,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "SystemMonitor.hpp"
 #include "LogMsgSender.hpp"
 #include "LogMsgReceiver.hpp"
-#include "ILoggerInternal.hpp"
+#include "LoggerMessage.hpp"
 #include "StructuredLoggingKeys.hpp"
 #include "TimeProvider.hpp"
 #include "TimeSyncService.hpp"
@@ -70,7 +70,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "Assert.hpp"
 #include "ExecutionEnvironment.hpp"
 
-#include "ILoggerInternal.hpp"
 
 
 namespace SilKit {

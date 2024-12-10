@@ -9,7 +9,7 @@
 
 #include "Assert.hpp"
 #include "StringHelpers.hpp"
-#include "ILoggerInternal.hpp"
+#include "LoggerMessage.hpp"
 
 #include <fstream>
 

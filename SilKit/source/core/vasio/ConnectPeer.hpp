@@ -26,7 +26,7 @@
 
 #include "IIoContext.hpp"
 
-#include "ILoggerInternal.hpp"
+#include "LoggerMessage.hpp"
 
 #include <chrono>
 #include <functional>
