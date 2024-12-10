@@ -52,7 +52,6 @@ template <class SilKitMessageT>
 void TraceRx(Logging::ILoggerInternal* logger, const Core::IServiceEndpoint* addr, const SilKitMessageT& msg,
              const Core::ServiceDescriptor& from)
 {
-
     if (logger->GetLogLevel() == Logging::Level::Trace)
     {
         Logging::LoggerMessage lm{logger, Logging::Level::Trace};
