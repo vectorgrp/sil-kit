@@ -148,14 +148,17 @@ call CMake in your build directory as follows::
 Platform support
 ----------------------------------------
 
-SIL Kit provides two tiers of platform support
+SIL Kit provides three tiers of platform support
 
 .. list-table:: Support Tiers
 
    * - Tier 1
-     - Officially build, continuously tested targets for which we provide binary
-       packages
-   * - Tier 2
+     - Essential targets. Continuously tested and
+       official binary packages are provided.
+   * - Tier 1
+     - Officially supported targets. Continuously tested 
+       but NO binary packages are provided
+   * - Tier 3
      - | Targets for which we have (limited) build support but which
        | are not continuously tested and no packages are provided from us
 
@@ -176,7 +179,7 @@ packages available for it.
 Tier 1
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Essential targets. Automatically tested and provided as binary packages.
+Essential targets. Automatically tested and provided as official binary packages.
 
 .. list-table:: Platform Support
    :header-rows: 1
