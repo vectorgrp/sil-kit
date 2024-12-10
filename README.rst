@@ -176,7 +176,7 @@ packages available for it.
 Tier 1
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Supported, automatically tested and provided as binary packages.
+Essential targets. Automatically tested and provided as binary packages.
 
 .. list-table:: Platform Support
    :header-rows: 1
@@ -190,29 +190,38 @@ Supported, automatically tested and provided as binary packages.
    * - Windows
      - 32bit (x86)
      - MSVC 19 with Toolset 14.1
-   * - Windows
-     - 64bit (x86_64)
-     - MSYS2/Mingw: GCC 14
    * - Ubuntu 18.04
      - amd64
      - GCC 8
    * - Ubuntu 20.04
      - amd64
      - Clang 10
+
+Tier 2
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Officially supported and automatically tested. NO binary packages provided
+
+.. list-table:: Platform Support
+   :header-rows: 1
+
+   * - Windows
+     - 64bit (x86_64)
+     - MSYS2/Mingw: GCC 14
    * - Ubuntu 22.04
      - amd64
-     - | GCC11/Clang 18
+     - | GCC 11/Clang 18
        | + Address Sanitizer
        | + Undefined Behaviour Sanitizer
        | + Thread Sanitizer
-   * - Ubuntu
+   * - Ubuntu 22.04
      - ARM64
-     - 22.04 LTS: Clang 18
+     - Clang 18
    * - MAC OS
      - ARM64/M1
      - AppleClang 15
 
-Tier 2
+Tier 3
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Build and tested by individual contributors or users.
@@ -224,6 +233,10 @@ Since these are not part of the CI pipeline, compatibility with these platforms 
    * - Platform
      - Architecture
      - Notes
+   * - Ubuntu 24.04
+     - amd64
+     - | GCC 13
+       | Clang 18
    * - QNX 7.1 RTOS
      - X86 64bit
      - QNX GCC 8
