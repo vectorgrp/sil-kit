@@ -106,10 +106,8 @@ std::vector<uint8_t> SerializeSortData(const std::vector<uint8_t>& numberList)
 
 std::vector<uint8_t> DeserializeSortData(const std::vector<uint8_t>& eventData)
 {
-    std::vector<uint8_t> numberList;
-
     SilKit::Util::SerDes::Deserializer deserializer(eventData);
-    std::vector<uint8_t> argumentData = deserializer.Deserialize<std::vector<uint8_t>>();
+    std::vector<uint8_t> numberList = deserializer.Deserialize<std::vector<uint8_t>>();
 
     return numberList;
 }

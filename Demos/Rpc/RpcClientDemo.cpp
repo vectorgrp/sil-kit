@@ -76,7 +76,7 @@ private:
         auto numberListSerialized = RpcDemoCommon::SerializeSortData(randomNumberList);
 
         std::stringstream ss;
-        ss << ">> Calling with arguments: randomNumberList=" << randomNumberList << " (userContext=" << userContext
+        ss << "<< Calling with arguments: randomNumberList=" << randomNumberList << " (userContext=" << userContext
            << ")";
         GetLogger()->Info(ss.str());
 
