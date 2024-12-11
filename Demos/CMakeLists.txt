@@ -100,6 +100,7 @@ endif()
 set(SILKIT_DEMO_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
 macro(make_silkit_demo executableName demoSourceFile)
+
     add_executable(${executableName}
         ${demoSourceFile}
         $<$<CXX_COMPILER_ID:MSVC>: "${CMAKE_CURRENT_SOURCE_DIR}/../demo.manifest" >
@@ -132,13 +133,18 @@ macro(make_silkit_demo executableName demoSourceFile)
     endif()
 
     add_dependencies(Demos ${executableName})
-    set(demo_list "${demo_list} ${executableName}" PARENT_SCOPE)
+
+    get_property(demo_list GLOBAL PROPERTY demo_list_property)
+    set_property(GLOBAL PROPERTY demo_list_property "${demo_list} ${executableName}")
+
 endmacro()
 
 #######################################################################################################################
 # Add the actual demo projects
 #######################################################################################################################
 # C++ Demos
+set_property(GLOBAL PROPERTY demo_list_property "")
+
 add_subdirectory(Can)
 add_subdirectory(Ethernet)
 add_subdirectory(Flexray)
@@ -148,6 +154,7 @@ add_subdirectory(Rpc)
 add_subdirectory(Benchmark)
 add_subdirectory(NetworkSimulator)
 
+get_property(demo_list GLOBAL PROPERTY demo_list_property)
 message(STATUS "Demos available: ${demo_list}")
 #######################################################################################################################
 # VisualStudio specific setup

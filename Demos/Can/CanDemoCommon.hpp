@@ -8,23 +8,17 @@
 
 using namespace SilKit::Services::Can;
 
-std::ostream& operator<<(std::ostream& out, std::chrono::nanoseconds timestamp)
-{
-    out << std::chrono::duration_cast<std::chrono::milliseconds>(timestamp).count() << "ms";
-    return out;
-}
-
 // This is the common behavior used in CanReaderDemo and CanWriterDemo
 namespace CanDemoCommon {
 
 void FrameTransmitHandler(const CanFrameTransmitEvent& canFrameAck, ILogger* logger)
 {
-    std::stringstream buffer;
-    buffer << "Ack CAN frame, canId=" << canFrameAck.canId << ", status='" << canFrameAck.status << "'";
-    logger->Info(buffer.str());
+    std::stringstream ss;
+    ss << "Ack CAN frame, canId=" << canFrameAck.canId << ", status='" << canFrameAck.status << "'";
+    logger->Info(ss.str());
 }
 
-void FrameHandler(const CanFrameEvent& canFrameEvent, ILogger* logger)
+void FrameHandler(bool printHex, const CanFrameEvent& canFrameEvent, ILogger* logger)
 {
     std::string frameTypeHint = "";
     if ((canFrameEvent.frame.flags & static_cast<CanFrameFlagMask>(CanFrameFlag::Fdf)) != 0)
@@ -32,11 +26,17 @@ void FrameHandler(const CanFrameEvent& canFrameEvent, ILogger* logger)
         frameTypeHint = "FD ";
     }
 
-    std::string payloadStr(canFrameEvent.frame.dataField.begin(), canFrameEvent.frame.dataField.end());
-    std::stringstream buffer;
-    buffer << "Receive CAN " << frameTypeHint << "frame, canId=" << canFrameEvent.frame.canId << ", data='"
-           << payloadStr << "'";
-    logger->Info(buffer.str());
+    std::stringstream ss;
+    ss << "Receive CAN " << frameTypeHint << "frame, canId=" << canFrameEvent.frame.canId << ", data=";
+    if (printHex)
+    {
+        ss << "[" << Util::AsHexString(canFrameEvent.frame.dataField).WithSeparator(" ") << "]";
+    }
+    else
+    {
+        ss << "'" << std::string(canFrameEvent.frame.dataField.begin(), canFrameEvent.frame.dataField.end()) << "'";
+    }
+    logger->Info(ss.str());
 }
 
 } // namespace CanDemoBehavior

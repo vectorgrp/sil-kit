@@ -32,11 +32,18 @@ struct Arguments
 {
     std::string participantName = "Participant1";
     std::string registryUri = "silkit://localhost:8500";
+    bool runAutonomous{false};
     bool runAsync{false};
     std::chrono::nanoseconds duration = 1ms;
     bool asFastAsPossible{false};
 };
 std::shared_ptr<SilKit::Config::IParticipantConfiguration> _participantConfiguration{nullptr};
+
+std::ostream& operator<<(std::ostream& out, std::chrono::nanoseconds timestamp)
+{
+    out << std::chrono::duration_cast<std::chrono::milliseconds>(timestamp).count() << "ms";
+    return out;
+}
 
 class ApplicationBase
 {
@@ -80,6 +87,7 @@ public:
         Log,
         Config,
         Async,
+        Autonomous,
         Duration,
         AsFastAsPossible
     };
@@ -95,7 +103,8 @@ private:
                                                                         {DefaultArg::Log, "log"},
                                                                         {DefaultArg::Config, "config"},
                                                                         {DefaultArg::Async, "async"},
-                                                                        {DefaultArg::Duration, "duration"},
+                                                                        {DefaultArg::Autonomous, "autonomous"},
+                                                                        {DefaultArg::Duration, "sim-step-duration"},
                                                                         {DefaultArg::AsFastAsPossible, "fast"}};
     Arguments _arguments;
 
@@ -118,8 +127,14 @@ private:
     std::atomic<SystemControllerResult> _systemControllerResult{SystemControllerResult::Unknown};
 
     // For async: Couple worker thread to SIL Kit lifecycle
-    std::promise<void> _unleashWorkerThreadPromise;
-    std::future<void> _unleashWorkerThreadFuture;
+    enum struct UnleashWorkerThreadResult
+    {
+        Unknown,
+        Start,
+        UserAbort
+    };
+    std::promise<UnleashWorkerThreadResult> _unleashWorkerThreadPromise;
+    std::future<UnleashWorkerThreadResult> _unleashWorkerThreadFuture;
     std::thread _workerThread;
 
     // Wait for the SIL Kit lifecycle to end
@@ -158,7 +173,8 @@ private:
                 defaultArgName.at(DefaultArg::Log), "l", "info",
                 "-l, --" + defaultArgName.at(DefaultArg::Log) + " <level>",
                 std::vector<std::string>{
-                    "Log to stdout with level 'trace', 'debug', 'warn', 'info', 'error', 'critical' or 'off'.",
+                    "Log to stdout with level:", 
+                    "'trace', 'debug', 'warn', 'info', 'error', 'critical' or 'off'.",
                     "Defaults to 'info'.",
                     "Cannot be used together with '--" + defaultArgName.at(DefaultArg::Config) + "'."});
         }
@@ -178,9 +194,20 @@ private:
             _commandLineParser->Add<CommandlineParser::Flag>(
                 defaultArgName.at(DefaultArg::Async), "a", "-a, --" + defaultArgName.at(DefaultArg::Async),
                 std::vector<std::string>{
-                    "Run in asynchronous mode.",
+                    "Run without time synchronization mode.",
                     "Cannot be used together with '--" + defaultArgName.at(DefaultArg::Duration) + "'."});
         }
+
+        if (!excludedCommandLineArgs.count(DefaultArg::Autonomous))
+        {
+            _commandLineParser->Add<CommandlineParser::Flag>(
+                defaultArgName.at(DefaultArg::Autonomous), "A", "-A, --" + defaultArgName.at(DefaultArg::Autonomous),
+                std::vector<std::string>{"Start the simulation autonomously.",
+                                         "Without this flag, a coordinated start is performed",
+                                         "which requires the SIL Kit System Controller."
+                    });
+        }
+
 
         if (!excludedCommandLineArgs.count(DefaultArg::Duration))
         {
@@ -188,7 +215,7 @@ private:
                 defaultArgName.at(DefaultArg::Duration), "d", std::to_string(defaultArgs.duration.count() / 1000000),
                 "-d, --" + defaultArgName.at(DefaultArg::Duration) + " <us>",
                 std::vector<std::string>{
-                    "The step size in microseconds of the participant.", "Defaults to 1000us.",
+                    "The duration of a simulation step in microseconds.", "Defaults to 1000us.",
                     "Cannot be used together with '--" + defaultArgName.at(DefaultArg::Async) + "'."});
         }
 
@@ -261,6 +288,14 @@ private:
         {
             _arguments.runAsync = hasAsyncFlag =
                 _commandLineParser->Get<CommandlineParser::Flag>(defaultArgName.at(DefaultArg::Async)).Value();
+        }
+
+        
+        bool hasAutonomousFlag = false;
+        if (!excludedCommandLineArgs.count(DefaultArg::Autonomous))
+        {
+            _arguments.runAutonomous = hasAutonomousFlag =
+                _commandLineParser->Get<CommandlineParser::Flag>(defaultArgName.at(DefaultArg::Autonomous)).Value();
         }
 
         bool hasDurationOption = false;
@@ -405,7 +440,12 @@ private:
 
     void WorkerThread()
     {
-        _unleashWorkerThreadFuture.wait();
+        auto result = _unleashWorkerThreadFuture.get();
+        if (result == UnleashWorkerThreadResult::UserAbort)
+        {
+            return;
+        }
+
         while (_lifecycleService->State() == ParticipantState::ReadyToRun)
         {
             // Await running state
@@ -428,7 +468,7 @@ private:
 
     void SetupLifecycle()
     {
-        auto operationMode = (_arguments.runAsync ? OperationMode::Autonomous : OperationMode::Coordinated);
+        auto operationMode = (_arguments.runAutonomous ? OperationMode::Autonomous : OperationMode::Coordinated);
         _lifecycleService = _participant->CreateLifecycleService({operationMode});
 
         // Handle simulation abort by sil-kit-system-controller
@@ -443,7 +483,7 @@ private:
 
         // Called during startup
         _lifecycleService->SetCommunicationReadyHandler([this]() {
-            if (!_arguments.runAsync)
+            if (!_arguments.runAutonomous)
             {
                 // Handle valid simulation start by sil-kit-system-controller
                 if (!_hasSystemControllerResult)
@@ -464,14 +504,19 @@ private:
             // Async: Work by the app is done in a separate thread
             _unleashWorkerThreadFuture = _unleashWorkerThreadPromise.get_future();
             _workerThread = std::thread{&ApplicationBase::WorkerThread, this};
-            _lifecycleService->SetStartingHandler([this]() { _unleashWorkerThreadPromise.set_value(); });
+            _lifecycleService->SetStartingHandler([this]() { _unleashWorkerThreadPromise.set_value(UnleashWorkerThreadResult::Start); });
         }
         else
         {
             // Sync: Work by the app is done in the SimulationStepHandler
             _timeSyncService = _lifecycleService->CreateTimeSyncService();
             _timeSyncService->SetSimulationStepHandler(
-                [this](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) { DoWorkSync(now); },
+                [this](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) { 
+                    std::stringstream ss;
+                    ss << "--------- Simulation step T=" << now << " ---------";
+                    _participant->GetLogger()->Info(ss.str());
+
+                    DoWorkSync(now); },
                 _arguments.duration);
         }
     }
@@ -490,7 +535,7 @@ private:
         }
         else
         {
-            if (!_arguments.runAsync && !_hasSystemControllerResult)
+            if (!_arguments.runAutonomous && !_hasSystemControllerResult)
             {
                 _waitForSystemControllerPromise.set_value(SystemControllerResult::UserAbort);
             }
@@ -499,15 +544,25 @@ private:
 
     void WaitUntilDone()
     {
-        if (!_arguments.runAsync)
+        if (!_arguments.runAutonomous)
         {
-            // Allow the application to exit by itself in all cases
             _participant->GetLogger()->Info("Waiting for the system controller to start the simulation");
+            // Allow the application to exit by itself in case the user aborted while waiting for the sil-kit-system-controller
             _systemControllerResult = _waitForSystemControllerFuture.get();
             if (_systemControllerResult == SystemControllerResult::UserAbort)
             {
-                _participant->GetLogger()->Info("Terminated while waiting for coordinated start");
                 // Premature user abort, don't wait for _participantStateFuture
+                _participant->GetLogger()->Info("Terminated while waiting for coordinated start");
+
+                if (_arguments.runAsync)
+                {
+                    _unleashWorkerThreadPromise.set_value(UnleashWorkerThreadResult::UserAbort);
+
+                    if (_workerThread.joinable())
+                    {
+                        _workerThread.join();
+                    }
+                }
                 return;
             }
             else if (_systemControllerResult == SystemControllerResult::SystemControllerAbort)

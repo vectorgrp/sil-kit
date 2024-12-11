@@ -14,17 +14,22 @@ public:
 private:
     ICanController* _canController{nullptr};
     std::string _networkName = "CAN1";
+    bool _printHex{false};
 
     void AddCommandLineArgs() override
     {
         GetCommandLineParser()->Add<CommandlineParser::Option>(
-            "network", "n", _networkName, "-n, --network <name>",
+            "network", "N", _networkName, "-N, --network <name>",
             std::vector<std::string>{"Name of the CAN network to use.", "Defaults to '" + _networkName + "'."});
+
+        GetCommandLineParser()->Add<CommandlineParser::Flag>("hex", "H", "-H, --hex",
+                                                             std::vector<std::string>{"Print the CAN payload as hex."});
     }
 
     void EvaluateCommandLineArgs() override
     {
         _networkName = GetCommandLineParser()->Get<CommandlineParser::Option>("network").Value();
+        _printHex = GetCommandLineParser()->Get<CommandlineParser::Flag>("hex").Value();
     }
 
     void CreateControllers() override
@@ -35,7 +40,7 @@ private:
             CanDemoCommon::FrameTransmitHandler(ack, GetLogger());
         });
         _canController->AddFrameHandler([this](ICanController* /*ctrl*/, const CanFrameEvent& frameEvent) {
-            CanDemoCommon::FrameHandler(frameEvent, GetLogger());
+            CanDemoCommon::FrameHandler(_printHex, frameEvent, GetLogger());
         });
     }
 
@@ -66,9 +71,17 @@ private:
         canFrame.dlc = static_cast<uint16_t>(canFrame.dataField.size());
 
         // Log
-        std::stringstream buffer;
-        buffer << "Send CAN FD frame, canId=" << canFrame.canId << ", data='" << payloadStr << "' ";
-        GetLogger()->Info(buffer.str());
+        std::stringstream ss;
+        ss << "Send CAN FD frame, canId=" << canFrame.canId << ", data=";
+        if (_printHex)
+        {
+            ss << "[" << Util::AsHexString(canFrame.dataField).WithSeparator(" ") << "]";
+        }
+        else
+        {
+            ss << "'" << std::string(canFrame.dataField.begin(), canFrame.dataField.end()) << "'";
+        }
+        GetLogger()->Info(ss.str());
 
         // Send
         _canController->SendFrame(std::move(canFrame));

@@ -9,12 +9,6 @@
 
 using namespace SilKit::Services::Lin;
 
-std::ostream& operator<<(std::ostream& out, std::chrono::nanoseconds timestamp)
-{
-    out << std::chrono::duration_cast<std::chrono::milliseconds>(timestamp).count() << "ms";
-    return out;
-}
-
 // This is the common behavior used in LinSlaveDemo and LinMasterDemo
 namespace LinDemoCommon {
 
@@ -29,6 +23,7 @@ public:
         _timeOut = timeOut;
         _action = std::move(action);
     }
+
     void Clear() noexcept
     {
         auto lock = Lock();
@@ -37,6 +32,7 @@ public:
         _timeOut = std::chrono::nanoseconds::max();
         _action = std::function<void(std::chrono::nanoseconds)>{};
     }
+
     auto ExecuteIfDue(std::chrono::nanoseconds now) -> bool
     {
         std::function<void(std::chrono::nanoseconds)> action;

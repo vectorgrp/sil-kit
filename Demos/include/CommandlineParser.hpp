@@ -33,8 +33,16 @@ public:
         auto argument = std::make_unique<TArgument>(std::forward<Args>(args)...);
         if (NameExists(argument->Name()))
         {
-            throw std::runtime_error("Argument '" + argument->Name() + "' already exists");
+            throw std::runtime_error("Cannot add argument '" + argument->Name() + "'. Name already exists.");
         }
+        auto shortNameCollision = ShortNameExists(argument->ShortName());
+        if (shortNameCollision.first)
+        {
+            throw std::runtime_error("Cannot add argument '" + argument->Name() + "'. Short name '"
+                                     + argument->ShortName() + "' already exists for argument '"
+                                     + shortNameCollision.second + "'");
+        }
+
         if (argument->Usage().size() > _longestUsage)
         {
             _longestUsage = argument->Usage().size();
@@ -43,7 +51,7 @@ public:
         return *this;
     }
 
-    /*! \brief Retrieve a commandline argument by its name
+    /*! \brief Retrieve a command line argument by its name
      * \throw SilKit::std::runtime_error when argument does not exist or is of a different kind
      */
     template <class TArgument>
@@ -62,19 +70,9 @@ public:
     void PrintUsageInfo(std::ostream& out, const std::string& executableName)
     {
         out << std::endl;
-        //out << std::setw(_longestUsage + 1) << std::left << "Description: " << _appDescription << std::endl;
         out << _appDescription << std::endl;
         out << std::endl;
 
-        //out << std::setw(_longestUsage + 1) << std::left << "Usage: " << executableName;
-        //for (auto& argument : _arguments)
-        //{
-        //    if (argument->IsHidden())
-        //        continue;
-
-        //    out << " [" << argument->Usage() << "]";
-        //}
-        //out << std::endl << std::endl;
 
         out << "Arguments:" << std::endl;
         for (auto& argument : _arguments)
@@ -84,7 +82,7 @@ public:
 
             if (argument->DescriptionLines().size() > 0)
             {
-                out << std::setw(_longestUsage + 1) << std::left << argument->Usage() << ": "
+                out << std::setw(_longestUsage + 1) << std::left << argument->Usage() << "| "
                     << argument->DescriptionLines()[0] << std::endl;
             }
             bool skipFirst = true;
@@ -177,15 +175,40 @@ public:
                 continue;
             }
 
-            auto* flag = isShortForm ? GetByShortName<Flag>(name) : GetByName<Flag>(name);
-            if (flag)
+            if (isShortForm)
             {
-                bool value = true;
-                flag->_value = value;
+                // Flag short form (potentially multiple)
+                bool foundAny = false;
+                for (auto& c : name)
+                {
+                    auto* flag = GetByShortName<Flag>(std::string{c});
+                    if (flag)
+                    {
+                        foundAny = true;
+                        flag->_value = true;
+                    }
+                    else
+                    {
+                        throw std::runtime_error("Unknown flag '" + std::string{c} + "'");
+                    }
 
-                continue;
+                }
+                if (foundAny)
+                {
+                    continue;
+                }
             }
-
+            else
+            {
+                // Flag long form
+                auto* flag = GetByName<Flag>(name);
+                if (flag)
+                {
+                    flag->_value = true;
+                    continue;
+                }
+            }
+   
             throw std::runtime_error("Unknown argument '" + argument + "'");
         }
     }
@@ -209,6 +232,7 @@ public:
 
         virtual auto Kind() const -> ArgumentKind = 0;
         virtual auto Name() const -> std::string = 0;
+        virtual auto ShortName() const -> std::string = 0;
         virtual auto Usage() const -> std::string = 0;
         virtual auto DescriptionLines() const -> std::vector<std::string> = 0;
         virtual bool IsHidden() const = 0;
@@ -217,8 +241,9 @@ public:
     template <class Derived, class T>
     struct Argument : public IArgument
     {
-        Argument(std::string name, std::string usage, std::vector<std::string> descriptionLines, bool hidden = false)
+        Argument(std::string name, std::string shortName, std::string usage, std::vector<std::string> descriptionLines, bool hidden = false)
             : _name(std::move(name))
+            , _shortName(std::move(shortName))
             , _usage(std::move(usage))
             , _descriptionLines(std::move(descriptionLines))
             , _hidden{hidden}
@@ -232,6 +257,10 @@ public:
         auto Name() const -> std::string override
         {
             return _name;
+        }
+        auto ShortName() const -> std::string override
+        {
+            return _shortName;
         }
         auto Usage() const -> std::string override
         {
@@ -247,8 +276,9 @@ public:
         }
 
     private:
-        std::string _name;
-        std::string _usage;
+        std::string _name{};
+        std::string _shortName{};
+        std::string _usage{};
         std::vector<std::string> _descriptionLines;
         bool _hidden{false};
     };
@@ -263,7 +293,7 @@ public:
         static constexpr auto kind = ArgumentKind::Positional;
 
         Positional(std::string name, std::string usage, std::vector<std::string> descriptionLines)
-            : Argument(std::move(name), std::move(usage), std::move(descriptionLines))
+            : Argument(std::move(name), "", std::move(usage), std::move(descriptionLines))
             , _value()
         {
         }
@@ -292,7 +322,7 @@ public:
         static constexpr auto kind = ArgumentKind::PositionalList;
 
         PositionalList(std::string name, std::string usage, std::vector<std::string> descriptionLines)
-            : Argument(std::move(name), std::move(usage), std::move(descriptionLines))
+            : Argument(std::move(name), "",  std::move(usage), std::move(descriptionLines))
             , _values()
         {
         }
@@ -323,8 +353,7 @@ public:
 
         Option(std::string name, std::string shortName, std::string defaultValue, std::string usage,
                std::vector<std::string> descriptionLines)
-            : Argument(std::move(name), std::move(usage), std::move(descriptionLines))
-            , _shortName(std::move(shortName))
+            : Argument(std::move(name), std::move(shortName),  std::move(usage), std::move(descriptionLines))
             , _defaultValue(std::move(defaultValue))
             , _value()
         {
@@ -332,17 +361,12 @@ public:
 
         Option(std::string name, std::string shortName, std::string defaultValue, std::string usage,
                std::vector<std::string> descriptionLines, decltype(Hidden))
-            : Argument(std::move(name), std::move(usage), std::move(descriptionLines), true)
-            , _shortName(std::move(shortName))
+            : Argument(std::move(name), std::move(shortName), std::move(usage), std::move(descriptionLines), true)
             , _defaultValue(std::move(defaultValue))
             , _value()
         {
         }
 
-        auto ShortName() const -> std::string
-        {
-            return _shortName;
-        }
         auto DefaultValue() const -> std::string
         {
             return _defaultValue;
@@ -357,7 +381,6 @@ public:
         }
 
     private:
-        std::string _shortName;
         std::string _defaultValue;
         std::string _value;
     };
@@ -374,23 +397,17 @@ public:
         static constexpr auto kind = ArgumentKind::Flag;
 
         Flag(std::string name, std::string shortName, std::string usage, std::vector<std::string> descriptionLines)
-            : Argument(std::move(name), std::move(usage), std::move(descriptionLines))
-            , _shortName(std::move(shortName))
+            : Argument(std::move(name), std::move(shortName), std::move(usage), std::move(descriptionLines))
             , _value(false)
         {
         }
 
         Flag(std::string name, std::string shortName, std::string usage, std::vector<std::string> descriptionLines, decltype(Hidden))
-            : Argument(std::move(name), std::move(usage), std::move(descriptionLines), true)
-            , _shortName(std::move(shortName))
+            : Argument(std::move(name), std::move(shortName), std::move(usage), std::move(descriptionLines), true)
             , _value(false)
         {
         }
 
-        auto ShortName() const -> std::string
-        {
-            return _shortName;
-        }
         auto DefaultValue() const -> bool
         {
             return false;
@@ -401,7 +418,6 @@ public:
         }
 
     private:
-        std::string _shortName;
         bool _value;
     };
 
@@ -427,9 +443,22 @@ private:
 
     auto NameExists(std::string name) -> bool
     {
-        auto it =
-            std::find_if(_arguments.begin(), _arguments.end(), [&name](const auto& el) { return el->Name() == name; });
+        auto it = std::find_if(_arguments.begin(), _arguments.end(),
+                               [&name](const auto& el) { return el->Name() == name; });
         return it != _arguments.end();
+    }
+
+    auto ShortNameExists(std::string shortName) -> std::pair<bool, std::string>
+    {
+        auto it = std::find_if(_arguments.begin(), _arguments.end(),
+                               [&shortName](const auto& el) { return el->ShortName() == shortName; });
+        bool collision = it != _arguments.end();
+        std::string collisionArgName = "";
+        if (collision)
+        {
+            collisionArgName = it->get()->Name();
+        }
+        return {collision, collisionArgName};
     }
 
 private:

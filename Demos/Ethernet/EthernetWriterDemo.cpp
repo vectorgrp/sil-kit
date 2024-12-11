@@ -18,7 +18,7 @@ private:
     void AddCommandLineArgs() override
     {
         GetCommandLineParser()->Add<CommandlineParser::Option>(
-            "network", "n", _networkName, "-n, --network <name>",
+            "network", "N", _networkName, "-N, --network <name>",
             std::vector<std::string>{"Name of the Ethernet network to use.", "Defaults to '" + _networkName + "'."});
     }
 

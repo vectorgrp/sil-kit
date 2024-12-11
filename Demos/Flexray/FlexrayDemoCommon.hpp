@@ -10,12 +10,6 @@
 using namespace SilKit::Services::Flexray;
 using namespace std::chrono_literals;
 
-std::ostream& operator<<(std::ostream& out, std::chrono::nanoseconds timestamp)
-{
-    out << std::chrono::duration_cast<std::chrono::milliseconds>(timestamp).count() << "ms";
-    return out;
-}
-
 // This is the common behavior used in FlexrayNode0 and FlexrayNode1
 namespace FlexrayDemoCommon {
 

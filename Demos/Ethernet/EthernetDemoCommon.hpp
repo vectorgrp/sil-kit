@@ -8,12 +8,6 @@
 
 using namespace SilKit::Services::Ethernet;
 
-std::ostream& operator<<(std::ostream& out, std::chrono::nanoseconds timestamp)
-{
-    out << std::chrono::duration_cast<std::chrono::milliseconds>(timestamp).count() << "ms";
-    return out;
-}
-
 // This is the common behavior used in EthernetReaderDemo and EthernetWriterDemo
 namespace EthernetDemoCommon {
 
