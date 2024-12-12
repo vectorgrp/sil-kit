@@ -9,7 +9,15 @@ The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <
 [4.0.55] - Unreleased
 ---------------------
 
+Changed
+~~~~~~~
 
+- Overhaul of Can, Ethernet, Lin, Flexray, PubSub and Rpc demos
+  - The demos are restructured into one participant per executable
+  - Basic SIL Kit features are implemented in a base class used by the demos
+  - No command line arguments needed for basic execution (with time synchronization and coordinated start)
+  - Useful command line arguments are provided for all demos (e.g. rename the participant or network, logging, execution modes)
+  - The old '--async' mode of the demos now is accessible by '--async --autonomous' (or short form '-aA')
 
 [4.0.54] - 2024-11-11
 ---------------------
