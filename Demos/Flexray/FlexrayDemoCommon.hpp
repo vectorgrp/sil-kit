@@ -26,41 +26,41 @@ public:
 
         _flexrayController->AddFrameHandler([this](IFlexrayController* /*ctrl*/, FlexrayFrameEvent ev) {
             std::stringstream ss;
-            ss << ">>" << ev;
+            ss << "Received " << ev;
             _logger->Info(ss.str());
         });
 
         _flexrayController->AddFrameTransmitHandler(
             [this](IFlexrayController* /*ctrl*/, const FlexrayFrameTransmitEvent& ev) {
             std::stringstream ss;
-            ss << ">>" << ev;
+            ss << "Received " << ev;
             _logger->Info(ss.str());
         });
 
         _flexrayController->AddSymbolHandler([this](IFlexrayController* /*ctrl*/, FlexraySymbolEvent ev) {
             std::stringstream ss;
-            ss << ">>" << ev;
+            ss << "Received " << ev;
             _logger->Info(ss.str());
         });
 
         _flexrayController->AddSymbolTransmitHandler(
             [this](IFlexrayController* /*ctrl*/, const FlexraySymbolTransmitEvent& ev) {
             std::stringstream ss;
-            ss << ">>" << ev;
+            ss << "Received " << ev;
             _logger->Info(ss.str());
         });
 
         _flexrayController->AddCycleStartHandler(
             [this](IFlexrayController* /*ctrl*/, const FlexrayCycleStartEvent& ev) {
             std::stringstream ss;
-            ss << ">>" << ev;
+            ss << "Received " << ev;
             _logger->Info(ss.str());
         });
 
         _flexrayController->AddWakeupHandler(
             [this](IFlexrayController* /*ctrl*/, const FlexrayWakeupEvent& wakeupEvent) {
             std::stringstream ss;
-            ss << ">> WAKEUP! (" << wakeupEvent.pattern << ")";
+            ss << "Received WAKEUP! (" << wakeupEvent.pattern << ")";
             _logger->Info(ss.str());
 
             _flexrayController->AllowColdstart();
@@ -71,7 +71,7 @@ public:
             [this](IFlexrayController* /*ctrl*/, const FlexrayPocStatusEvent& pocStatusEvent) {
             {
                 std::stringstream ss;
-                ss << ">> POC=" << pocStatusEvent.state << ", Freeze=" << pocStatusEvent.freeze
+                ss << "Received POC=" << pocStatusEvent.state << ", Freeze=" << pocStatusEvent.freeze
                    << ", Wakeup=" << pocStatusEvent.wakeupStatus << ", Slot=" << pocStatusEvent.slotMode
                    << " @t=" << pocStatusEvent.timestamp;
                 _logger->Info(ss.str());

@@ -24,7 +24,8 @@ private:
 
         GetCommandLineParser()->Add<CommandlineParser::Flag>(
             "hex", "H", "-H, --hex",
-            std::vector<std::string>{"Print the CAN payload as hex."});
+            std::vector<std::string>{"Print the CAN payloads in hexadecimal format.",
+                                     "Otherwise, the payloads are interpreted as strings."});
     }
 
     void EvaluateCommandLineArgs() override
@@ -41,7 +42,7 @@ private:
             CanDemoCommon::FrameTransmitHandler(ack, GetLogger());
         });
         _canController->AddFrameHandler([this](ICanController* /*ctrl*/, const CanFrameEvent& frameEvent) {
-            CanDemoCommon::FrameHandler(_printHex, frameEvent, GetLogger());
+            CanDemoCommon::FrameHandler(frameEvent, GetLogger(), _printHex);
         });
     }
 

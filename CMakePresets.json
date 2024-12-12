@@ -62,7 +62,10 @@
                 "value": "x64",
                 "strategy": "external"
             },
-            "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug" }
+          "cacheVariables": {
+            "CMAKE_BUILD_TYPE": "Debug",
+            "SILKIT_BUILD_DOCS":  "ON"
+          }
         },
         {
             "name": "x64-release",
@@ -820,11 +823,11 @@
             "inherits": "linux-base",
             "configurePreset": "linux-relwithdebinfo"
         },
-        {
-            "name": "x64-debug",
-            "inherits": "windows-base",
-            "configurePreset": "x64-debug"
-        },
+      {
+        "name": "x64-debug",
+        "inherits": "windows-base",
+        "configurePreset": "x64-debug"
+      },
         {
             "name": "x64-release",
             "inherits": "windows-base",

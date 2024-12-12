@@ -24,7 +24,7 @@ private:
     {
         _rpcClientSignalStrength = GetParticipant()->CreateRpcClient(
             "ClientSignalStrength", RpcDemoCommon::rpcSpecSignalStrength,
-            [this](IRpcClient* /*client*/, RpcCallResultEvent event) { CallReturnSignalStrength(event); });
+            [this](IRpcClient* /*client*/, RpcCallResultEvent event) { CallReturnGetSignalStrength(event); });
 
         _rpcClientSort = GetParticipant()->CreateRpcClient(
             "ClientSort", RpcDemoCommon::rpcSpecSort,
@@ -45,14 +45,14 @@ private:
         auto tunerDataSerialized = RpcDemoCommon::SerializeTunerData(randomTunerData);
 
         std::stringstream ss;
-        ss << "<< Calling with arguments: band=" << band << ", frequency=" << randomTunerData.frequency
+        ss << "Calling 'SignalStrength' with arguments: band=" << band << ", frequency=" << randomTunerData.frequency
            << " (userContext=" << userContext << ")";
         GetLogger()->Info(ss.str());
 
         _rpcClientSignalStrength->Call(tunerDataSerialized, userContext);
     }
 
-    void CallReturnSignalStrength(RpcCallResultEvent callResult)
+    void CallReturnGetSignalStrength(RpcCallResultEvent callResult)
     {
         if (RpcDemoCommon::EvaluateCallStatus(callResult, GetLogger()))
         {
@@ -60,7 +60,8 @@ private:
                 RpcDemoCommon::DeserializeSignalStrength(SilKit::Util::ToStdVector(callResult.resultData));
 
             std::stringstream ss;
-            ss << ">> signalStrength=" << signalStrength;
+            ss << "Call 'GetSignalStrength' returned: signalStrength=" << signalStrength
+               << " (userContext=" << callResult.userContext << ")";
             GetLogger()->Info(ss.str());
         }
     }
@@ -76,7 +77,7 @@ private:
         auto numberListSerialized = RpcDemoCommon::SerializeSortData(randomNumberList);
 
         std::stringstream ss;
-        ss << "<< Calling with arguments: randomNumberList=" << randomNumberList << " (userContext=" << userContext
+        ss << "Calling 'Sort' with arguments: randomNumberList=" << randomNumberList << " (userContext=" << userContext
            << ")";
         GetLogger()->Info(ss.str());
 
@@ -90,7 +91,8 @@ private:
             auto sortedNumbers = RpcDemoCommon::DeserializeSortData(SilKit::Util::ToStdVector(callResult.resultData));
 
             std::stringstream ss;
-            ss << ">> sortedNumbers=" << sortedNumbers;
+            ss << "Call 'Sort' returned: sortedNumbers=" << sortedNumbers << " (userContext=" << callResult.userContext
+               << ")";
             GetLogger()->Info(ss.str());
         }
     }

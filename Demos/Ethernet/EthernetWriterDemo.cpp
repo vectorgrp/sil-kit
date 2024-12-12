@@ -14,17 +14,24 @@ public:
 private:
     IEthernetController* _ethernetController{nullptr};
     std::string _networkName = "Eth1";
+    bool _printHex{false};
 
     void AddCommandLineArgs() override
     {
         GetCommandLineParser()->Add<CommandlineParser::Option>(
             "network", "N", _networkName, "-N, --network <name>",
             std::vector<std::string>{"Name of the Ethernet network to use.", "Defaults to '" + _networkName + "'."});
+
+        GetCommandLineParser()->Add<CommandlineParser::Flag>(
+            "hex", "H", "-H, --hex",
+            std::vector<std::string>{"Print the CAN payloads in hexadecimal format.",
+                                     "Otherwise, the payloads are interpreted as strings."});
     }
 
     void EvaluateCommandLineArgs() override
     {
         _networkName = GetCommandLineParser()->Get<CommandlineParser::Option>("network").Value();
+        _printHex = GetCommandLineParser()->Get<CommandlineParser::Flag>("hex").Value();
     }
 
     void CreateControllers() override
@@ -37,7 +44,7 @@ private:
         });
         _ethernetController->AddFrameHandler(
             [this](IEthernetController* /*ctrl*/, const EthernetFrameEvent& frameEvent) {
-            EthernetDemoCommon::FrameHandler(frameEvent, GetLogger());
+            EthernetDemoCommon::FrameHandler(frameEvent, GetLogger(), _printHex);
         });
     }
 
@@ -70,19 +77,16 @@ private:
         std::stringstream stream;
         // Ensure that the payload is long enough to constitute a valid Ethernet frame
         stream << "Hello from Ethernet writer! (frameId=" << frameId++
-               << ")"
-                  "----------------------------------------------------";
-
+               << ")----------------------------------------------------";
         auto payloadString = stream.str();
-        std::vector<uint8_t> payload(payloadString.size() + 1);
-        memcpy(payload.data(), payloadString.c_str(), payloadString.size() + 1);
-
+        std::vector<uint8_t> payload(payloadString.begin(), payloadString.end());
+        auto frame = CreateFrame(BroadcastMacAddr, WriterMacAddr, payload);
         const auto userContext = reinterpret_cast<void*>(static_cast<intptr_t>(frameId));
 
-        auto frame = CreateFrame(BroadcastMacAddr, WriterMacAddr, payload);
         _ethernetController->SendFrame(EthernetFrame{frame}, userContext);
+
         std::stringstream ss;
-        ss << "<< ETH Frame sent with userContext=" << userContext;
+        ss << "Sending Ethernet frame, data=" << EthernetDemoCommon::PrintPayload(payload, _printHex);
         GetLogger()->Info(ss.str());
     }
 

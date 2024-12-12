@@ -47,7 +47,7 @@ private:
         auto gpsSerialized = PubSubDemoCommon::SerializeGPSData(gpsData);
 
         std::stringstream ss;
-        ss << ">> Publish GPS data: lat=" << gpsData.latitude << ", lon=" << gpsData.longitude
+        ss << "Publishing GPS data: lat=" << gpsData.latitude << ", lon=" << gpsData.longitude
                   << ", signalQuality=" << gpsData.signalQuality;
         GetLogger()->Info(ss.str());
 
@@ -60,7 +60,7 @@ private:
         auto temperatureSerialized = PubSubDemoCommon::SerializeTemperature(temperature);
 
         std::stringstream ss;
-        ss << ">> Publish temperature data: temperature=" << temperature;
+        ss << "Publishing temperature data: temperature=" << temperature;
         GetLogger()->Info(ss.str());
 
         _temperaturePublisher->Publish(temperatureSerialized);

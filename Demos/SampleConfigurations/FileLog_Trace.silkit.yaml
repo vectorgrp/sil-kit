@@ -1,4 +1,4 @@
-Description: Logging to File with Trace level
+Description: Log to a file with Trace level
 Logging:
   Sinks:
     - Level: Trace

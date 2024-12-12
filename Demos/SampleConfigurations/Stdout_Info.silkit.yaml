@@ -1,4 +1,4 @@
-Description: Logging to Stdout with Info level
+Description: Log to Stdout with Level Info
 Logging:
   Sinks:
     - Level: Info

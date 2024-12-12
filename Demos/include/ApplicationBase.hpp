@@ -211,11 +211,13 @@ private:
 
         if (!excludedCommandLineArgs.count(DefaultArg::Duration))
         {
+            auto defaultValue = std::to_string(defaultArgs.duration.count() / 1000000);
             _commandLineParser->Add<CommandlineParser::Option>(
-                defaultArgName.at(DefaultArg::Duration), "d", std::to_string(defaultArgs.duration.count() / 1000000),
+                defaultArgName.at(DefaultArg::Duration), "d", defaultValue,
                 "-d, --" + defaultArgName.at(DefaultArg::Duration) + " <us>",
-                std::vector<std::string>{
-                    "The duration of a simulation step in microseconds.", "Defaults to 1000us.",
+                std::vector<std::string>{"The duration of a simulation step in microseconds.",
+                                         "Defaults to " + defaultValue
+                                             + "us.",
                     "Cannot be used together with '--" + defaultArgName.at(DefaultArg::Async) + "'."});
         }
 

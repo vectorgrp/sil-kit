@@ -56,9 +56,10 @@ private:
             default:
                 break;
             }
-
+            
             std::stringstream ss;
-            ss << ">> Received call with arguments: band=" << band << ", frequency=" << tunerData.frequency << "; Return signalStrength=" << signalStrength;
+            ss << "Receive call to 'GetSignalStrength' with arguments: band=" << band
+               << ", frequency=" << tunerData.frequency << "; returning signalStrength=" << signalStrength;
             GetLogger()->Info(ss.str());
 
             // Serialize result data
@@ -79,8 +80,7 @@ private:
             std::sort(resultData.begin(), resultData.end());
 
             std::stringstream ss;
-            ss << ">> Received call with argumentData=" << argumentData
-                      << ", returning resultData=" << resultData;
+            ss << "Receive call to 'Sort' with argumentData=" << argumentData << "; returning resultData=" << resultData;
             GetLogger()->Info(ss.str());
 
             // Serialize result data

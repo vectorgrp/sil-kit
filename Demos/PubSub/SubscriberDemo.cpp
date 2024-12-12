@@ -34,7 +34,7 @@ private:
             auto gpsData = PubSubDemoCommon::DeserializeGPSData(SilKit::Util::ToStdVector(dataMessageEvent.data));
 
             std::stringstream ss;
-            ss << "<< Received GPS data: lat=" << gpsData.latitude << ", lon=" << gpsData.longitude
+            ss << "Received GPS data: lat=" << gpsData.latitude << ", lon=" << gpsData.longitude
                << ", signalQuality=" << gpsData.signalQuality;
             GetLogger()->Info(ss.str());
         });
@@ -46,7 +46,7 @@ private:
                 PubSubDemoCommon::DeserializeTemperature(SilKit::Util::ToStdVector(dataMessageEvent.data));
 
             std::stringstream ss;
-            ss << "<< Received temperature data: temperature=" << temperature;
+            ss << "Received temperature data: temperature=" << temperature;
             GetLogger()->Info(ss.str());
         });
     }

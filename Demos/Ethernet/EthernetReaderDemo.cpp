@@ -14,17 +14,24 @@ public:
 private:
     IEthernetController* _ethernetController{nullptr};
     std::string _networkName = "Eth1";
+    bool _printHex{false};
 
     void AddCommandLineArgs() override
     {
         GetCommandLineParser()->Add<CommandlineParser::Option>(
             "network", "N", _networkName, "-N, --network <name>",
             std::vector<std::string>{"Name of the Ethernet network to use.", "Defaults to '" + _networkName + "'."});
+
+        GetCommandLineParser()->Add<CommandlineParser::Flag>(
+            "hex", "H", "-H, --hex",
+            std::vector<std::string>{"Print the CAN payloads in hexadecimal format.",
+                                     "Otherwise, the payloads are interpreted as strings."});
     }
 
     void EvaluateCommandLineArgs() override
     {
         _networkName = GetCommandLineParser()->Get<CommandlineParser::Option>("network").Value();
+        _printHex = GetCommandLineParser()->Get<CommandlineParser::Flag>("hex").Value();
     }
 
     void CreateControllers() override
@@ -35,7 +42,7 @@ private:
             EthernetDemoCommon::FrameTransmitHandler(ack, GetLogger());
         });
         _ethernetController->AddFrameHandler([this](IEthernetController* /*ctrl*/, const EthernetFrameEvent& frameEvent) {
-            EthernetDemoCommon::FrameHandler(frameEvent, GetLogger());
+            EthernetDemoCommon::FrameHandler(frameEvent, GetLogger(), _printHex);
         });
     }
 

@@ -11,20 +11,20 @@ Demos
 .. |SystemController| replace::  |UtilDir|/sil-kit-system-controller
 
 .. |DemoAbstractCAN| replace:: 
-  The `CanWriter` application sends CAN frames to the `CanReader` application including frame acknowledgment handling.
+  The `CanWriter` participant sends Can frames to the `CanReader` participant including frame acknowledgment handling.
 .. |DemoAbstractETH| replace:: 
-  The `EthernetWriter` application sends Ethernet frames to the `EthernetReader` application including frame acknowledgment handling.
+  The `EthernetWriter` participant sends Ethernet frames to the `EthernetReader` participant including frame acknowledgment handling.
 .. |DemoAbstractLIN| replace:: 
-  A two-node LIN Setup with a `LinMaster` and a `LinSlave` application. 
+  A two-node Lin Setup with a `LinMaster` and a `LinSlave`. 
   Includes a simple scheduling mechanism and demonstrates controller sleep / wakeup handling.
 .. |DemoAbstractFlexRay| replace::
   A two-node FlexRay Setup with a full cluster and node parametrization. Includes POC Status handling, buffer updates and reconfiguration.
   This Demo requires a separate `Network Simulator` application to simulate the details of the FlexRay cluster, which is not included in the |ProductName|.
 .. |DemoAbstractPubSub| replace:: 
-  One application publishes GPS and temperature data, another application subscribes to these topics.
+  One participant publishes GPS and temperature data, another participant subscribes to these topics.
   Including (de-)serialization of the C++ structures into a transmittable format.
 .. |DemoAbstractRPC| replace:: 
-  The RPC server application provides two simple functions which are called by a RPC client application.
+  The Rpc server participant provides two simple functions which are called by a Rpc client participant.
   Includes (de-)serialization of the function parameters.
 .. |DemoAbstractBenchmark| replace:: 
   This demo sets up a simulation with various command line arguments for benchmarking purposes.
@@ -36,7 +36,7 @@ Demos
   E.g., between a local host, a virtual machine, a remote network, etc.
 .. |DemoAbstractNetSim| replace:: 
   Demonstrates the usage of the experimental |ProductName| NetworkSimulator API.
-  A custom network simulation for CAN is set up, the network simulator application can be used together with the CAN demo.
+  A custom network simulation for Can is set up, the network simulator application can be used together with the Can demo.
 
 
 This chapter describes the demo projects showcasing the core features of the |ProductName|.
@@ -121,8 +121,8 @@ Visual Studio
    a. For the git repository: The binaries reside in ``_build/<build config>/<build type, e.g. Debug, Release>/``
    b. For a |ProductName| package: The binaries reside in ``<package folder>/SilKit/bin``
 
-Command Line
-------------
+From command line
+-----------------
  
 #. Make sure a C++ compiler and CMake is installed
 #. Open a terminal
@@ -163,13 +163,87 @@ Build the Demos from a |ProductName| package against your own target library
    E.g., instead of ``./SilKit/bin/SilKitDemoCan ./SilKit-Demos/Can/DemoCan.silkit.yaml CanReader``, use ``.\SilKit\bin\SilKitDemoCan .\SilKit-Demos\Can\DemoCan.silkit.yaml CanReader``
 
 
+.. _sec:common-cla:
+
+Demo command line arguments
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Some general settings for |ProductName| participants are available through a common set of command line arguments. 
+The demos for Can, Ethernet, Lin, Flexray, PubSub and Rpc all share the following arguments:
+
+.. code-block:: console
+
+    -h, --help                   | Get this help.
+    -n, --name <name>            | The participant name used to take part in the simulation.
+                                   Defaults to '<set by the individual demo>'.
+    -u, --registry-uri <uri>     | The registry URI to connect to.
+                                   Defaults to 'silkit://localhost:8500'.
+    -l, --log <level>            | Log to stdout with level:
+                                   'trace', 'debug', 'warn', 'info', 'error', 'critical' or 'off'.
+                                   Defaults to 'info'.
+                                   Cannot be used together with '--config'.
+    -c, --config <filePath>      | Path to the Participant configuration YAML or JSON file.
+                                   Cannot be used together with '--log'.
+                                   Will always run as fast as possible.
+    -a, --async                  | Run without time synchronization mode.
+                                   Cannot be used together with '--sim-step-duration'.
+    -A, --autonomous             | Start the simulation autonomously.
+                                   Without this flag, a coordinated start is performed
+                                   which requires the SIL Kit System Controller.
+    -d, --sim-step-duration <us> | The duration of a simulation step in microseconds.
+                                   Defaults to <set by the individual demo>us.
+                                   Cannot be used together with '--async'.
+    -f, --fast                   | Run the simulation as fast as possible.
+                                   By default, the execution is slowed down to two work cycles per second.
+                                   Cannot be used together with '--config'.
+
+The default behavior of these options is:
+
+* Participant name is set by the individual demo executable (e.g. ``CanWriter`` for ``SilKitDemoCanWriter``).
+* Default registry-uri ``silkit://localhost:8500``.
+* Logging to Stdout with Level Info.
+* No participant configuration file in use.
+* Virtual time synchronization enabled.
+* Coordinated start (requires a ``sil-kit-system-controller``).
+* Simulation step duration set by the individual demo executable.
+* Slowed down execution to two work cycles per second.
+
+Useful execution modes that are made accessible by the general options:
+
+* Spawn multiple demo participants by using collision free participant names, e.g. add a second Can reader with  ``--name CanReader1``.
+* Run without time synchronization and start coordination: ``--async --autonomous``, or short ``-aA``.
+  This allows to start/stop the participants individually without requiring a ``sil-kit-system-controller``.
+* Join a already running simulation with time synchronization: ``--autonomous`` (without ``--async``).
+* Perform a coordinated start without time synchronization: ``--async`` (without ``--autonomous``).
+  This requires a ``sil-kit-system-controller``.
+
+Some demos extend these options by the following command line arguments:
+
+* For the bus demos (Can, Ethernet, Lin, Flexray): ``--network`` to override the default bus network name.
+* For Can and Ethernet: ``--hex`` to print payloads in hexadecimal format.
+
+.. _sec:sample-configs:
+
+Sample participant configurations
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The following sample participant configurations are available:
+
+ * ``FileLog_Trace.silkit.yaml``: Log to a file with Level Trace.
+ * ``FileLog_Trace_FromRemotes.silkit.yaml``: Log to file with Level Trace from participants that use a Sink of Type Remote.
+ * ``Stdout_Info.silkit.yaml``: Log to Stdout with Level Info.
+ * ``Trace_ToRemote.silkit.yaml``: Log to Remote with Level Info. Another participant must specify LogFromRemotes True.
+
 .. _sec:can-demo:
 
-CAN Demo
+Can Demo
 ~~~~~~~~
 
 Abstract
     |DemoAbstractCAN|
+Executables
+    * ``SilKitDemoCanReader``
+    * ``SilKitDemoCanWriter``
 Source location
     ``./SilKit-Demos/Can``
 Requirements
@@ -178,22 +252,12 @@ Requirements
     * :ref:`sil-kit-monitor<sec:util-monitor>` (optional)
     * SIL Kit Network Simulator (optional)
 Parameters
-    * ``<ParticipantConfiguration.yaml>``
-      File name of the participant configuration to be used; 
-      use ``DemoCan.silkit.yaml`` for an example configuration.
-    * ``<ParticipantName>``
-      The name of the participant within the simulation; must either be ``CanWriter`` or ``CanReader``.
-    * ``[RegistryUri]``
-      The silkit:// URI of the registry to connect to; defaults to silkit://localhost:8500 (optional).
-    * ``[--async]`` 
-      If async flag is set, the participant will join the simulation unsynchronized and it will not need
-      the |SystemController| to start.
-Parameter Example
-    .. parsed-literal::
-
-        # Creates a CAN Writer Process with the registry's default URI
-        |DemoDir|/SilKitDemoCan ./SilKit-Demos/Can/DemoCan.silkit.yaml CanWriter
-
+    * ``--network <name>``
+      Name of the Can network to use. 
+      Defaults to "CAN1".
+    * ``--hex``
+      Print the Can payloads in hexadecimal format.
+      Otherwise, the payloads are interpreted as strings.
 System Example
     Run the following commands in separate terminals:
 
@@ -205,32 +269,27 @@ System Example
         # Monitor (optional):
         |Monitor|
 
-        # CAN Reader:
-        |DemoDir|/SilKitDemoCan ./SilKit-Demos/Can/DemoCan.silkit.yaml CanReader
+        # Can Reader:
+        |DemoDir|/SilKitDemoCanReader
 
-        # CAN Writer:
-        |DemoDir|/SilKitDemoCan ./SilKit-Demos/Can/DemoCan.silkit.yaml CanWriter
+        # Can Writer:
+        |DemoDir|/SilKitDemoCanWriter
 
         # System Controller:
         |SystemController| CanReader CanWriter 
 
-    To run the demo without virtual time synchronization, use the following commands in separate terminals:
+    To run the demo without virtual time synchronization and start coordination, use the following commands in separate terminals:
 
     .. parsed-literal:: 
 
         # Registry (if not already running):
         |Registry|
 
-        # CAN Reader:
-        |DemoDir|/SilKitDemoCan ./SilKit-Demos/Can/DemoCan.silkit.yaml CanReader --async
+        # Can Reader:
+        |DemoDir|/SilKitDemoCanReader --async --autonomous
 
-        # CAN Writer:
-        |DemoDir|/SilKitDemoCan ./SilKit-Demos/Can/DemoCan.silkit.yaml CanWriter --async
-
-Notes
-    * The writer sends CAN frames at a fixed rate of one frame per simulation step (1ms).
-    * Both reader and writer sleep for 1 second per simulation step to slow down the execution.
-
+        # Can Writer:
+        |DemoDir|/SilKitDemoCanWriter --async --autonomous
 
 .. _sec:eth-demo:
 
@@ -239,6 +298,9 @@ Ethernet Demo
 
 Abstract
     |DemoAbstractETH|
+Executables
+    * ``SilKitDemoEthernetReader``
+    * ``SilKitDemoEthernetWriter``
 Source location
     ``./SilKit-Demos/Ethernet``
 Requirements
@@ -247,22 +309,12 @@ Requirements
     * :ref:`sil-kit-monitor<sec:util-monitor>` (optional)
     * SIL Kit Network Simulator (optional)
 Parameters
-    * ``<ParticipantConfiguration.yaml>`` 
-      File name of the participant configuration to be used; 
-      use ``DemoEthernet.silkit.yaml`` for an example configuration.
-    * ``<ParticipantName>`` 
-      The name of the participant within the simulation; must either be ``EthernetWriter`` or 
-      ``EthernetReader``.
-    * ``[RegistryUri]`` 
-      The ``silkit://`` URI of the registry to connect to; defaults to ``silkit://localhost:8500`` (optional).
-    * ``[--async]``  
-      If async flag is set, the participant will join the simulation unsynchronized and it will not need
-      the |SystemController| to start.
-Parameter Example
-    .. parsed-literal:: 
-
-       # Creates an Ethernet Writer Process with the registry's default URI:
-       |DemoDir|/SilKitDemoEthernet ./SilKit-Demos/Ethernet/DemoEthernet.silkit.yaml EthernetWriter
+    * ``--network <name>``
+      Name of the Ethernet network to use. 
+      Defaults to "Eth1".
+    * ``--hex``
+      Print the Ethernet payloads in hexadecimal format.
+      Otherwise, the payloads are interpreted as strings.
 System Example
     Run the following commands in separate terminals:
 
@@ -271,19 +323,16 @@ System Example
         # Registry (if not already running):
         |Registry|
 
-        # Monitor (optional):
-        |Monitor|
-
         # Ethernet Reader:
-        |DemoDir|/SilKitDemoEthernet ./SilKit-Demos/Ethernet/DemoEthernet.silkit.yaml EthernetReader
+        |DemoDir|/SilKitDemoEthernetReader
 
         # Ethernet Writer:
-        |DemoDir|/SilKitDemoEthernet ./SilKit-Demos/Ethernet/DemoEthernet.silkit.yaml EthernetWriter
+        |DemoDir|/SilKitDemoEthernetWriter
 
         # System Controller:
         |SystemController| EthernetReader EthernetWriter
 
-    To run the demo without virtual time synchronization, use the following commands in separate terminals:
+    To run the demo without virtual time synchronization and start coordination, use the following commands in separate terminals:
 
     .. parsed-literal:: 
 
@@ -291,22 +340,21 @@ System Example
         |Registry|
 
         # Ethernet Reader:
-        |DemoDir|/SilKitDemoEthernet ./SilKit-Demos/Ethernet/DemoEthernet.silkit.yaml EthernetReader --async
+        |DemoDir|/SilKitDemoEthernetReader --async --autonomous
 
         # Ethernet Writer:
-        |DemoDir|/SilKitDemoEthernet ./SilKit-Demos/Ethernet/DemoEthernet.silkit.yaml EthernetWriter --async
-Notes
-    * The writer sends Ethernet frames at a fixed rate of one frame per simulation step (1ms).
-    * Both reader and writer sleep for 1 second per simulation step to slow down execution.
-
+        |DemoDir|/SilKitDemoEthernetWriter --async --autonomous
 
 .. _sec:lin-demo:
 
-LIN Demo
+Lin Demo
 ~~~~~~~~
 
 Abstract
     |DemoAbstractLIN|
+Executables
+    * ``SilKitDemoLinMaster``
+    * ``SilKitDemoLinSlave``
 Source location
     ``./SilKit-Demos/Lin``
 Requirements
@@ -315,21 +363,9 @@ Requirements
     * :ref:`sil-kit-monitor<sec:util-monitor>` (optional)
     * SIL Kit Network Simulator (optional)
 Parameters
-    * ``<ParticipantConfiguration.yaml>`` 
-      File name of the participant configuration to be used; 
-      use ``DemoLin.silkit.yaml`` for an example configuration.
-    * ``<ParticipantName>`` 
-      The name of the participant within the simulation; 
-      must either be ``EthernetWriter`` or ``EthernetReader``.
-    * ``[RegistryUri]`` 
-      The silkit:// URI of the registry to connect to; defaults to silkit://localhost:8500 (optional).
-    * ``[--async]``  
-      If async flag is set, the participant will join the simulation unsynchronized and it will not need the |SystemController| to start.
-Parameter Example
-    .. parsed-literal:: 
-
-       # Creates a LIN Master Process with the registry's default URI:
-       |DemoDir|/SilKitDemoLin ./SilKit-Demos/Lin/DemoLin.silkit.yaml LinMaster
+    * ``--network <name>``
+      Name of the Lin network to use. 
+      Defaults to "LIN1".
 System Example
     Run the following commands in separate terminals:
 
@@ -341,30 +377,27 @@ System Example
        # Monitor (optional):
        |Monitor|
 
-       # LIN Master:
-       |DemoDir|/SilKitDemoLin ./SilKit-Demos/Lin/DemoLin.silkit.yaml LinMaster
+       # Lin Master:
+       |DemoDir|/SilKitDemoLinMaster
 
-       # LIN Slave:
-       |DemoDir|/SilKitDemoLin ./SilKit-Demos/Lin/DemoLin.silkit.yaml LinSlave
+       # Lin Slave:
+       |DemoDir|/SilKitDemoLinSlave
 
        # System Controller:
        |SystemController| LinSlave LinMaster
 
-    To run the demo without virtual time synchronization, use the following commands in separate terminals:
+    To run the demo without virtual time synchronization and start coordination, use the following commands in separate terminals:
 
     .. parsed-literal:: 
 
        # Registry (if not already running):
        |Registry|
 
-       # LIN Master:
-       |DemoDir|/SilKitDemoLin ./SilKit-Demos/Lin/DemoLin.silkit.yaml LinMaster --async
+       # Lin Master:
+       |DemoDir|/SilKitDemoLinMaster --async --autonomous
 
-       # LIN Slave:
-       |DemoDir|/SilKitDemoLin ./SilKit-Demos/Lin/DemoLin.silkit.yaml LinSlave --async
-
-Notes
-    * Both Master and Slave sleep for 100ms per simulation step to slow down execution.
+       # Lin Slave:
+       |DemoDir|/SilKitDemoLinSlave --async --autonomous
 
 .. _sec:flexray-demo:
 
@@ -373,6 +406,9 @@ FlexRay Demo
 
 Abstract
     |DemoAbstractFlexRay|
+Executables
+    * ``SilKitDemoFlexrayNode0``
+    * ``SilKitDemoFlexrayNode1``
 Source location
     ``./SilKit-Demos/FlexRay``
 Requirements
@@ -381,19 +417,9 @@ Requirements
     * SIL Kit Network Simulator (mandatory)
     * :ref:`sil-kit-monitor<sec:util-monitor>` (optional)
 Parameters
-    * ``<ParticipantConfiguration.yaml>`` 
-      File name of the participant configuration to be used; 
-      use ``DemoFlexRay.silkit.yaml`` for an example configuration.
-    * ``<ParticipantName>`` 
-      The name of the participant within the simulation; must either be ``Node0`` or 
-      ``Node1``.
-    * ``[RegistryUri]`` 
-      The silkit:// URI of the registry to connect to; defaults to silkit://localhost:8500 (optional).
-Parameter Example
-    .. parsed-literal:: 
-
-       # Creates a FlexRay Process for Node 0 with the registry's default URI:
-       |DemoDir|/SilKitDemoFlexRay ./SilKit-Demos/FlexRay/DemoFlexRay.silkit.yaml Node0
+    * ``--network <name>``
+      Name of the FlexRay network to use. 
+      Defaults to "PowerTrain1".
 System Example
     Run the following commands in separate terminals:
 
@@ -409,16 +435,16 @@ System Example
        |Monitor|
 
        # Node 0:
-       |DemoDir|/SilKitDemoFlexRay ./SilKit-Demos/FlexRay/DemoFlexRay.silkit.yaml Node0
+       |DemoDir|/SilKitDemoFlexrayNode0
 
        # Node 1:
-       |DemoDir|/SilKitDemoFlexRay ./SilKit-Demos/FlexRay/DemoFlexRay.silkit.yaml Node1
+       |DemoDir|/SilKitDemoFlexrayNode1
 
        # System Controller:
        |SystemController| Node0 Node1 NetworkSimulator
 Notes
-    * Starting the FlexRay cycle takes quite some time, which is accurately modeled by the SIL Kit Network Simulator.
-    * It takes somewhat between 50 and 100 ms until the first FlexRay messages are transmitted.
+    * The FlexRay demo requires the usage of the SIL Kit Network Simulator and virtual time synchronization.
+    * It takes about 65ms (virtual time) until the starting the FlexRay cycle has started and the first FlexRay messages are transmitted.
 
 .. _sec:pubsub-demo:
 
@@ -427,6 +453,9 @@ Publish/Subscribe Demo
 
 Abstract
     |DemoAbstractPubSub|
+Executables
+    * ``SilKitDemoPublisher``
+    * ``SilKitDemoSubscriber``
 Source location
     ``./SilKit-Demos/PubSub``
 Requirements
@@ -434,22 +463,7 @@ Requirements
     * :ref:`sil-kit-system-controller<sec:util-system-controller>` (not needed for unsynchronized execution)
     * :ref:`sil-kit-monitor<sec:util-monitor>` (optional)
 Parameters
-    * ``<ParticipantConfiguration.yaml>`` 
-      File name of the participant configuration to be used; 
-      use ``DemoPubSub.silkit.yaml`` for an example configuration.
-    * ``<ParticipantName>`` 
-      The name of the participant within the simulation; must either be ``Publisher`` or 
-      ``Subscriber``.
-    * ``[RegistryUri]`` 
-      The silkit:// URI of the registry to connect to; defaults to silkit://localhost:8500 (optional).
-    * ``[--async]``  
-      If async flag is set, the participant will join the simulation unsynchronized and it will not need
-      the |SystemController| to start.
-Parameter Example
-    .. parsed-literal:: 
-    
-       # Creates a publisher with the registry's default URI:
-       |DemoDir|/SilKitDemoPubSub ./SilKit-Demos/PubSub/DemoPubSub.silkit.yaml Publisher
+    * No demo specific command line arguments
 System Example
     Run the following commands in separate terminals:
 
@@ -462,15 +476,15 @@ System Example
        |Monitor|
     
        # Publisher:
-       |DemoDir|/SilKitDemoPubSub ./SilKit-Demos/PubSub/DemoPubSub.silkit.yaml Publisher
+       |DemoDir|/SilKitDemoPublisher 
     
        # Subscriber:
-       |DemoDir|/SilKitDemoPubSub ./SilKit-Demos/PubSub/DemoPubSub.silkit.yaml Subscriber
+       |DemoDir|/SilKitDemoSubscriber
     
        # System Controller:
        |SystemController| Publisher Subscriber
     
-    To run the demo without virtual time synchronization, use the following commands in separate terminals:
+    To run the demo without virtual time synchronization and start coordination, use the following commands in separate terminals:
     
     .. parsed-literal::
     
@@ -478,21 +492,21 @@ System Example
        |Registry|
     
        # Publisher:
-       |DemoDir|/SilKitDemoPubSub ./SilKit-Demos/PubSub/DemoPubSub.silkit.yaml Publisher --async
+       |DemoDir|/SilKitDemoPublisher --async --autonomous
     
        # Subscriber:
-       |DemoDir|/SilKitDemoPubSub ./SilKit-Demos/PubSub/DemoPubSub.silkit.yaml Subscriber --async
-    
-Notes
-    * The publisher and subscriber show how to serialize/deserialize different kinds of data with the built-in :doc:`Data Serialization API</api/serdes>`.
+       |DemoDir|/SilKitDemoSubscriber --async --autonomous
 
 .. _sec:rpc-demo:
 
-RPC Demo
+Rpc Demo
 ~~~~~~~~
 
 Abstract
     |DemoAbstractRPC|
+Executables
+    * ``SilKitDemoRpcClient``
+    * ``SilKitDemoRpcServer``
 Source location
     ``./SilKit-Demos/Rpc``
 Requirements
@@ -500,22 +514,7 @@ Requirements
     * :ref:`sil-kit-system-controller<sec:util-system-controller>` (not needed for unsynchronized execution)
     * :ref:`sil-kit-monitor<sec:util-monitor>` (optional)
 Parameters
-    * ``<ParticipantConfiguration.yaml>`` 
-      File name of the participant configuration to be used; 
-      use ``DemoRpc.silkit.yaml`` for an example configuration.
-    * ``<ParticipantName>`` 
-      The name of the participant within the simulation; must either be ``Server`` or 
-      ``Client``.
-    * ``[RegistryUri]`` 
-      The silkit:// URI of the registry to connect to; defaults to silkit://localhost:8500 (optional).
-    * ``[--async]``  
-      If async flag is set, the participant will join the simulation unsynchronized and it will not need
-      the |SystemController| to start.
-Parameter Example
-    .. parsed-literal:: 
-    
-       # Creates an RPC server process with the registry's default URI:
-       |DemoDir|/SilKitDemoRpc ./SilKit-Demos/Rpc/DemoRpc.silkit.yaml Server
+    * No demo specific command line arguments
 System Example
     Run the following commands in separate terminals:
 
@@ -528,15 +527,15 @@ System Example
        |Monitor|
     
        # Server:
-       |DemoDir|/SilKitDemoRpc ./SilKit-Demos/Rpc/DemoRpc.silkit.yaml Server
+       |DemoDir|/SilKitDemoRpcServer
     
        # Client:
-       |DemoDir|/SilKitDemoRpc ./SilKit-Demos/Rpc/DemoRpc.silkit.yaml Client
+       |DemoDir|/SilKitDemoRpcClient
     
        # System Controller:
-       |SystemController| Server Client
+       |SystemController| RpcServer RpcClient
     
-    To run the demo without virtual time synchronization, use the following commands in separate terminals:
+    To run the demo without virtual time synchronization and start coordination, use the following commands in separate terminals:
     
     .. parsed-literal::
     
@@ -544,15 +543,11 @@ System Example
        |Registry|
     
        # Server:
-       |DemoDir|/SilKitDemoRpc ./SilKit-Demos/Rpc/DemoRpc.silkit.yaml Server --async
+       |DemoDir|/SilKitDemoRpcServer --async --autonomous
     
        # Client:
-       |DemoDir|/SilKitDemoRpc ./SilKit-Demos/Rpc/DemoRpc.silkit.yaml Client --async
+       |DemoDir|/SilKitDemoRpcClient --async --autonomous
     
-Notes
-    * ``Client`` participant has two RPC clients which call the ``Add100`` and ``Sort`` functions on the ``Server`` participant's two RPC servers.
-
-
 .. _sec:benchmark-demo:
 
 Benchmark Demo
@@ -617,7 +612,7 @@ Notes
     * The demo can be wrapped in helper scripts to run parameter scans, e.g., for performance analysis regarding different message sizes. 
       See ``.\SilKit-Demos\Benchmark\msg-size-scaling\Readme.md`` and ``.\SilKit-Demos\Benchmark\performance-diff\Readme.md`` for further information.
          
-         
+
 .. _sec:latency-demo:
 
 Latency Demo
@@ -697,7 +692,7 @@ Parameter Example
        # Start the Network Simulator Demo with the given configuration file and participant name
        |DemoDir|/SilKitDemoNetSim ./SilKit-Demos/NetworkSimulator/DemoNetSim.silkit.silkit.yaml NetworkSimulator
 System Example
-    Interplay with the CAN Demo:
+    Interplay with the Can Demo:
 
     .. parsed-literal:: 
     
@@ -707,10 +702,10 @@ System Example
         # Monitor (optional):
         |Monitor|
     
-        # CAN Reader:
+        # Can Reader:
         |DemoDir|/SilKitDemoCan ./SilKit-Demos/Can/DemoCan.silkit.yaml CanReader
     
-        # CAN Writer:
+        # Can Writer:
         |DemoDir|/SilKitDemoCan ./SilKit-Demos/Can/DemoCan.silkit.yaml CanWriter
     
         # System Controller:
@@ -720,7 +715,104 @@ System Example
         |DemoDir|/SilKitDemoNetSim ./SilKit-Demos/NetworkSimulator/DemoNetSim.silkit.silkit.yaml NetworkSimulator
     
 Notes
-    * The CAN Reader and Writer configure their controller on the network "CAN1", which is simulated by the network simulator demo.
-    * In the simple bus logic of the network simulation demo (see ``Demos\NetworkSimulator\src\Can\MySimulatedCanController.cpp``), the acknowledgment (CanFrameTransmitEvent) is sent directly to the CAN Writer. 
+    * The Can Reader and Writer configure their controller on the network "CAN1", which is simulated by the network simulator demo.
+    * In the simple bus logic of the network simulation demo (see ``Demos\NetworkSimulator\src\Can\MySimulatedCanController.cpp``), the acknowledgment (CanFrameTransmitEvent) is sent directly to the Can Writer. 
       The frame itself (CanFrameEvent) is sent with a delay of 2ms.
 
+
+Demo implementation details
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The communication demos Can, Ethernet, Lin, Flexray, PubSub and Rpc share a base implementation that provides general |ProductName| features.
+This allows to separate the demo specific use case (e.g. how to use Ethernet with the |ProductName|) from general features (e.g. setup the |ProductName| lifecycle).
+This base implementation is located in ``Demos\include\ApplicationBase.hpp``.
+
+Further, the participant pairs of the demos share some common behavior like printing frames, status handling or small helper classes.
+This is located in the header ``<DemoName>Common.hpp`` of the respective demo folders.
+
+To constructed your own demo, use the following template:
+
+.. code-block:: c++
+
+    #include "ApplicationBase.hpp"
+
+    // Inherit from ApplicationBase that provides common SIL Kit features
+    class MyDemoParticipant: public ApplicationBase
+    {
+    public:
+        // Inherit constructors
+        using ApplicationBase::ApplicationBase;
+
+    private:
+        
+        // Member variables like SIL Kit controller pointers, Demo state, etc
+        std::string _myOption;
+        bool _myFlag;
+
+        // The following overrides are invoked in the right order by the ApplicationBase
+        // This enables:
+        // - General and demo specific command line arguments
+        // - Setup of the SIL Kit lifecycle
+        // - Controller creation and initialization
+        // - SimulationStepHandler vs. thread based execution (--async)
+        // - Signal handling to CTRL-C at any time
+        // - Basic logging
+
+        // Extend the command line argument list
+        void AddCommandLineArgs() override
+        {
+            GetCommandLineParser()->Add<CommandlineParser::Option>(
+                "myOption", "o", "DefaultValue", "-o, --myOption <value>",
+                std::vector<std::string>{"Description Line 1.", "Description Line 2"});
+
+            GetCommandLineParser()->Add<CommandlineParser::Flag>(
+                "myFlag", "f", "-f, --myFlag",
+                std::vector<std::string>{"Description Line 1.", "Description Line 2"});
+        }
+
+        // Evaluate the command line argument list
+        void EvaluateCommandLineArgs() override
+        {
+            _myOption = GetCommandLineParser()->Get<CommandlineParser::Option>("myOption").Value();
+            _myFlag = GetCommandLineParser()->Get<CommandlineParser::Flag>("myFlag").Value();
+        }
+
+        // Create all SIL Kit controllers here
+        void CreateControllers() override
+        {
+            // All SIL Kit features can be accessed via GetParticipant()
+            // _myController = GetParticipant()->CreateXYZController(...);
+        }
+
+        // Controller initialization goes here
+        void InitControllers() override
+        {
+        }
+    
+        // Called in each simulation step when running with time synchronization
+        void DoWorkSync(std::chrono::nanoseconds now) override
+        {
+            // _myController->Send(...)   
+        }
+
+        // Called in a worker thread when running without time synchronization
+        void DoWorkAsync() override
+        {
+            // _myController->Send(...)   
+        }
+    };
+
+    int main(int argc, char** argv)
+    {
+        Arguments args;
+        args.participantName = "MyDemoParticipant"; // Always specify a meaningful default participant name 
+
+        MyDemoParticipant app{args};
+
+        // This will trigger AddCommandLineArgs() and EvaluateCommandLineArgs()
+        // Optionally, a set of excluded default command line arguments can be specified
+        app.SetupCommandLineArgs(argc, argv, "Description for the command line help");
+    
+        // This will trigger CreateControllers(), InitControllers() and then cyclically DoWorkSync() or DoWorkAsync()
+        return app.Run();
+    }

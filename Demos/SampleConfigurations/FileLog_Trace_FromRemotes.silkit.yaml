@@ -1,4 +1,4 @@
-Description: Logging to file with Trace Level from remotes
+Description: Log to file with Level Trace from participants that use a Sink of Type Remote
 Logging:
   LogFromRemotes: True
   Sinks:

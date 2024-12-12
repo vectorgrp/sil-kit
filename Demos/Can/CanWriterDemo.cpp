@@ -40,7 +40,7 @@ private:
             CanDemoCommon::FrameTransmitHandler(ack, GetLogger());
         });
         _canController->AddFrameHandler([this](ICanController* /*ctrl*/, const CanFrameEvent& frameEvent) {
-            CanDemoCommon::FrameHandler(_printHex, frameEvent, GetLogger());
+            CanDemoCommon::FrameHandler(frameEvent, GetLogger(), _printHex);
         });
     }
 
@@ -72,7 +72,7 @@ private:
 
         // Log
         std::stringstream ss;
-        ss << "Send CAN FD frame, canId=" << canFrame.canId << ", data=";
+        ss << "Sending CAN FD frame, canId=" << canFrame.canId << ", data=";
         if (_printHex)
         {
             ss << "[" << Util::AsHexString(canFrame.dataField).WithSeparator(" ") << "]";

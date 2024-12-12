@@ -46,7 +46,7 @@ private:
             }
 
             std::stringstream ss;
-            ss << ">> " << frameStatusEvent.frame << " status=" << frameStatusEvent.status
+            ss << "Received " << frameStatusEvent.frame << " status=" << frameStatusEvent.status
                       << " timestamp=" << frameStatusEvent.timestamp;
 
             GetLogger()->Info(ss.str());
@@ -57,13 +57,13 @@ private:
             [this](ILinController* /*linController*/, const LinGoToSleepEvent& /*goToSleepEvent*/) {
 
             std::stringstream ss;
-            ss << "LIN Slave received go-to-sleep command; entering sleep mode.";
+            ss << "Received go-to-sleep command; entering sleep mode.";
             GetLogger()->Info(ss.str());
 
             // Wakeup in 10 ms
             _timer.Set(_now + 10ms, [this](std::chrono::nanoseconds now) {
                 std::stringstream ss;
-                ss << "<< Wakeup pulse @" << now;
+                ss << "Sending Wakeup pulse @" << now;
                 GetLogger()->Info(ss.str());
 
                 _linController->Wakeup();
@@ -92,24 +92,24 @@ private:
             
             {
                 std::stringstream ss;
-                ss << "<< Received frame header: id=" << (int)headerEvent.id << " @" << headerEvent.timestamp
-                   << std::endl;
+                ss << "Received frame header: id=" << (int)headerEvent.id << " @" << headerEvent.timestamp;
                 GetLogger()->Info(ss.str());
             }
 
             const auto it = _slaveResponses.find(headerEvent.id);
             if (it != _slaveResponses.end())
             {
+                std::stringstream ss;
+                ss << "Sending dynamic response: id=" << static_cast<int>(headerEvent.id);
+                GetLogger()->Info(ss.str());
+
                 const auto& frame = it->second;
                 SilKit::Experimental::Services::Lin::SendDynamicResponse(_linController, frame);
-                std::stringstream ss;
-                ss << ">> Sending dynamic response: id=" << static_cast<int>(headerEvent.id) << std::endl;
-                GetLogger()->Info(ss.str());
             }
             else
             {
                 std::stringstream ss;
-                ss << "!! Not sending dynamic response: id=" << static_cast<int>(headerEvent.id) << std::endl;
+                ss << "!! Not sending dynamic response: id=" << static_cast<int>(headerEvent.id);
                 GetLogger()->Info(ss.str());
             }
 

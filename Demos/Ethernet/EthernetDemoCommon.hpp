@@ -19,11 +19,11 @@ void FrameTransmitHandler(const EthernetFrameTransmitEvent& frameTransmitEvent, 
     std::stringstream ss;
     if (frameTransmitEvent.status == EthernetTransmitStatus::Transmitted)
     {
-        ss << ">> ACK for Ethernet frame with userContext=" << frameTransmitEvent.userContext << std::endl;
+        ss << "Received ACK for Ethernet frame with userContext=" << frameTransmitEvent.userContext;
     }
     else
     {
-        ss << ">> NACK for Ethernet frame with userContext=" << frameTransmitEvent.userContext;
+        ss << "Received NACK for Ethernet frame with userContext=" << frameTransmitEvent.userContext;
         switch (frameTransmitEvent.status)
         {
         case EthernetTransmitStatus::Transmitted:
@@ -41,27 +41,33 @@ void FrameTransmitHandler(const EthernetFrameTransmitEvent& frameTransmitEvent, 
             ss << ": Dropped";
             break;
         }
-
-        ss << std::endl;
-        logger->Info(ss.str());
     }
+    logger->Info(ss.str());
 }
 
-std::string GetPayloadStringFromFrame(const EthernetFrame& frame)
+auto PrintPayload(const std::vector<uint8_t>& payload, bool printHex)
+{
+    std::stringstream ss;
+    if (printHex)
+    {
+        ss << "[" << Util::AsHexString(payload).WithSeparator(" ") << "]";
+    }
+    else
+    {
+        ss << "'" << std::string(payload.begin(), payload.end()) << "'";
+    }
+    return ss.str();
+}
+
+void FrameHandler(const EthernetFrameEvent& ethernetFrameEvent, ILogger* logger, bool printHex)
 {
     const size_t FrameHeaderSize = 2 * sizeof(EthernetMac) + sizeof(EtherType);
+    std::vector<uint8_t> payloadWithoutHeader;
+    payloadWithoutHeader.insert(payloadWithoutHeader.end(), ethernetFrameEvent.frame.raw.begin() + FrameHeaderSize,
+                                ethernetFrameEvent.frame.raw.end());
 
-    std::vector<uint8_t> payload;
-    payload.insert(payload.end(), frame.raw.begin() + FrameHeaderSize, frame.raw.end());
-    std::string payloadString(payload.begin(), payload.end());
-    return payloadString;
-}
-
-void FrameHandler(const EthernetFrameEvent& ethernetFrameEvent, ILogger* logger)
-{
-    auto payload = GetPayloadStringFromFrame(ethernetFrameEvent.frame);
     std::stringstream ss;
-    ss << ">> Ethernet frame: \"" << payload << "\"" << std::endl;
+    ss << "Receive Ethernet frame, data=" << PrintPayload(payloadWithoutHeader, printHex);
     logger->Info(ss.str());
 }
 

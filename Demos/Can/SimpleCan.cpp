@@ -34,11 +34,11 @@ int main(int argc, char** argv)
         auto* canController = participant->CreateCanController("CanController1", "CAN1");
 
         canController->AddFrameTransmitHandler([logger](ICanController* /*ctrl*/, const CanFrameTransmitEvent& ack) {
-            logger->Info("CAN frame transmit acknowledge");
+            logger->Info("Receive CAN frame transmit acknowledge");
         });
         canController->AddFrameHandler([logger](ICanController* /*ctrl*/, const CanFrameEvent& canFrameEvent) {
             std::string payload(canFrameEvent.frame.dataField.begin(), canFrameEvent.frame.dataField.end());
-            logger->Info("CAN frame received: '" + payload + "'");
+            logger->Info("Receive CAN frame: data='" + payload + "'");
         });
 
         // Initialize CAN controller
@@ -65,7 +65,7 @@ int main(int argc, char** argv)
                 canFrame.dlc = static_cast<uint16_t>(canFrame.dataField.size());
 
                 // Send frame (move ownership of canFrame to avoid additional copy)
-                logger->Info("Send CAN frame: '" + payloadStr + "'");
+                logger->Info("Sending CAN frame: data='" + payloadStr + "'");
                 canController->SendFrame(std::move(canFrame));
             }
         }, stepSize);

@@ -27,7 +27,7 @@ static std::ostream& operator<<(std::ostream& os, const std::vector<uint8_t>& v)
 namespace RpcDemoCommon {
 
 std::string mediaType{SilKit::Util::SerDes::MediaTypeRpc()};
-RpcSpec rpcSpecSignalStrength{"SignalStrength", mediaType};
+RpcSpec rpcSpecSignalStrength{"GetSignalStrength", mediaType};
 RpcSpec rpcSpecSort{"Sort", mediaType};
 
 // ----------------------------------------------------------------
@@ -121,7 +121,6 @@ bool EvaluateCallStatus(RpcCallResultEvent callResult, ILogger* logger)
     {
     case RpcCallStatus::Success:
     {
-        ss << ">> Call " << callResult.userContext << " returned successfully";
         isSuccessful = true;
         break;
     }
@@ -148,7 +147,11 @@ bool EvaluateCallStatus(RpcCallResultEvent callResult, ILogger* logger)
     default:
         break;
     }
-    logger->Info(ss.str());
+
+    if (!isSuccessful)
+    {
+        logger->Info(ss.str());
+    }
 
     return isSuccessful;
 }

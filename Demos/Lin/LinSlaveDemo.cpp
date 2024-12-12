@@ -49,8 +49,7 @@ private:
             }
 
             std::stringstream ss;
-            ss << ">> " << frameStatusEvent.frame << " status=" << frameStatusEvent.status
-                      << " timestamp=" << frameStatusEvent.timestamp;
+            ss << "Received " << frameStatusEvent.frame << " status=" << frameStatusEvent.status;
 
             GetLogger()->Info(ss.str());
 
@@ -60,13 +59,13 @@ private:
             [this](ILinController* /*linController*/, const LinGoToSleepEvent& /*goToSleepEvent*/) {
 
             std::stringstream ss;
-            ss << "LIN Slave received go-to-sleep command; entering sleep mode.";
+            ss << "Received go-to-sleep command; entering sleep mode.";
             GetLogger()->Info(ss.str());
 
             // Wakeup in 15 ms
             _timer.Set(_now + 15ms, [this](std::chrono::nanoseconds now) {
                 std::stringstream ss;
-                ss << "<< Wakeup pulse @" << now;
+                ss << "Sending Wakeup pulse @" << now;
                 GetLogger()->Info(ss.str());
 
                 _linController->Wakeup();
@@ -77,7 +76,7 @@ private:
         _linController->AddWakeupHandler([this](ILinController* /*linController*/, const LinWakeupEvent& wakeupEvent) {
             
             std::stringstream ss;
-            ss << "LIN Slave received wakeup pulse; direction=" << wakeupEvent.direction
+            ss << "Received Wakeup pulse, direction=" << wakeupEvent.direction
                       << "; Entering normal operation mode.";
             GetLogger()->Info(ss.str());
 

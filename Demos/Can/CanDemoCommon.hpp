@@ -14,11 +14,11 @@ namespace CanDemoCommon {
 void FrameTransmitHandler(const CanFrameTransmitEvent& canFrameAck, ILogger* logger)
 {
     std::stringstream ss;
-    ss << "Ack CAN frame, canId=" << canFrameAck.canId << ", status='" << canFrameAck.status << "'";
+    ss << "Receive CAN frame transmit acknowledge: canId=" << canFrameAck.canId << ", status='" << canFrameAck.status << "'";
     logger->Info(ss.str());
 }
 
-void FrameHandler(bool printHex, const CanFrameEvent& canFrameEvent, ILogger* logger)
+void FrameHandler(const CanFrameEvent& canFrameEvent, ILogger* logger, bool printHex)
 {
     std::string frameTypeHint = "";
     if ((canFrameEvent.frame.flags & static_cast<CanFrameFlagMask>(CanFrameFlag::Fdf)) != 0)
@@ -27,7 +27,7 @@ void FrameHandler(bool printHex, const CanFrameEvent& canFrameEvent, ILogger* lo
     }
 
     std::stringstream ss;
-    ss << "Receive CAN " << frameTypeHint << "frame, canId=" << canFrameEvent.frame.canId << ", data=";
+    ss << "Receive CAN " << frameTypeHint << "frame: canId=" << canFrameEvent.frame.canId << ", data=";
     if (printHex)
     {
         ss << "[" << Util::AsHexString(canFrameEvent.frame.dataField).WithSeparator(" ") << "]";

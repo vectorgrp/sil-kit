@@ -51,7 +51,7 @@ private:
             }
 
             std::stringstream ss;
-            ss << ">> " << frameStatusEvent.frame << " status=" << frameStatusEvent.status << std::endl;
+            ss << "Received FrameStatus for " << frameStatusEvent.frame << ", status=" << frameStatusEvent.status;
             GetLogger()->Info(ss.str());
             
             _schedule->ScheduleNextTask();
@@ -66,7 +66,7 @@ private:
             }
 
             std::stringstream ss;
-            ss << ">> Wakeup pulse received; direction=" << wakeupEvent.direction;
+            ss << "Received Wakeup pulse, direction=" << wakeupEvent.direction;
             GetLogger()->Info(ss.str());
 
             _linController->WakeupInternal();
@@ -81,18 +81,19 @@ private:
 
             {
                 std::stringstream ss;
-                ss << ">> Received frame header: id=" << (int)headerEvent.id << " @" << headerEvent.timestamp;
+                ss << "Received frame header: id=" << (int)headerEvent.id;
                 GetLogger()->Info(ss.str());
             }
 
             const auto it = _masterResponses.find(headerEvent.id);
             if (it != _masterResponses.end())
             {
+                std::stringstream ss;
+                ss << "Sending dynamic response: id=" << static_cast<int>(headerEvent.id);
+                GetLogger()->Info(ss.str());
+
                 const auto& frame = it->second;
                 SilKit::Experimental::Services::Lin::SendDynamicResponse(linController, frame);
-                std::stringstream ss;
-                ss << "<< Sending dynamic response: id=" << static_cast<int>(headerEvent.id);
-                GetLogger()->Info(ss.str());
             }
             else
             {
@@ -177,14 +178,14 @@ private:
     {
         _linController->SendFrameHeader(linId);
         std::stringstream ss;
-        ss << "<< LIN frame header sent with ID=" << static_cast<uint16_t>(linId) << " @" << _now;
+        ss << "Sending LIN frame header, ID=" << static_cast<uint16_t>(linId) << " @" << _now;
         GetLogger()->Info(ss.str());
     }
 
     void GoToSleep()
     {
         std::stringstream ss;
-        ss << "<< Sending Go-To-Sleep command and entering sleep state";
+        ss << "Sending Go-To-Sleep command and entering sleep state";
         GetLogger()->Info(ss.str());
 
         _linController->GoToSleep();

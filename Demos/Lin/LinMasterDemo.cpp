@@ -48,7 +48,7 @@ private:
             }
 
             std::stringstream ss;
-            ss << ">> " << frameStatusEvent.frame << " status=" << frameStatusEvent.status << std::endl;
+            ss << "Received " << frameStatusEvent.frame << ", status=" << frameStatusEvent.status;
             GetLogger()->Info(ss.str());
         });
 
@@ -62,7 +62,7 @@ private:
             }
 
             std::stringstream ss;
-            ss << ">> Wakeup pulse received; direction=" << wakeupEvent.direction << std::endl;
+            ss << "Received Wakeup pulse, direction=" << wakeupEvent.direction;
             GetLogger()->Info(ss.str());
 
             _linController->WakeupInternal();
@@ -117,11 +117,11 @@ private:
         std::stringstream ss;
         if (responseType == LinFrameResponseType::SlaveResponse)
         {
-            ss << "<< LIN Frame Header sent for ID=" << linId;
+            ss << "LIN frame Header sent for ID=" << linId;
         }
         else
         {
-            ss << "<< LIN Frame sent with ID=" << linId;
+            ss << "LIN frame sent with ID=" << linId;
         }
         GetLogger()->Info(ss.str());
     }
@@ -183,7 +183,7 @@ private:
     void GoToSleep()
     {
         std::stringstream ss;
-        ss << "<< Sending Go-To-Sleep command and entering sleep state";
+        ss << "Sending Go-To-Sleep command and entering sleep state";
         GetLogger()->Info(ss.str());
 
         _linController->GoToSleep();
