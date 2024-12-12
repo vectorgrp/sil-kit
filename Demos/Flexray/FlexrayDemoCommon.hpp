@@ -90,11 +90,12 @@ public:
     }
 
 private:
-    ILogger* _logger;
+    IFlexrayController* _flexrayController{nullptr};
     FlexrayControllerConfig _controllerConfig;
     FlexrayPocStatusEvent _lastPocStatus{};
-    IFlexrayController* _flexrayController{nullptr};
     bool _configured{false};
+
+    ILogger* _logger;
 
     enum class MasterState
     {
