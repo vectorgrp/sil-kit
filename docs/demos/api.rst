@@ -1,21 +1,23 @@
 .. include:: /substitutions.rst
-.. include:: ./demo-abstracts.rst
+.. include:: ./abstracts.rst
 
-=========
-API Demos
-=========
+===
+API
+===
+
+These demos focus on basic systems or single topics of the |ProductName| API.
 
 .. _sec:simple-can-demo:
 
-Simple Can Demo
-~~~~~~~~~~~~~~~
+Simple Can
+~~~~~~~~~~
 
 Abstract
     |DemoAbstractSimpleCan|
 Executables
     * ``SilKitDemoSimpleCan``
 Sources
-    * :repo-link:`SimpleCan.cpp <Demos/api-demos/SimpleCan/SimpleCan.cpp>`
+    * :repo-link:`SimpleCan.cpp <Demos/api/SimpleCan/SimpleCan.cpp>`
 Requirements
     * :ref:`sil-kit-registry<sec:util-registry>`
     * :ref:`sil-kit-system-controller<sec:util-system-controller>`
@@ -28,13 +30,13 @@ System Example
 
 .. _sec:netsim-demo:
 
-Network Simulator Demo
-~~~~~~~~~~~~~~~~~~~~~~
+Network Simulator API
+~~~~~~~~~~~~~~~~~~~~~
 
 Abstract
     |DemoAbstractNetSim|
 Sources
-    * :repo-link:`NetSimDemo.cpp <Demos/api-demos/NetworkSimulator/NetSimDemo.cpp>`
+    * :repo-link:`NetSimDemo.cpp <Demos/api/NetworkSimulator/NetSimDemo.cpp>`
 Requirements
     * :ref:`sil-kit-registry<sec:util-registry>`
     * :ref:`sil-kit-system-controller<sec:util-system-controller>`

@@ -134,9 +134,6 @@ macro(make_silkit_demo executableName demoSourceFile)
 
     add_dependencies(Demos ${executableName})
 
-    get_property(demo_list GLOBAL PROPERTY demo_list_property)
-    set_property(GLOBAL PROPERTY demo_list_property "${demo_list} ${executableName}")
-
 endmacro()
 
 #######################################################################################################################
@@ -145,18 +142,16 @@ endmacro()
 # C++ Demos
 set_property(GLOBAL PROPERTY demo_list_property "")
 
-add_subdirectory(system-demos/Can)
-add_subdirectory(system-demos/Ethernet)
-add_subdirectory(system-demos/Flexray)
-add_subdirectory(system-demos/Lin)
-add_subdirectory(system-demos/PubSub)
-add_subdirectory(system-demos/Rpc)
+add_subdirectory(communication/Can)
+add_subdirectory(communication/Ethernet)
+add_subdirectory(communication/Flexray)
+add_subdirectory(communication/Lin)
+add_subdirectory(communication/PubSub)
+add_subdirectory(communication/Rpc)
 add_subdirectory(tools/Benchmark)
-add_subdirectory(api-demos/SimpleCan)
-add_subdirectory(api-demos/NetworkSimulator)
+add_subdirectory(api/SimpleCan)
+add_subdirectory(api/NetworkSimulator)
 
-get_property(demo_list GLOBAL PROPERTY demo_list_property)
-message(STATUS "Demos available: ${demo_list}")
 #######################################################################################################################
 # VisualStudio specific setup
 #######################################################################################################################

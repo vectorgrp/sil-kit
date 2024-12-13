@@ -1,24 +1,24 @@
 .. include:: /substitutions.rst
-.. include:: ./demo-abstracts.rst
+.. include:: ./abstracts.rst
 
-======================
+=====
 Demos
-======================
+=====
 
 This chapter describes the demo projects of the |ProductName|.
 
 .. toctree::
     :maxdepth: 1
 
-    build-demos.rst
-    sample-configs.rst
-    system-demos.rst
-    api-demos.rst
+    build.rst
+    configs.rst
+    communication.rst
+    api.rst
     tool.rst
 
 The demos are organized into three categories:
 
-.. rubric:: 1. |ProductName| systems
+.. rubric:: 1. Communication Protocols
 
 These demos showcase multi-participant systems for communication via Can, Ethernet, Lin, Flexray, PubSub or Rpc: 
 
@@ -40,7 +40,7 @@ These demos showcase multi-participant systems for communication via Can, Ethern
 :ref:`sec:rpc-demo`
     |DemoAbstractRPC|
 
-.. rubric:: 2. |ProductName| API features
+.. rubric:: 2.API
 
 These demos focus on a basic systems and single topic of the |ProductName| API:
 
@@ -50,7 +50,7 @@ These demos focus on a basic systems and single topic of the |ProductName| API:
 :ref:`sec:netsim-demo`
     |DemoAbstractNetSim|
 
-.. rubric:: 3. |ProductName| tools
+.. rubric:: 3. Tools
 
 Tools for performance analysis:
 

@@ -1,9 +1,11 @@
 .. include:: /substitutions.rst
-.. include:: ./demo-abstracts.rst
+.. include:: ./abstracts.rst
 
 =====
 Tools
 =====
+
+Tools for performance analysis.
 
 .. _sec:benchmark-demo:
 
