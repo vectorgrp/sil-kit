@@ -1,9 +1,9 @@
 .. include:: /substitutions.rst
 .. include:: ./demo-abstracts.rst
 
-===================
-|ProductName| tools
-===================
+=====
+Tools
+=====
 
 .. _sec:benchmark-demo:
 
@@ -12,8 +12,8 @@ Benchmark Demo
 
 Abstract
     |DemoAbstractBenchmark|
-Source location
-    ``./SilKit-Demos/Benchmark``
+Sources
+    * :repo-link:`BenchmarkDemo.cpp <Demos/tools/Benchmark/BenchmarkDemo.cpp>`
 Requirements
     None (The demo starts its own instance of the registry and system controller).
 Positional Parameters
@@ -77,8 +77,8 @@ Latency Demo
 
 Abstract
     |DemoAbstractLatency|
-Source location
-    ``./SilKit-Demos/Benchmark``
+Sources
+    * :repo-link:`LatencyDemo.cpp <Demos/tools/Benchmark/LatencyDemo.cpp>`
 Requirements
     * :ref:`sil-kit-registry<sec:util-registry>`
 Positional Parameters

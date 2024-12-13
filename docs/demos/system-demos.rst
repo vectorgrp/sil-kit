@@ -1,9 +1,9 @@
 .. include:: /substitutions.rst
 .. include:: ./demo-abstracts.rst
 
-=====================
-Communication systems
-=====================
+============
+System Demos
+============
 
 The demos shown here are build on top of a base implementation that provides general |ProductName| features.
 This allows to separate the demo specific use case (e.g. how to use Ethernet with the |ProductName|) from general features (e.g. setup the |ProductName| lifecycle).
@@ -74,8 +74,9 @@ Abstract
 Executables
     * ``SilKitDemoCanReader``
     * ``SilKitDemoCanWriter``
-Source location
-    ``./SilKit-Demos/Can``
+Sources
+    * :repo-link:`CanReaderDemo.cpp <Demos/system-demos/Can/CanReaderDemo.cpp>`
+    * :repo-link:`CanWriterDemo.cpp <Demos/system-demos/Can/CanWriterDemo.cpp>`
 Requirements
     * :ref:`sil-kit-registry<sec:util-registry>`
     * :ref:`sil-kit-system-controller<sec:util-system-controller>` (not needed for unsynchronized execution)
@@ -131,8 +132,9 @@ Abstract
 Executables
     * ``SilKitDemoEthernetReader``
     * ``SilKitDemoEthernetWriter``
-Source location
-    ``./SilKit-Demos/Ethernet``
+Sources
+    * :repo-link:`EthernetReaderDemo.cpp <Demos/system-demos/Ethernet/EthernetReaderDemo.cpp>`
+    * :repo-link:`EthernetWriterDemo.cpp <Demos/system-demos/Ethernet/EthernetWriterDemo.cpp>`
 Requirements
     * :ref:`sil-kit-registry<sec:util-registry>`
     * :ref:`sil-kit-system-controller<sec:util-system-controller>` (not needed for unsynchronized execution)
@@ -185,8 +187,9 @@ Abstract
 Executables
     * ``SilKitDemoLinMaster``
     * ``SilKitDemoLinSlave``
-Source location
-    ``./SilKit-Demos/Lin``
+Sources
+    * :repo-link:`LinMasterDemo.cpp <Demos/system-demos/Ethernet/LinMasterDemo.cpp>`
+    * :repo-link:`LinSlaveDemo.cpp <Demos/system-demos/Ethernet/LinSlaveDemo.cpp>`
 Requirements
     * :ref:`sil-kit-registry<sec:util-registry>`
     * :ref:`sil-kit-system-controller<sec:util-system-controller>` (not needed for unsynchronized execution)
@@ -239,8 +242,9 @@ Abstract
 Executables
     * ``SilKitDemoFlexrayNode0``
     * ``SilKitDemoFlexrayNode1``
-Source location
-    ``./SilKit-Demos/FlexRay``
+Sources
+    * :repo-link:`FlexrayNode0Demo.cpp <Demos/system-demos/Flexray/FlexrayNode0Demo.cpp>`
+    * :repo-link:`FlexrayNode1Demo.cpp <Demos/system-demos/Flexray/FlexrayNode1Demo.cpp>`
 Requirements
     * :ref:`sil-kit-registry<sec:util-registry>`
     * :ref:`sil-kit-system-controller<sec:util-system-controller>`
@@ -286,8 +290,9 @@ Abstract
 Executables
     * ``SilKitDemoPublisher``
     * ``SilKitDemoSubscriber``
-Source location
-    ``./SilKit-Demos/PubSub``
+Sources
+    * :repo-link:`PublisherDemo.cpp <Demos/system-demos/PubSub/PublisherDemo.cpp>`
+    * :repo-link:`SubscriberDemo.cpp <Demos/system-demos/PubSub/SubscriberDemo.cpp>`
 Requirements
     * :ref:`sil-kit-registry<sec:util-registry>`
     * :ref:`sil-kit-system-controller<sec:util-system-controller>` (not needed for unsynchronized execution)
@@ -337,8 +342,9 @@ Abstract
 Executables
     * ``SilKitDemoRpcClient``
     * ``SilKitDemoRpcServer``
-Source location
-    ``./SilKit-Demos/Rpc``
+Sources
+    * :repo-link:`RpcClientDemo.cpp <Demos/system-demos/Rpc/RpcClientDemo.cpp>`
+    * :repo-link:`RpcServerDemo.cpp <Demos/system-demos/Rpc/RpcServerDemo.cpp>`
 Requirements
     * :ref:`sil-kit-registry<sec:util-registry>`
     * :ref:`sil-kit-system-controller<sec:util-system-controller>` (not needed for unsynchronized execution)

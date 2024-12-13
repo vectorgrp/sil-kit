@@ -1,9 +1,9 @@
 .. include:: /substitutions.rst
 .. include:: ./demo-abstracts.rst
 
-==========================
-|ProductName| API features
-==========================
+=========
+API Demos
+=========
 
 .. _sec:simple-can-demo:
 
@@ -13,106 +13,31 @@ Simple Can Demo
 Abstract
     |DemoAbstractSimpleCan|
 Executables
-    * ``SilKitDemoCanReader``
-    * ``SilKitDemoCanWriter``
-Sources 
-    ``./SilKit-Demos/Can``
+    * ``SilKitDemoSimpleCan``
+Sources
+    * :repo-link:`SimpleCan.cpp <Demos/api-demos/SimpleCan/SimpleCan.cpp>`
 Requirements
     * :ref:`sil-kit-registry<sec:util-registry>`
-    * :ref:`sil-kit-system-controller<sec:util-system-controller>` (not needed for unsynchronized execution)
-    * :ref:`sil-kit-monitor<sec:util-monitor>` (optional)
-    * SIL Kit Network Simulator (optional)
+    * :ref:`sil-kit-system-controller<sec:util-system-controller>`
 Parameters
-    * ``--network <name>``
-      Name of the Can network to use. 
-      Defaults to "CAN1".
-    * ``--hex``
-      Print the Can payloads in hexadecimal format.
-      Otherwise, the payloads are interpreted as strings.
+    * ``<ParticipantName>``
+      Name of the SIL Kit participant. 
 System Example
     Run the following commands in separate terminals:
 
-    .. parsed-literal::
-
-        # Registry (if not already running):
-        |Registry|
-            
-        # Monitor (optional):
-        |Monitor|
-
-        # Can Reader:
-        |DemoDir|/SilKitDemoCanReader
-
-        # Can Writer:
-        |DemoDir|/SilKitDemoCanWriter
-
-        # System Controller:
-        |SystemController| CanReader CanWriter 
-
-    To run the demo without virtual time synchronization and start coordination, use the following commands in separate terminals:
-
-    .. parsed-literal:: 
-
-        # Registry (if not already running):
-        |Registry|
-
-        # Can Reader:
-        |DemoDir|/SilKitDemoCanReader --async --autonomous
-
-        # Can Writer:
-        |DemoDir|/SilKitDemoCanWriter --async --autonomous
-
-
-
-.. _sec:autonomous-lifecycle-demo:
-
-Autonomous lifecycle Demo
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
-TODO
-
-.. _sec:coordinated-lifecycle-demo:
-
-Coordinated lifecycle Demo
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-TODO
-
-.. _sec:event-based-demo:
-
-Event based participant Demo
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-TODO
-
-
-.. _sec:timesync-demo:
-
-Virtual Time Synchronization Demo
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-TODO
-
-.. _sec:integration-demo:
-
-Asynchronous Simulation Step Demo
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-TODO
 
 .. _sec:netsim-demo:
-         
+
 Network Simulator Demo
 ~~~~~~~~~~~~~~~~~~~~~~
 
 Abstract
     |DemoAbstractNetSim|
-Source location
-    ``./SilKit-Demos/NetworkSimulator``
+Sources
+    * :repo-link:`NetSimDemo.cpp <Demos/api-demos/NetworkSimulator/NetSimDemo.cpp>`
 Requirements
     * :ref:`sil-kit-registry<sec:util-registry>`
     * :ref:`sil-kit-system-controller<sec:util-system-controller>`
-    * :ref:`sil-kit-monitor<sec:util-monitor>` (optional)
 Parameters
     * ``<ParticipantConfiguration.yaml>`` 
       File name of the participant configuration to be used; 
@@ -138,10 +63,10 @@ System Example
         |Monitor|
     
         # Can Reader:
-        |DemoDir|/SilKitDemoCan ./SilKit-Demos/Can/DemoCan.silkit.yaml CanReader
+        |DemoDir|/SilKitDemoCanReader
     
         # Can Writer:
-        |DemoDir|/SilKitDemoCan ./SilKit-Demos/Can/DemoCan.silkit.yaml CanWriter
+        |DemoDir|/SilKitDemoCanWriter
     
         # System Controller:
         |SystemController| CanReader CanWriter NetworkSimulator
@@ -154,3 +79,55 @@ Notes
     * In the simple bus logic of the network simulation demo (see ``Demos\NetworkSimulator\src\Can\MySimulatedCanController.cpp``), the acknowledgment (CanFrameTransmitEvent) is sent directly to the Can Writer. 
       The frame itself (CanFrameEvent) is sent with a delay of 2ms.
 
+    .. parsed-literal::
+
+        # Registry (if not already running):
+        |Registry|
+
+        # Can Reader:
+        |DemoDir|/SilKitDemoSimpleCan CanReader
+
+        # Can Writer:
+        |DemoDir|/SilKitDemoSimpleCan CanWriter
+
+        # System Controller:
+        |SystemController| CanReader CanWriter 
+
+..
+   .. _sec:autonomous-lifecycle-demo:
+   
+   Autonomous lifecycle Demo
+   ~~~~~~~~~~~~~~~~~~~~~~~~~
+   
+   TODO
+   
+   .. _sec:coordinated-lifecycle-demo:
+   
+   Coordinated lifecycle Demo
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~
+   
+   TODO
+   
+   .. _sec:event-based-demo:
+   
+   Event based participant Demo
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   
+   TODO
+   
+   .. _sec:timesync-demo:
+   
+   Virtual Time Synchronization Demo
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   
+   TODO
+   
+   .. _sec:integration-demo:
+   
+   Asynchronous Simulation Step Demo
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   
+   TODO
+
+
+      

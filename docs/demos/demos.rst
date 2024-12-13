@@ -12,14 +12,13 @@ This chapter describes the demo projects of the |ProductName|.
 
     build-demos.rst
     sample-configs.rst
-    com-system-demos.rst
-    api-feature-demos.rst
+    system-demos.rst
+    api-demos.rst
     tool.rst
 
 The demos are organized into three categories:
 
-1. Communication systems
-~~~~~~~~~~~~~~~~~~~~~~~~
+.. rubric:: 1. |ProductName| systems
 
 These demos showcase multi-participant systems for communication via Can, Ethernet, Lin, Flexray, PubSub or Rpc: 
 
@@ -41,8 +40,7 @@ These demos showcase multi-participant systems for communication via Can, Ethern
 :ref:`sec:rpc-demo`
     |DemoAbstractRPC|
 
-2. |ProductName| API features
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. rubric:: 2. |ProductName| API features
 
 These demos focus on a basic systems and single topic of the |ProductName| API:
 
@@ -52,10 +50,9 @@ These demos focus on a basic systems and single topic of the |ProductName| API:
 :ref:`sec:netsim-demo`
     |DemoAbstractNetSim|
 
-3. |ProductName| tools
-~~~~~~~~~~~~~~~~~~~~~~
+.. rubric:: 3. |ProductName| tools
 
-Performance analysis applications:
+Tools for performance analysis:
 
 :ref:`sec:benchmark-demo`
     |DemoAbstractBenchmark|
