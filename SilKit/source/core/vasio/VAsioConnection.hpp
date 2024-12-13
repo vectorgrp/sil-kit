@@ -57,7 +57,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "ProtocolVersion.hpp"
 #include "SerializedMessage.hpp"
 #include "Assert.hpp"
-#include "ILoggerInternal.hpp"
+#include "LoggerMessage.hpp"
 #include "VAsioCapabilities.hpp"
 #include "WireLinMessages.hpp"
 #include "Uri.hpp"

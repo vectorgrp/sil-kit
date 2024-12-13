@@ -76,7 +76,8 @@ protected:
     }
 
 protected:
-    const ServiceDescriptor addr1_netsim{"P1", "N1", "C1", 5};
+    const std::string netsimName = "bussim";
+    const ServiceDescriptor addr1_netsim{netsimName, "N1", "C1", 5};
     const ServiceDescriptor addr1_proxy{"P2", "N1", "C1", 5};
     const ServiceDescriptor addr2_proxy{"P1", "N1", "C2", 9};
 
@@ -90,6 +91,7 @@ protected:
     LinController::GoToSleepHandler goToSleepHandler;
     LinController::WakeupHandler wakeupHandler;
     SilKit::Experimental::Services::Lin::LinSlaveConfigurationHandler slaveConfigurationHandler;
+
 };
 
 TEST_F(Test_LinControllerDetailedSim, send_frame_unitialized)
@@ -118,7 +120,7 @@ TEST_F(Test_LinControllerDetailedSim, send_frame)
     master.ReceiveMsg(&slave1, slaveConfig);
 
     EXPECT_CALL(participant, SendMsg(&master, A<const LinFrameResponseUpdate&>())).Times(1);
-    EXPECT_CALL(participant, SendMsg(&master, expectedMsg)).Times(1);
+    EXPECT_CALL(participant, SendMsg(&master, netsimName, expectedMsg)).Times(1);
     master.SendFrame(expectedMsg.frame, expectedMsg.responseType);
 }
 
@@ -131,7 +133,7 @@ TEST_F(Test_LinControllerDetailedSim, send_frame_without_configured_slave_respon
 
     LinFrame frame = MakeFrame(17, LinChecksumModel::Enhanced, 4, {1, 2, 3, 4, 5, 6, 7, 8});
 
-    EXPECT_CALL(participant, SendMsg(&master, A<const LinSendFrameRequest&>())).Times(0);
+    EXPECT_CALL(participant, SendMsg(&master, netsimName, A<const LinSendFrameRequest&>())).Times(0);
     EXPECT_CALL(callbacks, FrameStatusHandler(&master, frame, LinFrameStatus::LIN_RX_NO_RESPONSE)).Times(2);
     EXPECT_CALL(participant.mockTimeProvider, Now()).Times(2);
     master.SendFrame(frame, LinFrameResponseType::SlaveResponse);
@@ -154,7 +156,7 @@ TEST_F(Test_LinControllerDetailedSim, send_frame_header)
     expectedMsg.id = 13;
 
     EXPECT_CALL(participant.mockTimeProvider, Now()).Times(1);
-    EXPECT_CALL(participant, SendMsg(&master, expectedMsg)).Times(1);
+    EXPECT_CALL(participant, SendMsg(&master, netsimName, expectedMsg)).Times(1);
     master.SendFrameHeader(expectedMsg.id);
 }
 
@@ -212,7 +214,7 @@ TEST_F(Test_LinControllerDetailedSim, go_to_sleep)
     expectedMsg.frame = GoToSleepFrame();
     expectedMsg.responseType = LinFrameResponseType::MasterResponse;
 
-    EXPECT_CALL(participant, SendMsg(&master, expectedMsg)).Times(1);
+    EXPECT_CALL(participant, SendMsg(&master, netsimName, expectedMsg)).Times(1);
     EXPECT_CALL(participant, SendMsg(&master, AControllerStatusUpdateWith(LinControllerStatus::SleepPending))).Times(1);
 
     master.GoToSleep();
@@ -225,7 +227,7 @@ TEST_F(Test_LinControllerDetailedSim, go_to_sleep_internal)
     auto config = MakeControllerConfig(LinControllerMode::Master);
     master.Init(config);
 
-    EXPECT_CALL(participant, SendMsg(&master, A<const LinSendFrameRequest&>())).Times(0);
+    EXPECT_CALL(participant, SendMsg(&master, netsimName, A<const LinSendFrameRequest&>())).Times(0);
     EXPECT_CALL(participant, SendMsg(&master, AControllerStatusUpdateWith(LinControllerStatus::Sleep))).Times(1);
 
     master.GoToSleepInternal();
@@ -277,7 +279,7 @@ TEST_F(Test_LinControllerDetailedSim, wake_up)
     auto config = MakeControllerConfig(LinControllerMode::Master);
     master.Init(config);
 
-    EXPECT_CALL(participant, SendMsg(&master, A<const LinWakeupPulse&>())).Times(1);
+    EXPECT_CALL(participant, SendMsg(&master, netsimName, A<const LinWakeupPulse&>())).Times(1);
     EXPECT_CALL(participant, SendMsg(&master, AControllerStatusUpdateWith(LinControllerStatus::Operational))).Times(1);
 
     master.Wakeup();
@@ -290,7 +292,7 @@ TEST_F(Test_LinControllerDetailedSim, wake_up_internal)
     auto config = MakeControllerConfig(LinControllerMode::Master);
     master.Init(config);
 
-    EXPECT_CALL(participant, SendMsg(&master, A<const LinWakeupPulse&>())).Times(0);
+    EXPECT_CALL(participant, SendMsg(&master, netsimName, A<const LinWakeupPulse&>())).Times(0);
     EXPECT_CALL(participant, SendMsg(&master, AControllerStatusUpdateWith(LinControllerStatus::Operational))).Times(1);
 
     master.WakeupInternal();

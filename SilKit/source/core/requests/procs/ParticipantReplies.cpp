@@ -22,7 +22,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "ParticipantReplies.hpp"
 
 #include "silkit/participant/exception.hpp"
-#include "ILoggerInternal.hpp"
+#include "LoggerMessage.hpp"
 
 namespace SilKit {
 namespace Core {

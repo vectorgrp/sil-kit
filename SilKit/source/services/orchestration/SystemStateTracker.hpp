@@ -6,7 +6,7 @@
 
 
 #include "silkit/services/orchestration/OrchestrationDatatypes.hpp"
-#include "ILoggerInternal.hpp"
+#include "LoggerMessage.hpp"
 #include "silkit/util/Span.hpp"
 
 #include <unordered_map>

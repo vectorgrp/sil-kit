@@ -37,7 +37,7 @@ SimBehaviorDetailed::SimBehaviorDetailed(Core::IParticipantInternal* participant
 template <typename MsgT>
 void SimBehaviorDetailed::SendMsgImpl(MsgT&& msg)
 {
-    _participant->SendMsg(_parentServiceEndpoint, std::forward<MsgT>(msg));
+    _participant->SendMsg(_parentServiceEndpoint, _simulatedLink.GetParticipantName(), std::forward<MsgT>(msg));
 }
 
 void SimBehaviorDetailed::SendMsg(WireEthernetFrameEvent&& msg)

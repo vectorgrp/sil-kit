@@ -4,7 +4,7 @@
 
 #include "MetricsReceiver.hpp"
 
-#include "ILoggerInternal.hpp"
+#include "LoggerMessage.hpp"
 
 
 namespace Log = SilKit::Services::Logging;

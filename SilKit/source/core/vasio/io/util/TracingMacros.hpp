@@ -5,7 +5,7 @@
 #pragma once
 
 
-#include "ILoggerInternal.hpp"
+#include "LoggerMessage.hpp"
 
 #include <algorithm>
 #include <string>

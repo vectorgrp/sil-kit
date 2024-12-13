@@ -24,7 +24,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "IServiceDiscovery.hpp"
 #include "ServiceDatatypes.hpp"
 
-#include "ILoggerInternal.hpp"
+#include "LoggerMessage.hpp"
 
 namespace SilKit {
 namespace Services {
@@ -340,7 +340,7 @@ void FlexrayController::ReceiveMsg(const IServiceEndpoint* from, const FlexrayPo
 template <typename MsgT>
 void FlexrayController::SendMsg(MsgT&& msg)
 {
-    _participant->SendMsg(this, std::forward<MsgT>(msg));
+    _participant->SendMsg(this, _simulatedLink.GetParticipantName(), std::forward<MsgT>(msg));
 }
 
 //------------------------

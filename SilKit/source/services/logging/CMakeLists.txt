@@ -69,7 +69,8 @@ add_library(O_SilKit_Services_Logging OBJECT
     Logger.cpp
     #string formatting for SIL Kit types
     SilKitFmtFormatters.hpp
-
+    LoggerMessage.hpp
+    LogFunctions.hpp
     LoggingSerdes.hpp
     LoggingSerdes.cpp
     StructuredLoggingKeys.hpp
