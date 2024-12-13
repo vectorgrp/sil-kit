@@ -103,7 +103,7 @@ macro(make_silkit_demo executableName demoSourceFile)
 
     add_executable(${executableName}
         ${demoSourceFile}
-        $<$<CXX_COMPILER_ID:MSVC>: "${CMAKE_CURRENT_SOURCE_DIR}/../demo.manifest" >
+        $<$<CXX_COMPILER_ID:MSVC>: "${CMAKE_CURRENT_SOURCE_DIR}/../../demo.manifest" >
     )
     remove_definitions(-DEXPORT_SilKitAPI)
     
@@ -145,14 +145,15 @@ endmacro()
 # C++ Demos
 set_property(GLOBAL PROPERTY demo_list_property "")
 
-add_subdirectory(Can)
-add_subdirectory(Ethernet)
-add_subdirectory(Flexray)
-add_subdirectory(Lin)
-add_subdirectory(PubSub)
-add_subdirectory(Rpc)
-add_subdirectory(Benchmark)
-add_subdirectory(NetworkSimulator)
+add_subdirectory(system-demos/Can)
+add_subdirectory(system-demos/Ethernet)
+add_subdirectory(system-demos/Flexray)
+add_subdirectory(system-demos/Lin)
+add_subdirectory(system-demos/PubSub)
+add_subdirectory(system-demos/Rpc)
+add_subdirectory(tools/Benchmark)
+add_subdirectory(api-demos/SimpleCan)
+add_subdirectory(api-demos/NetworkSimulator)
 
 get_property(demo_list GLOBAL PROPERTY demo_list_property)
 message(STATUS "Demos available: ${demo_list}")

@@ -3,6 +3,4 @@
 # SPDX-License-Identifier: MIT
 
 make_silkit_demo(SilKitDemoSimpleCan SimpleCan.cpp)
-make_silkit_demo(SilKitDemoCanWriter CanWriterDemo.cpp)
-make_silkit_demo(SilKitDemoCanReader CanReaderDemo.cpp)
 
