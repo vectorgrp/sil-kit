@@ -16,6 +16,8 @@ The Vector SIL Kit
    :target: https://github.com/vectorgrp/sil-kit/actions/workflows/linux-tsan.yml
 .. |WinBadge| image:: https://github.com/vectorgrp/sil-kit/actions/workflows/build-win.yml/badge.svg
    :target: https://github.com/vectorgrp/sil-kit/actions/workflows/build-win.yml
+.. |Linux/Arm64| image:: https://github.com/vectorgrp/sil-kit/actions/workflows/build-linux-arm64.yml/badge.svg
+   :target: https://github.com/vectorgrp/sil-kit/actions/workflows/build-linux-arm64.yml
 | |ReleaseBadge| |LicenseBadge| |DocsBadge| 
 | |AsanBadge| |UbsanBadge| |TsanBadge| |WinBadge|
 
