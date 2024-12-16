@@ -30,7 +30,7 @@ The SIL Kit source and documentation is licensed under a permissible open
 source license, see LICENSE file. For licenses of third party dependencies,
 see `ThirdParty/LICENSES.rst`.
 
-For supported platforms refer to `Platform Support <docs/for-developers/developers.rst>`_
+For supported platforms, see `Developer Guide <docs/for-developers/developers.rst>`_
 
 Related Projects
 ----------------
