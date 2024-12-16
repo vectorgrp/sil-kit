@@ -17,7 +17,7 @@ The Vector SIL Kit
 .. |WinBadge| image:: https://github.com/vectorgrp/sil-kit/actions/workflows/build-win.yml/badge.svg
    :target: https://github.com/vectorgrp/sil-kit/actions/workflows/build-win.yml
 | |ReleaseBadge| |LicenseBadge| |DocsBadge| 
-| |AsanBadge| |UbsanBadge| |TsanBadge| |WinBadge| 
+| |AsanBadge| |UbsanBadge| |TsanBadge| |WinBadge|
 
 The Vector SIL Kit is an open-source library for connecting Software-in-the-Loop Environments.
 This README is intended to provide you with quick start on how to build the Vector SIL Kit.
@@ -29,6 +29,8 @@ Build) and is provided in pre-built form with the SIL Kit packages.
 The SIL Kit source and documentation is licensed under a permissible open
 source license, see LICENSE file. For licenses of third party dependencies,
 see `ThirdParty/LICENSES.rst`.
+
+For supported platforms, see `Developer Guide <docs/for-developers/developers.rst>`_
 
 Related Projects
 ----------------
