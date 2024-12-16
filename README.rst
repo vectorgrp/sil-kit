@@ -19,7 +19,8 @@ The Vector SIL Kit
 .. |Linux/Arm64| image:: https://github.com/vectorgrp/sil-kit/actions/workflows/build-linux-arm64.yml/badge.svg
    :target: https://github.com/vectorgrp/sil-kit/actions/workflows/build-linux-arm64.yml
 | |ReleaseBadge| |LicenseBadge| |DocsBadge| 
-| |AsanBadge| |UbsanBadge| |TsanBadge| |WinBadge|
+| |AsanBadge| |UbsanBadge| |TsanBadge| |Linux/Arm64|
+| |WinBadge|
 
 The Vector SIL Kit is an open-source library for connecting Software-in-the-Loop Environments.
 This README is intended to provide you with quick start on how to build the Vector SIL Kit.
