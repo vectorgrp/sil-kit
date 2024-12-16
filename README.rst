@@ -17,7 +17,7 @@ The Vector SIL Kit
 .. |WinBadge| image:: https://github.com/vectorgrp/sil-kit/actions/workflows/build-win.yml/badge.svg
    :target: https://github.com/vectorgrp/sil-kit/actions/workflows/build-win.yml
 | |ReleaseBadge| |LicenseBadge| |DocsBadge| 
-| |AsanBadge| |UbsanBadge| |TsanBadge| |WinBadge| 
+| |AsanBadge| |UbsanBadge| |TsanBadge| |WinBadge|
 
 The Vector SIL Kit is an open-source library for connecting Software-in-the-Loop Environments.
 This README is intended to provide you with quick start on how to build the Vector SIL Kit.
@@ -29,6 +29,8 @@ Build) and is provided in pre-built form with the SIL Kit packages.
 The SIL Kit source and documentation is licensed under a permissible open
 source license, see LICENSE file. For licenses of third party dependencies,
 see `ThirdParty/LICENSES.rst`.
+
+For supported platforms refer to `docs/for-developers/developers.rst`
 
 Related Projects
 ----------------
@@ -139,105 +141,3 @@ call CMake in your build directory as follows::
     cmake -D SILKIT_BUILD_DOCS=ON -B _build
     cmake --build _build --target Doxygen
 
-Platform support
-----------------------------------------
-
-SIL Kit provides three tiers of platform support
-
-.. list-table:: Support Tiers
-
-   * - Tier 1
-     - Essential targets. Continuously tested and
-       official binary packages are provided.
-   * - Tier 2
-     - Officially supported targets. Continuously tested 
-       but NO binary packages are provided
-   * - Tier 3
-     - | Targets for which we have (limited) build support but which
-       | are not continuously tested and no packages are provided from us
-
-A platform is hereby defined by the combination of the used operating system (OS), the CPU architecture (eg. x86 or ARM64) and the compiler/toolchain used. 
-For example,  `Ubuntu 20.04 x86_64 Clang 10`.
-
-SIL Kit should compile and run on
-any POSIX platform. If you have feedback for different targets or platforms not listed here,
-please report them using GitHub Issues. Thanks!
-
-A target may be upgraded to
-`Tier 1` once we have continuous testing for it in place and we have binary
-packages available for it.
-
-
-Tier 1
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Essential targets. Automatically tested and provided as official binary packages.
-
-.. list-table:: Platform Support
-   :header-rows: 1
-
-   * - OS
-     - Architecture
-     - Notes
-   * - Windows
-     - 64bit (x86_64)
-     - MSVC 19 with Toolset 14.1
-   * - Windows
-     - 32bit (x86)
-     - MSVC 19 with Toolset 14.1
-   * - Ubuntu 18.04
-     - amd64
-     - GCC 8
-   * - Ubuntu 20.04
-     - amd64
-     - Clang 10, `.deb`
-
-Tier 2
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Officially supported and automatically tested. NO binary packages provided
-
-.. list-table:: Platform Support
-   :header-rows: 1
-
-   * - Windows
-     - 64bit (x86_64)
-     - MSYS2/Mingw: GCC 14
-   * - Ubuntu 22.04
-     - amd64
-     - | GCC 11/Clang 18
-       | + Address Sanitizer
-       | + Undefined Behaviour Sanitizer
-       | + Thread Sanitizer
-   * - Ubuntu 22.04
-     - ARM64
-     - Clang 18
-   * - MAC OS
-     - ARM64/M1
-     - AppleClang 15
-
-Tier 3
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Build and tested by individual contributors or users.
-Since these are not part of the CI pipeline, compatibility with these platforms can be broken at any time!
-
-.. list-table:: Platform Support
-   :header-rows: 1
-
-   * - Platform
-     - Architecture
-     - Notes
-   * - Ubuntu 24.04
-     - amd64
-     - | GCC 13
-       | Clang 18
-   * - QNX 7.1 RTOS
-     - X86 64bit
-     - QNX GCC 8
-   * - FreeBSD 14
-     - X86 64bit
-     - FreeBSD Clang 18
-   * - Android
-     - ARM64
-     - NDK builds with default compiler, libc++_shared
