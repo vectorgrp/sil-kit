@@ -175,7 +175,7 @@ SIL Kit provides three tiers of platform support
        but NO binary packages are provided
    * - Tier 3
      - | Targets for which we have (limited) build support but which
-       | are not continuously tested and no packages are provided from us
+       | are not continuously tested and no packages are provided
 
 A platform is hereby defined by the combination of the used operating system (OS), the CPU architecture (eg. x86 or ARM64) and the compiler/toolchain used.
 For example,  `Ubuntu 20.04 x86_64 Clang 10`.
