@@ -1,4 +1,4 @@
-name: 'Linux Release Builds For ARM64'
+name: 'Linux/arm64'
 on:
   workflow_call:
     inputs:
