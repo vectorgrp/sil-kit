@@ -73,21 +73,21 @@ void ThrowOnError(SilKit_ReturnCode returnCode)
         {
         case SilKit_ReturnCode_WRONGSTATE:
             throw StateError{os.str()};
-        case SilKit_ReturnCode_TYPECONVERSION_ERROR:
+        case SilKit_ReturnCode_TYPECONVERSIONERROR:
             throw TypeConversionError{os.str()};
-        case SilKit_ReturnCode_CONFIGURATION_ERROR:
+        case SilKit_ReturnCode_CONFIGURATIONERROR:
             throw ConfigurationError{os.str()};
-        case SilKit_ReturnCode_PROTOCOL_ERROR:
+        case SilKit_ReturnCode_PROTOCOLERROR:
             throw ProtocolError{os.str()};
-        case SilKit_ReturnCode_ASSERTION_ERROR:
+        case SilKit_ReturnCode_ASSERTIONERROR:
             throw AssertionError{os.str()};
-        case SilKit_ReturnCode_EXTENSION_ERROR:
+        case SilKit_ReturnCode_EXTENSIONERROR:
             throw ExtensionError{os.str()};
-        case SilKit_ReturnCode_LOGIC_ERROR:
+        case SilKit_ReturnCode_LOGICERROR:
             throw LogicError{os.str()};
-        case SilKit_ReturnCode_LENGTH_ERROR:
+        case SilKit_ReturnCode_LENGTHERROR:
             throw LengthError{os.str()};
-        case SilKit_ReturnCode_OUTOFRANGE_ERROR:
+        case SilKit_ReturnCode_OUTOFRANGEERROR:
             throw OutOfRangeError{os.str()};
         default:
             throw SilKitError{os.str()};

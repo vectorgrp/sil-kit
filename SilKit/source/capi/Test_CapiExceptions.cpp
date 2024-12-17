@@ -61,15 +61,15 @@ TEST_F(Test_CapiExceptions, catch_exception_macro)
 {
     EXPECT_EQ(TestExceptionToErrorCode<SilKit::CapiBadParameterError>(), SilKit_ReturnCode_BADPARAMETER);
 
-    EXPECT_EQ(TestExceptionToErrorCode<SilKit::TypeConversionError>(), SilKit_ReturnCode_TYPECONVERSION_ERROR);
-    EXPECT_EQ(TestExceptionToErrorCode<SilKit::ConfigurationError>(), SilKit_ReturnCode_CONFIGURATION_ERROR);
+    EXPECT_EQ(TestExceptionToErrorCode<SilKit::TypeConversionError>(), SilKit_ReturnCode_TYPECONVERSIONERROR);
+    EXPECT_EQ(TestExceptionToErrorCode<SilKit::ConfigurationError>(), SilKit_ReturnCode_CONFIGURATIONERROR);
     EXPECT_EQ(TestExceptionToErrorCode<SilKit::StateError>(), SilKit_ReturnCode_WRONGSTATE);
-    EXPECT_EQ(TestExceptionToErrorCode<SilKit::ProtocolError>(), SilKit_ReturnCode_PROTOCOL_ERROR);
-    EXPECT_EQ(TestExceptionToErrorCode<SilKit::AssertionError>(), SilKit_ReturnCode_ASSERTION_ERROR);
-    EXPECT_EQ(TestExceptionToErrorCode<SilKit::ExtensionError>(), SilKit_ReturnCode_EXTENSION_ERROR);
-    EXPECT_EQ(TestExceptionToErrorCode<SilKit::LogicError>(), SilKit_ReturnCode_LOGIC_ERROR);
-    EXPECT_EQ(TestExceptionToErrorCode<SilKit::LengthError>(), SilKit_ReturnCode_LENGTH_ERROR);
-    EXPECT_EQ(TestExceptionToErrorCode<SilKit::OutOfRangeError>(), SilKit_ReturnCode_OUTOFRANGE_ERROR);
+    EXPECT_EQ(TestExceptionToErrorCode<SilKit::ProtocolError>(), SilKit_ReturnCode_PROTOCOLERROR);
+    EXPECT_EQ(TestExceptionToErrorCode<SilKit::AssertionError>(), SilKit_ReturnCode_ASSERTIONERROR);
+    EXPECT_EQ(TestExceptionToErrorCode<SilKit::ExtensionError>(), SilKit_ReturnCode_EXTENSIONERROR);
+    EXPECT_EQ(TestExceptionToErrorCode<SilKit::LogicError>(), SilKit_ReturnCode_LOGICERROR);
+    EXPECT_EQ(TestExceptionToErrorCode<SilKit::LengthError>(), SilKit_ReturnCode_LENGTHERROR);
+    EXPECT_EQ(TestExceptionToErrorCode<SilKit::OutOfRangeError>(), SilKit_ReturnCode_OUTOFRANGEERROR);
 
     EXPECT_EQ(TestExceptionToErrorCode<SilKit::SilKitError>(), SilKit_ReturnCode_UNSPECIFIEDERROR);
     EXPECT_EQ(TestExceptionToErrorCode<std::runtime_error>(), SilKit_ReturnCode_UNSPECIFIEDERROR);
@@ -80,16 +80,16 @@ TEST_F(Test_CapiExceptions, catch_exception_macro)
 // Test that the C-API return code results in the correct exception
 TEST_F(Test_CapiExceptions, throw_on_error)
 {
-    EXPECT_THROW(SilKit::_detail_v1::Impl::ThrowOnError(SilKit_ReturnCode_TYPECONVERSION_ERROR),
+    EXPECT_THROW(SilKit::_detail_v1::Impl::ThrowOnError(SilKit_ReturnCode_TYPECONVERSIONERROR),
                  SilKit::TypeConversionError);
-    EXPECT_THROW(SilKit::_detail_v1::Impl::ThrowOnError(SilKit_ReturnCode_CONFIGURATION_ERROR), SilKit::ConfigurationError);
+    EXPECT_THROW(SilKit::_detail_v1::Impl::ThrowOnError(SilKit_ReturnCode_CONFIGURATIONERROR), SilKit::ConfigurationError);
     EXPECT_THROW(SilKit::_detail_v1::Impl::ThrowOnError(SilKit_ReturnCode_WRONGSTATE), SilKit::StateError);
-    EXPECT_THROW(SilKit::_detail_v1::Impl::ThrowOnError(SilKit_ReturnCode_PROTOCOL_ERROR), SilKit::ProtocolError);
-    EXPECT_THROW(SilKit::_detail_v1::Impl::ThrowOnError(SilKit_ReturnCode_ASSERTION_ERROR), SilKit::AssertionError);
-    EXPECT_THROW(SilKit::_detail_v1::Impl::ThrowOnError(SilKit_ReturnCode_EXTENSION_ERROR), SilKit::ExtensionError);
-    EXPECT_THROW(SilKit::_detail_v1::Impl::ThrowOnError(SilKit_ReturnCode_LOGIC_ERROR), SilKit::LogicError);
-    EXPECT_THROW(SilKit::_detail_v1::Impl::ThrowOnError(SilKit_ReturnCode_LENGTH_ERROR), SilKit::LengthError);
-    EXPECT_THROW(SilKit::_detail_v1::Impl::ThrowOnError(SilKit_ReturnCode_OUTOFRANGE_ERROR), SilKit::OutOfRangeError);
+    EXPECT_THROW(SilKit::_detail_v1::Impl::ThrowOnError(SilKit_ReturnCode_PROTOCOLERROR), SilKit::ProtocolError);
+    EXPECT_THROW(SilKit::_detail_v1::Impl::ThrowOnError(SilKit_ReturnCode_ASSERTIONERROR), SilKit::AssertionError);
+    EXPECT_THROW(SilKit::_detail_v1::Impl::ThrowOnError(SilKit_ReturnCode_EXTENSIONERROR), SilKit::ExtensionError);
+    EXPECT_THROW(SilKit::_detail_v1::Impl::ThrowOnError(SilKit_ReturnCode_LOGICERROR), SilKit::LogicError);
+    EXPECT_THROW(SilKit::_detail_v1::Impl::ThrowOnError(SilKit_ReturnCode_LENGTHERROR), SilKit::LengthError);
+    EXPECT_THROW(SilKit::_detail_v1::Impl::ThrowOnError(SilKit_ReturnCode_OUTOFRANGEERROR), SilKit::OutOfRangeError);
     EXPECT_THROW(SilKit::_detail_v1::Impl::ThrowOnError(SilKit_ReturnCode_UNSPECIFIEDERROR), SilKit::SilKitError);
 }
 

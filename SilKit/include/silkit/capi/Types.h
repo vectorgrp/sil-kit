@@ -61,14 +61,14 @@ typedef int32_t SilKit_ReturnCode;
 // exception and thrown in ThrowOnError.hpp.
 
 #define SilKit_ReturnCode_WRONGSTATE ((SilKit_ReturnCode)8)             // SilKit::StateError
-#define SilKit_ReturnCode_TYPECONVERSION_ERROR ((SilKit_ReturnCode)9)   // SilKit::TypeConversionError
-#define SilKit_ReturnCode_CONFIGURATION_ERROR ((SilKit_ReturnCode)10)   // SilKit::ConfigurationError
-#define SilKit_ReturnCode_PROTOCOL_ERROR ((SilKit_ReturnCode)11)        // SilKit::ProtocolError
-#define SilKit_ReturnCode_ASSERTION_ERROR ((SilKit_ReturnCode)12)       // SilKit::AssertionError
-#define SilKit_ReturnCode_EXTENSION_ERROR ((SilKit_ReturnCode)13)       // SilKit::ExtensionError
-#define SilKit_ReturnCode_LOGIC_ERROR ((SilKit_ReturnCode)14)           // SilKit::LogicError
-#define SilKit_ReturnCode_LENGTH_ERROR ((SilKit_ReturnCode)15)          // SilKit::LengthError
-#define SilKit_ReturnCode_OUTOFRANGE_ERROR ((SilKit_ReturnCode)16)      // SilKit::OutOfRangeError
+#define SilKit_ReturnCode_TYPECONVERSIONERROR ((SilKit_ReturnCode)9)   // SilKit::TypeConversionError
+#define SilKit_ReturnCode_CONFIGURATIONERROR ((SilKit_ReturnCode)10)   // SilKit::ConfigurationError
+#define SilKit_ReturnCode_PROTOCOLERROR ((SilKit_ReturnCode)11)        // SilKit::ProtocolError
+#define SilKit_ReturnCode_ASSERTIONERROR ((SilKit_ReturnCode)12)       // SilKit::AssertionError
+#define SilKit_ReturnCode_EXTENSIONERROR ((SilKit_ReturnCode)13)       // SilKit::ExtensionError
+#define SilKit_ReturnCode_LOGICERROR ((SilKit_ReturnCode)14)           // SilKit::LogicError
+#define SilKit_ReturnCode_LENGTHERROR ((SilKit_ReturnCode)15)          // SilKit::LengthError
+#define SilKit_ReturnCode_OUTOFRANGEERROR ((SilKit_ReturnCode)16)      // SilKit::OutOfRangeError
 
 typedef uint64_t SilKit_NanosecondsTime;
 

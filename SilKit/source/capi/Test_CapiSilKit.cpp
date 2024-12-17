@@ -71,7 +71,7 @@ TEST_F(Test_CapiSilKit, silkit_bad_params)
 
         returnCode =
             SilKit_ParticipantConfiguration_FromString(&participantConfigFromString, SILKIT_MALFORMED_CONFIG_STRING);
-        EXPECT_EQ(returnCode, SilKit_ReturnCode_CONFIGURATION_ERROR);
+        EXPECT_EQ(returnCode, SilKit_ReturnCode_CONFIGURATIONERROR);
         EXPECT_EQ(participantConfigFromString, nullptr);
     }
 
@@ -87,7 +87,7 @@ TEST_F(Test_CapiSilKit, silkit_bad_params)
 
         returnCode =
             SilKit_ParticipantConfiguration_FromFile(&participantConfigFromFile, "this_file_does_not_exist.yaml");
-        EXPECT_EQ(returnCode, SilKit_ReturnCode_CONFIGURATION_ERROR);
+        EXPECT_EQ(returnCode, SilKit_ReturnCode_CONFIGURATIONERROR);
         EXPECT_TRUE(participantConfigFromFile == nullptr);
     }
 
