@@ -353,6 +353,7 @@ SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_CanController_AddFrameHandler(SilK
 typedef SilKit_ReturnCode(SilKitFPTR* SilKit_CanController_AddFrameHandler_t)(SilKit_CanController* controller,
                                                                               void* context,
                                                                               SilKit_CanFrameHandler_t handler,
+                                                                              SilKit_Direction directionMask,
                                                                               SilKit_HandlerId* outHandlerId);
 
 /*! \brief  Remove a \ref SilKit_CanFrameHandler_t by SilKit_HandlerId on this controller 

@@ -467,7 +467,7 @@ SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_TimeSyncService_Create(SilKit_Time
                                                                      SilKit_LifecycleService* lifecycleService);
 
 typedef SilKit_ReturnCode(SilKitFPTR* SilKit_TimeSyncService_Create_t)(SilKit_TimeSyncService** outTimeSyncService,
-                                                                       SilKit_Participant* lifecycleService);
+                                                                       SilKit_LifecycleService* lifecycleService);
 
 /*! \brief The handler to be called if the simulation task is due
  *
