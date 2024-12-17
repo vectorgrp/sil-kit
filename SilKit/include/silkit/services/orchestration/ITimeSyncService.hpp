@@ -71,7 +71,9 @@ public:
 
     /*! \brief Sets the precision timestamp of the current simulation step
      * 
-     * Must reside in the current interval 
+     * Must reside in the interval of the current simulation step.
+     * Affects the time provided by Now() and message timestamps.
+     * Has no effect on message timestamps when a network simulator is involved.
      */
     virtual void SetPrecisionTime(std::chrono::nanoseconds now) = 0;
 };

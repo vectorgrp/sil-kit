@@ -502,8 +502,9 @@ void TimeSyncService::ExecuteSimStep(std::chrono::nanoseconds timePoint, std::ch
         // skip the first sample, since it was never 'started' (it is always the current epoch of the underlying clock)
         _simStepWaitingTimeStatisticMetric->Take(waitingDurationS.count());
     }
-
-    _timeProvider->SetTime(timePoint, duration);
+    
+    // TODO: Evaluate semantical change: Time is set at end of logical SimStep
+    //_timeProvider->SetTime(timePoint, duration);
 
     _simStepHandlerExecTimeMonitor.StartMeasurement();
     _watchDog.Start();
@@ -532,12 +533,18 @@ void TimeSyncService::ExecuteSimStep(std::chrono::nanoseconds timePoint, std::ch
 
 void TimeSyncService::LogicalSimStepCompleted(std::chrono::duration<double, std::milli> logicalSimStepTimeMs)
 {
+
     _simStepCounterMetric->Add(1);
     Logging::LoggerMessage lm{_logger, Logging::Level::Trace};
     lm.SetMessage("Finished Simulation Step.");
     lm.FormatKeyValue(Logging::Keys::executionTime, "{}", logicalSimStepTimeMs.count());
     lm.FormatKeyValue(Logging::Keys::virtualTimeNS, "{}", Now().count());
     lm.Dispatch();
+
+    // TODO: Evaluate semantical change: Time is set at end of logical SimStep
+    auto nextStep = _timeConfiguration.NextSimStep();
+    _timeProvider->SetTime(nextStep.timePoint, nextStep.duration);
+
     _waitTimeMonitor.StartMeasurement();
 }
 
@@ -666,17 +673,14 @@ void TimeSyncService::SetPrecisionTime(std::chrono::nanoseconds precisionTime)
 {
     const auto duration = _timeConfiguration.CurrentSimStep().duration;
     const auto now = _timeProvider->Now();
-    // TODO: This check must correspond to the time sync. semantic of the interval to be simulated, i.e. [T,t+dt[ vs. ]T,T+dt]
-    // For the current evaluation, we use ]T,T+dt].
-    // Using this interval has the advantage that the right border is an integer
 
-    if (precisionTime <= now || precisionTime > now + duration)
+    if (precisionTime < now || precisionTime > now + duration)
     {
         auto intervalLeftMs = std::chrono::duration_cast<std::chrono::milliseconds>(now).count();
         auto intervalRightMs = std::chrono::duration_cast<std::chrono::milliseconds>(now + duration).count();
 
         std::stringstream errormsg;
-        errormsg << "Precision timestamp out of valid interval. Must be in the interval ]" << intervalLeftMs << ", "
+        errormsg << "Precision timestamp out of valid interval. Must be in the interval [" << intervalLeftMs << ", "
                  << intervalRightMs << "] (ms).";
         throw SilKit::OutOfRangeError(errormsg.str());
     }

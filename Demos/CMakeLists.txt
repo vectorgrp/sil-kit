@@ -145,6 +145,7 @@ add_subdirectory(PubSub)
 add_subdirectory(Rpc)
 add_subdirectory(Benchmark)
 add_subdirectory(NetworkSimulator)
+add_subdirectory(TimeSyncTest)
 
 message(STATUS "Demos available: ${demo_list}")
 #######################################################################################################################

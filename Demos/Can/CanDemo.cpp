@@ -193,10 +193,21 @@ int main(int argc, char** argv)
             if (participantName == "CanWriter")
             {
                 timeSyncService->SetSimulationStepHandler(
-                    [canController, logger, sleepTimePerTick](std::chrono::nanoseconds now,
+                    [timeSyncService, canController, logger, sleepTimePerTick](std::chrono::nanoseconds now,
                                                               std::chrono::nanoseconds duration) {
-                    std::cout << "now=" << now << ", duration=" << duration << std::endl;
+                    std::stringstream logmsg;
+                    logmsg << std::endl << "now=" << now << ", duration=" << duration;
+                    logger->Info(logmsg.str());
+
+                    timeSyncService->SetPrecisionTime(now + 1ms);
                     SendFrame(canController, logger);
+
+                    timeSyncService->SetPrecisionTime(now + 2ms);
+                    SendFrame(canController, logger);
+
+                    timeSyncService->SetPrecisionTime(now + 3ms);
+                    SendFrame(canController, logger);
+
                     std::this_thread::sleep_for(sleepTimePerTick);
                 },
                     5ms);
@@ -204,8 +215,12 @@ int main(int argc, char** argv)
             else
             {
                 timeSyncService->SetSimulationStepHandler(
-                    [sleepTimePerTick](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {
-                    std::cout << "now=" << now << ", duration=" << duration << std::endl;
+                    [sleepTimePerTick, logger](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {
+
+                    std::stringstream logmsg;
+                    logmsg << std::endl << "now=" << now << ", duration=" << duration;
+                    logger->Info(logmsg.str());
+
                     std::this_thread::sleep_for(sleepTimePerTick);
                 }, 5ms);
             }
