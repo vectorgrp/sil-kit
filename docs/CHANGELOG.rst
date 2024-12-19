@@ -20,6 +20,15 @@ Fixed
   The symbol was not present in the dynamic symbol table of the ``SilKit.dll`` / ``.so``, so this change
   does not break the ABI of the shared libraries.
 
+Changed
+~~~~~~~
+
+- Overhaul of Can, Ethernet, Lin, Flexray, PubSub and Rpc demos
+  - The demos are restructured into one participant per executable
+  - Basic SIL Kit features are implemented in a base class used by the demos
+  - No command line arguments needed for basic execution (with time synchronization and coordinated start)
+  - Useful command line arguments are provided for all demos (e.g. rename the participant or network, logging, execution modes)
+  - The old ``--async`` mode of the demos now is accessible by ``--async --autonomous`` (or short form ``-aA``)
 
 [4.0.54] - 2024-11-11
 ---------------------

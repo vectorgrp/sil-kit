@@ -1,0 +1,9 @@
+# SPDX-FileCopyrightText: 2024 Vector Informatik GmbH
+#
+# SPDX-License-Identifier: MIT
+
+make_silkit_communication_demo(SilKitDemoLinSlave LinSlaveDemo.cpp)
+make_silkit_communication_demo(SilKitDemoLinMaster LinMasterDemo.cpp)
+
+make_silkit_communication_demo(SilKitDemoLinSlaveDynamic LinSlaveDynamicDemo.cpp)
+make_silkit_communication_demo(SilKitDemoLinMasterDynamic LinMasterDynamicDemo.cpp)

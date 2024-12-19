@@ -1,5 +1,0 @@
-Description: Sample configuration for Ethernet
-Logging:
-  Sinks:
-    - Level: Info
-      Type: Stdout

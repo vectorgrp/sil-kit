@@ -82,8 +82,6 @@ endif()
 
 set(make_silkit_demo_caller_dir ${CMAKE_CURRENT_LIST_DIR} CACHE INTERNAL "")
 
-set(demo_list "")
-
 add_custom_target(Demos COMMENT "Build all available Demos")
 set_property(TARGET Demos PROPERTY FOLDER "Demos")
 
@@ -97,10 +95,17 @@ else()
     set(_DEMO_OUTPUT_DIR "${CMAKE_BINARY_DIR}/$<CONFIG>")
 endif()
 
+set(SILKIT_DEMO_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+
+#######################################################################################################################
+# Demo creation macros
+#######################################################################################################################
+
 macro(make_silkit_demo executableName demoSourceFile)
+
     add_executable(${executableName}
         ${demoSourceFile}
-        $<$<CXX_COMPILER_ID:MSVC>: "${CMAKE_CURRENT_SOURCE_DIR}/../demo.manifest" >
+        $<$<CXX_COMPILER_ID:MSVC>: "${CMAKE_CURRENT_SOURCE_DIR}/../../demo.manifest" >
     )
     remove_definitions(-DEXPORT_SilKitAPI)
     
@@ -124,29 +129,38 @@ macro(make_silkit_demo executableName demoSourceFile)
             SilKit::SilKit 
             Threads::Threads
     )
-
     if(MSVC)
         target_compile_options(${executableName} PRIVATE /wd4996)
     endif()
 
     add_dependencies(Demos ${executableName})
-    set(demo_list "${demo_list} ${executableName}" PARENT_SCOPE)
+
+endmacro()
+
+macro(make_silkit_communication_demo executableName demoSourceFile)
+
+    make_silkit_demo(${executableName} ${demoSourceFile})
+    target_include_directories(${executableName} PRIVATE ${SILKIT_DEMO_DIR}/communication/include)
+
 endmacro()
 
 #######################################################################################################################
 # Add the actual demo projects
 #######################################################################################################################
-# C++ Demos
-add_subdirectory(Can)
-add_subdirectory(Ethernet)
-add_subdirectory(Flexray)
-add_subdirectory(Lin)
-add_subdirectory(PubSub)
-add_subdirectory(Rpc)
-add_subdirectory(Benchmark)
-add_subdirectory(NetworkSimulator)
 
-message(STATUS "Demos available: ${demo_list}")
+add_subdirectory(communication/Can)
+add_subdirectory(communication/Ethernet)
+add_subdirectory(communication/Flexray)
+add_subdirectory(communication/Lin)
+add_subdirectory(communication/PubSub)
+add_subdirectory(communication/Rpc)
+
+add_subdirectory(tools/Benchmark)
+
+add_subdirectory(api/SimpleCan)
+add_subdirectory(api/NetworkSimulator)
+add_subdirectory(api/Orchestration)
+
 #######################################################################################################################
 # VisualStudio specific setup
 #######################################################################################################################
