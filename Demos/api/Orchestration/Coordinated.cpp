@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 #include <iostream>
+#include <thread>
 
 #include "silkit/SilKit.hpp"
 
@@ -46,8 +47,8 @@ int main(int argc, char** argv)
         });
 
         // Start the worker thread and wait for the go from the system monitor
-        std::atomic<bool> workerThreadDone = false;
-        auto workerThread = std::thread([&unleashWorkerThreadFuture, &workerThreadDone, lifecycleService, logger]() {
+        std::atomic<bool> workerThreadDone{false};
+        auto workerThread = std::thread([&unleashWorkerThreadFuture, &workerThreadDone, logger]() {
             unleashWorkerThreadFuture.wait();
             while (!workerThreadDone)
             {

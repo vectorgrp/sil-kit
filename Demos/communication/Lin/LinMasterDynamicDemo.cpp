@@ -36,7 +36,7 @@ private:
         _linController = GetParticipant()->CreateLinController("LinController1", _networkName);
 
         _linController->AddFrameStatusHandler(
-            [this](ILinController* linController, const LinFrameStatusEvent& frameStatusEvent) {
+            [this](ILinController* /*linController*/, const LinFrameStatusEvent& frameStatusEvent) {
 
             switch (frameStatusEvent.status)
             {
@@ -134,12 +134,12 @@ private:
 
         _schedule = std::make_unique<LinDemoCommon::Schedule>(
             std::initializer_list<std::pair<std::chrono::nanoseconds, std::function<void(std::chrono::nanoseconds)>>>{
-            {5ms, [this](std::chrono::nanoseconds now) { SendFrameHeader(16); }},
-            {5ms, [this](std::chrono::nanoseconds now) { SendFrameHeader(17); }},
-            {5ms, [this](std::chrono::nanoseconds now) { SendFrameHeader(18); }},
-            {5ms, [this](std::chrono::nanoseconds now) { SendFrameHeader(19); }},
-            {5ms, [this](std::chrono::nanoseconds now) { SendFrameHeader(34); }},
-            {5ms, [this](std::chrono::nanoseconds now) { GoToSleep(); }}
+            {5ms, [this](std::chrono::nanoseconds /*now*/) { SendFrameHeader(16); }},
+            {5ms, [this](std::chrono::nanoseconds /*now*/) { SendFrameHeader(17); }},
+            {5ms, [this](std::chrono::nanoseconds /*now*/) { SendFrameHeader(18); }},
+            {5ms, [this](std::chrono::nanoseconds /*now*/) { SendFrameHeader(19); }},
+            {5ms, [this](std::chrono::nanoseconds /*now*/) { SendFrameHeader(34); }},
+            {5ms, [this](std::chrono::nanoseconds /*now*/) { GoToSleep(); }}
         }, false);
 
     }

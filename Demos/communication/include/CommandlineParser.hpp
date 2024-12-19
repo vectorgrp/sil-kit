@@ -67,7 +67,7 @@ public:
 
     /*! \brief Output usage info for previously declared parameters to the given stream
      */
-    void PrintUsageInfo(std::ostream& out, const std::string& executableName)
+    void PrintUsageInfo(std::ostream& out)
     {
         out << std::endl;
         out << _appDescription << std::endl;

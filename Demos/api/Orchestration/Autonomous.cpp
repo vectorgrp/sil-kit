@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 #include <iostream>
+#include <thread>
 
 #include "silkit/SilKit.hpp"
 

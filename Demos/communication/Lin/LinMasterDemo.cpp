@@ -34,7 +34,7 @@ private:
         _linController = GetParticipant()->CreateLinController("LinController1", _networkName);
 
         _linController->AddFrameStatusHandler(
-            [this](ILinController* linController, const LinFrameStatusEvent& frameStatusEvent) {
+            [this](ILinController* /*linController*/, const LinFrameStatusEvent& frameStatusEvent) {
             switch (frameStatusEvent.status)
             {
             case LinFrameStatus::LIN_RX_OK:

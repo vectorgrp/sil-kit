@@ -255,16 +255,16 @@ private:
         catch (const std::exception& e)
         {
             std::cerr << "Error: " << e.what() << std::endl;
-            _commandLineParser->PrintUsageInfo(std::cerr, argv[0]);
+            _commandLineParser->PrintUsageInfo(std::cerr);
             exit(-1);
         }
     }
 
-    void EvaluateDefaultArgs(const std::string& executableName, std::unordered_set<DefaultArg> excludedCommandLineArgs)
+    void EvaluateDefaultArgs(std::unordered_set<DefaultArg> excludedCommandLineArgs)
     {
         if (_commandLineParser->Get<CommandlineParser::Flag>("help").Value())
         {
-            _commandLineParser->PrintUsageInfo(std::cout, executableName);
+            _commandLineParser->PrintUsageInfo(std::cout);
             exit(0);
         }
 
@@ -319,7 +319,7 @@ private:
         {
             std::cerr << "Error: Options '--" << defaultArgName.at(DefaultArg::Async) << "' and '--"
                       << defaultArgName.at(DefaultArg::Duration) << "' cannot be used simultaneously" << std::endl;
-            _commandLineParser->PrintUsageInfo(std::cerr, executableName);
+            _commandLineParser->PrintUsageInfo(std::cerr);
             exit(-1);
         }
 
@@ -349,7 +349,7 @@ private:
         {
             std::cerr << "Error: Options '--" << defaultArgName.at(DefaultArg::Log) << "' and '--"
                       << defaultArgName.at(DefaultArg::Config) << "' cannot be used simultaneously" << std::endl;
-            _commandLineParser->PrintUsageInfo(std::cerr, executableName);
+            _commandLineParser->PrintUsageInfo(std::cerr);
             exit(-1);
         }
 
@@ -357,7 +357,7 @@ private:
         {
             std::cerr << "Error: Options '--" << defaultArgName.at(DefaultArg::AsFastAsPossible) << "' and '--"
                       << defaultArgName.at(DefaultArg::Config) << "' cannot be used simultaneously" << std::endl;
-            _commandLineParser->PrintUsageInfo(std::cerr, executableName);
+            _commandLineParser->PrintUsageInfo(std::cerr);
             exit(-1);
         }
 
@@ -641,7 +641,6 @@ public:
                               std::unordered_set<DefaultArg> excludedCommandLineArgs = {})
     {
         _commandLineParser->SetDescription(appDescription);
-        std::string executableName = argv[0];
         AddDefaultArgs(excludedCommandLineArgs);
         try
         {
@@ -653,7 +652,7 @@ public:
             exit(-1);
         }
         ParseArguments(argc, argv);
-        EvaluateDefaultArgs(executableName, excludedCommandLineArgs);
+        EvaluateDefaultArgs(excludedCommandLineArgs);
         try
         {
             EvaluateCommandLineArgs();
@@ -661,7 +660,7 @@ public:
         catch (const std::exception& e)
         {
             std::cerr << "Error: " << e.what() << std::endl;
-            _commandLineParser->PrintUsageInfo(std::cerr, executableName);
+            _commandLineParser->PrintUsageInfo(std::cerr);
             exit(-1);
         }
     }

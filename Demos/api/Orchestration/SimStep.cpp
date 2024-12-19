@@ -41,7 +41,7 @@ int main(int argc, char** argv)
         // Simulation steps
         const auto stepSize = 1ms;
         timeSyncService->SetSimulationStepHandler(
-            [logger](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {
+            [logger](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
             std::stringstream ss;
             ss << "--------- Simulation step T=" << now << " ---------";
             logger->Info(ss.str());

@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 #include <iostream>
+#include <thread>
 
 #include "silkit/SilKit.hpp"
 
@@ -17,7 +18,7 @@ std::ostream& operator<<(std::ostream& out, std::chrono::nanoseconds timestamp)
 std::mutex mx;
 bool doStep = false;
 std::condition_variable cv;
-std::atomic<bool> asyncThreadDone = false;
+std::atomic<bool> asyncThreadDone{false};
 
 int main(int argc, char** argv)
 {
@@ -51,7 +52,7 @@ int main(int argc, char** argv)
         // Simulation steps
         const auto stepSize = 1ms;
         timeSyncService->SetSimulationStepHandlerAsync(
-            [logger](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {
+            [logger](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
             std::stringstream ss;
             ss << "--------- Simulation step T=" << now << " ---------";
             logger->Info(ss.str());
