@@ -2,6 +2,6 @@
 #
 # SPDX-License-Identifier: MIT
 
-make_silkit_demo(SilKitDemoEthernetWriter EthernetWriterDemo.cpp)
-make_silkit_demo(SilKitDemoEthernetReader EthernetReaderDemo.cpp)
+make_silkit_communication_demo(SilKitDemoEthernetWriter EthernetWriterDemo.cpp)
+make_silkit_communication_demo(SilKitDemoEthernetReader EthernetReaderDemo.cpp)
 

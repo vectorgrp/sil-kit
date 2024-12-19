@@ -7,6 +7,10 @@ Tools
 
 Tools for performance analysis.
 
+.. contents::
+    :depth: 1
+    :local:
+
 .. _sec:benchmark-demo:
 
 Benchmark Demo

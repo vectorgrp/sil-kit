@@ -28,7 +28,7 @@ Changed
   - Basic SIL Kit features are implemented in a base class used by the demos
   - No command line arguments needed for basic execution (with time synchronization and coordinated start)
   - Useful command line arguments are provided for all demos (e.g. rename the participant or network, logging, execution modes)
-  - The old '--async' mode of the demos now is accessible by '--async --autonomous' (or short form '-aA')
+  - The old ``--async`` mode of the demos now is accessible by ``--async --autonomous`` (or short form ``-aA``)
 
 [4.0.54] - 2024-11-11
 ---------------------

@@ -19,5 +19,5 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-make_silkit_demo(SilKitDemoFlexrayNode0 FlexrayNode0Demo.cpp)
-make_silkit_demo(SilKitDemoFlexrayNode1 FlexrayNode1Demo.cpp)
+make_silkit_communication_demo(SilKitDemoFlexrayNode0 FlexrayNode0Demo.cpp)
+make_silkit_communication_demo(SilKitDemoFlexrayNode1 FlexrayNode1Demo.cpp)

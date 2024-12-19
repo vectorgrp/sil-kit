@@ -23,14 +23,14 @@ There are several options to build the demos, all require the installation of a 
 VS Code
 -------
 
-#. Install the VS Code extensions `C/C++` and `CMake` 
+#. Install the VS Code extensions ``C/C++`` and ``CMake`` 
 #. Open the folder with VS Code
 
    a. For the git repository: open the root folder of the repository
-   b. For a |ProductName| package: open the `SilKit-Demos` folder
+   b. For a |ProductName| package: open the ``SilKit-Demos`` folder
 #. Opening the folder automatically starts the CMake configuration step.
-   You can also manually call this step in the CMake extension page under `Project Status | Configure`.
-#. In the CMake extension page, build the project under `Project Status | Build`
+   You can also manually call this step in the CMake extension page under ``Project Status | Configure``.
+#. In the CMake extension page, build the project under ``Project Status | Build``
 #. Locate the binaries
 
    a. For the git repository: The binaries reside in ``_build/<build config>/<build type, e.g. Debug, Release>/``
@@ -43,10 +43,10 @@ Visual Studio
 #. Open the folder with Visual Studio
 
    a. For the git repository: open the root folder of the repository
-   b. For a |ProductName| package: open the `SilKit-Demos` folder
+   b. For a |ProductName| package: open the ``SilKit-Demos`` folder
 #. Opening the folder automatically starts the CMake configuration step. 
-   You can also manually call this step under `Project | Configure Cache`.
-#. Build the project with `Build | Build All`
+   You can also manually call this step under ``Project | Configure Cache``.
+#. Build the project with ``Build | Build All``
 #. Locate the binaries
 
    a. For the git repository: The binaries reside in ``_build/<build config>/<build type, e.g. Debug, Release>/``

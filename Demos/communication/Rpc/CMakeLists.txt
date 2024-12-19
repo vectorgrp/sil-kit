@@ -2,5 +2,5 @@
 #
 # SPDX-License-Identifier: MIT
 
-make_silkit_demo(SilKitDemoRpcServer RpcServerDemo.cpp)
-make_silkit_demo(SilKitDemoRpcClient RpcClientDemo.cpp)
+make_silkit_communication_demo(SilKitDemoRpcServer RpcServerDemo.cpp)
+make_silkit_communication_demo(SilKitDemoRpcClient RpcClientDemo.cpp)

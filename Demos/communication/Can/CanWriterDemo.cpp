@@ -15,6 +15,7 @@ private:
     ICanController* _canController{nullptr};
     std::string _networkName = "CAN1";
     bool _printHex{false};
+    int _frameId = 0;
 
     void AddCommandLineArgs() override
     {
@@ -52,9 +53,7 @@ private:
 
     void SendFrame()
     {
-        // Count up message id per frame
-        static uint64_t messageId = 0;
-        messageId++;
+        _frameId++;
 
         // Build a CAN FD frame
         CanFrame canFrame{};
@@ -62,9 +61,9 @@ private:
         canFrame.flags = static_cast<CanFrameFlagMask>(CanFrameFlag::Fdf) // FD Format Indicator
                          | static_cast<CanFrameFlagMask>(CanFrameFlag::Brs); // Bit Rate Switch (for FD Format only)
 
-        // Build a payload with the message Id
+        // Build a payload with the frame Id
         std::stringstream payloadBuilder;
-        payloadBuilder << "CAN " << messageId % 10000;
+        payloadBuilder << "CAN " << _frameId % 10000;
         auto payloadStr = payloadBuilder.str();
         std::vector<uint8_t> payloadBytes(payloadStr.begin(), payloadStr.end());
         canFrame.dataField = payloadBytes;
@@ -96,6 +95,7 @@ private:
     {
         SendFrame();
     }
+
 };
 
 int main(int argc, char** argv)

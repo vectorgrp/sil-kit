@@ -93,8 +93,8 @@ private:
     IFlexrayController* _flexrayController{nullptr};
     FlexrayControllerConfig _controllerConfig;
     FlexrayPocStatusEvent _lastPocStatus{};
+    int _msgId = 0;
     bool _configured{false};
-
     ILogger* _logger;
 
     enum class MasterState
@@ -130,14 +130,13 @@ private:
         if (_controllerConfig.bufferConfigs.empty())
             return;
 
-        static auto msgNumber = -1;
-        msgNumber++;
+        _msgId++;
 
-        auto bufferIdx = msgNumber % _controllerConfig.bufferConfigs.size();
+        auto bufferIdx = _msgId % _controllerConfig.bufferConfigs.size();
 
         // prepare a friendly message as payload
         std::stringstream payloadStream;
-        payloadStream << "FlexrayFrameEvent#" << std::setw(4) << msgNumber << "; bufferId=" << bufferIdx;
+        payloadStream << "FlexrayFrameEvent#" << std::setw(4) << _msgId << "; bufferId=" << bufferIdx;
         auto payloadString = payloadStream.str();
 
         std::vector<uint8_t> payloadBytes;

@@ -2,8 +2,8 @@
 #
 # SPDX-License-Identifier: MIT
 
-make_silkit_demo(SilKitDemoLinSlave LinSlaveDemo.cpp)
-make_silkit_demo(SilKitDemoLinMaster LinMasterDemo.cpp)
+make_silkit_communication_demo(SilKitDemoLinSlave LinSlaveDemo.cpp)
+make_silkit_communication_demo(SilKitDemoLinMaster LinMasterDemo.cpp)
 
-make_silkit_demo(SilKitDemoLinSlaveDynamic LinSlaveDynamicDemo.cpp)
-make_silkit_demo(SilKitDemoLinMasterDynamic LinMasterDynamicDemo.cpp)
+make_silkit_communication_demo(SilKitDemoLinSlaveDynamic LinSlaveDynamicDemo.cpp)
+make_silkit_communication_demo(SilKitDemoLinMasterDynamic LinMasterDynamicDemo.cpp)

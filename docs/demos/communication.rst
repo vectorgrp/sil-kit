@@ -8,6 +8,10 @@ Communication Protocols
 The demos shown here are build on top of a base implementation that provides general |ProductName| features.
 This allows to separate the demo specific use case (e.g. how to use Ethernet with the |ProductName|) from general features (e.g. setup the |ProductName| lifecycle).
 
+.. contents::
+    :depth: 1
+    :local:
+
 Command line arguments
 ~~~~~~~~~~~~~~~~~~~~~~
 

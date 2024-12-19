@@ -15,6 +15,7 @@ private:
     IEthernetController* _ethernetController{nullptr};
     std::string _networkName = "Eth1";
     bool _printHex{false};
+    int _frameId = 0;
 
     void AddCommandLineArgs() override
     {
@@ -73,21 +74,22 @@ private:
         EthernetDemoCommon::EthernetMac WriterMacAddr = {0xF6, 0x04, 0x68, 0x71, 0xAA, 0xC1};
         EthernetDemoCommon::EthernetMac BroadcastMacAddr = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 
-        static int frameId = 0;
+        _frameId++;
+
         std::stringstream stream;
         // Ensure that the payload is long enough to constitute a valid Ethernet frame
-        stream << "Hello from Ethernet writer! (frameId=" << frameId++
+        stream << "Hello from Ethernet writer! (frameId=" << _frameId
                << ")----------------------------------------------------";
         auto payloadString = stream.str();
         std::vector<uint8_t> payload(payloadString.begin(), payloadString.end());
         auto frame = CreateFrame(BroadcastMacAddr, WriterMacAddr, payload);
-        const auto userContext = reinterpret_cast<void*>(static_cast<intptr_t>(frameId));
-
-        _ethernetController->SendFrame(EthernetFrame{frame}, userContext);
+        const auto userContext = reinterpret_cast<void*>(static_cast<intptr_t>(_frameId));
 
         std::stringstream ss;
         ss << "Sending Ethernet frame, data=" << EthernetDemoCommon::PrintPayload(payload, _printHex);
         GetLogger()->Info(ss.str());
+
+        _ethernetController->SendFrame(EthernetFrame{frame}, userContext);
     }
 
     void DoWorkSync(std::chrono::nanoseconds /*now*/) override
@@ -99,6 +101,7 @@ private:
     {
         SendFrame();
     }
+
 };
 
 int main(int argc, char** argv)

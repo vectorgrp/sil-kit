@@ -2,5 +2,5 @@
 #
 # SPDX-License-Identifier: MIT
 
-make_silkit_demo(SilKitDemoPublisher PublisherDemo.cpp)
-make_silkit_demo(SilKitDemoSubscriber SubscriberDemo.cpp)
+make_silkit_communication_demo(SilKitDemoPublisher PublisherDemo.cpp)
+make_silkit_communication_demo(SilKitDemoSubscriber SubscriberDemo.cpp)

@@ -47,8 +47,21 @@ These demos focus on a basic systems and single topic of the |ProductName| API:
 :ref:`sec:simple-can-demo`
     |DemoAbstractSimpleCan|
 
+:ref:`sec:autonomous-lifecycle-demo`
+    |DemoAbstractAutonomous|
+
+:ref:`sec:coordinated-lifecycle-demo`
+    |DemoAbstractCoordinated|
+
+:ref:`sec:sim-step-demo`
+    |DemoAbstractSimStep|
+
+:ref:`sec:sim-step-async-demo`
+    |DemoAbstractSimStepAsync|
+
 :ref:`sec:netsim-demo`
     |DemoAbstractNetSim|
+
 
 .. rubric:: 3. Tools
 

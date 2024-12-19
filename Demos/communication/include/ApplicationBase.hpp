@@ -112,6 +112,7 @@ private:
     std::unique_ptr<IParticipant> _participant;
     ILifecycleService* _lifecycleService{nullptr};
     ITimeSyncService* _timeSyncService{nullptr};
+    ISystemMonitor* _systemMonitor{nullptr};
 
     // For sync: wait for sil-kit-system-controller start/abort or manual user abort
     enum struct SystemControllerResult
@@ -130,7 +131,7 @@ private:
     enum struct UnleashWorkerThreadResult
     {
         Unknown,
-        Start,
+        ParticipantStateRunning,
         UserAbort
     };
     std::promise<UnleashWorkerThreadResult> _unleashWorkerThreadPromise;
@@ -466,6 +467,7 @@ private:
     {
         _participant =
             SilKit::CreateParticipant(_participantConfiguration, _arguments.participantName, _arguments.registryUri);
+        _systemMonitor = _participant->CreateSystemMonitor();
     }
 
     void SetupLifecycle()
@@ -503,10 +505,19 @@ private:
     {
         if (_arguments.runAsync)
         {
-            // Async: Work by the app is done in a separate thread
+            // Track the participant status to unleash the worker thread when in Running state
+            _systemMonitor->AddParticipantStatusHandler(
+                [this](const SilKit::Services::Orchestration::ParticipantStatus& participantStatus) {
+                if (participantStatus.participantName == _arguments.participantName && participantStatus.state
+                    == SilKit::Services::Orchestration::ParticipantState::Running)
+                {
+                    _unleashWorkerThreadPromise.set_value(UnleashWorkerThreadResult::ParticipantStateRunning);
+                }
+            });
+
+            // Start the worker thread
             _unleashWorkerThreadFuture = _unleashWorkerThreadPromise.get_future();
             _workerThread = std::thread{&ApplicationBase::WorkerThread, this};
-            _lifecycleService->SetStartingHandler([this]() { _unleashWorkerThreadPromise.set_value(UnleashWorkerThreadResult::Start); });
         }
         else
         {
@@ -588,6 +599,11 @@ private:
 
     // Only use inside class
 protected:
+    IParticipant* GetParticipant() const
+    {
+        return _participant.get();
+    }
+
     ILifecycleService* GetLifecycleService() const
     {
         return _lifecycleService;
@@ -598,9 +614,9 @@ protected:
         return _timeSyncService;
     }
 
-    IParticipant* GetParticipant() const
+    ISystemMonitor* GetSystemMonitor() const
     {
-        return _participant.get();
+        return _systemMonitor;
     }
 
     ILogger* GetLogger() const
