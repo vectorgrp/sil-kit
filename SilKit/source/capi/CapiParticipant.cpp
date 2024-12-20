@@ -27,6 +27,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/SilKit.hpp"
 #include "silkit/services/logging/ILogger.hpp"
 #include "silkit/services/orchestration/all.hpp"
+#include "silkit/participant/parameters.hpp"
 
 #include "CapiImpl.hpp"
 #include "TypeConversion.hpp"
@@ -98,6 +99,20 @@ try
     auto cppParticipant = reinterpret_cast<SilKit::IParticipant*>(participant);
     auto logger = cppParticipant->GetLogger();
     *outLogger = reinterpret_cast<SilKit_Logger*>(logger);
+    return SilKit_ReturnCode_SUCCESS;
+}
+CAPI_CATCH_EXCEPTIONS
+
+SilKit_ReturnCode SilKitCALL SilKit_Participant_GetParameter(const char** outParameterValue, SilKit_Parameter parameter,
+                                                             SilKit_Participant* participant)
+try
+{
+    ASSERT_VALID_OUT_PARAMETER(outParameterValue);
+    ASSERT_VALID_POINTER_PARAMETER(participant);
+
+    auto cppParticipant = reinterpret_cast<SilKit::IParticipant*>(participant);
+    auto cppParameter = static_cast<SilKit::Parameter>(parameter);
+    *outParameterValue = cppParticipant->GetParameter(cppParameter).c_str();
     return SilKit_ReturnCode_SUCCESS;
 }
 CAPI_CATCH_EXCEPTIONS
