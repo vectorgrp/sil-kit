@@ -15,6 +15,7 @@
 
 #include "silkit/services/all.hpp"
 #include "silkit/services/logging/ILogger.hpp"
+#include "silkit/participant/parameters.hpp"
 
 #include "ParticipantConfiguration.hpp"
 #include "ReplayScheduler.hpp"
@@ -149,6 +150,7 @@ public:
     auto GetMetricsManager() -> IMetricsManager* override;
 
     auto GetLogger() -> Services::Logging::ILogger* override;
+    
     auto CreateLifecycleService(Services::Orchestration::LifecycleConfiguration startConfiguration)
         -> Services::Orchestration::ILifecycleService* override;
     auto GetLifecycleService() -> Services::Orchestration::ILifecycleService* override;
@@ -157,11 +159,11 @@ public:
 
     auto CreateNetworkSimulator() -> Experimental::NetworkSimulation::INetworkSimulator* override;
 
-    auto GetParticipantName() const -> const std::string& override
+    auto GetParticipantName() const -> std::string override
     {
         return _participantConfig.participantName;
     }
-    auto GetRegistryUri() const -> const std::string& override
+    auto GetRegistryUri() const -> std::string override
     {
         return _participantConfig.middleware.registryUri;
     }

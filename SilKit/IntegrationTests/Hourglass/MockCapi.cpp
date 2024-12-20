@@ -769,6 +769,22 @@ extern "C"
         return globalCapi->SilKit_Participant_GetLogger(outLogger, participant);
     }
 
+    SilKit_ReturnCode SilKitCALL SilKit_Participant_GetParticipantName(void* outParameterValue,
+                                                                       size_t* inOutParameterValueSize,
+                                                                       SilKit_Participant* participant)
+    {
+        return globalCapi->SilKit_Participant_GetParticipantName(outParameterValue, inOutParameterValueSize,
+                                                                  participant);
+    }
+
+    SilKit_ReturnCode SilKitCALL SilKit_Participant_GetGetRegistryUri(void* outParameterValue,
+                                                                      size_t* inOutParameterValueSize,
+                                                                      SilKit_Participant* participant)
+    {
+        return globalCapi->SilKit_Participant_GetGetRegistryUri(outParameterValue, inOutParameterValueSize,
+                                                                 participant);
+    }
+
     // ParticipantConfiguration
 
     SilKit_ReturnCode SilKitCALL SilKit_ParticipantConfiguration_FromString(

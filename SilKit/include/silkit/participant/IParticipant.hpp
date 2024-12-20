@@ -18,6 +18,8 @@
 #include "silkit/services/rpc/RpcSpec.hpp"
 #include "silkit/services/rpc/RpcDatatypes.hpp"
 
+#include "silkit/participant/parameters.hpp"
+
 namespace SilKit {
 
 /*! \brief Communication interface to be used by SIL Kit participants
@@ -82,6 +84,10 @@ public:
 
     //! \brief Return the ILogger at this SIL Kit participant.
     virtual auto GetLogger() -> Services::Logging::ILogger* = 0;
+
+    virtual auto GetParticipantName() const -> std::string = 0;
+
+    virtual auto GetRegistryUri() const -> std::string = 0;
 };
 
 } // namespace SilKit

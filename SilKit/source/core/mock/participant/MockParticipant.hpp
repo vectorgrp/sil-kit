@@ -349,6 +349,15 @@ public:
         return &logger;
     }
 
+    auto GetParticipantName() const -> std::string override
+    {
+        return _name;
+    }
+    auto GetRegistryUri() const -> std::string override
+    {
+        return _registryUri;
+    }
+
     void RegisterSimulator(Core::ISimulator*, std::string,
                            Experimental::NetworkSimulation::SimulatedNetworkType) override
     {
@@ -619,15 +628,6 @@ public:
     void ExecuteDeferred(std::function<void()> callback) override
     {
         callback();
-    }
-
-    auto GetParticipantName() const -> const std::string& override
-    {
-        return _name;
-    }
-    auto GetRegistryUri() const -> const std::string& override
-    {
-        return _registryUri;
     }
 
     virtual auto GetTimeProvider() -> Services::Orchestration::ITimeProvider*

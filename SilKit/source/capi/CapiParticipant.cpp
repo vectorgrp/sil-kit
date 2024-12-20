@@ -11,15 +11,39 @@
 #include "silkit/SilKit.hpp"
 #include "silkit/services/logging/ILogger.hpp"
 #include "silkit/services/orchestration/all.hpp"
+#include "silkit/participant/parameters.hpp"
 
 #include "CapiImpl.hpp"
 #include "TypeConversion.hpp"
 
+#include <algorithm>
 #include <memory>
 #include <map>
 #include <mutex>
 #include <fstream>
 
+namespace
+{
+auto CopyStringToOutBuffer(const std::string& value, void* outParameterValue, size_t* inOutParameterValueSize)
+    -> SilKit_ReturnCode
+{
+    const auto requiredSize = value.size() + 1; // include '\0'
+
+    if (outParameterValue != nullptr)
+    {
+        const auto bufferSize = *inOutParameterValueSize;
+        if (bufferSize > 0)
+        {
+            const auto sizeToCopy = std::min(value.size(), bufferSize - 1);
+            value.copy(static_cast<char*>(outParameterValue), sizeToCopy);
+            static_cast<char*>(outParameterValue)[sizeToCopy] = '\0';
+        }
+    }
+
+    *inOutParameterValueSize = requiredSize;
+    return SilKit_ReturnCode_SUCCESS;
+}
+} // namespace
 
 SilKit_ReturnCode SilKitCALL SilKit_Participant_Create(SilKit_Participant** outParticipant,
                                                        SilKit_ParticipantConfiguration* participantConfiguration,
@@ -83,6 +107,32 @@ try
     auto logger = cppParticipant->GetLogger();
     *outLogger = reinterpret_cast<SilKit_Logger*>(logger);
     return SilKit_ReturnCode_SUCCESS;
+}
+CAPI_CATCH_EXCEPTIONS
+
+SilKit_ReturnCode SilKitCALL SilKit_Participant_GetParticipantName(void* outParameterValue,
+                                                                   size_t* inOutParameterValueSize,
+                                                                   SilKit_Participant* participant)
+try
+{
+    ASSERT_VALID_OUT_PARAMETER(inOutParameterValueSize);
+    ASSERT_VALID_POINTER_PARAMETER(participant);
+
+    auto cppParticipant = reinterpret_cast<SilKit::IParticipant*>(participant);
+    return CopyStringToOutBuffer(cppParticipant->GetParticipantName(), outParameterValue, inOutParameterValueSize);
+}
+CAPI_CATCH_EXCEPTIONS
+
+SilKit_ReturnCode SilKitCALL SilKit_Participant_GetGetRegistryUri(void* outParameterValue,
+                                                                  size_t* inOutParameterValueSize,
+                                                                  SilKit_Participant* participant)
+try
+{
+    ASSERT_VALID_OUT_PARAMETER(inOutParameterValueSize);
+    ASSERT_VALID_POINTER_PARAMETER(participant);
+
+    auto cppParticipant = reinterpret_cast<SilKit::IParticipant*>(participant);
+    return CopyStringToOutBuffer(cppParticipant->GetRegistryUri(), outParameterValue, inOutParameterValueSize);
 }
 CAPI_CATCH_EXCEPTIONS
 

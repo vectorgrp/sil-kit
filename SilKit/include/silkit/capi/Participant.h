@@ -8,6 +8,7 @@
 #include "silkit/capi/SilKitMacros.h"
 #include "silkit/capi/Types.h"
 #include "silkit/capi/Logger.h"
+#include "silkit/capi/Parameters.h"
 
 #pragma pack(push)
 #pragma pack(8)
@@ -62,6 +63,37 @@ SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Participant_GetLogger(SilKit_Logge
 
 typedef SilKit_ReturnCode(SilKitFPTR* SilKit_Participant_GetLogger_t)(SilKit_Logger** outLogger,
                                                                       SilKit_Participant* participant);
+
+
+/*! \brief Retrieve the participant name from a participant.
+ *
+ * \param outParameterValue A buffer to copy the null-terminated participant name to.
+ *                          Passing a nullptr is valid and indicates a size-check via inOutParameterValueSize.
+ * \param inOutParameterValueSize The required/provided size of the value including null-termination.
+ * \param participant The participant to query.
+ */
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Participant_GetParticipantName(void* outParameterValue,
+                                                                              size_t* inOutParameterValueSize,
+                                                                              SilKit_Participant* participant);
+
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_Participant_GetParticipantName_t)(void* outParameterValue,
+                                                                                size_t* inOutParameterValueSize,
+                                                                                SilKit_Participant* participant);
+
+/*! \brief Retrieve the registry URI from a participant.
+ *
+ * \param outParameterValue A buffer to copy the null-terminated registry URI to.
+ *                          Passing a nullptr is valid and indicates a size-check via inOutParameterValueSize.
+ * \param inOutParameterValueSize The required/provided size of the value including null-termination.
+ * \param participant The participant to query.
+ */
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Participant_GetGetRegistryUri(void* outParameterValue,
+                                                                             size_t* inOutParameterValueSize,
+                                                                             SilKit_Participant* participant);
+
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_Participant_GetGetRegistryUri_t)(void* outParameterValue,
+                                                                               size_t* inOutParameterValueSize,
+                                                                               SilKit_Participant* participant);
 
 SILKIT_END_DECLS
 

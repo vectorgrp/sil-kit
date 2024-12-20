@@ -20,6 +20,7 @@
 #include "silkit/capi/Version.h"
 #include "silkit/capi/NetworkSimulator.h"
 #include "silkit/capi/EventProducer.h"
+#include "silkit/capi/Parameters.h"
 
 SILKIT_BEGIN_DECLS
 
