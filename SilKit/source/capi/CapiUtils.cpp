@@ -106,7 +106,7 @@ SilKit_ReturnCode SilKitCALL SilKit_ReturnCodeToString(const char** outString, S
         *outString = SilKit_ReturnCode_OUTOFRANGEERROR_str;
         break;
     default:
-        return SilKit_ReturnCode_UNSPECIFIEDERROR;
+        return SilKit_ReturnCode_BADPARAMETER;
     }
 
     return SilKit_ReturnCode_SUCCESS;
