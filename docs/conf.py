@@ -42,8 +42,10 @@ master_doc = 'contents'
 # ones.
 extensions = [ 
     'sphinx_rtd_theme',
-    #'sphinx.ext.autosectionlabel',
-    "breathe" ]
+    'sphinx.ext.extlinks',
+    'breathe' ]
+
+extlinks = {'repo-link': ('https://github.com/vectorgrp/sil-kit/tree/main/%s', '%s')}
 
 # For automatic creation of labels per section
 autosectionlabel_prefix_document = True

@@ -1,0 +1,7 @@
+Description: Log to Stdout with Level Info
+Logging:
+  Sinks:
+    - Level: Info
+      Type: Stdout
+
+

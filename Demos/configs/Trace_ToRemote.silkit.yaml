@@ -1,0 +1,5 @@
+Description: Log to Remote with Level Info. Another participant must specify LogFromRemotes True.
+Logging:
+  Sinks:
+    - Level: Info
+      Type: Remote
