@@ -406,6 +406,10 @@ public:
 
     MOCK_METHOD(SilKit_ReturnCode, SilKit_Participant_GetLogger,
                 (SilKit_Logger * *outLogger, SilKit_Participant* participant));
+    
+    MOCK_METHOD(SilKit_ReturnCode, SilKit_Participant_GetParameter,
+                (char* outParameterValue, size_t* outParameterValueSize, SilKit_Parameter parameter,
+                 SilKit_Participant* participant));
 
     // ParticipantConfiguration
 
