@@ -57,7 +57,7 @@ auto MakeRegistryMsgHeader(ProtocolVersion version)
     return header;
 }
 
-//! Map ProtocolVersion ranges to SILKIT distribution releases
+//! Map ProtocolVersion ranges to SIL Kit distribution releases
 auto MapVersionToRelease(const SilKit::Core::RegistryMsgHeader& registryMsgHeader) -> std::string
 {
     const auto version = ExtractProtocolVersion(registryMsgHeader);

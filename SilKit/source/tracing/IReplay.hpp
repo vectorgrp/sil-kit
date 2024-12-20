@@ -65,7 +65,7 @@ public:
     virtual ~IReplayFile() = default;
     //! Get the filesystem path of the replay file
     virtual auto FilePath() const -> const std::string& = 0;
-    //! Returns embedded SILKIT config or empty string for non-SILKIT replay files
+    //! Returns embedded SIL Kit config or empty string for non SIL Kit replay files
     virtual auto SilKitConfig() const -> std::string = 0;
 
     //! Returns the file format type
@@ -78,7 +78,7 @@ public:
 
 //! Interface shared among all ReplayMessage types.
 
-//! Use a dynamic_cast to SILKIT message type to get actual data
+//! Use a dynamic_cast to SIL Kit message type to get actual data
 class IReplayMessage
 {
 public:

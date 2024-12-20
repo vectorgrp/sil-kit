@@ -90,7 +90,7 @@ struct ParticipantAnnouncement
 {
     RegistryMsgHeader messageHeader; //not changed
     VAsioPeerInfo peerInfo;
-    //!< additional field as of SILKIT >3.4.1, will be ignored by older participants
+    //!< additional field as of SIL Kit >3.4.1, will be ignored by older participants
     VAsioPeerUri peerUri;
 };
 
@@ -103,7 +103,7 @@ struct KnownParticipants
 {
     RegistryMsgHeader messageHeader;
     std::vector<VAsioPeerInfo> peerInfos;
-    //!< additional field as of SILKIT >3.4.1, will be ignored by older participants
+    //!< additional field as of SIL Kit >3.4.1, will be ignored by older participants
     std::vector<VAsioPeerUri> peerUris;
 };
 

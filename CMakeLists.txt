@@ -44,7 +44,7 @@ option(SILKIT_ENABLE_TRACING_INSTRUMENTATION "Enable tracing instrumentation (_S
 option(SILKIT_LINK_LLD "Use the lld linker for SIL KIT" OFF)
 option(SILKIT_USE_SYSTEM_LIBRARIES "Use the libraries installed on the system for third party dependencies" OFF)
 option(SILKIT_BUILD_REPRODUCIBLE "Creates a reproducible build by ommiting timestamps/unique build ids" ON)
-option(SILKIT_BUILD_LINUX_PACKAGE "Creates SILKIT builds suitable for package managers in Linux Distributions (.deb)" OFF)
+option(SILKIT_BUILD_LINUX_PACKAGE "Creates SIL Kit builds suitable for package managers in Linux Distributions (.deb)" OFF)
 
 if(SILKIT_BUILD_LINUX_PACKAGE)
 

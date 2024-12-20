@@ -163,7 +163,7 @@ private:
 
 private:
     const std::map<std::string, std::string>& _metaInfos;
-    //Used as default in SILKIT, CANoe
+    //Used as default in SIL Kit, CANoe
     const std::string _defaultSeparator{"/"};
 };
 
@@ -190,7 +190,7 @@ bool MatchMdfChannel(std::shared_ptr<IReplayChannel> channel, const Config::MdfC
     return result;
 }
 
-// Helper to identify Channel by its name in SILKIT format
+// Helper to identify Channel by its name in SIL Kit format
 bool MatchSilKitChannel(std::shared_ptr<IReplayChannel> channel, const std::string& networkName,
                         const std::string& participantName, const std::string& controllerName)
 {
@@ -267,7 +267,7 @@ auto FindReplayChannel(SilKit::Services::Logging::ILogger* log, IReplayFile* rep
         }
         else
         {
-            // SILKIT builtin channel lookup
+            // SIL Kit builtin channel lookup
             if (channel->Type() != type)
             {
                 Services::Logging::Trace(log, "Replay: skipping channel '{}' of type {}", channel->Name(),

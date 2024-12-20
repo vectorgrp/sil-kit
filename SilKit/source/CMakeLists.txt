@@ -41,7 +41,7 @@ set(GIT_DIR "${PROJECT_SOURCE_DIR}/../.git")
 set(GIT_HEAD_FILE "${GIT_DIR}/HEAD")
 set(VERSION_MACROS_HPP ${CMAKE_CURRENT_BINARY_DIR}/version_macros.hpp)
 if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/version_macros.hpp)
-    message(STATUS "SILKIT: using deployed version_macros.hpp")
+    message(STATUS "SIL Kit: using deployed version_macros.hpp")
     set(VERSION_MACROS_HPP ${CMAKE_CURRENT_LIST_DIR}/version_macros.hpp)
 elseif(EXISTS "${GIT_HEAD_FILE}")
     configure_file(
@@ -58,7 +58,7 @@ elseif(EXISTS "${GIT_HEAD_FILE}")
         )
     endif()
 else()
-    message(STATUS "SILKIT: Cannot determine hash of current git head! GIT_HEAD_HASH will be set to UNKNOWN")
+    message(STATUS "SIL Kit: Cannot determine hash of current git head! GIT_HEAD_HASH will be set to UNKNOWN")
     set(GIT_HEAD_HASH "UNKNOWN")
     configure_file(
         version_macros.hpp.in
@@ -343,7 +343,7 @@ endif()
 #
 #   These files map the targets to the Release build. Without them, applications
 #   that are built as MinSizeRel or RelWithDebInfo will link against the Debug
-#   build of the SILKIT and will crash.
+#   build of the SIL Kit and will crash.
 install(
     FILES
         cmake/SilKitTargets-minsizerel.cmake

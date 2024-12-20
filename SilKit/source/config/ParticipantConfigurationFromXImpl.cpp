@@ -121,11 +121,11 @@ void Validate(const std::string& text)
     SilKit::Config::YamlValidator validator;
     if (!validator.Validate(text, warnings))
     {
-        throw SilKit::ConfigurationError{"YAML validation returned errors: \n" + warnings.str()};
+        throw SilKit::ConfigurationError{"YAML validation returned errors:\n" + warnings.str()};
     }
     if (warnings.str().size() > 0)
     {
-        std::cout << "YAML validation returned warnings: \n" << warnings.str() << std::endl;
+        std::cout << "YAML validation returned warnings:\n" << warnings.str() << std::endl;
     }
 }
 

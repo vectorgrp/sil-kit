@@ -96,12 +96,12 @@ DEFINE_SILKIT_PARSE_TYPE_NAME(std::string);
 } // namespace YAML
 
 ////////////////////////////////////////////////////////////////////////////////
-// Miscellaneous SILKIT Parsing Helper
+// Miscellaneous SIL Kit Parsing Helper
 ////////////////////////////////////////////////////////////////////////////////
 namespace SilKit {
 namespace Config {
 
-// Exception type for Bad SILKIT internal type conversion
+// Exception type for Bad SIL Kit internal type conversion
 class ConversionError : public YAML::BadConversion
 {
 public:
@@ -112,7 +112,7 @@ public:
     }
 };
 
-// Helper template function to convert SILKIT data types with nice error message
+// Helper template function to convert SIL Kit data types with nice error message
 template <typename ValueT>
 auto parse_as(const YAML::Node& node) -> ValueT
 {

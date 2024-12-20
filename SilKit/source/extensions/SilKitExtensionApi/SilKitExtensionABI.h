@@ -21,14 +21,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #ifndef __SILKIT_EXTENSION_ABI_H__
 #define __SILKIT_EXTENSION_ABI_H__
 
-/*! SILKIT Extension Libraries
+/*! SIL Kit Extension Libraries
  *
  * This header defines the shared library interface in terms of C symbols, which
- * allow creation of SILKIT extensions as dynamic libraries.
+ * allow creation of SIL Kit extensions as dynamic libraries.
  * You have to implement the C functions listed below in your own library.
  *
  * Version Compatibility:
- * - SILKIT version must match, otherwise the extension will not be loaded.
+ * - SIL Kit version must match, otherwise the extension will not be loaded.
  * - newer versions of SilKitExtensionDescriptor must not change the existing struct
  *   layout, but may append to it.
  */

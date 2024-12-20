@@ -341,7 +341,7 @@ struct Experimental
 //  Root
 // ================================================================================
 
-//! \brief ParticipantConfiguration is the main configuration data object for a SILKIT participant.
+//! \brief ParticipantConfiguration is the main configuration data object for a SIL Kit participant.
 struct ParticipantConfiguration : public IParticipantConfiguration
 {
     ParticipantConfiguration() = default;

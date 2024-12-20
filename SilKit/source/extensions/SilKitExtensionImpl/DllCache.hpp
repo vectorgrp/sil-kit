@@ -64,7 +64,7 @@ public:
         catch (const SilKit::ExtensionError& err)
         {
             std::stringstream msg;
-            msg << "Error loading SILKIT extension '" << extensionName << "': " << err.what();
+            msg << "Error loading SIL Kit extension '" << extensionName << "': " << err.what();
             if (logger)
             {
                 logger->Error(msg.str());

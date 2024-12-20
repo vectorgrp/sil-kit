@@ -33,7 +33,7 @@ if(GIT_HEAD_REF)
     if(NOT EXISTS "${linkedHeadFile}")
         # the workspace might have a .git/packed-refs file instead of
         # .git/refs/heads/master
-        message("-- SILKIT GIT Version: using ${GIT_DIR}/packed-refs")
+        message("-- SIL Kit GIT Version: using ${GIT_DIR}/packed-refs")
         file(READ ${GIT_DIR}/packed-refs packedRefs LIMIT 4096)
         string(REGEX MATCH "([abcdef0-9]+) ${linkedRef}" headHash ${packedRefs})
         if(NOT headHash)
@@ -41,7 +41,7 @@ if(GIT_HEAD_REF)
         endif()
         file(WRITE ${gitHashFile} "${CMAKE_MATCH_1}\n")
     else()
-        message("-- SILKIT GIT Version: using ${linkedHeadFile}")
+        message("-- SIL Kit GIT Version: using ${linkedHeadFile}")
         configure_file(
             "${linkedHeadFile}"
             ${gitHashFile}
@@ -57,7 +57,7 @@ endif()
 
 file(READ ${gitHashFile} GIT_HEAD_HASH LIMIT 512)
 string(STRIP "${GIT_HEAD_HASH}" GIT_HEAD_HASH)
-message(STATUS "SILKIT GIT Version: ${GIT_HEAD_HASH}")
+message(STATUS "SIL Kit GIT Version: ${GIT_HEAD_HASH}")
 configure_file(
     version_macros.hpp.in
     ${CMAKE_CURRENT_BINARY_DIR}/version_macros.hpp

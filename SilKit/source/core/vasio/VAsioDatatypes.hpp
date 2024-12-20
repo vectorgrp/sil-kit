@@ -39,7 +39,7 @@ static constexpr std::array<uint8_t, 4> REGISTRY_MESSAGE_HEADER_PREAMBLE_BYTES =
 struct RegistryMsgHeader
 {
     uint32_t preamble{REGISTRY_MESSAGE_HEADER_PREAMBLE_VALUE};
-    // If versionHigh/Low changes here, update SILKIT version range .
+    // If versionHigh/Low changes here, update SIL Kit version range .
     // Also, ensure backwards compatibility in the Ser/Des code path.
     // See VAsioProtcolVersion.hpp
     uint16_t versionHigh;

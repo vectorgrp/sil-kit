@@ -66,7 +66,7 @@ public:
     using SilKitError::SilKitError;
 
     ConfigurationError()
-        : ConfigurationError("SilKit: Configuration has syntactical or semantical errors.")
+        : ConfigurationError("Configuration has syntactical or semantical errors.")
     {
     }
 };
