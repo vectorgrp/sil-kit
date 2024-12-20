@@ -21,6 +21,13 @@ Fixed
   does not break the ABI of the shared libraries.
 
 
+- Aligned C API error return codes ``SilKit_ReturnCode_<ERRORTYPE>`` and SIL Kit specific exceptions.
+  All exceptions are now forwarded through the hourglass and thrown in the C++ API.
+  For users of the C API, a more detailed error handling is possible with the extended error return codes.
+
+  Before, all execptions ended up as ``SilKitError`` on the user side.
+
+
 [4.0.54] - 2024-11-11
 ---------------------
 

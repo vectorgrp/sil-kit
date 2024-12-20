@@ -39,6 +39,46 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
         SilKit_error_string = e.what(); \
         return SilKit_ReturnCode_WRONGSTATE; \
     } \
+    catch (const SilKit::TypeConversionError& e) \
+    { \
+        SilKit_error_string = e.what(); \
+        return SilKit_ReturnCode_TYPECONVERSIONERROR; \
+    } \
+    catch (const SilKit::ConfigurationError& e) \
+    { \
+        SilKit_error_string = e.what(); \
+        return SilKit_ReturnCode_CONFIGURATIONERROR; \
+    } \
+    catch (const SilKit::ProtocolError& e) \
+    { \
+        SilKit_error_string = e.what(); \
+        return SilKit_ReturnCode_PROTOCOLERROR; \
+    } \
+    catch (const SilKit::AssertionError& e) \
+    { \
+        SilKit_error_string = e.what(); \
+        return SilKit_ReturnCode_ASSERTIONERROR; \
+    } \
+    catch (const SilKit::ExtensionError& e) \
+    { \
+        SilKit_error_string = e.what(); \
+        return SilKit_ReturnCode_EXTENSIONERROR; \
+    } \
+    catch (const SilKit::LengthError& e) \
+    { \
+        SilKit_error_string = e.what(); \
+        return SilKit_ReturnCode_LENGTHERROR; \
+    } \
+    catch (const SilKit::OutOfRangeError& e) \
+    { \
+        SilKit_error_string = e.what(); \
+        return SilKit_ReturnCode_OUTOFRANGEERROR; \
+    } \
+    catch (const SilKit::LogicError& e) \
+    { \
+        SilKit_error_string = e.what(); \
+        return SilKit_ReturnCode_LOGICERROR; \
+    } \
     catch (const SilKit::SilKitError& e) \
     { \
         SilKit_error_string = e.what(); \

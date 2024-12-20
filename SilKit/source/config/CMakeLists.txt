@@ -76,6 +76,7 @@ add_silkit_test_to_executable(SilKitUnitTests
         ParticipantConfiguration_Full.json
         ParticipantConfiguration_Full.yaml
 
+        TestParticipantConfigs/ParticipantConfiguration_TestCapi.yaml
         TestParticipantConfigs/ParticipantConfiguration_FullIncludes.yaml
         TestParticipantConfigs/ParticipantConfiguration_FullIncludes_Reference.yaml
 

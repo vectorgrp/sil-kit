@@ -69,7 +69,29 @@ void ThrowOnError(SilKit_ReturnCode returnCode)
         std::ostringstream os;
         os << "SIL Kit: " << returnCodeCstr << " (" << returnCode << "): " << lastErrorCstr;
 
-        throw SilKitError{os.str()};
+        switch (returnCode)
+        {
+        case SilKit_ReturnCode_WRONGSTATE:
+            throw StateError{os.str()};
+        case SilKit_ReturnCode_TYPECONVERSIONERROR:
+            throw TypeConversionError{os.str()};
+        case SilKit_ReturnCode_CONFIGURATIONERROR:
+            throw ConfigurationError{os.str()};
+        case SilKit_ReturnCode_PROTOCOLERROR:
+            throw ProtocolError{os.str()};
+        case SilKit_ReturnCode_ASSERTIONERROR:
+            throw AssertionError{os.str()};
+        case SilKit_ReturnCode_EXTENSIONERROR:
+            throw ExtensionError{os.str()};
+        case SilKit_ReturnCode_LOGICERROR:
+            throw LogicError{os.str()};
+        case SilKit_ReturnCode_LENGTHERROR:
+            throw LengthError{os.str()};
+        case SilKit_ReturnCode_OUTOFRANGEERROR:
+            throw OutOfRangeError{os.str()};
+        default:
+            throw SilKitError{os.str()};
+        }
     }
 }
 

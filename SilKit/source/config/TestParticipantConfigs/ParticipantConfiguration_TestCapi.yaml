@@ -1,0 +1,6 @@
+Description: Example configuration used in Test_CapiSilkit
+Logging:
+  Sinks:
+  - Type: Stdout
+    Level: Trace
+
