@@ -70,13 +70,13 @@ void VerifyExtension(SilKit::Services::Logging::ILogger* logger, const SilKitExt
     {
         throw ExtensionError("Extension returned invalid SilKitExtensionDescriptor");
     }
-    //verify the extensions SILKIT version to ours
+    //verify the extensions SIL Kit version to ours
     if (descr->silkit_version_major != SilKit::Version::MajorImpl()
         || descr->silkit_version_minor != SilKit::Version::MinorImpl()
         || descr->silkit_version_patch != SilKit::Version::PatchImpl())
     {
         std::stringstream ss;
-        ss << "Version mismatch: host SILKIT version is: " << SilKit::Version::MajorImpl() << "."
+        ss << "Version mismatch: host SIL Kit version is: " << SilKit::Version::MajorImpl() << "."
            << SilKit::Version::MinorImpl() << "." << SilKit::Version::PatchImpl()
            << " module has version: " << descr->silkit_version_major << "." << descr->silkit_version_minor << "."
            << descr->silkit_version_patch << ".";
@@ -106,14 +106,14 @@ void VerifyExtension(SilKit::Services::Logging::ILogger* logger, const SilKitExt
     {
         if (logger)
         {
-            logger->Warn("SILKIT extension verification: build system is misconfigured, the host system is UNKNOWN");
+            logger->Warn("SIL Kit extension verification: build system is misconfigured, the host system is UNKNOWN");
         }
     }
 
     if (my_sys != mod_sys)
     {
         std::stringstream msg;
-        msg << "SILKIT extension verification: Host system '" << my_sys << "' differs from module system '" << mod_sys
+        msg << "SIL Kit extension verification: Host system '" << my_sys << "' differs from module system '" << mod_sys
             << "'";
         if (logger)
         {
@@ -207,7 +207,7 @@ auto LoadExtension(Services::Logging::ILogger* logger, const std::string& name,
         catch (const ExtensionError& ex)
         {
             std::stringstream msg;
-            msg << "Failed to verify SILKIT extension located at path'" << path << "': " << ex.what();
+            msg << "Failed to verify SIL Kit extension located at path'" << path << "': " << ex.what();
             if (logger)
             {
                 logger->Debug(msg.str());
@@ -224,7 +224,7 @@ auto LoadExtension(Services::Logging::ILogger* logger, const std::string& name,
         if (lib_handle != nullptr)
         {
             std::stringstream msg;
-            msg << "Loaded SILKIT extension '" << name << "' from path '" << path << "'";
+            msg << "Loaded SIL Kit extension '" << name << "' from path '" << path << "'";
             if (logger)
             {
                 logger->Info(msg.str());

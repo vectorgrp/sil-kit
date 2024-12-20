@@ -19,13 +19,13 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
-// This test ensures that the public SILKIT api is compatible with windows headers.
+// This test ensures that the public SIL Kit api is compatible with windows headers.
 
 // 1. include any relevant windows headers, that define some evil macros, e.g.,
 // max and min
 #include <windows.h>
 
-// 2. include all SILKIT headers
+// 2. include all SIL Kit headers
 #include "silkit/config/all.hpp"
 #include "silkit/participant/exception.hpp"
 #include "silkit/SilKitMacros.hpp"

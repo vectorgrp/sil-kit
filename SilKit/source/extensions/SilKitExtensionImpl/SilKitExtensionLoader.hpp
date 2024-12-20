@@ -49,7 +49,7 @@ auto SilKitExtensionLoader(Services::Logging::ILogger* logger, const std::string
     catch (const std::bad_cast& err)
     {
         std::stringstream msg;
-        msg << "Error loading SILKIT extension '" << extensionName << "': " << err.what();
+        msg << "Error loading SIL Kit extension '" << extensionName << "': " << err.what();
         logger->Error(msg.str());
         throw ExtensionError(msg.str());
     }

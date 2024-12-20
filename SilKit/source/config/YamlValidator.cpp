@@ -188,7 +188,7 @@ bool YamlValidator::Validate(const std::string& yamlString, std::ostream& warnin
             auto version = yamlDoc["SchemaVersion"].as<std::string>();
             if (!LoadSchema(version))
             {
-                warnings << "Error: Cannot load schema with SchemaVersion='" << version << "'" << "\n";
+                warnings << "Cannot load schema with SchemaVersion='" << version << "'" << "\n";
                 return false;
             }
         }
@@ -201,7 +201,7 @@ bool YamlValidator::Validate(const std::string& yamlString, std::ostream& warnin
     }
     catch (const std::exception& ex)
     {
-        warnings << "Error: caught exception: " << ex.what() << "\n";
+        warnings << ex.what() << "\n";
         return false;
     }
 }
@@ -211,7 +211,7 @@ auto YamlValidator::ParentName(const std::string& elementName) const -> std::str
     auto sep = elementName.rfind(_elementSeparator);
     if (sep == elementName.npos)
     {
-        throw SilKitError("Yaml Validation: elementName" + elementName + " has no parent");
+        throw ConfigurationError("elementName " + elementName + " has no parent");
     }
     else if (sep == 0)
     {

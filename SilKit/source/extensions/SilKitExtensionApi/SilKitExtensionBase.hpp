@@ -23,7 +23,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 /*! SIL Kit Extension Implementations
  * Use the following SilKitExtensionBase class and to implement
- * shared libraries that act as SILKIT extensions.
+ * shared libraries that act as SIL Kit extensions.
  */
 
 #include <cstdint>

@@ -40,7 +40,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
  *   1.) loading dynamic, shared library (ie, *.so or *.dll), and
  *   2.) the extension points derived from ISilKitExtension.
  *
- * To create an extension for use inside of SILKIT create an interface as a
+ * To create an extension for use inside of SIL Kit create an interface as a
  * subclass of ISilKitExtension, and implement the interface in a
  * shared library.
  *

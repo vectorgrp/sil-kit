@@ -20,7 +20,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ######################################################################
-# SILKIT Tracing and Replay component
+# SIL Kit Tracing and Replay component
 # - Some tracing and replay functionality is implemented in
 #   the external sil-kit-mdf4tracing extension.
 ######################################################################

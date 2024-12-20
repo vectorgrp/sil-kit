@@ -67,7 +67,7 @@ void ThrowOnError(SilKit_ReturnCode returnCode)
         }
 
         std::ostringstream os;
-        os << "SIL Kit: " << returnCodeCstr << " (" << returnCode << "): " << lastErrorCstr;
+        os << "SIL Kit: " << returnCodeCstr << " (" << returnCode << "):\n" << lastErrorCstr;
 
         switch (returnCode)
         {

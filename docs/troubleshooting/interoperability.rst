@@ -53,7 +53,7 @@ The second participant does not report a timeout anymore, but immediately report
 
 .. code-block:: powershell
 
-    SILKIT Connection Handshake: ParticipantAnnouncementReply contains unsupported version. participant=SilKitRegistry participant-version=3.1
+    SIL Kit Connection Handshake: ParticipantAnnouncementReply contains unsupported version. participant=SilKitRegistry participant-version=3.1
 
 Scenario D
 ----------
