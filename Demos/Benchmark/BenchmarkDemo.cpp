@@ -421,6 +421,7 @@ void ParticipantsThread(std::shared_ptr<SilKit::Config::IParticipantConfiguratio
                                                const EthernetFrameEvent& /*frameEvent*/) { messageCounter++; });
 
         lifecycleService->SetCommunicationReadyHandler([ethernetController]() { ethernetController->Activate(); });
+        break;
     }
     case ServiceType::Can:
     {
