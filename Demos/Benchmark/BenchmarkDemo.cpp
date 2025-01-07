@@ -368,7 +368,7 @@ void SendEthernetFrames(IEthernetController* ethernetController, uint32_t messag
     for (uint32_t i = 0; i < messageCount; i++)
     {
         std::vector<uint8_t> frameData(messageSizeInBytes, '*');
-        ethernetController->SendFrame(std::move(EthernetFrame{frameData}));
+        ethernetController->SendFrame(EthernetFrame{frameData});
     }
 }
 
@@ -417,8 +417,9 @@ void ParticipantsThread(std::shared_ptr<SilKit::Config::IParticipantConfiguratio
         ethernetController = participant->CreateEthernetController("Eth1", "Eth1");
 
         ethernetController->AddFrameHandler(
-            [&messageCounter, participantName](IEthernetController* /*controller*/,
-                                               const EthernetFrameEvent& /*frameEvent*/) { messageCounter++; });
+            [&messageCounter](IEthernetController* /*controller*/, const EthernetFrameEvent& /*frameEvent*/) {
+            messageCounter++;
+        });
 
         lifecycleService->SetCommunicationReadyHandler([ethernetController]() { ethernetController->Activate(); });
         break;
@@ -428,9 +429,7 @@ void ParticipantsThread(std::shared_ptr<SilKit::Config::IParticipantConfiguratio
         canController = participant->CreateCanController("CAN1", "CAN1");
 
         canController->AddFrameHandler(
-            [&messageCounter, participantName](ICanController* /*ctrl*/, const CanFrameEvent& /*frameEvent*/) {
-            messageCounter++;
-        });
+            [&messageCounter](ICanController* /*ctrl*/, const CanFrameEvent& /*frameEvent*/) { messageCounter++; });
 
         lifecycleService->SetCommunicationReadyHandler([canController]() {
             canController->SetBaudRate(10'000, 1'000'000, 2'000'000);
@@ -511,8 +510,7 @@ void PrintParameters(BenchmarkConfig benchmark)
               << std::endl
               << std::left << std::setw(39) << "- Number of participants: " << benchmark.numberOfParticipants
               << std::endl
-              << std::left << std::setw(39) << "- Messages per simulation step: " << benchmark.messageCount
-              << std::endl
+              << std::left << std::setw(39) << "- Messages per simulation step: " << benchmark.messageCount << std::endl
               << std::left << std::setw(39) << "- Message size (bytes): " << benchmark.messageSizeInBytes << std::endl
               << std::left << std::setw(39) << "- Registry URI: " << benchmark.registryUri << std::endl
               << std::left << std::setw(39) << "- Configuration: " << benchmark.silKitConfigPath << std::endl
