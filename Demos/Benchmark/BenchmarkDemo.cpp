@@ -410,6 +410,7 @@ void ParticipantsThread(std::shared_ptr<SilKit::Config::IParticipantConfiguratio
             // this is handled in I/O thread, so no data races on counter.
             messageCounter++;
         });
+        break;
     }
     case ServiceType::Ethernet:
     {
