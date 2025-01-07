@@ -461,6 +461,7 @@ void ParticipantsThread(std::shared_ptr<SilKit::Config::IParticipantConfiguratio
         case ServiceType::PubSub:
         {
             PublishMessages(publisher, benchmark.messageCount, benchmark.messageSizeInBytes);
+            break;
         }
         case ServiceType::Ethernet:
         {
