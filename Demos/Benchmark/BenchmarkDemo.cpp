@@ -511,7 +511,7 @@ void PrintParameters(BenchmarkConfig benchmark)
               << std::endl
               << std::left << std::setw(39) << "- Number of participants: " << benchmark.numberOfParticipants
               << std::endl
-              << std::left << std::setw(39) << "- Messages per simulation step (1ms): " << benchmark.messageCount
+              << std::left << std::setw(39) << "- Messages per simulation step: " << benchmark.messageCount
               << std::endl
               << std::left << std::setw(39) << "- Message size (bytes): " << benchmark.messageSizeInBytes << std::endl
               << std::left << std::setw(39) << "- Registry URI: " << benchmark.registryUri << std::endl
