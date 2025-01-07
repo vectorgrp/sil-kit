@@ -41,7 +41,15 @@ using namespace SilKit::Services::Ethernet;
 
 using namespace std::chrono_literals;
 
-// Field in a frame that can indicate the protocol, payload size, or the start of a VLAN tag
+struct EthTagControlInformation
+{
+    uint16_t vid : 12;
+    uint16_t dei : 1;
+    uint16_t pcp : 3;
+};
+static_assert(sizeof(EthTagControlInformation) == sizeof(uint16_t), "");
+
+    // Field in a frame that can indicate the protocol, payload size, or the start of a VLAN tag
 using EtherType = uint16_t;
 using EthernetMac = std::array<uint8_t, 6>;
 
@@ -53,17 +61,33 @@ std::ostream& operator<<(std::ostream& out, std::chrono::nanoseconds timestamp)
 }
 
 std::vector<uint8_t> CreateFrame(const EthernetMac& destinationAddress, const EthernetMac& sourceAddress,
-                                 const std::vector<uint8_t>& payload)
+                                 const std::vector<uint8_t>& payload, int frameId)
 {
-    const uint16_t etherType = 0x0000; // no protocol
+    const uint16_t vlanEtherType = 0x8100;
+    auto tci = EthTagControlInformation{};
+
+    tci.pcp = 0;
+    tci.dei = 0;
+    tci.vid = 12 + (frameId % 2);
+
+
+    const uint16_t etherType = 0x0800; // ip protocol
 
     std::vector<uint8_t> raw;
+    auto toBigEndian = [&raw](auto& data) {
+        auto bytes = reinterpret_cast<const uint8_t*>(&data);
+        raw.push_back(bytes[1]); // We assume our host platform to be little-endian
+        raw.push_back(bytes[0]);
+
+    };
 
     std::copy(destinationAddress.begin(), destinationAddress.end(), std::back_inserter(raw));
     std::copy(sourceAddress.begin(), sourceAddress.end(), std::back_inserter(raw));
-    auto etherTypeBytes = reinterpret_cast<const uint8_t*>(&etherType);
-    raw.push_back(etherTypeBytes[1]); // We assume our platform to be little-endian
-    raw.push_back(etherTypeBytes[0]);
+
+    toBigEndian(vlanEtherType);
+    toBigEndian(tci);
+    toBigEndian(etherType);
+
     std::copy(payload.begin(), payload.end(), std::back_inserter(raw));
 
     return raw;
@@ -132,7 +156,7 @@ void SendFrame(IEthernetController* controller, const EthernetMac& from, const E
 
     const auto userContext = reinterpret_cast<void*>(static_cast<intptr_t>(frameId));
 
-    auto frame = CreateFrame(to, from, payload);
+    auto frame = CreateFrame(to, from, payload, frameId);
     controller->SendFrame(EthernetFrame{frame}, userContext);
     std::cout << "<< ETH Frame sent with userContext=" << userContext << std::endl;
 }
