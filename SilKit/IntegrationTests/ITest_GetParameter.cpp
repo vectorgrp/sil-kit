@@ -6,29 +6,65 @@
 #include <string>
 
 #include "gtest/gtest.h"
-#include "SimTestHarness.hpp"
+#include "silkit/vendor/CreateSilKitRegistry.hpp"
+#include "silkit/SilKit.hpp"
 
 namespace {
-using namespace SilKit::Tests;
 
 struct ITest_GetParameter : public testing::Test
 {
+
+    void checkGetParameterValues(SilKit::IParticipant* participant, std::unordered_map<SilKit::Parameter, std::string> expected)
+    {
+        for (auto it : expected)
+        {
+            EXPECT_EQ(it.second, participant->GetParameter(it.first));
+        }
+    }
+
+    const std::string _registryUriAnyPort = "silkit://127.0.0.1:0";
 };
 
-
+// Check that GetParameter return the values set via api
 TEST_F(ITest_GetParameter, get_parameter_set_by_api)
 {
-    const std::string participantName = "P1"; 
+    const std::string participantNameByApi = "P1";
 
-    SimTestHarnessArgs args;
-    args.deferParticipantCreation = true;
-    args.asyncParticipantNames = {participantName};
-    //args.registry.listenUri = "silkit://127.0.0.1:0"
-    auto simTestHarness = std::make_unique<SimTestHarness>(args);
+    auto emptyParticipantConfig = SilKit::Config::ParticipantConfigurationFromString("");
 
-    auto participant = simTestHarness->GetParticipant(participantName)->Participant();
-    auto participantNameByGetParameter = participant->GetParameter(SilKit::Parameter::ParticipantName);
-    EXPECT_EQ(participantName, participantNameByGetParameter);
+    auto registry = SilKit::Vendor::Vector::CreateSilKitRegistry(emptyParticipantConfig);
+    auto registryUriByApi = registry->StartListening(_registryUriAnyPort);
+
+    auto participant = SilKit::CreateParticipant(emptyParticipantConfig, participantNameByApi, registryUriByApi);
+
+    checkGetParameterValues(participant.get(), {{SilKit::Parameter::ParticipantName, participantNameByApi},
+                                                {SilKit::Parameter::RegistryUri, registryUriByApi}});
+}
+
+// Config values take precedence over api values
+// Check that GetParameter actually return the config values if both are set
+TEST_F(ITest_GetParameter, get_parameter_set_by_config)
+{
+    const std::string participantNameByApi = "P2";
+    const std::string registryUriByApi = "silkit://127.0.0.42:0";
+
+    const std::string participantNameByConfig = "P1";
+
+    auto emptyParticipantConfig = SilKit::Config::ParticipantConfigurationFromString("");
+
+    auto registry = SilKit::Vendor::Vector::CreateSilKitRegistry(emptyParticipantConfig);
+    auto registryUriByConfig = registry->StartListening(_registryUriAnyPort);
+
+    std::ostringstream ss;
+    ss << R"({ "ParticipantName": ")" << participantNameByConfig << R"(", "Middleware": { "RegistryUri": ")"
+       << registryUriByConfig << R"(" }})";
+    auto participantConfig = SilKit::Config::ParticipantConfigurationFromString(ss.str());
+
+    auto participant = SilKit::CreateParticipant(participantConfig, participantNameByApi, registryUriByApi);
+
+    checkGetParameterValues(participant.get(), {{SilKit::Parameter::ParticipantName, participantNameByConfig},
+                                                {SilKit::Parameter::RegistryUri, registryUriByConfig}});
+
 }
 
 } //end namespace

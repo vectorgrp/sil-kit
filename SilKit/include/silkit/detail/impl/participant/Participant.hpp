@@ -102,7 +102,7 @@ public:
 
     inline auto GetLogger() -> SilKit::Services::Logging::ILogger* override;
 
-    inline auto GetParameter(SilKit::Parameter parameter) -> std::string override;
+    inline auto GetParameter(SilKit::Parameter parameter) -> const std::string& override;
 
     inline auto ExperimentalCreateNetworkSimulator() -> SilKit::Experimental::NetworkSimulation::INetworkSimulator*;
 
@@ -249,7 +249,7 @@ auto Participant::GetLogger() -> SilKit::Services::Logging::ILogger*
 }
 
 
-auto Participant::GetParameter(SilKit::Parameter parameter) -> std::string
+auto Participant::GetParameter(SilKit::Parameter parameter) -> const std::string&
 {
     return _parameterProvider->GetParameter(_participant, parameter);
 }

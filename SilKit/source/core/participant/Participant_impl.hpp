@@ -1049,7 +1049,7 @@ auto Participant<SilKitConnectionT>::GetLoggerInternal() -> Services::Logging::I
 }
 
 template <class SilKitConnectionT>
-auto Participant<SilKitConnectionT>::GetParameter(Parameter parameter) -> std::string
+auto Participant<SilKitConnectionT>::GetParameter(Parameter parameter) -> const std::string&
 {
     switch (parameter)
     {

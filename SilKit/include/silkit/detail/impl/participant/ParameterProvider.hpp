@@ -35,10 +35,10 @@ public:
 
     inline ~ParameterProvider() = default;
 
-    inline auto GetParameter(SilKit_Participant* participant, Parameter parameter) -> std::string;
+    inline auto GetParameter(SilKit_Participant* participant, Parameter parameter) -> const std::string&;
 
 private:
-    SilKit_ParamterProvider* _parameterProvider{nullptr};
+    std::unordered_map<Parameter, std::string> _parameterValues;
 };
 
 } // namespace Impl
@@ -60,13 +60,14 @@ ParameterProvider::ParameterProvider()
 {
 }
 
-auto ParameterProvider::GetParameter(SilKit_Participant* participant, Parameter parameter) -> std::string
+auto ParameterProvider::GetParameter(SilKit_Participant* participant, Parameter parameter) -> const std::string&
 {
     const char* cParameterValue;
     SilKit_Parameter cParameter = static_cast<SilKit_Parameter>(parameter);
     const auto returnCode = SilKit_Participant_GetParameter(&cParameterValue, cParameter, participant);
+    _parameterValues[parameter] = std::string(cParameterValue);
     ThrowOnError(returnCode);
-    return std::string{cParameterValue};
+    return _parameterValues[parameter];
 }
 
 } // namespace Impl

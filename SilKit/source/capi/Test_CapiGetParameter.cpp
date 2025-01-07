@@ -14,7 +14,7 @@ using SilKit::Core::Tests::DummyParticipant;
 class MockParticipant : public SilKit::Core::Tests::DummyParticipant
 {
 public:
-    MOCK_METHOD(std::string, GetParameter, (SilKit::Parameter /*parameter*/), (override));
+    MOCK_METHOD(const std::string&, GetParameter, (SilKit::Parameter /*parameter*/), (override));
 };
 
 class Test_CapiGetParameter : public testing::Test
