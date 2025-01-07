@@ -436,6 +436,7 @@ void ParticipantsThread(std::shared_ptr<SilKit::Config::IParticipantConfiguratio
             canController->SetBaudRate(10'000, 1'000'000, 2'000'000);
             canController->Start();
         });
+        break;
     }
     }
 
