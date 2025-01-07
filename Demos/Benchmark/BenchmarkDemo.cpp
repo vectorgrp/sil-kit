@@ -471,6 +471,7 @@ void ParticipantsThread(std::shared_ptr<SilKit::Config::IParticipantConfiguratio
         case ServiceType::Can:
         {
             SendCanFrames(canController, benchmark.messageCount, benchmark.messageSizeInBytes);
+            break;
         }
         }
     }, benchmark.simulationStepSize);
