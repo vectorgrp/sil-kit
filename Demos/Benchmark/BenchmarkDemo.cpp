@@ -356,29 +356,29 @@ void CheckAndTruncateMessageSize(BenchmarkConfig& benchmark)
 
 void PublishMessages(IDataPublisher* publisher, uint32_t messageCount, uint32_t messageSizeInBytes)
 {
+    std::vector<uint8_t> data(messageSizeInBytes, '*');
     for (uint32_t i = 0; i < messageCount; i++)
-    {
-        std::vector<uint8_t> data(messageSizeInBytes, '*');
-        publisher->Publish(std::move(data));
+    {        
+        publisher->Publish(SilKit::Util::ToSpan(data));
     }
 }
 
 void SendEthernetFrames(IEthernetController* ethernetController, uint32_t messageCount, uint32_t messageSizeInBytes)
 {
+    std::vector<uint8_t> frameData(messageSizeInBytes, '*');
     for (uint32_t i = 0; i < messageCount; i++)
-    {
-        std::vector<uint8_t> frameData(messageSizeInBytes, '*');
-        ethernetController->SendFrame(EthernetFrame{frameData});
+    {        
+        ethernetController->SendFrame(EthernetFrame{SilKit::Util::ToSpan(frameData)});
     }
 }
 
 void SendCanFrames(ICanController* canController, uint32_t messageCount, uint32_t messageSizeInBytes)
 {
+    std::vector<uint8_t> frameData(messageSizeInBytes, '*');
     for (uint32_t i = 0; i < messageCount; i++)
     {
-        CanFrame canFrame{};
-        std::vector<uint8_t> frameData(messageSizeInBytes, '*');
-        canFrame.dataField = frameData;
+        CanFrame canFrame{};        
+        canFrame.dataField = SilKit::Util::ToSpan(frameData);
 
         canController->SendFrame(std::move(canFrame));
     }
