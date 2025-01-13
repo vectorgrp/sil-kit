@@ -392,9 +392,9 @@ void ParticipantsThread(std::shared_ptr<SilKit::Config::IParticipantConfiguratio
     auto* lifecycleService = participant->CreateLifecycleService({OperationMode::Coordinated});
     auto* timeSyncService = lifecycleService->CreateTimeSyncService();
 
-    IDataPublisher* publisher;
-    IEthernetController* ethernetController;
-    ICanController* canController;
+    IDataPublisher* publisher = nullptr;
+    IEthernetController* ethernetController = nullptr;
+    ICanController* canController = nullptr;
 
     switch (benchmark.service)
     {
