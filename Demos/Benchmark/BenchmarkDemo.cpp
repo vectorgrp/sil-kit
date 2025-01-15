@@ -321,18 +321,6 @@ bool Validate(const BenchmarkConfig& config)
     return true;
 }
 
-uint32_t relateParticipant(uint32_t idx, uint32_t numberOfParticipants)
-{
-    if (idx == (numberOfParticipants - 1)) //last participant
-    {
-        return 0;
-    }
-    else
-    {
-        return idx + 1;
-    }
-}
-
 void CheckAndTruncateMessageSize(BenchmarkConfig& benchmark)
 {
     const uint32_t maxSizeEth = 1500;
@@ -358,7 +346,7 @@ void PublishMessages(IDataPublisher* publisher, uint32_t messageCount, uint32_t 
 {
     std::vector<uint8_t> data(messageSizeInBytes, '*');
     for (uint32_t i = 0; i < messageCount; i++)
-    {        
+    {
         publisher->Publish(SilKit::Util::ToSpan(data));
     }
 }
@@ -367,7 +355,7 @@ void SendEthernetFrames(IEthernetController* ethernetController, uint32_t messag
 {
     std::vector<uint8_t> frameData(messageSizeInBytes, '*');
     for (uint32_t i = 0; i < messageCount; i++)
-    {        
+    {
         ethernetController->SendFrame(EthernetFrame{SilKit::Util::ToSpan(frameData)});
     }
 }
@@ -377,7 +365,7 @@ void SendCanFrames(ICanController* canController, uint32_t messageCount, uint32_
     std::vector<uint8_t> frameData(messageSizeInBytes, '*');
     for (uint32_t i = 0; i < messageCount; i++)
     {
-        CanFrame canFrame{};        
+        CanFrame canFrame{};
         canFrame.dataField = SilKit::Util::ToSpan(frameData);
 
         canController->SendFrame(std::move(canFrame));
@@ -385,8 +373,7 @@ void SendCanFrames(ICanController* canController, uint32_t messageCount, uint32_
 }
 
 void ParticipantsThread(std::shared_ptr<SilKit::Config::IParticipantConfiguration> config,
-                        const BenchmarkConfig& benchmark, const std::string& participantName, uint32_t participantIndex,
-                        size_t& messageCounter)
+                        const BenchmarkConfig& benchmark, const std::string& participantName, uint32_t participantIndex)
 {
     auto participant = SilKit::CreateParticipant(config, participantName, benchmark.registryUri);
     auto* lifecycleService = participant->CreateLifecycleService({OperationMode::Coordinated});
@@ -400,37 +387,23 @@ void ParticipantsThread(std::shared_ptr<SilKit::Config::IParticipantConfiguratio
     {
     case ServiceType::PubSub:
     {
-        const std::string topicPub = "Topic" + std::to_string(participantIndex);
-        const std::string topicSub =
-            "Topic" + std::to_string(relateParticipant(participantIndex, benchmark.numberOfParticipants));
-        SilKit::Services::PubSub::PubSubSpec dataSpec{topicPub, {}};
-        SilKit::Services::PubSub::PubSubSpec matchingDataSpec{topicSub, {}};
+        SilKit::Services::PubSub::PubSubSpec dataSpec{"Topic", {}};
+        SilKit::Services::PubSub::PubSubSpec matchingDataSpec{"Topic", {}};
         publisher = participant->CreateDataPublisher("PubCtrl1", dataSpec, 0);
-        participant->CreateDataSubscriber("SubCtrl1", matchingDataSpec, [&messageCounter](auto*, auto&) {
-            // this is handled in I/O thread, so no data races on counter.
-            messageCounter++;
-        });
+        participant->CreateDataSubscriber("SubCtrl1", matchingDataSpec, [](auto*, auto&) {});
         break;
     }
     case ServiceType::Ethernet:
     {
         ethernetController = participant->CreateEthernetController("Eth1", "Eth1");
-
-        ethernetController->AddFrameHandler(
-            [&messageCounter](IEthernetController* /*controller*/, const EthernetFrameEvent& /*frameEvent*/) {
-            messageCounter++;
-        });
-
+        ethernetController->AddFrameHandler([](auto*, auto&) {});
         lifecycleService->SetCommunicationReadyHandler([ethernetController]() { ethernetController->Activate(); });
         break;
     }
     case ServiceType::Can:
     {
         canController = participant->CreateCanController("CAN1", "CAN1");
-
-        canController->AddFrameHandler(
-            [&messageCounter](ICanController* /*ctrl*/, const CanFrameEvent& /*frameEvent*/) { messageCounter++; });
-
+        canController->AddFrameHandler([](auto*, auto&) {});
         lifecycleService->SetCommunicationReadyHandler([canController]() {
             canController->SetBaudRate(10'000, 1'000'000, 2'000'000);
             canController->Start();
@@ -441,9 +414,10 @@ void ParticipantsThread(std::shared_ptr<SilKit::Config::IParticipantConfiguratio
 
     const auto isVerbose = participantIndex == 0;
     timeSyncService->SetSimulationStepHandler([=](std::chrono::nanoseconds now, const auto /*duration*/) {
-        if (now > benchmark.simulationDuration)
+        if (now == benchmark.simulationDuration)
         {
             lifecycleService->Stop("Simulation done");
+            return;
         }
 
         if (isVerbose)
@@ -566,27 +540,20 @@ int main(int argc, char** argv)
             SilKit::Vendor::Vector::CreateSilKitRegistry(config);
         benchmark.registryUri = registry->StartListening(benchmark.registryUri);
 
-        std::vector<size_t> messageCounts;
         std::vector<std::chrono::nanoseconds> measuredRealDurations;
 
         for (uint32_t simulationRun = 1; simulationRun <= benchmark.numberOfSimulationRuns; simulationRun++)
         {
-            std::vector<size_t> counters(benchmark.numberOfParticipants, 0);
-
             std::cout << "> Simulation " << simulationRun << ": ";
             auto startTimestamp = std::chrono::high_resolution_clock::now();
 
             std::vector<std::string> participantNames;
             std::vector<std::thread> threads;
-            size_t idx = 0;
             for (uint32_t participantIndex = 0; participantIndex < benchmark.numberOfParticipants; participantIndex++)
             {
                 std::string participantName = "Participant" + std::to_string(participantIndex);
                 participantNames.push_back(participantName);
-                auto& counter = counters.at(idx);
-                idx++;
-                threads.emplace_back(&ParticipantsThread, config, benchmark, participantName, participantIndex,
-                                     std::ref(counter));
+                threads.emplace_back(&ParticipantsThread, config, benchmark, participantName, participantIndex);
             }
 
             const auto systemControllerName = "SystemController";
@@ -609,8 +576,6 @@ int main(int argc, char** argv)
 
             auto endTimestamp = std::chrono::high_resolution_clock::now();
             measuredRealDurations.emplace_back(endTimestamp - startTimestamp);
-            auto totalCount = std::accumulate(counters.begin(), counters.end(), size_t{0});
-            messageCounts.emplace_back(totalCount);
             std::cout << "  " << measuredRealDurations.back() << std::endl;
         }
 
@@ -620,20 +585,25 @@ int main(int argc, char** argv)
 
         const auto averageDuration = mean_and_error(measuredRealDurationsSeconds);
 
-        const auto averageNumberMessages =
-            std::accumulate(messageCounts.begin(), messageCounts.end(), size_t{0}) / messageCounts.size();
+        const auto virtualDurationMilliseconds =
+            std::chrono::duration_cast<std::chrono::milliseconds>(benchmark.simulationDuration);
+        const auto numberSimulationSteps =
+            static_cast<size_t>(virtualDurationMilliseconds.count() / benchmark.simulationStepSize.count());
+        // fully connected network topology
+        const size_t numberMessages = numberSimulationSteps * benchmark.messageCount * benchmark.numberOfParticipants
+                                      * (benchmark.numberOfParticipants - 1);
 
         // Reoccuring factor from error propagation
         const auto sigmaDurOverDurSqr = averageDuration.second / averageDuration.first / averageDuration.first;
 
         // Byte throughput mean and error (Byte to Mebi and ns to s)
-        const auto throughputPrefac = averageNumberMessages * benchmark.messageSizeInBytes / 1024.0 / 1024.0;
+        const auto throughputPrefac = numberMessages * benchmark.messageSizeInBytes / 1024.0 / 1024.0;
         const auto averageThroughput =
             std::make_pair(throughputPrefac / averageDuration.first, throughputPrefac * sigmaDurOverDurSqr);
 
         // Message rate mean and error
         const auto averageMsgRate =
-            std::make_pair(averageNumberMessages / averageDuration.first, averageNumberMessages * sigmaDurOverDurSqr);
+            std::make_pair(numberMessages / averageDuration.first, numberMessages * sigmaDurOverDurSqr);
 
         // Speedup mean and error
         const auto averageSpeedup = std::make_pair(benchmark.simulationDuration.count() / averageDuration.first,
@@ -673,7 +643,7 @@ int main(int argc, char** argv)
                   << averageMsgRateWithUnit.str() << " +/- " << static_cast<int>(averageMsgRate.second) << " 1/s"
                   << std::endl
 
-                  << std::left << std::setw(39) << "- Total number of messages: " << averageNumberMessages << std::endl
+                  << std::left << std::setw(39) << "- Total number of messages: " << numberMessages << std::endl
 
                   << std::endl
                   << std::endl;
@@ -715,7 +685,7 @@ int main(int argc, char** argv)
                 csvFile << benchmark.numberOfSimulationRuns << ";" << benchmark.numberOfParticipants << ";"
                         << benchmark.messageSizeInBytes << ";" << benchmark.messageCount << ";"
                         << benchmark.simulationDuration.count() << ";" << benchmark.simulationStepSize.count() << ";"
-                        << averageNumberMessages << ";" << averageDuration.first << ";" << averageDuration.second << ";"
+                        << numberMessages << ";" << averageDuration.first << ";" << averageDuration.second << ";"
                         << averageThroughput.first << ";" << averageThroughput.second << ";" << averageSpeedup.first
                         << ";" << averageSpeedup.second << ";" << averageMsgRate.first << ";" << averageMsgRate.second
                         << std::endl;
