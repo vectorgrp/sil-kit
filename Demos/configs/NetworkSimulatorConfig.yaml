@@ -1,0 +1,27 @@
+SchemaVersion: 1
+Description: Small sample configuration for testing purposes, with Link names from the SILKIT Demos
+SimulationStepSizeNanoseconds: 1000000
+SimulatedNetworks:
+  - Name: CAN1
+    Type: CAN
+  - Name: LIN1
+    Type: LIN
+  - Name: Eth1
+    Type: Ethernet
+  - Name: FS-Port0
+    Type: Ethernet
+  - Name: FS-Port1
+    Type: Ethernet
+  - Name: PowerTrain1
+    Type: FlexRay
+Switches:
+  - Name: FrontSwitch
+    Ports:
+      - Name: Port0
+        Network: FS-Port0
+        VlanIds:
+          - 1
+      - Name: Port1
+        Network: FS-Port1
+        VlanIds:
+          - 1

@@ -1,0 +1,6 @@
+Description: Log to a file with Trace level
+Logging:
+  Sinks:
+    - Level: Trace
+      Type: File
+      LogName: TraceLog

@@ -58,7 +58,7 @@ if (participantName == "CanWriter")
 			SilKit::Core::Services::Can::CanFrame msg;
 			msg.timestamp = now;
 			msg.canId = 17;
-			canController->SendFrame(std::move(msg));
+			canController->SendFrame(msg);
 	}, 1ms);
 }
 

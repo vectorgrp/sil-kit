@@ -65,6 +65,11 @@
             "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug" }
         },
         {
+          "name": "x64-debug-docs",
+          "inherits": "x64-debug",
+          "cacheVariables": { "SILKIT_BUILD_DOCS": "ON" }
+        },
+        {
             "name": "x64-release",
             "displayName": "x64 Release",
             "description": "Target Windows (64-bit) with the Visual Studio development environment. (Release)",
