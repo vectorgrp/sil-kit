@@ -143,6 +143,16 @@ void SystemMonitor::ReceiveMsg(const IServiceEndpoint* /*from*/,
 
 void SystemMonitor::SetParticipantConnectedHandler(ParticipantConnectedHandler handler)
 {
+    {
+        std::lock_guard<decltype(_connectedParticipantsMx)> lock{_connectedParticipantsMx};
+
+        for (const auto& participantConnectionInformation : _connectedParticipants)
+        {
+            ParticipantConnectionInformation participantConnectionInfoCopy{
+                participantConnectionInformation.second.participantName};
+            handler(participantConnectionInfoCopy);
+        }
+    }
     _participantConnectedHandler = std::move(handler);
 }
 
@@ -160,16 +170,18 @@ auto SystemMonitor::IsParticipantConnected(const std::string& participantName) c
 
 void SystemMonitor::OnParticipantConnected(const ParticipantConnectionInformation& participantConnectionInformation)
 {
+    bool hasInserted = false;
     {
         std::unique_lock<decltype(_connectedParticipantsMx)> lock{_connectedParticipantsMx};
 
         // Add the participant name to the map of connected participant names/connections
-        _connectedParticipants.emplace(participantConnectionInformation.participantName,
-                                       participantConnectionInformation);
+        const auto pair = _connectedParticipants.emplace(participantConnectionInformation.participantName,
+                                                         participantConnectionInformation);
+        hasInserted = pair.second;
     }
 
     // Call the handler if set
-    if (_participantConnectedHandler)
+    if (_participantConnectedHandler && hasInserted)
     {
         _participantConnectedHandler(participantConnectionInformation);
     }

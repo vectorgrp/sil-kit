@@ -80,6 +80,12 @@ struct NullConnection
         return 0;
     }
 
+    std::vector<std::string> GetConnectedParticipantsNames()
+    {
+        std::vector<std::string> tmp;
+        return tmp;
+    }
+
     size_t GetNumberOfRemoteReceivers(const IServiceEndpoint* /*service*/, const std::string& /*msgTypeName*/)
     {
         return 0;

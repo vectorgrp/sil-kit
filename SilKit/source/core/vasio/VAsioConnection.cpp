@@ -1678,6 +1678,24 @@ void VAsioConnection::AddAsyncSubscriptionsCompletionHandler(std::function<void(
     }
 }
 
+std::vector<std::string> VAsioConnection::GetConnectedParticipantsNames()
+{
+    std::vector<std::string> participants;
+
+    {
+        std::unique_lock<decltype(_mutex)> lock{_mutex};
+        for (const auto& item : _participantNameToPeer)
+        {
+            for(const auto& peer: item.second)
+            {
+                participants.push_back(peer.first);
+            }
+        }
+    }
+
+    return participants;
+}
+
 auto VAsioConnection::GetNumberOfRemoteReceivers(const IServiceEndpoint* service,
                                                  const std::string& msgTypeName) -> size_t
 {
