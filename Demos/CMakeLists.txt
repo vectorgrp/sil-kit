@@ -101,7 +101,7 @@ set(SILKIT_DEMO_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 # Demo creation macros
 #######################################################################################################################
 
-macro(make_silkit_demo executableName demoSourceFile)
+macro(make_silkit_demo executableName demoSourceFile addToPackage)
 
     add_executable(${executableName}
         ${demoSourceFile}
@@ -135,11 +135,18 @@ macro(make_silkit_demo executableName demoSourceFile)
 
     add_dependencies(Demos ${executableName})
 
+    if(${addToPackage})
+        install(TARGETS ${executableName}
+            RUNTIME DESTINATION ${INSTALL_BIN_DIR}
+            COMPONENT demos
+        )
+    endif()
+
 endmacro()
 
 macro(make_silkit_communication_demo executableName demoSourceFile)
 
-    make_silkit_demo(${executableName} ${demoSourceFile})
+    make_silkit_demo(${executableName} ${demoSourceFile} ON)
     target_include_directories(${executableName} PRIVATE ${SILKIT_DEMO_DIR}/communication/include)
 
 endmacro()

@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: MIT
 
-make_silkit_demo(SilKitDemoNetSim NetSimDemo.cpp)
+make_silkit_demo(SilKitDemoNetSim NetSimDemo.cpp OFF)
 
 target_sources(SilKitDemoNetSim
     PRIVATE src/MySimulatedNetwork.cpp
