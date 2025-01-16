@@ -216,6 +216,8 @@ public:
         return _peers.size();
     };
 
+    std::vector<std::string> GetConnectedParticipantsNames();
+
     auto GetNumberOfRemoteReceivers(const IServiceEndpoint* service, const std::string& msgTypeName) -> size_t;
     auto GetParticipantNamesOfRemoteReceivers(const IServiceEndpoint* service,
                                               const std::string& msgTypeName) -> std::vector<std::string>;

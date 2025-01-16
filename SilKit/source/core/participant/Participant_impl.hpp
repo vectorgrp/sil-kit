@@ -899,7 +899,15 @@ auto Participant<SilKitConnectionT>::GetSystemMonitor() -> Services::Orchestrati
             controller->OnParticipantDisconnected(
                 Services::Orchestration::ParticipantConnectionInformation{peer->GetInfo().participantName});
         });
+
+        // Get Participant which joined the Simulation earlier
+        std::vector<std::string> knownNames = _connection.GetConnectedParticipantsNames();
+        for (const auto& name : knownNames)
+        {
+            controller->OnParticipantConnected(Services::Orchestration::ParticipantConnectionInformation{name});
+        }
     }
+
     return controller;
 }
 

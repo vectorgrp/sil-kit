@@ -149,6 +149,12 @@ struct MockConnection
         return 0;
     }
 
+    std::vector<std::string> GetConnectedParticipantsNames()
+    {
+        std::vector<std::string> tmp;
+        return tmp;
+    }
+
     size_t GetNumberOfRemoteReceivers(const SilKit::Core::IServiceEndpoint* /*service*/,
                                       const std::string& /*msgTypeName*/)
     {
