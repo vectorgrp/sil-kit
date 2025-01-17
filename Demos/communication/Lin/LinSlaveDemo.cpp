@@ -35,7 +35,7 @@ private:
         _linController = GetParticipant()->CreateLinController("LinController1", _networkName);
 
         _linController->AddFrameStatusHandler(
-            [this](ILinController* linController, const LinFrameStatusEvent& frameStatusEvent) {
+            [this](ILinController* /*linController*/, const LinFrameStatusEvent& frameStatusEvent) {
             
             // On a TX acknowledge for ID 34, update the TxBuffer for the next transmission
             if (frameStatusEvent.frame.id == 34)
