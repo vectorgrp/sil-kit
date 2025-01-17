@@ -37,7 +37,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <mutex>
 #include <fstream>
 
-
 SilKit_ReturnCode SilKitCALL SilKit_Participant_Create(SilKit_Participant** outParticipant,
                                                        SilKit_ParticipantConfiguration* participantConfiguration,
                                                        const char* participantName, const char* registryUri)
@@ -103,16 +102,36 @@ try
 }
 CAPI_CATCH_EXCEPTIONS
 
-SilKit_ReturnCode SilKitCALL SilKit_Participant_GetParameter(const char** outParameterValue, SilKit_Parameter parameter,
+SilKit_ReturnCode SilKitCALL SilKit_Participant_GetParameter(char* outParameterValue, size_t* inOutParameterValueSize,
+                                                             SilKit_Parameter parameter,
                                                              SilKit_Participant* participant)
 try
 {
-    ASSERT_VALID_OUT_PARAMETER(outParameterValue);
+    ASSERT_VALID_OUT_PARAMETER(inOutParameterValueSize);
     ASSERT_VALID_POINTER_PARAMETER(participant);
 
     auto cppParticipant = reinterpret_cast<SilKit::IParticipant*>(participant);
     auto cppParameter = static_cast<SilKit::Parameter>(parameter);
-    *outParameterValue = cppParticipant->GetParameter(cppParameter).c_str();
+    auto parameterValue = cppParticipant->GetParameter(cppParameter);
+
+    if (outParameterValue != nullptr)
+    {
+        // outParameterValue == nullptr indicates a size-check, otherwise copy
+        size_t size_to_copy;
+        if (*inOutParameterValueSize > parameterValue.size())
+        {
+            // Don't copy more that we actually have
+            size_to_copy = parameterValue.size();
+        }
+        else
+        {
+            // Less is ok, user should check if inOutParameterValueSize has changed and try again
+            size_to_copy = *inOutParameterValueSize;
+        }
+        std::strncpy(outParameterValue, parameterValue.c_str(), size_to_copy);
+    }
+    // Set the size in any case
+    *inOutParameterValueSize = parameterValue.size();
     return SilKit_ReturnCode_SUCCESS;
 }
 CAPI_CATCH_EXCEPTIONS

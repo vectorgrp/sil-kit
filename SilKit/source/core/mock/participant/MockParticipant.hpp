@@ -346,9 +346,9 @@ public:
         return &logger;
     }
 
-    auto GetParameter(Parameter parameter) -> const std::string& override
+    auto GetParameter(Parameter parameter) -> std::string override
     {
-        return nullptr;
+        return "";
     }
 
     void RegisterSimulator(Core::ISimulator*, std::string,

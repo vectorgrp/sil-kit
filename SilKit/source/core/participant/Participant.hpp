@@ -167,7 +167,7 @@ public:
 
     auto GetLogger() -> Services::Logging::ILogger* override;
     
-    auto GetParameter(Parameter parameter) -> const std::string& override;
+    auto GetParameter(Parameter parameter) -> std::string override;
 
     auto CreateLifecycleService(Services::Orchestration::LifecycleConfiguration startConfiguration)
         -> Services::Orchestration::ILifecycleService* override;

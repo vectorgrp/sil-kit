@@ -770,11 +770,13 @@ extern "C"
         return globalCapi->SilKit_Participant_GetLogger(outLogger, participant);
     }
 
-    SilKit_ReturnCode SilKitCALL SilKit_Participant_GetParameter(const char** outParameterValue,
+    SilKit_ReturnCode SilKitCALL SilKit_Participant_GetParameter(char* outParameterValue,
+                                                                 size_t* inOutParameterValueSize,
                                                                  SilKit_Parameter parameter,
                                                                  SilKit_Participant* participant)
     {
-        return globalCapi->SilKit_Participant_GetParameter(outParameterValue, parameter, participant);
+        return globalCapi->SilKit_Participant_GetParameter(outParameterValue, inOutParameterValueSize, parameter,
+                                                           participant);
     }
 
     // ParticipantConfiguration

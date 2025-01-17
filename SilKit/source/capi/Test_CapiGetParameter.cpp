@@ -14,7 +14,7 @@ using SilKit::Core::Tests::DummyParticipant;
 class MockParticipant : public SilKit::Core::Tests::DummyParticipant
 {
 public:
-    MOCK_METHOD(const std::string&, GetParameter, (SilKit::Parameter /*parameter*/), (override));
+    MOCK_METHOD(std::string, GetParameter, (SilKit::Parameter /*parameter*/), (override));
 };
 
 class Test_CapiGetParameter : public testing::Test
@@ -28,12 +28,19 @@ TEST_F(Test_CapiGetParameter, getparameter_bad_params)
 {
     SilKit_ReturnCode returnCode;
     auto cMockParticipant = (SilKit_Participant*)&mockParticipant;
-    const char* parameterValue{nullptr};
+    char* parameterValue{nullptr};
+    size_t parameterSize;
 
-    returnCode = SilKit_Participant_GetParameter(nullptr, SilKit_Parameter_ParticipantName, cMockParticipant);
+    returnCode =
+        SilKit_Participant_GetParameter(nullptr, &parameterSize, SilKit_Parameter_ParticipantName, cMockParticipant);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
+
+    returnCode =
+        SilKit_Participant_GetParameter(parameterValue, nullptr, SilKit_Parameter_ParticipantName, cMockParticipant);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
-    returnCode = SilKit_Participant_GetParameter(&parameterValue, SilKit_Parameter_ParticipantName, nullptr);
+    returnCode =
+        SilKit_Participant_GetParameter(parameterValue, &parameterSize, SilKit_Parameter_ParticipantName, nullptr);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 }
 
@@ -41,10 +48,12 @@ TEST_F(Test_CapiGetParameter, getparameter_function_mapping)
 {
     SilKit_ReturnCode returnCode;
     auto cMockParticipant = (SilKit_Participant*)&mockParticipant;
-    const char* parameterValue{nullptr};
+    char* parameterValue{nullptr};
+    size_t parameterSize;
 
     EXPECT_CALL(mockParticipant, GetParameter(SilKit::Parameter::ParticipantName)).Times(testing::Exactly(1));
-    returnCode = SilKit_Participant_GetParameter(&parameterValue, SilKit_Parameter_ParticipantName, cMockParticipant);
+    returnCode = SilKit_Participant_GetParameter(parameterValue, & parameterSize, SilKit_Parameter_ParticipantName,
+                                                 cMockParticipant);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 }
 
