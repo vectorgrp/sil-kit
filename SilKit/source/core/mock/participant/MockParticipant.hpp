@@ -346,7 +346,7 @@ public:
         return &logger;
     }
 
-    auto GetParameter(Parameter parameter) -> std::string override
+    auto GetParameter(Parameter /*parameter*/) -> std::string override
     {
         return "";
     }

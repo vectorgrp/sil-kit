@@ -114,24 +114,24 @@ try
     auto cppParameter = static_cast<SilKit::Parameter>(parameter);
     auto parameterValue = cppParticipant->GetParameter(cppParameter);
 
+    // outParameterValue == nullptr indicates a size-check only, otherwise copy
     if (outParameterValue != nullptr)
     {
-        // outParameterValue == nullptr indicates a size-check, otherwise copy
-        size_t size_to_copy;
-        if (*inOutParameterValueSize > parameterValue.size())
+        size_t sizeToCopy;
+        if (*inOutParameterValueSize >= parameterValue.size() + 1)
         {
-            // Don't copy more that we actually have
-            size_to_copy = parameterValue.size();
+            // Don't copy more than we actually have
+            sizeToCopy = parameterValue.size();
         }
         else
         {
-            // Less is ok, user should check if inOutParameterValueSize has changed and try again
-            size_to_copy = *inOutParameterValueSize;
+            // Don't copy more than the given size
+            sizeToCopy = *inOutParameterValueSize - 1;
         }
-        std::strncpy(outParameterValue, parameterValue.c_str(), size_to_copy);
+        parameterValue.copy(outParameterValue, sizeToCopy);
+        outParameterValue[sizeToCopy] = '\0';
     }
-    // Set the size in any case
-    *inOutParameterValueSize = parameterValue.size();
+    *inOutParameterValueSize = parameterValue.size() + 1;
     return SilKit_ReturnCode_SUCCESS;
 }
 CAPI_CATCH_EXCEPTIONS

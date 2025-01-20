@@ -486,7 +486,6 @@ void TimeSyncService::ExecuteSimStep(std::chrono::nanoseconds timePoint, std::ch
 
     _waitTimeMonitor.StopMeasurement();
     const auto waitingDuration = _waitTimeMonitor.CurrentDuration();
-    const auto waitingDurationMs = std::chrono::duration_cast<DoubleMSecs>(waitingDuration);
     const auto waitingDurationS = std::chrono::duration_cast<DoubleSecs>(waitingDuration);
 
     {

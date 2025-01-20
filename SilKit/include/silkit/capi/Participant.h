@@ -84,7 +84,9 @@ typedef SilKit_ReturnCode(SilKitFPTR* SilKit_Participant_GetLogger_t)(SilKit_Log
 
 /*! \brief Retrieve a parameter from a participant.
  *
- * \param outParameterValue The string value of the parameter (out parameter).
+ * \param outParameterValue A buffer to copy the null-terminated parameter value to. 
+                            Passing a nullptr is valid and indicates a size-check via inOutParameterValueSize to allocate the buffer.
+ * \param inOutParameterValueSize The size of the parameter including null-termination. 
  * \param parameter The parameter to get.
  * \param participant The participant to get the parameter from.
  *

@@ -14,11 +14,13 @@ namespace {
 struct ITest_GetParameter : public testing::Test
 {
 
-    void checkGetParameterValues(SilKit::IParticipant* participant, std::unordered_map<SilKit::Parameter, std::string> expected)
+    void checkGetParameterValues(SilKit::IParticipant* participant, std::unordered_map<SilKit::Parameter, std::string> expectedParameters)
     {
-        for (auto it : expected)
+        for (auto it : expectedParameters)
         {
-            EXPECT_EQ(it.second, participant->GetParameter(it.first));
+            std::string parameterValue = participant->GetParameter(it.first);
+            std::string expectedValue = it.second;
+            EXPECT_EQ(expectedValue, parameterValue);
         }
     }
 

@@ -1059,6 +1059,8 @@ auto Participant<SilKitConnectionT>::GetParameter(Parameter parameter) -> std::s
     case Parameter::RegistryUri:
         return GetRegistryUri();
         break;
+    case Parameter::Undefined:
+        break;
     }
 
     throw SilKit::SilKitError("Unknown parameter.");
