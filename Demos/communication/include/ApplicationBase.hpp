@@ -35,6 +35,7 @@ struct Arguments
     bool runAutonomous{false};
     bool runAsync{false};
     std::chrono::nanoseconds duration = 1ms;
+    std::chrono::nanoseconds sleep = 1000ms;
     bool asFastAsPossible{false};
 };
 std::shared_ptr<SilKit::Config::IParticipantConfiguration> _participantConfiguration{nullptr};
@@ -89,7 +90,8 @@ public:
         Async,
         Autonomous,
         Duration,
-        AsFastAsPossible
+        AsFastAsPossible,
+        Sleep
     };
 
 private:
@@ -98,14 +100,17 @@ private:
 
     // Names of the default command line arguments.
     // Note that the 'short name' (e.g. -n) and description are defined at runtime.
-    const std::unordered_map<DefaultArg, std::string> defaultArgName = {{DefaultArg::Name, "name"},
-                                                                        {DefaultArg::Uri, "registry-uri"},
-                                                                        {DefaultArg::Log, "log"},
-                                                                        {DefaultArg::Config, "config"},
-                                                                        {DefaultArg::Async, "async"},
-                                                                        {DefaultArg::Autonomous, "autonomous"},
-                                                                        {DefaultArg::Duration, "sim-step-duration"},
-                                                                        {DefaultArg::AsFastAsPossible, "fast"}};
+    const std::unordered_map<DefaultArg, std::string> defaultArgName = {
+        {DefaultArg::Name, "name"},
+        {DefaultArg::Uri, "registry-uri"},
+        {DefaultArg::Log, "log"},
+        {DefaultArg::Config, "config"},
+        {DefaultArg::Async, "async"},
+        {DefaultArg::Autonomous, "autonomous"},
+        {DefaultArg::Duration, "sim-step-duration"},
+        {DefaultArg::AsFastAsPossible, "fast"},
+        {DefaultArg::Sleep, "sleep"},
+    };
     Arguments _arguments;
 
     // SIL Kit API
@@ -113,6 +118,7 @@ private:
     ILifecycleService* _lifecycleService{nullptr};
     ITimeSyncService* _timeSyncService{nullptr};
     ISystemMonitor* _systemMonitor{nullptr};
+    bool _sleepingEnabled = false;
 
     // For sync: wait for sil-kit-system-controller start/abort or manual user abort
     enum struct SystemControllerResult
@@ -217,7 +223,7 @@ private:
 
         if (!excludedCommandLineArgs.count(DefaultArg::Duration))
         {
-            auto defaultValue = std::to_string(defaultArgs.duration.count() / 1000000);
+            auto defaultValue = std::to_string(defaultArgs.duration.count() / 1000);
             _commandLineParser->Add<CommandlineParser::Option>(
                 defaultArgName.at(DefaultArg::Duration), "d", defaultValue,
                 "-d, --" + defaultArgName.at(DefaultArg::Duration) + " <us>",
@@ -236,6 +242,18 @@ private:
                     "Run the simulation as fast as possible.",
                     "By default, the execution is slowed down to two work cycles per second.",
                     "Cannot be used together with '--" + defaultArgName.at(DefaultArg::Config) + "'."});
+        }
+
+        if (!excludedCommandLineArgs.count(DefaultArg::Sleep))
+        {
+            auto defaultValue = std::to_string(defaultArgs.sleep.count() / 1000000);
+            _commandLineParser->Add<CommandlineParser::Option>(
+                defaultArgName.at(DefaultArg::Sleep), "s", defaultValue,
+                "-s, --" + defaultArgName.at(DefaultArg::Sleep) + " <ms>",
+                std::vector<std::string>{
+                    "The sleep duration per work cycle in milliseconds.", "Default is no sleeping.",
+                    "Using this options overrides the default execution slow down.",
+                    "Cannot be used together with '--" + defaultArgName.at(DefaultArg::AsFastAsPossible) + "'."});
         }
     }
 
@@ -320,6 +338,21 @@ private:
             }
         }
 
+        bool hasSleepOption = false;
+        if (!excludedCommandLineArgs.count(DefaultArg::Sleep))
+        {
+            hasSleepOption =
+                _commandLineParser->Get<CommandlineParser::Option>(defaultArgName.at(DefaultArg::Sleep)).HasValue();
+            if (hasSleepOption)
+            {
+                int sleepDurationMs = std::stoi(
+                    _commandLineParser->Get<CommandlineParser::Option>(defaultArgName.at(DefaultArg::Sleep))
+                        .Value());
+                _arguments.sleep = std::chrono::milliseconds(sleepDurationMs);
+                _sleepingEnabled = true;
+            }
+        }
+
         if (hasAsyncFlag && hasDurationOption)
         {
             std::cerr << "Error: Options '--" << defaultArgName.at(DefaultArg::Async) << "' and '--"
@@ -334,6 +367,14 @@ private:
             _arguments.asFastAsPossible = hasAsFastAsPossibleFlag =
                 _commandLineParser->Get<CommandlineParser::Flag>(defaultArgName.at(DefaultArg::AsFastAsPossible))
                     .Value();
+        }
+
+        if (hasAsFastAsPossibleFlag && hasSleepOption)
+        {
+            std::cerr << "Error: Options '--" << defaultArgName.at(DefaultArg::AsFastAsPossible) << "' and '--"
+                      << defaultArgName.at(DefaultArg::Sleep) << "' cannot be used simultaneously" << std::endl;
+            _commandLineParser->PrintUsageInfo(std::cerr);
+            exit(-1);
         }
 
         bool hasLogOption = false;
@@ -408,7 +449,7 @@ private:
             ss << "{";
             ss << R"("Logging":{"Sinks":[{"Type":"Stdout","Level":")" << configLogLevel << R"("}]})";
 
-            if (!_arguments.runAsync && !_arguments.asFastAsPossible)
+            if (!_arguments.runAsync && !_arguments.asFastAsPossible && !_sleepingEnabled)
             {
                 // For async: sleep 0.5s per cycle
                 // For sync: set the animation factor to 0.5/duration(s) here, resulting in two simulation step per second
@@ -457,11 +498,16 @@ private:
         {
             DoWorkAsync();
 
-            auto wait = _arguments.asFastAsPossible ? 0ms : 500ms;
+            auto wait = _arguments.asFastAsPossible || _sleepingEnabled ? 0ms : 500ms;
             auto futureStatus = _stopWorkFuture.wait_for(wait);
             if (futureStatus == std::future_status::ready)
             {
                 break;
+            }
+
+            if (_sleepingEnabled)
+            {
+                std::this_thread::sleep_for(_arguments.sleep);
             }
         }
     }
@@ -545,6 +591,10 @@ private:
             _participant->GetLogger()->Info(ss.str());
 
             DoWorkSync(now);
+            if (_sleepingEnabled)
+            {
+                std::this_thread::sleep_for(_arguments.sleep);
+            }
         }, _arguments.duration);
     }
 
