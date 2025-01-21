@@ -51,7 +51,13 @@ Added
   - SimpleCan
   - Orchestration demos  
 
-- Sample participant configurations  
+- Sample participant configurations
+
+Fixed
+~~~~~
+
+- Block multiple attempts to connect with an already present participant name, not just the first.
+
 
 [4.0.54] - 2024-11-11
 ---------------------

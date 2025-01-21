@@ -290,11 +290,21 @@ void VAsioRegistry::OnPeerShutdown(IVAsioPeer* peer)
     const auto& simulationName{peer->GetSimulationName()};
     const auto& participantName{peer->GetInfo().participantName};
 
-    if (FindConnectedParticipant(participantName, simulationName) == nullptr)
+    const auto connectedParticipant = FindConnectedParticipant(participantName, simulationName);
+
+    if (connectedParticipant == nullptr)
     {
         Log::Debug(_logger.get(), "Peer '{}' has shut down, which had no participant information", participantName);
         return;
     }
+
+    if (connectedParticipant->peer != peer)
+    {
+        Log::Debug(_logger.get(), "Duplicate peer '{}' has shut down, which had no participant information", participantName);
+        return;
+    }
+
+    Log::Debug(_logger.get(), "Peer '{}' has shut down", participantName);
 
     if (_registryEventListener != nullptr)
     {
