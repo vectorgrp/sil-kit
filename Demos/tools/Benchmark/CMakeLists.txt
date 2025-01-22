@@ -19,11 +19,11 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-make_silkit_demo(SilKitDemoBenchmark BenchmarkDemo.cpp)
+make_silkit_demo(SilKitDemoBenchmark BenchmarkDemo.cpp ON)
 
 target_sources(SilKitDemoBenchmark
     PRIVATE DemoBenchmarkDomainSocketsOff.silkit.yaml
     PRIVATE DemoBenchmarkTCPNagleOff.silkit.yaml
 )
 
-make_silkit_demo(SilKitDemoLatency LatencyDemo.cpp)
+make_silkit_demo(SilKitDemoLatency LatencyDemo.cpp ON)
