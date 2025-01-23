@@ -263,6 +263,20 @@ auto SystemStateTracker::GetParticipantStatus(const std::string& participantName
     return &it->second;
 }
 
+bool SystemStateTracker::GetParticipantStatus(const std::string& participantName, ParticipantStatus& status) const
+{
+    std::lock_guard<decltype(_mutex)> lock{_mutex};
+
+    const auto it{_participantStatusCache.find(participantName)};
+    if (it == _participantStatusCache.end())
+    {
+        return false;
+    }
+
+    status = it->second;
+    return true;
+}
+
 auto SystemStateTracker::GetSystemState() const -> SystemState
 {
     std::lock_guard<decltype(_mutex)> lock{_mutex};

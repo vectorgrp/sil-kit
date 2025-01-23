@@ -55,6 +55,7 @@ public:
 
     auto IsRequiredParticipant(const std::string& participantName) const -> bool;
     auto GetParticipantStatus(const std::string& participantName) const -> const ParticipantStatus*;
+    bool GetParticipantStatus(const std::string& participantName, ParticipantStatus& status) const;
     auto GetSystemState() const -> SystemState;
 
 private:
