@@ -1,0 +1,6 @@
+Description: Log to Stdout with Level Info from participants that use a Sink of Type Remote
+Logging:
+  LogFromRemotes: True
+  Sinks:
+    - Level: Info
+      Type: Stdout
