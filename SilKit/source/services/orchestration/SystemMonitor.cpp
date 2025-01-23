@@ -84,14 +84,15 @@ auto SystemMonitor::AddParticipantStatusHandler(ParticipantStatusHandler handler
         for (const auto& participantConnectionInformation : _connectedParticipants)
         {
             const auto& participantName{participantConnectionInformation.second.participantName};
-            const auto* const participantStatus{_systemStateTracker.GetParticipantStatus(participantName)};
+            struct ParticipantStatus participantStatus;
+            const bool present = _systemStateTracker.GetParticipantStatus(participantName, participantStatus);
 
-            if (participantStatus == nullptr || participantStatus->state == ParticipantState::Invalid)
+            if (!present || participantStatus.state == ParticipantState::Invalid)
             {
                 continue;
             }
 
-            handler(*participantStatus);
+            handler(participantStatus);
         }
     }
 
