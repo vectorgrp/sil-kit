@@ -42,6 +42,10 @@ The following arguments are available for all demos described in this chapter:
     -f, --fast                   | Run the simulation as fast as possible.
                                    By default, the execution is slowed down to two work cycles per second.
                                    Cannot be used together with '--config'.
+    -s, --sleep <ms>             | The sleep duration per work cycle in milliseconds.
+                                   Default is no sleeping.
+                                   Using this options overrides the default execution slow down.
+                                   Cannot be used together with '--fast'.
 
 The default behavior of these options is:
 
