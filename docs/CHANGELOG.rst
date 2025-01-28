@@ -57,6 +57,7 @@ Fixed
 ~~~~~
 
 - Block multiple attempts to connect with an already present participant name, not just the first.
+- When demos are installed into the ``bin`` directory under the installation prefix, their RPATH will be set such that they are able to find the ``libSilKit[d].so``. This is the same RPATH value as the utility executables.
 
 
 [4.0.54] - 2024-11-11
