@@ -388,6 +388,8 @@ int main(int argc, char** argv)
         std::cout << "Press Ctrl-C to end the simulation..." << std::endl;
         controller.RegisterSignalHandler();
         controller.WaitForFinalState();
+
+        SilKit::Util::ShutdownSignalHandler();
     }
     catch (const std::exception& error)
     {
