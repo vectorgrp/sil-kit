@@ -110,6 +110,7 @@ public:
     auto GetCurrentWallClockSyncPoint() const -> std::chrono::nanoseconds;
 
     bool IsBlocking() const;
+    void StartWallClockCouplingThread(std::chrono::nanoseconds startTimeOffset);
 
 private:
     // ----------------------------------------
@@ -122,7 +123,6 @@ private:
     inline auto GetTimeSyncPolicy() const -> ITimeSyncPolicy*;
 
     void StopWallClockCouplingThread();
-    void StartWallClockCouplingThread();
     void HybridWait(std::chrono::nanoseconds targetWaitDuration);
 
     void LogicalSimStepCompleted(std::chrono::duration<double, std::milli> logicalSimStepExecutionTimeMs);

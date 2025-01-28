@@ -256,12 +256,21 @@ private:
     {
         if (_controller.State() == ParticipantState::Paused || _controller.State() == ParticipantState::Running)
         {
-            if (_configuration->HandleHopOn())
+            if (!_hopOnEvaluated)
             {
-                if (_controller.AbortHopOnForCoordinatedParticipants())
+                _hopOnEvaluated = true;
+                if (_configuration->IsHopOn())
                 {
-                    // Prevent that the sim task is triggered
-                    return;
+                    if (_controller.AbortHopOnForCoordinatedParticipants())
+                    {
+                        // Prevent that the sim task is triggered
+                        return;
+                    }
+                }
+                if (_controller.IsCoupledToWallClock())
+                {
+                    // Start the wall clock coupling thread, possibly with an offset in case of an hop-on.
+                    _controller.StartWallClockCouplingThread(_configuration->NextSimStep().timePoint);
                 }
             }
 
@@ -278,6 +287,7 @@ private:
     std::chrono::nanoseconds _lastSentNextSimTask{-1ns};
     Core::IParticipantInternal* _participant;
     TimeConfiguration* _configuration;
+    bool _hopOnEvaluated = false;
 };
 
 TimeSyncService::TimeSyncService(Core::IParticipantInternal* participant, ITimeProvider* timeProvider,
@@ -639,11 +649,6 @@ void TimeSyncService::StartTime()
             }
         }
 
-        if (_isCoupledToWallClock)
-        {
-            StartWallClockCouplingThread();
-        }
-
         // Start the distributed time algorithm by sending our NextSimStep
         GetTimeSyncPolicy()->RequestNextStep();
     }
@@ -741,11 +746,11 @@ void TimeSyncService::HybridWait(std::chrono::nanoseconds targetWaitDuration)
     }
 }
 
-
-void TimeSyncService::StartWallClockCouplingThread()
+void TimeSyncService::StartWallClockCouplingThread(std::chrono::nanoseconds startTimeOffset)
 {
     _wallClockCouplingThreadRunning = true;
-    _wallClockCouplingThread = std::thread{[this]() {
+    _currentWallClockSyncPointNs = startTimeOffset.count();
+    _wallClockCouplingThread = std::thread{[this, startTimeOffset]() {
 
         SilKit::Util::SetThreadName("SK-WallClkSync");
 

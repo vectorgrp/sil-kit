@@ -173,35 +173,36 @@ bool TimeConfiguration::IsBlocking() const
     return _blocking;
 }
 
-bool TimeConfiguration::HandleHopOn()
+bool TimeConfiguration::HoppedOn()
 {
-    // HopOn can happen only once
-    if (!_hoppedOn)
-    {
-        Lock lock{_mx};
+    return _hoppedOn;
+}
 
-        if (_currentTask.timePoint == -1ns) // On initial time
+bool TimeConfiguration::IsHopOn()
+{
+    Lock lock{_mx};
+
+    if (_currentTask.timePoint == -1ns) // On initial time
+    {
+        std::chrono::nanoseconds minimalOtherTime = std::chrono::nanoseconds::max();
+        for (const auto& otherTask : _otherNextTasks)
         {
-            std::chrono::nanoseconds minimalOtherTime = std::chrono::nanoseconds::max();
-            for (const auto& otherTask : _otherNextTasks)
+            // Any other participant has already advanced further that its duration -> HopOn
+            if (otherTask.second.timePoint > otherTask.second.duration)
             {
-                // Any other participant has already advanced further that its duration -> HopOn
-                if (otherTask.second.timePoint > otherTask.second.duration)
+                _hoppedOn = true;
+                if (otherTask.second.timePoint < minimalOtherTime)
                 {
-                    _hoppedOn = true;
-                    if (otherTask.second.timePoint < minimalOtherTime)
-                    {
-                        minimalOtherTime = otherTask.second.timePoint;
-                    }
+                    minimalOtherTime = otherTask.second.timePoint;
                 }
             }
-            if (_hoppedOn)
-            {
-                _myNextTask.timePoint = minimalOtherTime;
-                Logging::Debug(_logger, "Simulation time already advanced. Starting at {}ns",
-                               _myNextTask.timePoint.count());
-                return true;
-            }
+        }
+        if (_hoppedOn)
+        {
+            _myNextTask.timePoint = minimalOtherTime;
+            Logging::Debug(_logger, "Simulation time already advanced. Starting at {}ns",
+                           _myNextTask.timePoint.count());
+            return true;
         }
     }
     return false;

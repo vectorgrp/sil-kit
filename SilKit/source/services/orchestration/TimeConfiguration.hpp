@@ -55,7 +55,8 @@ public: //Methods
     bool ShouldResendNextSimStep();
 
     // Returns true (only once) in the step the actual hop-on happened
-    bool HandleHopOn();
+    bool IsHopOn();
+    bool HoppedOn();
 
 private: //Members
     mutable std::mutex _mx;
