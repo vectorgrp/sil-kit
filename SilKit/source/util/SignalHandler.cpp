@@ -72,7 +72,10 @@ public:
     {
         SetConsoleCtrlHandler(systemHandler, false);
         Notify(INVALID_SIGNAL_NUMBER);
-        _worker.join();
+        if (_worker.joinable())
+        {
+            _worker.join();
+        }
         CloseHandle(_writeEnd);
         CloseHandle(_readEnd);
     }
@@ -173,7 +176,7 @@ public:
 
     ~SignalMonitor()
     {
-        // Restore default actio0ns
+        // Restore default actions
         setSignalAction(SIGINT, nullptr);
         setSignalAction(SIGTERM, nullptr);
         Notify(INVALID_SIGNAL_NUMBER);
@@ -264,6 +267,12 @@ void RegisterSignalHandler(SignalHandler handler)
 {
     gSignalMonitor.reset(new SignalMonitor(std::move(handler)));
 }
+
+void ShutdownSignalHandler()
+{
+    gSignalMonitor.reset();
+}
+
 
 } // namespace Util
 } // namespace SilKit

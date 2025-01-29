@@ -29,6 +29,7 @@ namespace Util {
 
 using SignalHandler = std::function<void(int)>;
 void RegisterSignalHandler(SignalHandler handler);
+void ShutdownSignalHandler();
 
 } // namespace Util
 } // namespace SilKit

@@ -767,6 +767,8 @@ public:
             // async: Join worker thread
             WaitUntilDone();
 
+            ShutdownSignalHandler();
+
             return 0;
         }
         catch (const std::exception& error)

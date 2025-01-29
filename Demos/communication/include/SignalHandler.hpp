@@ -255,3 +255,8 @@ void RegisterSignalHandler(SignalHandler handler)
 {
     gSignalMonitor.reset(new SignalMonitor(std::move(handler)));
 }
+
+void ShutdownSignalHandler()
+{
+    gSignalMonitor.reset();
+}
