@@ -250,13 +250,13 @@ auto LifecycleService::StartLifecycle() -> std::future<ParticipantState>
     std::promise<ParticipantState> participantStatePromise;
     auto participantStateFuture = participantStatePromise.get_future();
 
-    std::thread waiter{[this, promise = std::move(participantStatePromise)]() mutable {
+    std::thread waiter{[cLifecycleService = _lifecycleService, promise = std::move(participantStatePromise)]() mutable {
         SilKit_ParticipantState participantState;
 
         try
         {
             const auto returnCode =
-                SilKit_LifecycleService_WaitForLifecycleToComplete(_lifecycleService, &participantState);
+                SilKit_LifecycleService_WaitForLifecycleToComplete(cLifecycleService, &participantState);
             ThrowOnError(returnCode);
         }
         catch (...)
