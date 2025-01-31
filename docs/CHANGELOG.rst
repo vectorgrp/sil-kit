@@ -53,6 +53,8 @@ Fixed
 
 - CMake: When demos are installed into the ``bin`` directory under the installation prefix, their RPATH will be set such that they are able to find the ``libSilKit[d].so``. This is the same RPATH value as the utility executables.
 
+- System Monitor: Show all participants, not just the ones that joined during the monitors execution.
+
 
 [4.0.54] - 2024-11-11
 ---------------------
