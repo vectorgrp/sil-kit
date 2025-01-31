@@ -6,9 +6,9 @@ All notable changes to the Vector SIL Kit project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
-[4.0.55] - Unreleased
----------------------
 
+[4.0.55] - 2025-01-31
+---------------------
 
 - **Important** ``SilKit_LinDataLengthUnknown`` in the C header ``Lin.h`` used to be a ``const`` global, which could cause
   linker issues if the header file is used in multiple translation units in the same binary.
@@ -17,7 +17,6 @@ The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <
 
   The symbol was not present in the dynamic symbol table of the ``SilKit.dll`` / ``.so``, so this change
   does not break the ABI of the shared libraries.
-
 
 - Aligned C API error return codes ``SilKit_ReturnCode_<ERRORTYPE>`` and SIL Kit specific exceptions.
   All exceptions are now forwarded through the hourglass and thrown in the C++ API.
@@ -36,12 +35,6 @@ The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <
     - No command line arguments needed for basic execution (with time synchronization and coordinated start)
     - Useful command line arguments are provided for all demos (e.g. rename the participant or network, logging, execution modes)
     - The old ``--async`` mode of the demos now is accessible by ``--async --autonomous`` (or short form ``-aA``)
- 
-- Aligned C API error return codes ``SilKit_ReturnCode_<ERRORTYPE>`` and SIL Kit specific exceptions.
-  All exceptions are now forwarded through the hourglass and thrown in the C++ API.
-  For users of the C API, a more detailed error handling is possible with the extended error return codes.
-
-  Before, all exceptions ended up as ``SilKitError`` on the user side.
 
 Added
 ~~~~~
@@ -51,13 +44,16 @@ Added
   - SimpleCan
   - Orchestration demos  
 
-- Sample participant configurations
+- Demos: Sample participant configurations
 
 Fixed
 ~~~~~
 
-- Block multiple attempts to connect with an already present participant name, not just the first.
-- When demos are installed into the ``bin`` directory under the installation prefix, their RPATH will be set such that they are able to find the ``libSilKit[d].so``. This is the same RPATH value as the utility executables.
+- Registry: Block all attempts to connect with an already present participant name, not just the first.
+
+- CMake: When demos are installed into the ``bin`` directory under the installation prefix, their RPATH will be set such that they are able to find the ``libSilKit[d].so``. This is the same RPATH value as the utility executables.
+
+- System Monitor: Show all participants, not just the ones that joined during the monitors execution.
 
 
 [4.0.54] - 2024-11-11
