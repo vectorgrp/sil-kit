@@ -134,12 +134,12 @@ private:
 
         _schedule = std::make_unique<LinDemoCommon::Schedule>(
             std::initializer_list<std::pair<std::chrono::nanoseconds, std::function<void(std::chrono::nanoseconds)>>>{
-            {5ms, [this](std::chrono::nanoseconds /*now*/) { SendFrameHeader(16); }},
-            {5ms, [this](std::chrono::nanoseconds /*now*/) { SendFrameHeader(17); }},
-            {5ms, [this](std::chrono::nanoseconds /*now*/) { SendFrameHeader(18); }},
-            {5ms, [this](std::chrono::nanoseconds /*now*/) { SendFrameHeader(19); }},
-            {5ms, [this](std::chrono::nanoseconds /*now*/) { SendFrameHeader(34); }},
-            {5ms, [this](std::chrono::nanoseconds /*now*/) { GoToSleep(); }}
+            {10ms, [this](std::chrono::nanoseconds /*now*/) { SendFrameHeader(16); }},
+            {20ms, [this](std::chrono::nanoseconds /*now*/) { SendFrameHeader(17); }},
+            {10ms, [this](std::chrono::nanoseconds /*now*/) { SendFrameHeader(18); }},
+            {10ms, [this](std::chrono::nanoseconds /*now*/) { SendFrameHeader(19); }},
+            {10ms, [this](std::chrono::nanoseconds /*now*/) { SendFrameHeader(34); }},
+            {10ms, [this](std::chrono::nanoseconds /*now*/) { GoToSleep(); }}
         }, false);
 
     }

@@ -70,12 +70,12 @@ private:
 
         _schedule = std::make_unique<LinDemoCommon::Schedule>(
             std::initializer_list<std::pair<std::chrono::nanoseconds, std::function<void(std::chrono::nanoseconds)>>>{
-                {5ms, [this](std::chrono::nanoseconds /*now*/) { SendFrame_16(); }},
-                {5ms, [this](std::chrono::nanoseconds /*now*/) { SendFrame_17(); }},
-                {5ms, [this](std::chrono::nanoseconds /*now*/) { SendFrame_18(); }},
-                {5ms, [this](std::chrono::nanoseconds /*now*/) { SendFrame_19(); }},
-                {5ms, [this](std::chrono::nanoseconds /*now*/) { SendFrame_34(); }},
-                {5ms, [this](std::chrono::nanoseconds /*now*/) { GoToSleep(); }}});
+                {10ms, [this](std::chrono::nanoseconds /*now*/) { SendFrame_16(); }},
+                {20ms, [this](std::chrono::nanoseconds /*now*/) { SendFrame_17(); }},
+                {10ms, [this](std::chrono::nanoseconds /*now*/) { SendFrame_18(); }},
+                {10ms, [this](std::chrono::nanoseconds /*now*/) { SendFrame_19(); }},
+                {10ms, [this](std::chrono::nanoseconds /*now*/) { SendFrame_34(); }},
+                {10ms, [this](std::chrono::nanoseconds /*now*/) { GoToSleep(); }}});
     }
 
     void InitControllers() override
