@@ -2,22 +2,10 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include <memory>
-#include <thread>
-#include <string>
-#include <chrono>
-#include <iostream>
-#include <atomic>
-
-#include <unordered_map> //remove this after rebase on cmake-cleanup-branch
-
 #include "ITestFixture.hpp"
-#include "ITestThreadSafeLogger.hpp"
 
 #include "silkit/services/pubsub/all.hpp"
 #include "silkit/services/rpc/all.hpp"
-
-#include "gtest/gtest.h"
 
 namespace {
 using namespace SilKit::Tests;
@@ -25,6 +13,7 @@ using namespace SilKit::Config;
 using namespace SilKit::Services;
 using namespace SilKit::Services::PubSub;
 using namespace SilKit::Services::Rpc;
+using namespace std::chrono_literals;
 
 struct ITest_LabelMatching: ITest_SimTestHarness
 {
