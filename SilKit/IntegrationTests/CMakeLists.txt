@@ -75,6 +75,10 @@ add_silkit_test_to_executable(SilKitInternalIntegrationTests
     SOURCES ITest_Internals_DataPubSub.cpp
 )
 
+add_silkit_test_to_executable(SilKitIntegrationTests
+    SOURCES ITest_LabelsMatching.cpp
+)
+
 add_silkit_test_to_executable(SilKitInternalIntegrationTests
     SOURCES ITest_Internals_TargetedMessaging.cpp
 )
