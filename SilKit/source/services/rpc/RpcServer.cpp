@@ -58,9 +58,17 @@ void RpcServer::RegisterServiceDiscovery()
                 return tmp;
             };
 
+            auto clientUUID = getVal(Core::Discovery::supplKeyRpcClientUUID);
+
+            // Early abort creation if Client is already connected
+            if (discoveryType == SilKit::Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated
+                && _internalRpcServers.count(clientUUID) > 0)
+            {
+                return;
+            }
+
             auto functionName = getVal(Core::Discovery::supplKeyRpcClientFunctionName);
             auto clientMediaType = getVal(Core::Discovery::supplKeyRpcClientMediaType);
-            auto clientUUID = getVal(Core::Discovery::supplKeyRpcClientUUID);
             std::string labelsStr = getVal(Core::Discovery::supplKeyRpcClientLabels);
             auto clientLabels = SilKit::Config::Deserialize<std::vector<SilKit::Services::MatchingLabel>>(labelsStr);
 
@@ -96,9 +104,9 @@ void RpcServer::SubmitResult(IRpcCallHandle* callHandle, Util::Span<const uint8_
 
     {
         std::unique_lock<decltype(_internalRpcServersMx)> lock{_internalRpcServersMx};
-        for (auto* internalRpcServer : _internalRpcServers)
+        for (auto internalRpcServer : _internalRpcServers)
         {
-            submitResultCounter += (internalRpcServer->SubmitResult(callHandle, resultData) ? 1 : 0);
+            submitResultCounter += (internalRpcServer.second->SubmitResult(callHandle, resultData) ? 1 : 0);
         }
     }
 
@@ -118,7 +126,7 @@ void RpcServer::AddInternalRpcServer(const std::string& clientUUID, std::string 
         _dataSpec.FunctionName(), clientUUID, joinedMediaType, clientLabels, _handler, this));
 
     std::unique_lock<decltype(_internalRpcServersMx)> lock{_internalRpcServersMx};
-    _internalRpcServers.push_back(internalRpcServer);
+    _internalRpcServers.emplace(clientUUID, internalRpcServer);
 }
 
 void RpcServer::SetCallHandler(RpcCallHandler handler)
@@ -126,9 +134,9 @@ void RpcServer::SetCallHandler(RpcCallHandler handler)
     _handler = handler;
 
     std::unique_lock<decltype(_internalRpcServersMx)> lock{_internalRpcServersMx};
-    for (auto* internalRpcServer : _internalRpcServers)
+    for (auto internalRpcServer : _internalRpcServers)
     {
-        internalRpcServer->SetRpcHandler(handler);
+        internalRpcServer.second->SetRpcHandler(handler);
     }
 }
 

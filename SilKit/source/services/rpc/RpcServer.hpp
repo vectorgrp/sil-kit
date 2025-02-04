@@ -23,6 +23,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include <vector>
 #include <future>
+#include <unordered_map>
 
 #include "silkit/services/rpc/IRpcServer.hpp"
 #include "silkit/services/rpc/IRpcCallHandle.hpp"
@@ -73,7 +74,7 @@ private:
     Core::IParticipantInternal* _participant{nullptr};
 
     std::mutex _internalRpcServersMx;
-    std::vector<RpcServerInternal*> _internalRpcServers;
+    std::unordered_map<std::string, RpcServerInternal*> _internalRpcServers;
 };
 
 // ================================================================================
