@@ -57,6 +57,8 @@ void PrintUsage(const std::string& executableName)
         << "Usage:" << std::endl
         << executableName << " [numberOfSimulationRuns]"
         << " [simulationDuration]"
+        << " [simulationStepSize]"
+        << " [service]"
         << " [numberOfParticipants]"
         << " [messageCount]"
         << " [messageSizeInBytes]"
@@ -234,7 +236,7 @@ bool Parse(int argc, char** argv, BenchmarkConfig& config)
         }
     }
     // Handle positional arguments, if any:
-    if (args.size() > 7)
+    if (args.size() > 8)
     {
         std::cout << "Error: Too many arguments!" << std::endl;
         PrintUsage(argv[0]);
@@ -245,17 +247,23 @@ bool Parse(int argc, char** argv, BenchmarkConfig& config)
     {
         switch (args.size())
         {
+        case 8:
+            config.registryUri = args.at(7);
+            // [[fallthrough]]
+        case 7:
+            config.messageSizeInBytes = asNum(args.at(6));
+            // [[fallthrough]]
         case 6:
-            config.registryUri = args.at(5);
+            config.messageCount = asNum(args.at(5));
             // [[fallthrough]]
         case 5:
-            config.messageSizeInBytes = asNum(args.at(4));
+            config.numberOfParticipants = asNum(args.at(4));
             // [[fallthrough]]
         case 4:
-            config.messageCount = asNum(args.at(3));
+            config.service = asServiceType(args.at(3));
             // [[fallthrough]]
         case 3:
-            config.numberOfParticipants = asNum(args.at(2));
+            config.simulationStepSize = std::chrono::milliseconds(asNum(args.at(2)));
             // [[fallthrough]]
         case 2:
             config.simulationDuration = std::chrono::seconds(asNum(args.at(1)));

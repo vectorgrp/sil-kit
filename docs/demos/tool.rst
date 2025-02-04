@@ -27,6 +27,10 @@ Positional Parameters
       Sets the number of simulation runs to perform.
     * ``[simulationDuration]``
       Sets the virtual simulation duration <S>.
+    * ``[simulationStepSize]``
+      Sets the virtual simulation step size <T>.
+    * ``[service]``
+      Sets the communication service type (pubsub, can or ethernet).
     * ``[numberOfParticipants]``
       Sets the number of simulation participants <N>.
     * ``[messageCount]``
@@ -48,8 +52,12 @@ Optional Parameters
       Sets the number of simulation participants <N>. Default: 2
     * ``--number-simulation-runs``
       Sets the number of simulation runs to perform. Default: 4
+    * ``--simulation-step-size``
+      Sets the simulation step size <T> (virtual time). Default: 1ms
     * ``--simulation-duration``
       Sets the simulation duration <S> (virtual time). Default: 1s
+    * ``--service``
+      Sets the communication service type (pubsub, can or ethernet). Default: pubsub
     * ``--configuration``
       Path and filename of the participant configuration YAML file. Default: empty
     * ``--write-csv``
@@ -64,13 +72,13 @@ System Examples
 
       .. parsed-literal:: 
 
-         |DemoDir|/SilKitDemoBenchmark 4 1 2 1 10 --configuration ./SilKit-Demos/Benchmark/DemoBenchmarkDomainSocketsOff.silkit.yaml 
+         |DemoDir|/SilKitDemoBenchmark 4 1 1 ethernet 2 1 10 --configuration ./SilKit-Demos/Benchmark/DemoBenchmarkDomainSocketsOff.silkit.yaml 
 Notes
     * This benchmark demo produces timings of a configurable simulation setup.
-      <N> participants exchange <M> messages of <B> bytes per simulation step with a fixed simulation step size of 1ms and run for <S> seconds (virtual time).
+      <N> participants exchange <M> messages of <B> bytes per simulation step with a simulation step size of <T> ms and run for <S> seconds (virtual time).
     * This simulation run is repeated <K> times and averages over all runs are calculated. 
       Results for average runtime, speedup (virtual time/runtime), throughput (data size/runtime), message rate (count/runtime) including the standard deviation are printed.
-    * The demo uses publish/subscribe controllers with the same topic for the message exchange, so each participant broadcasts the messages to all other participants. 
+    * The demo uses publish/subscribe, can or ethernet controllers. In the publish/subscribe case, the same topic for the message exchange is used, so each participant broadcasts the messages to all other participants. 
       The configuration file ``DemoBenchmarkDomainSocketsOff.silkit.yaml`` can be used to disable domain socket usage for more realistic timings of TCP/IP traffic. With ``DemoBenchmarkTCPNagleOff.silkit.yaml``, Nagle's algorithm and domain sockets are switched off.
     * The demo can be wrapped in helper scripts to run parameter scans, e.g., for performance analysis regarding different message sizes. 
       See ``.\SilKit-Demos\Benchmark\msg-size-scaling\Readme.md`` and ``.\SilKit-Demos\Benchmark\performance-diff\Readme.md`` for further information.
