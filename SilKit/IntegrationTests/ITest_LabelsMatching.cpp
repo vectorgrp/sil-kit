@@ -124,14 +124,14 @@ TEST_F(ITest_LabelMatching,  pubsub_multiple_controllers_same_topic_different_la
 
 TEST_F(ITest_LabelMatching, rpc_multiple_controllers_same_topic_different_labels)
 {
+    // This test ensures that we do not regress on SILKIT-1691
+
     SetupFromParticipantList({"Client1", "Server1"});
 
     auto functionName = "F";
     auto mediaType = "M";
 
     size_t numReceivedCallResults1{0};
-    size_t numReceivedCallResults2{0};
-    size_t numReceivedCallResults3{0};
 
     size_t numReceivedCalls1{0};
     size_t numReceivedCalls2{0};
@@ -171,7 +171,6 @@ TEST_F(ITest_LabelMatching, rpc_multiple_controllers_same_topic_different_labels
         });
     }
     
-    
     {
         /////////////////////////////////////////////////////////////////////////
         // Client1
@@ -187,23 +186,11 @@ TEST_F(ITest_LabelMatching, rpc_multiple_controllers_same_topic_different_labels
         auto&& client1 = participant->CreateRpcClient(
             "ClientCtrl1", spec1, [&numReceivedCallResults1](auto*, const auto&) { numReceivedCallResults1++; });
 
-        RpcSpec spec2{functionName, mediaType};
-        spec2.AddLabel("K", "L2", MatchingLabel::Kind::Optional);
-        auto&& client2 = participant->CreateRpcClient(
-            "ClientCtrl2", spec2, [&numReceivedCallResults2](auto*, const auto&) { numReceivedCallResults2++; });
-
-        RpcSpec spec3{functionName, mediaType};
-        spec3.AddLabel("K", "L3", MatchingLabel::Kind::Optional);
-        auto&& client3 = participant->CreateRpcClient(
-            "ClientCtrl3", spec3, [&numReceivedCallResults3](auto*, const auto&) { numReceivedCallResults3++; });
-
         timeSyncService->SetSimulationStepHandler(
-            [client1, client2, client3, lifecycleService](auto now, auto) {
+            [client1, lifecycleService](auto now, auto) {
             if (now == 0ms)
             {
                 client1->Call(std::vector<uint8_t>{1});
-                client2->Call(std::vector<uint8_t>{2});
-                client3->Call(std::vector<uint8_t>{3});
             }
             else if (now == 10ms)
             {
@@ -215,12 +202,10 @@ TEST_F(ITest_LabelMatching, rpc_multiple_controllers_same_topic_different_labels
     _simTestHarness->Run(1s);
 
     EXPECT_EQ(numReceivedCallResults1, 1);
-    EXPECT_EQ(numReceivedCallResults2, 1);
-    EXPECT_EQ(numReceivedCallResults3, 1);
 
     EXPECT_EQ(numReceivedCalls1, 1);
-    EXPECT_EQ(numReceivedCalls2, 1);
-    EXPECT_EQ(numReceivedCalls3, 1);
+    EXPECT_EQ(numReceivedCalls2, 0);
+    EXPECT_EQ(numReceivedCalls3, 0);
 }
 
 } //end namespace

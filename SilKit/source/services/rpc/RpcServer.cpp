@@ -61,8 +61,7 @@ void RpcServer::RegisterServiceDiscovery()
             auto clientUUID = getVal(Core::Discovery::supplKeyRpcClientUUID);
 
             // Early abort creation if Client is already connected
-            if (discoveryType == SilKit::Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated
-                && _internalRpcServers.count(clientUUID) > 0)
+            if (_internalRpcServers.count(clientUUID) > 0)
             {
                 return;
             }
