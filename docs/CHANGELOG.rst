@@ -10,6 +10,11 @@ The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <
 [4.0.55] - 2025-01-31
 ---------------------
 
+This is a Quality Assured Release.
+
+Changed
+~~~~~~~
+
 - **Important** ``SilKit_LinDataLengthUnknown`` in the C header ``Lin.h`` used to be a ``const`` global, which could cause
   linker issues if the header file is used in multiple translation units in the same binary.
 
