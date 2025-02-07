@@ -346,6 +346,11 @@ public:
         return &logger;
     }
 
+    auto GetParameter(Parameter /*parameter*/) -> std::string override
+    {
+        return "";
+    }
+
     void RegisterSimulator(Core::ISimulator*, std::string,
                            Experimental::NetworkSimulation::SimulatedNetworkType) override
     {
