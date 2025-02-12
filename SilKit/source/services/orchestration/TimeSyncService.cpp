@@ -243,6 +243,9 @@ private:
         if (!_isExecutingSimStep.compare_exchange_strong(test, newval))
         {
             //_isExecutingSimStep was not modified, it was already true
+
+            _controller.InvokeExternalCouplingHandlers();
+
             return;
         }
 
@@ -797,6 +800,21 @@ void TimeSyncService::StartWallClockCouplingThread(std::chrono::nanoseconds star
             }
         }
     }};
+}
+
+auto TimeSyncService::AddExternalCouplingHandler(std::function<void()> handler) -> HandlerId
+{
+    return _externalCouplingHandlers.Add(std::move(handler));
+}
+
+void TimeSyncService::RemoveExternalCouplingHandler(HandlerId handlerId)
+{
+    _externalCouplingHandlers.Remove(handlerId);
+}
+
+void TimeSyncService::InvokeExternalCouplingHandlers()
+{
+    _externalCouplingHandlers.InvokeAll();
 }
 
 void TimeSyncService::StopWallClockCouplingThread()
