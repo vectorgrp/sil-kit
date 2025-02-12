@@ -28,6 +28,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "silkit/services/all.hpp"
 #include "silkit/services/orchestration/all.hpp"
+#include "silkit/experimental/services/orchestration/TimeSyncServiceExtensions.hpp"
 
 #include "SimTestHarness.hpp"
 
@@ -245,4 +246,137 @@ TEST(ITest_AsyncSimTask, test_async_simtask_multiple_completion_calls)
     // validate that they are called approximately equally often
     ASSERT_TRUE(std::abs(countAsync * periodFactor - countSync) < periodFactor);
 }
+
+struct ParticipantData
+{
+    std::mutex mx;
+    std::condition_variable cv;
+    bool needsComplete{false};
+    std::atomic<bool> running{true};
+    std::vector<std::chrono::steady_clock::time_point> stepStarted;
+    std::vector<std::chrono::steady_clock::time_point> stepCompleted;
+
+    void AssertValid() const
+    {
+        ASSERT_FALSE(running);
+        ASSERT_FALSE(needsComplete);
+
+        for (size_t i = 0; i < std::min(stepStarted.size(), stepCompleted.size()); ++i)
+        {
+            ASSERT_LT(stepStarted[i], stepCompleted[i]);
+            if (i + 1 < stepStarted.size())
+            {
+                ASSERT_LT(stepCompleted[i], stepStarted[i + 1]);
+            }
+        }
+    }
+
+    void AssertTimestampsAlwaysOutsideStep(const std::vector<std::chrono::steady_clock::time_point>& timestamps) const
+    {
+        for (size_t i = 0; i < std::min(stepStarted.size(), stepCompleted.size()); ++i)
+        {
+            for (const auto& timestamp : timestamps)
+            {
+                ASSERT_FALSE((stepStarted[i] < timestamp) && (timestamp < stepCompleted[i]));
+            }
+        }
+    }
+};
+
+auto MakeNormalSimulationStepHandlerAsync(ParticipantData* d)
+    -> SilKit::Services::Orchestration::ITimeSyncService::SimulationStepHandler
+{
+    return SilKit::Services::Orchestration::ITimeSyncService::SimulationStepHandler{[d](auto, auto) {
+        d->stepStarted.emplace_back(std::chrono::steady_clock::now());
+
+        {
+            std::lock_guard<std::mutex> lock(d->mx);
+            d->needsComplete = true;
+        }
+
+        d->cv.notify_one();
+    }};
+}
+
+auto MakeCompletionThread(SimParticipant* p, ParticipantData* d) -> std::thread
+{
+    return std::thread{[p, d] {
+        while (d->running)
+        {
+            std::unique_lock<std::mutex> lock(d->mx);
+
+            d->cv.wait_for(lock, 10ms, [d] { return d->needsComplete; });
+
+            if (d->needsComplete)
+            {
+                d->needsComplete = false;
+                d->stepCompleted.emplace_back(std::chrono::steady_clock::now());
+                p->GetOrCreateTimeSyncService()->CompleteSimulationStep();
+            }
+        }
+    }};
+}
+
+TEST(ITest_AsyncSimTask, test_async_simtask_other_simulation_steps_completed_handler)
+{
+    SimTestHarness testHarness({"A", "B", "C"}, "silkit://localhost:0");
+
+    const auto a = testHarness.GetParticipant("A");
+    const auto b = testHarness.GetParticipant("B");
+    const auto c = testHarness.GetParticipant("C");
+
+    ParticipantData ad, bd, cd;
+
+    std::vector<std::chrono::steady_clock::time_point> stepLastOpen;
+
+    a->GetOrCreateLifecycleService()->SetStopHandler([&ad] { ad.running = false; });
+    b->GetOrCreateLifecycleService()->SetStopHandler([&bd] { bd.running = false; });
+    c->GetOrCreateLifecycleService()->SetStopHandler([&cd] { cd.running = false; });
+
+    const auto aLifecycleService = a->GetOrCreateLifecycleService();
+
+    a->GetOrCreateTimeSyncService()->SetSimulationStepHandlerAsync([aLifecycleService, &ad](auto now, auto) {
+        ad.stepStarted.emplace_back(std::chrono::steady_clock::now());
+
+        if (now > 90ms)
+        {
+            aLifecycleService->Stop("STOP");
+        }
+    }, 1ms);
+
+    SilKit::Experimental::Services::Orchestration::AddOtherSimulationStepsCompletedHandler(
+        a->GetOrCreateTimeSyncService(), [&ad, &stepLastOpen] {
+        stepLastOpen.emplace_back(std::chrono::steady_clock::now());
+
+        {
+            std::unique_lock<std::mutex> lock{ad.mx};
+            ad.needsComplete = true;
+        }
+
+        ad.cv.notify_one();
+    });
+
+    b->GetOrCreateTimeSyncService()->SetSimulationStepHandlerAsync(MakeNormalSimulationStepHandlerAsync(&bd), 3ms);
+    c->GetOrCreateTimeSyncService()->SetSimulationStepHandlerAsync(MakeNormalSimulationStepHandlerAsync(&cd), 10ms);
+
+    auto aCompletionThread = MakeCompletionThread(a, &ad);
+    auto bCompletionThread = MakeCompletionThread(b, &bd);
+    auto cCompletionThread = MakeCompletionThread(c, &cd);
+
+    const bool stopped = testHarness.Run(10s);
+    ASSERT_TRUE(stopped);
+
+    aCompletionThread.join();
+    bCompletionThread.join();
+    cCompletionThread.join();
+
+    ad.AssertValid();
+
+    bd.AssertValid();
+    bd.AssertTimestampsAlwaysOutsideStep(stepLastOpen);
+
+    cd.AssertValid();
+    cd.AssertTimestampsAlwaysOutsideStep(stepLastOpen);
+}
+
 } // anonymous namespace

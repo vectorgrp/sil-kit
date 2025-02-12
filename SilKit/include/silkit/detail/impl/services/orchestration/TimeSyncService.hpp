@@ -25,6 +25,9 @@
 
 #include "silkit/participant/exception.hpp"
 #include "silkit/services/orchestration/ITimeSyncService.hpp"
+#include "silkit/experimental/services/orchestration/TimeSyncDatatypesExtensions.hpp"
+
+#include <unordered_map>
 
 
 namespace SilKit {
@@ -49,11 +52,29 @@ public:
 
     inline auto Now() const -> std::chrono::nanoseconds override;
 
+public:
+    inline auto ExperimentalAddOtherSimulationStepsCompletedHandler(
+        SilKit::Experimental::Services::Orchestration::OtherSimulationStepsCompletedHandler) -> SilKit::Util::HandlerId;
+
+    inline void ExperimentalRemoveOtherSimulationStepsCompletedHandler(SilKit::Util::HandlerId handlerId);
+
+private:
+    template <typename HandlerFunction>
+    struct HandlerData
+    {
+        HandlerFunction handler{};
+    };
+
+    template <typename HandlerFunction>
+    using HandlerDataMap = std::unordered_map<SilKit::Util::HandlerId, std::unique_ptr<HandlerData<HandlerFunction>>>;
+
 private:
     SilKit_TimeSyncService* _timeSyncService{nullptr};
 
     std::unique_ptr<SimulationStepHandler> _simulationStepHandler;
     std::unique_ptr<SimulationStepHandler> _simulationStepHandlerAsync;
+    HandlerDataMap<SilKit::Experimental::Services::Orchestration::OtherSimulationStepsCompletedHandler>
+        _otherSimulationStepsCompletedHandlers;
 };
 
 } // namespace Orchestration
@@ -134,6 +155,43 @@ auto TimeSyncService::Now() const -> std::chrono::nanoseconds
     ThrowOnError(returnCode);
 
     return std::chrono::nanoseconds{nanosecondsTime};
+}
+
+inline auto TimeSyncService::ExperimentalAddOtherSimulationStepsCompletedHandler(std::function<void()> handler)
+    -> SilKit::Util::HandlerId
+{
+    const auto cHandler = [](void* context, SilKit_TimeSyncService* cTimeSyncService) {
+        SILKIT_UNUSED_ARG(cTimeSyncService);
+
+        const auto data = static_cast<
+            HandlerData<SilKit::Experimental::Services::Orchestration::OtherSimulationStepsCompletedHandler>*>(context);
+        data->handler();
+    };
+
+    SilKit_HandlerId handlerId;
+
+    auto handlerData = std::make_unique<
+        HandlerData<SilKit::Experimental::Services::Orchestration::OtherSimulationStepsCompletedHandler>>();
+    handlerData->handler = std::move(handler);
+
+    const auto returnCode = SilKit_Experimental_TimeSyncService_AddOtherSimulationStepsCompletedHandler(
+        _timeSyncService, handlerData.get(), cHandler, &handlerId);
+    ThrowOnError(returnCode);
+
+    _otherSimulationStepsCompletedHandlers.emplace(static_cast<SilKit::Util::HandlerId>(handlerId),
+                                                   std::move(handlerData));
+
+    return static_cast<SilKit::Services::HandlerId>(handlerId);
+}
+
+inline void TimeSyncService::ExperimentalRemoveOtherSimulationStepsCompletedHandler(
+    const SilKit::Util::HandlerId cppHandlerId)
+{
+    const auto cHandlerId = static_cast<SilKit_HandlerId>(cppHandlerId);
+
+    const auto returnCode =
+        SilKit_Experimental_TimeSyncService_RemoveOtherSimulationStepsCompletedHandler(_timeSyncService, cHandlerId);
+    ThrowOnError(returnCode);
 }
 
 } // namespace Orchestration
