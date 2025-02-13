@@ -151,31 +151,26 @@ def assess_kpis(ref_kpi_dir: str, kpi_dir: str):
     throughput_large_msg = read_kpi(os.path.join(kpi_dir, throughput_large_msg_file), "throughput(MiB/s)")
     throughput_small_msg = read_kpi(os.path.join(kpi_dir, throughput_small_msg_file), "throughput(MiB/s)")
 
+    def report(topic: str, passed: bool, extra: str):
+        print(f"{topic + ': ':<30}{'PASSED' if passed else 'FAILED'}{extra}")
+
     # assess and report
-    test_str = ""
 
     print("\n" + "----- Test Report (start) -----" + "\n")
 
-    if latency < latency_ref:
-        test_str = "PASSED"
-    else:
-        test_str = "FAILED"
-    print("Latency:                     " + test_str + " with " + str(latency) + " us    (reference value: " + str(
-        latency_ref) + " us).")
+    report("Latency", latency < latency_ref, f" with {latency} us (reference value: {latency_ref} us)")
 
-    if throughput_large_msg > throughput_large_msg_ref:
-        test_str = "PASSED"
-    else:
-        test_str = "FAILED"
-    print("Throughput (large messages): " + test_str + " with " + str(
-        throughput_large_msg) + " MiB/s (reference value: " + str(throughput_large_msg_ref) + " MiB/s).")
+    report(
+        "Throughput (large messages)",
+        throughput_large_msg > throughput_large_msg_ref,
+        f" with {throughput_large_msg} MiB/s (reference value: {throughput_large_msg_ref} MiB/s)",
+    )
 
-    if throughput_small_msg > throughput_small_msg_ref:
-        test_str = "PASSED"
-    else:
-        test_str = "FAILED"
-    print("Throughput (small messages): " + test_str + " with " + str(
-        throughput_small_msg) + " MiB/s (reference value: " + str(throughput_small_msg_ref) + " MiB/s).")
+    report(
+        "Throughput (small messages)",
+        throughput_small_msg > throughput_small_msg_ref,
+        f" with {throughput_small_msg} MiB/s (reference value: {throughput_small_msg_ref} MiB/s)",
+    )
 
     print("\n" + "----- Test Report (end) -------")
 
