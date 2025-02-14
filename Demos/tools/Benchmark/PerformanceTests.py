@@ -159,7 +159,7 @@ def configure(repository: 'ConfigRepository'):
         return
 
     if os.path.isdir(build_dir):
-        print(f"Skipping cloning because the directory {build_dir!r} already exists")
+        print(f"Skipping configure because the directory {build_dir!r} already exists")
         return
 
     run(['cmake', f"-S{source_dir}", f"-B{build_dir}", "-DCMAKE_BUILD_TYPE=Release", "-DSILKIT_BUILD_TESTS=OFF"])
