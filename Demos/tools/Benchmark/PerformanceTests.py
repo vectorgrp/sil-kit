@@ -172,10 +172,6 @@ def build(repository: 'ConfigRepository'):
         print("Skipping build as requested")
         return
 
-    if os.path.isdir(build_dir):
-        print(f"Skipping cloning because the directory {build_dir!r} already exists")
-        return
-
     run(['cmake', "--build", build_dir, "--config", "Release", "--parallel", "--target", "sil-kit-registry"])
     run(['cmake', "--build", build_dir, "--config", "Release", "--parallel", "--target", "SilKitDemoBenchmark"])
     run(['cmake', "--build", build_dir, "--config", "Release", "--parallel", "--target", "SilKitDemoLatency"])
