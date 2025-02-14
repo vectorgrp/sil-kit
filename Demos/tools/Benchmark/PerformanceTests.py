@@ -2,120 +2,247 @@
 #
 # SPDX-License-Identifier: MIT
 
+import dataclasses
+import tomllib
 import os
-import sys
 import subprocess
 import signal
 import csv
 import argparse
+import typing
+import platform
 
 from git import Repo  # PyPI: GitPython
+
+SCRIPT_PATH = os.path.abspath(__file__)
+WINDOWS = platform.system() == "Windows"
+
+
+# data structures
+
+@dataclasses.dataclass
+class Config:
+    tests: list['Test']
+    repositories: 'ConfigRepositories'
+    verbose: bool | None = None
+    work_dir: str | None = None
+
+    def __post_init__(self):
+        self.repositories = ConfigRepositories(**typing.cast(dict, self.repositories))
+        self.tests = [Test(**d) for d in typing.cast(list[dict], self.tests)]
+
+
+@dataclasses.dataclass
+class ConfigRepositories:
+    reference: 'ConfigRepository'
+    under_test: 'ConfigRepository'
+
+    def __post_init__(self):
+        self.reference = ConfigRepository(**typing.cast(dict, self.reference))
+        self.under_test = ConfigRepository(**typing.cast(dict, self.under_test))
+
+
+@dataclasses.dataclass
+class ConfigRepository:
+    version: str
+    skip_clone: bool = False
+    skip_configure: bool = False
+    skip_build: bool = False
+    source_dir: str | None = None
+    build_dir: str | None = None
+    bin_dir: str | None = None
+    results_dir: str | None = None
+
+
+@dataclasses.dataclass
+class Test:
+    name: str
+    topic: str
+    unit: str
+    kpis: 'TestKpis'
+    demos: ['Process']
+    csv_output: str
+    enabled: bool = True
+
+    def __post_init__(self):
+        self.kpis = TestKpis(**typing.cast(dict, self.kpis))
+        self.demos = [Process(**d) for d in typing.cast(list[dict], self.demos)]
+
+
+@dataclasses.dataclass
+class TestKpis:
+    mean: 'TestKpisEntry'
+    err: 'TestKpisEntry'
+
+    def __post_init__(self):
+        self.mean = TestKpisEntry(**typing.cast(dict, self.mean))
+        self.err = TestKpisEntry(**typing.cast(dict, self.err))
+
+
+@dataclasses.dataclass
+class TestKpisEntry:
+    label: str
+
+
+@dataclasses.dataclass
+class Process:
+    executable: str
+    args: list[str]
+
+
+@dataclasses.dataclass
+class TestRun:
+    csv_output: str
+
+    @staticmethod
+    def new(test: Test, repository: ConfigRepository) -> 'TestRun':
+        return TestRun(csv_output=os.path.join(repository.results_dir, test.csv_output))
 
 
 ##### function definitions #####
 
-def get_command(command, args, bin_dir):
-    return os.path.join(bin_dir, command) + " " + " ".join(args)
+def get_command(command, bin_dir):
+    if WINDOWS:
+        command = f"{command}.exe"
+    return os.path.join(bin_dir, command)
 
 
-def clone_and_build(silkit_dir: str, ref_version: str, build_dir: str, use_ref_commit=False):
+def spawn(args: list[str], bin_dir: str, verbose: bool) -> subprocess.Popen:
+    args = [get_command(args[0], bin_dir)] + args[1:]
+    output = subprocess.DEVNULL
+
+    if verbose:
+        output = None
+        print(f"spawning: {args!r}")
+
+    popen = subprocess.Popen(args, stdout=output, stderr=output)
+    return popen
+
+
+def run(args: list[str], cwd: str | None = None, check: bool = True):
+    print(f"running: {args!r}")
+    subprocess.run(args, cwd=cwd, check=check)
+
+
+def clone(repository: 'ConfigRepository'):
+    source_dir = repository.source_dir
+    version = repository.version
+
+    if repository.skip_clone:
+        print(f"Skipping cloning into {source_dir!r} as configured")
+        return
+
+    if os.path.isdir(source_dir):
+        print(f"Skipping cloning because the directory {source_dir!r} already exists")
+        return
+
     # clone from GitHub
-    repo_url = "https://github.com/vectorgrp/sil-kit.git"
-    repo = Repo.clone_from(repo_url, silkit_dir)
+    url = "https://github.com/vectorgrp/sil-kit.git"
 
-    if use_ref_commit:
-        print("Checking out tag/commit id " + ref_version + ".")
-        repo.git.checkout(ref_version)
+    print(f"Cloning {url!r} into {source_dir!r}")
+    repo = Repo.clone_from(url, source_dir)
 
-        # initialize submodules
+    print(f"Checking out version {version!r}")
+    repo.git.checkout(version)
+
+    print(f"Updating submodules")
     output = repo.git.submodule('update', '--init', '--recursive')
     print(output)
 
-    # build    
-    os.makedirs(build_dir)
-    subprocess.run(['cmake', "-DCMAKE_BUILD_TYPE=Release", "-DSILKIT_BUILD_TESTS=OFF", ".."], cwd=build_dir, check=True)
-    subprocess.run(['cmake', "--build", ".", "--config Release"], cwd=build_dir, check=True)
+
+def configure(repository: 'ConfigRepository'):
+    source_dir = repository.source_dir
+    build_dir = repository.build_dir
+
+    if repository.skip_configure:
+        print("Skipping configure as requested")
+        return
+
+    if os.path.isdir(build_dir):
+        print(f"Skipping cloning because the directory {build_dir!r} already exists")
+        return
+
+    run(['cmake', f"-S{source_dir}", f"-B{build_dir}", "-DCMAKE_BUILD_TYPE=Release", "-DSILKIT_BUILD_TESTS=OFF"])
 
 
-def start_registry(bin_dir: str, verbose: bool):
-    cmd = get_command("sil-kit-registry", ["--log", "off"], bin_dir)
-    process = subprocess.Popen(
-        cmd,
-        stdout=None if verbose else subprocess.DEVNULL,
-    )
-    return process.pid
+def build(repository: 'ConfigRepository'):
+    build_dir = repository.build_dir
+
+    if repository.skip_build:
+        print("Skipping build as requested")
+        return
+
+    if os.path.isdir(build_dir):
+        print(f"Skipping cloning because the directory {build_dir!r} already exists")
+        return
+
+    run(['cmake', "--build", build_dir, "--config", "Release", "--parallel", "--target", "sil-kit-registry"])
+    run(['cmake', "--build", build_dir, "--config", "Release", "--parallel", "--target", "SilKitDemoBenchmark"])
+    run(['cmake', "--build", build_dir, "--config", "Release", "--parallel", "--target", "SilKitDemoLatency"])
+
+
+def start_registry(repository: 'ConfigRepository', config: 'Config'):
+    return spawn(["sil-kit-registry", "--log", "off"], repository.bin_dir, config.verbose).pid
 
 
 def kill_process(pid: int):
     os.kill(pid, signal.SIGTERM)
 
 
-def test_latency(bin_dir: str, path_to_dir: str, verbose: bool):
-    res_file = os.path.join(path_to_dir, latency_file)
-    if os.path.isfile(res_file):
-        os.remove(res_file)
+def prepare_repository(repository: ConfigRepository, force: bool):
+    results_dir = repository.results_dir
 
-    # TODO: Use original parameter set
-    # options_latency = ["--message-size", "10"] + ["--message-count", "1000000"]
-    options_latency = ["--message-size", "10"] + ["--message-count", "100"]
+    if not force and os.path.exists(results_dir):
+        # TODO If something went wrong in creating the ref. KPIs (e.g. registry collision, build failure,...), the folder exists but the result files not
+        print(f"Skipping repository preparation because directory {results_dir!r} already exists")
+        return
 
-    receiver = subprocess.Popen(
-        args=get_command("SilKitDemoLatency", ["--isReceiver"] + options_latency, bin_dir),
-        stdout=None if verbose else subprocess.DEVNULL,
-    )
-
-    sender = subprocess.Popen(
-        args=get_command("SilKitDemoLatency", ["--write-csv", res_file] + options_latency, bin_dir),
-        stdout=None if verbose else subprocess.DEVNULL,
-    )
-
-    receiver.communicate()
-    sender.communicate()
+    clone(repository)
+    configure(repository)
+    build(repository)
 
 
-def test_throughput_large_msg(bin_dir: str, path_to_dir: str, verbose: bool):
-    res_file = os.path.join(path_to_dir, throughput_large_msg_file)
-    if os.path.isfile(res_file):
-        os.remove(res_file)
-
-    # TODO: Use original parameter set
-    # options_throughput_large_msg = ["--message-size", "100000"] + ["--message-count", "1"] + ["--simulation-duration","10"] + ["--number-simulation-runs", "50"] + ["--write-csv", res_file]
-    options_throughput_large_msg = ["--message-size", "100000"] + ["--message-count", "1"] + ["--simulation-duration",
-                                                                                              "1"] + [
-                                       "--number-simulation-runs", "5"] + ["--write-csv", res_file]
-
-    benchmark = subprocess.Popen(
-        args=get_command("SilKitDemoBenchmark", options_throughput_large_msg, bin_dir),
-        stdout=None if verbose else subprocess.DEVNULL,
-    )
-
-    benchmark.communicate()
+def run_process(process: Process, config: Config, bin_dir: str, **kwargs) -> subprocess.Popen:
+    format_arg = lambda f: f.format(process=process, config=config, **kwargs)
+    args = [format_arg(arg) for arg in [process.executable] + process.args]
+    return spawn(args, bin_dir, config.verbose)
 
 
-def test_throughput_small_msg(bin_dir: str, path_to_dir: str, verbose: bool):
-    res_file = os.path.join(path_to_dir, throughput_small_msg_file)
-    if os.path.isfile(res_file):
-        os.remove(res_file)
+def run_test(test: Test, repository: ConfigRepository, config: Config):
+    if not test.enabled:
+        print(f"Skipping test {test.name!r} as configured")
+        return
 
-    # TODO: Use original parameter set
-    # options_throughput_small_msg = ["--message-size", "10"] + ["--message-count", "10"] + ["--simulation-duration","10"] + ["--number-simulation-runs", "50"] + ["--write-csv", res_file]
-    options_throughput_small_msg = ["--message-size", "10"] + ["--message-count", "10"] + ["--simulation-duration",
-                                                                                           "1"] + [
-                                       "--number-simulation-runs", "5"] + ["--write-csv", res_file]
+    if os.path.isfile(test.csv_output):
+        os.remove(test.csv_output)
 
-    benchmark = subprocess.Popen(
-        args=get_command("SilKitDemoBenchmark", options_throughput_small_msg, bin_dir),
-        stdout=None if verbose else subprocess.DEVNULL,
-    )
+    demo_processes = []
 
-    benchmark.communicate()
+    test_run = TestRun.new(test, repository)
+
+    for demo in test.demos:
+        popen = run_process(demo, config, repository.bin_dir, test=test, run=test_run)
+        demo_processes.append(popen)
+
+    for process in demo_processes:
+        process.communicate()
 
 
-def run_tests(bin_dir: str, path_to_dir: str, verbose: bool):
-    sil_kit_registry_pid = start_registry(bin_dir, verbose)
-    test_latency(bin_dir, path_to_dir, verbose)
-    test_throughput_large_msg(bin_dir, path_to_dir, verbose)
-    test_throughput_small_msg(bin_dir, path_to_dir, verbose)
+def run_tests(repository: ConfigRepository, config: Config, force: bool):
+    results_dir = repository.results_dir
+
+    if not force and os.path.exists(results_dir):
+        # TODO If something went wrong in creating the ref. KPIs (e.g. registry collision, build failure,...), the folder exists but the result files not
+        print(f"Skipping test execution because directory {results_dir!r} already exists")
+        return
+
+    os.makedirs(results_dir, exist_ok=True)
+
+    sil_kit_registry_pid = start_registry(repository, config)
+
+    for test in config.tests:
+        run_test(test, repository, config)
+
     kill_process(sil_kit_registry_pid)
 
 
@@ -129,106 +256,105 @@ def read_kpi(path: str, kpi_label: str):
     return kpi_value
 
 
-def assess_kpis(ref_kpi_dir: str, kpi_dir: str):
+def assess_test(test: Test, reference: ConfigRepository, under_test: ConfigRepository):
+    if not test.enabled:
+        print(f"Skipping assessment of test {test.name!r} as configured")
+        return
+
     # get reference kpi values
-    latency_ref_mean = read_kpi(os.path.join(ref_kpi_dir, latency_file), "latency(us)")
-    latency_ref_err = read_kpi(os.path.join(ref_kpi_dir, latency_file), "latency_err")
-
-    throughput_large_ref_mean = read_kpi(os.path.join(ref_kpi_dir, throughput_large_msg_file), "throughput(MiB/s)")
-    throughput_large_ref_err = read_kpi(os.path.join(ref_kpi_dir, throughput_large_msg_file), "throughput_err")
-
-    throughput_small_ref_mean = read_kpi(os.path.join(ref_kpi_dir, throughput_small_msg_file), "throughput(MiB/s)")
-    throughput_small_ref_err = read_kpi(os.path.join(ref_kpi_dir, throughput_small_msg_file), "throughput_err")
+    reference_test_run = TestRun.new(test, reference)
+    reference_mean = read_kpi(reference_test_run.csv_output, test.kpis.mean.label)
+    reference_err = read_kpi(reference_test_run.csv_output, test.kpis.err.label)
 
     # compute thresholds (2 sigma rule)
     sigma = 2.0
-    latency_ref = latency_ref_mean + sigma * latency_ref_err
-    throughput_large_msg_ref = throughput_large_ref_mean - sigma * throughput_large_ref_err
-    throughput_small_msg_ref = throughput_small_ref_mean - sigma * throughput_small_ref_err
+    reference_upper_threshold = reference_mean + sigma * reference_err
+    reference_lower_threshold = reference_mean - sigma * reference_err
 
-    # get kpi values
-    latency = read_kpi(os.path.join(kpi_dir, latency_file), "latency(us)")
-    throughput_large_msg = read_kpi(os.path.join(kpi_dir, throughput_large_msg_file), "throughput(MiB/s)")
-    throughput_small_msg = read_kpi(os.path.join(kpi_dir, throughput_small_msg_file), "throughput(MiB/s)")
+    # get under-test kpi values
+    under_test_test_run = TestRun.new(test, under_test)
+    under_test_mean = read_kpi(under_test_test_run.csv_output, test.kpis.mean.label)
+
+    # TODO: assess the variance of the version under-test as well
+    # under_test_err = read_kpi(under_test_test_run.csv_output, test.kpis.err.label)
 
     def report(topic: str, passed: bool, extra: str):
         print(f"{topic + ': ':<30}{'PASSED' if passed else 'FAILED'}{extra}")
 
-    # assess and report
+    report(
+        test.topic,
+        reference_lower_threshold < under_test_mean < reference_upper_threshold,
+        f" with {under_test_mean} {test.unit} (reference value: {reference_mean} {test.unit})"
+    )
 
+
+def assess_kpis(reference: ConfigRepository, under_test: ConfigRepository, config: Config):
     print("\n" + "----- Test Report (start) -----" + "\n")
 
-    report("Latency", latency < latency_ref, f" with {latency} us (reference value: {latency_ref} us)")
-
-    report(
-        "Throughput (large messages)",
-        throughput_large_msg > throughput_large_msg_ref,
-        f" with {throughput_large_msg} MiB/s (reference value: {throughput_large_msg_ref} MiB/s)",
-    )
-
-    report(
-        "Throughput (small messages)",
-        throughput_small_msg > throughput_small_msg_ref,
-        f" with {throughput_small_msg} MiB/s (reference value: {throughput_small_msg_ref} MiB/s)",
-    )
+    for test in config.tests:
+        assess_test(test, reference, under_test)
 
     print("\n" + "----- Test Report (end) -------")
 
 
 ##### start script #####
 
-latency_file = "latency.csv"
-throughput_large_msg_file = "throughputLargeMsg.csv"
-throughput_small_msg_file = "throughputSmallMsg.csv"
+DEFAULT_REFERENCE_VERSION = "v4.0.52"
+
+T = typing.TypeVar("T")
+U = typing.TypeVar("U")
+
+
+def override_or(obj: T, args: object, key: str, default=None):
+    return override_with_or(obj, key, getattr(args, key), default)
+
+
+def override_with_or(obj: T, key: str, value: U | None, default=U | None):
+    if value is not None:
+        setattr(obj, key, value)
+        return
+
+    if getattr(obj, key) is None:
+        assert default is not None
+        setattr(obj, key, default)
+
+
+def update_config(config: Config, args: object):
+    override_or(config, args, "work_dir", os.path.join(os.getcwd(), "_work"))
+    override_or(config, args, "verbose", False)
+
+    config.work_dir = os.path.abspath("_work")
+
+    for name, repository in vars(config.repositories).items():
+        override_with_or(repository, "source_dir", None, os.path.join(config.work_dir, "s", name))
+        override_with_or(repository, "build_dir", None, os.path.join(config.work_dir, "b", name))
+        override_with_or(repository, "bin_dir", None, os.path.join(repository.build_dir, "Release"))
+        override_with_or(repository, "results_dir", None, os.path.join(config.work_dir, "r", name))
 
 
 def main():
     parser = argparse.ArgumentParser(description="Process a reference tag or commit id.")
-    parser.add_argument('ref-version', nargs='?', default='v4.0.52', help='Reference tag or commit id')
-    parser.add_argument('-v', '--verbose', action='store_true', help='Print output of SIL Kit applications to stdout')
+    parser.add_argument('--reference-version', type=str, default=None,
+                        help='Reference tag or commit id of the reference version')
+    parser.add_argument('--version-under-test', type=str, default=None,
+                        help='Reference tag or commit id for the version under test')
+    parser.add_argument('--work-dir', type=str, default=None)
+    parser.add_argument('-v', '--verbose', action='store_true', default=None,
+                        help='Print output of SIL Kit applications to stdout')
     args = parser.parse_args()
 
-    if len(sys.argv) > 2:
-        sys.exit("Only one command line argument (reference tag/commit id) allowed.")
+    with open(os.path.join(os.path.dirname(SCRIPT_PATH), "performance-tests.toml"), "rb") as f:
+        config = Config(**tomllib.load(f))
 
-    ref_version = args.refVersion
+    update_config(config, args)
 
-    # set reference kpis if not available yet
-    ref_kpi_dir = os.path.join(os.getcwd(), "kpis_ref")
-    if not os.path.isdir(ref_kpi_dir):
-        os.makedirs(ref_kpi_dir)
+    prepare_repository(config.repositories.reference, force=False)
+    prepare_repository(config.repositories.under_test, force=True)
 
-        silkit_dir = os.path.join(os.getcwd(), "sil-kit-reference")
-        build_dir = os.path.join(silkit_dir, "build")
-        bin_dir = os.path.join(build_dir, "Release")
+    run_tests(config.repositories.reference, config, force=False)
+    run_tests(config.repositories.under_test, config, force=True)
 
-        if not os.path.isdir(silkit_dir):
-            clone_and_build(silkit_dir, ref_version, build_dir, True)
-        else:
-            print("SIL Kit (reference version) has already been cloned and built.")
-
-        run_tests(bin_dir, ref_kpi_dir, args.verbose)
-    else:
-        # TODO If something went wrong in creating the ref. KPIs (e.g. registry collision, build failure,...), the folder exists but the result files not
-        print("Reference KPIs already existent.")
-
-    # get kpis of current SIL Kit version
-    kpi_dir = os.path.join(os.getcwd(), "kpis")
-    if not os.path.isdir(kpi_dir):
-        os.makedirs(kpi_dir)
-
-    silkit_dir = os.path.join(os.getcwd(), "sil-kit")
-    build_dir = os.path.join(silkit_dir, "build")
-    bin_dir = os.path.join(build_dir, "Release")
-
-    if not os.path.isdir(silkit_dir):
-        clone_and_build(silkit_dir, ref_version, build_dir, False)
-    else:
-        print("SIL Kit (current version) has already been cloned and built.")
-
-    run_tests(bin_dir, kpi_dir, args.verbose)
-
-    assess_kpis(ref_kpi_dir, kpi_dir)
+    assess_kpis(config.repositories.reference, config.repositories.under_test, config)
 
 
 if __name__ == "__main__":
