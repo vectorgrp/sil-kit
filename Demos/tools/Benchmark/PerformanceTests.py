@@ -247,7 +247,7 @@ def read_kpi(path: str, kpi_label: str):
         lines = csv_file.readlines()[1:]  # skip comment
         data = csv.DictReader(lines, delimiter=';', skipinitialspace=True)
         vals = [float(row[kpi_label]) for row in data]
-        kpi_value = vals[0]
+        kpi_value = vals[-1]
 
     return kpi_value
 
@@ -270,9 +270,7 @@ def assess_test(test: Test, reference: ConfigRepository, under_test: ConfigRepos
     # get under-test kpi values
     under_test_test_run = TestRun.new(test, under_test)
     under_test_mean = read_kpi(under_test_test_run.csv_output, test.kpis.mean.label)
-
-    # TODO: assess the variance of the version under-test as well
-    # under_test_err = read_kpi(under_test_test_run.csv_output, test.kpis.err.label)
+    under_test_err = read_kpi(under_test_test_run.csv_output, test.kpis.err.label)
 
     def report(topic: str, passed: bool, extra: str):
         print(f"{topic + ': ':<30}{'PASSED' if passed else 'FAILED'}{extra}")
@@ -280,8 +278,13 @@ def assess_test(test: Test, reference: ConfigRepository, under_test: ConfigRepos
     report(
         test.topic,
         reference_lower_threshold < under_test_mean < reference_upper_threshold,
-        f" with {under_test_mean} {test.unit} (reference value: {reference_mean} {test.unit})"
+        f" with {under_test_mean} {test.unit} (acceptance interval: {reference_lower_threshold} - {reference_upper_threshold} {test.unit})"
     )
+
+    # check if standard deviation does not exceed 10% of the mean (NB: 10% is just heuristically chosen and may turn out to be unreasonable)
+    err_coeff = 0.1
+    if (under_test_mean * err_coeff) < under_test_err:
+        print("     WARNING: Standard deviation is larger than " + str(int(100*err_coeff)) + "% of the computed mean.")
 
 
 def assess_kpis(reference: ConfigRepository, under_test: ConfigRepository, config: Config):
