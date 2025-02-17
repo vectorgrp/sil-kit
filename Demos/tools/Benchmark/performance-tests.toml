@@ -20,7 +20,7 @@ executable = "SilKitDemoLatency"
 args = [
     "--isReceiver",
     "--message-size", "10",
-    "--message-count", "100",
+    "--message-count", "1000000",
 ]
 
 [[tests.demos]]
@@ -32,7 +32,7 @@ executable = "SilKitDemoLatency"
 args = [
     "--write-csv", "{run.csv_output}",
     "--message-size", "10",
-    "--message-count", "100",
+    "--message-count", "1000000",
 ]
 
 
@@ -52,8 +52,8 @@ args = [
     "--write-csv", "{run.csv_output}",
     "--message-size", "100000",
     "--message-count", "1",
-    "--simulation-duration", "1",
-    "--number-simulation-runs", "5",
+    "--simulation-duration", "10",
+    "--number-simulation-runs", "50",
 ]
 
 
@@ -73,6 +73,6 @@ args = [
     "--write-csv", "{run.csv_output}",
     "--message-size", "10",
     "--message-count", "10",
-    "--simulation-duration", "1",
-    "--number-simulation-runs", "5",
+    "--simulation-duration", "10",
+    "--number-simulation-runs", "50",
 ]
