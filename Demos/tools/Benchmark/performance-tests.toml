@@ -51,7 +51,7 @@ executable = "SilKitDemoBenchmark"
 args = [
     "--write-csv", "{run.csv_output}",
     "--message-size", "100000",
-    "--message-count", "1",
+    "--message-count", "10",
     "--simulation-duration", "10",
     "--number-simulation-runs", "50",
 ]
@@ -72,7 +72,7 @@ executable = "SilKitDemoBenchmark"
 args = [
     "--write-csv", "{run.csv_output}",
     "--message-size", "10",
-    "--message-count", "10",
+    "--message-count", "100",
     "--simulation-duration", "10",
     "--number-simulation-runs", "50",
 ]
