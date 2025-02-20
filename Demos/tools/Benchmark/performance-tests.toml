@@ -1,0 +1,78 @@
+[repositories.reference]
+version = "v4.0.52"
+
+[repositories.under_test]
+version = "main"
+
+
+[[tests]]
+name = "latency"
+unit = "us"
+topic = "Latency"
+csv_output = "latency.csv"
+
+[tests.kpis]
+mean = { label = "latency(us)" }
+err = { label = "latency_err" }
+
+[[tests.demos]]
+executable = "SilKitDemoLatency"
+args = [
+    "--isReceiver",
+    "--message-size", "10",
+    "--message-count", "1000000",
+]
+
+[[tests.demos]]
+executable = "SilKitDemoLatency"
+# args are treated as a Python format string (see str.format) with the following bindings available:
+# - test.*: any field of the current test
+# - repository.*: any field of the repository the test is being executed from
+# - run.csv_output: {repository.results_dir} joined with {test.csv_output}
+args = [
+    "--write-csv", "{run.csv_output}",
+    "--message-size", "10",
+    "--message-count", "1000000",
+]
+
+
+[[tests]]
+name = "throughput-large-msg"
+unit = "MiB/s"
+topic = "Throughput (large messages)"
+csv_output = "throughput-large-msg.csv"
+
+[tests.kpis]
+mean = { label = "throughput(MiB/s)" }
+err = { label = "throughput_err" }
+
+[[tests.demos]]
+executable = "SilKitDemoBenchmark"
+args = [
+    "--write-csv", "{run.csv_output}",
+    "--message-size", "100000",
+    "--message-count", "10",
+    "--simulation-duration", "10",
+    "--number-simulation-runs", "50",
+]
+
+
+[[tests]]
+name = "throughput-small-msg"
+unit = "MiB/s"
+topic = "Throughput (small messages)"
+csv_output = "throughput-small-msg.csv"
+
+[tests.kpis]
+mean = { label = "throughput(MiB/s)" }
+err = { label = "throughput_err" }
+
+[[tests.demos]]
+executable = "SilKitDemoBenchmark"
+args = [
+    "--write-csv", "{run.csv_output}",
+    "--message-size", "10",
+    "--message-count", "100",
+    "--simulation-duration", "10",
+    "--number-simulation-runs", "50",
+]

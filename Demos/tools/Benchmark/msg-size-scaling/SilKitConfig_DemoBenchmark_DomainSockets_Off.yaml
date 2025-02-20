@@ -1,3 +1,0 @@
-Description: Configuration for Benchmark Demo without domain sockets
-Middleware:
-  EnableDomainSockets: 'False'
