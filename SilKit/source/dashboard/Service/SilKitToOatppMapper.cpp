@@ -462,6 +462,39 @@ auto SilKitToOatppMapper::CreateBulkSimulationDto(const DashboardBulkUpdate& bul
     return bulkSimulationDto;
 }
 
+auto SilKitToOatppMapper::CreateMetricsUpdateDto(const std::string origin, const VSilKit::MetricsUpdate& metricsUpdate)
+    -> Object<MetricsUpdateDto>
+{
+    auto dto = MetricsUpdateDto::CreateEmpty();
+    for (const auto& metricData : metricsUpdate.metrics)
+    {
+        auto dataDto = MetricDataDto::createShared();
+        dataDto->ts = metricData.timestamp;
+        dataDto->mn = metricData.name;
+        switch (metricData.kind)
+        {
+        case VSilKit::MetricKind::COUNTER:
+            dataDto->mk = "COUNTER";
+            break;
+        case VSilKit::MetricKind::STATISTIC:
+            dataDto->mk = "STATISTIC";
+            break;
+        case VSilKit::MetricKind::STRING_LIST:
+            dataDto->mk = "STRING_LIST";
+            break;
+        default:
+            dataDto->mk = "UNKNOWN";
+            break;
+        }
+        dataDto->mv = metricData.value;
+        dataDto->pn = origin;
+
+        dto->metrics->emplace_back(std::move(dataDto));
+    }
+    return dto;
+}
+
+
 // SilKitToOatppMapper Private Methods
 
 void SilKitToOatppMapper::ProcessServiceDiscovery(BulkParticipantDto& dto, const ServiceDescriptor& serviceDescriptor)

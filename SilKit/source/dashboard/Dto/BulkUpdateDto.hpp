@@ -127,6 +127,31 @@ class BulkSimulationDto : public oatpp::DTO
     }
 };
 
+class MetricDataDto : public oatpp::DTO
+{
+    DTO_INIT(MetricDataDto, DTO)
+
+    DTO_FIELD(Int64, ts);
+    DTO_FIELD(String, pn);
+    DTO_FIELD(String, mn);
+    DTO_FIELD(String, mk);
+    DTO_FIELD(String, mv);
+};
+
+class MetricsUpdateDto : public oatpp::DTO
+{
+    DTO_INIT(MetricsUpdateDto, DTO)
+
+    DTO_FIELD(Vector<Object<MetricDataDto>>, metrics);
+
+    static auto CreateEmpty() -> Wrapper
+    {
+        auto dto = createShared();
+        dto->metrics = Vector<Object<MetricDataDto>>::createShared();
+        return dto;
+    }
+};
+
 } // namespace Dashboard
 } // namespace SilKit
 
