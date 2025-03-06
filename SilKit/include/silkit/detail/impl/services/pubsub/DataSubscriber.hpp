@@ -22,6 +22,7 @@
 #pragma once
 
 #include "silkit/capi/DataPubSub.h"
+#include "silkit/capi/SilKitMacros.h"
 
 #include "silkit/services/pubsub/IDataSubscriber.hpp"
 
@@ -46,8 +47,8 @@ public:
     inline void SetDataMessageHandler(SilKit::Services::PubSub::DataMessageHandler handler) override;
 
 private:
-    inline static void TheDataMessageHandler(void* context, SilKit_DataSubscriber* subscriber,
-                                             const SilKit_DataMessageEvent* dataMessageEvent);
+    inline static void SilKitCALL TheDataMessageHandler(void* context, SilKit_DataSubscriber* subscriber,
+                                                        const SilKit_DataMessageEvent* dataMessageEvent);
 
 private:
     template <typename HandlerFunction>
