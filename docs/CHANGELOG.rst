@@ -10,6 +10,13 @@ The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <
 [4.0.56] - UNRELEASED
 ---------------------
 
+Fixed
+~~~~~
+
+- Three static methods which are part of the C++ (Hourglass) API implementation and passed as
+  callbacks to the C-API, did not use the correct calling convention if the default calling
+  convention wasn't ``__cdecl`` on Windows. This has been remedied.
+
 
 [4.0.55] - 2025-01-31
 ---------------------
