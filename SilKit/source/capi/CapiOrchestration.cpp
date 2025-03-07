@@ -29,6 +29,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "CapiImpl.hpp"
 #include "TypeConversion.hpp"
 
+#include "services/orchestration/TimeSyncServiceExtensionsImpl.hpp"
+
 #include <memory>
 #include <map>
 #include <mutex>
@@ -722,6 +724,44 @@ try
     }
 
     cppSystemMonitor->SetWorkflowConfiguration(cppWorkflowConfiguration);
+
+    return SilKit_ReturnCode_SUCCESS;
+}
+CAPI_CATCH_EXCEPTIONS
+
+
+SilKit_ReturnCode SilKitCALL SilKit_Experimental_TimeSyncService_AddExternalCouplingHandler(
+    SilKit_TimeSyncService* cTimeSyncService, void* context, SilKit_Experimental_TimeSyncExternalCouplingHandler_t handler,
+    SilKit_HandlerId* outHandlerId)
+try
+{
+    ASSERT_VALID_POINTER_PARAMETER(cTimeSyncService);
+    ASSERT_VALID_HANDLER_PARAMETER(handler);
+    ASSERT_VALID_OUT_PARAMETER(outHandlerId);
+
+    auto* cppITimeSyncService = reinterpret_cast<SilKit::Services::Orchestration::ITimeSyncService*>(cTimeSyncService);
+
+    auto cppHandlerId = SilKit::Experimental::Services::Orchestration::AddExternalCouplingHandler(
+        cppITimeSyncService, [handler, context, cTimeSyncService]() { handler(context, cTimeSyncService); });
+
+    *outHandlerId = static_cast<SilKit_HandlerId>(cppHandlerId);
+
+    return SilKit_ReturnCode_SUCCESS;
+}
+CAPI_CATCH_EXCEPTIONS
+
+
+SilKit_ReturnCode SilKitCALL SilKit_Experimental_TimeSyncService_RemoveExternalCouplingHandler(
+    SilKit_TimeSyncService* cTimeSyncService, SilKit_HandlerId cHandlerId)
+try
+{
+    ASSERT_VALID_POINTER_PARAMETER(cTimeSyncService);
+
+    const auto cppITimeSyncService =
+        reinterpret_cast<SilKit::Services::Orchestration::ITimeSyncService*>(cTimeSyncService);
+    const auto cppHandlerId = static_cast<SilKit::Util::HandlerId>(cHandlerId);
+
+    SilKit::Experimental::Services::Orchestration::RemoveExternalCouplingHandler(cppITimeSyncService, cppHandlerId);
 
     return SilKit_ReturnCode_SUCCESS;
 }
