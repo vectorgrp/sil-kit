@@ -93,6 +93,8 @@ Finally, the hardware being used, the network infrastructure and the distributio
 
 To get a first impression of the performance that can be expected of the |ProductName| in your use case, refer to the :ref:`Benchmark Demo<sec:benchmark-demo>` where you can specify a set of relevant parameters and get real performance measurements for your setup.
 
+You can find further information on performance aspects in the :doc:`troubleshooting<../troubleshooting/performance>` section.
+
 Can I control the order in which simulation participants execute their simulation steps, in case they occur at the same time?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
