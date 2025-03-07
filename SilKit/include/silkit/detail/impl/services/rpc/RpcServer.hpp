@@ -22,6 +22,7 @@
 #pragma once
 
 #include "silkit/capi/Rpc.h"
+#include "silkit/capi/SilKitMacros.h"
 
 #include "silkit/services/rpc/IRpcServer.hpp"
 
@@ -49,8 +50,8 @@ public:
     inline void SetCallHandler(SilKit::Services::Rpc::RpcCallHandler handler) override;
 
 private:
-    inline static void TheRpcCallHandler(void* context, SilKit_RpcServer* server,
-                                         const SilKit_RpcCallEvent* rpcCallEvent);
+    inline static void SilKitCALL TheRpcCallHandler(void* context, SilKit_RpcServer* server,
+                                                    const SilKit_RpcCallEvent* rpcCallEvent);
 
     inline static auto CallHandleFromC(SilKit_RpcCallHandle* rpcCallHandle) -> SilKit::Services::Rpc::IRpcCallHandle*;
 
