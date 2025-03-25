@@ -301,7 +301,7 @@ struct Middleware
     int connectAttempts{1}; //!<  Number of connection attempts to the registry a participant should perform.
     int tcpReceiveBufferSize{-1};
     int tcpSendBufferSize{-1};
-    bool tcpNoDelay{true}; //!< Nagle's algorithm disabled by default.
+    bool tcpNoDelay{true}; //!< Setting this option to true disables Nagle's algorithm on all TCP/IP sockets. Defaults to true for performance reasons.
     bool tcpQuickAck{false}; //!< Setting this Linux specific flag disables delayed TCP/IP acknowledgements.
     bool enableDomainSockets{true}; //!< By default local domain socket is preferred to TCP/IP sockets.
     std::vector<std::string>

@@ -10,9 +10,9 @@ TCP Socket Configuration
 
 The TCP sockets used by SIL Kit can be configured via the participant configuration file, more precisely the :doc:`middleware<../configuration/middleware-configuration>` options.
 This configuration needs to be done carefully. In particular, using Nagle's algorithm (``TcpNoDelay: false``) and delayed acknowledgements (``TcpQuickAck: false``) are known to interact badly.
-Please note that version X.Y.Z and following will use the ``NO_DELAY`` flag (disable Nagle's algorithm) by default (``TcpNoDelay: true``).
+Please note that version 4.0.56 and following will use the ``NO_DELAY`` flag (which disables Nagle's algorithm) by default (``TcpNoDelay: true``).
 Using ``TcpNoDelay: true`` and ``TcpQuickAck: true`` together, may cause severe performance losses as well as non-deterministic behaviour.
-Latency peaks of 40 ms and a large throughput variance have been observed in this case so far.
+For example, resulting in 40ms latency peaks on Linux platforms.
 
 Message Aggregation
 ~~~~~~~~~~~~~~~~~~~

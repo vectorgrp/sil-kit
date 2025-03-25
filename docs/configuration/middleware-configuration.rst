@@ -57,7 +57,8 @@ running on 'localhost' listening on port 8500. These values can be changed via t
        By default, only a single connect is attempted.
 
    * - TcpNoDelay
-     - Disable the TCP_NODELAY flag on TCP sockets. This enables Nagle's algorithm.
+     - Is used to set the TCP_NODELAY flag on TCP sockets. Setting this to true will disable Nagle's algorithm.
+       This setting may have performance implications.
 
    * - TcpQuickAck
      - Enable the TCP_QUICKACK flag on TCP sockets (Linux only). Disables delayed
