@@ -33,7 +33,7 @@ running on 'localhost' listening on port 8500. These values can be changed via t
     Middleware:
       RegistryUri: silkit://localhost:8500
       ConnectAttempts: 1
-      TcpNoDelay: false
+      TcpNoDelay: true
       TcpQuickAck: false
       TcpSendBufferSize: 1024
       TcpReceiveBufferSize: 1024
@@ -57,7 +57,8 @@ running on 'localhost' listening on port 8500. These values can be changed via t
        By default, only a single connect is attempted.
 
    * - TcpNoDelay
-     - Enable the TCP_NODELAY flag on TCP sockets. This disables Nagle's algorithm.
+     - Setting this to ``true`` will set the ``TCP_NODELAY`` flag on TCP sockets, which disables Nagle's algorithm.
+       This setting may have performance implications.
 
    * - TcpQuickAck
      - Enable the TCP_QUICKACK flag on TCP sockets (Linux only). Disables delayed

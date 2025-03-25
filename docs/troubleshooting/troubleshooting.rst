@@ -32,9 +32,11 @@ Most issues can be identified based on log messages by the application.
     lifecycle.rst
     interoperability.rst
     connection-guides.rst
+    performance.rst
 
 ..
     .. include:: connectivity.rst
     .. include:: lifecycle.rst
     .. include:: interoperability.rst
     .. include:: connection-guides.rst
+    .. include:: performance.rst
