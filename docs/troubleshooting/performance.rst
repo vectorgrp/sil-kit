@@ -1,7 +1,7 @@
 .. include:: /substitutions.rst
 
 Performance
-=========
+===========
 
 The following sections provide support for improving the performance of |ProductName|.
 
