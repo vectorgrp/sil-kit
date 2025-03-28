@@ -111,6 +111,14 @@ void SilKitEventHandler::OnBulkUpdate(uint64_t simulationId, const DashboardBulk
                                                     _silKitToOatppMapper->CreateBulkSimulationDto(bulkUpdate));
 }
 
+void SilKitEventHandler::OnMetricsUpdate(uint64_t simulationId, const std::string& origin,
+                                         const VSilKit::MetricsUpdate& metricsUpdate)
+{
+    _dashboardSystemServiceClient->UpdateSimulationMetrics(
+        simulationId, _silKitToOatppMapper->CreateMetricsUpdateDto(origin, metricsUpdate));
+}
+
+
 void SilKitEventHandler::OnControllerCreated(uint64_t simulationId, const Core::ServiceDescriptor& serviceDescriptor)
 {
     Services::Logging::Debug(_logger, "Dashboard: adding service for simulation {} {}", simulationId,
