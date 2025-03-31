@@ -1,6 +1,9 @@
 ================================
 The Vector SIL Kit
 ================================
+.. |VectorSite| image:: https://img.shields.io/badge/vector-sil--kit-red
+   :target: https://vector.com/sil-kit
+
 .. |ReleaseBadge| image:: https://img.shields.io/github/v/release/vectorgrp/sil-kit.svg
    :target: https://github.com/vectorgrp/sil-kit/releases
 .. |LicenseBadge| image:: https://img.shields.io/badge/license-MIT-blue.svg
@@ -18,6 +21,7 @@ The Vector SIL Kit
    :target: https://github.com/vectorgrp/sil-kit/actions/workflows/build-win.yml
 .. |Linux/Arm64| image:: https://github.com/vectorgrp/sil-kit/actions/workflows/build-linux-arm64.yml/badge.svg
    :target: https://github.com/vectorgrp/sil-kit/actions/workflows/build-linux-arm64.yml
+| |VectorSite|
 | |ReleaseBadge| |LicenseBadge| |DocsBadge| 
 | |AsanBadge| |UbsanBadge| |TsanBadge| |Linux/Arm64|
 | |WinBadge|
