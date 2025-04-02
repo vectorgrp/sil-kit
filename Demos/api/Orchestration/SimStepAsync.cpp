@@ -71,7 +71,7 @@ int main(int argc, char** argv)
             while (!asyncThreadDone)
             {
                 std::unique_lock<MxType> lock(mx);
-                cv.wait(lock, [doStep] { return doStep; });
+                cv.wait(lock, [&doStep] { return doStep; });
                 doStep = false;
 
                 logger->Info("Asynchronous operation in the simulation step:");
