@@ -22,6 +22,7 @@ Fixed
 
 Changed
 ~~~~~~~
+
 - The participant configuration ``TcpNoDelay`` now defaults to true. Please note, that this has performance implications.
   On Linux platforms this improves throughput, and latency in particular when used in combination with ``TcpQuickAck: true``.
 
