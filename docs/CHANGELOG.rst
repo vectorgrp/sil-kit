@@ -17,6 +17,9 @@ Fixed
   callbacks to the C-API, did not use the correct calling convention if the default calling
   convention wasn't ``__cdecl`` on Windows. This has been remedied.
 
+- ``SilKitDemoSimStepAsync`` did not work as intended, due to the predicate lambda capturing
+  by-value instead of by-reference.
+
 Changed
 ~~~~~~~
 - The participant configuration ``TcpNoDelay`` now defaults to true. Please note, that this has performance implications.
