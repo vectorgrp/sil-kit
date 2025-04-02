@@ -43,7 +43,9 @@ master_doc = 'contents'
 extensions = [ 
     'sphinx_rtd_theme',
     'sphinx.ext.extlinks',
-    'breathe' ]
+    'breathe',
+    'myst_parser',
+]
 
 extlinks = {'repo-link': ('https://github.com/vectorgrp/sil-kit/tree/main/%s', '%s')}
 
