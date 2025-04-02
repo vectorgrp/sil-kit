@@ -32,7 +32,7 @@ jobs:
       run: |
         # HOTFIX: github hosted runners have upgraded to CMake 4.0.0 which
         #         breaks building yaml-cpp
-        choco uninstall cmake
+        choco uninstall cmake --yes
         choco install cmake --version 3.31.6
 
         choco install -y ninja
@@ -67,7 +67,7 @@ jobs:
       run: |
         # HOTFIX: github hosted runners have upgraded to CMake 4.0.0 which
         #         breaks building yaml-cpp
-        choco uninstall cmake
+        choco uninstall cmake --yes
         choco install cmake --version 3.31.6
 
         choco install -y ninja
