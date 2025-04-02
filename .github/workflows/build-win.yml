@@ -30,6 +30,11 @@ jobs:
 
     - name: Setup host
       run: |
+        # HOTFIX: github hosted runners have upgraded to CMake 4.0.0 which
+        #         breaks building yaml-cpp
+        choco uninstall cmake
+        choco install cmake --version 3.31.6
+
         choco install -y ninja
         choco install -y doxygen.install
         pip install breathe==4.34.0
@@ -60,6 +65,11 @@ jobs:
 
     - name: Setup host
       run: |
+        # HOTFIX: github hosted runners have upgraded to CMake 4.0.0 which
+        #         breaks building yaml-cpp
+        choco uninstall cmake
+        choco install cmake --version 3.31.6
+
         choco install -y ninja
         choco install -y doxygen.install
         pip install breathe==4.34.0
