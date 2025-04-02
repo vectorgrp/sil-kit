@@ -54,7 +54,7 @@ int main(int argc, char** argv)
         timeSyncService->SetSimulationStepHandlerAsync(
             [&](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
             // The invocation of this handler marks the beginning of a simulation step.
-            
+
             std::stringstream ss;
             ss << "--------- Simulation step T=" << now << " ---------";
             logger->Info(ss.str());
@@ -64,7 +64,7 @@ int main(int argc, char** argv)
             cv.notify_one();
 
             // Returning from the handler is NOT the end of a simulation step.
-            // With the SetSimulationStepHandlerAsync, completing the step is done explicitly by calling CompleteSimulationStep(). 
+            // With the SetSimulationStepHandlerAsync, completing the step is done explicitly by calling CompleteSimulationStep().
         }, stepSize);
 
         auto asyncThread = std::thread([&]() {
@@ -94,7 +94,6 @@ int main(int argc, char** argv)
         {
             asyncThread.join();
         }
-
     }
     catch (const std::exception& error)
     {
