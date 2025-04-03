@@ -20,10 +20,14 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-Project(sil-kit-docs  NONE)
+project(sil-kit-docs NONE)
+
 include(SilKitVersion)
+
 configure_silkit_version(${PROJECT_NAME})
+
 find_package(Doxygen REQUIRED)
+find_package(Python3 COMPONENTS Interpreter)
 
 # Find all the public headers
 get_target_property(SILKIT_API_HEADERS SilKitApi SOURCES)
@@ -79,7 +83,8 @@ add_custom_command(OUTPUT ${DOXYGEN_INDEX_FILE}
                        ${SVG_FILES}
                    COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYFILE_OUT}
                    # generate docs
-                   COMMAND sphinx-build -b html
+                   COMMAND "${Python3_EXECUTABLE}" -m sphinx.cmd.build
+                       -b html
                        # Tell Breathe where to find the Doxygen output
                        -Dbreathe_projects.SilKit=${DOXYGEN_OUTPUT_DIR}/xml
                        -Drelease=${PROJECT_VERSION}
