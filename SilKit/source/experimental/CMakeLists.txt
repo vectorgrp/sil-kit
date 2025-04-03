@@ -34,6 +34,8 @@ add_library(O_SilKit_Experimental OBJECT
     participant/ParticipantExtensionsImpl.hpp
     services/lin/LinControllerExtensionsImpl.cpp
     services/lin/LinControllerExtensionsImpl.hpp
+    services/orchestration/TimeSyncServiceExtensionsImpl.cpp
+    services/orchestration/TimeSyncServiceExtensionsImpl.hpp
 )
 
 target_link_libraries(O_SilKit_Experimental
@@ -41,6 +43,7 @@ target_link_libraries(O_SilKit_Experimental
 
     PRIVATE I_SilKit_Core_Internal
     PRIVATE I_SilKit_Services_Lin
+    PRIVATE I_SilKit_Services_Orchestration
     PRIVATE I_SilKit_Util
     PRIVATE I_SilKit_Services_Logging
 )
