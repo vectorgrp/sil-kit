@@ -370,7 +370,17 @@ TimeSyncService::TimeSyncService(Core::IParticipantInternal* participant, ITimeP
                                   "Participant \'{}\' is joining an already running simulation. Resending our "
                                   "NextSimTask.",
                                   descriptorParticipantName);
-                            SendMsg(_timeConfiguration.NextSimStep());
+
+                            if (GetTimeSyncPolicy()->IsExecutingSimStep())
+                            {
+                                Debug(_participant->GetLogger(), "Sending CURRENT sim. step");
+                                SendMsg(_timeConfiguration.CurrentSimStep());
+                            }
+                            else
+                            {
+                                Debug(_participant->GetLogger(), "Sending NEXT sim. step");
+                                SendMsg(_timeConfiguration.NextSimStep());
+                            }
                         }
                     }
                     else if (discoveryEventType == Core::Discovery::ServiceDiscoveryEvent::Type::ServiceRemoved)
