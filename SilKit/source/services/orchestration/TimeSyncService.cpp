@@ -373,12 +373,12 @@ TimeSyncService::TimeSyncService(Core::IParticipantInternal* participant, ITimeP
 
                             if (GetTimeSyncPolicy()->IsExecutingSimStep())
                             {
-                                Debug(_participant->GetLogger(), "Sending CURRENT sim. step");
+                                Debug(_participant->GetLogger(), "Sending currently executing simulation step");
                                 SendMsg(_timeConfiguration.CurrentSimStep());
                             }
                             else
                             {
-                                Debug(_participant->GetLogger(), "Sending NEXT sim. step");
+                                Debug(_participant->GetLogger(), "Sending next simulation step");
                                 SendMsg(_timeConfiguration.NextSimStep());
                             }
                         }
