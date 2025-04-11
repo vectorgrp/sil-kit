@@ -3,6 +3,9 @@
 # SPDX-License-Identifier: MIT
 
 include(CheckCXXSourceCompiles)
+if(MINGW)
+    set(CMAKE_REQUIRED_INCLUDES /mingw64/include/asio)
+endif()
 macro(silkit_check_for_asio)
     check_cxx_source_compiles("
 #include <asio.hpp>
