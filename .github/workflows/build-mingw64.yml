@@ -29,7 +29,7 @@ jobs:
     steps:
     - name: Setup host
       run: |
-        pacman -S ${{ matrix.builds.arch }}-gcc ${{ matrix.builds.arch }}-cmake ${{ matrix.builds.arch }}-ninja ${{ matrix.builds.arch }}-yaml-cpp ${{ matrix.builds.arch }}-fmt ${{ matrix.builds.arch }}-gtest --noconfirm
+        pacman -S ${{ matrix.builds.arch }}-gcc ${{ matrix.builds.arch }}-cmake ${{ matrix.builds.arch }}-ninja ${{ matrix.builds.arch }}-yaml-cpp ${{ matrix.builds.arch }}-fmt ${{ matrix.builds.arch }}-gtest  ${{matrix.builds.arch}}-asio ${{matrix.builds.arch}}-spdlog --noconfirm
 
 
     - uses: actions/checkout@v4
