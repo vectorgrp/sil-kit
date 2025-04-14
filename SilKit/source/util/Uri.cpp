@@ -21,6 +21,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "Uri.hpp"
 
+#include <cctype>
+
 #include "silkit/participant/exception.hpp"
 
 #include "fmt/format.h"
