@@ -84,10 +84,10 @@ function(include_asio)
         target_include_directories(asio INTERFACE "${ASIO_INCLUDE_DIR}")
         set(SILKIT_THIRD_PARTY_ASIO "asio" CACHE STRING "Name of the third party asio target")
     else()
-        # Test if ASIO is installed
-        include(SilKitTestAsio)
-        silkit_check_for_asio()
-        set(SILKIT_THIRD_PARTY_ASIO "" CACHE STRING "Name of the third party asio target")
+        # assume pkg-config is set up properly
+        include(FindPkgConfig)
+        pkg_check_modules(asio REQUIRED IMPORTED_TARGET GLOBAL asio)
+        add_library(asio ALIAS PkgConfig::asio)
     endif()
 endfunction()
 
@@ -146,9 +146,20 @@ function(include_fmt)
             set(SILKIT_THIRD_PARTY_FMT_HEADER_ONLY_TARGET "" CACHE STRING "Header only target for third party libfmt")
         endif()
     else()
-        # Find libfmt
-        find_package(fmt REQUIRED)
-        set(SILKIT_THIRD_PARTY_FMT_HEADER_ONLY_TARGET "fmt::fmt-header-only" CACHE STRING "Header only target for third party libfmt")
+        # Find system libfmt
+        #find_package(fmt REQUIRED)
+        include(FindPkgConfig)
+        pkg_check_modules(fmt REQUIRED IMPORTED_TARGET GLOBAL fmt)
+        add_library(fmt-header-only INTERFACE)
+        target_include_directories(fmt-header-only INTERFACE ${fmt_INCLUDE_DIRS})
+        target_compile_definitions(fmt-header-only INTERFACE FMT_HEADER_ONLY=1)
+
+        #add_library(fmt ALIAS PkgConfig::fmt)
+        add_library(fmt::fmt-header-only ALIAS fmt-header-only)
+        add_library(fmt::fmt ALIAS fmt-header-only)
+        set(SPDLOG_FMT_EXTERNAL Off CACHE BOOL "we have our own")
+        set(SPDLOG_FMT_EXTERNAL_HO Off CACHE BOOL "we have our own")
+        set(SILKIT_THIRD_PARTY_FMT_HEADER_ONLY_TARGET "fmt::fmt-header-only" CACHE STRING "Header only target for third party libfmt (system library)")
     endif()
 endfunction()
 
