@@ -47,7 +47,7 @@ uint64_t SilKitEventHandler::OnSimulationStart(const std::string& connectUri, ui
         _silKitToOatppMapper->CreateSimulationCreationRequestDto(connectUri, time));
     if (simulation)
     {
-        Services::Logging::Info(_logger, "Dashboard: created simulation with id {}", simulation->id);
+        Services::Logging::Info(_logger, "Dashboard: created simulation with id {}", *simulation->id.get());
         return simulation->id;
     }
     _logger->Warn("Dashboard: creating simulation failed");
