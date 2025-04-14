@@ -70,25 +70,23 @@ endfunction()
 # the binary distribution lacks the Asio sources
 # but it should be included/deployed by our packaging tools
 function(include_asio)
-    if(NOT SILKIT_USE_SYSTEM_LIBRARIES)
-        set(ASIO_INCLUDE_DIR ${SILKIT_THIRD_PARTY_SOURCE_DIR}/asio/asio/include)
 
-        if(NOT EXISTS ${ASIO_INCLUDE_DIR})
-            message(FATAL_ERROR "Asio include directory not found: ${ASIO_INCLUDE_DIR}")
-        else()
-            message(STATUS "Asio include directory found:${ASIO_INCLUDE_DIR}")
-        endif()
-
-        silkit_clean_default_compileflags()
-        add_library(asio INTERFACE)
-        target_include_directories(asio INTERFACE "${ASIO_INCLUDE_DIR}")
-        set(SILKIT_THIRD_PARTY_ASIO "asio" CACHE STRING "Name of the third party asio target")
+    if( SILKIT_USE_SYSTEM_LIBRARIES)
+        find_path(ASIO_INCLUDE_DIR asio.hpp)
     else()
-        # assume pkg-config is set up properly
-        include(FindPkgConfig)
-        pkg_check_modules(asio REQUIRED IMPORTED_TARGET GLOBAL asio)
-        add_library(asio ALIAS PkgConfig::asio)
+        set(ASIO_INCLUDE_DIR ${SILKIT_THIRD_PARTY_SOURCE_DIR}/asio/asio/include)
     endif()
+
+    if(NOT EXISTS ${ASIO_INCLUDE_DIR})
+        message(FATAL_ERROR "Asio include directory not found: ${ASIO_INCLUDE_DIR}")
+    else()
+        message(STATUS "Asio include directory found:${ASIO_INCLUDE_DIR}")
+    endif()
+
+    silkit_clean_default_compileflags()
+    add_library(asio INTERFACE)
+    target_include_directories(asio INTERFACE "${ASIO_INCLUDE_DIR}")
+    set(SILKIT_THIRD_PARTY_ASIO "asio" CACHE STRING "Name of the third party asio target")
 endfunction()
 
 # Third party YAML parsing 
