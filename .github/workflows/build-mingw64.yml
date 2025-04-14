@@ -40,6 +40,6 @@ jobs:
       with:
         preset-name: gcc-release
         artifact-label: ${{ github.job }}-${{ matrix.builds.arch }}
-        cmake-args: -D SILKIT_BUILD_DOCS=OFF -D SILKIT_USE_SYSTEM_LIBRARIES=ON
+        cmake-args: -D SILKIT_BUILD_DOCS=OFF -D SILKIT_USE_SYSTEM_LIBRARIES=ON -D SILKIT_BUILD_DASHBOARD=OFF
         extra-path: "${{ matrix.builds.bin }}:"
         shell: C:\shells\msys2bash.cmd {0}

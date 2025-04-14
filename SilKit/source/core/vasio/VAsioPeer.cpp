@@ -261,7 +261,7 @@ void VAsioPeer::DispatchBuffer()
     // validate the received size
     if (_currentMsgSize == 0 || _currentMsgSize > 1024 * 1024 * 1024)
     {
-        SilKit::Services::Logging::Error(_logger, "Received invalid Message Size: {}", _currentMsgSize);
+        SilKit::Services::Logging::Error(_logger, "Received invalid Message Size: {}", _currentMsgSize.load());
         Shutdown();
     }
 
