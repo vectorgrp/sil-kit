@@ -92,12 +92,12 @@ Initialization
 ~~~~~~~~~~~~~~
 
 Before the LIN Controller can be used, it must be initialized. The initialization is performed by setting up a
-|LinControllerConfig| and passing it to |Init| or |InitDynamic|. The |LinControllerMode| must be set to either 
-|LinControllerMode_Master| or |LinControllerMode_Slave| and the baud rate must be specified. Further, the 
-|LinControllerConfig| provides the configuration on which LIN IDs the controller will receive 
+|LinControllerConfig| and passing it to |Init| or |InitDynamic|. The |LinControllerMode| must be set to either
+|LinControllerMode_Master| or |LinControllerMode_Slave| and the baud rate must be specified. Further, the
+|LinControllerConfig| provides the configuration on which LIN IDs the controller will receive
 (|LinFrameResponseMode_Rx|) or respond to (|LinFrameResponseMode_Tx|) frames.
 
-The following example configures a LIN controller as a LIN slave with a baud rate of 20'000 baud. Furthermore, LIN ID 
+The following example configures a LIN controller as a LIN slave with a baud rate of 20'000 baud. Furthermore, LIN ID
 0x11 is configured for transmission::
 
     LinFrameResponse response;
