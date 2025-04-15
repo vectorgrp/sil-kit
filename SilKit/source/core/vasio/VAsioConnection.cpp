@@ -49,6 +49,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "asio.hpp"
 
+#include "fmt/ranges.h"
+
 
 #if SILKIT_ENABLE_TRACING_INSTRUMENTATION_VAsioConnection
 #define SILKIT_TRACE_METHOD_(logger, ...) SILKIT_TRACE_METHOD(logger, __VA_ARGS__)

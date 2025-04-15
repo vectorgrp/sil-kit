@@ -31,6 +31,7 @@
 #include <memory>
 
 #include "fmt/format.h"
+#include "fmt/ranges.h"
 
 
 #if SILKIT_ENABLE_TRACING_INSTRUMENTATION_VAsioConnection

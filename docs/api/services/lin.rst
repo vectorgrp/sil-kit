@@ -12,6 +12,7 @@ LIN Service API
 .. |ILinController| replace:: :cpp:class:`ILinController<SilKit::Services::Lin::ILinController>`
 
 .. |Init| replace:: :cpp:func:`Init()<SilKit::Services::Lin::ILinController::Init>`
+.. |InitDynamic| replace:: :cpp:func:`InitDynamic()<SilKit::Experimental::Services::Lin::InitDynamic>`
 .. |SendFrame| replace:: :cpp:func:`SendFrame()<SilKit::Services::Lin::ILinController::SendFrame>`
 .. |SendFrameHeader| replace:: :cpp:func:`SendFrameHeader()<SilKit::Services::Lin::ILinController::SendFrameHeader>`
 .. |UpdateTxBuffer| replace:: :cpp:func:`UpdateTxBuffer()<SilKit::Services::Lin::ILinController::UpdateTxBuffer>`
@@ -91,12 +92,12 @@ Initialization
 ~~~~~~~~~~~~~~
 
 Before the LIN Controller can be used, it must be initialized. The initialization is performed by setting up a
-|LinControllerConfig| and passing it to |Init|. The |LinControllerMode| must be set to either 
-|LinControllerMode_Master| or |LinControllerMode_Slave| and the baud rate must be specified. Further, the 
-|LinControllerConfig| provides the configuration on which LIN IDs the controller will receive 
+|LinControllerConfig| and passing it to |Init| or |InitDynamic|. The |LinControllerMode| must be set to either
+|LinControllerMode_Master| or |LinControllerMode_Slave| and the baud rate must be specified. Further, the
+|LinControllerConfig| provides the configuration on which LIN IDs the controller will receive
 (|LinFrameResponseMode_Rx|) or respond to (|LinFrameResponseMode_Tx|) frames.
 
-The following example configures a LIN controller as a LIN slave with a baud rate of 20'000 baud. Furthermore, LIN ID 
+The following example configures a LIN controller as a LIN slave with a baud rate of 20'000 baud. Furthermore, LIN ID
 0x11 is configured for transmission::
 
     LinFrameResponse response;
@@ -425,6 +426,10 @@ reside in the `SilKit::Experimental::Services::Lin` namespace and might be chang
 
 The experimental API is defined as follows:
 
+.. doxygenfunction:: SilKit::Experimental::Services::Lin::InitDynamic(SilKit::Services::Lin::ILinController* linController, const SilKit::Experimental::Services::Lin::LinControllerDynamicConfig& dynamicConfig)
 .. doxygenfunction:: SilKit::Experimental::Services::Lin::AddLinSlaveConfigurationHandler(SilKit::Services::Lin::ILinController* linController, SilKit::Experimental::Services::Lin::LinSlaveConfigurationHandler handler)
 .. doxygenfunction:: SilKit::Experimental::Services::Lin::RemoveLinSlaveConfigurationHandler(SilKit::Services::Lin::ILinController* linController, SilKit::Util::HandlerId handlerId)
 .. doxygenfunction:: SilKit::Experimental::Services::Lin::GetSlaveConfiguration(SilKit::Services::Lin::ILinController* linController)
+.. doxygenfunction:: SilKit::Experimental::Services::Lin::AddFrameHeaderHandler(SilKit::Services::Lin::ILinController* linController, SilKit::Experimental::Services::Lin::LinFrameHeaderHandler handler)
+.. doxygenfunction:: SilKit::Experimental::Services::Lin::RemoveFrameHeaderHandler
+.. doxygenfunction:: SilKit::Experimental::Services::Lin::SendDynamicResponse

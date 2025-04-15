@@ -43,9 +43,13 @@ LIN Controller
 
 **The following functions are experimental and might be changed or removed in future versions:**
 
+.. doxygenfunction:: SilKit_Experimental_LinController_InitDynamic
 .. doxygenfunction:: SilKit_Experimental_LinController_AddLinSlaveConfigurationHandler
 .. doxygenfunction:: SilKit_Experimental_LinController_RemoveLinSlaveConfigurationHandler
 .. doxygenfunction:: SilKit_Experimental_LinController_GetSlaveConfiguration
+.. doxygenfunction:: SilKit_Experimental_LinController_SendDynamicResponse
+.. doxygenfunction:: SilKit_Experimental_LinController_AddFrameHeaderHandler
+.. doxygenfunction:: SilKit_Experimental_LinController_RemoveFrameHeaderHandler
 
 Data Structures
 ~~~~~~~~~~~~~~~

@@ -29,7 +29,7 @@ target_link_libraries(O_SilKit_Util
     PUBLIC I_SilKit_Util
     PRIVATE SilKitInterface
     PRIVATE asio
-    PRIVATE fmt-header-only
+    PRIVATE fmt::fmt-header-only
 )
 
 if (MSVC)

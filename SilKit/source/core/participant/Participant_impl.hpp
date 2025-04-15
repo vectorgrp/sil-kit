@@ -70,6 +70,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "Assert.hpp"
 #include "ExecutionEnvironment.hpp"
 
+#include "fmt/ranges.h"
+
 
 
 namespace SilKit {

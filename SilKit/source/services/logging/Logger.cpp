@@ -141,7 +141,7 @@ struct fmt::formatter<SilKit::Services::Logging::SimpleLogMessage>
     }
 
     template <typename FormatContext>
-    auto format(const SilKit::Services::Logging::SimpleLogMessage& msg, FormatContext& ctx)
+    auto format(const SilKit::Services::Logging::SimpleLogMessage& msg, FormatContext& ctx) const
     {
         if (!msg.kv.empty())
         {
@@ -164,7 +164,7 @@ struct fmt::formatter<SilKit::Services::Logging::JsonLogMessage>
     }
 
     template <typename FormatContext>
-    auto format(const SilKit::Services::Logging::JsonLogMessage& msg, FormatContext& ctx)
+    auto format(const SilKit::Services::Logging::JsonLogMessage& msg, FormatContext& ctx) const
     {
         if (!msg.kv.empty())
         {
@@ -430,7 +430,7 @@ void Logger::Log(Level level, const std::string& msg)
     if (nullptr != _loggerJson)
     {
         JsonString jsonString{msg};
-        _loggerJson->log(now, spdlog::source_loc{}, to_spdlog(level), fmt::format("{}", jsonString));
+        _loggerJson->log(now, spdlog::source_loc{}, to_spdlog(level), fmt::format("{}",jsonString.m));
     }
     if (nullptr != _loggerSimple)
     {
