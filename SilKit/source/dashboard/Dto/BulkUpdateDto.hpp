@@ -127,6 +127,12 @@ class BulkSimulationDto : public oatpp::DTO
     }
 };
 
+ENUM(MetricKind, v_int32, //
+     VALUE(Unknown, 0, "unknown"), //
+     VALUE(Counter, 10, "counter"), //
+     VALUE(Statistic, 20, "statistic"), //
+     VALUE(StringList, 30, "stringlist"))
+
 class MetricDataDto : public oatpp::DTO
 {
     DTO_INIT(MetricDataDto, DTO)
@@ -134,7 +140,7 @@ class MetricDataDto : public oatpp::DTO
     DTO_FIELD(Int64, ts);
     DTO_FIELD(String, pn);
     DTO_FIELD(String, mn);
-    DTO_FIELD(String, mk);
+    DTO_FIELD(Enum<MetricKind>::AsString, mk);
     DTO_FIELD(String, mv);
 };
 

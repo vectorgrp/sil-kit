@@ -474,16 +474,16 @@ auto SilKitToOatppMapper::CreateMetricsUpdateDto(const std::string origin, const
         switch (metricData.kind)
         {
         case VSilKit::MetricKind::COUNTER:
-            dataDto->mk = "COUNTER";
+            dataDto->mk = MetricKind::Counter;
             break;
         case VSilKit::MetricKind::STATISTIC:
-            dataDto->mk = "STATISTIC";
+            dataDto->mk = MetricKind::Statistic;
             break;
         case VSilKit::MetricKind::STRING_LIST:
-            dataDto->mk = "STRING_LIST";
+            dataDto->mk = MetricKind::StringList;
             break;
         default:
-            dataDto->mk = "UNKNOWN";
+            dataDto->mk = MetricKind::Unknown;
             break;
         }
         dataDto->mv = metricData.value;
