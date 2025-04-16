@@ -23,6 +23,7 @@
 
 #include <chrono>
 #include <sstream>
+#include <cctype>
 
 #include "fmt/chrono.h"
 

@@ -430,7 +430,7 @@ void Logger::Log(Level level, const std::string& msg)
     if (nullptr != _loggerJson)
     {
         JsonString jsonString{msg};
-        _loggerJson->log(now, spdlog::source_loc{}, to_spdlog(level), fmt::format("{}",jsonString.m));
+        _loggerJson->log(now, spdlog::source_loc{}, to_spdlog(level), fmt::format("{}", jsonString.m));
     }
     if (nullptr != _loggerSimple)
     {
