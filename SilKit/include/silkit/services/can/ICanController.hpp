@@ -71,7 +71,7 @@ public:
      * range: 0 to 16'000'000
      *
      * \param xlRate Baud rate for CAN XL messages given in bps; valid
-     * range: 0 to 16'000'000
+     * range: 0 to 20'000'000
      *
      * NB: The baud rate of a CAN controller must be set before using it.
      * 
