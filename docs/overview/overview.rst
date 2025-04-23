@@ -5,8 +5,8 @@ Vector SIL Kit Overview
 =======================
 
 .. |_| unicode:: 0xA0 
-.. |CANBuses| replace:: CAN / CAN |_| FD / CAN |_| XL
    :trim:
+.. |CANBuses| replace:: CAN / CAN |_| FD / CAN |_| XL
 .. |CAN-API| replace:: :ref:`CAN / CAN FD / CAN XL<chap:can-service-api>`
 .. |Ethernet-API| replace:: :ref:`Ethernet<chap:ethernet-service-api>`
 .. |Flexray-API| replace:: :ref:`FlexRay<chap:flexray-service-api>`
