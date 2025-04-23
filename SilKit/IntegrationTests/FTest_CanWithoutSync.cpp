@@ -76,7 +76,8 @@ protected:
             canmsg.frame.dlc = static_cast<uint16_t>(canmsg.frame.dataField.size());
             canmsg.frame.flags |=
                 static_cast<CanFrameFlagMask>(CanFrameFlag::Ide) | static_cast<CanFrameFlagMask>(CanFrameFlag::Fdf)
-                | static_cast<CanFrameFlagMask>(CanFrameFlag::Esi) | static_cast<CanFrameFlagMask>(CanFrameFlag::Sec);
+                | static_cast<CanFrameFlagMask>(CanFrameFlag::Esi) | static_cast<CanFrameFlagMask>(CanFrameFlag::Sec)
+                | static_cast<CanFrameFlagMask>(CanFrameFlag::Xlf);
             canmsg.timestamp = 1s;
             canmsg.direction = SilKit::Services::TransmitDirection::RX;
             canmsg.userContext = 0;
