@@ -81,6 +81,9 @@ add_custom_command(OUTPUT ${DOXYGEN_INDEX_FILE}
                        ${SILKIT_API_HEADERS}
                        ${SPHINX_SOURCE_FILES}
                        ${SVG_FILES}
+                   # auto-upgrade the Doxyfile to the current configuration version
+                   COMMAND ${DOXYGEN_EXECUTABLE} -u ${DOXYFILE_OUT}
+                   # extract inline documentation from source code
                    COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYFILE_OUT}
                    # generate docs
                    COMMAND "${Python3_EXECUTABLE}" -m sphinx.cmd.build
