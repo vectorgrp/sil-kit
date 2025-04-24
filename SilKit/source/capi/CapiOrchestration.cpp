@@ -730,9 +730,9 @@ try
 CAPI_CATCH_EXCEPTIONS
 
 
-SilKit_ReturnCode SilKitCALL SilKit_Experimental_TimeSyncService_AddExternalCouplingHandler(
-    SilKit_TimeSyncService* cTimeSyncService, void* context, SilKit_Experimental_TimeSyncExternalCouplingHandler_t handler,
-    SilKit_HandlerId* outHandlerId)
+SilKit_ReturnCode SilKitCALL SilKit_Experimental_TimeSyncService_AddOtherSimulationStepsCompletedHandler(
+    SilKit_TimeSyncService* cTimeSyncService, void* context,
+    SilKit_Experimental_TimeSyncService_OtherSimulationStepsCompletedHandler_t handler, SilKit_HandlerId* outHandlerId)
 try
 {
     ASSERT_VALID_POINTER_PARAMETER(cTimeSyncService);
@@ -741,7 +741,7 @@ try
 
     auto* cppITimeSyncService = reinterpret_cast<SilKit::Services::Orchestration::ITimeSyncService*>(cTimeSyncService);
 
-    auto cppHandlerId = SilKit::Experimental::Services::Orchestration::AddExternalCouplingHandler(
+    auto cppHandlerId = SilKit::Experimental::Services::Orchestration::AddOtherSimulationStepsCompletedHandler(
         cppITimeSyncService, [handler, context, cTimeSyncService]() { handler(context, cTimeSyncService); });
 
     *outHandlerId = static_cast<SilKit_HandlerId>(cppHandlerId);
@@ -751,7 +751,7 @@ try
 CAPI_CATCH_EXCEPTIONS
 
 
-SilKit_ReturnCode SilKitCALL SilKit_Experimental_TimeSyncService_RemoveExternalCouplingHandler(
+SilKit_ReturnCode SilKitCALL SilKit_Experimental_TimeSyncService_RemoveOtherSimulationStepsCompletedHandler(
     SilKit_TimeSyncService* cTimeSyncService, SilKit_HandlerId cHandlerId)
 try
 {
@@ -761,7 +761,8 @@ try
         reinterpret_cast<SilKit::Services::Orchestration::ITimeSyncService*>(cTimeSyncService);
     const auto cppHandlerId = static_cast<SilKit::Util::HandlerId>(cHandlerId);
 
-    SilKit::Experimental::Services::Orchestration::RemoveExternalCouplingHandler(cppITimeSyncService, cppHandlerId);
+    SilKit::Experimental::Services::Orchestration::RemoveOtherSimulationStepsCompletedHandler(cppITimeSyncService,
+                                                                                              cppHandlerId);
 
     return SilKit_ReturnCode_SUCCESS;
 }

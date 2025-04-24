@@ -432,7 +432,7 @@ TEST_F(Test_HourglassOrchestration, SilKit_TimeSyncService_Now)
     EXPECT_EQ(timeSyncService.Now(), nanoseconds);
 }
 
-TEST_F(Test_HourglassOrchestration, SilKit_Experimental_TimeSyncService_AddExternalCouplingHandler)
+TEST_F(Test_HourglassOrchestration, SilKit_Experimental_TimeSyncService_AddOtherSimulationStepsCompletedHandler)
 {
     using testing::_;
 
@@ -442,13 +442,14 @@ TEST_F(Test_HourglassOrchestration, SilKit_Experimental_TimeSyncService_AddExter
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Orchestration::TimeSyncService timeSyncService{
         mockLifecycleService};
 
-    EXPECT_CALL(capi, SilKit_Experimental_TimeSyncService_AddExternalCouplingHandler(mockTimeSyncService, _, _, _))
+    EXPECT_CALL(
+        capi, SilKit_Experimental_TimeSyncService_AddOtherSimulationStepsCompletedHandler(mockTimeSyncService, _, _, _))
         .WillOnce(DoAll(SetArgPointee<3>(cHandlerId), Return(SilKit_ReturnCode_SUCCESS)));
 
-    EXPECT_EQ(timeSyncService.ExperimentalAddExternalCouplingHandler([] {}), cppHandlerId);
+    EXPECT_EQ(timeSyncService.ExperimentalAddOtherSimulationStepsCompletedHandler([] {}), cppHandlerId);
 }
 
-TEST_F(Test_HourglassOrchestration, SilKit_Experimental_TimeSyncService_RemoveExternalCouplingHandler)
+TEST_F(Test_HourglassOrchestration, SilKit_Experimental_TimeSyncService_RemoveOtherSimulationStepsCompletedHandler)
 {
     using testing::_;
 
@@ -458,11 +459,11 @@ TEST_F(Test_HourglassOrchestration, SilKit_Experimental_TimeSyncService_RemoveEx
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Orchestration::TimeSyncService timeSyncService{
         mockLifecycleService};
 
-    EXPECT_CALL(capi,
-                SilKit_Experimental_TimeSyncService_RemoveExternalCouplingHandler(mockTimeSyncService, cHandlerId))
+    EXPECT_CALL(capi, SilKit_Experimental_TimeSyncService_RemoveOtherSimulationStepsCompletedHandler(
+                          mockTimeSyncService, cHandlerId))
         .WillOnce(Return(SilKit_ReturnCode_SUCCESS));
 
-    timeSyncService.ExperimentalRemoveExternalCouplingHandler(cppHandlerId);
+    timeSyncService.ExperimentalRemoveOtherSimulationStepsCompletedHandler(cppHandlerId);
 }
 
 // SystemMonitor

@@ -758,28 +758,34 @@ typedef SilKit_ReturnCode(SilKitFPTR* SilKit_Experimental_SystemController_SetWo
     SilKit_Experimental_SystemController* systemController, const SilKit_WorkflowConfiguration* workflowConfiguration);
 
 /*! Callback type to indicate external simulation step coupling.
- *  Cf., \ref SilKit_Experimental_TimeSyncService_AddExternalCouplingHandler
+ *  Cf., \ref SilKit_Experimental_TimeSyncService_AddOtherSimulationStepsCompletedHandler
  */
-typedef void(SilKitFPTR* SilKit_Experimental_TimeSyncExternalCouplingHandler_t)(
+typedef void(SilKitFPTR* SilKit_Experimental_TimeSyncService_OtherSimulationStepsCompletedHandler_t)(
     void* context, SilKit_TimeSyncService* timeSyncService);
 
-/*! \brief Register a callback for external simulation step coupling
+/*! \brief Register a \ref SilKit_Experimental_TimeSyncService_OtherSimulationStepsCompletedHandler_t.
+ *
+ * The handler can only be used together with \ref SilKit_TimeSyncService_SetSimulationStepHandlerAsync.
+ *
+ * It will be called when the time sync. service detects that calling \ref SilKit_TimeSyncService_CompleteSimulationStep
+ * will immediately progress the simulation time.
  *
  * \param timeSyncService The time sync. service obtained via \ref SilKit_TimeSyncService_Create.
  * \param context The user context pointer made available to the handler.
  * \param handler The handler to be called when completion of the current sim. step will immediately progress sim. time.
  * \param outHandlerId The handler identifier that can be used to remove the callback.
  */
-SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Experimental_TimeSyncService_AddExternalCouplingHandler(
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Experimental_TimeSyncService_AddOtherSimulationStepsCompletedHandler(
     SilKit_TimeSyncService* timeSyncService, void* context,
-    SilKit_Experimental_TimeSyncExternalCouplingHandler_t handler, SilKit_HandlerId* outHandlerId);
+    SilKit_Experimental_TimeSyncService_OtherSimulationStepsCompletedHandler_t handler, SilKit_HandlerId* outHandlerId);
 
-/*! \brief  Remove a \ref SilKit_Experimental_ExternalCouplingHandler_t by SilKit_HandlerId on this participant
+/*! \brief Remove a \ref SilKit_Experimental_TimeSyncService_OtherSimulationStepsCompletedHandler_t by \ref SilKit_HandlerId
+ *         on this participant
  *
  * \param timeSyncService The time sync. service obtained via \ref SilKit_TimeSyncService_Create.
  * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
  */
-SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Experimental_TimeSyncService_RemoveExternalCouplingHandler(
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Experimental_TimeSyncService_RemoveOtherSimulationStepsCompletedHandler(
     SilKit_TimeSyncService* timeSyncService, SilKit_HandlerId handlerId);
 
 SILKIT_END_DECLS

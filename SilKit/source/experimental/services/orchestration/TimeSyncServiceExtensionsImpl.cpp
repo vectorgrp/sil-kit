@@ -11,19 +11,19 @@ namespace Experimental {
 namespace Services {
 namespace Orchestration {
 
-auto AddExternalCouplingHandler(SilKit::Services::Orchestration::ITimeSyncService* iTimeSyncService,
-                                std::function<void()> handler) -> SilKit::Util::HandlerId
+auto AddOtherSimulationStepsCompletedHandler(SilKit::Services::Orchestration::ITimeSyncService* iTimeSyncService,
+                                             std::function<void()> handler) -> SilKit::Util::HandlerId
 {
     const auto timeSyncService = static_cast<SilKit::Services::Orchestration::TimeSyncService*>(iTimeSyncService);
-    const auto handlerId = timeSyncService->AddExternalCouplingHandler(handler);
+    const auto handlerId = timeSyncService->AddOtherSimulationStepsCompletedHandler(handler);
     return handlerId;
 }
 
-void RemoveExternalCouplingHandler(SilKit::Services::Orchestration::ITimeSyncService* iTimeSyncService,
-                                   SilKit::Util::HandlerId handlerId)
+void RemoveOtherSimulationStepsCompletedHandler(SilKit::Services::Orchestration::ITimeSyncService* iTimeSyncService,
+                                                SilKit::Util::HandlerId handlerId)
 {
     const auto timeSyncService = static_cast<SilKit::Services::Orchestration::TimeSyncService*>(iTimeSyncService);
-    timeSyncService->RemoveExternalCouplingHandler(handlerId);
+    timeSyncService->RemoveOtherSimulationStepsCompletedHandler(handlerId);
 }
 
 } // namespace Orchestration

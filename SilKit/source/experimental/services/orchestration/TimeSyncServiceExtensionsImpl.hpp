@@ -27,11 +27,11 @@ namespace Experimental {
 namespace Services {
 namespace Orchestration {
 
-auto AddExternalCouplingHandler(SilKit::Services::Orchestration::ITimeSyncService* timeSyncService,
-                                std::function<void()> handler) -> SilKit::Util::HandlerId;
+auto AddOtherSimulationStepsCompletedHandler(SilKit::Services::Orchestration::ITimeSyncService* timeSyncService,
+                                             std::function<void()> handler) -> SilKit::Util::HandlerId;
 
-void RemoveExternalCouplingHandler(SilKit::Services::Orchestration::ITimeSyncService* timeSyncService,
-                                   SilKit::Util::HandlerId handlerId);
+void RemoveOtherSimulationStepsCompletedHandler(SilKit::Services::Orchestration::ITimeSyncService* timeSyncService,
+                                                SilKit::Util::HandlerId handlerId);
 
 } // namespace Orchestration
 } // namespace Services

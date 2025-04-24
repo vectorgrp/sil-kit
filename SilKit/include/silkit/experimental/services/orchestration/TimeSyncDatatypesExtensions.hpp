@@ -12,9 +12,9 @@ namespace Services {
 namespace Orchestration {
 
 /*! Callback type to indicate external simulation step coupling.
- *  Cf., \ref AddExternalCouplingHandler(ITimeSyncService*,TimeSyncExternalCouplingHandler);
+ *  Cf., \ref AddOtherSimulationStepsCompletedHandler(ITimeSyncService*,TimeSyncOtherSimulationStepsCompletedHandler);
  */
-using TimeSyncExternalCouplingHandler = std::function<void()>;
+using OtherSimulationStepsCompletedHandler = std::function<void()>;
 
 } // namespace Orchestration
 } // namespace Services

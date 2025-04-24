@@ -112,9 +112,9 @@ public:
     bool IsBlocking() const;
     void StartWallClockCouplingThread(std::chrono::nanoseconds startTimeOffset);
 
-    auto AddExternalCouplingHandler(std::function<void()> handler) -> HandlerId;
-    void RemoveExternalCouplingHandler(HandlerId handlerId);
-    void InvokeExternalCouplingHandlers();
+    auto AddOtherSimulationStepsCompletedHandler(std::function<void()> handler) -> HandlerId;
+    void RemoveOtherSimulationStepsCompletedHandler(HandlerId handlerId);
+    void InvokeOtherSimulationStepsCompletedHandlers();
 
 private:
     // ----------------------------------------
@@ -170,7 +170,7 @@ private:
     std::atomic<bool> _wallClockCouplingThreadRunning{false};
     std::atomic<bool> _wallClockReachedBeforeCompletion{false};
 
-    Util::SynchronizedHandlers<std::function<void()>> _externalCouplingHandlers;
+    Util::SynchronizedHandlers<std::function<void()>> _otherSimulationStepsCompletedHandlers;
 };
 
 // ================================================================================
