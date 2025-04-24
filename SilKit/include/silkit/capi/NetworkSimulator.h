@@ -74,13 +74,13 @@ typedef struct SilKit_Experimental_NetSim_CanConfigureBaudrate SilKit_Experiment
 
 typedef int32_t SilKit_Experimental_NetSim_CanControllerModeFlags;
 
+/*! Reset the error counters to zero and the error state to error active. */
 #define SilKit_Experimental_NetSim_CanControllerModeFlags_ResetErrorHandling \
-    ((SilKit_Experimental_NetSim_CanControllerModeFlags)BIT( \
-        0)) //!< Reset the error counters to zero and the error state to error active.
+    ((SilKit_Experimental_NetSim_CanControllerModeFlags)BIT(0)) 
 
+/*! Cancel all outstanding transmit requests (flush transmit queue of controller). */
 #define SilKit_Experimental_NetSim_CanControllerModeFlags_CancelTransmitRequests \
-    ((SilKit_Experimental_NetSim_CanControllerModeFlags)BIT( \
-        1)) //!< Cancel all outstanding transmit requests (flush transmit queue of controller).
+    ((SilKit_Experimental_NetSim_CanControllerModeFlags)BIT(1))
 
 struct SilKit_Experimental_NetSim_CanControllerMode
 {
