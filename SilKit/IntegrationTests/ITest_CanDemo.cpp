@@ -65,7 +65,13 @@ struct TestState
     {
         OwningCanFrame()
         {
-            memset(this, '\0', sizeof(CanFrame));
+            this->af = {};
+            this->canId = {};
+            this->dataField = {};
+            this->dlc = {};
+            this->flags = {};
+            this->sdt = {};
+            this->vcid = {};
         }
         std::vector<uint8_t> payloadBytes;
     };
