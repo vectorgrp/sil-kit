@@ -110,7 +110,7 @@ struct TestState
         fdFrame.dlc = 15;
         fdFrame.flags |= SilKit_CanFrameFlag_fdf | SilKit_CanFrameFlag_ide;
 
-        // Test data, CAN FD
+        // Test data, CAN XL
         fillData(xlFrame, 2048);
         xlFrame.canId = xlId;
         xlFrame.dlc = 2048;
