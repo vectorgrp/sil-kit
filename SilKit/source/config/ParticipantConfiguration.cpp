@@ -26,7 +26,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 namespace SilKit {
 namespace Config {
-namespace v1 {
+inline namespace v1 {
 
 auto Label::ToPublicApi() const -> SilKit::Services::MatchingLabel
 {

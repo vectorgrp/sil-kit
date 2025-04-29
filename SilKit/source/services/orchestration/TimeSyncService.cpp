@@ -496,7 +496,6 @@ void TimeSyncService::ExecuteSimStep(std::chrono::nanoseconds timePoint, std::ch
 
     _waitTimeMonitor.StopMeasurement();
     const auto waitingDuration = _waitTimeMonitor.CurrentDuration();
-    const auto waitingDurationMs = std::chrono::duration_cast<DoubleMSecs>(waitingDuration);
     const auto waitingDurationS = std::chrono::duration_cast<DoubleSecs>(waitingDuration);
 
     {
@@ -750,7 +749,7 @@ void TimeSyncService::StartWallClockCouplingThread(std::chrono::nanoseconds star
 {
     _wallClockCouplingThreadRunning = true;
     _currentWallClockSyncPointNs = startTimeOffset.count();
-    _wallClockCouplingThread = std::thread{[this, startTimeOffset]() {
+    _wallClockCouplingThread = std::thread{[this]() {
 
         SilKit::Util::SetThreadName("SK-WallClkSync");
 
