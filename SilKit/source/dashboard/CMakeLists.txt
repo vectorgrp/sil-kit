@@ -30,6 +30,7 @@ if(SILKIT_BUILD_DASHBOARD)
             target_compile_options("${TARGET_NAME}"
                 PRIVATE -Wno-gnu-zero-variadic-macro-arguments
                 PRIVATE -Wno-pessimizing-move
+                PRIVATE -Wno-c++20-extensions
             )
         endif ()
     endfunction()
