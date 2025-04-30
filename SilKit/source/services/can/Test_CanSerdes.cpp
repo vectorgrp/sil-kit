@@ -40,7 +40,8 @@ TEST(Test_CanSerdes, SimCan_CanMessage)
     in.frame.canId = 7;
     in.frame.flags |=
         static_cast<CanFrameFlagMask>(CanFrameFlag::Ide) | static_cast<CanFrameFlagMask>(CanFrameFlag::Fdf)
-        | static_cast<CanFrameFlagMask>(CanFrameFlag::Esi) | static_cast<CanFrameFlagMask>(CanFrameFlag::Sec);
+        | static_cast<CanFrameFlagMask>(CanFrameFlag::Esi) | static_cast<CanFrameFlagMask>(CanFrameFlag::Sec)
+        | static_cast<CanFrameFlagMask>(CanFrameFlag::Xlf);
     in.frame.dlc = 5;
     in.frame.sdt = 123;
     in.frame.vcid = 89;

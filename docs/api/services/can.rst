@@ -137,9 +137,9 @@ Then, the controller must be started explicitly by calling |Start|. Now the cont
 Additional control commands are |Stop| and |Reset|.
 
 The following example configures a CAN controller with a baud rate of 10'000 baud for regular CAN messages and a baud 
-rate of 1'000'000 baud for CAN |_| FD messages. Then, the controller is started::
+rate of 1'000'000 baud for CAN |_| FD messages and 1'000'000 baud for CAN |_| XL, respectively. Then, the controller is started::
 
-    canController->SetBaudRate(10000, 1000000);
+    canController->SetBaudRate(10000, 1000000, 1000000);
     canController->Start();
 
 .. admonition:: Note

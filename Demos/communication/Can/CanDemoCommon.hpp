@@ -25,7 +25,10 @@ void FrameHandler(const CanFrameEvent& canFrameEvent, ILogger* logger, bool prin
     {
         frameTypeHint = "FD ";
     }
-
+    if ((canFrameEvent.frame.flags & static_cast<CanFrameFlagMask>(CanFrameFlag::Xlf)) != 0)
+    {
+        frameTypeHint = "XL ";
+    }
     std::stringstream ss;
     ss << "Receive CAN " << frameTypeHint << "frame: canId=" << canFrameEvent.frame.canId << ", data=";
     if (printHex)

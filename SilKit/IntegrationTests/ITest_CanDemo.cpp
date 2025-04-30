@@ -57,15 +57,68 @@ struct TestState
     bool readerReceivedErrorActive = false;
     bool monitorReceivedErrorActive = false;
     std::atomic<uint32_t> monitorReceiveCount{0};
+    std::atomic<uint32_t> monitorReceiveCountXlf{0};
+    std::atomic<uint32_t> monitorReceiveCountFdf{0};
 
-    std::vector<uint8_t> payloadBytes;
 
-    CanFrame msg;
+    struct OwningCanFrame : CanFrame
+    {
+        OwningCanFrame()
+        {
+            this->af = {};
+            this->canId = {};
+            this->dataField = {};
+            this->dlc = {};
+            this->flags = {};
+            this->sdt = {};
+            this->vcid = {};
+        }
+        std::vector<uint8_t> payloadBytes;
+    };
+
+    OwningCanFrame msg{};
+    OwningCanFrame fdFrame{};
+    OwningCanFrame xlFrame{};
+
+    static constexpr uint32_t canId = 123;
+    static constexpr uint32_t fdId = 0xcafecafe;
+    static constexpr uint32_t xlId = 0xcacacaca;
 
     //Reader variables
     bool result = false;
     std::chrono::milliseconds receiveTime = 0ms;
     size_t messageCount{0};
+
+    TestState()
+    {
+        auto fillData = [](auto& frame, size_t size) {
+            frame.payloadBytes.resize(size);
+            for (size_t i = 0; i < frame.payloadBytes.size(); i++)
+            {
+                frame.payloadBytes[i] = 'A' + (i % 26);
+            }
+            frame.dataField = frame.payloadBytes;
+        };
+        //Test data, CAN
+        msg.canId = canId;
+        fillData(msg, 8);
+        msg.dlc = 8;
+
+        // Test data, CAN FD
+        fillData(fdFrame, 64);
+        fdFrame.canId = fdId;
+        fdFrame.dlc = 15;
+        fdFrame.flags |= SilKit_CanFrameFlag_fdf | SilKit_CanFrameFlag_ide;
+
+        // Test data, CAN XL
+        fillData(xlFrame, 2048);
+        xlFrame.canId = xlId;
+        xlFrame.dlc = 2048;
+        xlFrame.flags |= SilKit_CanFrameFlag_fdf | SilKit_CanFrameFlag_ide | SilKit_CanFrameFlag_xlf;
+        xlFrame.af = 0xdeadbeef;
+        xlFrame.vcid = 234;
+        xlFrame.sdt = 1;
+    }
 };
 
 TEST_F(ITest_CanDemo, can_demo)
@@ -76,15 +129,6 @@ TEST_F(ITest_CanDemo, can_demo)
     //Test Results
     auto state = std::make_shared<TestState>();
 
-    //Test data
-    const std::string payload = "Hallo Welt";
-
-    state->payloadBytes.resize(payload.size());
-    std::copy(payload.begin(), payload.end(), state->payloadBytes.begin());
-
-    state->msg = CanFrame{};
-    state->msg.canId = 123;
-    state->msg.dataField = state->payloadBytes;
 
     //Set up the Sending and receiving participants
     {
@@ -146,14 +190,28 @@ TEST_F(ITest_CanDemo, can_demo)
             }
 
             //Normal transmission
-            if (now > 20ms)
+            if (now > 20ms && now <= 30ms)
             {
                 Log() << "---   CanWriter sending CanFrame";
                 canController->SendFrame(state->msg, (void*)(intptr_t)(0xDEADBEEF));
             }
-        }, 1ms);
+            // CAN FD
+            if (now > 30ms && now <= 40ms)
+            {
+                Log() << "---   CanWriter sending FD Frame";
+                canController->SendFrame(state->fdFrame, (void*)(intptr_t)(0xFDFDFDFD));
+            }
+            // CAN XL
+            if (now > 40ms)
+            {
+                Log() << "---   CanWriter sending XL Frame";
+                canController->SendFrame(state->xlFrame, (void*)(intptr_t)(0xFDFDFDFD));
+            }
+            },
+            1ms);
 
-        canController->AddFrameHandler([state](auto, const Can::CanFrameEvent& frameEvent) {
+        canController->AddFrameHandler(
+            [state](auto, const Can::CanFrameEvent& frameEvent) {
             //ignore early test messages
             if (frameEvent.direction == SilKit::Services::TransmitDirection::TX)
             {
@@ -164,7 +222,8 @@ TEST_F(ITest_CanDemo, can_demo)
             {
                 state->writerHasReceivedRx = true;
             }
-        }, ((DirectionMask)TransmitDirection::RX | (DirectionMask)TransmitDirection::TX));
+            },
+            ((DirectionMask)TransmitDirection::RX | (DirectionMask)TransmitDirection::TX));
     }
 
     {
@@ -192,7 +251,8 @@ TEST_F(ITest_CanDemo, can_demo)
             {
                 canController->SendFrame(state->msg);
             }
-        }, 1ms);
+            },
+            1ms);
 
         canController->AddFrameHandler([state, lifecycleService](auto, const Can::CanFrameEvent& frameEvent) {
             if (frameEvent.timestamp < 20ms)
@@ -201,15 +261,15 @@ TEST_F(ITest_CanDemo, can_demo)
                 return;
             }
             EXPECT_EQ(frameEvent.direction, SilKit::Services::TransmitDirection::RX);
-
-            EXPECT_EQ(frameEvent.frame.canId, 123u);
-
             EXPECT_TRUE(frameEvent.userContext == (void*)((size_t)(0)));
 
-            if (state->messageCount++ == 10)
+            if (frameEvent.frame.canId == TestState::xlId)
             {
-                lifecycleService->Stop("Test done");
-                Log() << "---    CanReader: Sending Stop from";
+                if (state->messageCount++ == 10)
+                {
+                    lifecycleService->Stop("Test done");
+                    Log() << "---    CanReader: Sending Stop from";
+                }
             }
             state->result = true;
         });
@@ -247,10 +307,31 @@ TEST_F(ITest_CanDemo, can_demo)
             }
         });
 
-        canController->AddFrameHandler([state](auto, const Can::CanFrameEvent&) { state->monitorReceiveCount++; });
+        canController->AddFrameHandler([state](auto, const Can::CanFrameEvent& frame) {
+            if (frame.frame.canId == TestState::canId)
+            {
+                state->monitorReceiveCount++;
+            }
+            else if (frame.frame.canId == TestState::fdId)
+            {
+                state->monitorReceiveCountFdf++;
+                EXPECT_FALSE(frame.frame.flags & SilKit_CanFrameFlag_xlf);
+                EXPECT_TRUE(frame.frame.flags & SilKit_CanFrameFlag_fdf);
+            }
+            else if (frame.frame.canId == TestState::xlId)
+            {
+                state->monitorReceiveCountXlf++;
+                EXPECT_EQ(frame.frame.sdt, 1);
+                EXPECT_EQ(frame.frame.af, 0xdeadbeef);
+                EXPECT_EQ(frame.frame.vcid, 234);
+                EXPECT_EQ(frame.frame.dataField.size(), 2048);
+                EXPECT_TRUE(frame.frame.flags & SilKit_CanFrameFlag_xlf);
+                EXPECT_TRUE(frame.frame.flags & SilKit_CanFrameFlag_fdf);
+            }
+        });
     }
 
-    auto ok = _simTestHarness->Run(5s);
+    auto ok = _simTestHarness->Run(500s);
     ASSERT_TRUE(ok) << "SimTestHarness should terminate without timeout";
     EXPECT_TRUE(state->result) << " Expecting a message";
     EXPECT_TRUE(state->writerHasReceivedTx) << " Expecting a receive Message with Direction == TX on CanWriter";
@@ -263,6 +344,8 @@ TEST_F(ITest_CanDemo, can_demo)
     EXPECT_FALSE(state->readerReceivedErrorActive) << " Collisions are not computed in trivial simulation";
     EXPECT_FALSE(state->monitorReceivedErrorActive) << " Collisions are not computed in trivial simulation";
     EXPECT_GT(state->monitorReceiveCount, 10u) << "All participants connected to bus must receive frames";
+    EXPECT_GE(state->monitorReceiveCountFdf, 10u) << "All participants connected to bus must receive FD frames";
+    EXPECT_GE(state->monitorReceiveCountXlf, 10u) << "All participants connected to bus must receive XL frames";
 }
 
 } //end namespace

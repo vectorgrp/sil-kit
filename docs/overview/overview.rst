@@ -6,7 +6,8 @@ Vector SIL Kit Overview
 
 .. |_| unicode:: 0xA0 
    :trim:
-.. |CAN-API| replace:: :ref:`CAN / CAN FD<chap:can-service-api>`
+.. |CANBuses| replace:: CAN / CAN |_| FD / CAN |_| XL
+.. |CAN-API| replace:: :ref:`CAN / CAN FD / CAN XL<chap:can-service-api>`
 .. |Ethernet-API| replace:: :ref:`Ethernet<chap:ethernet-service-api>`
 .. |Flexray-API| replace:: :ref:`FlexRay<chap:flexray-service-api>`
 .. |LIN-API| replace:: :ref:`LIN<chap:lin-service-api>`
@@ -46,7 +47,7 @@ The |ProductName| supports the following services:
 Vehicle Networks
 ----------------
 
-The |ProductName| provides means to simulate CAN / CAN |_| FD, Ethernet, FlexRay, and LIN networks.
+The |ProductName| provides means to simulate |CANBuses|, Ethernet, FlexRay, and LIN networks.
 All networks except for FlexRay can be simulated with two different levels of detail: a simple, functional simulation or a detailed simulation.
 The simple simulation assumes no delay and unlimited bandwidth.
 The detailed simulation is enabled by using an additional |ProductName| |NetSim|, which considers these aspects as well.
@@ -67,7 +68,7 @@ The |ProductName| Registry process is required and must be started as a first st
 It acts as a connection broker between the actual simulation participants.
 
 One or more :doc:`participants<../api/participant>` take care of the actual simulation logic and communicate via built-in :ref:`services<sec:overview-supported-services>`.
-|ProductName| supports common vehicle networks (CAN / CAN |_| FD, Ethernet, FlexRay, LIN), data messages for application specific communication in a publish / subscribe pattern, and Remote Procedure Calls (RPC).
+|ProductName| supports common vehicle networks (|CANBuses|, Ethernet, FlexRay, LIN), data messages for application specific communication in a publish / subscribe pattern, and Remote Procedure Calls (RPC).
 The participant and its services are created by the client application using the |ProductName| :doc:`API<../api/api>`.
 
 To manage a group of participants in a simulation, |ProductName| participants can coordinate their startup behavior.

@@ -287,7 +287,7 @@ typedef SilKit_ReturnCode(SilKitFPTR* SilKit_CanController_SendFrame_t)(SilKit_C
  * range: 0 to 16'000'000
  *
  * \param xlRate Baud rate for CAN XL messages given in bps; valid
- * range: 0 to 16'000'000
+ * range: 0 to 20'000'000
  *
  * In a detailed simulation, the baud rate is used to calculate
  * transmission delays of CAN messages and to determine proper
