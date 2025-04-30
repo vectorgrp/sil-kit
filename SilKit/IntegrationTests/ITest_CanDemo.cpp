@@ -93,7 +93,7 @@ struct TestState
     {
         auto fillData = [](auto& frame, size_t size) {
             frame.payloadBytes.resize(size);
-            for (auto i = 0; i < frame.payloadBytes.size(); i++)
+            for (size_t i = 0; i < frame.payloadBytes.size(); i++)
             {
                 frame.payloadBytes[i] = 'A' + (i % 26);
             }
