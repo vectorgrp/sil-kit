@@ -770,6 +770,12 @@ typedef void(SilKitFPTR* SilKit_Experimental_TimeSyncService_OtherSimulationStep
  * It will be called when the time sync. service detects that calling \ref SilKit_TimeSyncService_CompleteSimulationStep
  * will immediately progress the simulation time.
  *
+ * Users of this callback must ensure that only a single participant in the simulation registers it. Multiple
+ * participants registering this callback can cause the time-synchronization to lock up.
+ *
+ * @warning This function is not part of the stable API and ABI of the SIL Kit. It may be removed at any time without
+ *          prior notice.
+ *
  * \param timeSyncService The time sync. service obtained via \ref SilKit_TimeSyncService_Create.
  * \param context The user context pointer made available to the handler.
  * \param handler The handler to be called when completion of the current sim. step will immediately progress sim. time.
@@ -781,6 +787,9 @@ SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Experimental_TimeSyncService_AddOt
 
 /*! \brief Remove a \ref SilKit_Experimental_TimeSyncService_OtherSimulationStepsCompletedHandler_t by \ref SilKit_HandlerId
  *         on this participant
+ *
+ * @warning This function is not part of the stable API and ABI of the SIL Kit. It may be removed at any time without
+ *          prior notice.
  *
  * \param timeSyncService The time sync. service obtained via \ref SilKit_TimeSyncService_Create.
  * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
