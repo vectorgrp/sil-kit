@@ -1,25 +1,7 @@
-/* Copyright (c) 2022 Vector Informatik GmbH
-
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
-
-The above copyright notice and this permission notice shall be
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
-
 #pragma once
+// SPDX-FileCopyrightText: 2025 Vector Informatik GmbH
+//
+// SPDX-License-Identifier: MIT
 
 #include <string>
 #include <memory>
@@ -27,9 +9,18 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <map>
 #include <vector>
 
-#include "yaml-cpp/yaml.h"
+#include "YamlReader.hpp"
+#include "YamlWriter.hpp"
+#include "rapidyaml.hpp"
 
-#include "YamlConversion.hpp"
+
+namespace VSilKit {
+
+// Utility for parsing key-value lists for protocol capabilities
+auto ParseCapabilities(const std::string& input) -> std::vector<std::map<std::string, std::string>>;
+
+} // namespace VSilKit
+
 
 namespace SilKit {
 namespace Config {
@@ -38,56 +29,58 @@ namespace Config {
 // Configuration Parsing
 //////////////////////////////////////////////////////////////////////
 
-//! Helper to print the YAML position in line and column format.
-std::ostream& operator<<(std::ostream& out, const YAML::Mark& mark);
-
-template <typename SilKitConfigT>
-auto to_yaml(const SilKitConfigT& silkitValue) -> YAML::Node
+template <typename T>
+auto Deserialize(const std::string& input) -> T
 {
-    YAML::Node node;
+    if (input.empty())
+    {
+        return {};
+    }
+
+    ryml::ParserOptions options{};
+    options.locations(true);
+
+    ryml::EventHandlerTree eventHandler{};
+    auto parser = ryml::Parser(&eventHandler, options);
+    parser.reserve_locations(100u);
+    auto&& cinput = ryml::to_csubstr(input);
     try
     {
-        node = silkitValue;
-        return node;
-    }
-    catch (const YAML::Exception& ex)
-    {
-        std::stringstream ss;
-        ss << "YAML Error @ " << ex.mark << ": " << ex.msg;
-        throw ConfigurationError{ss.str()};
-    }
-}
-template <typename SilKitConfigT>
-auto from_yaml(const YAML::Node& node) -> SilKitConfigT
-{
-    try
-    {
-        return node.as<SilKitConfigT>();
-    }
-    catch (const YAML::Exception& ex)
-    {
-        std::stringstream ss;
-        ss << "YAML Error @ " << ex.mark << ": " << ex.msg;
-        throw ConfigurationError{ss.str()};
-    }
-}
+        auto tree = ryml::parse_in_arena(&parser, cinput);
+        auto root = tree.crootref();
 
-//! Convert a YAML document node into json, using the internal emitter.
-auto yaml_to_json(YAML::Node node) -> std::string;
+        VSilKit::YamlReader reader{{parser, root}};
+        T result;
+        reader.ReadAll(result);
+        return result;
+    }
+    catch (const std::exception& ex)
+    {
+        throw SilKit::ConfigurationError{ex.what()};
+    }
+    catch (...)
+    {
+        throw;
+    }
+}
 
 
 template <typename T>
-auto Serialize(const T& value) -> std::string
+auto Serialize(const T& input) -> std::string
 {
-    return YAML::Dump(to_yaml<T>(value));
+    ryml::Tree t;
+    VSilKit::YamlWriter writer{t.rootref()};
+    writer.Write(input);
+    return ryml::emitrs_yaml<std::string>(t);
 }
 
 template <typename T>
-auto Deserialize(const std::string& str) -> T
+auto SerializeAsJson(const T& input) -> std::string
 {
-    std::stringstream ss;
-    ss << str;
-    return from_yaml<T>(YAML::Load(ss));
+    ryml::Tree t;
+    VSilKit::YamlWriter writer{t.rootref()};
+    writer.Write(input);
+    return ryml::emitrs_json<std::string>(t);
 }
 
 } // namespace Config

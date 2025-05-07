@@ -51,7 +51,7 @@ CanControllers:
     MdfChannel:
       ChannelName: MyTestChannel1
       ChannelPath: path/to/myTestChannel1
-      ChannelSource: MyTestChannel
+      ChannelSource: MyTestChannel1
       GroupName: MyTestGroup
       GroupPath: path/to/myTestGroup1
       GroupSource: MyTestGroup
@@ -188,7 +188,7 @@ HealthCheck:
 Tracing:
   TraceSinks:
   - Name: Sink1
-    OutputPath: FlexrayDemo_node0.mf4
+    OutputPath: FlexrayDemo_txt0.mf4
     Type: Mdf4File
   TraceSources:
   - Name: Source1
@@ -212,14 +212,22 @@ Middleware:
 
 TEST_F(Test_YamlParser, yaml_complete_configuration)
 {
-    auto node = YAML::Load(completeConfiguration);
-    auto config = node.as<ParticipantConfiguration>();
+    auto config = Deserialize<ParticipantConfiguration>(completeConfiguration);
 
-    EXPECT_TRUE(config.participantName == "Node0");
+    EXPECT_EQ(config.participantName, "Node0");
 
-    EXPECT_TRUE(config.canControllers.size() == 2);
-    EXPECT_TRUE(config.canControllers.at(0).name == "CAN1");
+    EXPECT_EQ(config.canControllers.size(), 2);
+    EXPECT_EQ(config.canControllers.at(0).name, "CAN1");
     EXPECT_TRUE(!config.canControllers.at(0).network.has_value());
+    EXPECT_EQ(config.canControllers.at(0).useTraceSinks.at(0), "Sink1");
+    EXPECT_EQ(config.canControllers.at(0).replay.direction, Replay::Direction::Both);
+    EXPECT_EQ(config.canControllers.at(0).replay.mdfChannel.channelName.value(), "MyTestChannel1");
+    EXPECT_EQ(config.canControllers.at(0).replay.mdfChannel.channelPath.value(), "path/to/myTestChannel1");
+    EXPECT_EQ(config.canControllers.at(0).replay.mdfChannel.channelSource.value(), "MyTestChannel1");
+    EXPECT_EQ(config.canControllers.at(0).replay.mdfChannel.groupName.value(), "MyTestGroup");
+    EXPECT_EQ(config.canControllers.at(0).replay.mdfChannel.groupPath.value(), "path/to/myTestGroup1");
+    EXPECT_EQ(config.canControllers.at(0).replay.mdfChannel.groupSource.value(), "MyTestGroup");
+
     EXPECT_TRUE(config.canControllers.at(1).name == "MyCAN2");
     EXPECT_TRUE(config.canControllers.at(1).network.has_value()
                 && config.canControllers.at(1).network.value() == "CAN2");
@@ -238,6 +246,9 @@ TEST_F(Test_YamlParser, yaml_complete_configuration)
     EXPECT_TRUE(config.dataPublishers.at(0).topic.has_value()
                 && config.dataPublishers.at(0).topic.value() == "Temperature");
 
+    EXPECT_TRUE(config.rpcServers.size() == 1);
+    EXPECT_TRUE(config.rpcClients.size() == 1);
+
     EXPECT_TRUE(config.logging.sinks.size() == 1);
     EXPECT_TRUE(config.logging.sinks.at(0).type == Sink::Type::File);
     EXPECT_TRUE(config.logging.sinks.at(0).level == SilKit::Services::Logging::Level::Critical);
@@ -248,7 +259,7 @@ TEST_F(Test_YamlParser, yaml_complete_configuration)
 
     EXPECT_TRUE(config.tracing.traceSinks.size() == 1);
     EXPECT_TRUE(config.tracing.traceSinks.at(0).name == "Sink1");
-    EXPECT_TRUE(config.tracing.traceSinks.at(0).outputPath == "FlexrayDemo_node0.mf4");
+    EXPECT_TRUE(config.tracing.traceSinks.at(0).outputPath == "FlexrayDemo_txt0.mf4");
     EXPECT_TRUE(config.tracing.traceSinks.at(0).type == TraceSink::Type::Mdf4File);
     EXPECT_TRUE(config.tracing.traceSources.size() == 1);
     EXPECT_TRUE(config.tracing.traceSources.at(0).name == "Source1");
@@ -269,25 +280,35 @@ TEST_F(Test_YamlParser, yaml_complete_configuration)
     EXPECT_FALSE(config.middleware.registryAsFallbackProxy);
 }
 
+TEST_F(Test_YamlParser, yaml_elements_in_random_order)
+{
+    auto config = Deserialize<ParticipantConfiguration>(R"(
+---
+CanControllers:
+- Name: CAN1
+  Replay:
+    UseTraceSource: Source1
+Description: Order of elements is different
+ParticipantName: Node0
+schemaVersion: 1347
+)");
+
+    EXPECT_EQ(config.participantName, "Node0");
+    EXPECT_EQ(config.description, "Order of elements is different");
+    EXPECT_EQ(config.schemaVersion, "1347");
+    EXPECT_EQ(config.canControllers.size(), 1);
+    EXPECT_EQ(config.canControllers.at(0).name, "CAN1");
+    EXPECT_TRUE(!config.canControllers.at(0).network.has_value());
+
+}
 const auto emptyConfiguration = R"raw(
 )raw";
 
 TEST_F(Test_YamlParser, yaml_empty_configuration)
 {
-    auto node = YAML::Load(emptyConfiguration);
-    EXPECT_THROW(
-        {
-            try
-            {
-                node.as<ParticipantConfiguration>();
-            }
-            catch (const YAML::TypedBadConversion<ParticipantConfiguration>& e)
-            {
-                EXPECT_STREQ("bad conversion", e.what());
-                throw;
-            }
-        },
-        YAML::TypedBadConversion<ParticipantConfiguration>);
+    ParticipantConfiguration empty{};
+    auto config = Deserialize <ParticipantConfiguration>(emptyConfiguration);
+    EXPECT_EQ(empty, config);
 }
 
 const auto minimalConfiguration = R"raw(
@@ -296,8 +317,7 @@ ParticipantName: Node1
 
 TEST_F(Test_YamlParser, yaml_minimal_configuration)
 {
-    auto node = YAML::Load(minimalConfiguration);
-    auto config = node.as<ParticipantConfiguration>();
+    auto config = Deserialize <ParticipantConfiguration>(minimalConfiguration);
     EXPECT_TRUE(config.participantName == "Node1");
 }
 
@@ -305,14 +325,14 @@ TEST_F(Test_YamlParser, yaml_native_type_conversions)
 {
     {
         uint16_t a{0x815};
-        auto node = to_yaml(a);
-        uint16_t b = from_yaml<uint16_t>(node);
+        auto txt = Serialize<uint16_t>(a);
+        uint16_t b = Deserialize<uint16_t>(txt);
         EXPECT_TRUE(a == b);
     }
     {
         std::vector<uint32_t> vec{0, 1, 3, 4, 5};
-        auto node = to_yaml(vec);
-        auto vec2 = from_yaml<std::vector<uint32_t>>(node);
+        auto txt = Serialize(vec);
+        auto vec2 = Deserialize<std::vector<uint32_t>>(txt);
         EXPECT_TRUE(vec == vec2);
     }
     {
@@ -323,8 +343,8 @@ TEST_F(Test_YamlParser, yaml_native_type_conversions)
         mdf.groupName = "groupName";
         mdf.groupPath = "groupPath";
         mdf.groupSource = "groupSource";
-        auto yaml = to_yaml(mdf);
-        auto mdf2 = from_yaml<decltype(mdf)>(yaml);
+        auto yaml = Serialize(mdf);
+        auto mdf2 = Deserialize<decltype(mdf)>(yaml);
         EXPECT_TRUE(mdf == mdf2);
     }
     {
@@ -338,24 +358,21 @@ TEST_F(Test_YamlParser, yaml_native_type_conversions)
         sink.type = Sink::Type::Stdout;
         sink.logName = "";
         logger.sinks.push_back(sink);
-        YAML::Node node;
-        node = logger;
-        //auto repr = node.as<std::string>();
-        auto logger2 = node.as<Logging>();
+        auto txt = Serialize(logger);
+        auto logger2 = Deserialize<decltype(logger)>(txt);
         EXPECT_TRUE(logger == logger2);
     }
     {
         ParticipantConfiguration config{};
-        YAML::Node node;
-        node = config;
-        auto config2 = node.as<ParticipantConfiguration>();
+        auto txt = Serialize(config);
+        auto config2 = Deserialize<decltype(config)>(txt);
         EXPECT_TRUE(config == config2);
     }
 }
 
 TEST_F(Test_YamlParser, middleware_convert)
 {
-    auto node = YAML::Load(R"(
+    auto config = Deserialize<Middleware>(R"(
         {
             "RegistryUri": "silkit://not-localhost:12345",
             "ConnectAttempts": 9,
@@ -367,7 +384,6 @@ TEST_F(Test_YamlParser, middleware_convert)
             "RegistryAsFallbackProxy": false
         }
     )");
-    auto config = node.as<Middleware>();
     EXPECT_EQ(config.registryUri, "silkit://not-localhost:12345");
     EXPECT_EQ(config.connectAttempts, 9);
 
@@ -379,15 +395,6 @@ TEST_F(Test_YamlParser, middleware_convert)
     EXPECT_EQ(config.registryAsFallbackProxy, false);
 }
 
-TEST_F(Test_YamlParser, map_serdes)
-{
-    std::map<std::string, std::string> mapin{
-        {"keya", "vala"}, {"keyb", "valb"}, {"keyc", ""}, {"", "vald"}, {"keye\nwithlinebreak", "vale\nwithlinebreak"}};
-    auto mapstr = SilKit::Config::Serialize<std::map<std::string, std::string>>(mapin);
-    auto mapout = SilKit::Config::Deserialize<std::map<std::string, std::string>>(mapstr);
-    EXPECT_EQ(mapin, mapout);
-}
-
 const auto deprecatedFlexRayControllersConfiguration = R"raw(
 FlexRayControllers:
 - Name: FlexRay1
@@ -396,8 +403,7 @@ FlexRayControllers:
 
 TEST_F(Test_YamlParser, yaml_deprecated_FlexRayControllers_configuration)
 {
-    auto node = YAML::Load(deprecatedFlexRayControllersConfiguration);
-    const auto participantConfiguration = node.as<ParticipantConfiguration>();
+    const auto participantConfiguration = Deserialize<ParticipantConfiguration>(deprecatedFlexRayControllersConfiguration);
     EXPECT_EQ(participantConfiguration.flexrayControllers.size(), 2);
     EXPECT_EQ(participantConfiguration.flexrayControllers[0].name, "FlexRay1");
     EXPECT_EQ(participantConfiguration.flexrayControllers[1].name, "FlexRay2");
@@ -415,8 +421,11 @@ FlexrayControllers:
 // Check that having both the correct "FlexrayControllers" and the deprecated "FlexRayControllers" keys present throws.
 TEST_F(Test_YamlParser, yaml_both_FlexrayControllers_and_deprecated_FlexRayControllers_configuration)
 {
-    auto node = YAML::Load(bothFlexrayControllersAndDeprecatedFlexRayControllersConfiguration);
-    EXPECT_THROW({ node.as<ParticipantConfiguration>(); }, ConversionError);
+    EXPECT_THROW({
+            auto cfg = Deserialize<ParticipantConfiguration>(
+                bothFlexrayControllersAndDeprecatedFlexRayControllersConfiguration);
+        },
+        SilKit::ConfigurationError);
 }
 
 const auto rpcClientConfiguration = R"raw(
@@ -431,8 +440,7 @@ RpcClients:
 
 TEST_F(Test_YamlParser, yaml_deprecated_RpcClient_configuration)
 {
-    auto node = YAML::Load(rpcClientConfiguration);
-    const auto participantConfiguration = node.as<ParticipantConfiguration>();
+    auto participantConfiguration = Deserialize<ParticipantConfiguration>(rpcClientConfiguration);
 
     ASSERT_EQ(participantConfiguration.rpcClients.size(), 3);
 
@@ -488,8 +496,12 @@ TEST_F(Test_YamlParser, yaml_broken_RpcClient_configuration)
     };
     for (const auto configuration : brokenConfigurations)
     {
-        auto node = YAML::Load(configuration);
-        EXPECT_THROW({ node.as<ParticipantConfiguration>(); }, ConversionError);
+        EXPECT_THROW(
+            {
+                auto&& brokenConfig = Deserialize<ParticipantConfiguration>(configuration);
+                (void)brokenConfig;
+            },
+            SilKit::ConfigurationError);
     }
 }
 
@@ -505,8 +517,8 @@ RpcServers:
 
 TEST_F(Test_YamlParser, yaml_deprecated_RpcServer_configuration)
 {
-    auto node = YAML::Load(rpcServerConfiguration);
-    const auto participantConfiguration = node.as<ParticipantConfiguration>();
+
+    auto participantConfiguration = Deserialize<ParticipantConfiguration>(rpcServerConfiguration);
 
     ASSERT_EQ(participantConfiguration.rpcServers.size(), 3);
 
@@ -522,5 +534,4 @@ TEST_F(Test_YamlParser, yaml_deprecated_RpcServer_configuration)
     ASSERT_TRUE(participantConfiguration.rpcServers[2].functionName.has_value());
     EXPECT_EQ(participantConfiguration.rpcServers[2].functionName.value(), "TheFunction3");
 }
-
 } // anonymous namespace

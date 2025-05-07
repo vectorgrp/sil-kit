@@ -28,7 +28,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 namespace {
 
-void CheckFull(const SilKitRegistry::Config::V1::RegistryConfiguration& c)
+void CheckFull(const SilKitRegistry::Config::v1::RegistryConfiguration& c)
 {
     EXPECT_EQ(c.description, "Test_RegistryConfiguration_Full");
 
@@ -47,6 +47,7 @@ void CheckFull(const SilKitRegistry::Config::V1::RegistryConfiguration& c)
 
     ASSERT_TRUE(c.dashboardUri.has_value());
     EXPECT_EQ(c.dashboardUri.value(), "http://dashboard.example.com:1234");
+    EXPECT_TRUE(c.experimental.metrics.collectFromRemote);
 }
 
 TEST(Test_RegistryConfiguration, FullJson)
@@ -64,7 +65,7 @@ TEST(Test_RegistryConfiguration, FullYaml)
 }
 
 
-void CheckEmpty(const SilKitRegistry::Config::V1::RegistryConfiguration& c)
+void CheckEmpty(const SilKitRegistry::Config::v1::RegistryConfiguration& c)
 {
     EXPECT_EQ(c.description, "");
 

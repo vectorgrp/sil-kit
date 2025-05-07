@@ -112,7 +112,7 @@ void ConfigureLoggingForWindowsService(std::shared_ptr<SilKit::Config::IParticip
 
 void OverrideFromRegistryConfiguration(std::shared_ptr<SilKit::Config::IParticipantConfiguration> configuration,
                                        std::string& dashboardUri, bool& enableDashboard,
-                                       const SilKitRegistry::Config::V1::RegistryConfiguration& registryConfiguration)
+                                       const SilKitRegistry::Config::v1::RegistryConfiguration& registryConfiguration)
 {
     auto config = std::dynamic_pointer_cast<SilKit::Config::ParticipantConfiguration>(configuration);
     SILKIT_ASSERT(config != nullptr);
@@ -287,8 +287,6 @@ auto StartRegistry(std::shared_ptr<SilKit::Config::IParticipantConfiguration> co
 
         const auto serializedConfiguration = [&generatedConfiguration,
                                               path = generatedConfigurationPath]() -> std::string {
-            const auto yamlNode = SilKit::Config::to_yaml(generatedConfiguration);
-
             const auto jsonSuffix = std::string{".json"};
             const auto pathHasJsonSuffix =
                 path.size() >= jsonSuffix.size()
@@ -296,11 +294,11 @@ auto StartRegistry(std::shared_ptr<SilKit::Config::IParticipantConfiguration> co
 
             if (pathHasJsonSuffix)
             {
-                return SilKit::Config::yaml_to_json(yamlNode);
+                return SilKit::Config::SerializeAsJson(generatedConfiguration);
             }
             else
             {
-                return YAML::Dump(yamlNode);
+                return SilKit::Config::Serialize(generatedConfiguration);
             }
         }();
 
@@ -459,7 +457,7 @@ int main(int argc, char** argv)
 
     try
     {
-        SilKitRegistry::Config::V1::RegistryConfiguration registryConfiguration{};
+        SilKitRegistry::Config::v1::RegistryConfiguration registryConfiguration{};
 
         const auto registryConfigurationPathOpt = commandlineParser.Get<CliParser::Option>("registry-configuration");
         if (registryConfigurationPathOpt.HasValue())

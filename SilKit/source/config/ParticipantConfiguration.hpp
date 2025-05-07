@@ -338,6 +338,17 @@ struct Experimental
 };
 
 // ================================================================================
+//  Includes
+// ================================================================================
+
+//! \brief Structure that contains experimental settings
+struct Includes
+{
+    std::vector<std::string> searchPathHints;
+    std::vector<std::string> files;
+};
+
+// ================================================================================
 //  Root
 // ================================================================================
 
@@ -374,6 +385,7 @@ struct ParticipantConfiguration : public IParticipantConfiguration
     HealthCheck healthCheck;
     Tracing tracing;
     Extensions extensions;
+    Includes includes;
     Middleware middleware;
     Experimental experimental;
 };
@@ -392,6 +404,7 @@ bool operator==(const MetricsSink& lhs, const MetricsSink& rhs);
 bool operator==(const Metrics& lhs, const Metrics& rhs);
 bool operator==(const Extensions& lhs, const Extensions& rhs);
 bool operator==(const Middleware& lhs, const Middleware& rhs);
+bool operator==(const Includes& lhs, const Includes& rhs);
 bool operator==(const ParticipantConfiguration& lhs, const ParticipantConfiguration& rhs);
 bool operator==(const TimeSynchronization& lhs, const TimeSynchronization& rhs);
 bool operator==(const Experimental& lhs, const Experimental& rhs);
@@ -406,3 +419,35 @@ bool operator>(const MetricsSink& lhs, const MetricsSink& rhs);
 } // namespace v1
 } // namespace Config
 } // namespace SilKit
+
+namespace SilKitRegistry {
+namespace Config {
+namespace v1 {
+
+constexpr inline auto GetSchemaVersion() -> const char*
+{
+    return "1";
+}
+
+struct Experimental
+{
+    SilKit::Config::v1::Metrics metrics;
+};
+
+struct RegistryConfiguration
+{
+    std::string description{""};
+    SilKit::Util::Optional<std::string> listenUri;
+    SilKit::Util::Optional<bool> enableDomainSockets;
+    SilKit::Util::Optional<std::string> dashboardUri;
+    SilKit::Config::Logging logging{};
+    Experimental experimental{};
+};
+
+bool operator==(const Experimental& lhs, const Experimental& rhs);
+
+
+
+} // namespace V1
+} // namespace Config
+} // namespace SilKitRegistry

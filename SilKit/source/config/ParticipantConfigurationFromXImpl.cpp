@@ -118,8 +118,7 @@ struct ConfigIncludeData
 void Validate(const std::string& text)
 {
     std::stringstream warnings;
-    SilKit::Config::YamlValidator validator;
-    if (!validator.Validate(text, warnings))
+    if (!ValidateWithSchema(text, warnings))
     {
         throw SilKit::ConfigurationError{"YAML validation returned errors:\n" + warnings.str()};
     }
@@ -129,24 +128,7 @@ void Validate(const std::string& text)
     }
 }
 
-auto Parse(const YAML::Node& doc) -> SilKit::Config::ParticipantConfiguration
-{
-    auto configuration = !doc.IsNull() ? SilKit::Config::from_yaml<SilKit::Config::v1::ParticipantConfiguration>(doc)
-                                       : SilKit::Config::v1::ParticipantConfiguration{};
-    configuration.configurationFilePath.clear();
-    return configuration;
-}
 
-void CollectIncludes(const YAML::Node& config, std::vector<std::string>& levelIncludes)
-{
-    if (config["Includes"])
-    {
-        for (const auto& include : config["Includes"]["Files"])
-        {
-            levelIncludes.push_back(include.as<std::string>());
-        }
-    }
-}
 
 // ================================================================================
 //  Helper functions to find and open config snippets
@@ -158,30 +140,26 @@ std::string GetConfigParentPath(const std::string& configFile)
     return fs::parent_path(filePath).string();
 }
 
-void AppendToSearchPaths(const YAML::Node& doc, ConfigIncludeData& configData)
+void AppendToSearchPaths(const ParticipantConfiguration& config, ConfigIncludeData& configData)
 {
-    if (doc["Includes"])
+    for (auto&& searchPath: config.includes.searchPathHints)
     {
-        for (auto& searchPath : doc["Includes"]["SearchPathHints"])
+        if (searchPath.empty())
         {
-            auto tmpString = searchPath.as<std::string>();
-
-            if (tmpString.empty())
-            {
-                std::cout << "Warning: Got empty SearchPathHint!";
-                continue;
-            }
-
-            std::string suffix = "";
-            auto lastChar = tmpString.back();
-            // We assume that the user provides a Path
-            // Make sure they have a seperator
-            if (lastChar != '/' && lastChar != '\\')
-            {
-                suffix = SilKit::Filesystem::path::preferred_separator;
-            }
-            configData.searchPaths.insert(searchPath.as<std::string>() + suffix);
+            std::cout << "Warning: Got empty SearchPathHint!";
+            continue;
         }
+
+        std::string suffix = "";
+        auto lastChar = searchPath.back();
+        // We assume that the user provides a Path
+        // Make sure they have a seperator
+        if (lastChar != '/' && lastChar != '\\')
+        {
+            suffix = SilKit::Filesystem::path::preferred_separator;
+        }
+
+        configData.searchPaths.insert(searchPath + suffix);
     }
 }
 
@@ -271,61 +249,59 @@ void MergeCacheSet(const std::set<T>& cache, std::vector<T>& root)
 // ================================================================================
 //  Helper functions to cache config entries with complicated merge strategies
 // ================================================================================
-template <typename FieldT>
-void PopulateCacheField(const YAML::Node& root, std::string rootname, const std::string& field,
-                        SilKit::Util::Optional<FieldT>& obj)
-{
-    SilKit::Util::Optional<FieldT> tmpObj;
-    optional_decode(tmpObj, root, field);
 
-    if (tmpObj.has_value())
+template <typename T>
+void CacheNonDefault(const T& defaultValue, const T& value, const std::string& configName, SilKit::Util::Optional<T>& cacheValue)
+{
+    if (defaultValue != value)
     {
-        if (obj.has_value() && (obj != tmpObj))
+        SilKit::Util::Optional<T> optValue{value};
+
+        if (cacheValue.has_value() && (cacheValue != optValue))
         {
             std::stringstream error_msg;
-            error_msg << "Config element " << field << "(" << tmpObj << ") for " << rootname << " already set to \'"
-                      << obj.value() << "\'!";
+            error_msg << "Config element " << configName << "='" << value << "' "
+                      << " is already set to '" << cacheValue.value() << "'!";
             throw SilKit::ConfigurationError(error_msg.str());
         }
-        obj = tmpObj;
+        cacheValue = optValue;
     }
 }
 
-void CacheMiddleware(const YAML::Node& root, MiddlewareCache& cache)
+void Cache(const Middleware& root, MiddlewareCache& cache)
 {
-    if (root["AcceptorUris"])
+    if (!root.acceptorUris.empty())
     {
         if (cache.acceptorUris.size() > 0)
         {
             throw SilKit::ConfigurationError{"AcceptorUris already defined!"};
         }
-        optional_decode(cache.acceptorUris, root, "AcceptorUris");
+        cache.acceptorUris = root.acceptorUris;
     }
-
-    PopulateCacheField(root, "Middleware", "ConnectAttempts", cache.connectAttempts);
-    PopulateCacheField(root, "Middleware", "TcpNoDelay", cache.tcpNoDelay);
-    PopulateCacheField(root, "Middleware", "TcpQuickAck", cache.tcpQuickAck);
-    PopulateCacheField(root, "Middleware", "TcpReceiveBufferSize", cache.tcpReceiveBufferSize);
-    PopulateCacheField(root, "Middleware", "TcpSendBufferSize", cache.tcpSendBufferSize);
-    PopulateCacheField(root, "Middleware", "EnableDomainSockets", cache.enableDomainSockets);
-    PopulateCacheField(root, "Middleware", "RegistryAsFallbackProxy", cache.registryAsFallbackProxy);
-    PopulateCacheField(root, "Middleware", "RegistryUri", cache.registryUri);
-    PopulateCacheField(root, "Middleware", "ExperimentalRemoteParticipantConnection",
+    static const Middleware defaultObject;
+    CacheNonDefault(defaultObject.connectAttempts, root.connectAttempts, "Middleware.ConnectAttempts", cache.connectAttempts);
+    CacheNonDefault(defaultObject.tcpNoDelay, root.tcpNoDelay, "Middleware.TcpNoDelay", cache.tcpNoDelay);
+    CacheNonDefault(defaultObject.tcpQuickAck, root.tcpQuickAck, "Middleware.TcpQuickAck", cache.tcpQuickAck);
+    CacheNonDefault(defaultObject.tcpReceiveBufferSize, root.tcpReceiveBufferSize, "Middleware.TcpReceiveBufferSize", cache.tcpReceiveBufferSize);
+    CacheNonDefault(defaultObject.tcpSendBufferSize, root.tcpSendBufferSize, "Middleware.TcpSendBufferSize", cache.tcpSendBufferSize);
+    CacheNonDefault(defaultObject.enableDomainSockets, root.enableDomainSockets, "Middleware.EnableDomainSockets", cache.enableDomainSockets);
+    CacheNonDefault(defaultObject.registryAsFallbackProxy, root.registryAsFallbackProxy, "Middleware.RegistryAsFallbackProxy", cache.registryAsFallbackProxy);
+    CacheNonDefault(defaultObject.registryUri, root.registryUri, "Middleware.RegistryUri", cache.registryUri);
+    CacheNonDefault(defaultObject.experimentalRemoteParticipantConnection, root.experimentalRemoteParticipantConnection, "Middleware.ExperimentalRemoteParticipantConnection",
                        cache.experimentalRemoteParticipantConnection);
-    PopulateCacheField(root, "Middleware", "ConnectTimeoutSeconds", cache.connectTimeoutSeconds);
+    CacheNonDefault(defaultObject.connectTimeoutSeconds, root.connectTimeoutSeconds, "Middleware.ConnectTimeoutSeconds", cache.connectTimeoutSeconds);
+}
+void CacheLoggingOptions(const Logging& config, GlobalLogCache& cache)
+{
+    const Logging defaultObject{};
+    CacheNonDefault(defaultObject.flushLevel, config.flushLevel, "Logging.FlushLevel", cache.flushLevel);
+    CacheNonDefault(defaultObject.logFromRemotes, config.logFromRemotes, "Logging.LogFromRemotes", cache.logFromRemotes);
 }
 
-void CacheLoggingOptions(const YAML::Node& root, GlobalLogCache& cache)
+void CacheLoggingSinks(const Logging& config, GlobalLogCache& cache)
 {
-    PopulateCacheField(root, "Logging", "FlushLevel", cache.flushLevel);
-    PopulateCacheField(root, "Logging", "LogFromRemotes", cache.logFromRemotes);
-}
-
-void CacheLoggingSinks(const YAML::Node& config, GlobalLogCache& cache)
-{
-    for (const auto& sinkNode : config["Sinks"])
+    for (auto&& sink: config.sinks)
     {
-        auto sink = parse_as<Sink>(sinkNode);
         if (sink.type == Sink::Type::Stdout)
         {
             if (!cache.stdOutSink.has_value())
@@ -336,9 +312,7 @@ void CacheLoggingSinks(const YAML::Node& config, GlobalLogCache& cache)
             }
             else
             {
-                std::stringstream error_msg;
-                error_msg << "Stdout Sink already exists!";
-                throw SilKit::ConfigurationError(error_msg.str());
+                throw SilKit::ConfigurationError{"Stdout Sink already exists!"};
             }
         }
         else if (sink.type == Sink::Type::Remote)
@@ -351,9 +325,7 @@ void CacheLoggingSinks(const YAML::Node& config, GlobalLogCache& cache)
             }
             else
             {
-                std::stringstream error_msg;
-                error_msg << "Remote Sink already exists!";
-                throw SilKit::ConfigurationError(error_msg.str());
+                throw SilKit::ConfigurationError{"Remote Sink already exists!"};
             }
         }
         else
@@ -373,92 +345,84 @@ void CacheLoggingSinks(const YAML::Node& config, GlobalLogCache& cache)
     }
 }
 
-void CacheTimeSynchronization(const YAML::Node& root, TimeSynchronizationCache& cache)
+void Cache(const TimeSynchronization& root, TimeSynchronizationCache& cache)
 {
-    PopulateCacheField(root, "TimeSynchronization", "AnimationFactor", cache.animationFactor);
-    PopulateCacheField(root, "TimeSynchronization", "EnableMessageAggregation", cache.enableMessageAggregation);
+    static const TimeSynchronization defaultObject;
+    CacheNonDefault(defaultObject.animationFactor, root.animationFactor, "TimeSynchronization.AnimationFactor", cache.animationFactor);
+    CacheNonDefault(defaultObject.enableMessageAggregation, root.enableMessageAggregation, "TimeSynchronization.EnableMessageAggregation", cache.enableMessageAggregation);
 }
 
-void CacheMetrics(const YAML::Node& root, MetricsCache& cache)
+void Cache(const Metrics& root, MetricsCache& cache)
 {
-    PopulateCacheField(root, "Metrics", "CollectFromRemote", cache.collectFromRemote);
+    static const Metrics defaultObject;
+    CacheNonDefault(defaultObject.collectFromRemote, root.collectFromRemote, "Metrics.CollectFromRemote", cache.collectFromRemote);
 
-    if (root["Sinks"])
+    for (const auto& sink: root.sinks)
     {
-        for (const auto& sinkNode : root["Sinks"])
+        if (sink.type == MetricsSink::Type::JsonFile)
         {
-            auto sink = parse_as<MetricsSink>(sinkNode);
-            if (sink.type == MetricsSink::Type::JsonFile)
+            if (cache.fileNames.count(sink.name) == 0)
             {
-                if (cache.fileNames.count(sink.name) == 0)
-                {
-                    cache.jsonFileSinks.insert(sink);
-                    cache.fileNames.insert(sink.name);
-                }
-                else
-                {
-                    std::stringstream error_msg;
-                    error_msg << "JSON file metrics sink " << sink.name << " already exists!";
-                    throw SilKit::ConfigurationError(error_msg.str());
-                }
-            }
-            else if (sink.type == MetricsSink::Type::Remote)
-            {
-                if (!cache.remoteSink.has_value())
-                {
-                    // Replace the already included sink with this one
-                    // since we have not set it yet
-                    cache.remoteSink = sink;
-                }
-                else
-                {
-                    std::stringstream error_msg;
-                    error_msg << "Remote metrics sink already exists!";
-                    throw SilKit::ConfigurationError(error_msg.str());
-                }
+                cache.jsonFileSinks.insert(sink);
+                cache.fileNames.insert(sink.name);
             }
             else
             {
                 std::stringstream error_msg;
-                error_msg << "Invalid MetricsSink::Type("
-                          << static_cast<std::underlying_type_t<MetricsSink::Type>>(sink.type) << ")";
+                error_msg << "JSON file metrics sink " << sink.name << " already exists!";
                 throw SilKit::ConfigurationError(error_msg.str());
             }
+        }
+        else if (sink.type == MetricsSink::Type::Remote)
+        {
+            if (!cache.remoteSink.has_value())
+            {
+                // Replace the already included sink with this one
+                // since we have not set it yet
+                cache.remoteSink = sink;
+            }
+            else
+            {
+                std::stringstream error_msg;
+                error_msg << "Remote metrics sink already exists!";
+                throw SilKit::ConfigurationError(error_msg.str());
+            }
+        }
+        else
+        {
+            std::stringstream error_msg;
+            error_msg << "Invalid MetricsSink::Type("
+                      << static_cast<std::underlying_type_t<MetricsSink::Type>>(sink.type) << ")";
+            throw SilKit::ConfigurationError(error_msg.str());
         }
     }
 }
 
-void CacheExperimental(const YAML::Node& root, ExperimentalCache& cache)
+void Cache(const Experimental& root, ExperimentalCache& cache)
 {
-    if (root["TimeSynchronization"])
-    {
-        CacheTimeSynchronization(root["TimeSynchronization"], cache.timeSynchronizationCache);
-    }
-
-    if (root["Metrics"])
-    {
-        CacheMetrics(root["Metrics"], cache.metricsCache);
-    }
+    Cache(root.timeSynchronization, cache.timeSynchronizationCache);
+    Cache(root.metrics, cache.metricsCache);
 }
 
-void PopulateCaches(const YAML::Node& config, ConfigIncludeData& configIncludeData)
+
+void PopulateCaches(const ParticipantConfiguration& config, ConfigIncludeData& configIncludeData)
 {
+    const ParticipantConfiguration defaultConfiguration{};
     // Cache those config options that need to be default constructed, since we lose the information
     // about default constructed vs. explicitly set to the default value later
-    if (config["Middleware"])
-    {
-        CacheMiddleware(config["Middleware"], configIncludeData.middlewareCache);
-    }
 
-    if (config["Logging"])
+    if (!(config.middleware == defaultConfiguration.middleware))
     {
-        CacheLoggingOptions(config["Logging"], configIncludeData.logCache);
-        CacheLoggingSinks(config["Logging"], configIncludeData.logCache);
+        Cache(config.middleware, configIncludeData.middlewareCache);
     }
-
-    if (config["Experimental"])
+    if (!(config.logging == defaultConfiguration.logging))
     {
-        CacheExperimental(config["Experimental"], configIncludeData.experimentalCache);
+        CacheLoggingOptions(config.logging, configIncludeData.logCache);
+        CacheLoggingSinks(config.logging, configIncludeData.logCache);
+    }
+    if (!(config.experimental == defaultConfiguration.experimental))
+    {
+        Cache(config.experimental, configIncludeData.experimentalCache);
     }
 }
 
@@ -628,11 +592,18 @@ auto MergeConfigs(ConfigIncludeData& configIncludeData) -> SilKit::Config::Parti
 // =========================================================================================================================
 // Include Logic
 // =========================================================================================================================
-void ProcessIncludes(const YAML::Node& config, ConfigIncludeData& configData)
+void ProcessIncludes(const ParticipantConfiguration& config, ConfigIncludeData& configData)
 {
     std::vector<std::string> levelIncludes;
 
-    CollectIncludes(config, levelIncludes);
+    auto collectIncludes = [](auto&& config, auto&& levelIncludes) {
+        for (auto&& include : config.includes.files)
+        {
+            levelIncludes.push_back(include);
+        }
+    };
+
+    collectIncludes(config, levelIncludes);
     PopulateCaches(config, configData);
 
     // Breadth first traversal, which means we collect all includes per "level" first
@@ -651,20 +622,20 @@ void ProcessIncludes(const YAML::Node& config, ConfigIncludeData& configData)
             }
 
             // Get the next Include to be processed within this tree level
-            auto nextConfig = SilKit::Config::OpenFileWithSearchHints(include, configData.searchPaths);
-            SilKit::Config::Validate(nextConfig);
+            auto nextConfigText = SilKit::Config::OpenFileWithSearchHints(include, configData.searchPaths);
+            SilKit::Config::Validate(nextConfigText);
 
             // Load and Parse the file as Yaml
-            auto nextConfigNode = YAML::Load(nextConfig);
-            configData.configBuffer.push_back((ConfigInclude(include, SilKit::Config::Parse(nextConfigNode))));
+            auto nextConfig = SilKit::Config::Deserialize<ParticipantConfiguration>(nextConfigText);
+            configData.configBuffer.push_back(ConfigInclude(include, nextConfig));
 
             // Append the config to our metadata buffer, so we can make informed decisions whether the compiled config is valid
             configData.includeSet.insert(include);
-            AppendToSearchPaths(nextConfigNode, configData);
+            AppendToSearchPaths(nextConfig, configData);
 
             // Collect Caches and Include for the next level within the tree
-            CollectIncludes(nextConfigNode, tmpIncludes);
-            PopulateCaches(nextConfigNode, configData);
+            collectIncludes(nextConfig, tmpIncludes);
+            PopulateCaches(nextConfig, configData);
         }
 
         // Goto next Level
@@ -677,23 +648,17 @@ void ProcessIncludes(const YAML::Node& config, ConfigIncludeData& configData)
     }
 }
 
-auto ParticipantConfigurationFromXImpl(const std::string& text,
+
+auto PaticipantConfigurationWithIncludes(const std::string& text,
                                        struct ConfigIncludeData& configData) -> SilKit::Config::ParticipantConfiguration
 {
-    SilKit::Config::Validate(text);
-    YAML::Node doc = YAML::Load(text);
-
-    auto configuration = SilKit::Config::Parse(doc);
+    auto configuration = SilKit::Config::Deserialize<ParticipantConfiguration>(text);
     configData.configBuffer.push_back(ConfigInclude("root", configuration));
 
-    // Check search Paths
-    if (doc["Includes"])
-    {
-        AppendToSearchPaths(doc, configData);
-    }
+    AppendToSearchPaths(configuration, configData);
 
     // Get all configs
-    ProcessIncludes(doc, configData);
+    ProcessIncludes(configuration, configData);
     // Merge the root and included configs
     return MergeConfigs(configData);
 }
@@ -780,7 +745,15 @@ bool operator==(const Middleware& lhs, const Middleware& rhs)
     return lhs.registryUri == rhs.registryUri && lhs.connectAttempts == rhs.connectAttempts
            && lhs.enableDomainSockets == rhs.enableDomainSockets && lhs.tcpNoDelay == rhs.tcpNoDelay
            && lhs.tcpQuickAck == rhs.tcpQuickAck && lhs.tcpReceiveBufferSize == rhs.tcpReceiveBufferSize
-           && lhs.tcpSendBufferSize == rhs.tcpSendBufferSize && lhs.acceptorUris == rhs.acceptorUris;
+           && lhs.tcpSendBufferSize == rhs.tcpSendBufferSize && lhs.acceptorUris == rhs.acceptorUris
+           && lhs.registryAsFallbackProxy == rhs.registryAsFallbackProxy
+           && lhs.connectTimeoutSeconds == rhs.connectTimeoutSeconds
+           && lhs.experimentalRemoteParticipantConnection == rhs.experimentalRemoteParticipantConnection;
+}
+
+bool operator==(const Includes& lhs, const Includes& rhs)
+{
+    return lhs.files == rhs.files && lhs.searchPathHints == rhs.searchPathHints;
 }
 
 bool operator==(const ParticipantConfiguration& lhs, const ParticipantConfiguration& rhs)
@@ -790,7 +763,7 @@ bool operator==(const ParticipantConfiguration& lhs, const ParticipantConfigurat
            && lhs.flexrayControllers == rhs.flexrayControllers && lhs.dataPublishers == rhs.dataPublishers
            && lhs.dataSubscribers == rhs.dataSubscribers && lhs.rpcClients == rhs.rpcClients
            && lhs.rpcServers == rhs.rpcServers && lhs.logging == rhs.logging && lhs.healthCheck == rhs.healthCheck
-           && lhs.tracing == rhs.tracing && lhs.extensions == rhs.extensions && lhs.experimental == rhs.experimental;
+           && lhs.tracing == rhs.tracing && lhs.extensions == rhs.extensions && lhs.experimental == rhs.experimental && lhs.includes == rhs.includes;
 }
 
 bool operator==(const TimeSynchronization& lhs, const TimeSynchronization& rhs)
@@ -845,31 +818,38 @@ auto operator<<(std::ostream& out, const Label& label) -> std::ostream&
 auto ParticipantConfigurationFromStringImpl(const std::string& text)
     -> std::shared_ptr<SilKit::Config::IParticipantConfiguration>
 {
-    auto configData = ConfigIncludeData();
-    auto configuration = SilKit::Config::ParticipantConfigurationFromXImpl(text, configData);
+    auto configData = ConfigIncludeData{};
+    auto configuration = PaticipantConfigurationWithIncludes(text, configData);
     return std::make_shared<SilKit::Config::ParticipantConfiguration>(std::move(configuration));
 }
 
 auto ParticipantConfigurationFromFileImpl(const std::string& filename)
     -> std::shared_ptr<SilKit::Config::IParticipantConfiguration>
 {
-    auto configData = ConfigIncludeData();
+    auto configData = ConfigIncludeData{};
     configData.searchPaths.insert(SilKit::Config::GetConfigParentPath(filename));
 
     // Parse the root config
     std::string text;
-    try
-    {
-        text = SilKit::Config::OpenFileWithSearchHints(filename, configData.searchPaths);
-    }
-    catch (...)
-    {
-        throw;
-    }
+    text = SilKit::Config::OpenFileWithSearchHints(filename, configData.searchPaths);
 
-    auto configuration = SilKit::Config::ParticipantConfigurationFromXImpl(text, configData);
+    auto configuration = PaticipantConfigurationWithIncludes(text, configData);
     return std::make_shared<SilKit::Config::ParticipantConfiguration>(std::move(configuration));
 }
 
 } // namespace Config
 } // namespace SilKit
+
+namespace SilKitRegistry {
+namespace Config {
+namespace v1 {
+
+bool operator==(const Experimental& lhs, const Experimental& rhs)
+{
+    return lhs.metrics == rhs.metrics;
+}
+
+} // namespace V1
+} // namespace Config
+} // namespace SilKitRegistry
+

@@ -88,7 +88,7 @@ TEST_F(Test_ParticipantConfiguration, full_configuration_file_with_includes)
     auto participantConfig = *std::dynamic_pointer_cast<ParticipantConfiguration>(cfg);
     auto participantConfigRef = *std::dynamic_pointer_cast<ParticipantConfiguration>(ref_cfg);
 
-    ASSERT_TRUE(participantConfig == participantConfigRef);
+    ASSERT_EQ(participantConfig, participantConfigRef);
 }
 
 TEST_F(Test_ParticipantConfiguration, participant_config_multiple_acceptor_uris)
@@ -258,10 +258,11 @@ TEST_F(Test_ParticipantConfiguration, full_configuration_file_json_yaml_equal)
 TEST_F(Test_ParticipantConfiguration, remote_metric_sink_collect_from_remote_fails)
 {
     constexpr auto configurationString = R"(
-Metrics:
-  CollectFromRemote: true
-  Sinks:
-    - Type: Remote
+Experimental:
+    Metrics:
+      CollectFromRemote: true
+      Sinks:
+        - Type: Remote
 )";
 
     ASSERT_THROW(SilKit::Config::ParticipantConfigurationFromStringImpl(configurationString),

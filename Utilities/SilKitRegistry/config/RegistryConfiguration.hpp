@@ -28,41 +28,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "ParticipantConfiguration.hpp"
 
 
-namespace SilKitRegistry {
-namespace Config {
-namespace V1 {
-
-constexpr inline auto GetSchemaVersion() -> const char*
-{
-    return "1";
-}
-
-struct Experimental
-{
-    SilKit::Config::v1::Metrics metrics;
-};
-
-struct RegistryConfiguration
-{
-    std::string description{""};
-    SilKit::Util::Optional<std::string> listenUri;
-    SilKit::Util::Optional<bool> enableDomainSockets;
-    SilKit::Util::Optional<std::string> dashboardUri;
-    SilKit::Config::Logging logging{};
-    Experimental experimental{};
-};
-
-bool operator==(const Experimental& lhs, const Experimental& rhs);
-
-} // namespace V1
-} // namespace Config
-} // namespace SilKitRegistry
-
 
 namespace SilKitRegistry {
 namespace Config {
 
-auto Parse(const std::string& string) -> V1::RegistryConfiguration;
+auto Parse(const std::string& string) -> v1::RegistryConfiguration;
 
 } // namespace Config
 } // namespace SilKitRegistry
