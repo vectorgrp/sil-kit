@@ -71,7 +71,8 @@ void MetricsProcessor::Process(const std::string &origin, const VSilKit::Metrics
     }
 }
 
-void MetricsProcessor::OnMetricsUpdate(const std::string &participantName, const MetricsUpdate &metricsUpdate)
+void MetricsProcessor::OnMetricsUpdate(const std::string &simulationName, const std::string &participantName,
+                                       const MetricsUpdate &metricsUpdate)
 {
     if (participantName == _participantName)
     {

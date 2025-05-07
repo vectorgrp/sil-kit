@@ -400,7 +400,8 @@ auto VAsioRegistry::GetServiceDescriptor() const -> const ServiceDescriptor&
 }
 
 
-void VAsioRegistry::OnMetricsUpdate(const std::string& participantName, const VSilKit::MetricsUpdate& metricsUpdate)
+void VAsioRegistry::OnMetricsUpdate(const std::string& simulationName, const std::string& participantName,
+                                    const VSilKit::MetricsUpdate& metricsUpdate)
 {
     Log::Info(GetLogger(), "Participant {} updates {} metrics", participantName, metricsUpdate.metrics.size());
     for (const auto& data : metricsUpdate.metrics)
@@ -409,8 +410,10 @@ void VAsioRegistry::OnMetricsUpdate(const std::string& participantName, const VS
                   participantName);
     }
 
-    dynamic_cast<VSilKit::MetricsProcessor&>(*_metricsProcessor).OnMetricsUpdate(participantName, metricsUpdate);
-    _registryEventListener->OnMetricsUpdate("", participantName, metricsUpdate);
+    dynamic_cast<VSilKit::MetricsProcessor&>(*_metricsProcessor)
+        .OnMetricsUpdate(simulationName, participantName, metricsUpdate);
+
+    _registryEventListener->OnMetricsUpdate(simulationName, participantName, metricsUpdate);
 }
 
 
