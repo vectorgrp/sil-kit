@@ -29,7 +29,9 @@ void MetricsReceiver::ReceiveMsg(const SilKit::Core::IServiceEndpoint *from, con
         return;
     }
 
-    _listener->OnMetricsUpdate(from->GetServiceDescriptor().GetParticipantName(), msg);
+    const auto &serviceDescriptor = from->GetServiceDescriptor();
+
+    _listener->OnMetricsUpdate(serviceDescriptor.GetSimulationName(), serviceDescriptor.GetParticipantName(), msg);
 }
 
 

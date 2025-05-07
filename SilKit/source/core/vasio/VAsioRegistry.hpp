@@ -121,7 +121,8 @@ private: // IServiceEndpoint
     auto GetServiceDescriptor() const -> const ServiceDescriptor& override;
 
 private: // IMetricsReceiverListener
-    void OnMetricsUpdate(const std::string& participantName, const VSilKit::MetricsUpdate& metricsUpdate) override;
+    void OnMetricsUpdate(const std::string& simulationName, const std::string& participantName,
+                         const VSilKit::MetricsUpdate& metricsUpdate) override;
 
 private:
     // ----------------------------------------
