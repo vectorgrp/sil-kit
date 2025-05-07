@@ -17,7 +17,8 @@ namespace VSilKit {
 struct IMetricsReceiverListener
 {
     virtual ~IMetricsReceiverListener() = default;
-    virtual void OnMetricsUpdate(const std::string& participantName, const MetricsUpdate& metricsUpdate) = 0;
+    virtual void OnMetricsUpdate(const std::string& simulationName, const std::string& participantName,
+                                 const MetricsUpdate& metricsUpdate) = 0;
 };
 
 

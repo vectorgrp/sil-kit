@@ -40,6 +40,7 @@ public:
     MOCK_METHOD(void, OnServiceDiscoveryEvent,
                 (uint64_t, Core::Discovery::ServiceDiscoveryEvent::Type, const Core::ServiceDescriptor&), (override));
     MOCK_METHOD(void, OnBulkUpdate, (uint64_t, const DashboardBulkUpdate&), (override));
+    MOCK_METHOD(void, OnMetricsUpdate, (uint64_t, const std::string&, const VSilKit::MetricsUpdate&), (override));
 };
 
 } // namespace Dashboard
