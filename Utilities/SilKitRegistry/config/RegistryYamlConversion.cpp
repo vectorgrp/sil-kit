@@ -27,10 +27,10 @@ namespace {
 
 using namespace SilKitRegistry::Config;
 
-using SilKit::Config::optional_encode;
-using SilKit::Config::optional_decode;
+using SilKit::Config::OptionalWrite;
+using SilKit::Config::OptionalRead;
 
-using SilKit::Config::non_default_encode;
+using SilKit::Config::NonDefaultWrite;
 
 } // namespace
 
@@ -44,7 +44,7 @@ Node Converter::encode(const V1::Experimental& obj)
 
     Node node;
 
-    non_default_encode(obj.metrics, node, "Metrics", defaultObj.metrics);
+    NonDefaultWrite(obj.metrics, node, "Metrics", defaultObj.metrics);
 
     return node;
 }
@@ -52,7 +52,7 @@ Node Converter::encode(const V1::Experimental& obj)
 template <>
 bool Converter::decode(const Node& node, V1::Experimental& obj)
 {
-    optional_decode(obj.metrics, node, "Metrics");
+    OptionalRead(obj.metrics, node, "Metrics");
 
     for (const auto& sink : obj.metrics.sinks)
     {
@@ -73,12 +73,12 @@ Node Converter::encode(const V1::RegistryConfiguration& obj)
     Node node;
     node["SchemaVersion"] = V1::GetSchemaVersion();
 
-    non_default_encode(obj.description, node, "Description", defaultObj.description);
-    optional_encode(obj.listenUri, node, "ListenUri");
-    optional_encode(obj.enableDomainSockets, node, "EnableDomainSockets");
-    optional_encode(obj.dashboardUri, node, "DashboardUri");
-    non_default_encode(obj.logging, node, "Logging", defaultObj.logging);
-    non_default_encode(obj.experimental, node, "Experimental", defaultObj.experimental);
+    NonDefaultWrite(obj.description, node, "Description", defaultObj.description);
+    OptionalWrite(obj.listenUri, node, "ListenUri");
+    OptionalWrite(obj.enableDomainSockets, node, "EnableDomainSockets");
+    OptionalWrite(obj.dashboardUri, node, "DashboardUri");
+    NonDefaultWrite(obj.logging, node, "Logging", defaultObj.logging);
+    NonDefaultWrite(obj.experimental, node, "Experimental", defaultObj.experimental);
 
     return node;
 }
@@ -86,12 +86,12 @@ Node Converter::encode(const V1::RegistryConfiguration& obj)
 template <>
 bool Converter::decode(const Node& node, V1::RegistryConfiguration& obj)
 {
-    optional_decode(obj.description, node, "Description");
-    optional_decode(obj.listenUri, node, "ListenUri");
-    optional_decode(obj.enableDomainSockets, node, "EnableDomainSockets");
-    optional_decode(obj.dashboardUri, node, "DashboardUri");
-    optional_decode(obj.logging, node, "Logging");
-    optional_decode(obj.experimental, node, "Experimental");
+    OptionalRead(obj.description, node, "Description");
+    OptionalRead(obj.listenUri, node, "ListenUri");
+    OptionalRead(obj.enableDomainSockets, node, "EnableDomainSockets");
+    OptionalRead(obj.dashboardUri, node, "DashboardUri");
+    OptionalRead(obj.logging, node, "Logging");
+    OptionalRead(obj.experimental, node, "Experimental");
 
     if (obj.logging.logFromRemotes)
     {

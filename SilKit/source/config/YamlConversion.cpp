@@ -33,7 +33,7 @@ using namespace SilKit;
 // Local utilities
 namespace {
 
-void optional_encode(const Replay& value, YAML::Node& node, const std::string& fieldName)
+void OptionalWrite(const Replay& value, YAML::Node& node, const std::string& fieldName)
 {
     if (value.useTraceSource.size() > 0)
     {
@@ -80,8 +80,8 @@ Node Converter::encode(const Logging& obj)
     Node node;
     static const Logging defaultLogger{};
 
-    non_default_encode(obj.logFromRemotes, node, "LogFromRemotes", defaultLogger.logFromRemotes);
-    non_default_encode(obj.flushLevel, node, "FlushLevel", defaultLogger.flushLevel);
+    NonDefaultWrite(obj.logFromRemotes, node, "LogFromRemotes", defaultLogger.logFromRemotes);
+    NonDefaultWrite(obj.flushLevel, node, "FlushLevel", defaultLogger.flushLevel);
     // ParticipantConfiguration.schema.json: this is a required property:
     node["Sinks"] = obj.sinks;
 
@@ -90,9 +90,9 @@ Node Converter::encode(const Logging& obj)
 template <>
 bool Converter::decode(const Node& node, Logging& obj)
 {
-    optional_decode(obj.logFromRemotes, node, "LogFromRemotes");
-    optional_decode(obj.flushLevel, node, "FlushLevel");
-    optional_decode(obj.sinks, node, "Sinks");
+    OptionalRead(obj.logFromRemotes, node, "LogFromRemotes");
+    OptionalRead(obj.flushLevel, node, "FlushLevel");
+    OptionalRead(obj.sinks, node, "Sinks");
     return true;
 }
 
@@ -103,16 +103,16 @@ Node Converter::encode(const Sink& obj)
     Node node;
     // ParticipantConfiguration.schema.json: Type is required:
     node["Type"] = obj.type;
-    non_default_encode(obj.level, node, "Level", defaultSink.level);
-    non_default_encode(obj.logName, node, "LogName", defaultSink.logName);
+    NonDefaultWrite(obj.level, node, "Level", defaultSink.level);
+    NonDefaultWrite(obj.logName, node, "LogName", defaultSink.logName);
     return node;
 }
 template <>
 bool Converter::decode(const Node& node, Sink& obj)
 {
-    optional_decode(obj.type, node, "Type");
-    optional_decode(obj.level, node, "Level");
-    optional_decode(obj.format, node, "Format");
+    OptionalRead(obj.type, node, "Type");
+    OptionalRead(obj.level, node, "Level");
+    OptionalRead(obj.format, node, "Format");
 
     if (obj.type == Sink::Type::File)
     {
@@ -274,12 +274,12 @@ template <>
 Node Converter::encode(const MdfChannel& obj)
 {
     Node node;
-    optional_encode(obj.channelName, node, "ChannelName");
-    optional_encode(obj.channelPath, node, "ChannelPath");
-    optional_encode(obj.channelSource, node, "ChannelSource");
-    optional_encode(obj.groupName, node, "GroupName");
-    optional_encode(obj.groupPath, node, "GroupPath");
-    optional_encode(obj.groupSource, node, "GroupSource");
+    OptionalWrite(obj.channelName, node, "ChannelName");
+    OptionalWrite(obj.channelPath, node, "ChannelPath");
+    OptionalWrite(obj.channelSource, node, "ChannelSource");
+    OptionalWrite(obj.groupName, node, "GroupName");
+    OptionalWrite(obj.groupPath, node, "GroupPath");
+    OptionalWrite(obj.groupSource, node, "GroupSource");
     return node;
 }
 template <>
@@ -289,12 +289,12 @@ bool Converter::decode(const Node& node, MdfChannel& obj)
     {
         throw ConversionError(node, "MdfChannel should be a Map");
     }
-    optional_decode(obj.channelName, node, "ChannelName");
-    optional_decode(obj.channelPath, node, "ChannelPath");
-    optional_decode(obj.channelSource, node, "ChannelSource");
-    optional_decode(obj.groupName, node, "GroupName");
-    optional_decode(obj.groupPath, node, "GroupPath");
-    optional_decode(obj.groupSource, node, "GroupSource");
+    OptionalRead(obj.channelName, node, "ChannelName");
+    OptionalRead(obj.channelPath, node, "ChannelPath");
+    OptionalRead(obj.channelSource, node, "ChannelSource");
+    OptionalRead(obj.groupName, node, "GroupName");
+    OptionalRead(obj.groupPath, node, "GroupPath");
+    OptionalRead(obj.groupSource, node, "GroupSource");
     return true;
 }
 
@@ -304,16 +304,16 @@ Node Converter::encode(const Replay& obj)
     static const Replay defaultObj{};
     Node node;
     node["UseTraceSource"] = obj.useTraceSource;
-    non_default_encode(obj.direction, node, "Direction", defaultObj.direction);
-    non_default_encode(obj.mdfChannel, node, "MdfChannel", defaultObj.mdfChannel);
+    NonDefaultWrite(obj.direction, node, "Direction", defaultObj.direction);
+    NonDefaultWrite(obj.mdfChannel, node, "MdfChannel", defaultObj.mdfChannel);
     return node;
 }
 template <>
 bool Converter::decode(const Node& node, Replay& obj)
 {
     obj.useTraceSource = parse_as<decltype(obj.useTraceSource)>(node["UseTraceSource"]);
-    optional_decode(obj.direction, node, "Direction");
-    optional_decode(obj.mdfChannel, node, "MdfChannel");
+    OptionalRead(obj.direction, node, "Direction");
+    OptionalRead(obj.mdfChannel, node, "MdfChannel");
     return true;
 }
 
@@ -363,18 +363,18 @@ Node Converter::encode(const CanController& obj)
     static const CanController defaultObj{};
     Node node;
     node["Name"] = obj.name;
-    optional_encode(obj.network, node, "Network");
-    optional_encode(obj.useTraceSinks, node, "UseTraceSinks");
-    optional_encode(obj.replay, node, "Replay");
+    OptionalWrite(obj.network, node, "Network");
+    OptionalWrite(obj.useTraceSinks, node, "UseTraceSinks");
+    OptionalWrite(obj.replay, node, "Replay");
     return node;
 }
 template <>
 bool Converter::decode(const Node& node, CanController& obj)
 {
     obj.name = parse_as<std::string>(node["Name"]);
-    optional_decode(obj.network, node, "Network");
-    optional_decode(obj.useTraceSinks, node, "UseTraceSinks");
-    optional_decode(obj.replay, node, "Replay");
+    OptionalRead(obj.network, node, "Network");
+    OptionalRead(obj.useTraceSinks, node, "UseTraceSinks");
+    OptionalRead(obj.replay, node, "Replay");
     return true;
 }
 
@@ -384,18 +384,18 @@ Node Converter::encode(const LinController& obj)
     static const LinController defaultObj{};
     Node node;
     node["Name"] = obj.name;
-    optional_encode(obj.network, node, "Network");
-    optional_encode(obj.useTraceSinks, node, "UseTraceSinks");
-    optional_encode(obj.replay, node, "Replay");
+    OptionalWrite(obj.network, node, "Network");
+    OptionalWrite(obj.useTraceSinks, node, "UseTraceSinks");
+    OptionalWrite(obj.replay, node, "Replay");
     return node;
 }
 template <>
 bool Converter::decode(const Node& node, LinController& obj)
 {
     obj.name = parse_as<std::string>(node["Name"]);
-    optional_decode(obj.network, node, "Network");
-    optional_decode(obj.useTraceSinks, node, "UseTraceSinks");
-    optional_decode(obj.replay, node, "Replay");
+    OptionalRead(obj.network, node, "Network");
+    OptionalRead(obj.useTraceSinks, node, "UseTraceSinks");
+    OptionalRead(obj.replay, node, "Replay");
     return true;
 }
 
@@ -405,9 +405,9 @@ Node Converter::encode(const EthernetController& obj)
     static const EthernetController defaultObj{};
     Node node;
     node["Name"] = obj.name;
-    optional_encode(obj.network, node, "Network");
-    optional_encode(obj.useTraceSinks, node, "UseTraceSinks");
-    optional_encode(obj.replay, node, "Replay");
+    OptionalWrite(obj.network, node, "Network");
+    OptionalWrite(obj.useTraceSinks, node, "UseTraceSinks");
+    OptionalWrite(obj.replay, node, "Replay");
 
     return node;
 }
@@ -415,9 +415,9 @@ template <>
 bool Converter::decode(const Node& node, EthernetController& obj)
 {
     obj.name = parse_as<std::string>(node["Name"]);
-    optional_decode(obj.network, node, "Network");
-    optional_decode(obj.useTraceSinks, node, "UseTraceSinks");
-    optional_decode(obj.replay, node, "Replay");
+    OptionalRead(obj.network, node, "Network");
+    OptionalRead(obj.useTraceSinks, node, "UseTraceSinks");
+    OptionalRead(obj.replay, node, "Replay");
     return true;
 }
 
@@ -682,7 +682,7 @@ Node Converter::encode(const FlexrayController& obj)
     static const FlexrayController defaultObj{};
     Node node;
     node["Name"] = obj.name;
-    optional_encode(obj.network, node, "Network");
+    OptionalWrite(obj.network, node, "Network");
     if (obj.clusterParameters.has_value())
     {
         node["ClusterParameters"] = encode(obj.clusterParameters.value());
@@ -691,23 +691,23 @@ Node Converter::encode(const FlexrayController& obj)
     {
         node["NodeParameters"] = encode(obj.nodeParameters.value());
     }
-    optional_encode(obj.clusterParameters, node, "ClusterParameters");
-    optional_encode(obj.nodeParameters, node, "NodeParameters");
-    optional_encode(obj.txBufferConfigurations, node, "TxBufferConfigurations");
-    optional_encode(obj.useTraceSinks, node, "UseTraceSinks");
-    optional_encode(obj.replay, node, "Replay");
+    OptionalWrite(obj.clusterParameters, node, "ClusterParameters");
+    OptionalWrite(obj.nodeParameters, node, "NodeParameters");
+    OptionalWrite(obj.txBufferConfigurations, node, "TxBufferConfigurations");
+    OptionalWrite(obj.useTraceSinks, node, "UseTraceSinks");
+    OptionalWrite(obj.replay, node, "Replay");
     return node;
 }
 template <>
 bool Converter::decode(const Node& node, FlexrayController& obj)
 {
     obj.name = parse_as<std::string>(node["Name"]);
-    optional_decode(obj.network, node, "Network");
-    optional_decode(obj.clusterParameters, node, "ClusterParameters");
-    optional_decode(obj.nodeParameters, node, "NodeParameters");
-    optional_decode(obj.txBufferConfigurations, node, "TxBufferConfigurations");
-    optional_decode(obj.useTraceSinks, node, "UseTraceSinks");
-    optional_decode(obj.replay, node, "Replay");
+    OptionalRead(obj.network, node, "Network");
+    OptionalRead(obj.clusterParameters, node, "ClusterParameters");
+    OptionalRead(obj.nodeParameters, node, "NodeParameters");
+    OptionalRead(obj.txBufferConfigurations, node, "TxBufferConfigurations");
+    OptionalRead(obj.useTraceSinks, node, "UseTraceSinks");
+    OptionalRead(obj.replay, node, "Replay");
     return true;
 }
 
@@ -756,9 +756,9 @@ Node Converter::encode(const Label& obj)
 template <>
 bool Converter::decode(const Node& node, Label& obj)
 {
-    optional_decode(obj.key, node, "Key");
-    optional_decode(obj.value, node, "Value");
-    optional_decode(obj.kind, node, "Kind");
+    OptionalRead(obj.key, node, "Key");
+    OptionalRead(obj.value, node, "Value");
+    OptionalRead(obj.kind, node, "Kind");
     return true;
 }
 
@@ -768,22 +768,22 @@ Node Converter::encode(const DataPublisher& obj)
     static const DataPublisher defaultObj{};
     Node node;
     node["Name"] = obj.name;
-    optional_encode(obj.topic, node, "Topic");
-    optional_encode(obj.labels, node, "Labels");
-    //optional_encode(obj.history, node, "History");
-    optional_encode(obj.useTraceSinks, node, "UseTraceSinks");
-    optional_encode(obj.replay, node, "Replay");
+    OptionalWrite(obj.topic, node, "Topic");
+    OptionalWrite(obj.labels, node, "Labels");
+    //OptionalWrite(obj.history, node, "History");
+    OptionalWrite(obj.useTraceSinks, node, "UseTraceSinks");
+    OptionalWrite(obj.replay, node, "Replay");
     return node;
 }
 template <>
 bool Converter::decode(const Node& node, DataPublisher& obj)
 {
     obj.name = parse_as<std::string>(node["Name"]);
-    optional_decode(obj.topic, node, "Topic");
-    optional_decode(obj.labels, node, "Labels");
-    //optional_decode(obj.history, node, "Replay");
-    optional_decode(obj.useTraceSinks, node, "UseTraceSinks");
-    optional_decode(obj.replay, node, "Replay");
+    OptionalRead(obj.topic, node, "Topic");
+    OptionalRead(obj.labels, node, "Labels");
+    //OptionalRead(obj.history, node, "Replay");
+    OptionalRead(obj.useTraceSinks, node, "UseTraceSinks");
+    OptionalRead(obj.replay, node, "Replay");
     return true;
 }
 
@@ -793,20 +793,20 @@ Node Converter::encode(const DataSubscriber& obj)
     static const DataSubscriber defaultObj{};
     Node node;
     node["Name"] = obj.name;
-    optional_encode(obj.topic, node, "Topic");
-    optional_encode(obj.labels, node, "Labels");
-    optional_encode(obj.useTraceSinks, node, "UseTraceSinks");
-    optional_encode(obj.replay, node, "Replay");
+    OptionalWrite(obj.topic, node, "Topic");
+    OptionalWrite(obj.labels, node, "Labels");
+    OptionalWrite(obj.useTraceSinks, node, "UseTraceSinks");
+    OptionalWrite(obj.replay, node, "Replay");
     return node;
 }
 template <>
 bool Converter::decode(const Node& node, DataSubscriber& obj)
 {
     obj.name = parse_as<std::string>(node["Name"]);
-    optional_decode(obj.topic, node, "Topic");
-    optional_decode(obj.labels, node, "Labels");
-    optional_decode(obj.useTraceSinks, node, "UseTraceSinks");
-    optional_decode(obj.replay, node, "Replay");
+    OptionalRead(obj.topic, node, "Topic");
+    OptionalRead(obj.labels, node, "Labels");
+    OptionalRead(obj.useTraceSinks, node, "UseTraceSinks");
+    OptionalRead(obj.replay, node, "Replay");
     return true;
 }
 
@@ -816,20 +816,20 @@ Node Converter::encode(const RpcServer& obj)
     static const RpcServer defaultObj{};
     Node node;
     node["Name"] = obj.name;
-    optional_encode(obj.functionName, node, "FunctionName");
-    optional_encode(obj.labels, node, "Labels");
-    optional_encode(obj.useTraceSinks, node, "UseTraceSinks");
-    optional_encode(obj.replay, node, "Replay");
+    OptionalWrite(obj.functionName, node, "FunctionName");
+    OptionalWrite(obj.labels, node, "Labels");
+    OptionalWrite(obj.useTraceSinks, node, "UseTraceSinks");
+    OptionalWrite(obj.replay, node, "Replay");
     return node;
 }
 template <>
 bool Converter::decode(const Node& node, RpcServer& obj)
 {
     obj.name = parse_as<std::string>(node["Name"]);
-    optional_decode_deprecated_alternative(obj.functionName, node, "FunctionName", {"Channel", "RpcChannel"});
-    optional_decode(obj.labels, node, "Labels");
-    optional_decode(obj.useTraceSinks, node, "UseTraceSinks");
-    optional_decode(obj.replay, node, "Replay");
+    OptionalRead_deprecated_alternative(obj.functionName, node, "FunctionName", {"Channel", "RpcChannel"});
+    OptionalRead(obj.labels, node, "Labels");
+    OptionalRead(obj.useTraceSinks, node, "UseTraceSinks");
+    OptionalRead(obj.replay, node, "Replay");
     return true;
 }
 
@@ -839,20 +839,20 @@ Node Converter::encode(const RpcClient& obj)
     static const RpcClient defaultObj{};
     Node node;
     node["Name"] = obj.name;
-    optional_encode(obj.functionName, node, "Channel");
-    optional_encode(obj.labels, node, "Labels");
-    optional_encode(obj.useTraceSinks, node, "UseTraceSinks");
-    optional_encode(obj.replay, node, "Replay");
+    OptionalWrite(obj.functionName, node, "Channel");
+    OptionalWrite(obj.labels, node, "Labels");
+    OptionalWrite(obj.useTraceSinks, node, "UseTraceSinks");
+    OptionalWrite(obj.replay, node, "Replay");
     return node;
 }
 template <>
 bool Converter::decode(const Node& node, RpcClient& obj)
 {
     obj.name = parse_as<std::string>(node["Name"]);
-    optional_decode_deprecated_alternative(obj.functionName, node, "FunctionName", {"Channel", "RpcChannel"});
-    optional_decode(obj.labels, node, "Labels");
-    optional_decode(obj.useTraceSinks, node, "UseTraceSinks");
-    optional_decode(obj.replay, node, "Replay");
+    OptionalRead_deprecated_alternative(obj.functionName, node, "FunctionName", {"Channel", "RpcChannel"});
+    OptionalRead(obj.labels, node, "Labels");
+    OptionalRead(obj.useTraceSinks, node, "UseTraceSinks");
+    OptionalRead(obj.replay, node, "Replay");
     return true;
 }
 
@@ -860,15 +860,15 @@ template <>
 Node Converter::encode(const HealthCheck& obj)
 {
     Node node;
-    optional_encode(obj.softResponseTimeout, node, "SoftResponseTimeout");
-    optional_encode(obj.hardResponseTimeout, node, "HardResponseTimeout");
+    OptionalWrite(obj.softResponseTimeout, node, "SoftResponseTimeout");
+    OptionalWrite(obj.hardResponseTimeout, node, "HardResponseTimeout");
     return node;
 }
 template <>
 bool Converter::decode(const Node& node, HealthCheck& obj)
 {
-    optional_decode(obj.softResponseTimeout, node, "SoftResponseTimeout");
-    optional_decode(obj.hardResponseTimeout, node, "HardResponseTimeout");
+    OptionalRead(obj.softResponseTimeout, node, "SoftResponseTimeout");
+    OptionalRead(obj.hardResponseTimeout, node, "HardResponseTimeout");
     return true;
 }
 
@@ -877,15 +877,15 @@ Node Converter::encode(const Tracing& obj)
 {
     static const Tracing defaultObj{};
     Node node;
-    optional_encode(obj.traceSinks, node, "TraceSinks");
-    optional_encode(obj.traceSources, node, "TraceSources");
+    OptionalWrite(obj.traceSinks, node, "TraceSinks");
+    OptionalWrite(obj.traceSources, node, "TraceSources");
     return node;
 }
 template <>
 bool Converter::decode(const Node& node, Tracing& obj)
 {
-    optional_decode(obj.traceSinks, node, "TraceSinks");
-    optional_decode(obj.traceSources, node, "TraceSources");
+    OptionalRead(obj.traceSinks, node, "TraceSinks");
+    OptionalRead(obj.traceSources, node, "TraceSources");
     return true;
 }
 
@@ -1085,7 +1085,7 @@ template <>
 bool Converter::decode(const Node& node, MetricsSink& obj)
 {
     obj.type = parse_as<decltype(obj.type)>(node["Type"]);
-    optional_decode(obj.name, node, "Name");
+    OptionalRead(obj.name, node, "Name");
     return true;
 }
 
@@ -1093,7 +1093,7 @@ template <>
 Node Converter::encode(const Metrics& obj)
 {
     Node node;
-    optional_encode(obj.sinks, node, "Sinks");
+    OptionalWrite(obj.sinks, node, "Sinks");
     if (obj.collectFromRemote)
     {
         node["CollectFromRemote"] = obj.collectFromRemote;
@@ -1104,8 +1104,8 @@ Node Converter::encode(const Metrics& obj)
 template <>
 bool Converter::decode(const Node& node, Metrics& obj)
 {
-    optional_decode(obj.sinks, node, "Sinks");
-    optional_decode(obj.collectFromRemote, node, "CollectFromRemote");
+    OptionalRead(obj.sinks, node, "Sinks");
+    OptionalRead(obj.collectFromRemote, node, "CollectFromRemote");
     return true;
 }
 
@@ -1116,13 +1116,13 @@ Node Converter::encode(const Extensions& obj)
 {
     static const Extensions defaultObj{};
     Node node;
-    non_default_encode(obj.searchPathHints, node, "SearchPathHints", defaultObj.searchPathHints);
+    NonDefaultWrite(obj.searchPathHints, node, "SearchPathHints", defaultObj.searchPathHints);
     return node;
 }
 template <>
 bool Converter::decode(const Node& node, Extensions& obj)
 {
-    optional_decode(obj.searchPathHints, node, "SearchPathHints");
+    OptionalRead(obj.searchPathHints, node, "SearchPathHints");
     return true;
 }
 
@@ -1132,35 +1132,35 @@ Node Converter::encode(const Middleware& obj)
 {
     Node node;
     static const Middleware defaultObj;
-    non_default_encode(obj.registryUri, node, "RegistryUri", defaultObj.registryUri);
-    non_default_encode(obj.connectAttempts, node, "ConnectAttempts", defaultObj.connectAttempts);
-    non_default_encode(obj.tcpNoDelay, node, "TcpNoDelay", defaultObj.tcpNoDelay);
-    non_default_encode(obj.tcpQuickAck, node, "TcpQuickAck", defaultObj.tcpQuickAck);
-    non_default_encode(obj.tcpReceiveBufferSize, node, "TcpReceiveBufferSize", defaultObj.tcpReceiveBufferSize);
-    non_default_encode(obj.tcpSendBufferSize, node, "TcpSendBufferSize", defaultObj.tcpSendBufferSize);
-    non_default_encode(obj.enableDomainSockets, node, "EnableDomainSockets", defaultObj.enableDomainSockets);
-    non_default_encode(obj.acceptorUris, node, "acceptorUris", defaultObj.acceptorUris);
-    non_default_encode(obj.registryAsFallbackProxy, node, "RegistryAsFallbackProxy",
+    NonDefaultWrite(obj.registryUri, node, "RegistryUri", defaultObj.registryUri);
+    NonDefaultWrite(obj.connectAttempts, node, "ConnectAttempts", defaultObj.connectAttempts);
+    NonDefaultWrite(obj.tcpNoDelay, node, "TcpNoDelay", defaultObj.tcpNoDelay);
+    NonDefaultWrite(obj.tcpQuickAck, node, "TcpQuickAck", defaultObj.tcpQuickAck);
+    NonDefaultWrite(obj.tcpReceiveBufferSize, node, "TcpReceiveBufferSize", defaultObj.tcpReceiveBufferSize);
+    NonDefaultWrite(obj.tcpSendBufferSize, node, "TcpSendBufferSize", defaultObj.tcpSendBufferSize);
+    NonDefaultWrite(obj.enableDomainSockets, node, "EnableDomainSockets", defaultObj.enableDomainSockets);
+    NonDefaultWrite(obj.acceptorUris, node, "acceptorUris", defaultObj.acceptorUris);
+    NonDefaultWrite(obj.registryAsFallbackProxy, node, "RegistryAsFallbackProxy",
                        defaultObj.registryAsFallbackProxy);
-    non_default_encode(obj.experimentalRemoteParticipantConnection, node, "ExperimentalRemoteParticipantConnection",
+    NonDefaultWrite(obj.experimentalRemoteParticipantConnection, node, "ExperimentalRemoteParticipantConnection",
                        defaultObj.experimentalRemoteParticipantConnection);
-    non_default_encode(obj.connectTimeoutSeconds, node, "ConnectTimeoutSeconds", defaultObj.connectTimeoutSeconds);
+    NonDefaultWrite(obj.connectTimeoutSeconds, node, "ConnectTimeoutSeconds", defaultObj.connectTimeoutSeconds);
     return node;
 }
 template <>
 bool Converter::decode(const Node& node, Middleware& obj)
 {
-    optional_decode(obj.registryUri, node, "RegistryUri");
-    optional_decode(obj.connectAttempts, node, "ConnectAttempts");
-    optional_decode(obj.tcpNoDelay, node, "TcpNoDelay");
-    optional_decode(obj.tcpQuickAck, node, "TcpQuickAck");
-    optional_decode(obj.tcpReceiveBufferSize, node, "TcpReceiveBufferSize");
-    optional_decode(obj.tcpSendBufferSize, node, "TcpSendBufferSize");
-    optional_decode(obj.enableDomainSockets, node, "EnableDomainSockets");
-    optional_decode(obj.acceptorUris, node, "AcceptorUris");
-    optional_decode(obj.registryAsFallbackProxy, node, "RegistryAsFallbackProxy");
-    optional_decode(obj.experimentalRemoteParticipantConnection, node, "ExperimentalRemoteParticipantConnection");
-    optional_decode(obj.connectTimeoutSeconds, node, "ConnectTimeoutSeconds");
+    OptionalRead(obj.registryUri, node, "RegistryUri");
+    OptionalRead(obj.connectAttempts, node, "ConnectAttempts");
+    OptionalRead(obj.tcpNoDelay, node, "TcpNoDelay");
+    OptionalRead(obj.tcpQuickAck, node, "TcpQuickAck");
+    OptionalRead(obj.tcpReceiveBufferSize, node, "TcpReceiveBufferSize");
+    OptionalRead(obj.tcpSendBufferSize, node, "TcpSendBufferSize");
+    OptionalRead(obj.enableDomainSockets, node, "EnableDomainSockets");
+    OptionalRead(obj.acceptorUris, node, "AcceptorUris");
+    OptionalRead(obj.registryAsFallbackProxy, node, "RegistryAsFallbackProxy");
+    OptionalRead(obj.experimentalRemoteParticipantConnection, node, "ExperimentalRemoteParticipantConnection");
+    OptionalRead(obj.connectTimeoutSeconds, node, "ConnectTimeoutSeconds");
     return true;
 }
 
@@ -1206,16 +1206,16 @@ Node Converter::encode(const TimeSynchronization& obj)
 {
     Node node;
     static const TimeSynchronization defaultObj;
-    non_default_encode(obj.animationFactor, node, "AnimationFactor", defaultObj.animationFactor);
-    non_default_encode(obj.enableMessageAggregation, node, "EnableMessageAggregation",
+    NonDefaultWrite(obj.animationFactor, node, "AnimationFactor", defaultObj.animationFactor);
+    NonDefaultWrite(obj.enableMessageAggregation, node, "EnableMessageAggregation",
                        defaultObj.enableMessageAggregation);
     return node;
 }
 template <>
 bool Converter::decode(const Node& node, TimeSynchronization& obj)
 {
-    optional_decode(obj.animationFactor, node, "AnimationFactor");
-    optional_decode(obj.enableMessageAggregation, node, "EnableMessageAggregation");
+    OptionalRead(obj.animationFactor, node, "AnimationFactor");
+    OptionalRead(obj.enableMessageAggregation, node, "EnableMessageAggregation");
     return true;
 }
 
@@ -1225,15 +1225,15 @@ Node Converter::encode(const Experimental& obj)
     static const Experimental defaultObj{};
 
     Node node;
-    non_default_encode(obj.timeSynchronization, node, "TimeSynchronization", defaultObj.timeSynchronization);
-    non_default_encode(obj.metrics, node, "Metrics", defaultObj.metrics);
+    NonDefaultWrite(obj.timeSynchronization, node, "TimeSynchronization", defaultObj.timeSynchronization);
+    NonDefaultWrite(obj.metrics, node, "Metrics", defaultObj.metrics);
     return node;
 }
 template <>
 bool Converter::decode(const Node& node, Experimental& obj)
 {
-    optional_decode(obj.timeSynchronization, node, "TimeSynchronization");
-    optional_decode(obj.metrics, node, "Metrics");
+    OptionalRead(obj.timeSynchronization, node, "TimeSynchronization");
+    OptionalRead(obj.metrics, node, "Metrics");
     return true;
 }
 
@@ -1253,45 +1253,45 @@ Node Converter::encode(const ParticipantConfiguration& obj)
         node["ParticipantName"] = obj.participantName;
     }
 
-    optional_encode(obj.canControllers, node, "CanControllers");
-    optional_encode(obj.linControllers, node, "LinControllers");
-    optional_encode(obj.ethernetControllers, node, "EthernetControllers");
-    optional_encode(obj.flexrayControllers, node, "FlexrayControllers");
-    optional_encode(obj.dataPublishers, node, "DataPublishers");
-    optional_encode(obj.dataSubscribers, node, "DataSubscribers");
-    optional_encode(obj.rpcServers, node, "RpcServers");
-    optional_encode(obj.rpcClients, node, "RpcClients");
+    OptionalWrite(obj.canControllers, node, "CanControllers");
+    OptionalWrite(obj.linControllers, node, "LinControllers");
+    OptionalWrite(obj.ethernetControllers, node, "EthernetControllers");
+    OptionalWrite(obj.flexrayControllers, node, "FlexrayControllers");
+    OptionalWrite(obj.dataPublishers, node, "DataPublishers");
+    OptionalWrite(obj.dataSubscribers, node, "DataSubscribers");
+    OptionalWrite(obj.rpcServers, node, "RpcServers");
+    OptionalWrite(obj.rpcClients, node, "RpcClients");
 
-    non_default_encode(obj.logging, node, "Logging", defaultObj.logging);
-    non_default_encode(obj.healthCheck, node, "Extensions", defaultObj.healthCheck);
-    non_default_encode(obj.tracing, node, "Extensions", defaultObj.tracing);
-    non_default_encode(obj.extensions, node, "Extensions", defaultObj.extensions);
-    non_default_encode(obj.middleware, node, "Middleware", defaultObj.middleware);
-    non_default_encode(obj.experimental, node, "Experimental", defaultObj.experimental);
+    NonDefaultWrite(obj.logging, node, "Logging", defaultObj.logging);
+    NonDefaultWrite(obj.healthCheck, node, "Extensions", defaultObj.healthCheck);
+    NonDefaultWrite(obj.tracing, node, "Extensions", defaultObj.tracing);
+    NonDefaultWrite(obj.extensions, node, "Extensions", defaultObj.extensions);
+    NonDefaultWrite(obj.middleware, node, "Middleware", defaultObj.middleware);
+    NonDefaultWrite(obj.experimental, node, "Experimental", defaultObj.experimental);
     return node;
 }
 template <>
 bool Converter::decode(const Node& node, ParticipantConfiguration& obj)
 {
-    optional_decode(obj.schemaVersion, node, "SchemaVersion");
-    optional_decode(obj.description, node, "Description");
-    optional_decode(obj.participantName, node, "ParticipantName");
+    OptionalRead(obj.schemaVersion, node, "SchemaVersion");
+    OptionalRead(obj.description, node, "Description");
+    OptionalRead(obj.participantName, node, "ParticipantName");
 
-    optional_decode(obj.canControllers, node, "CanControllers");
-    optional_decode(obj.linControllers, node, "LinControllers");
-    optional_decode(obj.ethernetControllers, node, "EthernetControllers");
-    optional_decode_deprecated_alternative(obj.flexrayControllers, node, "FlexrayControllers", {"FlexRayControllers"});
-    optional_decode(obj.dataPublishers, node, "DataPublishers");
-    optional_decode(obj.dataSubscribers, node, "DataSubscribers");
-    optional_decode(obj.rpcServers, node, "RpcServers");
-    optional_decode(obj.rpcClients, node, "RpcClients");
+    OptionalRead(obj.canControllers, node, "CanControllers");
+    OptionalRead(obj.linControllers, node, "LinControllers");
+    OptionalRead(obj.ethernetControllers, node, "EthernetControllers");
+    OptionalRead_deprecated_alternative(obj.flexrayControllers, node, "FlexrayControllers", {"FlexRayControllers"});
+    OptionalRead(obj.dataPublishers, node, "DataPublishers");
+    OptionalRead(obj.dataSubscribers, node, "DataSubscribers");
+    OptionalRead(obj.rpcServers, node, "RpcServers");
+    OptionalRead(obj.rpcClients, node, "RpcClients");
 
-    optional_decode(obj.logging, node, "Logging");
-    optional_decode(obj.healthCheck, node, "HealthCheck");
-    optional_decode(obj.tracing, node, "Tracing");
-    optional_decode(obj.extensions, node, "Extensions");
-    optional_decode(obj.middleware, node, "Middleware");
-    optional_decode(obj.experimental, node, "Experimental");
+    OptionalRead(obj.logging, node, "Logging");
+    OptionalRead(obj.healthCheck, node, "HealthCheck");
+    OptionalRead(obj.tracing, node, "Tracing");
+    OptionalRead(obj.extensions, node, "Extensions");
+    OptionalRead(obj.middleware, node, "Middleware");
+    OptionalRead(obj.experimental, node, "Experimental");
     return true;
 }
 
@@ -1324,9 +1324,9 @@ Node Converter::encode(const SilKit::Services::MatchingLabel& obj)
 template <>
 bool Converter::decode(const Node& node, SilKit::Services::MatchingLabel& obj)
 {
-    optional_decode(obj.key, node, "key");
-    optional_decode(obj.value, node, "value");
-    optional_decode(obj.kind, node, "kind");
+    OptionalRead(obj.key, node, "key");
+    OptionalRead(obj.value, node, "value");
+    OptionalRead(obj.kind, node, "kind");
     return true;
 }
 

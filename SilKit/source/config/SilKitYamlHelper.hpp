@@ -139,7 +139,7 @@ auto parse_as(const YAML::Node& node) -> ValueT
 template <typename ConfigT,
           typename std::enable_if<(std::is_fundamental<ConfigT>::value || std::is_same<ConfigT, std::string>::value),
                                   bool>::type = true>
-void optional_encode(const Util::Optional<ConfigT>& value, YAML::Node& node, const std::string& fieldName)
+void OptionalWrite(const Util::Optional<ConfigT>& value, YAML::Node& node, const std::string& fieldName)
 {
     if (value.has_value())
     {
@@ -150,7 +150,7 @@ void optional_encode(const Util::Optional<ConfigT>& value, YAML::Node& node, con
 template <typename ConfigT,
           typename std::enable_if<!(std::is_fundamental<ConfigT>::value || std::is_same<ConfigT, std::string>::value),
                                   bool>::type = true>
-void optional_encode(const SilKit::Util::Optional<ConfigT>& value, YAML::Node& node, const std::string& fieldName)
+void OptionalWrite(const SilKit::Util::Optional<ConfigT>& value, YAML::Node& node, const std::string& fieldName)
 {
     if (value.has_value())
     {
@@ -161,7 +161,7 @@ void optional_encode(const SilKit::Util::Optional<ConfigT>& value, YAML::Node& n
 template <typename ConfigT,
           typename std::enable_if<!(std::is_fundamental<ConfigT>::value || std::is_same<ConfigT, std::string>::value),
                                   bool>::type = true>
-void optional_encode(const SilKit::Util::Optional<std::vector<ConfigT>>& value, YAML::Node& node,
+void OptionalWrite(const SilKit::Util::Optional<std::vector<ConfigT>>& value, YAML::Node& node,
                      const std::string& fieldName)
 {
     if (value.has_value())
@@ -171,7 +171,7 @@ void optional_encode(const SilKit::Util::Optional<std::vector<ConfigT>>& value, 
 }
 
 template <typename ConfigT>
-void optional_encode(const std::vector<ConfigT>& value, YAML::Node& node, const std::string& fieldName)
+void OptionalWrite(const std::vector<ConfigT>& value, YAML::Node& node, const std::string& fieldName)
 {
     if (value.size() > 0)
     {
@@ -181,7 +181,7 @@ void optional_encode(const std::vector<ConfigT>& value, YAML::Node& node, const 
 
 
 template <typename ConfigT>
-void optional_decode(Util::Optional<ConfigT>& value, const YAML::Node& node, const std::string& fieldName)
+void OptionalRead(Util::Optional<ConfigT>& value, const YAML::Node& node, const std::string& fieldName)
 {
     if (node.IsMap() && node[fieldName]) //operator[] does not modify node
     {
@@ -190,7 +190,7 @@ void optional_decode(Util::Optional<ConfigT>& value, const YAML::Node& node, con
 }
 
 template <typename ConfigT>
-void optional_decode(ConfigT& value, const YAML::Node& node, const std::string& fieldName)
+void OptionalRead(ConfigT& value, const YAML::Node& node, const std::string& fieldName)
 {
     if (node.IsMap() && node[fieldName]) //operator[] does not modify node
     {
@@ -199,7 +199,7 @@ void optional_decode(ConfigT& value, const YAML::Node& node, const std::string& 
 }
 
 template <typename ConfigT>
-void optional_decode_deprecated_alternative(ConfigT& value, const YAML::Node& node, const std::string& fieldName,
+void OptionalRead_deprecated_alternative(ConfigT& value, const YAML::Node& node, const std::string& fieldName,
                                             std::initializer_list<std::string> deprecatedFieldNames)
 {
     if (node.IsMap())
@@ -233,16 +233,16 @@ void optional_decode_deprecated_alternative(ConfigT& value, const YAML::Node& no
             throw ConversionError{node, ss.str()};
         }
 
-        optional_decode(value, node, fieldName);
+        OptionalRead(value, node, fieldName);
         for (const auto& deprecatedFieldName : deprecatedFieldNames)
         {
-            optional_decode(value, node, deprecatedFieldName);
+            OptionalRead(value, node, deprecatedFieldName);
         }
     }
 }
 
 template <typename ConfigT>
-auto non_default_encode(const std::vector<ConfigT>& values, YAML::Node& node, const std::string& fieldName,
+auto NonDefaultWrite(const std::vector<ConfigT>& values, YAML::Node& node, const std::string& fieldName,
                         const std::vector<ConfigT>& defaultValue)
 {
     // Only encode vectors that have members that deviate from a default-value.
@@ -267,7 +267,7 @@ auto non_default_encode(const std::vector<ConfigT>& values, YAML::Node& node, co
 }
 
 template <typename ConfigT>
-auto non_default_encode(const ConfigT& value, YAML::Node& node, const std::string& fieldName,
+auto NonDefaultWrite(const ConfigT& value, YAML::Node& node, const std::string& fieldName,
                         const ConfigT& defaultValue)
 {
     if (!(value == defaultValue))

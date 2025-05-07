@@ -276,7 +276,7 @@ void PopulateCacheField(const YAML::Node& root, std::string rootname, const std:
                         SilKit::Util::Optional<FieldT>& obj)
 {
     SilKit::Util::Optional<FieldT> tmpObj;
-    optional_decode(tmpObj, root, field);
+    OptionalRead(tmpObj, root, field);
 
     if (tmpObj.has_value())
     {
@@ -299,7 +299,7 @@ void CacheMiddleware(const YAML::Node& root, MiddlewareCache& cache)
         {
             throw SilKit::ConfigurationError{"AcceptorUris already defined!"};
         }
-        optional_decode(cache.acceptorUris, root, "AcceptorUris");
+        OptionalRead(cache.acceptorUris, root, "AcceptorUris");
     }
 
     PopulateCacheField(root, "Middleware", "ConnectAttempts", cache.connectAttempts);
