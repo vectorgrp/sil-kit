@@ -186,7 +186,9 @@ void OptionalRead(SilKit::Util::Optional<T>& val, const ryml::ConstNodeRef& node
     SetCurrentLocation(node, name);
     if (IsValidChild(node, name))
     {
-        node[name.c_str()] >> *val;
+        T tmp;
+        node[name.c_str()] >> tmp;
+        val = std::move(tmp); // needs a propper setter to set "has_value"
     }
 }
 

@@ -64,6 +64,14 @@ void write(ryml::NodeRef* node, const SilKitRegistry::Config::V1::RegistryConfig
 
 bool read(const ryml::ConstNodeRef& node, SilKitRegistry::Config::V1::RegistryConfiguration* obj)
 {
+    std::string schemaVersion;
+    OptionalRead(schemaVersion, node, "SchemaVersion");
+    if (!schemaVersion.empty() && schemaVersion != V1::GetSchemaVersion())
+    {
+        throw SilKit::ConfigurationError{
+            fmt::format("Unknown schema version '{}' found in registry configuration!", schemaVersion)};
+    }
+
     OptionalRead(obj->description, node, "Description");
     OptionalRead(obj->listenUri, node, "ListenUri");
     OptionalRead(obj->enableDomainSockets, node, "EnableDomainSockets");
@@ -94,45 +102,7 @@ namespace Config {
 
 auto Parse(const std::string& string) -> V1::RegistryConfiguration
 {
-
-    V1::RegistryConfiguration result = SilKit::Config::DeserializeNew<V1::RegistryConfiguration>(string);
-
-    YAML::Node node = YAML::Load(string);
-
-    if (node.IsNull())
-    {
-        return V1::RegistryConfiguration{};
-    }
-
-    const auto schemaVersion = [&node]() -> std::string {
-        const auto schemaVersionNode = node["SchemaVersion"];
-
-        // if the 'SchemaVersion' is not set, assume a particular schema version.
-        if (schemaVersionNode.Type() == YAML::NodeType::Undefined)
-        {
-            return V1::GetSchemaVersion();
-        }
-
-        if (!schemaVersionNode.IsScalar())
-        {
-            throw SilKit::ConfigurationError{
-                "The 'SchemaVersion' field of the registry configuration must be a scalar value!"};
-        }
-
-        return schemaVersionNode.Scalar();
-    }();
-
-    if (schemaVersion == V1::GetSchemaVersion())
-    {
-        return SilKit::Config::from_yaml<V1::RegistryConfiguration>(node);
-    }
-
-    // After the 'active' schema version is bumped, parse and validate the then old configuration and transform it into
-    // the 'active' configuration version.  The 'active' configuration version is the one returned by this function, as
-    // stated in the namespace.
-
-    throw SilKit::ConfigurationError{
-        fmt::format("Unknown schema version '{}' found in registry configuration!", schemaVersion)};
+    return SilKit::Config::DeserializeNew<V1::RegistryConfiguration>(string);
 }
 
 } // namespace Config
