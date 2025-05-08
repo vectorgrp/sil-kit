@@ -30,6 +30,30 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "SilKitYamlHelper.hpp"
 
+namespace SilKit {
+// XXXXXXXXXX RAPID YML XXXXXXXXXXXXXX
+namespace Services {
+namespace Logging {
+void write(ryml::NodeRef* node, const Services::Logging::Level& obj);
+bool read(const ryml::ConstNodeRef& node, Services::Logging::Level* obj);
+
+} // namespace Logging
+} // namespace Services
+namespace Config {
+void write(ryml::NodeRef* node, const Sink::Type& obj);
+bool read(const ryml::ConstNodeRef& node, Sink::Type* obj);
+void write(ryml::NodeRef* node, const Sink::Format& obj);
+bool read(const ryml::ConstNodeRef& node, Sink::Format* obj);
+void write(ryml::NodeRef* node, const Sink& obj);
+bool read(const ryml::ConstNodeRef& node, Sink* obj);
+void write(ryml::NodeRef* node, const Logging& obj);
+bool read(const ryml::ConstNodeRef& node, Logging* obj);
+
+} //end namespace Config
+} //end namespace SilKit
+
+// XXXXXXXXXX END RAPID YML XXXXXXXXXXXXXX
+ 
 // YAML-cpp serialization/deserialization for ParticipantConfiguration data types
 namespace YAML {
 

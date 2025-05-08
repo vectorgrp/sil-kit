@@ -90,5 +90,60 @@ auto Deserialize(const std::string& str) -> T
     return from_yaml<T>(YAML::Load(ss));
 }
 
+
+template<typename T>
+auto DeserializeNew(const std::string& input) -> T
+{
+    if (input.empty())
+    {
+        return {};
+    }
+
+    ryml::Callbacks cb{};
+
+    cb.m_error = [](auto* msg, auto msg_len, auto location, auto* userdata) 
+    {
+        std::string message{ msg, msg_len };
+        std::string errorMessage = Format("YAML Parsing error in file '{}' at line {} (offset {}), column {}: {}", location.name, location.line, location.offset, location.col, message);
+        if (userdata)
+        {
+            auto&& ctx = reinterpret_cast<ParserContext*>(userdata);
+            errorMessage = Format("YAML Parsing error in at line {} (offset {}), column {} near '{}' with error: '{}'. Expected value: '{}'",
+                ctx->currentLocation.line, ctx->currentLocation.offset, ctx->currentLocation.col, ctx->currentContent, message, ctx->expectedValue);
+        }
+        throw SilKitError{ errorMessage };
+    };
+
+    ryml::ParserOptions options{};
+    options.locations(true);
+
+    ryml::EventHandlerTree eventHandler{cb};
+    auto parser = ryml::Parser(&eventHandler, options);
+    parser.reserve_locations(100u);
+    auto&& cinput = ryml::to_csubstr(input);
+
+    auto t = ryml::parse_in_arena(&parser, cinput);
+
+    ParserContext ctx;
+    ctx.parser = &parser;
+    cb.m_user_data = &ctx;
+    t.callbacks(cb);
+
+    T result;
+    t.crootref() >> result;
+
+    return result;
+}
+
+
+template<typename T>
+auto SerializeNew(const T& input) -> std::string
+{
+    ryml::Tree t;
+    t.rootref() << input;
+    return ryml::emitrs_yaml<std::string>(t);
+}
+
+
 } // namespace Config
 } // namespace SilKit

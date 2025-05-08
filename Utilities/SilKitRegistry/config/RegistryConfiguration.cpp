@@ -46,9 +46,57 @@ bool operator==(const Experimental& lhs, const Experimental& rhs)
 
 namespace SilKitRegistry {
 namespace Config {
+namespace V1 {
+using namespace SilKit::Config;
+// rapid yaml impl
+void write(ryml::NodeRef* node, const SilKitRegistry::Config::V1::RegistryConfiguration& obj)
+{
+    static const V1::RegistryConfiguration defaultObject{};
+    *node |= ryml::MAP;
+    Write(node, "SchemaVersion", V1::GetSchemaVersion());
+    NonDefaultWrite(obj.description, node, "Description", defaultObject.description);
+    OptionalWrite(obj.listenUri, node, "ListenUri");
+    OptionalWrite(obj.enableDomainSockets, node, "EnableDomainSockets");
+    OptionalWrite(obj.dashboardUri, node, "DashboardUri");
+    NonDefaultWrite(obj.logging, node, "Logging", defaultObject.logging);
+    //NonDefaultWrite(obj.experimental, node, "Experimental", defaultObj.experimental);
+}
+
+bool read(const ryml::ConstNodeRef& node, SilKitRegistry::Config::V1::RegistryConfiguration* obj)
+{
+    OptionalRead(obj->description, node, "Description");
+    OptionalRead(obj->listenUri, node, "ListenUri");
+    OptionalRead(obj->enableDomainSockets, node, "EnableDomainSockets");
+    OptionalRead(obj->dashboardUri, node, "DashboardUri");
+    OptionalRead(obj->logging, node, "Logging");
+    //OptionalRead(obj->experimental, node, "Experimental");
+
+    if (obj->logging.logFromRemotes)
+    {
+        throw SilKit::ConfigurationError{"SIL Kit Registry does not support receiving logs from remotes"};
+    }
+
+    for (auto&& sink : obj->logging.sinks)
+    {
+        if (sink.type == SilKit::Config::Sink::Type::Remote)
+        {
+            throw SilKit::ConfigurationError{"SIL Kit Registry does not support remote logging"};
+        }
+    }
+    return true;
+}
+} // namespace V1
+} // namespace Config
+} // namespace SilKitRegistry
+
+namespace SilKitRegistry {
+namespace Config {
 
 auto Parse(const std::string& string) -> V1::RegistryConfiguration
 {
+
+    V1::RegistryConfiguration result = SilKit::Config::DeserializeNew<V1::RegistryConfiguration>(string);
+
     YAML::Node node = YAML::Load(string);
 
     if (node.IsNull())

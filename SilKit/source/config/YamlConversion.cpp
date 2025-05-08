@@ -31,66 +31,198 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 using namespace SilKit::Config;
 using namespace SilKit;
 
-// rapidyaml utils, need to be defined in proper ADL context
-namespace
-{
-struct ParserContext
-{
-  ryml::Parser* parser{ nullptr };
-  ryml::Location currentLocation{};
-  std::string currentContent;
-  std::string expectedValue;
-};
-
-} // namespace
 namespace SilKit {
+// XXXXXXXXXX RAPID YML XXXXXXXXXXXXXX
+namespace Services {
+namespace Logging {
+using namespace SilKit::Config;
+void write (ryml::NodeRef* node,  const Services::Logging::Level& obj)
+{
+    switch (obj)
+    {
+    case Services::Logging::Level::Critical:
+        Write(node, "Critical");
+        break;
+    case Services::Logging::Level::Error:
+        Write(node, "Error");
+        break;
+    case Services::Logging::Level::Warn:
+        Write(node, "Warn");
+        break;
+    case Services::Logging::Level::Info:
+        Write(node, "Info");
+        break;
+    case Services::Logging::Level::Debug:
+        Write(node, "Debug");
+        break;
+    case Services::Logging::Level::Trace:
+        Write(node, "Trace");
+        break;
+    case Services::Logging::Level::Off:
+        Write(node, "Off");
+        break;
+    }
+}
+
+bool read(const ryml::ConstNodeRef& node, Services::Logging::Level* obj)
+{
+    if (!IsScalar(node))
+    {
+        throw ConfigurationError( "Level should be a string of Critical|Error|Warn|Info|Debug|Trace|Off.");
+    }
+    auto&& str = node.val();
+    if (str == "Critical")
+        *obj = Services::Logging::Level::Critical;
+    else if (str == "Error")
+        *obj = Services::Logging::Level::Error;
+    else if (str == "Warn")
+        *obj = Services::Logging::Level::Warn;
+    else if (str == "Info")
+        *obj = Services::Logging::Level::Info;
+    else if (str == "Debug")
+        *obj = Services::Logging::Level::Debug;
+    else if (str == "Trace")
+        *obj = Services::Logging::Level::Trace;
+    else if (str == "Off")
+        *obj = Services::Logging::Level::Off;
+    else
+    {
+        throw ConfigurationError(Format("Unknown Services::Logging::Level: {}.", str ));
+    }
+    return true;
+}
+
+} // namespace Logging
+} // namespace Services
 namespace Config {
 
-bool IsValidChild(const ryml::ConstNodeRef& node, const std::string& name)
-{
-  return !node.find_child(ryml::to_csubstr(name)).invalid();
-}
 
-// for better error messages we keep track on the current node being read
-void SetCurrentLocation(const ryml::ConstNodeRef& node, const std::string& name)
+void write (ryml::NodeRef* node,  const Sink::Type& obj)
 {
-    auto&& cname = ryml::to_csubstr(name);
-    auto&& ctx = reinterpret_cast<ParserContext*>(node.m_tree->callbacks().m_user_data);
-
-    if (ctx)
+    switch (obj)
     {
-      ctx->expectedValue = name;
-      if( !node.find_child(ryml::to_csubstr(name)).invalid())
-      {
-          ctx->currentLocation = ctx->parser->location(node[cname]);
-          auto cstr = ctx->parser->location_contents(ctx->currentLocation);
-          if (cstr.size() > 1)
-          {
-            ctx->currentContent = std::string{ cstr.data(), cstr.size() - 1 };
-          }
-      }
+    case Sink::Type::Remote:
+        Write(node, "Remote");
+        break;
+    case Sink::Type::Stdout:
+        Write(node, "Stdout");
+        break;
+    case Sink::Type::File:
+        Write(node, "File");
+        break;
     }
 }
-template<typename T, typename std::enable_if_t<std::is_integral_v<T>, bool> = true>
-void OptionalRead(T& val, const ryml::ConstNodeRef& node, const std::string& name)
+
+bool read(const ryml::ConstNodeRef& node, Sink::Type* obj)
 {
-    SetCurrentLocation(node, name);
-    auto tmp = ryml::fmt::overflow_checked(val);
-    (void)node.get_if(ryml::to_csubstr(name), &tmp);
+    if (!IsScalar(node))
+    {
+        throw ConfigurationError( "Sink::Type should be a string of Remote|Stdout|File.");
+    }
+
+    auto&& str = node.val();
+    if (str == "Remote" || str == "")
+    {
+        *obj = Sink::Type::Remote;
+    }
+    else if (str == "Stdout")
+    {
+        *obj = Sink::Type::Stdout;
+    }
+    else if (str == "File")
+    {
+        *obj = Sink::Type::File;
+    }
+    else
+    {
+        throw ConfigurationError(Format("Unknown Sink::Type: {}.", str));
+    }
+    return true;
 }
 
-template<typename T, typename std::enable_if_t<!std::is_integral_v<T>, bool> = true>
-void OptionalRead(T& val, const ryml::ConstNodeRef& node, const std::string& name)
+void write (ryml::NodeRef* node,  const Sink::Format& obj)
 {
-    SetCurrentLocation(node, name);
-    if (IsValidChild(node, name))
+    switch (obj)
     {
-        node[name.c_str()] >> val;
+    case Sink::Format::Simple:
+        Write(node, "Simple");
+        break;
+    case Sink::Format::Json:
+        Write(node, "Json");
+        break;
     }
+}
+
+bool read(const ryml::ConstNodeRef& node, Sink::Format* obj)
+{
+    if (!IsScalar(node))
+    {
+        throw ConfigurationError("Sink::Format should be a string of Simple|Json.");
+    }
+    auto&& str = node.val();
+    if (str == "Simple" || str == "")
+    {
+        *obj = Sink::Format::Simple;
+    }
+    else if (str == "Json")
+    {
+        *obj = Sink::Format::Json;
+    }
+    else
+    {
+        throw ConfigurationError(Format("Unknown Sink::Format: {}.", str));
+    }
+    return true;
+}
+
+void write (ryml::NodeRef* node,  const Sink& obj)
+{
+    static const Sink defaultSink{};
+    // ParticipantConfiguration.schema.json: Type is required:
+    Write(node, "Type", obj.type);
+    NonDefaultWrite(obj.level, node, "Level", defaultSink.level);
+    NonDefaultWrite(obj.logName, node, "LogName", defaultSink.logName);
+}
+
+bool read(const ryml::ConstNodeRef& node, Sink* obj)
+{
+    OptionalRead(obj->type, node, "Type");
+    OptionalRead(obj->level, node, "Level");
+    OptionalRead(obj->format, node, "Format");
+
+    if (obj->type == Sink::Type::File)
+    {
+        if (!IsValidChild(node, "LogName"))
+        {
+            throw ConfigurationError("Sink of type Sink::Type::File requires a LogName");
+        }
+        Read(obj->logName, node, "LogName");
+    }
+    return true;
+}
+
+void write (ryml::NodeRef* node,  const Logging& obj)
+{
+    static const Logging defaultLogger{};
+    NonDefaultWrite(obj.logFromRemotes, node, "LogFromRemotes", defaultLogger.logFromRemotes);
+    NonDefaultWrite(obj.flushLevel, node, "FlushLevel", defaultLogger.flushLevel);
+    // ParticipantConfiguration.schema.json: this is a required property:
+    Write(node, "Sinks", obj.sinks);
+}
+
+bool read(const ryml::ConstNodeRef& node, Logging* obj)
+{
+    OptionalRead(obj->logFromRemotes, node, "LogFromRemotes");
+    OptionalRead(obj->flushLevel, node, "FlushLevel");
+    OptionalRead(obj->sinks, node, "Sinks");
+    return true;
 }
 
 } //end namespace Config
 } //end namespace SilKit
+
+// XXXXXXXXXX END RAPID YML XXXXXXXXXXXXXX
+ 
 
 // Local utilities
 namespace {

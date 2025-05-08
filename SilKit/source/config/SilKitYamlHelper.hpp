@@ -30,6 +30,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "yaml-cpp/yaml.h"
 
+#include "rapidyaml.hpp"
+
 
 // YAML-cpp serialization/deserialization for our config data types
 namespace YAML {
@@ -101,6 +103,132 @@ DEFINE_SILKIT_PARSE_TYPE_NAME(std::string);
 ////////////////////////////////////////////////////////////////////////////////
 namespace SilKit {
 namespace Config {
+
+//XXXXXXXXXX RAPID YAML XXXXXXXXXX 
+// rapidyaml utils, need to be defined in proper ADL context
+namespace {
+struct ParserContext
+{
+    ryml::Parser* parser{nullptr};
+    ryml::Location currentLocation{};
+    std::string currentContent;
+    std::string expectedValue;
+};
+
+template<typename... Args>
+auto Format(const std::string& fmt, Args&&... args)
+{
+  std::string buf;
+  ryml::formatrs(&buf, ryml::to_csubstr(fmt), std::forward<Args>(args)...);
+  return buf;
+}
+
+bool IsValidChild(const ryml::ConstNodeRef& node, const std::string& name)
+{
+    return !node.find_child(ryml::to_csubstr(name)).invalid();
+}
+
+bool IsScalar(const ryml::ConstNodeRef& node)
+{
+    return node.is_val() || node.is_keyval();
+}
+
+// for better error messages we keep track on the current node being read
+void SetCurrentLocation(const ryml::ConstNodeRef& node, const std::string& name)
+{
+    auto&& cname = ryml::to_csubstr(name);
+    auto&& ctx = reinterpret_cast<ParserContext*>(node.m_tree->callbacks().m_user_data);
+
+    if (ctx)
+    {
+        ctx->expectedValue = name;
+        if (node.is_map() && !node.find_child(ryml::to_csubstr(name)).invalid())
+        {
+            ctx->currentLocation = ctx->parser->location(node[cname]);
+            auto cstr = ctx->parser->location_contents(ctx->currentLocation);
+            if (cstr.size() > 1)
+            {
+                ctx->currentContent = std::string{cstr.data(), cstr.size() - 1};
+            }
+        }
+    }
+}
+} // namespace
+
+template<typename T>
+void Read(T& val, const ryml::ConstNodeRef& node, const std::string& name)
+{
+    SetCurrentLocation(node, name);
+    node[ryml::to_csubstr(name)] >> val;
+}
+
+template<typename T, typename std::enable_if_t<std::is_integral_v<T>, bool> = true>
+void OptionalRead(T& val, const ryml::ConstNodeRef& node, const std::string& name)
+{
+    SetCurrentLocation(node, name);
+    auto tmp = ryml::fmt::overflow_checked(val);
+    (void)node.get_if(ryml::to_csubstr(name), &tmp);
+}
+
+template<typename T, typename std::enable_if_t<!std::is_integral_v<T>, bool> = true>
+void OptionalRead(T& val, const ryml::ConstNodeRef& node, const std::string& name)
+{
+    SetCurrentLocation(node, name);
+    if (IsValidChild(node, name))
+    {
+        node[name.c_str()] >> val;
+    }
+}
+
+template<typename T>
+void OptionalRead(SilKit::Util::Optional<T>& val, const ryml::ConstNodeRef& node, const std::string& name)
+{
+    SetCurrentLocation(node, name);
+    if (IsValidChild(node, name))
+    {
+        node[name.c_str()] >> *val;
+    }
+}
+
+template<typename T>
+void Write(ryml::NodeRef* node, const std::string& name, const T& val)
+{
+    if (!node->is_map())
+    {
+        throw ConfigurationError("Parse error: trying to access child of something not a map");
+    }
+    node->append_child() << ryml::key(name) << val;
+}
+
+template<typename T>
+void Write(ryml::NodeRef* node, const T& val)
+{
+    if (!node->is_val())
+    {
+        throw ConfigurationError("Parse error: trying to write to something that is not a scalar");
+    }
+    node->set_val(val);
+}
+
+template<typename T>
+void OptionalWrite(const SilKit::Util::Optional<T>& val, ryml::NodeRef* node, const std::string& name)
+{
+    if (val.has_value())
+    {
+        node->append_child() << ryml::key(name) << *val;
+    }
+};
+
+template<typename T>
+void NonDefaultWrite( const T& val, ryml::NodeRef* node, const std::string& name, const T& defaultValue)
+{
+    if (!(val == defaultValue))
+    {
+        node->append_child() << ryml::key(name) << val;
+    }
+}
+//XXXXXXXXXX END RAPID YAML XXXXXXXXXX 
+
 
 // Exception type for Bad SIL Kit internal type conversion
 class ConversionError : public YAML::BadConversion
