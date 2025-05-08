@@ -49,6 +49,20 @@ bool read(const ryml::ConstNodeRef& node, std::chrono::milliseconds* obj)
     return true;
 }
 
+void write(ryml::NodeRef* node, const std::chrono::nanoseconds& obj)
+{
+    Write(node, std::to_string(obj.count()));
+}
+
+bool read(const ryml::ConstNodeRef& node, std::chrono::nanoseconds* obj)
+{
+    uint64_t buf;
+    auto tmp = ryml::fmt::overflow_checked(buf);
+    node >> tmp;
+    *obj = std::chrono::nanoseconds{*tmp.val};
+    return true;
+}
+
 } // namespace chrono
 } // namespace std
 namespace SilKit {

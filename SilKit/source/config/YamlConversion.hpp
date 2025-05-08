@@ -39,6 +39,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 namespace std {
 namespace chrono {
 DECLARE_READ_WRITE_FUNCS(milliseconds);
+DECLARE_READ_WRITE_FUNCS(nanoseconds);
 } // namespace chrono
 } // namespace std
 
