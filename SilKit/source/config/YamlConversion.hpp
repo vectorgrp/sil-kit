@@ -40,6 +40,7 @@ bool read(const ryml::ConstNodeRef& node, Services::Logging::Level* obj);
 } // namespace Logging
 } // namespace Services
 namespace Config {
+inline namespace v1 {
 void write(ryml::NodeRef* node, const Sink::Type& obj);
 bool read(const ryml::ConstNodeRef& node, Sink::Type* obj);
 void write(ryml::NodeRef* node, const Sink::Format& obj);
@@ -48,7 +49,14 @@ void write(ryml::NodeRef* node, const Sink& obj);
 bool read(const ryml::ConstNodeRef& node, Sink* obj);
 void write(ryml::NodeRef* node, const Logging& obj);
 bool read(const ryml::ConstNodeRef& node, Logging* obj);
+void write(ryml::NodeRef* node, const Metrics& obj);
+bool read(const ryml::ConstNodeRef& node, Metrics* obj);
+void write(ryml::NodeRef* node, const MetricsSink& obj);
+bool read(const ryml::ConstNodeRef& node, MetricsSink* obj);
+void write(ryml::NodeRef* node, const MetricsSink::Type& obj);
+bool read(const ryml::ConstNodeRef& node, MetricsSink* obj);
 
+} // namespace v1
 } //end namespace Config
 } //end namespace SilKit
 

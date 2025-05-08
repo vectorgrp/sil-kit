@@ -49,6 +49,28 @@ namespace Config {
 namespace V1 {
 using namespace SilKit::Config;
 // rapid yaml impl
+
+void write(ryml::NodeRef* node, const SilKitRegistry::Config::V1::Experimental& obj)
+{
+    static const V1::Experimental defaultObject{};
+    NonDefaultWrite(obj.metrics, node, "Metrics", defaultObject.metrics);
+}
+
+bool read(const ryml::ConstNodeRef& node, SilKitRegistry::Config::V1::Experimental* obj)
+{
+    OptionalRead(obj->metrics, node, "Metrics");
+
+    for (auto&& sink : obj->metrics.sinks)
+    {
+        if (sink.type == SilKit::Config::MetricsSink::Type::Remote)
+        {
+            throw SilKit::ConfigurationError{"SIL Kit Registry does not support remote metrics sinks"};
+        }
+    }
+
+    return true;
+}
+
 void write(ryml::NodeRef* node, const SilKitRegistry::Config::V1::RegistryConfiguration& obj)
 {
     static const V1::RegistryConfiguration defaultObject{};
@@ -59,7 +81,7 @@ void write(ryml::NodeRef* node, const SilKitRegistry::Config::V1::RegistryConfig
     OptionalWrite(obj.enableDomainSockets, node, "EnableDomainSockets");
     OptionalWrite(obj.dashboardUri, node, "DashboardUri");
     NonDefaultWrite(obj.logging, node, "Logging", defaultObject.logging);
-    //NonDefaultWrite(obj.experimental, node, "Experimental", defaultObj.experimental);
+    NonDefaultWrite(obj.experimental, node, "Experimental", defaultObject.experimental);
 }
 
 bool read(const ryml::ConstNodeRef& node, SilKitRegistry::Config::V1::RegistryConfiguration* obj)
@@ -77,7 +99,7 @@ bool read(const ryml::ConstNodeRef& node, SilKitRegistry::Config::V1::RegistryCo
     OptionalRead(obj->enableDomainSockets, node, "EnableDomainSockets");
     OptionalRead(obj->dashboardUri, node, "DashboardUri");
     OptionalRead(obj->logging, node, "Logging");
-    //OptionalRead(obj->experimental, node, "Experimental");
+    OptionalRead(obj->experimental, node, "Experimental");
 
     if (obj->logging.logFromRemotes)
     {

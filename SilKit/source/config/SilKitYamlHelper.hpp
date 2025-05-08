@@ -170,6 +170,15 @@ void OptionalRead(T& val, const ryml::ConstNodeRef& node, const std::string& nam
     (void)node.get_if(ryml::to_csubstr(name), &tmp);
 }
 
+inline void OptionalRead(bool& val, const ryml::ConstNodeRef& node, const std::string& name)
+{
+    SetCurrentLocation(node, name);
+    if (IsValidChild(node, name))
+    {
+        node[name.c_str()] >> val;
+    }
+}
+
 template<typename T, typename std::enable_if_t<!std::is_integral_v<T>, bool> = true>
 void OptionalRead(T& val, const ryml::ConstNodeRef& node, const std::string& name)
 {
@@ -218,6 +227,23 @@ void OptionalWrite(const SilKit::Util::Optional<T>& val, ryml::NodeRef* node, co
     if (val.has_value())
     {
         node->append_child() << ryml::key(name) << *val;
+    }
+};
+
+template<typename T>
+void OptionalWrite(const std::vector<T>& val, ryml::NodeRef* node, const std::string& name)
+{
+    if (!val.empty())
+    {
+        node->append_child() << ryml::key(name) << val;
+    }
+};
+
+inline void OptionalWrite(const std::string& val, ryml::NodeRef* node, const std::string& name)
+{
+    if (!val.empty())
+    {
+        node->append_child() << ryml::key(name) << val;
     }
 };
 

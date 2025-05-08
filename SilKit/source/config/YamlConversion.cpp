@@ -95,9 +95,10 @@ bool read(const ryml::ConstNodeRef& node, Services::Logging::Level* obj)
 } // namespace Logging
 } // namespace Services
 namespace Config {
+inline namespace v1 {
 
 
-void write (ryml::NodeRef* node,  const Sink::Type& obj)
+void write(ryml::NodeRef* node, const Sink::Type& obj)
 {
     switch (obj)
     {
@@ -117,7 +118,7 @@ bool read(const ryml::ConstNodeRef& node, Sink::Type* obj)
 {
     if (!IsScalar(node))
     {
-        throw ConfigurationError( "Sink::Type should be a string of Remote|Stdout|File.");
+        throw ConfigurationError("Sink::Type should be a string of Remote|Stdout|File.");
     }
 
     auto&& str = node.val();
@@ -140,7 +141,7 @@ bool read(const ryml::ConstNodeRef& node, Sink::Type* obj)
     return true;
 }
 
-void write (ryml::NodeRef* node,  const Sink::Format& obj)
+void write(ryml::NodeRef* node, const Sink::Format& obj)
 {
     switch (obj)
     {
@@ -175,7 +176,7 @@ bool read(const ryml::ConstNodeRef& node, Sink::Format* obj)
     return true;
 }
 
-void write (ryml::NodeRef* node,  const Sink& obj)
+void write(ryml::NodeRef* node, const Sink& obj)
 {
     static const Sink defaultSink{};
     // ParticipantConfiguration.schema.json: Type is required:
@@ -201,7 +202,7 @@ bool read(const ryml::ConstNodeRef& node, Sink* obj)
     return true;
 }
 
-void write (ryml::NodeRef* node,  const Logging& obj)
+void write(ryml::NodeRef* node, const Logging& obj)
 {
     static const Logging defaultLogger{};
     NonDefaultWrite(obj.logFromRemotes, node, "LogFromRemotes", defaultLogger.logFromRemotes);
@@ -218,6 +219,80 @@ bool read(const ryml::ConstNodeRef& node, Logging* obj)
     return true;
 }
 
+// Metrics
+void write(ryml::NodeRef* node, const MetricsSink::Type& obj)
+{
+    switch (obj)
+    {
+    case MetricsSink::Type::Undefined:
+        Write(node, "Undefined");
+        break;
+    case MetricsSink::Type::JsonFile:
+        Write(node, "JsonFile");
+        break;
+    case MetricsSink::Type::Remote:
+        Write(node, "Remote");
+        break;
+    default:
+        throw ConfigurationError{"Unknown MetricsSink Type"};
+    }
+}
+
+bool read(const ryml::ConstNodeRef& node, MetricsSink::Type* obj)
+{
+    auto&& str = node.val();
+    if (str == "Undefined" || str == "")
+    {
+        *obj = MetricsSink::Type::Undefined;
+    }
+    else if (str == "JsonFile")
+    {
+        *obj = MetricsSink::Type::JsonFile;
+    }
+    else if (str == "Remote")
+    {
+        *obj = MetricsSink::Type::Remote;
+    }
+    else
+    {
+        throw ConfigurationError{Format("Unknown MetricsSink::Type: {}.", str)};
+    }
+    return true;
+}
+
+void write(ryml::NodeRef* node, const MetricsSink& obj)
+{
+    Write(node, "Type", obj.type);
+    if (!obj.name.empty())
+    {
+        Write(node, "Name", obj.name);
+    }
+}
+
+bool read(const ryml::ConstNodeRef& node, MetricsSink* obj)
+{
+    Read(obj->type, node, "Type");
+    OptionalRead(obj->name, node, "Name");
+    return true;
+}
+
+void write(ryml::NodeRef* node, const Metrics& obj)
+{
+    OptionalWrite(obj.sinks, node, "Sinks");
+    if (obj.collectFromRemote)
+    {
+        Write(node, "CollectFromRemote", obj.collectFromRemote);
+    }
+}
+
+bool read(const ryml::ConstNodeRef& node, Metrics* obj)
+{
+    OptionalRead(obj->sinks, node, "Sinks");
+    OptionalRead(obj->collectFromRemote, node, "CollectFromRemote");
+    return true;
+}
+
+} // namespace v1
 } //end namespace Config
 } //end namespace SilKit
 

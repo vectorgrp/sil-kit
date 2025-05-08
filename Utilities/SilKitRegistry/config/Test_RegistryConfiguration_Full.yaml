@@ -14,3 +14,7 @@ Logging:
       LogName: FileSink
 
 DashboardUri: http://dashboard.example.com:1234
+
+Experimental:
+  Metrics:
+    CollectFromRemote: true
