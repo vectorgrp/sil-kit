@@ -26,9 +26,71 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <chrono>
 #include <type_traits>
 #include <silkit/capi/Types.h>
+#include "rapidyaml.hpp"
 
 using namespace SilKit::Config;
 using namespace SilKit;
+
+// rapidyaml utils, need to be defined in proper ADL context
+namespace
+{
+struct ParserContext
+{
+  ryml::Parser* parser{ nullptr };
+  ryml::Location currentLocation{};
+  std::string currentContent;
+  std::string expectedValue;
+};
+
+} // namespace
+namespace SilKit {
+namespace Config {
+
+bool IsValidChild(const ryml::ConstNodeRef& node, const std::string& name)
+{
+  return !node.find_child(ryml::to_csubstr(name)).invalid();
+}
+
+// for better error messages we keep track on the current node being read
+void SetCurrentLocation(const ryml::ConstNodeRef& node, const std::string& name)
+{
+    auto&& cname = ryml::to_csubstr(name);
+    auto&& ctx = reinterpret_cast<ParserContext*>(node.m_tree->callbacks().m_user_data);
+
+    if (ctx)
+    {
+      ctx->expectedValue = name;
+      if( !node.find_child(ryml::to_csubstr(name)).invalid())
+      {
+          ctx->currentLocation = ctx->parser->location(node[cname]);
+          auto cstr = ctx->parser->location_contents(ctx->currentLocation);
+          if (cstr.size() > 1)
+          {
+            ctx->currentContent = std::string{ cstr.data(), cstr.size() - 1 };
+          }
+      }
+    }
+}
+template<typename T, typename std::enable_if_t<std::is_integral_v<T>, bool> = true>
+void OptionalRead(T& val, const ryml::ConstNodeRef& node, const std::string& name)
+{
+    SetCurrentLocation(node, name);
+    auto tmp = ryml::fmt::overflow_checked(val);
+    (void)node.get_if(ryml::to_csubstr(name), &tmp);
+}
+
+template<typename T, typename std::enable_if_t<!std::is_integral_v<T>, bool> = true>
+void OptionalRead(T& val, const ryml::ConstNodeRef& node, const std::string& name)
+{
+    SetCurrentLocation(node, name);
+    if (IsValidChild(node, name))
+    {
+        node[name.c_str()] >> val;
+    }
+}
+
+} //end namespace Config
+} //end namespace SilKit
 
 // Local utilities
 namespace {

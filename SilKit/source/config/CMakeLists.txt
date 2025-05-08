@@ -57,6 +57,7 @@ target_link_libraries(O_SilKit_Config
     PRIVATE O_SilKit_Util_Filesystem
     PUBLIC yaml-cpp
     PRIVATE I_SilKit_Util_FileHelpers
+    PRIVATE rapidyaml-static
 )
 
 target_include_directories(O_SilKit_Config

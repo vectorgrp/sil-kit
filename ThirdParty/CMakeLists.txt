@@ -214,6 +214,14 @@ function(include_oatpp)
     set_property(TARGET oatpp PROPERTY VISIBILITY_INLINES_HIDDEN ON)
 endfunction()
 
+function(include_rapidyaml)
+		add_subdirectory(
+            "${SILKIT_THIRD_PARTY_SOURCE_DIR}/rapidyaml"
+            "${SILKIT_THIRD_PARTY_BINARY_DIR}/_tp_rapidyaml"
+    )
+    add_library(rapidyaml ALIAS rapidyaml-static)
+endfunction()
+
 function(silkit_add_third_party_packages)
     if(SILKIT_BUILD_TESTS)
         include_gtest()
@@ -223,8 +231,11 @@ function(silkit_add_third_party_packages)
     include_yamlcpp()
     include_fmt()
     include_spdlog()
+    include_rapidyaml()
 
     if (SILKIT_BUILD_DASHBOARD)
         include_oatpp()
     endif ()
 endfunction()
+
+

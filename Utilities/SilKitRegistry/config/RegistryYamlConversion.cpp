@@ -22,6 +22,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "RegistryYamlConversion.hpp"
 #include "YamlConversion.hpp"
 
+#include "rapidyaml.hpp"
 
 namespace {
 

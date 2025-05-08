@@ -29,6 +29,7 @@ target_link_libraries(O_SilKitRegistry_Config
 
     PUBLIC fmt::fmt
     PUBLIC yaml-cpp
+    PRIVATE rapidyaml
 )
 
 

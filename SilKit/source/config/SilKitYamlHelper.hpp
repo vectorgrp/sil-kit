@@ -30,6 +30,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "yaml-cpp/yaml.h"
 
+
 // YAML-cpp serialization/deserialization for our config data types
 namespace YAML {
 using namespace SilKit::Config;
