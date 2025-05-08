@@ -21,15 +21,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "RegistryConfiguration.hpp"
 
-// SIL Kit Registry Headers
-#include "RegistryYamlConversion.hpp"
-
 // Internal SIL Kit Headers
 #include "YamlParser.hpp"
 
 // Third-Party Headers
 #include "fmt/format.h"
-#include "yaml-cpp/yaml.h"
 
 namespace SilKitRegistry {
 namespace Config {

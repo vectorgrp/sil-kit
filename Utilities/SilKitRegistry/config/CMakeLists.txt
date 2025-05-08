@@ -19,7 +19,6 @@ target_link_libraries(I_SilKitRegistry_Config
 
 add_library(O_SilKitRegistry_Config OBJECT
     RegistryConfiguration.cpp
-    RegistryYamlConversion.cpp
 )
 
 target_link_libraries(O_SilKitRegistry_Config
@@ -28,7 +27,6 @@ target_link_libraries(O_SilKitRegistry_Config
     PUBLIC I_SilKit_Config
 
     PUBLIC fmt::fmt
-    PUBLIC yaml-cpp
     PRIVATE rapidyaml
 )
 
