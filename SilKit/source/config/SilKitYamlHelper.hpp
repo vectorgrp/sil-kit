@@ -123,14 +123,19 @@ auto Format(const std::string& fmt, Args&&... args)
   return buf;
 }
 
-bool IsValidChild(const ryml::ConstNodeRef& node, const std::string& name)
+inline bool IsValidChild(const ryml::ConstNodeRef& node, const std::string& name)
 {
     return !node.find_child(ryml::to_csubstr(name)).invalid();
 }
 
-bool IsScalar(const ryml::ConstNodeRef& node)
+inline bool IsScalar(const ryml::ConstNodeRef& node)
 {
     return node.is_val() || node.is_keyval();
+}
+
+inline bool IsMap(const ryml::ConstNodeRef& node)
+{
+    return node.is_map();
 }
 
 // for better error messages we keep track on the current node being read
@@ -218,7 +223,7 @@ void Write(ryml::NodeRef* node, const T& val)
     {
         throw ConfigurationError("Parse error: trying to write to something that is not a scalar");
     }
-    node->set_val(val);
+    node->set_val(ryml::to_csubstr(val));
 }
 
 template<typename T>
@@ -247,12 +252,63 @@ inline void OptionalWrite(const std::string& val, ryml::NodeRef* node, const std
     }
 };
 
+inline void OptionalWrite(const Replay& value, ryml::NodeRef* node, const std::string& name)
+{
+    if (value.useTraceSource.size() > 0)
+    {
+        node->append_child() << ryml::key(name) << value;
+    }
+}
+
 template<typename T>
 void NonDefaultWrite( const T& val, ryml::NodeRef* node, const std::string& name, const T& defaultValue)
 {
     if (!(val == defaultValue))
     {
         node->append_child() << ryml::key(name) << val;
+    }
+}
+
+template <typename ConfigT>
+void OptionalRead_deprecated_alternative(ConfigT& value, const ryml::ConstNodeRef& node, const std::string& fieldName,
+                                            std::initializer_list<std::string> deprecatedFieldNames)
+{
+    if (IsMap(node))
+    {
+        std::vector<std::string> presentDeprecatedFieldNames;
+        std::copy_if(deprecatedFieldNames.begin(), deprecatedFieldNames.end(),
+                     std::back_inserter(presentDeprecatedFieldNames),
+                     [&node](const auto& deprecatedFieldName) { return IsValidChild(node, deprecatedFieldName); });
+
+        if (IsValidChild(node, fieldName) && presentDeprecatedFieldNames.size() >= 1)
+        {
+            std::stringstream ss;
+            ss << "The key \"" << fieldName << "\" and the deprected alternatives";
+            for (const auto& deprecatedFieldName : presentDeprecatedFieldNames)
+            {
+                ss << " \"" << deprecatedFieldName << "\"";
+            }
+            ss << " are present.";
+            throw ConfigurationError{ss.str()};
+        }
+
+        if (presentDeprecatedFieldNames.size() >= 2)
+        {
+            std::stringstream ss;
+            ss << "The deprecated keys";
+            for (const auto& deprecatedFieldName : presentDeprecatedFieldNames)
+            {
+                ss << " \"" << deprecatedFieldName << "\"";
+            }
+            ss << " are present.";
+            throw ConfigurationError{ ss.str()};
+        }
+
+        OptionalRead(value, node, fieldName);
+        for (const auto& deprecatedFieldName : deprecatedFieldNames)
+        {
+            OptionalRead(value, node, deprecatedFieldName);
+        }
     }
 }
 //XXXXXXXXXX END RAPID YAML XXXXXXXXXX 
