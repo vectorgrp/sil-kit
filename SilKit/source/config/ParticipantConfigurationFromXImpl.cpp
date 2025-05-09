@@ -867,6 +867,8 @@ auto ParticipantConfigurationFromFileImpl(const std::string& filename)
         throw;
     }
 
+    auto newConfig = SilKit::Config::DeserializeNew<SilKit::Config::ParticipantConfiguration>(text);
+
     auto configuration = SilKit::Config::ParticipantConfigurationFromXImpl(text, configData);
     return std::make_shared<SilKit::Config::ParticipantConfiguration>(std::move(configuration));
 }

@@ -132,6 +132,7 @@ namespace Flexray {
 void write (ryml::NodeRef* node,  const FlexrayClusterParameters& obj)
 {
     // Parse parameters as an int value; uint8_t would be interpreted as a character
+    MakeMap(node);
     Write(node,"gColdstartAttempts",obj.gColdstartAttempts);
     Write(node,"gCycleCountMax",obj.gCycleCountMax);
     Write(node,"gdActionPointOffset",obj.gdActionPointOffset);
@@ -182,6 +183,7 @@ bool read(const ryml::ConstNodeRef& node, Services::Flexray::FlexrayClusterParam
 
 void write (ryml::NodeRef* node,  const FlexrayNodeParameters& obj)
 {
+    MakeMap(node);
     Write(node,"pAllowHaltDueToClock", obj.pAllowHaltDueToClock);
     Write(node,"pAllowPassiveToActive", obj.pAllowPassiveToActive);
     Write(node,"pClusterDriftDamping", obj.pClusterDriftDamping);
@@ -237,6 +239,7 @@ bool read(const ryml::ConstNodeRef& node, Services::Flexray::FlexrayNodeParamete
 
 void write (ryml::NodeRef* node,  const FlexrayTxBufferConfig& obj)
 {
+    MakeMap(node);
     Write(node,"channels",obj.channels);
     Write(node,"slotId", obj.slotId);
     Write(node,"offset", obj.offset);
@@ -446,6 +449,7 @@ void write(ryml::NodeRef* node, const Sink& obj)
 {
     static const Sink defaultSink{};
     // ParticipantConfiguration.schema.json: Type is required:
+    MakeMap(node);
     Write(node, "Type", obj.type);
     NonDefaultWrite(obj.level, node, "Level", defaultSink.level);
     NonDefaultWrite(obj.logName, node, "LogName", defaultSink.logName);
@@ -471,6 +475,7 @@ bool read(const ryml::ConstNodeRef& node, Sink* obj)
 void write(ryml::NodeRef* node, const Logging& obj)
 {
     static const Logging defaultLogger{};
+    MakeMap(node);
     NonDefaultWrite(obj.logFromRemotes, node, "LogFromRemotes", defaultLogger.logFromRemotes);
     NonDefaultWrite(obj.flushLevel, node, "FlushLevel", defaultLogger.flushLevel);
     // ParticipantConfiguration.schema.json: this is a required property:
@@ -528,6 +533,7 @@ bool read(const ryml::ConstNodeRef& node, MetricsSink::Type* obj)
 
 void write(ryml::NodeRef* node, const MetricsSink& obj)
 {
+    MakeMap(node);
     Write(node, "Type", obj.type);
     if (!obj.name.empty())
     {
@@ -544,6 +550,7 @@ bool read(const ryml::ConstNodeRef& node, MetricsSink* obj)
 
 void write(ryml::NodeRef* node, const Metrics& obj)
 {
+    MakeMap(node);
     OptionalWrite(obj.sinks, node, "Sinks");
     if (obj.collectFromRemote)
     {
@@ -560,6 +567,7 @@ bool read(const ryml::ConstNodeRef& node, Metrics* obj)
 
 void write(ryml::NodeRef* node, const MdfChannel& obj)
 {
+    MakeMap(node);
     OptionalWrite(obj.channelName, node, "ChannelName");
     OptionalWrite(obj.channelPath, node, "ChannelPath");
     OptionalWrite(obj.channelSource, node, "ChannelSource");
@@ -586,6 +594,7 @@ bool read(const ryml::ConstNodeRef& node, MdfChannel* obj)
 void write(ryml::NodeRef* node, const Replay& obj)
 {
     static const Replay defaultObject{};
+    MakeMap(node);
     Write(node, "UseTraceSource", obj.useTraceSource);
     NonDefaultWrite(obj.direction, node, "Direction", defaultObject.direction);
     NonDefaultWrite(obj.mdfChannel, node, "MdfChannel", defaultObject.mdfChannel);
@@ -638,6 +647,7 @@ bool read(const ryml::ConstNodeRef& node, Replay::Direction* obj)
 
 void write(ryml::NodeRef* node, const CanController& obj)
 {
+    MakeMap(node);
     Write(node, "Name", obj.name);
     OptionalWrite(obj.network, node, "Network");
     OptionalWrite(obj.useTraceSinks, node, "UseTraceSinks");
@@ -655,7 +665,7 @@ bool read(const ryml::ConstNodeRef& node, CanController* obj)
 
 void write(ryml::NodeRef* node, const LinController& obj)
 {
-    static const LinController defaultObj{};
+    MakeMap(node);
     Write(node, "Name", obj.name);
     OptionalWrite(obj.network, node, "Network");
     OptionalWrite(obj.useTraceSinks, node, "UseTraceSinks");
@@ -673,6 +683,7 @@ bool read(const ryml::ConstNodeRef& node, LinController* obj)
 
 void write(ryml::NodeRef* node, const EthernetController& obj)
 {
+    MakeMap(node);
     Write(node, "Name", obj.name);
     OptionalWrite(obj.network, node, "Network");
     OptionalWrite(obj.useTraceSinks, node, "UseTraceSinks");
@@ -690,6 +701,7 @@ bool read(const ryml::ConstNodeRef& node, EthernetController* obj)
 
 void write(ryml::NodeRef* node, const FlexrayController& obj)
 {
+    MakeMap(node);
     Write(node, "Name", obj.name);
     OptionalWrite(obj.network, node, "Network");
     OptionalWrite(obj.clusterParameters, node, "ClusterParameters");
@@ -742,6 +754,7 @@ bool read(const ryml::ConstNodeRef& node, Label::Kind* obj)
 
 void write(ryml::NodeRef* node, const Label& obj)
 {
+    MakeMap(node);
     Write(node, "Key", obj.key);
     Write(node,"Value", obj.value);
     Write(node,"Kind", obj.kind);
@@ -756,6 +769,7 @@ bool read(const ryml::ConstNodeRef& node, Label* obj)
 
 void write(ryml::NodeRef* node, const DataPublisher& obj)
 {
+    MakeMap(node);
     Write(node,"Name",obj.name);
     OptionalWrite(obj.topic, node, "Topic");
     OptionalWrite(obj.labels, node, "Labels");
@@ -776,6 +790,7 @@ bool read(const ryml::ConstNodeRef& node, DataPublisher* obj)
 
 void write(ryml::NodeRef* node, const DataSubscriber& obj)
 {
+    MakeMap(node);
     Write(node, "Name", obj.name);
     OptionalWrite(obj.topic, node, "Topic");
     OptionalWrite(obj.labels, node, "Labels");
@@ -794,6 +809,7 @@ bool read(const ryml::ConstNodeRef& node, DataSubscriber* obj)
 
 void write(ryml::NodeRef* node, const RpcServer& obj)
 {
+    MakeMap(node);
     Write(node, "Name", obj.name);
     OptionalWrite(obj.functionName, node, "FunctionName");
     OptionalWrite(obj.labels, node, "Labels");
@@ -814,6 +830,7 @@ bool read(const ryml::ConstNodeRef& node, RpcServer* obj)
 
 void write(ryml::NodeRef* node, const RpcClient& obj)
 {
+    MakeMap(node);
     Write(node, "Name", obj.name);
     OptionalWrite(obj.functionName, node, "Channel");
     OptionalWrite(obj.labels, node, "Labels");
@@ -832,6 +849,7 @@ bool read(const ryml::ConstNodeRef& node, RpcClient* obj)
 
 void write(ryml::NodeRef* node, const Tracing& obj)
 {
+    MakeMap(node);
     OptionalWrite(obj.traceSinks, node, "TraceSinks");
     OptionalWrite(obj.traceSources, node, "TraceSources");
 }
@@ -844,6 +862,7 @@ bool read(const ryml::ConstNodeRef& node, Tracing* obj)
 
 void write(ryml::NodeRef* node, const TraceSink& obj)
 {
+    MakeMap(node);
     Write(node, "Name", obj.name);
     Write(node, "Type", obj.type);
     Write(node, "OutputPath", obj.outputPath);
@@ -898,6 +917,7 @@ bool read(const ryml::ConstNodeRef& node, TraceSink::Type* obj)
 
 void write(ryml::NodeRef* node, const TraceSource& obj)
 {
+    MakeMap(node);
     Write(node,"Name", obj.name);
     Write(node,"Type", obj.type);
     Write(node,"InputPath", obj.inputPath);
@@ -948,6 +968,7 @@ bool read(const ryml::ConstNodeRef& node, TraceSource::Type* obj)
 void write(ryml::NodeRef* node, const Extensions& obj)
 {
     static const Extensions defaultObj{};
+    MakeMap(node);
     NonDefaultWrite(obj.searchPathHints, node, "SearchPathHints", defaultObj.searchPathHints);
 }
 bool read(const ryml::ConstNodeRef& node, Extensions* obj)
@@ -960,6 +981,7 @@ bool read(const ryml::ConstNodeRef& node, Extensions* obj)
 void write(ryml::NodeRef* node, const Middleware& obj)
 {
     static const Middleware defaultObj;
+    MakeMap(node);
     NonDefaultWrite(obj.registryUri, node, "RegistryUri", defaultObj.registryUri);
     NonDefaultWrite(obj.connectAttempts, node, "ConnectAttempts", defaultObj.connectAttempts);
     NonDefaultWrite(obj.tcpNoDelay, node, "TcpNoDelay", defaultObj.tcpNoDelay);
@@ -1027,6 +1049,7 @@ bool read(const ryml::ConstNodeRef& node, Aggregation* obj)
 void write(ryml::NodeRef* node, const TimeSynchronization& obj)
 {
     static const TimeSynchronization defaultObj;
+    MakeMap(node);
     NonDefaultWrite(obj.animationFactor, node, "AnimationFactor", defaultObj.animationFactor);
     NonDefaultWrite(obj.enableMessageAggregation, node, "EnableMessageAggregation",
                        defaultObj.enableMessageAggregation);
@@ -1043,6 +1066,7 @@ void write(ryml::NodeRef* node, const Experimental& obj)
 {
     static const Experimental defaultObj{};
 
+    MakeMap(node);
     NonDefaultWrite(obj.timeSynchronization, node, "TimeSynchronization", defaultObj.timeSynchronization);
     NonDefaultWrite(obj.metrics, node, "Metrics", defaultObj.metrics);
 }
@@ -1057,6 +1081,7 @@ bool read(const ryml::ConstNodeRef& node, Experimental* obj)
 void write(ryml::NodeRef* node, const ParticipantConfiguration& obj)
 {
     static const ParticipantConfiguration defaultObj{};
+    MakeMap(node);
     Write(node, "SchemaVersion", obj.schemaVersion);
     OptionalWrite(obj.description, node, "Description");
     OptionalWrite(obj.participantName, node, "ParticipantName");
@@ -1078,7 +1103,7 @@ void write(ryml::NodeRef* node, const ParticipantConfiguration& obj)
 }
 bool read(const ryml::ConstNodeRef& node, ParticipantConfiguration* obj)
 {
-    OptionalRead(obj->schemaVersion, node, "SchemaVersion");
+    OptionalRead(obj->schemaVersion, node, "schemaVersion"); // note lower case schemaVersion
     OptionalRead(obj->description, node, "Description");
     OptionalRead(obj->participantName, node, "ParticipantName");
 
@@ -1102,6 +1127,7 @@ bool read(const ryml::ConstNodeRef& node, ParticipantConfiguration* obj)
 
 void write(ryml::NodeRef* node, const HealthCheck& obj)
 {
+    MakeMap(node);
     OptionalWrite(obj.softResponseTimeout, node, "SoftResponseTimeout");
     OptionalWrite(obj.hardResponseTimeout, node, "HardResponseTimeout");
 }

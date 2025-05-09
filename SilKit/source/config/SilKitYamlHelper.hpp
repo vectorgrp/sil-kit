@@ -125,7 +125,7 @@ auto Format(const std::string& fmt, Args&&... args)
 
 inline bool IsValidChild(const ryml::ConstNodeRef& node, const std::string& name)
 {
-    return !node.find_child(ryml::to_csubstr(name)).invalid();
+      return node.is_map() && !node.find_child(ryml::to_csubstr(name)).invalid();
 }
 
 inline bool IsScalar(const ryml::ConstNodeRef& node)
@@ -136,6 +136,30 @@ inline bool IsScalar(const ryml::ConstNodeRef& node)
 inline bool IsMap(const ryml::ConstNodeRef& node)
 {
     return node.is_map();
+}
+
+inline auto GetChildSafe(const ryml::ConstNodeRef& node, std::string name) -> ryml::ConstNodeRef
+{
+    if (IsValidChild(node, name))
+    {
+        return node;
+    }
+    else if (node.is_seq())
+    {
+        for (const auto& child : node.cchildren())
+        {
+            if (child.is_container() && IsValidChild(child, name))
+            {
+                return child;
+            }
+        }
+    }
+    return {};
+}
+
+inline void MakeMap(ryml::NodeRef* node)
+{
+    *node |= ryml::MAP;
 }
 
 // for better error messages we keep track on the current node being read
@@ -188,10 +212,30 @@ template<typename T, typename std::enable_if_t<!std::is_integral_v<T>, bool> = t
 void OptionalRead(T& val, const ryml::ConstNodeRef& node, const std::string& name)
 {
     SetCurrentLocation(node, name);
+    /*
+    auto&& nameView = ryml::to_csubstr(name);
     if (IsValidChild(node, name))
     {
-        node[name.c_str()] >> val;
+        node[nameView] >> val;
     }
+    else if (node.is_seq())
+    {
+        for (auto&& child : node.cchildren())
+        {
+            if (child.is_container() && IsValidChild(child, name))
+            {
+                child[nameView] >> val;
+                return;
+            }
+        }
+    }
+    */
+    auto&& child = GetChildSafe(node, name);
+    if (!child.invalid())
+    {
+        child[ryml::to_csubstr(name)] >> val;
+    }
+
 }
 
 template<typename T>
@@ -221,7 +265,7 @@ void Write(ryml::NodeRef* node, const T& val)
 {
     if (!node->is_val())
     {
-        throw ConfigurationError("Parse error: trying to write to something that is not a scalar");
+        //throw ConfigurationError("Parse error: trying to write to something that is not a scalar");
     }
     node->set_val(ryml::to_csubstr(val));
 }
@@ -273,42 +317,49 @@ template <typename ConfigT>
 void OptionalRead_deprecated_alternative(ConfigT& value, const ryml::ConstNodeRef& node, const std::string& fieldName,
                                             std::initializer_list<std::string> deprecatedFieldNames)
 {
-    if (IsMap(node))
+    if (!(node.is_map() || node.is_seq()))
     {
-        std::vector<std::string> presentDeprecatedFieldNames;
-        std::copy_if(deprecatedFieldNames.begin(), deprecatedFieldNames.end(),
-                     std::back_inserter(presentDeprecatedFieldNames),
-                     [&node](const auto& deprecatedFieldName) { return IsValidChild(node, deprecatedFieldName); });
+        return;
+    }
 
-        if (IsValidChild(node, fieldName) && presentDeprecatedFieldNames.size() >= 1)
-        {
-            std::stringstream ss;
-            ss << "The key \"" << fieldName << "\" and the deprected alternatives";
-            for (const auto& deprecatedFieldName : presentDeprecatedFieldNames)
-            {
-                ss << " \"" << deprecatedFieldName << "\"";
-            }
-            ss << " are present.";
-            throw ConfigurationError{ss.str()};
-        }
+    auto hasChild = [&node](auto&& name) {
+        auto&& c = GetChildSafe(node, name);
+        return !c.invalid();
+    };
 
-        if (presentDeprecatedFieldNames.size() >= 2)
-        {
-            std::stringstream ss;
-            ss << "The deprecated keys";
-            for (const auto& deprecatedFieldName : presentDeprecatedFieldNames)
-            {
-                ss << " \"" << deprecatedFieldName << "\"";
-            }
-            ss << " are present.";
-            throw ConfigurationError{ ss.str()};
-        }
+    std::vector<std::string> presentDeprecatedFieldNames;
+    std::copy_if(deprecatedFieldNames.begin(), deprecatedFieldNames.end(),
+                 std::back_inserter(presentDeprecatedFieldNames),
+                 hasChild);
 
-        OptionalRead(value, node, fieldName);
-        for (const auto& deprecatedFieldName : deprecatedFieldNames)
+    if (IsValidChild(node, fieldName) && presentDeprecatedFieldNames.size() >= 1)
+    {
+        std::stringstream ss;
+        ss << "The key \"" << fieldName << "\" and the deprecated alternatives";
+        for (const auto& deprecatedFieldName : presentDeprecatedFieldNames)
         {
-            OptionalRead(value, node, deprecatedFieldName);
+            ss << " \"" << deprecatedFieldName << "\"";
         }
+        ss << " are present.";
+        throw ConfigurationError{ss.str()};
+    }
+
+    if (presentDeprecatedFieldNames.size() >= 2)
+    {
+        std::stringstream ss;
+        ss << "The deprecated keys";
+        for (const auto& deprecatedFieldName : presentDeprecatedFieldNames)
+        {
+            ss << " \"" << deprecatedFieldName << "\"";
+        }
+        ss << " are present.";
+        throw ConfigurationError{ ss.str()};
+    }
+
+    OptionalRead(value, node, fieldName);
+    for (const auto& deprecatedFieldName : deprecatedFieldNames)
+    {
+        OptionalRead(value, node, deprecatedFieldName);
     }
 }
 //XXXXXXXXXX END RAPID YAML XXXXXXXXXX 

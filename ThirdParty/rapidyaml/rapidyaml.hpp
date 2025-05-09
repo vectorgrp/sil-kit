@@ -11665,9 +11665,9 @@ inline FASTFLOAT_CONSTEXPR20 adjusted_mantissa negative_digit_comp(
   adjusted_mantissa answer = am;
   round<T>(answer, [ord](adjusted_mantissa &a, int32_t shift) {
     round_nearest_tie_even(
-        a, shift, [ord](bool is_odd, bool _, bool __) -> bool {
-          (void)_;  // not needed, since we've done our comparison
-          (void)__; // not needed, since we've done our comparison
+        a, shift, [ord](bool is_odd, bool _unused_parameter, bool __unused_parameter) -> bool {
+          (void)_unused_parameter;  // not needed, since we've done our comparison
+          (void)__unused_parameter; // not needed, since we've done our comparison
           if (ord > 0) {
             return true;
           } else if (ord < 0) {
