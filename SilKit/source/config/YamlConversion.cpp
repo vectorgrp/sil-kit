@@ -67,6 +67,50 @@ bool read(const ryml::ConstNodeRef& node, std::chrono::nanoseconds* obj)
 } // namespace std
 namespace SilKit {
 namespace Services {
+
+void write(ryml::NodeRef* node, const SilKit::Services::MatchingLabel::Kind& obj)
+{
+    switch (obj)
+    {
+    case Services::MatchingLabel::Kind::Mandatory:
+        Write(node, "Mandatory");
+        break;
+    case Services::MatchingLabel::Kind::Optional:
+        Write(node, "Optional");
+        break;
+    }
+}
+
+bool read(const ryml::ConstNodeRef& node, SilKit::Services::MatchingLabel::Kind* obj)
+{
+    if (!IsScalar(node))
+    {
+        throw ConfigurationError("Level should be a string of Critical|Error|Warn|Info|Debug|Trace|Off.");
+    }
+    auto&& str = node.val();
+    if (str == "Mandatory")
+        *obj = SilKit::Services::MatchingLabel::Kind::Mandatory;
+    else if (str == "Optional")
+        *obj = SilKit::Services::MatchingLabel::Kind::Optional;
+    return true;
+}
+
+void write(ryml::NodeRef* node, const SilKit::Services::MatchingLabel& obj)
+{
+    MakeMap(node);
+    Write(node, "key", obj.key);
+    Write(node, "value", obj.value);
+    Write(node, "kind", obj.kind);
+}
+
+bool read(const ryml::ConstNodeRef& node, SilKit::Services::MatchingLabel* obj)
+{
+    OptionalRead(obj->key, node, "key");
+    OptionalRead(obj->value, node, "value");
+    OptionalRead(obj->kind, node, "kind");
+    return true;
+}
+
 namespace Logging {
 using namespace SilKit::Config;
 void write (ryml::NodeRef* node,  const Services::Logging::Level& obj)
@@ -821,7 +865,7 @@ bool read(const ryml::ConstNodeRef& node, RpcServer* obj)
 {
     Read(obj->name, node, "Name");
 
-    //TODO OptionalRead_deprecated_alternative(obj.functionName, node, "FunctionName", {"Channel", "RpcChannel"});
+    OptionalRead_deprecated_alternative(obj->functionName, node, "FunctionName", {"Channel", "RpcChannel"});
     OptionalRead(obj->labels, node, "Labels");
     OptionalRead(obj->useTraceSinks, node, "UseTraceSinks");
     OptionalRead(obj->replay, node, "Replay");

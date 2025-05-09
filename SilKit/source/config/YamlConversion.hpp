@@ -99,7 +99,7 @@ namespace Services {
 DECLARE_READ_WRITE_FUNCS(MatchingLabel::Kind);
 DECLARE_READ_WRITE_FUNCS(MatchingLabel);
 
-}
+} // namespace Services
 } //end namespace SilKit
 
 // XXXXXXXXXX END RAPID YML XXXXXXXXXXXXXX

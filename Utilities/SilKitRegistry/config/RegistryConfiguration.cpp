@@ -120,7 +120,7 @@ namespace Config {
 
 auto Parse(const std::string& string) -> V1::RegistryConfiguration
 {
-    return SilKit::Config::DeserializeNew<V1::RegistryConfiguration>(string);
+    return SilKit::Config::Deserialize<V1::RegistryConfiguration>(string);
 }
 
 } // namespace Config

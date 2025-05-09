@@ -287,8 +287,6 @@ auto StartRegistry(std::shared_ptr<SilKit::Config::IParticipantConfiguration> co
 
         const auto serializedConfiguration = [&generatedConfiguration,
                                               path = generatedConfigurationPath]() -> std::string {
-            const auto yamlNode = SilKit::Config::to_yaml(generatedConfiguration);
-
             const auto jsonSuffix = std::string{".json"};
             const auto pathHasJsonSuffix =
                 path.size() >= jsonSuffix.size()
@@ -296,11 +294,11 @@ auto StartRegistry(std::shared_ptr<SilKit::Config::IParticipantConfiguration> co
 
             if (pathHasJsonSuffix)
             {
-                return SilKit::Config::yaml_to_json(yamlNode);
+                return SilKit::Config::SerializeAsJson(generatedConfiguration);
             }
             else
             {
-                return YAML::Dump(yamlNode);
+                return SilKit::Config::Serialize(generatedConfiguration);
             }
         }();
 

@@ -212,7 +212,7 @@ Middleware:
 
 TEST_F(Test_YamlParser, yaml_complete_configuration)
 {
-    auto config = DeserializeNew<ParticipantConfiguration>(completeConfiguration);
+    auto config = Deserialize<ParticipantConfiguration>(completeConfiguration);
 
     EXPECT_TRUE(config.participantName == "Node0");
 
@@ -277,7 +277,7 @@ const auto emptyConfiguration = R"raw(
 TEST_F(Test_YamlParser, yaml_empty_configuration)
 {
     ParticipantConfiguration empty{};
-    auto config = DeserializeNew <ParticipantConfiguration>(emptyConfiguration);
+    auto config = Deserialize <ParticipantConfiguration>(emptyConfiguration);
     EXPECT_EQ(empty, config);
 }
 
@@ -287,7 +287,7 @@ ParticipantName: Node1
 
 TEST_F(Test_YamlParser, yaml_minimal_configuration)
 {
-    auto config = DeserializeNew <ParticipantConfiguration>(minimalConfiguration);
+    auto config = Deserialize <ParticipantConfiguration>(minimalConfiguration);
     EXPECT_TRUE(config.participantName == "Node1");
 }
 
@@ -295,14 +295,14 @@ TEST_F(Test_YamlParser, yaml_native_type_conversions)
 {
     {
         uint16_t a{0x815};
-        auto txt = SerializeNew<uint16_t>(a);
-        uint16_t b = DeserializeNew<uint16_t>(txt);
+        auto txt = Serialize<uint16_t>(a);
+        uint16_t b = Deserialize<uint16_t>(txt);
         EXPECT_TRUE(a == b);
     }
     {
         std::vector<uint32_t> vec{0, 1, 3, 4, 5};
-        auto txt = SerializeNew(vec);
-        auto vec2 = DeserializeNew<std::vector<uint32_t>>(txt);
+        auto txt = Serialize(vec);
+        auto vec2 = Deserialize<std::vector<uint32_t>>(txt);
         EXPECT_TRUE(vec == vec2);
     }
     {
@@ -313,8 +313,8 @@ TEST_F(Test_YamlParser, yaml_native_type_conversions)
         mdf.groupName = "groupName";
         mdf.groupPath = "groupPath";
         mdf.groupSource = "groupSource";
-        auto yaml = SerializeNew(mdf);
-        auto mdf2 = DeserializeNew<decltype(mdf)>(yaml);
+        auto yaml = Serialize(mdf);
+        auto mdf2 = Deserialize<decltype(mdf)>(yaml);
         EXPECT_TRUE(mdf == mdf2);
     }
     {
@@ -328,21 +328,21 @@ TEST_F(Test_YamlParser, yaml_native_type_conversions)
         sink.type = Sink::Type::Stdout;
         sink.logName = "";
         logger.sinks.push_back(sink);
-        auto txt = SerializeNew(logger);
-        auto logger2 = DeserializeNew<decltype(logger)>(txt);
+        auto txt = Serialize(logger);
+        auto logger2 = Deserialize<decltype(logger)>(txt);
         EXPECT_TRUE(logger == logger2);
     }
     {
         ParticipantConfiguration config{};
-        auto txt = SerializeNew(config);
-        auto config2 = DeserializeNew<decltype(config)>(txt);
+        auto txt = Serialize(config);
+        auto config2 = Deserialize<decltype(config)>(txt);
         EXPECT_TRUE(config == config2);
     }
 }
 
 TEST_F(Test_YamlParser, middleware_convert)
 {
-    auto config = DeserializeNew<Middleware>(R"(
+    auto config = Deserialize<Middleware>(R"(
         {
             "RegistryUri": "silkit://not-localhost:12345",
             "ConnectAttempts": 9,
@@ -365,16 +365,6 @@ TEST_F(Test_YamlParser, middleware_convert)
     EXPECT_EQ(config.registryAsFallbackProxy, false);
 }
 
-TEST_F(Test_YamlParser, DISABLED_map_serdes)
-{
-    // this does not work in rapidyaml parser
-    std::map<std::string, std::string> mapin{
-        {"keya", "vala"}, {"keyb", "valb"}, {"keyc", ""}, {"", "vald"}, {"keye\nwithlinebreak", "vale\nwithlinebreak"}};
-    auto mapstr = SilKit::Config::SerializeNew<std::map<std::string, std::string>>(mapin);
-    auto mapout = SilKit::Config::DeserializeNew<std::map<std::string, std::string>>(mapstr);
-    EXPECT_EQ(mapin, mapout);
-}
-
 const auto deprecatedFlexRayControllersConfiguration = R"raw(
 FlexRayControllers:
 - Name: FlexRay1
@@ -383,7 +373,7 @@ FlexRayControllers:
 
 TEST_F(Test_YamlParser, yaml_deprecated_FlexRayControllers_configuration)
 {
-    const auto participantConfiguration = DeserializeNew<ParticipantConfiguration>(deprecatedFlexRayControllersConfiguration);
+    const auto participantConfiguration = Deserialize<ParticipantConfiguration>(deprecatedFlexRayControllersConfiguration);
     EXPECT_EQ(participantConfiguration.flexrayControllers.size(), 2);
     EXPECT_EQ(participantConfiguration.flexrayControllers[0].name, "FlexRay1");
     EXPECT_EQ(participantConfiguration.flexrayControllers[1].name, "FlexRay2");
@@ -402,7 +392,7 @@ FlexrayControllers:
 TEST_F(Test_YamlParser, yaml_both_FlexrayControllers_and_deprecated_FlexRayControllers_configuration)
 {
     EXPECT_THROW({
-            auto cfg = DeserializeNew<ParticipantConfiguration>(
+            auto cfg = Deserialize<ParticipantConfiguration>(
                 bothFlexrayControllersAndDeprecatedFlexRayControllersConfiguration);
         },
         SilKit::ConfigurationError);
@@ -420,7 +410,7 @@ RpcClients:
 
 TEST_F(Test_YamlParser, yaml_deprecated_RpcClient_configuration)
 {
-    auto participantConfiguration = DeserializeNew<ParticipantConfiguration>(rpcClientConfiguration);
+    auto participantConfiguration = Deserialize<ParticipantConfiguration>(rpcClientConfiguration);
 
     ASSERT_EQ(participantConfiguration.rpcClients.size(), 3);
 
@@ -478,7 +468,7 @@ TEST_F(Test_YamlParser, yaml_broken_RpcClient_configuration)
     {
         EXPECT_THROW(
             {
-                auto&& brokenConfig = DeserializeNew<ParticipantConfiguration>(configuration);
+                auto&& brokenConfig = Deserialize<ParticipantConfiguration>(configuration);
                 (void)brokenConfig;
             },
             SilKit::ConfigurationError);
@@ -497,8 +487,7 @@ RpcServers:
 
 TEST_F(Test_YamlParser, yaml_deprecated_RpcServer_configuration)
 {
-    auto txt = YAML::Load(rpcServerConfiguration);
-    const auto participantConfiguration = txt.as<ParticipantConfiguration>();
+    auto participantConfiguration = Deserialize<ParticipantConfiguration>(rpcServerConfiguration);
 
     ASSERT_EQ(participantConfiguration.rpcServers.size(), 3);
 

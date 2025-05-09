@@ -129,14 +129,8 @@ void Validate(const std::string& text)
     }
 }
 
-auto Parse(const YAML::Node& doc) -> SilKit::Config::ParticipantConfiguration
-{
-    auto configuration = !doc.IsNull() ? SilKit::Config::from_yaml<SilKit::Config::v1::ParticipantConfiguration>(doc)
-                                       : SilKit::Config::v1::ParticipantConfiguration{};
-    configuration.configurationFilePath.clear();
-    return configuration;
-}
 
+/*XXXXXXXXXXXXXXXX TODO
 void CollectIncludes(const YAML::Node& config, std::vector<std::string>& levelIncludes)
 {
     if (config["Includes"])
@@ -185,6 +179,8 @@ void AppendToSearchPaths(const YAML::Node& doc, ConfigIncludeData& configData)
     }
 }
 
+*/
+
 std::string OpenFileWithSearchHints(const std::string& configFile, const std::set<std::string>& searchPathHints)
 {
     std::stringstream buffer;
@@ -216,6 +212,7 @@ std::string OpenFileWithSearchHints(const std::string& configFile, const std::se
     throw SilKit::ConfigurationError(error_msg.str());
 }
 
+/* TODO
 // ================================================================================
 //  Helper functions to merge config fields/vectors/sets
 // ================================================================================
@@ -655,8 +652,7 @@ void ProcessIncludes(const YAML::Node& config, ConfigIncludeData& configData)
             SilKit::Config::Validate(nextConfig);
 
             // Load and Parse the file as Yaml
-            auto nextConfigNode = YAML::Load(nextConfig);
-            configData.configBuffer.push_back((ConfigInclude(include, SilKit::Config::Parse(nextConfigNode))));
+            configData.configBuffer.push_back((ConfigInclude(include, SilKit::Config::Deserialize<ParticipantConfiguration>(nextConfig))));
 
             // Append the config to our metadata buffer, so we can make informed decisions whether the compiled config is valid
             configData.includeSet.insert(include);
@@ -677,15 +673,15 @@ void ProcessIncludes(const YAML::Node& config, ConfigIncludeData& configData)
     }
 }
 
+*/
+
 auto ParticipantConfigurationFromXImpl(const std::string& text,
                                        struct ConfigIncludeData& configData) -> SilKit::Config::ParticipantConfiguration
 {
-    SilKit::Config::Validate(text);
-    YAML::Node doc = YAML::Load(text);
-
-    auto configuration = SilKit::Config::Parse(doc);
+    auto configuration = SilKit::Config::Deserialize<ParticipantConfiguration>(text);
     configData.configBuffer.push_back(ConfigInclude("root", configuration));
 
+    /* TODO
     // Check search Paths
     if (doc["Includes"])
     {
@@ -696,6 +692,8 @@ auto ParticipantConfigurationFromXImpl(const std::string& text,
     ProcessIncludes(doc, configData);
     // Merge the root and included configs
     return MergeConfigs(configData);
+    */
+    return configuration; //TODO
 }
 
 
@@ -854,20 +852,20 @@ auto ParticipantConfigurationFromFileImpl(const std::string& filename)
     -> std::shared_ptr<SilKit::Config::IParticipantConfiguration>
 {
     auto configData = ConfigIncludeData();
-    configData.searchPaths.insert(SilKit::Config::GetConfigParentPath(filename));
+    //TODO configData.searchPaths.insert(SilKit::Config::GetConfigParentPath(filename));
 
     // Parse the root config
     std::string text;
     try
     {
-        text = SilKit::Config::OpenFileWithSearchHints(filename, configData.searchPaths);
+         text = SilKit::Config::OpenFileWithSearchHints(filename, configData.searchPaths);
     }
     catch (...)
     {
         throw;
     }
 
-    auto newConfig = SilKit::Config::DeserializeNew<SilKit::Config::ParticipantConfiguration>(text);
+    auto newConfig = SilKit::Config::Deserialize<SilKit::Config::ParticipantConfiguration>(text);
 
     auto configuration = SilKit::Config::ParticipantConfigurationFromXImpl(text, configData);
     return std::make_shared<SilKit::Config::ParticipantConfiguration>(std::move(configuration));

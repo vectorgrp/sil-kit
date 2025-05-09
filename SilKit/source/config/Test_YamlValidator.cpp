@@ -71,7 +71,7 @@ TEST_F(Test_YamlValidator, validate_without_warnings)
     cfg.middleware.tcpSendBufferSize = 1234;
 
     std::stringstream stream;
-    auto jsonString = yaml_to_json(to_yaml(cfg));
+    auto jsonString = SerializeAsJson(cfg);
     YamlValidator validator;
     auto isValid = validator.Validate(jsonString, stream);
     EXPECT_TRUE(isValid);
