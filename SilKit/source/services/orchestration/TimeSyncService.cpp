@@ -243,6 +243,9 @@ private:
         if (!_isExecutingSimStep.compare_exchange_strong(test, newval))
         {
             //_isExecutingSimStep was not modified, it was already true
+
+            _controller.InvokeOtherSimulationStepsCompletedHandlers();
+
             return;
         }
 
@@ -299,7 +302,8 @@ TimeSyncService::TimeSyncService(Core::IParticipantInternal* participant, ITimeP
     , _timeProvider{timeProvider}
     , _timeConfiguration{participant->GetLoggerInternal()}
     , _simStepCounterMetric{participant->GetMetricsManager()->GetCounter("SimStepCount")}
-    , _simStepHandlerExecutionTimeStatisticMetric{participant->GetMetricsManager()->GetStatistic("SimStepHandlerExecutionDuration")}
+    , _simStepHandlerExecutionTimeStatisticMetric{participant->GetMetricsManager()->GetStatistic(
+          "SimStepHandlerExecutionDuration")}
     , _simStepCompletionTimeStatisticMetric{participant->GetMetricsManager()->GetStatistic("SimStepCompletionDuration")}
     , _simStepWaitingTimeStatisticMetric{participant->GetMetricsManager()->GetStatistic("SimStepWaitingDuration")}
     , _watchDog{healthCheckConfig}
@@ -511,7 +515,8 @@ void TimeSyncService::ExecuteSimStep(std::chrono::nanoseconds timePoint, std::ch
     {
         Logging::LoggerMessage lm{_logger, Logging::Level::Trace};
         lm.SetMessage("Starting next Simulation Step.");
-        lm.FormatKeyValue(Logging::Keys::waitingTime, "{}", std::chrono::duration_cast<DoubleMSecs>(_waitTimeMonitor.CurrentDuration()).count());
+        lm.FormatKeyValue(Logging::Keys::waitingTime, "{}",
+                          std::chrono::duration_cast<DoubleMSecs>(_waitTimeMonitor.CurrentDuration()).count());
         lm.FormatKeyValue(Logging::Keys::virtualTimeNS, "{}", timePoint.count());
         lm.Dispatch();
     }
@@ -575,7 +580,6 @@ void TimeSyncService::CompleteSimulationStep()
     }
 
     _participant->ExecuteDeferred([this] {
-
         // Timing and metrics of the completion time
         using DoubleMSecs = std::chrono::duration<double, std::milli>;
         using DoubleSecs = std::chrono::duration<double>;
@@ -690,8 +694,9 @@ bool TimeSyncService::ParticipantHasAutonomousSynchronousCapability(const std::s
         // We are a participant with autonomous lifecycle and virtual time sync.
         // The remote participant must support this, otherwise Hop-On / Hop-Off will fail.
         Logging::LoggerMessage lm{_participant->GetLoggerInternal(), Logging::Level::Error};
-        lm.SetMessage("This participant does not support simulations with participants that use an autonomous lifecycle "
-              "and virtual time synchronization. Please consider upgrading Participant. Aborting simulation...");
+        lm.SetMessage(
+            "This participant does not support simulations with participants that use an autonomous lifecycle "
+            "and virtual time synchronization. Please consider upgrading Participant. Aborting simulation...");
         lm.SetKeyValue(Logging::Keys::participantName, participantName);
         lm.Dispatch();
         return false;
@@ -706,7 +711,8 @@ bool TimeSyncService::AbortHopOnForCoordinatedParticipants() const
         if (_lifecycleService->GetOperationMode() == OperationMode::Coordinated)
         {
             Logging::LoggerMessage lm{_participant->GetLoggerInternal(), Logging::Level::Error};
-            lm.SetMessage("This participant is running with a coordinated lifecycle and virtual time synchronization and wants "
+            lm.SetMessage(
+                "This participant is running with a coordinated lifecycle and virtual time synchronization and wants "
                 "to join an already running simulation. This is not allowed, aborting simulation...");
             lm.SetKeyValue(Logging::Keys::participantName, _participant->GetParticipantName());
             lm.Dispatch();
@@ -737,7 +743,7 @@ void TimeSyncService::HybridWait(std::chrono::nanoseconds targetWaitDuration)
 
     // By default, Windows timer have a resolution of 15.6ms
     // The effective time that wait_for or sleep_for actually waits will be a step function with steps every 15.6ms
-    const auto defaultTimerResolution = GetDefaultTimerResolution(); 
+    const auto defaultTimerResolution = GetDefaultTimerResolution();
 
     if (targetWaitDuration < defaultTimerResolution)
     {
@@ -760,7 +766,6 @@ void TimeSyncService::StartWallClockCouplingThread(std::chrono::nanoseconds star
     _wallClockCouplingThreadRunning = true;
     _currentWallClockSyncPointNs = startTimeOffset.count();
     _wallClockCouplingThread = std::thread{[this]() {
-
         SilKit::Util::SetThreadName("SK-WallClkSync");
 
         const auto startTime = std::chrono::steady_clock::now();
@@ -797,6 +802,21 @@ void TimeSyncService::StartWallClockCouplingThread(std::chrono::nanoseconds star
             }
         }
     }};
+}
+
+auto TimeSyncService::AddOtherSimulationStepsCompletedHandler(std::function<void()> handler) -> HandlerId
+{
+    return _otherSimulationStepsCompletedHandlers.Add(std::move(handler));
+}
+
+void TimeSyncService::RemoveOtherSimulationStepsCompletedHandler(HandlerId handlerId)
+{
+    _otherSimulationStepsCompletedHandlers.Remove(handlerId);
+}
+
+void TimeSyncService::InvokeOtherSimulationStepsCompletedHandlers()
+{
+    _otherSimulationStepsCompletedHandlers.InvokeAll();
 }
 
 void TimeSyncService::StopWallClockCouplingThread()

@@ -658,6 +658,22 @@ extern "C"
         return globalCapi->SilKit_TimeSyncService_Now(timeSyncService, outNanosecondsTime);
     }
 
+    SilKit_ReturnCode SilKitCALL SilKit_Experimental_TimeSyncService_AddOtherSimulationStepsCompletedHandler(
+        SilKit_TimeSyncService* timeSyncService, void* context,
+        SilKit_Experimental_TimeSyncService_OtherSimulationStepsCompletedHandler_t handler,
+        SilKit_HandlerId* outHandlerId)
+    {
+        return globalCapi->SilKit_Experimental_TimeSyncService_AddOtherSimulationStepsCompletedHandler(
+            timeSyncService, context, handler, outHandlerId);
+    }
+
+    SilKit_ReturnCode SilKitCALL SilKit_Experimental_TimeSyncService_RemoveOtherSimulationStepsCompletedHandler(
+        SilKit_TimeSyncService* timeSyncService, SilKit_HandlerId handlerId)
+    {
+        return globalCapi->SilKit_Experimental_TimeSyncService_RemoveOtherSimulationStepsCompletedHandler(
+            timeSyncService, handlerId);
+    }
+
     // SystemMonitor
 
     SilKit_ReturnCode SilKitCALL SilKit_SystemMonitor_Create(SilKit_SystemMonitor** outSystemMonitor,

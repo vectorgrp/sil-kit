@@ -114,6 +114,9 @@ TEST(Test_CapiSymbols, DISABLED_link_all_public_symbols)
     (void)SilKit_TimeSyncService_SetSimulationStepHandler(nullptr, nullptr, nullptr, 0);
     (void)SilKit_TimeSyncService_SetSimulationStepHandlerAsync(nullptr, nullptr, nullptr, 0);
     (void)SilKit_TimeSyncService_CompleteSimulationStep(nullptr);
+    (void)SilKit_Experimental_TimeSyncService_AddOtherSimulationStepsCompletedHandler(nullptr, nullptr, nullptr,
+                                                                                      nullptr);
+    (void)SilKit_Experimental_TimeSyncService_RemoveOtherSimulationStepsCompletedHandler(nullptr, 0);
     (void)SilKit_LifecycleService_Pause(nullptr, "");
     (void)SilKit_LifecycleService_Continue(nullptr);
     (void)SilKit_LifecycleService_Stop(nullptr, "");

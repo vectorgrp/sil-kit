@@ -356,6 +356,14 @@ public:
     MOCK_METHOD(SilKit_ReturnCode, SilKit_TimeSyncService_Now,
                 (SilKit_TimeSyncService * timeSyncService, SilKit_NanosecondsTime* outNanosecondsTime));
 
+    MOCK_METHOD(SilKit_ReturnCode, SilKit_Experimental_TimeSyncService_AddOtherSimulationStepsCompletedHandler,
+                (SilKit_TimeSyncService * timeSyncService, void* context,
+                 SilKit_Experimental_TimeSyncService_OtherSimulationStepsCompletedHandler_t handler,
+                 SilKit_HandlerId* outHandlerId));
+
+    MOCK_METHOD(SilKit_ReturnCode, SilKit_Experimental_TimeSyncService_RemoveOtherSimulationStepsCompletedHandler,
+                (SilKit_TimeSyncService * timeSyncService, SilKit_HandlerId handlerId));
+
     // SystemMonitor
 
     MOCK_METHOD(SilKit_ReturnCode, SilKit_SystemMonitor_Create,

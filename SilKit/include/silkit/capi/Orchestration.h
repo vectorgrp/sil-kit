@@ -757,6 +757,46 @@ SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Experimental_SystemController_SetW
 typedef SilKit_ReturnCode(SilKitFPTR* SilKit_Experimental_SystemController_SetWorkflowConfiguration_t)(
     SilKit_Experimental_SystemController* systemController, const SilKit_WorkflowConfiguration* workflowConfiguration);
 
+/*! Callback type to indicate external simulation step coupling.
+ *  Cf., \ref SilKit_Experimental_TimeSyncService_AddOtherSimulationStepsCompletedHandler
+ */
+typedef void(SilKitFPTR* SilKit_Experimental_TimeSyncService_OtherSimulationStepsCompletedHandler_t)(
+    void* context, SilKit_TimeSyncService* timeSyncService);
+
+/*! \brief Register a \ref SilKit_Experimental_TimeSyncService_OtherSimulationStepsCompletedHandler_t.
+ *
+ * The handler can only be used together with \ref SilKit_TimeSyncService_SetSimulationStepHandlerAsync.
+ *
+ * It will be called when the time sync. service detects that calling \ref SilKit_TimeSyncService_CompleteSimulationStep
+ * will immediately progress the simulation time.
+ *
+ * Users of this callback must ensure that only a single participant in the simulation registers it. Multiple
+ * participants registering this callback can cause the time-synchronization to lock up.
+ *
+ * @warning This function is not part of the stable API and ABI of the SIL Kit. It may be removed at any time without
+ *          prior notice.
+ *
+ * \param timeSyncService The time sync. service obtained via \ref SilKit_TimeSyncService_Create.
+ * \param context The user context pointer made available to the handler.
+ * \param handler The handler to be called when completion of the current sim. step will immediately progress sim. time.
+ * \param outHandlerId The handler identifier that can be used to remove the callback.
+ */
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Experimental_TimeSyncService_AddOtherSimulationStepsCompletedHandler(
+    SilKit_TimeSyncService* timeSyncService, void* context,
+    SilKit_Experimental_TimeSyncService_OtherSimulationStepsCompletedHandler_t handler, SilKit_HandlerId* outHandlerId);
+
+/*! \brief Remove a \ref SilKit_Experimental_TimeSyncService_OtherSimulationStepsCompletedHandler_t by \ref SilKit_HandlerId
+ *         on this participant
+ *
+ * @warning This function is not part of the stable API and ABI of the SIL Kit. It may be removed at any time without
+ *          prior notice.
+ *
+ * \param timeSyncService The time sync. service obtained via \ref SilKit_TimeSyncService_Create.
+ * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
+ */
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Experimental_TimeSyncService_RemoveOtherSimulationStepsCompletedHandler(
+    SilKit_TimeSyncService* timeSyncService, SilKit_HandlerId handlerId);
+
 SILKIT_END_DECLS
 
 #pragma pack(pop)
