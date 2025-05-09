@@ -1057,6 +1057,19 @@ bool read(const ryml::ConstNodeRef& node, Middleware* obj)
     return true;
 }
 
+void write(ryml::NodeRef* node, const Includes& obj)
+{
+    MakeMap(node);
+    OptionalWrite(obj.files, node, "Files"); 
+    OptionalWrite(obj.searchPathHints, node, "SearchPathHints"); 
+}
+
+bool read(const ryml::ConstNodeRef& node, Includes* obj)
+{
+    OptionalRead(obj->files, node, "Files");
+    OptionalRead(obj->searchPathHints, node, "SearchPathHints");
+    return true;
+}
 void write(ryml::NodeRef* node, const Aggregation& obj)
 {
     switch (obj)
@@ -1143,6 +1156,7 @@ void write(ryml::NodeRef* node, const ParticipantConfiguration& obj)
     NonDefaultWrite(obj.tracing, node, "Extensions", defaultObj.tracing);
     NonDefaultWrite(obj.extensions, node, "Extensions", defaultObj.extensions);
     NonDefaultWrite(obj.middleware, node, "Middleware", defaultObj.middleware);
+    NonDefaultWrite(obj.includes, node, "Includes", defaultObj.includes);
     NonDefaultWrite(obj.experimental, node, "Experimental", defaultObj.experimental);
 }
 bool read(const ryml::ConstNodeRef& node, ParticipantConfiguration* obj)
@@ -1165,6 +1179,7 @@ bool read(const ryml::ConstNodeRef& node, ParticipantConfiguration* obj)
     OptionalRead(obj->tracing, node, "Tracing");
     OptionalRead(obj->extensions, node, "Extensions");
     OptionalRead(obj->middleware, node, "Middleware");
+    OptionalRead(obj->includes, node, "Includes");
     OptionalRead(obj->experimental, node, "Experimental");
     return true;
 }

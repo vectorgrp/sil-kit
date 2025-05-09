@@ -338,6 +338,17 @@ struct Experimental
 };
 
 // ================================================================================
+//  Includes
+// ================================================================================
+
+//! \brief Structure that contains experimental settings
+struct Includes
+{
+    std::vector<std::string> searchPathHints;
+    std::vector<std::string> files;
+};
+
+// ================================================================================
 //  Root
 // ================================================================================
 
@@ -374,6 +385,7 @@ struct ParticipantConfiguration : public IParticipantConfiguration
     HealthCheck healthCheck;
     Tracing tracing;
     Extensions extensions;
+    Includes includes;
     Middleware middleware;
     Experimental experimental;
 };
@@ -392,6 +404,7 @@ bool operator==(const MetricsSink& lhs, const MetricsSink& rhs);
 bool operator==(const Metrics& lhs, const Metrics& rhs);
 bool operator==(const Extensions& lhs, const Extensions& rhs);
 bool operator==(const Middleware& lhs, const Middleware& rhs);
+bool operator==(const Includes& lhs, const Includes& rhs);
 bool operator==(const ParticipantConfiguration& lhs, const ParticipantConfiguration& rhs);
 bool operator==(const TimeSynchronization& lhs, const TimeSynchronization& rhs);
 bool operator==(const Experimental& lhs, const Experimental& rhs);

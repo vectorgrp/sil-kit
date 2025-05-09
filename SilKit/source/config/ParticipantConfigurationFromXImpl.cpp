@@ -130,15 +130,11 @@ void Validate(const std::string& text)
 }
 
 
-/*XXXXXXXXXXXXXXXX TODO
-void CollectIncludes(const YAML::Node& config, std::vector<std::string>& levelIncludes)
+void CollectIncludes(const ParticipantConfiguration& config, std::vector<std::string>& levelIncludes)
 {
-    if (config["Includes"])
+    for (auto&& include: config.includes.files) 
     {
-        for (const auto& include : config["Includes"]["Files"])
-        {
-            levelIncludes.push_back(include.as<std::string>());
-        }
+        levelIncludes.push_back(include);
     }
 }
 
@@ -152,34 +148,28 @@ std::string GetConfigParentPath(const std::string& configFile)
     return fs::parent_path(filePath).string();
 }
 
-void AppendToSearchPaths(const YAML::Node& doc, ConfigIncludeData& configData)
+void AppendToSearchPaths(const ParticipantConfiguration& config, ConfigIncludeData& configData)
 {
-    if (doc["Includes"])
+    for (auto&& searchPath: config.includes.searchPathHints)
     {
-        for (auto& searchPath : doc["Includes"]["SearchPathHints"])
+        if (searchPath.empty())
         {
-            auto tmpString = searchPath.as<std::string>();
-
-            if (tmpString.empty())
-            {
-                std::cout << "Warning: Got empty SearchPathHint!";
-                continue;
-            }
-
-            std::string suffix = "";
-            auto lastChar = tmpString.back();
-            // We assume that the user provides a Path
-            // Make sure they have a seperator
-            if (lastChar != '/' && lastChar != '\\')
-            {
-                suffix = SilKit::Filesystem::path::preferred_separator;
-            }
-            configData.searchPaths.insert(searchPath.as<std::string>() + suffix);
+            std::cout << "Warning: Got empty SearchPathHint!";
+            continue;
         }
+
+        std::string suffix = "";
+        auto lastChar = searchPath.back();
+        // We assume that the user provides a Path
+        // Make sure they have a seperator
+        if (lastChar != '/' && lastChar != '\\')
+        {
+            suffix = SilKit::Filesystem::path::preferred_separator;
+        }
+
+        configData.searchPaths.insert(searchPath + suffix);
     }
 }
-
-*/
 
 std::string OpenFileWithSearchHints(const std::string& configFile, const std::set<std::string>& searchPathHints)
 {
@@ -212,7 +202,6 @@ std::string OpenFileWithSearchHints(const std::string& configFile, const std::se
     throw SilKit::ConfigurationError(error_msg.str());
 }
 
-/* TODO
 // ================================================================================
 //  Helper functions to merge config fields/vectors/sets
 // ================================================================================
@@ -268,12 +257,11 @@ void MergeCacheSet(const std::set<T>& cache, std::vector<T>& root)
 // ================================================================================
 //  Helper functions to cache config entries with complicated merge strategies
 // ================================================================================
-template <typename FieldT>
-void PopulateCacheField(const YAML::Node& root, std::string rootname, const std::string& field,
-                        SilKit::Util::Optional<FieldT>& obj)
+template <typename T>
+void PopulateCacheField(const T& value, const std::string& rootname, const std::string& valueName, SilKit::Util::Optional<T>& obj)
 {
-    SilKit::Util::Optional<FieldT> tmpObj;
-    OptionalRead(tmpObj, root, field);
+    SilKit::Util::Optional<T> tmpObj;
+    tmpObj = value;
 
     if (tmpObj.has_value())
     {
@@ -288,15 +276,16 @@ void PopulateCacheField(const YAML::Node& root, std::string rootname, const std:
     }
 }
 
-void CacheMiddleware(const YAML::Node& root, MiddlewareCache& cache)
+/* XXXXX ARRRGHS this should be easier fixme
+void CacheMiddleware(const Middleware& root, MiddlewareCache& cache)
 {
-    if (root["AcceptorUris"])
+    if (!root.acceptorUris.empty())
     {
         if (cache.acceptorUris.size() > 0)
         {
             throw SilKit::ConfigurationError{"AcceptorUris already defined!"};
         }
-        OptionalRead(cache.acceptorUris, root, "AcceptorUris");
+        cache.acceptorUris = root.acceptorUris;
     }
 
     PopulateCacheField(root, "Middleware", "ConnectAttempts", cache.connectAttempts);
@@ -438,26 +427,17 @@ void CacheExperimental(const YAML::Node& root, ExperimentalCache& cache)
     }
 }
 
-void PopulateCaches(const YAML::Node& config, ConfigIncludeData& configIncludeData)
+void PopulateCaches(const ParticipantConfiguration& config, ConfigIncludeData& configIncludeData)
 {
     // Cache those config options that need to be default constructed, since we lose the information
     // about default constructed vs. explicitly set to the default value later
-    if (config["Middleware"])
-    {
-        CacheMiddleware(config["Middleware"], configIncludeData.middlewareCache);
-    }
+    CacheMiddleware(config.middleware, configIncludeData.middlewareCache);
 
-    if (config["Logging"])
-    {
-        CacheLoggingOptions(config["Logging"], configIncludeData.logCache);
-        CacheLoggingSinks(config["Logging"], configIncludeData.logCache);
-    }
-
-    if (config["Experimental"])
-    {
-        CacheExperimental(config["Experimental"], configIncludeData.experimentalCache);
-    }
+    CacheLoggingOptions(config.logging, configIncludeData.logCache);
+    CacheLoggingSinks(config.logging, configIncludeData.logCache);
+    CacheExperimental(config.experimental, configIncludeData.experimentalCache);
 }
+*/
 
 // =========================================================================================================================
 // Functions to merge the different fields
@@ -625,12 +605,12 @@ auto MergeConfigs(ConfigIncludeData& configIncludeData) -> SilKit::Config::Parti
 // =========================================================================================================================
 // Include Logic
 // =========================================================================================================================
-void ProcessIncludes(const YAML::Node& config, ConfigIncludeData& configData)
+void ProcessIncludes(const ParticipantConfiguration& config, ConfigIncludeData& configData)
 {
     std::vector<std::string> levelIncludes;
 
     CollectIncludes(config, levelIncludes);
-    PopulateCaches(config, configData);
+    // TODO PopulateCaches(config, configData);
 
     // Breadth first traversal, which means we collect all includes per "level" first
     // and then use the collected includes as the "next level"
@@ -648,19 +628,20 @@ void ProcessIncludes(const YAML::Node& config, ConfigIncludeData& configData)
             }
 
             // Get the next Include to be processed within this tree level
-            auto nextConfig = SilKit::Config::OpenFileWithSearchHints(include, configData.searchPaths);
-            SilKit::Config::Validate(nextConfig);
+            auto nextConfigText = SilKit::Config::OpenFileWithSearchHints(include, configData.searchPaths);
+            SilKit::Config::Validate(nextConfigText);
 
             // Load and Parse the file as Yaml
-            configData.configBuffer.push_back((ConfigInclude(include, SilKit::Config::Deserialize<ParticipantConfiguration>(nextConfig))));
+            auto nextConfig = SilKit::Config::Deserialize<ParticipantConfiguration>(nextConfigText);
+            configData.configBuffer.push_back(ConfigInclude(include, nextConfig));
 
             // Append the config to our metadata buffer, so we can make informed decisions whether the compiled config is valid
             configData.includeSet.insert(include);
-            AppendToSearchPaths(nextConfigNode, configData);
+            AppendToSearchPaths(nextConfig, configData);
 
             // Collect Caches and Include for the next level within the tree
-            CollectIncludes(nextConfigNode, tmpIncludes);
-            PopulateCaches(nextConfigNode, configData);
+            CollectIncludes(nextConfig, tmpIncludes);
+            //TODO PopulateCaches(nextConfig, configData);
         }
 
         // Goto next Level
@@ -673,27 +654,19 @@ void ProcessIncludes(const YAML::Node& config, ConfigIncludeData& configData)
     }
 }
 
-*/
 
-auto ParticipantConfigurationFromXImpl(const std::string& text,
+auto PaticipantConfigurationWithIncludes(const std::string& text,
                                        struct ConfigIncludeData& configData) -> SilKit::Config::ParticipantConfiguration
 {
     auto configuration = SilKit::Config::Deserialize<ParticipantConfiguration>(text);
     configData.configBuffer.push_back(ConfigInclude("root", configuration));
 
-    /* TODO
-    // Check search Paths
-    if (doc["Includes"])
-    {
-        AppendToSearchPaths(doc, configData);
-    }
+    AppendToSearchPaths(configuration, configData);
 
     // Get all configs
-    ProcessIncludes(doc, configData);
+    ProcessIncludes(configuration, configData);
     // Merge the root and included configs
     return MergeConfigs(configData);
-    */
-    return configuration; //TODO
 }
 
 
@@ -781,6 +754,11 @@ bool operator==(const Middleware& lhs, const Middleware& rhs)
            && lhs.tcpSendBufferSize == rhs.tcpSendBufferSize && lhs.acceptorUris == rhs.acceptorUris;
 }
 
+bool operator==(const Includes& lhs, const Includes& rhs)
+{
+    return lhs.files == rhs.files && lhs.searchPathHints == rhs.searchPathHints;
+}
+
 bool operator==(const ParticipantConfiguration& lhs, const ParticipantConfiguration& rhs)
 {
     return lhs.participantName == rhs.participantName && lhs.canControllers == rhs.canControllers
@@ -788,7 +766,7 @@ bool operator==(const ParticipantConfiguration& lhs, const ParticipantConfigurat
            && lhs.flexrayControllers == rhs.flexrayControllers && lhs.dataPublishers == rhs.dataPublishers
            && lhs.dataSubscribers == rhs.dataSubscribers && lhs.rpcClients == rhs.rpcClients
            && lhs.rpcServers == rhs.rpcServers && lhs.logging == rhs.logging && lhs.healthCheck == rhs.healthCheck
-           && lhs.tracing == rhs.tracing && lhs.extensions == rhs.extensions && lhs.experimental == rhs.experimental;
+           && lhs.tracing == rhs.tracing && lhs.extensions == rhs.extensions && lhs.experimental == rhs.experimental && lhs.includes == rhs.includes;
 }
 
 bool operator==(const TimeSynchronization& lhs, const TimeSynchronization& rhs)
@@ -843,31 +821,22 @@ auto operator<<(std::ostream& out, const Label& label) -> std::ostream&
 auto ParticipantConfigurationFromStringImpl(const std::string& text)
     -> std::shared_ptr<SilKit::Config::IParticipantConfiguration>
 {
-    auto configData = ConfigIncludeData();
-    auto configuration = SilKit::Config::ParticipantConfigurationFromXImpl(text, configData);
+    auto configData = ConfigIncludeData{};
+    auto configuration = PaticipantConfigurationWithIncludes(text, configData);
     return std::make_shared<SilKit::Config::ParticipantConfiguration>(std::move(configuration));
 }
 
 auto ParticipantConfigurationFromFileImpl(const std::string& filename)
     -> std::shared_ptr<SilKit::Config::IParticipantConfiguration>
 {
-    auto configData = ConfigIncludeData();
-    //TODO configData.searchPaths.insert(SilKit::Config::GetConfigParentPath(filename));
+    auto configData = ConfigIncludeData{};
+    configData.searchPaths.insert(SilKit::Config::GetConfigParentPath(filename));
 
     // Parse the root config
     std::string text;
-    try
-    {
-         text = SilKit::Config::OpenFileWithSearchHints(filename, configData.searchPaths);
-    }
-    catch (...)
-    {
-        throw;
-    }
+    text = SilKit::Config::OpenFileWithSearchHints(filename, configData.searchPaths);
 
-    auto newConfig = SilKit::Config::Deserialize<SilKit::Config::ParticipantConfiguration>(text);
-
-    auto configuration = SilKit::Config::ParticipantConfigurationFromXImpl(text, configData);
+    auto configuration = PaticipantConfigurationWithIncludes(text, configData);
     return std::make_shared<SilKit::Config::ParticipantConfiguration>(std::move(configuration));
 }
 
