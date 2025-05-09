@@ -250,22 +250,22 @@ void MergeCacheSet(const std::set<T>& cache, std::vector<T>& root)
 // ================================================================================
 //  Helper functions to cache config entries with complicated merge strategies
 // ================================================================================
-template <typename T>
-void PopulateCacheField(const T& value, const std::string& rootname, const std::string& valueName, SilKit::Util::Optional<T>& obj)
-{
-    SilKit::Util::Optional<T> tmpObj;
-    tmpObj = value;
 
-    if (tmpObj.has_value())
+template <typename T>
+void CacheNonDefault(const T& defaultValue, const T& value, const std::string& configName, SilKit::Util::Optional<T>& cacheValue)
+{
+    if (defaultValue != value)
     {
-        if (obj.has_value() && (obj != tmpObj))
+        SilKit::Util::Optional<T> optValue{value};
+
+        if (cacheValue.has_value() && (cacheValue != optValue))
         {
             std::stringstream error_msg;
-            error_msg << "Config element " << valueName << "(" << tmpObj << ") for " << rootname << " already set to \'"
-                      << obj.value() << "\'!";
+            error_msg << "Config element " << configName << "='" << value << "' "
+                      << " is already set to '" << cacheValue.value() << "'!";
             throw SilKit::ConfigurationError(error_msg.str());
         }
-        obj = tmpObj;
+        cacheValue = optValue;
     }
 }
 
@@ -279,23 +279,24 @@ void Cache(const Middleware& root, MiddlewareCache& cache)
         }
         cache.acceptorUris = root.acceptorUris;
     }
-
-    PopulateCacheField(root.connectAttempts, "Middleware", "ConnectAttempts", cache.connectAttempts);
-    PopulateCacheField(root.tcpNoDelay, "Middleware", "TcpNoDelay", cache.tcpNoDelay);
-    PopulateCacheField(root.tcpQuickAck, "Middleware", "TcpQuickAck", cache.tcpQuickAck);
-    PopulateCacheField(root.tcpReceiveBufferSize, "Middleware", "TcpReceiveBufferSize", cache.tcpReceiveBufferSize);
-    PopulateCacheField(root.tcpSendBufferSize, "Middleware", "TcpSendBufferSize", cache.tcpSendBufferSize);
-    PopulateCacheField(root.enableDomainSockets, "Middleware", "EnableDomainSockets", cache.enableDomainSockets);
-    PopulateCacheField(root.registryAsFallbackProxy, "Middleware", "RegistryAsFallbackProxy", cache.registryAsFallbackProxy);
-    PopulateCacheField(root.registryUri, "Middleware", "RegistryUri", cache.registryUri);
-    PopulateCacheField(root.experimentalRemoteParticipantConnection, "Middleware", "ExperimentalRemoteParticipantConnection",
+    static const Middleware defaultObject;
+    CacheNonDefault(defaultObject.connectAttempts, root.connectAttempts, "Middleware.ConnectAttempts", cache.connectAttempts);
+    CacheNonDefault(defaultObject.tcpNoDelay, root.tcpNoDelay, "Middleware.TcpNoDelay", cache.tcpNoDelay);
+    CacheNonDefault(defaultObject.tcpQuickAck, root.tcpQuickAck, "Middleware.TcpQuickAck", cache.tcpQuickAck);
+    CacheNonDefault(defaultObject.tcpReceiveBufferSize, root.tcpReceiveBufferSize, "Middleware.TcpReceiveBufferSize", cache.tcpReceiveBufferSize);
+    CacheNonDefault(defaultObject.tcpSendBufferSize, root.tcpSendBufferSize, "Middleware.TcpSendBufferSize", cache.tcpSendBufferSize);
+    CacheNonDefault(defaultObject.enableDomainSockets, root.enableDomainSockets, "Middleware.EnableDomainSockets", cache.enableDomainSockets);
+    CacheNonDefault(defaultObject.registryAsFallbackProxy, root.registryAsFallbackProxy, "Middleware.RegistryAsFallbackProxy", cache.registryAsFallbackProxy);
+    CacheNonDefault(defaultObject.registryUri, root.registryUri, "Middleware.RegistryUri", cache.registryUri);
+    CacheNonDefault(defaultObject.experimentalRemoteParticipantConnection, root.experimentalRemoteParticipantConnection, "Middleware.ExperimentalRemoteParticipantConnection",
                        cache.experimentalRemoteParticipantConnection);
-    PopulateCacheField(root.connectTimeoutSeconds, "Middleware", "ConnectTimeoutSeconds", cache.connectTimeoutSeconds);
+    CacheNonDefault(defaultObject.connectTimeoutSeconds, root.connectTimeoutSeconds, "Middleware.ConnectTimeoutSeconds", cache.connectTimeoutSeconds);
 }
 void CacheLoggingOptions(const Logging& config, GlobalLogCache& cache)
 {
-    PopulateCacheField(config.flushLevel, "Logging", "FlushLevel", cache.flushLevel);
-    PopulateCacheField(config.logFromRemotes, "Logging", "LogFromRemotes", cache.logFromRemotes);
+    const Logging defaultObject{};
+    CacheNonDefault(defaultObject.flushLevel, config.flushLevel, "Logging.FlushLevel", cache.flushLevel);
+    CacheNonDefault(defaultObject.logFromRemotes, config.logFromRemotes, "Logging.LogFromRemotes", cache.logFromRemotes);
 }
 
 void CacheLoggingSinks(const Logging& config, GlobalLogCache& cache)
@@ -312,9 +313,7 @@ void CacheLoggingSinks(const Logging& config, GlobalLogCache& cache)
             }
             else
             {
-                std::stringstream error_msg;
-                error_msg << "Stdout Sink already exists!";
-                throw SilKit::ConfigurationError(error_msg.str());
+                throw SilKit::ConfigurationError{"Stdout Sink already exists!"};
             }
         }
         else if (sink.type == Sink::Type::Remote)
@@ -327,9 +326,7 @@ void CacheLoggingSinks(const Logging& config, GlobalLogCache& cache)
             }
             else
             {
-                std::stringstream error_msg;
-                error_msg << "Remote Sink already exists!";
-                throw SilKit::ConfigurationError(error_msg.str());
+                throw SilKit::ConfigurationError{"Remote Sink already exists!"};
             }
         }
         else
@@ -351,13 +348,15 @@ void CacheLoggingSinks(const Logging& config, GlobalLogCache& cache)
 
 void Cache(const TimeSynchronization& root, TimeSynchronizationCache& cache)
 {
-    PopulateCacheField(root.animationFactor, "TimeSynchronization", "AnimationFactor", cache.animationFactor);
-    PopulateCacheField(root.enableMessageAggregation, "TimeSynchronization", "EnableMessageAggregation", cache.enableMessageAggregation);
+    static const TimeSynchronization defaultObject;
+    CacheNonDefault(defaultObject.animationFactor, root.animationFactor, "TimeSynchronization.AnimationFactor", cache.animationFactor);
+    CacheNonDefault(defaultObject.enableMessageAggregation, root.enableMessageAggregation, "TimeSynchronization.EnableMessageAggregation", cache.enableMessageAggregation);
 }
 
 void Cache(const Metrics& root, MetricsCache& cache)
 {
-    PopulateCacheField(root.collectFromRemote, "Metrics", "CollectFromRemote", cache.collectFromRemote);
+    static const Metrics defaultObject;
+    CacheNonDefault(defaultObject.collectFromRemote, root.collectFromRemote, "Metrics.CollectFromRemote", cache.collectFromRemote);
 
     for (const auto& sink: root.sinks)
     {
@@ -409,7 +408,7 @@ void Cache(const Experimental& root, ExperimentalCache& cache)
 
 void PopulateCaches(const ParticipantConfiguration& config, ConfigIncludeData& configIncludeData)
 {
-    static const ParticipantConfiguration defaultConfiguration{};
+    const ParticipantConfiguration defaultConfiguration{};
     // Cache those config options that need to be default constructed, since we lose the information
     // about default constructed vs. explicitly set to the default value later
 
@@ -417,7 +416,6 @@ void PopulateCaches(const ParticipantConfiguration& config, ConfigIncludeData& c
     {
         Cache(config.middleware, configIncludeData.middlewareCache);
     }
-
     if (!(config.logging == defaultConfiguration.logging))
     {
         CacheLoggingOptions(config.logging, configIncludeData.logCache);
