@@ -40,10 +40,10 @@ target_link_libraries(I_SilKit_Services_Logging
 ################################################################################
 # We use fmtlib to offer a convenient logging interface
 
-if (TARGET ${SILKIT_THIRD_PARTY_FMT_HEADER_ONLY_TARGET})
+if (TARGET ${SILKIT_THIRD_PARTY_FMT})
     message(STATUS "have fmt-header-only")
     target_link_libraries(I_SilKit_Services_Logging
-        INTERFACE $<BUILD_INTERFACE:${SILKIT_THIRD_PARTY_FMT_HEADER_ONLY_TARGET}>
+        INTERFACE $<BUILD_INTERFACE:${SILKIT_THIRD_PARTY_FMT}>
     )
     target_include_directories(I_SilKit_Services_Logging INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
     target_compile_definitions(I_SilKit_Services_Logging
@@ -79,7 +79,7 @@ add_library(O_SilKit_Services_Logging OBJECT
 target_link_libraries(O_SilKit_Services_Logging
     PUBLIC I_SilKit_Services_Logging
     PRIVATE I_SilKit_Util_StringHelpers
-    PRIVATE spdlog
+    PRIVATE ${SILKIT_THIRD_PARTY_SPDLOG}
 )
 
 if(UNIX)
