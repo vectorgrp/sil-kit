@@ -27,9 +27,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <map>
 #include <vector>
 
-#include "yaml-cpp/yaml.h"
-
 #include "YamlConversion.hpp"
+#include "SilKitYamlHelper.hpp"
 
 namespace SilKit {
 namespace Config {

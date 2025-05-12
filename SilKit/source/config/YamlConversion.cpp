@@ -20,13 +20,13 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "YamlConversion.hpp"
+#include "SilKitYamlHelper.hpp"
 
 #include <algorithm>
 #include <sstream>
 #include <chrono>
 #include <type_traits>
 #include <silkit/capi/Types.h>
-#include "rapidyaml.hpp"
 
 using namespace SilKit::Config;
 using namespace SilKit;
@@ -409,6 +409,15 @@ bool read(const ryml::ConstNodeRef& node, FlexrayTransmissionMode* obj)
 } // namespace Services
 namespace Config {
 inline namespace v1 {
+
+// local utility
+void OptionalWrite(const Replay& value, ryml::NodeRef* node, const std::string& name)
+{
+    if (value.useTraceSource.size() > 0)
+    {
+        node->append_child() << ryml::key(name) << value;
+    }
+}
 
 
 void write(ryml::NodeRef* node, const Sink::Type& obj)

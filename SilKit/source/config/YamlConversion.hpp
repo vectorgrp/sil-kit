@@ -24,11 +24,12 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <chrono>
 #include <string>
 
+#include "Configuration.hpp"
 #include "ParticipantConfiguration.hpp"
 
-#include "yaml-cpp/yaml.h"
+#include "rapidyaml.hpp"
 
-#include "SilKitYamlHelper.hpp"
+//#include "SilKitYamlHelper.hpp"
 
 #define DECLARE_READ_WRITE_FUNCS(TYPE) \
     void write(ryml::NodeRef* node, const TYPE& obj);\
@@ -104,72 +105,5 @@ DECLARE_READ_WRITE_FUNCS(MatchingLabel);
 } //end namespace SilKit
 
 // XXXXXXXXXX END RAPID YML XXXXXXXXXXXXXX
- 
-// YAML-cpp serialization/deserialization for ParticipantConfiguration data types
-namespace YAML {
-
-using namespace SilKit::Config;
-
-DEFINE_SILKIT_CONVERT(std::chrono::milliseconds);
-DEFINE_SILKIT_CONVERT(std::chrono::nanoseconds);
-
-DEFINE_SILKIT_CONVERT(Logging);
-DEFINE_SILKIT_CONVERT(Sink);
-DEFINE_SILKIT_CONVERT(Sink::Type);
-DEFINE_SILKIT_CONVERT(Sink::Format);
-DEFINE_SILKIT_CONVERT(SilKit::Services::Logging::Level);
-
-DEFINE_SILKIT_CONVERT(MdfChannel);
-DEFINE_SILKIT_CONVERT(Replay);
-DEFINE_SILKIT_CONVERT(Replay::Direction);
-
-DEFINE_SILKIT_CONVERT(CanController);
-
-DEFINE_SILKIT_CONVERT(LinController);
-
-DEFINE_SILKIT_CONVERT(EthernetController);
-
-DEFINE_SILKIT_CONVERT(SilKit::Services::Flexray::FlexrayClusterParameters);
-DEFINE_SILKIT_CONVERT(SilKit::Services::Flexray::FlexrayNodeParameters);
-DEFINE_SILKIT_CONVERT(SilKit::Services::Flexray::FlexrayTxBufferConfig);
-DEFINE_SILKIT_CONVERT(SilKit::Services::Flexray::FlexrayChannel);
-DEFINE_SILKIT_CONVERT(SilKit::Services::Flexray::FlexrayClockPeriod);
-DEFINE_SILKIT_CONVERT(SilKit::Services::Flexray::FlexrayTransmissionMode);
-DEFINE_SILKIT_CONVERT(FlexrayController);
-
-// Conversions for ServiceDiscovery Supplemental Data
-DEFINE_SILKIT_CONVERT(SilKit::Services::MatchingLabel::Kind);
-DEFINE_SILKIT_CONVERT(SilKit::Services::MatchingLabel);
-
-DEFINE_SILKIT_CONVERT(Label::Kind);
-DEFINE_SILKIT_CONVERT(Label);
-DEFINE_SILKIT_CONVERT(DataPublisher);
-DEFINE_SILKIT_CONVERT(DataSubscriber);
-DEFINE_SILKIT_CONVERT(RpcServer);
-DEFINE_SILKIT_CONVERT(RpcClient);
-
-DEFINE_SILKIT_CONVERT(HealthCheck);
-
-DEFINE_SILKIT_CONVERT(Tracing);
-DEFINE_SILKIT_CONVERT(TraceSink);
-DEFINE_SILKIT_CONVERT(TraceSink::Type);
-DEFINE_SILKIT_CONVERT(TraceSource);
-DEFINE_SILKIT_CONVERT(TraceSource::Type);
-
-DEFINE_SILKIT_CONVERT(MetricsSink);
-DEFINE_SILKIT_CONVERT(MetricsSink::Type);
-DEFINE_SILKIT_CONVERT(Metrics);
-
-DEFINE_SILKIT_CONVERT(Middleware);
-
-DEFINE_SILKIT_CONVERT(Extensions);
-
-DEFINE_SILKIT_CONVERT(Experimental);
-DEFINE_SILKIT_CONVERT(TimeSynchronization);
-DEFINE_SILKIT_CONVERT(Aggregation);
-
-DEFINE_SILKIT_CONVERT(ParticipantConfiguration);
-
-} // namespace YAML
 
 #undef DECLARE_READ_WRITE_FUNCS

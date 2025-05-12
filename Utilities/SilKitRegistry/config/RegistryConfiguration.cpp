@@ -23,6 +23,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 // Internal SIL Kit Headers
 #include "YamlParser.hpp"
+#include "SilKitYamlHelper.hpp"
 
 // Third-Party Headers
 #include "fmt/format.h"

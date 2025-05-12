@@ -21,29 +21,21 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "YamlValidator.hpp"
 
-#include "yaml-cpp/yaml.h"
-#include "yaml-cpp/ostream_wrapper.h"
-
 #include <stdexcept>
 #include <set>
+#include <string>
 
-#include "YamlParser.hpp" // for operator<<(Mark)
+
+#include "Configuration.hpp"
+#include "rapidyaml.hpp"
+
+//#include "YamlConversion.hpp"
+#include "SilKitYamlHelper.hpp" // ParserContext
 
 namespace {
 
-//! Helper to print the YAML document position
-std::ostream& operator<<(std::ostream& out, const YAML::Mark& mark)
-{
-    if (!mark.is_null())
-    {
-        out << "line " << mark.line << ", column " << mark.column;
-    }
-    return out;
-}
-
-
 //! Recursive validation helper to iterate through the YAML document
-bool ValidateDoc(YAML::Node& doc, const SilKit::Config::YamlValidator& v, std::ostream& warnings,
+bool ValidateDoc(ryml::ConstNodeRef& doc, const SilKit::Config::YamlValidator& v, std::ostream& warnings,
                  const std::string& parent)
 {
     using namespace SilKit::Config;
@@ -54,8 +46,12 @@ bool ValidateDoc(YAML::Node& doc, const SilKit::Config::YamlValidator& v, std::o
         return !std::get<1>(it);
     };
 
-    for (auto node : doc)
+    for (auto&& node : doc.cchildren())
     {
+        std::cout << "node " << node << std::endl;
+    }
+    return ok;
+    /*
         if (node.IsDefined())
         {
             if (node.IsScalar())
@@ -143,6 +139,7 @@ bool ValidateDoc(YAML::Node& doc, const SilKit::Config::YamlValidator& v, std::o
         }
     }
     return ok;
+    */
 }
 
 } // anonymous namespace
@@ -194,10 +191,26 @@ bool YamlValidator::Validate(const std::string& yamlString, std::ostream& warnin
 {
     try
     {
-        auto yamlDoc = YAML::Load(yamlString);
-        if (yamlDoc.IsDefined() && yamlDoc.IsMap() && yamlDoc["SchemaVersion"])
+        ryml::ParserOptions options{};
+        options.locations(true);
+
+        ryml::EventHandlerTree eventHandler{};
+        auto parser = ryml::Parser(&eventHandler, options);
+        parser.reserve_locations(100u);
+        auto&& cinput = ryml::to_csubstr(yamlString);
+        auto tree = ryml::parse_in_arena(&parser, cinput);
+
+        ryml::Callbacks cb{};
+        ParserContext ctx;
+        ctx.parser = &parser;
+        cb.m_user_data = &ctx;
+        tree.callbacks(cb);
+
+        auto root = tree.crootref();
+        if (root.is_doc() && (root.is_map() || root.is_seq()))
         {
-            auto version = yamlDoc["SchemaVersion"].as<std::string>();
+            std::string version;
+            Read(version, root, "schemaVersion");
             if (!LoadSchema(version))
             {
                 warnings << "Cannot load schema with SchemaVersion='" << version << "'" << "\n";
@@ -209,7 +222,7 @@ bool YamlValidator::Validate(const std::string& yamlString, std::ostream& warnin
             // The document does not specify 'SchemaVersion', we're assuming version '1'
             LoadSchema("1");
         }
-        return ValidateDoc(yamlDoc, *this, warnings, DocumentRoot());
+        return ValidateDoc(root, *this, warnings, DocumentRoot());
     }
     catch (const std::exception& ex)
     {
