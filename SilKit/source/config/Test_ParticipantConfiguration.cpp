@@ -257,12 +257,12 @@ TEST_F(Test_ParticipantConfiguration, full_configuration_file_json_yaml_equal)
 
 TEST_F(Test_ParticipantConfiguration, remote_metric_sink_collect_from_remote_fails)
 {
-    //TODO only the registry V1::Metrics parsing has a check for sinks versus CollectFromRemote?
     constexpr auto configurationString = R"(
-Metrics:
-  CollectFromRemote: true
-  Sinks:
-    - Type: Remote
+Experimental:
+    Metrics:
+      CollectFromRemote: true
+      Sinks:
+        - Type: Remote
 )";
 
     ASSERT_THROW(SilKit::Config::ParticipantConfigurationFromStringImpl(configurationString),

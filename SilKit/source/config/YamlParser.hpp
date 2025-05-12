@@ -58,7 +58,7 @@ auto Deserialize(const std::string& input) -> T
             errorMessage = Format("YAML Parsing error in at line {} (offset {}), column {} near '{}' with error: '{}'. Expected value: '{}'",
                 ctx->currentLocation.line, ctx->currentLocation.offset, ctx->currentLocation.col, ctx->currentContent, message, ctx->expectedValue);
         }
-        throw SilKitError{ errorMessage };
+        throw SilKit::ConfigurationError{ errorMessage };
     };
 
     ryml::ParserOptions options{};

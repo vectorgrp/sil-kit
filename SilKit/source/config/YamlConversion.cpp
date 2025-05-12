@@ -606,6 +606,18 @@ bool read(const ryml::ConstNodeRef& node, Metrics* obj)
 {
     OptionalRead(obj->sinks, node, "Sinks");
     OptionalRead(obj->collectFromRemote, node, "CollectFromRemote");
+
+    if (obj->collectFromRemote)
+    {
+        for (auto&& sink : obj->sinks)
+        {
+            if (sink.type == SilKit::Config::MetricsSink::Type::Remote)
+            {
+                throw SilKit::ConfigurationError{
+                    "Metrics collectFromRemote is enabled while having a Remote MetricsSink active"};  
+            }
+        }
+    }
     return true;
 }
 
@@ -1181,6 +1193,7 @@ bool read(const ryml::ConstNodeRef& node, ParticipantConfiguration* obj)
     OptionalRead(obj->middleware, node, "Middleware");
     OptionalRead(obj->includes, node, "Includes");
     OptionalRead(obj->experimental, node, "Experimental");
+
     return true;
 }
 

@@ -51,7 +51,7 @@ CanControllers:
     MdfChannel:
       ChannelName: MyTestChannel1
       ChannelPath: path/to/myTestChannel1
-      ChannelSource: MyTestChannel
+      ChannelSource: MyTestChannel1
       GroupName: MyTestGroup
       GroupPath: path/to/myTestGroup1
       GroupSource: MyTestGroup
@@ -214,11 +214,20 @@ TEST_F(Test_YamlParser, yaml_complete_configuration)
 {
     auto config = Deserialize<ParticipantConfiguration>(completeConfiguration);
 
-    EXPECT_TRUE(config.participantName == "Node0");
+    EXPECT_EQ(config.participantName, "Node0");
 
-    EXPECT_TRUE(config.canControllers.size() == 2);
-    EXPECT_TRUE(config.canControllers.at(0).name == "CAN1");
+    EXPECT_EQ(config.canControllers.size(), 2);
+    EXPECT_EQ(config.canControllers.at(0).name, "CAN1");
     EXPECT_TRUE(!config.canControllers.at(0).network.has_value());
+    EXPECT_EQ(config.canControllers.at(0).useTraceSinks.at(0), "Sink1");
+    EXPECT_EQ(config.canControllers.at(0).replay.direction, Replay::Direction::Both);
+    EXPECT_EQ(config.canControllers.at(0).replay.mdfChannel.channelName.value(), "MyTestChannel1");
+    EXPECT_EQ(config.canControllers.at(0).replay.mdfChannel.channelPath.value(), "path/to/myTestChannel1");
+    EXPECT_EQ(config.canControllers.at(0).replay.mdfChannel.channelSource.value(), "MyTestChannel1");
+    EXPECT_EQ(config.canControllers.at(0).replay.mdfChannel.groupName.value(), "MyTestGroup");
+    EXPECT_EQ(config.canControllers.at(0).replay.mdfChannel.groupPath.value(), "path/to/myTestGroup1");
+    EXPECT_EQ(config.canControllers.at(0).replay.mdfChannel.groupSource.value(), "MyTestGroup");
+
     EXPECT_TRUE(config.canControllers.at(1).name == "MyCAN2");
     EXPECT_TRUE(config.canControllers.at(1).network.has_value()
                 && config.canControllers.at(1).network.value() == "CAN2");
@@ -271,6 +280,27 @@ TEST_F(Test_YamlParser, yaml_complete_configuration)
     EXPECT_FALSE(config.middleware.registryAsFallbackProxy);
 }
 
+TEST_F(Test_YamlParser, yaml_elements_in_random_order)
+{
+    auto config = Deserialize<ParticipantConfiguration>(R"(
+---
+CanControllers:
+- Name: CAN1
+  Replay:
+    UseTraceSource: Source1
+Description: Order of elements is different
+ParticipantName: Node0
+schemaVersion: 1347
+)");
+
+    EXPECT_EQ(config.participantName, "Node0");
+    EXPECT_EQ(config.description, "Order of elements is different");
+    EXPECT_EQ(config.schemaVersion, "1347");
+    EXPECT_EQ(config.canControllers.size(), 1);
+    EXPECT_EQ(config.canControllers.at(0).name, "CAN1");
+    EXPECT_TRUE(!config.canControllers.at(0).network.has_value());
+
+}
 const auto emptyConfiguration = R"raw(
 )raw";
 
