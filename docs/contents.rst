@@ -15,5 +15,6 @@ Contents
   utilities/utilities
   troubleshooting/troubleshooting
   faq/faq
+  for-developers/versioning
   licenses/license
   CHANGELOG
