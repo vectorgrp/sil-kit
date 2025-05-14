@@ -13,7 +13,8 @@ The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <
 .. admonition:: Note: Support for Ubuntu 18.04 binary distribution packages is deprecated
 
    We are sunsetting the distribution of Ubuntu 18.04 packages with this release.
-   In the future, we will provide Ubuntu 24.04 binary distribution packages.
+   With the next release, we will provide Ubuntu 24.04 binary distribution packages instead.
+   
 
 Fixed
 ~~~~~
