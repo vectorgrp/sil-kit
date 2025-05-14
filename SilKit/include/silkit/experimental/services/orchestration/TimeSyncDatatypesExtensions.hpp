@@ -12,7 +12,7 @@ namespace Services {
 namespace Orchestration {
 
 /*! Callback type to indicate external simulation step coupling.
- *  Cf., \ref AddOtherSimulationStepsCompletedHandler(ITimeSyncService*,TimeSyncOtherSimulationStepsCompletedHandler);
+ *  Cf., \ref AddOtherSimulationStepsCompletedHandler
  */
 using OtherSimulationStepsCompletedHandler = std::function<void()>;
 

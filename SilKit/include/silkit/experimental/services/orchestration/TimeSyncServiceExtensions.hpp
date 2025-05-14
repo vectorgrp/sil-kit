@@ -15,7 +15,7 @@ namespace Experimental {
 namespace Services {
 namespace Orchestration {
 
-/*! \brief Add a \ref SilKit::Experimental::Services::Orchestration::OtherSimulationStepsCompletedHandler on a given
+/*! \brief Add a \ref OtherSimulationStepsCompletedHandler on a given
  *         time sync. service for external simulation step coupling.
  *
  * \param timeSyncService The time sync. service.
@@ -28,9 +28,8 @@ DETAIL_SILKIT_CPP_API auto AddOtherSimulationStepsCompletedHandler(
     SilKit::Experimental::Services::Orchestration::OtherSimulationStepsCompletedHandler handler)
     -> SilKit::Util::HandlerId;
 
-/*! \brief Remove a LinSlaveConfigurationHandler by HandlerId on a given controller.
- *
- * Requires \ref Services::Lin::LinControllerMode::Master.
+/*! \brief Remove a \ref SilKit::Experimental::Services::Orchestration::OtherSimulationStepsCompletedHandler by
+ *         HandlerId on a given controller.
  *
  * \param timeSyncService The time sync. service.
  * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
