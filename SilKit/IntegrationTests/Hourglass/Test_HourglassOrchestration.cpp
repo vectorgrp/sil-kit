@@ -432,6 +432,40 @@ TEST_F(Test_HourglassOrchestration, SilKit_TimeSyncService_Now)
     EXPECT_EQ(timeSyncService.Now(), nanoseconds);
 }
 
+TEST_F(Test_HourglassOrchestration, SilKit_Experimental_TimeSyncService_AddOtherSimulationStepsCompletedHandler)
+{
+    using testing::_;
+
+    const SilKit_HandlerId cHandlerId{12345};
+    const auto cppHandlerId = static_cast<SilKit::Util::HandlerId>(cHandlerId);
+
+    SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Orchestration::TimeSyncService timeSyncService{
+        mockLifecycleService};
+
+    EXPECT_CALL(
+        capi, SilKit_Experimental_TimeSyncService_AddOtherSimulationStepsCompletedHandler(mockTimeSyncService, _, _, _))
+        .WillOnce(DoAll(SetArgPointee<3>(cHandlerId), Return(SilKit_ReturnCode_SUCCESS)));
+
+    EXPECT_EQ(timeSyncService.ExperimentalAddOtherSimulationStepsCompletedHandler([] {}), cppHandlerId);
+}
+
+TEST_F(Test_HourglassOrchestration, SilKit_Experimental_TimeSyncService_RemoveOtherSimulationStepsCompletedHandler)
+{
+    using testing::_;
+
+    const SilKit_HandlerId cHandlerId{12345};
+    const auto cppHandlerId = static_cast<SilKit::Util::HandlerId>(cHandlerId);
+
+    SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Orchestration::TimeSyncService timeSyncService{
+        mockLifecycleService};
+
+    EXPECT_CALL(capi, SilKit_Experimental_TimeSyncService_RemoveOtherSimulationStepsCompletedHandler(
+                          mockTimeSyncService, cHandlerId))
+        .WillOnce(Return(SilKit_ReturnCode_SUCCESS));
+
+    timeSyncService.ExperimentalRemoveOtherSimulationStepsCompletedHandler(cppHandlerId);
+}
+
 // SystemMonitor
 
 TEST_F(Test_HourglassOrchestration, SilKit_SystemMonitor_Create)

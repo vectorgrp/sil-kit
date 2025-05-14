@@ -36,6 +36,7 @@ Added
 ~~~~~
 
 - The documentation now contains a page that explains the upcoming new versioning scheme.
+- Experimental 'other-simulation-steps-completed' API
 
 
 [4.0.55] - 2025-01-31
