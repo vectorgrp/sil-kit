@@ -24,6 +24,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <map>
 #include <string>
 #include <ostream>
+#include <set>
 
 #include "YamlSchema.hpp"
 
@@ -58,7 +59,6 @@ public:
     bool IsReservedElementName(const std::string& elementName) const;
 
     auto DocumentRoot() const -> std::string;
-
 private:
     void UpdateIndex(const YamlSchemaElem& element, const std::string& currentParent);
     bool LoadSchema(std::string schemaVersion);
@@ -67,6 +67,7 @@ private:
     static const std::string _elementSeparator;
     std::map<std::string /*elementName*/, YamlSchemaElem> _index;
     YamlSchemaElem _schema;
+    std::set<std::string> _alreadyDefinedPaths;
 };
 
 } // namespace Config

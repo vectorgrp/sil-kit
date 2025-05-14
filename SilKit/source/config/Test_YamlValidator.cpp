@@ -82,7 +82,7 @@ TEST_F(Test_YamlValidator, validate_without_warnings)
 TEST_F(Test_YamlValidator, validate_unknown_toplevel)
 {
     auto yamlString = R"yaml(
-SchemaVersion: 1
+schemaVersion: 1
 ParticipantName: CanDemoParticipant
 Description: Sample configuration for CAN
 #typo in a toplevel statement, additional 's'
@@ -93,8 +93,8 @@ CanControllerss:
     YamlValidator validator;
     bool yamlValid = validator.Validate(yamlString, warnings);
     std::cout << "Yaml Validator warnings: " << warnings.str() << std::endl;
-    EXPECT_TRUE(yamlValid && warnings.str().size() > 0) << "Yaml Validator warnings: " << warnings.str();
-    EXPECT_TRUE(warnings.str().size() > 0);
+    EXPECT_TRUE(yamlValid) << "We ignore non-keyword errors and typos, but generate warnings!";
+    EXPECT_GT(warnings.str().size(),  0)  << "Yaml Validator warnings: '" << warnings.str() << "'";;
 }
 
 TEST_F(Test_YamlValidator, validate_duplicate_element)
@@ -104,21 +104,21 @@ LinControllers:
 - Name: SimpleEcu1_LIN1
 # At line 18, column 0: Element "LinControllers" is already defined in path "/"
 LinControllers:
-- Name: SimpleEcu1_LIN1
+- Name: SomeOtherValue
 )raw";
     std::stringstream warnings;
     YamlValidator validator;
     bool yamlValid = validator.Validate(yamlString, warnings);
     EXPECT_FALSE(yamlValid) << "YamlValidator warnings: " << warnings.str();
     std::cout << "YamlValidator warnings: " << warnings.str() << std::endl;
-    EXPECT_TRUE(warnings.str().size() > 0);
+    EXPECT_GT(warnings.str().size(),  0);
 }
 
 TEST_F(Test_YamlValidator, validate_unnamed_children)
 {
     auto yamlString = R"yaml(
 ParticipantName: P1
-  CanControllers:
+CanControllers:
   - Name: CAN1
     UseTraceSinks:
     - Sink1
@@ -160,7 +160,7 @@ TEST_F(Test_YamlValidator, validate_full_participant_configuration)
         EXPECT_TRUE(valid);
 
         auto warnings{warningsStream.str()};
-        EXPECT_EQ(warnings, "");
+        ASSERT_EQ(warnings, "");
     };
 
     Validate("ParticipantConfiguration_Full.json");

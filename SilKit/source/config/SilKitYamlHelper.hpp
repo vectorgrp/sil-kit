@@ -45,6 +45,11 @@ struct ParserContext
     std::string expectedValue;
 };
 
+auto to_string(ryml::csubstr stringView) -> std::string
+{
+    return {stringView.data(), stringView.size()};
+}
+
 template <typename... Args>
 auto Format(const std::string& fmt, Args&&... args)
 {
@@ -87,12 +92,42 @@ inline auto GetChildSafe(const ryml::ConstNodeRef& node, std::string name) -> ry
     return {};
 }
 
+inline auto GetNodeName(ryml::ConstNodeRef& node) -> std::string
+{
+    if (node.is_val_ref())
+    {
+        return to_string(node.val_ref());
+    }
+    else if (node.is_key_ref())
+    {
+        return to_string(node.key_ref());
+    }
+    else if (node.is_keyval())
+    {
+        return to_string(node.key());
+    }
+    else if (node.is_val())
+    {
+        return to_string(node.val());
+    }
+    throw std::runtime_error("Don't know the yaml node type");
+}
+
 inline void MakeMap(ryml::NodeRef* node)
 {
     *node |= ryml::MAP;
 }
 
 // for better error messages we keep track on the current node being read
+auto GetCurrentLocation(const ryml::ConstNodeRef& node) -> ryml::Location
+{
+    auto&& ctx = reinterpret_cast<ParserContext*>(node.m_tree->callbacks().m_user_data);
+    if (ctx)
+    {
+        return ctx->currentLocation;
+    }
+    return {};
+}
 void SetCurrentLocation(const ryml::ConstNodeRef& node, const std::string& name)
 {
     auto&& cname = ryml::to_csubstr(name);

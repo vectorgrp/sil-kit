@@ -139,6 +139,8 @@ auto MakeYamlSchema() -> YamlSchemaElem
                                                                   replay,
                                                               });
 
+    std::initializer_list<YamlSchemaElem> labels = {{"Key"}, {"Value"}, {"Kind"}};
+
     // Root element of the YAML schema
     YamlSchemaElem yamlSchema{
         // JSON schema, not interpreted by us:
@@ -157,7 +159,7 @@ auto MakeYamlSchema() -> YamlSchemaElem
          {
              {"Name"},
              {"Topic"},
-             {"Labels"},
+             {"Labels", labels},
              {"UseTraceSinks"},
              replay,
          }},
@@ -165,7 +167,7 @@ auto MakeYamlSchema() -> YamlSchemaElem
          {
              {"Name"},
              {"Topic"},
-             {"Labels"},
+             {"Labels", labels},
              {"UseTraceSinks"},
              replay,
          }},
@@ -173,7 +175,7 @@ auto MakeYamlSchema() -> YamlSchemaElem
          {
              {"Name"},
              {"FunctionName"},
-             {"Labels"},
+             {"Labels", labels},
              {"UseTraceSinks"},
              replay,
          }},
@@ -181,7 +183,7 @@ auto MakeYamlSchema() -> YamlSchemaElem
          {
              {"Name"},
              {"FunctionName"},
-             {"Labels"},
+             {"Labels", labels},
              {"UseTraceSinks"},
              replay,
          }},

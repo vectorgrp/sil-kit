@@ -24202,8 +24202,8 @@ bool _visit(NodeRefType &node, Visitor fn, id_type indentation_level, bool skip_
     return false;
 }
 
-template<class NodeRefType, class Visitor>
-bool _visit_stacked(NodeRefType &node, Visitor fn, id_type indentation_level, bool skip_root=false)
+template<class NodeRefType, class VisitorRef>
+bool _visit_stacked(NodeRefType &node, VisitorRef& fn, id_type indentation_level, bool skip_root=false)
 {
     id_type increment = 0;
     if( ! (node.is_root() && skip_root))
@@ -24865,8 +24865,8 @@ public:
     }
 
     /** visit every child node calling fn(node, level) */
-    template<class Visitor>
-    bool visit_stacked(Visitor fn, id_type indentation_level=0, bool skip_root=true) const RYML_NOEXCEPT
+    template<class VisitorRef>
+    bool visit_stacked(VisitorRef& fn, id_type indentation_level=0, bool skip_root=true) const RYML_NOEXCEPT
     {
         _C4RR();
         return detail::_visit_stacked(*(ConstImpl const*)this, fn, indentation_level, skip_root);
