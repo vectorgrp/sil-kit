@@ -37,27 +37,6 @@ class Test_YamlValidator : public testing::Test
 
 using namespace SilKit::Config;
 
-TEST_F(Test_YamlValidator, yaml_doc_relations)
-{
-    YamlValidator v;
-    // Ensure that YAML validation of top-level elements works
-    EXPECT_TRUE(v.IsRootElement("/SchemaVersion"));
-    EXPECT_TRUE(v.IsRootElement("/ParticipantName"));
-    EXPECT_TRUE(v.IsRootElement("/Description"));
-    EXPECT_TRUE(v.IsRootElement("/CanControllers"));
-    EXPECT_TRUE(v.IsRootElement("/LinControllers"));
-    EXPECT_TRUE(v.IsRootElement("/EthernetControllers"));
-    EXPECT_TRUE(v.IsRootElement("/FlexrayControllers"));
-    EXPECT_TRUE(v.IsRootElement("/Logging"));
-    EXPECT_TRUE(v.IsRootElement("/HealthCheck"));
-    EXPECT_TRUE(v.IsRootElement("/Tracing"));
-    EXPECT_TRUE(v.IsRootElement("/Extensions"));
-    EXPECT_TRUE(v.IsRootElement("/Middleware"));
-
-    EXPECT_FALSE(v.IsRootElement(" /CanControllers"));
-    EXPECT_FALSE(v.IsRootElement("/Tracing/TraceSinks"));
-}
-
 TEST_F(Test_YamlValidator, validate_without_warnings)
 {
     ParticipantConfiguration cfg;
@@ -72,8 +51,7 @@ TEST_F(Test_YamlValidator, validate_without_warnings)
 
     std::stringstream stream;
     auto jsonString = SerializeAsJson(cfg);
-    YamlValidator validator;
-    auto isValid = validator.Validate(jsonString, stream);
+    auto isValid = ValidateWithSchema(jsonString, stream);
     EXPECT_TRUE(isValid);
     auto warnings = stream.str();
     EXPECT_TRUE(warnings.empty()) << "Warnings: " << warnings;
@@ -90,8 +68,7 @@ CanControllerss:
 )yaml";
 
     std::stringstream warnings;
-    YamlValidator validator;
-    bool yamlValid = validator.Validate(yamlString, warnings);
+    bool yamlValid = ValidateWithSchema(yamlString, warnings);
     std::cout << "Yaml Validator warnings: " << warnings.str() << std::endl;
     EXPECT_TRUE(yamlValid) << "We ignore non-keyword errors and typos, but generate warnings!";
     EXPECT_GT(warnings.str().size(),  0)  << "Yaml Validator warnings: '" << warnings.str() << "'";;
@@ -107,8 +84,7 @@ LinControllers:
 - Name: SomeOtherValue
 )raw";
     std::stringstream warnings;
-    YamlValidator validator;
-    bool yamlValid = validator.Validate(yamlString, warnings);
+    bool yamlValid = ValidateWithSchema(yamlString, warnings);
     EXPECT_FALSE(yamlValid) << "YamlValidator warnings: " << warnings.str();
     std::cout << "YamlValidator warnings: " << warnings.str() << std::endl;
     EXPECT_GT(warnings.str().size(),  0);
@@ -134,8 +110,7 @@ Logging:
 )yaml";
 
     std::stringstream warnings;
-    YamlValidator validator;
-    bool yamlValid = validator.Validate(yamlString, warnings);
+    bool yamlValid = ValidateWithSchema(yamlString, warnings);
     EXPECT_FALSE(yamlValid) << "YamlValidator warnings: " << warnings.str();
     std::cout << "YamlValidator warnings: " << warnings.str() << std::endl;
     EXPECT_TRUE(warnings.str().size() > 0);
@@ -155,8 +130,7 @@ TEST_F(Test_YamlValidator, validate_full_participant_configuration)
 
         std::stringstream warningsStream;
 
-        YamlValidator validator;
-        const bool valid{validator.Validate(text, warningsStream)};
+        const bool valid{ValidateWithSchema(text, warningsStream)};
         EXPECT_TRUE(valid);
 
         auto warnings{warningsStream.str()};

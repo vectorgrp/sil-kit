@@ -25,6 +25,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <set>
 #include <deque>
 #include <string>
+#include <vector>
 #include <sstream>
 
 
@@ -36,6 +37,426 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 namespace {
 
+//the rapidyaml visit_stacked does not accept reference types, so we implement it here
+
+template<typename VisitorRef>
+bool visit_stacked(ryml::ConstNodeRef& node, VisitorRef& visitor,  ryml::id_type indentation_level = 0)
+{
+    ryml::id_type increment = 1;
+    if (visitor(node, indentation_level))
+    {
+        return true;
+    }
+    if (node.has_children())
+    {
+        visitor.push(node, indentation_level);
+        for (auto child : node.children())
+        {
+            if (visit_stacked(child, visitor, indentation_level + increment))
+            {
+                visitor.pop(node, indentation_level);
+                return true;
+            }
+        }
+        visitor.pop(node, indentation_level);
+    }
+    return false;
+}
+
+inline auto splitString(std::string s, std::string delimiter) -> std::vector<std::string>
+{
+    size_t pos_start = 0, pos_end, delim_len = delimiter.length();
+    std::string token;
+    std::vector<std::string> res;
+
+    while ((pos_end = s.find(delimiter, pos_start)) != std::string::npos)
+    {
+        token = s.substr(pos_start, pos_end - pos_start);
+        pos_start = pos_end + delim_len;
+        res.push_back(token);
+    }
+
+    res.push_back(s.substr(pos_start));
+    return res;
+}
+
+const std::string schemaSeparator{"/"};
+const std::set<std::string> schemaPaths_v1 = {
+    "/$schema",
+    "/CanControllers",
+    "/CanControllers/Name",
+    "/CanControllers/Network",
+    "/CanControllers/Replay",
+    "/CanControllers/Replay/Direction",
+    "/CanControllers/Replay/MdfChannel",
+    "/CanControllers/Replay/MdfChannel/ChannelName",
+    "/CanControllers/Replay/MdfChannel/ChannelPath",
+    "/CanControllers/Replay/MdfChannel/ChannelSource",
+    "/CanControllers/Replay/MdfChannel/GroupName",
+    "/CanControllers/Replay/MdfChannel/GroupPath",
+    "/CanControllers/Replay/MdfChannel/GroupSource",
+    "/CanControllers/Replay/UseTraceSource",
+    "/CanControllers/UseTraceSinks",
+    "/DataPublishers",
+    "/DataPublishers/Labels",
+    "/DataPublishers/Labels/Key",
+    "/DataPublishers/Labels/Kind",
+    "/DataPublishers/Labels/Value",
+    "/DataPublishers/Name",
+    "/DataPublishers/Replay",
+    "/DataPublishers/Replay/Direction",
+    "/DataPublishers/Replay/MdfChannel",
+    "/DataPublishers/Replay/MdfChannel/ChannelName",
+    "/DataPublishers/Replay/MdfChannel/ChannelPath",
+    "/DataPublishers/Replay/MdfChannel/ChannelSource",
+    "/DataPublishers/Replay/MdfChannel/GroupName",
+    "/DataPublishers/Replay/MdfChannel/GroupPath",
+    "/DataPublishers/Replay/MdfChannel/GroupSource",
+    "/DataPublishers/Replay/UseTraceSource",
+    "/DataPublishers/Topic",
+    "/DataPublishers/UseTraceSinks",
+    "/DataSubscribers",
+    "/DataSubscribers/Labels",
+    "/DataSubscribers/Labels/Key",
+    "/DataSubscribers/Labels/Kind",
+    "/DataSubscribers/Labels/Value",
+    "/DataSubscribers/Name",
+    "/DataSubscribers/Replay",
+    "/DataSubscribers/Replay/Direction",
+    "/DataSubscribers/Replay/MdfChannel",
+    "/DataSubscribers/Replay/MdfChannel/ChannelName",
+    "/DataSubscribers/Replay/MdfChannel/ChannelPath",
+    "/DataSubscribers/Replay/MdfChannel/ChannelSource",
+    "/DataSubscribers/Replay/MdfChannel/GroupName",
+    "/DataSubscribers/Replay/MdfChannel/GroupPath",
+    "/DataSubscribers/Replay/MdfChannel/GroupSource",
+    "/DataSubscribers/Replay/UseTraceSource",
+    "/DataSubscribers/Topic",
+    "/DataSubscribers/UseTraceSinks",
+    "/Description",
+    "/EthernetControllers",
+    "/EthernetControllers/Name",
+    "/EthernetControllers/Network",
+    "/EthernetControllers/Replay",
+    "/EthernetControllers/Replay/Direction",
+    "/EthernetControllers/Replay/MdfChannel",
+    "/EthernetControllers/Replay/MdfChannel/ChannelName",
+    "/EthernetControllers/Replay/MdfChannel/ChannelPath",
+    "/EthernetControllers/Replay/MdfChannel/ChannelSource",
+    "/EthernetControllers/Replay/MdfChannel/GroupName",
+    "/EthernetControllers/Replay/MdfChannel/GroupPath",
+    "/EthernetControllers/Replay/MdfChannel/GroupSource",
+    "/EthernetControllers/Replay/UseTraceSource",
+    "/EthernetControllers/UseTraceSinks",
+    "/Experimental",
+    "/Experimental/Metrics",
+    "/Experimental/Metrics/CollectFromRemote",
+    "/Experimental/Metrics/Sinks",
+    "/Experimental/Metrics/Sinks/Name",
+    "/Experimental/Metrics/Sinks/Type",
+    "/Experimental/TimeSynchronization",
+    "/Experimental/TimeSynchronization/AnimationFactor",
+    "/Experimental/TimeSynchronization/EnableMessageAggregation",
+    "/Extensions",
+    "/Extensions/SearchPathHints",
+    "/FlexrayControllers",
+    "/FlexRayControllers",
+    "/FlexrayControllers/ClusterParameters",
+    "/FlexRayControllers/ClusterParameters",
+    "/FlexrayControllers/ClusterParameters/gColdstartAttempts",
+    "/FlexRayControllers/ClusterParameters/gColdstartAttempts",
+    "/FlexrayControllers/ClusterParameters/gCycleCountMax",
+    "/FlexRayControllers/ClusterParameters/gCycleCountMax",
+    "/FlexrayControllers/ClusterParameters/gdActionPointOffset",
+    "/FlexRayControllers/ClusterParameters/gdActionPointOffset",
+    "/FlexrayControllers/ClusterParameters/gdDynamicSlotIdlePhase",
+    "/FlexRayControllers/ClusterParameters/gdDynamicSlotIdlePhase",
+    "/FlexrayControllers/ClusterParameters/gdMiniSlot",
+    "/FlexRayControllers/ClusterParameters/gdMiniSlot",
+    "/FlexrayControllers/ClusterParameters/gdMiniSlotActionPointOffset",
+    "/FlexRayControllers/ClusterParameters/gdMiniSlotActionPointOffset",
+    "/FlexrayControllers/ClusterParameters/gdStaticSlot",
+    "/FlexRayControllers/ClusterParameters/gdStaticSlot",
+    "/FlexrayControllers/ClusterParameters/gdSymbolWindow",
+    "/FlexRayControllers/ClusterParameters/gdSymbolWindow",
+    "/FlexrayControllers/ClusterParameters/gdSymbolWindowActionPointOffset",
+    "/FlexRayControllers/ClusterParameters/gdSymbolWindowActionPointOffset",
+    "/FlexrayControllers/ClusterParameters/gdTSSTransmitter",
+    "/FlexRayControllers/ClusterParameters/gdTSSTransmitter",
+    "/FlexrayControllers/ClusterParameters/gdWakeupTxActive",
+    "/FlexRayControllers/ClusterParameters/gdWakeupTxActive",
+    "/FlexrayControllers/ClusterParameters/gdWakeupTxIdle",
+    "/FlexRayControllers/ClusterParameters/gdWakeupTxIdle",
+    "/FlexrayControllers/ClusterParameters/gListenNoise",
+    "/FlexRayControllers/ClusterParameters/gListenNoise",
+    "/FlexrayControllers/ClusterParameters/gMacroPerCycle",
+    "/FlexRayControllers/ClusterParameters/gMacroPerCycle",
+    "/FlexrayControllers/ClusterParameters/gMaxWithoutClockCorrectionFatal",
+    "/FlexRayControllers/ClusterParameters/gMaxWithoutClockCorrectionFatal",
+    "/FlexrayControllers/ClusterParameters/gMaxWithoutClockCorrectionPassive",
+    "/FlexRayControllers/ClusterParameters/gMaxWithoutClockCorrectionPassive",
+    "/FlexrayControllers/ClusterParameters/gNumberOfMiniSlots",
+    "/FlexRayControllers/ClusterParameters/gNumberOfMiniSlots",
+    "/FlexrayControllers/ClusterParameters/gNumberOfStaticSlots",
+    "/FlexRayControllers/ClusterParameters/gNumberOfStaticSlots",
+    "/FlexrayControllers/ClusterParameters/gPayloadLengthStatic",
+    "/FlexRayControllers/ClusterParameters/gPayloadLengthStatic",
+    "/FlexrayControllers/ClusterParameters/gSyncFrameIDCountMax",
+    "/FlexRayControllers/ClusterParameters/gSyncFrameIDCountMax",
+    "/FlexrayControllers/Name",
+    "/FlexRayControllers/Name",
+    "/FlexrayControllers/Network",
+    "/FlexRayControllers/Network",
+    "/FlexrayControllers/NodeParameters",
+    "/FlexRayControllers/NodeParameters",
+    "/FlexrayControllers/NodeParameters/pAllowHaltDueToClock",
+    "/FlexRayControllers/NodeParameters/pAllowHaltDueToClock",
+    "/FlexrayControllers/NodeParameters/pAllowPassiveToActive",
+    "/FlexRayControllers/NodeParameters/pAllowPassiveToActive",
+    "/FlexrayControllers/NodeParameters/pChannels",
+    "/FlexRayControllers/NodeParameters/pChannels",
+    "/FlexrayControllers/NodeParameters/pClusterDriftDamping",
+    "/FlexRayControllers/NodeParameters/pClusterDriftDamping",
+    "/FlexrayControllers/NodeParameters/pdAcceptedStartupRange",
+    "/FlexRayControllers/NodeParameters/pdAcceptedStartupRange",
+    "/FlexrayControllers/NodeParameters/pdListenTimeout",
+    "/FlexRayControllers/NodeParameters/pdListenTimeout",
+    "/FlexrayControllers/NodeParameters/pdMicrotick",
+    "/FlexRayControllers/NodeParameters/pdMicrotick",
+    "/FlexrayControllers/NodeParameters/pKeySlotId",
+    "/FlexRayControllers/NodeParameters/pKeySlotId",
+    "/FlexrayControllers/NodeParameters/pKeySlotOnlyEnabled",
+    "/FlexRayControllers/NodeParameters/pKeySlotOnlyEnabled",
+    "/FlexrayControllers/NodeParameters/pKeySlotUsedForStartup",
+    "/FlexRayControllers/NodeParameters/pKeySlotUsedForStartup",
+    "/FlexrayControllers/NodeParameters/pKeySlotUsedForSync",
+    "/FlexRayControllers/NodeParameters/pKeySlotUsedForSync",
+    "/FlexrayControllers/NodeParameters/pLatestTx",
+    "/FlexRayControllers/NodeParameters/pLatestTx",
+    "/FlexrayControllers/NodeParameters/pMacroInitialOffsetA",
+    "/FlexRayControllers/NodeParameters/pMacroInitialOffsetA",
+    "/FlexrayControllers/NodeParameters/pMacroInitialOffsetB",
+    "/FlexRayControllers/NodeParameters/pMacroInitialOffsetB",
+    "/FlexrayControllers/NodeParameters/pMicroInitialOffsetA",
+    "/FlexRayControllers/NodeParameters/pMicroInitialOffsetA",
+    "/FlexrayControllers/NodeParameters/pMicroInitialOffsetB",
+    "/FlexRayControllers/NodeParameters/pMicroInitialOffsetB",
+    "/FlexrayControllers/NodeParameters/pMicroPerCycle",
+    "/FlexRayControllers/NodeParameters/pMicroPerCycle",
+    "/FlexrayControllers/NodeParameters/pOffsetCorrectionOut",
+    "/FlexRayControllers/NodeParameters/pOffsetCorrectionOut",
+    "/FlexrayControllers/NodeParameters/pOffsetCorrectionStart",
+    "/FlexRayControllers/NodeParameters/pOffsetCorrectionStart",
+    "/FlexrayControllers/NodeParameters/pRateCorrectionOut",
+    "/FlexRayControllers/NodeParameters/pRateCorrectionOut",
+    "/FlexrayControllers/NodeParameters/pSamplesPerMicrotick",
+    "/FlexRayControllers/NodeParameters/pSamplesPerMicrotick",
+    "/FlexrayControllers/NodeParameters/pWakeupChannel",
+    "/FlexRayControllers/NodeParameters/pWakeupChannel",
+    "/FlexrayControllers/NodeParameters/pWakeupPattern",
+    "/FlexRayControllers/NodeParameters/pWakeupPattern",
+    "/FlexrayControllers/Replay",
+    "/FlexRayControllers/Replay",
+    "/FlexrayControllers/Replay/Direction",
+    "/FlexRayControllers/Replay/Direction",
+    "/FlexrayControllers/Replay/MdfChannel",
+    "/FlexRayControllers/Replay/MdfChannel",
+    "/FlexrayControllers/Replay/MdfChannel/ChannelName",
+    "/FlexRayControllers/Replay/MdfChannel/ChannelName",
+    "/FlexrayControllers/Replay/MdfChannel/ChannelPath",
+    "/FlexRayControllers/Replay/MdfChannel/ChannelPath",
+    "/FlexrayControllers/Replay/MdfChannel/ChannelSource",
+    "/FlexRayControllers/Replay/MdfChannel/ChannelSource",
+    "/FlexrayControllers/Replay/MdfChannel/GroupName",
+    "/FlexRayControllers/Replay/MdfChannel/GroupName",
+    "/FlexrayControllers/Replay/MdfChannel/GroupPath",
+    "/FlexRayControllers/Replay/MdfChannel/GroupPath",
+    "/FlexrayControllers/Replay/MdfChannel/GroupSource",
+    "/FlexRayControllers/Replay/MdfChannel/GroupSource",
+    "/FlexrayControllers/Replay/UseTraceSource",
+    "/FlexRayControllers/Replay/UseTraceSource",
+    "/FlexrayControllers/TxBufferConfigurations",
+    "/FlexRayControllers/TxBufferConfigurations",
+    "/FlexrayControllers/TxBufferConfigurations/channels",
+    "/FlexRayControllers/TxBufferConfigurations/channels",
+    "/FlexrayControllers/TxBufferConfigurations/headerCrc",
+    "/FlexRayControllers/TxBufferConfigurations/headerCrc",
+    "/FlexrayControllers/TxBufferConfigurations/offset",
+    "/FlexRayControllers/TxBufferConfigurations/offset",
+    "/FlexrayControllers/TxBufferConfigurations/PPindicator",
+    "/FlexRayControllers/TxBufferConfigurations/PPindicator",
+    "/FlexrayControllers/TxBufferConfigurations/repetition",
+    "/FlexRayControllers/TxBufferConfigurations/repetition",
+    "/FlexrayControllers/TxBufferConfigurations/slotId",
+    "/FlexRayControllers/TxBufferConfigurations/slotId",
+    "/FlexrayControllers/TxBufferConfigurations/transmissionMode",
+    "/FlexRayControllers/TxBufferConfigurations/transmissionMode",
+    "/FlexrayControllers/UseTraceSinks",
+    "/FlexRayControllers/UseTraceSinks",
+    "/HealthCheck",
+    "/HealthCheck/HardResponseTimeout",
+    "/HealthCheck/SoftResponseTimeout",
+    "/Includes",
+    "/Includes/Files",
+    "/Includes/SearchPathHints",
+    "/LinControllers",
+    "/LinControllers/Name",
+    "/LinControllers/Network",
+    "/LinControllers/Replay",
+    "/LinControllers/Replay/Direction",
+    "/LinControllers/Replay/MdfChannel",
+    "/LinControllers/Replay/MdfChannel/ChannelName",
+    "/LinControllers/Replay/MdfChannel/ChannelPath",
+    "/LinControllers/Replay/MdfChannel/ChannelSource",
+    "/LinControllers/Replay/MdfChannel/GroupName",
+    "/LinControllers/Replay/MdfChannel/GroupPath",
+    "/LinControllers/Replay/MdfChannel/GroupSource",
+    "/LinControllers/Replay/UseTraceSource",
+    "/LinControllers/UseTraceSinks",
+    "/Logging",
+    "/Logging/FlushLevel",
+    "/Logging/LogFromRemotes",
+    "/Logging/Sinks",
+    "/Logging/Sinks/Format",
+    "/Logging/Sinks/Level",
+    "/Logging/Sinks/LogName",
+    "/Logging/Sinks/Type",
+    "/Middleware",
+    "/Middleware/AcceptorUris",
+    "/Middleware/ConnectAttempts",
+    "/Middleware/ConnectTimeoutSeconds",
+    "/Middleware/EnableDomainSockets",
+    "/Middleware/ExperimentalRemoteParticipantConnection",
+    "/Middleware/RegistryAsFallbackProxy",
+    "/Middleware/RegistryUri",
+    "/Middleware/TcpNoDelay",
+    "/Middleware/TcpQuickAck",
+    "/Middleware/TcpReceiveBufferSize",
+    "/Middleware/TcpSendBufferSize",
+    "/ParticipantName",
+    "/RpcClients",
+    "/RpcClients/FunctionName",
+    "/RpcClients/Labels",
+    "/RpcClients/Labels/Key",
+    "/RpcClients/Labels/Kind",
+    "/RpcClients/Labels/Value",
+    "/RpcClients/Name",
+    "/RpcClients/Replay",
+    "/RpcClients/Replay/Direction",
+    "/RpcClients/Replay/MdfChannel",
+    "/RpcClients/Replay/MdfChannel/ChannelName",
+    "/RpcClients/Replay/MdfChannel/ChannelPath",
+    "/RpcClients/Replay/MdfChannel/ChannelSource",
+    "/RpcClients/Replay/MdfChannel/GroupName",
+    "/RpcClients/Replay/MdfChannel/GroupPath",
+    "/RpcClients/Replay/MdfChannel/GroupSource",
+    "/RpcClients/Replay/UseTraceSource",
+    "/RpcClients/UseTraceSinks",
+    "/RpcServers",
+    "/RpcServers/FunctionName",
+    "/RpcServers/Labels",
+    "/RpcServers/Labels/Key",
+    "/RpcServers/Labels/Kind",
+    "/RpcServers/Labels/Value",
+    "/RpcServers/Name",
+    "/RpcServers/Replay",
+    "/RpcServers/Replay/Direction",
+    "/RpcServers/Replay/MdfChannel",
+    "/RpcServers/Replay/MdfChannel/ChannelName",
+    "/RpcServers/Replay/MdfChannel/ChannelPath",
+    "/RpcServers/Replay/MdfChannel/ChannelSource",
+    "/RpcServers/Replay/MdfChannel/GroupName",
+    "/RpcServers/Replay/MdfChannel/GroupPath",
+    "/RpcServers/Replay/MdfChannel/GroupSource",
+    "/RpcServers/Replay/UseTraceSource",
+    "/RpcServers/UseTraceSinks",
+    "/schemaVersion",
+    "/SchemaVersion",
+    "/Tracing",
+    "/Tracing/TraceSinks",
+    "/Tracing/TraceSinks/Name",
+    "/Tracing/TraceSinks/OutputPath",
+    "/Tracing/TraceSinks/Type",
+    "/Tracing/TraceSources",
+    "/Tracing/TraceSources/InputPath",
+    "/Tracing/TraceSources/Name",
+    "/Tracing/TraceSources/Type",
+
+};
+std::set<std::string> reservedNames; // computed from schemaPaths
+
+auto DocumentRoot() -> std::string
+{
+    return schemaSeparator;
+}
+
+auto ParentPath(const std::string& elementName) -> std::string
+{
+    auto sep = elementName.rfind(schemaSeparator);
+    if (sep == elementName.npos)
+    {
+        throw SilKit::ConfigurationError("elementName " + elementName + " has no parent");
+    }
+    else if (sep == 0)
+    {
+        // Special case for root lookups
+        return schemaSeparator;
+    }
+    else
+    {
+        return elementName.substr(0, sep);
+    }
+}
+
+auto ElementName(const std::string& elementName) -> std::string
+{
+    auto sep = elementName.rfind(schemaSeparator);
+    if (sep == elementName.npos || sep == elementName.size())
+    {
+        return elementName;
+    }
+    return elementName.substr(sep + 1, elementName.size());
+}
+
+auto MakePath(const std::string& parentEl, const std::string& elementName) -> std::string
+{
+    if (elementName.empty())
+    {
+        return parentEl;
+    }
+    if (parentEl == schemaSeparator) // Special case for root lookups
+    {
+        return schemaSeparator + elementName;
+    }
+    else
+    {
+        return parentEl + schemaSeparator + elementName;
+    }
+}
+
+
+bool IsReservedElementName(const std::string& queryElement)
+{
+    if (reservedNames.empty())
+    {
+        //build cache of reserved schema element names
+        for (auto&& path : schemaPaths_v1)
+        {
+            auto elements = splitString(path, schemaSeparator);
+            for (auto&& element : elements)
+            {
+                reservedNames.insert(element);
+            }
+        }
+    }
+    const auto elementName = ElementName(queryElement);
+    return reservedNames.count(elementName);
+}
+bool IsSchemaPath(const std::string& path) 
+{
+    return schemaPaths_v1.count(path) > 0;
+}
+
 using namespace SilKit::Config;
 
 auto operator<<(std::stringstream& out, const ryml::Location& location) -> std::stringstream&
@@ -46,18 +467,16 @@ auto operator<<(std::stringstream& out, const ryml::Location& location) -> std::
 struct ValidatingVisitor
 {
     std::ostream& warnings;
-    SilKit::Config::YamlValidator& v;
     std::string currentNodePath;
     std::deque<std::string> nodePaths;
     std::set<std::string> userDefinedPaths;
 
     bool ok{true};
 
-    ValidatingVisitor(SilKit::Config::YamlValidator& validator, std::ostream& warnings)
-        : v{validator}
-        , warnings{warnings}
+    ValidatingVisitor(std::ostream& warnings)
+        : warnings{warnings}
     {
-        currentNodePath = v.DocumentRoot();
+        currentNodePath = DocumentRoot();
         nodePaths.push_back(currentNodePath);
     }
   
@@ -80,7 +499,7 @@ struct ValidatingVisitor
         }
 
         auto nodeKey = to_string(node.key());
-        auto nodePath = v.MakeName(currentNodePath, nodeKey);
+        auto nodePath = MakePath(currentNodePath, nodeKey);
         if (PathIsAlreadyDefined(nodePath))
         {
             warnings << "At " << GetCurrentLocation(node) << ": Element \"" << nodePath  << "\""
@@ -106,10 +525,10 @@ struct ValidatingVisitor
     void HandleKeyVal(const ryml::ConstNodeRef& node)
     {
         auto nodeName = to_string(node.key());
-        auto valuePath = v.MakeName(currentNodePath, nodeName);
-        if (!v.IsSchemaElement(valuePath))
+        auto valuePath = MakePath(currentNodePath, nodeName);
+        if (!IsSchemaPath(valuePath))
         {
-            if (v.IsReservedElementName(valuePath))
+            if (IsReservedElementName(valuePath))
             {
                 warnings << "At " << GetCurrentLocation(node) << ": Element \"" << nodeName << "\""
                          << " is not a valid sub-element of schema path \"" << currentNodePath << "\"\n";
@@ -132,11 +551,11 @@ struct ValidatingVisitor
     void HandleVal(const ryml::ConstNodeRef& node)
     {
         auto value = to_string(node.val());
-        auto valuePath = v.MakeName(currentNodePath, value);
-        if (!v.IsSchemaElement(currentNodePath))
+        auto valuePath = MakePath(currentNodePath, value);
+        if (!IsSchemaPath(currentNodePath))
         {
             warnings << "At " << GetCurrentLocation(node) << ": Element \"" << value << "\""
-                     << " is not a valid sub-element of schema path \"" << v.ParentName(currentNodePath) << "\"\n";
+                     << " is not a valid sub-element of schema path \"" << ParentPath(currentNodePath) << "\"\n";
             ok &= false;
 
         }
@@ -158,7 +577,6 @@ struct ValidatingVisitor
         }
         else
         {
-            auto typeStr = node.type_str();
             throw SilKit::ConfigurationError{"Unknown YAML Validation Error"};
         }
         return false;
@@ -169,197 +587,14 @@ struct ValidatingVisitor
         return ok;
     }
 };
-//! Recursive validation helper to iterate through the YAML document
-bool ValidateDoc(ryml::ConstNodeRef& node, SilKit::Config::YamlValidator& v, std::ostream& warnings,
-                 const std::string& parent)
-{
-    using namespace SilKit::Config;
-    bool ok = true;
-    std::set<std::string> declaredKeys;
-    auto isAlreadyDefined = [&declaredKeys](auto keyNameToCheck) {
-        auto it = declaredKeys.insert(keyNameToCheck);
-        return !std::get<1>(it);
-    };
-
-
-
-    auto visitor = [](auto&& node, auto&& level) {
-        auto typeStr = node.type_str();
-        auto nodeStr = node.is_keyval() ? node.key() : "N/A";
-        nodeStr = node.is_val() ? node.val() : nodeStr;
-        std::cout << "VISIT: " << typeStr << ": " << nodeStr << std::endl;
-        return false;
-        };
-
-
-#if DEBUG_NO_BUILD
-    if (node.num_other_siblings() == 0)
-    {
-        std::string keyString;
-        if (node.has_key())
-        {
-            keyString = to_string(node.key());
-        }
-
-        if (node.is_val())
-        {
-            auto nodeName = v.MakeName(parent, GetNodeName(node));
-            if (v.IsSchemaElement(nodeName) && !v.IsSubelementOf(parent, nodeName))
-            {
-                warnings << "At " << GetCurrentLocation(node) << ": Element \"" << v.ElementName(nodeName) << "\""
-                         << " is not a valid sub-element of schema path \"" << parent << "\"\n";
-                ok &= false;
-            }
-            else
-            {
-                // This is a user-defined value, that is, a subelement
-                // with no corresponding schema element as parent
-            }
-        }
-        else if (node.is_seq())
-        {
-            for (auto&& child : node.cchildren())
-            {
-                ok &= ValidateDoc(child, v, warnings, v.MakeName(parent, keyString));
-            }
-        }
-        else if (node.is_keyval())
-        {
-            // Key value pair
-            auto&& value = to_string(node.val());
-            auto keyName = v.MakeName(parent, keyString);
-            auto valueName = v.MakeName(parent, value);
-            if (isAlreadyDefined(keyName))
-            {
-                warnings << "At " << GetCurrentLocation(node) << ": Element \"" << v.ElementName(keyName) << "\""
-                         << " is already defined in path \"" << parent << "\"\n";
-                ok &= false;
-            }
-            // A nonempty, but invalid element name
-            if (!keyName.empty() && !v.IsSchemaElement(keyName))
-            {
-                // Unknown elements, which are not found in the schema are only warnings
-                warnings << "At " << GetCurrentLocation(node) << ": Element \"" << v.ElementName(keyName) << "\"";
-                if (v.IsReservedElementName(keyName))
-                {
-                    warnings << " is a reserved element name and as such"
-                             << " not a sub-element of schema path \"";
-                    // Misplacing a keyword is an error!
-                    ok &= false;
-                }
-                else
-                {
-                    // We only report error if the element is a reserved keyword
-                    warnings << " is being ignored. It is not a sub-element of schema path \"";
-                }
-                warnings << parent << "\"\n";
-            }
-            // We are not a subelement of parent
-            else if (v.HasSubelements(parent) && !v.IsSubelementOf(parent, keyName))
-            {
-                warnings << "At " << GetCurrentLocation(node) << ": Element \"" << v.ElementName(keyName) << "\""
-                         << " is not a valid sub-element of schema path \"" << parent << "\"\n";
-                ok &= false;
-            }
-            for (auto&& sibling : node.csiblings())
-            {
-                if (sibling == node)
-                {
-                    continue;
-                }
-                ok &= ValidateDoc(sibling, v, warnings, parent);
-            }
-            /*
-            else if (!value.invalid())
-            {
-                ok &= ValidateDoc(value, v, warnings, newParent);
-                if (value.is_map() || value.is_seq())
-                {
-                    // Nested sequences and maps might have no  key name
-                    std::string newParent = parent; // A fallback in case keyName is not given
-                    if (!keyName.empty())
-                    {
-                        newParent = keyName;
-                    }
-
-                    if (v.HasSubelements(newParent))
-                    {
-                        ok &= ValidateDoc(value, v, warnings, newParent);
-                    }
-                }
-                else if (value.num_children() > 0)
-                {
-                    std::string newParent = parent;
-                    if (!keyName.empty())
-                    {
-                        newParent = keyName;
-                    }
-                    ok &= ValidateDoc(value, v, warnings, newParent);
-                }
-            }
-                */
-        }
-        else if (node.is_map())
-        {
-            for (auto&& child : node.cchildren())
-            {
-                ok &= ValidateDoc(child, v, warnings, v.MakeName(parent, keyString));
-            }
-        }
-    }
-#endif
-    return ok;
-}
-
 } // anonymous namespace
 
 namespace SilKit {
 namespace Config {
 
-const std::string YamlValidator::_elementSeparator{"/"};
 
-bool YamlValidator::LoadSchema(std::string schemaVersion)
+bool ValidateWithSchema(const std::string& yamlString, std::ostream& warnings)
 {
-    if (schemaVersion == "1")
-    {
-        _schema = MakeYamlSchema();
-    }
-    else
-    {
-        return false;
-    }
-    // The root element in schema can be skipped
-    for (auto& subelement : _schema.subelements)
-    {
-        UpdateIndex(subelement, "");
-    }
-    return true;
-}
-
-void YamlValidator::UpdateIndex(const YamlSchemaElem& element, const std::string& currentParent)
-{
-    auto uniqueName = MakeName(currentParent, element.name);
-    _index[uniqueName] = element;
-    for (auto& subelement : element.subelements)
-    {
-        UpdateIndex(subelement, uniqueName);
-    }
-}
-
-auto YamlValidator::ElementName(const std::string& elementName) const -> std::string
-{
-    auto sep = elementName.rfind(_elementSeparator);
-    if (sep == elementName.npos || sep == elementName.size())
-    {
-        return {};
-    }
-    return elementName.substr(sep + 1, elementName.size());
-}
-
-bool YamlValidator::Validate(const std::string& yamlString, std::ostream& warnings)
-{
-    _alreadyDefinedPaths.clear();
-
     try
     {
         ryml::ParserOptions options{};
@@ -382,19 +617,14 @@ bool YamlValidator::Validate(const std::string& yamlString, std::ostream& warnin
         {
             std::string version;
             Read(version, root, "schemaVersion");
-            if (!LoadSchema(version))
+            if (version != "1")
             {
                 warnings << "Cannot load schema with SchemaVersion='" << version << "'" << "\n";
                 return false;
             }
         }
-        else
-        {
-            // The document does not specify 'SchemaVersion', we're assuming version '1'
-            LoadSchema("1");
-        }
-        ValidatingVisitor visitor{*this, warnings};
-        root.visit_stacked(visitor);
+        ValidatingVisitor visitor{ warnings};
+        visit_stacked(root, visitor);
         return visitor.IsValid();
     }
     catch (const std::exception& ex)
@@ -402,88 +632,6 @@ bool YamlValidator::Validate(const std::string& yamlString, std::ostream& warnin
         warnings << ex.what() << "\n";
         return false;
     }
-}
-
-auto YamlValidator::ParentName(const std::string& elementName) const -> std::string
-{
-    auto sep = elementName.rfind(_elementSeparator);
-    if (sep == elementName.npos)
-    {
-        throw ConfigurationError("elementName " + elementName + " has no parent");
-    }
-    else if (sep == 0)
-    {
-        // Special case for root lookups
-        return _elementSeparator;
-    }
-    else
-    {
-        return elementName.substr(0, sep);
-    }
-}
-
-auto YamlValidator::MakeName(const std::string& parentEl, const std::string& elementName) const -> std::string
-{
-    if (elementName.empty())
-    {
-        return parentEl;
-    }
-    if (parentEl == _elementSeparator) // Special case for root lookups
-    {
-        return _elementSeparator + elementName;
-    }
-    else
-    {
-        return parentEl + _elementSeparator + elementName;
-    }
-}
-
-bool YamlValidator::IsSchemaElement(const std::string& elementName) const
-{
-    return _index.count(elementName) > 0;
-}
-
-bool YamlValidator::HasSubelements(const std::string& elementName) const
-{
-    if (elementName == _elementSeparator)
-    {
-        // Special case for root level lookups
-        return true;
-    }
-    else
-    {
-        return _index.at(elementName).subelements.size() > 0;
-    }
-}
-
-bool YamlValidator::IsSubelementOf(const std::string& parentName, const std::string& elementName) const
-{
-    return ParentName(elementName) == parentName;
-}
-
-bool YamlValidator::IsRootElement(const std::string& elementName) const
-{
-    return IsSubelementOf(_elementSeparator, elementName);
-}
-
-bool YamlValidator::IsReservedElementName(const std::string& queryElement) const
-{
-    const auto elementName = ElementName(queryElement);
-    for (const auto& kv : _index)
-    {
-        const auto& elementPath = kv.first;
-        auto idx = elementPath.find(elementName);
-        if (idx != elementPath.npos)
-        {
-            return true;
-        }
-    }
-    return false;
-}
-
-auto YamlValidator::DocumentRoot() const -> std::string
-{
-    return _elementSeparator;
 }
 } // namespace Config
 } // namespace SilKit

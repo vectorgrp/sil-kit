@@ -42,11 +42,8 @@ add_library(O_SilKit_Config OBJECT
     Validation.hpp
     Validation.cpp
     YamlParser.hpp
-    YamlParser.cpp
     YamlConversion.hpp
     YamlConversion.cpp
-    YamlSchema.hpp
-    YamlSchema.cpp
     YamlValidator.hpp
     YamlValidator.cpp
 )

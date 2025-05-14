@@ -118,8 +118,7 @@ struct ConfigIncludeData
 void Validate(const std::string& text)
 {
     std::stringstream warnings;
-    SilKit::Config::YamlValidator validator;
-    if (!validator.Validate(text, warnings))
+    if (!ValidateWithSchema(text, warnings))
     {
         throw SilKit::ConfigurationError{"YAML validation returned errors:\n" + warnings.str()};
     }
