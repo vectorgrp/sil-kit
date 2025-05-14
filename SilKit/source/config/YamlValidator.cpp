@@ -492,7 +492,6 @@ struct ValidatingVisitor
 
     void push(ryml::ConstNodeRef node, ryml::id_type level)
     {
-        auto typeStr = node.type_str();
         if (!node.has_key())
         {
             return;
@@ -518,7 +517,6 @@ struct ValidatingVisitor
             auto path = nodePaths.back();
             nodePaths.pop_back();
             currentNodePath = nodePaths.back();
-            //std::cout << "POP " << level << " path= " << path << std::endl;
         }
     }
 
