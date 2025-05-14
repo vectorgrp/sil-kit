@@ -53,7 +53,6 @@ target_link_libraries(O_SilKit_Config
 
     PRIVATE SilKitInterface
     PRIVATE O_SilKit_Util_Filesystem
-    PUBLIC yaml-cpp
     PRIVATE I_SilKit_Util_FileHelpers
     PUBLIC rapidyaml
 )
@@ -96,12 +95,12 @@ add_silkit_test_to_executable(SilKitUnitTests
 
 add_silkit_test_to_executable(SilKitUnitTests
     SOURCES Test_YamlParser.cpp
-    LIBS O_SilKit_Config yaml-cpp rapidyaml
+    LIBS O_SilKit_Config rapidyaml
 )
 
 add_silkit_test_to_executable(SilKitUnitTests
     SOURCES Test_YamlValidator.cpp
-    LIBS O_SilKit_Config yaml-cpp rapidyaml
+    LIBS O_SilKit_Config rapidyaml
 )
 
 set(ParticipantTestCanConfigs

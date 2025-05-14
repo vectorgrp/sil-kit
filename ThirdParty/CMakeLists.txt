@@ -89,42 +89,6 @@ function(include_asio)
     set(SILKIT_THIRD_PARTY_ASIO "asio" CACHE STRING "Name of the third party asio target")
 endfunction()
 
-# Third party YAML parsing 
-function(include_yamlcpp)
-
-    if(NOT SILKIT_USE_SYSTEM_LIBRARIES)
-        set(YAML_CPP_BUILD_TESTS OFF CACHE BOOL "Disable because of gmock import conflict" FORCE)
-        set(YAML_BUILD_SHARED_LIBS OFF CACHE BOOL "Disable building yaml-cpp as shared library" FORCE)
-        silkit_clean_default_compileflags()
-
-        # disable the IPO for GTest due to CMake policy CMP0069 changes
-        if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-            set(CMAKE_INTERPROCEDURAL_OPTIMIZATION OFF)
-        endif()
-
-        add_subdirectory(
-            "${SILKIT_THIRD_PARTY_SOURCE_DIR}/yaml-cpp"
-            "${SILKIT_THIRD_PARTY_BINARY_DIR}/_tp_yaml-cpp"
-            EXCLUDE_FROM_ALL
-        )
-
-        # yaml-cpp explicitly sets /W3
-        silkit_target_clean_compileflags(yaml-cpp)
-
-        add_library(YamlInterface INTERFACE)
-        target_include_directories(YamlInterface
-            INTERFACE $<TARGET_PROPERTY:yaml-cpp,INTERFACE_INCLUDE_DIRECTORIES>)
-        target_compile_definitions(YamlInterface
-            INTERFACE YAML_CPP_STATIC_DEFINE)
-        set(SILKIT_THIRD_PARTY_YAML_INTERFACE "YamlInterface" CACHE STRING "Name of the third party yaml interface target")
-    else()
-        # Find yaml-cpp
-        find_package(yaml-cpp REQUIRED)
-        set(SILKIT_THIRD_PARTY_YAML_INTERFACE "yaml-cpp" CACHE STRING "Name of the third party yaml interface target")
-    endif()
-
-endfunction()
-
 # libfmt
 function(include_fmt)
     if(NOT SILKIT_USE_SYSTEM_LIBRARIES)
@@ -228,7 +192,6 @@ function(silkit_add_third_party_packages)
     endif()
 
     include_asio()
-    include_yamlcpp()
     include_fmt()
     include_spdlog()
     include_rapidyaml()

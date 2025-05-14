@@ -7,6 +7,10 @@ target_include_directories(rapidyaml-static
 	INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
+target_compile_definitions(rapidyaml-static
+PRIVATE
+	RYML_DEFAULT_CALLBACK_USES_EXCEPTIONS=1
+)
 if(UNIX)
     set_target_properties(rapidyaml-static
         PROPERTIES
