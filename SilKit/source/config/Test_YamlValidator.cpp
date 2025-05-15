@@ -71,7 +71,7 @@ CanControllerss:
     bool yamlValid = ValidateWithSchema(yamlString, warnings);
     std::cout << "Yaml Validator warnings: " << warnings.str() << std::endl;
     EXPECT_TRUE(yamlValid) << "We ignore non-keyword errors and typos, but generate warnings!";
-    EXPECT_GT(warnings.str().size(),  0)  << "Yaml Validator warnings: '" << warnings.str() << "'";;
+    EXPECT_GT(warnings.str().size(),  0u)  << "Yaml Validator warnings: '" << warnings.str() << "'";;
 }
 
 TEST_F(Test_YamlValidator, validate_duplicate_element)
