@@ -745,7 +745,10 @@ bool operator==(const Middleware& lhs, const Middleware& rhs)
     return lhs.registryUri == rhs.registryUri && lhs.connectAttempts == rhs.connectAttempts
            && lhs.enableDomainSockets == rhs.enableDomainSockets && lhs.tcpNoDelay == rhs.tcpNoDelay
            && lhs.tcpQuickAck == rhs.tcpQuickAck && lhs.tcpReceiveBufferSize == rhs.tcpReceiveBufferSize
-           && lhs.tcpSendBufferSize == rhs.tcpSendBufferSize && lhs.acceptorUris == rhs.acceptorUris;
+           && lhs.tcpSendBufferSize == rhs.tcpSendBufferSize && lhs.acceptorUris == rhs.acceptorUris
+           && lhs.registryAsFallbackProxy == rhs.registryAsFallbackProxy
+           && lhs.connectTimeoutSeconds == rhs.connectTimeoutSeconds
+           && lhs.experimentalRemoteParticipantConnection == rhs.experimentalRemoteParticipantConnection;
 }
 
 bool operator==(const Includes& lhs, const Includes& rhs)

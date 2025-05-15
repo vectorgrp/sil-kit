@@ -8,7 +8,7 @@ target_include_directories(rapidyaml-static
 )
 
 target_compile_definitions(rapidyaml-static
-PRIVATE
+	PUBLIC
 	RYML_DEFAULT_CALLBACK_USES_EXCEPTIONS=1
 )
 if(UNIX)

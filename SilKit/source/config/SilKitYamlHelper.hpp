@@ -45,7 +45,7 @@ struct ParserContext
     std::string expectedValue;
 };
 
-auto to_string(ryml::csubstr stringView) -> std::string
+inline auto to_string(ryml::csubstr stringView) -> std::string
 {
     return {stringView.data(), stringView.size()};
 }
@@ -119,7 +119,7 @@ inline void MakeMap(ryml::NodeRef* node)
 }
 
 // for better error messages we keep track on the current node being read
-auto GetCurrentLocation(const ryml::ConstNodeRef& node) -> ryml::Location
+inline auto GetCurrentLocation(const ryml::ConstNodeRef& node) -> ryml::Location
 {
     auto&& ctx = reinterpret_cast<ParserContext*>(node.m_tree->callbacks().m_user_data);
     if (ctx)
@@ -128,7 +128,8 @@ auto GetCurrentLocation(const ryml::ConstNodeRef& node) -> ryml::Location
     }
     return {};
 }
-void SetCurrentLocation(const ryml::ConstNodeRef& node, const std::string& name)
+
+inline void SetCurrentLocation(const ryml::ConstNodeRef& node, const std::string& name)
 {
     auto&& cname = ryml::to_csubstr(name);
     auto&& ctx = reinterpret_cast<ParserContext*>(node.m_tree->callbacks().m_user_data);
