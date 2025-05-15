@@ -87,7 +87,7 @@ LinControllers:
     bool yamlValid = ValidateWithSchema(yamlString, warnings);
     EXPECT_FALSE(yamlValid) << "YamlValidator warnings: " << warnings.str();
     std::cout << "YamlValidator warnings: " << warnings.str() << std::endl;
-    EXPECT_GT(warnings.str().size(),  0);
+    EXPECT_GT(warnings.str().size(),  0u);
 }
 
 TEST_F(Test_YamlValidator, validate_unnamed_children)
@@ -113,7 +113,7 @@ Logging:
     bool yamlValid = ValidateWithSchema(yamlString, warnings);
     EXPECT_FALSE(yamlValid) << "YamlValidator warnings: " << warnings.str();
     std::cout << "YamlValidator warnings: " << warnings.str() << std::endl;
-    EXPECT_TRUE(warnings.str().size() > 0);
+    EXPECT_TRUE(warnings.str().size() > 0u);
 }
 
 TEST_F(Test_YamlValidator, validate_full_participant_configuration)
