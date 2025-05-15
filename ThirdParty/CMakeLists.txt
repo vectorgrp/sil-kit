@@ -138,11 +138,12 @@ function(include_fmt)
             "${SILKIT_THIRD_PARTY_BINARY_DIR}/_tp_fmt"
             EXCLUDE_FROM_ALL
         )
-        if(TARGET fmt-header-only)
-            set(SILKIT_THIRD_PARTY_FMT_HEADER_ONLY_TARGET "fmt-header-only" CACHE STRING "Header only target for third party libfmt")
-        else()
-            set(SILKIT_THIRD_PARTY_FMT_HEADER_ONLY_TARGET "" CACHE STRING "Header only target for third party libfmt")
+
+        if(NOT TARGET fmt-header-only)
+            message(FATAL_ERROR "SIL Kit needs fmt-header-only target, but it is not available")
         endif()
+
+        set(SILKIT_THIRD_PARTY_FMT "fmt-header-only" CACHE STRING "Header only target for third party libfmt")
     else()
         # Find system libfmt
         include(FindPkgConfig)
@@ -155,7 +156,8 @@ function(include_fmt)
         add_library(fmt::fmt ALIAS fmt-header-only)
         set(SPDLOG_FMT_EXTERNAL Off CACHE BOOL "we have our own")
         set(SPDLOG_FMT_EXTERNAL_HO Off CACHE BOOL "we have our own")
-        set(SILKIT_THIRD_PARTY_FMT_HEADER_ONLY_TARGET "fmt::fmt-header-only" CACHE STRING "Header only target for third party libfmt (system library)")
+
+        set(SILKIT_THIRD_PARTY_FMT "fmt::fmt-header-only" CACHE STRING "Header only target for third party libfmt (system library)")
     endif()
 endfunction()
 
@@ -178,9 +180,13 @@ function(include_spdlog)
             "${SILKIT_THIRD_PARTY_BINARY_DIR}/_tp_spdlog"
             EXCLUDE_FROM_ALL
         )
+
+        set(SILKIT_THIRD_PARTY_SPDLOG "spdlog" CACHE STRING "Header only target for third party spdlog")
     else()
         # Find spdlog
         find_package(spdlog REQUIRED)
+
+        set(SILKIT_THIRD_PARTY_SPDLOG "spdlog::spdlog" CACHE STRING "Header only target for third party spdlog")
     endif()
 endfunction()
 

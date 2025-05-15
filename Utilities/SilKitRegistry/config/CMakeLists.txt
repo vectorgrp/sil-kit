@@ -27,7 +27,7 @@ target_link_libraries(O_SilKitRegistry_Config
 
     PUBLIC I_SilKit_Config
 
-    PUBLIC fmt::fmt
+    PUBLIC "${SILKIT_THIRD_PARTY_FMT}"
     PUBLIC yaml-cpp
 )
 
