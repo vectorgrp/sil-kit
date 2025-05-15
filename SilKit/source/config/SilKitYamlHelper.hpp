@@ -156,7 +156,7 @@ void Read(T& val, const ryml::ConstNodeRef& node, const std::string& name)
     node[ryml::to_csubstr(name)] >> val;
 }
 
-template <typename T, typename std::enable_if_t<std::is_integral_v<T>, bool> = true>
+template <typename T, typename std::enable_if_t<std::is_integral<T>::value, bool> = true>
 void OptionalRead(T& val, const ryml::ConstNodeRef& node, const std::string& name)
 {
     SetCurrentLocation(node, name);
@@ -173,7 +173,7 @@ inline void OptionalRead(bool& val, const ryml::ConstNodeRef& node, const std::s
     }
 }
 
-template <typename T, typename std::enable_if_t<!std::is_integral_v<T>, bool> = true>
+template <typename T, typename std::enable_if_t<!std::is_integral<T>::value, bool> = true>
 void OptionalRead(T& val, const ryml::ConstNodeRef& node, const std::string& name)
 {
     SetCurrentLocation(node, name);
