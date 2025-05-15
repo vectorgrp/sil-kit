@@ -67,7 +67,7 @@ TEST(Test_MetricsJsonSink, test_json_escaping_and_structure)
 
     // split the result into lines and parse them
 
-    //std::vector<YAML::Node> nodes;
+    std::vector<std::map<std::string, std::string>> nodes;
 
     std::string::size_type pos;
     while ((pos = result.find('\n')) != std::string::npos)
@@ -75,14 +75,14 @@ TEST(Test_MetricsJsonSink, test_json_escaping_and_structure)
         auto line = result.substr(0, pos);
         result = result.substr(pos + 1);
 
-     //   nodes.emplace_back(YAML::Load(line));
+        nodes.emplace_back(SilKit::Config::Deserialize<std::map<std::string, std::string>>(line));
     }
 
     // checks
 
-    /*
     ASSERT_EQ(nodes.size(), 3);
 
+    /*
     ASSERT_TRUE(nodes[0].IsMap());
     ASSERT_EQ(nodes[0]["ts"].as<MetricTimestamp>(), ts1);
     ASSERT_EQ(nodes[0]["mn"].as<std::string>(), mn1);

@@ -37,6 +37,32 @@ namespace Config {
 // Configuration Parsing
 //////////////////////////////////////////////////////////////////////
 
+inline auto ParseCapabilities(const std::string& input) -> std::vector<std::map<std::string, std::string>>
+{
+    std::vector<std::map<std::string, std::string>> result;
+    auto&& cinput = ryml::to_csubstr(input);
+    auto t = ryml::parse_in_arena(cinput);
+
+    auto root = t.crootref();
+    if (!root.is_seq())
+    {
+        throw ConfigurationError{"First element in Capabilities string is not a sequence"};
+    }
+    if (root.has_children())
+    {
+        for (auto&& child : root.children())
+        {
+            if (!child.is_map())
+            {
+                throw ConfigurationError{"Capabilities should be a sequence of map objects."};
+            }
+        }
+    }
+    root >> result;
+    return result;
+}
+
+
 template<typename T>
 auto Deserialize(const std::string& input) -> T
 {
@@ -76,11 +102,10 @@ auto Deserialize(const std::string& input) -> T
     t.callbacks(cb);
 
     T result;
-    t.crootref() >> result;
-
+    auto root = t.crootref();
+    root >> result;
     return result;
 }
-
 
 template<typename T>
 auto Serialize(const T& input) -> std::string

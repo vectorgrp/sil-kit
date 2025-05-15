@@ -109,10 +109,8 @@ void VAsioCapabilities::Parse(const std::string& string)
     {
         // the top-level node must be a sequence
         // each item of the top-level sequence must be a map
-        using map = std::map<std::string, std::string>;
-        using seq = std::vector<map>;
-        auto sequence = SilKit::Config::Deserialize<seq>(string);
-        for (auto&& item : sequence)
+        auto caps = SilKit::Config::ParseCapabilities(string);
+        for (auto&& item : caps)
         {
             // each item must contain a name key which has a scalar value
             const auto name = item.at("name");

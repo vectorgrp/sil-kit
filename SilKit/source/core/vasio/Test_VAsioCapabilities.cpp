@@ -97,7 +97,7 @@ TEST(Test_VAsioCapabilities, permit_and_ignore_additional_field)
 TEST(Test_VAsioCapabilities, throw_invalid_top_level)
 {
     // non-empty, but just whitespace is not allowed
-    EXPECT_THROW(SilKit::Core::VAsioCapabilities{R"(     )"}, SilKit::SilKitError);
+    EXPECT_THROW(SilKit::Core::VAsioCapabilities{R"( )"}, SilKit::SilKitError);
     // top-level is not a sequence
     EXPECT_THROW(SilKit::Core::VAsioCapabilities{R"(some-characters)"}, SilKit::SilKitError);
     EXPECT_THROW(SilKit::Core::VAsioCapabilities{R"("top-level-string")"}, SilKit::SilKitError);
