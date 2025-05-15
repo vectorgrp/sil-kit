@@ -16,6 +16,7 @@ if(UNIX)
         PROPERTIES
         VISIBILITY_INLINES_HIDDEN 1
         CXX_VISIBILITY_PRESET hidden
+        CXX_STANDARD 14
     )
 endif()
 
