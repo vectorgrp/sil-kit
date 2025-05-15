@@ -459,11 +459,6 @@ bool IsSchemaPath(const std::string& path)
 
 using namespace SilKit::Config;
 
-auto operator<<(std::stringstream& out, const ryml::Location& location) -> std::stringstream&
-{
-    out << location.line << ", " << location.col;
-    return out;
-}
 struct ValidatingVisitor
 {
     std::ostream& warnings;
