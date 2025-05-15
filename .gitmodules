@@ -1,9 +1,6 @@
 [submodule "spdlog"]
 	path = ThirdParty/spdlog
 	url = https://github.com/gabime/spdlog
-[submodule "ThirdParty/yaml-cpp"]
-	path = ThirdParty/yaml-cpp
-	url = https://github.com/jbeder/yaml-cpp
 [submodule "ThirdParty/asio"]
 	path = ThirdParty/asio
 	url = https://github.com/chriskohlhoff/asio.git

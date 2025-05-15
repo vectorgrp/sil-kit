@@ -50,6 +50,7 @@ target_link_libraries(O_SilKit_Core_Service
     PUBLIC I_SilKit_Core_Service
 
     PRIVATE I_SilKit_Services_Logging
+    PRIVATE rapidyaml
 )
 
 
