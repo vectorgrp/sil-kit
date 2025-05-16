@@ -17,6 +17,9 @@ This is a Quality Assured Release.
    We are sunsetting the distribution of Ubuntu 18.04 packages with this release.
    With the next release, we will provide Ubuntu 24.04 binary distribution packages instead.
 
+.. admonition:: Note: we will change our versioning scheme to semantic versioning
+
+   Please read the full notice in the ``Semantic Versioning`` page in the documentation.
 
 Fixed
 ~~~~~
@@ -28,11 +31,27 @@ Fixed
 - ``SilKitDemoSimStepAsync`` did not work as intended, due to the predicate lambda capturing
   by-value instead of by-reference.
 
+- During hop-on of another participant, participants will send the current simulation step
+  instead of the next simulation step, if they are inside of their simulation step.
+
 Changed
 ~~~~~~~
 
 - The participant configuration ``TcpNoDelay`` now defaults to true. Please note, that this has performance implications.
   On Linux platforms this improves throughput, and latency in particular when used in combination with ``TcpQuickAck: true``.
+
+- Updated third party libraries
+  - ``asio`` to ``1.30.2``
+  - ``fmt`` to ``11.1.4``
+  - ``spdlog`` to ``1.15.2``
+
+- Add the ``myst_parser`` extension to documentation build, which allows using Markdown
+  for documentation pages
+
+- Automatically 'upgrade' the ``Doxyfile`` using ``doxygen -u``, which avoids warnings
+  when with different ``doxygen`` versions across distibutions
+
+- CAN XL: Update documentation, tests, and the demo to (better) reflect that we support it
 
 Added
 ~~~~~
