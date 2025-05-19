@@ -7,8 +7,10 @@ All notable changes to the Vector SIL Kit project shall be documented in this fi
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
 
-[4.0.56] - UNRELEASED
+[4.0.56] - 2025-05-19
 ---------------------
+
+This is a Quality Assured Release.
 
 .. admonition:: Note: the Ubuntu 18.04 binary distribution package is deprecated
 
