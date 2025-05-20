@@ -25,9 +25,9 @@
 # * Major and minor release number, as well as the sprint number are encoded into Version.hpp and compiled into the library,
 #   they will be accessible from public headers.
 macro(configure_silkit_version project_name)
-    set(SILKIT_VERSION_MAJOR 4)
+    set(SILKIT_VERSION_MAJOR 5)
     set(SILKIT_VERSION_MINOR 0)
-    set(SILKIT_VERSION_PATCH 56)
+    set(SILKIT_VERSION_PATCH 0)
     set(SILKIT_BUILD_NUMBER 0 CACHE STRING "The build number")
     set(SILKIT_VERSION_SUFFIX "")
 
