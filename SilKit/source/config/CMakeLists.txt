@@ -94,7 +94,7 @@ add_silkit_test_to_executable(SilKitUnitTests
 )
 
 add_silkit_test_to_executable(SilKitUnitTests
-    SOURCES Test_YamlParser.cpp
+    SOURCES Test_YamlParser.cpp Test_MyPartConf.cpp
     LIBS O_SilKit_Config rapidyaml
 )
 

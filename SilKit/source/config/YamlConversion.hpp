@@ -24,15 +24,162 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <chrono>
 #include <string>
 
+#include "silkit/participant/exception.hpp"
+
 #include "Configuration.hpp"
 #include "ParticipantConfiguration.hpp"
+#include "rapidyaml.hpp"
 
 #include "rapidyaml.hpp"
 
 //#include "SilKitYamlHelper.hpp"
 
+
+namespace VSilKit {
+namespace Config {
+
+
+struct DesCtx
+{
+    ryml::Parser& parser;
+    ryml::Tree& tree;
+    ryml::ConstNodeRef node;
+
+    template <typename T>
+    auto operator>>(T& t) -> DesCtx&
+    {
+        this->node >> t;
+        return *this;
+    }
+
+    auto IsStr(const char* str) const -> bool
+    {
+        if (!this->node.is_val())
+        {
+            return false;
+        }
+
+        return this->node.val() == ryml::to_csubstr(str);
+    }
+
+    auto IsMap() const -> bool
+    {
+        return this->node.is_map();
+    }
+
+    auto IsEmpty() const -> bool
+    {
+        return this->node.empty();
+    }
+
+    auto HasKeyValue(const char* key) const -> bool
+    {
+        if (!this->node.is_map())
+        {
+            return false;
+        }
+
+        return this->node.has_child(key);
+    }
+
+    auto GetKeyValue(const char* key) const -> DesCtx
+    {
+        if (!this->node.is_map())
+        {
+            throw MakeConfigurationError("expected node to be map");
+        }
+
+        auto ctx = *this;
+        ctx.node = this->node.find_child(key);
+
+        if (ctx.node.invalid())
+        {
+            throw MakeConfigurationError("key not found");
+        }
+
+        return ctx;
+    }
+
+    auto MakeConfigurationError(const char* message) const -> SilKit::ConfigurationError
+    {
+        const auto location = this->parser.location(this->node);
+
+        std::ostringstream s;
+
+        s << "error parsing configuration";
+
+        if (location.name.empty())
+        {
+            s << " file " << location.name << ": ";
+        }
+        else
+        {
+            s << " string: ";
+        }
+
+        s << "line " << location.line << " column " << location.col << ": " << message;
+
+        return SilKit::ConfigurationError{s.str()};
+    }
+};
+
+struct SerCtx
+{
+    ryml::Tree& tree;
+    ryml::NodeRef node;
+
+    template <typename T>
+    auto operator<<(const T& t) -> SerCtx&
+    {
+        this->node << t;
+        return *this;
+    }
+
+    void TurnIntoMap()
+    {
+        this->node |= ryml::MAP;
+    }
+
+    auto StartKeyValue(const char* key) -> SerCtx
+    {
+        auto ctx = *this;
+        ctx.node = (ctx.node << ryml::key(key));
+        return ctx;
+    }
+};
+
+
+void DesRoot(DesCtx ctx, SilKit::Config::ParticipantConfiguration& obj);
+
+
+inline auto DeserializeParticipantConfiguration(const std::string& input) -> SilKit::Config::ParticipantConfiguration
+{
+    ryml::ParserOptions options{};
+    options.locations(true);
+
+    ryml::Callbacks cb{};
+    ryml::EventHandlerTree eventHandler{cb};
+
+    auto parser = ryml::Parser(&eventHandler, options);
+    parser.reserve_locations(100u);
+
+    auto tree = ryml::parse_in_arena(&parser, ryml::to_csubstr(input));
+    auto node = tree.crootref();
+
+    DesCtx ctx{parser, tree, node};
+
+    SilKit::Config::ParticipantConfiguration obj;
+    DesRoot(ctx, obj);
+    return obj;
+}
+
+
+} // namespace Config
+} // namespace VSilKit
+
+
 #define DECLARE_READ_WRITE_FUNCS(TYPE) \
-    void write(ryml::NodeRef* node, const TYPE& obj);\
+    void write(ryml::NodeRef* node, const TYPE& obj); \
     bool read(const ryml::ConstNodeRef& node, TYPE* obj);
 
 // XXXXXXXXXX RAPID YML XXXXXXXXXXXXXX

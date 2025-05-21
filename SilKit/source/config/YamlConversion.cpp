@@ -31,6 +31,250 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 using namespace SilKit::Config;
 using namespace SilKit;
 
+
+namespace VSilKit {
+namespace Config {
+
+
+template <typename T>
+auto ShouldSerOpt(const T& obj) -> bool
+{
+    return true;
+}
+
+auto ShouldSerOpt(const std::string& obj) -> bool
+{
+    return !obj.empty();
+}
+
+
+template <typename T>
+void DesMap(DesCtx ctx, T& obj)
+{
+    if (!ctx.IsMap())
+    {
+        throw ctx.MakeConfigurationError("expected map");
+    }
+
+    Des(ctx, obj);
+}
+
+template <typename T>
+void SerMap(SerCtx ctx, const T& obj)
+{
+    ctx.TurnIntoMap();
+    Ser(ctx, obj);
+}
+
+
+template <typename T>
+void DesOptKV(DesCtx ctx, const char* key, T& obj)
+{
+    if (ctx.HasKeyValue(key))
+    {
+        Des(ctx.GetKeyValue(key), obj);
+    }
+}
+
+template <typename T>
+void SerOptKV(SerCtx ctx, const char* key, const T& obj)
+{
+    if (ShouldSerOpt(obj))
+    {
+        Ser(ctx.StartKeyValue(key), obj);
+    }
+}
+
+
+void DesRoot(DesCtx ctx, SilKit::Config::ParticipantConfiguration& obj)
+{
+    if (ctx.IsEmpty())
+    {
+        obj = SilKit::Config::ParticipantConfiguration{};
+        return;
+    }
+
+    DesMap(ctx, obj);
+}
+
+
+// std::string
+
+void Des(DesCtx ctx, std::string& obj)
+{
+    ctx >> obj;
+}
+
+void Ser(SerCtx ctx, const std::string& obj)
+{
+    ctx << obj;
+}
+
+// std::chrono::duration<Rep, Period>
+
+template <typename Rep, typename Period>
+void Des(DesCtx ctx, std::chrono::duration<Rep, Period>& obj)
+{
+    Rep value{};
+    ctx >> ryml::fmt::overflow_checked(value);
+    obj = std::chrono::milliseconds{value};
+}
+
+template <typename Rep, typename Period>
+void Ser(SerCtx ctx, const std::chrono::duration<Rep, Period>& obj)
+{
+    ctx << obj.count();
+}
+
+// SilKit::Services::MatchingLabel::Kind
+
+void Des(DesCtx ctx, SilKit::Services::MatchingLabel::Kind& obj)
+{
+    if (ctx.IsStr("Mandatory"))
+    {
+        obj = SilKit::Services::MatchingLabel::Kind::Mandatory;
+        return;
+    }
+
+    if (ctx.IsStr("Optional"))
+    {
+        obj = SilKit::Services::MatchingLabel::Kind::Optional;
+        return;
+    }
+
+    throw ctx.MakeConfigurationError("matching label kind must be \"Mandatory\" or \"Optional\"");
+}
+
+void Ser(SerCtx ctx, const SilKit::Services::MatchingLabel::Kind& obj)
+{
+    switch (obj)
+    {
+    case SilKit::Services::MatchingLabel::Kind::Mandatory:
+        ctx << "Mandatory";
+        break;
+    case SilKit::Services::MatchingLabel::Kind::Optional:
+        ctx << "Optional";
+        break;
+    default:
+        throw SilKit::ConfigurationError{"unknown matching label kind"};
+    }
+}
+
+// SilKit::Services::MatchingLabel
+
+void Des(DesCtx ctx, SilKit::Services::MatchingLabel& obj)
+{
+    DesOptKV(ctx, "Key", obj.kind);
+    DesOptKV(ctx, "Value", obj.value);
+    DesOptKV(ctx, "Kind", obj.kind);
+}
+
+void Ser(SerCtx ctx, const SilKit::Services::MatchingLabel& obj)
+{
+    SerOptKV(ctx, "Key", obj.kind);
+    SerOptKV(ctx, "Value", obj.value);
+    SerOptKV(ctx, "Kind", obj.kind);
+}
+
+// SilKit::Config::ParticipantConfiguration
+
+void Des(DesCtx ctx, SilKit::Config::ParticipantConfiguration& obj)
+{
+    DesOptKV(ctx, "ParticipantName", obj.participantName);
+    DesOptKV(ctx, "Description", obj.description);
+}
+
+void Ser(SerCtx ctx, const SilKit::Config::ParticipantConfiguration& obj)
+{
+    SerOptKV(ctx, "ParticipantName", obj.participantName);
+    SerOptKV(ctx, "Description", obj.description);
+}
+
+// SilKit::Services::Logging::Level
+
+void Des(DesCtx ctx, SilKit::Services::Logging::Level& obj)
+{
+    if (ctx.IsStr("Critical"))
+    {
+        obj = SilKit::Services::Logging::Level::Critical;
+        return;
+    }
+
+    if (ctx.IsStr("Error"))
+    {
+        obj = SilKit::Services::Logging::Level::Error;
+        return;
+    }
+
+    if (ctx.IsStr("Warn"))
+    {
+        obj = SilKit::Services::Logging::Level::Warn;
+        return;
+    }
+
+    if (ctx.IsStr("Info"))
+    {
+        obj = SilKit::Services::Logging::Level::Info;
+        return;
+    }
+
+    if (ctx.IsStr("Debug"))
+    {
+        obj = SilKit::Services::Logging::Level::Debug;
+        return;
+    }
+
+    if (ctx.IsStr("Trace"))
+    {
+        obj = SilKit::Services::Logging::Level::Trace;
+        return;
+    }
+
+    if (ctx.IsStr("Off"))
+    {
+        obj = SilKit::Services::Logging::Level::Off;
+        return;
+    }
+
+    throw ctx.MakeConfigurationError(
+        "log level must be \"Critical\", \"Error\", \"Warn\", \"Info\", \"Debug\", \"Trace\", or \"Off\"");
+}
+
+void Ser(SerCtx ctx, const SilKit::Services::Logging::Level& obj)
+{
+    switch (obj)
+    {
+    case SilKit::Services::Logging::Level::Critical:
+        ctx << "Critical";
+        break;
+    case SilKit::Services::Logging::Level::Error:
+        ctx << "Error";
+        break;
+    case SilKit::Services::Logging::Level::Warn:
+        ctx << "Warn";
+        break;
+    case SilKit::Services::Logging::Level::Info:
+        ctx << "Info";
+        break;
+    case SilKit::Services::Logging::Level::Debug:
+        ctx << "Debug";
+        break;
+    case SilKit::Services::Logging::Level::Trace:
+        ctx << "Trace";
+        break;
+    case SilKit::Services::Logging::Level::Off:
+        ctx << "Off";
+        break;
+    default:
+        throw SilKit::ConfigurationError{"unknown log level"};
+    }
+}
+
+
+} // namespace Config
+} // namespace VSilKit
+
+
 // XXXXXXXXXX RAPID YML XXXXXXXXXXXXXX
 
 namespace std {
@@ -113,7 +357,7 @@ bool read(const ryml::ConstNodeRef& node, SilKit::Services::MatchingLabel* obj)
 
 namespace Logging {
 using namespace SilKit::Config;
-void write (ryml::NodeRef* node,  const Services::Logging::Level& obj)
+void write(ryml::NodeRef* node, const Services::Logging::Level& obj)
 {
     switch (obj)
     {
@@ -145,7 +389,7 @@ bool read(const ryml::ConstNodeRef& node, Services::Logging::Level* obj)
 {
     if (!IsScalar(node))
     {
-        throw ConfigurationError( "Level should be a string of Critical|Error|Warn|Info|Debug|Trace|Off.");
+        throw ConfigurationError("Level should be a string of Critical|Error|Warn|Info|Debug|Trace|Off.");
     }
     auto&& str = node.val();
     if (str == "Critical")
@@ -164,7 +408,7 @@ bool read(const ryml::ConstNodeRef& node, Services::Logging::Level* obj)
         *obj = Services::Logging::Level::Off;
     else
     {
-        throw ConfigurationError(Format("Unknown Services::Logging::Level: {}.", str ));
+        throw ConfigurationError(Format("Unknown Services::Logging::Level: {}.", str));
     }
     return true;
 }
@@ -173,124 +417,124 @@ bool read(const ryml::ConstNodeRef& node, Services::Logging::Level* obj)
 
 namespace Flexray {
 
-void write (ryml::NodeRef* node,  const FlexrayClusterParameters& obj)
+void write(ryml::NodeRef* node, const FlexrayClusterParameters& obj)
 {
     // Parse parameters as an int value; uint8_t would be interpreted as a character
     MakeMap(node);
-    Write(node,"gColdstartAttempts",obj.gColdstartAttempts);
-    Write(node,"gCycleCountMax",obj.gCycleCountMax);
-    Write(node,"gdActionPointOffset",obj.gdActionPointOffset);
-    Write(node,"gdDynamicSlotIdlePhase",obj.gdDynamicSlotIdlePhase);
-    Write(node,"gdMiniSlot",obj.gdMiniSlot);
-    Write(node,"gdMiniSlotActionPointOffset",obj.gdMiniSlotActionPointOffset);
-    Write(node,"gdStaticSlot",obj.gdStaticSlot);
-    Write(node,"gdSymbolWindow",obj.gdSymbolWindow);
-    Write(node,"gdSymbolWindowActionPointOffset",obj.gdSymbolWindowActionPointOffset);
-    Write(node,"gdTSSTransmitter",obj.gdTSSTransmitter);
-    Write(node,"gdWakeupTxActive",obj.gdWakeupTxActive);
-    Write(node,"gdWakeupTxIdle",obj.gdWakeupTxIdle);
-    Write(node,"gListenNoise",obj.gListenNoise);
-    Write(node,"gMacroPerCycle",obj.gMacroPerCycle);
-    Write(node,"gMaxWithoutClockCorrectionFatal",obj.gMaxWithoutClockCorrectionFatal);
-    Write(node,"gMaxWithoutClockCorrectionPassive",obj.gMaxWithoutClockCorrectionPassive);
-    Write(node,"gNumberOfMiniSlots",obj.gNumberOfMiniSlots);
-    Write(node,"gNumberOfStaticSlots",obj.gNumberOfStaticSlots);
-    Write(node,"gPayloadLengthStatic",obj.gPayloadLengthStatic);
-    Write(node,"gSyncFrameIDCountMax",obj.gSyncFrameIDCountMax);
+    Write(node, "gColdstartAttempts", obj.gColdstartAttempts);
+    Write(node, "gCycleCountMax", obj.gCycleCountMax);
+    Write(node, "gdActionPointOffset", obj.gdActionPointOffset);
+    Write(node, "gdDynamicSlotIdlePhase", obj.gdDynamicSlotIdlePhase);
+    Write(node, "gdMiniSlot", obj.gdMiniSlot);
+    Write(node, "gdMiniSlotActionPointOffset", obj.gdMiniSlotActionPointOffset);
+    Write(node, "gdStaticSlot", obj.gdStaticSlot);
+    Write(node, "gdSymbolWindow", obj.gdSymbolWindow);
+    Write(node, "gdSymbolWindowActionPointOffset", obj.gdSymbolWindowActionPointOffset);
+    Write(node, "gdTSSTransmitter", obj.gdTSSTransmitter);
+    Write(node, "gdWakeupTxActive", obj.gdWakeupTxActive);
+    Write(node, "gdWakeupTxIdle", obj.gdWakeupTxIdle);
+    Write(node, "gListenNoise", obj.gListenNoise);
+    Write(node, "gMacroPerCycle", obj.gMacroPerCycle);
+    Write(node, "gMaxWithoutClockCorrectionFatal", obj.gMaxWithoutClockCorrectionFatal);
+    Write(node, "gMaxWithoutClockCorrectionPassive", obj.gMaxWithoutClockCorrectionPassive);
+    Write(node, "gNumberOfMiniSlots", obj.gNumberOfMiniSlots);
+    Write(node, "gNumberOfStaticSlots", obj.gNumberOfStaticSlots);
+    Write(node, "gPayloadLengthStatic", obj.gPayloadLengthStatic);
+    Write(node, "gSyncFrameIDCountMax", obj.gSyncFrameIDCountMax);
 }
 
 bool read(const ryml::ConstNodeRef& node, Services::Flexray::FlexrayClusterParameters* obj)
 {
     // Parse parameters as an int value; uint8_t would be interpreted as a character
-    Read(obj->gColdstartAttempts , node, "gColdstartAttempts");
-    Read(obj->gCycleCountMax , node, "gCycleCountMax");
-    Read(obj->gdActionPointOffset , node, "gdActionPointOffset");
-    Read(obj->gdDynamicSlotIdlePhase , node, "gdDynamicSlotIdlePhase");
-    Read(obj->gdMiniSlot , node, "gdMiniSlot");
-    Read(obj->gdMiniSlotActionPointOffset , node, "gdMiniSlotActionPointOffset");
-    Read(obj->gdStaticSlot , node, "gdStaticSlot");
-    Read(obj->gdSymbolWindow , node, "gdSymbolWindow");
-    Read(obj->gdSymbolWindowActionPointOffset , node, "gdSymbolWindowActionPointOffset");
-    Read(obj->gdTSSTransmitter , node, "gdTSSTransmitter");
-    Read(obj->gdWakeupTxActive , node, "gdWakeupTxActive");
-    Read(obj->gdWakeupTxIdle , node, "gdWakeupTxIdle");
-    Read(obj->gListenNoise , node, "gListenNoise");
-    Read(obj->gMacroPerCycle , node, "gMacroPerCycle");
-    Read(obj->gMaxWithoutClockCorrectionFatal , node, "gMaxWithoutClockCorrectionFatal");
-    Read(obj->gMaxWithoutClockCorrectionPassive , node, "gMaxWithoutClockCorrectionPassive");
-    Read(obj->gNumberOfMiniSlots , node, "gNumberOfMiniSlots");
-    Read(obj->gNumberOfStaticSlots , node, "gNumberOfStaticSlots");
-    Read(obj->gPayloadLengthStatic , node, "gPayloadLengthStatic");
-    Read(obj->gSyncFrameIDCountMax , node, "gSyncFrameIDCountMax");
+    Read(obj->gColdstartAttempts, node, "gColdstartAttempts");
+    Read(obj->gCycleCountMax, node, "gCycleCountMax");
+    Read(obj->gdActionPointOffset, node, "gdActionPointOffset");
+    Read(obj->gdDynamicSlotIdlePhase, node, "gdDynamicSlotIdlePhase");
+    Read(obj->gdMiniSlot, node, "gdMiniSlot");
+    Read(obj->gdMiniSlotActionPointOffset, node, "gdMiniSlotActionPointOffset");
+    Read(obj->gdStaticSlot, node, "gdStaticSlot");
+    Read(obj->gdSymbolWindow, node, "gdSymbolWindow");
+    Read(obj->gdSymbolWindowActionPointOffset, node, "gdSymbolWindowActionPointOffset");
+    Read(obj->gdTSSTransmitter, node, "gdTSSTransmitter");
+    Read(obj->gdWakeupTxActive, node, "gdWakeupTxActive");
+    Read(obj->gdWakeupTxIdle, node, "gdWakeupTxIdle");
+    Read(obj->gListenNoise, node, "gListenNoise");
+    Read(obj->gMacroPerCycle, node, "gMacroPerCycle");
+    Read(obj->gMaxWithoutClockCorrectionFatal, node, "gMaxWithoutClockCorrectionFatal");
+    Read(obj->gMaxWithoutClockCorrectionPassive, node, "gMaxWithoutClockCorrectionPassive");
+    Read(obj->gNumberOfMiniSlots, node, "gNumberOfMiniSlots");
+    Read(obj->gNumberOfStaticSlots, node, "gNumberOfStaticSlots");
+    Read(obj->gPayloadLengthStatic, node, "gPayloadLengthStatic");
+    Read(obj->gSyncFrameIDCountMax, node, "gSyncFrameIDCountMax");
     return true;
 }
 
-void write (ryml::NodeRef* node,  const FlexrayNodeParameters& obj)
+void write(ryml::NodeRef* node, const FlexrayNodeParameters& obj)
 {
     MakeMap(node);
-    Write(node,"pAllowHaltDueToClock", obj.pAllowHaltDueToClock);
-    Write(node,"pAllowPassiveToActive", obj.pAllowPassiveToActive);
-    Write(node,"pClusterDriftDamping", obj.pClusterDriftDamping);
-    Write(node,"pdAcceptedStartupRange", obj.pdAcceptedStartupRange);
-    Write(node,"pdListenTimeout", obj.pdListenTimeout);
-    Write(node,"pKeySlotId", obj.pKeySlotId);
-    Write(node,"pKeySlotOnlyEnabled", obj.pKeySlotOnlyEnabled);
-    Write(node,"pKeySlotUsedForStartup", obj.pKeySlotUsedForStartup);
-    Write(node,"pKeySlotUsedForSync", obj.pKeySlotUsedForSync);
-    Write(node,"pLatestTx", obj.pLatestTx);
-    Write(node,"pMacroInitialOffsetA", obj.pMacroInitialOffsetA);
-    Write(node,"pMacroInitialOffsetB", obj.pMacroInitialOffsetB);
-    Write(node,"pMicroInitialOffsetA", obj.pMicroInitialOffsetA);
-    Write(node,"pMicroInitialOffsetB", obj.pMicroInitialOffsetB);
-    Write(node,"pMicroPerCycle", obj.pMicroPerCycle);
-    Write(node,"pOffsetCorrectionOut", obj.pOffsetCorrectionOut);
-    Write(node,"pOffsetCorrectionStart", obj.pOffsetCorrectionStart);
-    Write(node,"pRateCorrectionOut", obj.pRateCorrectionOut);
-    Write(node,"pWakeupPattern", obj.pWakeupPattern);
-    Write(node,"pSamplesPerMicrotick", obj.pSamplesPerMicrotick);
-    Write(node,"pWakeupChannel", obj.pWakeupChannel);
-    Write(node,"pdMicrotick", obj.pdMicrotick);
-    Write(node,"pChannels", obj.pChannels);
+    Write(node, "pAllowHaltDueToClock", obj.pAllowHaltDueToClock);
+    Write(node, "pAllowPassiveToActive", obj.pAllowPassiveToActive);
+    Write(node, "pClusterDriftDamping", obj.pClusterDriftDamping);
+    Write(node, "pdAcceptedStartupRange", obj.pdAcceptedStartupRange);
+    Write(node, "pdListenTimeout", obj.pdListenTimeout);
+    Write(node, "pKeySlotId", obj.pKeySlotId);
+    Write(node, "pKeySlotOnlyEnabled", obj.pKeySlotOnlyEnabled);
+    Write(node, "pKeySlotUsedForStartup", obj.pKeySlotUsedForStartup);
+    Write(node, "pKeySlotUsedForSync", obj.pKeySlotUsedForSync);
+    Write(node, "pLatestTx", obj.pLatestTx);
+    Write(node, "pMacroInitialOffsetA", obj.pMacroInitialOffsetA);
+    Write(node, "pMacroInitialOffsetB", obj.pMacroInitialOffsetB);
+    Write(node, "pMicroInitialOffsetA", obj.pMicroInitialOffsetA);
+    Write(node, "pMicroInitialOffsetB", obj.pMicroInitialOffsetB);
+    Write(node, "pMicroPerCycle", obj.pMicroPerCycle);
+    Write(node, "pOffsetCorrectionOut", obj.pOffsetCorrectionOut);
+    Write(node, "pOffsetCorrectionStart", obj.pOffsetCorrectionStart);
+    Write(node, "pRateCorrectionOut", obj.pRateCorrectionOut);
+    Write(node, "pWakeupPattern", obj.pWakeupPattern);
+    Write(node, "pSamplesPerMicrotick", obj.pSamplesPerMicrotick);
+    Write(node, "pWakeupChannel", obj.pWakeupChannel);
+    Write(node, "pdMicrotick", obj.pdMicrotick);
+    Write(node, "pChannels", obj.pChannels);
 }
 
 bool read(const ryml::ConstNodeRef& node, Services::Flexray::FlexrayNodeParameters* obj)
 {
-    Read(obj->pAllowHaltDueToClock,node, "pAllowHaltDueToClock");
-    Read(obj->pAllowPassiveToActive,node, "pAllowPassiveToActive");
-    Read(obj->pClusterDriftDamping,node, "pClusterDriftDamping");
-    Read(obj->pdAcceptedStartupRange,node, "pdAcceptedStartupRange");
-    Read(obj->pdListenTimeout,node, "pdListenTimeout");
-    Read(obj->pKeySlotId,node, "pKeySlotId");
-    Read(obj->pKeySlotOnlyEnabled,node, "pKeySlotOnlyEnabled");
-    Read(obj->pKeySlotUsedForStartup,node, "pKeySlotUsedForStartup");
-    Read(obj->pKeySlotUsedForSync,node, "pKeySlotUsedForSync");
-    Read(obj->pLatestTx,node, "pLatestTx");
-    Read(obj->pMacroInitialOffsetA,node, "pMacroInitialOffsetA");
-    Read(obj->pMacroInitialOffsetB,node, "pMacroInitialOffsetB");
-    Read(obj->pMicroInitialOffsetA,node, "pMicroInitialOffsetA");
-    Read(obj->pMicroInitialOffsetB,node, "pMicroInitialOffsetB");
-    Read(obj->pMicroPerCycle,node, "pMicroPerCycle");
-    Read(obj->pOffsetCorrectionOut,node, "pOffsetCorrectionOut");
-    Read(obj->pOffsetCorrectionStart,node, "pOffsetCorrectionStart");
-    Read(obj->pRateCorrectionOut,node, "pRateCorrectionOut");
-    Read(obj->pWakeupPattern,node, "pWakeupPattern");
-    Read(obj->pSamplesPerMicrotick,node, "pSamplesPerMicrotick");
+    Read(obj->pAllowHaltDueToClock, node, "pAllowHaltDueToClock");
+    Read(obj->pAllowPassiveToActive, node, "pAllowPassiveToActive");
+    Read(obj->pClusterDriftDamping, node, "pClusterDriftDamping");
+    Read(obj->pdAcceptedStartupRange, node, "pdAcceptedStartupRange");
+    Read(obj->pdListenTimeout, node, "pdListenTimeout");
+    Read(obj->pKeySlotId, node, "pKeySlotId");
+    Read(obj->pKeySlotOnlyEnabled, node, "pKeySlotOnlyEnabled");
+    Read(obj->pKeySlotUsedForStartup, node, "pKeySlotUsedForStartup");
+    Read(obj->pKeySlotUsedForSync, node, "pKeySlotUsedForSync");
+    Read(obj->pLatestTx, node, "pLatestTx");
+    Read(obj->pMacroInitialOffsetA, node, "pMacroInitialOffsetA");
+    Read(obj->pMacroInitialOffsetB, node, "pMacroInitialOffsetB");
+    Read(obj->pMicroInitialOffsetA, node, "pMicroInitialOffsetA");
+    Read(obj->pMicroInitialOffsetB, node, "pMicroInitialOffsetB");
+    Read(obj->pMicroPerCycle, node, "pMicroPerCycle");
+    Read(obj->pOffsetCorrectionOut, node, "pOffsetCorrectionOut");
+    Read(obj->pOffsetCorrectionStart, node, "pOffsetCorrectionStart");
+    Read(obj->pRateCorrectionOut, node, "pRateCorrectionOut");
+    Read(obj->pWakeupPattern, node, "pWakeupPattern");
+    Read(obj->pSamplesPerMicrotick, node, "pSamplesPerMicrotick");
     Read(obj->pWakeupChannel, node, "pWakeupChannel");
     Read(obj->pdMicrotick, node, "pdMicrotick");
     Read(obj->pChannels, node, "pChannels");
     return true;
 }
 
-void write (ryml::NodeRef* node,  const FlexrayTxBufferConfig& obj)
+void write(ryml::NodeRef* node, const FlexrayTxBufferConfig& obj)
 {
     MakeMap(node);
-    Write(node,"channels",obj.channels);
-    Write(node,"slotId", obj.slotId);
-    Write(node,"offset", obj.offset);
-    Write(node,"repetition", obj.repetition);
-    Write(node,"PPindicator", obj.hasPayloadPreambleIndicator);
-    Write(node,"headerCrc", obj.headerCrc);
-    Write(node,"transmissionMode", obj.transmissionMode);
+    Write(node, "channels", obj.channels);
+    Write(node, "slotId", obj.slotId);
+    Write(node, "offset", obj.offset);
+    Write(node, "repetition", obj.repetition);
+    Write(node, "PPindicator", obj.hasPayloadPreambleIndicator);
+    Write(node, "headerCrc", obj.headerCrc);
+    Write(node, "transmissionMode", obj.transmissionMode);
 }
 
 bool read(const ryml::ConstNodeRef& node, Services::Flexray::FlexrayTxBufferConfig* obj)
@@ -305,7 +549,7 @@ bool read(const ryml::ConstNodeRef& node, Services::Flexray::FlexrayTxBufferConf
     return true;
 }
 
-void write (ryml::NodeRef* node,  const FlexrayChannel& obj)
+void write(ryml::NodeRef* node, const FlexrayChannel& obj)
 {
     switch (obj)
     {
@@ -337,12 +581,12 @@ bool read(const ryml::ConstNodeRef& node, Services::Flexray::FlexrayChannel* obj
         *obj = Services::Flexray::FlexrayChannel::None;
     else
     {
-        throw ConfigurationError(Format("Unknown Services::Flexray::FlexrayChannel: {}.",str));
+        throw ConfigurationError(Format("Unknown Services::Flexray::FlexrayChannel: {}.", str));
     }
     return true;
 }
 
-void write (ryml::NodeRef* node,  const FlexrayClockPeriod& obj)
+void write(ryml::NodeRef* node, const FlexrayClockPeriod& obj)
 {
     switch (obj)
     {
@@ -376,15 +620,15 @@ bool read(const ryml::ConstNodeRef& node, FlexrayClockPeriod* obj)
     return true;
 }
 
-void write (ryml::NodeRef* node,  const FlexrayTransmissionMode& obj)
+void write(ryml::NodeRef* node, const FlexrayTransmissionMode& obj)
 {
     switch (obj)
     {
     case Services::Flexray::FlexrayTransmissionMode::Continuous:
-        Write(node , "Continuous");
+        Write(node, "Continuous");
         break;
     case Services::Flexray::FlexrayTransmissionMode::SingleShot:
-        Write(node , "SingleShot");
+        Write(node, "SingleShot");
         break;
     default:
         throw ConfigurationError("Unknown FlexrayTransmissionMode");
@@ -623,7 +867,7 @@ bool read(const ryml::ConstNodeRef& node, Metrics* obj)
             if (sink.type == SilKit::Config::MetricsSink::Type::Remote)
             {
                 throw SilKit::ConfigurationError{
-                    "Metrics collectFromRemote is enabled while having a Remote MetricsSink active"};  
+                    "Metrics collectFromRemote is enabled while having a Remote MetricsSink active"};
             }
         }
     }
@@ -705,7 +949,7 @@ bool read(const ryml::ConstNodeRef& node, Replay::Direction* obj)
         *obj = Replay::Direction::Both;
     else
     {
-        throw ConfigurationError(Format("Unknown Replay::Direction: {}.", str ));
+        throw ConfigurationError(Format("Unknown Replay::Direction: {}.", str));
     }
     return true;
 }
@@ -821,8 +1065,8 @@ void write(ryml::NodeRef* node, const Label& obj)
 {
     MakeMap(node);
     Write(node, "Key", obj.key);
-    Write(node,"Value", obj.value);
-    Write(node,"Kind", obj.kind);
+    Write(node, "Value", obj.value);
+    Write(node, "Kind", obj.kind);
 }
 bool read(const ryml::ConstNodeRef& node, Label* obj)
 {
@@ -835,7 +1079,7 @@ bool read(const ryml::ConstNodeRef& node, Label* obj)
 void write(ryml::NodeRef* node, const DataPublisher& obj)
 {
     MakeMap(node);
-    Write(node,"Name",obj.name);
+    Write(node, "Name", obj.name);
     OptionalWrite(obj.topic, node, "Topic");
     OptionalWrite(obj.labels, node, "Labels");
     //OptionalWrite(obj.history, node, "History");
@@ -935,8 +1179,8 @@ void write(ryml::NodeRef* node, const TraceSink& obj)
 
 bool read(const ryml::ConstNodeRef& node, TraceSink* obj)
 {
-    Read(obj->name, node,"Name");
-    Read(obj->type, node,"Type");
+    Read(obj->name, node, "Name");
+    Read(obj->type, node, "Type");
     Read(obj->outputPath, node, "OutputPath");
     return true;
 }
@@ -946,16 +1190,16 @@ void write(ryml::NodeRef* node, const TraceSink::Type& obj)
     switch (obj)
     {
     case TraceSink::Type::Undefined:
-        Write(node , "Undefined");
+        Write(node, "Undefined");
         break;
     case TraceSink::Type::Mdf4File:
-        Write(node , "Mdf4File");
+        Write(node, "Mdf4File");
         break;
     case TraceSink::Type::PcapFile:
-        Write(node , "PcapFile");
+        Write(node, "PcapFile");
         break;
     case TraceSink::Type::PcapPipe:
-        Write(node , "PcapPipe");
+        Write(node, "PcapPipe");
         break;
     default:
         throw ConfigurationError{"Unknown TraceSink Type"};
@@ -983,16 +1227,16 @@ bool read(const ryml::ConstNodeRef& node, TraceSink::Type* obj)
 void write(ryml::NodeRef* node, const TraceSource& obj)
 {
     MakeMap(node);
-    Write(node,"Name", obj.name);
-    Write(node,"Type", obj.type);
-    Write(node,"InputPath", obj.inputPath);
+    Write(node, "Name", obj.name);
+    Write(node, "Type", obj.type);
+    Write(node, "InputPath", obj.inputPath);
 }
 
 bool read(const ryml::ConstNodeRef& node, TraceSource* obj)
 {
     Read(obj->name, node, "Name");
-    Read(obj->type, node,"Type");
-    Read(obj->inputPath,node,"InputPath");
+    Read(obj->type, node, "Type");
+    Read(obj->inputPath, node, "InputPath");
     return true;
 }
 
@@ -1001,7 +1245,7 @@ void write(ryml::NodeRef* node, const TraceSource::Type& obj)
     switch (obj)
     {
     case TraceSource::Type::Undefined:
-        Write(node ,"Undefined");
+        Write(node, "Undefined");
         break;
     case TraceSource::Type::Mdf4File:
         Write(node, "Mdf4File");
@@ -1055,10 +1299,9 @@ void write(ryml::NodeRef* node, const Middleware& obj)
     NonDefaultWrite(obj.tcpSendBufferSize, node, "TcpSendBufferSize", defaultObj.tcpSendBufferSize);
     NonDefaultWrite(obj.enableDomainSockets, node, "EnableDomainSockets", defaultObj.enableDomainSockets);
     NonDefaultWrite(obj.acceptorUris, node, "acceptorUris", defaultObj.acceptorUris);
-    NonDefaultWrite(obj.registryAsFallbackProxy, node, "RegistryAsFallbackProxy",
-                       defaultObj.registryAsFallbackProxy);
+    NonDefaultWrite(obj.registryAsFallbackProxy, node, "RegistryAsFallbackProxy", defaultObj.registryAsFallbackProxy);
     NonDefaultWrite(obj.experimentalRemoteParticipantConnection, node, "ExperimentalRemoteParticipantConnection",
-                       defaultObj.experimentalRemoteParticipantConnection);
+                    defaultObj.experimentalRemoteParticipantConnection);
     NonDefaultWrite(obj.connectTimeoutSeconds, node, "ConnectTimeoutSeconds", defaultObj.connectTimeoutSeconds);
 }
 
@@ -1081,8 +1324,8 @@ bool read(const ryml::ConstNodeRef& node, Middleware* obj)
 void write(ryml::NodeRef* node, const Includes& obj)
 {
     MakeMap(node);
-    OptionalWrite(obj.files, node, "Files"); 
-    OptionalWrite(obj.searchPathHints, node, "SearchPathHints"); 
+    OptionalWrite(obj.files, node, "Files");
+    OptionalWrite(obj.searchPathHints, node, "SearchPathHints");
 }
 
 bool read(const ryml::ConstNodeRef& node, Includes* obj)
@@ -1099,10 +1342,10 @@ void write(ryml::NodeRef* node, const Aggregation& obj)
         Write(node, "Off");
         break;
     case Aggregation::On:
-        Write(node , "On");
+        Write(node, "On");
         break;
     case Aggregation::Auto:
-        Write(node , "Auto");
+        Write(node, "Auto");
         break;
     default:
         throw ConfigurationError{"Unknown Aggregation Type"};
@@ -1130,7 +1373,7 @@ void write(ryml::NodeRef* node, const TimeSynchronization& obj)
     MakeMap(node);
     NonDefaultWrite(obj.animationFactor, node, "AnimationFactor", defaultObj.animationFactor);
     NonDefaultWrite(obj.enableMessageAggregation, node, "EnableMessageAggregation",
-                       defaultObj.enableMessageAggregation);
+                    defaultObj.enableMessageAggregation);
 }
 
 bool read(const ryml::ConstNodeRef& node, TimeSynchronization* obj)
@@ -1225,4 +1468,3 @@ bool read(const ryml::ConstNodeRef& node, HealthCheck* obj)
 } //end namespace SilKit
 
 // XXXXXXXXXX END RAPID YML XXXXXXXXXXXXXX
-
