@@ -206,9 +206,9 @@ Essential targets. Automatically tested and provided as official binary packages
    * - Windows
      - 32bit (x86)
      - MSVC 19 with Toolset 14.1
-   * - Ubuntu 18.04
+   * - Ubuntu 24.04
      - amd64
-     - GCC 8
+     - GCC 13
    * - Ubuntu 20.04
      - amd64
      - Clang 10, `.deb`
@@ -236,8 +236,11 @@ Officially supported and automatically tested. NO binary packages provided
    * - Ubuntu 22.04
      - ARM64
      - Clang 18
-   * - MAC OS
-     - ARM64/M1
+   * - Ubuntu 20.04
+     - amd64
+     - GCC 9
+   * - macOS
+     - ARM64
      - AppleClang 15
 
 Tier 3: Known to build
@@ -252,10 +255,6 @@ Since these are not part of the CI pipeline, compatibility with these platforms 
    * - Platform
      - Architecture
      - Notes
-   * - Ubuntu 24.04
-     - amd64
-     - | GCC 13
-       | Clang 18
    * - QNX 7.1 RTOS
      - X86 64bit
      - QNX GCC 8
@@ -265,3 +264,7 @@ Since these are not part of the CI pipeline, compatibility with these platforms 
    * - Android
      - ARM64
      - NDK builds with default compiler, libc++_shared
+   * - Ubuntu 18.04
+     - amd64
+     -
+
