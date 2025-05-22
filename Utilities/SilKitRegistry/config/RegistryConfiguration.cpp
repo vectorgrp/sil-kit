@@ -21,15 +21,12 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "RegistryConfiguration.hpp"
 
-// SIL Kit Registry Headers
-#include "RegistryYamlConversion.hpp"
-
 // Internal SIL Kit Headers
 #include "YamlParser.hpp"
+#include "SilKitYamlHelper.hpp"
 
 // Third-Party Headers
 #include "fmt/format.h"
-#include "yaml-cpp/yaml.h"
 
 namespace SilKitRegistry {
 namespace Config {
@@ -46,45 +43,85 @@ bool operator==(const Experimental& lhs, const Experimental& rhs)
 
 namespace SilKitRegistry {
 namespace Config {
+namespace V1 {
+using namespace SilKit::Config;
+// rapid yaml impl
+
+void write(ryml::NodeRef* node, const SilKitRegistry::Config::V1::Experimental& obj)
+{
+    static const V1::Experimental defaultObject{};
+    NonDefaultWrite(obj.metrics, node, "Metrics", defaultObject.metrics);
+}
+
+bool read(const ryml::ConstNodeRef& node, SilKitRegistry::Config::V1::Experimental* obj)
+{
+    OptionalRead(obj->metrics, node, "Metrics");
+
+    for (auto&& sink : obj->metrics.sinks)
+    {
+        if (sink.type == SilKit::Config::MetricsSink::Type::Remote)
+        {
+            throw SilKit::ConfigurationError{"SIL Kit Registry does not support remote metrics sinks"};
+        }
+    }
+
+    return true;
+}
+
+void write(ryml::NodeRef* node, const SilKitRegistry::Config::V1::RegistryConfiguration& obj)
+{
+    static const V1::RegistryConfiguration defaultObject{};
+    *node |= ryml::MAP;
+    Write(node, "SchemaVersion", V1::GetSchemaVersion());
+    NonDefaultWrite(obj.description, node, "Description", defaultObject.description);
+    OptionalWrite(obj.listenUri, node, "ListenUri");
+    OptionalWrite(obj.enableDomainSockets, node, "EnableDomainSockets");
+    OptionalWrite(obj.dashboardUri, node, "DashboardUri");
+    NonDefaultWrite(obj.logging, node, "Logging", defaultObject.logging);
+    NonDefaultWrite(obj.experimental, node, "Experimental", defaultObject.experimental);
+}
+
+bool read(const ryml::ConstNodeRef& node, SilKitRegistry::Config::V1::RegistryConfiguration* obj)
+{
+    std::string schemaVersion;
+    OptionalRead(schemaVersion, node, "SchemaVersion");
+    if (!schemaVersion.empty() && schemaVersion != V1::GetSchemaVersion())
+    {
+        throw SilKit::ConfigurationError{
+            fmt::format("Unknown schema version '{}' found in registry configuration!", schemaVersion)};
+    }
+
+    OptionalRead(obj->description, node, "Description");
+    OptionalRead(obj->listenUri, node, "ListenUri");
+    OptionalRead(obj->enableDomainSockets, node, "EnableDomainSockets");
+    OptionalRead(obj->dashboardUri, node, "DashboardUri");
+    OptionalRead(obj->logging, node, "Logging");
+    OptionalRead(obj->experimental, node, "Experimental");
+
+    if (obj->logging.logFromRemotes)
+    {
+        throw SilKit::ConfigurationError{"SIL Kit Registry does not support receiving logs from remotes"};
+    }
+
+    for (auto&& sink : obj->logging.sinks)
+    {
+        if (sink.type == SilKit::Config::Sink::Type::Remote)
+        {
+            throw SilKit::ConfigurationError{"SIL Kit Registry does not support remote logging"};
+        }
+    }
+    return true;
+}
+} // namespace V1
+} // namespace Config
+} // namespace SilKitRegistry
+
+namespace SilKitRegistry {
+namespace Config {
 
 auto Parse(const std::string& string) -> V1::RegistryConfiguration
 {
-    YAML::Node node = YAML::Load(string);
-
-    if (node.IsNull())
-    {
-        return V1::RegistryConfiguration{};
-    }
-
-    const auto schemaVersion = [&node]() -> std::string {
-        const auto schemaVersionNode = node["SchemaVersion"];
-
-        // if the 'SchemaVersion' is not set, assume a particular schema version.
-        if (schemaVersionNode.Type() == YAML::NodeType::Undefined)
-        {
-            return V1::GetSchemaVersion();
-        }
-
-        if (!schemaVersionNode.IsScalar())
-        {
-            throw SilKit::ConfigurationError{
-                "The 'SchemaVersion' field of the registry configuration must be a scalar value!"};
-        }
-
-        return schemaVersionNode.Scalar();
-    }();
-
-    if (schemaVersion == V1::GetSchemaVersion())
-    {
-        return SilKit::Config::from_yaml<V1::RegistryConfiguration>(node);
-    }
-
-    // After the 'active' schema version is bumped, parse and validate the then old configuration and transform it into
-    // the 'active' configuration version.  The 'active' configuration version is the one returned by this function, as
-    // stated in the namespace.
-
-    throw SilKit::ConfigurationError{
-        fmt::format("Unknown schema version '{}' found in registry configuration!", schemaVersion)};
+    return SilKit::Config::Deserialize<V1::RegistryConfiguration>(string);
 }
 
 } // namespace Config

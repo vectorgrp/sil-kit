@@ -47,6 +47,7 @@ void CheckFull(const SilKitRegistry::Config::V1::RegistryConfiguration& c)
 
     ASSERT_TRUE(c.dashboardUri.has_value());
     EXPECT_EQ(c.dashboardUri.value(), "http://dashboard.example.com:1234");
+    EXPECT_TRUE(c.experimental.metrics.collectFromRemote);
 }
 
 TEST(Test_RegistryConfiguration, FullJson)

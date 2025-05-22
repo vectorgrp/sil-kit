@@ -24,75 +24,86 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <chrono>
 #include <string>
 
+#include "Configuration.hpp"
 #include "ParticipantConfiguration.hpp"
 
-#include "yaml-cpp/yaml.h"
+#include "rapidyaml.hpp"
 
-#include "SilKitYamlHelper.hpp"
+//#include "SilKitYamlHelper.hpp"
 
-// YAML-cpp serialization/deserialization for ParticipantConfiguration data types
-namespace YAML {
+#define DECLARE_READ_WRITE_FUNCS(TYPE) \
+    void write(ryml::NodeRef* node, const TYPE& obj);\
+    bool read(const ryml::ConstNodeRef& node, TYPE* obj);
 
-using namespace SilKit::Config;
+// XXXXXXXXXX RAPID YML XXXXXXXXXXXXXX
 
-DEFINE_SILKIT_CONVERT(std::chrono::milliseconds);
-DEFINE_SILKIT_CONVERT(std::chrono::nanoseconds);
+namespace std {
+namespace chrono {
+DECLARE_READ_WRITE_FUNCS(milliseconds);
+DECLARE_READ_WRITE_FUNCS(nanoseconds);
+} // namespace chrono
+} // namespace std
 
-DEFINE_SILKIT_CONVERT(Logging);
-DEFINE_SILKIT_CONVERT(Sink);
-DEFINE_SILKIT_CONVERT(Sink::Type);
-DEFINE_SILKIT_CONVERT(Sink::Format);
-DEFINE_SILKIT_CONVERT(SilKit::Services::Logging::Level);
+namespace SilKit {
+namespace Services {
+namespace Logging {
+DECLARE_READ_WRITE_FUNCS(Services::Logging::Level);
+} // namespace Logging
+namespace Flexray {
+DECLARE_READ_WRITE_FUNCS(Services::Flexray::FlexrayChannel);
+DECLARE_READ_WRITE_FUNCS(Services::Flexray::FlexrayClockPeriod);
+DECLARE_READ_WRITE_FUNCS(Services::Flexray::FlexrayTransmissionMode);
+DECLARE_READ_WRITE_FUNCS(Services::Flexray::FlexrayClusterParameters);
+DECLARE_READ_WRITE_FUNCS(Services::Flexray::FlexrayNodeParameters);
+DECLARE_READ_WRITE_FUNCS(Services::Flexray::FlexrayTxBufferConfig);
+} // namespace Flexray
+} // namespace Services
+namespace Config {
+inline namespace v1 {
+DECLARE_READ_WRITE_FUNCS(Sink);
+DECLARE_READ_WRITE_FUNCS(Sink::Type);
+DECLARE_READ_WRITE_FUNCS(Sink::Format);
+DECLARE_READ_WRITE_FUNCS(Logging);
+DECLARE_READ_WRITE_FUNCS(Metrics);
+DECLARE_READ_WRITE_FUNCS(MetricsSink);
+DECLARE_READ_WRITE_FUNCS(MetricsSink::Type);
+DECLARE_READ_WRITE_FUNCS(MdfChannel);
+DECLARE_READ_WRITE_FUNCS(Replay);
+DECLARE_READ_WRITE_FUNCS(Replay::Direction);
+DECLARE_READ_WRITE_FUNCS(CanController);
+DECLARE_READ_WRITE_FUNCS(LinController);
+DECLARE_READ_WRITE_FUNCS(EthernetController);
+DECLARE_READ_WRITE_FUNCS(FlexrayController);
+DECLARE_READ_WRITE_FUNCS(Label::Kind);
+DECLARE_READ_WRITE_FUNCS(Label);
+DECLARE_READ_WRITE_FUNCS(DataPublisher);
+DECLARE_READ_WRITE_FUNCS(DataSubscriber);
+DECLARE_READ_WRITE_FUNCS(RpcServer);
+DECLARE_READ_WRITE_FUNCS(RpcClient);
+DECLARE_READ_WRITE_FUNCS(Tracing);
+DECLARE_READ_WRITE_FUNCS(TraceSink::Type);
+DECLARE_READ_WRITE_FUNCS(TraceSink);
+DECLARE_READ_WRITE_FUNCS(TraceSource::Type);
+DECLARE_READ_WRITE_FUNCS(TraceSource);
+DECLARE_READ_WRITE_FUNCS(Extensions);
+DECLARE_READ_WRITE_FUNCS(Middleware);
+DECLARE_READ_WRITE_FUNCS(Includes);
+DECLARE_READ_WRITE_FUNCS(Aggregation);
+DECLARE_READ_WRITE_FUNCS(TimeSynchronization);
+DECLARE_READ_WRITE_FUNCS(Experimental);
+DECLARE_READ_WRITE_FUNCS(ParticipantConfiguration);
+DECLARE_READ_WRITE_FUNCS(HealthCheck);
 
-DEFINE_SILKIT_CONVERT(MdfChannel);
-DEFINE_SILKIT_CONVERT(Replay);
-DEFINE_SILKIT_CONVERT(Replay::Direction);
+} // namespace v1
 
-DEFINE_SILKIT_CONVERT(CanController);
+} //end namespace Config
+namespace Services {
+DECLARE_READ_WRITE_FUNCS(MatchingLabel::Kind);
+DECLARE_READ_WRITE_FUNCS(MatchingLabel);
 
-DEFINE_SILKIT_CONVERT(LinController);
+} // namespace Services
+} //end namespace SilKit
 
-DEFINE_SILKIT_CONVERT(EthernetController);
+// XXXXXXXXXX END RAPID YML XXXXXXXXXXXXXX
 
-DEFINE_SILKIT_CONVERT(SilKit::Services::Flexray::FlexrayClusterParameters);
-DEFINE_SILKIT_CONVERT(SilKit::Services::Flexray::FlexrayNodeParameters);
-DEFINE_SILKIT_CONVERT(SilKit::Services::Flexray::FlexrayTxBufferConfig);
-DEFINE_SILKIT_CONVERT(SilKit::Services::Flexray::FlexrayChannel);
-DEFINE_SILKIT_CONVERT(SilKit::Services::Flexray::FlexrayClockPeriod);
-DEFINE_SILKIT_CONVERT(SilKit::Services::Flexray::FlexrayTransmissionMode);
-DEFINE_SILKIT_CONVERT(FlexrayController);
-
-// Conversions for ServiceDiscovery Supplemental Data
-DEFINE_SILKIT_CONVERT(SilKit::Services::MatchingLabel::Kind);
-DEFINE_SILKIT_CONVERT(SilKit::Services::MatchingLabel);
-
-DEFINE_SILKIT_CONVERT(Label::Kind);
-DEFINE_SILKIT_CONVERT(Label);
-DEFINE_SILKIT_CONVERT(DataPublisher);
-DEFINE_SILKIT_CONVERT(DataSubscriber);
-DEFINE_SILKIT_CONVERT(RpcServer);
-DEFINE_SILKIT_CONVERT(RpcClient);
-
-DEFINE_SILKIT_CONVERT(HealthCheck);
-
-DEFINE_SILKIT_CONVERT(Tracing);
-DEFINE_SILKIT_CONVERT(TraceSink);
-DEFINE_SILKIT_CONVERT(TraceSink::Type);
-DEFINE_SILKIT_CONVERT(TraceSource);
-DEFINE_SILKIT_CONVERT(TraceSource::Type);
-
-DEFINE_SILKIT_CONVERT(MetricsSink);
-DEFINE_SILKIT_CONVERT(MetricsSink::Type);
-DEFINE_SILKIT_CONVERT(Metrics);
-
-DEFINE_SILKIT_CONVERT(Middleware);
-
-DEFINE_SILKIT_CONVERT(Extensions);
-
-DEFINE_SILKIT_CONVERT(Experimental);
-DEFINE_SILKIT_CONVERT(TimeSynchronization);
-DEFINE_SILKIT_CONVERT(Aggregation);
-
-DEFINE_SILKIT_CONVERT(ParticipantConfiguration);
-
-} // namespace YAML
+#undef DECLARE_READ_WRITE_FUNCS

@@ -266,7 +266,6 @@ if ((CMAKE_CXX_COMPILER_ID STREQUAL GNU OR CMAKE_CXX_COMPILER_ID STREQUAL Clang)
     set(SILKIT_LINK_EXCLUDE_LIBS "")
     # add the file name (xxx.a) to the list
     list(APPEND SILKIT_LINK_EXCLUDE_LIBS "$<TARGET_FILE_NAME:spdlog>")
-    list(APPEND SILKIT_LINK_EXCLUDE_LIBS "$<TARGET_FILE_NAME:yaml-cpp>")
     # format the list such that the linker flag accepts it
     list(JOIN SILKIT_LINK_EXCLUDE_LIBS ":" SILKIT_LINK_EXCLUDE_LIBS)
     # add the excluded libs to the linker command line

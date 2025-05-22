@@ -25,256 +25,282 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <string>
 #include <sstream>
 
-#include "Configuration.hpp"
 #include "Optional.hpp"
 
-#include "yaml-cpp/yaml.h"
-
-// YAML-cpp serialization/deserialization for our config data types
-namespace YAML {
-using namespace SilKit::Config;
-
-// Helper to parse a node as the given type or throw our ConversionError with the type's name in the error message.
-template <typename T>
-struct ParseTypeName
-{
-    static constexpr const char* Name()
-    {
-        return "Unknown Type";
-    }
-};
-
-#define DEFINE_SILKIT_PARSE_TYPE_NAME(TYPE) \
-    template <> \
-    struct ParseTypeName<TYPE> \
-    { \
-        static constexpr const char* Name() \
-        { \
-            return #TYPE; \
-        } \
-    }
-
-template <typename T>
-struct ParseTypeName<std::vector<T>>
-{
-    static constexpr const char* Name()
-    {
-        return ParseTypeName<T>::Name();
-    }
-};
-
-// Encode/Decode implementation is provided as templated static methods, to reduce boiler plate code.
-struct Converter
-{
-    // required for YAML::convert<T>:
-    template <typename SilKitDataType>
-    static Node encode(const SilKitDataType& obj);
-    template <typename SilKitDataType>
-    static bool decode(const Node& node, SilKitDataType& obj);
-};
-
-#define DEFINE_SILKIT_CONVERT(TYPE) \
-    template <> \
-    struct convert<TYPE> : public Converter \
-    { \
-    }; \
-    DEFINE_SILKIT_PARSE_TYPE_NAME(TYPE)
-
-// Other types used for parsing, required in ConversionError for helpful error messages
-DEFINE_SILKIT_PARSE_TYPE_NAME(int16_t);
-DEFINE_SILKIT_PARSE_TYPE_NAME(uint16_t);
-DEFINE_SILKIT_PARSE_TYPE_NAME(uint64_t);
-DEFINE_SILKIT_PARSE_TYPE_NAME(int64_t);
-DEFINE_SILKIT_PARSE_TYPE_NAME(int8_t);
-DEFINE_SILKIT_PARSE_TYPE_NAME(uint8_t);
-DEFINE_SILKIT_PARSE_TYPE_NAME(int);
-DEFINE_SILKIT_PARSE_TYPE_NAME(double);
-DEFINE_SILKIT_PARSE_TYPE_NAME(bool);
-DEFINE_SILKIT_PARSE_TYPE_NAME(std::vector<std::string>);
-DEFINE_SILKIT_PARSE_TYPE_NAME(std::string);
-
-} // namespace YAML
+#include "rapidyaml.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////
 // Miscellaneous SIL Kit Parsing Helper
 ////////////////////////////////////////////////////////////////////////////////
 namespace SilKit {
 namespace Config {
-
-// Exception type for Bad SIL Kit internal type conversion
-class ConversionError : public YAML::BadConversion
+inline namespace v1 {
+// rapidyaml utils, need to be defined in proper ADL context
+namespace {
+struct ParserContext
 {
-public:
-    ConversionError(const YAML::Node& node, const std::string& message)
-        : BadConversion(node.Mark())
+    ryml::Parser* parser{nullptr};
+    ryml::Location currentLocation{};
+    std::string currentContent;
+    std::string expectedValue;
+};
+
+inline auto to_string(ryml::csubstr stringView) -> std::string
+{
+    return {stringView.data(), stringView.size()};
+}
+
+template <typename... Args>
+auto Format(const std::string& fmt, Args&&... args)
+{
+    std::string buf;
+    ryml::formatrs(&buf, ryml::to_csubstr(fmt), std::forward<Args>(args)...);
+    return buf;
+}
+
+inline bool IsValidChild(const ryml::ConstNodeRef& node, const std::string& name)
+{
+    return node.is_map() && !node.find_child(ryml::to_csubstr(name)).invalid();
+}
+
+inline bool IsScalar(const ryml::ConstNodeRef& node)
+{
+    return node.is_val() || node.is_keyval();
+}
+
+inline bool IsMap(const ryml::ConstNodeRef& node)
+{
+    return node.is_map();
+}
+
+inline auto GetChildSafe(const ryml::ConstNodeRef& node, std::string name) -> ryml::ConstNodeRef
+{
+    if (IsValidChild(node, name))
     {
-        msg = message;
+        return node;
+    }
+    else if (node.is_seq())
+    {
+        for (const auto& child : node.cchildren())
+        {
+            if (child.is_container() && IsValidChild(child, name))
+            {
+                return child;
+            }
+        }
+    }
+    return {};
+}
+
+inline auto GetNodeName(ryml::ConstNodeRef& node) -> std::string
+{
+    if (node.is_val_ref())
+    {
+        return to_string(node.val_ref());
+    }
+    else if (node.is_key_ref())
+    {
+        return to_string(node.key_ref());
+    }
+    else if (node.is_keyval())
+    {
+        return to_string(node.key());
+    }
+    else if (node.is_val())
+    {
+        return to_string(node.val());
+    }
+    throw std::runtime_error("Don't know the yaml node type");
+}
+
+inline void MakeMap(ryml::NodeRef* node)
+{
+    *node |= ryml::MAP;
+}
+
+// for better error messages we keep track on the current node being read
+inline auto GetCurrentLocation(const ryml::ConstNodeRef& node) -> ryml::Location
+{
+    auto&& ctx = reinterpret_cast<ParserContext*>(node.m_tree->callbacks().m_user_data);
+    if (ctx)
+    {
+        return ctx->currentLocation;
+    }
+    return {};
+}
+
+inline void SetCurrentLocation(const ryml::ConstNodeRef& node, const std::string& name)
+{
+    auto&& cname = ryml::to_csubstr(name);
+    auto&& ctx = reinterpret_cast<ParserContext*>(node.m_tree->callbacks().m_user_data);
+
+    if (ctx)
+    {
+        ctx->expectedValue = name;
+        if (node.is_map() && !node.find_child(ryml::to_csubstr(name)).invalid())
+        {
+            ctx->currentLocation = ctx->parser->location(node[cname]);
+            auto cstr = ctx->parser->location_contents(ctx->currentLocation);
+            if (cstr.size() > 1)
+            {
+                ctx->currentContent = std::string{cstr.data(), cstr.size() - 1};
+            }
+        }
+    }
+}
+} // namespace
+
+template <typename T>
+void Read(T& val, const ryml::ConstNodeRef& node, const std::string& name)
+{
+    SetCurrentLocation(node, name);
+    node[ryml::to_csubstr(name)] >> val;
+}
+
+template <typename T, typename std::enable_if_t<std::is_integral<T>::value, bool> = true>
+void OptionalRead(T& val, const ryml::ConstNodeRef& node, const std::string& name)
+{
+    SetCurrentLocation(node, name);
+    auto tmp = ryml::fmt::overflow_checked(val);
+    (void)node.get_if(ryml::to_csubstr(name), &tmp);
+}
+
+inline void OptionalRead(bool& val, const ryml::ConstNodeRef& node, const std::string& name)
+{
+    SetCurrentLocation(node, name);
+    if (IsValidChild(node, name))
+    {
+        node[name.c_str()] >> val;
+    }
+}
+
+template <typename T, typename std::enable_if_t<!std::is_integral<T>::value, bool> = true>
+void OptionalRead(T& val, const ryml::ConstNodeRef& node, const std::string& name)
+{
+    SetCurrentLocation(node, name);
+    auto&& child = GetChildSafe(node, name);
+    if (!child.invalid())
+    {
+        child[ryml::to_csubstr(name)] >> val;
+    }
+}
+
+template <typename T>
+void OptionalRead(SilKit::Util::Optional<T>& val, const ryml::ConstNodeRef& node, const std::string& name)
+{
+    SetCurrentLocation(node, name);
+    if (IsValidChild(node, name))
+    {
+        T tmp;
+        node[name.c_str()] >> tmp;
+        val = std::move(tmp); // needs a propper setter to set "has_value"
+    }
+}
+
+template <typename T>
+void Write(ryml::NodeRef* node, const std::string& name, const T& val)
+{
+    if (!node->is_map())
+    {
+        throw ConfigurationError("Parse error: trying to access child of something not a map");
+    }
+    node->append_child() << ryml::key(name) << val;
+}
+
+template <typename T>
+void Write(ryml::NodeRef* node, const T& val)
+{
+    if (!node->is_val())
+    {
+        //throw ConfigurationError("Parse error: trying to write to something that is not a scalar");
+    }
+    node->set_val(ryml::to_csubstr(val));
+}
+
+template <typename T>
+void OptionalWrite(const SilKit::Util::Optional<T>& val, ryml::NodeRef* node, const std::string& name)
+{
+    if (val.has_value())
+    {
+        node->append_child() << ryml::key(name) << *val;
     }
 };
 
-// Helper template function to convert SIL Kit data types with nice error message
-template <typename ValueT>
-auto parse_as(const YAML::Node& node) -> ValueT
+template <typename T>
+void OptionalWrite(const std::vector<T>& val, ryml::NodeRef* node, const std::string& name)
 {
-    try
+    if (!val.empty())
     {
-        return node.as<ValueT>();
+        node->append_child() << ryml::key(name) << val;
     }
-    catch (const ConversionError&)
+};
+
+inline void OptionalWrite(const std::string& val, ryml::NodeRef* node, const std::string& name)
+{
+    if (!val.empty())
     {
-        //we already have a concise error message, propagate it to our caller
-        throw;
+        node->append_child() << ryml::key(name) << val;
     }
-    catch (const YAML::Exception& ex)
+};
+
+
+template <typename T>
+void NonDefaultWrite(const T& val, ryml::NodeRef* node, const std::string& name, const T& defaultValue)
+{
+    if (!(val == defaultValue))
+    {
+        node->append_child() << ryml::key(name) << val;
+    }
+}
+
+template <typename ConfigT>
+void OptionalRead_deprecated_alternative(ConfigT& value, const ryml::ConstNodeRef& node, const std::string& fieldName,
+                                         std::initializer_list<std::string> deprecatedFieldNames)
+{
+    if (!(node.is_map() || node.is_seq()))
+    {
+        return;
+    }
+
+    auto hasChild = [&node](auto&& name) {
+        auto&& c = GetChildSafe(node, name);
+        return !c.invalid();
+    };
+
+    std::vector<std::string> presentDeprecatedFieldNames;
+    std::copy_if(deprecatedFieldNames.begin(), deprecatedFieldNames.end(),
+                 std::back_inserter(presentDeprecatedFieldNames), hasChild);
+
+    if (IsValidChild(node, fieldName) && presentDeprecatedFieldNames.size() >= 1)
     {
         std::stringstream ss;
-        ss << "Cannot parse as Type \"" << YAML::ParseTypeName<ValueT>::Name() << "\". Exception: \"" << ex.what()
-           << "\". While parsing: " << YAML::Dump(node);
-        throw ConversionError(node, ss.str());
-    }
-}
-
-// Utility functions to encode/decode optional elements
-
-template <typename ConfigT,
-          typename std::enable_if<(std::is_fundamental<ConfigT>::value || std::is_same<ConfigT, std::string>::value),
-                                  bool>::type = true>
-void optional_encode(const Util::Optional<ConfigT>& value, YAML::Node& node, const std::string& fieldName)
-{
-    if (value.has_value())
-    {
-        node[fieldName] = value.value();
-    }
-}
-
-template <typename ConfigT,
-          typename std::enable_if<!(std::is_fundamental<ConfigT>::value || std::is_same<ConfigT, std::string>::value),
-                                  bool>::type = true>
-void optional_encode(const SilKit::Util::Optional<ConfigT>& value, YAML::Node& node, const std::string& fieldName)
-{
-    if (value.has_value())
-    {
-        node[fieldName] = YAML::Converter::encode(value.value());
-    }
-}
-
-template <typename ConfigT,
-          typename std::enable_if<!(std::is_fundamental<ConfigT>::value || std::is_same<ConfigT, std::string>::value),
-                                  bool>::type = true>
-void optional_encode(const SilKit::Util::Optional<std::vector<ConfigT>>& value, YAML::Node& node,
-                     const std::string& fieldName)
-{
-    if (value.has_value())
-    {
-        node[fieldName] = value.value();
-    }
-}
-
-template <typename ConfigT>
-void optional_encode(const std::vector<ConfigT>& value, YAML::Node& node, const std::string& fieldName)
-{
-    if (value.size() > 0)
-    {
-        node[fieldName] = value;
-    }
-}
-
-
-template <typename ConfigT>
-void optional_decode(Util::Optional<ConfigT>& value, const YAML::Node& node, const std::string& fieldName)
-{
-    if (node.IsMap() && node[fieldName]) //operator[] does not modify node
-    {
-        value = parse_as<ConfigT>(node[fieldName]);
-    }
-}
-
-template <typename ConfigT>
-void optional_decode(ConfigT& value, const YAML::Node& node, const std::string& fieldName)
-{
-    if (node.IsMap() && node[fieldName]) //operator[] does not modify node
-    {
-        value = parse_as<ConfigT>(node[fieldName]);
-    }
-}
-
-template <typename ConfigT>
-void optional_decode_deprecated_alternative(ConfigT& value, const YAML::Node& node, const std::string& fieldName,
-                                            std::initializer_list<std::string> deprecatedFieldNames)
-{
-    if (node.IsMap())
-    {
-        std::vector<std::string> presentDeprecatedFieldNames;
-        std::copy_if(deprecatedFieldNames.begin(), deprecatedFieldNames.end(),
-                     std::back_inserter(presentDeprecatedFieldNames),
-                     [&node](const auto& deprecatedFieldName) { return node[deprecatedFieldName]; });
-
-        if (node[fieldName] && presentDeprecatedFieldNames.size() >= 1)
+        ss << "The key \"" << fieldName << "\" and the deprecated alternatives";
+        for (const auto& deprecatedFieldName : presentDeprecatedFieldNames)
         {
-            std::stringstream ss;
-            ss << "The key \"" << fieldName << "\" and the deprected alternatives";
-            for (const auto& deprecatedFieldName : presentDeprecatedFieldNames)
-            {
-                ss << " \"" << deprecatedFieldName << "\"";
-            }
-            ss << " are present.";
-            throw ConversionError{node, ss.str()};
+            ss << " \"" << deprecatedFieldName << "\"";
         }
-
-        if (presentDeprecatedFieldNames.size() >= 2)
-        {
-            std::stringstream ss;
-            ss << "The deprecated keys";
-            for (const auto& deprecatedFieldName : presentDeprecatedFieldNames)
-            {
-                ss << " \"" << deprecatedFieldName << "\"";
-            }
-            ss << " are present.";
-            throw ConversionError{node, ss.str()};
-        }
-
-        optional_decode(value, node, fieldName);
-        for (const auto& deprecatedFieldName : deprecatedFieldNames)
-        {
-            optional_decode(value, node, deprecatedFieldName);
-        }
+        ss << " are present.";
+        throw ConfigurationError{ss.str()};
     }
-}
 
-template <typename ConfigT>
-auto non_default_encode(const std::vector<ConfigT>& values, YAML::Node& node, const std::string& fieldName,
-                        const std::vector<ConfigT>& defaultValue)
-{
-    // Only encode vectors that have members that deviate from a default-value.
-    // And also ensure we only encode values that are user-defined.
-    if (!values.empty() && !(values == defaultValue))
+    if (presentDeprecatedFieldNames.size() >= 2)
     {
-        std::vector<ConfigT> userValues;
-        static const ConfigT defaultObj{};
-        // only encode non-default values
-        for (const auto& value : values)
+        std::stringstream ss;
+        ss << "The deprecated keys";
+        for (const auto& deprecatedFieldName : presentDeprecatedFieldNames)
         {
-            if (!(value == defaultObj))
-            {
-                userValues.push_back(value);
-            }
+            ss << " \"" << deprecatedFieldName << "\"";
         }
-        if (userValues.size() > 0)
-        {
-            node[fieldName] = values;
-        }
+        ss << " are present.";
+        throw ConfigurationError{ss.str()};
     }
-}
 
-template <typename ConfigT>
-auto non_default_encode(const ConfigT& value, YAML::Node& node, const std::string& fieldName,
-                        const ConfigT& defaultValue)
-{
-    if (!(value == defaultValue))
+    OptionalRead(value, node, fieldName);
+    for (const auto& deprecatedFieldName : deprecatedFieldNames)
     {
-        node[fieldName] = value;
+        OptionalRead(value, node, deprecatedFieldName);
     }
 }
-
+} // namespace v1
 } // namespace Config
 } // namespace SilKit
