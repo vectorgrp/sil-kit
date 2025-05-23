@@ -28,8 +28,8 @@ add_Library(O_SilKit_Util OBJECT
 target_link_libraries(O_SilKit_Util
     PUBLIC I_SilKit_Util
     PRIVATE SilKitInterface
-    PRIVATE asio
-    PRIVATE fmt::fmt-header-only
+    PRIVATE "${SILKIT_THIRD_PARTY_ASIO}"
+    PRIVATE "${SILKIT_THIRD_PARTY_FMT}"
 )
 
 if (MSVC)
@@ -83,7 +83,7 @@ add_library(O_SilKit_Util_StringHelpers OBJECT
 target_include_directories(O_SilKit_Util_StringHelpers INTERFACE ${CMAKE_CURRENT_LIST_DIR})
 target_link_libraries(O_SilKit_Util_StringHelpers
     PUBLIC I_SilKit_Util_StringHelpers
-    PRIVATE fmt::fmt-header-only
+    PRIVATE ${SILKIT_THIRD_PARTY_FMT}
 )
 
 
@@ -135,7 +135,7 @@ add_library(O_SilKit_Util_Uri OBJECT
 target_link_libraries(O_SilKit_Util_Uri
     PUBLIC I_SilKit_Util_Uri
 
-    PRIVATE ${SILKIT_THIRD_PARTY_FMT_HEADER_ONLY_TARGET}
+    PRIVATE ${SILKIT_THIRD_PARTY_FMT}
 )
 target_include_directories(O_SilKit_Util_Uri INTERFACE ${CMAKE_CURRENT_LIST_DIR})
 
