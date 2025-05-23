@@ -20,6 +20,6 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #NB: Call <<QNX_INSTALLATION_DIR>>/qnxsdp-env.sh before building
-set(SILKIT_TARGET_TOOLSET "gcc_ntox86_64_gpp")
+set(SILKIT_TARGET_TOOLSET "gcc_ntox86_64")
 set(SILKIT_TARGET_ARCHITECTURE "x86_64")
 include(${CMAKE_CURRENT_LIST_DIR}/qnx-cross-base-toolchain.cmake)
