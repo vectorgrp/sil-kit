@@ -68,6 +68,11 @@ endif()
 add_compile_definitions(_QNX_SOURCE) #include all non-posix headers
 link_libraries(-lsocket) # link against QNX TCP/IP Stack
 
+# Add compile options for asio. QNX does not implement SA_RESTART and ASIO does
+# not have a seperate check for QNX when using it
+# Also increase FD_SETSIZE globally from 256 to 1000 (QNX maximum)
+add_compile_definitions(SA_RESTART=0 FD_SETSIZE=1000)
+
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
@@ -78,14 +83,16 @@ set(CMAKE_C_COMPILER_TARGET ${qcc_arch})
 
 set(CMAKE_CXX_COMPILER ${QPP_EXE})
 set(CMAKE_CXX_COMPILER_TARGET ${qcc_arch})
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wc,-std=c++14")
+
+# Use LLVM stdlib for now, since GNU is segfaulting with future.waits
+# -Y and -stdlib should be redundant
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Y_cxx -stdlib=libc++ -Wc,-std=c++14")
+set(CMAKE_EXE_LINKER_FLAGS "-Wl,-z,origin")
 
 set(CMAKE_ASM_COMPILER "${QCC_EXE}" -V${qcc_arch})
 set(CMAKE_ASM_DEFINE_FLAG "-Wa,--defsym,")
 
 set(CMAKE_RANLIB ${RANLIB_EXE} CACHE PATH "QNX ranlib" FORCE)
 set(CMAKE_AR ${AR_EXE} CACHE PATH "QNX ranlib" FORCE)
-
-set(CMAKE_MAKE_PROGRAM ${MAKE_EXE} CACHE PATH "QNX make" FORCE)
 
 set(CMAKE_SKIP_BUILD_RPATH ON)
