@@ -73,6 +73,9 @@ DETAIL_SILKIT_CPP_API auto ParticipantConfigurationFromString(const std::string&
 DETAIL_SILKIT_CPP_API auto ParticipantConfigurationFromFile(const std::string& filename)
     -> std::shared_ptr<SilKit::Config::IParticipantConfiguration>;
 
+DETAIL_SILKIT_CPP_API auto ParticipantConfigurationToString(
+    std::shared_ptr<SilKit::Config::IParticipantConfiguration> config) -> std::string;
+
 } // namespace Config
 DETAIL_SILKIT_DETAIL_VN_NAMESPACE_CLOSE
 } // namespace SilKit

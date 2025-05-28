@@ -22,6 +22,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "ParticipantConfiguration.hpp"
 #include "ParticipantConfigurationFromXImpl.hpp"
 #include "CreateParticipantImpl.hpp"
+#include "YamlParser.hpp"
 
 #include "silkit/capi/SilKit.h"
 #include "silkit/SilKit.hpp"
@@ -154,6 +155,30 @@ try
 }
 CAPI_CATCH_EXCEPTIONS
 
+
+SilKit_ReturnCode SilKitCALL SilKit_ParticipantConfiguration_ToString(
+    const SilKit_ParticipantConfiguration* participantConfiguration, char** outputString, size_t* requiredSize)
+try
+{
+    ASSERT_VALID_OUT_PARAMETER(participantConfiguration);
+    ASSERT_VALID_POINTER_PARAMETER(requiredSize);
+    //outputString may be NULL
+
+    auto* cppParticipantConfiguration =
+        reinterpret_cast<const SilKit::Config::ParticipantConfiguration*>(participantConfiguration);
+
+    auto&& jsonString = SilKit::Config::SerializeAsJson(*cppParticipantConfiguration);
+    *requiredSize = jsonString.size();
+
+    if(outputString != nullptr && jsonString.size() > 0)
+    {
+        std::copy(std::cbegin(jsonString), std::cend(jsonString), *outputString);
+    }
+    // since it is not possible to release the "raw" pointer from a shared_ptr, we copy it into our own raw pointer
+
+    return SilKit_ReturnCode_SUCCESS;
+}
+CAPI_CATCH_EXCEPTIONS
 
 SilKit_ReturnCode SilKitCALL
 SilKit_ParticipantConfiguration_Destroy(SilKit_ParticipantConfiguration* participantConfiguration)
