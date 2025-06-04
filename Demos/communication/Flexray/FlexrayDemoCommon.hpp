@@ -52,9 +52,11 @@ public:
 
         _flexrayController->AddCycleStartHandler(
             [this](IFlexrayController* /*ctrl*/, const FlexrayCycleStartEvent& ev) {
+            _cycleCount = ev.cycleCounter;
             std::stringstream ss;
-            ss << "Received " << ev;
+            ss << "CYCLE START Received " << ev;
             _logger->Info(ss.str());
+            TxBufferUpdate();
         });
 
         _flexrayController->AddWakeupHandler(
@@ -96,6 +98,7 @@ private:
     int _msgId = 0;
     bool _configured{false};
     ILogger* _logger;
+    int _cycleCount{-1};
 
     enum class MasterState
     {
@@ -136,13 +139,18 @@ private:
 
         // prepare a friendly message as payload
         std::stringstream payloadStream;
-        payloadStream << "FlexrayFrameEvent#" << std::setw(4) << _msgId << "; bufferId=" << bufferIdx;
+        //payloadStream << "FlexrayFrameEvent#" << std::setw(4) << _msgId << "; bufferId=" << bufferIdx << "; cycle=" << _cycleCount;
+        payloadStream << _cycleCount;
+        _logger->Info("TxBufferUpdate cycleCount=" + std::to_string(_cycleCount));
         auto payloadString = payloadStream.str();
 
         std::vector<uint8_t> payloadBytes;
-        payloadBytes.resize(payloadString.size());
+        //payloadBytes.resize(payloadString.size());
 
-        std::copy(payloadString.begin(), payloadString.end(), payloadBytes.begin());
+        //std::copy(payloadString.begin(), payloadString.end(), payloadBytes.begin());
+        // XXX
+        payloadBytes.resize(1);
+        payloadBytes.at(0) = _cycleCount & 0xff;
 
         FlexrayTxBufferUpdate update;
         update.payload = payloadBytes;
@@ -188,6 +196,8 @@ private:
 public:
     void DoAction(std::chrono::nanoseconds now)
     {
+        _logger->Info("CYCLE " + std::to_string(_cycleCount) + " NOW=" + std::to_string(now.count())
+                      + " STATE=" + to_string(_lastPocStatus.state));
         switch (_lastPocStatus.state)
         {
         case FlexrayPocState::DefaultConfig:
@@ -203,7 +213,7 @@ public:
             }
             else
             {
-                TxBufferUpdate();
+                //TxBufferUpdate();
             }
             break;
         case FlexrayPocState::Config:

@@ -31,6 +31,7 @@ private:
 
     void CreateControllers() override
     {
+        //TODO debugging off-by-one cycle
         auto flexrayController = GetParticipant()->CreateFlexrayController("FlexrayController1", _networkName);
 
         FlexrayControllerConfig config = FlexrayDemoCommon::MakeControllerConfig();
@@ -65,7 +66,6 @@ private:
 
         // The specific keyslotID for this node
         config.nodeParams.pKeySlotId = 60;
-
         _flexrayNode = std::make_unique<FlexrayDemoCommon::FlexrayNode>(flexrayController, std::move(config), GetLogger());
     }
 
