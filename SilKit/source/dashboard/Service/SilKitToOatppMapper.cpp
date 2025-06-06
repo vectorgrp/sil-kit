@@ -482,6 +482,9 @@ auto SilKitToOatppMapper::CreateMetricsUpdateDto(const std::string origin, const
         case VSilKit::MetricKind::STRING_LIST:
             dataDto->mk = MetricKind::StringList;
             break;
+        case VSilKit::MetricKind::ATTRIBUTE:
+            dataDto->mk = MetricKind::Attribute;
+            break;
         default:
             dataDto->mk = MetricKind::Unknown;
             break;

@@ -119,4 +119,31 @@ TEST(Test_MetricsManager, string_list_metric_create_and_update_only_submits_afte
 }
 
 
+TEST(Test_MetricsManager, attribute_metric_create_and_update_only_submits_after_change)
+{
+    const std::string participantName{"Participant Name"};
+    const std::string metricName{"Attribute Metric"};
+
+    MetricsUpdate metricsUpdate;
+    metricsUpdate.metrics.emplace_back(MetricData{});
+
+    MockMetricsProcessor mockMetricsProcessor;
+    EXPECT_CALL(mockMetricsProcessor, Process(participantName, MetricsUpdateWithSingleMetricWithNameAndKind(
+                                                                   metricName, MetricKind::ATTRIBUTE)))
+        .Times(1);
+
+    MetricsManager metricsManager{participantName, mockMetricsProcessor};
+    // no metrics to report, no Process call should be made
+    metricsManager.SubmitUpdates();
+
+    auto metric = metricsManager.GetAttribute(metricName);
+    // no metric value to report, no Process call should be made
+    metricsManager.SubmitUpdates();
+
+    metric->Add("AttributeValue");
+    // metric value to report, single Process call
+    metricsManager.SubmitUpdates();
+}
+
+
 } // anonymous namespace

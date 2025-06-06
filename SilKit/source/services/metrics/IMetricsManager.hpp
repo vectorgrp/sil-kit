@@ -11,6 +11,7 @@ namespace VSilKit {
 struct ICounterMetric;
 struct IStatisticMetric;
 struct IStringListMetric;
+struct IAttributeMetric;
 
 struct IMetricsManager
 {
@@ -19,6 +20,7 @@ struct IMetricsManager
     virtual auto GetCounter(const std::string& name) -> ICounterMetric* = 0;
     virtual auto GetStatistic(const std::string& name) -> IStatisticMetric* = 0;
     virtual auto GetStringList(const std::string& name) -> IStringListMetric* = 0;
+    virtual auto GetAttribute(const std::string& name) -> IAttributeMetric* = 0;
 };
 
 } // namespace VSilKit

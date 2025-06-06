@@ -127,11 +127,12 @@ class BulkSimulationDto : public oatpp::DTO
     }
 };
 
-ENUM(MetricKind, v_int32, //
-     VALUE(Unknown, 0, "unknown"), //
-     VALUE(Counter, 10, "counter"), //
-     VALUE(Statistic, 20, "statistic"), //
-     VALUE(StringList, 30, "stringlist"))
+ENUM(MetricKind, v_int32,
+     VALUE(Unknown, 0, "unknown"),
+     VALUE(Counter, 10, "counter"),
+     VALUE(Statistic, 20, "statistic"),
+     VALUE(StringList, 30, "stringlist"),
+     VALUE(Attribute, 40, "attribute"))
 
 class MetricDataDto : public oatpp::DTO
 {
