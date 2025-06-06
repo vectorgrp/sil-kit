@@ -167,7 +167,7 @@ void Participant<SilKitConnectionT>::OnSilKitSimulationJoined()
         _logger->Info("Replay Scheduler active.");
     }
 
-    CreateSystemInformationMetrics();
+    CreateParticipantAttributeMetrics();
 
     if (_metricsTimerThread)
     {
@@ -2010,18 +2010,21 @@ auto Participant<SilKitConnectionT>::GetOrCreateMetricsSender() -> VSilKit::IMet
 
 
 template <class SilKitConnectionT>
-void Participant<SilKitConnectionT>::CreateSystemInformationMetrics()
+void Participant<SilKitConnectionT>::CreateParticipantAttributeMetrics()
 {
-    auto ee = VSilKit::GetExecutionEnvironment();
+    {
+        auto ee = VSilKit::GetExecutionEnvironment();
 
-    GetMetricsManager()->GetStringList("SilKit/System/OperatingSystem")->Add(ee.operatingSystem);
-    GetMetricsManager()->GetStringList("SilKit/System/Hostname")->Add(ee.hostname);
-    GetMetricsManager()->GetStringList("SilKit/System/PageSize")->Add(ee.pageSize);
-    GetMetricsManager()->GetStringList("SilKit/System/ProcessorCount")->Add(ee.processorCount);
-    GetMetricsManager()->GetStringList("SilKit/System/ProcessorArchitecture")->Add(ee.processorArchitecture);
-    GetMetricsManager()->GetStringList("SilKit/System/PhysicalMemory")->Add(ee.physicalMemoryMiB + " MiB");
-    GetMetricsManager()->GetStringList("SilKit/Process/Executable")->Add(ee.executable);
-    GetMetricsManager()->GetStringList("SilKit/Process/Username")->Add(ee.username);
+        GetMetricsManager()->GetAttribute("SilKit/System/OperatingSystem")->Add(ee.operatingSystem);
+        GetMetricsManager()->GetAttribute("SilKit/System/Hostname")->Add(ee.hostname);
+        GetMetricsManager()->GetAttribute("SilKit/System/PageSize")->Add(ee.pageSize);
+        GetMetricsManager()->GetAttribute("SilKit/System/ProcessorCount")->Add(ee.processorCount);
+        GetMetricsManager()->GetAttribute("SilKit/System/ProcessorArchitecture")->Add(ee.processorArchitecture);
+        GetMetricsManager()->GetAttribute("SilKit/System/PhysicalMemory")->Add(ee.physicalMemoryMiB + " MiB");
+        GetMetricsManager()->GetAttribute("SilKit/Process/Executable")->Add(ee.executable);
+        GetMetricsManager()->GetAttribute("SilKit/Process/Username")->Add(ee.username);
+    }
+    GetMetricsManager()->GetAttribute("SilKit/Participant/JsonConfig")->Add(R"({"TODO": true})");
 }
 
 

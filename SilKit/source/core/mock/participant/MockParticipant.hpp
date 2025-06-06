@@ -200,6 +200,13 @@ class DummyMetricsManager : public IMetricsManager
         void Add(const std::string&) override {}
     };
 
+    class DummyAttributeMetric : public IAttributeMetric
+    {
+    public:
+        void Clear() override {}
+        void Add(const std::string&) override {}
+    };
+
 public:
     auto GetCounter(const std::string& name) -> ICounterMetric* override
     {
@@ -231,12 +238,23 @@ public:
         return &(it->second);
     }
 
+    auto GetAttribute(const std::string& name) -> IAttributeMetric* override
+    {
+        auto it = _attributes.find(name);
+        if (it == _attributes.end())
+        {
+            it = _attributes.emplace().first;
+        }
+        return &(it->second);
+    }
+
     void SubmitUpdates() override {}
 
 private:
     std::unordered_map<std::string, DummyCounterMetric> _counters;
     std::unordered_map<std::string, DummyStatisticMetric> _statistics;
     std::unordered_map<std::string, DummyStringListMetric> _stringLists;
+    std::unordered_map<std::string, DummyAttributeMetric> _attributes;
 };
 
 class DummyParticipant : public IParticipantInternal

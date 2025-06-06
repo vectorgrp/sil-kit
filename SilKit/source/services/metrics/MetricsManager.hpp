@@ -11,6 +11,7 @@
 #include "LoggerMessage.hpp"
 #include "IServiceEndpoint.hpp"
 #include "IParticipantInternal.hpp"
+#include "IAttributeMetric.hpp"
 
 #include <atomic>
 #include <chrono>
@@ -46,6 +47,7 @@ private:
     class CounterMetric;
     class StatisticMetric;
     class StringListMetric;
+    class AttributeMetric;
 
 public:
     MetricsManager(std::string participantName, IMetricsProcessor& processor);
@@ -57,6 +59,7 @@ public: // IMetricsManager
     auto GetCounter(const std::string& name) -> ICounterMetric* override;
     auto GetStatistic(const std::string& name) -> IStatisticMetric* override;
     auto GetStringList(const std::string& name) -> IStringListMetric* override;
+    auto GetAttribute(const std::string& name) -> IAttributeMetric* override;
 
 private:
     auto GetOrCreateMetric(std::string name, MetricKind kind) -> IMetric*;

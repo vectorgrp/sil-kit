@@ -32,6 +32,8 @@ auto operator<<(std::ostream& os, const MetricKind& metricKind) -> std::ostream&
         return os << "MetricKind::STATISTIC";
     case MetricKind::STRING_LIST:
         return os << "MetricKind::STRING_LIST";
+    case MetricKind::ATTRIBUTE:
+        return os << "MetricKind::ATTRIBUTE";
     default:
         return os << "MetricKind(" << static_cast<std::underlying_type_t<MetricKind>>(metricKind) << ")";
     }

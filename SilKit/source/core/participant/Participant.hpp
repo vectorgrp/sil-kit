@@ -435,7 +435,7 @@ private:
 
     auto GetOrCreateMetricsSender() -> VSilKit::IMetricsSender*;
 
-    void CreateSystemInformationMetrics();
+    void CreateParticipantAttributeMetrics();
 
     auto MakeTimerThread() -> std::unique_ptr<IMetricsTimerThread>;
 

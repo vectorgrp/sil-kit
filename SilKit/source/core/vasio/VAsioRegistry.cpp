@@ -413,7 +413,10 @@ void VAsioRegistry::OnMetricsUpdate(const std::string& simulationName, const std
     dynamic_cast<VSilKit::MetricsProcessor&>(*_metricsProcessor)
         .OnMetricsUpdate(simulationName, participantName, metricsUpdate);
 
-    _registryEventListener->OnMetricsUpdate(simulationName, participantName, metricsUpdate);
+    if (_registryEventListener != nullptr)
+    {
+        _registryEventListener->OnMetricsUpdate(simulationName, participantName, metricsUpdate);
+    }
 }
 
 

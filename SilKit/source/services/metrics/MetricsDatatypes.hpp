@@ -23,6 +23,7 @@ enum struct MetricKind
     COUNTER,
     STATISTIC,
     STRING_LIST,
+    ATTRIBUTE,
 };
 
 
