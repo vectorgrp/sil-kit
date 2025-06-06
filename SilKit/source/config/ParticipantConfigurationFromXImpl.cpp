@@ -674,7 +674,6 @@ auto PaticipantConfigurationWithIncludes(const std::string& text, struct ConfigI
 
 
 } // anonymous namespace
-
 } // namespace V1
 
 // ============================================================================

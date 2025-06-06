@@ -2024,7 +2024,8 @@ void Participant<SilKitConnectionT>::CreateParticipantAttributeMetrics()
         GetMetricsManager()->GetAttribute("SilKit/Process/Executable")->Add(ee.executable);
         GetMetricsManager()->GetAttribute("SilKit/Process/Username")->Add(ee.username);
     }
-    GetMetricsManager()->GetAttribute("SilKit/Participant/JsonConfig")->Add(R"({"TODO": true})");
+ 
+    GetMetricsManager()->GetAttribute("SilKit/Participant/JsonConfig")->Add(SilKit::Config::to_json(_participantConfig));
 }
 
 
@@ -2036,7 +2037,7 @@ auto Participant<SilKitConnectionT>::MakeTimerThread() -> std::unique_ptr<IMetri
         return nullptr;
     }
 
-    return std::make_unique<VSilKit::MetricsTimerThread>(
+    return std::make_unique<VSilKit::MetricsTimerThread>(_participantConfig.experimental.metrics.updateInterval,
         [this] { ExecuteDeferred([this] { GetMetricsManager()->SubmitUpdates(); }); });
 }
 
