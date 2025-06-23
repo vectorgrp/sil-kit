@@ -158,7 +158,7 @@ public:
     void Write(const SilKit::Config::Experimental& obj);
     void Write(const SilKit::Config::ParticipantConfiguration& obj);
     void Write(const SilKit::Config::HealthCheck& obj);
-    void Write(const SilKitRegistry::Config::v1::Experimental& obj);
-    void Write(const SilKitRegistry::Config::v1::RegistryConfiguration& obj);
+    void Write(const SilKitRegistry::Config::V1::Experimental& obj);
+    void Write(const SilKitRegistry::Config::V1::RegistryConfiguration& obj);
 };
 } // namespace VSilKit

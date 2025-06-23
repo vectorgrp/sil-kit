@@ -26,9 +26,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 namespace SilKit {
 namespace Config {
 
-inline namespace v1 {
+inline namespace V1 {
 
-void Validate(const SilKit::Config::v1::ParticipantConfiguration& configuration);
+void Validate(const SilKit::Config::V1::ParticipantConfiguration& configuration);
 
 } // namespace v1
 

@@ -208,8 +208,8 @@ public:
     void Read(SilKit::Config::ParticipantConfiguration& obj);
     void Read(SilKit::Config::HealthCheck& obj);
     //Registry
-    void Read(SilKitRegistry::Config::v1::Experimental& obj);
-    void Read(SilKitRegistry::Config::v1::RegistryConfiguration& obj);
+    void Read(SilKitRegistry::Config::V1::Experimental& obj);
+    void Read(SilKitRegistry::Config::V1::RegistryConfiguration& obj);
 
 public:
     //main parsing

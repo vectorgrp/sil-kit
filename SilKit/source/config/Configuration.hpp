@@ -40,7 +40,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 namespace SilKit {
 namespace Config {
 
-inline namespace v1 {
+inline namespace V1 {
 
 // ================================================================================
 //  Shared configuration declarations
@@ -322,7 +322,7 @@ inline Aggregation from_string(const std::string& aggregationStr)
     return Aggregation::Auto;
 }
 
-} // namespace v1
+} // namespace V1
 
 } // namespace Config
 } // namespace SilKit

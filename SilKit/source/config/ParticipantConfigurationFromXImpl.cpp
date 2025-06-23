@@ -41,14 +41,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 namespace SilKit {
 namespace Config {
 
-inline namespace v1 {
+inline namespace V1 {
 
 namespace {
 
 // =================================================================================
 //  Helper structs to keep metadata when processing/merging included config snippets
 // =================================================================================
-using ConfigInclude = std::pair<std::string, SilKit::Config::v1::ParticipantConfiguration>;
+using ConfigInclude = std::pair<std::string, SilKit::Config::V1::ParticipantConfiguration>;
 struct MiddlewareCache
 {
     std::vector<std::string> acceptorUris;
@@ -432,7 +432,7 @@ void PopulateCaches(const ParticipantConfiguration& config, ConfigIncludeData& c
 // =========================================================================================================================
 // Functions to merge the different fields
 // =========================================================================================================================
-void MergeExtensions(const SilKit::Config::v1::Extensions& child, SilKit::Config::v1::Extensions& parent)
+void MergeExtensions(const SilKit::Config::V1::Extensions& child, SilKit::Config::V1::Extensions& parent)
 {
     parent.searchPathHints.insert(parent.searchPathHints.end(), child.searchPathHints.begin(),
                                   child.searchPathHints.end());
@@ -554,28 +554,28 @@ auto MergeConfigs(ConfigIncludeData& configIncludeData) -> SilKit::Config::Parti
     for (const auto& include : configIncludeData.configBuffer)
     {
         // Merge all vectors first!
-        MergeNamedVector<SilKit::Config::v1::CanController>(include.second.canControllers, "CanController",
+        MergeNamedVector<SilKit::Config::V1::CanController>(include.second.canControllers, "CanController",
                                                             config.canControllers, configIncludeData.canCache);
-        MergeNamedVector<SilKit::Config::v1::LinController>(include.second.linControllers, "LinController",
+        MergeNamedVector<SilKit::Config::V1::LinController>(include.second.linControllers, "LinController",
                                                             config.linControllers, configIncludeData.linCache);
-        MergeNamedVector<SilKit::Config::v1::EthernetController>(include.second.ethernetControllers,
+        MergeNamedVector<SilKit::Config::V1::EthernetController>(include.second.ethernetControllers,
                                                                  "EthernetController", config.ethernetControllers,
                                                                  configIncludeData.ethCache);
-        MergeNamedVector<SilKit::Config::v1::FlexrayController>(include.second.flexrayControllers, "FlexRayController",
+        MergeNamedVector<SilKit::Config::V1::FlexrayController>(include.second.flexrayControllers, "FlexRayController",
                                                                 config.flexrayControllers,
                                                                 configIncludeData.flexrayCache);
-        MergeNamedVector<SilKit::Config::v1::DataSubscriber>(include.second.dataSubscribers, "DataSubscriber",
+        MergeNamedVector<SilKit::Config::V1::DataSubscriber>(include.second.dataSubscribers, "DataSubscriber",
                                                              config.dataSubscribers, configIncludeData.subCache);
-        MergeNamedVector<SilKit::Config::v1::DataPublisher>(include.second.dataPublishers, "DataPublisher",
+        MergeNamedVector<SilKit::Config::V1::DataPublisher>(include.second.dataPublishers, "DataPublisher",
                                                             config.dataPublishers, configIncludeData.pubCache);
-        MergeNamedVector<SilKit::Config::v1::RpcServer>(include.second.rpcServers, "RpcServer", config.rpcServers,
+        MergeNamedVector<SilKit::Config::V1::RpcServer>(include.second.rpcServers, "RpcServer", config.rpcServers,
                                                         configIncludeData.rpcServerCache);
-        MergeNamedVector<SilKit::Config::v1::RpcClient>(include.second.rpcClients, "RpcClient", config.rpcClients,
+        MergeNamedVector<SilKit::Config::V1::RpcClient>(include.second.rpcClients, "RpcClient", config.rpcClients,
                                                         configIncludeData.rpcClientCache);
 
-        MergeNamedVector<SilKit::Config::v1::TraceSink>(include.second.tracing.traceSinks, "TraceSink",
+        MergeNamedVector<SilKit::Config::V1::TraceSink>(include.second.tracing.traceSinks, "TraceSink",
                                                         config.tracing.traceSinks, configIncludeData.traceSinkCache);
-        MergeNamedVector<SilKit::Config::v1::TraceSource>(include.second.tracing.traceSources, "TraceSource",
+        MergeNamedVector<SilKit::Config::V1::TraceSource>(include.second.tracing.traceSources, "TraceSource",
                                                           config.tracing.traceSources,
                                                           configIncludeData.traceSourceCache);
 
@@ -656,7 +656,7 @@ auto PaticipantConfigurationWithIncludes(const std::string& text,
                                        struct ConfigIncludeData& configData) -> SilKit::Config::ParticipantConfiguration
 {
     auto configuration = SilKit::Config::Deserialize<ParticipantConfiguration>(text);
-    if (!configuration.schemaVersion.empty() && configuration.schemaVersion != SilKitRegistry::Config::v1::GetSchemaVersion())
+    if (!configuration.schemaVersion.empty() && configuration.schemaVersion != SilKitRegistry::Config::V1::GetSchemaVersion())
     {
         throw SilKit::ConfigurationError{fmt::format("Unknown schema version '{}' found in participant configuration!", configuration.schemaVersion)};
     }
@@ -816,7 +816,7 @@ auto operator<<(std::ostream& out, const Label& label) -> std::ostream&
     return out << "MatchingLabel{" << label.key << ", " << label.value << ", " << label.kind << "}";
 }
 
-} // namespace v1
+} // namespace V1
 
 
 // ============================================================================
@@ -849,7 +849,7 @@ auto ParticipantConfigurationFromFileImpl(const std::string& filename)
 
 namespace SilKitRegistry {
 namespace Config {
-namespace v1 {
+namespace V1 {
 
 bool operator==(const Experimental& lhs, const Experimental& rhs)
 {

@@ -28,7 +28,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 namespace {
 
-void CheckFull(const SilKitRegistry::Config::v1::RegistryConfiguration& c)
+void CheckFull(const SilKitRegistry::Config::V1::RegistryConfiguration& c)
 {
     EXPECT_EQ(c.description, "Test_RegistryConfiguration_Full");
 
@@ -65,7 +65,7 @@ TEST(Test_RegistryConfiguration, FullYaml)
 }
 
 
-void CheckEmpty(const SilKitRegistry::Config::v1::RegistryConfiguration& c)
+void CheckEmpty(const SilKitRegistry::Config::V1::RegistryConfiguration& c)
 {
     EXPECT_EQ(c.description, "");
 

@@ -40,7 +40,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 namespace SilKit {
 namespace Config {
-inline namespace v1 {
+inline namespace V1 {
 
 // ================================================================================
 //  Internal controller service
@@ -416,13 +416,13 @@ auto operator<<(std::ostream& out, const Label& label) -> std::ostream&;
 bool operator<(const MetricsSink& lhs, const MetricsSink& rhs);
 bool operator>(const MetricsSink& lhs, const MetricsSink& rhs);
 
-} // namespace v1
+} // namespace V1
 } // namespace Config
 } // namespace SilKit
 
 namespace SilKitRegistry {
 namespace Config {
-namespace v1 {
+namespace V1 {
 
 constexpr inline auto GetSchemaVersion() -> const char*
 {
@@ -431,7 +431,7 @@ constexpr inline auto GetSchemaVersion() -> const char*
 
 struct Experimental
 {
-    SilKit::Config::v1::Metrics metrics;
+    SilKit::Config::V1::Metrics metrics;
 };
 
 struct RegistryConfiguration

@@ -26,7 +26,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 namespace SilKit {
 namespace Config {
-inline namespace v1 {
+inline namespace V1 {
 
 auto Label::ToPublicApi() const -> SilKit::Services::MatchingLabel
 {
@@ -81,12 +81,12 @@ auto Label::FromPublicApi(const SilKit::Services::MatchingLabel& label) -> Label
 
 auto Label::VectorFromPublicApi(const std::vector<SilKit::Services::MatchingLabel>& labels) -> std::vector<Label>
 {
-    std::vector<SilKit::Config::v1::Label> result;
+    std::vector<SilKit::Config::V1::Label> result;
     std::transform(labels.begin(), labels.end(), std::back_inserter(result), Label::FromPublicApi);
     return result;
 }
 
 
-} // namespace v1
+} // namespace V1
 } // namespace Config
 } // namespace SilKit

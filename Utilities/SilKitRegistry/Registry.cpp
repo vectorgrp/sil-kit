@@ -112,7 +112,7 @@ void ConfigureLoggingForWindowsService(std::shared_ptr<SilKit::Config::IParticip
 
 void OverrideFromRegistryConfiguration(std::shared_ptr<SilKit::Config::IParticipantConfiguration> configuration,
                                        std::string& dashboardUri, bool& enableDashboard,
-                                       const SilKitRegistry::Config::v1::RegistryConfiguration& registryConfiguration)
+                                       const SilKitRegistry::Config::V1::RegistryConfiguration& registryConfiguration)
 {
     auto config = std::dynamic_pointer_cast<SilKit::Config::ParticipantConfiguration>(configuration);
     SILKIT_ASSERT(config != nullptr);
@@ -457,7 +457,7 @@ int main(int argc, char** argv)
 
     try
     {
-        SilKitRegistry::Config::v1::RegistryConfiguration registryConfiguration{};
+        SilKitRegistry::Config::V1::RegistryConfiguration registryConfiguration{};
 
         const auto registryConfigurationPathOpt = commandlineParser.Get<CliParser::Option>("registry-configuration");
         if (registryConfigurationPathOpt.HasValue())

@@ -32,7 +32,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 namespace SilKitRegistry {
 namespace Config {
 
-auto Parse(const std::string& string) -> v1::RegistryConfiguration;
+auto Parse(const std::string& string) -> V1::RegistryConfiguration;
 
 } // namespace Config
 } // namespace SilKitRegistry

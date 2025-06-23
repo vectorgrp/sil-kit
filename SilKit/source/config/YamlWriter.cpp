@@ -21,12 +21,12 @@ void YamlWriter::Write(const SilKit::Services::MatchingLabel::Kind& obj)
 {
     switch (obj)
     {
+    case SilKit::Services::MatchingLabel::Kind::Optional: // [[fallthrough]]
     case SilKit::Services::MatchingLabel::Kind::Mandatory:
         Write(std::underlying_type_t<SilKit::Services::MatchingLabel::Kind>(obj));
         break;
-    case SilKit::Services::MatchingLabel::Kind::Optional:
-        Write(std::underlying_type_t<SilKit::Services::MatchingLabel::Kind>(obj));
-        break;
+    default:
+        throw SilKit::ConfigurationError{"Write MatchingLabel::Kind: Invalid MatchingLabel::Kind"};
     }
 }
 
@@ -609,18 +609,18 @@ void YamlWriter::Write(const SilKit::Config::HealthCheck& obj)
 }
 
 
-void YamlWriter::Write(const SilKitRegistry::Config::v1::Experimental& obj)
+void YamlWriter::Write(const SilKitRegistry::Config::V1::Experimental& obj)
 {
-    static const SilKitRegistry::Config::v1::Experimental defaultObject{};
+    static const SilKitRegistry::Config::V1::Experimental defaultObject{};
     NonDefaultWrite(obj.metrics, "Metrics", defaultObject.metrics);
 }
 
 
-void YamlWriter::Write(const SilKitRegistry::Config::v1::RegistryConfiguration& obj)
+void YamlWriter::Write(const SilKitRegistry::Config::V1::RegistryConfiguration& obj)
 {
-    static const SilKitRegistry::Config::v1::RegistryConfiguration defaultObject{};
+    static const SilKitRegistry::Config::V1::RegistryConfiguration defaultObject{};
     MakeMap(_node);
-    Write("SchemaVersion", SilKitRegistry::Config::v1::GetSchemaVersion());
+    Write("SchemaVersion", SilKitRegistry::Config::V1::GetSchemaVersion());
     NonDefaultWrite(obj.description, "Description", defaultObject.description);
     OptionalWrite(obj.listenUri, "ListenUri");
     OptionalWrite(obj.enableDomainSockets, "EnableDomainSockets");

@@ -601,7 +601,7 @@ void YamlReader::Read(SilKit::Config::HealthCheck& obj)
     OptionalRead(obj.hardResponseTimeout, "HardResponseTimeout");
 }
 //Registry
-void YamlReader::Read(SilKitRegistry::Config::v1::Experimental& obj)
+void YamlReader::Read(SilKitRegistry::Config::V1::Experimental& obj)
 {
     OptionalRead(obj.metrics, "Metrics");
 
@@ -614,7 +614,7 @@ void YamlReader::Read(SilKitRegistry::Config::v1::Experimental& obj)
     }
 }
 
-void YamlReader::Read(SilKitRegistry::Config::v1::RegistryConfiguration& obj)
+void YamlReader::Read(SilKitRegistry::Config::V1::RegistryConfiguration& obj)
 {
     OptionalRead(obj.schemaVersion, "SchemaVersion");
     OptionalRead(obj.description, "Description");
