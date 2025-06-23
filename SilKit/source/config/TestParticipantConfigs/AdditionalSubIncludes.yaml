@@ -1,6 +1,6 @@
 ---
 Description: Additional Subs
-schemaVersion: 0
+schemaVersion: 1
 DataSubscribers:
 - Name: Subscriber1
   Topic: Temperature

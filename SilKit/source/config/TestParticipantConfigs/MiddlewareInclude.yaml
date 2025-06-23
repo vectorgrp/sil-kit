@@ -1,6 +1,6 @@
 ---
 Description: Example Middleware config include to test YAML Parser
-schemaVersion: 0
+schemaVersion: 1
 Includes:
   Files:
     - MoreMiddlewareIncludes.yaml

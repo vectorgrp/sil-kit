@@ -125,7 +125,7 @@ TEST_F(Test_SpecificDiscoveryStore, lookup_entries_pubsub)
     noLabelTestDescriptor.SetServiceId(1);
 
     ServiceDescriptor labelTestDescriptor{baseDescriptor};
-    labelTestDescriptor.SetSupplementalDataItem(supplKeyDataPublisherPubLabels, "- key: kA\n  value: vA\n  kind: Mandatory");
+    labelTestDescriptor.SetSupplementalDataItem(supplKeyDataPublisherPubLabels, "- key: kA\n  value: vA\n  kind: 2");
     labelTestDescriptor.SetServiceId(2);
 
     TestWrapperSpecificDiscoveryStore testStore;
@@ -183,7 +183,7 @@ TEST_F(Test_SpecificDiscoveryStore, lookup_entries_rpc_client)
     noLabelTestDescriptor.SetServiceId(1);
 
     ServiceDescriptor labelTestDescriptor{baseDescriptor};
-    labelTestDescriptor.SetSupplementalDataItem(supplKeyRpcClientLabels, "- key: kA\n  value: vA\n  kind: Mandatory");
+    labelTestDescriptor.SetSupplementalDataItem(supplKeyRpcClientLabels, "- key: kA\n  value: vA\n  kind: 2");
     labelTestDescriptor.SetServiceId(2);
 
     TestWrapperSpecificDiscoveryStore testStore;
@@ -319,7 +319,7 @@ TEST_F(Test_SpecificDiscoveryStore, lookup_service_discovery_then_handler_labels
     baseDescriptor.SetSupplementalDataItem(Core::Discovery::controllerType, controllerTypeDataPublisher);
     baseDescriptor.SetSupplementalDataItem(supplKeyDataPublisherTopic, "Topic1");
     baseDescriptor.SetSupplementalDataItem(supplKeyDataPublisherMediaType, "text/json");
-    baseDescriptor.SetSupplementalDataItem(supplKeyDataPublisherPubLabels, "- key: kA\n  value: vA\n  kind: Mandatory");
+    baseDescriptor.SetSupplementalDataItem(supplKeyDataPublisherPubLabels, "- key: kA\n  value: vA\n  kind: 2");
 
     ServiceDescriptor noLabelTestDescriptor{baseDescriptor};
     noLabelTestDescriptor.SetServiceId(1);
@@ -353,8 +353,8 @@ TEST_F(Test_SpecificDiscoveryStore, lookup_service_discovery_then_handler_issues
 
     ServiceDescriptor labelTestDescriptor{baseDescriptor};
     labelTestDescriptor.SetSupplementalDataItem(supplKeyDataPublisherPubLabels,
-                                                " - key: kA\n   value: vA\n   kind: Mandatory\n - key: kB\n   value: vB\n   "
-                                                "kind: Mandatory\n - key: kC\n   value: vC\n   kind: Mandatory ");
+                                                " - key: kA\n   value: vA\n   kind: 2\n - key: kB\n   value: vB\n   "
+                                                "kind: 2\n - key: kC\n   value: vC\n   kind: 2 ");
     labelTestDescriptor.SetServiceId(2);
 
     testStore.ServiceChange(ServiceDiscoveryEvent::Type::ServiceCreated, labelTestDescriptor);
