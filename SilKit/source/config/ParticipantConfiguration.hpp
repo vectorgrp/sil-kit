@@ -360,8 +360,8 @@ struct ParticipantConfiguration : public IParticipantConfiguration
     //virtual auto ToYamlString() -> std::string override;
     //virtual auto ToJsonString() -> std::string override;
 
-    //! \brief Version of the JSON/YAML schema.
-    std::string schemaVersion{"1"};
+    //! \brief Version of the JSON/YAML schema. Currently is at 1
+    std::string schemaVersion{""};
     //! \brief An optional user description for documentation purposes. Currently unused.
     std::string description;
     //! \brief An optional file path.
@@ -437,7 +437,7 @@ struct Experimental
 struct RegistryConfiguration
 {
     std::string description{""};
-    std::string schemaVersion{1};
+    std::string schemaVersion{""};
     SilKit::Util::Optional<std::string> listenUri;
     SilKit::Util::Optional<bool> enableDomainSockets;
     SilKit::Util::Optional<std::string> dashboardUri;
