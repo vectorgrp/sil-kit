@@ -111,12 +111,15 @@ void YamlReader::Read(SilKit::Services::MatchingLabel& value)
 
 void YamlReader::Read(SilKit::Services::MatchingLabel::Kind& value)
 {
-    if (IsString("Mandatory"))
+
+    std::underlying_type_t<SilKit::Services::MatchingLabel::Kind> numericValue{};
+    Read(numericValue); // for reasons, we use numeric encoding for these
+    if (numericValue == 2)
         value = SilKit::Services::MatchingLabel::Kind::Mandatory;
-    else if (IsString("Optional"))
+    else if (numericValue == 1)
         value = SilKit::Services::MatchingLabel::Kind::Optional;
     else
-        throw MakeConfigurationError("Kind should be a string of Mandatory|Optional.");
+        throw MakeConfigurationError("MatchingLabel::Kind should be an integer of Mandatory(2)|Optional(1).");
 }
 
 
@@ -568,7 +571,9 @@ void YamlReader::Read(SilKit::Config::Experimental& obj)
 
 void YamlReader::Read(SilKit::Config::ParticipantConfiguration& obj)
 {
-    OptionalRead(obj.schemaVersion, "schemaVersion"); // note lower case schemaVersion
+
+    OptionalRead(obj.schemaVersion, "schemaVersion"); // legacy with lower case 's'
+    OptionalRead(obj.schemaVersion, "SchemaVersion");
     OptionalRead(obj.description, "Description");
     OptionalRead(obj.participantName, "ParticipantName");
 
@@ -611,13 +616,7 @@ void YamlReader::Read(SilKitRegistry::Config::v1::Experimental& obj)
 
 void YamlReader::Read(SilKitRegistry::Config::v1::RegistryConfiguration& obj)
 {
-    std::string schemaVersion;
-    OptionalRead(schemaVersion, "SchemaVersion");
-    if (!schemaVersion.empty() && schemaVersion != SilKitRegistry::Config::v1::GetSchemaVersion())
-    {
-        throw SilKit::ConfigurationError{"Unknown schema version '{}' found in registry configuration!"};
-    }
-
+    OptionalRead(obj.schemaVersion, "SchemaVersion");
     OptionalRead(obj.description, "Description");
     OptionalRead(obj.listenUri, "ListenUri");
     OptionalRead(obj.enableDomainSockets, "EnableDomainSockets");

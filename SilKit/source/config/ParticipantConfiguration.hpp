@@ -437,6 +437,7 @@ struct Experimental
 struct RegistryConfiguration
 {
     std::string description{""};
+    std::string schemaVersion{1};
     SilKit::Util::Optional<std::string> listenUri;
     SilKit::Util::Optional<bool> enableDomainSockets;
     SilKit::Util::Optional<std::string> dashboardUri;

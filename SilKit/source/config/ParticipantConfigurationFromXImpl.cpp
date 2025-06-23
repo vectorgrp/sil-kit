@@ -32,8 +32,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "FileHelpers.hpp"
 #include "ParticipantConfigurationFromXImpl.hpp"
 #include "silkit/services/logging/string_utils.hpp"
+
 #include "YamlParser.hpp"
 #include "YamlValidator.hpp"
+
+#include "fmt/format.h"
 
 namespace SilKit {
 namespace Config {
@@ -653,6 +656,10 @@ auto PaticipantConfigurationWithIncludes(const std::string& text,
                                        struct ConfigIncludeData& configData) -> SilKit::Config::ParticipantConfiguration
 {
     auto configuration = SilKit::Config::Deserialize<ParticipantConfiguration>(text);
+    if (!configuration.schemaVersion.empty() && configuration.schemaVersion != SilKitRegistry::Config::v1::GetSchemaVersion())
+    {
+        throw SilKit::ConfigurationError{fmt::format("Unknown schema version '{}' found in participant configuration!", configuration.schemaVersion)};
+    }
     configData.configBuffer.push_back(ConfigInclude("root", configuration));
 
     AppendToSearchPaths(configuration, configData);

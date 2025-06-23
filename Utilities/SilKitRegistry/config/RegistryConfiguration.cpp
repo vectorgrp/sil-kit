@@ -24,13 +24,19 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 // Internal SIL Kit Headers
 #include "YamlParser.hpp"
+#include "fmt/format.h"
 
 namespace SilKitRegistry {
 namespace Config {
 
 auto Parse(const std::string& string) -> v1::RegistryConfiguration
 {
-    return SilKit::Config::Deserialize<v1::RegistryConfiguration>(string);
+    auto&& configuration =  SilKit::Config::Deserialize<v1::RegistryConfiguration>(string);
+    if (!configuration.schemaVersion.empty() && configuration.schemaVersion != SilKitRegistry::Config::v1::GetSchemaVersion())
+    {
+        throw SilKit::ConfigurationError{fmt::format("Unknown schema version '{}' found in registry configuration!", configuration.schemaVersion)};
+    }
+    return configuration;
 }
 
 } // namespace Config

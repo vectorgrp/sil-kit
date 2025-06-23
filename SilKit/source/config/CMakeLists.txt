@@ -60,6 +60,7 @@ target_link_libraries(O_SilKit_Config
     PRIVATE O_SilKit_Util_Filesystem
     PRIVATE I_SilKit_Util_FileHelpers
     PUBLIC rapidyaml
+    PRIVATE fmt::fmt
 )
 
 target_include_directories(O_SilKit_Config

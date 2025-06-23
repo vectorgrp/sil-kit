@@ -22,10 +22,10 @@ void YamlWriter::Write(const SilKit::Services::MatchingLabel::Kind& obj)
     switch (obj)
     {
     case SilKit::Services::MatchingLabel::Kind::Mandatory:
-        Write("Mandatory");
+        Write(std::underlying_type_t<SilKit::Services::MatchingLabel::Kind>(obj));
         break;
     case SilKit::Services::MatchingLabel::Kind::Optional:
-        Write("Optional");
+        Write(std::underlying_type_t<SilKit::Services::MatchingLabel::Kind>(obj));
         break;
     }
 }
