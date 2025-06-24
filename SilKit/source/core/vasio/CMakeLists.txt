@@ -107,7 +107,9 @@ add_library(O_SilKit_Core_VAsio OBJECT
     RingBuffer.hpp
     RingBuffer.cpp
 
+    IPeerMetrics.hpp
     PeerMetrics.hpp
+    PeerMetrics.cpp
 )
 
 target_link_libraries(O_SilKit_Core_VAsio
