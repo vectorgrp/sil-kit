@@ -24,6 +24,7 @@ namespace Core {
 
 struct MockVAsioPeer : IVAsioPeer
 {
+
     // IVAsioPeer
 
     MOCK_METHOD(void, SendSilKitMsg, (SerializedMessage), (override));

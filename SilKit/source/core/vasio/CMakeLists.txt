@@ -169,7 +169,7 @@ add_silkit_test_to_executable(SilKitUnitTests SOURCES io/Test_AsioIoContext.cpp 
 add_silkit_test_to_executable(SilKitUnitTests SOURCES io/util/Test_TracingMacrosDetails.cpp LIBS S_SilKitImpl)
 
 add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_ConnectPeer.cpp LIBS S_SilKitImpl I_SilKit_Services_Logging_Testing I_SilKit_Core_VAsio_Testing)
-add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_ConnectKnownParticipants.cpp LIBS S_SilKitImpl I_SilKit_Services_Logging_Testing I_SilKit_Core_VAsio_Testing)
+add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_ConnectKnownParticipants.cpp LIBS S_SilKitImpl I_SilKit_Services_Logging_Testing I_SilKit_Core_VAsio_Testing I_SilKit_Core_VAsio_Testing)
 
 # Testing interoperability between different protocol versions requires testing on a higher level:
 # We instantiate a complete Participant<VAsioConnection> with a specific version
