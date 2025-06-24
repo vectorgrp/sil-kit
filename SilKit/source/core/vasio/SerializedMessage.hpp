@@ -105,6 +105,11 @@ public: // Receiving a SerializedMessage: from binary blob to SilKitMessage<T>
 
     void SetAggregationKind(MessageAggregationKind msgAggregationKind);
 
+    auto GetStorageSize() const -> size_t
+    {
+        return _buffer.PeekData().size();
+    }
+
 private:
     void WriteNetworkHeaders();
     void ReadNetworkHeaders();

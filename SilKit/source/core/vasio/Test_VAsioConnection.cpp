@@ -138,6 +138,7 @@ struct MockVAsioPeer : public IVAsioPeer
     MOCK_METHOD(ProtocolVersion, GetProtocolVersion, (), (const, override));
     MOCK_METHOD(void, Shutdown, (), (override));
     MOCK_METHOD(void, EnableAggregation, (), (override));
+    MOCK_METHOD(void, InitializeMetrics, (const std::string&, IMetricsManager*), (override));
 
     // IServiceEndpoint (via IVAsioPeer)
     MOCK_METHOD(void, SetServiceDescriptor, (const ServiceDescriptor& serviceDescriptor), (override));

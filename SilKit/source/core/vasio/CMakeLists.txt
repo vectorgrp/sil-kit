@@ -106,6 +106,8 @@ add_library(O_SilKit_Core_VAsio OBJECT
 
     RingBuffer.hpp
     RingBuffer.cpp
+
+    PeerMetrics.hpp
 )
 
 target_link_libraries(O_SilKit_Core_VAsio
@@ -118,7 +120,6 @@ target_include_directories(O_SilKit_Core_VAsio
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/io
 )
-
 
 if (SILKIT_BUILD_TESTS)
     add_library(I_SilKit_Core_VAsio_Testing INTERFACE

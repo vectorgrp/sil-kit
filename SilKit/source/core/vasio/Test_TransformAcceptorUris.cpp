@@ -194,6 +194,11 @@ struct DummyVAsioPeerBase : IVAsioPeer
     {
         throw MethodNotImplementedError{};
     }
+
+    void InitializeMetrics(const std::string&, VSilKit::IMetricsManager*) override
+    {
+        throw MethodNotImplementedError{};
+    }
 };
 
 struct AdvertisedVAsioPeer final : DummyVAsioPeerBase
