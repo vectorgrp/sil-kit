@@ -122,10 +122,6 @@ private: // IRawByteStreamListener
     void OnTimerExpired(ITimer& timer) override;
 
 private:
-
-    std::unique_ptr<VSilKit::IPeerMetrics> _peerMetrics;
-
-private:
     // ----------------------------------------
     // Private Members
     ProtocolVersion _protocolVersion{};
@@ -161,6 +157,7 @@ private:
     std::unique_ptr<ITimer> _flushTimer;
     const std::chrono::milliseconds _flushTimeout{50};
     bool _initialTimerStarted{false};
+    std::unique_ptr<VSilKit::IPeerMetrics> _peerMetrics;
 };
 
 // ================================================================================
