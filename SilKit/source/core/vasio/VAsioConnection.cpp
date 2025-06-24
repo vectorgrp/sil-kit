@@ -958,7 +958,7 @@ void VAsioConnection::ReceiveRemoteParticipantConnectRequest_Registry(IVAsioPeer
     }
 
     SerializedMessage buffer{msg};
-    destination->SendSilKitMsg(buffer);
+    destination->SendSilKitMsg(std::move(buffer));
 }
 
 void VAsioConnection::ReceiveRemoteParticipantConnectRequest_Participant(IVAsioPeer* peer,
@@ -1076,6 +1076,10 @@ void VAsioConnection::AssociateParticipantNameAndPeer(const std::string& simulat
         _participantNameToPeer[simulationName].insert({participantName, peer});
     }
 
+    if(_config.experimental.metrics.sinks.empty())
+    {
+        return;
+    }
     IStringListMetric* metric;
     auto metricNameBase = "Peer/" + simulationName + "/" + participantName;
 
@@ -1084,6 +1088,8 @@ void VAsioConnection::AssociateParticipantNameAndPeer(const std::string& simulat
 
     metric = _metricsManager->GetStringList(metricNameBase + "/RemoteEndpoint");
     metric->Add(peer->GetRemoteAddress());
+
+    peer->InitializeMetrics(_participantName, _metricsManager);
 }
 
 auto VAsioConnection::FindPeerByName(const std::string& simulationName,
@@ -1838,8 +1844,18 @@ auto VAsioConnection::MakeConnectPeer(const VAsioPeerInfo& peerInfo) -> std::uni
 
 auto VAsioConnection::MakeVAsioPeer(std::unique_ptr<IRawByteStream> stream) -> std::unique_ptr<IVAsioPeer>
 {
-    auto vAsioPeer{std::make_unique<VAsioPeer>(this, _ioContext.get(), std::move(stream), _logger)};
-    return vAsioPeer;
+
+    if(_config.experimental.metrics.sinks.empty())
+    {
+        return std::make_unique<VAsioPeer>(this, _ioContext.get(), std::move(stream), _logger,
+                                           std::move(std::make_unique<VSilKit::NoMetrics>()));
+    }
+    else
+    {
+        return std::make_unique<VAsioPeer>(this, _ioContext.get(), std::move(stream), _logger,
+                                           std::move(std::make_unique<VSilKit::PeerMetrics>()));
+
+    }
 }
 
 

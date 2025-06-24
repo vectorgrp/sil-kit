@@ -48,12 +48,13 @@ namespace SilKit {
 namespace Core {
 
 VAsioPeer::VAsioPeer(IVAsioPeerListener* listener, IIoContext* ioContext, std::unique_ptr<IRawByteStream> stream,
-                     Services::Logging::ILogger* logger)
+              Services::Logging::ILogger* logger, std::unique_ptr<VSilKit::IPeerMetrics> peerMetrics)
     : _listener{listener}
     , _ioContext{ioContext}
     , _socket{std::move(stream)}
     , _logger{logger}
     , _msgBuffer{4096}
+    , _peerMetrics{std::move(peerMetrics)}
 {
     _socket->SetListener(*this);
 
@@ -116,6 +117,9 @@ auto VAsioPeer::GetSimulationName() const -> const std::string&
 
 void VAsioPeer::SendSilKitMsg(SerializedMessage buffer)
 {
+    _peerMetrics->TxBytes(buffer);
+    _peerMetrics->TxPacket();
+
     auto blob = buffer.ReleaseStorage();
 
     if (_useAggregation && buffer.GetAggregationKind() == MessageAggregationKind::UserDataMessage)
@@ -287,6 +291,10 @@ void VAsioPeer::DispatchBuffer()
 
         SerializedMessage message{std::move(currentMsg)};
         message.SetProtocolVersion(GetProtocolVersion());
+
+        _peerMetrics->RxBytes(message);
+        _peerMetrics->RxPacket();
+
         _listener->OnSocketData(this, std::move(message));
 
         _currentMsgSize = 0u;
