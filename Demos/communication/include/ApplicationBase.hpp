@@ -517,7 +517,6 @@ private:
         _participant =
             SilKit::CreateParticipant(_participantConfiguration, _arguments.participantName, _arguments.registryUri);
         _systemMonitor = _participant->CreateSystemMonitor();
-        (void)SilKit::Config::ParticipantConfigurationToString(_participantConfiguration);
     }
 
     void SetupLifecycle()
