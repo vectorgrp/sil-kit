@@ -265,6 +265,9 @@ TEST_F(Test_ParticipantConfiguration, full_configuration_file_json_yaml_equal)
     auto participantConfigYaml = *std::dynamic_pointer_cast<ParticipantConfiguration>(yamlCfg);
 
     ASSERT_TRUE(participantConfigJson == participantConfigYaml);
+    EXPECT_EQ(participantConfigYaml.healthCheck.hardResponseTimeout.value(), 5000ms);
+    EXPECT_EQ(participantConfigYaml.healthCheck.softResponseTimeout.value(), 500ms);
+    EXPECT_EQ(participantConfigYaml.extensions.searchPathHints.at(1), "path/to/extensions2");
 }
 
 TEST_F(Test_ParticipantConfiguration, remote_metric_sink_collect_from_remote_fails)
