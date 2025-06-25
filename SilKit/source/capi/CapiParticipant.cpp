@@ -174,7 +174,6 @@ try
     {
         std::copy(std::cbegin(jsonString), std::cend(jsonString), *outputString);
     }
-    // since it is not possible to release the "raw" pointer from a shared_ptr, we copy it into our own raw pointer
 
     return SilKit_ReturnCode_SUCCESS;
 }
