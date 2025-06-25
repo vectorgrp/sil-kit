@@ -1,6 +1,6 @@
 ---
 Description: Example configuration to test a broken configuration with duplicate Controller Names
-schemaVersion: 0
+schemaVersion: 1
 Includes:
   Files:
     - DuplicateEthernetControllerNames.yaml

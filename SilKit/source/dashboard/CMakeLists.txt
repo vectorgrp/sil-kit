@@ -122,7 +122,6 @@ if(SILKIT_BUILD_DASHBOARD)
             S_SilKitImpl
             Threads::Threads
             oatpp
-            yaml-cpp
     )
 
     silkit_target_clean_compileflags(O_SilKit_Dashboard)

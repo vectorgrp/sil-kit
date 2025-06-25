@@ -40,7 +40,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 namespace SilKit {
 namespace Config {
-inline namespace v1 {
+inline namespace V1 {
 
 // ================================================================================
 //  Internal controller service
@@ -338,6 +338,17 @@ struct Experimental
 };
 
 // ================================================================================
+//  Includes
+// ================================================================================
+
+//! \brief Structure that contains experimental settings
+struct Includes
+{
+    std::vector<std::string> searchPathHints;
+    std::vector<std::string> files;
+};
+
+// ================================================================================
 //  Root
 // ================================================================================
 
@@ -349,8 +360,8 @@ struct ParticipantConfiguration : public IParticipantConfiguration
     //virtual auto ToYamlString() -> std::string override;
     //virtual auto ToJsonString() -> std::string override;
 
-    //! \brief Version of the JSON/YAML schema.
-    std::string schemaVersion{"1"};
+    //! \brief Version of the JSON/YAML schema. Currently is at 1
+    std::string schemaVersion{""};
     //! \brief An optional user description for documentation purposes. Currently unused.
     std::string description;
     //! \brief An optional file path.
@@ -374,6 +385,7 @@ struct ParticipantConfiguration : public IParticipantConfiguration
     HealthCheck healthCheck;
     Tracing tracing;
     Extensions extensions;
+    Includes includes;
     Middleware middleware;
     Experimental experimental;
 };
@@ -392,6 +404,7 @@ bool operator==(const MetricsSink& lhs, const MetricsSink& rhs);
 bool operator==(const Metrics& lhs, const Metrics& rhs);
 bool operator==(const Extensions& lhs, const Extensions& rhs);
 bool operator==(const Middleware& lhs, const Middleware& rhs);
+bool operator==(const Includes& lhs, const Includes& rhs);
 bool operator==(const ParticipantConfiguration& lhs, const ParticipantConfiguration& rhs);
 bool operator==(const TimeSynchronization& lhs, const TimeSynchronization& rhs);
 bool operator==(const Experimental& lhs, const Experimental& rhs);
@@ -403,6 +416,39 @@ auto operator<<(std::ostream& out, const Label& label) -> std::ostream&;
 bool operator<(const MetricsSink& lhs, const MetricsSink& rhs);
 bool operator>(const MetricsSink& lhs, const MetricsSink& rhs);
 
-} // namespace v1
+} // namespace V1
 } // namespace Config
 } // namespace SilKit
+
+namespace SilKitRegistry {
+namespace Config {
+namespace V1 {
+
+constexpr inline auto GetSchemaVersion() -> const char*
+{
+    return "1";
+}
+
+struct Experimental
+{
+    SilKit::Config::V1::Metrics metrics;
+};
+
+struct RegistryConfiguration
+{
+    std::string description{""};
+    std::string schemaVersion{""};
+    SilKit::Util::Optional<std::string> listenUri;
+    SilKit::Util::Optional<bool> enableDomainSockets;
+    SilKit::Util::Optional<std::string> dashboardUri;
+    SilKit::Config::Logging logging{};
+    Experimental experimental{};
+};
+
+bool operator==(const Experimental& lhs, const Experimental& rhs);
+
+
+
+} // namespace V1
+} // namespace Config
+} // namespace SilKitRegistry

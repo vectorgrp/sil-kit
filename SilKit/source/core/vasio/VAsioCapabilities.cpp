@@ -23,7 +23,7 @@
 
 #include "silkit/participant/exception.hpp"
 
-#include "yaml-cpp/yaml.h"
+#include "YamlParser.hpp"
 
 #include <algorithm>
 #include <exception>
@@ -107,33 +107,15 @@ void VAsioCapabilities::Parse(const std::string& string)
 
     try
     {
-        // we (mis-)use the YAML parser for JSON parsing
-        const auto node = YAML::Load(string);
-
         // the top-level node must be a sequence
-        if (!node.IsSequence())
+        // each item of the top-level sequence must be a map
+        auto caps = VSilKit::ParseCapabilities(string);
+        for (auto&& item : caps)
         {
-            throw SilKit::TypeConversionError{"failed to parse capabilities string: top-level must be a sequence"};
-        }
-
-        for (const auto& item : node)
-        {
-            // each item of the top-level sequence must be a map
-            if (!item.IsMap())
-            {
-                throw SilKit::TypeConversionError{"failed to parse capabilities string: capability must be a map"};
-            }
-
             // each item must contain a name key which has a scalar value
-            const auto name = item["name"];
-            if (!name.IsScalar())
-            {
-                throw SilKit::TypeConversionError{"failed to parse capabilities string: name must be a scalar"};
-            }
-
-            AddCapability(name.Scalar());
+            const auto name = item.at("name");
+            AddCapability(name);
         }
-
         UpdateCache();
     }
     catch (const std::exception& exception)

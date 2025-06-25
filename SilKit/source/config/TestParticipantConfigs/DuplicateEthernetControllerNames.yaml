@@ -1,6 +1,6 @@
 ---
 Description: Example configuration EthernetControllers with name
-schemaVersion: 0
+schemaVersion: 1
 EthernetControllers:
 - Name: ETH0
   Replay:

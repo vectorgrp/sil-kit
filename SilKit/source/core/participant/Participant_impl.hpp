@@ -511,7 +511,7 @@ auto Participant<SilKitConnectionT>::CreateDataPublisher(const std::string& cano
         GetConfigByControllerName(_participantConfig.dataPublishers, canonicalName);
     UpdateOptionalConfigValue(canonicalName, controllerConfig.topic, dataSpec.Topic());
     UpdateOptionalConfigValue(canonicalName, controllerConfig.labels,
-                              SilKit::Config::v1::Label::VectorFromPublicApi(dataSpec.Labels()));
+                              SilKit::Config::V1::Label::VectorFromPublicApi(dataSpec.Labels()));
 
     auto sortedConfigLabels = controllerConfig.labels.value();
     std::sort(sortedConfigLabels.begin(), sortedConfigLabels.end(),
@@ -582,7 +582,7 @@ auto Participant<SilKitConnectionT>::CreateDataSubscriber(
         GetConfigByControllerName(_participantConfig.dataSubscribers, canonicalName);
     UpdateOptionalConfigValue(canonicalName, controllerConfig.topic, dataSpec.Topic());
     UpdateOptionalConfigValue(canonicalName, controllerConfig.labels,
-                              SilKit::Config::v1::Label::VectorFromPublicApi(dataSpec.Labels()));
+                              SilKit::Config::V1::Label::VectorFromPublicApi(dataSpec.Labels()));
 
     auto sortedConfigLabels = controllerConfig.labels.value();
     std::sort(sortedConfigLabels.begin(), sortedConfigLabels.end(),
@@ -672,7 +672,7 @@ auto Participant<SilKitConnectionT>::CreateRpcClient(
         GetConfigByControllerName(_participantConfig.rpcClients, canonicalName);
     UpdateOptionalConfigValue(canonicalName, controllerConfig.functionName, dataSpec.FunctionName());
     UpdateOptionalConfigValue(canonicalName, controllerConfig.labels,
-                              SilKit::Config::v1::Label::VectorFromPublicApi(dataSpec.Labels()));
+                              SilKit::Config::V1::Label::VectorFromPublicApi(dataSpec.Labels()));
 
     auto sortedConfigLabels = controllerConfig.labels.value();
     std::sort(sortedConfigLabels.begin(), sortedConfigLabels.end(),
@@ -730,7 +730,7 @@ auto Participant<SilKitConnectionT>::CreateRpcServer(
         GetConfigByControllerName(_participantConfig.rpcServers, canonicalName);
     UpdateOptionalConfigValue(canonicalName, controllerConfig.functionName, dataSpec.FunctionName());
     UpdateOptionalConfigValue(canonicalName, controllerConfig.labels,
-                              SilKit::Config::v1::Label::VectorFromPublicApi(dataSpec.Labels()));
+                              SilKit::Config::V1::Label::VectorFromPublicApi(dataSpec.Labels()));
 
     auto sortedConfigLabels = controllerConfig.labels.value();
     std::sort(sortedConfigLabels.begin(), sortedConfigLabels.end(),
@@ -1895,14 +1895,14 @@ void Participant<SilKitConnectionT>::EvaluateAggregationInfo(bool isSyncSimStepH
 
     switch (_participantConfig.experimental.timeSynchronization.enableMessageAggregation)
     {
-    case SilKit::Config::v1::Aggregation::Off:
+    case SilKit::Config::V1::Aggregation::Off:
         // nothing to do
         break;
-    case SilKit::Config::v1::Aggregation::On:
+    case SilKit::Config::V1::Aggregation::On:
         // aggregate in both blocking and non-blocking case
         _connection.EnableAggregation();
         break;
-    case SilKit::Config::v1::Aggregation::Auto:
+    case SilKit::Config::V1::Aggregation::Auto:
         // aggregate in blocking case only
         if (isSyncSimStepHandler)
             _connection.EnableAggregation();

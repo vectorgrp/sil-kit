@@ -117,8 +117,8 @@ MAKE_FORMATTER(SilKit::Services::Rpc::FunctionCallResponse);
 MAKE_FORMATTER(SilKit::Services::MatchingLabel::Kind);
 MAKE_FORMATTER(SilKit::Services::MatchingLabel);
 
-MAKE_FORMATTER(SilKit::Config::v1::Label::Kind);
-MAKE_FORMATTER(SilKit::Config::v1::Label);
+MAKE_FORMATTER(SilKit::Config::V1::Label::Kind);
+MAKE_FORMATTER(SilKit::Config::V1::Label);
 
 MAKE_FORMATTER(SilKit::Core::ServiceDescriptor);
 MAKE_FORMATTER(SilKit::Core::ProtocolVersion);

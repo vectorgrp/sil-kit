@@ -19,72 +19,24 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
+#include "ParticipantConfiguration.hpp"
 #include "RegistryConfiguration.hpp"
-
-// SIL Kit Registry Headers
-#include "RegistryYamlConversion.hpp"
 
 // Internal SIL Kit Headers
 #include "YamlParser.hpp"
-
-// Third-Party Headers
 #include "fmt/format.h"
-#include "yaml-cpp/yaml.h"
-
-namespace SilKitRegistry {
-namespace Config {
-namespace V1 {
-
-bool operator==(const Experimental& lhs, const Experimental& rhs)
-{
-    return lhs.metrics == rhs.metrics;
-}
-
-} // namespace V1
-} // namespace Config
-} // namespace SilKitRegistry
 
 namespace SilKitRegistry {
 namespace Config {
 
 auto Parse(const std::string& string) -> V1::RegistryConfiguration
 {
-    YAML::Node node = YAML::Load(string);
-
-    if (node.IsNull())
+    auto&& configuration =  SilKit::Config::Deserialize<V1::RegistryConfiguration>(string);
+    if (!configuration.schemaVersion.empty() && configuration.schemaVersion != SilKitRegistry::Config::V1::GetSchemaVersion())
     {
-        return V1::RegistryConfiguration{};
+        throw SilKit::ConfigurationError{fmt::format("Unknown schema version '{}' found in registry configuration!", configuration.schemaVersion)};
     }
-
-    const auto schemaVersion = [&node]() -> std::string {
-        const auto schemaVersionNode = node["SchemaVersion"];
-
-        // if the 'SchemaVersion' is not set, assume a particular schema version.
-        if (schemaVersionNode.Type() == YAML::NodeType::Undefined)
-        {
-            return V1::GetSchemaVersion();
-        }
-
-        if (!schemaVersionNode.IsScalar())
-        {
-            throw SilKit::ConfigurationError{
-                "The 'SchemaVersion' field of the registry configuration must be a scalar value!"};
-        }
-
-        return schemaVersionNode.Scalar();
-    }();
-
-    if (schemaVersion == V1::GetSchemaVersion())
-    {
-        return SilKit::Config::from_yaml<V1::RegistryConfiguration>(node);
-    }
-
-    // After the 'active' schema version is bumped, parse and validate the then old configuration and transform it into
-    // the 'active' configuration version.  The 'active' configuration version is the one returned by this function, as
-    // stated in the namespace.
-
-    throw SilKit::ConfigurationError{
-        fmt::format("Unknown schema version '{}' found in registry configuration!", schemaVersion)};
+    return configuration;
 }
 
 } // namespace Config

@@ -88,7 +88,7 @@ TEST_F(Test_ParticipantConfiguration, full_configuration_file_with_includes)
     auto participantConfig = *std::dynamic_pointer_cast<ParticipantConfiguration>(cfg);
     auto participantConfigRef = *std::dynamic_pointer_cast<ParticipantConfiguration>(ref_cfg);
 
-    ASSERT_TRUE(participantConfig == participantConfigRef);
+    ASSERT_EQ(participantConfig, participantConfigRef);
 }
 
 TEST_F(Test_ParticipantConfiguration, participant_config_multiple_acceptor_uris)
@@ -258,14 +258,36 @@ TEST_F(Test_ParticipantConfiguration, full_configuration_file_json_yaml_equal)
 TEST_F(Test_ParticipantConfiguration, remote_metric_sink_collect_from_remote_fails)
 {
     constexpr auto configurationString = R"(
-Metrics:
-  CollectFromRemote: true
-  Sinks:
-    - Type: Remote
+Experimental:
+    Metrics:
+      CollectFromRemote: true
+      Sinks:
+        - Type: Remote
 )";
 
     ASSERT_THROW(SilKit::Config::ParticipantConfigurationFromStringImpl(configurationString),
                  SilKit::ConfigurationError);
+}
+
+void CheckEmpty(std::shared_ptr<SilKit::Config::IParticipantConfiguration> config)
+{
+    auto c = *std::dynamic_pointer_cast<ParticipantConfiguration>(config);
+    EXPECT_EQ(c.description, "");
+    ASSERT_EQ(c.participantName, "");
+    ASSERT_EQ(c.logging.sinks.size(), 0);
+    ASSERT_EQ(c.schemaVersion, "");
+}
+
+TEST_F(Test_ParticipantConfiguration, empty_json)
+{
+    auto&& config = SilKit::Config::ParticipantConfigurationFromStringImpl("{}");
+    CheckEmpty(config);
+}
+
+TEST_F(Test_ParticipantConfiguration, empty_yaml)
+{
+    auto&& config = SilKit::Config::ParticipantConfigurationFromStringImpl("");
+    CheckEmpty(config);
 }
 
 } // anonymous namespace
