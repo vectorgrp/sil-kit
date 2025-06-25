@@ -16,3 +16,14 @@ CanControllers:
   - Sink1
 - Name: MyCAN2
   Network: CAN2
+HealthCheck:
+  SoftResponseTimeout: 1234
+  HardResponseTimeout: 4567
+Extensions:
+  SearchPathHints:
+  - Foobar
+Tracing:
+  TraceSinks:
+  - Name: sink1
+    Type: Mdf4File
+    OutputPath: someFile.mf4
