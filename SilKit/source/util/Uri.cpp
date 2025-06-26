@@ -5,11 +5,13 @@
 #include "Uri.hpp"
 
 #include <cctype>
+#include <filesystem>
 
 #include "silkit/participant/exception.hpp"
 
 #include "fmt/format.h"
 
+namespace fs = std::filesystem;
 
 namespace {
 
@@ -154,8 +156,22 @@ auto Uri::Parse(std::string rawUri) -> Uri
 
     if (uri.Type() == UriType::Local)
     {
+#if defined(__QNX__)
         //must be a path, might contain ':' (currently not quoted)
+        if(!rawUri.empty() && !fs::path(rawUri).is_absolute())
+        {
+            // Make sure we always get a proper absolute Path
+            // Treat all relative paths as relative from CWD
+            uri._path = fs::current_path() / rawUri;
+        }
+        else
+        {
+            uri._path = rawUri;
+        }
+#else
         uri._path = rawUri;
+#endif
+
     }
     else
     {

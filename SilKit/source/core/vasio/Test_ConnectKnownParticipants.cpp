@@ -221,7 +221,6 @@ TEST_F(Test_ConnectKnownParticipants, direct_connect_fallback_to_remote_connect_
     ioContext.Run();
 }
 
-
 TEST_F(Test_ConnectKnownParticipants, remote_connect_timer_expiry_fallback_to_proxy)
 {
     auto MakeFailingConnectPeer{[this](const VAsioPeerInfo& peerInfo) { return MakeConnectPeerThatFails(peerInfo); }};
@@ -272,6 +271,47 @@ TEST_F(Test_ConnectKnownParticipants, remote_connect_timer_expiry_fallback_to_pr
     ioContext.Run();
 }
 
+TEST_F(Test_ConnectKnownParticipants, direct_connect_failure_qnx_with_windows_paths)
+{
+    auto MakeFailingConnectPeer{[this](const VAsioPeerInfo& peerInfo) { return MakeConnectPeerThatFails(peerInfo); }};
+
+    VAsioPeerInfo peerInfo;
+    peerInfo.participantName = "A";
+    peerInfo.participantId = SilKit::Util::Hash::Hash(peerInfo.participantName);
+    peerInfo.acceptorUris.emplace_back("local://C:\\\\tmp\\win.sock");
+    peerInfo.capabilities = "";
+
+    // Arrange
+
+    Sequence s1;
+
+    StrictMock<MockConnectionMethods> connectionMethods;
+    MockConnectKnownParticipantsListener listener;
+
+    EXPECT_CALL(connectionMethods, MakeConnectPeer(WithParticipantName(peerInfo.participantName)))
+        .InSequence(s1)
+        .WillOnce(MakeFailingConnectPeer);
+
+    EXPECT_CALL(connectionMethods, TryRemoteConnectRequest(WithParticipantName(peerInfo.participantName)))
+        .InSequence(s1)
+        .WillOnce(Return(false));
+
+    EXPECT_CALL(connectionMethods, TryProxyConnect(WithParticipantName(peerInfo.participantName)))
+        .InSequence(s1)
+        .WillOnce(Return(false));
+
+    EXPECT_CALL(listener, OnConnectKnownParticipantsFailure).Times(1).InSequence(s1);
+
+    // Act
+
+    ConnectKnownParticipants connectKnownParticipants{ioContext, connectionMethods, listener, settings};
+    connectKnownParticipants.SetLogger(logger);
+
+    connectKnownParticipants.SetKnownParticipants({peerInfo});
+    connectKnownParticipants.StartConnecting();
+
+    ioContext.Run();
+}
 
 TEST_F(Test_ConnectKnownParticipants, remote_connect_waits_for_replies_after_connecting_and_announcement_notifications)
 {
