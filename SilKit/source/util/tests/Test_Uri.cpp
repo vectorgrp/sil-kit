@@ -80,6 +80,29 @@ void CheckLocalUri(const std::string& uriString, const std::string& path)
 }
 
 
+#if defined(_WIN32)
+void CheckPlatformLocalPath()
+{
+    //Windows local paths (contains C:\)
+    auto uri = Uri::Parse(R"aw(local://C:\\temp\hello\ world")aw");
+    ASSERT_EQ(uri.Scheme(), "local");
+    ASSERT_EQ(uri.Host(), "");
+    ASSERT_EQ(uri.Port(), 0);
+    ASSERT_EQ(uri.Path(), R"aw(C:\\temp\hello\ world")aw");
+
+    // Check forward slash Paths
+    CheckLocalUri("local:///", "/");
+}
+#else
+// Assume Unix/Posix like local Paths
+void CheckPlatformLocalPath()
+{
+    CheckLocalUri("local:///one/two/three", "/one/two/three");
+    CheckLocalUri("local:///", "/");
+}
+#endif
+
+
 TEST(Test_Uri, parse_silkit_scheme)
 {
     CheckSilKitUri("silkit://localhost:8500", "localhost", 8500);
@@ -143,23 +166,6 @@ TEST(Test_Uri, parse_tcp_scheme)
                 8500);
 }
 
-
-TEST(Test_Uri, parse_local_scheme_posix_path)
-{
-    CheckLocalUri("local:///one/two/three", "/one/two/three");
-    CheckLocalUri("local:///", "/");
-}
-
-
-TEST(Test_Uri, parse_local_scheme_windows_path_slash)
-{
-    CheckLocalUri("local:///", "/");
-}
-
-
-TEST(Test_Uri, parse_local_scheme_windows_path_backslash) {}
-
-
 TEST(Test_Uri, parse_uris)
 {
     auto uri = Uri::Parse("silkit://hostname:1234/path");
@@ -200,13 +206,6 @@ TEST(Test_Uri, parse_uris)
     ASSERT_EQ(uri.Port(), 3456);
     ASSERT_EQ(uri.Path(), "");
 
-    //Windows local paths (contains C:\)
-    uri = Uri::Parse(R"aw(local://C:\\temp\hello\ world")aw");
-    ASSERT_EQ(uri.Scheme(), "local");
-    ASSERT_EQ(uri.Host(), "");
-    ASSERT_EQ(uri.Port(), 0);
-    ASSERT_EQ(uri.Path(), R"aw(C:\\temp\hello\ world")aw");
-
     // No Port given results in default port
     uri = Uri::Parse("silkit://localhost");
     ASSERT_EQ(uri.Scheme(), "silkit");
@@ -219,6 +218,8 @@ TEST(Test_Uri, parse_uris)
     ASSERT_EQ(uri.Host(), "localhost");
     ASSERT_EQ(uri.Port(), 0);
     ASSERT_EQ(uri.Path(), "");
+
+    CheckPlatformLocalPath();
 }
 
 
