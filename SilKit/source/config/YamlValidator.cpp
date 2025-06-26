@@ -43,10 +43,10 @@ inline auto to_string(ryml::csubstr stringView) -> std::string
     return {stringView.data(), stringView.size()};
 }
 
-//the rapidyaml visit_stacked does not accept reference types, so we implement it here
+// the rapidyaml visit_stacked does not accept reference types, so we implement it here
 
-template<typename VisitorRef>
-bool visit_stacked(ryml::ConstNodeRef& node, VisitorRef& visitor,  ryml::id_type indentation_level = 0)
+template <typename VisitorRef>
+bool visit_stacked(ryml::ConstNodeRef& node, VisitorRef& visitor, ryml::id_type indentation_level = 0)
 {
     ryml::id_type increment = 1;
     if (visitor(node, indentation_level))
@@ -87,6 +87,7 @@ inline auto splitString(std::string s, std::string delimiter) -> std::vector<std
 }
 
 const std::string schemaSeparator{"/"};
+
 const std::set<std::string> schemaPaths_v1 = {
     "/$schema",
     "/CanControllers",
@@ -389,6 +390,7 @@ const std::set<std::string> schemaPaths_v1 = {
     "/Tracing/TraceSources/Type",
 
 };
+
 std::set<std::string> reservedNames; // computed from schemaPaths
 
 auto DocumentRoot() -> std::string
@@ -440,7 +442,6 @@ auto MakePath(const std::string& parentEl, const std::string& elementName) -> st
     }
 }
 
-
 bool IsReservedElementName(const std::string& queryElement)
 {
     if (reservedNames.empty())
@@ -458,7 +459,8 @@ bool IsReservedElementName(const std::string& queryElement)
     const auto elementName = ElementName(queryElement);
     return reservedNames.count(elementName);
 }
-bool IsSchemaPath(const std::string& path) 
+
+bool IsSchemaPath(const std::string& path)
 {
     return schemaPaths_v1.count(path) > 0;
 }
@@ -482,10 +484,10 @@ struct ValidatingVisitor
         currentNodePath = DocumentRoot();
         nodePaths.push_back(currentNodePath);
     }
-  
+
     ValidatingVisitor() = delete;
-    ValidatingVisitor(const ValidatingVisitor& ) = delete;
-    ValidatingVisitor& operator=(const ValidatingVisitor& ) = delete;
+    ValidatingVisitor(const ValidatingVisitor&) = delete;
+    ValidatingVisitor& operator=(const ValidatingVisitor&) = delete;
 
     bool PathIsAlreadyDefined(const std::string& path)
     {
@@ -511,7 +513,7 @@ struct ValidatingVisitor
         return s.str();
     }
 
-    void push(ryml::ConstNodeRef node, ryml::id_type level)
+    void push(ryml::ConstNodeRef node, ryml::id_type /* level */)
     {
         if (!node.has_key())
         {
@@ -522,7 +524,7 @@ struct ValidatingVisitor
         auto nodePath = MakePath(currentNodePath, nodeKey);
         if (PathIsAlreadyDefined(nodePath))
         {
-            warnings << "At " << GetCurrentLocation(node) << ": Element \"" << nodePath  << "\""
+            warnings << "At " << GetCurrentLocation(node) << ": Element \"" << nodePath << "\""
                      << " is already defined in path \"" << currentNodePath << "\"\n";
             ok &= false;
         }
@@ -531,7 +533,8 @@ struct ValidatingVisitor
         currentNodePath = nodePaths.back();
         return;
     }
-    void pop(ryml::ConstNodeRef node, ryml::id_type level)
+
+    void pop(ryml::ConstNodeRef node, ryml::id_type /* level */)
     {
         if (node.has_key())
         {
@@ -556,16 +559,13 @@ struct ValidatingVisitor
             else
             {
                 // We only report error if the element is a reserved keyword
-                warnings << "At " << GetCurrentLocation(node)  << ": Element \"" << nodeName << "\""
+                warnings << "At " << GetCurrentLocation(node) << ": Element \"" << nodeName << "\""
                          << " is being ignored. It is not a sub-element of schema path \"";
             }
-
         }
-        
     }
-    void HandleSeq(const ryml::ConstNodeRef& node)
-    {
-    }
+
+    void HandleSeq(const ryml::ConstNodeRef& /* node */) {}
 
     void HandleVal(const ryml::ConstNodeRef& node)
     {
@@ -573,14 +573,13 @@ struct ValidatingVisitor
         auto valuePath = MakePath(currentNodePath, value);
         if (!IsSchemaPath(currentNodePath))
         {
-            warnings << "At " << GetCurrentLocation(node)  << ": Element \"" << value << "\""
+            warnings << "At " << GetCurrentLocation(node) << ": Element \"" << value << "\""
                      << " is not a valid sub-element of schema path \"" << ParentPath(currentNodePath) << "\"\n";
             ok &= false;
-
         }
     }
 
-    bool operator()(const ryml::ConstNodeRef& node, ryml::id_type level) 
+    bool operator()(const ryml::ConstNodeRef& node, ryml::id_type /* level */)
     {
         if ((node.has_key() && (node.is_map() || node.is_seq())) || node.is_keyval())
         {
@@ -606,11 +605,11 @@ struct ValidatingVisitor
         return ok;
     }
 };
+
 } // anonymous namespace
 
 namespace SilKit {
 namespace Config {
-
 
 bool ValidateWithSchema(const std::string& yamlString, std::ostream& warnings)
 {
@@ -620,24 +619,26 @@ bool ValidateWithSchema(const std::string& yamlString, std::ostream& warnings)
         options.locations(true);
 
         ryml::EventHandlerTree eventHandler{};
+
         auto parser = ryml::Parser(&eventHandler, options);
         parser.reserve_locations(100u);
+
         auto&& cinput = ryml::to_csubstr(yamlString);
         auto tree = ryml::parse_in_arena(&parser, cinput);
-
 
         auto root = tree.crootref();
         if (root.is_doc() && (root.is_map() || root.is_seq()))
         {
             std::string version;
             VSilKit::YamlReader reader{VSilKit::YamlReaderContext{parser, root}};
-            reader.ReadKeyValue(version,  "schemaVersion");
+            reader.ReadKeyValue(version, "schemaVersion");
             if (version != "1")
             {
                 warnings << "Cannot load schema with SchemaVersion='" << version << "'" << "\n";
                 return false;
             }
         }
+
         ValidatingVisitor visitor{parser, warnings};
         visit_stacked(root, visitor);
         return visitor.IsValid();
@@ -648,5 +649,6 @@ bool ValidateWithSchema(const std::string& yamlString, std::ostream& warnings)
         return false;
     }
 }
+
 } // namespace Config
 } // namespace SilKit
