@@ -5,103 +5,6 @@
 
 namespace VSilKit {
 
-bool IsValidChild(const ryml::ConstNodeRef& node, const std::string& name)
-{
-    return node.is_map() && !node.find_child(ryml::to_csubstr(name)).invalid();
-}
-
-bool YamlReader::IsValid() const
-{
-    return !_context.node.invalid();
-}
-
-bool YamlReader::IsMap() const
-{
-    return _context.node.is_map();
-}
-
-bool YamlReader::IsScalar() const
-{
-    return _context.node.is_val() || _context.node.is_keyval();
-}
-bool YamlReader::IsSequence() const
-{
-    return _context.node.is_seq();
-}
-bool YamlReader::IsExistingString(const char* str) const
-{
-    if (!_context.node.is_val())
-    {
-        return false;
-    }
-    return _context.node.val() == ryml::to_csubstr(str);
-}
-
-bool YamlReader::IsEmpty() const
-{
-    return _context.node.empty();
-}
-
-bool YamlReader::IsString(const char* string) const
-{
-    return IsScalar() && (_context.node.val() == ryml::to_csubstr(string));
-}
-
-auto YamlReader::MakeConfigurationError(const char* message) const -> SilKit::ConfigurationError
-{
-    const auto location = _context.parser.location(_context.node);
-
-    std::ostringstream s;
-
-    s << "error parsing configuration";
-    if (location.name.empty())
-    {
-        s << " file " << location.name << ": ";
-    }
-    else
-    {
-        s << " string: ";
-    }
-
-    s << "line " << location.line << " column " << location.col << ": " << message;
-
-    return SilKit::ConfigurationError{s.str()};
-}
-
-auto YamlReader::MakeYamlReader(ryml::ConstNodeRef node) const -> YamlReader
-{
-    auto ctx = _context;
-    ctx.node = node;
-    return {ctx};
-}
-
-auto YamlReader::GetChildSafe(const std::string& name) const -> YamlReader
-{
-    if (IsValidChild(_context.node, name))
-    {
-        return MakeYamlReader(_context.node.find_child(ryml::to_csubstr(name)));
-    }
-    else if (IsSequence())
-    {
-        for (const auto& child : _context.node.cchildren())
-        {
-            if (child.is_container() && IsValidChild(child, name))
-            {
-                return MakeYamlReader(child.find_child(ryml::to_csubstr(name)));
-            }
-        }
-    }
-    return MakeYamlReader({});
-}
-void YamlReader::OptionalRead(bool& val, const std::string& name)
-{
-    auto&& child = GetChildSafe(name);
-    if (child.IsValid())
-    {
-        child.Read(val);
-    }
-}
-
 void YamlReader::Read(SilKit::Services::MatchingLabel& value)
 {
     OptionalRead(value.key, "key");
@@ -111,7 +14,6 @@ void YamlReader::Read(SilKit::Services::MatchingLabel& value)
 
 void YamlReader::Read(SilKit::Services::MatchingLabel::Kind& value)
 {
-
     std::underlying_type_t<SilKit::Services::MatchingLabel::Kind> numericValue{};
     Read(numericValue); // for reasons, we use numeric encoding for these
     if (numericValue == 2)
@@ -294,10 +196,11 @@ void YamlReader::Read(SilKit::Config::Sink& obj)
 
     if (obj.type == SilKit::Config::Sink::Type::File)
     {
-        if (!IsValidChild(_context.node, "LogName"))
+        if (!HasKey("LogName"))
         {
             throw MakeConfigurationError("Sink of type Sink::Type::File requires a LogName");
         }
+
         ReadKeyValue(obj.logName, "LogName");
     }
 }
@@ -571,7 +474,6 @@ void YamlReader::Read(SilKit::Config::Experimental& obj)
 
 void YamlReader::Read(SilKit::Config::ParticipantConfiguration& obj)
 {
-
     OptionalRead(obj.schemaVersion, "schemaVersion"); // legacy with lower case 's'
     OptionalRead(obj.schemaVersion, "SchemaVersion");
     OptionalRead(obj.description, "Description");

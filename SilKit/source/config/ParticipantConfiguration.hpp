@@ -301,7 +301,8 @@ struct Middleware
     int connectAttempts{1}; //!<  Number of connection attempts to the registry a participant should perform.
     int tcpReceiveBufferSize{-1};
     int tcpSendBufferSize{-1};
-    bool tcpNoDelay{true}; //!< Setting this option to true disables Nagle's algorithm on all TCP/IP sockets. Defaults to true for performance reasons.
+    bool tcpNoDelay{
+        true}; //!< Setting this option to true disables Nagle's algorithm on all TCP/IP sockets. Defaults to true for performance reasons.
     bool tcpQuickAck{false}; //!< Setting this Linux specific flag disables delayed TCP/IP acknowledgements.
     bool enableDomainSockets{true}; //!< By default local domain socket is preferred to TCP/IP sockets.
     std::vector<std::string>
@@ -409,6 +410,7 @@ bool operator==(const ParticipantConfiguration& lhs, const ParticipantConfigurat
 bool operator==(const TimeSynchronization& lhs, const TimeSynchronization& rhs);
 bool operator==(const Experimental& lhs, const Experimental& rhs);
 bool operator==(const Label& lhs, const Label& rhs);
+bool operator==(const SimulatedNetwork& lhs, const SimulatedNetwork& rhs);
 
 auto operator<<(std::ostream& out, const Label::Kind& kind) -> std::ostream&;
 auto operator<<(std::ostream& out, const Label& label) -> std::ostream&;
@@ -446,8 +448,6 @@ struct RegistryConfiguration
 };
 
 bool operator==(const Experimental& lhs, const Experimental& rhs);
-
-
 
 } // namespace V1
 } // namespace Config

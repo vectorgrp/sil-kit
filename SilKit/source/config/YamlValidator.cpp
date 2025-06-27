@@ -630,7 +630,7 @@ bool ValidateWithSchema(const std::string& yamlString, std::ostream& warnings)
         if (root.is_doc() && (root.is_map() || root.is_seq()))
         {
             std::string version;
-            VSilKit::YamlReader reader{VSilKit::YamlReaderContext{parser, root}};
+            VSilKit::YamlReader reader{parser, root};
             reader.ReadKeyValue(version, "schemaVersion");
             if (version != "1")
             {
