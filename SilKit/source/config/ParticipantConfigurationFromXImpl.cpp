@@ -667,6 +667,11 @@ auto PaticipantConfigurationWithIncludes(const std::string& text, struct ConfigI
     -> SilKit::Config::ParticipantConfiguration
 {
     auto configuration = SilKit::Config::Deserialize<ParticipantConfiguration>(text);
+    if(configuration.schemaVersion.empty())
+    {
+        configuration.schemaVersion = SilKit::Config::GetSchemaVersion();
+    }
+
     if (!configuration.schemaVersion.empty()
         && configuration.schemaVersion != SilKitRegistry::Config::V1::GetSchemaVersion())
     {

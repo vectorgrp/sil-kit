@@ -126,6 +126,18 @@ CanControllers:
   - Sink1
 - Name: MyCAN2
   Network: CAN2
+HealthCheck:
+  SoftResponseTimeout: 1234
+  HardResponseTimeout: 4567
+Extensions:
+  SearchPathHints:
+  - Foobar
+Tracing:
+  TraceSinks:
+  - Name: sink1
+    Type: Mdf4File
+    OutputPath: someFile.mf4
+ 
     )raw";
 
     auto cfg = SilKit::Config::ParticipantConfigurationFromStringImpl(configString);
@@ -136,7 +148,7 @@ CanControllers:
     auto participantConfig = *std::dynamic_pointer_cast<ParticipantConfiguration>(cfg);
     auto participantConfigRef = *std::dynamic_pointer_cast<ParticipantConfiguration>(ref_cfg);
 
-    ASSERT_TRUE(participantConfig == participantConfigRef);
+    ASSERT_EQ(participantConfig, participantConfigRef);
 }
 TEST_F(Test_ParticipantConfiguration, participant_config_from_string_includes)
 {
@@ -253,6 +265,9 @@ TEST_F(Test_ParticipantConfiguration, full_configuration_file_json_yaml_equal)
     auto participantConfigYaml = *std::dynamic_pointer_cast<ParticipantConfiguration>(yamlCfg);
 
     ASSERT_TRUE(participantConfigJson == participantConfigYaml);
+    EXPECT_EQ(participantConfigYaml.healthCheck.hardResponseTimeout.value(), 5000ms);
+    EXPECT_EQ(participantConfigYaml.healthCheck.softResponseTimeout.value(), 500ms);
+    EXPECT_EQ(participantConfigYaml.extensions.searchPathHints.at(1), "path/to/extensions2");
 }
 
 TEST_F(Test_ParticipantConfiguration, remote_metric_sink_collect_from_remote_fails)

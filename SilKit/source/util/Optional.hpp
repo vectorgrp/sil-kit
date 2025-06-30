@@ -90,7 +90,7 @@ public:
         return _value;
     };
 
-    operator bool() const noexcept
+    explicit operator bool() const noexcept
     {
         return _has_value;
     }

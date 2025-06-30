@@ -353,6 +353,12 @@ struct Includes
 //  Root
 // ================================================================================
 
+//! \brief Current Schema version for ParticipantConfigurations
+constexpr inline auto GetSchemaVersion() -> const char*
+{
+    return "1";
+}
+
 //! \brief ParticipantConfiguration is the main configuration data object for a SIL Kit participant.
 struct ParticipantConfiguration : public IParticipantConfiguration
 {

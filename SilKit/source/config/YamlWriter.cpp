@@ -580,7 +580,7 @@ void YamlWriter::Write(const SilKit::Config::ParticipantConfiguration& obj)
 {
     static const SilKit::Config::ParticipantConfiguration defaultObj{};
     MakeMap();
-    WriteKeyValue("SchemaVersion", obj.schemaVersion);
+    WriteKeyValue("SchemaVersion", SilKit::Config::V1::GetSchemaVersion());
     OptionalWrite(obj.description, "Description");
     OptionalWrite(obj.participantName, "ParticipantName");
     OptionalWrite(obj.canControllers, "CanControllers");
@@ -593,8 +593,8 @@ void YamlWriter::Write(const SilKit::Config::ParticipantConfiguration& obj)
     OptionalWrite(obj.rpcClients, "RpcClients");
 
     NonDefaultWrite(obj.logging, "Logging", defaultObj.logging);
-    NonDefaultWrite(obj.healthCheck, "Extensions", defaultObj.healthCheck);
-    NonDefaultWrite(obj.tracing, "Extensions", defaultObj.tracing);
+    NonDefaultWrite(obj.healthCheck, "HealthCheck", defaultObj.healthCheck);
+    NonDefaultWrite(obj.tracing, "Tracing", defaultObj.tracing);
     NonDefaultWrite(obj.extensions, "Extensions", defaultObj.extensions);
     NonDefaultWrite(obj.middleware, "Middleware", defaultObj.middleware);
     NonDefaultWrite(obj.includes, "Includes", defaultObj.includes);
