@@ -19,12 +19,12 @@ namespace VSilKit {
 template <typename Impl>
 struct BasicYamlReader
 {
-    ryml::Parser& parser;
-    ryml::ConstNodeRef node;
+    ryml::Parser& _parser;
+    ryml::ConstNodeRef _node;
 
     BasicYamlReader(ryml::Parser& parser_, ryml::ConstNodeRef node_)
-        : parser(parser_)
-        , node(node_)
+        : _parser(parser_)
+        , _node(node_)
     {
     }
 
@@ -65,7 +65,7 @@ public:
     void OptionalRead(T& val, const std::string& name)
     {
         auto tmp = ryml::fmt::overflow_checked(val);
-        (void)node.get_if(ryml::to_csubstr(name), &tmp);
+        (void)_node.get_if(ryml::to_csubstr(name), &tmp);
     }
 
     template <typename ConfigT>
@@ -129,7 +129,7 @@ public:
     template <typename T>
     void Read(T& value)
     {
-        node >> value;
+        _node >> value;
     }
 
     template <typename Rep, typename Period>
@@ -144,7 +144,7 @@ public:
     template <typename T>
     void Read(std::vector<T>& val)
     {
-        for (auto&& i : node.cchildren())
+        for (auto&& i : _node.cchildren())
         {
             T element{};
             MakeImpl(i).Read(element);
@@ -155,46 +155,46 @@ public:
 protected:
     bool IsValid() const
     {
-        return !node.invalid();
+        return !_node.invalid();
     }
 
     bool IsMap() const
     {
-        return node.is_map();
+        return _node.is_map();
     }
 
     bool IsScalar() const
     {
-        return node.is_val() || node.is_keyval();
+        return _node.is_val() || _node.is_keyval();
     }
 
     bool IsSequence() const
     {
-        return node.is_seq();
+        return _node.is_seq();
     }
 
     bool IsExistingString(const char* str) const
     {
-        if (!node.is_val())
+        if (!_node.is_val())
         {
             return false;
         }
-        return node.val() == ryml::to_csubstr(str);
+        return _node.val() == ryml::to_csubstr(str);
     }
 
     bool IsEmpty() const
     {
-        return node.empty();
+        return _node.empty();
     }
 
     bool IsString(const char* string) const
     {
-        return IsScalar() && (node.val() == ryml::to_csubstr(string));
+        return IsScalar() && (_node.val() == ryml::to_csubstr(string));
     }
 
     bool HasKey(const std::string& name) const
     {
-        return HasKey(node, name);
+        return HasKey(_node, name);
     }
 
     static bool HasKey(ryml::ConstNodeRef node, const std::string& name)
@@ -204,7 +204,7 @@ protected:
 
     auto MakeConfigurationError(const char* message) const -> SilKit::ConfigurationError
     {
-        const auto location = parser.location(node);
+        const auto location = _parser.location(_node);
 
         std::ostringstream s;
 
@@ -227,12 +227,12 @@ protected:
     {
         if (HasKey(name))
         {
-            return MakeImpl(node.find_child(ryml::to_csubstr(name)));
+            return MakeImpl(_node.find_child(ryml::to_csubstr(name)));
         }
 
         if (IsSequence())
         {
-            for (const auto& child : node.cchildren())
+            for (const auto& child : _node.cchildren())
             {
                 if (child.is_container() && HasKey(child, name))
                 {
@@ -246,7 +246,7 @@ protected:
 
     auto MakeImpl(ryml::ConstNodeRef node_) const -> Impl
     {
-        return Impl{parser, node_};
+        return Impl{_parser, node_};
     }
 
 private:
