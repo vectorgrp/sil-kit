@@ -132,7 +132,6 @@ void Validate(const std::string& text)
 }
 
 
-
 // ================================================================================
 //  Helper functions to find and open config snippets
 // ================================================================================
@@ -145,7 +144,7 @@ std::string GetConfigParentPath(const std::string& configFile)
 
 void AppendToSearchPaths(const ParticipantConfiguration& config, ConfigIncludeData& configData)
 {
-    for (auto&& searchPath: config.includes.searchPathHints)
+    for (auto&& searchPath : config.includes.searchPathHints)
     {
         if (searchPath.empty())
         {
@@ -254,7 +253,8 @@ void MergeCacheSet(const std::set<T>& cache, std::vector<T>& root)
 // ================================================================================
 
 template <typename T>
-void CacheNonDefault(const T& defaultValue, const T& value, const std::string& configName, SilKit::Util::Optional<T>& cacheValue)
+void CacheNonDefault(const T& defaultValue, const T& value, const std::string& configName,
+                     SilKit::Util::Optional<T>& cacheValue)
 {
     if (defaultValue != value)
     {
@@ -282,28 +282,36 @@ void Cache(const Middleware& root, MiddlewareCache& cache)
         cache.acceptorUris = root.acceptorUris;
     }
     static const Middleware defaultObject;
-    CacheNonDefault(defaultObject.connectAttempts, root.connectAttempts, "Middleware.ConnectAttempts", cache.connectAttempts);
+    CacheNonDefault(defaultObject.connectAttempts, root.connectAttempts, "Middleware.ConnectAttempts",
+                    cache.connectAttempts);
     CacheNonDefault(defaultObject.tcpNoDelay, root.tcpNoDelay, "Middleware.TcpNoDelay", cache.tcpNoDelay);
     CacheNonDefault(defaultObject.tcpQuickAck, root.tcpQuickAck, "Middleware.TcpQuickAck", cache.tcpQuickAck);
-    CacheNonDefault(defaultObject.tcpReceiveBufferSize, root.tcpReceiveBufferSize, "Middleware.TcpReceiveBufferSize", cache.tcpReceiveBufferSize);
-    CacheNonDefault(defaultObject.tcpSendBufferSize, root.tcpSendBufferSize, "Middleware.TcpSendBufferSize", cache.tcpSendBufferSize);
-    CacheNonDefault(defaultObject.enableDomainSockets, root.enableDomainSockets, "Middleware.EnableDomainSockets", cache.enableDomainSockets);
-    CacheNonDefault(defaultObject.registryAsFallbackProxy, root.registryAsFallbackProxy, "Middleware.RegistryAsFallbackProxy", cache.registryAsFallbackProxy);
+    CacheNonDefault(defaultObject.tcpReceiveBufferSize, root.tcpReceiveBufferSize, "Middleware.TcpReceiveBufferSize",
+                    cache.tcpReceiveBufferSize);
+    CacheNonDefault(defaultObject.tcpSendBufferSize, root.tcpSendBufferSize, "Middleware.TcpSendBufferSize",
+                    cache.tcpSendBufferSize);
+    CacheNonDefault(defaultObject.enableDomainSockets, root.enableDomainSockets, "Middleware.EnableDomainSockets",
+                    cache.enableDomainSockets);
+    CacheNonDefault(defaultObject.registryAsFallbackProxy, root.registryAsFallbackProxy,
+                    "Middleware.RegistryAsFallbackProxy", cache.registryAsFallbackProxy);
     CacheNonDefault(defaultObject.registryUri, root.registryUri, "Middleware.RegistryUri", cache.registryUri);
-    CacheNonDefault(defaultObject.experimentalRemoteParticipantConnection, root.experimentalRemoteParticipantConnection, "Middleware.ExperimentalRemoteParticipantConnection",
-                       cache.experimentalRemoteParticipantConnection);
-    CacheNonDefault(defaultObject.connectTimeoutSeconds, root.connectTimeoutSeconds, "Middleware.ConnectTimeoutSeconds", cache.connectTimeoutSeconds);
+    CacheNonDefault(defaultObject.experimentalRemoteParticipantConnection, root.experimentalRemoteParticipantConnection,
+                    "Middleware.ExperimentalRemoteParticipantConnection",
+                    cache.experimentalRemoteParticipantConnection);
+    CacheNonDefault(defaultObject.connectTimeoutSeconds, root.connectTimeoutSeconds, "Middleware.ConnectTimeoutSeconds",
+                    cache.connectTimeoutSeconds);
 }
 void CacheLoggingOptions(const Logging& config, GlobalLogCache& cache)
 {
     const Logging defaultObject{};
     CacheNonDefault(defaultObject.flushLevel, config.flushLevel, "Logging.FlushLevel", cache.flushLevel);
-    CacheNonDefault(defaultObject.logFromRemotes, config.logFromRemotes, "Logging.LogFromRemotes", cache.logFromRemotes);
+    CacheNonDefault(defaultObject.logFromRemotes, config.logFromRemotes, "Logging.LogFromRemotes",
+                    cache.logFromRemotes);
 }
 
 void CacheLoggingSinks(const Logging& config, GlobalLogCache& cache)
 {
-    for (auto&& sink: config.sinks)
+    for (auto&& sink : config.sinks)
     {
         if (sink.type == Sink::Type::Stdout)
         {
@@ -351,16 +359,19 @@ void CacheLoggingSinks(const Logging& config, GlobalLogCache& cache)
 void Cache(const TimeSynchronization& root, TimeSynchronizationCache& cache)
 {
     static const TimeSynchronization defaultObject;
-    CacheNonDefault(defaultObject.animationFactor, root.animationFactor, "TimeSynchronization.AnimationFactor", cache.animationFactor);
-    CacheNonDefault(defaultObject.enableMessageAggregation, root.enableMessageAggregation, "TimeSynchronization.EnableMessageAggregation", cache.enableMessageAggregation);
+    CacheNonDefault(defaultObject.animationFactor, root.animationFactor, "TimeSynchronization.AnimationFactor",
+                    cache.animationFactor);
+    CacheNonDefault(defaultObject.enableMessageAggregation, root.enableMessageAggregation,
+                    "TimeSynchronization.EnableMessageAggregation", cache.enableMessageAggregation);
 }
 
 void Cache(const Metrics& root, MetricsCache& cache)
 {
     static const Metrics defaultObject;
-    CacheNonDefault(defaultObject.collectFromRemote, root.collectFromRemote, "Metrics.CollectFromRemote", cache.collectFromRemote);
+    CacheNonDefault(defaultObject.collectFromRemote, root.collectFromRemote, "Metrics.CollectFromRemote",
+                    cache.collectFromRemote);
 
-    for (const auto& sink: root.sinks)
+    for (const auto& sink : root.sinks)
     {
         if (sink.type == MetricsSink::Type::JsonFile)
         {
@@ -652,13 +663,15 @@ void ProcessIncludes(const ParticipantConfiguration& config, ConfigIncludeData& 
 }
 
 
-auto PaticipantConfigurationWithIncludes(const std::string& text,
-                                       struct ConfigIncludeData& configData) -> SilKit::Config::ParticipantConfiguration
+auto PaticipantConfigurationWithIncludes(const std::string& text, struct ConfigIncludeData& configData)
+    -> SilKit::Config::ParticipantConfiguration
 {
     auto configuration = SilKit::Config::Deserialize<ParticipantConfiguration>(text);
-    if (!configuration.schemaVersion.empty() && configuration.schemaVersion != SilKitRegistry::Config::V1::GetSchemaVersion())
+    if (!configuration.schemaVersion.empty()
+        && configuration.schemaVersion != SilKitRegistry::Config::V1::GetSchemaVersion())
     {
-        throw SilKit::ConfigurationError{fmt::format("Unknown schema version '{}' found in participant configuration!", configuration.schemaVersion)};
+        throw SilKit::ConfigurationError{fmt::format("Unknown schema version '{}' found in participant configuration!",
+                                                     configuration.schemaVersion)};
     }
     configData.configBuffer.push_back(ConfigInclude("root", configuration));
 
@@ -673,155 +686,12 @@ auto PaticipantConfigurationWithIncludes(const std::string& text,
 
 } // anonymous namespace
 
-// ================================================================================
-//  Implementation data types
-// ================================================================================
-bool operator==(const CanController& lhs, const CanController& rhs)
-{
-    return lhs.name == rhs.name && lhs.network == rhs.network && lhs.replay == rhs.replay
-           && lhs.useTraceSinks == rhs.useTraceSinks;
-}
-
-bool operator==(const LinController& lhs, const LinController& rhs)
-{
-    return lhs.name == rhs.name && lhs.network == rhs.network && lhs.useTraceSinks == rhs.useTraceSinks
-           && lhs.replay == rhs.replay;
-}
-
-bool operator==(const EthernetController& lhs, const EthernetController& rhs)
-{
-    return lhs.name == rhs.name && lhs.network == rhs.network && lhs.useTraceSinks == rhs.useTraceSinks
-           && lhs.replay == rhs.replay;
-}
-
-bool operator==(const FlexrayController& lhs, const FlexrayController& rhs)
-{
-    return lhs.name == rhs.name && lhs.network == rhs.network && lhs.clusterParameters == rhs.clusterParameters
-           && lhs.nodeParameters == rhs.nodeParameters && lhs.useTraceSinks == rhs.useTraceSinks
-           && lhs.replay == rhs.replay;
-}
-
-bool operator==(const DataPublisher& lhs, const DataPublisher& rhs)
-{
-    return lhs.useTraceSinks == rhs.useTraceSinks && lhs.replay == rhs.replay;
-}
-
-bool operator==(const DataSubscriber& lhs, const DataSubscriber& rhs)
-{
-    return lhs.useTraceSinks == rhs.useTraceSinks && lhs.replay == rhs.replay;
-}
-
-bool operator==(const RpcServer& lhs, const RpcServer& rhs)
-{
-    return lhs.useTraceSinks == rhs.useTraceSinks && lhs.replay == rhs.replay;
-}
-
-bool operator==(const RpcClient& lhs, const RpcClient& rhs)
-{
-    return lhs.useTraceSinks == rhs.useTraceSinks && lhs.replay == rhs.replay;
-}
-
-bool operator==(const HealthCheck& lhs, const HealthCheck& rhs)
-{
-    return lhs.softResponseTimeout == rhs.softResponseTimeout && lhs.hardResponseTimeout == rhs.hardResponseTimeout;
-}
-
-bool operator==(const Tracing& lhs, const Tracing& rhs)
-{
-    return lhs.traceSinks == rhs.traceSinks && lhs.traceSources == rhs.traceSources;
-}
-
-bool operator==(const MetricsSink& lhs, const MetricsSink& rhs)
-{
-    return lhs.type == rhs.type && lhs.name == rhs.name;
-}
-
-bool operator==(const Metrics& lhs, const Metrics& rhs)
-{
-    return lhs.sinks == rhs.sinks && lhs.collectFromRemote == rhs.collectFromRemote;
-}
-
-bool operator==(const Extensions& lhs, const Extensions& rhs)
-{
-    return lhs.searchPathHints == rhs.searchPathHints;
-}
-
-
-bool operator==(const Middleware& lhs, const Middleware& rhs)
-{
-    return lhs.registryUri == rhs.registryUri && lhs.connectAttempts == rhs.connectAttempts
-           && lhs.enableDomainSockets == rhs.enableDomainSockets && lhs.tcpNoDelay == rhs.tcpNoDelay
-           && lhs.tcpQuickAck == rhs.tcpQuickAck && lhs.tcpReceiveBufferSize == rhs.tcpReceiveBufferSize
-           && lhs.tcpSendBufferSize == rhs.tcpSendBufferSize && lhs.acceptorUris == rhs.acceptorUris
-           && lhs.registryAsFallbackProxy == rhs.registryAsFallbackProxy
-           && lhs.connectTimeoutSeconds == rhs.connectTimeoutSeconds
-           && lhs.experimentalRemoteParticipantConnection == rhs.experimentalRemoteParticipantConnection;
-}
-
-bool operator==(const Includes& lhs, const Includes& rhs)
-{
-    return lhs.files == rhs.files && lhs.searchPathHints == rhs.searchPathHints;
-}
-
-bool operator==(const ParticipantConfiguration& lhs, const ParticipantConfiguration& rhs)
-{
-    return lhs.participantName == rhs.participantName && lhs.canControllers == rhs.canControllers
-           && lhs.linControllers == rhs.linControllers && lhs.ethernetControllers == rhs.ethernetControllers
-           && lhs.flexrayControllers == rhs.flexrayControllers && lhs.dataPublishers == rhs.dataPublishers
-           && lhs.dataSubscribers == rhs.dataSubscribers && lhs.rpcClients == rhs.rpcClients
-           && lhs.rpcServers == rhs.rpcServers && lhs.logging == rhs.logging && lhs.healthCheck == rhs.healthCheck
-           && lhs.tracing == rhs.tracing && lhs.extensions == rhs.extensions && lhs.experimental == rhs.experimental && lhs.includes == rhs.includes;
-}
-
-bool operator==(const TimeSynchronization& lhs, const TimeSynchronization& rhs)
-{
-    return lhs.animationFactor == rhs.animationFactor && lhs.enableMessageAggregation == rhs.enableMessageAggregation;
-}
-
-bool operator==(const Experimental& lhs, const Experimental& rhs)
-{
-    return lhs.timeSynchronization == rhs.timeSynchronization && lhs.metrics == rhs.metrics;
-}
-
-bool operator<(const MetricsSink& lhs, const MetricsSink& rhs)
-{
-    return std::make_tuple(lhs.type, lhs.name) < std::make_tuple(rhs.type, rhs.name);
-}
-
-bool operator>(const MetricsSink& lhs, const MetricsSink& rhs)
-{
-    return !(lhs < rhs);
-}
-
-bool operator==(const Label& lhs, const Label& rhs)
-{
-    return lhs.key == rhs.key && lhs.value == rhs.value && lhs.kind == rhs.kind;
-}
-
-auto operator<<(std::ostream& out, const Label::Kind& kind) -> std::ostream&
-{
-    switch (kind)
-    {
-    case Label::Kind::Mandatory:
-        return out << "Mandatory";
-    case Label::Kind::Optional:
-        return out << "Optional";
-    default:
-        return out << "MatchingLabel::Kind(" << static_cast<std::underlying_type_t<Label::Kind>>(kind) << ")";
-    }
-}
-
-auto operator<<(std::ostream& out, const Label& label) -> std::ostream&
-{
-    return out << "MatchingLabel{" << label.key << ", " << label.value << ", " << label.kind << "}";
-}
-
 } // namespace V1
-
 
 // ============================================================================
 // Interface Layer functions
 // ============================================================================
+
 auto ParticipantConfigurationFromStringImpl(const std::string& text)
     -> std::shared_ptr<SilKit::Config::IParticipantConfiguration>
 {
@@ -846,17 +716,3 @@ auto ParticipantConfigurationFromFileImpl(const std::string& filename)
 
 } // namespace Config
 } // namespace SilKit
-
-namespace SilKitRegistry {
-namespace Config {
-namespace V1 {
-
-bool operator==(const Experimental& lhs, const Experimental& rhs)
-{
-    return lhs.metrics == rhs.metrics;
-}
-
-} // namespace V1
-} // namespace Config
-} // namespace SilKitRegistry
-

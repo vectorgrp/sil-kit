@@ -1,4 +1,5 @@
 #pragma once
+
 // SPDX-FileCopyrightText: 2025 Vector Informatik GmbH
 //
 // SPDX-License-Identifier: MIT
@@ -15,40 +16,21 @@
 
 namespace VSilKit {
 
-//Utilities
-bool IsValidChild(const ryml::ConstNodeRef& node, const std::string& name);
-
-struct YamlReaderContext
+template <typename Impl>
+class BasicYamlReader
 {
-    ryml::Parser& parser;
-    ryml::ConstNodeRef node;
-};
-
-struct YamlReader
-{
-    YamlReaderContext _context;
+protected:
+    ryml::Parser& _parser;
+    ryml::ConstNodeRef _node;
 
 public:
-    YamlReader(YamlReaderContext cursor)
-        : _context{std::move(cursor)}
+    BasicYamlReader(ryml::Parser& parser_, ryml::ConstNodeRef node_)
+        : _parser(parser_)
+        , _node(node_)
     {
     }
 
-private:
-    // Helpers
-    bool IsValid() const;
-    bool IsMap() const;
-    bool IsScalar() const;
-    bool IsSequence() const;
-    bool IsExistingString(const char* str) const;
-    bool IsEmpty() const;
-    bool IsString(const char* string) const;
-    auto MakeConfigurationError(const char* message) const -> SilKit::ConfigurationError;
-    auto GetChildSafe(const std::string& name) const -> YamlReader;
-    auto MakeYamlReader(ryml::ConstNodeRef node) const -> YamlReader;
-
-private:
-    // Parsing utils
+public:
     template <typename T, typename std::enable_if_t<!std::is_integral<T>::value, bool> = true>
     void OptionalRead(T& val, const std::string& name)
     {
@@ -59,16 +41,12 @@ private:
         }
     }
 
-    void OptionalRead(bool& val, const std::string& name);
-
-    template <typename T>
-    void Read(std::vector<T>& val)
+    void OptionalRead(bool& val, const std::string& name)
     {
-        for (auto&& i : _context.node.cchildren())
+        auto&& child = GetChildSafe(name);
+        if (child.IsValid())
         {
-            T element{};
-            MakeYamlReader(i).Read(element);
-            val.emplace_back(std::move(element));
+            child.Read(val);
         }
     }
 
@@ -89,17 +67,7 @@ private:
     void OptionalRead(T& val, const std::string& name)
     {
         auto tmp = ryml::fmt::overflow_checked(val);
-        (void)_context.node.get_if(ryml::to_csubstr(name), &tmp);
-    }
-
-
-    template <typename T>
-    void ReadController(T& obj)
-    {
-        ReadKeyValue(obj.name, "Name");
-        OptionalRead(obj.network, "Network");
-        OptionalRead(obj.useTraceSinks, "UseTraceSinks");
-        OptionalRead(obj.replay, "Replay");
+        (void)_node.get_if(ryml::to_csubstr(name), &tmp);
     }
 
     template <typename ConfigT>
@@ -120,7 +88,7 @@ private:
         std::copy_if(deprecatedFieldNames.begin(), deprecatedFieldNames.end(),
                      std::back_inserter(presentDeprecatedFieldNames), hasChild);
 
-        if (IsValidChild(_context.node, fieldName) && presentDeprecatedFieldNames.size() >= 1)
+        if (HasKey(fieldName) && presentDeprecatedFieldNames.size() >= 1)
         {
             std::stringstream ss;
             ss << "The key \"" << fieldName << "\" and the deprecated alternatives";
@@ -150,13 +118,22 @@ private:
             OptionalRead(value, deprecatedFieldName);
         }
     }
+
+public:
     template <typename T>
-    void Read(T& value)
+    void ReadKeyValue(T& value, const std::string& name)
     {
-        _context.node >> value;
+        auto&& child = GetChildSafe(name);
+        child.Read(value);
     }
 
 public:
+    template <typename T>
+    void Read(T& value)
+    {
+        _node >> value;
+    }
+
     template <typename Rep, typename Period>
     void Read(std::chrono::duration<Rep, Period>& obj)
     {
@@ -165,6 +142,143 @@ public:
         Read(tmp);
         obj = std::chrono::milliseconds{value};
     }
+
+    template <typename T>
+    void Read(std::vector<T>& val)
+    {
+        for (auto&& i : _node.cchildren())
+        {
+            T element{};
+            MakeImpl(i).Read(element);
+            val.emplace_back(std::move(element));
+        }
+    }
+
+protected:
+    bool IsValid() const
+    {
+        return !_node.invalid();
+    }
+
+    bool IsMap() const
+    {
+        return _node.is_map();
+    }
+
+    bool IsScalar() const
+    {
+        return _node.is_val() || _node.is_keyval();
+    }
+
+    bool IsSequence() const
+    {
+        return _node.is_seq();
+    }
+
+    bool IsExistingString(const char* str) const
+    {
+        if (!_node.is_val())
+        {
+            return false;
+        }
+        return _node.val() == ryml::to_csubstr(str);
+    }
+
+    bool IsEmpty() const
+    {
+        return _node.empty();
+    }
+
+    bool IsString(const char* string) const
+    {
+        return IsScalar() && (_node.val() == ryml::to_csubstr(string));
+    }
+
+    bool HasKey(const std::string& name) const
+    {
+        return HasKey(_node, name);
+    }
+
+    static bool HasKey(ryml::ConstNodeRef node, const std::string& name)
+    {
+        return node.is_map() && !node.find_child(ryml::to_csubstr(name)).invalid();
+    }
+
+    auto MakeConfigurationError(const char* message) const -> SilKit::ConfigurationError
+    {
+        const auto location = _parser.location(_node);
+
+        std::ostringstream s;
+
+        s << "error parsing configuration";
+        if (location.name.empty())
+        {
+            s << " file " << location.name << ": ";
+        }
+        else
+        {
+            s << " string: ";
+        }
+
+        s << "line " << location.line << " column " << location.col << ": " << message;
+
+        return SilKit::ConfigurationError{s.str()};
+    }
+
+    auto GetChildSafe(const std::string& name) const -> Impl
+    {
+        if (HasKey(name))
+        {
+            return MakeImpl(_node.find_child(ryml::to_csubstr(name)));
+        }
+
+        if (IsSequence())
+        {
+            for (const auto& child : _node.cchildren())
+            {
+                if (child.is_container() && HasKey(child, name))
+                {
+                    return MakeImpl(child.find_child(ryml::to_csubstr(name)));
+                }
+            }
+        }
+
+        return MakeImpl({});
+    }
+
+    auto MakeImpl(ryml::ConstNodeRef node_) const -> Impl
+    {
+        return Impl{_parser, node_};
+    }
+
+private:
+    auto AsImpl() -> Impl&
+    {
+        return static_cast<Impl&>(*this);
+    }
+
+    auto AsImpl() const -> const Impl&
+    {
+        return static_cast<const Impl&>(*this);
+    }
+};
+
+struct YamlReader : BasicYamlReader<YamlReader>
+{
+    using BasicYamlReader::BasicYamlReader;
+    using BasicYamlReader::Read;
+
+protected: // Parsing utils
+    template <typename T>
+    void ReadController(T& obj)
+    {
+        ReadKeyValue(obj.name, "Name");
+        OptionalRead(obj.network, "Network");
+        OptionalRead(obj.useTraceSinks, "UseTraceSinks");
+        OptionalRead(obj.replay, "Replay");
+    }
+
+public:
     void Read(SilKit::Services::MatchingLabel& value);
     void Read(SilKit::Services::MatchingLabel::Kind& value);
     void Read(SilKit::Services::Logging::Level& obj);
@@ -207,25 +321,10 @@ public:
     void Read(SilKit::Config::Experimental& obj);
     void Read(SilKit::Config::ParticipantConfiguration& obj);
     void Read(SilKit::Config::HealthCheck& obj);
+
     //Registry
     void Read(SilKitRegistry::Config::V1::Experimental& obj);
     void Read(SilKitRegistry::Config::V1::RegistryConfiguration& obj);
-
-public:
-    //main parsing
-    template <typename T>
-    void ReadAll(T& value)
-    {
-        Read(value);
-    }
-
-    // XXX only needed in YamlValidator
-    template <typename T>
-    void ReadKeyValue(T& value, const std::string& name)
-    {
-        auto&& child = GetChildSafe(name);
-        child.Read(value);
-    }
 };
 
 } // namespace VSilKit

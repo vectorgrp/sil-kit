@@ -14,66 +14,25 @@
 #include "ParticipantConfiguration.hpp"
 
 namespace VSilKit {
-// Writer
-inline void MakeMap(ryml::NodeRef& node)
-{
-    node |= ryml::MAP;
-}
 
-struct YamlWriter
+template <typename Impl>
+struct BasicYamlWriter
 {
-    ryml::NodeRef _node;
+    ryml::NodeRef node;
 
 public:
-    YamlWriter(ryml::NodeRef node)
-        : _node{std::move(node)}
+    BasicYamlWriter(ryml::NodeRef node_)
+        : node(node_)
     {
     }
 
 public:
-    // utilities, also used in unit testing
-    template <typename T>
-    void Write(const std::string& name, const T& val)
-    {
-        if (!_node.is_map())
-        {
-            throw SilKit::ConfigurationError("Parse error: trying to access child of something not a map");
-        }
-
-        YamlWriter writer{_node.append_child() << ryml::key(name)};
-        writer.Write(val);
-    }
-
-    template <typename T>
-    void Write(const std::vector<T>& val)
-    {
-        _node |= ryml::SEQ;
-        for (auto&& el : val)
-        {
-            YamlWriter writer{_node.append_child()};
-            writer.Write(el);
-        }
-    }
-
-    template <typename T>
-    void Write(const std::string& name, const std::vector<T>& val)
-    {
-        YamlWriter writer{_node.append_child() << ryml::key(name)};
-        writer.Write(val);
-    }
-
-    template <typename T>
-    void Write(const T& val)
-    {
-        _node << val;
-    }
-
     template <typename T>
     void OptionalWrite(const SilKit::Util::Optional<T>& val, const std::string& name)
     {
         if (val.has_value())
         {
-            Write(name, val.value());
+            WriteKeyValue(name, val.value());
         }
     }
 
@@ -82,7 +41,7 @@ public:
     {
         if (!val.empty())
         {
-            Write(name, val);
+            WriteKeyValue(name, val);
         }
     }
 
@@ -90,26 +49,93 @@ public:
     {
         if (!val.empty())
         {
-            Write(name, val);
+            WriteKeyValue(name, val);
         }
     }
-
 
     template <typename T>
     void NonDefaultWrite(const T& val, const std::string& name, const T& defaultValue)
     {
         if (!(val == defaultValue))
         {
-            YamlWriter writer{_node.append_child() << ryml::key(name)};
-            writer.Write(val);
+            WriteKeyValue(name, val);
         }
     }
 
+    template <typename T>
+    void WriteKeyValue(const std::string& name, const T& val)
+    {
+        if (!node.is_map())
+        {
+            throw SilKit::ConfigurationError("Parse error: trying to access child of something not a map");
+        }
+
+        auto writer = MakeImpl(node.append_child() << ryml::key(name));
+        writer.Write(val);
+    }
+
+    template <typename T>
+    void Write(const T& val)
+    {
+        node << val;
+    }
+
+    template <typename T>
+    void Write(const std::vector<T>& val)
+    {
+        node |= ryml::SEQ;
+        for (auto&& el : val)
+        {
+            auto writer = MakeImpl(node.append_child());
+            writer.Write(el);
+        }
+    }
+
+protected:
+    void MakeMap()
+    {
+        node |= ryml::MAP;
+    }
+
+    auto MakeConfigurationError(const char* message) const -> SilKit::ConfigurationError
+    {
+        std::ostringstream s;
+
+        s << "error writing configuration: " << message;
+
+        return SilKit::ConfigurationError{s.str()};
+    }
+
+protected:
+    auto MakeImpl(ryml::NodeRef node_) const -> Impl
+    {
+        return Impl{node_};
+    }
+
+private:
+    auto AsImpl() -> Impl&
+    {
+        return static_cast<Impl&>(*this);
+    }
+
+    auto AsImpl() const -> const Impl&
+    {
+        return static_cast<const Impl&>(*this);
+    }
+};
+
+struct YamlWriter : BasicYamlWriter<YamlWriter>
+{
+    using BasicYamlWriter::BasicYamlWriter;
+    using BasicYamlWriter::OptionalWrite;
+    using BasicYamlWriter::Write;
+
+public:
     void OptionalWrite(const SilKit::Config::Replay& value, const std::string& name)
     {
         if (value.useTraceSource.size() > 0)
         {
-            Write(name, value);
+            WriteKeyValue(name, value);
         }
     }
 
@@ -161,4 +187,5 @@ public:
     void Write(const SilKitRegistry::Config::V1::Experimental& obj);
     void Write(const SilKitRegistry::Config::V1::RegistryConfiguration& obj);
 };
+
 } // namespace VSilKit

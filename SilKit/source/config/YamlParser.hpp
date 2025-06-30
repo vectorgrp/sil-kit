@@ -29,7 +29,7 @@ namespace Config {
 // Configuration Parsing
 //////////////////////////////////////////////////////////////////////
 
-template <typename T>
+template <typename T, typename R = VSilKit::YamlReader>
 auto Deserialize(const std::string& input) -> T
 {
     if (input.empty())
@@ -49,9 +49,9 @@ auto Deserialize(const std::string& input) -> T
         auto tree = ryml::parse_in_arena(&parser, cinput);
         auto root = tree.crootref();
 
-        VSilKit::YamlReader reader{{parser, root}};
+        R reader{parser, root};
         T result;
-        reader.ReadAll(result);
+        reader.Read(result);
         return result;
     }
     catch (const std::exception& ex)
@@ -65,20 +65,20 @@ auto Deserialize(const std::string& input) -> T
 }
 
 
-template <typename T>
+template <typename T, typename W = VSilKit::YamlWriter>
 auto Serialize(const T& input) -> std::string
 {
     ryml::Tree t;
-    VSilKit::YamlWriter writer{t.rootref()};
+    W writer{t.rootref()};
     writer.Write(input);
     return ryml::emitrs_yaml<std::string>(t);
 }
 
-template <typename T>
+template <typename T, typename W = VSilKit::YamlWriter>
 auto SerializeAsJson(const T& input) -> std::string
 {
     ryml::Tree t;
-    VSilKit::YamlWriter writer{t.rootref()};
+    W writer{t.rootref()};
     writer.Write(input);
     return ryml::emitrs_json<std::string>(t);
 }

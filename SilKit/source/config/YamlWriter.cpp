@@ -5,6 +5,7 @@
 #include "YamlWriter.hpp"
 
 namespace VSilKit {
+
 void YamlWriter::Write(const std::chrono::milliseconds& obj)
 {
     Write(std::to_string(obj.count()));
@@ -30,13 +31,12 @@ void YamlWriter::Write(const SilKit::Services::MatchingLabel::Kind& obj)
     }
 }
 
-
 void YamlWriter::Write(const SilKit::Services::MatchingLabel& obj)
 {
-    MakeMap(_node);
-    Write("key", obj.key);
-    Write("value", obj.value);
-    Write("kind", obj.kind);
+    MakeMap();
+    WriteKeyValue("key", obj.key);
+    WriteKeyValue("value", obj.value);
+    WriteKeyValue("kind", obj.kind);
 }
 
 
@@ -72,69 +72,69 @@ void YamlWriter::Write(const SilKit::Services::Logging::Level& obj)
 void YamlWriter::Write(const SilKit::Services::Flexray::FlexrayClusterParameters& obj)
 {
     // Parse parameters as an int value; uint8_t would be interpreted as a character
-    MakeMap(_node);
-    Write("gColdstartAttempts", obj.gColdstartAttempts);
-    Write("gCycleCountMax", obj.gCycleCountMax);
-    Write("gdActionPointOffset", obj.gdActionPointOffset);
-    Write("gdDynamicSlotIdlePhase", obj.gdDynamicSlotIdlePhase);
-    Write("gdMiniSlot", obj.gdMiniSlot);
-    Write("gdMiniSlotActionPointOffset", obj.gdMiniSlotActionPointOffset);
-    Write("gdStaticSlot", obj.gdStaticSlot);
-    Write("gdSymbolWindow", obj.gdSymbolWindow);
-    Write("gdSymbolWindowActionPointOffset", obj.gdSymbolWindowActionPointOffset);
-    Write("gdTSSTransmitter", obj.gdTSSTransmitter);
-    Write("gdWakeupTxActive", obj.gdWakeupTxActive);
-    Write("gdWakeupTxIdle", obj.gdWakeupTxIdle);
-    Write("gListenNoise", obj.gListenNoise);
-    Write("gMacroPerCycle", obj.gMacroPerCycle);
-    Write("gMaxWithoutClockCorrectionFatal", obj.gMaxWithoutClockCorrectionFatal);
-    Write("gMaxWithoutClockCorrectionPassive", obj.gMaxWithoutClockCorrectionPassive);
-    Write("gNumberOfMiniSlots", obj.gNumberOfMiniSlots);
-    Write("gNumberOfStaticSlots", obj.gNumberOfStaticSlots);
-    Write("gPayloadLengthStatic", obj.gPayloadLengthStatic);
-    Write("gSyncFrameIDCountMax", obj.gSyncFrameIDCountMax);
+    MakeMap();
+    WriteKeyValue("gColdstartAttempts", obj.gColdstartAttempts);
+    WriteKeyValue("gCycleCountMax", obj.gCycleCountMax);
+    WriteKeyValue("gdActionPointOffset", obj.gdActionPointOffset);
+    WriteKeyValue("gdDynamicSlotIdlePhase", obj.gdDynamicSlotIdlePhase);
+    WriteKeyValue("gdMiniSlot", obj.gdMiniSlot);
+    WriteKeyValue("gdMiniSlotActionPointOffset", obj.gdMiniSlotActionPointOffset);
+    WriteKeyValue("gdStaticSlot", obj.gdStaticSlot);
+    WriteKeyValue("gdSymbolWindow", obj.gdSymbolWindow);
+    WriteKeyValue("gdSymbolWindowActionPointOffset", obj.gdSymbolWindowActionPointOffset);
+    WriteKeyValue("gdTSSTransmitter", obj.gdTSSTransmitter);
+    WriteKeyValue("gdWakeupTxActive", obj.gdWakeupTxActive);
+    WriteKeyValue("gdWakeupTxIdle", obj.gdWakeupTxIdle);
+    WriteKeyValue("gListenNoise", obj.gListenNoise);
+    WriteKeyValue("gMacroPerCycle", obj.gMacroPerCycle);
+    WriteKeyValue("gMaxWithoutClockCorrectionFatal", obj.gMaxWithoutClockCorrectionFatal);
+    WriteKeyValue("gMaxWithoutClockCorrectionPassive", obj.gMaxWithoutClockCorrectionPassive);
+    WriteKeyValue("gNumberOfMiniSlots", obj.gNumberOfMiniSlots);
+    WriteKeyValue("gNumberOfStaticSlots", obj.gNumberOfStaticSlots);
+    WriteKeyValue("gPayloadLengthStatic", obj.gPayloadLengthStatic);
+    WriteKeyValue("gSyncFrameIDCountMax", obj.gSyncFrameIDCountMax);
 }
 
 
 void YamlWriter::Write(const SilKit::Services::Flexray::FlexrayNodeParameters& obj)
 {
-    MakeMap(_node);
-    Write("pAllowHaltDueToClock", obj.pAllowHaltDueToClock);
-    Write("pAllowPassiveToActive", obj.pAllowPassiveToActive);
-    Write("pClusterDriftDamping", obj.pClusterDriftDamping);
-    Write("pdAcceptedStartupRange", obj.pdAcceptedStartupRange);
-    Write("pdListenTimeout", obj.pdListenTimeout);
-    Write("pKeySlotId", obj.pKeySlotId);
-    Write("pKeySlotOnlyEnabled", obj.pKeySlotOnlyEnabled);
-    Write("pKeySlotUsedForStartup", obj.pKeySlotUsedForStartup);
-    Write("pKeySlotUsedForSync", obj.pKeySlotUsedForSync);
-    Write("pLatestTx", obj.pLatestTx);
-    Write("pMacroInitialOffsetA", obj.pMacroInitialOffsetA);
-    Write("pMacroInitialOffsetB", obj.pMacroInitialOffsetB);
-    Write("pMicroInitialOffsetA", obj.pMicroInitialOffsetA);
-    Write("pMicroInitialOffsetB", obj.pMicroInitialOffsetB);
-    Write("pMicroPerCycle", obj.pMicroPerCycle);
-    Write("pOffsetCorrectionOut", obj.pOffsetCorrectionOut);
-    Write("pOffsetCorrectionStart", obj.pOffsetCorrectionStart);
-    Write("pRateCorrectionOut", obj.pRateCorrectionOut);
-    Write("pWakeupPattern", obj.pWakeupPattern);
-    Write("pSamplesPerMicrotick", obj.pSamplesPerMicrotick);
-    Write("pWakeupChannel", obj.pWakeupChannel);
-    Write("pdMicrotick", obj.pdMicrotick);
-    Write("pChannels", obj.pChannels);
+    MakeMap();
+    WriteKeyValue("pAllowHaltDueToClock", obj.pAllowHaltDueToClock);
+    WriteKeyValue("pAllowPassiveToActive", obj.pAllowPassiveToActive);
+    WriteKeyValue("pClusterDriftDamping", obj.pClusterDriftDamping);
+    WriteKeyValue("pdAcceptedStartupRange", obj.pdAcceptedStartupRange);
+    WriteKeyValue("pdListenTimeout", obj.pdListenTimeout);
+    WriteKeyValue("pKeySlotId", obj.pKeySlotId);
+    WriteKeyValue("pKeySlotOnlyEnabled", obj.pKeySlotOnlyEnabled);
+    WriteKeyValue("pKeySlotUsedForStartup", obj.pKeySlotUsedForStartup);
+    WriteKeyValue("pKeySlotUsedForSync", obj.pKeySlotUsedForSync);
+    WriteKeyValue("pLatestTx", obj.pLatestTx);
+    WriteKeyValue("pMacroInitialOffsetA", obj.pMacroInitialOffsetA);
+    WriteKeyValue("pMacroInitialOffsetB", obj.pMacroInitialOffsetB);
+    WriteKeyValue("pMicroInitialOffsetA", obj.pMicroInitialOffsetA);
+    WriteKeyValue("pMicroInitialOffsetB", obj.pMicroInitialOffsetB);
+    WriteKeyValue("pMicroPerCycle", obj.pMicroPerCycle);
+    WriteKeyValue("pOffsetCorrectionOut", obj.pOffsetCorrectionOut);
+    WriteKeyValue("pOffsetCorrectionStart", obj.pOffsetCorrectionStart);
+    WriteKeyValue("pRateCorrectionOut", obj.pRateCorrectionOut);
+    WriteKeyValue("pWakeupPattern", obj.pWakeupPattern);
+    WriteKeyValue("pSamplesPerMicrotick", obj.pSamplesPerMicrotick);
+    WriteKeyValue("pWakeupChannel", obj.pWakeupChannel);
+    WriteKeyValue("pdMicrotick", obj.pdMicrotick);
+    WriteKeyValue("pChannels", obj.pChannels);
 }
 
 
 void YamlWriter::Write(const SilKit::Services::Flexray::FlexrayTxBufferConfig& obj)
 {
-    MakeMap(_node);
-    Write("channels", obj.channels);
-    Write("slotId", obj.slotId);
-    Write("offset", obj.offset);
-    Write("repetition", obj.repetition);
-    Write("PPindicator", obj.hasPayloadPreambleIndicator);
-    Write("headerCrc", obj.headerCrc);
-    Write("transmissionMode", obj.transmissionMode);
+    MakeMap();
+    WriteKeyValue("channels", obj.channels);
+    WriteKeyValue("slotId", obj.slotId);
+    WriteKeyValue("offset", obj.offset);
+    WriteKeyValue("repetition", obj.repetition);
+    WriteKeyValue("PPindicator", obj.hasPayloadPreambleIndicator);
+    WriteKeyValue("headerCrc", obj.headerCrc);
+    WriteKeyValue("transmissionMode", obj.transmissionMode);
 }
 
 
@@ -228,8 +228,8 @@ void YamlWriter::Write(const SilKit::Config::Sink& obj)
 {
     static const SilKit::Config::Sink defaultSink{};
     // ParticipantConfiguration.schema.json: Type is required:
-    MakeMap(_node);
-    Write("Type", obj.type);
+    MakeMap();
+    WriteKeyValue("Type", obj.type);
     NonDefaultWrite(obj.level, "Level", defaultSink.level);
     NonDefaultWrite(obj.logName, "LogName", defaultSink.logName);
 }
@@ -238,11 +238,11 @@ void YamlWriter::Write(const SilKit::Config::Sink& obj)
 void YamlWriter::Write(const SilKit::Config::Logging& obj)
 {
     static const SilKit::Config::Logging defaultLogger{};
-    MakeMap(_node);
+    MakeMap();
     NonDefaultWrite(obj.logFromRemotes, "LogFromRemotes", defaultLogger.logFromRemotes);
     NonDefaultWrite(obj.flushLevel, "FlushLevel", defaultLogger.flushLevel);
     // ParticipantConfiguration.schema.json: this is a required property:
-    Write("Sinks", obj.sinks);
+    WriteKeyValue("Sinks", obj.sinks);
 }
 
 
@@ -268,29 +268,29 @@ void YamlWriter::Write(const SilKit::Config::MetricsSink::Type& obj)
 
 void YamlWriter::Write(const SilKit::Config::MetricsSink& obj)
 {
-    MakeMap(_node);
-    Write("Type", obj.type);
+    MakeMap();
+    WriteKeyValue("Type", obj.type);
     if (!obj.name.empty())
     {
-        Write("Name", obj.name);
+        WriteKeyValue("Name", obj.name);
     }
 }
 
 
 void YamlWriter::Write(const SilKit::Config::Metrics& obj)
 {
-    MakeMap(_node);
+    MakeMap();
     OptionalWrite(obj.sinks, "Sinks");
     if (obj.collectFromRemote)
     {
-        Write("CollectFromRemote", obj.collectFromRemote);
+        WriteKeyValue("CollectFromRemote", obj.collectFromRemote);
     }
 }
 
 
 void YamlWriter::Write(const SilKit::Config::MdfChannel& obj)
 {
-    MakeMap(_node);
+    MakeMap();
     OptionalWrite(obj.channelName, "ChannelName");
     OptionalWrite(obj.channelPath, "ChannelPath");
     OptionalWrite(obj.channelSource, "ChannelSource");
@@ -303,8 +303,8 @@ void YamlWriter::Write(const SilKit::Config::MdfChannel& obj)
 void YamlWriter::Write(const SilKit::Config::Replay& obj)
 {
     static const SilKit::Config::Replay defaultObject{};
-    MakeMap(_node);
-    Write("UseTraceSource", obj.useTraceSource);
+    MakeMap();
+    WriteKeyValue("UseTraceSource", obj.useTraceSource);
     NonDefaultWrite(obj.direction, "Direction", defaultObject.direction);
     NonDefaultWrite(obj.mdfChannel, "MdfChannel", defaultObject.mdfChannel);
 }
@@ -332,8 +332,8 @@ void YamlWriter::Write(const SilKit::Config::Replay::Direction& obj)
 
 void YamlWriter::Write(const SilKit::Config::CanController& obj)
 {
-    MakeMap(_node);
-    Write("Name", obj.name);
+    MakeMap();
+    WriteKeyValue("Name", obj.name);
     OptionalWrite(obj.network, "Network");
     OptionalWrite(obj.useTraceSinks, "UseTraceSinks");
     OptionalWrite(obj.replay, "Replay");
@@ -342,8 +342,8 @@ void YamlWriter::Write(const SilKit::Config::CanController& obj)
 
 void YamlWriter::Write(const SilKit::Config::LinController& obj)
 {
-    MakeMap(_node);
-    Write("Name", obj.name);
+    MakeMap();
+    WriteKeyValue("Name", obj.name);
     OptionalWrite(obj.network, "Network");
     OptionalWrite(obj.useTraceSinks, "UseTraceSinks");
     OptionalWrite(obj.replay, "Replay");
@@ -352,8 +352,8 @@ void YamlWriter::Write(const SilKit::Config::LinController& obj)
 
 void YamlWriter::Write(const SilKit::Config::EthernetController& obj)
 {
-    MakeMap(_node);
-    Write("Name", obj.name);
+    MakeMap();
+    WriteKeyValue("Name", obj.name);
     OptionalWrite(obj.network, "Network");
     OptionalWrite(obj.useTraceSinks, "UseTraceSinks");
     OptionalWrite(obj.replay, "Replay");
@@ -362,8 +362,8 @@ void YamlWriter::Write(const SilKit::Config::EthernetController& obj)
 
 void YamlWriter::Write(const SilKit::Config::FlexrayController& obj)
 {
-    MakeMap(_node);
-    Write("Name", obj.name);
+    MakeMap();
+    WriteKeyValue("Name", obj.name);
     OptionalWrite(obj.network, "Network");
     OptionalWrite(obj.clusterParameters, "ClusterParameters");
     OptionalWrite(obj.nodeParameters, "NodeParameters");
@@ -390,16 +390,16 @@ void YamlWriter::Write(const SilKit::Config::Label::Kind& obj)
 
 void YamlWriter::Write(const SilKit::Config::Label& obj)
 {
-    MakeMap(_node);
-    Write("Key", obj.key);
-    Write("Value", obj.value);
-    Write("Kind", obj.kind);
+    MakeMap();
+    WriteKeyValue("Key", obj.key);
+    WriteKeyValue("Value", obj.value);
+    WriteKeyValue("Kind", obj.kind);
 }
 
 void YamlWriter::Write(const SilKit::Config::DataPublisher& obj)
 {
-    MakeMap(_node);
-    Write("Name", obj.name);
+    MakeMap();
+    WriteKeyValue("Name", obj.name);
     OptionalWrite(obj.topic, "Topic");
     OptionalWrite(obj.labels, "Labels");
     //OptionalWrite(obj.history, "History");
@@ -410,8 +410,8 @@ void YamlWriter::Write(const SilKit::Config::DataPublisher& obj)
 
 void YamlWriter::Write(const SilKit::Config::DataSubscriber& obj)
 {
-    MakeMap(_node);
-    Write("Name", obj.name);
+    MakeMap();
+    WriteKeyValue("Name", obj.name);
     OptionalWrite(obj.topic, "Topic");
     OptionalWrite(obj.labels, "Labels");
     OptionalWrite(obj.useTraceSinks, "UseTraceSinks");
@@ -420,8 +420,8 @@ void YamlWriter::Write(const SilKit::Config::DataSubscriber& obj)
 
 void YamlWriter::Write(const SilKit::Config::RpcServer& obj)
 {
-    MakeMap(_node);
-    Write("Name", obj.name);
+    MakeMap();
+    WriteKeyValue("Name", obj.name);
     OptionalWrite(obj.functionName, "FunctionName");
     OptionalWrite(obj.labels, "Labels");
     OptionalWrite(obj.useTraceSinks, "UseTraceSinks");
@@ -431,8 +431,8 @@ void YamlWriter::Write(const SilKit::Config::RpcServer& obj)
 
 void YamlWriter::Write(const SilKit::Config::RpcClient& obj)
 {
-    MakeMap(_node);
-    Write("Name", obj.name);
+    MakeMap();
+    WriteKeyValue("Name", obj.name);
     OptionalWrite(obj.functionName, "Channel");
     OptionalWrite(obj.labels, "Labels");
     OptionalWrite(obj.useTraceSinks, "UseTraceSinks");
@@ -441,17 +441,17 @@ void YamlWriter::Write(const SilKit::Config::RpcClient& obj)
 
 void YamlWriter::Write(const SilKit::Config::Tracing& obj)
 {
-    MakeMap(_node);
+    MakeMap();
     OptionalWrite(obj.traceSinks, "TraceSinks");
     OptionalWrite(obj.traceSources, "TraceSources");
 }
 
 void YamlWriter::Write(const SilKit::Config::TraceSink& obj)
 {
-    MakeMap(_node);
-    Write("Name", obj.name);
-    Write("Type", obj.type);
-    Write("OutputPath", obj.outputPath);
+    MakeMap();
+    WriteKeyValue("Name", obj.name);
+    WriteKeyValue("Type", obj.type);
+    WriteKeyValue("OutputPath", obj.outputPath);
 }
 
 
@@ -479,10 +479,10 @@ void YamlWriter::Write(const SilKit::Config::TraceSink::Type& obj)
 
 void YamlWriter::Write(const SilKit::Config::TraceSource& obj)
 {
-    MakeMap(_node);
-    Write("Name", obj.name);
-    Write("Type", obj.type);
-    Write("InputPath", obj.inputPath);
+    MakeMap();
+    WriteKeyValue("Name", obj.name);
+    WriteKeyValue("Type", obj.type);
+    WriteKeyValue("InputPath", obj.inputPath);
 }
 
 
@@ -508,7 +508,7 @@ void YamlWriter::Write(const SilKit::Config::TraceSource::Type& obj)
 void YamlWriter::Write(const SilKit::Config::Extensions& obj)
 {
     static const SilKit::Config::Extensions defaultObj{};
-    MakeMap(_node);
+    MakeMap();
     NonDefaultWrite(obj.searchPathHints, "SearchPathHints", defaultObj.searchPathHints);
 }
 
@@ -516,7 +516,7 @@ void YamlWriter::Write(const SilKit::Config::Extensions& obj)
 void YamlWriter::Write(const SilKit::Config::Middleware& obj)
 {
     static const SilKit::Config::Middleware defaultObj;
-    MakeMap(_node);
+    MakeMap();
     NonDefaultWrite(obj.registryUri, "RegistryUri", defaultObj.registryUri);
     NonDefaultWrite(obj.connectAttempts, "ConnectAttempts", defaultObj.connectAttempts);
     NonDefaultWrite(obj.tcpNoDelay, "TcpNoDelay", defaultObj.tcpNoDelay);
@@ -534,7 +534,7 @@ void YamlWriter::Write(const SilKit::Config::Middleware& obj)
 
 void YamlWriter::Write(const SilKit::Config::Includes& obj)
 {
-    MakeMap(_node);
+    MakeMap();
     OptionalWrite(obj.files, "Files");
     OptionalWrite(obj.searchPathHints, "SearchPathHints");
 }
@@ -560,7 +560,7 @@ void YamlWriter::Write(const SilKit::Config::Aggregation& obj)
 void YamlWriter::Write(const SilKit::Config::TimeSynchronization& obj)
 {
     static const SilKit::Config::TimeSynchronization defaultObj;
-    MakeMap(_node);
+    MakeMap();
     NonDefaultWrite(obj.animationFactor, "AnimationFactor", defaultObj.animationFactor);
     NonDefaultWrite(obj.enableMessageAggregation, "EnableMessageAggregation", defaultObj.enableMessageAggregation);
 }
@@ -570,7 +570,7 @@ void YamlWriter::Write(const SilKit::Config::Experimental& obj)
 {
     static const SilKit::Config::Experimental defaultObj{};
 
-    MakeMap(_node);
+    MakeMap();
     NonDefaultWrite(obj.timeSynchronization, "TimeSynchronization", defaultObj.timeSynchronization);
     NonDefaultWrite(obj.metrics, "Metrics", defaultObj.metrics);
 }
@@ -579,8 +579,8 @@ void YamlWriter::Write(const SilKit::Config::Experimental& obj)
 void YamlWriter::Write(const SilKit::Config::ParticipantConfiguration& obj)
 {
     static const SilKit::Config::ParticipantConfiguration defaultObj{};
-    MakeMap(_node);
-    Write("SchemaVersion", obj.schemaVersion);
+    MakeMap();
+    WriteKeyValue("SchemaVersion", obj.schemaVersion);
     OptionalWrite(obj.description, "Description");
     OptionalWrite(obj.participantName, "ParticipantName");
     OptionalWrite(obj.canControllers, "CanControllers");
@@ -603,7 +603,7 @@ void YamlWriter::Write(const SilKit::Config::ParticipantConfiguration& obj)
 
 void YamlWriter::Write(const SilKit::Config::HealthCheck& obj)
 {
-    MakeMap(_node);
+    MakeMap();
     OptionalWrite(obj.softResponseTimeout, "SoftResponseTimeout");
     OptionalWrite(obj.hardResponseTimeout, "HardResponseTimeout");
 }
@@ -619,8 +619,8 @@ void YamlWriter::Write(const SilKitRegistry::Config::V1::Experimental& obj)
 void YamlWriter::Write(const SilKitRegistry::Config::V1::RegistryConfiguration& obj)
 {
     static const SilKitRegistry::Config::V1::RegistryConfiguration defaultObject{};
-    MakeMap(_node);
-    Write("SchemaVersion", SilKitRegistry::Config::V1::GetSchemaVersion());
+    MakeMap();
+    WriteKeyValue("SchemaVersion", SilKitRegistry::Config::V1::GetSchemaVersion());
     NonDefaultWrite(obj.description, "Description", defaultObject.description);
     OptionalWrite(obj.listenUri, "ListenUri");
     OptionalWrite(obj.enableDomainSockets, "EnableDomainSockets");
@@ -628,4 +628,5 @@ void YamlWriter::Write(const SilKitRegistry::Config::V1::RegistryConfiguration& 
     NonDefaultWrite(obj.logging, "Logging", defaultObject.logging);
     NonDefaultWrite(obj.experimental, "Experimental", defaultObject.experimental);
 }
+
 } // namespace VSilKit
