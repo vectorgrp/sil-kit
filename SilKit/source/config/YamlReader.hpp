@@ -17,11 +17,13 @@
 namespace VSilKit {
 
 template <typename Impl>
-struct BasicYamlReader
+class BasicYamlReader
 {
+protected:
     ryml::Parser& _parser;
     ryml::ConstNodeRef _node;
 
+public:
     BasicYamlReader(ryml::Parser& parser_, ryml::ConstNodeRef node_)
         : _parser(parser_)
         , _node(node_)
