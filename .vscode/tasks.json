@@ -4,7 +4,8 @@
     {
       "label": "Format Code",
       "type": "shell",
-      "command": "./SilKit/ci/check_formatting.py --force-formatting"
+      "command": "./SilKit/ci/check_formatting.py --force-formatting",
+      "problemMatcher": []
     }
   ]
 }
