@@ -20,6 +20,7 @@ struct IPeerMetrics
     virtual void TxPacket() = 0;
     virtual void RxBytes(const SilKit::Core::SerializedMessage&) = 0;
     virtual void TxBytes(const SilKit::Core::SerializedMessage&) = 0;
+    virtual void TxQueueSize(size_t) = 0;
 };
 
 } // namespace VSilKit

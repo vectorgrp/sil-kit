@@ -19,6 +19,7 @@ public:
     void TxPacket() override;
     void RxBytes(const SilKit::Core::SerializedMessage& ) override;
     void TxBytes(const SilKit::Core::SerializedMessage&) override;
+    void TxQueueSize(size_t) override;
 };
 
 
@@ -31,6 +32,7 @@ private:
     VSilKit::ICounterMetric* _txPackets{nullptr};
     VSilKit::ICounterMetric* _rxBytes{nullptr};
     VSilKit::ICounterMetric* _txBytes{nullptr};
+    VSilKit::ICounterMetric* _txQueueSize{nullptr};
 
 public:
     void InitializeMetrics(const std::string& localParticipantName, VSilKit::IMetricsManager* manager,
@@ -39,6 +41,7 @@ public:
     void TxPacket() override;
     void RxBytes(const SilKit::Core::SerializedMessage& msg) override;
     void TxBytes(const SilKit::Core::SerializedMessage& msg) override;
+    void TxQueueSize(size_t queueSize) override;
 };
 
 } // namespace VSilKit

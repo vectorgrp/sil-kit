@@ -146,6 +146,8 @@ void VAsioPeer::SendSilKitMsgInternal(std::vector<uint8_t> blob)
 
         _sendingQueue.emplace_back(std::move(blob));
 
+        _peerMetrics->TxQueueSize(_sendingQueue.size());
+
         lock.unlock();
 
         _ioContext->Dispatch([this] { StartAsyncWrite(); });
