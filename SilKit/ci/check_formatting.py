@@ -41,14 +41,10 @@ def main():
     parser.add_argument("--force-formatting", action='store_true', help='format each file (modifies files!)')
     args = parser.parse_args()
 
-    dryrun="--dryrun"
-    if args.force_formatting:
-        dryrun=""
-
     # Check for supported clang-format version
     format_version = subprocess.run([CLANG_FORMAT, '--version'], capture_output=True, encoding='utf-8')
 
-    version_reg = re.compile('^.* clang-format version (\d+)\.(\d+)\.(\d+).*')
+    version_reg = re.compile(r'^.* clang-format version (\d+)\.(\d+)\.(\d+).*')
     version = re.match(version_reg, format_version.stdout)
 
     if version is None or len(version.groups()) != 3:
@@ -74,10 +70,12 @@ def main():
         for ext in fileExtensions:
             files = sorted(rootPath.rglob(ext))
             #print("INFO: Found {} {} files in {}!".format(len(files), ext, directory))
-
+            command = [CLANG_FORMAT, '--Werror', '-i', '--style=file:.clang-format']
+            if not args.force_formatting:
+                command += ["--dry-run"]
             for file in files:
                 totalFiles = totalFiles + 1
-                formatResult = subprocess.run([CLANG_FORMAT, '--Werror', dryrun,  '-i', '--style=file:.clang-format', file], capture_output=True, encoding='utf-8')
+                formatResult = subprocess.run( command + [file], capture_output=True, encoding='utf-8')
                 if formatResult.returncode != 0:
                     formattingCorrect = False
                     totalWarnings = totalWarnings + 1
