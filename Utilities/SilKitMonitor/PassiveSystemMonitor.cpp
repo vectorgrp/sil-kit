@@ -181,13 +181,11 @@ int main(int argc, char** argv)
             if (sync)
             {
                 auto* timeSyncService = lifecycle->CreateTimeSyncService();
-                timeSyncService->SetSimulationStepHandler(
-                    [logger](auto now, auto) {
+                timeSyncService->SetSimulationStepHandler([logger](auto now, auto) {
                     std::stringstream buffer;
                     buffer << "now=" << now;
                     logger->Info(buffer.str());
-                    },
-                    1ms);
+                }, 1ms);
             }
             auto finalStateFuture = lifecycle->StartLifecycle();
 

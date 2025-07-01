@@ -135,7 +135,7 @@ namespace {
 
 using namespace SilKit::Util;
 
-using SignalHandlerT = void(*)(int);
+using SignalHandlerT = void (*)(int);
 
 //forward
 static inline void setSignalAction(int sigNum, SignalHandlerT action);
@@ -232,7 +232,7 @@ static inline void setSignalAction(int sigNum, SignalHandlerT action)
     struct sigaction newAction
     {
     };
-    if(action == nullptr)
+    if (action == nullptr)
     {
         newAction.sa_handler = SIG_DFL;
     }

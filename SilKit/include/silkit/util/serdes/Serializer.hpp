@@ -165,13 +165,12 @@ public:
         if (static_cast<unsigned>(discriminator) > (std::numeric_limits<UnionDiscriminator>::max)())
             throw LengthError{"Union discriminator is too big"};
 #endif
-        SerializeAligned<UnionDiscriminator>(static_cast<UnionDiscriminator>(discriminator), sizeof(UnionDiscriminator));
+        SerializeAligned<UnionDiscriminator>(static_cast<UnionDiscriminator>(discriminator),
+                                             sizeof(UnionDiscriminator));
     }
 
     /*! \brief Serialize the end of a union. */
-    void EndUnion()
-    {
-    }
+    void EndUnion() {}
 
     /*! \brief Resets the buffer. */
     void Reset()

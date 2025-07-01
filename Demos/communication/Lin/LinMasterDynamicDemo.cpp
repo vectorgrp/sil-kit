@@ -37,7 +37,6 @@ private:
 
         _linController->AddFrameStatusHandler(
             [this](ILinController* /*linController*/, const LinFrameStatusEvent& frameStatusEvent) {
-
             switch (frameStatusEvent.status)
             {
             case LinFrameStatus::LIN_RX_OK:
@@ -53,7 +52,7 @@ private:
             std::stringstream ss;
             ss << "Received FrameStatus for " << frameStatusEvent.frame << ", status=" << frameStatusEvent.status;
             GetLogger()->Info(ss.str());
-            
+
             _schedule->ScheduleNextTask();
         });
 
@@ -72,13 +71,11 @@ private:
             _linController->WakeupInternal();
 
             _schedule->ScheduleNextTask();
-
         });
 
         SilKit::Experimental::Services::Lin::AddFrameHeaderHandler(
             _linController, [this](ILinController* linController,
-                                     const SilKit::Experimental::Services::Lin::LinFrameHeaderEvent& headerEvent) {
-
+                                   const SilKit::Experimental::Services::Lin::LinFrameHeaderEvent& headerEvent) {
             {
                 std::stringstream ss;
                 ss << "Received frame header: id=" << (int)headerEvent.id;
@@ -101,9 +98,8 @@ private:
                 ss << "!! Not sending dynamic response: id=" << static_cast<int>(headerEvent.id);
                 GetLogger()->Info(ss.str());
             }
-
         });
-                
+
         LinFrame f16{};
         f16.id = 16;
         f16.checksumModel = LinChecksumModel::Classic;
@@ -134,14 +130,13 @@ private:
 
         _schedule = std::make_unique<LinDemoCommon::Schedule>(
             std::initializer_list<std::pair<std::chrono::nanoseconds, std::function<void(std::chrono::nanoseconds)>>>{
-            {10ms, [this](std::chrono::nanoseconds /*now*/) { SendFrameHeader(16); }},
-            {20ms, [this](std::chrono::nanoseconds /*now*/) { SendFrameHeader(17); }},
-            {10ms, [this](std::chrono::nanoseconds /*now*/) { SendFrameHeader(18); }},
-            {10ms, [this](std::chrono::nanoseconds /*now*/) { SendFrameHeader(19); }},
-            {10ms, [this](std::chrono::nanoseconds /*now*/) { SendFrameHeader(34); }},
-            {10ms, [this](std::chrono::nanoseconds /*now*/) { GoToSleep(); }}
-        }, false);
-
+                {10ms, [this](std::chrono::nanoseconds /*now*/) { SendFrameHeader(16); }},
+                {20ms, [this](std::chrono::nanoseconds /*now*/) { SendFrameHeader(17); }},
+                {10ms, [this](std::chrono::nanoseconds /*now*/) { SendFrameHeader(18); }},
+                {10ms, [this](std::chrono::nanoseconds /*now*/) { SendFrameHeader(19); }},
+                {10ms, [this](std::chrono::nanoseconds /*now*/) { SendFrameHeader(34); }},
+                {10ms, [this](std::chrono::nanoseconds /*now*/) { GoToSleep(); }}},
+            false);
     }
 
     void InitControllers() override
@@ -190,7 +185,6 @@ private:
 
         _linController->GoToSleep();
     }
-
 };
 
 int main(int argc, char** argv)

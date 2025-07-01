@@ -299,7 +299,6 @@ schemaVersion: 1347
     EXPECT_EQ(config.canControllers.size(), 1);
     EXPECT_EQ(config.canControllers.at(0).name, "CAN1");
     EXPECT_TRUE(!config.canControllers.at(0).network.has_value());
-
 }
 const auto emptyConfiguration = R"raw(
 )raw";
@@ -307,7 +306,7 @@ const auto emptyConfiguration = R"raw(
 TEST_F(Test_YamlParser, yaml_empty_configuration)
 {
     ParticipantConfiguration empty{};
-    auto config = Deserialize <ParticipantConfiguration>(emptyConfiguration);
+    auto config = Deserialize<ParticipantConfiguration>(emptyConfiguration);
     EXPECT_EQ(empty, config);
 }
 
@@ -317,7 +316,7 @@ ParticipantName: Node1
 
 TEST_F(Test_YamlParser, yaml_minimal_configuration)
 {
-    auto config = Deserialize <ParticipantConfiguration>(minimalConfiguration);
+    auto config = Deserialize<ParticipantConfiguration>(minimalConfiguration);
     EXPECT_TRUE(config.participantName == "Node1");
 }
 
@@ -403,7 +402,8 @@ FlexRayControllers:
 
 TEST_F(Test_YamlParser, yaml_deprecated_FlexRayControllers_configuration)
 {
-    const auto participantConfiguration = Deserialize<ParticipantConfiguration>(deprecatedFlexRayControllersConfiguration);
+    const auto participantConfiguration =
+        Deserialize<ParticipantConfiguration>(deprecatedFlexRayControllersConfiguration);
     EXPECT_EQ(participantConfiguration.flexrayControllers.size(), 2);
     EXPECT_EQ(participantConfiguration.flexrayControllers[0].name, "FlexRay1");
     EXPECT_EQ(participantConfiguration.flexrayControllers[1].name, "FlexRay2");
@@ -421,7 +421,8 @@ FlexrayControllers:
 // Check that having both the correct "FlexrayControllers" and the deprecated "FlexRayControllers" keys present throws.
 TEST_F(Test_YamlParser, yaml_both_FlexrayControllers_and_deprecated_FlexRayControllers_configuration)
 {
-    EXPECT_THROW({
+    EXPECT_THROW(
+        {
             auto cfg = Deserialize<ParticipantConfiguration>(
                 bothFlexrayControllersAndDeprecatedFlexRayControllersConfiguration);
         },
@@ -517,7 +518,6 @@ RpcServers:
 
 TEST_F(Test_YamlParser, yaml_deprecated_RpcServer_configuration)
 {
-
     auto participantConfiguration = Deserialize<ParticipantConfiguration>(rpcServerConfiguration);
 
     ASSERT_EQ(participantConfiguration.rpcServers.size(), 3);

@@ -145,10 +145,13 @@ auto GetDummyConfigWithValues() -> SilKit::Config::FlexrayController
 class MockParticipant : public DummyParticipant
 {
 public:
-    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint *, const std::string&, const FlexrayHostCommand &), (override));
-    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint *, const std::string&, const FlexrayControllerConfig &), (override));
-    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint *, const std::string&, const FlexrayTxBufferConfigUpdate &), (override));
-    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint *, const std::string&, const WireFlexrayTxBufferUpdate &), (override));
+    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint *, const std::string &, const FlexrayHostCommand &), (override));
+    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint *, const std::string &, const FlexrayControllerConfig &),
+                (override));
+    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint *, const std::string &, const FlexrayTxBufferConfigUpdate &),
+                (override));
+    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint *, const std::string &, const WireFlexrayTxBufferUpdate &),
+                (override));
 };
 
 class Test_FlexrayController : public testing::Test
@@ -179,7 +182,6 @@ protected:
 
         referencePayload.resize(20);
         std::iota(referencePayload.begin(), referencePayload.end(), '\000');
-
     }
 
 protected:

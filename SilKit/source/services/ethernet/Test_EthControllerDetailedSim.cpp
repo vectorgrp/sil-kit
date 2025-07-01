@@ -61,10 +61,12 @@ auto AnEthMessageWith(std::chrono::nanoseconds timestamp) -> testing::Matcher<co
 class MockParticipant : public DummyParticipant
 {
 public:
-    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint *,const std::string&, const WireEthernetFrameEvent &), (override));
-    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint *,const std::string&, const EthernetFrameTransmitEvent &), (override));
-    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint *,const std::string&, const EthernetStatus &), (override));
-    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint *,const std::string&, const EthernetSetMode &), (override));
+    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint *, const std::string &, const WireEthernetFrameEvent &),
+                (override));
+    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint *, const std::string &, const EthernetFrameTransmitEvent &),
+                (override));
+    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint *, const std::string &, const EthernetStatus &), (override));
+    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint *, const std::string &, const EthernetSetMode &), (override));
 };
 
 class Test_EthControllerDetailedSim : public testing::Test

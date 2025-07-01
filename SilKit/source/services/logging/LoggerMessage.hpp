@@ -104,7 +104,7 @@ public:
     {
         if (_logger->GetLogLevel() <= _level)
         {
-            for (const auto& pair :  descriptor.to_keyValues())
+            for (const auto& pair : descriptor.to_keyValues())
             {
                 SetKeyValue(pair.first, pair.second);
             }

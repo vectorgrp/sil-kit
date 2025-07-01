@@ -16,8 +16,7 @@
 
 #include "YamlParser.hpp"
 
-namespace VSilKit
-{
+namespace VSilKit {
 
 bool read(const ryml::ConstNodeRef& node, MetricData* obj)
 {
@@ -39,7 +38,6 @@ bool read(const ryml::ConstNodeRef& node, MetricData* obj)
     }
     else if (kind == "STRING_LIST")
     {
-
         obj->kind = MetricKind::STRING_LIST;
         std::vector<std::string> stringList;
         node["mv"] >> stringList;
@@ -49,7 +47,7 @@ bool read(const ryml::ConstNodeRef& node, MetricData* obj)
         throw SilKit::ConfigurationError{"Invalid MetricData.kind " + kind};
     return true;
 }
-}
+} // namespace VSilKit
 namespace {
 
 using VSilKit::MetricData;

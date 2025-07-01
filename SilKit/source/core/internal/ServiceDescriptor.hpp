@@ -308,7 +308,7 @@ std::string ServiceDescriptor::to_string() const
 }
 
 
- std::vector<std::pair<std::string, std::string>> ServiceDescriptor::to_keyValues() const
+std::vector<std::pair<std::string, std::string>> ServiceDescriptor::to_keyValues() const
 {
     namespace Keys = SilKit::Services::Logging::Keys;
 

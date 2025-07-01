@@ -170,9 +170,7 @@ public:
     }
 
     /*! \brief Deserializes the end of a union. */
-    void EndUnion()
-    {
-    }
+    void EndUnion() {}
 
     /*! \brief Resets the buffer and replaces it with another one.
      *  \param buffer The new data buffer.

@@ -263,8 +263,8 @@ void CacheNonDefault(const T& defaultValue, const T& value, const std::string& c
         if (cacheValue.has_value() && (cacheValue != optValue))
         {
             std::stringstream error_msg;
-            error_msg << "Config element " << configName << "='" << value << "' "
-                      << " is already set to '" << cacheValue.value() << "'!";
+            error_msg << "Config element " << configName << "='" << value << "' " << " is already set to '"
+                      << cacheValue.value() << "'!";
             throw SilKit::ConfigurationError(error_msg.str());
         }
         cacheValue = optValue;
@@ -667,7 +667,7 @@ auto PaticipantConfigurationWithIncludes(const std::string& text, struct ConfigI
     -> SilKit::Config::ParticipantConfiguration
 {
     auto configuration = SilKit::Config::Deserialize<ParticipantConfiguration>(text);
-    if(configuration.schemaVersion.empty())
+    if (configuration.schemaVersion.empty())
     {
         configuration.schemaVersion = SilKit::Config::GetSchemaVersion();
     }

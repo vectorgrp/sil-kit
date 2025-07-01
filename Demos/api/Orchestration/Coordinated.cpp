@@ -32,7 +32,7 @@ int main(int argc, char** argv)
         auto* lifecycleService =
             participant->CreateLifecycleService({SilKit::Services::Orchestration::OperationMode::Coordinated});
 
-         // Future / promise to control entrance of the main loop in the worker thread
+        // Future / promise to control entrance of the main loop in the worker thread
         std::promise<void> startWorkPromise;
         std::future<void> startWorkFuture;
         startWorkFuture = startWorkPromise.get_future();

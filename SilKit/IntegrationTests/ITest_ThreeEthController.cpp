@@ -70,7 +70,6 @@ protected:
 protected:
     ITest_ThreeEthController()
     {
-
         testMessages.resize(5);
         for (auto index = 0u; index < testMessages.size(); index++)
         {
@@ -140,9 +139,9 @@ protected:
             const auto& frame = event.frame;
             std::string message(frame.raw.begin() + EthernetFrameHeaderSize + EthernetFrameVlanTagSize,
                                 frame.raw.end());
-            std::cout << participant->Name() << " <- received frame"
-                      << ": frame size=" << frame.raw.size() << ": testMessages size=" << testMessages.size()
-                      << ": receiveCount=" << numReceived << ": message='" << message << "'" << std::endl;
+            std::cout << participant->Name() << " <- received frame" << ": frame size=" << frame.raw.size()
+                      << ": testMessages size=" << testMessages.size() << ": receiveCount=" << numReceived
+                      << ": message='" << message << "'" << std::endl;
             testMessages[numReceived].receivedData = message;
             numReceived++;
             if (numReceived >= testMessages.size())
@@ -180,9 +179,9 @@ protected:
         }
         EXPECT_CALL(callbacks, AckHandler(MatchUserContext(nullptr))).Times(0);
 
-        EXPECT_TRUE(testHarness.Run(30s)) << "TestHarness Timeout occurred!"
-                                          << " numSent=" << numSent << " numAcked=" << numAcked
-                                          << " numReceived=" << numReceived << " numReceived2=" << numReceived2;
+        EXPECT_TRUE(testHarness.Run(30s))
+            << "TestHarness Timeout occurred!" << " numSent=" << numSent << " numAcked=" << numAcked
+            << " numReceived=" << numReceived << " numReceived2=" << numReceived2;
 
         EXPECT_EQ(numAcked, numSent);
         EXPECT_EQ(numSent, numReceived);

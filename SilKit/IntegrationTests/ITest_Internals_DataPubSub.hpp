@@ -484,7 +484,6 @@ protected:
 
     void RunSyncTest(std::vector<PubSubParticipant>& pubsubs)
     {
-
         std::vector<std::string> requiredParticipantNames;
         for (const auto& p : pubsubs)
         {

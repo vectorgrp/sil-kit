@@ -76,7 +76,7 @@ typedef int32_t SilKit_Experimental_NetSim_CanControllerModeFlags;
 
 /*! Reset the error counters to zero and the error state to error active. */
 #define SilKit_Experimental_NetSim_CanControllerModeFlags_ResetErrorHandling \
-    ((SilKit_Experimental_NetSim_CanControllerModeFlags)BIT(0)) 
+    ((SilKit_Experimental_NetSim_CanControllerModeFlags)BIT(0))
 
 /*! Cancel all outstanding transmit requests (flush transmit queue of controller). */
 #define SilKit_Experimental_NetSim_CanControllerModeFlags_CancelTransmitRequests \

@@ -53,9 +53,7 @@ void PrintUsage(const std::string& executableName)
 {
     std::cout
         << "Usage:" << std::endl
-        << executableName << " [messageCount]"
-        << " [messageSizeInBytes]"
-        << " [registryURi]" << std::endl
+        << executableName << " [messageCount]" << " [messageSizeInBytes]" << " [registryURi]" << std::endl
         << "If no arguments are given, default values will be used." << std::endl
         << "\t--help\tshow this message." << std::endl
         << "\t--isReceiver\tThis process is the receiving counterpart of the latency measurement" << std::endl

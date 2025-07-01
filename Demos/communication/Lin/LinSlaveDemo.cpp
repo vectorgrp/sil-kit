@@ -6,7 +6,7 @@
 #include "LinDemoCommon.hpp"
 #include "silkit/experimental/services/lin/LinControllerExtensions.hpp"
 
-class LinSlave: public ApplicationBase
+class LinSlave : public ApplicationBase
 {
 public:
     // Inherit constructors
@@ -36,7 +36,6 @@ private:
 
         _linController->AddFrameStatusHandler(
             [this](ILinController* /*linController*/, const LinFrameStatusEvent& frameStatusEvent) {
-            
             // On a TX acknowledge for ID 34, update the TxBuffer for the next transmission
             if (frameStatusEvent.frame.id == 34)
             {
@@ -52,12 +51,10 @@ private:
             ss << "Received " << frameStatusEvent.frame << " status=" << frameStatusEvent.status;
 
             GetLogger()->Info(ss.str());
-
         });
 
         _linController->AddGoToSleepHandler(
             [this](ILinController* /*linController*/, const LinGoToSleepEvent& /*goToSleepEvent*/) {
-
             std::stringstream ss;
             ss << "Received go-to-sleep command; entering sleep mode.";
             GetLogger()->Info(ss.str());
@@ -74,10 +71,8 @@ private:
         });
 
         _linController->AddWakeupHandler([this](ILinController* /*linController*/, const LinWakeupEvent& wakeupEvent) {
-            
             std::stringstream ss;
-            ss << "Received Wakeup pulse, direction=" << wakeupEvent.direction
-                      << "; Entering normal operation mode.";
+            ss << "Received Wakeup pulse, direction=" << wakeupEvent.direction << "; Entering normal operation mode.";
             GetLogger()->Info(ss.str());
 
             // No need to set the controller status if we sent the wakeup
@@ -85,7 +80,6 @@ private:
             {
                 _linController->WakeupInternal();
             }
-
         });
     }
 
@@ -142,7 +136,7 @@ private:
 
         _linController->Init(config);
     }
-    
+
     void DoWorkSync(std::chrono::nanoseconds now) override
     {
         _now = now;
@@ -165,4 +159,3 @@ int main(int argc, char** argv)
 
     return app.Run();
 }
-

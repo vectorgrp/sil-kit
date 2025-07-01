@@ -45,8 +45,7 @@ NamedPipeLinux::NamedPipeLinux(const std::string& name)
     if (err == -1)
     {
         std::stringstream ss;
-        ss << "Error creating pipe \"" << _name << "\""
-           << ": errno: " << err << ": " << strerror(errno);
+        ss << "Error creating pipe \"" << _name << "\"" << ": errno: " << err << ": " << strerror(errno);
 
         throw SilKitError(ss.str());
     }

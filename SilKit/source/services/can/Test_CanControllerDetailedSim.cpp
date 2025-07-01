@@ -50,12 +50,14 @@ using ::SilKit::Core::Tests::DummyParticipant;
 
 class MockParticipant : public DummyParticipant
 {
-
 public:
     MOCK_METHOD(void, SendMsg, (const IServiceEndpoint *, const std::string &, const WireCanFrameEvent &), (override));
-    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint *, const std::string &, const CanFrameTransmitEvent &), (override));
-    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint *, const std::string &, const CanConfigureBaudrate &), (override));
-    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint *, const std::string &, const CanSetControllerMode &), (override));
+    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint *, const std::string &, const CanFrameTransmitEvent &),
+                (override));
+    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint *, const std::string &, const CanConfigureBaudrate &),
+                (override));
+    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint *, const std::string &, const CanSetControllerMode &),
+                (override));
 };
 
 class CanControllerCallbacks

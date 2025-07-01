@@ -1688,7 +1688,7 @@ std::vector<std::string> VAsioConnection::GetConnectedParticipantsNames()
         std::unique_lock<decltype(_mutex)> lock{_mutex};
         for (const auto& item : _participantNameToPeer)
         {
-            for(const auto& peer: item.second)
+            for (const auto& peer : item.second)
             {
                 participants.push_back(peer.first);
             }

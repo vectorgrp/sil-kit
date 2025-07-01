@@ -191,7 +191,6 @@ public:
                     {
                         throw std::runtime_error("Unknown flag '" + std::string{c} + "'");
                     }
-
                 }
                 if (foundAny)
                 {
@@ -208,7 +207,7 @@ public:
                     continue;
                 }
             }
-   
+
             throw std::runtime_error("Unknown argument '" + argument + "'");
         }
     }
@@ -241,7 +240,8 @@ public:
     template <class Derived, class T>
     struct Argument : public IArgument
     {
-        Argument(std::string name, std::string shortName, std::string usage, std::vector<std::string> descriptionLines, bool hidden = false)
+        Argument(std::string name, std::string shortName, std::string usage, std::vector<std::string> descriptionLines,
+                 bool hidden = false)
             : _name(std::move(name))
             , _shortName(std::move(shortName))
             , _usage(std::move(usage))
@@ -322,7 +322,7 @@ public:
         static constexpr auto kind = ArgumentKind::PositionalList;
 
         PositionalList(std::string name, std::string usage, std::vector<std::string> descriptionLines)
-            : Argument(std::move(name), "",  std::move(usage), std::move(descriptionLines))
+            : Argument(std::move(name), "", std::move(usage), std::move(descriptionLines))
             , _values()
         {
         }
@@ -353,7 +353,7 @@ public:
 
         Option(std::string name, std::string shortName, std::string defaultValue, std::string usage,
                std::vector<std::string> descriptionLines)
-            : Argument(std::move(name), std::move(shortName),  std::move(usage), std::move(descriptionLines))
+            : Argument(std::move(name), std::move(shortName), std::move(usage), std::move(descriptionLines))
             , _defaultValue(std::move(defaultValue))
             , _value()
         {
@@ -402,7 +402,8 @@ public:
         {
         }
 
-        Flag(std::string name, std::string shortName, std::string usage, std::vector<std::string> descriptionLines, decltype(Hidden))
+        Flag(std::string name, std::string shortName, std::string usage, std::vector<std::string> descriptionLines,
+             decltype(Hidden))
             : Argument(std::move(name), std::move(shortName), std::move(usage), std::move(descriptionLines), true)
             , _value(false)
         {
@@ -443,8 +444,8 @@ private:
 
     auto NameExists(std::string name) -> bool
     {
-        auto it = std::find_if(_arguments.begin(), _arguments.end(),
-                               [&name](const auto& el) { return el->Name() == name; });
+        auto it =
+            std::find_if(_arguments.begin(), _arguments.end(), [&name](const auto& el) { return el->Name() == name; });
         return it != _arguments.end();
     }
 

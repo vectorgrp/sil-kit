@@ -58,7 +58,7 @@ public:
 TEST_F(Test_CapiSilKit, silkit_bad_params)
 {
     SilKit_ReturnCode returnCode;
-    
+
     {
         // Bad / Invalid Parameter ParticipantConfiguration_FromString
         SilKit_ParticipantConfiguration* participantConfigFromString = nullptr;
@@ -137,7 +137,7 @@ TEST_F(Test_CapiSilKit, silkit_bad_params)
         returnCode = SilKit_ParticipantConfiguration_Destroy(participantConfigFromString);
         EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
     }
-    
+
     {
         // Bad Parameter SilKit_Participant_Destroy
         returnCode = SilKit_Participant_Destroy(nullptr);

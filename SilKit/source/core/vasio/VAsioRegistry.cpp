@@ -300,7 +300,8 @@ void VAsioRegistry::OnPeerShutdown(IVAsioPeer* peer)
 
     if (connectedParticipant->peer != peer)
     {
-        Log::Debug(_logger.get(), "Duplicate peer '{}' has shut down, which had no participant information", participantName);
+        Log::Debug(_logger.get(), "Duplicate peer '{}' has shut down, which had no participant information",
+                   participantName);
         return;
     }
 

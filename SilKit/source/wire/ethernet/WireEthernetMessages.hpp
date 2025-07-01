@@ -160,9 +160,8 @@ std::ostream& operator<<(std::ostream& out, EthernetMode value)
 std::ostream& operator<<(std::ostream& out, const EthernetStatus& msg)
 {
     auto timestamp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(msg.timestamp);
-    return out << "EthernetStatus{"
-               << "state=" << msg.state << "bitrate=" << msg.bitrate << " @" << timestamp.count() << "ms"
-               << "}";
+    return out << "EthernetStatus{" << "state=" << msg.state << "bitrate=" << msg.bitrate << " @" << timestamp.count()
+               << "ms" << "}";
 }
 
 std::ostream& operator<<(std::ostream& out, const EthernetSetMode& msg)

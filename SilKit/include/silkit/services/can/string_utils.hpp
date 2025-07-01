@@ -170,8 +170,7 @@ std::ostream& operator<<(std::ostream& out, CanTransmitStatus status)
 
 std::ostream& operator<<(std::ostream& out, const CanFrame& msg)
 {
-    out << "Can::CanFrame{"
-        << ", canId=" << msg.canId << ", flags=";
+    out << "Can::CanFrame{" << ", canId=" << msg.canId << ", flags=";
 
     auto printFlag = [firstFlag = true, &out, &msg](const CanFrameFlag flag) mutable {
         if (!(msg.flags & static_cast<CanFrameFlagMask>(flag)))

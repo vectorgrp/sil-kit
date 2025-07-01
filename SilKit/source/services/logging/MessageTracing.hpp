@@ -32,20 +32,16 @@ namespace Services {
 
 
 template <typename MsgT>
-std::chrono::nanoseconds GetTimestamp(MsgT& msg,
-                                      std::enable_if_t<Core::HasTimestamp<MsgT>::value, bool> = true)
+std::chrono::nanoseconds GetTimestamp(MsgT& msg, std::enable_if_t<Core::HasTimestamp<MsgT>::value, bool> = true)
 {
     return msg.timestamp;
 }
 
 template <typename MsgT>
-std::chrono::nanoseconds GetTimestamp(MsgT& /*msg*/,
-                  std::enable_if_t<!Core::HasTimestamp<MsgT>::value, bool> = false)
+std::chrono::nanoseconds GetTimestamp(MsgT& /*msg*/, std::enable_if_t<!Core::HasTimestamp<MsgT>::value, bool> = false)
 {
     return std::chrono::nanoseconds::duration::min();
 }
-
-
 
 
 template <class SilKitMessageT>
@@ -65,7 +61,7 @@ void TraceRx(Logging::ILoggerInternal* logger, const Core::IServiceEndpoint* add
         {
             lm.FormatKeyValue(Logging::Keys::virtualTimeNS, "{}", virtualTimeStamp.count());
         }
-    lm.Dispatch();
+        lm.Dispatch();
     }
 }
 
@@ -82,17 +78,27 @@ void TraceTx(Logging::ILoggerInternal* logger, const Core::IServiceEndpoint* add
         auto virtualTimeStamp = GetTimestamp(msg);
         if (virtualTimeStamp != std::chrono::nanoseconds::duration::min())
         {
-                lm.FormatKeyValue(Logging::Keys::virtualTimeNS, "{}", virtualTimeStamp.count());
+            lm.FormatKeyValue(Logging::Keys::virtualTimeNS, "{}", virtualTimeStamp.count());
         }
         lm.Dispatch();
     }
 }
 
 // Don't trace LogMessages - this could cause cycles!
-inline void TraceRx(Logging::ILoggerInternal* /*logger*/, Core::IServiceEndpoint* /*addr*/, const Logging::LogMsg& /*msg*/) {}
-inline void TraceTx(Logging::ILoggerInternal* /*logger*/, Core::IServiceEndpoint* /*addr*/, const Logging::LogMsg& /*msg*/) {}
+inline void TraceRx(Logging::ILoggerInternal* /*logger*/, Core::IServiceEndpoint* /*addr*/,
+                    const Logging::LogMsg& /*msg*/)
+{
+}
+inline void TraceTx(Logging::ILoggerInternal* /*logger*/, Core::IServiceEndpoint* /*addr*/,
+                    const Logging::LogMsg& /*msg*/)
+{
+}
 
-inline void TraceRx(Logging::ILoggerInternal* /*logger*/, Core::IServiceEndpoint* /*addr*/, Logging::LogMsg&& /*msg*/) {}
-inline void TraceTx(Logging::ILoggerInternal* /*logger*/, Core::IServiceEndpoint* /*addr*/, Logging::LogMsg&& /*msg*/) {}
+inline void TraceRx(Logging::ILoggerInternal* /*logger*/, Core::IServiceEndpoint* /*addr*/, Logging::LogMsg&& /*msg*/)
+{
+}
+inline void TraceTx(Logging::ILoggerInternal* /*logger*/, Core::IServiceEndpoint* /*addr*/, Logging::LogMsg&& /*msg*/)
+{
+}
 } // namespace Services
 } // namespace SilKit

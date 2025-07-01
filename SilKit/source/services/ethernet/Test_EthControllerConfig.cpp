@@ -37,7 +37,7 @@ using namespace SilKit::Services::Ethernet;
 class Test_EthControllerConfig : public testing::Test
 {
 public:
-    Test_EthControllerConfig() {};
+    Test_EthControllerConfig(){};
 };
 
 auto PrepareParticipantConfiguration() -> std::shared_ptr<SilKit::Config::ParticipantConfiguration>

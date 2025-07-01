@@ -38,7 +38,6 @@ namespace Tests {
 class ITest_SimTestHarness : public testing::Test
 {
 protected: //CTor and operators
-
     auto TestHarness() -> SimTestHarness&
     {
         return *_simTestHarness;
@@ -75,9 +74,8 @@ protected:
     {
         // create test harness with deferred participant and controller creation.
         // Will only create the SIL Kit Registry and tell the SystemController the participantNames
-        _simTestHarness =
-            std::make_unique<SimTestHarness>(coordinatedParticipantNames, "silkit://localhost:0", true, true,
-                                                           autonomousParticipantNames);
+        _simTestHarness = std::make_unique<SimTestHarness>(coordinatedParticipantNames, "silkit://localhost:0", true,
+                                                           true, autonomousParticipantNames);
         _registryUri = _simTestHarness->GetRegistryUri();
     }
 

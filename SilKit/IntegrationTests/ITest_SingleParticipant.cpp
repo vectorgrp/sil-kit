@@ -124,8 +124,8 @@ protected:
         EXPECT_CALL(callbacks, AckHandler(AnAckWithCanIdAndUserContext(1, (void*)uintptr_t(0)))).Times(0);
         EXPECT_CALL(callbacks, AckHandler(AnAckWithCanIdAndUserContext(1, (void*)uintptr_t(6)))).Times(0);
 
-        EXPECT_TRUE(testHarness.Run(10s)) << "TestHarness timeout occurred!"
-                                          << " numSent=" << numSent << " numAcked=" << numAcked;
+        EXPECT_TRUE(testHarness.Run(10s))
+            << "TestHarness timeout occurred!" << " numSent=" << numSent << " numAcked=" << numAcked;
         EXPECT_EQ(numSent, testMessages.size());
         EXPECT_EQ(numAcked, testMessages.size());
     }

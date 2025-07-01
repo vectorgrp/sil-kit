@@ -238,8 +238,7 @@ std::ostream& operator<<(std::ostream& out, const WireFlexrayTxBufferUpdate& msg
 
 std::ostream& operator<<(std::ostream& out, const FlexrayTxBufferConfigUpdate& msg)
 {
-    return out << "fr::FlexrayTxBufferConfigUpdate{"
-               << "idx=" << msg.txBufferIndex << " " << msg.txBufferConfig << "}";
+    return out << "fr::FlexrayTxBufferConfigUpdate{" << "idx=" << msg.txBufferIndex << " " << msg.txBufferConfig << "}";
 }
 
 std::ostream& operator<<(std::ostream& out, FlexrayChiCommand command)

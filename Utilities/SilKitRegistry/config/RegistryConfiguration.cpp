@@ -31,10 +31,12 @@ namespace Config {
 
 auto Parse(const std::string& string) -> V1::RegistryConfiguration
 {
-    auto&& configuration =  SilKit::Config::Deserialize<V1::RegistryConfiguration>(string);
-    if (!configuration.schemaVersion.empty() && configuration.schemaVersion != SilKitRegistry::Config::V1::GetSchemaVersion())
+    auto&& configuration = SilKit::Config::Deserialize<V1::RegistryConfiguration>(string);
+    if (!configuration.schemaVersion.empty()
+        && configuration.schemaVersion != SilKitRegistry::Config::V1::GetSchemaVersion())
     {
-        throw SilKit::ConfigurationError{fmt::format("Unknown schema version '{}' found in registry configuration!", configuration.schemaVersion)};
+        throw SilKit::ConfigurationError{
+            fmt::format("Unknown schema version '{}' found in registry configuration!", configuration.schemaVersion)};
     }
     return configuration;
 }

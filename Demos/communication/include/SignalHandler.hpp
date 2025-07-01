@@ -24,7 +24,7 @@ static std::unique_ptr<SignalMonitor> gSignalMonitor;
 ////////////////////////////////////////////
 #if WIN32
 #ifndef NOMINMAX
-    #define NOMINMAX
+#define NOMINMAX
 #endif
 #include <windows.h>
 
