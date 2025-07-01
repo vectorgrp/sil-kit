@@ -46,7 +46,7 @@ jobs:
       uses: ilammy/msvc-dev-cmd@v1.12.0
       with:
         arch: x64
-        toolset: 14.1
+        toolset: 14.20
 
     - uses: ./.github/actions/build-cmake-preset
       with:
@@ -81,7 +81,7 @@ jobs:
       uses: ilammy/msvc-dev-cmd@v1.12.0
       with:
         arch: x86
-        toolset: 14.1
+        toolset: 14.20
 
     - uses: ./.github/actions/build-cmake-preset
       with:
