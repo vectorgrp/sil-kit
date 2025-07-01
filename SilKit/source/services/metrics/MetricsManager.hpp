@@ -56,13 +56,13 @@ public:
 
 public: // IMetricsManager
     void SubmitUpdates() override;
-    auto GetCounter(const std::string& name) -> ICounterMetric* override;
-    auto GetStatistic(const std::string& name) -> IStatisticMetric* override;
-    auto GetStringList(const std::string& name) -> IStringListMetric* override;
-    auto GetAttribute(const std::string& name) -> IAttributeMetric* override;
+    auto GetCounter(MetricName name) -> ICounterMetric* override;
+    auto GetStatistic(MetricName name) -> IStatisticMetric* override;
+    auto GetStringList(MetricName name) -> IStringListMetric* override;
+    auto GetAttribute(MetricName name) -> IAttributeMetric* override;
 
 private:
-    auto GetOrCreateMetric(std::string name, MetricKind kind) -> IMetric*;
+    auto GetOrCreateMetric(MetricName name, MetricKind kind) -> IMetric*;
 
 private:
     std::string _participantName;

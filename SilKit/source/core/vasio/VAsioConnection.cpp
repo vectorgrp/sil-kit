@@ -337,7 +337,7 @@ auto VAsioConnection::PrepareAcceptorEndpointUris(const std::string& connectUri)
 
 void VAsioConnection::OpenTcpAcceptors(const std::vector<std::string>& acceptorEndpointUris)
 {
-    auto metric = _metricsManager->GetStringList("TcpAcceptors");
+    auto metric = _metricsManager->GetStringList({"TcpAcceptors"});
     metric->Clear();
 
     for (const auto& uriString : acceptorEndpointUris)
@@ -386,7 +386,7 @@ void VAsioConnection::OpenTcpAcceptors(const std::vector<std::string>& acceptorE
 
 void VAsioConnection::OpenLocalAcceptors(const std::vector<std::string>& acceptorEndpointUris)
 {
-    auto metric = _metricsManager->GetStringList("LocalAcceptors");
+    auto metric = _metricsManager->GetStringList({"LocalAcceptors"});
     metric->Clear();
 
     for (const auto& uriString : acceptorEndpointUris)
@@ -1081,12 +1081,12 @@ void VAsioConnection::AssociateParticipantNameAndPeer(const std::string& simulat
         return;
     }
     IStringListMetric* metric;
-    auto metricNameBase = "Peer/" + simulationName + "/" + participantName;
 
-    metric = _metricsManager->GetStringList(metricNameBase + "/LocalEndpoint");
+    metric = _metricsManager->GetStringList({"Peer", simulationName, participantName, "LocalEndpoint"});
     metric->Add(peer->GetLocalAddress());
 
-    metric = _metricsManager->GetStringList(metricNameBase + "/RemoteEndpoint");
+    metric =
+        _metricsManager->GetStringList({"Peer", simulationName, participantName, "LocalEndpoint", "/RemoteEndpoint"});
     metric->Add(peer->GetRemoteAddress());
 
     peer->InitializeMetrics(_participantName, _metricsManager);

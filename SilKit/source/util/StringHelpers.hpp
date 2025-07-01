@@ -22,6 +22,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 
 namespace SilKit {
@@ -43,6 +44,7 @@ auto LowerCase(std::string input) -> std::string;
 
 auto PrintableString(const std::string& input) -> std::string;
 
+auto SplitString(std::string input, const std::string& separator)  -> std::vector<std::string>;
 
 } // namespace Util
 } // namespace SilKit

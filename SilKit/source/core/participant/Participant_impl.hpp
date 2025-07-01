@@ -2015,17 +2015,19 @@ void Participant<SilKitConnectionT>::CreateParticipantAttributeMetrics()
     {
         auto ee = VSilKit::GetExecutionEnvironment();
 
-        GetMetricsManager()->GetAttribute("SilKit/System/OperatingSystem")->Add(ee.operatingSystem);
-        GetMetricsManager()->GetAttribute("SilKit/System/Hostname")->Add(ee.hostname);
-        GetMetricsManager()->GetAttribute("SilKit/System/PageSize")->Add(ee.pageSize);
-        GetMetricsManager()->GetAttribute("SilKit/System/ProcessorCount")->Add(ee.processorCount);
-        GetMetricsManager()->GetAttribute("SilKit/System/ProcessorArchitecture")->Add(ee.processorArchitecture);
-        GetMetricsManager()->GetAttribute("SilKit/System/PhysicalMemory")->Add(ee.physicalMemoryMiB + " MiB");
-        GetMetricsManager()->GetAttribute("SilKit/Process/Executable")->Add(ee.executable);
-        GetMetricsManager()->GetAttribute("SilKit/Process/Username")->Add(ee.username);
+        GetMetricsManager()->GetAttribute({"SilKit", "System", "OperatingSystem"})->Add(ee.operatingSystem);
+        GetMetricsManager()->GetAttribute({"SilKit", "System", "Hostname"})->Add(ee.hostname);
+        GetMetricsManager()->GetAttribute({"SilKit", "System", "PageSize"})->Add(ee.pageSize);
+        GetMetricsManager()->GetAttribute({"SilKit", "System", "ProcessorCount"})->Add(ee.processorCount);
+        GetMetricsManager()->GetAttribute({"SilKit", "System", "ProcessorArchitecture"})->Add(ee.processorArchitecture);
+        GetMetricsManager()->GetAttribute({"SilKit", "System", "PhysicalMemory"})->Add(ee.physicalMemoryMiB + " MiB");
+        GetMetricsManager()->GetAttribute({"SilKit", "Process", "Executable"})->Add(ee.executable);
+        GetMetricsManager()->GetAttribute({"SilKit", "Process", "Username"})->Add(ee.username);
     }
  
-    GetMetricsManager()->GetAttribute("SilKit/Participant/JsonConfig")->Add(SilKit::Config::to_json(_participantConfig));
+    GetMetricsManager()
+        ->GetAttribute({"SilKit", "Participant", "JsonConfig"})
+        ->Add(SilKit::Config::SerializeAsJson(_participantConfig));
 }
 
 

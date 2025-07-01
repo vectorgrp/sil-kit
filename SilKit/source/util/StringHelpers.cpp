@@ -141,5 +141,20 @@ auto PrintableString(const std::string& participantName) -> std::string
     return safeName;
 }
 
+auto SplitString(std::string input, const std::string& separator)  -> std::vector<std::string>
+{
+    std::vector<std::string> tokens;
+    for (auto i = input.find(separator); i != input.npos; i = input.find(separator))
+    {
+        tokens.emplace_back(input.substr(0, i));
+        input = input.substr(i + 1);
+    }
+    if (!input.empty())
+    {
+        tokens.emplace_back(std::move(input));
+    }
+    return tokens;
+}
+
 } // namespace Util
 } // namespace SilKit

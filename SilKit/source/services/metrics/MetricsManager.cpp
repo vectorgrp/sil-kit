@@ -195,22 +195,22 @@ void MetricsManager::SubmitUpdates()
 
 // IMetricsManager
 
-auto MetricsManager::GetCounter(const std::string &name) -> ICounterMetric *
+auto MetricsManager::GetCounter(MetricName name) -> ICounterMetric *
 {
     return &dynamic_cast<ICounterMetric &>(*GetOrCreateMetric(name, MetricKind::COUNTER));
 }
 
-auto MetricsManager::GetStatistic(const std::string &name) -> IStatisticMetric *
+auto MetricsManager::GetStatistic(MetricName name) -> IStatisticMetric *
 {
     return &dynamic_cast<IStatisticMetric &>(*GetOrCreateMetric(name, MetricKind::STATISTIC));
 }
 
-auto MetricsManager::GetStringList(const std::string &name) -> IStringListMetric *
+auto MetricsManager::GetStringList(MetricName name) -> IStringListMetric *
 {
     return &dynamic_cast<IStringListMetric &>(*GetOrCreateMetric(name, MetricKind::STRING_LIST));
 }
 
-auto MetricsManager::GetAttribute(const std::string& name) -> IAttributeMetric*
+auto MetricsManager::GetAttribute(MetricName name) -> IAttributeMetric*
 {
     return &dynamic_cast<IAttributeMetric&>(*GetOrCreateMetric(name, MetricKind::ATTRIBUTE));
 }
@@ -218,9 +218,10 @@ auto MetricsManager::GetAttribute(const std::string& name) -> IAttributeMetric*
 
 // MetricsManager
 
-auto MetricsManager::GetOrCreateMetric(std::string name, MetricKind kind) -> IMetric *
+auto MetricsManager::GetOrCreateMetric(MetricName nameList, MetricKind kind) -> IMetric *
 {
     std::lock_guard<decltype(_mutex)> lock{_mutex};
+    auto name = ToString(nameList);
 
     auto it = _metrics.find(name);
 

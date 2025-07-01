@@ -120,6 +120,7 @@ Experimental:
     CollectFromRemote: true
 )";
 
+    std::string _registryConfiguration = "";
 };
 
 } //namespace Tests
