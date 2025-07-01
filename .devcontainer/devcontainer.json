@@ -1,5 +1,5 @@
 {
-  "name": "CLang-foramt container",
+  "name": "CLang-format container",
   "build": {
     "dockerfile": "clangformat.Dockerfile"
   },
