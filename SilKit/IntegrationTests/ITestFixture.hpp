@@ -88,27 +88,17 @@ protected:
 
 protected: // members
     std::string _dashboardUri;
-    const std::string _dashboardParticipantConfig = R"(
+    std::string _dashboardParticipantConfig = R"(
 Logging:
   Sinks:
   - Type: Stdout
     Level: Info
-Experimental:
-  Metrics:
-    Sinks:
-      - Name: Lala
-        Type: Remote
 )";
-    const std::string _participantConfig = R"(
+    std::string _participantConfig = R"(
 Logging:
   Sinks:
   - Type: Stdout
     Level: Info
-Experimental:
-  Metrics:
-    Sinks:
-      - Name: Lala
-        Type: Remote
 )";
     const std::string _registryParticipantConfig = R"(
 Logging:

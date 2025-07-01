@@ -79,6 +79,9 @@ public: // CTor
     VAsioRegistry(std::shared_ptr<SilKit::Config::IParticipantConfiguration> cfg,
                   IRegistryEventListener* registryEventListener, ProtocolVersion version = CurrentProtocolVersion());
 
+public: // methods for test injection
+    void SetRegistryEventListener(IRegistryEventListener* listener);
+
 public: // methods
     auto StartListening(const std::string& listenUri) -> std::string override;
 

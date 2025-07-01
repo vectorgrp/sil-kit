@@ -133,6 +133,10 @@ public:
     SimParticipant* GetParticipant(const std::string& participantName, const std::string& participantConfiguration);
 
     auto GetRegistryUri() const -> std::string;
+    auto GetRegistry() const -> SilKit::Vendor::Vector::ISilKitRegistry*
+    {
+        return _registry.get();
+    }
 
     // clear everything and destroy participants:
     void Reset();
