@@ -76,8 +76,6 @@ public: // CTor
     VAsioRegistry(VAsioRegistry&&) = delete;
     VAsioRegistry(std::shared_ptr<SilKit::Config::IParticipantConfiguration> cfg,
                   ProtocolVersion version = CurrentProtocolVersion());
-    VAsioRegistry(std::shared_ptr<SilKit::Config::IParticipantConfiguration> cfg,
-                  IRegistryEventListener* registryEventListener, ProtocolVersion version = CurrentProtocolVersion());
 
 public: // methods for test injection
     void SetRegistryEventListener(IRegistryEventListener* listener);
