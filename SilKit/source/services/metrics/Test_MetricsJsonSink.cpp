@@ -83,9 +83,9 @@ TEST(Test_MetricsJsonSink, test_json_escaping_and_structure)
     const std::string mv3{fmt::format(R"(["{}","{}"])", EscapeString(mv3a), EscapeString(mv3b))};
 
     MetricsUpdate update;
-    update.metrics.emplace_back(MetricData{ts1, mn1, mk1, mv1});
-    update.metrics.emplace_back(MetricData{ts2, mn2, mk2, mv2});
-    update.metrics.emplace_back(MetricData{ts3, mn3, mk3, mv3});
+    update.metrics.emplace_back(MetricData{ts1, mn1, mk1, mv1, {}});
+    update.metrics.emplace_back(MetricData{ts2, mn2, mk2, mv2, {}});
+    update.metrics.emplace_back(MetricData{ts3, mn3, mk3, mv3, {}});
 
     auto ownedOstream = std::make_unique<std::ostringstream>();
     auto& ostream = *ownedOstream;
