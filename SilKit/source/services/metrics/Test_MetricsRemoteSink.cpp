@@ -32,10 +32,10 @@ TEST(Test_MetricsRemoteSink, test_forward_to_sender_only_if_local_origin)
     const std::string otherOrigin{"Another Participant Name"};
 
     MetricsUpdate updateOne;
-    updateOne.metrics.emplace_back(MetricData{1, "One", MetricKind::COUNTER, "1"});
+    updateOne.metrics.emplace_back(MetricData{1, "One", MetricKind::COUNTER, "1", {"1"}});
 
     MetricsUpdate updateTwo;
-    updateTwo.metrics.emplace_back(MetricData{2, "Two", MetricKind::COUNTER, "2"});
+    updateTwo.metrics.emplace_back(MetricData{2, "Two", MetricKind::COUNTER, "2", {"2"}});
 
     MockMetricsSender sender;
 
