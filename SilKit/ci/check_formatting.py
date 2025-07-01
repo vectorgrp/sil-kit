@@ -35,8 +35,8 @@ CLANG_FORMAT = "clang-format-" + CLANG_VERSION
 
 def main():
     if which(CLANG_FORMAT) is None:
-        warn("No {} found!", CLANG_FORMAT)
-        die(1, "Please install {}!", CLANG_FORMAT)
+        warn(f"No {CLANG_FORMAT} found!")
+        die(1, f"Please install {CLANG_FORMAT}!")
     parser = argparse.ArgumentParser()
     parser.add_argument("--force-formatting", action='store_true', help='format each file (modifies files!)')
     args = parser.parse_args()
@@ -52,9 +52,9 @@ def main():
 
     major, minor, patch = version.group(1,2,3)
     if int(major) < 13:
-        die(3, "clang{} not supported!\r\n       Minimum supported version is clang-{}!", major, CLANG_VERSION)
+        die(3, f"clang{major} not supported!\r\n       Minimum supported version is clang-{CLANG_VERSION}!")
 
-    info("clang-format-{}.{}.{} found!", major, minor, patch)
+    info(f"clang-format-{major}.{minor}.{patch} found!")
 
     ############################################################################################################################
     fileExtensions = ["*.cpp", "*.ipp", "*.c", "*.hpp", "*.h"]
@@ -80,8 +80,10 @@ def main():
                     formattingCorrect = False
                     totalWarnings = totalWarnings + 1
                     warn(f"File not formatted correctly: {file}: result: {formatResult}")
+                if formatResult.returncode == 0 and args.force_formatting:
+                    info(f"formatted {file}")
 
-    info("{} files checked, {} produced a warning!", totalFiles, totalWarnings)
+    info(f"{totalFiles} files checked, {totalWarnings} produced a warning!")
     if formattingCorrect is False:
         # Only warn for now
         warn("Formatting for one or more SilKit source code files not correct.!")
@@ -89,6 +91,8 @@ def main():
         exit(0)
 
     info("All source code files properly formatted!")
+    if args.force_formatting:
+        info(f"formatted using {major}.{minor}.{patch}")
     exit(0)
 
 if __name__=="__main__":
