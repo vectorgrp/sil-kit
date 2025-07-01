@@ -77,11 +77,11 @@ def main():
 
             for file in files:
                 totalFiles = totalFiles + 1
-                formatResult = subprocess.run([CLANG_FORMAT, '--Werror', dryrun,  '-i', '--style=file', file], capture_output=True, encoding='utf-8')
+                formatResult = subprocess.run([CLANG_FORMAT, '--Werror', dryrun,  '-i', '--style=file:.clang-format', file], capture_output=True, encoding='utf-8')
                 if formatResult.returncode != 0:
                     formattingCorrect = False
                     totalWarnings = totalWarnings + 1
-                    warn("File not formatted correctly: {}", file)
+                    warn(f"File not formatted correctly: {file}: result: {formatResult}")
 
     info("{} files checked, {} produced a warning!", totalFiles, totalWarnings)
     if formattingCorrect is False:
