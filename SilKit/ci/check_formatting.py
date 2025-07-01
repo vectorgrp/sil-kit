@@ -9,6 +9,7 @@ import os
 import re
 import subprocess
 import sys
+import argparse
 
 INFO_PREFIX = "::notice ::" if os.getenv('CI') != None else "INFO: "
 WARN_PREFIX = "::warning ::" if os.getenv('CI') != None else "WARNING: "
@@ -36,6 +37,13 @@ def main():
     if which(CLANG_FORMAT) is None:
         warn("No {} found!", CLANG_FORMAT)
         die(1, "Please install {}!", CLANG_FORMAT)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--force-formatting", action='store_true', help='format each file (modifies files!)')
+    args = parser.parse_args()
+
+    dryrun="--dryrun"
+    if args.force_formatting:
+        dryrun=""
 
     # Check for supported clang-format version
     format_version = subprocess.run([CLANG_FORMAT, '--version'], capture_output=True, encoding='utf-8')
@@ -69,7 +77,7 @@ def main():
 
             for file in files:
                 totalFiles = totalFiles + 1
-                formatResult = subprocess.run([CLANG_FORMAT, '--Werror', '--dry-run', '-i', '--style=file', file], capture_output=True, encoding='utf-8')
+                formatResult = subprocess.run([CLANG_FORMAT, '--Werror', dryrun,  '-i', '--style=file', file], capture_output=True, encoding='utf-8')
                 if formatResult.returncode != 0:
                     formattingCorrect = False
                     totalWarnings = totalWarnings + 1
