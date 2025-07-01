@@ -1,0 +1,10 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Format Code",
+      "type": "shell",
+      "command": "./SilKit/ci/check_formatting.py --force-formatting"
+    }
+  ]
+}

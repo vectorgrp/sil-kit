@@ -1,0 +1,16 @@
+{
+  "name": "CLang-foramt container",
+  "build": {
+    "dockerfile": "clangformat.Dockerfile"
+  },
+  "settings": {},
+  "extensions": [
+    "ms-vscode.cpptools"
+  ],
+  "postCreateCommand": "echo 'Container ready!'",
+  "runArgs": ["--init"],
+  "workspaceFolder": "/workspace",
+  "mounts": [
+    "source=${localWorkspaceFolder},target=/workspace,type=bind"
+  ]
+}
