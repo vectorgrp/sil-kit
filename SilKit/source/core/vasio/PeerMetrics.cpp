@@ -31,6 +31,12 @@ void NoMetrics::TxBytes(const SilKit::Core::SerializedMessage&)
     // no op
 }
 
+void NoMetrics::TxQueueSize(size_t)
+{
+    // no op
+}
+
+
 // PeerMetrics
 
 void PeerMetrics::InitializeMetrics(const std::string& localParticipantName, VSilKit::IMetricsManager* manager,
@@ -44,6 +50,7 @@ void PeerMetrics::InitializeMetrics(const std::string& localParticipantName, VSi
     _txPackets = manager->GetCounter({"Peer", simulationName, localParticipantName, remoteParticipant, "tx_packets"});
     _rxBytes = manager->GetCounter({"Peer", simulationName, localParticipantName, remoteParticipant, "rx_bytes"});
     _rxPackets = manager->GetCounter({"Peer", simulationName, localParticipantName, remoteParticipant, "rx_packets"});
+    _txQueueSize = manager->GetCounter({"Peer", simulationName, localParticipantName, remoteParticipant, "tx_queue_size"});
 
     _initialized = true;
 }
@@ -83,5 +90,15 @@ void PeerMetrics::TxBytes(const SilKit::Core::SerializedMessage& msg)
     }
     _txBytes->Add(msg.GetStorageSize());
 }
+
+void PeerMetrics::TxQueueSize(size_t queueSize)
+{
+    if (!_initialized)
+    {
+        return;
+    }
+    _txQueueSize->Add(queueSize);
+}
+
 
 }
