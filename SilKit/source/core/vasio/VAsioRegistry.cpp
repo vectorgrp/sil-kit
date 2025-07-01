@@ -26,6 +26,12 @@ namespace Core {
 
 
 VAsioRegistry::VAsioRegistry(std::shared_ptr<SilKit::Config::IParticipantConfiguration> cfg, ProtocolVersion version)
+    : VAsioRegistry(std::move(cfg), nullptr, version)
+{
+}
+
+VAsioRegistry::VAsioRegistry(std::shared_ptr<SilKit::Config::IParticipantConfiguration> cfg,
+                             IRegistryEventListener* registryEventListener, ProtocolVersion version)
     : _vasioConfig{std::dynamic_pointer_cast<SilKit::Config::ParticipantConfiguration>(cfg)}
     , _metricsProcessor{std::make_unique<VSilKit::MetricsProcessor>(REGISTRY_PARTICIPANT_NAME)}
     , _metricsManager{std::make_unique<VSilKit::MetricsManager>(REGISTRY_PARTICIPANT_NAME, *_metricsProcessor)}
@@ -38,6 +44,7 @@ VAsioRegistry::VAsioRegistry(std::shared_ptr<SilKit::Config::IParticipantConfigu
                   version}
 {
     _logger = std::make_unique<Services::Logging::Logger>(REGISTRY_PARTICIPANT_NAME, _vasioConfig->logging);
+    SetRegistryEventListener(registryEventListener);
 
     dynamic_cast<VSilKit::MetricsProcessor&>(*_metricsProcessor).SetLogger(*_logger);
     dynamic_cast<VSilKit::MetricsManager&>(*_metricsManager).SetLogger(*_logger);

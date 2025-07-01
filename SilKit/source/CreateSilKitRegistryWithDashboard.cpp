@@ -14,9 +14,7 @@ auto CreateSilKitRegistryWithDashboard(std::shared_ptr<SilKit::Config::IParticip
                                        SilKit::Core::IRegistryEventListener* registryEventListener)
     -> std::unique_ptr<SilKit::Vendor::Vector::ISilKitRegistry>
 {
-    auto&& registry = std::make_unique<SilKit::Core::VAsioRegistry>(config); 
-    registry->SetRegistryEventListener(registryEventListener);
-    return registry;
+    return std::make_unique<SilKit::Core::VAsioRegistry>(config, registryEventListener);
 }
 
 
