@@ -21,6 +21,11 @@ using MetricName = std::initializer_list<std::string>;
 inline auto ToString(MetricName stringList) -> std::string
 {
     std::stringstream ss;
+    if(stringList.size() == 1)
+    {
+        return *stringList.begin();
+    }
+
     for (auto&& s : stringList)
     {
         ss << s << "/";

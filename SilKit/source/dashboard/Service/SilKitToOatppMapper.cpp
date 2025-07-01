@@ -471,9 +471,17 @@ auto SilKitToOatppMapper::CreateMetricsUpdateDto(const std::string origin, const
     {
         auto dataDto = MetricDataDto::createShared();
         dataDto->ts = metricData.timestamp;
-        auto&& metricNameFragments = SilKit::Util::SplitString(metricData.name, "/");
+        if(metricData.nameList.empty())
+        {
+            //backwards compatible single string for name
+            auto&& metricNameFragments = SilKit::Util::SplitString(metricData.name, "/");
+            std::copy(metricNameFragments.begin(),metricNameFragments.end(), std::back_inserter(*dataDto->mn));
+        }
+        else
+        {
+            std::copy(metricData.nameList.begin(),metricData.nameList.end(), std::back_inserter(*dataDto->mn));
+        }
 
-        std::copy(metricNameFragments.begin(),metricNameFragments.end(), std::back_inserter(*dataDto->mn));
         switch (metricData.kind)
         {
         case VSilKit::MetricKind::COUNTER:

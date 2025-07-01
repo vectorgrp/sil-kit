@@ -97,10 +97,7 @@ public:
 
     void EnableAggregation() override;
 
-    void InitializeMetrics(const std::string& localParticipantName, VSilKit::IMetricsManager* manager) override
-    {
-        _peerMetrics->InitializeMetrics(localParticipantName, manager, this);
-    }
+    void InitializeMetrics(const std::string& localParticipantName, VSilKit::IMetricsManager* manager) override;
 
 private:
     // ----------------------------------------
