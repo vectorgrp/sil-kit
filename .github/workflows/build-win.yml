@@ -20,7 +20,7 @@ on:
 
 jobs:
   build-win-x64:
-    runs-on: windows-2019
+    runs-on: windows-2022
 
     if: (inputs.run_build == true) || (github.event_name == 'push')
     steps:
@@ -55,7 +55,7 @@ jobs:
         artifact-label: ${{ github.job }}
 
   build-win-x32:
-    runs-on: windows-2019
+    runs-on: windows-2022
 
     if: inputs.run_build == true
     steps:
