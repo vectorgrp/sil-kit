@@ -50,7 +50,7 @@ jobs:
 
     - uses: ./.github/actions/build-cmake-preset
       with:
-        preset-name: vs141-x64-release
+        preset-name: x64-release
         build-arch: x64
         artifact-label: ${{ github.job }}
 
@@ -85,5 +85,5 @@ jobs:
 
     - uses: ./.github/actions/build-cmake-preset
       with:
-        preset-name: vs141-x86-release
+        preset-name: x86-release
         artifact-label: ${{ github.job }}
