@@ -40,10 +40,10 @@ TEST(Test_MetricsProcessor, metrics_are_cached_until_sinks_are_set)
     const std::string participantName{"Participant Name"};
 
     MetricsUpdate updateOne;
-    updateOne.metrics.emplace_back(MetricData{1, "1", MetricKind::COUNTER, "1"});
+    updateOne.metrics.emplace_back(MetricData{1, "1", MetricKind::COUNTER, "1", {}});
 
     MetricsUpdate updateTwo;
-    updateTwo.metrics.emplace_back(MetricData{2, "2", MetricKind::COUNTER, "2"});
+    updateTwo.metrics.emplace_back(MetricData{2, "2", MetricKind::COUNTER, "2", {}});
 
     std::vector<MetricData> metrics;
     std::copy(updateOne.metrics.begin(), updateOne.metrics.end(), std::back_inserter(metrics));
@@ -70,16 +70,16 @@ TEST(Test_MetricsProcessor, metrics_are_cached_until_sinks_are_set_per_origin)
     const std::string updateTwoOrigin{"Two"};
 
     MetricsUpdate updateOneA;
-    updateOneA.metrics.emplace_back(MetricData{1, "1A", MetricKind::COUNTER, "1"});
+    updateOneA.metrics.emplace_back(MetricData{1, "1A", MetricKind::COUNTER, "1", {"1"}});
 
     MetricsUpdate updateOneB;
-    updateOneB.metrics.emplace_back(MetricData{2, "1B", MetricKind::COUNTER, "1"});
+    updateOneB.metrics.emplace_back(MetricData{2, "1B", MetricKind::COUNTER, "1", {"1"}});
 
     MetricsUpdate updateTwoA;
-    updateTwoA.metrics.emplace_back(MetricData{2, "2", MetricKind::COUNTER, "2"});
+    updateTwoA.metrics.emplace_back(MetricData{2, "2", MetricKind::COUNTER, "2", {"1"}});
 
     MetricsUpdate updateTwoB;
-    updateTwoB.metrics.emplace_back(MetricData{2, "2", MetricKind::COUNTER, "2"});
+    updateTwoB.metrics.emplace_back(MetricData{2, "2", MetricKind::COUNTER, "2", {"1"}});
 
     std::vector<MetricData> metricsOne;
     std::copy(updateOneA.metrics.begin(), updateOneA.metrics.end(), std::back_inserter(metricsOne));
@@ -111,10 +111,10 @@ TEST(Test_MetricsProcessor, metrics_are_processed_directly_after_sinks_are_set)
     const std::string participantName{"Participant Name"};
 
     MetricsUpdate updateOne;
-    updateOne.metrics.emplace_back(MetricData{1, "1", MetricKind::COUNTER, "1"});
+    updateOne.metrics.emplace_back(MetricData{1, "1", MetricKind::COUNTER, "1", {"1", "1.1"}});
 
     MetricsUpdate updateTwo;
-    updateTwo.metrics.emplace_back(MetricData{2, "2", MetricKind::COUNTER, "2"});
+    updateTwo.metrics.emplace_back(MetricData{2, "2", MetricKind::COUNTER, "2", {"2", "2.1"}});
 
     std::vector<std::unique_ptr<IMetricsSink>> sinks;
     sinks.emplace_back(std::make_unique<MockMetricsSink>());
@@ -137,10 +137,10 @@ TEST(Test_MetricsProcessor, receive_handler_ignores_metrics_from_own_participant
     const std::string participantName{"Participant Name"};
 
     MetricsUpdate updateOne;
-    updateOne.metrics.emplace_back(MetricData{1, "1", MetricKind::COUNTER, "1"});
+    updateOne.metrics.emplace_back(MetricData{1, "1", MetricKind::COUNTER, "1", {"1","1.1"}});
 
     MetricsUpdate updateTwo;
-    updateTwo.metrics.emplace_back(MetricData{2, "2", MetricKind::COUNTER, "2"});
+    updateTwo.metrics.emplace_back(MetricData{2, "2", MetricKind::COUNTER, "2", {"2", "2.1"}});
 
     std::vector<std::unique_ptr<IMetricsSink>> sinks;
     sinks.emplace_back(std::make_unique<MockMetricsSink>());
