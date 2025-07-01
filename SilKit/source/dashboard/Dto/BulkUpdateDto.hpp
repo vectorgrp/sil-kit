@@ -140,7 +140,7 @@ class MetricDataDto : public oatpp::DTO
 
     DTO_FIELD(Int64, ts);
     DTO_FIELD(String, pn);
-    DTO_FIELD(String, mn);
+    DTO_FIELD(Vector<String>, mn);
     DTO_FIELD(Enum<MetricKind>::AsString, mk);
     DTO_FIELD(String, mv);
 };

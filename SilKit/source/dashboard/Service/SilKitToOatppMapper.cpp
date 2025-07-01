@@ -22,6 +22,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "SilKitToOatppMapper.hpp"
 
 #include "YamlParser.hpp"
+#include "StringHelpers.hpp"
 
 #include <string>
 #include <type_traits>
@@ -470,7 +471,9 @@ auto SilKitToOatppMapper::CreateMetricsUpdateDto(const std::string origin, const
     {
         auto dataDto = MetricDataDto::createShared();
         dataDto->ts = metricData.timestamp;
-        dataDto->mn = metricData.name;
+        auto&& metricNameFragments = SilKit::Util::SplitString(metricData.name, "/");
+
+        std::copy(metricNameFragments.begin(),metricNameFragments.end(), std::back_inserter(*dataDto->mn));
         switch (metricData.kind)
         {
         case VSilKit::MetricKind::COUNTER:
