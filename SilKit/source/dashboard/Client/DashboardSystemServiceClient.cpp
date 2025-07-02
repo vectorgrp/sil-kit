@@ -215,6 +215,14 @@ void DashboardSystemServiceClient::SetSimulationEnd(oatpp::UInt64 simulationId,
     Log(response, "setting simulation end");
 }
 
+void DashboardSystemServiceClient::UpdateSimulationMetrics(oatpp::UInt64 simulationId,
+                                                           oatpp::Object<MetricsUpdateDto> metrics)
+{
+    auto response = _dashboardSystemApiClient->updateSimulationMetrics(simulationId, metrics);
+    Log(response, "updating simulation metrics");
+}
+
+
 void DashboardSystemServiceClient::Log(std::shared_ptr<oatpp::web::client::RequestExecutor::Response> response,
                                        const std::string& message)
 {

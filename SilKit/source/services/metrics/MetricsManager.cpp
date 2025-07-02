@@ -117,6 +117,26 @@ private:
 };
 
 
+class MetricsManager::AttributeMetric
+    : public IAttributeMetric
+    , public IMetric
+{
+public:
+    AttributeMetric();
+
+    void Clear() override;
+    void Add(const std::string& value) override;
+
+    auto GetMetricKind() const -> MetricKind override;
+    auto GetUpdateTime() const -> MetricTimePoint override;
+    auto FormatValue() const -> std::string override;
+
+private:
+    MetricTimePoint _timestamp;
+    std::string _value;
+};
+
+
 MetricsManager::MetricsManager(std::string participantName, IMetricsProcessor &processor)
     : _participantName{std::move(participantName)}
     , _processor{&processor}
@@ -143,11 +163,8 @@ void MetricsManager::SubmitUpdates()
             return std::chrono::duration_cast<std::chrono::nanoseconds>(timepoint.time_since_epoch()).count();
         };
 
-        for (const auto &pair : _metrics)
+        for (auto&& [name, metric] : _metrics)
         {
-            const auto &name = pair.first;
-            const auto *metric = pair.second.get();
-
             const auto timepoint = metric->GetUpdateTime();
             if (timepoint <= _lastSubmitUpdate)
             {
@@ -175,27 +192,33 @@ void MetricsManager::SubmitUpdates()
 
 // IMetricsManager
 
-auto MetricsManager::GetCounter(const std::string &name) -> ICounterMetric *
+auto MetricsManager::GetCounter(MetricName name) -> ICounterMetric *
 {
     return &dynamic_cast<ICounterMetric &>(*GetOrCreateMetric(name, MetricKind::COUNTER));
 }
 
-auto MetricsManager::GetStatistic(const std::string &name) -> IStatisticMetric *
+auto MetricsManager::GetStatistic(MetricName name) -> IStatisticMetric *
 {
     return &dynamic_cast<IStatisticMetric &>(*GetOrCreateMetric(name, MetricKind::STATISTIC));
 }
 
-auto MetricsManager::GetStringList(const std::string &name) -> IStringListMetric *
+auto MetricsManager::GetStringList(MetricName name) -> IStringListMetric *
 {
     return &dynamic_cast<IStringListMetric &>(*GetOrCreateMetric(name, MetricKind::STRING_LIST));
+}
+
+auto MetricsManager::GetAttribute(MetricName name) -> IAttributeMetric*
+{
+    return &dynamic_cast<IAttributeMetric&>(*GetOrCreateMetric(name, MetricKind::ATTRIBUTE));
 }
 
 
 // MetricsManager
 
-auto MetricsManager::GetOrCreateMetric(std::string name, MetricKind kind) -> IMetric *
+auto MetricsManager::GetOrCreateMetric(MetricName nameList, MetricKind kind) -> IMetric *
 {
     std::lock_guard<decltype(_mutex)> lock{_mutex};
+    auto name = ToString(nameList);
 
     auto it = _metrics.find(name);
 
@@ -211,6 +234,9 @@ auto MetricsManager::GetOrCreateMetric(std::string name, MetricKind kind) -> IMe
             break;
         case MetricKind::STRING_LIST:
             it = _metrics.emplace(name, std::make_unique<StringListMetric>()).first;
+            break;
+        case MetricKind::ATTRIBUTE:
+            it = _metrics.emplace(name, std::make_unique<AttributeMetric>()).first;
             break;
         default:
             throw SilKit::SilKitError{fmt::format("Invalid MetricKind ({})", kind)};
@@ -357,6 +383,38 @@ auto MetricsManager::StringListMetric::FormatValue() const -> std::string
     }
     result.push_back(']');
     return result;
+}
+
+
+// AttributeMetric
+
+MetricsManager::AttributeMetric::AttributeMetric() = default;
+
+void MetricsManager::AttributeMetric::Clear()
+{
+    _timestamp = MetricClockNow();
+    _value.clear();
+}
+
+void MetricsManager::AttributeMetric::Add(const std::string& value)
+{
+    _timestamp = MetricClockNow();
+    _value = value;
+}
+
+auto MetricsManager::AttributeMetric::GetMetricKind() const -> MetricKind
+{
+    return MetricKind::ATTRIBUTE;
+}
+
+auto MetricsManager::AttributeMetric::GetUpdateTime() const -> MetricTimePoint
+{
+    return _timestamp;
+}
+
+auto MetricsManager::AttributeMetric::FormatValue() const -> std::string
+{
+    return _value;
 }
 
 

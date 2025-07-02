@@ -65,6 +65,7 @@ struct SimulationData
     std::map<std::string, std::map<uint64_t, Service>> servicesByParticipant;
     std::map<std::string, std::set<Link>> linksByParticipant;
     std::set<std::string> systemStates;
+    size_t metricCount{};
     bool stopped{false};
 };
 

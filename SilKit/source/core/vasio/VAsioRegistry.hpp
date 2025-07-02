@@ -60,6 +60,8 @@ struct IRegistryEventListener
     virtual void OnServiceDiscoveryEvent(
         const std::string& simulationName, const std::string& participantName,
         const SilKit::Core::Discovery::ServiceDiscoveryEvent& serviceDiscoveryEvent) = 0;
+    virtual void OnMetricsUpdate(const std::string& simulationName, const std::string& origin,
+                                 const VSilKit::MetricsUpdate& metricsUpdate) = 0;
 };
 
 class VAsioRegistry
@@ -76,6 +78,9 @@ public: // CTor
                   ProtocolVersion version = CurrentProtocolVersion());
     VAsioRegistry(std::shared_ptr<SilKit::Config::IParticipantConfiguration> cfg,
                   IRegistryEventListener* registryEventListener, ProtocolVersion version = CurrentProtocolVersion());
+
+public: // methods for test injection
+    void SetRegistryEventListener(IRegistryEventListener* listener);
 
 public: // methods
     auto StartListening(const std::string& listenUri) -> std::string override;
@@ -119,7 +124,8 @@ private: // IServiceEndpoint
     auto GetServiceDescriptor() const -> const ServiceDescriptor& override;
 
 private: // IMetricsReceiverListener
-    void OnMetricsUpdate(const std::string& participantName, const VSilKit::MetricsUpdate& metricsUpdate) override;
+    void OnMetricsUpdate(const std::string& simulationName, const std::string& participantName,
+                         const VSilKit::MetricsUpdate& metricsUpdate) override;
 
 private:
     // ----------------------------------------

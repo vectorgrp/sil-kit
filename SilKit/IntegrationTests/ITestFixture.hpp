@@ -63,8 +63,6 @@ protected:
     ITest_DashboardTestHarness()
         : ITest_SimTestHarness()
         , _dashboardUri(MakeTestDashboardUri())
-        , _dashboardParticipantConfig(R"({"Logging": {"Sinks": [{"Type": "Stdout", "Level":"Info"}]}})")
-        , _participantConfig(R"({"Logging": {"Sinks": [{"Type": "Stdout", "Level":"Info"}]}})")
     {
     }
     ~ITest_DashboardTestHarness() {}
@@ -75,16 +73,44 @@ protected:
     {
         // create test harness with deferred participant and controller creation.
         // Will only create the SIL Kit Registry and tell the SystemController the participantNames
+        SimTestHarnessArgs args{};
+        args.syncParticipantNames = std::move(coordinatedParticipantNames);
+        args.asyncParticipantNames = std::move(autonomousParticipantNames);
+        args.registry.participantConfiguration = _registryParticipantConfig;
+        args.registry.listenUri = "silkit://localhost:0";
+        args.deferParticipantCreation = true;
+        args.deferSystemControllerCreation = true;
+
         _simTestHarness =
-            std::make_unique<SimTestHarness>(coordinatedParticipantNames, "silkit://localhost:0", true, true,
-                                                           autonomousParticipantNames);
+            std::make_unique<SimTestHarness>(args);
         _registryUri = _simTestHarness->GetRegistryUri();
     }
 
 protected: // members
     std::string _dashboardUri;
-    std::string _dashboardParticipantConfig;
-    std::string _participantConfig;
+    std::string _dashboardParticipantConfig = R"(
+Logging:
+  Sinks:
+  - Type: Stdout
+    Level: Info
+)";
+    std::string _participantConfig = R"(
+Logging:
+  Sinks:
+  - Type: Stdout
+    Level: Info
+)";
+    const std::string _registryParticipantConfig = R"(
+Logging:
+  Sinks:
+  - Type: Stdout
+    Level: Info
+Experimental:
+  Metrics:
+    CollectFromRemote: true
+)";
+
+    std::string _registryConfiguration = "";
 };
 
 } //namespace Tests

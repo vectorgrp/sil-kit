@@ -22,6 +22,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "SilKitToOatppMapper.hpp"
 
 #include "YamlParser.hpp"
+#include "StringHelpers.hpp"
 
 #include <string>
 #include <type_traits>
@@ -461,6 +462,51 @@ auto SilKitToOatppMapper::CreateBulkSimulationDto(const DashboardBulkUpdate& bul
 
     return bulkSimulationDto;
 }
+
+auto SilKitToOatppMapper::CreateMetricsUpdateDto(const std::string& participantName, const VSilKit::MetricsUpdate& metricsUpdate)
+    -> Object<MetricsUpdateDto>
+{
+    auto dto = MetricsUpdateDto::CreateEmpty();
+    for (const auto& metricData : metricsUpdate.metrics)
+    {
+        auto setValues = [&](auto&& dataDto) {
+            dataDto->pn = participantName;
+            dataDto->ts = metricData.timestamp;
+            std::copy(metricData.nameList.begin(), metricData.nameList.end(), std::back_inserter(*dataDto->mn));
+
+        };
+
+        switch (metricData.kind)
+        {
+        case VSilKit::MetricKind::COUNTER:
+        {
+            auto dataDto = CounterDataDto::createShared();
+            setValues(dataDto);
+            dto->counters->emplace_back(std::move(dataDto));
+            break;
+        }
+        case VSilKit::MetricKind::STATISTIC:
+        {
+            auto dataDto = StatisticDataDto::createShared();
+            setValues(dataDto);
+            dto->statistics->emplace_back(std::move(dataDto));
+            break;
+        }
+        case VSilKit::MetricKind::ATTRIBUTE:
+        {
+            auto dataDto = AttributeDataDto::createShared();
+            setValues(dataDto);
+            dto->attributes->emplace_back(std::move(dataDto));
+            break;
+        }
+        default:
+            assert(false);//DEBUG break
+            break;
+        }
+    }
+    return dto;
+}
+
 
 // SilKitToOatppMapper Private Methods
 

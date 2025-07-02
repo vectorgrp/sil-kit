@@ -41,7 +41,8 @@ public: // IMetricsProcessor
     void Process(const std::string& origin, const MetricsUpdate& metricsUpdate) override;
 
 public: // IMetricsReceiverListener
-    void OnMetricsUpdate(std::string const& participantName, const MetricsUpdate& metricsUpdate) override;
+    void OnMetricsUpdate(const std::string& simulationName, const std::string& participantName,
+                         const MetricsUpdate& metricsUpdate) override;
 };
 
 } // namespace VSilKit

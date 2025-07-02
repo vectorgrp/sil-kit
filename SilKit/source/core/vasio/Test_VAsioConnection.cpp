@@ -59,6 +59,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include <chrono>
 
+#include "MockVAsioPeer.hpp"
+
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
@@ -98,14 +100,15 @@ struct MockSilKitMessageReceiver
 };
 
 
-struct MockVAsioPeer : public IVAsioPeer
+// adds some more behavior to MockVasioPeer
+struct MockVAsioPeer2 : public MockVAsioPeer
 {
     VAsioPeerInfo _peerInfo;
     ServiceDescriptor _serviceDescriptor;
     ProtocolVersion _protocolVersion;
     std::string _simulationName;
 
-    MockVAsioPeer()
+    MockVAsioPeer2()
     {
         _peerInfo.participantId = 1234;
         _peerInfo.participantName = "MockVAsioPeer";
@@ -123,25 +126,6 @@ struct MockVAsioPeer : public IVAsioPeer
         ON_CALL(*this, GetServiceDescriptor()).WillByDefault(ReturnRef(_serviceDescriptor));
         ON_CALL(*this, GetProtocolVersion()).WillByDefault(Return(_protocolVersion));
     }
-
-    // IVAsioPeer
-    MOCK_METHOD(void, SendSilKitMsg, (SerializedMessage), (override));
-    MOCK_METHOD(void, Subscribe, (VAsioMsgSubscriber), (override));
-    MOCK_METHOD(const VAsioPeerInfo&, GetInfo, (), (const, override));
-    MOCK_METHOD(void, SetInfo, (VAsioPeerInfo), (override));
-    MOCK_METHOD(std::string, GetRemoteAddress, (), (const, override));
-    MOCK_METHOD(std::string, GetLocalAddress, (), (const, override));
-    MOCK_METHOD(void, SetSimulationName, (const std::string&), (override));
-    MOCK_METHOD(const std::string&, GetSimulationName, (), (const, override));
-    MOCK_METHOD(void, StartAsyncRead, (), (override));
-    MOCK_METHOD(void, SetProtocolVersion, (ProtocolVersion), (override));
-    MOCK_METHOD(ProtocolVersion, GetProtocolVersion, (), (const, override));
-    MOCK_METHOD(void, Shutdown, (), (override));
-    MOCK_METHOD(void, EnableAggregation, (), (override));
-
-    // IServiceEndpoint (via IVAsioPeer)
-    MOCK_METHOD(void, SetServiceDescriptor, (const ServiceDescriptor& serviceDescriptor), (override));
-    MOCK_METHOD(const ServiceDescriptor&, GetServiceDescriptor, (), (override, const));
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -185,7 +169,7 @@ protected:
     Tests::DummyMetricsManager _dummyMetricsManager;
     Services::Orchestration::TimeProvider _timeProvider;
     VAsioConnection _connection;
-    MockVAsioPeer _from;
+    MockVAsioPeer2 _from;
 
     //we are a friend class
     // - allow selected access to private member

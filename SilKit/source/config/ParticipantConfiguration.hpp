@@ -278,6 +278,7 @@ struct Metrics
 {
     std::vector<MetricsSink> sinks;
     bool collectFromRemote{false};
+    std::chrono::seconds updateInterval{1};
 };
 
 // ================================================================================

@@ -8,9 +8,10 @@
 
 namespace VSilKit {
 
-MetricsTimerThread::MetricsTimerThread(std::function<void()> callback)
+MetricsTimerThread::MetricsTimerThread(std::chrono::seconds interval, std::function<void()> callback)
     : _callback{std::move(callback)}
     , _thread{MakeThread()}
+    , _interval{interval}
 {
 }
 
@@ -59,7 +60,7 @@ auto MetricsTimerThread::MakeThread() -> std::thread
 {
     auto go = _go.get_future();
     auto done = _done.get_future();
-    return std::thread{[go = std::move(go), done = std::move(done), callback = &_callback]() mutable {
+    return std::thread{[go = std::move(go), done = std::move(done), callback = &_callback, timeout = _interval]() mutable {
         try
         {
             SilKit::Util::SetThreadName("SK Metrics");
@@ -68,7 +69,7 @@ auto MetricsTimerThread::MakeThread() -> std::thread
 
             while (true)
             {
-                if (done.wait_for(std::chrono::seconds{1}) != std::future_status::timeout)
+                if (done.wait_for(timeout) != std::future_status::timeout)
                 {
                     break;
                 }
