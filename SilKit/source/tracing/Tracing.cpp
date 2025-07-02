@@ -138,7 +138,8 @@ auto CreateReplayFiles(Services::Logging::ILogger* logger, const Config::Partici
             replayFiles.insert({source.name, std::move(file)});
             break;
         }
-        case Config::TraceSource::Type::Undefined: //[[fallthrough]]
+        case Config::TraceSource::Type::Undefined:
+            [[fallthrough]];
         default:
             throw SilKitError("CreateReplayFiles: unknown TraceSource::Type!");
         }

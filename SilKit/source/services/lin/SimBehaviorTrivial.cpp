@@ -49,15 +49,21 @@ inline auto ToTracingDir(LinFrameStatus status) -> SilKit::Services::TransmitDir
 {
     switch (status)
     {
-    case LinFrameStatus::LIN_RX_ERROR: //[[fallthrough]]
-    case LinFrameStatus::LIN_RX_BUSY: //[[fallthrough]]
-    case LinFrameStatus::LIN_RX_NO_RESPONSE: //[[fallthrough]]
+    case LinFrameStatus::LIN_RX_ERROR:
+        [[fallthrough]];
+    case LinFrameStatus::LIN_RX_BUSY:
+        [[fallthrough]];
+    case LinFrameStatus::LIN_RX_NO_RESPONSE:
+        [[fallthrough]];
     case LinFrameStatus::LIN_RX_OK:
         return SilKit::Services::TransmitDirection::RX;
 
-    case LinFrameStatus::LIN_TX_ERROR: //[[fallthrough]]
-    case LinFrameStatus::LIN_TX_BUSY: //[[fallthrough]]
-    case LinFrameStatus::LIN_TX_HEADER_ERROR: //[[fallthrough]]
+    case LinFrameStatus::LIN_TX_ERROR:
+        [[fallthrough]];
+    case LinFrameStatus::LIN_TX_BUSY:
+        [[fallthrough]];
+    case LinFrameStatus::LIN_TX_HEADER_ERROR:
+        [[fallthrough]];
     case LinFrameStatus::LIN_TX_OK:
         return SilKit::Services::TransmitDirection::TX;
 

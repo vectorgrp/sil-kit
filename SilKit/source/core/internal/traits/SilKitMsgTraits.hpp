@@ -25,7 +25,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "SilKitMsgVersion.hpp"
 #include "SilKitMsgSerdesName.hpp"
-#include "TypeUtils.hpp"
 
 namespace SilKit {
 namespace Core {
@@ -39,7 +38,7 @@ struct HasTimestamp : std::false_type
 };
 
 template <typename T>
-struct HasTimestamp<T, Util::VoidT<decltype(std::declval<std::decay_t<T>>().timestamp = std::chrono::nanoseconds{})>>
+struct HasTimestamp<T, std::void_t<decltype(std::declval<std::decay_t<T>>().timestamp = std::chrono::nanoseconds{})>>
     : std::true_type
 {
 };

@@ -7,6 +7,7 @@
 #include <memory>
 #include <sstream>
 #include <map>
+#include <optional>
 #include <vector>
 
 #include "rapidyaml.hpp"
@@ -28,7 +29,7 @@ public:
 
 public:
     template <typename T>
-    void OptionalWrite(const SilKit::Util::Optional<T>& val, const std::string& name)
+    void OptionalWrite(const std::optional<T>& val, const std::string& name)
     {
         if (val.has_value())
         {

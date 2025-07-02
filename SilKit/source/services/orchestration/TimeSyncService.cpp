@@ -133,21 +133,30 @@ public:
 
         switch (_controller.State())
         {
-        case ParticipantState::Invalid: // [[fallthrough]]
-        case ParticipantState::ServicesCreated: // [[fallthrough]]
-        case ParticipantState::CommunicationInitializing: // [[fallthrough]]
-        case ParticipantState::CommunicationInitialized: // [[fallthrough]]
+        case ParticipantState::Invalid:
+            [[fallthrough]];
+        case ParticipantState::ServicesCreated:
+            [[fallthrough]];
+        case ParticipantState::CommunicationInitializing:
+            [[fallthrough]];
+        case ParticipantState::CommunicationInitialized:
+            [[fallthrough]];
         case ParticipantState::ReadyToRun:
             return;
-        case ParticipantState::Paused: // [[fallthrough]]
+        case ParticipantState::Paused:
+            [[fallthrough]];
         case ParticipantState::Running:
             ProcessSimulationTimeUpdate();
             return;
-        case ParticipantState::Stopping: // [[fallthrough]]
-        case ParticipantState::Stopped: // [[fallthrough]]
-        case ParticipantState::Error: // [[fallthrough]]
-        case ParticipantState::ShuttingDown: // [[fallthrough]]
-        case ParticipantState::Shutdown: // [[fallthrough]]
+        case ParticipantState::Stopping:
+            [[fallthrough]];
+        case ParticipantState::Stopped:
+            [[fallthrough]];
+        case ParticipantState::Error:
+            [[fallthrough]];
+        case ParticipantState::ShuttingDown:
+            [[fallthrough]];
+        case ParticipantState::Shutdown:
             return;
         default:
             _participant->GetLifecycleService()->ReportError("Received NextSimTask in state ParticipantState::"

@@ -57,7 +57,6 @@ target_link_libraries(O_SilKit_Config
     PUBLIC I_SilKit_Config
 
     PRIVATE SilKitInterface
-    PRIVATE O_SilKit_Util_Filesystem
     PRIVATE I_SilKit_Util_FileHelpers
     PUBLIC rapidyaml
     PRIVATE fmt::fmt

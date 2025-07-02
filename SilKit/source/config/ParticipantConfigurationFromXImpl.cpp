@@ -1,30 +1,14 @@
-/* Copyright (c) 2022 Vector Informatik GmbH
-
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
-
-The above copyright notice and this permission notice shall be
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
+// SPDX-FileCopyrightText: 2022-2025 Vector Informatik GmbH
+//
+// SPDX-License-Identifier: MIT
 
 #include "ParticipantConfiguration.hpp"
-#include "Filesystem.hpp"
 
+#include <filesystem>
 #include <fstream>
 #include <sstream>
 #include <iomanip>
+#include <optional>
 #include <set>
 #include <utility>
 #include <vector>
@@ -52,40 +36,40 @@ using ConfigInclude = std::pair<std::string, SilKit::Config::V1::ParticipantConf
 struct MiddlewareCache
 {
     std::vector<std::string> acceptorUris;
-    SilKit::Util::Optional<std::string> registryUri;
-    SilKit::Util::Optional<double> connectTimeoutSeconds;
-    SilKit::Util::Optional<int> connectAttempts;
-    SilKit::Util::Optional<int> tcpReceiveBufferSize;
-    SilKit::Util::Optional<int> tcpSendBufferSize;
-    SilKit::Util::Optional<bool> tcpNoDelay;
-    SilKit::Util::Optional<bool> tcpQuickAck;
-    SilKit::Util::Optional<bool> enableDomainSockets;
-    SilKit::Util::Optional<bool> registryAsFallbackProxy;
-    SilKit::Util::Optional<bool> experimentalRemoteParticipantConnection;
+    std::optional<std::string> registryUri;
+    std::optional<double> connectTimeoutSeconds;
+    std::optional<int> connectAttempts;
+    std::optional<int> tcpReceiveBufferSize;
+    std::optional<int> tcpSendBufferSize;
+    std::optional<bool> tcpNoDelay;
+    std::optional<bool> tcpQuickAck;
+    std::optional<bool> enableDomainSockets;
+    std::optional<bool> registryAsFallbackProxy;
+    std::optional<bool> experimentalRemoteParticipantConnection;
 };
 
 struct GlobalLogCache
 {
-    SilKit::Util::Optional<bool> logFromRemotes;
-    SilKit::Util::Optional<Services::Logging::Level> flushLevel;
+    std::optional<bool> logFromRemotes;
+    std::optional<Services::Logging::Level> flushLevel;
     std::set<Sink> fileSinks;
-    SilKit::Util::Optional<Sink> stdOutSink;
-    SilKit::Util::Optional<Sink> remoteSink;
+    std::optional<Sink> stdOutSink;
+    std::optional<Sink> remoteSink;
     std::set<std::string> fileNames;
 };
 
 struct TimeSynchronizationCache
 {
-    SilKit::Util::Optional<double> animationFactor;
-    SilKit::Util::Optional<Aggregation> enableMessageAggregation;
+    std::optional<double> animationFactor;
+    std::optional<Aggregation> enableMessageAggregation;
 };
 
 struct MetricsCache
 {
-    SilKit::Util::Optional<bool> collectFromRemote;
+    std::optional<bool> collectFromRemote;
     std::set<MetricsSink> jsonFileSinks;
     std::set<std::string> fileNames;
-    SilKit::Util::Optional<MetricsSink> remoteSink;
+    std::optional<MetricsSink> remoteSink;
 };
 
 struct ExperimentalCache
@@ -137,9 +121,9 @@ void Validate(const std::string& text)
 // ================================================================================
 std::string GetConfigParentPath(const std::string& configFile)
 {
-    namespace fs = SilKit::Filesystem;
-    auto filePath = fs::concatenate_paths(fs::current_path().string(), configFile);
-    return fs::parent_path(filePath).string();
+    namespace fs = std::filesystem;
+    const auto filePath = fs::current_path() / configFile;
+    return filePath.parent_path().string();
 }
 
 void AppendToSearchPaths(const ParticipantConfiguration& config, ConfigIncludeData& configData)
@@ -158,7 +142,7 @@ void AppendToSearchPaths(const ParticipantConfiguration& config, ConfigIncludeDa
         // Make sure they have a seperator
         if (lastChar != '/' && lastChar != '\\')
         {
-            suffix = SilKit::Filesystem::path::preferred_separator;
+            suffix = std::filesystem::path::preferred_separator;
         }
 
         configData.searchPaths.insert(searchPath + suffix);
@@ -200,7 +184,7 @@ std::string OpenFileWithSearchHints(const std::string& configFile, const std::se
 //  Helper functions to merge config fields/vectors/sets
 // ================================================================================
 template <typename FieldT>
-void MergeCacheField(const SilKit::Util::Optional<FieldT>& includeObject, FieldT& rootObject)
+void MergeCacheField(const std::optional<FieldT>& includeObject, FieldT& rootObject)
 {
     if (includeObject.has_value())
     {
@@ -254,11 +238,11 @@ void MergeCacheSet(const std::set<T>& cache, std::vector<T>& root)
 
 template <typename T>
 void CacheNonDefault(const T& defaultValue, const T& value, const std::string& configName,
-                     SilKit::Util::Optional<T>& cacheValue)
+                     std::optional<T>& cacheValue)
 {
     if (defaultValue != value)
     {
-        SilKit::Util::Optional<T> optValue{value};
+        std::optional<T> optValue{value};
 
         if (cacheValue.has_value() && (cacheValue != optValue))
         {

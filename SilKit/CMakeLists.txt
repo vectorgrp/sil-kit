@@ -27,7 +27,9 @@ cmake_minimum_required(VERSION 3.13)
 
 project("SilKit-Library" LANGUAGES CXX C)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_STANDARD_EXTENSIONS OFF)
 
 include(SilKitVersion)
 configure_silkit_version(${PROJECT_NAME})

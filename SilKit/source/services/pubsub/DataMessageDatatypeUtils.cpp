@@ -21,7 +21,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "DataMessageDatatypeUtils.hpp"
 #include "silkit/services/datatypes.hpp"
-#include "Optional.hpp"
 
 namespace SilKit {
 namespace Services {

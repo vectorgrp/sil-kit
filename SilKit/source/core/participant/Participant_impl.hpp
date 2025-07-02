@@ -19,6 +19,7 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
+#include <optional>
 #include <sstream>
 #include <chrono>
 #include <string>
@@ -291,7 +292,7 @@ auto Participant<SilKitConnectionT>::GetConfigByControllerName(const std::vector
 template <class SilKitConnectionT>
 template <typename ValueT>
 void Participant<SilKitConnectionT>::UpdateOptionalConfigValue(const std::string& controllerName,
-                                                               SilKit::Util::Optional<ValueT>& configuredValue,
+                                                               std::optional<ValueT>& configuredValue,
                                                                const ValueT& passedValue)
 {
     if (!configuredValue.has_value())

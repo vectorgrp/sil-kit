@@ -22,7 +22,8 @@ void YamlWriter::Write(const SilKit::Services::MatchingLabel::Kind& obj)
 {
     switch (obj)
     {
-    case SilKit::Services::MatchingLabel::Kind::Optional: // [[fallthrough]]
+    case SilKit::Services::MatchingLabel::Kind::Optional:
+        [[fallthrough]];
     case SilKit::Services::MatchingLabel::Kind::Mandatory:
         Write(std::underlying_type_t<SilKit::Services::MatchingLabel::Kind>(obj));
         break;

@@ -6,6 +6,7 @@
 
 #include <string>
 #include <memory>
+#include <optional>
 #include <sstream>
 #include <map>
 #include <vector>
@@ -31,7 +32,7 @@ public:
     }
 
 public:
-    template <typename T, typename std::enable_if_t<!std::is_integral<T>::value, bool> = true>
+    template <typename T, typename std::enable_if_t<!std::is_integral_v<T>, bool> = true>
     void OptionalRead(T& val, const std::string& name)
     {
         auto&& child = GetChildSafe(name);
@@ -51,7 +52,7 @@ public:
     }
 
     template <typename T>
-    void OptionalRead(SilKit::Util::Optional<T>& val, const std::string& name)
+    void OptionalRead(std::optional<T>& val, const std::string& name)
     {
         auto&& child = GetChildSafe(name);
         if (child.IsValid())
@@ -63,7 +64,7 @@ public:
     }
 
 
-    template <typename T, typename std::enable_if_t<std::is_integral<T>::value, bool> = true>
+    template <typename T, typename std::enable_if_t<std::is_integral_v<T>, bool> = true>
     void OptionalRead(T& val, const std::string& name)
     {
         auto tmp = ryml::fmt::overflow_checked(val);

@@ -21,6 +21,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include <tuple>
 #include <iostream>
+#include <filesystem>
 
 #include "silkit/SilKitVersion.hpp"
 
@@ -32,7 +33,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "MockParticipant.hpp" //for DummyLogger
 #include "SilKitExtensions.hpp"
 #include "DummyExtension.hpp"
-#include "Filesystem.hpp"
 
 
 #if defined(WIN32)
@@ -46,12 +46,12 @@ using namespace testing;
 namespace {
 std::string GetCurrentWorkingDir()
 {
-    return SilKit::Filesystem::current_path().string();
+    return std::filesystem::current_path().string();
 }
 
 void SetCurrentWorkingDir(const std::string& cwd)
 {
-    SilKit::Filesystem::current_path(cwd);
+    std::filesystem::current_path(cwd);
 }
 
 class StdoutLogger : public SilKit::Core::Tests::MockLogger
@@ -101,8 +101,8 @@ using triple = std::tuple<uint32_t, uint32_t, uint32_t>;
 TEST_F(Test_SilKitExtensions, load_dummy_lib)
 {
     {
-        const auto testDir = SilKit::Filesystem::path{"silkit_library_test"};
-        SilKit::Filesystem::current_path(testDir);
+        const auto testDir = std::filesystem::path{"silkit_library_test"};
+        std::filesystem::current_path(testDir);
         auto dummyExtension = SilKit::LoadExtension(&logger, "DummyExtension");
 
         {
@@ -129,8 +129,8 @@ TEST_F(Test_SilKitExtensions, load_dummy_lib)
 
 TEST_F(Test_SilKitExtensions, static_cast)
 {
-    const auto testDir = SilKit::Filesystem::path{"silkit_library_test"};
-    SilKit::Filesystem::current_path(testDir);
+    const auto testDir = std::filesystem::path{"silkit_library_test"};
+    std::filesystem::current_path(testDir);
     // test if dynamic cast of dynamic extension works
     auto extensionBase = SilKit::LoadExtension(&logger, "DummyExtension");
     auto* dummy = static_cast<DummyExtension*>(extensionBase.get());
@@ -167,8 +167,8 @@ TEST_F(Test_SilKitExtensions, wrong_build_system)
 
 TEST_F(Test_SilKitExtensions, multiple_extensions_loaded)
 {
-    const auto testDir = SilKit::Filesystem::path{"silkit_library_test"};
-    SilKit::Filesystem::current_path(testDir);
+    const auto testDir = std::filesystem::path{"silkit_library_test"};
+    std::filesystem::current_path(testDir);
     //check that multiple instances don't interfere
     auto base1 = SilKit::LoadExtension(&logger, "DummyExtension");
     auto base2 = SilKit::LoadExtension(&logger, "DummyExtension");
@@ -185,7 +185,7 @@ TEST_F(Test_SilKitExtensions, multiple_extensions_loaded)
 #if !defined(_WIN32)
 TEST_F(Test_SilKitExtensions, load_from_envvar)
 {
-    const auto testDir = SilKit::Filesystem::path{"silkit_library_test"};
+    const auto testDir = std::filesystem::path{"silkit_library_test"};
     setenv("TEST_VAR", testDir.c_str(), 1); // should be invariant
     SilKit::Config::Extensions config;
     config.searchPathHints.emplace_back("ENV:TEST_VAR");
