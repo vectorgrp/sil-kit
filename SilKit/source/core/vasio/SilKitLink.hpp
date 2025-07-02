@@ -184,25 +184,25 @@ void SilKitLink<MsgT>::DistributeLocalSilKitMessage(const IServiceEndpoint* from
 template <class MsgT>
 void SilKitLink<MsgT>::DistributeToSelf(const IServiceEndpoint* from, const MsgT& msg)
 {
-    for (auto&& receiver : _localReceivers)
+    if constexpr (SilKitMsgTraits<MsgT>::IsSelfDeliveryForbidden())
     {
-        auto* receiverId = dynamic_cast<const IServiceEndpoint*>(receiver);
-
-        // C++ 17 -> if constexpr
-        if (SilKitMsgTraits<MsgT>::IsSelfDeliveryForbidden())
+        return;
+    }
+    else
+    {
+        for (auto&& receiver : _localReceivers)
         {
-            continue;
-        }
-        // C++ 17 -> if constexpr
-        if (!SilKitMsgTraits<MsgT>::IsSelfDeliveryEnforced())
-        {
-            if (receiverId->GetServiceDescriptor() == from->GetServiceDescriptor())
-                continue;
-        }
-        // Trace reception of self delivery
-        Services::TraceRx(_logger, receiverId, msg, from->GetServiceDescriptor());
+            auto* receiverId = dynamic_cast<const IServiceEndpoint*>(receiver);
+            if constexpr (!SilKitMsgTraits<MsgT>::IsSelfDeliveryEnforced())
+            {
+                if (receiverId->GetServiceDescriptor() == from->GetServiceDescriptor())
+                    continue;
+            }
+            // Trace reception of self delivery
+            Services::TraceRx(_logger, receiverId, msg, from->GetServiceDescriptor());
 
-        DispatchSilKitMessage(receiver, from, msg);
+            DispatchSilKitMessage(receiver, from, msg);
+        }
     }
 }
 

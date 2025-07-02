@@ -225,16 +225,15 @@ bool SimTestHarness::Run(std::chrono::nanoseconds testRunTimeout, const std::vec
     bool runStatus = true;
     const auto startTime = Now();
     auto timeRemaining = testRunTimeout;
-    //C++17: for (auto& [name, participant] : _simParticipants)
-    for (auto& kv : _simParticipants)
+
+    for (auto& [name, participant]: _simParticipants)
     {
-        if (std::find(keepAlive.begin(), keepAlive.end(), kv.first) != keepAlive.end())
+        if (std::find(keepAlive.begin(), keepAlive.end(), name) != keepAlive.end())
         {
             // Ignore waiting for participants in keepAlive list
             continue;
         }
 
-        auto& participant = kv.second;
         if (noTimeout)
         {
             participant->Result().wait();
