@@ -20,7 +20,7 @@ on:
 
 jobs:
   build-win-x64:
-    runs-on: windows-2019
+    runs-on: windows-2022
 
     if: (inputs.run_build == true) || (github.event_name == 'push')
     steps:
@@ -46,16 +46,16 @@ jobs:
       uses: ilammy/msvc-dev-cmd@v1.12.0
       with:
         arch: x64
-        toolset: 14.1
+        toolset: 14.20
 
     - uses: ./.github/actions/build-cmake-preset
       with:
-        preset-name: vs141-x64-release
+        preset-name: x64-release
         build-arch: x64
         artifact-label: ${{ github.job }}
 
   build-win-x32:
-    runs-on: windows-2019
+    runs-on: windows-2022
 
     if: inputs.run_build == true
     steps:
@@ -81,9 +81,9 @@ jobs:
       uses: ilammy/msvc-dev-cmd@v1.12.0
       with:
         arch: x86
-        toolset: 14.1
+        toolset: 14.20
 
     - uses: ./.github/actions/build-cmake-preset
       with:
-        preset-name: vs141-x86-release
+        preset-name: x86-release
         artifact-label: ${{ github.job }}
