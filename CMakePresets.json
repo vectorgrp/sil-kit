@@ -55,9 +55,7 @@
         },
         {
             "name": "x64-debug",
-            "displayName": "x64 Debug",
-            "description": "Target Windows (64-bit) with the Visual Studio development environment. (Debug)",
-            "inherits": "windows-base",
+            "inherits": ["windows-base", "mixin-dirs", "mixin-ninja"],
             "architecture": {
                 "value": "x64",
                 "strategy": "external"
@@ -71,14 +69,11 @@
         },
         {
             "name": "x64-release",
-            "displayName": "x64 Release",
-            "description": "Target Windows (64-bit) with the Visual Studio development environment. (Release)",
             "inherits": "x64-debug",
             "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" }
         },
         {
             "name": "x64-relwithdebinfo",
-            "description": "Target Windows (64-bit) with the Visual Studio development environment. (RelWithDebInfo)",
             "inherits": "x64-debug",
             "cacheVariables": {
                 "SILKIT_PACKAGE_SYMBOLS": "OFF",
@@ -87,7 +82,7 @@
         },
         {
             "name": "x86-debug",
-            "inherits": "windows-base",
+            "inherits": ["windows-base", "mixin-dirs", "mixin-ninja"],
             "architecture": {
                 "value": "x86",
                 "strategy": "external"
@@ -197,24 +192,6 @@
                 "CMAKE_CXX_COMPILER": "g++"
             }
         },
-        {
-            "name": "mixin-gcc8",
-            "description": "Target GCC-8",
-            "hidden": true,
-            "cacheVariables": {
-                "CMAKE_C_COMPILER": "gcc-8",
-                "CMAKE_CXX_COMPILER": "g++-8"
-            }
-        },
-        {
-            "name": "mixin-gcc9",
-            "description": "Target GCC-9",
-            "hidden": true,
-            "cacheVariables": {
-                "CMAKE_C_COMPILER": "gcc-9",
-                "CMAKE_CXX_COMPILER": "g++-9"
-            }
-        },
 
         {
             "name": "mixin-clang10",
@@ -223,15 +200,6 @@
             "cacheVariables": {
                 "CMAKE_C_COMPILER": "clang-10",
                 "CMAKE_CXX_COMPILER": "clang++-10"
-            }
-        },
-        {
-            "name": "mixin-clang12",
-            "description": "Target clang 12",
-            "hidden": true,
-            "cacheVariables": {
-                "CMAKE_C_COMPILER": "clang-12",
-                "CMAKE_CXX_COMPILER": "clang++-12"
             }
         },
         {
@@ -355,30 +323,6 @@
             "hidden": true,
             "toolchainFile": "${sourceDir}/SilKit/cmake/toolchain-arm-linux-gnueabi.cmake"
         },
-        {
-            "name": "vs140-x86-debug",
-            "inherits": [ "mixin-windows", "mixin-dirs", "mixin-ninja", "mixin-arch-x86", "mixin-toolset-v140", "mixin-debug", "mixin-werror" ]
-        },
-        {
-            "name": "vs140-x86-release",
-            "inherits": [ "mixin-release", "vs140-x86-debug" ]
-        },
-        {
-            "name": "vs140-x86-relwithdebinfo",
-            "inherits": [ "mixin-relwithdebinfo", "vs140-x86-debug" ]
-        },
-        {
-            "name": "vs140-x64-debug",
-            "inherits": [ "mixin-arch-x64", "vs140-x86-debug" ]
-        },
-        {
-            "name": "vs140-x64-release",
-            "inherits": [ "mixin-release", "vs140-x64-debug" ]
-        },
-        {
-            "name": "vs140-x64-relwithdebinfo",
-            "inherits": [ "mixin-relwithdebinfo", "vs140-x64-debug" ]
-        },
 
         {
             "name": "vs141-x86-debug",
@@ -419,82 +363,10 @@
             "inherits": [ "mixin-relwithdebinfo", "gcc-debug", "mixin-build-docs" ]
         },
 
-        {
-            "name": "gcc8-debug",
-            "inherits": [ "mixin-posix", "mixin-dirs", "mixin-ninja", "mixin-debug", "mixin-gcc8", "mixin-werror" ]
-        },
-
-        {
-            "name": "gcc8-release",
-            "inherits": [ "mixin-release", "gcc8-debug", "mixin-build-docs" ]
-        },
-
-        {
-            "name": "gcc8-relwithdebinfo",
-            "inherits": [ "mixin-relwithdebinfo", "gcc8-debug", "mixin-build-docs" ]
-        },
-
-        {
-            "name": "gcc9-debug",
-            "inherits": [ "mixin-posix", "mixin-dirs", "mixin-ninja", "mixin-debug", "mixin-gcc9" ]
-        },
-        {
-            "name": "gcc9-release",
-            "inherits": [ "mixin-release", "gcc9-debug", "mixin-build-docs" ]
-        },
-        {
-            "name": "gcc9-relwithdebinfo",
-            "inherits": [ "mixin-relwithdebinfo", "gcc9-debug", "mixin-build-docs" ]
-        },
-        {
-            "name": "clang10-debug",
-            "inherits": [ "mixin-clang10", "gcc9-debug" ]
-        },
-        {
-            "name": "clang10-release",
-            "inherits": [ "mixin-release", "clang10-debug" ]
-        },
-        {
-            "name": "clang12-debug",
-            "inherits": [ "mixin-clang12", "gcc9-debug" ]
-        },
-        {
-            "name": "clang12-release",
-            "inherits": [ "mixin-release", "clang12-debug" ]
-        },
-        {
-            "name": "clang12-relwithdebinfo",
-            "inherits": [ "mixin-relwithdebinfo", "clang12-debug" ]
-        },
-        {
-            "name": "clang14-debug",
-            "inherits": [ "mixin-clang14", "gcc9-debug" ]
-        },
-        {
-            "name": "clang14-release",
-            "inherits": [ "mixin-release", "clang14-debug" ]
-        },
-        {
-            "name": "clang14-relwithdebinfo",
-            "inherits": [ "mixin-relwithdebinfo", "clang14-debug" ]
-        },
-
-        {
-            "name": "clang15-debug",
-            "inherits": [ "mixin-clang15", "gcc9-debug" ]
-        },
-        {
-            "name": "clang15-release",
-            "inherits": [ "mixin-release", "clang15-debug" ]
-        },
-        {
-            "name": "clang15-relwithdebinfo",
-            "inherits": [ "mixin-relwithdebinfo", "clang15-debug" ]
-        },
 
         {
             "name": "clang-debug",
-            "inherits": [ "mixin-clang", "gcc9-debug" ]
+            "inherits": [ "mixin-clang", "gcc-debug" ]
         },
         {
             "name": "clang-release",
@@ -506,37 +378,13 @@
         },
 
         {
-            "name": "clang12-asan-debug",
-            "inherits": [ "clang12-debug", "mixin-asan", "mixin-nosplitdebug" ]
-        },
-        {
-            "name": "clang12-tsan-debug",
-            "inherits": [ "clang12-debug", "mixin-tsan", "mixin-nosplitdebug" ]
-        },
-        {
-            "name": "clang12-ubsan-debug",
-            "inherits": [ "clang12-debug", "mixin-ubsan", "mixin-nosplitdebug" ]
-        },
-        {
-            "name": "clang15-asan-debug",
-            "inherits": [ "clang15-debug", "mixin-asan", "mixin-nosplitdebug" ]
-        },
-        {
-            "name": "clang15-tsan-debug",
-            "inherits": [ "clang15-debug", "mixin-tsan", "mixin-nosplitdebug" ]
-        },
-        {
-            "name": "clang15-ubsan-debug",
-            "inherits": [ "clang15-debug", "mixin-ubsan", "mixin-nosplitdebug" ]
-        },
-        {
             "name": "cross-armeabihf-debug",
-            "inherits": [ "mixin-crossarmeabihf", "gcc9-debug" ],
+            "inherits": [ "mixin-crossarmeabihf", "gcc-debug" ],
             "displayName": "Debian cross build for GNU arm eabihf"
         },
         {
             "name": "cross-armeabi-debug",
-            "inherits": [ "mixin-crossarmeabi", "gcc9-debug", "mixin-nosplitdebug" ],
+            "inherits": [ "mixin-crossarmeabi", "gcc-debug", "mixin-nosplitdebug" ],
             "displayName": "Debian cross build for GNU arm eabi"
         },
         {
@@ -661,78 +509,6 @@
         },
 
         {
-            "name": "gcc8-debug",
-            "configurePreset": "gcc8-debug"
-        },
-        {
-            "name": "gcc8-release",
-            "configurePreset": "gcc8-release"
-        },
-        {
-            "name": "gcc8-relwithdebinfo",
-            "configurePreset": "gcc8-relwithdebinfo"
-        },
-        {
-            "name": "gcc9-debug",
-            "configurePreset": "gcc9-debug"
-        },
-        {
-            "name": "gcc9-release",
-            "configurePreset": "gcc9-release"
-        },
-        {
-            "name": "gcc9-relwithdebinfo",
-            "configurePreset": "gcc9-relwithdebinfo"
-        },
-
-        {
-            "name": "clang10-debug",
-            "configurePreset": "clang10-debug"
-        },
-        {
-            "name": "clang10-release",
-            "configurePreset": "clang10-release"
-        },
-
-
-        {
-            "name": "clang12-debug",
-            "configurePreset": "clang12-debug"
-        },
-        {
-            "name": "clang12-release",
-            "configurePreset": "clang12-release"
-        },
-        {
-            "name": "clang12-relwithdebinfo",
-            "configurePreset": "clang12-relwithdebinfo"
-        },
-
-        {
-            "name": "clang14-debug",
-            "configurePreset": "clang14-debug"
-        },
-        {
-            "name": "clang14-release",
-            "configurePreset": "clang14-release"
-        },
-        {
-            "name": "clang14-relwithdebinfo",
-            "configurePreset": "clang14-relwithdebinfo"
-        },
-        {
-            "name": "clang15-debug",
-            "configurePreset": "clang15-debug"
-        },
-        {
-            "name": "clang15-release",
-            "configurePreset": "clang15-release"
-        },
-        {
-            "name": "clang15-relwithdebinfo",
-            "configurePreset": "clang15-relwithdebinfo"
-        },
-        {
             "name": "clang-debug",
             "configurePreset": "clang-debug"
         },
@@ -743,30 +519,6 @@
         {
             "name": "clang-relwithdebinfo",
             "configurePreset": "clang-relwithdebinfo"
-        },
-        {
-            "name": "clang12-asan-debug",
-            "configurePreset": "clang12-asan-debug"
-        },
-        {
-            "name": "clang12-tsan-debug",
-            "configurePreset": "clang12-tsan-debug"
-        },
-        {
-            "name": "clang12-ubsan-debug",
-            "configurePreset": "clang12-ubsan-debug"
-        },
-        {
-            "name": "clang15-asan-debug",
-            "configurePreset": "clang15-asan-debug"
-        },
-        {
-            "name": "clang15-tsan-debug",
-            "configurePreset": "clang15-tsan-debug"
-        },
-        {
-            "name": "clang15-ubsan-debug",
-            "configurePreset": "clang15-ubsan-debug"
         },
         {
             "name": "cross-qnx-x86_64",
@@ -856,30 +608,6 @@
             "configurePreset": "x86-relwithdebinfo"
         },
         {
-            "name": "vs140-x86-debug",
-            "configurePreset": "vs140-x86-debug"
-        },
-        {
-            "name": "vs140-x86-release",
-            "configurePreset": "vs140-x86-release"
-        },
-        {
-            "name": "vs140-x86-relwithdebinfo",
-            "configurePreset": "vs140-x86-relwithdebinfo"
-        },
-        {
-            "name": "vs140-x64-debug",
-            "configurePreset": "vs140-x64-debug"
-        },
-        {
-            "name": "vs140-x64-release",
-            "configurePreset": "vs140-x64-release"
-        },
-        {
-            "name": "vs140-x64-relwithdebinfo",
-            "configurePreset": "vs140-x64-relwithdebinfo"
-        },
-        {
             "name": "vs141-x86-debug",
             "configurePreset": "vs141-x86-debug"
         },
@@ -915,103 +643,6 @@
         {
             "name": "gcc-relwithdebinfo",
             "configurePreset": "gcc-relwithdebinfo"
-        },
-        {
-            "name": "gcc8-debug",
-            "configurePreset": "gcc8-debug"
-        },
-        {
-            "name": "gcc8-release",
-            "configurePreset": "gcc8-release"
-        },
-        {
-            "name": "gcc8-relwithdebinfo",
-            "configurePreset": "gcc8-relwithdebinfo"
-        },
-        {
-            "name": "gcc9-debug",
-            "configurePreset": "gcc9-debug"
-        },
-        {
-            "name": "gcc9-release",
-            "configurePreset": "gcc9-release"
-        },
-        {
-            "name": "gcc9-relwithdebinfo",
-            "configurePreset": "gcc9-relwithdebinfo"
-        },
-
-        {
-            "name": "clang10-debug",
-            "configurePreset": "clang10-debug"
-        },
-        {
-            "name": "clang10-release",
-            "configurePreset": "clang10-release"
-        },
-
-
-        {
-            "name": "clang12-debug",
-            "configurePreset": "clang12-debug"
-        },
-        {
-            "name": "clang12-release",
-            "configurePreset": "clang12-release"
-        },
-        {
-            "name": "clang12-relwithdebinfo",
-            "configurePreset": "clang12-relwithdebinfo"
-        },
-
-        {
-            "name": "clang14-debug",
-            "configurePreset": "clang14-debug"
-        },
-        {
-            "name": "clang14-release",
-            "configurePreset": "clang14-release"
-        },
-        {
-            "name": "clang14-relwithdebinfo",
-            "configurePreset": "clang14-relwithdebinfo"
-        },
-
-        {
-            "name": "clang15-debug",
-            "configurePreset": "clang15-debug"
-        },
-        {
-            "name": "clang15-release",
-            "configurePreset": "clang15-release"
-        },
-        {
-            "name": "clang15-relwithdebinfo",
-            "configurePreset": "clang15-relwithdebinfo"
-        },
-        {
-            "name": "clang12-asan-debug",
-            "configurePreset": "clang12-asan-debug"
-        },
-        {
-            "name": "clang12-tsan-debug",
-            "configurePreset": "clang12-tsan-debug"
-        },
-        {
-            "name": "clang12-ubsan-debug",
-            "configurePreset": "clang12-ubsan-debug"
-        },
-        {
-            "name": "clang15-asan-debug",
-            "configurePreset": "clang15-asan-debug"
-        },
-        {
-            "name": "clang15-tsan-debug",
-            "configurePreset": "clang15-tsan-debug"
-        },
-        {
-            "name": "clang15-ubsan-debug",
-            "configurePreset": "clang15-ubsan-debug"
         },
         {
             "name": "clang-debug",
