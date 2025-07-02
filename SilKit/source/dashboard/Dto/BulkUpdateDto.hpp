@@ -127,13 +127,6 @@ class BulkSimulationDto : public oatpp::DTO
     }
 };
 
-ENUM(MetricKind, v_int32,
-     VALUE(Unknown, 0, "unknown"),
-     VALUE(Counter, 10, "counter"),
-     VALUE(Statistic, 20, "statistic"),
-     VALUE(StringList, 30, "stringlist"),
-     VALUE(Attribute, 40, "attribute"))
-
 class MetricDataDto : public oatpp::DTO
 {
     DTO_INIT(MetricDataDto, DTO)
@@ -141,24 +134,47 @@ class MetricDataDto : public oatpp::DTO
     DTO_FIELD(Int64, ts);
     DTO_FIELD(String, pn);
     DTO_FIELD(Vector<String>, mn);
-    DTO_FIELD(Enum<MetricKind>::AsString, mk);
+};
+
+class AttributeDataDto : public MetricDataDto
+{
+    DTO_INIT(AttributeDataDto, MetricDataDto)
+
     DTO_FIELD(String, mv);
+};
+
+class CounterDataDto : public MetricDataDto
+{
+    DTO_INIT(CounterDataDto, MetricDataDto)
+
+    DTO_FIELD(Int64, mv);
+};
+
+class StatisticDataDto : public MetricDataDto
+{
+    DTO_INIT(StatisticDataDto, MetricDataDto)
+
+    DTO_FIELD(Vector<Float64>, mv);
 };
 
 class MetricsUpdateDto : public oatpp::DTO
 {
-    DTO_INIT(MetricsUpdateDto, DTO)
+    DTO_INIT(MetricsUpdateDto, oatpp::DTO)
 
-    DTO_FIELD(Vector<Object<MetricDataDto>>, metrics);
+    DTO_FIELD(Vector<Object<AttributeDataDto>>, attributes);
+    DTO_FIELD(Vector<Object<CounterDataDto>>, counters);
+    DTO_FIELD(Vector<Object<StatisticDataDto>>, statistics);
 
     static auto CreateEmpty() -> Wrapper
     {
         auto dto = createShared();
-        dto->metrics = Vector<Object<MetricDataDto>>::createShared();
+        dto->attributes = decltype(dto->attributes)::createShared();
+        dto->counters = decltype(dto->counters)::createShared();
+        dto->statistics = decltype(dto->statistics)::createShared();
         return dto;
     }
-};
 
+};
 } // namespace Dashboard
 } // namespace SilKit
 

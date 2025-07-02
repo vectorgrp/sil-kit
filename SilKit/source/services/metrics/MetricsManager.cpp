@@ -163,11 +163,8 @@ void MetricsManager::SubmitUpdates()
             return std::chrono::duration_cast<std::chrono::nanoseconds>(timepoint.time_since_epoch()).count();
         };
 
-        for (const auto &pair : _metrics)
+        for (auto&& [name, metric] : _metrics)
         {
-            const auto &name = pair.first;
-            const auto *metric = pair.second.get();
-
             const auto timepoint = metric->GetUpdateTime();
             if (timepoint <= _lastSubmitUpdate)
             {

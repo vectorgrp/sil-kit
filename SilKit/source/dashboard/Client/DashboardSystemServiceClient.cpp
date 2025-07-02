@@ -218,7 +218,7 @@ void DashboardSystemServiceClient::SetSimulationEnd(oatpp::UInt64 simulationId,
 void DashboardSystemServiceClient::UpdateSimulationMetrics(oatpp::UInt64 simulationId,
                                                            oatpp::Object<MetricsUpdateDto> metrics)
 {
-    auto response = _dashboardSystemApiClient->updateSimulationMetrics(simulationId, metrics->metrics);
+    auto response = _dashboardSystemApiClient->updateSimulationMetrics(simulationId, metrics);
     Log(response, "updating simulation metrics");
 }
 

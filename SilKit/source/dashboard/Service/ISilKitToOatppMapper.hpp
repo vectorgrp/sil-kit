@@ -74,7 +74,7 @@ public:
     virtual auto CreateBulkServiceInternalDto(const ServiceDescriptor& serviceDescriptor)
         -> Object<BulkServiceInternalDto> = 0;
     virtual auto CreateBulkSimulationDto(const DashboardBulkUpdate& bulkUpdate) -> Object<BulkSimulationDto> = 0;
-    virtual auto CreateMetricsUpdateDto(const std::string origin,
+    virtual auto CreateMetricsUpdateDto(const std::string& origin,
                                         const VSilKit::MetricsUpdate& metricsUpdate) -> Object<MetricsUpdateDto> = 0;
 };
 } // namespace Dashboard
