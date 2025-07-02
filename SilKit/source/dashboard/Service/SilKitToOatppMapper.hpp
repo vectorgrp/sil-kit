@@ -52,7 +52,7 @@ public:
     auto CreateBulkServiceInternalDto(const ServiceDescriptor& serviceDescriptor)
         -> Object<BulkServiceInternalDto> override;
     auto CreateBulkSimulationDto(const DashboardBulkUpdate& bulkUpdate) -> Object<BulkSimulationDto> override;
-    auto CreateMetricsUpdateDto(const std::string origin,
+    auto CreateMetricsUpdateDto(const std::string& origin,
                                 const VSilKit::MetricsUpdate& metricsUpdate) -> Object<MetricsUpdateDto> override;
 
 private:

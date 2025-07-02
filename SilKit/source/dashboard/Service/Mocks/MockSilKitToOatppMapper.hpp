@@ -57,7 +57,7 @@ public:
     MOCK_METHOD(Object<BulkRpcServiceDto>, CreateBulkRpcServiceDto, (const ServiceDescriptor&), (override));
     MOCK_METHOD(Object<BulkServiceInternalDto>, CreateBulkServiceInternalDto, (const ServiceDescriptor&), (override));
     MOCK_METHOD(Object<BulkSimulationDto>, CreateBulkSimulationDto, (const DashboardBulkUpdate&), (override));
-    MOCK_METHOD(Object<MetricsUpdateDto>, CreateMetricsUpdateDto, (const std::string, const VSilKit::MetricsUpdate&),
+    MOCK_METHOD(Object<MetricsUpdateDto>, CreateMetricsUpdateDto, (const std::string&, const VSilKit::MetricsUpdate&),
                 (override));
 };
 } // namespace Dashboard
