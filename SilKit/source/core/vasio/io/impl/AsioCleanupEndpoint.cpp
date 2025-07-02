@@ -4,7 +4,7 @@
 
 #include "AsioCleanupEndpoint.hpp"
 
-#include "Filesystem.hpp"
+#include <filesystem>
 
 
 namespace VSilKit {
@@ -18,8 +18,7 @@ void CleanupEndpoint(const asio::ip::tcp::endpoint&)
 
 void CleanupEndpoint(const asio::local::stream_protocol::endpoint& ep)
 {
-    namespace fs = SilKit::Filesystem;
-    fs::remove(ep.path());
+    std::filesystem::remove(ep.path());
 }
 
 

@@ -19,6 +19,7 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
+#include <filesystem>
 #include <fstream>
 #include <random>
 #include <future>
@@ -39,7 +40,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "CommandlineParser.hpp"
 #include "ParticipantConfiguration.hpp"
-#include "Filesystem.hpp"
 #include "FileHelpers.hpp"
 #include "YamlParser.hpp"
 #include "ParticipantConfigurationFromXImpl.hpp"
@@ -57,6 +57,9 @@ using namespace SilKit::Util;
 using CliParser = SilKit::Util::CommandlineParser;
 
 namespace {
+
+namespace fs = std::filesystem;
+
 auto isValidLogLevel(const std::string& levelStr)
 {
     auto logLevel = SilKit::Util::LowerCase(levelStr);
@@ -79,7 +82,6 @@ void ConfigureLogging(std::shared_ptr<SilKit::Config::IParticipantConfiguration>
 void ConfigureLoggingForWindowsService(std::shared_ptr<SilKit::Config::IParticipantConfiguration> configuration,
                                        const std::string& logLevel, bool explicitWorkingDirectory)
 {
-    namespace fs = SilKit::Filesystem;
 
     auto config = std::dynamic_pointer_cast<SilKit::Config::ParticipantConfiguration>(configuration);
     SILKIT_ASSERT(config != nullptr);
@@ -100,7 +102,7 @@ void ConfigureLoggingForWindowsService(std::shared_ptr<SilKit::Config::IParticip
             }
             else
             {
-                path << fs::temp_directory_path().string() << fs::path::preferred_separator << logName;
+                path << fs::temp_directory_path().concat(logName).string();
             }
             return path.str();
         }();
@@ -280,7 +282,6 @@ auto StartRegistry(std::shared_ptr<SilKit::Config::IParticipantConfiguration> co
         SilKit::Config::ParticipantConfiguration generatedConfiguration;
         generatedConfiguration.middleware.registryUri = chosenListenUri;
 
-        namespace fs = SilKit::Filesystem;
 
         auto tmpPath = fs::path(generatedConfigurationPath + "."
                                 + GenerateRandomCharacters(generatedConfigurationPath, 8) + ".tmp");
@@ -397,7 +398,7 @@ int main(int argc, char** argv)
         {
             try
             {
-                SilKit::Filesystem::current_path(SilKit::Filesystem::path{directory});
+                std::filesystem::current_path(std::filesystem::path{directory});
             }
             catch (const std::exception& error)
             {

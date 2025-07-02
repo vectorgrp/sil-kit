@@ -27,4 +27,3 @@ add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_Timer.cpp LIBS I_SilK
 add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_Util_FileHelpers.cpp LIBS O_SilKit_Util_FileHelpers)
 add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_Util_StringHelpers.cpp LIBS O_SilKit_Util_StringHelpers)
 add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_Uri.cpp)
-add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_Filesystem.cpp LIBS O_SilKit_Util_Filesystem)

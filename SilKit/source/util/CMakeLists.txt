@@ -43,22 +43,6 @@ endif()
 add_subdirectory(tests)
 
 
-# Filesystem utilities required for cross platform and language portability.
-# Can be removed when we finaly upgrade to C++17
-add_library(I_SilKit_Util_Filesystem INTERFACE)
-target_include_directories(I_SilKit_Util_Filesystem INTERFACE ${CMAKE_CURRENT_LIST_DIR})
-
-add_library(O_SilKit_Util_Filesystem OBJECT
-    Filesystem.hpp
-    Filesystem.cpp
-)
-target_include_directories(O_SilKit_Util_Filesystem PRIVATE ${CMAKE_CURRENT_LIST_DIR})
-target_link_libraries(O_SilKit_Util_Filesystem
-    PUBLIC I_SilKit_Util_Filesystem
-
-    PRIVATE SilKitInterface
-)
-
 
 add_library(I_SilKit_Util_FileHelpers INTERFACE)
 target_include_directories(I_SilKit_Util_FileHelpers INTERFACE ${CMAKE_CURRENT_LIST_DIR})

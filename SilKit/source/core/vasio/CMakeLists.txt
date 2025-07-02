@@ -46,7 +46,6 @@ target_link_libraries(I_SilKit_Core_VAsio
     INTERFACE I_SilKit_Services_PubSub
     INTERFACE I_SilKit_Services_Rpc
     INTERFACE I_SilKit_Util
-    INTERFACE I_SilKit_Util_Filesystem
     INTERFACE I_SilKit_Util_Uri
 
     INTERFACE ${SILKIT_THIRD_PARTY_ASIO}

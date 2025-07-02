@@ -29,6 +29,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <thread>
 #include <array>
 #include <functional>
+#include <filesystem>
 #include <cctype>
 #include <map>
 
@@ -37,7 +38,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "VAsioConstants.hpp"
 #include "VAsioPeer.hpp"
 #include "VAsioProxyPeer.hpp"
-#include "Filesystem.hpp"
 #include "SetThreadName.hpp"
 #include "Uri.hpp"
 #include "Assert.hpp"
@@ -63,7 +63,7 @@ namespace Log = SilKit::Services::Logging;
 
 
 using namespace std::chrono_literals;
-namespace fs = SilKit::Filesystem;
+namespace fs = std::filesystem;
 
 namespace {
 

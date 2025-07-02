@@ -22,7 +22,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "Uri.hpp"
 #include "core/vasio/io/MakeAsioIoContext.hpp"
-#include "Filesystem.hpp"
+#include <filesystem>
 #include "Uuid.hpp"
 
 #include "MockLogger.hpp"
@@ -61,22 +61,20 @@ struct MockCallbacks
 };
 
 
+namespace fs = std::filesystem;
 struct Test_IoContext : ::testing::Test
 {
     std::string acceptorLocalDomainSocketPath;
 
     void SetUp() override
     {
-        namespace fs = SilKit::Filesystem;
 
-        acceptorLocalDomainSocketPath = fs::temp_directory_path().string() + fs::path::preferred_separator
-                                        + to_string(SilKit::Util::Uuid::GenerateRandom()) + ".silkit";
+        acceptorLocalDomainSocketPath =
+            fs::temp_directory_path().concat(to_string(SilKit::Util::Uuid::GenerateRandom()) + ".silkit").string();
     }
 
     void TearDown() override
     {
-        namespace fs = SilKit::Filesystem;
-
         try
         {
             fs::remove(acceptorLocalDomainSocketPath);
