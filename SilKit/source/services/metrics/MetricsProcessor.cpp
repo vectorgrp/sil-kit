@@ -48,7 +48,7 @@ void MetricsProcessor::SetSinks(std::vector<std::unique_ptr<IMetricsSink>> sinks
     _sinksSetUp = true;
 }
 
-void MetricsProcessor::Process(const std::string &origin, const VSilKit::MetricsUpdate &metricsUpdate)
+void MetricsProcessor::Process(const std::string& origin, const VSilKit::MetricsUpdate& metricsUpdate)
 {
     if (!_sinksSetUp)
     {
@@ -71,8 +71,8 @@ void MetricsProcessor::Process(const std::string &origin, const VSilKit::Metrics
     }
 }
 
-void MetricsProcessor::OnMetricsUpdate(const std::string &simulationName, const std::string &participantName,
-                                       const MetricsUpdate &metricsUpdate)
+void MetricsProcessor::OnMetricsUpdate(const std::string& /*simulationName*/, const std::string& participantName,
+                                       const MetricsUpdate& metricsUpdate)
 {
     if (participantName == _participantName)
     {
