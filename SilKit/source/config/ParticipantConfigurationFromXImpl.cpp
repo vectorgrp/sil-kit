@@ -122,7 +122,7 @@ void Validate(const std::string& text)
 std::string GetConfigParentPath(const std::string& configFile)
 {
     namespace fs = std::filesystem;
-    const auto filePath = fs::current_path().concat(configFile);
+    const auto filePath = fs::current_path() / configFile;
     return filePath.parent_path().string();
 }
 

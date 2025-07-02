@@ -139,7 +139,7 @@ std::vector<std::string> FindLibrary(const std::string& name, const SilKit::Exte
         for (const auto& path : candidates)
         {
             //eg, result looks like "./libDummyModuled.so"
-            const auto current = std::filesystem::path{dir}.concat(path);
+            const auto current = std::filesystem::path{dir} / path;
             if (std::filesystem::exists(current))
             {
                 rv.push_back(current.string());

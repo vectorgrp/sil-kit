@@ -70,7 +70,7 @@ struct Test_IoContext : ::testing::Test
     {
 
         acceptorLocalDomainSocketPath =
-            fs::temp_directory_path().concat(to_string(SilKit::Util::Uuid::GenerateRandom()) + ".silkit").string();
+            (fs::temp_directory_path() / (to_string(SilKit::Util::Uuid::GenerateRandom()) + ".silkit")).string();
     }
 
     void TearDown() override

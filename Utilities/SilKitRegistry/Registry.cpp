@@ -102,7 +102,7 @@ void ConfigureLoggingForWindowsService(std::shared_ptr<SilKit::Config::IParticip
             }
             else
             {
-                path << fs::temp_directory_path().concat(logName).string();
+                path << (fs::temp_directory_path() / logName).string();
             }
             return path.str();
         }();
