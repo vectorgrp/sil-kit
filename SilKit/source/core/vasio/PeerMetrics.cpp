@@ -44,7 +44,6 @@ void PeerMetrics::InitializeMetrics(const std::string& localParticipantName, VSi
 {
     auto&& remoteParticipant = peer->GetServiceDescriptor().GetParticipantName();
     auto&& simulationName = peer->GetSimulationName();
-    MetricName prefix{"Peer", simulationName, localParticipantName, remoteParticipant};
 
     _txBytes = manager->GetCounter({"Peer", simulationName, localParticipantName, remoteParticipant, "tx_bytes"});
     _txPackets = manager->GetCounter({"Peer", simulationName, localParticipantName, remoteParticipant, "tx_packets"});
