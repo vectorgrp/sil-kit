@@ -6,6 +6,7 @@
 
 #include <string>
 #include <memory>
+#include <optional>
 #include <sstream>
 #include <map>
 #include <vector>
@@ -51,7 +52,7 @@ public:
     }
 
     template <typename T>
-    void OptionalRead(SilKit::Util::Optional<T>& val, const std::string& name)
+    void OptionalRead(std::optional<T>& val, const std::string& name)
     {
         auto&& child = GetChildSafe(name);
         if (child.IsValid())

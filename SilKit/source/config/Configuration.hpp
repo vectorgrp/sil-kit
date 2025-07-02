@@ -23,6 +23,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include <algorithm>
 #include <iostream>
+#include <optional>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -34,7 +35,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/SilKitMacros.hpp"
 #include "silkit/services/logging/LoggingDatatypes.hpp"
 
-#include "Optional.hpp"
 #include "StringHelpers.hpp"
 
 namespace SilKit {
@@ -145,13 +145,13 @@ struct TraceSource
 struct MdfChannel
 {
     // A user supplied empty string in the configuration is valid
-    SilKit::Util::Optional<std::string> channelName; //!< maps to MDF cn_tx_name
-    SilKit::Util::Optional<std::string> channelSource; //!< maps to MDF si_tx_name of cn_si_source
-    SilKit::Util::Optional<std::string> channelPath; //!< maps to MDF si_tx_path of cn_si_source
+    std::optional<std::string> channelName; //!< maps to MDF cn_tx_name
+    std::optional<std::string> channelSource; //!< maps to MDF si_tx_name of cn_si_source
+    std::optional<std::string> channelPath; //!< maps to MDF si_tx_path of cn_si_source
 
-    SilKit::Util::Optional<std::string> groupName; //!< maps to MDF cg_tx_name
-    SilKit::Util::Optional<std::string> groupSource; //!< maps to MDF si_tx_name of cg_si_acq_source
-    SilKit::Util::Optional<std::string> groupPath; //!< maps to MDF si_tx_path of cn_si_acq_source
+    std::optional<std::string> groupName; //!< maps to MDF cg_tx_name
+    std::optional<std::string> groupSource; //!< maps to MDF si_tx_name of cg_si_acq_source
+    std::optional<std::string> groupPath; //!< maps to MDF si_tx_path of cn_si_acq_source
 };
 
 struct Replay

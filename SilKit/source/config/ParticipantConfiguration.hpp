@@ -24,6 +24,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <array>
 #include <chrono>
 #include <iostream>
+#include <optional>
 #include <ostream>
 #include <string>
 #include <vector>
@@ -36,7 +37,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/services/datatypes.hpp"
 
 #include "Configuration.hpp"
-#include "Optional.hpp"
 
 namespace SilKit {
 namespace Config {
@@ -55,7 +55,7 @@ struct InternalController
     }
 
     std::string name;
-    SilKit::Util::Optional<std::string> network;
+    std::optional<std::string> network;
 };
 
 // ================================================================================
@@ -71,7 +71,7 @@ struct CanController
     }
 
     std::string name;
-    SilKit::Util::Optional<std::string> network;
+    std::optional<std::string> network;
 
     std::vector<std::string> useTraceSinks;
     Replay replay;
@@ -90,7 +90,7 @@ struct LinController
     }
 
     std::string name;
-    SilKit::Util::Optional<std::string> network;
+    std::optional<std::string> network;
 
     std::vector<std::string> useTraceSinks;
     Replay replay;
@@ -109,7 +109,7 @@ struct EthernetController
     }
 
     std::string name;
-    SilKit::Util::Optional<std::string> network;
+    std::optional<std::string> network;
 
     std::vector<std::string> useTraceSinks;
     Replay replay;
@@ -128,10 +128,10 @@ struct FlexrayController
     }
 
     std::string name;
-    SilKit::Util::Optional<std::string> network;
+    std::optional<std::string> network;
 
-    SilKit::Util::Optional<Services::Flexray::FlexrayClusterParameters> clusterParameters;
-    SilKit::Util::Optional<Services::Flexray::FlexrayNodeParameters> nodeParameters;
+    std::optional<Services::Flexray::FlexrayClusterParameters> clusterParameters;
+    std::optional<Services::Flexray::FlexrayNodeParameters> nodeParameters;
     std::vector<Services::Flexray::FlexrayTxBufferConfig> txBufferConfigurations;
 
     std::vector<std::string> useTraceSinks;
@@ -172,11 +172,11 @@ struct DataPublisher
     }
 
     std::string name;
-    SilKit::Util::Optional<std::string> topic;
-    SilKit::Util::Optional<std::vector<Label>> labels;
+    std::optional<std::string> topic;
+    std::optional<std::vector<Label>> labels;
 
     //! \brief History length of a DataPublisher.
-    SilKit::Util::Optional<size_t> history{0};
+    std::optional<size_t> history{0};
 
     std::vector<std::string> useTraceSinks;
     Replay replay;
@@ -191,8 +191,8 @@ struct DataSubscriber
     }
 
     std::string name;
-    SilKit::Util::Optional<std::string> topic;
-    SilKit::Util::Optional<std::vector<Label>> labels;
+    std::optional<std::string> topic;
+    std::optional<std::vector<Label>> labels;
 
     std::vector<std::string> useTraceSinks;
     Replay replay;
@@ -211,8 +211,8 @@ struct RpcServer
     }
 
     std::string name;
-    SilKit::Util::Optional<std::string> functionName;
-    SilKit::Util::Optional<std::vector<Label>> labels;
+    std::optional<std::string> functionName;
+    std::optional<std::vector<Label>> labels;
 
     std::vector<std::string> useTraceSinks;
     Replay replay;
@@ -227,8 +227,8 @@ struct RpcClient
     }
 
     std::string name;
-    SilKit::Util::Optional<std::string> functionName;
-    SilKit::Util::Optional<std::vector<Label>> labels;
+    std::optional<std::string> functionName;
+    std::optional<std::vector<Label>> labels;
 
     std::vector<std::string> useTraceSinks;
     Replay replay;
@@ -241,8 +241,8 @@ struct RpcClient
 //! \brief Health checking service
 struct HealthCheck
 {
-    SilKit::Util::Optional<std::chrono::milliseconds> softResponseTimeout;
-    SilKit::Util::Optional<std::chrono::milliseconds> hardResponseTimeout;
+    std::optional<std::chrono::milliseconds> softResponseTimeout;
+    std::optional<std::chrono::milliseconds> hardResponseTimeout;
 };
 
 // ================================================================================
@@ -446,9 +446,9 @@ struct RegistryConfiguration
 {
     std::string description{""};
     std::string schemaVersion{""};
-    SilKit::Util::Optional<std::string> listenUri;
-    SilKit::Util::Optional<bool> enableDomainSockets;
-    SilKit::Util::Optional<std::string> dashboardUri;
+    std::optional<std::string> listenUri;
+    std::optional<bool> enableDomainSockets;
+    std::optional<std::string> dashboardUri;
     SilKit::Config::Logging logging{};
     Experimental experimental{};
 };

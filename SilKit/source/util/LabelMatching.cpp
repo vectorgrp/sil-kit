@@ -20,14 +20,14 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "LabelMatching.hpp"
-#include "Optional.hpp"
+#include <optional>
 
 namespace SilKit {
 namespace Util {
 
 using namespace SilKit::Services;
 
-Optional<MatchingLabel> TryFindLabelByKey(const std::string& key, const std::vector<MatchingLabel>& labels)
+std::optional<MatchingLabel> TryFindLabelByKey(const std::string& key, const std::vector<MatchingLabel>& labels)
 {
     for (auto it : labels)
     {
@@ -36,7 +36,7 @@ Optional<MatchingLabel> TryFindLabelByKey(const std::string& key, const std::vec
             return {it};
         }
     }
-    return Optional<MatchingLabel>();
+    return std::optional<MatchingLabel>();
 }
 
 bool LabelMatchesLabelList(MatchingLabel label, const std::vector<MatchingLabel>& labels)
@@ -50,7 +50,7 @@ bool LabelMatchesLabelList(MatchingLabel label, const std::vector<MatchingLabel>
             // Mandatory labels must exist
             return false;
         }
-        // Optional labels that do not exist are ignored
+        // std::optional labels that do not exist are ignored
     }
     else if (label.value != foundLabel.value().value)
     {
