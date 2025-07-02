@@ -1848,12 +1848,12 @@ auto VAsioConnection::MakeVAsioPeer(std::unique_ptr<IRawByteStream> stream) -> s
     if(_config.experimental.metrics.sinks.empty())
     {
         return std::make_unique<VAsioPeer>(this, _ioContext.get(), std::move(stream), _logger,
-                                           std::move(std::make_unique<VSilKit::NoMetrics>()));
+                                           std::make_unique<VSilKit::NoMetrics>());
     }
     else
     {
         return std::make_unique<VAsioPeer>(this, _ioContext.get(), std::move(stream), _logger,
-                                           std::move(std::make_unique<VSilKit::PeerMetrics>()));
+                                           std::make_unique<VSilKit::PeerMetrics>());
 
     }
 }
