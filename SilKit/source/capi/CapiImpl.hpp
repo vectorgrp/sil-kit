@@ -26,7 +26,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/participant/exception.hpp"
 
 #include "CapiExceptions.hpp"
-#include "TypeUtils.hpp"
 
 #define CAPI_CATCH_EXCEPTIONS \
     catch (const SilKit::CapiBadParameterError& e) \
@@ -183,7 +182,7 @@ struct HasStructHeader : std::false_type
 
 template <typename T>
 struct HasStructHeader<
-    T, SilKit::Util::VoidT<decltype(std::declval<std::decay_t<T>>().structHeader = SilKit_StructHeader{})>>
+    T, std::void_t<decltype(std::declval<std::decay_t<T>>().structHeader = SilKit_StructHeader{})>>
     : std::true_type
 {
 };
