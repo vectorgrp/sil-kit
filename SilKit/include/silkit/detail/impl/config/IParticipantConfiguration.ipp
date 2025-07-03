@@ -26,6 +26,9 @@
 #include "silkit/detail/impl/ThrowOnError.hpp"
 #include "silkit/detail/impl/config/ParticipantConfiguration.hpp"
 
+#include <string>
+#include <vector>
+
 namespace SilKit {
 DETAIL_SILKIT_DETAIL_VN_NAMESPACE_BEGIN
 namespace Config {
@@ -52,6 +55,25 @@ auto ParticipantConfigurationFromFile(const std::string& path)
     return std::make_shared<Impl::Config::ParticipantConfiguration>(participantConfiguration);
 }
 
+auto ParticipantConfigurationToString(std::shared_ptr<SilKit::Config::IParticipantConfiguration> config) -> std::string
+{
+    size_t size{};
+    auto&& concreteConfig = std::dynamic_pointer_cast<Impl::Config::ParticipantConfiguration>(config);
+    SilKit_ParticipantConfiguration_ToString(concreteConfig->Get(), nullptr, &size);
+
+    std::vector<char> buffer;
+    if( size > 0)
+    {
+        buffer.resize(size);
+        //C++17 std::string::data() -> char*;
+        auto&& data = buffer.data();
+        SilKit_ParticipantConfiguration_ToString(concreteConfig->Get(), &data, &size);
+
+    }
+    return {buffer.data(), buffer.size()};
+}
+
+
 } // namespace Config
 DETAIL_SILKIT_DETAIL_VN_NAMESPACE_CLOSE
 } // namespace SilKit
@@ -61,5 +83,6 @@ namespace SilKit {
 namespace Config {
 using SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Config::ParticipantConfigurationFromString;
 using SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Config::ParticipantConfigurationFromFile;
+using SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Config::ParticipantConfigurationToString;
 } // namespace Config
 } // namespace SilKit
