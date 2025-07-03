@@ -421,9 +421,9 @@ TEST_F(ITest_NetSimLin, basic_networksimulation_lin)
 
     // Not dynamic: No Handler triggered
     // See: LinController::ReceiveMsg(const IServiceEndpoint* from, const LinSendFrameHeaderRequest& msg)
-    EXPECT_EQ(callCounts.silKitHandlersLinSimulated.FrameHeaderHandler, 0);
+    EXPECT_EQ(callCounts.silKitHandlersLinSimulated.FrameHeaderHandler, 0u);
     // Trivial: No Handler triggered, but a LinTransmission and thus FrameStatusHandler
-    EXPECT_EQ(callCounts.silKitHandlersLinTrivial.FrameHeaderHandler, 0);
+    EXPECT_EQ(callCounts.silKitHandlersLinTrivial.FrameHeaderHandler, 0u);
 
     // - 1 because the handler is not called on the master
     EXPECT_EQ(callCounts.silKitHandlersLinSimulated.GoToSleepHandler, numSimulatedLinControllers - 1);
@@ -438,7 +438,7 @@ TEST_F(ITest_NetSimLin, basic_networksimulation_lin)
     EXPECT_EQ(callCounts.netSimLin.OnFrameHeaderRequest, numSentFrameHeadersSimulated);
 
     // Oneshot by the masters ILinController::Wakeup
-    EXPECT_EQ(callCounts.netSimLin.OnWakeupPulse, 1);
+    EXPECT_EQ(callCounts.netSimLin.OnWakeupPulse, 1u);
 
     EXPECT_EQ(callCounts.netSimLin.OnControllerConfig, numSimulatedLinControllers);
 
@@ -446,7 +446,7 @@ TEST_F(ITest_NetSimLin, basic_networksimulation_lin)
     EXPECT_EQ(callCounts.netSimLin.OnFrameResponseUpdate, numSentFramesSimulated);
 
     // Once via ILinController::Wakeup, once via ILinController::GoToSleep
-    EXPECT_EQ(callCounts.netSimLin.OnControllerStatusUpdate, 2);
+    EXPECT_EQ(callCounts.netSimLin.OnControllerStatusUpdate, 2u);
 
     EXPECT_EQ(callCounts.silKitSentMsgLin.SentFramesSimulated, numSentFramesSimulated);
     EXPECT_EQ(callCounts.silKitSentMsgLin.SentFrameHeadersSimulated, numSentFrameHeadersSimulated);
@@ -594,7 +594,7 @@ TEST_F(ITest_NetSimLin, networksimulation_lin_dynamic)
     EXPECT_EQ(callCounts.silKitHandlersLinSimulated.FrameHeaderHandler,
               numSentFrameHeadersSimulated * numSimulatedLinControllers);
     // Trivial: No Handler triggered, but a LinTransmission and thus FrameStatusHandler
-    EXPECT_EQ(callCounts.silKitHandlersLinTrivial.FrameHeaderHandler, 0);
+    EXPECT_EQ(callCounts.silKitHandlersLinTrivial.FrameHeaderHandler, 0u);
 
     // - 1 because the handler is not called on the master
     EXPECT_EQ(callCounts.silKitHandlersLinSimulated.GoToSleepHandler, numSimulatedLinControllers - 1);
@@ -604,12 +604,12 @@ TEST_F(ITest_NetSimLin, networksimulation_lin_dynamic)
     EXPECT_EQ(callCounts.silKitHandlersLinTrivial.WakeupHandler, numTrivialLinControllers);
 
     // Only the GoToSleepFrame comes in as a FrameRequest in dynamic mode
-    EXPECT_EQ(callCounts.netSimLin.OnFrameRequest, 1);
+    EXPECT_EQ(callCounts.netSimLin.OnFrameRequest, 1u);
 
     EXPECT_EQ(callCounts.netSimLin.OnFrameHeaderRequest, numSentFrameHeadersSimulated);
 
     // Oneshot by the masters ILinController::Wakeup
-    EXPECT_EQ(callCounts.netSimLin.OnWakeupPulse, 1);
+    EXPECT_EQ(callCounts.netSimLin.OnWakeupPulse, 1u);
 
     EXPECT_EQ(callCounts.netSimLin.OnControllerConfig, numSimulatedLinControllers);
 
@@ -617,7 +617,7 @@ TEST_F(ITest_NetSimLin, networksimulation_lin_dynamic)
     EXPECT_EQ(callCounts.netSimLin.OnFrameResponseUpdate, numSentFrameHeadersSimulated);
 
     // Once via ILinController::Wakeup, once via ILinController::GoToSleep
-    EXPECT_EQ(callCounts.netSimLin.OnControllerStatusUpdate, 2);
+    EXPECT_EQ(callCounts.netSimLin.OnControllerStatusUpdate, 2u);
 
     EXPECT_EQ(callCounts.silKitSentMsgLin.SentFramesSimulated, numSentFramesSimulated);
     EXPECT_EQ(callCounts.silKitSentMsgLin.SentFrameHeadersSimulated, numSentFrameHeadersSimulated);

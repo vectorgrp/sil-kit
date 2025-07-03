@@ -1,4 +1,4 @@
-breathe == 4.34.0
-sphinx == 5.1.1
-sphinx-rtd-theme == 1.0.0
-myst-parser == 1.0.0
+breathe == 4.35.0
+sphinx == 6.2.1
+sphinx-rtd-theme == 3.0.2
+myst-parser == 4.0.1

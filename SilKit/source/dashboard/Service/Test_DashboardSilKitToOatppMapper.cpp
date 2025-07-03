@@ -524,7 +524,7 @@ TEST_F(Test_DashboardSilKitToOatppMapper, CreateBulkSimulationDto)
 
     // Assert
     ASSERT_NE(dto->stopped.getPtr(), nullptr);
-    ASSERT_EQ(dto->stopped.getValue(0), *expectedBulkUpdate.stopped);
+    ASSERT_EQ(dto->stopped.getValue(0), static_cast<std::int64_t>(*expectedBulkUpdate.stopped));
 
     ASSERT_NE(dto->system.getPtr(), nullptr);
     ASSERT_NE(dto->system->statuses.getPtr(), nullptr);

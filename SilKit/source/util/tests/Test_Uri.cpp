@@ -93,7 +93,13 @@ TEST(Test_Uri, parse_silkit_scheme)
 
 TEST(Test_Uri, parse_silkit_scheme_with_simulation_name)
 {
-    const std::initializer_list<std::tuple<std::string, uint16_t>> baseUris = {
+    struct HostPortPair
+    {
+        std::string host;
+        std::uint16_t port;
+    };
+
+    const std::initializer_list<HostPortPair> baseUris = {
         {"localhost", 8500},
         {"example.com", 8500},
         {"0.0.0.0", 8500},
@@ -103,12 +109,8 @@ TEST(Test_Uri, parse_silkit_scheme_with_simulation_name)
         {"[2001:0db8:85a3:08d3:1319:8a2e:0370:7344]", 8500},
     };
 
-    for (const auto& baseUri : baseUris)
+    for (const auto& [host, port] : baseUris)
     {
-        std::string host;
-        uint16_t port;
-        std::tie(host, port) = baseUri;
-
         std::string uri{"silkit://" + host + ":" + std::to_string(port)};
 
         CheckSilKitUriWithSimName(uri, host, port, "");
