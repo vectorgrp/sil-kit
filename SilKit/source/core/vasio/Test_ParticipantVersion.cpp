@@ -103,7 +103,7 @@ protected:
 
         uint8_t lastIter = 0;
         recvCan->AddFrameHandler([&lastIter, &done](auto*, const auto& event) {
-            EXPECT_EQ(event.frame.dataField.size(), 7);
+            EXPECT_EQ(event.frame.dataField.size(), 7u);
             auto iter = event.frame.dataField.at(6);
             EXPECT_EQ(lastIter + 1, iter);
             lastIter = iter;

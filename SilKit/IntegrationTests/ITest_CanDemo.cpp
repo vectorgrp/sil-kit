@@ -324,7 +324,7 @@ TEST_F(ITest_CanDemo, can_demo)
                 EXPECT_EQ(frame.frame.sdt, 1);
                 EXPECT_EQ(frame.frame.af, 0xdeadbeef);
                 EXPECT_EQ(frame.frame.vcid, 234);
-                EXPECT_EQ(frame.frame.dataField.size(), 2048);
+                EXPECT_EQ(frame.frame.dataField.size(), 2048u);
                 EXPECT_TRUE(frame.frame.flags & SilKit_CanFrameFlag_xlf);
                 EXPECT_TRUE(frame.frame.flags & SilKit_CanFrameFlag_fdf);
             }

@@ -30,16 +30,16 @@ namespace {
 
 TEST(Test_VAsioCapabilities, parse_empty_capabilities)
 {
-    EXPECT_EQ(SilKit::Core::VAsioCapabilities{}.Count(), 0);
-    EXPECT_EQ(SilKit::Core::VAsioCapabilities{""}.Count(), 0);
-    EXPECT_EQ(SilKit::Core::VAsioCapabilities{"[]"}.Count(), 0);
+    EXPECT_EQ(SilKit::Core::VAsioCapabilities{}.Count(), 0u);
+    EXPECT_EQ(SilKit::Core::VAsioCapabilities{""}.Count(), 0u);
+    EXPECT_EQ(SilKit::Core::VAsioCapabilities{"[]"}.Count(), 0u);
 }
 
 TEST(Test_VAsioCapabilities, parse_single_capability)
 {
     const auto capabilities = SilKit::Core::VAsioCapabilities{R"([{"name":"abc"}])"};
 
-    EXPECT_EQ(capabilities.Count(), 1);
+    EXPECT_EQ(capabilities.Count(), 1u);
     EXPECT_TRUE(capabilities.HasCapability("abc"));
 
     EXPECT_FALSE(capabilities.HasCapability(""));
@@ -51,7 +51,7 @@ TEST(Test_VAsioCapabilities, parse_single_capability_with_duplicates)
 {
     const auto capabilities = SilKit::Core::VAsioCapabilities{R"([{"name":"abc"},{"name":"abc"}])"};
 
-    EXPECT_EQ(capabilities.Count(), 1);
+    EXPECT_EQ(capabilities.Count(), 1u);
     EXPECT_TRUE(capabilities.HasCapability("abc"));
 
     EXPECT_FALSE(capabilities.HasCapability(""));
@@ -63,7 +63,7 @@ TEST(Test_VAsioCapabilities, parse_multiple_capabilities_without_duplicates)
 {
     const auto capabilities = SilKit::Core::VAsioCapabilities{R"([{"name":"abc"},{"name":"def"},{"name":"ghi"}])"};
 
-    EXPECT_EQ(capabilities.Count(), 3);
+    EXPECT_EQ(capabilities.Count(), 3u);
     EXPECT_TRUE(capabilities.HasCapability("abc"));
     EXPECT_TRUE(capabilities.HasCapability("def"));
     EXPECT_TRUE(capabilities.HasCapability("ghi"));
@@ -77,7 +77,7 @@ TEST(Test_VAsioCapabilities, parse_multiple_capabilities_with_duplicates)
 {
     const auto capabilities = SilKit::Core::VAsioCapabilities{R"([{"name":"abc"},{"name":"def"},{"name":"abc"}])"};
 
-    EXPECT_EQ(capabilities.Count(), 2);
+    EXPECT_EQ(capabilities.Count(), 2u);
     EXPECT_TRUE(capabilities.HasCapability("abc"));
     EXPECT_TRUE(capabilities.HasCapability("def"));
 
@@ -90,7 +90,7 @@ TEST(Test_VAsioCapabilities, permit_and_ignore_additional_field)
 {
     const auto capabilities = SilKit::Core::VAsioCapabilities{R"([{"name":"abc","a":"b","c":"d"}])"};
 
-    EXPECT_EQ(capabilities.Count(), 1);
+    EXPECT_EQ(capabilities.Count(), 1u);
     EXPECT_TRUE(capabilities.HasCapability("abc"));
 }
 
@@ -116,7 +116,7 @@ TEST(Test_VAsioCapabilities, parse_add_capability)
     SilKit::Core::VAsioCapabilities capabilities;
 
     capabilities.AddCapability("abc");
-    EXPECT_EQ(capabilities.Count(), 1);
+    EXPECT_EQ(capabilities.Count(), 1u);
     EXPECT_TRUE(capabilities.HasCapability("abc"));
     EXPECT_FALSE(capabilities.HasCapability("def"));
     EXPECT_FALSE(capabilities.HasCapability("ghi"));
@@ -125,7 +125,7 @@ TEST(Test_VAsioCapabilities, parse_add_capability)
     EXPECT_FALSE(capabilities.HasCapability("Hello World"));
 
     capabilities.AddCapability("def");
-    EXPECT_EQ(capabilities.Count(), 2);
+    EXPECT_EQ(capabilities.Count(), 2u);
     EXPECT_TRUE(capabilities.HasCapability("abc"));
     EXPECT_TRUE(capabilities.HasCapability("def"));
     EXPECT_FALSE(capabilities.HasCapability("ghi"));
@@ -134,7 +134,7 @@ TEST(Test_VAsioCapabilities, parse_add_capability)
     EXPECT_FALSE(capabilities.HasCapability("Hello World"));
 
     capabilities.AddCapability("abc");
-    EXPECT_EQ(capabilities.Count(), 2);
+    EXPECT_EQ(capabilities.Count(), 2u);
     EXPECT_TRUE(capabilities.HasCapability("abc"));
     EXPECT_TRUE(capabilities.HasCapability("def"));
     EXPECT_FALSE(capabilities.HasCapability("ghi"));
@@ -143,7 +143,7 @@ TEST(Test_VAsioCapabilities, parse_add_capability)
     EXPECT_FALSE(capabilities.HasCapability("Hello World"));
 
     capabilities.AddCapability("ghi");
-    EXPECT_EQ(capabilities.Count(), 3);
+    EXPECT_EQ(capabilities.Count(), 3u);
     EXPECT_TRUE(capabilities.HasCapability("abc"));
     EXPECT_TRUE(capabilities.HasCapability("def"));
     EXPECT_TRUE(capabilities.HasCapability("ghi"));
@@ -161,7 +161,7 @@ TEST(Test_VAsioCapabilities, empty_roundtrip)
     EXPECT_EQ(originalString, "");
 
     const auto roundtrip = SilKit::Core::VAsioCapabilities{originalString};
-    EXPECT_EQ(roundtrip.Count(), 0);
+    EXPECT_EQ(roundtrip.Count(), 0u);
 }
 
 TEST(Test_VAsioCapabilities, single_capability_roundtrip)
@@ -175,7 +175,7 @@ TEST(Test_VAsioCapabilities, single_capability_roundtrip)
     EXPECT_NE(originalString, "");
 
     const auto roundtrip = SilKit::Core::VAsioCapabilities{originalString};
-    EXPECT_EQ(roundtrip.Count(), 1);
+    EXPECT_EQ(roundtrip.Count(), 1u);
     EXPECT_TRUE(roundtrip.HasCapability("abc"));
 }
 
@@ -192,7 +192,7 @@ TEST(Test_VAsioCapabilities, multiple_capabilities_roundtrip)
     EXPECT_NE(originalString, "");
 
     const auto roundtrip = SilKit::Core::VAsioCapabilities{originalString};
-    EXPECT_EQ(roundtrip.Count(), 3);
+    EXPECT_EQ(roundtrip.Count(), 3u);
     EXPECT_TRUE(roundtrip.HasCapability("abc"));
     EXPECT_TRUE(roundtrip.HasCapability("def"));
     EXPECT_TRUE(roundtrip.HasCapability("ghi"));

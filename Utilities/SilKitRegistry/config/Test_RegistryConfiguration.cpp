@@ -38,7 +38,7 @@ void CheckFull(const SilKitRegistry::Config::V1::RegistryConfiguration& c)
     ASSERT_TRUE(c.enableDomainSockets.has_value());
     EXPECT_EQ(c.enableDomainSockets.value(), false);
 
-    ASSERT_EQ(c.logging.sinks.size(), 2);
+    ASSERT_EQ(c.logging.sinks.size(), 2u);
     EXPECT_EQ(c.logging.sinks[0].type, SilKit::Config::Sink::Type::Stdout);
     EXPECT_EQ(c.logging.sinks[0].level, SilKit::Services::Logging::Level::Trace);
     EXPECT_EQ(c.logging.sinks[1].type, SilKit::Config::Sink::Type::File);
@@ -71,7 +71,7 @@ void CheckEmpty(const SilKitRegistry::Config::V1::RegistryConfiguration& c)
 
     ASSERT_FALSE(c.listenUri.has_value());
     ASSERT_FALSE(c.enableDomainSockets.has_value());
-    ASSERT_EQ(c.logging.sinks.size(), 0);
+    ASSERT_EQ(c.logging.sinks.size(), 0u);
     ASSERT_FALSE(c.dashboardUri.has_value());
 }
 

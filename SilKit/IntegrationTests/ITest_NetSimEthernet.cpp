@@ -254,7 +254,7 @@ TEST_F(ITest_NetSimEthernet, basic_networksimulation_ethernet)
     EXPECT_EQ(callCounts.silKitHandlersEthernetSimulated.StateChangeHandler, numSimulatedEthernetControllers);
     EXPECT_EQ(callCounts.silKitHandlersEthernetTrivial.StateChangeHandler, _numParticipantsTrivial);
     EXPECT_EQ(callCounts.silKitHandlersEthernetSimulated.BitrateChangeHandler, numSimulatedEthernetControllers);
-    EXPECT_EQ(callCounts.silKitHandlersEthernetTrivial.BitrateChangeHandler, 0);
+    EXPECT_EQ(callCounts.silKitHandlersEthernetTrivial.BitrateChangeHandler, 0u);
 
     EXPECT_EQ(callCounts.netSimEthernet.OnFrameRequest, numSentFramesSimulated);
     EXPECT_EQ(callCounts.netSimEthernet.OnSetControllerMode, numSimulatedEthernetControllers);

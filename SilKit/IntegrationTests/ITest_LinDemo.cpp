@@ -509,7 +509,7 @@ TEST_F(ITest_LinDemo, DISABLED_lin_demo)
     {
         if (node->_name == "LinSlave")
         {
-            EXPECT_EQ(node->_result.numberReceivedInSleep, 0);
+            EXPECT_EQ(node->_result.numberReceivedInSleep, 0u);
             EXPECT_EQ(node->_result.numberReceived, node->_controllerConfig.frameResponses.size());
             EXPECT_TRUE(node->_result.gotoSleepReceived)
                 << "Assuming node " << node->_name << " has received a GoToSleep";

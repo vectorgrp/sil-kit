@@ -263,7 +263,7 @@ TEST_F(ITest_NetSimCan, basic_networksimulation_can)
     EXPECT_EQ(callCounts.silKitHandlersCanSimulated.StateChangeHandler, numSimulatedCanControllers);
     EXPECT_EQ(callCounts.silKitHandlersCanTrivial.StateChangeHandler, _numParticipantsTrivial);
     EXPECT_EQ(callCounts.silKitHandlersCanSimulated.ErrorStateChangeHandler, numSimulatedCanControllers);
-    EXPECT_EQ(callCounts.silKitHandlersCanTrivial.ErrorStateChangeHandler, 0);
+    EXPECT_EQ(callCounts.silKitHandlersCanTrivial.ErrorStateChangeHandler, 0u);
 
     EXPECT_EQ(callCounts.netSimCan.OnFrameRequest, numSentFramesSimulated);
     EXPECT_EQ(callCounts.netSimCan.OnSetBaudrate, numSimulatedCanControllers);

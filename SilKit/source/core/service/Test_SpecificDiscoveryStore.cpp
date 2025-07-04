@@ -107,7 +107,7 @@ TEST_F(Test_SpecificDiscoveryStore, no_reaction_on_irrelevant_services)
     }
 
     auto& lookup = testStore.GetLookup();
-    ASSERT_EQ(lookup.size(), 0);
+    ASSERT_EQ(lookup.size(), 0u);
 }
 
 TEST_F(Test_SpecificDiscoveryStore, lookup_entries_pubsub)
@@ -132,7 +132,7 @@ TEST_F(Test_SpecificDiscoveryStore, lookup_entries_pubsub)
     testStore.ServiceChange(ServiceDiscoveryEvent::Type::ServiceCreated, noLabelTestDescriptor);
 
     auto& lookup = testStore.GetLookup();
-    ASSERT_EQ(lookup.size(), 1);
+    ASSERT_EQ(lookup.size(), 1u);
     auto& entry = lookup[std::make_tuple(controllerTypeDataPublisher, "Topic1")];
     ASSERT_EQ(entry.noLabelCluster.nodes[0], noLabelTestDescriptor);
     ASSERT_EQ(entry.allCluster.nodes[0], noLabelTestDescriptor);
@@ -142,7 +142,7 @@ TEST_F(Test_SpecificDiscoveryStore, lookup_entries_pubsub)
     //refresh lookup and entry
     entry = lookup[std::make_tuple(controllerTypeDataPublisher, "Topic1")];
 
-    ASSERT_EQ(entry.noLabelCluster.nodes.size(), 1);
+    ASSERT_EQ(entry.noLabelCluster.nodes.size(), 1u);
     ASSERT_EQ(entry.noLabelCluster.nodes[0], noLabelTestDescriptor);
     auto& labelMapEntry = entry.labelMap[std::make_tuple("kA", "vA")];
     ASSERT_EQ(entry.labelMap[std::make_tuple("kA", "vA")].nodes[0], labelTestDescriptor);
@@ -156,13 +156,13 @@ TEST_F(Test_SpecificDiscoveryStore, lookup_entries_pubsub)
     //refresh lookup and entry
     entry = lookup[std::make_tuple(controllerTypeDataPublisher, "Topic1")];
 
-    ASSERT_EQ(entry.noLabelCluster.nodes.size(), 1);
+    ASSERT_EQ(entry.noLabelCluster.nodes.size(), 1u);
     ASSERT_EQ(entry.noLabelCluster.nodes[0], noLabelTestDescriptor);
 
     labelMapEntry = entry.labelMap[std::make_tuple("kA", "vA")];
-    ASSERT_EQ(entry.labelMap[std::make_tuple("kA", "vA")].nodes.size(), 0);
+    ASSERT_EQ(entry.labelMap[std::make_tuple("kA", "vA")].nodes.size(), 0u);
     ASSERT_EQ(entry.allCluster.nodes[0], noLabelTestDescriptor);
-    ASSERT_EQ(entry.allCluster.nodes.size(), 1);
+    ASSERT_EQ(entry.allCluster.nodes.size(), 1u);
 
     // check that old descriptor with no labels still exists notLabelMap
     ASSERT_EQ(entry.notLabelMap["kA"].nodes[0], noLabelTestDescriptor);
@@ -190,7 +190,7 @@ TEST_F(Test_SpecificDiscoveryStore, lookup_entries_rpc_client)
     testStore.ServiceChange(ServiceDiscoveryEvent::Type::ServiceCreated, noLabelTestDescriptor);
 
     auto& lookup = testStore.GetLookup();
-    ASSERT_EQ(lookup.size(), 1);
+    ASSERT_EQ(lookup.size(), 1u);
     auto& entry = lookup[std::make_tuple(controllerTypeRpcClient, "FunctionName1")];
     ASSERT_EQ(entry.noLabelCluster.nodes[0], noLabelTestDescriptor);
     ASSERT_EQ(entry.allCluster.nodes[0], noLabelTestDescriptor);
@@ -200,7 +200,7 @@ TEST_F(Test_SpecificDiscoveryStore, lookup_entries_rpc_client)
     //refresh lookup and entry
     entry = lookup[std::make_tuple(controllerTypeRpcClient, "FunctionName1")];
 
-    ASSERT_EQ(entry.noLabelCluster.nodes.size(), 1);
+    ASSERT_EQ(entry.noLabelCluster.nodes.size(), 1u);
     ASSERT_EQ(entry.noLabelCluster.nodes[0], noLabelTestDescriptor);
     auto& labelMapEntry = entry.labelMap[std::make_tuple("kA", "vA")];
     ASSERT_EQ(entry.labelMap[std::make_tuple("kA", "vA")].nodes[0], labelTestDescriptor);
@@ -214,13 +214,13 @@ TEST_F(Test_SpecificDiscoveryStore, lookup_entries_rpc_client)
     //refresh lookup and entry
     entry = lookup[std::make_tuple(controllerTypeRpcClient, "FunctionName1")];
 
-    ASSERT_EQ(entry.noLabelCluster.nodes.size(), 1);
+    ASSERT_EQ(entry.noLabelCluster.nodes.size(), 1u);
     ASSERT_EQ(entry.noLabelCluster.nodes[0], noLabelTestDescriptor);
 
     labelMapEntry = entry.labelMap[std::make_tuple("kA", "vA")];
-    ASSERT_EQ(entry.labelMap[std::make_tuple("kA", "vA")].nodes.size(), 0);
+    ASSERT_EQ(entry.labelMap[std::make_tuple("kA", "vA")].nodes.size(), 0u);
     ASSERT_EQ(entry.allCluster.nodes[0], noLabelTestDescriptor);
-    ASSERT_EQ(entry.allCluster.nodes.size(), 1);
+    ASSERT_EQ(entry.allCluster.nodes.size(), 1u);
 
     // check that old descriptor with no labels still exists notLabelMap
     ASSERT_EQ(entry.notLabelMap["kA"].nodes[0], noLabelTestDescriptor);
@@ -244,7 +244,7 @@ TEST_F(Test_SpecificDiscoveryStore, lookup_entries_rpc_server_internal)
     testStore.ServiceChange(ServiceDiscoveryEvent::Type::ServiceCreated, noLabelTestDescriptor);
 
     auto& lookup = testStore.GetLookup();
-    ASSERT_EQ(lookup.size(), 1);
+    ASSERT_EQ(lookup.size(), 1u);
     auto& entry = lookup[std::make_tuple(controllerTypeRpcServerInternal, uuid)];
     ASSERT_EQ(entry.noLabelCluster.nodes[0], noLabelTestDescriptor);
     ASSERT_EQ(entry.allCluster.nodes[0], noLabelTestDescriptor);
@@ -252,7 +252,7 @@ TEST_F(Test_SpecificDiscoveryStore, lookup_entries_rpc_server_internal)
     testStore.ServiceChange(ServiceDiscoveryEvent::Type::ServiceRemoved, noLabelTestDescriptor);
     //refresh lookup and entry
     entry = lookup[std::make_tuple(controllerTypeRpcServerInternal, uuid)];
-    ASSERT_EQ(entry.allCluster.nodes.size(), 0);
+    ASSERT_EQ(entry.allCluster.nodes.size(), 0u);
 }
 
 TEST_F(Test_SpecificDiscoveryStore, lookup_handler_then_service_discovery)

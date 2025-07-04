@@ -263,7 +263,7 @@ TEST(Test_SilSerDes, serdes_array)
 
     Deserializer deserializer;
     deserializer.Reset(serializer.ReleaseBuffer());
-    EXPECT_EQ(3, deserializer.BeginArray());
+    EXPECT_EQ(3u, deserializer.BeginArray());
     EXPECT_EQ(1, deserializer.Deserialize<int32_t>(32));
     EXPECT_EQ(2, deserializer.Deserialize<int32_t>(32));
     EXPECT_EQ(3, deserializer.Deserialize<int32_t>(32));
