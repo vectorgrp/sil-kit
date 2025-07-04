@@ -887,17 +887,17 @@ TEST_F(ITest_LinDynamicResponse, normal_master_dynamic_slave)
     auto&& slaveRecvFrames = linNodes.at(1)->_result.receivedFrames;
 
     // 2 frame states on master
-    ASSERT_EQ(masterRecvFrames.size(), 2);
+    ASSERT_EQ(masterRecvFrames.size(), 2u);
 
     // 1x RX_OK for id 34 on master
-    ASSERT_EQ(masterRecvFrames[LinFrameStatus::LIN_RX_OK].size(), 1);
+    ASSERT_EQ(masterRecvFrames[LinFrameStatus::LIN_RX_OK].size(), 1u);
     EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_RX_OK][0].id, 34);
     EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_RX_OK][0].checksumModel, LinChecksumModel::Enhanced);
     EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_RX_OK][0].dataLength, 6);
     EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_RX_OK][0].data, (std::array<uint8_t, 8>{3, 4, 3, 4, 3, 4, 3, 4}));
 
     // 5x TX_OK for id 16,17,18,19,60 on master
-    ASSERT_EQ(masterRecvFrames[LinFrameStatus::LIN_TX_OK].size(), 5);
+    ASSERT_EQ(masterRecvFrames[LinFrameStatus::LIN_TX_OK].size(), 5u);
     EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_TX_OK][0].id, 16);
     EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_TX_OK][0].checksumModel, LinChecksumModel::Classic);
     EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_TX_OK][0].dataLength, 6);
@@ -921,10 +921,10 @@ TEST_F(ITest_LinDynamicResponse, normal_master_dynamic_slave)
               (std::array<uint8_t, 8>{0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}));
 
     // 2 frame states on dynamic slave
-    ASSERT_EQ(slaveRecvFrames.size(), 2);
+    ASSERT_EQ(slaveRecvFrames.size(), 2u);
 
     // 5x RX_OK for id 16,17,18,19,60 on dynamic slave
-    ASSERT_EQ(slaveRecvFrames[LinFrameStatus::LIN_RX_OK].size(), 5);
+    ASSERT_EQ(slaveRecvFrames[LinFrameStatus::LIN_RX_OK].size(), 5u);
     EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_RX_OK][0].id, 16);
     EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_RX_OK][0].checksumModel, LinChecksumModel::Classic);
     EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_RX_OK][0].dataLength, 6);
@@ -948,7 +948,7 @@ TEST_F(ITest_LinDynamicResponse, normal_master_dynamic_slave)
               (std::array<uint8_t, 8>{0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}));
 
     // 1x TX_OK for id 34 on dynamic slave
-    ASSERT_EQ(slaveRecvFrames[LinFrameStatus::LIN_TX_OK].size(), 1);
+    ASSERT_EQ(slaveRecvFrames[LinFrameStatus::LIN_TX_OK].size(), 1u);
     EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_TX_OK][0].id, 34);
     EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_TX_OK][0].checksumModel, LinChecksumModel::Enhanced);
     EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_TX_OK][0].dataLength, 6);
@@ -1080,10 +1080,10 @@ TEST_F(ITest_LinDynamicResponse, normal_master_two_dynamic_slave_collision)
     auto&& slave2RecvFrames = linNodes.at(2)->_result.receivedFrames;
 
     // 2 frame states on master
-    ASSERT_EQ(masterRecvFrames.size(), 2);
+    ASSERT_EQ(masterRecvFrames.size(), 2u);
 
     // 2x RX_OK for id 34 on master (two repsonses from the two slaves, no collision detection for the trivial simulation)
-    ASSERT_EQ(masterRecvFrames[LinFrameStatus::LIN_RX_OK].size(), 2);
+    ASSERT_EQ(masterRecvFrames[LinFrameStatus::LIN_RX_OK].size(), 2u);
     EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_RX_OK][0].id, 34);
     EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_RX_OK][0].checksumModel, LinChecksumModel::Enhanced);
     EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_RX_OK][0].dataLength, 6);
@@ -1094,7 +1094,7 @@ TEST_F(ITest_LinDynamicResponse, normal_master_two_dynamic_slave_collision)
     EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_RX_OK][1].data, (std::array<uint8_t, 8>{3, 4, 3, 4, 3, 4, 3, 4}));
 
     // 5x TX_OK for id 16,17,18,19,60 on master
-    ASSERT_EQ(masterRecvFrames[LinFrameStatus::LIN_TX_OK].size(), 5);
+    ASSERT_EQ(masterRecvFrames[LinFrameStatus::LIN_TX_OK].size(), 5u);
     EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_TX_OK][0].id, 16);
     EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_TX_OK][0].checksumModel, LinChecksumModel::Classic);
     EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_TX_OK][0].dataLength, 6);
@@ -1118,10 +1118,10 @@ TEST_F(ITest_LinDynamicResponse, normal_master_two_dynamic_slave_collision)
               (std::array<uint8_t, 8>{0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}));
 
     // 2 frame states on dynamic slave 1
-    ASSERT_EQ(slave1RecvFrames.size(), 2);
+    ASSERT_EQ(slave1RecvFrames.size(), 2u);
 
     // 6x RX_OK for id 16,17,18,19,34,60 on dynamic slave 1
-    ASSERT_EQ(slave1RecvFrames[LinFrameStatus::LIN_RX_OK].size(), 6);
+    ASSERT_EQ(slave1RecvFrames[LinFrameStatus::LIN_RX_OK].size(), 6u);
     EXPECT_EQ(slave1RecvFrames[LinFrameStatus::LIN_RX_OK][0].id, 16);
     EXPECT_EQ(slave1RecvFrames[LinFrameStatus::LIN_RX_OK][0].checksumModel, LinChecksumModel::Classic);
     EXPECT_EQ(slave1RecvFrames[LinFrameStatus::LIN_RX_OK][0].dataLength, 6);
@@ -1149,17 +1149,17 @@ TEST_F(ITest_LinDynamicResponse, normal_master_two_dynamic_slave_collision)
               (std::array<uint8_t, 8>{0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}));
 
     // 1x TX_OK for id 34 on dynamic slave 1
-    ASSERT_EQ(slave1RecvFrames[LinFrameStatus::LIN_TX_OK].size(), 1);
+    ASSERT_EQ(slave1RecvFrames[LinFrameStatus::LIN_TX_OK].size(), 1u);
     EXPECT_EQ(slave1RecvFrames[LinFrameStatus::LIN_TX_OK][0].id, 34);
     EXPECT_EQ(slave1RecvFrames[LinFrameStatus::LIN_TX_OK][0].checksumModel, LinChecksumModel::Enhanced);
     EXPECT_EQ(slave1RecvFrames[LinFrameStatus::LIN_TX_OK][0].dataLength, 6);
     EXPECT_EQ(slave1RecvFrames[LinFrameStatus::LIN_TX_OK][0].data, (std::array<uint8_t, 8>{3, 4, 3, 4, 3, 4, 3, 4}));
 
     // 2 frame states on dynamic slave 2
-    ASSERT_EQ(slave2RecvFrames.size(), 2);
+    ASSERT_EQ(slave2RecvFrames.size(), 2u);
 
     // 6x RX_OK for id 16,17,18,19,34,60 on dynamic slave 2
-    ASSERT_EQ(slave2RecvFrames[LinFrameStatus::LIN_RX_OK].size(), 6);
+    ASSERT_EQ(slave2RecvFrames[LinFrameStatus::LIN_RX_OK].size(), 6u);
     EXPECT_EQ(slave2RecvFrames[LinFrameStatus::LIN_RX_OK][0].id, 16);
     EXPECT_EQ(slave2RecvFrames[LinFrameStatus::LIN_RX_OK][0].checksumModel, LinChecksumModel::Classic);
     EXPECT_EQ(slave2RecvFrames[LinFrameStatus::LIN_RX_OK][0].dataLength, 6);
@@ -1187,7 +1187,7 @@ TEST_F(ITest_LinDynamicResponse, normal_master_two_dynamic_slave_collision)
               (std::array<uint8_t, 8>{0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}));
 
     // 1x TX_OK for id 34 on dynamic slave 2
-    ASSERT_EQ(slave2RecvFrames[LinFrameStatus::LIN_TX_OK].size(), 1);
+    ASSERT_EQ(slave2RecvFrames[LinFrameStatus::LIN_TX_OK].size(), 1u);
     EXPECT_EQ(slave2RecvFrames[LinFrameStatus::LIN_TX_OK][0].id, 34);
     EXPECT_EQ(slave2RecvFrames[LinFrameStatus::LIN_TX_OK][0].checksumModel, LinChecksumModel::Enhanced);
     EXPECT_EQ(slave2RecvFrames[LinFrameStatus::LIN_TX_OK][0].dataLength, 6);
@@ -1321,17 +1321,17 @@ TEST_F(ITest_LinDynamicResponse, dynamic_master_normal_slave)
     auto&& slaveRecvFrames = linNodes.at(1)->_result.receivedFrames;
 
     // 2 frame states on master TX_OK,RX_OK
-    ASSERT_EQ(masterRecvFrames.size(), 2);
+    ASSERT_EQ(masterRecvFrames.size(), 2u);
 
     // 1x RX_OK for id 34 on dynamic master
-    ASSERT_EQ(masterRecvFrames[LinFrameStatus::LIN_RX_OK].size(), 1);
+    ASSERT_EQ(masterRecvFrames[LinFrameStatus::LIN_RX_OK].size(), 1u);
     EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_RX_OK][0].id, 34);
     EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_RX_OK][0].checksumModel, LinChecksumModel::Enhanced);
     EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_RX_OK][0].dataLength, 6);
     EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_RX_OK][0].data, (std::array<uint8_t, 8>{3, 4, 3, 4, 3, 4, 3, 4}));
 
     // 5x TX_OK for id 16,17,18,19,60 on dynamic master
-    ASSERT_EQ(masterRecvFrames[LinFrameStatus::LIN_TX_OK].size(), 5);
+    ASSERT_EQ(masterRecvFrames[LinFrameStatus::LIN_TX_OK].size(), 5u);
     EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_TX_OK][0].id, 16);
     EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_TX_OK][0].checksumModel, LinChecksumModel::Classic);
     EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_TX_OK][0].dataLength, 6);
@@ -1355,10 +1355,10 @@ TEST_F(ITest_LinDynamicResponse, dynamic_master_normal_slave)
               (std::array<uint8_t, 8>{0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}));
 
     // 3 frame states on slave RX_OK,RX_ERROR,TX_OK
-    ASSERT_EQ(slaveRecvFrames.size(), 3);
+    ASSERT_EQ(slaveRecvFrames.size(), 3u);
 
     // 2x RX_OK for id 16,60 on slave
-    ASSERT_EQ(slaveRecvFrames[LinFrameStatus::LIN_RX_OK].size(), 2);
+    ASSERT_EQ(slaveRecvFrames[LinFrameStatus::LIN_RX_OK].size(), 2u);
     EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_RX_OK][0].id, 16);
     EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_RX_OK][0].checksumModel, LinChecksumModel::Classic);
     EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_RX_OK][0].dataLength, 6);
@@ -1370,7 +1370,7 @@ TEST_F(ITest_LinDynamicResponse, dynamic_master_normal_slave)
               (std::array<uint8_t, 8>{0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}));
 
     // 2x RX_ERROR for id 18,19 on slave
-    ASSERT_EQ(slaveRecvFrames[LinFrameStatus::LIN_RX_ERROR].size(), 2);
+    ASSERT_EQ(slaveRecvFrames[LinFrameStatus::LIN_RX_ERROR].size(), 2u);
     EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_RX_ERROR][0].id, 18);
     EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_RX_ERROR][0].checksumModel, LinChecksumModel::Enhanced);
     EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_RX_ERROR][0].dataLength, 8);
@@ -1381,7 +1381,7 @@ TEST_F(ITest_LinDynamicResponse, dynamic_master_normal_slave)
     EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_RX_ERROR][1].data, (std::array<uint8_t, 8>{0}));
 
     // 1x TX_OK for id 34 on slave
-    ASSERT_EQ(slaveRecvFrames[LinFrameStatus::LIN_TX_OK].size(), 1);
+    ASSERT_EQ(slaveRecvFrames[LinFrameStatus::LIN_TX_OK].size(), 1u);
     EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_TX_OK][0].id, 34);
     EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_TX_OK][0].checksumModel, LinChecksumModel::Enhanced);
     EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_TX_OK][0].dataLength, 6);
@@ -1517,17 +1517,17 @@ TEST_F(ITest_LinDynamicResponse, dynamic_master_dynamic_slave)
     auto&& slaveRecvFrames = linNodes.at(1)->_result.receivedFrames;
 
     // 2 frame states on master TX_OK,RX_OK
-    ASSERT_EQ(masterRecvFrames.size(), 2);
+    ASSERT_EQ(masterRecvFrames.size(), 2u);
 
     // 1x RX_OK for id 34 on master
-    ASSERT_EQ(masterRecvFrames[LinFrameStatus::LIN_RX_OK].size(), 1);
+    ASSERT_EQ(masterRecvFrames[LinFrameStatus::LIN_RX_OK].size(), 1u);
     EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_RX_OK][0].id, 34);
     EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_RX_OK][0].checksumModel, LinChecksumModel::Enhanced);
     EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_RX_OK][0].dataLength, 6);
     EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_RX_OK][0].data, (std::array<uint8_t, 8>{3, 4, 3, 4, 3, 4, 3, 4}));
 
     // 5x TX_OK for id 16,17,18,19,60 on master
-    ASSERT_EQ(masterRecvFrames[LinFrameStatus::LIN_TX_OK].size(), 5);
+    ASSERT_EQ(masterRecvFrames[LinFrameStatus::LIN_TX_OK].size(), 5u);
     EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_TX_OK][0].id, 16);
     EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_TX_OK][0].checksumModel, LinChecksumModel::Classic);
     EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_TX_OK][0].dataLength, 6);
@@ -1551,10 +1551,10 @@ TEST_F(ITest_LinDynamicResponse, dynamic_master_dynamic_slave)
               (std::array<uint8_t, 8>{0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}));
 
     // 2 frame states on dynamic slave
-    ASSERT_EQ(slaveRecvFrames.size(), 2);
+    ASSERT_EQ(slaveRecvFrames.size(), 2u);
 
     // 5x RX_OK for id 16,17,18,19,60 on dynamic slave
-    ASSERT_EQ(slaveRecvFrames[LinFrameStatus::LIN_RX_OK].size(), 5);
+    ASSERT_EQ(slaveRecvFrames[LinFrameStatus::LIN_RX_OK].size(), 5u);
     EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_RX_OK][0].id, 16);
     EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_RX_OK][0].checksumModel, LinChecksumModel::Classic);
     EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_RX_OK][0].dataLength, 6);
@@ -1578,7 +1578,7 @@ TEST_F(ITest_LinDynamicResponse, dynamic_master_dynamic_slave)
               (std::array<uint8_t, 8>{0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}));
 
     // 1x TX_OK for id 34 on dynamic slave
-    ASSERT_EQ(slaveRecvFrames[LinFrameStatus::LIN_TX_OK].size(), 1);
+    ASSERT_EQ(slaveRecvFrames[LinFrameStatus::LIN_TX_OK].size(), 1u);
     EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_TX_OK][0].id, 34);
     EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_TX_OK][0].checksumModel, LinChecksumModel::Enhanced);
     EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_TX_OK][0].dataLength, 6);
@@ -1809,10 +1809,10 @@ TEST_F(ITest_LinDynamicResponse, normal_master_dynamic_slave_response_resets)
     auto&& slaveRecvFrames = linNodes.at(1)->_result.receivedFrames;
 
     // 1 frame states on master
-    ASSERT_EQ(masterRecvFrames.size(), 1);
+    ASSERT_EQ(masterRecvFrames.size(), 1u);
 
     // 1x RX_OK for id 34 on master
-    ASSERT_EQ(masterRecvFrames[LinFrameStatus::LIN_RX_OK].size(), 1);
+    ASSERT_EQ(masterRecvFrames[LinFrameStatus::LIN_RX_OK].size(), 1u);
     EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_RX_OK][0].id, 34);
     EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_RX_OK][0].checksumModel,
               SilKit::Services::Lin::LinChecksumModel::Enhanced);
@@ -1824,10 +1824,10 @@ TEST_F(ITest_LinDynamicResponse, normal_master_dynamic_slave_response_resets)
     // Trivial simulation does not produce the LIN_RX_NO_RESPONSE for frames that are _not_ responded to dynamically.
 
     // 1 frame states on dynamic slave
-    ASSERT_EQ(slaveRecvFrames.size(), 1);
+    ASSERT_EQ(slaveRecvFrames.size(), 1u);
 
     // 1x TX_OK for id 34 on dynamic slave
-    ASSERT_EQ(slaveRecvFrames[LinFrameStatus::LIN_TX_OK].size(), 1);
+    ASSERT_EQ(slaveRecvFrames[LinFrameStatus::LIN_TX_OK].size(), 1u);
     EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_TX_OK][0].id, 34);
     EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_TX_OK][0].checksumModel,
               SilKit::Services::Lin::LinChecksumModel::Enhanced);
@@ -1957,13 +1957,13 @@ TEST_F(ITest_LinDynamicResponse, normal_master_dynamic_slave_out_of_band_respons
     auto&& slaveDynamicRecvFrames = linNodes.at(2)->_result.receivedFrames;
 
     // 2 frame states on master
-    ASSERT_EQ(masterRecvFrames.size(), 0);
+    ASSERT_EQ(masterRecvFrames.size(), 0u);
 
     // 2 frame states on dynamic slave
-    ASSERT_EQ(slaveRecvFrames.size(), 1);
+    ASSERT_EQ(slaveRecvFrames.size(), 1u);
 
     // 1x TX_OK for id 34 on dynamic slave
-    ASSERT_EQ(slaveRecvFrames[LinFrameStatus::LIN_TX_OK].size(), 2);
+    ASSERT_EQ(slaveRecvFrames[LinFrameStatus::LIN_TX_OK].size(), 2u);
     EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_TX_OK][0].id, 34);
     EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_TX_OK][0].checksumModel, LinChecksumModel::Enhanced);
     EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_TX_OK][0].dataLength, 6);
@@ -1974,10 +1974,10 @@ TEST_F(ITest_LinDynamicResponse, normal_master_dynamic_slave_out_of_band_respons
     EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_TX_OK][1].data, (std::array<uint8_t, 8>{1, 2, 3, 4, 5, 6, 0, 0}));
 
     // 2 frame states on dynamic slave
-    ASSERT_EQ(slaveDynamicRecvFrames.size(), 1);
+    ASSERT_EQ(slaveDynamicRecvFrames.size(), 1u);
 
     // 1x TX_OK for id 34 on dynamic slave
-    ASSERT_EQ(slaveDynamicRecvFrames[LinFrameStatus::LIN_RX_OK].size(), 2);
+    ASSERT_EQ(slaveDynamicRecvFrames[LinFrameStatus::LIN_RX_OK].size(), 2u);
     EXPECT_EQ(slaveDynamicRecvFrames[LinFrameStatus::LIN_RX_OK][0].id, 34);
     EXPECT_EQ(slaveDynamicRecvFrames[LinFrameStatus::LIN_RX_OK][0].checksumModel, LinChecksumModel::Enhanced);
     EXPECT_EQ(slaveDynamicRecvFrames[LinFrameStatus::LIN_RX_OK][0].dataLength, 6);

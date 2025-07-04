@@ -516,10 +516,10 @@ TEST_F(ITest_Lin, sync_lin_simulation)
     auto&& slaveRecvFrames = linNodes.at(1)->_result.receivedFrames;
 
     // 5x acks with TX_OK for id 16,17,18,19,60 on master
-    EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_TX_OK].size(), 5);
+    EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_TX_OK].size(), 5u);
 
     // LIN_RX_OK for Id 16 and GoToSleep-Frame
-    EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_RX_OK].size(), 2);
+    EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_RX_OK].size(), 2u);
     // Id 16 is valid for slave and received with LIN_RX_OK and given data
     EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_RX_OK][0].id, 16);
     EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_RX_OK][0].data, (std::array<uint8_t, 8>{1, 6, 1, 6, 1, 6, 1, 6}));
@@ -530,12 +530,12 @@ TEST_F(ITest_Lin, sync_lin_simulation)
     // id 17: sent with LinFrameResponseMode::Unused and should not trigger the reception callback for slaves
     // id 18: LinChecksumModel does not match with master --> Receive with LIN_RX_ERROR
     // id 19: dataLength does not match with master --> Receive with LIN_RX_ERROR
-    EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_RX_ERROR].size(), 2);
+    EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_RX_ERROR].size(), 2u);
 
     // id 34: sent by slave (slave should see TX, master should see RX with given data)
-    EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_TX_OK].size(), 1);
+    EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_TX_OK].size(), 1u);
     EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_TX_OK][0].id, 34);
-    EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_RX_OK].size(), 1);
+    EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_RX_OK].size(), 1u);
     EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_RX_OK][0].id, 34);
     EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_RX_OK][0].data, (std::array<uint8_t, 8>{3, 4, 3, 4, 3, 4, 3, 4}));
 }

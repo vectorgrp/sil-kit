@@ -289,7 +289,7 @@ void CheckEmpty(std::shared_ptr<SilKit::Config::IParticipantConfiguration> confi
     auto c = *std::dynamic_pointer_cast<ParticipantConfiguration>(config);
     EXPECT_EQ(c.description, "");
     ASSERT_EQ(c.participantName, "");
-    ASSERT_EQ(c.logging.sinks.size(), 0);
+    ASSERT_EQ(c.logging.sinks.size(), 0u);
     ASSERT_EQ(c.schemaVersion, "");
 }
 

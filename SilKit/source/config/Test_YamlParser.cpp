@@ -216,9 +216,9 @@ TEST_F(Test_YamlParser, yaml_complete_configuration)
 
     EXPECT_EQ(config.participantName, "Node0");
 
-    EXPECT_EQ(config.canControllers.size(), 2);
+    EXPECT_EQ(config.canControllers.size(), 2u);
     EXPECT_EQ(config.canControllers.at(0).name, "CAN1");
-    EXPECT_TRUE(!config.canControllers.at(0).network.has_value());
+    ASSERT_FALSE(config.canControllers.at(0).network.has_value());
     EXPECT_EQ(config.canControllers.at(0).useTraceSinks.at(0), "Sink1");
     EXPECT_EQ(config.canControllers.at(0).replay.direction, Replay::Direction::Both);
     EXPECT_EQ(config.canControllers.at(0).replay.mdfChannel.channelName.value(), "MyTestChannel1");
@@ -228,56 +228,56 @@ TEST_F(Test_YamlParser, yaml_complete_configuration)
     EXPECT_EQ(config.canControllers.at(0).replay.mdfChannel.groupPath.value(), "path/to/myTestGroup1");
     EXPECT_EQ(config.canControllers.at(0).replay.mdfChannel.groupSource.value(), "MyTestGroup");
 
-    EXPECT_TRUE(config.canControllers.at(1).name == "MyCAN2");
-    EXPECT_TRUE(config.canControllers.at(1).network.has_value()
-                && config.canControllers.at(1).network.value() == "CAN2");
+    EXPECT_EQ(config.canControllers.at(1).name, "MyCAN2");
+    ASSERT_TRUE(config.canControllers.at(1).network.has_value());
+    EXPECT_EQ(config.canControllers.at(1).network.value(), "CAN2");
 
-    EXPECT_TRUE(config.linControllers.size() == 1);
-    EXPECT_TRUE(config.linControllers.at(0).name == "SimpleEcu1_LIN1");
-    EXPECT_TRUE(config.linControllers.at(0).network.has_value()
-                && config.linControllers.at(0).network.value() == "LIN1");
+    EXPECT_EQ(config.linControllers.size(), 1u);
+    EXPECT_EQ(config.linControllers.at(0).name, "SimpleEcu1_LIN1");
+    ASSERT_TRUE(config.linControllers.at(0).network.has_value());
+    EXPECT_EQ(config.linControllers.at(0).network.value(), "LIN1");
 
-    EXPECT_TRUE(config.flexrayControllers.size() == 1);
-    EXPECT_TRUE(config.flexrayControllers.at(0).name == "FlexRay1");
-    EXPECT_TRUE(!config.flexrayControllers.at(0).network.has_value());
+    EXPECT_EQ(config.flexrayControllers.size(), 1u);
+    EXPECT_EQ(config.flexrayControllers.at(0).name, "FlexRay1");
+    ASSERT_FALSE(config.flexrayControllers.at(0).network.has_value());
 
-    EXPECT_TRUE(config.dataPublishers.size() == 1);
-    EXPECT_TRUE(config.dataPublishers.at(0).name == "Publisher1");
-    EXPECT_TRUE(config.dataPublishers.at(0).topic.has_value()
-                && config.dataPublishers.at(0).topic.value() == "Temperature");
+    EXPECT_EQ(config.dataPublishers.size(), 1u);
+    EXPECT_EQ(config.dataPublishers.at(0).name, "Publisher1");
+    ASSERT_TRUE(config.dataPublishers.at(0).topic.has_value());
+    EXPECT_EQ(config.dataPublishers.at(0).topic.value(), "Temperature");
 
-    EXPECT_TRUE(config.rpcServers.size() == 1);
-    EXPECT_TRUE(config.rpcClients.size() == 1);
+    EXPECT_EQ(config.rpcServers.size(), 1u);
+    EXPECT_EQ(config.rpcClients.size(), 1u);
 
-    EXPECT_TRUE(config.logging.sinks.size() == 1);
-    EXPECT_TRUE(config.logging.sinks.at(0).type == Sink::Type::File);
-    EXPECT_TRUE(config.logging.sinks.at(0).level == SilKit::Services::Logging::Level::Critical);
-    EXPECT_TRUE(config.logging.sinks.at(0).logName == "MyLog1");
+    EXPECT_EQ(config.logging.sinks.size(), 1u);
+    EXPECT_EQ(config.logging.sinks.at(0).type, Sink::Type::File);
+    EXPECT_EQ(config.logging.sinks.at(0).level, SilKit::Services::Logging::Level::Critical);
+    EXPECT_EQ(config.logging.sinks.at(0).logName, "MyLog1");
 
-    EXPECT_TRUE(config.healthCheck.softResponseTimeout.value() == 500ms);
-    EXPECT_TRUE(config.healthCheck.hardResponseTimeout.value() == 5000ms);
+    EXPECT_EQ(config.healthCheck.softResponseTimeout.value(), 500ms);
+    EXPECT_EQ(config.healthCheck.hardResponseTimeout.value(), 5000ms);
 
-    EXPECT_TRUE(config.tracing.traceSinks.size() == 1);
-    EXPECT_TRUE(config.tracing.traceSinks.at(0).name == "Sink1");
-    EXPECT_TRUE(config.tracing.traceSinks.at(0).outputPath == "FlexrayDemo_txt0.mf4");
-    EXPECT_TRUE(config.tracing.traceSinks.at(0).type == TraceSink::Type::Mdf4File);
-    EXPECT_TRUE(config.tracing.traceSources.size() == 1);
-    EXPECT_TRUE(config.tracing.traceSources.at(0).name == "Source1");
-    EXPECT_TRUE(config.tracing.traceSources.at(0).inputPath == "path/to/Source1.mf4");
-    EXPECT_TRUE(config.tracing.traceSources.at(0).type == TraceSource::Type::Mdf4File);
+    EXPECT_EQ(config.tracing.traceSinks.size(), 1u);
+    EXPECT_EQ(config.tracing.traceSinks.at(0).name, "Sink1");
+    EXPECT_EQ(config.tracing.traceSinks.at(0).outputPath, "FlexrayDemo_txt0.mf4");
+    EXPECT_EQ(config.tracing.traceSinks.at(0).type, TraceSink::Type::Mdf4File);
+    EXPECT_EQ(config.tracing.traceSources.size(), 1u);
+    EXPECT_EQ(config.tracing.traceSources.at(0).name, "Source1");
+    EXPECT_EQ(config.tracing.traceSources.at(0).inputPath, "path/to/Source1.mf4");
+    EXPECT_EQ(config.tracing.traceSources.at(0).type, TraceSource::Type::Mdf4File);
 
-    EXPECT_TRUE(config.extensions.searchPathHints.size() == 2);
-    EXPECT_TRUE(config.extensions.searchPathHints.at(0) == "path/to/extensions1");
-    EXPECT_TRUE(config.extensions.searchPathHints.at(1) == "path/to/extensions2");
+    EXPECT_EQ(config.extensions.searchPathHints.size(), 2u);
+    EXPECT_EQ(config.extensions.searchPathHints.at(0), "path/to/extensions1");
+    EXPECT_EQ(config.extensions.searchPathHints.at(1), "path/to/extensions2");
 
-    EXPECT_TRUE(config.middleware.connectAttempts == 9);
-    EXPECT_TRUE(config.middleware.registryUri == "silkit://example.com:1234");
-    EXPECT_TRUE(config.middleware.enableDomainSockets == false);
-    EXPECT_TRUE(config.middleware.tcpQuickAck == true);
-    EXPECT_TRUE(config.middleware.tcpNoDelay == true);
-    EXPECT_TRUE(config.middleware.tcpReceiveBufferSize == 3456);
-    EXPECT_TRUE(config.middleware.tcpSendBufferSize == 3456);
-    EXPECT_FALSE(config.middleware.registryAsFallbackProxy);
+    EXPECT_EQ(config.middleware.connectAttempts, 9);
+    EXPECT_EQ(config.middleware.registryUri, "silkit://example.com:1234");
+    ASSERT_FALSE(config.middleware.enableDomainSockets);
+    ASSERT_TRUE(config.middleware.tcpQuickAck);
+    ASSERT_TRUE(config.middleware.tcpNoDelay);
+    EXPECT_EQ(config.middleware.tcpReceiveBufferSize, 3456);
+    EXPECT_EQ(config.middleware.tcpSendBufferSize, 3456);
+    ASSERT_FALSE(config.middleware.registryAsFallbackProxy);
 }
 
 TEST_F(Test_YamlParser, yaml_elements_in_random_order)
@@ -296,9 +296,9 @@ schemaVersion: 1347
     EXPECT_EQ(config.participantName, "Node0");
     EXPECT_EQ(config.description, "Order of elements is different");
     EXPECT_EQ(config.schemaVersion, "1347");
-    EXPECT_EQ(config.canControllers.size(), 1);
+    EXPECT_EQ(config.canControllers.size(), 1u);
     EXPECT_EQ(config.canControllers.at(0).name, "CAN1");
-    EXPECT_TRUE(!config.canControllers.at(0).network.has_value());
+    ASSERT_FALSE(config.canControllers.at(0).network.has_value());
 
 }
 const auto emptyConfiguration = R"raw(
@@ -318,7 +318,7 @@ ParticipantName: Node1
 TEST_F(Test_YamlParser, yaml_minimal_configuration)
 {
     auto config = Deserialize <ParticipantConfiguration>(minimalConfiguration);
-    EXPECT_TRUE(config.participantName == "Node1");
+    EXPECT_EQ(config.participantName, "Node1");
 }
 
 TEST_F(Test_YamlParser, yaml_native_type_conversions)
@@ -327,13 +327,13 @@ TEST_F(Test_YamlParser, yaml_native_type_conversions)
         uint16_t a{0x815};
         auto txt = Serialize<uint16_t>(a);
         uint16_t b = Deserialize<uint16_t>(txt);
-        EXPECT_TRUE(a == b);
+        EXPECT_EQ(a, b);
     }
     {
         std::vector<uint32_t> vec{0, 1, 3, 4, 5};
         auto txt = Serialize(vec);
         auto vec2 = Deserialize<std::vector<uint32_t>>(txt);
-        EXPECT_TRUE(vec == vec2);
+        EXPECT_EQ(vec, vec2);
     }
     {
         MdfChannel mdf;
@@ -345,7 +345,7 @@ TEST_F(Test_YamlParser, yaml_native_type_conversions)
         mdf.groupSource = "groupSource";
         auto yaml = Serialize(mdf);
         auto mdf2 = Deserialize<decltype(mdf)>(yaml);
-        EXPECT_TRUE(mdf == mdf2);
+        EXPECT_EQ(mdf, mdf2);
     }
     {
         Logging logger;
@@ -360,13 +360,13 @@ TEST_F(Test_YamlParser, yaml_native_type_conversions)
         logger.sinks.push_back(sink);
         auto txt = Serialize(logger);
         auto logger2 = Deserialize<decltype(logger)>(txt);
-        EXPECT_TRUE(logger == logger2);
+        EXPECT_EQ(logger, logger2);
     }
     {
         ParticipantConfiguration config{};
         auto txt = Serialize(config);
         auto config2 = Deserialize<decltype(config)>(txt);
-        EXPECT_TRUE(config == config2);
+        EXPECT_EQ(config, config2);
     }
 }
 
@@ -404,7 +404,7 @@ FlexRayControllers:
 TEST_F(Test_YamlParser, yaml_deprecated_FlexRayControllers_configuration)
 {
     const auto participantConfiguration = Deserialize<ParticipantConfiguration>(deprecatedFlexRayControllersConfiguration);
-    EXPECT_EQ(participantConfiguration.flexrayControllers.size(), 2);
+    EXPECT_EQ(participantConfiguration.flexrayControllers.size(), 2u);
     EXPECT_EQ(participantConfiguration.flexrayControllers[0].name, "FlexRay1");
     EXPECT_EQ(participantConfiguration.flexrayControllers[1].name, "FlexRay2");
 }
@@ -442,7 +442,7 @@ TEST_F(Test_YamlParser, yaml_deprecated_RpcClient_configuration)
 {
     auto participantConfiguration = Deserialize<ParticipantConfiguration>(rpcClientConfiguration);
 
-    ASSERT_EQ(participantConfiguration.rpcClients.size(), 3);
+    ASSERT_EQ(participantConfiguration.rpcClients.size(), 3u);
 
     EXPECT_EQ(participantConfiguration.rpcClients[0].name, "TheRpcClient1");
     ASSERT_TRUE(participantConfiguration.rpcClients[0].functionName.has_value());
@@ -520,7 +520,7 @@ TEST_F(Test_YamlParser, yaml_deprecated_RpcServer_configuration)
 
     auto participantConfiguration = Deserialize<ParticipantConfiguration>(rpcServerConfiguration);
 
-    ASSERT_EQ(participantConfiguration.rpcServers.size(), 3);
+    ASSERT_EQ(participantConfiguration.rpcServers.size(), 3u);
 
     EXPECT_EQ(participantConfiguration.rpcServers[0].name, "TheRpcServer1");
     ASSERT_TRUE(participantConfiguration.rpcServers[0].functionName.has_value());

@@ -206,7 +206,7 @@ TEST(Test_SynchronizedHandlers, add_remove_call_concurrently)
     caller.join();
 
     EXPECT_GE(called.load(), call_count);
-    EXPECT_EQ(handlerIds.size(), 0);
+    EXPECT_EQ(handlerIds.size(), 0u);
 }
 
 TEST(Test_SynchronizedHandlers, swap_transfers_handlers)
@@ -224,31 +224,31 @@ TEST(Test_SynchronizedHandlers, swap_transfers_handlers)
 
     ids.insert(b.Add([&callCounter] { ++callCounter; }));
 
-    ASSERT_EQ(ids.size(), 2);
+    ASSERT_EQ(ids.size(), 2u);
 
-    ASSERT_EQ(callCounter, 0);
+    ASSERT_EQ(callCounter, 0u);
     a.InvokeAll();
-    ASSERT_EQ(callCounter, 0);
+    ASSERT_EQ(callCounter, 0u);
     b.InvokeAll();
-    ASSERT_EQ(callCounter, 2);
+    ASSERT_EQ(callCounter, 2u);
 
     swap(a, b);
 
-    ASSERT_EQ(callCounter, 2);
+    ASSERT_EQ(callCounter, 2u);
     a.InvokeAll();
-    ASSERT_EQ(callCounter, 4);
+    ASSERT_EQ(callCounter, 4u);
     b.InvokeAll();
-    ASSERT_EQ(callCounter, 4);
+    ASSERT_EQ(callCounter, 4u);
 
     ids.insert(a.Add([&callCounter] { ++callCounter; }));
 
-    ASSERT_EQ(ids.size(), 3);
+    ASSERT_EQ(ids.size(), 3u);
 
-    ASSERT_EQ(callCounter, 4);
+    ASSERT_EQ(callCounter, 4u);
     a.InvokeAll();
-    ASSERT_EQ(callCounter, 7);
+    ASSERT_EQ(callCounter, 7u);
     b.InvokeAll();
-    ASSERT_EQ(callCounter, 7);
+    ASSERT_EQ(callCounter, 7u);
 }
 
 } // namespace

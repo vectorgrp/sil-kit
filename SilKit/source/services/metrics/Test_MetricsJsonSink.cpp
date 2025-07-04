@@ -114,7 +114,7 @@ TEST(Test_MetricsJsonSink, test_json_escaping_and_structure)
 
     // checks
 
-    ASSERT_EQ(nodes.size(), 3);
+    ASSERT_EQ(nodes.size(), 3u);
 
     ASSERT_EQ(nodes[0].timestamp, ts1);
     ASSERT_EQ(nodes[0].name, mn1);

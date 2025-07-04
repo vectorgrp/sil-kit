@@ -249,7 +249,7 @@ TEST(ITest_SimTask, blocking_during_simtask_does_not_affect_processing_order)
         s->CreateDataSubscriber("Sub", spec,
                                 [&received](SilKit::Services::PubSub::IDataSubscriber *,
                                             const SilKit::Services::PubSub::DataMessageEvent &event) {
-            ASSERT_EQ(event.data.size(), 8);
+            ASSERT_EQ(event.data.size(), 8u);
             const auto value = Counter::ExtractValue(event.data);
             ASSERT_GT(Counter::ExtractMajor(value), uint32_t{0})
                 << SilKit::Util::AsHexString(event.data).WithSeparator(":");
