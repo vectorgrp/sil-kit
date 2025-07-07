@@ -176,7 +176,7 @@ struct DataPublisher
     std::optional<std::vector<Label>> labels;
 
     //! \brief History length of a DataPublisher.
-    std::optional<size_t> history{0};
+    std::optional<size_t> history;
 
     std::vector<std::string> useTraceSinks;
     Replay replay;

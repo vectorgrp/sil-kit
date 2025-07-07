@@ -121,6 +121,7 @@ const std::set<std::string> schemaPaths_v1 = {
     "/DataPublishers/Replay/MdfChannel/GroupSource",
     "/DataPublishers/Replay/UseTraceSource",
     "/DataPublishers/Topic",
+    "/DataPublishers/History",
     "/DataPublishers/UseTraceSinks",
     "/DataSubscribers",
     "/DataSubscribers/Labels",

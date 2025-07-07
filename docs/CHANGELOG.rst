@@ -10,6 +10,11 @@ The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <
 [4.0.57] - UNRELEASED
 ---------------------
 
+Added
+~~~~~
+
+- The history length of a publisher can now be overridden in the participant configuration.
+
 
 [4.0.56] - 2025-05-19
 ---------------------

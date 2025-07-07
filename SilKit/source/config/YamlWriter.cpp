@@ -403,7 +403,7 @@ void YamlWriter::Write(const SilKit::Config::DataPublisher& obj)
     WriteKeyValue("Name", obj.name);
     OptionalWrite(obj.topic, "Topic");
     OptionalWrite(obj.labels, "Labels");
-    //OptionalWrite(obj.history, "History");
+    OptionalWrite(obj.history, "History");
     OptionalWrite(obj.useTraceSinks, "UseTraceSinks");
     OptionalWrite(obj.replay, "Replay");
 }

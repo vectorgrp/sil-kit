@@ -339,6 +339,7 @@ void YamlReader::Read(SilKit::Config::DataPublisher& obj)
     ReadKeyValue(obj.name, "Name");
     OptionalRead(obj.topic, "Topic");
     OptionalRead(obj.labels, "Labels");
+    OptionalRead(obj.history, "History");
     OptionalRead(obj.useTraceSinks, "UseTraceSinks");
     OptionalRead(obj.replay, "Replay");
 }
