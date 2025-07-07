@@ -499,6 +499,13 @@ auto SilKitToOatppMapper::CreateMetricsUpdateDto(const std::string& participantN
             dto->attributes->emplace_back(std::move(dataDto));
             break;
         }
+        case VSilKit::MetricKind::STRING_LIST:
+        {
+            auto dataDto = StringListDataDto::createShared();
+            setValues(dataDto);
+            dto->stringLists->emplace_back(std::move(dataDto));
+            break;
+        }
         default:
             assert(false);//DEBUG break
             break;

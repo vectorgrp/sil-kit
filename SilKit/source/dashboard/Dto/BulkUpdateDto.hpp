@@ -157,6 +157,14 @@ class StatisticDataDto : public MetricDataDto
     DTO_FIELD(Vector<Float64>, mv);
 };
 
+class StringListDataDto : public MetricDataDto
+{
+    DTO_INIT(StringListDataDto, MetricDataDto)
+
+    DTO_FIELD(Vector<String>, mv);
+};
+
+
 class MetricsUpdateDto : public oatpp::DTO
 {
     DTO_INIT(MetricsUpdateDto, oatpp::DTO)
@@ -164,6 +172,7 @@ class MetricsUpdateDto : public oatpp::DTO
     DTO_FIELD(Vector<Object<AttributeDataDto>>, attributes);
     DTO_FIELD(Vector<Object<CounterDataDto>>, counters);
     DTO_FIELD(Vector<Object<StatisticDataDto>>, statistics);
+    DTO_FIELD(Vector<Object<StringListDataDto>>, stringLists);
 
     static auto CreateEmpty() -> Wrapper
     {
@@ -171,6 +180,7 @@ class MetricsUpdateDto : public oatpp::DTO
         dto->attributes = decltype(dto->attributes)::createShared();
         dto->counters = decltype(dto->counters)::createShared();
         dto->statistics = decltype(dto->statistics)::createShared();
+        dto->stringLists = decltype(dto->stringLists)::createShared();
         return dto;
     }
 
