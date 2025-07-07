@@ -106,9 +106,9 @@ TEST_F(ITest_LabelMatching,  pubsub_multiple_controllers_same_topic_different_la
 
     _simTestHarness->Run(1s);
 
-    EXPECT_EQ(numReceivedSubCtrl1, 1);
-    EXPECT_EQ(numReceivedSubCtrl2, 1);
-    EXPECT_EQ(numReceivedSubCtrl3, 1);
+    EXPECT_EQ(numReceivedSubCtrl1, 1u);
+    EXPECT_EQ(numReceivedSubCtrl2, 1u);
+    EXPECT_EQ(numReceivedSubCtrl3, 1u);
 }
 
 TEST_F(ITest_LabelMatching, rpc_multiple_controllers_same_topic_different_labels)
@@ -190,11 +190,11 @@ TEST_F(ITest_LabelMatching, rpc_multiple_controllers_same_topic_different_labels
 
     _simTestHarness->Run(1s);
 
-    EXPECT_EQ(numReceivedCallResults1, 1);
+    EXPECT_EQ(numReceivedCallResults1, 1u);
 
-    EXPECT_EQ(numReceivedCalls1, 1);
-    EXPECT_EQ(numReceivedCalls2, 0);
-    EXPECT_EQ(numReceivedCalls3, 0);
+    EXPECT_EQ(numReceivedCalls1, 1u);
+    EXPECT_EQ(numReceivedCalls2, 0u);
+    EXPECT_EQ(numReceivedCalls3, 0u);
 }
 
 } //end namespace

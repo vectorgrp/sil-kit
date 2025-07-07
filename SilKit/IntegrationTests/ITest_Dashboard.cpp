@@ -273,7 +273,7 @@ void CheckTestResult(SilKit::Dashboard::TestResult actual, SilKit::Dashboard::Te
     for (auto i = expected.dataBySimulation.begin(); i != expected.dataBySimulation.end(); ++i)
     {
         auto simulationId = i->first;
-        ASSERT_EQ(actual.dataBySimulation.count(simulationId), 1) << "Simulation Ids differ!";
+        ASSERT_EQ(actual.dataBySimulation.count(simulationId), 1u) << "Simulation Ids differ!";
         CheckSimulationData(actual.dataBySimulation[simulationId], i->second, simulationId);
     }
 }

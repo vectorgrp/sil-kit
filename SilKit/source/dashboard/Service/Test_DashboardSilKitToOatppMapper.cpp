@@ -524,7 +524,7 @@ TEST_F(Test_DashboardSilKitToOatppMapper, CreateBulkSimulationDto)
 
     // Assert
     ASSERT_NE(dto->stopped.getPtr(), nullptr);
-    ASSERT_EQ(dto->stopped.getValue(0), *expectedBulkUpdate.stopped);
+    ASSERT_EQ(dto->stopped.getValue(0), static_cast<std::int64_t>(*expectedBulkUpdate.stopped));
 
     ASSERT_NE(dto->system.getPtr(), nullptr);
     ASSERT_NE(dto->system->statuses.getPtr(), nullptr);
@@ -540,7 +540,7 @@ TEST_F(Test_DashboardSilKitToOatppMapper, CreateBulkSimulationDto)
     ASSERT_EQ(dto->system->statuses[2]->state, expectedSystemState2);
 
     ASSERT_NE(dto->participants.getPtr(), nullptr);
-    ASSERT_EQ(dto->participants->size(), 3);
+    ASSERT_EQ(dto->participants->size(), 3u);
 
     oatpp::Object<BulkParticipantDto> aParticipantDto;
     oatpp::Object<BulkParticipantDto> bParticipantDto;
@@ -569,7 +569,7 @@ TEST_F(Test_DashboardSilKitToOatppMapper, CreateBulkSimulationDto)
 
     ASSERT_NE(aParticipantDto.getPtr(), nullptr);
     ASSERT_NE(aParticipantDto->statuses.getPtr(), nullptr);
-    ASSERT_EQ(aParticipantDto->statuses->size(), 2);
+    ASSERT_EQ(aParticipantDto->statuses->size(), 2u);
     ASSERT_NE(aParticipantDto->statuses[0].getPtr(), nullptr);
     ASSERT_EQ(aParticipantDto->statuses[0]->state, expectedAParticipantState0);
     ASSERT_EQ(aParticipantDto->statuses[0]->enterReason, aParticipantStatus0.enterReason);
@@ -580,40 +580,40 @@ TEST_F(Test_DashboardSilKitToOatppMapper, CreateBulkSimulationDto)
     ASSERT_EQ(aParticipantDto->statuses[1]->enterTime, to_ms(aParticipantStatus1.enterTime));
 
     ASSERT_NE(aParticipantDto->canControllers.getPtr(), nullptr);
-    ASSERT_EQ(aParticipantDto->canControllers->size(), 2);
+    ASSERT_EQ(aParticipantDto->canControllers->size(), 2u);
     ASSERT_NE(aParticipantDto->canControllers[0].getPtr(), nullptr);
     ASSERT_NE(aParticipantDto->canControllers[1].getPtr(), nullptr);
 
     ASSERT_NE(aParticipantDto->ethernetControllers.getPtr(), nullptr);
-    ASSERT_EQ(aParticipantDto->ethernetControllers->size(), 2);
+    ASSERT_EQ(aParticipantDto->ethernetControllers->size(), 2u);
     ASSERT_NE(aParticipantDto->ethernetControllers[0].getPtr(), nullptr);
     ASSERT_NE(aParticipantDto->ethernetControllers[1].getPtr(), nullptr);
 
     ASSERT_NE(aParticipantDto->flexrayControllers.getPtr(), nullptr);
-    ASSERT_EQ(aParticipantDto->flexrayControllers->size(), 2);
+    ASSERT_EQ(aParticipantDto->flexrayControllers->size(), 2u);
     ASSERT_NE(aParticipantDto->flexrayControllers[0].getPtr(), nullptr);
     ASSERT_NE(aParticipantDto->flexrayControllers[1].getPtr(), nullptr);
 
     ASSERT_NE(aParticipantDto->linControllers.getPtr(), nullptr);
-    ASSERT_EQ(aParticipantDto->linControllers->size(), 2);
+    ASSERT_EQ(aParticipantDto->linControllers->size(), 2u);
     ASSERT_NE(aParticipantDto->linControllers[0].getPtr(), nullptr);
     ASSERT_NE(aParticipantDto->linControllers[1].getPtr(), nullptr);
 
     ASSERT_NE(aParticipantDto->canNetworks.getPtr(), nullptr);
-    ASSERT_EQ(aParticipantDto->canNetworks->size(), 2);
+    ASSERT_EQ(aParticipantDto->canNetworks->size(), 2u);
 
     ASSERT_NE(aParticipantDto->ethernetNetworks.getPtr(), nullptr);
-    ASSERT_EQ(aParticipantDto->ethernetNetworks->size(), 2);
+    ASSERT_EQ(aParticipantDto->ethernetNetworks->size(), 2u);
 
     ASSERT_NE(aParticipantDto->flexrayNetworks.getPtr(), nullptr);
-    ASSERT_EQ(aParticipantDto->flexrayNetworks->size(), 2);
+    ASSERT_EQ(aParticipantDto->flexrayNetworks->size(), 2u);
 
     ASSERT_NE(aParticipantDto->linNetworks.getPtr(), nullptr);
-    ASSERT_EQ(aParticipantDto->linNetworks->size(), 2);
+    ASSERT_EQ(aParticipantDto->linNetworks->size(), 2u);
 
     ASSERT_NE(bParticipantDto.getPtr(), nullptr);
     ASSERT_NE(bParticipantDto->statuses.getPtr(), nullptr);
-    ASSERT_EQ(bParticipantDto->statuses->size(), 1);
+    ASSERT_EQ(bParticipantDto->statuses->size(), 1u);
     ASSERT_NE(bParticipantDto->statuses[0].getPtr(), nullptr);
     ASSERT_EQ(bParticipantDto->statuses[0]->state, expectedBParticipantState);
     ASSERT_EQ(bParticipantDto->statuses[0]->enterReason, bParticipantStatus.enterReason);
