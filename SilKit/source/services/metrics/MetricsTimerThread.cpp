@@ -10,7 +10,6 @@ namespace VSilKit {
 
 MetricsTimerThread::MetricsTimerThread(std::chrono::seconds interval, std::function<void()> callback)
     : _callback{std::move(callback)}
-    , _interval{interval}
     , _thread{MakeThread(interval)}
 {
 }
