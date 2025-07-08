@@ -42,9 +42,14 @@ VAsioRegistry::VAsioRegistry(std::shared_ptr<SilKit::Config::IParticipantConfigu
                   REGISTRY_PARTICIPANT_ID,
                   &_timeProvider,
                   version}
+    , _registryEventListener{registryEventListener}
 {
     _logger = std::make_unique<Services::Logging::Logger>(REGISTRY_PARTICIPANT_NAME, _vasioConfig->logging);
-    SetRegistryEventListener(registryEventListener);
+
+    if (_registryEventListener != nullptr)
+    {
+        _registryEventListener->OnLoggerInternalCreated(_logger.get());
+    }
 
     dynamic_cast<VSilKit::MetricsProcessor&>(*_metricsProcessor).SetLogger(*_logger);
     dynamic_cast<VSilKit::MetricsManager&>(*_metricsManager).SetLogger(*_logger);
@@ -62,15 +67,6 @@ VAsioRegistry::VAsioRegistry(std::shared_ptr<SilKit::Config::IParticipantConfigu
     _serviceDescriptor.SetServiceId(_localEndpointId++);
 
     SetupMetrics();
-}
-
-void VAsioRegistry::SetRegistryEventListener(IRegistryEventListener* listener)
-{
-    _registryEventListener = listener;
-    if (_registryEventListener != nullptr)
-    {
-        _registryEventListener->OnLoggerInternalCreated(_logger.get());
-    }
 }
 
 auto VAsioRegistry::StartListening(const std::string& listenUri) -> std::string

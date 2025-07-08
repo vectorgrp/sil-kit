@@ -150,7 +150,9 @@ void VAsioPeer::SendSilKitMsgInternal(std::vector<uint8_t> blob)
 
         lock.unlock();
 
-        _ioContext->Dispatch([this] { StartAsyncWrite(); });
+        _ioContext->Dispatch([this] {
+            StartAsyncWrite();
+            });
     }
 }
 
