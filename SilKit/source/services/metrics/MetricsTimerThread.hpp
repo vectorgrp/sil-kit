@@ -20,7 +20,6 @@ class MetricsTimerThread : public IMetricsTimerThread
     std::promise<void> _done;
     std::function<void()> _callback;
 
-    std::chrono::seconds _interval;
     std::thread _thread;
 public:
     explicit MetricsTimerThread(std::chrono::seconds interval, std::function<void()> callback);
