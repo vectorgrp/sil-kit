@@ -35,8 +35,6 @@ inline auto ToString(MetricName stringList) -> std::string
 
 struct IMetricsManager
 {
-
-
     virtual ~IMetricsManager() = default;
     virtual void SubmitUpdates() = 0;
     virtual auto GetCounter(MetricName name) -> ICounterMetric* = 0;
