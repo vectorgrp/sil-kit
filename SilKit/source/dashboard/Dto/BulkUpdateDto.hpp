@@ -133,7 +133,7 @@ class MetricDataDto : public oatpp::DTO
 
     DTO_FIELD(Int64, ts);
     DTO_FIELD(String, pn);
-    DTO_FIELD(Vector<String>, mn);
+    DTO_FIELD(Vector<String>, mn) = Vector<String>::createShared();
 };
 
 class AttributeDataDto : public MetricDataDto
@@ -154,14 +154,14 @@ class StatisticDataDto : public MetricDataDto
 {
     DTO_INIT(StatisticDataDto, MetricDataDto)
 
-    DTO_FIELD(Vector<Float64>, mv);
+    DTO_FIELD(Vector<Float64>, mv) = Vector<Float64>::createShared();
 };
 
 class StringListDataDto : public MetricDataDto
 {
     DTO_INIT(StringListDataDto, MetricDataDto)
 
-    DTO_FIELD(Vector<String>, mv);
+    DTO_FIELD(Vector<String>, mv) = Vector<String>::createShared();
 };
 
 
@@ -169,21 +169,10 @@ class MetricsUpdateDto : public oatpp::DTO
 {
     DTO_INIT(MetricsUpdateDto, oatpp::DTO)
 
-    DTO_FIELD(Vector<Object<AttributeDataDto>>, attributes);
-    DTO_FIELD(Vector<Object<CounterDataDto>>, counters);
-    DTO_FIELD(Vector<Object<StatisticDataDto>>, statistics);
-    DTO_FIELD(Vector<Object<StringListDataDto>>, stringLists);
-
-    static auto CreateEmpty() -> Wrapper
-    {
-        auto dto = createShared();
-        dto->attributes = decltype(dto->attributes)::createShared();
-        dto->counters = decltype(dto->counters)::createShared();
-        dto->statistics = decltype(dto->statistics)::createShared();
-        dto->stringLists = decltype(dto->stringLists)::createShared();
-        return dto;
-    }
-
+    DTO_FIELD(Vector<Object<AttributeDataDto>>, attributes) = Vector<Object<AttributeDataDto>>::createShared();
+    DTO_FIELD(Vector<Object<CounterDataDto>>, counters) = Vector<Object<CounterDataDto>>::createShared();
+    DTO_FIELD(Vector<Object<StatisticDataDto>>, statistics) = Vector<Object<StatisticDataDto>>::createShared();
+    DTO_FIELD(Vector<Object<StringListDataDto>>, stringLists) = Vector<Object<StringListDataDto>>::createShared();
 };
 } // namespace Dashboard
 } // namespace SilKit

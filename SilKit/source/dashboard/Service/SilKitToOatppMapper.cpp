@@ -449,7 +449,8 @@ auto SilKitToOatppMapper::CreateBulkSimulationDto(const DashboardBulkUpdate& bul
 auto SilKitToOatppMapper::CreateMetricsUpdateDto(const std::string& participantName, const VSilKit::MetricsUpdate& metricsUpdate)
     -> Object<MetricsUpdateDto>
 {
-    auto dto = MetricsUpdateDto::CreateEmpty();
+    auto objectMapper = oatpp::parser::json::mapping::ObjectMapper::createShared();       
+    auto dto = MetricsUpdateDto::createShared();
     for (const auto& metricData : metricsUpdate.metrics)
     {
         auto setValues = [&](auto&& dataDto, auto&& metricData) {
@@ -466,6 +467,7 @@ auto SilKitToOatppMapper::CreateMetricsUpdateDto(const std::string& participantN
         {
             auto dataDto = CounterDataDto::createShared();
             setValues(dataDto, metricData);
+            dataDto->mv = std::stoi(metricData.value);
             dto->counters->emplace_back(std::move(dataDto));
             break;
         }
@@ -473,6 +475,7 @@ auto SilKitToOatppMapper::CreateMetricsUpdateDto(const std::string& participantN
         {
             auto dataDto = StatisticDataDto::createShared();
             setValues(dataDto, metricData);
+            dataDto->mv = objectMapper->readFromString<oatpp::Vector<oatpp::Float64>>(metricData.value);
             dto->statistics->emplace_back(std::move(dataDto));
             break;
         }
@@ -480,6 +483,7 @@ auto SilKitToOatppMapper::CreateMetricsUpdateDto(const std::string& participantN
         {
             auto dataDto = AttributeDataDto::createShared();
             setValues(dataDto, metricData);
+            dataDto->mv = metricData.value;
             dto->attributes->emplace_back(std::move(dataDto));
             break;
         }
@@ -487,6 +491,7 @@ auto SilKitToOatppMapper::CreateMetricsUpdateDto(const std::string& participantN
         {
             auto dataDto = StringListDataDto::createShared();
             setValues(dataDto, metricData);
+            dataDto->mv = objectMapper->readFromString<oatpp::Vector<oatpp::String>>(metricData.value);
             dto->stringLists->emplace_back(std::move(dataDto));
             break;
         }
