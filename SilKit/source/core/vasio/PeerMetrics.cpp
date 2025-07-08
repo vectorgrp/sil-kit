@@ -42,6 +42,11 @@ void NoMetrics::TxQueueSize(size_t)
 void PeerMetrics::InitializeMetrics(const std::string& localParticipantName, VSilKit::IMetricsManager* manager,
                                     SilKit::Core::IVAsioPeer* peer)
 {
+    if(_initialized)
+    {
+        return;
+    }
+
     auto&& remoteParticipant = peer->GetServiceDescriptor().GetParticipantName();
     auto&& simulationName = peer->GetSimulationName();
 

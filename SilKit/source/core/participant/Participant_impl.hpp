@@ -2040,7 +2040,10 @@ auto Participant<SilKitConnectionT>::MakeTimerThread() -> std::unique_ptr<IMetri
     }
 
     return std::make_unique<VSilKit::MetricsTimerThread>(_participantConfig.experimental.metrics.updateInterval,
-        [this] { ExecuteDeferred([this] { GetMetricsManager()->SubmitUpdates(); }); });
+        [this] { ExecuteDeferred([this] {
+            GetMetricsManager()->SubmitUpdates();
+            });
+        });
 }
 
 

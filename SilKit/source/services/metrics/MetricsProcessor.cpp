@@ -35,10 +35,8 @@ void MetricsProcessor::SetSinks(std::vector<std::unique_ptr<IMetricsSink>> sinks
 
     for (const auto &sink : _sinks)
     {
-        for (const auto &pair : _updateCache)
+        for (const auto &[origin, update] : _updateCache)
         {
-            const auto &origin = pair.first;
-            const auto &update = pair.second;
             sink->Process(origin, update);
         }
     }
