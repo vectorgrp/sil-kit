@@ -1,23 +1,6 @@
-/* Copyright (c) 2022 Vector Informatik GmbH
- 
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
-
-The above copyright notice and this permission notice shall be
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
+// SPDX-FileCopyrightText: 2022-2025 Vector Informatik GmbH
+//
+// SPDX-License-Identifier: MIT
 
 #include "SilKitToOatppMapper.hpp"
 
@@ -469,10 +452,11 @@ auto SilKitToOatppMapper::CreateMetricsUpdateDto(const std::string& participantN
     auto dto = MetricsUpdateDto::CreateEmpty();
     for (const auto& metricData : metricsUpdate.metrics)
     {
-        auto setValues = [&](auto&& dataDto) {
+        auto setValues = [&](auto&& dataDto, auto&& metricData) {
             dataDto->pn = participantName;
             dataDto->ts = metricData.timestamp;
-            std::copy(metricData.nameList.begin(), metricData.nameList.end(), std::back_inserter(*dataDto->mn));
+            auto&& nameList = SilKit::Util::SplitString(metricData.name, "/");
+            std::copy(nameList.begin(), nameList.end(), std::back_inserter(*dataDto->mn));
 
         };
 
@@ -481,33 +465,33 @@ auto SilKitToOatppMapper::CreateMetricsUpdateDto(const std::string& participantN
         case VSilKit::MetricKind::COUNTER:
         {
             auto dataDto = CounterDataDto::createShared();
-            setValues(dataDto);
+            setValues(dataDto, metricData);
             dto->counters->emplace_back(std::move(dataDto));
             break;
         }
         case VSilKit::MetricKind::STATISTIC:
         {
             auto dataDto = StatisticDataDto::createShared();
-            setValues(dataDto);
+            setValues(dataDto, metricData);
             dto->statistics->emplace_back(std::move(dataDto));
             break;
         }
         case VSilKit::MetricKind::ATTRIBUTE:
         {
             auto dataDto = AttributeDataDto::createShared();
-            setValues(dataDto);
+            setValues(dataDto, metricData);
             dto->attributes->emplace_back(std::move(dataDto));
             break;
         }
         case VSilKit::MetricKind::STRING_LIST:
         {
             auto dataDto = StringListDataDto::createShared();
-            setValues(dataDto);
+            setValues(dataDto, metricData);
             dto->stringLists->emplace_back(std::move(dataDto));
             break;
         }
         default:
-            assert(false);//DEBUG break
+            throw SilKit::SilKitError{"MetricsUpdate unknown MetricKind"};
             break;
         }
     }

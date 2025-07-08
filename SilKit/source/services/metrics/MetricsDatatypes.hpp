@@ -33,7 +33,6 @@ struct MetricData
     std::string name;
     MetricKind kind;
     std::string value;
-    std::vector<std::string> nameList; // supersedes name
 };
 
 

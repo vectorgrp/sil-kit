@@ -10,16 +10,12 @@ namespace VSilKit {
 
 inline auto operator<<(SilKit::Core::MessageBuffer& buffer, const MetricData& msg) -> SilKit::Core::MessageBuffer&
 {
-    return buffer << msg.timestamp << msg.name << msg.kind << msg.value << msg.nameList;
+    return buffer << msg.timestamp << msg.name << msg.kind << msg.value;
 }
 
 inline auto operator>>(SilKit::Core::MessageBuffer& buffer, MetricData& out) -> SilKit::Core::MessageBuffer&
 {
     buffer >> out.timestamp >> out.name >> out.kind >> out.value;
-    if (buffer.RemainingBytesLeft() > 0)
-    {
-        buffer >> out.nameList;
-    }
     return buffer;
 }
 
