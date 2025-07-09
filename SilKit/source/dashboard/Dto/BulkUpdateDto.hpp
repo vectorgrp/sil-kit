@@ -38,7 +38,7 @@ class BulkDataServiceDto : public oatpp::DTO
     DTO_FIELD(UInt64, id);
     DTO_FIELD(String, name);
     DTO_FIELD(String, networkName);
-    DTO_FIELD(Object<DataSpecDto>, spec);
+    DTO_FIELD(Object<DataSpecDto>, spec) = Object<DataSpecDto>::createShared();
 };
 
 class BulkRpcServiceDto : public oatpp::DTO
@@ -48,7 +48,7 @@ class BulkRpcServiceDto : public oatpp::DTO
     DTO_FIELD(UInt64, id);
     DTO_FIELD(String, name);
     DTO_FIELD(String, networkName);
-    DTO_FIELD(Object<RpcSpecDto>, spec);
+    DTO_FIELD(Object<RpcSpecDto>, spec) = Object<RpcSpecDto>::createShared();
 };
 
 class BulkServiceInternalDto : public oatpp::DTO
@@ -93,7 +93,7 @@ class BulkSimulationDto : public oatpp::DTO
     DTO_INIT(BulkSimulationDto, DTO)
 
     DTO_FIELD(Int64, stopped);
-    DTO_FIELD(Object<BulkSystemDto>, system);
+    DTO_FIELD(Object<BulkSystemDto>, system) = Object<BulkSystemDto>::createShared();
     DTO_FIELD(Vector<Object<BulkParticipantDto>>, participants) = Vector<Object<BulkParticipantDto>>::createShared();
 };
 
