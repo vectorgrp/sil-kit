@@ -6,7 +6,7 @@
 
 namespace VSilKit
 {
-void NoMetrics::InitializeMetrics(const std::string&, VSilKit::IMetricsManager*, SilKit::Core::IVAsioPeer*)
+void NoMetrics::InitializeMetrics(VSilKit::IMetricsManager*, SilKit::Core::IVAsioPeer*)
 {
     // no op
 }
@@ -39,7 +39,7 @@ void NoMetrics::TxQueueSize(size_t)
 
 // PeerMetrics
 
-void PeerMetrics::InitializeMetrics(const std::string& localParticipantName, VSilKit::IMetricsManager* manager,
+void PeerMetrics::InitializeMetrics(VSilKit::IMetricsManager* manager,
                                     SilKit::Core::IVAsioPeer* peer)
 {
     if(_initialized)
@@ -50,11 +50,11 @@ void PeerMetrics::InitializeMetrics(const std::string& localParticipantName, VSi
     auto&& remoteParticipant = peer->GetServiceDescriptor().GetParticipantName();
     auto&& simulationName = peer->GetSimulationName();
 
-    _txBytes = manager->GetCounter({"Peer", simulationName, localParticipantName, remoteParticipant, "tx_bytes"});
-    _txPackets = manager->GetCounter({"Peer", simulationName, localParticipantName, remoteParticipant, "tx_packets"});
-    _rxBytes = manager->GetCounter({"Peer", simulationName, localParticipantName, remoteParticipant, "rx_bytes"});
-    _rxPackets = manager->GetCounter({"Peer", simulationName, localParticipantName, remoteParticipant, "rx_packets"});
-    _txQueueSize = manager->GetCounter({"Peer", simulationName, localParticipantName, remoteParticipant, "tx_queue_size"});
+    _txBytes = manager->GetCounter({"Peer", simulationName, remoteParticipant, "tx_bytes"});
+    _txPackets = manager->GetCounter({"Peer", simulationName, remoteParticipant, "tx_packets"});
+    _rxBytes = manager->GetCounter({"Peer", simulationName, remoteParticipant, "rx_bytes"});
+    _rxPackets = manager->GetCounter({"Peer", simulationName, remoteParticipant, "rx_packets"});
+    _txQueueSize = manager->GetCounter({"Peer", simulationName, remoteParticipant, "tx_queue_size"});
 
     _initialized = true;
 }

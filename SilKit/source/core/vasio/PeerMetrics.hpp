@@ -14,7 +14,7 @@ namespace VSilKit {
 class NoMetrics final : public IPeerMetrics
 {
 public:
-    void InitializeMetrics(const std::string&, VSilKit::IMetricsManager* , SilKit::Core::IVAsioPeer* ) override;
+    void InitializeMetrics(VSilKit::IMetricsManager*, SilKit::Core::IVAsioPeer*) override;
     void RxPacket() override;
     void TxPacket() override;
     void RxBytes(const SilKit::Core::SerializedMessage& ) override;
@@ -35,7 +35,7 @@ private:
     VSilKit::ICounterMetric* _txQueueSize{nullptr};
 
 public:
-    void InitializeMetrics(const std::string& localParticipantName, VSilKit::IMetricsManager* manager,
+    void InitializeMetrics(VSilKit::IMetricsManager* manager,
                            SilKit::Core::IVAsioPeer* peer) override;
     void RxPacket() override;
     void TxPacket() override;

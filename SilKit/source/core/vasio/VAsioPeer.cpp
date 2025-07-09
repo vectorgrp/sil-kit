@@ -372,7 +372,7 @@ void VAsioPeer::EnableAggregation()
 
 void VAsioPeer::InitializeMetrics(const std::string& localParticipantName, VSilKit::IMetricsManager* manager)
 {
-    _peerMetrics->InitializeMetrics(localParticipantName, manager, this);
+    _peerMetrics->InitializeMetrics(manager, this);
 }
 
 } // namespace Core
