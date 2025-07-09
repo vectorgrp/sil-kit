@@ -406,7 +406,7 @@ auto SilKitToOatppMapper::CreateBulkSimulationDto(const DashboardBulkUpdate& bul
         auto it = nameToBulkParticipantDto.find(name);
         if (it == nameToBulkParticipantDto.end())
         {
-            auto dto = BulkParticipantDto::CreateEmpty();
+            auto dto = BulkParticipantDto::createShared();
             dto->name = name;
 
             it = nameToBulkParticipantDto.emplace(name, std::move(dto)).first;
