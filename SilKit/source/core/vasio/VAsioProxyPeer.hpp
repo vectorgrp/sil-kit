@@ -61,7 +61,7 @@ public: // IVAsioPeer
     void SetSimulationName(const std::string& simulationName) override;
     auto GetSimulationName() const -> const std::string& override;
 
-    void InitializeMetrics(const std::string&, VSilKit::IMetricsManager*) override { }
+    void InitializeMetrics(VSilKit::IMetricsManager*) override { }
 
 public: // IVAsioPeer (IServiceEndpoint)
     void SetServiceDescriptor(const ServiceDescriptor& serviceDescriptor) override;

@@ -195,7 +195,7 @@ struct DummyVAsioPeerBase : IVAsioPeer
         throw MethodNotImplementedError{};
     }
 
-    void InitializeMetrics(const std::string&, VSilKit::IMetricsManager*) override
+    void InitializeMetrics(VSilKit::IMetricsManager*) override
     {
         throw MethodNotImplementedError{};
     }
