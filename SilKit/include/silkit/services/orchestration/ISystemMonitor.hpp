@@ -33,6 +33,9 @@ namespace Orchestration {
 class ISystemMonitor
 {
 public:
+    virtual ~ISystemMonitor() = default;
+
+public:
     /*! Callback type to indicate that a \ref SilKit::Services::Orchestration::SystemState has been received.
     *  Cf., \ref AddSystemStateHandler(SystemStateHandler);
     */
