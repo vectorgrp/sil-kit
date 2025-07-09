@@ -467,7 +467,7 @@ auto SilKitToOatppMapper::CreateMetricsUpdateDto(const std::string& participantN
         {
             auto dataDto = CounterDataDto::createShared();
             setValues(dataDto, metricData);
-            dataDto->mv = std::stoi(metricData.value);
+            dataDto->mv = objectMapper->readFromString<oatpp::Int64>(metricData.value);
             dto->counters->emplace_back(std::move(dataDto));
             break;
         }
@@ -480,19 +480,12 @@ auto SilKitToOatppMapper::CreateMetricsUpdateDto(const std::string& participantN
             break;
         }
         case VSilKit::MetricKind::ATTRIBUTE:
+        case VSilKit::MetricKind::STRING_LIST:
         {
             auto dataDto = AttributeDataDto::createShared();
             setValues(dataDto, metricData);
             dataDto->mv = metricData.value;
             dto->attributes->emplace_back(std::move(dataDto));
-            break;
-        }
-        case VSilKit::MetricKind::STRING_LIST:
-        {
-            auto dataDto = StringListDataDto::createShared();
-            setValues(dataDto, metricData);
-            dataDto->mv = objectMapper->readFromString<oatpp::Vector<oatpp::String>>(metricData.value);
-            dto->stringLists->emplace_back(std::move(dataDto));
             break;
         }
         default:

@@ -14,7 +14,7 @@ namespace VSilKit {
 struct IPeerMetrics
 {
     virtual ~IPeerMetrics() = default;
-    virtual void InitializeMetrics(const std::string& localParticipantName, VSilKit::IMetricsManager* manager,
+    virtual void InitializeMetrics(VSilKit::IMetricsManager* manager,
                                    SilKit::Core::IVAsioPeer* peer) = 0;
     virtual void RxPacket() = 0;
     virtual void TxPacket() = 0;

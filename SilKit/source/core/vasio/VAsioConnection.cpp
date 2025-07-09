@@ -1087,7 +1087,7 @@ void VAsioConnection::AssociateParticipantNameAndPeer(const std::string& simulat
     metric->Add(peer->GetLocalAddress());
 
     metric =
-        _metricsManager->GetStringList({"Peer", simulationName, participantName, "LocalEndpoint", "RemoteEndpoint"});
+        _metricsManager->GetStringList({"Peer", simulationName, participantName, "RemoteEndpoint"});
     metric->Add(peer->GetRemoteAddress());
 
     peer->InitializeMetrics(_participantName, _metricsManager);

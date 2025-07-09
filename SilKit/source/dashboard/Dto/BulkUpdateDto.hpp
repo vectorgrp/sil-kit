@@ -157,13 +157,6 @@ class StatisticDataDto : public MetricDataDto
     DTO_FIELD(Vector<Float64>, mv) = Vector<Float64>::createShared();
 };
 
-class StringListDataDto : public MetricDataDto
-{
-    DTO_INIT(StringListDataDto, MetricDataDto)
-
-    DTO_FIELD(Vector<String>, mv) = Vector<String>::createShared();
-};
-
 
 class MetricsUpdateDto : public oatpp::DTO
 {
@@ -172,7 +165,6 @@ class MetricsUpdateDto : public oatpp::DTO
     DTO_FIELD(Vector<Object<AttributeDataDto>>, attributes) = Vector<Object<AttributeDataDto>>::createShared();
     DTO_FIELD(Vector<Object<CounterDataDto>>, counters) = Vector<Object<CounterDataDto>>::createShared();
     DTO_FIELD(Vector<Object<StatisticDataDto>>, statistics) = Vector<Object<StatisticDataDto>>::createShared();
-    DTO_FIELD(Vector<Object<StringListDataDto>>, stringLists) = Vector<Object<StringListDataDto>>::createShared();
 };
 } // namespace Dashboard
 } // namespace SilKit
