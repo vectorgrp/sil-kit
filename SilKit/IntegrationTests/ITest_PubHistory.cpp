@@ -199,7 +199,7 @@ TEST_F(ITest_PubHistory, history_api_one_conf_zero)
     a.SetupParticipant(HISTORY_ZERO_PART_CONF, "A", registryUri);
     a.SetupPublisher(PUBLISHER_NAME, spec, 1);
 
-    // publish a single message, which will be historized and picked up by the subscriber
+    // publish a single message, which will not be historized
     a.publisher->Publish(SilKit::Util::ToSpan(data));
 
     SubscriberParticipant b;
@@ -218,7 +218,7 @@ TEST_F(ITest_PubHistory, history_api_zero_conf_zero)
     a.SetupParticipant(HISTORY_ZERO_PART_CONF, "A", registryUri);
     a.SetupPublisher(PUBLISHER_NAME, spec, 0);
 
-    // publish a single message, which will be historized and picked up by the subscriber
+    // publish a single message, which will not be historized
     a.publisher->Publish(SilKit::Util::ToSpan(data));
 
     SubscriberParticipant b;
