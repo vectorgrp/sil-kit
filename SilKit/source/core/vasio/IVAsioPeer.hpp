@@ -65,7 +65,7 @@ public:
 
     virtual void EnableAggregation() = 0;
 
-    virtual void InitializeMetrics(const std::string& localParticipantName, VSilKit::IMetricsManager*) = 0;
+    virtual void InitializeMetrics( VSilKit::IMetricsManager*) = 0;
 };
 
 

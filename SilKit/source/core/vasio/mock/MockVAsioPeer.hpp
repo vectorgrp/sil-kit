@@ -40,7 +40,7 @@ struct MockVAsioPeer : IVAsioPeer
     MOCK_METHOD(void, EnableAggregation, (), (override));
     MOCK_METHOD(void, SetProtocolVersion, (ProtocolVersion), (override));
     MOCK_METHOD(ProtocolVersion, GetProtocolVersion, (), (const, override));
-    MOCK_METHOD(void, InitializeMetrics, (const std::string&, VSilKit::IMetricsManager*), (override));
+    MOCK_METHOD(void, InitializeMetrics, (VSilKit::IMetricsManager*), (override));
 
     // IServiceEndpoint (via IVAsioPeer)
 

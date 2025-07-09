@@ -370,7 +370,7 @@ void VAsioPeer::EnableAggregation()
     SilKit::Services::Logging::Debug(_logger, "VAsioPeer: Enable aggregation for peer {}", _info.participantName);
 }
 
-void VAsioPeer::InitializeMetrics(const std::string& localParticipantName, VSilKit::IMetricsManager* manager)
+void VAsioPeer::InitializeMetrics(VSilKit::IMetricsManager* manager)
 {
     _peerMetrics->InitializeMetrics(manager, this);
 }
