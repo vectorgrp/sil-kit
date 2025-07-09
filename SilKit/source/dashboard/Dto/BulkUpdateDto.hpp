@@ -18,14 +18,8 @@ class BulkSystemDto : public oatpp::DTO
 {
     DTO_INIT(BulkSystemDto, DTO)
 
-    DTO_FIELD(Vector<Object<SystemStatusDto>>, statuses);
+    DTO_FIELD(Vector<Object<SystemStatusDto>>, statuses) = Vector<Object<SystemStatusDto>>::createShared();
 
-    static auto CreateEmpty() -> Wrapper
-    {
-        auto dto = createShared();
-        dto->statuses = Vector<Object<SystemStatusDto>>::createShared();
-        return dto;
-    }
 };
 
 class BulkControllerDto : public oatpp::DTO
@@ -116,15 +110,7 @@ class BulkSimulationDto : public oatpp::DTO
 
     DTO_FIELD(Int64, stopped);
     DTO_FIELD(Object<BulkSystemDto>, system);
-    DTO_FIELD(Vector<Object<BulkParticipantDto>>, participants);
-
-    static auto CreateEmpty() -> Wrapper
-    {
-        auto dto = createShared();
-        dto->system = BulkSystemDto::CreateEmpty();
-        dto->participants = Vector<Object<BulkParticipantDto>>::createShared();
-        return dto;
-    }
+    DTO_FIELD(Vector<Object<BulkParticipantDto>>, participants) = Vector<Object<BulkParticipantDto>>::createShared();
 };
 
 class MetricDataDto : public oatpp::DTO

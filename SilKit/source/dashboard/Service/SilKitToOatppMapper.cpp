@@ -388,7 +388,7 @@ auto SilKitToOatppMapper::CreateBulkServiceInternalDto(const ServiceDescriptor& 
 
 auto SilKitToOatppMapper::CreateBulkSimulationDto(const DashboardBulkUpdate& bulkUpdate) -> Object<BulkSimulationDto>
 {
-    auto bulkSimulationDto = BulkSimulationDto::CreateEmpty();
+    auto bulkSimulationDto = BulkSimulationDto::createShared();
 
     if (bulkUpdate.stopped)
     {

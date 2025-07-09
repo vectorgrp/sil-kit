@@ -694,7 +694,7 @@ TEST_F(Test_DashboardSilKitEventHandler, OnServiceDiscoveryEvent_Invalid_Ignore)
 TEST_F(Test_DashboardSilKitEventHandler, OnBulkUpdate)
 {
     constexpr uint64_t expectedSimulationId{123};
-    const auto expectedBulkSimulationDto = SilKit::Dashboard::BulkSimulationDto::CreateEmpty();
+    const auto expectedBulkSimulationDto = SilKit::Dashboard::BulkSimulationDto::createShared();
 
     // Arrange
     const auto service = CreateService();
