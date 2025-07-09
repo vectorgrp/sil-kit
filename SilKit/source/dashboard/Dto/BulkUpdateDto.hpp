@@ -66,42 +66,26 @@ class BulkParticipantDto : public oatpp::DTO
     DTO_INIT(BulkParticipantDto, DTO)
 
     DTO_FIELD(String, name);
-    DTO_FIELD(Vector<Object<ParticipantStatusDto>>, statuses);
-    DTO_FIELD(Vector<Object<BulkControllerDto>>, canControllers);
-    DTO_FIELD(Vector<Object<BulkControllerDto>>, ethernetControllers);
-    DTO_FIELD(Vector<Object<BulkControllerDto>>, flexrayControllers);
-    DTO_FIELD(Vector<Object<BulkControllerDto>>, linControllers);
-    DTO_FIELD(Vector<Object<BulkDataServiceDto>>, dataPublishers);
-    DTO_FIELD(Vector<Object<BulkDataServiceDto>>, dataSubscribers);
-    DTO_FIELD(Vector<Object<BulkServiceInternalDto>>, dataSubscriberInternals);
-    DTO_FIELD(Vector<Object<BulkRpcServiceDto>>, rpcClients);
-    DTO_FIELD(Vector<Object<BulkRpcServiceDto>>, rpcServers);
-    DTO_FIELD(Vector<Object<BulkServiceInternalDto>>, rpcServerInternals);
-    DTO_FIELD(Vector<String>, canNetworks);
-    DTO_FIELD(Vector<String>, ethernetNetworks);
-    DTO_FIELD(Vector<String>, flexrayNetworks);
-    DTO_FIELD(Vector<String>, linNetworks);
+    DTO_FIELD(Vector<Object<ParticipantStatusDto>>, statuses) = Vector<Object<ParticipantStatusDto>>::createShared();
+    DTO_FIELD(Vector<Object<BulkControllerDto>>, canControllers) = Vector<Object<BulkControllerDto>>::createShared();
+    DTO_FIELD(Vector<Object<BulkControllerDto>>,
+              ethernetControllers) = Vector<Object<BulkControllerDto>>::createShared();
+    DTO_FIELD(Vector<Object<BulkControllerDto>>,
+              flexrayControllers) = Vector<Object<BulkControllerDto>>::createShared();
+    DTO_FIELD(Vector<Object<BulkControllerDto>>, linControllers) = Vector<Object<BulkControllerDto>>::createShared();
+    DTO_FIELD(Vector<Object<BulkDataServiceDto>>, dataPublishers) = Vector<Object<BulkDataServiceDto>>::createShared();
+    DTO_FIELD(Vector<Object<BulkDataServiceDto>>, dataSubscribers) = Vector<Object<BulkDataServiceDto>>::createShared();
+    DTO_FIELD(Vector<Object<BulkServiceInternalDto>>,
+              dataSubscriberInternals) = Vector<Object<BulkServiceInternalDto>>::createShared();
+    DTO_FIELD(Vector<Object<BulkRpcServiceDto>>, rpcClients) = Vector<Object<BulkRpcServiceDto>>::createShared();
+    DTO_FIELD(Vector<Object<BulkRpcServiceDto>>, rpcServers) = Vector<Object<BulkRpcServiceDto>>::createShared();
+    DTO_FIELD(Vector<Object<BulkServiceInternalDto>>,
+              rpcServerInternals) = Vector<Object<BulkServiceInternalDto>>::createShared();
+    DTO_FIELD(Vector<String>, canNetworks) = Vector<String>::createShared();
+    DTO_FIELD(Vector<String>, ethernetNetworks) = Vector<String>::createShared();
+    DTO_FIELD(Vector<String>, flexrayNetworks) = Vector<String>::createShared();
+    DTO_FIELD(Vector<String>, linNetworks) = Vector<String>::createShared();
 
-    static auto CreateEmpty() -> Wrapper
-    {
-        auto dto = createShared();
-        dto->statuses = Vector<Object<ParticipantStatusDto>>::createShared();
-        dto->canControllers = Vector<Object<BulkControllerDto>>::createShared();
-        dto->ethernetControllers = Vector<Object<BulkControllerDto>>::createShared();
-        dto->flexrayControllers = Vector<Object<BulkControllerDto>>::createShared();
-        dto->linControllers = Vector<Object<BulkControllerDto>>::createShared();
-        dto->dataPublishers = Vector<Object<BulkDataServiceDto>>::createShared();
-        dto->dataSubscribers = Vector<Object<BulkDataServiceDto>>::createShared();
-        dto->dataSubscriberInternals = Vector<Object<BulkServiceInternalDto>>::createShared();
-        dto->rpcClients = Vector<Object<BulkRpcServiceDto>>::createShared();
-        dto->rpcServers = Vector<Object<BulkRpcServiceDto>>::createShared();
-        dto->rpcServerInternals = Vector<Object<BulkServiceInternalDto>>::createShared();
-        dto->canNetworks = Vector<String>::createShared();
-        dto->ethernetNetworks = Vector<String>::createShared();
-        dto->flexrayNetworks = Vector<String>::createShared();
-        dto->linNetworks = Vector<String>::createShared();
-        return dto;
-    }
 };
 
 class BulkSimulationDto : public oatpp::DTO
