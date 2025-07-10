@@ -46,7 +46,7 @@ public:
 
     inline void Init(SilKit::Services::Lin::LinControllerConfig config) override;
 
-    inline auto Status() const noexcept -> SilKit::Services::Lin::LinControllerStatus override;
+    inline auto Status() const -> SilKit::Services::Lin::LinControllerStatus override;
 
     inline void SendFrame(SilKit::Services::Lin::LinFrame frame,
                           SilKit::Services::Lin::LinFrameResponseType responseType) override;
@@ -188,12 +188,12 @@ void LinController::Init(SilKit::Services::Lin::LinControllerConfig config)
     ThrowOnError(returnCode);
 }
 
-auto LinController::Status() const noexcept -> SilKit::Services::Lin::LinControllerStatus
+auto LinController::Status() const -> SilKit::Services::Lin::LinControllerStatus
 {
     SilKit_LinControllerStatus status{SilKit_LinControllerStatus_Unknown};
 
     const auto returnCode = SilKit_LinController_Status(_linController, &status);
-    ThrowOnError(returnCode); // will call std::terminate on exception (! because noexcept !)
+    ThrowOnError(returnCode);
 
     return static_cast<SilKit::Services::Lin::LinControllerStatus>(status);
 }

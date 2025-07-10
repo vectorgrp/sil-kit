@@ -96,7 +96,7 @@ public:
     virtual void Init(LinControllerConfig config) = 0;
 
     //! \brief Get the current status of the LIN Controller, i.e., Operational or Sleep.
-    virtual auto Status() const noexcept -> LinControllerStatus = 0;
+    virtual auto Status() const -> LinControllerStatus = 0;
 
     /*! \brief Initiate a LIN data transfer of a given LinFrameResponseType (AUTOSAR LIN master interface)
      *
