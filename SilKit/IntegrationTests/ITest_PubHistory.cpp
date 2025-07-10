@@ -37,6 +37,12 @@ DataPublishers:
     History: 1
 )";
 
+constexpr const char* HISTORY_TWO_PART_CONF = R"(
+DataPublishers:
+  - Name: P
+    History: 2
+)";
+
 struct Participant
 {
     std::shared_ptr<SilKit::Config::IParticipantConfiguration> configuration;
@@ -226,6 +232,16 @@ TEST_F(ITest_PubHistory, history_api_zero_conf_zero)
     b.SetupSubscriber("S", spec);
 
     ExpectNoMessage(b, 2s);
+}
+
+TEST_F(ITest_PubHistory, history_api_zero_conf_two_error)
+{
+    const auto registry = SilKit::Vendor::Vector::CreateSilKitRegistry(registryConfiguration);
+    const auto registryUri = registry->StartListening("silkit://127.0.0.1:0");
+
+    PublisherParticipant a;
+    a.SetupParticipant(HISTORY_TWO_PART_CONF, "A", registryUri);
+    EXPECT_THROW(a.SetupPublisher(PUBLISHER_NAME, spec, 0), SilKit::ConfigurationError);
 }
 
 } //end namespace
