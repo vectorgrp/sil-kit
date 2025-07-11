@@ -511,8 +511,14 @@ auto Participant<SilKitConnectionT>::CreateDataPublisher(const std::string& cano
     SilKit::Config::DataPublisher controllerConfig =
         GetConfigByControllerName(_participantConfig.dataPublishers, canonicalName);
     UpdateOptionalConfigValue(canonicalName, controllerConfig.topic, dataSpec.Topic());
+    UpdateOptionalConfigValue(canonicalName, controllerConfig.history, history);
     UpdateOptionalConfigValue(canonicalName, controllerConfig.labels,
                               SilKit::Config::V1::Label::VectorFromPublicApi(dataSpec.Labels()));
+
+    if (controllerConfig.history.value() > 1)
+    {
+        throw SilKit::ConfigurationError("DataPublishers do not support history > 1.");
+    }
 
     auto sortedConfigLabels = controllerConfig.labels.value();
     std::sort(sortedConfigLabels.begin(), sortedConfigLabels.end(),
@@ -536,7 +542,7 @@ auto Participant<SilKitConnectionT>::CreateDataPublisher(const std::string& cano
         controllerConfig, network, std::move(supplementalData), true, true, &_timeProvider, configuredDataNodeSpec,
         network, controllerConfig);
 
-    _connection.SetHistoryLengthForLink(history, controller);
+    _connection.SetHistoryLengthForLink(controllerConfig.history.value(), controller);
 
     if (GetLogger()->GetLogLevel() <= Logging::Level::Trace)
     {

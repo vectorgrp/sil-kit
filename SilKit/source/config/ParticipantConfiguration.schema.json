@@ -439,6 +439,12 @@
         "$ref": "#/definitions/MatchingLabel"
       }
     },
+    "History": {
+      "type": "integer",
+      "description": "Override the history length (must be `0` or `1`)",
+      "minimum": 0,
+      "maximum": 1
+    },
     "Logging": {
       "type": "object",
       "description": "Configures the properties of the SIL Kit Logging Service",
@@ -601,6 +607,9 @@
           },
           "Labels": {
             "$ref": "#/definitions/Labels"
+          },
+          "History": {
+            "$ref": "#/definitions/History"
           }
         },
         "additionalProperties": false,

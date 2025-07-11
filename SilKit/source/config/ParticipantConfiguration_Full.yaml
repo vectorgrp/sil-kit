@@ -117,6 +117,7 @@ FlexrayControllers:
 DataPublishers:
 - Name: Publisher1
   Topic: Temperature
+  History: 1
   Labels:
     - Key: A
       Value: B
