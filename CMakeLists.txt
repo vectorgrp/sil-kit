@@ -1,25 +1,8 @@
-# Copyright (c) 2022 Vector Informatik GmbH
-# 
-# Permission is hereby granted, free of charge, to any person obtaining
-# a copy of this software and associated documentation files (the
-# "Software"), to deal in the Software without restriction, including
-# without limitation the rights to use, copy, modify, merge, publish,
-# distribute, sublicense, and/or sell copies of the Software, and to
-# permit persons to whom the Software is furnished to do so, subject to
-# the following conditions:
-# 
-# The above copyright notice and this permission notice shall be
-# included in all copies or substantial portions of the Software.
-# 
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-# NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-# LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-# OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-# WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+# PDX-FileCopyrightText: 2025 Vector Informatik GmbH
+#
+# SPDX-License-Identifier: MIT
 
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.13)
 
 ###############################################################################
 # Project definition
@@ -45,6 +28,7 @@ option(SILKIT_LINK_LLD "Use the lld linker for SIL KIT" OFF)
 option(SILKIT_USE_SYSTEM_LIBRARIES "Use the libraries installed on the system for third party dependencies" OFF)
 option(SILKIT_BUILD_REPRODUCIBLE "Creates a reproducible build by ommiting timestamps/unique build ids" ON)
 option(SILKIT_BUILD_LINUX_PACKAGE "Creates SIL Kit builds suitable for package managers in Linux Distributions (.deb)" OFF)
+option(SILKIT_BUILD_LTO "Build with link time optimizations" ON)
 
 if(SILKIT_BUILD_LINUX_PACKAGE)
 
@@ -58,7 +42,6 @@ if(SILKIT_BUILD_LINUX_PACKAGE)
     add_subdirectory(docs/man)
 
 endif()
-
 
 set(CMAKE_C_VISIBILITY_PRESET hidden)
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
