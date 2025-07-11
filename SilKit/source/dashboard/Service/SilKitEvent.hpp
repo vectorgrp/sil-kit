@@ -23,6 +23,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "silkit/services/orchestration/OrchestrationDatatypes.hpp"
 #include "ServiceDatatypes.hpp"
+#include "MetricsDatatypes.hpp"
 
 namespace SilKit {
 namespace Dashboard {
@@ -51,7 +52,8 @@ enum class SilKitEventType
     OnSystemStateChanged,
     OnParticipantStatusChanged,
     OnServiceDiscoveryEvent,
-    OnSimulationEnd
+    OnSimulationEnd,
+    OnMetricUpdate,
 };
 
 template <SilKitEventType id>
@@ -69,12 +71,15 @@ struct SilKitEventTrait;
     { \
     };
 
+using MetricsUpdatePair = std::pair<std::string, VSilKit::MetricsUpdate>;
+
 SILKIT_EVENT(SimulationStart, OnSimulationStart)
 SILKIT_EVENT(Services::Orchestration::ParticipantConnectionInformation, OnParticipantConnected)
 SILKIT_EVENT(Services::Orchestration::SystemState, OnSystemStateChanged)
 SILKIT_EVENT(Services::Orchestration::ParticipantStatus, OnParticipantStatusChanged)
 SILKIT_EVENT(ServiceData, OnServiceDiscoveryEvent)
 SILKIT_EVENT(SimulationEnd, OnSimulationEnd)
+SILKIT_EVENT(MetricsUpdatePair, OnMetricUpdate)
 
 #undef SILKIT_EVENT
 
@@ -181,6 +186,11 @@ public:
     auto GetSimulationEnd() const -> const SimulationEnd&
     {
         return Get<SimulationEnd>();
+    }
+
+    auto GetMetricsUpdate() const -> const std::pair<std::string, VSilKit::MetricsUpdate>&
+    {
+        return Get<std::pair<std::string, VSilKit::MetricsUpdate>>();
     }
 
 private:

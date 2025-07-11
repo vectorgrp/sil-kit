@@ -106,6 +106,10 @@ add_library(O_SilKit_Core_VAsio OBJECT
 
     RingBuffer.hpp
     RingBuffer.cpp
+
+    IPeerMetrics.hpp
+    PeerMetrics.hpp
+    PeerMetrics.cpp
 )
 
 target_link_libraries(O_SilKit_Core_VAsio
@@ -118,7 +122,6 @@ target_include_directories(O_SilKit_Core_VAsio
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/io
 )
-
 
 if (SILKIT_BUILD_TESTS)
     add_library(I_SilKit_Core_VAsio_Testing INTERFACE
@@ -168,7 +171,7 @@ add_silkit_test_to_executable(SilKitUnitTests SOURCES io/Test_AsioIoContext.cpp 
 add_silkit_test_to_executable(SilKitUnitTests SOURCES io/util/Test_TracingMacrosDetails.cpp LIBS S_SilKitImpl)
 
 add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_ConnectPeer.cpp LIBS S_SilKitImpl I_SilKit_Services_Logging_Testing I_SilKit_Core_VAsio_Testing)
-add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_ConnectKnownParticipants.cpp LIBS S_SilKitImpl I_SilKit_Services_Logging_Testing I_SilKit_Core_VAsio_Testing)
+add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_ConnectKnownParticipants.cpp LIBS S_SilKitImpl I_SilKit_Services_Logging_Testing I_SilKit_Core_VAsio_Testing I_SilKit_Core_VAsio_Testing)
 
 # Testing interoperability between different protocol versions requires testing on a higher level:
 # We instantiate a complete Participant<VAsioConnection> with a specific version

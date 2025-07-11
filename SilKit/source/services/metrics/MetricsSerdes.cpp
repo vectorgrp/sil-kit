@@ -15,7 +15,8 @@ inline auto operator<<(SilKit::Core::MessageBuffer& buffer, const MetricData& ms
 
 inline auto operator>>(SilKit::Core::MessageBuffer& buffer, MetricData& out) -> SilKit::Core::MessageBuffer&
 {
-    return buffer >> out.timestamp >> out.name >> out.kind >> out.value;
+    buffer >> out.timestamp >> out.name >> out.kind >> out.value;
+    return buffer;
 }
 
 

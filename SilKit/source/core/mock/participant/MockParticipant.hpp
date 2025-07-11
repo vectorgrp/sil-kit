@@ -62,6 +62,8 @@ namespace Core {
 namespace Tests {
 
 using SilKit::Util::HandlerId;
+using VSilKit::MetricName;
+using VSilKit::ToString;
 
 using SilKit::Services::Logging::MockLogger;
 
@@ -200,10 +202,17 @@ class DummyMetricsManager : public IMetricsManager
         void Add(const std::string&) override {}
     };
 
-public:
-    auto GetCounter(const std::string& name) -> ICounterMetric* override
+    class DummyAttributeMetric : public IAttributeMetric
     {
-        auto it = _counters.find(name);
+    public:
+        void Clear() override {}
+        void Add(const std::string&) override {}
+    };
+
+public:
+    auto GetCounter(MetricName name) -> ICounterMetric* override
+    {
+        auto it = _counters.find(ToString(name));
         if (it == _counters.end())
         {
             it = _counters.emplace().first;
@@ -211,9 +220,9 @@ public:
         return &(it->second);
     }
 
-    auto GetStatistic(const std::string& name) -> IStatisticMetric* override
+    auto GetStatistic(MetricName name) -> IStatisticMetric* override
     {
-        auto it = _statistics.find(name);
+        auto it = _statistics.find(ToString(name));
         if (it == _statistics.end())
         {
             it = _statistics.emplace().first;
@@ -221,12 +230,22 @@ public:
         return &(it->second);
     }
 
-    auto GetStringList(const std::string& name) -> IStringListMetric* override
+    auto GetStringList(MetricName name) -> IStringListMetric* override
     {
-        auto it = _stringLists.find(name);
+        auto it = _stringLists.find(ToString(name));
         if (it == _stringLists.end())
         {
             it = _stringLists.emplace().first;
+        }
+        return &(it->second);
+    }
+
+    auto GetAttribute(MetricName name) -> IAttributeMetric* override
+    {
+        auto it = _attributes.find(ToString(name));
+        if (it == _attributes.end())
+        {
+            it = _attributes.emplace().first;
         }
         return &(it->second);
     }
@@ -237,6 +256,7 @@ private:
     std::unordered_map<std::string, DummyCounterMetric> _counters;
     std::unordered_map<std::string, DummyStatisticMetric> _statistics;
     std::unordered_map<std::string, DummyStringListMetric> _stringLists;
+    std::unordered_map<std::string, DummyAttributeMetric> _attributes;
 };
 
 class DummyParticipant : public IParticipantInternal

@@ -1,27 +1,11 @@
-/* Copyright (c) 2022 Vector Informatik GmbH
- 
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
-
-The above copyright notice and this permission notice shall be
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
+// SPDX-FileCopyrightText: 2022-2025 Vector Informatik GmbH
+//
+// SPDX-License-Identifier: MIT
 
 #include "SilKitToOatppMapper.hpp"
 
 #include "YamlParser.hpp"
+#include "StringHelpers.hpp"
 
 #include <string>
 #include <type_traits>
@@ -404,7 +388,7 @@ auto SilKitToOatppMapper::CreateBulkServiceInternalDto(const ServiceDescriptor& 
 
 auto SilKitToOatppMapper::CreateBulkSimulationDto(const DashboardBulkUpdate& bulkUpdate) -> Object<BulkSimulationDto>
 {
-    auto bulkSimulationDto = BulkSimulationDto::CreateEmpty();
+    auto bulkSimulationDto = BulkSimulationDto::createShared();
 
     if (bulkUpdate.stopped)
     {
@@ -422,7 +406,7 @@ auto SilKitToOatppMapper::CreateBulkSimulationDto(const DashboardBulkUpdate& bul
         auto it = nameToBulkParticipantDto.find(name);
         if (it == nameToBulkParticipantDto.end())
         {
-            auto dto = BulkParticipantDto::CreateEmpty();
+            auto dto = BulkParticipantDto::createShared();
             dto->name = name;
 
             it = nameToBulkParticipantDto.emplace(name, std::move(dto)).first;
@@ -461,6 +445,57 @@ auto SilKitToOatppMapper::CreateBulkSimulationDto(const DashboardBulkUpdate& bul
 
     return bulkSimulationDto;
 }
+
+auto SilKitToOatppMapper::CreateMetricsUpdateDto(const std::string& participantName, const VSilKit::MetricsUpdate& metricsUpdate)
+    -> Object<MetricsUpdateDto>
+{
+    auto objectMapper = oatpp::parser::json::mapping::ObjectMapper::createShared();       
+    auto dto = MetricsUpdateDto::createShared();
+    for (const auto& metricData : metricsUpdate.metrics)
+    {
+        auto setValues = [&](auto&& dataDto, auto&& metricData) {
+            dataDto->pn = participantName;
+            dataDto->ts = metricData.timestamp;
+            auto&& nameList = SilKit::Util::SplitString(metricData.name, "/");
+            std::copy(nameList.begin(), nameList.end(), std::back_inserter(*dataDto->mn));
+
+        };
+
+        switch (metricData.kind)
+        {
+        case VSilKit::MetricKind::COUNTER:
+        {
+            auto dataDto = CounterDataDto::createShared();
+            setValues(dataDto, metricData);
+            dataDto->mv = objectMapper->readFromString<oatpp::Int64>(metricData.value);
+            dto->counters->emplace_back(std::move(dataDto));
+            break;
+        }
+        case VSilKit::MetricKind::STATISTIC:
+        {
+            auto dataDto = StatisticDataDto::createShared();
+            setValues(dataDto, metricData);
+            dataDto->mv = objectMapper->readFromString<oatpp::Vector<oatpp::Float64>>(metricData.value);
+            dto->statistics->emplace_back(std::move(dataDto));
+            break;
+        }
+        case VSilKit::MetricKind::ATTRIBUTE:
+        case VSilKit::MetricKind::STRING_LIST:
+        {
+            auto dataDto = AttributeDataDto::createShared();
+            setValues(dataDto, metricData);
+            dataDto->mv = metricData.value;
+            dto->attributes->emplace_back(std::move(dataDto));
+            break;
+        }
+        default:
+            throw SilKit::SilKitError{"MetricsUpdate unknown MetricKind"};
+            break;
+        }
+    }
+    return dto;
+}
+
 
 // SilKitToOatppMapper Private Methods
 

@@ -40,6 +40,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "BulkUpdateDto.hpp"
 
 #include "DashboardBulkUpdate.hpp"
+#include "MetricsDatatypes.hpp"
 
 
 namespace SilKit {
@@ -73,6 +74,8 @@ public:
     virtual auto CreateBulkServiceInternalDto(const ServiceDescriptor& serviceDescriptor)
         -> Object<BulkServiceInternalDto> = 0;
     virtual auto CreateBulkSimulationDto(const DashboardBulkUpdate& bulkUpdate) -> Object<BulkSimulationDto> = 0;
+    virtual auto CreateMetricsUpdateDto(const std::string& origin,
+                                        const VSilKit::MetricsUpdate& metricsUpdate) -> Object<MetricsUpdateDto> = 0;
 };
 } // namespace Dashboard
 } // namespace SilKit

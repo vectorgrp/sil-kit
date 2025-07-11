@@ -43,6 +43,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "SimulationCreationResponseDto.hpp"
 #include "SimulationEndDto.hpp"
 #include "SystemStatusDto.hpp"
+#include "BulkUpdateDto.hpp"
 
 #include "TestResult.hpp"
 
@@ -377,6 +378,24 @@ public:
         {
             _allSimulationsFinishedPromise.set_value();
         }
+        return createResponse(Status::CODE_204, "");
+    }
+    ENDPOINT("POST", "system-service/v1.1/simulations/{simulationId}", updateSimulation, PATH(UInt64, simulationId),
+             BODY_DTO(Object<BulkSimulationDto>, simulation))
+    {
+        std::this_thread::sleep_for(_updateTimeout);
+        OATPP_ASSERT_HTTP(simulationId <= _simulationId, Status::CODE_404, "simulationId not found");
+        OATPP_ASSERT_HTTP(simulation, Status::CODE_400, "simulation not set");
+        return createResponse(Status::CODE_204, "");
+    }
+
+    ENDPOINT("POST", "system-service/v1.1/simulations/{simulationId}/metrics", updateSimulationMetrics,
+             PATH(UInt64, simulationId), BODY_DTO(oatpp::Vector<Object<MetricDataDto>>, metrics))
+    {
+        std::this_thread::sleep_for(_updateTimeout);
+        OATPP_ASSERT_HTTP(simulationId <= _simulationId, Status::CODE_404, "simulationId not found");
+        OATPP_ASSERT_HTTP(metrics, Status::CODE_400, "simulation not set");
+        _data[simulationId].metricCount++;
         return createResponse(Status::CODE_204, "");
     }
 

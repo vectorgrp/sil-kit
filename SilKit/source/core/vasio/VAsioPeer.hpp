@@ -40,10 +40,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "IRawByteStream.hpp"
 #include "ITimer.hpp"
 
+#include "PeerMetrics.hpp"
 
 namespace SilKit {
 namespace Core {
-
 
 class VAsioPeer
     : public IVAsioPeer
@@ -65,7 +65,7 @@ public:
     VAsioPeer& operator=(VAsioPeer&& other) = delete; //implicitly deleted because of mutex
 
     VAsioPeer(IVAsioPeerListener* listener, IIoContext* ioContext, std::unique_ptr<IRawByteStream> stream,
-              Services::Logging::ILogger* logger);
+              Services::Logging::ILogger* logger, std::unique_ptr<VSilKit::IPeerMetrics> metrics);
 
     ~VAsioPeer() override;
 
@@ -96,6 +96,8 @@ public:
     void Shutdown() override;
 
     void EnableAggregation() override;
+
+    void InitializeMetrics( VSilKit::IMetricsManager* manager) override;
 
 private:
     // ----------------------------------------
@@ -152,6 +154,7 @@ private:
     std::unique_ptr<ITimer> _flushTimer;
     const std::chrono::milliseconds _flushTimeout{50};
     bool _initialTimerStarted{false};
+    std::unique_ptr<VSilKit::IPeerMetrics> _peerMetrics;
 };
 
 // ================================================================================

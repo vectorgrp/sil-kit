@@ -29,6 +29,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "DashboardSystemApiController.hpp"
 #include "DashboardTestComponents.hpp"
 
+#include "ParticipantConfigurationFromXImpl.hpp"
+
 
 namespace SilKit {
 namespace Dashboard {
@@ -40,11 +42,13 @@ auto CreateDashboard(std::shared_ptr<SilKit::Config::IParticipantConfiguration> 
     return std::make_unique<SilKit::Dashboard::OatppContext>(participantConfig, registryUri, dashboardUri);
 }
 
-auto RunDashboardTest(std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig,
-                      const std::string& registryUri, const std::string& dashboardUri, std::function<void()> testCode,
+auto RunDashboardTest(const std::string& participantConfigString, const std::string& registryUri,
+                      const std::string& dashboardUri, std::function<void()> testCode,
                       uint64_t expectedSimulationsCount, std::chrono::seconds creationTimeout,
                       std::chrono::seconds updateTimeout) -> TestResult
 {
+    //we need the internal ParticipantConfiguration struct
+    auto&& participantConfig = Config::ParticipantConfigurationFromStringImpl(participantConfigString);
     TestResult testResult{};
     oatpp::base::Environment::init();
     try

@@ -1,23 +1,6 @@
-/* Copyright (c) 2022 Vector Informatik GmbH
-
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
-
-The above copyright notice and this permission notice shall be
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
+// SPDX-FileCopyrightText: 2025 Vector Informatik GmbH
+//
+// SPDX-License-Identifier: MIT
 
 #include <chrono>
 #include <iostream>
@@ -34,7 +17,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "IParticipantInternal.hpp"
 #include "IServiceDiscovery.hpp"
-#include "ParticipantConfigurationFromXImpl.hpp"
 
 #include "CreateDashboard.hpp"
 
@@ -61,7 +43,7 @@ protected:
     {
         _simTestHarness->CreateSystemController();
         {
-            auto&& simParticipant = _simTestHarness->GetParticipant(participantName1);
+            auto&& simParticipant = _simTestHarness->GetParticipant(participantName1, _participantConfig);
             auto&& participant = simParticipant->Participant();
             (void)participant->CreateCanController(canonicalName, networkName);
             auto&& lifecycleService = simParticipant->GetOrCreateLifecycleService();
@@ -70,7 +52,7 @@ protected:
                                                       10ms);
         }
         {
-            auto&& simParticipant = _simTestHarness->GetParticipant(participantName2);
+            auto&& simParticipant = _simTestHarness->GetParticipant(participantName2, _participantConfig);
             auto&& participant = simParticipant->Participant();
             (void)participant->CreateCanController(canonicalName, networkName);
         }
@@ -115,21 +97,20 @@ protected:
                                              "stopped"};
         SilKit::Dashboard::TestResult expected{};
         expected.objectCount = 0;
-        for (auto simulationIdx = 0u; simulationIdx < simulations.size(); simulationIdx++)
+        auto simulationId = 1;
+        //for (auto simulationIdx = 0u; simulationIdx < simulations.size(); simulationIdx++)
+        for (auto&& servicesByParticipant: simulations)
         {
-            std::map<std::string, std::map<uint64_t, SilKit::Dashboard::Service>> servicesByParticipant =
-                simulations[simulationIdx];
-            auto simulationId = simulationIdx + 1;
             if (sync)
             {
                 expected.dataBySimulation[simulationId].participants.insert("SystemController");
                 expected.dataBySimulation[simulationId].participants.insert("InternalSystemMonitor");
                 expected.dataBySimulation[simulationId].statesByParticipant["InternalSystemMonitor"] = expectedStates;
             }
-            for (auto i = servicesByParticipant.begin(); i != servicesByParticipant.end(); ++i)
+            for (auto&& participantAndStates: servicesByParticipant)
             {
-                expected.dataBySimulation[simulationId].participants.insert(i->first);
-                expected.dataBySimulation[simulationId].statesByParticipant[i->first] = expectedStates;
+                expected.dataBySimulation[simulationId].participants.insert(participantAndStates.first);
+                expected.dataBySimulation[simulationId].statesByParticipant[participantAndStates.first] = expectedStates;
             }
             expected.dataBySimulation[simulationId].servicesByParticipant = servicesByParticipant;
             if (sync)
@@ -137,6 +118,7 @@ protected:
                 expected.dataBySimulation[simulationId].systemStates = expectedStates;
             }
             expected.dataBySimulation[simulationId].stopped = true;
+            simulationId++;
         }
         return expected;
     }
@@ -261,6 +243,11 @@ void CheckSimulationData(SilKit::Dashboard::SimulationData actual, SilKit::Dashb
     }
     CheckStates(actual.systemStates, expected.systemStates, "system", simulationId);
     ASSERT_EQ(actual.stopped, expected.stopped) << "Simulation " << simulationId << " should have been stopped!";
+    if(expected.metricCount != 0)
+    {
+        ASSERT_GT(actual.metricCount, 0)
+            << "Simulation " << simulationId << " should have the metric count set to non-zero";
+    }
 }
 
 void CheckTestResult(SilKit::Dashboard::TestResult actual, SilKit::Dashboard::TestResult expected)
@@ -282,7 +269,7 @@ TEST_F(ITest_Dashboard, dashboard_no_simulation)
 {
     SetupFromParticipantLists({}, {});
     auto testResult = SilKit::Dashboard::RunDashboardTest(
-        ParticipantConfigurationFromStringImpl(_dashboardParticipantConfig), _registryUri, _dashboardUri, [this]() {
+        _dashboardParticipantConfig, _registryUri, _dashboardUri, [this]() {
         auto ok = _simTestHarness->Run(5s);
         ASSERT_TRUE(ok) << "SimTestHarness should terminate without timeout";
     }, 0);
@@ -301,7 +288,7 @@ TEST_F(ITest_Dashboard, dashboard_unicode_emoji_coordinated)
     const auto networkName = "CAN1";
     SetupFromParticipantLists({participantName1, participantName2}, {});
     auto testResult = SilKit::Dashboard::RunDashboardTest(
-        ParticipantConfigurationFromStringImpl(_dashboardParticipantConfig), _registryUri, _dashboardUri,
+        _dashboardParticipantConfig, _registryUri, _dashboardUri,
         [this, &participantName1, &participantName2, &canonicalName, &networkName]() {
         RunCanDemo(participantName1, participantName2, canonicalName, networkName);
     });
@@ -321,7 +308,7 @@ TEST_F(ITest_Dashboard, dashboard_can_coordinated)
     const auto networkName = "CAN1";
     SetupFromParticipantLists({participantName1, participantName2}, {});
     auto testResult = SilKit::Dashboard::RunDashboardTest(
-        ParticipantConfigurationFromStringImpl(_dashboardParticipantConfig), _registryUri, _dashboardUri,
+        _dashboardParticipantConfig, _registryUri, _dashboardUri,
         [this, &participantName1, &participantName2, &canonicalName, &networkName]() {
         RunCanDemo(participantName1, participantName2, canonicalName, networkName);
     });
@@ -341,7 +328,7 @@ TEST_F(ITest_Dashboard, dashboard_can_repeat)
     const auto networkName = "CAN1";
     SetupFromParticipantLists({participantName1, participantName2}, {});
     auto testResult = SilKit::Dashboard::RunDashboardTest(
-        ParticipantConfigurationFromStringImpl(_dashboardParticipantConfig), _registryUri, _dashboardUri,
+        _dashboardParticipantConfig, _registryUri, _dashboardUri,
         [this, &participantName1, &participantName2, &canonicalName, &networkName]() {
         RunCanDemo(participantName1, participantName2, canonicalName, networkName);
         RunCanDemo(participantName1, participantName2, canonicalName, networkName);
@@ -369,7 +356,7 @@ TEST_F(ITest_Dashboard, dashboard_pubsub_mix)
     spec2.AddLabel(label2);
     SetupFromParticipantLists({participantName1}, {participantName2});
     auto testResult = SilKit::Dashboard::RunDashboardTest(
-        ParticipantConfigurationFromStringImpl(_dashboardParticipantConfig), _registryUri, _dashboardUri,
+        _dashboardParticipantConfig, _registryUri, _dashboardUri,
         [this, &participantName1, &canonicalName1, &spec1, &participantName2, &canonicalName2, &spec2]() {
         _simTestHarness->CreateSystemController();
         {
@@ -422,7 +409,7 @@ TEST_F(ITest_Dashboard, dashboard_rpc_autonomous)
     spec2.AddLabel(label2);
     SetupFromParticipantLists({}, {participantName1, participantName2});
     auto testResult = SilKit::Dashboard::RunDashboardTest(
-        ParticipantConfigurationFromStringImpl(_dashboardParticipantConfig), _registryUri, _dashboardUri,
+        _dashboardParticipantConfig, _registryUri, _dashboardUri,
         [this, &participantName1, &canonicalName1, &spec1, &participantName2, &canonicalName2, &spec2]() {
         {
             auto&& simParticipant = _simTestHarness->GetParticipant(participantName1);
@@ -462,9 +449,8 @@ TEST_F(ITest_Dashboard, dashboard_netsim_coordinated)
 {
     const auto participantName = "NetSim";
     SetupFromParticipantLists({participantName}, {});
-    auto testResult =
-        SilKit::Dashboard::RunDashboardTest(ParticipantConfigurationFromStringImpl(_dashboardParticipantConfig),
-                                            _registryUri, _dashboardUri, [this, &participantName]() {
+    auto testResult = SilKit::Dashboard::RunDashboardTest(_dashboardParticipantConfig, _registryUri, _dashboardUri,
+                                                          [this, &participantName]() {
         _simTestHarness->CreateSystemController();
         {
             auto&& simParticipant = _simTestHarness->GetParticipant(participantName, _participantConfig);

@@ -78,7 +78,7 @@ public:
    * @param timeout
    */
     template <typename Lambda>
-    void run(const Lambda& lambda, const std::chrono::duration<v_int64, std::micro>& timeout = std::chrono::hours(12))
+    void run(const Lambda& lambda, std::chrono::duration<v_int64, std::milli> timeout)
     {
         auto startTime = std::chrono::system_clock::now();
         std::atomic<bool> running(true);
@@ -89,8 +89,8 @@ public:
         // atomic end
 
         m_server = std::make_shared<oatpp::network::Server>(m_connectionProvider, m_connectionHandler);
-        OATPP_LOGD("\033[1;34mClientServerTestRunner\033[0m",
-                   "\033[1;34mRunning server on port %s. Timeout %lld(micro)\033[0m",
+        OATPP_LOGD("ClientServerTestRunner",
+                   "Running server on port %s. Timeout %lld(micro)",
                    m_connectionProvider->getProperty("port").toString()->c_str(), timeout.count());
 
         std::function<bool()> condition = [&runConditionForLambda]() { return runConditionForLambda.load(); };
@@ -113,9 +113,14 @@ public:
             std::unique_lock<std::mutex> lock(timeoutMutex);
             while (running)
             {
-                timeoutCondition.wait_for(lock, std::chrono::seconds(1));
+                timeoutCondition.wait_for(lock, std::chrono::milliseconds(666));
                 auto elapsed = std::chrono::system_clock::now() - startTime;
-                OATPP_ASSERT("ClientServerTestRunner: Error. Timeout." && elapsed < timeout);
+                if(elapsed >= timeout)
+                {
+                    OATPP_LOGD("ClientServerTestRunner", "Timeout after time %lld ms. throwing...",
+                               std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count());
+                    OATPP_ASSERT("ClientServerTestRunner: Error. Timeout." && false);
+                }
             }
         });
 
@@ -124,8 +129,8 @@ public:
 
         auto elapsed =
             std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now() - startTime);
-        OATPP_LOGD("\033[1;34mClientServerTestRunner\033[0m",
-                   "\033[1;34mFinished with time %lld(micro). Stopping server...\033[0m", elapsed.count());
+        OATPP_LOGD("ClientServerTestRunner", "Finished with time %lld ms. Stopping server...",
+                   std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count());
 
         running = false;
         timeoutCondition.notify_one();

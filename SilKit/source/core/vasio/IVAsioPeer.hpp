@@ -30,6 +30,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "VAsioProtocolVersion.hpp"
 
 #include "SerializedMessage.hpp"
+#include "IMetricsManager.hpp"
 
 namespace SilKit {
 namespace Core {
@@ -63,6 +64,8 @@ public:
     virtual auto GetProtocolVersion() const -> ProtocolVersion = 0;
 
     virtual void EnableAggregation() = 0;
+
+    virtual void InitializeMetrics( VSilKit::IMetricsManager*) = 0;
 };
 
 
