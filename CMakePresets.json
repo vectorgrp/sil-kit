@@ -55,7 +55,7 @@
         },
         {
             "name": "x64-debug",
-            "inherits": ["windows-base", "mixin-dirs", "mixin-ninja"],
+            "inherits": ["windows-base", "mixin-dirs", "mixin-ninja", "mixin-werror"],
             "architecture": {
                 "value": "x64",
                 "strategy": "external"

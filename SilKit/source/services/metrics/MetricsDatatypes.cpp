@@ -6,10 +6,30 @@
 
 #include <ostream>
 #include <type_traits>
-
+#include <sstream>
 
 namespace VSilKit {
 
+
+auto ToString(MetricName stringList) -> std::string
+{
+    if(stringList.size() == 0)
+    {
+        return {};
+    }
+
+    auto it = stringList.begin();
+
+    std::stringstream ss;
+    ss << *it;
+
+    for (++it; it != stringList.end(); ++it)
+    {
+        ss << '/' << *it;
+    }
+
+    return ss.str();
+}
 
 auto operator==(const MetricData& lhs, const MetricData& rhs) -> bool
 {
@@ -32,6 +52,8 @@ auto operator<<(std::ostream& os, const MetricKind& metricKind) -> std::ostream&
         return os << "MetricKind::STATISTIC";
     case MetricKind::STRING_LIST:
         return os << "MetricKind::STRING_LIST";
+    case MetricKind::ATTRIBUTE:
+        return os << "MetricKind::ATTRIBUTE";
     default:
         return os << "MetricKind(" << static_cast<std::underlying_type_t<MetricKind>>(metricKind) << ")";
     }

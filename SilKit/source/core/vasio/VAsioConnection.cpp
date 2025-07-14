@@ -337,7 +337,7 @@ auto VAsioConnection::PrepareAcceptorEndpointUris(const std::string& connectUri)
 
 void VAsioConnection::OpenTcpAcceptors(const std::vector<std::string>& acceptorEndpointUris)
 {
-    auto metric = _metricsManager->GetStringList("TcpAcceptors");
+    auto metric = _metricsManager->GetStringList({"TcpAcceptors"});
     metric->Clear();
 
     for (const auto& uriString : acceptorEndpointUris)
@@ -386,7 +386,7 @@ void VAsioConnection::OpenTcpAcceptors(const std::vector<std::string>& acceptorE
 
 void VAsioConnection::OpenLocalAcceptors(const std::vector<std::string>& acceptorEndpointUris)
 {
-    auto metric = _metricsManager->GetStringList("LocalAcceptors");
+    auto metric = _metricsManager->GetStringList({"LocalAcceptors"});
     metric->Clear();
 
     for (const auto& uriString : acceptorEndpointUris)
@@ -958,7 +958,7 @@ void VAsioConnection::ReceiveRemoteParticipantConnectRequest_Registry(IVAsioPeer
     }
 
     SerializedMessage buffer{msg};
-    destination->SendSilKitMsg(buffer);
+    destination->SendSilKitMsg(std::move(buffer));
 }
 
 void VAsioConnection::ReceiveRemoteParticipantConnectRequest_Participant(IVAsioPeer* peer,
@@ -1065,6 +1065,7 @@ void VAsioConnection::HandleConnectedPeer(IVAsioPeer* peer)
     peer->SetServiceDescriptor(peerId);
 
     AssociateParticipantNameAndPeer(_simulationName, peer->GetInfo().participantName, peer);
+
 }
 
 
@@ -1076,14 +1077,20 @@ void VAsioConnection::AssociateParticipantNameAndPeer(const std::string& simulat
         _participantNameToPeer[simulationName].insert({participantName, peer});
     }
 
+    if(_config.experimental.metrics.sinks.empty())
+    {
+        return;
+    }
     IStringListMetric* metric;
-    auto metricNameBase = "Peer/" + simulationName + "/" + participantName;
 
-    metric = _metricsManager->GetStringList(metricNameBase + "/LocalEndpoint");
+    metric = _metricsManager->GetStringList({"Peer", simulationName, participantName, "LocalEndpoint"});
     metric->Add(peer->GetLocalAddress());
 
-    metric = _metricsManager->GetStringList(metricNameBase + "/RemoteEndpoint");
+    metric =
+        _metricsManager->GetStringList({"Peer", simulationName, participantName, "RemoteEndpoint"});
     metric->Add(peer->GetRemoteAddress());
+
+    peer->InitializeMetrics(_metricsManager);
 }
 
 auto VAsioConnection::FindPeerByName(const std::string& simulationName,
@@ -1838,8 +1845,18 @@ auto VAsioConnection::MakeConnectPeer(const VAsioPeerInfo& peerInfo) -> std::uni
 
 auto VAsioConnection::MakeVAsioPeer(std::unique_ptr<IRawByteStream> stream) -> std::unique_ptr<IVAsioPeer>
 {
-    auto vAsioPeer{std::make_unique<VAsioPeer>(this, _ioContext.get(), std::move(stream), _logger)};
-    return vAsioPeer;
+
+    if(_config.experimental.metrics.sinks.empty())
+    {
+        return std::make_unique<VAsioPeer>(this, _ioContext.get(), std::move(stream), _logger,
+                                           std::make_unique<VSilKit::NoMetrics>());
+    }
+    else
+    {
+        return std::make_unique<VAsioPeer>(this, _ioContext.get(), std::move(stream), _logger,
+                                           std::make_unique<VSilKit::PeerMetrics>());
+
+    }
 }
 
 

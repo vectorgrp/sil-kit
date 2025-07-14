@@ -325,7 +325,7 @@ void VAsioRegistry::SetupMetrics()
 
     if (_vasioConfig->experimental.metrics.collectFromRemote)
     {
-        auto metricsReceiver = std::make_unique<VSilKit::MetricsReceiver>(nullptr, processor);
+        auto metricsReceiver = std::make_unique<VSilKit::MetricsReceiver>(nullptr, *this);
 
         SilKit::Core::SupplementalData supplementalData;
         supplementalData[SilKit::Core::Discovery::controllerType] =
@@ -400,13 +400,22 @@ auto VAsioRegistry::GetServiceDescriptor() const -> const ServiceDescriptor&
 }
 
 
-void VAsioRegistry::OnMetricsUpdate(const std::string& participantName, const VSilKit::MetricsUpdate& metricsUpdate)
+void VAsioRegistry::OnMetricsUpdate(const std::string& simulationName, const std::string& participantName,
+                                    const VSilKit::MetricsUpdate& metricsUpdate)
 {
     Log::Info(GetLogger(), "Participant {} updates {} metrics", participantName, metricsUpdate.metrics.size());
     for (const auto& data : metricsUpdate.metrics)
     {
         Log::Info(GetLogger(), "Metric Update: {} {} {} {} ({})", data.name, data.kind, data.value, data.timestamp,
                   participantName);
+    }
+
+    dynamic_cast<VSilKit::MetricsProcessor&>(*_metricsProcessor)
+        .OnMetricsUpdate(simulationName, participantName, metricsUpdate);
+
+    if (_registryEventListener != nullptr)
+    {
+        _registryEventListener->OnMetricsUpdate(simulationName, participantName, metricsUpdate);
     }
 }
 

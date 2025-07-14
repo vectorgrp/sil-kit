@@ -18,14 +18,8 @@ class BulkSystemDto : public oatpp::DTO
 {
     DTO_INIT(BulkSystemDto, DTO)
 
-    DTO_FIELD(Vector<Object<SystemStatusDto>>, statuses);
+    DTO_FIELD(Vector<Object<SystemStatusDto>>, statuses) = Vector<Object<SystemStatusDto>>::createShared();
 
-    static auto CreateEmpty() -> Wrapper
-    {
-        auto dto = createShared();
-        dto->statuses = Vector<Object<SystemStatusDto>>::createShared();
-        return dto;
-    }
 };
 
 class BulkControllerDto : public oatpp::DTO
@@ -44,7 +38,7 @@ class BulkDataServiceDto : public oatpp::DTO
     DTO_FIELD(UInt64, id);
     DTO_FIELD(String, name);
     DTO_FIELD(String, networkName);
-    DTO_FIELD(Object<DataSpecDto>, spec);
+    DTO_FIELD(Object<DataSpecDto>, spec) = Object<DataSpecDto>::createShared();
 };
 
 class BulkRpcServiceDto : public oatpp::DTO
@@ -54,7 +48,7 @@ class BulkRpcServiceDto : public oatpp::DTO
     DTO_FIELD(UInt64, id);
     DTO_FIELD(String, name);
     DTO_FIELD(String, networkName);
-    DTO_FIELD(Object<RpcSpecDto>, spec);
+    DTO_FIELD(Object<RpcSpecDto>, spec) = Object<RpcSpecDto>::createShared();
 };
 
 class BulkServiceInternalDto : public oatpp::DTO
@@ -72,42 +66,26 @@ class BulkParticipantDto : public oatpp::DTO
     DTO_INIT(BulkParticipantDto, DTO)
 
     DTO_FIELD(String, name);
-    DTO_FIELD(Vector<Object<ParticipantStatusDto>>, statuses);
-    DTO_FIELD(Vector<Object<BulkControllerDto>>, canControllers);
-    DTO_FIELD(Vector<Object<BulkControllerDto>>, ethernetControllers);
-    DTO_FIELD(Vector<Object<BulkControllerDto>>, flexrayControllers);
-    DTO_FIELD(Vector<Object<BulkControllerDto>>, linControllers);
-    DTO_FIELD(Vector<Object<BulkDataServiceDto>>, dataPublishers);
-    DTO_FIELD(Vector<Object<BulkDataServiceDto>>, dataSubscribers);
-    DTO_FIELD(Vector<Object<BulkServiceInternalDto>>, dataSubscriberInternals);
-    DTO_FIELD(Vector<Object<BulkRpcServiceDto>>, rpcClients);
-    DTO_FIELD(Vector<Object<BulkRpcServiceDto>>, rpcServers);
-    DTO_FIELD(Vector<Object<BulkServiceInternalDto>>, rpcServerInternals);
-    DTO_FIELD(Vector<String>, canNetworks);
-    DTO_FIELD(Vector<String>, ethernetNetworks);
-    DTO_FIELD(Vector<String>, flexrayNetworks);
-    DTO_FIELD(Vector<String>, linNetworks);
+    DTO_FIELD(Vector<Object<ParticipantStatusDto>>, statuses) = Vector<Object<ParticipantStatusDto>>::createShared();
+    DTO_FIELD(Vector<Object<BulkControllerDto>>, canControllers) = Vector<Object<BulkControllerDto>>::createShared();
+    DTO_FIELD(Vector<Object<BulkControllerDto>>,
+              ethernetControllers) = Vector<Object<BulkControllerDto>>::createShared();
+    DTO_FIELD(Vector<Object<BulkControllerDto>>,
+              flexrayControllers) = Vector<Object<BulkControllerDto>>::createShared();
+    DTO_FIELD(Vector<Object<BulkControllerDto>>, linControllers) = Vector<Object<BulkControllerDto>>::createShared();
+    DTO_FIELD(Vector<Object<BulkDataServiceDto>>, dataPublishers) = Vector<Object<BulkDataServiceDto>>::createShared();
+    DTO_FIELD(Vector<Object<BulkDataServiceDto>>, dataSubscribers) = Vector<Object<BulkDataServiceDto>>::createShared();
+    DTO_FIELD(Vector<Object<BulkServiceInternalDto>>,
+              dataSubscriberInternals) = Vector<Object<BulkServiceInternalDto>>::createShared();
+    DTO_FIELD(Vector<Object<BulkRpcServiceDto>>, rpcClients) = Vector<Object<BulkRpcServiceDto>>::createShared();
+    DTO_FIELD(Vector<Object<BulkRpcServiceDto>>, rpcServers) = Vector<Object<BulkRpcServiceDto>>::createShared();
+    DTO_FIELD(Vector<Object<BulkServiceInternalDto>>,
+              rpcServerInternals) = Vector<Object<BulkServiceInternalDto>>::createShared();
+    DTO_FIELD(Vector<String>, canNetworks) = Vector<String>::createShared();
+    DTO_FIELD(Vector<String>, ethernetNetworks) = Vector<String>::createShared();
+    DTO_FIELD(Vector<String>, flexrayNetworks) = Vector<String>::createShared();
+    DTO_FIELD(Vector<String>, linNetworks) = Vector<String>::createShared();
 
-    static auto CreateEmpty() -> Wrapper
-    {
-        auto dto = createShared();
-        dto->statuses = Vector<Object<ParticipantStatusDto>>::createShared();
-        dto->canControllers = Vector<Object<BulkControllerDto>>::createShared();
-        dto->ethernetControllers = Vector<Object<BulkControllerDto>>::createShared();
-        dto->flexrayControllers = Vector<Object<BulkControllerDto>>::createShared();
-        dto->linControllers = Vector<Object<BulkControllerDto>>::createShared();
-        dto->dataPublishers = Vector<Object<BulkDataServiceDto>>::createShared();
-        dto->dataSubscribers = Vector<Object<BulkDataServiceDto>>::createShared();
-        dto->dataSubscriberInternals = Vector<Object<BulkServiceInternalDto>>::createShared();
-        dto->rpcClients = Vector<Object<BulkRpcServiceDto>>::createShared();
-        dto->rpcServers = Vector<Object<BulkRpcServiceDto>>::createShared();
-        dto->rpcServerInternals = Vector<Object<BulkServiceInternalDto>>::createShared();
-        dto->canNetworks = Vector<String>::createShared();
-        dto->ethernetNetworks = Vector<String>::createShared();
-        dto->flexrayNetworks = Vector<String>::createShared();
-        dto->linNetworks = Vector<String>::createShared();
-        return dto;
-    }
 };
 
 class BulkSimulationDto : public oatpp::DTO
@@ -115,18 +93,49 @@ class BulkSimulationDto : public oatpp::DTO
     DTO_INIT(BulkSimulationDto, DTO)
 
     DTO_FIELD(Int64, stopped);
-    DTO_FIELD(Object<BulkSystemDto>, system);
-    DTO_FIELD(Vector<Object<BulkParticipantDto>>, participants);
-
-    static auto CreateEmpty() -> Wrapper
-    {
-        auto dto = createShared();
-        dto->system = BulkSystemDto::CreateEmpty();
-        dto->participants = Vector<Object<BulkParticipantDto>>::createShared();
-        return dto;
-    }
+    DTO_FIELD(Object<BulkSystemDto>, system) = Object<BulkSystemDto>::createShared();
+    DTO_FIELD(Vector<Object<BulkParticipantDto>>, participants) = Vector<Object<BulkParticipantDto>>::createShared();
 };
 
+class MetricDataDto : public oatpp::DTO
+{
+    DTO_INIT(MetricDataDto, DTO)
+
+    DTO_FIELD(Int64, ts);
+    DTO_FIELD(String, pn);
+    DTO_FIELD(Vector<String>, mn) = Vector<String>::createShared();
+};
+
+class AttributeDataDto : public MetricDataDto
+{
+    DTO_INIT(AttributeDataDto, MetricDataDto)
+
+    DTO_FIELD(String, mv);
+};
+
+class CounterDataDto : public MetricDataDto
+{
+    DTO_INIT(CounterDataDto, MetricDataDto)
+
+    DTO_FIELD(Int64, mv);
+};
+
+class StatisticDataDto : public MetricDataDto
+{
+    DTO_INIT(StatisticDataDto, MetricDataDto)
+
+    DTO_FIELD(Vector<Float64>, mv) = Vector<Float64>::createShared();
+};
+
+
+class MetricsUpdateDto : public oatpp::DTO
+{
+    DTO_INIT(MetricsUpdateDto, oatpp::DTO)
+
+    DTO_FIELD(Vector<Object<AttributeDataDto>>, attributes) = Vector<Object<AttributeDataDto>>::createShared();
+    DTO_FIELD(Vector<Object<CounterDataDto>>, counters) = Vector<Object<CounterDataDto>>::createShared();
+    DTO_FIELD(Vector<Object<StatisticDataDto>>, statistics) = Vector<Object<StatisticDataDto>>::createShared();
+};
 } // namespace Dashboard
 } // namespace SilKit
 

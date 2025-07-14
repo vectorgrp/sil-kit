@@ -21,16 +21,15 @@ class MetricsTimerThread : public IMetricsTimerThread
     std::function<void()> _callback;
 
     std::thread _thread;
-
 public:
-    explicit MetricsTimerThread(std::function<void()> callback);
+    explicit MetricsTimerThread(std::chrono::seconds interval, std::function<void()> callback);
 
     ~MetricsTimerThread() override;
 
     void Start() override;
 
 private:
-    auto MakeThread() -> std::thread;
+    auto MakeThread(std::chrono::seconds interval) -> std::thread;
 };
 
 } // namespace VSilKit

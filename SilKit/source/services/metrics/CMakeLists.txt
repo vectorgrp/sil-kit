@@ -30,6 +30,7 @@ add_library(O_SilKit_Services_Metrics OBJECT
     MetricsTimerThread.cpp
 
     CreateMetricsSinksFromParticipantConfiguration.cpp
+
 )
 
 target_link_libraries(O_SilKit_Services_Metrics

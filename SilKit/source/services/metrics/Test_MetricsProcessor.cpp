@@ -133,6 +133,7 @@ TEST(Test_MetricsProcessor, metrics_are_processed_directly_after_sinks_are_set)
 
 TEST(Test_MetricsProcessor, receive_handler_ignores_metrics_from_own_participant)
 {
+    const std::string simulationName{"Simulation Name"};
     const std::string participantName{"Participant Name"};
 
     MetricsUpdate updateOne;
@@ -152,7 +153,7 @@ TEST(Test_MetricsProcessor, receive_handler_ignores_metrics_from_own_participant
     MetricsProcessor processor{participantName};
     processor.SetSinks(std::move(sinks));
     processor.Process(participantName, updateOne);
-    processor.OnMetricsUpdate(participantName, updateTwo);
+    processor.OnMetricsUpdate(simulationName, participantName, updateTwo);
 }
 
 

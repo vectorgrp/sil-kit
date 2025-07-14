@@ -108,6 +108,8 @@ public:
 
     void SetSimulationEnd(oatpp::UInt64 simulationId, oatpp::Object<SimulationEndDto> simulation) override;
 
+    void UpdateSimulationMetrics(oatpp::UInt64 simulationId, oatpp::Object<MetricsUpdateDto> metrics) override;
+
 private:
     void Log(std::shared_ptr<oatpp::web::client::RequestExecutor::Response> response, const std::string& message);
 
