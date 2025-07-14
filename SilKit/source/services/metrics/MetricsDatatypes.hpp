@@ -9,6 +9,8 @@
 #include <iosfwd>
 #include <string>
 #include <vector>
+#include <initializer_list>
+#include <string_view>
 
 
 namespace VSilKit {
@@ -40,6 +42,9 @@ struct MetricsUpdate
 {
     std::vector<MetricData> metrics;
 };
+
+using MetricName = std::initializer_list<std::string_view>;
+auto ToString(MetricName stringList) -> std::string;
 
 
 auto operator==(const MetricData& lhs, const MetricData& rhs) -> bool;

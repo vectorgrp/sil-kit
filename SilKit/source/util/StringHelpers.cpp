@@ -141,7 +141,7 @@ auto PrintableString(const std::string& participantName) -> std::string
     return safeName;
 }
 
-auto SplitString(std::string input, const std::string& separator)  -> std::vector<std::string>
+auto SplitString(std::string_view input, const std::string_view& separator)  -> std::vector<std::string>
 {
     std::vector<std::string> tokens;
     for (auto i = input.find(separator); i != input.npos; i = input.find(separator))

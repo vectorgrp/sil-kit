@@ -4,10 +4,7 @@
 
 #pragma once
 
-#include <string>
-#include <sstream>
-#include <vector>
-#include <initializer_list>
+#include "MetricsDataTypes.hpp"
 
 namespace VSilKit {
 
@@ -16,22 +13,6 @@ struct IStatisticMetric;
 struct IStringListMetric;
 struct IAttributeMetric;
 
-using MetricName = std::initializer_list<std::string>;
-
-inline auto ToString(MetricName stringList) -> std::string
-{
-    std::stringstream ss;
-    if(stringList.size() == 1)
-    {
-        return *stringList.begin();
-    }
-
-    for (auto&& s : stringList)
-    {
-        ss << s << "/";
-    }
-    return ss.str();
-}
 
 struct IMetricsManager
 {
