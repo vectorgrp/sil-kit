@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "MetricsDataTypes.hpp"
+#include "MetricsDatatypes.hpp"
 
 namespace VSilKit {
 
