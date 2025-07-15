@@ -1452,7 +1452,14 @@ void VAsioConnection::ReceiveProxyMessage(IVAsioPeer* from, SerializedMessage&& 
         // We are relaying a message from source to destination and acting as a proxy. Record the association between
         // source and destination. This is used during disconnects, where we create empty ProxyMessages on behalf of
         // the disconnected peer, to inform the destination that the source peer has disconnected.
-        _proxySourceToDestinations[fromSimulationName][proxyMessage.source].insert(proxyMessage.destination);
+        auto [it, inserted] =
+            _proxySourceToDestinations[fromSimulationName][proxyMessage.source].insert(proxyMessage.destination);
+
+        if (inserted)
+        {
+            Log::Warn(_logger, "Acting as proxy between {:?} ({:?}) and {:?} ({:?})", proxyMessage.source,
+                      fromSimulationName, proxyMessage.destination, fromSimulationName);
+        }
 
         return;
     }
