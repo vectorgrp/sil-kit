@@ -745,6 +745,12 @@ void VAsioConnection::SendParticipantAnnouncementReply(IVAsioPeer* peer)
                              ExtractProtocolVersion(reply.remoteHeader));
 
     peer->SendSilKitMsg(SerializedMessage{peer->GetProtocolVersion(), reply});
+
+    if (const auto proxyPeer = dynamic_cast<VAsioProxyPeer*>(peer); proxyPeer != nullptr)
+    {
+        Log::Warn(_logger, "Connected to {:?} ({:?}) using {:?} as a proxy", proxyPeer->GetInfo().participantName,
+                  proxyPeer->GetSimulationName(), proxyPeer->GetPeer()->GetInfo().participantName);
+    }
 }
 
 void VAsioConnection::SendFailedParticipantAnnouncementReply(IVAsioPeer* peer, ProtocolVersion version,
@@ -817,6 +823,12 @@ void VAsioConnection::ReceiveParticipantAnnouncementReply(IVAsioPeer* from, Seri
     {
         _connectKnownParticipants.HandlePeerEvent(from->GetInfo().participantName,
                                                   ConnectKnownParticipants::PeerEvent::PARTICIPANT_ANNOUNCEMENT_REPLY);
+    }
+
+    if (const auto proxyPeer = dynamic_cast<VAsioProxyPeer*>(from); proxyPeer != nullptr)
+    {
+        Log::Warn(_logger, "Connected to {:?} ({:?}) using {:?} as a proxy", proxyPeer->GetInfo().participantName,
+                  proxyPeer->GetSimulationName(), proxyPeer->GetPeer()->GetInfo().participantName);
     }
 }
 
