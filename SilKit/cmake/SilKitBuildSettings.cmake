@@ -222,7 +222,6 @@ macro(silkit_enable_lto enableLto)
     include(CheckIPOSupported)
     check_ipo_supported(RESULT _lto_is_supported OUTPUT error)
 
-    message("foo = ${enableLto} ${_enable} ${_lto_is_supported}")
     if (${enableLto} AND  _lto_is_supported)
         if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 
