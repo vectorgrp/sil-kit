@@ -222,7 +222,7 @@ macro(silkit_enable_lto enableLto)
     include(CheckIPOSupported)
     check_ipo_supported(RESULT _lto_is_supported OUTPUT error)
 
-    if (${enableLto} AND  _lto_is_supported)
+    if ((NOT MINGW) AND ${enableLto} AND  _lto_is_supported)
         if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 
             find_program(LLD_EXECUTABLE NAMES lld ld.lld)
