@@ -1,4 +1,4 @@
-# PDX-FileCopyrightText: 2025 Vector Informatik GmbH
+# SPDX-FileCopyrightText: 2025 Vector Informatik GmbH
 #
 # SPDX-License-Identifier: MIT
 
@@ -28,15 +28,6 @@ else()
 endif()
 ## Allow debug libraries to be installed side-by-side with their release variant
 set(CMAKE_DEBUG_POSTFIX "d" CACHE STRING "Make sure debug binaries differ from release binaries by a suffix 'd'" FORCE)
-
-if(SILKIT_BUILD_LTO)
-    include(CheckIPOSupported)
-    check_ipo_supported(RESULT _lto_is_supported OUTPUT error)
-    if ( _lto_is_supported) 
-        message(STATUS "SIL Kit: Enabling Link Time Optimization globally.")
-        set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
-    endif()
-endif()
 
 ################################################################################
 # Install definitions

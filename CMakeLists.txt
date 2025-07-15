@@ -1,4 +1,4 @@
-# PDX-FileCopyrightText: 2025 Vector Informatik GmbH
+# SPDX-FileCopyrightText: 2025 Vector Informatik GmbH
 #
 # SPDX-License-Identifier: MIT
 
