@@ -1454,6 +1454,7 @@ void VAsioConnection::ReceiveProxyMessage(IVAsioPeer* from, SerializedMessage&& 
         // the disconnected peer, to inform the destination that the source peer has disconnected.
         auto [it, inserted] =
             _proxySourceToDestinations[fromSimulationName][proxyMessage.source].insert(proxyMessage.destination);
+        SILKIT_UNUSED_ARG(it);
 
         if (inserted)
         {
