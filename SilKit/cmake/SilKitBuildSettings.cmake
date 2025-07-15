@@ -1,23 +1,6 @@
-# Copyright (c) 2022 Vector Informatik GmbH
-# 
-# Permission is hereby granted, free of charge, to any person obtaining
-# a copy of this software and associated documentation files (the
-# "Software"), to deal in the Software without restriction, including
-# without limitation the rights to use, copy, modify, merge, publish,
-# distribute, sublicense, and/or sell copies of the Software, and to
-# permit persons to whom the Software is furnished to do so, subject to
-# the following conditions:
-# 
-# The above copyright notice and this permission notice shall be
-# included in all copies or substantial portions of the Software.
-# 
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-# NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-# LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-# OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-# WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+# SPDX-FileCopyrightText: 2022-2024 Vector Informatik GmbH
+#
+# SPDX-License-Identifier: MIT
 
 function(silkit_enable_asan isOn)
     if(NOT isOn)
@@ -233,4 +216,51 @@ int main() {
     if(NOT APPLE AND NOT HAVE_ATOMIC_64BIT)
         link_libraries(-latomic)
     endif()
+endmacro()
+
+macro(silkit_enable_lto enableLto)
+    include(CheckIPOSupported)
+    check_ipo_supported(RESULT _lto_is_supported OUTPUT error)
+
+    message("foo = ${enableLto} ${_enable} ${_lto_is_supported}")
+    if (${enableLto} AND  _lto_is_supported)
+        if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+
+            find_program(LLD_EXECUTABLE NAMES lld ld.lld)
+            if(LLD_EXECUTABLE)
+                message("SIL Kit: Found LLD linker: ${LLD_EXECUTABLE}")
+                # Test if clang can use LLD
+                execute_process(COMMAND ${CMAKE_CXX_COMPILER} -fuse-ld=lld --version 
+                    RESULT_VARIABLE LLD_TEST_RESULT OUTPUT_QUIET ERROR_QUIET)
+                if(LLD_TEST_RESULT EQUAL 0)
+                    message("SIL Kit: Using LLD linker for LTO")
+                    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fuse-ld=lld")
+                    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fuse-ld=lld")
+                else()
+                    message(WARNING "SIL Kit: LLD found but not compatible with this Clang version")
+                endif()
+            else()
+                # Fallback to Gold linker
+                find_program(GOLD_EXECUTABLE NAMES gold ld.gold)
+                if(GOLD_EXECUTABLE)
+                    message("SIL Kit: LLD not found, using Gold linker: ${GOLD_EXECUTABLE}")
+                    execute_process(COMMAND ${CMAKE_CXX_COMPILER} -fuse-ld=gold --version 
+                        RESULT_VARIABLE GOLD_TEST_RESULT OUTPUT_QUIET ERROR_QUIET)
+                    if(GOLD_TEST_RESULT EQUAL 0)
+                        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fuse-ld=gold")
+                        set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fuse-ld=gold")
+                    else()
+                        message(WARNING "SIL Kit: Gold linker found but not compatible with this Clang version")
+                    endif()
+                else()
+                    message(WARNING "SIL Kit: Neither LLD nor Gold linker found - using default linker (may cause LTO issues)")
+                endif()
+            endif()
+        endif()
+        message(STATUS "SIL Kit: Enabling Link Time Optimization globally.")
+        set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
+    else()
+        message(STATUS "SIL Kit: Disabling Link Time Optimization.")
+    endif()
+
 endmacro()
