@@ -82,6 +82,7 @@ silkit_enable_coverage(${SILKIT_ENABLE_COVERAGE})
 silkit_check_reproducible()
 silkit_clean_default_compileflags()
 silkit_add_libs_for_atomic64()
+silkit_enable_lto(${SILKIT_BUILD_LTO})
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
