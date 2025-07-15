@@ -745,6 +745,12 @@ void VAsioConnection::SendParticipantAnnouncementReply(IVAsioPeer* peer)
                              ExtractProtocolVersion(reply.remoteHeader));
 
     peer->SendSilKitMsg(SerializedMessage{peer->GetProtocolVersion(), reply});
+
+    if (const auto proxyPeer = dynamic_cast<VAsioProxyPeer*>(peer); proxyPeer != nullptr)
+    {
+        Log::Warn(_logger, "Connected to {:?} ({:?}) using {:?} as a proxy", proxyPeer->GetInfo().participantName,
+                  proxyPeer->GetSimulationName(), proxyPeer->GetPeer()->GetInfo().participantName);
+    }
 }
 
 void VAsioConnection::SendFailedParticipantAnnouncementReply(IVAsioPeer* peer, ProtocolVersion version,
@@ -817,6 +823,12 @@ void VAsioConnection::ReceiveParticipantAnnouncementReply(IVAsioPeer* from, Seri
     {
         _connectKnownParticipants.HandlePeerEvent(from->GetInfo().participantName,
                                                   ConnectKnownParticipants::PeerEvent::PARTICIPANT_ANNOUNCEMENT_REPLY);
+    }
+
+    if (const auto proxyPeer = dynamic_cast<VAsioProxyPeer*>(from); proxyPeer != nullptr)
+    {
+        Log::Warn(_logger, "Connected to {:?} ({:?}) using {:?} as a proxy", proxyPeer->GetInfo().participantName,
+                  proxyPeer->GetSimulationName(), proxyPeer->GetPeer()->GetInfo().participantName);
     }
 }
 
@@ -1440,7 +1452,15 @@ void VAsioConnection::ReceiveProxyMessage(IVAsioPeer* from, SerializedMessage&& 
         // We are relaying a message from source to destination and acting as a proxy. Record the association between
         // source and destination. This is used during disconnects, where we create empty ProxyMessages on behalf of
         // the disconnected peer, to inform the destination that the source peer has disconnected.
-        _proxySourceToDestinations[fromSimulationName][proxyMessage.source].insert(proxyMessage.destination);
+        auto [it, inserted] =
+            _proxySourceToDestinations[fromSimulationName][proxyMessage.source].insert(proxyMessage.destination);
+        SILKIT_UNUSED_ARG(it);
+
+        if (inserted)
+        {
+            Log::Warn(_logger, "Acting as proxy between {:?} ({:?}) and {:?} ({:?})", proxyMessage.source,
+                      fromSimulationName, proxyMessage.destination, fromSimulationName);
+        }
 
         return;
     }
