@@ -245,7 +245,7 @@ void CheckSimulationData(SilKit::Dashboard::SimulationData actual, SilKit::Dashb
     ASSERT_EQ(actual.stopped, expected.stopped) << "Simulation " << simulationId << " should have been stopped!";
     if(expected.metricCount != 0)
     {
-        ASSERT_GT(actual.metricCount, 0)
+        ASSERT_GT(actual.metricCount, 0u)
             << "Simulation " << simulationId << " should have the metric count set to non-zero";
     }
 }
