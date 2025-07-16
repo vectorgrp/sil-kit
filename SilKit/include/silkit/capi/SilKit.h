@@ -104,4 +104,14 @@ typedef SilKit_ReturnCode(SilKitFPTR* SilKit_ParticipantConfiguration_Destroy_t)
     SilKit_ParticipantConfiguration* participantConfiguration);
 
 
+/*! \brief Return a JSON-string of the complete parsed participant configuration.
+*  \param outputJsonString the JSON string of the configuration. When this is NULL outputSize will contain the required size for the JSON string.
+*  \param outputSize the size of the outputJsonString is stored here. Can be called with outputJsonString set to NULL to get the required size.
+*/
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_ParticipantConfiguration_ToString(
+    const SilKit_ParticipantConfiguration* outParticipantConfiguration, char** outputJsonString, size_t* outputSize);
+
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_ParticipantConfiguration_ToString_t)(
+    const SilKit_ParticipantConfiguration* outParticipantConfiguration, char** outputJsonString, size_t* outputSize);
+
 SILKIT_END_DECLS
