@@ -18,7 +18,6 @@
 #include "IParticipantInternal.hpp"
 #include "IServiceDiscovery.hpp"
 
-#include "CreateDashboard.hpp"
 
 namespace {
 

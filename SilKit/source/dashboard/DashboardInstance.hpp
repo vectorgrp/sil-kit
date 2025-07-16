@@ -9,8 +9,6 @@
 
 #include "LoggerMessage.hpp"
 
-#include "silkit/config/IParticipantConfiguration.hpp"
-
 #include "CachingSilKitEventHandler.hpp"
 #include "IDashboard.hpp"
 #include "OatppHeaders.hpp"

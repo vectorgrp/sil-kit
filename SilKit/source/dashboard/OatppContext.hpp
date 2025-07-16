@@ -48,7 +48,6 @@ public:
     ~OatppContext();
 
 private:
-    std::unique_ptr<Dashboard> _dashboard;
 };
 
 } // namespace Dashboard

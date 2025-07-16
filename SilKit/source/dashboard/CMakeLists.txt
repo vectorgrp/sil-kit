@@ -92,14 +92,8 @@ if(SILKIT_BUILD_DASHBOARD)
         Service/SilKitToOatppMapper.cpp
         Service/SilKitToOatppMapper.hpp
 
-        CreateDashboard.hpp
-        CreateDashboard.cpp
-        Dashboard.cpp
-        Dashboard.hpp
         DashboardBulkUpdate.cpp
         DashboardBulkUpdate.hpp
-        DashboardParticipant.cpp
-        DashboardParticipant.hpp
         IDashboard.hpp
         OatppContext.cpp
         OatppContext.hpp

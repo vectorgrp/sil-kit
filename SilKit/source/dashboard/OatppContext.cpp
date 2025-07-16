@@ -26,7 +26,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "Uri.hpp"
 
 #include "DashboardComponents.hpp"
-#include "Dashboard.hpp"
 
 namespace SilKit {
 namespace Dashboard {
@@ -37,12 +36,10 @@ OatppContext::OatppContext(std::shared_ptr<SilKit::Config::IParticipantConfigura
     oatpp::base::Environment::init();
     auto uri = SilKit::Core::Uri::Parse(dashboardUri);
     DashboardComponents components{uri.Host(), uri.Port()};
-    _dashboard = std::make_unique<Dashboard>(participantConfig, registryUri);
 }
 
 OatppContext::~OatppContext()
 {
-    _dashboard.reset();
     oatpp::base::Environment::destroy();
 }
 
