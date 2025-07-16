@@ -78,9 +78,9 @@ if(SILKIT_BUILD_DASHBOARD)
         IntegrationTests/DashboardSystemApiController.hpp
         IntegrationTests/DashboardTestComponents.hpp
 
-        Service/CachingSilKitEventHandler.cpp
-        Service/CachingSilKitEventHandler.hpp
-        Service/ICachingSilKitEventHandler.hpp
+        #Service/CachingSilKitEventHandler.cpp
+        #Service/CachingSilKitEventHandler.hpp
+        #Service/ICachingSilKitEventHandler.hpp
         Service/ISilKitEventHandler.hpp
         Service/ISilKitEventQueue.hpp
         Service/ISilKitToOatppMapper.hpp
@@ -123,14 +123,6 @@ if(SILKIT_BUILD_DASHBOARD)
 
     set_property(TARGET O_SilKit_Dashboard PROPERTY FOLDER "Dashboard")
 
-    add_silkit_test_to_executable(SilKitDashboardTests
-        SOURCES Service/Test_DashboardCachingSilKitEventHandler.cpp 
-        LIBS
-        O_SilKit_Config
-        O_SilKit_Dashboard
-        I_SilKit_Core_Internal
-        I_SilKit_Core_Mock_Participant
-        )
 
     add_silkit_test_to_executable(SilKitDashboardTests
         SOURCES Service/Test_DashboardSilKitEventQueue.cpp 

@@ -9,13 +9,14 @@
 
 #include "LoggerMessage.hpp"
 
-#include "CachingSilKitEventHandler.hpp"
 #include "IDashboard.hpp"
 #include "OatppHeaders.hpp"
 #include "Client/DashboardSystemApiClient.hpp"
 #include "Service/ISilKitToOatppMapper.hpp"
 #include "SystemStateTracker.hpp"
 #include "DashboardRetryPolicy.hpp"
+#include "ISilKitEventHandler.hpp"
+#include "ISilKitEventQueue.hpp"
 
 #include <chrono>
 #include <string>
