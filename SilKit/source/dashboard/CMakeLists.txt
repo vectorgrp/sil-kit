@@ -75,7 +75,6 @@ if(SILKIT_BUILD_DASHBOARD)
         Dto/SystemStatusDto.hpp
 
         IntegrationTests/ClientServerTestRunner.hpp
-        IntegrationTests/DashboardSystemApiController.hpp
         IntegrationTests/DashboardTestComponents.hpp
 
         #Service/CachingSilKitEventHandler.cpp

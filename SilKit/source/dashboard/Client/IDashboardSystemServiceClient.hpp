@@ -26,10 +26,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "SystemStatusDto.hpp"
 #include "ParticipantStatusDto.hpp"
 #include "ServiceDto.hpp"
-#include "DataPublisherDto.hpp"
-#include "DataSubscriberDto.hpp"
-#include "RpcClientDto.hpp"
-#include "RpcServerDto.hpp"
 #include "SimulationEndDto.hpp"
 #include "BulkUpdateDto.hpp"
 

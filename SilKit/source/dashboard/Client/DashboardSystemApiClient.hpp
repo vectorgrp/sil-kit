@@ -24,14 +24,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "OatppHeaders.hpp"
 
 #include "SimulationCreationRequestDto.hpp"
-#include "SystemStatusDto.hpp"
-#include "ParticipantStatusDto.hpp"
-#include "ServiceDto.hpp"
-#include "DataPublisherDto.hpp"
-#include "DataSubscriberDto.hpp"
-#include "RpcClientDto.hpp"
-#include "RpcServerDto.hpp"
-#include "SimulationEndDto.hpp"
 #include "BulkUpdateDto.hpp"
 
 #include OATPP_CODEGEN_BEGIN(ApiClient)
