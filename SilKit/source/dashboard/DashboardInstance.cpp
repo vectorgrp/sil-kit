@@ -3,12 +3,9 @@
 // SPDX-License-Identifier: MIT
 
 #include "DashboardInstance.hpp"
-
-#include "DashboardSystemApiClient.hpp"
-
 #include "SilKitEvent.hpp"
 #include "SilKitEventHandler.hpp"
-#include "SilKitEventQueue.hpp"
+#include "LockedQueue.hpp"
 #include "SilKitToOatppMapper.hpp"
 
 
@@ -32,10 +29,10 @@ bool ShouldSkipServiceDiscoveryEvent(const SilKit::Core::Discovery::ServiceDisco
 }
 
 
-using SilKit::Dashboard::SilKitEvent;
-using SilKit::Dashboard::SimulationStart;
-using SilKit::Dashboard::SimulationEnd;
-using SilKit::Dashboard::ServiceData;
+using VSilKit::SilKitEvent;
+using VSilKit::SimulationStart;
+using VSilKit::SimulationEnd;
+using VSilKit::ServiceData;
 
 
 } // namespace
@@ -46,15 +43,10 @@ namespace VSilKit {
 
 DashboardInstance::DashboardInstance()
 {
-    oatpp::base::Environment::init();
 }
 
 DashboardInstance::~DashboardInstance()
 {
-    if (_retryPolicy != nullptr)
-    {
-        _retryPolicy->AbortAllRetries();
-    }
 
     try
     {
@@ -65,17 +57,13 @@ DashboardInstance::~DashboardInstance()
         // ignored
     }
 
-    if (_silKitEventQueue != nullptr)
-    {
-        _silKitEventQueue->Stop();
-    }
+    _silKitEventQueue.Stop();
 
     if (_eventQueueWorkerThread.joinable())
     {
         _eventQueueWorkerThread.join();
     }
 
-    oatpp::base::Environment::destroy();
 }
 
 auto DashboardInstance::GetRegistryEventListener() -> SilKit::Core::IRegistryEventListener *
@@ -87,8 +75,6 @@ void DashboardInstance::SetupDashboardConnection(std::string const &dashboardUri
 {
 
     _silKitEventHandler = std::make_shared<SilKit::Dashboard::SilKitEventHandler>(_logger, dashboardUri);
-    _silKitEventQueue = std::make_shared<SilKit::Dashboard::SilKitEventQueue>();
-
     RunEventQueueWorkerThread();
 }
 
@@ -98,16 +84,14 @@ using namespace SilKit::Dashboard;
 class EventQueueWorkerThread
 {
     ILogger* _logger{nullptr};
-    DashboardSystemApiClient* _apiClient{nullptr};
     SilKitEventHandler* _eventHandler{nullptr};
-    SilKitEventQueue* _eventQueue{nullptr};
+    LockedQueue<SilKitEvent>* _eventQueue{nullptr};
     std::future<void> _abort;
 
 public: //CTor
-    EventQueueWorkerThread(ILogger* logger, DashboardSystemApiClient* apiClient, SilKitEventHandler* eventHandler,
-                           SilKitEventQueue* eventQueue, std::future<void> abort)
+    EventQueueWorkerThread(ILogger* logger, SilKitEventHandler* eventHandler,
+                           LockedQueue<SilKitEvent>* eventQueue, std::future<void> abort)
         : _logger{logger}
-        , _apiClient{apiClient}
         , _eventHandler{eventHandler}
         , _eventQueue{eventQueue}
         , _abort{std::move(abort)}
@@ -131,12 +115,11 @@ public: //CTor
 
     void ProcessEventsWithBulkUpdates() const
     {
-        using SilKitEventType = SilKit::Dashboard::SilKitEventType;
 
         std::unordered_map<std::string, uint64_t> simulationNameToId;
         std::unordered_map<uint64_t, SilKit::Dashboard::DashboardBulkUpdate> simulationBulkUpdates;
 
-        std::vector<SilKit::Dashboard::SilKitEvent> events;
+        std::vector<SilKitEvent> events;
         while (_eventQueue->DequeueAllInto(events))
         {
             const auto ProcessAllAccumulatedBulkUpdates = [this, &simulationBulkUpdates] {
@@ -297,7 +280,7 @@ void DashboardInstance::RunEventQueueWorkerThread()
 
     _eventQueueWorkerThreadAbort = std::promise<void>{};
 
-    EventQueueWorkerThread workerThread{_logger, _apiClient.get(), _silKitEventHandler.get(), _silKitEventQueue.get(),
+    EventQueueWorkerThread workerThread{_logger,  _silKitEventHandler.get(), &_silKitEventQueue,
                                         _eventQueueWorkerThreadAbort.get_future()};
 
     _eventQueueWorkerThread = std::thread{std::move(workerThread)};
@@ -340,11 +323,11 @@ void DashboardInstance::OnParticipantConnected(const std::string& simulationName
     {
         const auto connectUri{
             SilKit::Core::Uri::MakeSilKit(_registryUri->Host(), _registryUri->Port(), simulationName)};
-        _silKitEventQueue->Enqueue(
+        _silKitEventQueue.Enqueue(
             SilKitEvent{simulationName, SimulationStart{connectUri.EncodedString(), GetCurrentTime()}});
     }
 
-    _silKitEventQueue->Enqueue(SilKitEvent{
+    _silKitEventQueue.Enqueue(SilKitEvent{
         simulationName, SilKit::Services::Orchestration::ParticipantConnectionInformation{participantName}});
 }
 
@@ -363,13 +346,13 @@ void DashboardInstance::OnParticipantDisconnected(const std::string& simulationN
 
         if (result.systemStateChanged)
         {
-            _silKitEventQueue->Enqueue(SilKitEvent{simulationName, simulationData.systemStateTracker.GetSystemState()});
+            _silKitEventQueue.Enqueue(SilKitEvent{simulationName, simulationData.systemStateTracker.GetSystemState()});
         }
     }
 
     if (isEmpty)
     {
-        _silKitEventQueue->Enqueue(SilKitEvent{simulationName, SimulationEnd{GetCurrentTime()}});
+        _silKitEventQueue.Enqueue(SilKitEvent{simulationName, SimulationEnd{GetCurrentTime()}});
         RemoveSimulationData(simulationName);
     }
 }
@@ -388,7 +371,7 @@ void DashboardInstance::OnRequiredParticipantsUpdate(const std::string &simulati
 
     if (result.systemStateChanged)
     {
-        _silKitEventQueue->Enqueue(SilKitEvent{simulationName, simulationData.systemStateTracker.GetSystemState()});
+        _silKitEventQueue.Enqueue(SilKitEvent{simulationName, simulationData.systemStateTracker.GetSystemState()});
     }
 }
 
@@ -406,12 +389,12 @@ void DashboardInstance::OnParticipantStatusUpdate(
 
     if (result.participantStateChanged)
     {
-        _silKitEventQueue->Enqueue(SilKitEvent{simulationName, participantStatus});
+        _silKitEventQueue.Enqueue(SilKitEvent{simulationName, participantStatus});
     }
 
     if (result.systemStateChanged)
     {
-        _silKitEventQueue->Enqueue(SilKitEvent{simulationName, simulationData.systemStateTracker.GetSystemState()});
+        _silKitEventQueue.Enqueue(SilKitEvent{simulationName, simulationData.systemStateTracker.GetSystemState()});
     }
 }
 
@@ -428,7 +411,7 @@ void DashboardInstance::OnServiceDiscoveryEvent(
         return;
     }
 
-    _silKitEventQueue->Enqueue(
+    _silKitEventQueue.Enqueue(
         SilKitEvent{simulationName, ServiceData{serviceDiscoveryEvent.type, serviceDiscoveryEvent.serviceDescriptor}});
 }
 
@@ -440,7 +423,7 @@ void DashboardInstance::OnMetricsUpdate(const std::string &simulationName, const
 
     std::pair<std::string, VSilKit::MetricsUpdate> data{origin, metricsUpdate};
 
-    _silKitEventQueue->Enqueue(SilKitEvent{simulationName, std::move(data)});
+    _silKitEventQueue.Enqueue(SilKitEvent{simulationName, std::move(data)});
 }
 
 

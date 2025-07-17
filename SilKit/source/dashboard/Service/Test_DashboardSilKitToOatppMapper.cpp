@@ -16,6 +16,8 @@
 
 namespace SilKit {
 namespace Dashboard {
+using namespace VSilKit;
+
 class Test_DashboardSilKitToOatppMapper : public testing::Test
 {
 public:
@@ -257,7 +259,7 @@ TEST_F(Test_DashboardSilKitToOatppMapper, CreateBulkSimulationDto)
     const auto makeControllerCreatedData = [](const std::string& participantName, const std::string& serviceName,
                                               SilKit::Core::EndpointId serviceId, const std::string& networkName,
                                               const std::string& controllerType) -> SilKit::Dashboard::ServiceData {
-        SilKit::Dashboard::ServiceData serviceData;
+        ServiceData serviceData;
         serviceData.discoveryType = Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated;
         serviceData.serviceDescriptor.SetParticipantNameAndComputeId(participantName);
         serviceData.serviceDescriptor.SetServiceType(Core::ServiceType::Controller);

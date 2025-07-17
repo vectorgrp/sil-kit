@@ -11,7 +11,6 @@
 #include "Uri.hpp"
 #include "SilKitToOatppMapper.hpp"
 #include "Client/DashboardSystemServiceClient.hpp"
-#include "DashboardRetryPolicy.hpp"
 
 namespace SilKit {
 namespace Dashboard {
@@ -20,14 +19,16 @@ SilKitEventHandler::SilKitEventHandler(Services::Logging::ILogger* logger, const
     : _logger(logger)
 {
 
+    oatpp::base::Environment::init();
+
     auto uri = SilKit::Core::Uri::Parse(dashboardServerUri);
     SilKit::Dashboard::DashboardComponents dashboardComponents{uri.Host(), uri.Port()};
 
     auto objectMapper = OATPP_GET_COMPONENT(std::shared_ptr<oatpp::data::mapping::ObjectMapper>);
-    auto retryPolicy = std::make_shared<SilKit::Dashboard::DashboardRetryPolicy>(3);
+    _retryPolicy = std::make_shared<SilKit::Dashboard::DashboardRetryPolicy>(3);
     OATPP_COMPONENT(std::shared_ptr<oatpp::network::ClientConnectionProvider>, connectionProvider);
 
-    auto requestExecutor = oatpp::web::client::HttpRequestExecutor::createShared(connectionProvider, retryPolicy);
+    auto requestExecutor = oatpp::web::client::HttpRequestExecutor::createShared(connectionProvider, _retryPolicy);
     _silKitToOatppMapper = std::make_shared<SilKit::Dashboard::SilKitToOatppMapper>();
     _apiClient = SilKit::Dashboard::DashboardSystemApiClient::createShared(requestExecutor, objectMapper);
 
@@ -36,7 +37,19 @@ SilKitEventHandler::SilKitEventHandler(Services::Logging::ILogger* logger, const
     _serviceClient = serviceClient;
 }
 
-SilKitEventHandler::~SilKitEventHandler() {}
+SilKitEventHandler::~SilKitEventHandler()
+{
+    if (_retryPolicy != nullptr)
+    {
+        _retryPolicy->AbortAllRetries();
+        _retryPolicy.reset();
+    }
+    _silKitToOatppMapper.reset();
+    _apiClient.reset();
+    _serviceClient.reset();
+
+    oatpp::base::Environment::destroy();
+}
 
 bool SilKitEventHandler::IsBulkUpdateSupported()
 {

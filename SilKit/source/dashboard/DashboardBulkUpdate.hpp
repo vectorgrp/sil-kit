@@ -26,7 +26,7 @@ struct DashboardBulkUpdate
     std::vector<SystemState> systemStates;
     std::vector<ParticipantConnectionInformation> participantConnectionInformations;
     std::vector<ParticipantStatus> participantStatuses;
-    std::vector<ServiceData> serviceDatas;
+    std::vector<VSilKit::ServiceData> serviceDatas;
 
     auto Empty() const -> bool
     {

@@ -73,13 +73,14 @@ if(SILKIT_BUILD_DASHBOARD)
         IntegrationTests/DashboardTestComponents.hpp
 
         Service/ISilKitToOatppMapper.hpp
-        Service/SilKitEvent.hpp
         Service/SilKitEventHandler.cpp
         Service/SilKitEventHandler.hpp
-        Service/SilKitEventQueue.cpp
-        Service/SilKitEventQueue.hpp
+        
         Service/SilKitToOatppMapper.cpp
         Service/SilKitToOatppMapper.hpp
+
+        LockedQueue.hpp
+        SilKitEvent.hpp
 
         DashboardBulkUpdate.cpp
         DashboardBulkUpdate.hpp
@@ -111,7 +112,7 @@ if(SILKIT_BUILD_DASHBOARD)
 
 
     add_silkit_test_to_executable(SilKitDashboardTests
-        SOURCES Service/Test_DashboardSilKitEventQueue.cpp 
+        SOURCES Test_DashboardSilKitEventQueue.cpp 
         LIBS
         S_SilKitImpl
         O_SilKit_Dashboard

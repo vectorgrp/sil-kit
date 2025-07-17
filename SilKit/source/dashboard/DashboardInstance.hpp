@@ -13,9 +13,10 @@
 #include "Client/DashboardSystemApiClient.hpp"
 #include "Service/ISilKitToOatppMapper.hpp"
 #include "SystemStateTracker.hpp"
-#include "DashboardRetryPolicy.hpp"
 #include "Service/SilKitEventHandler.hpp"
-#include "Service/SilKitEventQueue.hpp"
+
+#include "LockedQueue.hpp"
+#include "SilKitEvent.hpp"
 
 #include <chrono>
 #include <string>
@@ -55,7 +56,6 @@ private:
 
 private:
     void RunEventQueueWorkerThread();
-    void RunBulkUpdateEventQueueWorkerThread();
 
 private: // SilKit::Core::IRegistryEventListener
     void OnLoggerCreated(SilKit::Services::Logging::ILogger* logger) override;
@@ -77,12 +77,8 @@ private:
     /// Assigned in OnRegistryUri
     std::unique_ptr<SilKit::Core::Uri> _registryUri;
 
-    std::shared_ptr<oatpp::data::mapping::ObjectMapper> _objectMapper;
-    std::shared_ptr<SilKit::Dashboard::DashboardRetryPolicy> _retryPolicy;
-    std::shared_ptr<SilKit::Dashboard::DashboardSystemApiClient> _apiClient;
-    std::shared_ptr<SilKit::Dashboard::ISilKitToOatppMapper> _silKitToOatppMapper;
     std::shared_ptr<SilKit::Dashboard::SilKitEventHandler> _silKitEventHandler;
-    std::shared_ptr<SilKit::Dashboard::SilKitEventQueue> _silKitEventQueue;
+    LockedQueue<SilKitEvent> _silKitEventQueue;
 
     std::thread _eventQueueWorkerThread;
     std::promise<void> _eventQueueWorkerThreadAbort;

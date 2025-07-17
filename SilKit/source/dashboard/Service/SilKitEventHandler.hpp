@@ -15,6 +15,7 @@
 #include "ISilKitToOatppMapper.hpp"
 #include "IDashboardSystemServiceClient.hpp"
 #include "DashboardSystemApiClient.hpp"
+#include "DashboardRetryPolicy.hpp"
 
 namespace SilKit {
 namespace Dashboard {
@@ -34,9 +35,10 @@ public: //methods
 
 private: //member
     Services::Logging::ILogger* _logger;
+    std::shared_ptr<SilKit::Dashboard::DashboardRetryPolicy> _retryPolicy;
+    std::shared_ptr<ISilKitToOatppMapper> _silKitToOatppMapper;
     std::shared_ptr<DashboardSystemApiClient> _apiClient;
     std::shared_ptr<IDashboardSystemServiceClient> _serviceClient;
-    std::shared_ptr<ISilKitToOatppMapper> _silKitToOatppMapper;
 };
 
 } // namespace Dashboard
