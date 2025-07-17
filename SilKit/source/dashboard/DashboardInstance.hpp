@@ -13,7 +13,7 @@
 #include "Client/DashboardSystemApiClient.hpp"
 #include "Service/ISilKitToOatppMapper.hpp"
 #include "SystemStateTracker.hpp"
-#include "Service/SilKitEventHandler.hpp"
+#include "Service/DashboardRestClient.hpp"
 
 #include "LockedQueue.hpp"
 #include "SilKitEvent.hpp"
@@ -77,7 +77,7 @@ private:
     /// Assigned in OnRegistryUri
     std::unique_ptr<SilKit::Core::Uri> _registryUri;
 
-    std::shared_ptr<SilKit::Dashboard::SilKitEventHandler> _silKitEventHandler;
+    std::shared_ptr<SilKit::Dashboard::DashboardRestClient> _dashboardRestClient;
     LockedQueue<SilKitEvent> _silKitEventQueue;
 
     std::thread _eventQueueWorkerThread;

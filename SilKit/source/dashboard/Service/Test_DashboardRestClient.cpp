@@ -7,7 +7,7 @@
 
 #include "MockParticipant.hpp"
 
-#include "SilKitEventHandler.hpp"
+#include "DashboardRestClient.hpp"
 
 #include "Mocks/MockSilKitToOatppMapper.hpp"
 #include "Mocks/MockDashboardSystemServiceClient.hpp"
@@ -17,7 +17,7 @@ using namespace testing;
 namespace SilKit {
 namespace Dashboard {
 
-class Test_DashboardSilKitEventHandler : public Test
+class Test_DashboardRestClient : public Test
 {
 public:
     void SetUp() override
@@ -28,9 +28,9 @@ public:
         EXPECT_CALL(_dummyLogger, GetLogLevel).WillRepeatedly(Return(Services::Logging::Level::Warn));
     }
 
-    std::shared_ptr<SilKitEventHandler> CreateService()
+    std::shared_ptr<DashboardRestClient> CreateService()
     {
-        return std::make_shared<SilKitEventHandler>(&_dummyLogger, _mockDashboardSystemServiceClient,
+        return std::make_shared<DashboardRestClient>(&_dummyLogger, _mockDashboardSystemServiceClient,
                                                     _mockSilKitToOatppMapper);
     }
 
@@ -39,7 +39,7 @@ public:
     std::shared_ptr<StrictMock<MockSilKitToOatppMapper>> _mockSilKitToOatppMapper;
 };
 
-TEST_F(Test_DashboardSilKitEventHandler, Create)
+TEST_F(Test_DashboardRestClient, Create)
 {
     // Arrange
 
@@ -49,7 +49,7 @@ TEST_F(Test_DashboardSilKitEventHandler, Create)
     // Assert
 }
 
-TEST_F(Test_DashboardSilKitEventHandler, OnSimulationStart_CreateSimulationSuccess)
+TEST_F(Test_DashboardRestClient, OnSimulationStart_CreateSimulationSuccess)
 {
     // Arrange
     const uint64_t expectedSimulationId = 123;
@@ -67,7 +67,7 @@ TEST_F(Test_DashboardSilKitEventHandler, OnSimulationStart_CreateSimulationSucce
     ASSERT_EQ(res, expectedSimulationId) << "Wrong simulationId!";
 }
 
-TEST_F(Test_DashboardSilKitEventHandler, OnSimulationStart_CreateSimulationFailure)
+TEST_F(Test_DashboardRestClient, OnSimulationStart_CreateSimulationFailure)
 {
     // Arrange
     auto request = SimulationCreationRequestDto::createShared();
@@ -83,7 +83,7 @@ TEST_F(Test_DashboardSilKitEventHandler, OnSimulationStart_CreateSimulationFailu
     ASSERT_EQ(res, 0) << "Wrong simulationId!";
 }
 
-TEST_F(Test_DashboardSilKitEventHandler, OnBulkUpdate)
+TEST_F(Test_DashboardRestClient, OnBulkUpdate)
 {
     constexpr uint64_t expectedSimulationId{123};
     const auto expectedBulkSimulationDto = SilKit::Dashboard::BulkSimulationDto::createShared();

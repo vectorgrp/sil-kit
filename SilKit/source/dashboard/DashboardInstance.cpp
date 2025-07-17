@@ -4,9 +4,9 @@
 
 #include "DashboardInstance.hpp"
 #include "SilKitEvent.hpp"
-#include "SilKitEventHandler.hpp"
 #include "LockedQueue.hpp"
 #include "SilKitToOatppMapper.hpp"
+#include "DashboardRestClient.hpp"
 
 
 namespace Log = SilKit::Services::Logging;
@@ -74,7 +74,7 @@ auto DashboardInstance::GetRegistryEventListener() -> SilKit::Core::IRegistryEve
 void DashboardInstance::SetupDashboardConnection(std::string const &dashboardUri)
 {
 
-    _silKitEventHandler = std::make_shared<SilKit::Dashboard::SilKitEventHandler>(_logger, dashboardUri);
+    _dashboardRestClient = std::make_shared<SilKit::Dashboard::DashboardRestClient>(_logger, dashboardUri);
     RunEventQueueWorkerThread();
 }
 
@@ -84,15 +84,15 @@ using namespace SilKit::Dashboard;
 class EventQueueWorkerThread
 {
     ILogger* _logger{nullptr};
-    SilKitEventHandler* _eventHandler{nullptr};
+    DashboardRestClient* _dashboardRestClient{nullptr};
     LockedQueue<SilKitEvent>* _eventQueue{nullptr};
     std::future<void> _abort;
 
 public: //CTor
-    EventQueueWorkerThread(ILogger* logger, SilKitEventHandler* eventHandler,
+    EventQueueWorkerThread(ILogger* logger, DashboardRestClient* dashboardRestClient,
                            LockedQueue<SilKitEvent>* eventQueue, std::future<void> abort)
         : _logger{logger}
-        , _eventHandler{eventHandler}
+        , _dashboardRestClient{dashboardRestClient}
         , _eventQueue{eventQueue}
         , _abort{std::move(abort)}
     {
@@ -100,7 +100,7 @@ public: //CTor
 
     auto DetectBulkUpdate() const -> bool
     {
-        auto bulkUpdateAvailable = _eventHandler->IsBulkUpdateSupported();
+        auto bulkUpdateAvailable = _dashboardRestClient->IsBulkUpdateSupported();
         if (bulkUpdateAvailable)
         {
             _logger->Debug("Dashboard bulk-updates are available");
@@ -133,7 +133,7 @@ public: //CTor
                         continue;
                     }
 
-                    _eventHandler->OnBulkUpdate(simulationId, bulkUpdate);
+                    _dashboardRestClient->OnBulkUpdate(simulationId, bulkUpdate);
                     bulkUpdate.Clear();
                 }
             };
@@ -162,7 +162,7 @@ public: //CTor
 
                     const auto &simulationStart = event.GetSimulationStart();
                     const auto simulationId =
-                        _eventHandler->OnSimulationStart(simulationStart.connectUri, simulationStart.time);
+                        _dashboardRestClient->OnSimulationStart(simulationStart.connectUri, simulationStart.time);
 
                     if (simulationId == 0)
                     {
@@ -231,7 +231,7 @@ public: //CTor
                 case SilKitEventType::OnMetricUpdate:
                 {
                     const auto &data = event.GetMetricsUpdate();
-                    _eventHandler->OnMetricsUpdate(simulationId, data.first, data.second);
+                    _dashboardRestClient->OnMetricsUpdate(simulationId, data.first, data.second);
                 }
                 break;
 
@@ -280,7 +280,7 @@ void DashboardInstance::RunEventQueueWorkerThread()
 
     _eventQueueWorkerThreadAbort = std::promise<void>{};
 
-    EventQueueWorkerThread workerThread{_logger,  _silKitEventHandler.get(), &_silKitEventQueue,
+    EventQueueWorkerThread workerThread{_logger,  _dashboardRestClient.get(), &_silKitEventQueue,
                                         _eventQueueWorkerThreadAbort.get_future()};
 
     _eventQueueWorkerThread = std::thread{std::move(workerThread)};
