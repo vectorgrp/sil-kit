@@ -22,8 +22,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #pragma once
 
 
-#include "IDashboard.hpp"
-
 #include <memory>
 #include <string>
 
@@ -40,7 +38,7 @@ namespace Dashboard {
 
 class Dashboard;
 
-class OatppContext : public SilKit::Dashboard::IDashboard
+class OatppContext
 {
 public:
     OatppContext(std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig,

@@ -25,7 +25,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 struct MockInputStream : public oatpp::data::stream::InputStream
 {
-    ~MockInputStream() = default;
 
     MOCK_METHOD(void, setInputStreamIOMode, (oatpp::data::stream::IOMode), (override));
 
