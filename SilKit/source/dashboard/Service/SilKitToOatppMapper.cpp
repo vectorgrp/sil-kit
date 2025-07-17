@@ -236,14 +236,6 @@ oatpp::Object<RpcSpecDto> CreateRpcSpecDto(const Core::ServiceDescriptor& servic
     return rpcSpec;
 }
 
-
-oatpp::Object<SimulationEndDto> SilKitToOatppMapper::CreateSimulationEndDto(uint64_t stop)
-{
-    auto simulationEnd = SimulationEndDto::createShared();
-    simulationEnd->stopped = stop;
-    return simulationEnd;
-}
-
 auto SilKitToOatppMapper::CreateBulkControllerDto(const ServiceDescriptor& serviceDescriptor)
     -> Object<BulkControllerDto>
 {

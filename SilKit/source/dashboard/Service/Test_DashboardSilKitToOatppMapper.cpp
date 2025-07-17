@@ -128,23 +128,6 @@ TEST_F(Test_DashboardSilKitToOatppMapper, CreateServiceDto_MapNameAndNetworkName
     ASSERT_STREQ(dto->networkName->c_str(), expectedNetwork.c_str());
 }
 
-
-
-
-TEST_F(Test_DashboardSilKitToOatppMapper, CreateSimulationEndDto)
-{
-    // Arrange
-    const auto now = std::chrono::system_clock::now().time_since_epoch();
-    const uint64_t expectedStopTime = std::chrono::duration_cast<std::chrono::milliseconds>(now).count();
-
-    // Act
-    const auto dataMapper = CreateService();
-    const auto dto = dataMapper->CreateSimulationEndDto(expectedStopTime);
-
-    // Assert
-    ASSERT_EQ(dto->stopped, expectedStopTime);
-}
-
 TEST_F(Test_DashboardSilKitToOatppMapper, CreateBulkControllerDto)
 {
     // Arrange

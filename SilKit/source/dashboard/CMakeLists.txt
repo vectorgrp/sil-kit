@@ -59,19 +59,14 @@ if(SILKIT_BUILD_DASHBOARD)
         Client/DashboardRetryPolicy.hpp
         Client/IDashboardSystemServiceClient.hpp
 
-        Dto/DataPublisherDto.hpp
         Dto/DataSpecDto.hpp
-        Dto/DataSubscriberDto.hpp
         Dto/MatchingLabelDto.hpp
         Dto/ParticipantStatusDto.hpp
-        Dto/RpcClientDto.hpp
-        Dto/RpcServerDto.hpp
         Dto/RpcSpecDto.hpp
         Dto/ServiceDto.hpp
         Dto/SimulationConfigurationDto.hpp
         Dto/SimulationCreationRequestDto.hpp
         Dto/SimulationCreationResponseDto.hpp
-        Dto/SimulationEndDto.hpp
         Dto/SystemStatusDto.hpp
 
         IntegrationTests/ClientServerTestRunner.hpp
