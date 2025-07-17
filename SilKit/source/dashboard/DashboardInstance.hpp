@@ -14,7 +14,7 @@
 #include "Service/ISilKitToOatppMapper.hpp"
 #include "SystemStateTracker.hpp"
 #include "DashboardRetryPolicy.hpp"
-#include "ISilKitEventHandler.hpp"
+#include "Service/SilKitEventHandler.hpp"
 #include "ISilKitEventQueue.hpp"
 
 #include <chrono>
@@ -81,7 +81,7 @@ private:
     std::shared_ptr<SilKit::Dashboard::DashboardRetryPolicy> _retryPolicy;
     std::shared_ptr<SilKit::Dashboard::DashboardSystemApiClient> _apiClient;
     std::shared_ptr<SilKit::Dashboard::ISilKitToOatppMapper> _silKitToOatppMapper;
-    std::shared_ptr<SilKit::Dashboard::ISilKitEventHandler> _silKitEventHandler;
+    std::shared_ptr<SilKit::Dashboard::SilKitEventHandler> _silKitEventHandler;
     std::shared_ptr<SilKit::Dashboard::ISilKitEventQueue> _silKitEventQueue;
 
     std::thread _eventQueueWorkerThread;

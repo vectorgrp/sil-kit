@@ -21,9 +21,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #pragma once
 
-#include "ISilKitEventHandler.hpp"
+#include "DashboardBulkUpdate.hpp"
+#include "MetricsDatatypes.hpp"
 
 #include <memory>
+#include <string>
 
 #include "silkit/services/logging/ILogger.hpp"
 
@@ -33,7 +35,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 namespace SilKit {
 namespace Dashboard {
 
-class SilKitEventHandler : public ISilKitEventHandler
+class SilKitEventHandler
 {
 public:
     SilKitEventHandler(Services::Logging::ILogger* logger,
@@ -42,11 +44,11 @@ public:
     ~SilKitEventHandler();
 
 public: //methods
-    uint64_t OnSimulationStart(const std::string& connectUri, uint64_t time) override;
-    void OnBulkUpdate(uint64_t simulationId, const DashboardBulkUpdate& bulkUpdate) override;
+    uint64_t OnSimulationStart(const std::string& connectUri, uint64_t time);
+    void OnBulkUpdate(uint64_t simulationId, const DashboardBulkUpdate& bulkUpdate);
 
     void OnMetricsUpdate(uint64_t simulationId, const std::string& origin,
-                         const VSilKit::MetricsUpdate& metricsUpdate) override;
+                         const VSilKit::MetricsUpdate& metricsUpdate);
 
 private: //methods
     void OnControllerCreated(uint64_t simulationId, const Core::ServiceDescriptor& serviceDescriptor);
