@@ -4,10 +4,7 @@
 
 #include "DashboardInstance.hpp"
 
-#include "DashboardComponents.hpp"
-#include "DashboardRetryPolicy.hpp"
 #include "DashboardSystemApiClient.hpp"
-#include "Client/DashboardSystemServiceClient.hpp"
 
 #include "SilKitEvent.hpp"
 #include "SilKitEventHandler.hpp"
@@ -88,24 +85,8 @@ auto DashboardInstance::GetRegistryEventListener() -> SilKit::Core::IRegistryEve
 
 void DashboardInstance::SetupDashboardConnection(std::string const &dashboardUri)
 {
-    auto uri = SilKit::Core::Uri::Parse(dashboardUri);
-    SilKit::Dashboard::DashboardComponents dashboardComponents{uri.Host(), uri.Port()};
 
-    _objectMapper = OATPP_GET_COMPONENT(std::shared_ptr<oatpp::data::mapping::ObjectMapper>);
-
-    _retryPolicy = std::make_shared<SilKit::Dashboard::DashboardRetryPolicy>(3);
-
-    OATPP_COMPONENT(std::shared_ptr<oatpp::network::ClientConnectionProvider>, connectionProvider);
-    auto requestExecutor = oatpp::web::client::HttpRequestExecutor::createShared(connectionProvider, _retryPolicy);
-
-    _apiClient = SilKit::Dashboard::DashboardSystemApiClient::createShared(requestExecutor, _objectMapper);
-    _silKitToOatppMapper = std::make_shared<SilKit::Dashboard::SilKitToOatppMapper>();
-
-    auto serviceClient =
-        std::make_shared<SilKit::Dashboard::DashboardSystemServiceClient>(_logger, _apiClient, _objectMapper);
-
-    _silKitEventHandler =
-        std::make_shared<SilKit::Dashboard::SilKitEventHandler>(_logger, serviceClient, _silKitToOatppMapper);
+    _silKitEventHandler = std::make_shared<SilKit::Dashboard::SilKitEventHandler>(_logger, dashboardUri);
     _silKitEventQueue = std::make_shared<SilKit::Dashboard::SilKitEventQueue>();
 
     RunEventQueueWorkerThread();
@@ -135,17 +116,7 @@ public: //CTor
 
     auto DetectBulkUpdate() const -> bool
     {
-        bool bulkUpdateAvailable = false;
-
-        auto bulkSimulationDto = SilKit::Dashboard::BulkSimulationDto::createShared();
-        const auto response = _apiClient->updateSimulation(oatpp::UInt64{std::uint64_t{0}}, bulkSimulationDto);
-
-        if (response)
-        {
-            const auto statusCode = response->getStatusCode();
-            bulkUpdateAvailable = 200 <= statusCode && statusCode < 300;
-        }
-
+        auto bulkUpdateAvailable = _eventHandler->IsBulkUpdateSupported();
         if (bulkUpdateAvailable)
         {
             _logger->Debug("Dashboard bulk-updates are available");

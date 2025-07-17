@@ -2,31 +2,59 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "SilKitEventHandler.hpp"
-
-#include "LoggerMessage.hpp"
 #include "silkit/services/orchestration/string_utils.hpp"
 #include "silkit/SilKit.hpp"
+
+#include "SilKitEventHandler.hpp"
+#include "DashboardComponents.hpp"
+#include "LoggerMessage.hpp"
 #include "Uri.hpp"
+#include "SilKitToOatppMapper.hpp"
+#include "Client/DashboardSystemServiceClient.hpp"
+#include "DashboardRetryPolicy.hpp"
 
 namespace SilKit {
 namespace Dashboard {
 
-SilKitEventHandler::SilKitEventHandler(Services::Logging::ILogger* logger,
-                                       std::shared_ptr<IDashboardSystemServiceClient> dashboardSystemServiceClient,
-                                       std::shared_ptr<ISilKitToOatppMapper> silKitToOatppMapper)
+SilKitEventHandler::SilKitEventHandler(Services::Logging::ILogger* logger, const std::string& dashboardServerUri)
     : _logger(logger)
-    , _dashboardSystemServiceClient(dashboardSystemServiceClient)
-    , _silKitToOatppMapper(silKitToOatppMapper)
 {
+
+    auto uri = SilKit::Core::Uri::Parse(dashboardServerUri);
+    SilKit::Dashboard::DashboardComponents dashboardComponents{uri.Host(), uri.Port()};
+
+    auto objectMapper = OATPP_GET_COMPONENT(std::shared_ptr<oatpp::data::mapping::ObjectMapper>);
+    auto retryPolicy = std::make_shared<SilKit::Dashboard::DashboardRetryPolicy>(3);
+    OATPP_COMPONENT(std::shared_ptr<oatpp::network::ClientConnectionProvider>, connectionProvider);
+
+    auto requestExecutor = oatpp::web::client::HttpRequestExecutor::createShared(connectionProvider, retryPolicy);
+    _silKitToOatppMapper = std::make_shared<SilKit::Dashboard::SilKitToOatppMapper>();
+    _apiClient = SilKit::Dashboard::DashboardSystemApiClient::createShared(requestExecutor, objectMapper);
+
+    auto serviceClient =
+        std::make_shared<SilKit::Dashboard::DashboardSystemServiceClient>(_logger, _apiClient, objectMapper);
+    _serviceClient = serviceClient;
 }
 
 SilKitEventHandler::~SilKitEventHandler() {}
 
+bool SilKitEventHandler::IsBulkUpdateSupported()
+{
+    
+    auto bulkSimulationDto = SilKit::Dashboard::BulkSimulationDto::createShared();
+    const auto response = _apiClient->updateSimulation(oatpp::UInt64{std::uint64_t{0}}, bulkSimulationDto);
+    if (response)
+    {
+        const auto statusCode = response->getStatusCode();
+        return  200 <= statusCode && statusCode < 300;
+    }
+    return false;
+}
+
 uint64_t SilKitEventHandler::OnSimulationStart(const std::string& connectUri, uint64_t time)
 {
     Services::Logging::Info(_logger, "Dashboard: creating simulation {} {}", connectUri, time);
-    auto simulation = _dashboardSystemServiceClient->CreateSimulation(
+    auto simulation = _serviceClient->CreateSimulation(
         _silKitToOatppMapper->CreateSimulationCreationRequestDto(connectUri, time));
     if (simulation)
     {
@@ -39,26 +67,14 @@ uint64_t SilKitEventHandler::OnSimulationStart(const std::string& connectUri, ui
 
 void SilKitEventHandler::OnBulkUpdate(uint64_t simulationId, const DashboardBulkUpdate& bulkUpdate)
 {
-    _dashboardSystemServiceClient->UpdateSimulation(simulationId,
-                                                    _silKitToOatppMapper->CreateBulkSimulationDto(bulkUpdate));
+    _serviceClient->UpdateSimulation(simulationId, _silKitToOatppMapper->CreateBulkSimulationDto(bulkUpdate));
 }
 
 void SilKitEventHandler::OnMetricsUpdate(uint64_t simulationId, const std::string& origin,
                                          const VSilKit::MetricsUpdate& metricsUpdate)
 {
-    _dashboardSystemServiceClient->UpdateSimulationMetrics(
-        simulationId, _silKitToOatppMapper->CreateMetricsUpdateDto(origin, metricsUpdate));
-}
-
-
-void SilKitEventHandler::OnControllerCreated(uint64_t simulationId, const Core::ServiceDescriptor& serviceDescriptor)
-{
-    Services::Logging::Debug(_logger, "Dashboard: adding service for simulation {} {}", simulationId,
-                             serviceDescriptor);
-}
-
-void SilKitEventHandler::OnLinkCreated(uint64_t simulationId, const Core::ServiceDescriptor& serviceDescriptor)
-{
+    _serviceClient->UpdateSimulationMetrics(simulationId,
+                                            _silKitToOatppMapper->CreateMetricsUpdateDto(origin, metricsUpdate));
 }
 
 } // namespace Dashboard
