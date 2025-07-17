@@ -83,7 +83,7 @@ if(SILKIT_BUILD_DASHBOARD)
         LockedQueue.hpp
         SilKitEvent.hpp
 
-        DashboardBulkUpdate.cpp
+        
         DashboardBulkUpdate.hpp
         TestResult.hpp
         OatppHeaders.cpp

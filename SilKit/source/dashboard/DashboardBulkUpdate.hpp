@@ -16,8 +16,9 @@
 namespace SilKit {
 namespace Dashboard {
 
-struct DashboardBulkUpdate
+class DashboardBulkUpdate
 {
+public:
     using ParticipantConnectionInformation = SilKit::Services::Orchestration::ParticipantConnectionInformation;
     using SystemState = SilKit::Services::Orchestration::SystemState;
     using ParticipantStatus = SilKit::Services::Orchestration::ParticipantStatus;

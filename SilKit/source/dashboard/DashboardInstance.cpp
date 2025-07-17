@@ -84,12 +84,12 @@ using namespace SilKit::Dashboard;
 class EventQueueWorkerThread
 {
     ILogger* _logger{nullptr};
-    DashboardRestClient* _dashboardRestClient{nullptr};
+    IRestClient* _dashboardRestClient{nullptr};
     LockedQueue<SilKitEvent>* _eventQueue{nullptr};
     std::future<void> _abort;
 
 public: //CTor
-    EventQueueWorkerThread(ILogger* logger, DashboardRestClient* dashboardRestClient,
+    EventQueueWorkerThread(ILogger* logger, IRestClient* dashboardRestClient,
                            LockedQueue<SilKitEvent>* eventQueue, std::future<void> abort)
         : _logger{logger}
         , _dashboardRestClient{dashboardRestClient}
