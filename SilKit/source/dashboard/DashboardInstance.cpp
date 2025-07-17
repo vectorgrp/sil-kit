@@ -280,113 +280,6 @@ struct EventQueueWorkerThread
         }
     }
 
-    void ProcessEventsWithIndividualRequests() const
-    {
-        using SilKitEventType = SilKit::Dashboard::SilKitEventType;
-
-        std::unordered_map<std::string, uint64_t> simulationNameToId;
-
-        std::vector<SilKit::Dashboard::SilKitEvent> events;
-        while (eventQueue->DequeueAllInto(events))
-        {
-            for (const auto &event : events)
-            {
-                if (!abort.valid() || abort.wait_for(std::chrono::seconds{}) != std::future_status::timeout)
-                {
-                    return;
-                }
-
-                // process OnSimulationStart separately, since it does
-
-                if (event.Type() == SilKitEventType::OnSimulationStart)
-                {
-                    const auto it{simulationNameToId.find(event.GetSimulationName())};
-                    if (it != simulationNameToId.end())
-                    {
-                        Log::Warn(logger, "Dashboard: Simulation {} already has id {}", event.GetSimulationName(),
-                                  it->second);
-                        continue;
-                    }
-
-                    const auto &simulationStart = event.GetSimulationStart();
-                    const auto simulationId =
-                        eventHandler->OnSimulationStart(simulationStart.connectUri, simulationStart.time);
-
-                    if (simulationId == 0)
-                    {
-                        Log::Warn(logger, "Dashboard: Simulation {} could not be created", event.GetSimulationName());
-                        continue;
-                    }
-
-                    simulationNameToId.emplace(event.GetSimulationName(), simulationId);
-
-                    continue;
-                }
-
-                // fetch the simulation id for the given name
-
-                const auto it{simulationNameToId.find(event.GetSimulationName())};
-                if (it == simulationNameToId.end())
-                {
-                    Log::Warn(logger, "Dashboard: Simulation {} is unknown", event.GetSimulationName());
-                    continue;
-                }
-
-                const auto simulationId{it->second};
-
-                // process all event types, except OnSimulationStart
-
-                switch (event.Type())
-                {
-                case SilKitEventType::OnParticipantConnected:
-                {
-                    const auto &participantConnectionInformation = event.GetParticipantConnectionInformation();
-                    eventHandler->OnParticipantConnected(simulationId, participantConnectionInformation);
-                }
-                break;
-
-                case SilKitEventType::OnSystemStateChanged:
-                {
-                    const auto &systemState = event.GetSystemState();
-                    eventHandler->OnSystemStateChanged(simulationId, systemState);
-                }
-                break;
-
-                case SilKitEventType::OnParticipantStatusChanged:
-                {
-                    const auto &participantStatus = event.GetParticipantStatus();
-                    eventHandler->OnParticipantStatusChanged(simulationId, participantStatus);
-                }
-                break;
-
-                case SilKitEventType::OnServiceDiscoveryEvent:
-                {
-                    const auto &serviceData = event.GetServiceData();
-                    eventHandler->OnServiceDiscoveryEvent(simulationId, serviceData.discoveryType,
-                                                          serviceData.serviceDescriptor);
-                }
-                break;
-
-                case SilKitEventType::OnSimulationEnd:
-                {
-                    const auto &simulationEnd = event.GetSimulationEnd();
-                    eventHandler->OnSimulationEnd(simulationId, simulationEnd.time);
-
-                    simulationNameToId.erase(it);
-                }
-                break;
-
-                default:
-                {
-                    Log::Error(logger, "Dashboard: unexpected SilKitEventType");
-                }
-                break;
-                }
-            }
-            events.clear();
-        }
-    }
-
     void operator()() const
     try
     {
@@ -400,8 +293,8 @@ struct EventQueueWorkerThread
         }
         else
         {
-            ProcessEventsWithIndividualRequests();
-        }
+            throw SilKit::SilKitError{"Bulk update for REST API is required!"};
+        }   
     }
     catch (const std::exception &exception)
     {

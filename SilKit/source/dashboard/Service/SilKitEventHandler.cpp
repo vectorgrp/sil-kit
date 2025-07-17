@@ -54,57 +54,6 @@ uint64_t SilKitEventHandler::OnSimulationStart(const std::string& connectUri, ui
     return 0;
 }
 
-void SilKitEventHandler::OnSimulationEnd(uint64_t simulationId, uint64_t time)
-{
-    Services::Logging::Info(_logger, "Dashboard: setting end for simulation {}", simulationId);
-    _dashboardSystemServiceClient->SetSimulationEnd(simulationId, _silKitToOatppMapper->CreateSimulationEndDto(time));
-}
-
-void SilKitEventHandler::OnParticipantConnected(
-    uint64_t simulationId, const Services::Orchestration::ParticipantConnectionInformation& participantInformation)
-{
-    Services::Logging::Debug(_logger, "Dashboard: adding participant for simulation {} {}", simulationId,
-                             participantInformation.participantName);
-    auto participantName = SilKit::Core::Uri::UrlEncode(participantInformation.participantName);
-    _dashboardSystemServiceClient->AddParticipantToSimulation(simulationId, participantName);
-}
-
-void SilKitEventHandler::OnSystemStateChanged(uint64_t simulationId, Services::Orchestration::SystemState systemState)
-{
-    Services::Logging::Debug(_logger, "Dashboard: updating system state for simulation {} {}", simulationId,
-                             systemState);
-    _dashboardSystemServiceClient->UpdateSystemStatusForSimulation(
-        simulationId, _silKitToOatppMapper->CreateSystemStatusDto(systemState));
-}
-
-void SilKitEventHandler::OnParticipantStatusChanged(uint64_t simulationId,
-                                                    const Services::Orchestration::ParticipantStatus& participantStatus)
-{
-    Services::Logging::Debug(_logger, "Dashboard: adding participant status for simulation {} {} {}", simulationId,
-                             participantStatus.participantName, participantStatus.state);
-    auto participantName = SilKit::Core::Uri::UrlEncode(participantStatus.participantName);
-    _dashboardSystemServiceClient->AddParticipantStatusForSimulation(
-        simulationId, participantName, _silKitToOatppMapper->CreateParticipantStatusDto(participantStatus));
-}
-
-void SilKitEventHandler::OnServiceDiscoveryEvent(uint64_t simulationId,
-                                                 Core::Discovery::ServiceDiscoveryEvent::Type discoveryType,
-                                                 const Core::ServiceDescriptor& serviceDescriptor)
-{
-    SILKIT_UNUSED_ARG(discoveryType);
-    switch (serviceDescriptor.GetServiceType())
-    {
-    case Core::ServiceType::Controller:
-        OnControllerCreated(simulationId, serviceDescriptor);
-        break;
-    case Core::ServiceType::Link:
-        OnLinkCreated(simulationId, serviceDescriptor);
-        break;
-    default:
-        break;
-    }
-}
-
 void SilKitEventHandler::OnBulkUpdate(uint64_t simulationId, const DashboardBulkUpdate& bulkUpdate)
 {
     _dashboardSystemServiceClient->UpdateSimulation(simulationId,
@@ -123,6 +72,7 @@ void SilKitEventHandler::OnControllerCreated(uint64_t simulationId, const Core::
 {
     Services::Logging::Debug(_logger, "Dashboard: adding service for simulation {} {}", simulationId,
                              serviceDescriptor);
+    /* vikabgm
     std::string controllerType;
     if (!serviceDescriptor.GetSupplementalDataItem(Core::Discovery::controllerType, controllerType))
     {
@@ -203,10 +153,12 @@ void SilKitEventHandler::OnControllerCreated(uint64_t simulationId, const Core::
             simulationId, participantName, parentServiceId, serviceDescriptor.GetServiceId(),
             _silKitToOatppMapper->CreateServiceDto(serviceDescriptor));
     }
+    */
 }
 
 void SilKitEventHandler::OnLinkCreated(uint64_t simulationId, const Core::ServiceDescriptor& serviceDescriptor)
 {
+    /* vikabgm
     Services::Logging::Debug(_logger, "Dashboard: adding network for simulation {} {}", simulationId,
                              serviceDescriptor);
     auto participantName = SilKit::Core::Uri::UrlEncode(serviceDescriptor.GetParticipantName());
@@ -228,6 +180,7 @@ void SilKitEventHandler::OnLinkCreated(uint64_t simulationId, const Core::Servic
     default:
         return;
     }
+    */
 }
 
 } // namespace Dashboard

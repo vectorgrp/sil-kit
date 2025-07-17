@@ -43,71 +43,7 @@ public:
 public:
     oatpp::Object<SimulationCreationResponseDto> CreateSimulation(
         oatpp::Object<SimulationCreationRequestDto> simulation) override;
-
     void UpdateSimulation(oatpp::UInt64 simulationId, oatpp::Object<BulkSimulationDto> bulkSimulation) override;
-
-    void AddParticipantToSimulation(oatpp::UInt64 simulationId, oatpp::String participantName) override;
-
-    void AddParticipantStatusForSimulation(oatpp::UInt64 simulationId, oatpp::String participantName,
-                                           oatpp::Object<ParticipantStatusDto> participantStatus) override;
-
-    void AddCanControllerForParticipantOfSimulation(oatpp::UInt64 simulationId, oatpp::String participantName,
-                                                    oatpp::UInt64 serviceId,
-                                                    oatpp::Object<ServiceDto> canController) override;
-
-    void AddEthernetControllerForParticipantOfSimulation(oatpp::UInt64 simulationId, oatpp::String participantName,
-                                                         oatpp::UInt64 serviceId,
-                                                         oatpp::Object<ServiceDto> ethernetController) override;
-
-    void AddFlexrayControllerForParticipantOfSimulation(oatpp::UInt64 simulationId, oatpp::String participantName,
-                                                        oatpp::UInt64 serviceId,
-                                                        oatpp::Object<ServiceDto> flexrayController) override;
-
-    void AddLinControllerForParticipantOfSimulation(oatpp::UInt64 simulationId, oatpp::String participantName,
-                                                    oatpp::UInt64 serviceId,
-                                                    oatpp::Object<ServiceDto> linController) override;
-
-    void AddDataPublisherForParticipantOfSimulation(oatpp::UInt64 simulationId, oatpp::String participantName,
-                                                    oatpp::UInt64 serviceId,
-                                                    oatpp::Object<DataPublisherDto> dataPublisher) override;
-
-    void AddDataSubscriberForParticipantOfSimulation(oatpp::UInt64 simulationId, oatpp::String participantName,
-                                                     oatpp::UInt64 serviceId,
-                                                     oatpp::Object<DataSubscriberDto> dataSubscriber) override;
-
-    void AddDataSubscriberInternalForParticipantOfSimulation(oatpp::UInt64 simulationId, oatpp::String participantName,
-                                                             oatpp::String parentServiceId, oatpp::UInt64 serviceId,
-                                                             oatpp::Object<ServiceDto> dataSubscriberInternal) override;
-
-    void AddRpcClientForParticipantOfSimulation(oatpp::UInt64 simulationId, oatpp::String participantName,
-                                                oatpp::UInt64 serviceId,
-                                                oatpp::Object<RpcClientDto> rpcClient) override;
-
-    void AddRpcServerForParticipantOfSimulation(oatpp::UInt64 simulationId, oatpp::String participantName,
-                                                oatpp::UInt64 serviceId,
-                                                oatpp::Object<RpcServerDto> rpcServer) override;
-
-    void AddRpcServerInternalForParticipantOfSimulation(oatpp::UInt64 simulationId, oatpp::String participantName,
-                                                        oatpp::String parentServiceId, oatpp::UInt64 serviceId,
-                                                        oatpp::Object<ServiceDto> rpcServerInternal) override;
-
-    void AddCanNetworkToSimulation(oatpp::UInt64 simulationId, oatpp::String participantName,
-                                   oatpp::String networkName) override;
-
-    void AddEthernetNetworkToSimulation(oatpp::UInt64 simulationId, oatpp::String participantName,
-                                        oatpp::String networkName) override;
-
-    void AddFlexrayNetworkToSimulation(oatpp::UInt64 simulationId, oatpp::String participantName,
-                                       oatpp::String networkName) override;
-
-    void AddLinNetworkToSimulation(oatpp::UInt64 simulationId, oatpp::String participantName,
-                                   oatpp::String networkName) override;
-
-    void UpdateSystemStatusForSimulation(oatpp::UInt64 simulationId,
-                                         oatpp::Object<SystemStatusDto> systemStatus) override;
-
-    void SetSimulationEnd(oatpp::UInt64 simulationId, oatpp::Object<SimulationEndDto> simulation) override;
-
     void UpdateSimulationMetrics(oatpp::UInt64 simulationId, oatpp::Object<MetricsUpdateDto> metrics) override;
 
 private:

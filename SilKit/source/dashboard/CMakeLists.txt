@@ -94,9 +94,6 @@ if(SILKIT_BUILD_DASHBOARD)
 
         DashboardBulkUpdate.cpp
         DashboardBulkUpdate.hpp
-        IDashboard.hpp
-        OatppContext.cpp
-        OatppContext.hpp
         TestResult.hpp
         OatppHeaders.cpp
         OatppHeaders.hpp

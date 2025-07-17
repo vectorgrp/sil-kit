@@ -149,57 +149,5 @@ TEST_F(Test_DashboardSystemServiceClient, CreateSimulation_Failure)
     ASSERT_STREQ(actualPath->c_str(), "system-service/v1.0/simulations");
 }
 
-TEST_F(Test_DashboardSystemServiceClient, SetSimulationEnd_Success)
-{
-    // Arrange
-    EXPECT_CALL(*_mockObjectMapper, write);
-    oatpp::String actualPath;
-    oatpp::String actualMethod;
-    SetupExecuteRequest(Status::CODE_204,
-                        [&actualPath, &actualMethod](auto currentMethod, auto pathTemplate, auto map) {
-        actualMethod = currentMethod;
-        actualPath = pathTemplate.format(map);
-    });
-    EXPECT_CALL(_dummyLogger, Log(Services::Logging::Level::Debug, "Dashboard: setting simulation end returned 204"));
-
-    // Act
-    {
-        const auto service = CreateService();
-        const oatpp::UInt64 expectedSimulationId = 123;
-        auto request = SimulationEndDto::createShared();
-        service->SetSimulationEnd(expectedSimulationId, request);
-    }
-
-    // Assert
-    ASSERT_STREQ(actualMethod->c_str(), "POST");
-    ASSERT_STREQ(actualPath->c_str(), "system-service/v1.0/simulations/123");
-}
-
-TEST_F(Test_DashboardSystemServiceClient, SetSimulationEnd_Failure)
-{
-    // Arrange
-    EXPECT_CALL(*_mockObjectMapper, write);
-    oatpp::String actualPath;
-    oatpp::String actualMethod;
-    SetupExecuteRequest(Status::CODE_500,
-                        [&actualPath, &actualMethod](auto currentMethod, auto pathTemplate, auto map) {
-        actualMethod = currentMethod;
-        actualPath = pathTemplate.format(map);
-    });
-    EXPECT_CALL(_dummyLogger, Log(Services::Logging::Level::Error, "Dashboard: setting simulation end returned 500"));
-
-    // Act
-    {
-        const auto service = CreateService();
-        const oatpp::UInt64 expectedSimulationId = 123;
-        auto request = SimulationEndDto::createShared();
-        service->SetSimulationEnd(expectedSimulationId, request);
-    }
-
-    // Assert
-    ASSERT_STREQ(actualMethod->c_str(), "POST");
-    ASSERT_STREQ(actualPath->c_str(), "system-service/v1.0/simulations/123");
-}
-
 } // namespace Dashboard
 } // namespace SilKit

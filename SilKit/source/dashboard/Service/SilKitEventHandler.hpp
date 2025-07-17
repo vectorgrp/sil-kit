@@ -43,15 +43,6 @@ public:
 
 public: //methods
     uint64_t OnSimulationStart(const std::string& connectUri, uint64_t time) override;
-    void OnSimulationEnd(uint64_t simulationId, uint64_t time) override;
-    void OnParticipantConnected(
-        uint64_t simulationId,
-        const Services::Orchestration::ParticipantConnectionInformation& participantInformation) override;
-    void OnParticipantStatusChanged(uint64_t simulationId,
-                                    const Services::Orchestration::ParticipantStatus& participantStatus) override;
-    void OnSystemStateChanged(uint64_t simulationId, Services::Orchestration::SystemState systemState) override;
-    void OnServiceDiscoveryEvent(uint64_t simulationId, Core::Discovery::ServiceDiscoveryEvent::Type discoveryType,
-                                 const Core::ServiceDescriptor& serviceDescriptor) override;
     void OnBulkUpdate(uint64_t simulationId, const DashboardBulkUpdate& bulkUpdate) override;
 
     void OnMetricsUpdate(uint64_t simulationId, const std::string& origin,
