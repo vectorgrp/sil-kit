@@ -72,7 +72,6 @@ if(SILKIT_BUILD_DASHBOARD)
         IntegrationTests/ClientServerTestRunner.hpp
         IntegrationTests/DashboardTestComponents.hpp
 
-        Service/ISilKitEventQueue.hpp
         Service/ISilKitToOatppMapper.hpp
         Service/SilKitEvent.hpp
         Service/SilKitEventHandler.cpp

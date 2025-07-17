@@ -21,26 +21,27 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #pragma once
 
-#include "ISilKitEventQueue.hpp"
+#include "SilKitEvent.hpp"
 
 #include <queue>
 #include <mutex>
 #include <condition_variable>
-
+#include <deque>
+#include <vector>
 
 namespace SilKit {
 
 namespace Dashboard {
 
-class SilKitEventQueue : public ISilKitEventQueue
+class SilKitEventQueue
 {
 public:
     SilKitEventQueue();
     ~SilKitEventQueue();
 
-    void Enqueue(const SilKitEvent& obj) override;
-    bool DequeueAllInto(std::vector<SilKitEvent>& events) override;
-    void Stop() override;
+    void Enqueue(const SilKitEvent& obj);
+    bool DequeueAllInto(std::vector<SilKitEvent>& events);
+    void Stop();
 
 protected:
     std::mutex _mutex;

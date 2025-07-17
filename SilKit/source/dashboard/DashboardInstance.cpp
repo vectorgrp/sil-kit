@@ -119,12 +119,12 @@ class EventQueueWorkerThread
     ILogger* _logger{nullptr};
     DashboardSystemApiClient* _apiClient{nullptr};
     SilKitEventHandler* _eventHandler{nullptr};
-    ISilKitEventQueue* _eventQueue{nullptr};
+    SilKitEventQueue* _eventQueue{nullptr};
     std::future<void> _abort;
 
 public: //CTor
     EventQueueWorkerThread(ILogger* logger, DashboardSystemApiClient* apiClient, SilKitEventHandler* eventHandler,
-                           ISilKitEventQueue* eventQueue, std::future<void> abort)
+                           SilKitEventQueue* eventQueue, std::future<void> abort)
         : _logger{logger}
         , _apiClient{apiClient}
         , _eventHandler{eventHandler}
