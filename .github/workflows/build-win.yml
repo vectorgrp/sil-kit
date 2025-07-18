@@ -85,5 +85,5 @@ jobs:
 
     - uses: ./.github/actions/build-cmake-preset
       with:
-        preset-name: x86-release
+        preset-name: x86-relwithdebinfo
         artifact-label: ${{ github.job }}
