@@ -7,6 +7,7 @@ include(CMakeFindBinUtils)
 macro(silkit_split_debugsymbols targetName)
     set(_targetFile "$<TARGET_FILE:${targetName}>")
     set(_debugFile "${SILKIT_SYMBOLS_DIR}/${targetName}${CMAKE_DEBUG_POSTFIX}.debug")
+    message(STATUS "Split debugsymbols from ${_targetFile} into ${_debugFile}")
     add_custom_command(
         TARGET ${targetName}
         POST_BUILD
@@ -17,21 +18,19 @@ macro(silkit_split_debugsymbols targetName)
     )
 endmacro()
 
-macro(silkit_package_debugsymbols targetName)
+macro(silkit_install_debugsymbols targetName)
     if(MSVC)
-        message(STATUS "Creating symbol package ${SILKIT_SYMBOLS_DIR_NAME}")
-        add_custom_command(
-            TARGET "${targetName}"
-            POST_BUILD
-            WORKING_DIRECTORY "${SILKIT_SYMBOLS_DIR_BASE}"
-            COMMAND "${CMAKE_COMMAND}" -E tar cf "${SILKIT_SYMBOLS_DIR_NAME}.zip" --format=zip -- "${SILKIT_SYMBOLS_DIR_NAME}"
-            COMMENT "SIL Kit: SILKIT_PACKAGE_SYMBOLS: creating PDB zip"
-        )
+	message(STATUS "Installing .pdb symbols file")
+	install(
+		FILES $<TARGET_PDB_FILE:SilKit>
+		DESTINATION ${INSTALL_LIB_DIR}
+		COMPONENT bin
+	)
     endif()
     if(APPLE)
         return()
     endif()
-    if(UNIX AND CMAKE_BUILD_TYPE MATCHES "Debug")
+    if(UNIX)
         get_target_property(targetType ${targetName} TYPE)
         if(targetType STREQUAL STATIC_LIBRARY)
             message(STATUS "SIL Kit: splitting debug symbols on static libraries is not supported")
@@ -42,14 +41,12 @@ macro(silkit_package_debugsymbols targetName)
 
         file(MAKE_DIRECTORY "${SILKIT_SYMBOLS_DIR}")
 
-        message(STATUS "Creating symbol package ${SILKIT_SYMBOLS_DIR_NAME}")
-        add_custom_command(
-            TARGET "${targetName}"
-            POST_BUILD
-            WORKING_DIRECTORY "${SILKIT_SYMBOLS_DIR_BASE}"
-            COMMAND "${CMAKE_COMMAND}" -E tar cf "${SILKIT_SYMBOLS_DIR_NAME}.zip" --format=zip -- "${SILKIT_SYMBOLS_DIR_NAME}"
-            COMMENT "SIL Kit: SILKIT_PACKAGE_SYMBOLS: creating ELF debug symbols zip"
-        )
+	message(STATUS "Installing ELF debug file")
+	install(
+		FILES "${SILKIT_SYMBOLS_DIR}/${targetName}${CMAKE_DEBUG_POSTFIX}.debug"
+		DESTINATION ${INSTALL_LIB_DIR}
+		COMPONENT bin
+	)
     endif()
 endmacro()
 

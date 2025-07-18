@@ -329,6 +329,10 @@ if(NOT SILKIT_BUILD_STATIC)
             DESTINATION ${INSTALL_LIB_DIR}
             NAMELINK_ONLY
     )
+if(SILKIT_PACKAGE_SYMBOLS)
+	include(SilKitBuildTools)
+	silkit_install_debugsymbols(SilKit)
+endif()
 # portable installation  definitions
     install(EXPORT SilKitTargets
         DESTINATION ${INSTALL_LIB_DIR}/cmake/SilKit
@@ -337,19 +341,6 @@ if(NOT SILKIT_BUILD_STATIC)
         COMPONENT dev
     )
 endif()
-# Also install CmakeTargets for MinSizeRel and RelWithDebInfo
-#
-#   These files map the targets to the Release build. Without them, applications
-#   that are built as MinSizeRel or RelWithDebInfo will link against the Debug
-#   build of the SIL Kit and will crash.
-install(
-    FILES
-        cmake/SilKitTargets-minsizerel.cmake
-        cmake/SilKitTargets-relwithdebinfo.cmake
-    DESTINATION ${INSTALL_LIB_DIR}/cmake/SilKit
-    CONFIGURATIONS Release Debug RelWithDebInfo
-    COMPONENT dev
-)
 
 #make our local build dir usable for other projects
 export(EXPORT SilKitTargets
@@ -357,8 +348,3 @@ export(EXPORT SilKitTargets
     FILE SilKitTargets.cmake
     )
 
-
-if(SILKIT_PACKAGE_SYMBOLS)
-    include(SilKitBuildTools)
-    silkit_package_debugsymbols(SilKit)
-endif()
