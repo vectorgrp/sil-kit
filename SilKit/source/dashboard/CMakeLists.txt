@@ -44,37 +44,35 @@ if(SILKIT_BUILD_DASHBOARD)
     target_include_directories(I_SilKit_Dashboard
         INTERFACE
             ${CMAKE_CURRENT_SOURCE_DIR}
-            ${CMAKE_CURRENT_SOURCE_DIR}/Client
-            ${CMAKE_CURRENT_SOURCE_DIR}/Dto
-            ${CMAKE_CURRENT_SOURCE_DIR}/Service
+            ${CMAKE_CURRENT_SOURCE_DIR}/client
+            ${CMAKE_CURRENT_SOURCE_DIR}/dto
+            ${CMAKE_CURRENT_SOURCE_DIR}/service
     )
 
     add_library(O_SilKit_Dashboard STATIC
-        Client/DashboardComponents.hpp
-        Client/DashboardSystemApiClient.hpp
-        Client/DashboardSystemServiceClient.cpp
-        Client/DashboardSystemServiceClient.hpp
-        Client/DashboardRetryPolicy.cpp
-        Client/DashboardRetryPolicy.hpp
-        Client/IDashboardSystemServiceClient.hpp
+        client/DashboardComponents.hpp
+        client/DashboardSystemApiClient.hpp
+        client/DashboardSystemServiceClient.cpp
+        client/DashboardSystemServiceClient.hpp
+        client/DashboardRetryPolicy.cpp
+        client/DashboardRetryPolicy.hpp
+        client/IDashboardSystemServiceClient.hpp
 
-        Dto/DataSpecDto.hpp
-        Dto/MatchingLabelDto.hpp
-        Dto/ParticipantStatusDto.hpp
-        Dto/RpcSpecDto.hpp
-        Dto/ServiceDto.hpp
-        Dto/SimulationConfigurationDto.hpp
-        Dto/SimulationCreationRequestDto.hpp
-        Dto/SimulationCreationResponseDto.hpp
-        Dto/SystemStatusDto.hpp
+        dto/DataSpecDto.hpp
+        dto/MatchingLabelDto.hpp
+        dto/ParticipantStatusDto.hpp
+        dto/RpcSpecDto.hpp
+        dto/ServiceDto.hpp
+        dto/SimulationConfigurationDto.hpp
+        dto/SimulationCreationRequestDto.hpp
+        dto/SimulationCreationResponseDto.hpp
+        dto/SystemStatusDto.hpp
 
-        Service/ISilKitToOatppMapper.hpp
-
-        Service/DashboardRestClient.cpp
-        Service/DashboardRestClient.hpp
-        
-        Service/SilKitToOatppMapper.cpp
-        Service/SilKitToOatppMapper.hpp
+        service/ISilKitToOatppMapper.hpp
+        service/DashboardRestClient.cpp
+        service/DashboardRestClient.hpp
+        service/SilKitToOatppMapper.cpp
+        service/SilKitToOatppMapper.hpp
 
         LockedQueue.hpp
         SilKitEvent.hpp
