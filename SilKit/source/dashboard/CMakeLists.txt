@@ -47,7 +47,6 @@ if(SILKIT_BUILD_DASHBOARD)
             ${CMAKE_CURRENT_SOURCE_DIR}/Client
             ${CMAKE_CURRENT_SOURCE_DIR}/Dto
             ${CMAKE_CURRENT_SOURCE_DIR}/Service
-            ${CMAKE_CURRENT_SOURCE_DIR}/IntegrationTests
     )
 
     add_library(O_SilKit_Dashboard STATIC
@@ -68,9 +67,6 @@ if(SILKIT_BUILD_DASHBOARD)
         Dto/SimulationCreationRequestDto.hpp
         Dto/SimulationCreationResponseDto.hpp
         Dto/SystemStatusDto.hpp
-
-        IntegrationTests/ClientServerTestRunner.hpp
-        IntegrationTests/DashboardTestComponents.hpp
 
         Service/ISilKitToOatppMapper.hpp
 
