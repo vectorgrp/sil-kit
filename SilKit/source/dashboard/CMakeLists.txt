@@ -114,7 +114,7 @@ if(SILKIT_BUILD_DASHBOARD)
         )
 
     add_silkit_test_to_executable(SilKitDashboardTests
-        SOURCES Service/Test_DashboardRestClient.cpp 
+        SOURCES service/Test_DashboardRestClient.cpp 
         LIBS
         S_SilKitImpl
         O_SilKit_Dashboard
@@ -124,7 +124,7 @@ if(SILKIT_BUILD_DASHBOARD)
         )
 
     add_silkit_test_to_executable(SilKitDashboardTests
-        SOURCES Service/Test_DashboardSilKitToOatppMapper.cpp 
+        SOURCES service/Test_DashboardSilKitToOatppMapper.cpp 
         LIBS
         S_SilKitImpl
         O_SilKit_Dashboard
@@ -133,7 +133,7 @@ if(SILKIT_BUILD_DASHBOARD)
         )
 
     add_silkit_test_to_executable(SilKitDashboardTests
-        SOURCES Client/Test_DashboardSystemServiceClient.cpp 
+        SOURCES client/Test_DashboardSystemServiceClient.cpp 
         LIBS
         S_SilKitImpl
         O_SilKit_Dashboard
