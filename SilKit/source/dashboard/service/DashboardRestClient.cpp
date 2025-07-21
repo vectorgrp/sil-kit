@@ -9,7 +9,7 @@
 #include "LoggerMessage.hpp"
 #include "Uri.hpp"
 #include "SilKitToOatppMapper.hpp"
-#include "Client/DashboardSystemServiceClient.hpp"
+#include "client/DashboardSystemServiceClient.hpp"
 
 namespace SilKit {
 namespace Dashboard {
