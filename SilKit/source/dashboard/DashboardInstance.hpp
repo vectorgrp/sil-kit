@@ -9,7 +9,6 @@
 
 #include "LoggerMessage.hpp"
 
-#include "OatppHeaders.hpp"
 #include "Client/DashboardSystemApiClient.hpp"
 #include "Service/ISilKitToOatppMapper.hpp"
 #include "SystemStateTracker.hpp"

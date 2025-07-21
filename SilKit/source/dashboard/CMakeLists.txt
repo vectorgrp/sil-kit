@@ -81,7 +81,6 @@ if(SILKIT_BUILD_DASHBOARD)
 
         
         DashboardBulkUpdate.hpp
-        TestResult.hpp
         OatppHeaders.cpp
         OatppHeaders.hpp
 
