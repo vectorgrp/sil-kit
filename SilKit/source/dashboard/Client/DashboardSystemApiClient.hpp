@@ -8,6 +8,7 @@
 
 #include "SimulationCreationRequestDto.hpp"
 #include "BulkUpdateDto.hpp"
+#include "MetricsDto.hpp"
 
 #include OATPP_CODEGEN_BEGIN(ApiClient)
 

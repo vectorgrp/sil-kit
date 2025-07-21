@@ -7,6 +7,7 @@
 #include "SimulationCreationRequestDto.hpp"
 #include "SimulationCreationResponseDto.hpp"
 #include "BulkUpdateDto.hpp"
+#include "MetricsDto.hpp"
 
 namespace SilKit {
 namespace Dashboard {

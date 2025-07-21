@@ -16,6 +16,7 @@
 #include "SimulationCreationRequestDto.hpp"
 #include "SystemStatusDto.hpp"
 #include "BulkUpdateDto.hpp"
+#include "MetricsDto.hpp"
 
 #include "DashboardBulkUpdate.hpp"
 #include "MetricsDatatypes.hpp"
