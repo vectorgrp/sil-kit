@@ -11,31 +11,32 @@
 
 #include "Mocks/MockSilKitToOatppMapper.hpp"
 #include "Mocks/MockDashboardSystemServiceClient.hpp"
+#include "Mocks/MockDashboardSystemApiClient.hpp"
 
 using namespace testing;
-#if DISABLED_FOR_NOW_REVERT_THIS
 namespace SilKit {
 namespace Dashboard {
-
 class Test_DashboardRestClient : public Test
 {
 public:
     void SetUp() override
     {
-        _mockDashboardSystemServiceClient = std::make_shared<StrictMock<MockDashboardSystemServiceClient>>();
+        _mockServiceClient = std::make_shared<StrictMock<MockDashboardSystemServiceClient>>();
         _mockSilKitToOatppMapper = std::make_shared<StrictMock<MockSilKitToOatppMapper>>();
+        _libraryInit = std::make_shared<LibraryInitializer>();
 
         EXPECT_CALL(_dummyLogger, GetLogLevel).WillRepeatedly(Return(Services::Logging::Level::Warn));
     }
 
     std::shared_ptr<DashboardRestClient> CreateService()
     {
-        return std::make_shared<DashboardRestClient>(&_dummyLogger, _mockDashboardSystemServiceClient,
-                                                    _mockSilKitToOatppMapper);
+        return std::make_shared<DashboardRestClient>(_libraryInit, &_dummyLogger, _mockServiceClient,
+                                                    _mockSilKitToOatppMapper );
     }
 
     Core::Tests::MockLogger _dummyLogger;
-    std::shared_ptr<StrictMock<MockDashboardSystemServiceClient>> _mockDashboardSystemServiceClient;
+    std::shared_ptr<LibraryInitializer> _libraryInit;
+    std::shared_ptr<StrictMock<MockDashboardSystemServiceClient>> _mockServiceClient;
     std::shared_ptr<StrictMock<MockSilKitToOatppMapper>> _mockSilKitToOatppMapper;
 };
 
@@ -57,7 +58,7 @@ TEST_F(Test_DashboardRestClient, OnSimulationStart_CreateSimulationSuccess)
     EXPECT_CALL(*_mockSilKitToOatppMapper, CreateSimulationCreationRequestDto).WillOnce(Return(request));
     auto response = SimulationCreationResponseDto::createShared();
     response->id = expectedSimulationId;
-    EXPECT_CALL(*_mockDashboardSystemServiceClient, CreateSimulation).WillOnce(Return(response));
+    EXPECT_CALL(*_mockServiceClient, CreateSimulation).WillOnce(Return(response));
     const auto service = CreateService();
 
     // Act
@@ -72,7 +73,7 @@ TEST_F(Test_DashboardRestClient, OnSimulationStart_CreateSimulationFailure)
     // Arrange
     auto request = SimulationCreationRequestDto::createShared();
     EXPECT_CALL(*_mockSilKitToOatppMapper, CreateSimulationCreationRequestDto).WillOnce(Return(request));
-    EXPECT_CALL(*_mockDashboardSystemServiceClient, CreateSimulation).WillOnce(Return(nullptr));
+    EXPECT_CALL(*_mockServiceClient, CreateSimulation).WillOnce(Return(nullptr));
     EXPECT_CALL(_dummyLogger, Log(SilKit::Services::Logging::Level::Warn, "Dashboard: creating simulation failed"));
     const auto service = CreateService();
 
@@ -96,7 +97,7 @@ TEST_F(Test_DashboardRestClient, OnBulkUpdate)
 
     oatpp::UInt64 simulationId;
     oatpp::Object<BulkSimulationDto> bulkSimulationDto;
-    EXPECT_CALL(*_mockDashboardSystemServiceClient, UpdateSimulation)
+    EXPECT_CALL(*_mockServiceClient, UpdateSimulation)
         .WillOnce(WithArgs<0, 1>([&](oatpp::UInt64 simulationId_, oatpp::Object<BulkSimulationDto> bulkSimulation_) {
         simulationId = std::move(simulationId_);
         bulkSimulationDto = std::move(bulkSimulation_);
@@ -113,4 +114,3 @@ TEST_F(Test_DashboardRestClient, OnBulkUpdate)
 
 } // namespace Dashboard
 } // namespace SilKit
-#endif

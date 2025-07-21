@@ -21,11 +21,24 @@
 namespace SilKit {
 namespace Dashboard {
 
+// Utility to initialize the Oatpp library separately, e.g. in test cases
+struct LibraryInitializer
+{
+    LibraryInitializer();
+    ~LibraryInitializer();
+};
+
 class DashboardRestClient : public VSilKit::IRestClient
 {
 public:
     DashboardRestClient(Services::Logging::ILogger* logger, const std::string& dashboardServerUri);
     ~DashboardRestClient() override;
+
+public: // For testing
+    DashboardRestClient(std::shared_ptr<LibraryInitializer> libraryInit, Services::Logging::ILogger* logger,
+                        std::shared_ptr<IDashboardSystemServiceClient> serviceClient,
+                        std::shared_ptr<ISilKitToOatppMapper> mapper);
+
 public: // IRestClient
     bool IsBulkUpdateSupported() override;
     uint64_t OnSimulationStart(const std::string& connectUri, uint64_t time) override;
@@ -36,6 +49,7 @@ public: // IRestClient
                          const VSilKit::MetricsUpdate& metricsUpdate) override;
 
 private: //member
+    std::shared_ptr<LibraryInitializer> _libraryInit;
     Services::Logging::ILogger* _logger;
     std::shared_ptr<SilKit::Dashboard::DashboardRetryPolicy> _retryPolicy;
     std::shared_ptr<ISilKitToOatppMapper> _silKitToOatppMapper;

@@ -258,16 +258,3 @@ add_silkit_test_to_executable(SilKitIntegrationTests
 add_silkit_test_to_executable(SilKitIntegrationTests
     SOURCES ITest_Config.cpp
 )
-
-if(SILKIT_BUILD_DASHBOARD)
-    #add_silkit_test_to_executable(SilKitInternalIntegrationTests
-    #    SOURCES ITest_Dashboard.cpp
-    #    LIBS O_SilKit_Dashboard
-    #)
-
-
-    #add_silkit_test_to_executable(SilKitInternalIntegrationTests
-    #    SOURCES ITest_DashboardServerTimeout.cpp
-    #    LIBS O_SilKit_Dashboard
-    #)
-endif()
