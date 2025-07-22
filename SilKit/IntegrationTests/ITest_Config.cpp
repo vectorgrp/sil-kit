@@ -83,6 +83,9 @@ Logging:
     ASSERT_EQ(result, SilKit_ReturnCode_SUCCESS);
     ASSERT_GT(size, 0) << "the string should have length > 0";
     ASSERT_EQ(ptr[size], 'A') << "there should be no trailing \0";
+
+    result = SilKit_ParticipantConfiguration_Destroy(config);
+    ASSERT_EQ(result, SilKit_ReturnCode_SUCCESS);
 }
 
 
