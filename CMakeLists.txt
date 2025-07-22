@@ -28,7 +28,7 @@ option(SILKIT_LINK_LLD "Use the lld linker for SIL KIT" OFF)
 option(SILKIT_USE_SYSTEM_LIBRARIES "Use the libraries installed on the system for third party dependencies" OFF)
 option(SILKIT_BUILD_REPRODUCIBLE "Creates a reproducible build by ommiting timestamps/unique build ids" ON)
 option(SILKIT_BUILD_LINUX_PACKAGE "Creates SIL Kit builds suitable for package managers in Linux Distributions (.deb)" OFF)
-option(SILKIT_BUILD_LTO "Build with link time optimizations" ON)
+option(SILKIT_BUILD_LTO "Build with link time optimizations" OFF)
 
 if(SILKIT_BUILD_LINUX_PACKAGE)
 
