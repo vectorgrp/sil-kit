@@ -4,6 +4,7 @@
 
 
 #include <iostream>
+#include <cstring>
 
 #include "silkit/services/all.hpp"
 #include "SimTestHarness.hpp"
