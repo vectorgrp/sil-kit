@@ -147,14 +147,16 @@ try
     ASSERT_VALID_POINTER_PARAMETER(requiredSize);
     //outputString may be NULL
 
+    auto origOutputSize = *requiredSize;
     auto* cppParticipantConfiguration =
         reinterpret_cast<const SilKit::Config::ParticipantConfiguration*>(participantConfiguration);
 
     auto&& jsonString = SilKit::Config::SerializeAsJson(*cppParticipantConfiguration);
-    const auto sizeToWrite = std::min(*requiredSize, jsonString.size());
+    *requiredSize = jsonString.size();
 
-    if(outputString != nullptr)
+    if(outputString != nullptr && origOutputSize > 0)
     {
+        const auto sizeToWrite = std::min(origOutputSize, jsonString.size());
         std::copy(std::cbegin(jsonString), std::cbegin(jsonString) + sizeToWrite, *outputString);
     }
 
