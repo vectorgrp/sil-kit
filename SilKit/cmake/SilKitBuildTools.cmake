@@ -52,3 +52,4 @@ macro(silkit_package_debugsymbols targetName)
         )
     endif()
 endmacro()
+
