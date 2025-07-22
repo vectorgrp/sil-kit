@@ -156,7 +156,7 @@ try
 CAPI_CATCH_EXCEPTIONS
 
 
-SilKit_ReturnCode SilKitCALL SilKit_ParticipantConfiguration_ToString(
+SilKit_ReturnCode SilKitCALL SilKit_ParticipantConfiguration_ToJson(
     const SilKit_ParticipantConfiguration* participantConfiguration, char** outputString, size_t* requiredSize)
 try
 {
@@ -168,11 +168,11 @@ try
         reinterpret_cast<const SilKit::Config::ParticipantConfiguration*>(participantConfiguration);
 
     auto&& jsonString = SilKit::Config::SerializeAsJson(*cppParticipantConfiguration);
-    *requiredSize = jsonString.size();
+    const auto sizeToWrite = std::min(*requiredSize, jsonString.size());
 
-    if(outputString != nullptr && jsonString.size() > 0)
+    if(outputString != nullptr)
     {
-        std::copy(std::cbegin(jsonString), std::cend(jsonString), *outputString);
+        std::copy(std::cbegin(jsonString), std::cbegin(jsonString) + sizeToWrite, *outputString);
     }
 
     return SilKit_ReturnCode_SUCCESS;
