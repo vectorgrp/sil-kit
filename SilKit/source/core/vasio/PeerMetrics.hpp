@@ -5,6 +5,7 @@
 
 #include "IPeerMetrics.hpp"
 #include "ICounterMetric.hpp"
+#include "IStatisticMetric.hpp"
 #include "IVAsioPeer.hpp"
 #include "SerializedMessage.hpp"
 
@@ -31,8 +32,10 @@ private:
     VSilKit::ICounterMetric* _rxPackets{nullptr};
     VSilKit::ICounterMetric* _txPackets{nullptr};
     VSilKit::ICounterMetric* _rxBytes{nullptr};
+    VSilKit::IStatisticMetric* _rxBandwidth{nullptr};
     VSilKit::ICounterMetric* _txBytes{nullptr};
-    VSilKit::ICounterMetric* _txQueueSize{nullptr};
+    VSilKit::IStatisticMetric* _txQueueSize{nullptr};
+    VSilKit::IStatisticMetric* _txBandwidth{nullptr};
 
 public:
     void InitializeMetrics(VSilKit::IMetricsManager* manager,

@@ -50,11 +50,14 @@ void PeerMetrics::InitializeMetrics(VSilKit::IMetricsManager* manager,
     auto&& remoteParticipant = peer->GetServiceDescriptor().GetParticipantName();
     auto&& simulationName = peer->GetSimulationName();
 
-    _txBytes = manager->GetCounter({"Peer", simulationName, remoteParticipant, "tx_bytes"});
-    _txPackets = manager->GetCounter({"Peer", simulationName, remoteParticipant, "tx_packets"});
-    _rxBytes = manager->GetCounter({"Peer", simulationName, remoteParticipant, "rx_bytes"});
-    _rxPackets = manager->GetCounter({"Peer", simulationName, remoteParticipant, "rx_packets"});
-    _txQueueSize = manager->GetCounter({"Peer", simulationName, remoteParticipant, "tx_queue_size"});
+    _txBytes = manager->GetCounter({"Peer", simulationName, remoteParticipant, "tx_bytes", "[bytes]"});
+    _txPackets = manager->GetCounter({"Peer", simulationName, remoteParticipant, "tx_packets", "[count]"});
+    _txBandwidth = manager->GetStatistic({"Peer", simulationName, remoteParticipant, "tx_bandwidth", "[Bps]"});
+
+    _rxBytes = manager->GetCounter({"Peer", simulationName, remoteParticipant, "rx_bytes", "[bytes]"});
+    _rxPackets = manager->GetCounter({"Peer", simulationName, remoteParticipant, "rx_packets", "[count]"});
+    _txQueueSize = manager->GetStatistic({"Peer", simulationName, remoteParticipant, "tx_queue_size", "[count]"});
+    _rxBandwidth = manager->GetStatistic({"Peer", simulationName, remoteParticipant, "rx_bandwidth", "[Bps]"});
 
     _initialized = true;
 }
@@ -84,6 +87,7 @@ void PeerMetrics::RxBytes(const SilKit::Core::SerializedMessage& msg)
         return;
     }
     _rxBytes->Add(msg.GetStorageSize());
+    _rxBandwidth->Take(msg.GetStorageSize()*1.0);
 }
 
 void PeerMetrics::TxBytes(const SilKit::Core::SerializedMessage& msg)
@@ -93,6 +97,7 @@ void PeerMetrics::TxBytes(const SilKit::Core::SerializedMessage& msg)
         return;
     }
     _txBytes->Add(msg.GetStorageSize());
+    _txBandwidth->Take(msg.GetStorageSize()*1.0);
 }
 
 void PeerMetrics::TxQueueSize(size_t queueSize)
@@ -101,7 +106,7 @@ void PeerMetrics::TxQueueSize(size_t queueSize)
     {
         return;
     }
-    _txQueueSize->Add(queueSize);
+    _txQueueSize->Take(queueSize * 1.0);
 }
 
 

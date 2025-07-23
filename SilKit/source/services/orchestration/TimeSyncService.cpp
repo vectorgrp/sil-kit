@@ -312,10 +312,10 @@ TimeSyncService::TimeSyncService(Core::IParticipantInternal* participant, ITimeP
     , _timeConfiguration{participant->GetLoggerInternal()}
     , _simStepCounterMetric{participant->GetMetricsManager()->GetCounter({"SimStepCount"})}
     , _simStepHandlerExecutionTimeStatisticMetric{participant->GetMetricsManager()->GetStatistic(
-          {"SimStepHandlerExecutionDuration"})}
+          {"SimStep", "execution_duration", "[s]"})}
     , _simStepCompletionTimeStatisticMetric{participant->GetMetricsManager()->GetStatistic(
-          {"SimStepCompletionDuration"})}
-    , _simStepWaitingTimeStatisticMetric{participant->GetMetricsManager()->GetStatistic({"SimStepWaitingDuration"})}
+          {"SimStep", "completion_duration", "[s]"})}
+    , _simStepWaitingTimeStatisticMetric{participant->GetMetricsManager()->GetStatistic({"SimStep", "waiting_duration", "[s]"})}
     , _watchDog{healthCheckConfig}
     , _animationFactor{animationFactor}
 {
