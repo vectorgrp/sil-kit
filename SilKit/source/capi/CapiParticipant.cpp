@@ -1,27 +1,11 @@
-/* Copyright (c) 2022 Vector Informatik GmbH
-
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
-
-The above copyright notice and this permission notice shall be
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
+// SPDX-FileCopyrightText: 2022 Vector Informatik GmbH
+//
+// SPDX-License-Identifier: MIT
 
 #include "ParticipantConfiguration.hpp"
 #include "ParticipantConfigurationFromXImpl.hpp"
 #include "CreateParticipantImpl.hpp"
+#include "YamlParser.hpp"
 
 #include "silkit/capi/SilKit.h"
 #include "silkit/SilKit.hpp"
@@ -154,6 +138,31 @@ try
 }
 CAPI_CATCH_EXCEPTIONS
 
+
+SilKit_ReturnCode SilKitCALL SilKit_ParticipantConfiguration_ToJson(
+    const SilKit_ParticipantConfiguration* participantConfiguration, char** outputString, size_t* requiredSize)
+try
+{
+    ASSERT_VALID_OUT_PARAMETER(participantConfiguration);
+    ASSERT_VALID_POINTER_PARAMETER(requiredSize);
+    //outputString may be NULL
+
+    auto origOutputSize = *requiredSize;
+    auto* cppParticipantConfiguration =
+        reinterpret_cast<const SilKit::Config::ParticipantConfiguration*>(participantConfiguration);
+
+    auto&& jsonString = SilKit::Config::SerializeAsJson(*cppParticipantConfiguration);
+    *requiredSize = jsonString.size();
+
+    if(outputString != nullptr && origOutputSize > 0)
+    {
+        const auto sizeToWrite = std::min(origOutputSize, jsonString.size());
+        std::copy(std::cbegin(jsonString), std::cbegin(jsonString) + sizeToWrite, *outputString);
+    }
+
+    return SilKit_ReturnCode_SUCCESS;
+}
+CAPI_CATCH_EXCEPTIONS
 
 SilKit_ReturnCode SilKitCALL
 SilKit_ParticipantConfiguration_Destroy(SilKit_ParticipantConfiguration* participantConfiguration)

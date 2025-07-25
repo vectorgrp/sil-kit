@@ -808,6 +808,12 @@ extern "C"
         return globalCapi->SilKit_ParticipantConfiguration_Destroy(participantConfiguration);
     }
 
+    SilKit_ReturnCode SilKitCALL SilKit_ParticipantConfiguration_ToJson(const SilKit_ParticipantConfiguration* inParticipantConfiguration,
+                 char** outString, size_t* requiredSize)
+    {
+        return globalCapi->SilKit_ParticipantConfiguration_ToJson(inParticipantConfiguration, outString, requiredSize);
+    }
+
     // Logger
 
     SilKit_ReturnCode SilKitCALL SilKit_Logger_Log(SilKit_Logger* logger, SilKit_LoggingLevel level,

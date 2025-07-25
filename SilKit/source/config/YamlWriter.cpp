@@ -525,7 +525,7 @@ void YamlWriter::Write(const SilKit::Config::Middleware& obj)
     NonDefaultWrite(obj.tcpReceiveBufferSize, "TcpReceiveBufferSize", defaultObj.tcpReceiveBufferSize);
     NonDefaultWrite(obj.tcpSendBufferSize, "TcpSendBufferSize", defaultObj.tcpSendBufferSize);
     NonDefaultWrite(obj.enableDomainSockets, "EnableDomainSockets", defaultObj.enableDomainSockets);
-    NonDefaultWrite(obj.acceptorUris, "acceptorUris", defaultObj.acceptorUris);
+    NonDefaultWrite(obj.acceptorUris, "AcceptorUris", defaultObj.acceptorUris);
     NonDefaultWrite(obj.registryAsFallbackProxy, "RegistryAsFallbackProxy", defaultObj.registryAsFallbackProxy);
     NonDefaultWrite(obj.experimentalRemoteParticipantConnection, "ExperimentalRemoteParticipantConnection",
                     defaultObj.experimentalRemoteParticipantConnection);
