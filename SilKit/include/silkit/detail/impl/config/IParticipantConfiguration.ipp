@@ -49,7 +49,6 @@ auto ParticipantConfigurationToJson(std::shared_ptr<SilKit::Config::IParticipant
     if( size > 0)
     {
         buffer.resize(size);
-        //C++17 std::string::data() -> char*;
         auto&& data = buffer.data();
         returnCode = SilKit_ParticipantConfiguration_ToJson(concreteConfig->Get(), &data, &size);
         Impl::ThrowOnError(returnCode);

@@ -76,6 +76,7 @@ Logging:
     result = SilKit_ParticipantConfiguration_ToJson(config, nullptr, &size);
     ASSERT_EQ(result, SilKit_ReturnCode_SUCCESS);
     ASSERT_GT(size, 0) << "the string should have length > 0";
+    ASSERT_LT(size, buf.size()) << "the string should have length <= buf.size()";
 
     //get contents, n
     auto&& ptr = buf.data();
