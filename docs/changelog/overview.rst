@@ -9,6 +9,8 @@ versions page.
    :glob:
 
    versions/5.*
-   v4-and-older
+   versions/4.rst
+   versions/3.rst
+   versions/2-and-older.rst
 
 The format is based on `Keep a Changelog <http://keepachangelog.com/en/1.0.0/>`_.

@@ -1,0 +1,1287 @@
+Version 4.xx
+=================
+
+[4.0.56] - 2025-05-19
+---------------------
+
+This is a Quality Assured Release.
+
+.. admonition:: Note: the Ubuntu 18.04 binary distribution package is deprecated
+
+   We are sunsetting the distribution of Ubuntu 18.04 packages with this release.
+   With the next release, we will provide Ubuntu 24.04 binary distribution packages instead.
+
+.. admonition:: Note: we will change our versioning scheme to semantic versioning
+
+   Please read the full notice in the ``Semantic Versioning`` page in the documentation.
+
+Fixed
+~~~~~
+
+- Three static methods which are part of the C++ (Hourglass) API implementation and passed as
+  callbacks to the C-API, did not use the correct calling convention if the default calling
+  convention wasn't ``__cdecl`` on Windows. This has been remedied.
+
+- ``SilKitDemoSimStepAsync`` did not work as intended, due to the predicate lambda capturing
+  by-value instead of by-reference.
+
+- During hop-on of another participant, participants will send the current simulation step
+  instead of the next simulation step, if they are inside of their simulation step.
+
+Changed
+~~~~~~~
+
+- The participant configuration ``TcpNoDelay`` now defaults to true. Please note, that this has performance implications.
+  On Linux platforms this improves throughput, and latency in particular when used in combination with ``TcpQuickAck: true``.
+
+- Updated third party libraries
+  - ``asio`` to ``1.30.2``
+  - ``fmt`` to ``11.1.4``
+  - ``spdlog`` to ``1.15.2``
+
+- Add the ``myst_parser`` extension to documentation build, which allows using Markdown
+  for documentation pages
+
+- Automatically 'upgrade' the ``Doxyfile`` using ``doxygen -u``, which avoids warnings
+  when with different ``doxygen`` versions across distibutions
+
+- CAN XL: Update documentation, tests, and the demo to (better) reflect that we support it
+
+Added
+~~~~~
+
+- The documentation now contains a page that explains the upcoming new versioning scheme.
+- Experimental 'other-simulation-steps-completed' API
+
+
+[4.0.55] - 2025-01-31
+---------------------
+
+This is a Quality Assured Release.
+
+Changed
+~~~~~~~
+
+- **Important** ``SilKit_LinDataLengthUnknown`` in the C header ``Lin.h`` used to be a ``const`` global, which could cause
+  linker issues if the header file is used in multiple translation units in the same binary.
+
+  It has been turned into a ``#define``, like all the other constants in the C header files.
+
+  The symbol was not present in the dynamic symbol table of the ``SilKit.dll`` / ``.so``, so this change
+  does not break the ABI of the shared libraries.
+
+- Aligned C API error return codes ``SilKit_ReturnCode_<ERRORTYPE>`` and SIL Kit specific exceptions.
+  All exceptions are now forwarded through the hourglass and thrown in the C++ API.
+  For users of the C API, a more detailed error handling is possible with the extended error return codes.
+
+  Before, all execptions ended up as ``SilKitError`` on the user side.
+
+- Overhaul of SIL Kit demos
+
+  - Restructured into categories communication, api and tools
+
+  - Communication demos: Can, Ethernet, Lin, Flexray, PubSub and Rpc demos
+  
+    - These demos are split into one participant per executable
+    - Basic SIL Kit features are implemented in a base class used by the demos
+    - No command line arguments needed for basic execution (with time synchronization and coordinated start)
+    - Useful command line arguments are provided for all demos (e.g. rename the participant or network, logging, execution modes)
+    - The old ``--async`` mode of the demos now is accessible by ``--async --autonomous`` (or short form ``-aA``)
+
+Added
+~~~~~
+ 
+- New demos for basic API usage
+
+  - SimpleCan
+  - Orchestration demos  
+
+- Demos: Sample participant configurations
+
+Fixed
+~~~~~
+
+- Registry: Block all attempts to connect with an already present participant name, not just the first.
+
+- CMake: When demos are installed into the ``bin`` directory under the installation prefix, their RPATH will be set such that they are able to find the ``libSilKit[d].so``. This is the same RPATH value as the utility executables.
+
+- System Monitor: Show all participants, not just the ones that joined during the monitors execution.
+
+
+[4.0.54] - 2024-11-11
+---------------------
+
+Added
+~~~~~
+
+- Override the labels of ``DataPublisher``, ``DataSubscriber``, ``RpcClient``, and ``RpcServer`` instances through the participant configuration, extending the already possible override of the topic / function name.
+
+Changed
+~~~~~~~
+
+- Changed log messages for controller and participant creation, message tracing, system state tracker and time sync service
+- Revised the documentation (demos, troubleshooting, doxygen output, file structure)
+- Improved platform/compiler/architecture detection
+
+Fixed
+~~~~~
+
+- Failure to configure and package cross-builds to QNX on Windows
+
+[4.0.53] - 2024-10-11
+---------------------
+
+Changed
+~~~~~~~
+
+- Harmonized user interface of commandline utilities Registry, Monitor, and SystemController.
+
+  All utilities listen to OS signals to detect termination request.
+
+  - Old: Monitor and Registry wait for the user to press ``[Enter]`` to shutdown.
+  - New: Monitor and Registry can be requested to shutdown via ``[Ctrl]-[C]``. Registry option ``-s, --use-signal-handler`` is deprecated.
+
+  All utilities no longer require user interaction.
+
+  - Old: Registry, Monitor and System Controller prompt the user by default to press ``[Enter]`` to end process after shutdown.
+  - New: All utilities terminate without prompting for user input. SystemController option ``-ni, --non-interactive`` is deprecated.
+ 
+- The Logger now adds the participant's name (as a normalized string) to the user-defined ``LogName`` for file sinks.
+
+- Implemented the union (de-)serialization stubs in the ``silkit/util/serdes`` headers.
+
+Fixed
+~~~~~
+
+- If using the ``SimStepHandlerAsync``, the log message that reports the end of the simulation step is now printed after the call to ``CompleteSimulationStep``.
+
+- Fixed an issue with the NetSim API that caused an exception when used with log level ``trace``.
+
+[4.0.52] - 2024-09-02 
+---------------------
+
+Fixed
+~~~~~
+
+- Fixed crash in ``sil-kit-registry`` utility that happened when the dashboard is enabled, but not actually available.
+
+Added
+~~~~~
+
+- Message aggregation for simulations with time synchronization.
+  Accessible via the experimental section in the Participant Configuration (Experimental | TimeSynchronization | EnableMessageAggregation).
+
+
+[4.0.51] - 2024-07-18 
+---------------------
+
+Added
+~~~~~
+
+- Couple the virtual time to the wall clock. 
+  An animation factor can be configured that describes how fast the simulation is allowed to run relative to the local wall clock.
+  Accessible via a new experimental section in the Participant Configuration (Experimental | TimeSynchronization | AnimationFactor).
+- Event flow documentation for the Network Simulation API.
+- Registry (Dashboard): Automatically use bulk-endpoint if it is available
+- Configuration option for structured logging in JSON format
+
+
+[4.0.50] - 2024-05-15
+---------------------
+
+This is a Quality Assured Release.
+
+Fixed
+~~~~~
+
+- Fixed crash in ``sil-kit-system-controller`` utility.
+- Fixed source directory contents in ``.zip`` release archives.
+
+
+[4.0.49] - 2024-05-08
+---------------------
+
+Changed
+~~~~~~~
+
+- SystemController utility: 
+  Listens for OS signals to end simulation: Press ``[Ctrl]-[C]`` (SigInt) instead of ``[Enter]`` to end simulation.
+  Better reports about the current system state in case of Error.
+
+Fixed
+~~~~~
+
+- Valid state transition from ``Aborting`` to ``Shutdown`` no longer emits a warning message.
+
+Added
+~~~~~
+
+- Participant Configuration: Support include semantics in participant configuration files/strings.
+- Network Simulation: Experimental API for custom simulation of CAN, LIN, Ethernet and FlexRay networks.
+
+
+[4.0.48] - 2024-04-15
+---------------------
+
+Changed
+~~~~~~~
+
+- We now use a linker script to limit the exported symbol visibility to the public C API and some legacy C++ symbols. 
+- The ``--enable-dashboard`` CLI parameter for the registry is now a no-op. It is now activated when using ``--dashboard-uri`` or via the registry configuration. 
+
+Fixed
+~~~~~
+
+- Fix MinGW build.
+- Various fixes for dashboard integration.
+
+Added
+~~~~~
+
+- Man pages for linux.
+- All public struct members are now included by default in the documentation.
+
+
+[4.0.47] - 2024-03-01
+---------------------
+
+Fixed
+~~~~~
+
+- Fixed building from the packaged sources (``SilKit-Source``).
+
+- LIN Demo: Removed duplicate call to StartLifecyle when run as the LIN slave
+
+
+[4.0.46] - 2024-02-27
+---------------------
+
+Fixed
+~~~~~
+
+- Added the ``*.manifest`` files to the source distribution. Building from the ``SilKit-Source``
+  directory in the distributed ``.zip`` files was broken.
+
+- Update ``yaml-cpp`` to version 0.8.0 to fix linker errors caused by a missing symbol.
+
+- The system controller utility now logs parts of the command line output using the logger object
+  of the participant.
+
+Added
+~~~~~
+
+- Added a ``--log`` option to the system controller utility which cannot be used together with the
+  ``--configuration`` option. It provides a shortcut to set the log level of the utility.
+
+- Utilities: prepare the registry for handling multiple simulations
+
+- Added a licensecheck to prevent source files without a license header
+
+[4.0.45] - 2024-02-06
+---------------------
+
+Fixed
+~~~~~
+
+- Registry failed to start correctly, if the dashboard is enabled, but the registry is letting the
+  system determine the listening port, e.g., when using a URI like ``silkit://localhost:0``.
+
+Changed
+~~~~~~~
+
+- Add links to API sections in the documentation overview
+
+
+Added
+~~~~~
+
+- RPC usage example with lifecycle
+
+- Windows: Utilities and demos are now compiled with a manifest that sets the active codepage to UTF-8.
+  The required commands to change the output codepage of the Windows console in ``cmd`` or PowerShell
+  are documented in a new FAQ entry.
+
+
+[4.0.44] - 2024-01-22
+---------------------
+
+Fixed
+~~~~~
+
+- Changing the TCP send and receive buffer size failed on Windows
+
+Added
+~~~~~
+
+- Links to related SIL Kit projects in documentation and github Readme
+
+
+[4.0.43] - 2023-12-12
+---------------------
+
+Fixed
+~~~~~
+
+- Dashboard can be enabled using CLI arguments
+- Demos did not terminate when simulation is aborted (AbortSimulation)
+- Fix order of debug log message parameters
+
+
+[4.0.42] - 2023-11-29
+---------------------
+
+Changed
+~~~~~~~
+
+- LIN Demo: Adapted the schedule of the LIN Master and disallowed sending while in wrong controller state.
+
+
+[4.0.41] - 2023-11-28
+---------------------
+
+Fixed
+~~~~~
+
+- Potential deadlock when switching to virtual time-synchronization while replay is in use
+
+
+[4.0.40] - 2023-11-27
+---------------------
+
+Added
+~~~~~
+
+- Allow configuration of the connection timeout (``Middleware/ConnectTimeoutSeconds``)
+
+Changed
+~~~~~~~
+
+- Improved the documentation of Data Pub/Sub controllers
+- Improved the documentation of RPC controllers
+
+Fixed
+~~~~~
+
+- The LIN demo does not skip the first entry (sending frame 16) on all but the first iteration through the schedule anymore.
+- The name of the domain-socket used by the registry will use the hostname passed in the listen URI, not the resolved IP address (if any), for generating the name of the domain-socket.
+- When mixing autonomous participants without time-synchronization, and participants with time-synchronization,
+  the timestamps for messages received before the virtual time is started, is now the 'invalid' timestamp value,
+  normally used by participants without time-synchronization.
+- Reworked the pause/continue logic such that it pauses the virtual time synchronization without blocking the I/O thread.
+
+
+[4.0.39] - 2023-11-14
+---------------------
+
+Fixed
+~~~~~
+
+- Replaced remaining mentions of integrators with users.
+
+Added
+~~~~~
+
+- Usage examples for tracing and replay.
+- Timeouts per connection attempt.
+- Two-sided connection establishment: Allow direct connections, even if connections are only possible in one direction.
+
+
+[4.0.38] - 2023-11-02
+---------------------
+
+Fixed
+~~~~~
+
+- The dashboard now handles AbortSimulation.
+- The dashboard resolves the registry IP address if needed.
+
+
+Added
+~~~~~
+
+- Reintroduced build requirements to documentation
+
+Changed
+~~~~~~~
+
+- Consolidate SIL Kit tests into four executables
+
+
+[4.0.37] - 2023-10-17
+---------------------
+
+Changed
+~~~~~~~
+
+- Reworked the documentation on Virtual Time Synchronization
+- The documentation of the demo section now refers to the pre built Vector SIL Kit packages and not to a source build.
+
+[4.0.36] - 2023-09-19
+---------------------
+
+Added
+~~~~~
+
+- Documentation on ``DashboardUri``
+
+
+Fixed
+~~~~~
+
+- Fixed misbehavior of the sil-kit-system-controller in interactive mode on user input:
+
+  - The sil-kit-system-controller now triggers a Stop() in SystemState::Running or SystemState::Paused.
+  - The sil-kit-system-controller only triggers AbortSimulation when not SystemState::Running, SystemState::Paused, SystemState::Shutdown or SystemState::Aborting.
+
+Changed
+~~~~~~~
+
+- Performance improvement of the internal serialization
+- The final state handling of the sil-kit-system-controller in interactive mode on user input has changed:
+
+  - Old: The sil-kit-system-controller triggered AbortSimulation if the finalState was not received after 5s. 
+  - New: The sil-kit-system-controller retries receiving the finalState 3x5s. If this fails, the sil-kit-system-controller triggers AbortSimulation (if not already happened) and tries receiving the finalState 3x5s again. If this fails, the sil-kit-system-controller just terminates.
+
+[4.0.35] - 2023-09-04
+---------------------
+
+Added
+~~~~~
+
+- Memory management documentation introduced.
+- Integration tests for communication in the stop/shutdown/abort handlers.
+
+Changed
+~~~~~~~
+
+- When building the SIL Kit documentation, the sphinx build command is no longer called in a pipenv. 
+
+Fixed
+~~~~~
+
+- Ensured that calling ``ISystemController::AbortSimulation()`` does not lead to the system controller terminating
+  prior to other participants receiving its abort message.
+- Ensure that userContext field for external CanFrameTransmitEvents is always null.
+- Fixed warning in VS2017 (x86) build  
+
+[4.0.34] - 2023-08-21
+---------------------
+
+Changed
+~~~~~~~
+
+- Behavior change of ``ParticipantState::Error``
+
+  - Old: Several situations could lead to an ``ParticipantState::Error`` before the user called ``StartLifecycle()``
+
+    - Reception of an invalid ``WorkflowConfiguration``
+    - Remote participant disconnected
+    - Reception of ``AbortSimulation``
+
+  - New: ``ParticipantState::Error`` should only be reached after ``StartLifecycle()`` was called
+
+    - Reception of a WorkflowConfiguration is not validated before ``StartLifecycle()``
+    - A disconnected remote participant is only transitioned to ``ParticipantState::Error`` if he had a started Lifecycle
+    - Reaction on ``SystemCommang::AbortSimulation`` is deferred before ``StartLifecycle()`` (see below)
+
+- Behavior change of ``SystemCommand::AbortSimulation``
+
+  - Old: Reception of ``AbortSimulation`` before ``StartLifecycle()`` led to ``ParticipantState::Error``
+  - New: Reception of ``AbortSimulation`` before ``StartLifecycle()`` is firstly ignored. A later call to ``StartLifecycle()`` then directly leads to an abort (transition to ``ParticipantState::Aborting``, calling the ``AbortHandler``)
+
+- clang presets in ``CMakePresets.json`` now have the clang version in their names
+
+- Added an internal barrier between ``ParticipantState::Shutdown`` and setting the final state promise. This ensures that the participant state updates are all transmitted while shutting down. 
+
+- Revised log messages when shutting down / disconnecting participants
+
+  - Graceful, participant has lifecycle: "Participant <participantName> has disconnected after gracefully shutting down",
+  - Not graceful, participant has lifecycle: "Participant <participantName> has disconnected without gracefully shutting down."
+  - Registry shutdown: "Connection to SIL Kit Registry was lost - no new participant connections can be established."
+  - Participant without lifecycle: "Participant <participantName> has disconnected."
+
+
+Fixed
+~~~~~
+
+- Made simulation time stop for all coordinated participants when one coordinated participant disconnects ungracefully
+
+
+[4.0.33] - 2023-08-07
+---------------------
+
+Added
+~~~~~
+
+- New experimental extension of the LIN API that allows a user to send frame headers and respond to them
+  without setting up a static configuration beforehand.
+- Added link to FMU importer in Readme.md
+
+
+Changed
+~~~~~~~
+
+- Restructured the documentation to have separate sections for overview.
+  It is now divided into an overall introduction, a developer guide, and a user guide.
+- Removed internal use of exceptions for failing connections to the registry if another connection mechanism succeeded. 
+
+
+Fixed
+~~~~~
+
+- Fixed missing entry of RegistryAsFallbackProxy in YAML schema.
+
+
+[4.0.32] - 2023-07-19
+---------------------
+
+This is a Quality Assured Release.
+
+Fixed
+~~~~~
+
+- Ensure that the registry rejects a connecting participant if a participant with the same name
+  is already connected.
+
+
+[4.0.31] - 2023-07-10
+---------------------
+
+Added
+~~~~~
+
+- Improved Lifecycle and TimeSyncService features:
+
+  - Full support for Operation Mode Autonomous with TimeSyncService including hopping onto / leaving a running simulation
+  - Abort simulation in case Coordinated participants want to join a running simulation
+  - Abort simulation in case an Autonomous with TimeSyncService sees an incompatible participant 
+  - Extended integration tests for communication ready guarantees
+
+Fixed
+~~~~~
+
+- Fixed a bug in internal barriers where in-between connecting participants could break the communicaiton guarantees
+- Fixed transition when aborting from ErrorState, now the state changes to Shutdown like all aborting paths (formery the transition was to ShuttingDown)
+- Internal fixes for thread-safety
+- Fixed that the SimTask cannot be triggered again after calling ``ILifecycleService::Stop()`` in the SimTask
+
+
+Changed
+~~~~~~~
+
+- CreateLifecycleService with OperationMode::Invalid now throws a ConfigurationError
+- Improved documentation on how to run demos in asynchronous mode
+
+
+[4.0.30] - 2023-06-26
+---------------------
+
+Added
+~~~~~
+
+- Added optional timeout mechanism to RPC service. 
+
+Fixed
+~~~~~
+
+- Fix builds with CMake versions before ``3.19``
+- Fixed crash in SilKitRpcDemo when run with ``<config> Client --async`` without a server.
+
+Changed
+~~~~~~~
+
+- SIL Kit Demos (Can, Ethernet, Rpc, Lin, and PubSub) with ``--async`` now use an autonomous lifecycle.
+- Refactored documentation for participant configurations: The intent was made clearer, noting that it is an optional feature.
+
+
+[4.0.29] - 2023-06-14
+---------------------
+
+Fixed
+~~~~~
+
+- Registry: Set windows service state to ``stopped`` on error
+
+
+[4.0.28] - 2023-06-02
+---------------------
+
+Added
+~~~~~
+
+- Added documentation for Data Serialization/Deserialization (SerDes) API
+
+Fixed
+~~~~~
+
+- Fixed inconsistencies in API documentation
+- Fixed starting the registry without the ``--registry-configuration`` parameter
+
+
+[4.0.27] - 2023-05-30
+---------------------
+
+Changed
+~~~~~~~
+
+- Added detection of simulation start and end for the dashboard. 
+
+  - The simulation id initialization is deferred until the first dashboard relevant event happens.
+  - A simulation is considered as ended, when the last participant disconnects.
+
+Added
+~~~~~
+
+- SIL Kit Registry (``sil-kit-registry(.exe)``)
+
+  - Support for overriding command line settings via a YAML configuration file
+
+
+[4.0.26] - 2023-05-22
+---------------------
+
+Added
+~~~~~
+
+- Introducing an internal communication barrier between participant states. This happens in the transition from the states ServicesCreated to CommunicationInitializing and from Stopped to ShuttingDown. It leads to extended communication guarantees in the CommunicationReadyHandler, primarily for participants that use the autonomous lifecycle (see the documentation for details).
+
+Fixed
+~~~~~
+
+- Corrected spelling mistakes in the documentation
+- The dashboard is disabled for cross-builds to QNX, to avoid build errors
+
+
+[4.0.25] - 2023-05-17
+---------------------
+
+This version was skipped due to compatibility issues with dependent projects.
+
+
+[4.0.24] - 2023-05-04
+---------------------
+
+Known issue: A LIN transmission by a LIN Slave may have a timestamp that is smaller than the LinSendFrameHeaderRequest of the LIN Master that triggered the Slave response. 
+
+Added
+~~~~~
+
+- Header-only C++ API implementation following the hourglass-pattern
+
+  - The C++ symbols are still provided by the shared library, but are not used by default anymore
+
+- If a participant cannot establish a direct connection to another participant,
+  it will fall back to using the registry as a proxy for communications with
+  this particular participant
+
+  - Support can be disabled on a particular participant using the new
+    "Middleware/RegistryAsFallbackProxy" field in the participant configuration
+
+Fixed
+~~~~~
+
+- Messages are sent in the same order as the SIL Kit API calls that triggered
+  them, regardless of the thread or handler the API calls were executed from.
+  There are no ordering guarantees for API calls that are executed in parallel
+  from different threads.
+
+
+[4.0.23] - 2023-04-17
+---------------------
+
+Changed
+~~~~~~~
+
+- Added network simulator information to the dashboard REST API
+
+Fixed
+~~~~~
+
+- Fixed data type of simulation id returned by the dashboard REST API
+
+- Ethernet and CAN (Trivial Sim.): The self-delivery with ``TransmitDirection::TX`` is now triggered only after
+  the frame has been sent with ``TransmitDirection::RX``.
+
+
+Removed
+~~~~~~~
+
+- Visual Studio 2015 is no longer maintained and therefore not officially supported anymore.
+
+
+[4.0.22] - 2023-04-05
+---------------------
+
+Fixed
+~~~~~
+
+- Resolved issue that lead to wrong label matching behavior under certain circumstances.
+
+
+[4.0.21] - 2023-04-03
+---------------------
+
+Changed
+~~~~~~~
+
+- Improved FAQ
+- Preparation for upcoming tracing / replay 
+
+
+[4.0.20] - 2023-03-20
+---------------------
+
+Changed
+~~~~~~~
+
+- Make additional data and rpc information available to the dashboard.
+
+Added
+~~~~~
+
+- Added frequently asked questions (FAQ) section to documentation.
+
+- Modification of BenchmarkDemo: Change the communication topology by modifying the PubSub topics. 
+  A participant should only send to a single other participant.
+
+- Add LatencyDemo: Measure the average latency between two participants in different processes.
+
+
+Fixed
+~~~~~
+
+- C-API: Fixed a bug where the ``SilKit_EthernetFrameEvent`` delivered in the Ethernet frame handler had
+  the ``userContext`` field always set to ``nullptr``, instead of the value passed in the corresponding ``SilKit_EthernetController_SendFrame`` call.
+- C++-API: Fixed a bug where the ``userContext`` was set in the frame handlers registered on other controllers than the one calling ``SendFrame``. The ``userContext`` is only ever set when a frame event with ``TransmitDirection::TX`` is received, which is only possible on the same controller that sent it.
+
+
+[4.0.19] - 2023-03-02
+---------------------
+
+Changed
+~~~~~~~
+
+- Use function-try-blocks for C-API definitions to reduce indentation and reformat some code
+  for better readability.
+
+Fixed
+~~~~~
+
+- Allow installing and starting the sil-kit-registry.exe as a Windows Service on Windows Containers during ``docker build`` steps.
+  The layer creation fails if a domain socket is still active during shutdown of the temporary container.
+  Disables the local-domain sockets of the ``sil-kit-registry.exe`` when running as a Windows Service.
+
+- When a participant is unable to connect to another participant, the correct
+  error message is logged, and an error is raised.
+
+
+[4.0.18] - 2023-02-21
+---------------------
+
+Added
+~~~~~
+
+- Added descriptions to troubleshooting section for common errors.
+
+Changed
+~~~~~~~
+
+- Complete the Hourglass implementation of the C++ API used internally for testing.
+
+Fixed
+~~~~~
+
+- Properly handle IPv6 acceptors in the registry when transmitting to a remote participant
+
+
+[4.0.17] - 2023-02-09
+---------------------
+This is a Quality Assured Release.
+
+Fixed
+~~~~~
+- Fix DNS resolver issues on Ubuntu 18.04 and systemd-resolved. We now properly
+  strip square brackets from IPv6 addresses in URIs.
+- Fixed a race-condition in the ITest_SystemMonitor. This caused sporadic failures on CI builds.
+
+Removed
+~~~~~~~
+- Removed the deprecated CMakeSettings.json file from the source tree.
+  If you are a developer, use the CMakePreset.json instead which is more portable and flexible.
+- Removed `usr/share/doc` from the delivery packages. This should only be part of Debian packages.
+
+
+
+[4.0.16] - 2023-02-03
+---------------------
+
+Changed
+~~~~~~~
+
+- Improved error messages when connections between participants/to the registry have failed.
+
+- CMake: Reduced weak symbols exported in debug builds.
+
+- Allow configuration of acceptor URIs in the participant configuration.
+
+- The third party dependencies were updated.
+
+  - ``fmt`` to version 9.1.0.
+
+  - ``spdlog`` to version 1.11.0.
+
+
+[4.0.15] - 2023-01-23
+---------------------
+
+Changed
+~~~~~~~
+
+- Registry:
+
+  - Allow running the ``sil-kit-registry`` as a windows service.
+    In this case, the registry grants others the ``PROCESS_QUERY_LIMITED_INFORMATION`` permission.
+
+  - The registry must be run with the ``--windows-service`` command line flag.
+    This argument is *not* shown in the command line usage information available via ``--help``.
+    This command line flag may be removed in the future.
+
+- Docs: Add registry requirement to demos documentation.
+
+- CMake: The minimum required CMake version has been bumped to 3.10
+
+
+[4.0.14] - 2023-01-10
+---------------------
+
+Added
+~~~~~
+
+- CMake: Prepared cross-compiling for QNX
+
+Changed
+~~~~~~~
+
+- Tests: Improved tests regarding configuration parsing
+
+Fixed
+~~~~~
+
+- Catch and print exceptions when parsing utility CLI arguments
+- Various issues found by the Address Sanitizer and Thread Sanitizer of Clang 14 are now resolved.
+
+
+[4.0.13] - 2022-12-14
+---------------------
+
+Changed
+~~~~~~~
+
+- PubSub/Rpc: Improved performance in startup-phase when using labels.
+- Documentation: Configuration structure for PCAP tracing and replay
+
+Fixed
+~~~~~
+
+- LIN: Previously, only when using the network simulator, the FrameStatusHandler on the LIN Master was not called in
+  case of an unconfigured response (RX_NO_RESPONSE). This inconsistency has been fixed.
+
+- Registry
+
+  - The acceptor URIs the known participants list sent by the registry are now rewritten correctly.
+    Previously, certain startup scenarios only worked when the participants were started in a certain order.
+
+- SerDes: Added missing limit library include.
+
+
+[4.0.12] - 2022-11-24
+---------------------
+
+Fixed
+~~~~~
+
+- Integration Tests
+
+  - Linking executables with both, the dynamic library, and certain internal, static library components leads to ODR violations.
+    The ASAN / UBSAN instrumentation from recent Clang versions is able to detect these.
+
+- C-API Tests
+
+  - Fixed some memory leaks in C-API tests.
+
+- LIN
+
+  - Fixed faulty behavior of ``ILinController::SendFrame()`` for ``LinFrameResponseType::MasterResponse``. The method now consistently uses the input frame data.
+
+- Lifecycle Service
+
+  - Alleviate potential loss of the 'stop' signal issued from the lifecycle service of a participant.
+
+- Various fixes related to warnings
+
+  - Remove duplicate variables in PubSub demo.
+  
+  - Fix 'D9025: overriding...' diagnostics in MSVC.
+  
+  - Fix warnings in hourglass code.
+  
+  - Fix cmake configuration on macos.
+  
+  - Properly initialize variable in unit test.
+
+[4.0.11] - 2022-11-18
+---------------------
+
+Changed
+~~~~~~~
+
+- Ethernet
+
+  - The Ethernet controller now quietly pads Ethernet frames with zeros to the
+    minimum size of 60 bytes.
+
+  - (Re-)added experimental support for PCAP tracing and replay on ethernet controllers.
+    The tracing and replay behavior may change in the future.
+
+- Registry
+
+  - Only exit if neither TCP, nor domain sockets are available.
+
+- SIL Kit Library
+
+  - Changed the default symbol visibility to hidden, which is now also enforced for
+    Linux builds.
+
+  - Symbols for ASIO are not exported as weak symbols anymore.
+
+Fixed
+~~~~~
+
+- C: CAN:
+
+  - Added missing ``canId`` field to the ``SilKit_CanFrameTransmitEvent`` and bumped the structure version.
+
+
+[4.0.10] - 2022-11-07
+---------------------
+
+Changed
+~~~~~~~
+
+- Documentation
+
+  - Improved Quickstart Docs and fixed sample code
+  - Updated build instructions for documentation
+
+- Logging
+
+  - Trace-Log was extended with outputs for controller creation.
+  - Default verbosity of lifecycle reduced to debug
+  
+- Demos: Replaced JSON configuration files with YAML files. The provided configurations did not change.
+- Extended SilKitDemoBenchmark
+
+    - Calculates standard deviation for throughput, message rate, speedup
+    - Added ``--write-csv`` command line argument to output results to csv file
+    - Helper scripts for msg-size-scaling and performance-diff
+
+- Changed the lifecycle service to be less verbose in log level info. See log level debug for more detailed
+  information of the lifecycle.
+
+- Updated participant configuration file schema and added it to the json schema support. Use .silkit.yaml/json suffix 
+  for automated schema support.
+
+
+[4.0.9] - 2022-10-19
+--------------------
+
+Added
+~~~~~
+
+- The LinDemo, PubSubDemo, and RpcDemo now allow using ``--async`` cli flag for unsynchronized execution.
+
+Fixed
+~~~~~
+
+- C-API:
+
+  - Data race on static variable
+
+  - Setting the direction field of the ``CanFrameEvent``
+
+  - Initialize the struct header of the embedded ``CanFrame`` structure in the ``CanFrameEvent``
+
+- Immediate shutdown of the asynchronous mode of the LIN demo
+
+
+[4.0.8] - 2022-10-07
+--------------------
+
+Changed
+~~~~~~~
+
+- The third party dependencies were updated.
+
+  - ``yaml-cpp`` to version 0.7.0.
+
+  - ``asio`` to version 1.24.0.
+
+  - ``fmt`` to version 8.1.1.
+
+  - ``spdlog`` to version 1.10.0.
+
+  - ``googletest`` to version 1.12.1.
+
+- The FlexRay controller now issues a warning if the static buffer payload is truncated
+  or padded with zeros, i.e., if the size is not exactly as specified in the controller
+  configuration.
+
+- The registry now transmits a diagnostic string when a participant announcement cannot
+  be processed, e.g., because a participant with the same name already exists.
+  The second participant will not time out after a few seconds anymore, but fail much faster.
+
+[4.0.7] - 2022-09-20
+--------------------
+
+Changed
+~~~~~~~
+- The documentation is now packaged separately in a `SilKit-4.0.7-Docs.zip` file.
+  This simplifies the CI set up and reproducibility of the generated HTML.
+  To build the documentation you should set up the build environment using pip:
+
+  .. code-block:: sh
+
+     pip3 install -r SilKit/ci/docker/docs_requirements.txt
+
+- The source tree is now packaged separately in a `SilKit-4.0.7-Source.zip` file.
+  The SIL Kit Demos are part of this package.
+
+- We no longer have a `#if defined(HAVE_FMT)` in the `silkit/services/logging/ILogger.hpp`
+  and variadic logging functions.
+  This define was disabled by default for users and only used internally.
+
+- LIN allows sending with an unknown checksum model in master responses, now.
+
+- The Pub/Sub Demo was updated to use the internal serialization/deserialization routines.
+
+Fixed
+~~~~~
+- Fix building and linking on macOs. This platform is not part of the continuous test suite.
+- Fix to allow setting the hard and soft watchdog timeouts in the HealthCheck separately.
+
+[4.0.6] - 2022-09-06
+--------------------
+
+Changed
+~~~~~~~
+
+- Removed an empty directory from the packages
+
+- Updated the description of SIL Kit in the top-level README.rst
+
+Fixed
+~~~~~
+
+- Clean up peers after a remote participant disconnects
+
+- Windows: Fixed the internal name and original filename attributes of the ``sil-kit-monitor.exe``
+
+
+[4.0.5] - 2022-08-25 Initial public release (quality assured release)
+---------------------------------------------------------------------
+
+This is the first public open source release of the Vector SIL Kit.
+
+Starting with this version, Vector SIL Kit will provide longterm API, ABI, and network compatibility. Note that prior versions do not provide this compatibility.
+
+
+[4.0.4] - 2022-08-22
+--------------------
+
+Compatibility with 4.0.3
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+- Application binary interface (ABI): Yes
+- Application software interface (API): No
+- Middleware network protocol: No
+
+Changed
+~~~~~~~
+
+- Utility (SerDes)
+
+  - ``SilKit/include/silkit/util/serdes/Serialization.hpp``:
+
+    - The media type for PubSub was changed from ``application/vnd.vector.sil.data; protocolVersion=1`` to ``application/vnd.vector.silkit.data; protocolVersion=1``
+
+    - The media type for RPC was changed from ``application/vnd.vector.sil.rpc; protocolVersion=1`` to ``application/vnd.vector.silkit.rpc; protocolVersion=1``
+
+- LIN
+
+  - ``SilKit_LinChecksumModel_Undefined`` was renamed to ``SilKit_LinChecksumModel_Unknown``.
+
+- C: Orchestration
+
+  - ``SilKit_LifecycleService_Stop`` was added to the C-API.
+    This corresponds to ``SilKit::Services::Orchestration::ILifecycleService::Stop``.
+
+- C: Ethernet
+
+  - Frames delivered in user-provided ``SilKit_EthernetFrameHandler`` functions had an invalid payload delivered.
+    This was fixed, the frame is now correctly delivered.
+    The error only occured in the C API, the C++ API correctly delivered the entire frame.
+
+
+[4.0.3] - 2022-08-22
+--------------------
+
+Compatibility with 4.0.2
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+- Application binary interface (ABI): No
+- Application software interface (API): No
+- Middleware network protocol: Yes
+
+Added
+~~~~~
+
+- LIN
+
+  - ``SilKit/include/silkit/services/lin/ILinController.hpp``:
+
+    - The new method `SetFrameResponse` allows LIN nodes to adjust their LIN response configuration during operation
+      (i.e., after Init()). Calls to `SetFrameResponse` trigger the `LinSlaveConfigurationHandler` on the LIN master.
+
+    - The LIN types `LinChecksumModel::Unknown` and / or `LinDataLengthUnknown` now have wildcard functionality for
+      nodes  configured with `LinFrameResponseMode::RX` on that id. The first transmission will set the checksum model
+      and / or data length.
+
+- CAN
+
+  - Added ``SilKit_CanTransmitStatus_DefaultMask``.
+
+- Ethernet
+
+  - Added ``SilKit_EthernetTransmitStatus_DefaultMask``.
+
+Changed
+~~~~~~~
+
+- LIN
+
+  - ``SilKit/include/silkit/services/lin/ILinController.hpp``:
+
+    - The methods `AddLinSlaveConfigurationHandler`, `RemoveLinSlaveConfigurationHandler`, `GetSlaveConfiguration` and 
+      related data structures `LinSlaveConfigurationEvent`, `LinSlaveConfigurationHandler` and `LinSlaveConfiguration`
+      have been moved to the experimental namespace and now reside in  
+      ``SilKit/include/silkit/experimental/services/lin/LinControllerExtensions.hpp``.
+    - `LinChecksumModel::Undefined` is renamed to `LinChecksumModel::Unknown`.
+
+- Utility
+
+  - Moved the headers from ``silkit/util/serdes/sil/*.hpp`` to ``silkit/util/serdes/*.hpp``.
+
+- CAN
+
+  - Removed unused ``SilKit_CanTransmitStatus_DuplicatedTransmitId`` and ``SilKit::Services::Can::CanTransmitStatus::DuplicatedTransmitId`` enumerators.
+
+- Ethernet
+
+  - Removed unused ``SilKit_EthernetTransmitStatus_DuplicatedTransmitId`` and ``SilKit::Services::Ethernet::EthernetTransmitStatus::DuplicatedTransmitId`` enumerators.
+
+- FlexRay
+
+  - Renamed ``FlexrayHeader::HeaderFlag`` to ``FlexrayHeader::Flag`` and introduced ``FlexrayHeader::FlagMask``.
+
+- RPC
+
+  - Renamed ``RpcSpec::Topic`` to ``RpcSpec::FunctionName``.
+  - Renamed enumerators ``SilKit_CallStatus_UPPER_SNAKE_CASE`` to ``SilKit_RpcCallStatus_PascalCase``.
+
+Removed
+~~~~~~~
+
+- Orchestration
+
+  - Removed the deprecated ``ITimeSyncService::SetSimulationStepHandler`` handler which took a handler function without the ``duration`` argument.
+
+- FlexRay
+
+  - Removed the convenience functions ``FlexrayHeader::IsSet``, ``FlexrayHeader::Clear``, and ``FlexrayHeader::Set``.
+
+Fixed
+~~~~~
+
+- Coordinated, but non-required participants that received the required participant list before calling 
+  `ILifecycleService::StartLifecycle()` did not go to the error state.
+
+
+[4.0.2] - 2022-08-15
+--------------------
+
+Compatibility with 4.0.1
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+- Application binary interface (ABI): Yes
+- Application software interface (API): Yes
+- Middleware network protocol: Yes
+
+Changed
+~~~~~~~
+
+- SilKit will now build on NetBSD (currently not tested automatically)
+
+[4.0.1] - 2022-08-15
+--------------------
+
+Compatibility with 4.0.0
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+- Application binary interface (ABI): No
+- Application software interface (API): Yes
+- Middleware network protocol: Yes
+
+Changed
+~~~~~~~
+
+- The calling convention used in the C-API was changed to ``cdecl`` on 32-bit Windows.
+
+Removed
+~~~~~~~
+
+- The ``sil-kit-registry`` command line argument ``--configuration`` was removed.
+
+
+[4.0.0] - 2022-08-11
+--------------------
+
+Compatibility with 3.99.30
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- Application binary interface (ABI): No
+- Application software interface (API): No
+- Middleware network protocol: No
+
+Added
+~~~~~
+
+- Added the ``SILKIT_ENABLE_COVERAGE`` CMake option for adding code-coverage compiler flags when building with GCC or Clang.
+
+Changed
+~~~~~~~
+
+- Added an CLI argument to sil-kit-system-controller to run it without user interaction (--non-interactive or -ni)
+- Participants to not go to `ParticipantState::Error` anymore when the system state changes to `SystemState::Error`
+
+Removed
+~~~~~~~
+
+- Removed various demos (CCan, CEthernet, CFlexray, CLin, Lifecycle, and TimeAnnotation) as they were meant for testing
+- Removed benchmark demo
+
+Fixed
+~~~~~
+
+- The sil-kit-system-controller crashed when any button was pressed. This is fixed.
+
+
