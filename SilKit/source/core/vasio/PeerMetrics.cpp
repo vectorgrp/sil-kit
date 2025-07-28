@@ -87,7 +87,7 @@ void PeerMetrics::RxBytes(const SilKit::Core::SerializedMessage& msg)
         return;
     }
     _rxBytes->Add(msg.GetStorageSize());
-    _rxBandwidth->Take(msg.GetStorageSize()*1.0);
+    _rxBandwidth->Take(static_cast<double>(msg.GetStorageSize()));
 }
 
 void PeerMetrics::TxBytes(const SilKit::Core::SerializedMessage& msg)
@@ -97,7 +97,7 @@ void PeerMetrics::TxBytes(const SilKit::Core::SerializedMessage& msg)
         return;
     }
     _txBytes->Add(msg.GetStorageSize());
-    _txBandwidth->Take(msg.GetStorageSize()*1.0);
+    _txBandwidth->Take(static_cast<double>(msg.GetStorageSize()));
 }
 
 void PeerMetrics::TxQueueSize(size_t queueSize)
@@ -106,7 +106,7 @@ void PeerMetrics::TxQueueSize(size_t queueSize)
     {
         return;
     }
-    _txQueueSize->Take(queueSize * 1.0);
+    _txQueueSize->Take(static_cast<double>(queueSize));
 }
 
 
