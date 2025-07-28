@@ -45,7 +45,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 namespace SilKit {
 namespace Core {
 
-class VAsioPeer
+class VAsioPeer final
     : public IVAsioPeer
     , private IRawByteStreamListener
     , private ITimerListener
@@ -72,32 +72,32 @@ public:
 public:
     // ----------------------------------------
     // Public Methods
-    void SendSilKitMsg(SerializedMessage buffer) override;
-    void Subscribe(VAsioMsgSubscriber subscriber) override;
+    void SendSilKitMsg(SerializedMessage buffer) final override;
+    void Subscribe(VAsioMsgSubscriber subscriber) final override;
 
-    auto GetInfo() const -> const VAsioPeerInfo& override;
-    void SetInfo(VAsioPeerInfo info) override;
+    auto GetInfo() const -> const VAsioPeerInfo& final override;
+    void SetInfo(VAsioPeerInfo info) final override;
     //!< Return the socket address as URI encoded string or throw if not connected
-    auto GetRemoteAddress() const -> std::string override;
-    auto GetLocalAddress() const -> std::string override;
+    auto GetRemoteAddress() const -> std::string final override;
+    auto GetLocalAddress() const -> std::string final override;
 
-    void SetSimulationName(const std::string& simulationName) override;
-    auto GetSimulationName() const -> const std::string& override;
+    void SetSimulationName(const std::string& simulationName) final override;
+    auto GetSimulationName() const -> const std::string& final override;
 
-    void StartAsyncRead() override;
+    void StartAsyncRead() final override;
 
     // IServiceEndpoint
-    inline void SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor) override;
-    inline auto GetServiceDescriptor() const -> const Core::ServiceDescriptor& override;
+    inline void SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor) final override;
+    inline auto GetServiceDescriptor() const -> const Core::ServiceDescriptor& final override;
 
-    inline void SetProtocolVersion(ProtocolVersion v) override;
-    inline auto GetProtocolVersion() const -> ProtocolVersion override;
+    inline void SetProtocolVersion(ProtocolVersion v) final override;
+    inline auto GetProtocolVersion() const -> ProtocolVersion final override;
 
-    void Shutdown() override;
+    void Shutdown() final override;
 
-    void EnableAggregation() override;
+    void EnableAggregation() final override;
 
-    void InitializeMetrics( VSilKit::IMetricsManager* manager) override;
+    void InitializeMetrics( VSilKit::IMetricsManager* manager) final override;
 
 private:
     // ----------------------------------------

@@ -263,3 +263,49 @@ macro(silkit_enable_lto enableLto)
     endif()
 
 endmacro()
+
+function(silkit_enable_devirtualization isOn)
+    if(NOT isOn)
+        return()
+    endif()
+    
+    message(STATUS "SIL Kit -- Enabling devirtualization optimizations")
+    
+    if(MSVC)
+        # Microsoft Visual C++ flags for devirtualization
+        add_compile_options(
+            /GS-        # Disable buffer security checks for better optimization
+            /Gy         # Enable function-level linking (required for aggressive optimization)
+            /Ob2        # Inline expansion (any suitable)
+            /Oi         # Enable intrinsic functions
+            /Ot         # Favor speed over size
+            /GT         # Support fiber-safe thread-local storage
+        )
+        # Add linker flags for MSVC
+        add_link_options(
+            /OPT:REF    # Remove unreferenced functions and data
+            /OPT:ICF    # Enable identical function folding
+        )
+    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        # GCC flags for aggressive devirtualization
+        add_compile_options(
+            -fdevirtualize-speculatively    # Enable speculative devirtualization
+            -fdevirtualize-at-ltrans        # Enable devirtualization at link-time
+            -finline-functions              # Inline suitable functions
+            -finline-small-functions        # Inline small functions
+            -fipa-cp                        # Interprocedural constant propagation
+            -fipa-cp-clone                  # Clone functions for constant propagation
+            -fipa-pta                       # Interprocedural pointer analysis
+            -fwhole-program                 # Assume whole program visible
+            -fno-semantic-interposition     # Disable semantic interposition
+        )
+    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+        # Clang flags for devirtualization
+        add_compile_options(
+            -fwhole-program-vtables         # Enable whole-program virtual table optimization
+            -fvirtual-function-elimination  # Enable virtual function elimination
+            -finline-functions              # Inline suitable functions
+            -fno-semantic-interposition     # Disable semantic interposition
+        )
+    endif()
+endfunction()

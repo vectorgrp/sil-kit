@@ -38,7 +38,7 @@ namespace SilKit {
 namespace Core {
 
 
-class VAsioProxyPeer
+class VAsioProxyPeer final
     : public IVAsioPeer
     , public IVAsioPeerListener
 {
@@ -47,29 +47,29 @@ public:
                    SilKit::Services::Logging::ILogger* logger);
 
 public: // IVAsioPeer
-    void SendSilKitMsg(SerializedMessage buffer) override;
-    void Subscribe(VAsioMsgSubscriber subscriber) override;
-    auto GetInfo() const -> const VAsioPeerInfo& override;
-    void SetInfo(VAsioPeerInfo info) override;
-    auto GetRemoteAddress() const -> std::string override;
-    auto GetLocalAddress() const -> std::string override;
-    void StartAsyncRead() override;
-    void Shutdown() override;
-    void EnableAggregation() override;
-    void SetProtocolVersion(ProtocolVersion v) override;
-    auto GetProtocolVersion() const -> ProtocolVersion override;
-    void SetSimulationName(const std::string& simulationName) override;
-    auto GetSimulationName() const -> const std::string& override;
+    void SendSilKitMsg(SerializedMessage buffer) final override;
+    void Subscribe(VAsioMsgSubscriber subscriber) final override;
+    auto GetInfo() const -> const VAsioPeerInfo& final override;
+    void SetInfo(VAsioPeerInfo info) final override;
+    auto GetRemoteAddress() const -> std::string final override;
+    auto GetLocalAddress() const -> std::string final override;
+    void StartAsyncRead() final override;
+    void Shutdown() final override;
+    void EnableAggregation() final override;
+    void SetProtocolVersion(ProtocolVersion v) final override;
+    auto GetProtocolVersion() const -> ProtocolVersion final override;
+    void SetSimulationName(const std::string& simulationName) final override;
+    auto GetSimulationName() const -> const std::string& final override;
 
-    void InitializeMetrics(VSilKit::IMetricsManager*) override { }
+    void InitializeMetrics(VSilKit::IMetricsManager*) final override { }
 
 public: // IVAsioPeer (IServiceEndpoint)
-    void SetServiceDescriptor(const ServiceDescriptor& serviceDescriptor) override;
-    auto GetServiceDescriptor() const -> const ServiceDescriptor& override;
+    void SetServiceDescriptor(const ServiceDescriptor& serviceDescriptor) final override;
+    auto GetServiceDescriptor() const -> const ServiceDescriptor& final override;
 
 public: // IVAsioPeerListener
-    void OnSocketData(IVAsioPeer* from, SerializedMessage&& buffer) override;
-    void OnPeerShutdown(IVAsioPeer* peer) override;
+    void OnSocketData(IVAsioPeer* from, SerializedMessage&& buffer) final override;
+    void OnPeerShutdown(IVAsioPeer* peer) final override;
 
 public:
     auto GetPeer() const -> IVAsioPeer*;

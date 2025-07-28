@@ -48,7 +48,7 @@ namespace VSilKit {
 struct IConnectPeerListener;
 
 
-class ConnectPeer
+class ConnectPeer final
     : public IConnectPeer
     , private IConnectorListener
 {
@@ -75,9 +75,9 @@ public:
     ~ConnectPeer() override;
 
 public: // IConnectPeer
-    void SetListener(IConnectPeerListener& listener) override;
-    void AsyncConnect(size_t numberOfAttempts, std::chrono::milliseconds timeout) override;
-    void Shutdown() override;
+    void SetListener(IConnectPeerListener& listener) final override;
+    void AsyncConnect(size_t numberOfAttempts, std::chrono::milliseconds timeout) final override;
+    void Shutdown() final override;
 
 private:
     void UpdateUris();
@@ -86,8 +86,8 @@ private:
     void HandleFailure();
 
 private: // IConnectorListener
-    void OnAsyncConnectSuccess(IConnector&, std::unique_ptr<IRawByteStream> stream) override;
-    void OnAsyncConnectFailure(IConnector&) override;
+    void OnAsyncConnectSuccess(IConnector&, std::unique_ptr<IRawByteStream> stream) final override;
+    void OnAsyncConnectFailure(IConnector&) final override;
 };
 
 

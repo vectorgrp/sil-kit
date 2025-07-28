@@ -29,6 +29,7 @@ option(SILKIT_USE_SYSTEM_LIBRARIES "Use the libraries installed on the system fo
 option(SILKIT_BUILD_REPRODUCIBLE "Creates a reproducible build by ommiting timestamps/unique build ids" ON)
 option(SILKIT_BUILD_LINUX_PACKAGE "Creates SIL Kit builds suitable for package managers in Linux Distributions (.deb)" OFF)
 option(SILKIT_BUILD_LTO "Build with link time optimizations" OFF)
+option(SILKIT_ENABLE_DEVIRTUALIZATION "Enable aggressive devirtualization optimizations" ON)
 
 if(SILKIT_BUILD_LINUX_PACKAGE)
 
@@ -83,6 +84,7 @@ silkit_check_reproducible()
 silkit_clean_default_compileflags()
 silkit_add_libs_for_atomic64()
 silkit_enable_lto(${SILKIT_BUILD_LTO})
+silkit_enable_devirtualization(${SILKIT_ENABLE_DEVIRTUALIZATION})
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
