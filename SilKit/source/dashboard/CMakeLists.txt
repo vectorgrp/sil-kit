@@ -44,66 +44,41 @@ if(SILKIT_BUILD_DASHBOARD)
     target_include_directories(I_SilKit_Dashboard
         INTERFACE
             ${CMAKE_CURRENT_SOURCE_DIR}
-            ${CMAKE_CURRENT_SOURCE_DIR}/Client
-            ${CMAKE_CURRENT_SOURCE_DIR}/Dto
-            ${CMAKE_CURRENT_SOURCE_DIR}/Service
-            ${CMAKE_CURRENT_SOURCE_DIR}/IntegrationTests
+            ${CMAKE_CURRENT_SOURCE_DIR}/client
+            ${CMAKE_CURRENT_SOURCE_DIR}/dto
+            ${CMAKE_CURRENT_SOURCE_DIR}/service
     )
 
     add_library(O_SilKit_Dashboard STATIC
-        Client/DashboardComponents.hpp
-        Client/DashboardSystemApiClient.hpp
-        Client/DashboardSystemServiceClient.cpp
-        Client/DashboardSystemServiceClient.hpp
-        Client/DashboardRetryPolicy.cpp
-        Client/DashboardRetryPolicy.hpp
-        Client/IDashboardSystemServiceClient.hpp
+        client/DashboardComponents.hpp
+        client/DashboardSystemApiClient.hpp
+        client/DashboardSystemServiceClient.cpp
+        client/DashboardSystemServiceClient.hpp
+        client/DashboardRetryPolicy.cpp
+        client/DashboardRetryPolicy.hpp
+        client/IDashboardSystemServiceClient.hpp
 
-        Dto/DataPublisherDto.hpp
-        Dto/DataSpecDto.hpp
-        Dto/DataSubscriberDto.hpp
-        Dto/MatchingLabelDto.hpp
-        Dto/ParticipantStatusDto.hpp
-        Dto/RpcClientDto.hpp
-        Dto/RpcServerDto.hpp
-        Dto/RpcSpecDto.hpp
-        Dto/ServiceDto.hpp
-        Dto/SimulationConfigurationDto.hpp
-        Dto/SimulationCreationRequestDto.hpp
-        Dto/SimulationCreationResponseDto.hpp
-        Dto/SimulationEndDto.hpp
-        Dto/SystemStatusDto.hpp
+        dto/DataSpecDto.hpp
+        dto/MatchingLabelDto.hpp
+        dto/ParticipantStatusDto.hpp
+        dto/RpcSpecDto.hpp
+        dto/ServiceDto.hpp
+        dto/SimulationConfigurationDto.hpp
+        dto/SimulationCreationRequestDto.hpp
+        dto/SimulationCreationResponseDto.hpp
+        dto/SystemStatusDto.hpp
 
-        IntegrationTests/ClientServerTestRunner.hpp
-        IntegrationTests/DashboardSystemApiController.hpp
-        IntegrationTests/DashboardTestComponents.hpp
+        service/ISilKitToOatppMapper.hpp
+        service/DashboardRestClient.cpp
+        service/DashboardRestClient.hpp
+        service/SilKitToOatppMapper.cpp
+        service/SilKitToOatppMapper.hpp
 
-        Service/CachingSilKitEventHandler.cpp
-        Service/CachingSilKitEventHandler.hpp
-        Service/ICachingSilKitEventHandler.hpp
-        Service/ISilKitEventHandler.hpp
-        Service/ISilKitEventQueue.hpp
-        Service/ISilKitToOatppMapper.hpp
-        Service/SilKitEvent.hpp
-        Service/SilKitEventHandler.cpp
-        Service/SilKitEventHandler.hpp
-        Service/SilKitEventQueue.cpp
-        Service/SilKitEventQueue.hpp
-        Service/SilKitToOatppMapper.cpp
-        Service/SilKitToOatppMapper.hpp
+        LockedQueue.hpp
+        SilKitEvent.hpp
 
-        CreateDashboard.hpp
-        CreateDashboard.cpp
-        Dashboard.cpp
-        Dashboard.hpp
-        DashboardBulkUpdate.cpp
+        
         DashboardBulkUpdate.hpp
-        DashboardParticipant.cpp
-        DashboardParticipant.hpp
-        IDashboard.hpp
-        OatppContext.cpp
-        OatppContext.hpp
-        TestResult.hpp
         OatppHeaders.cpp
         OatppHeaders.hpp
 
@@ -129,17 +104,9 @@ if(SILKIT_BUILD_DASHBOARD)
 
     set_property(TARGET O_SilKit_Dashboard PROPERTY FOLDER "Dashboard")
 
-    add_silkit_test_to_executable(SilKitDashboardTests
-        SOURCES Service/Test_DashboardCachingSilKitEventHandler.cpp 
-        LIBS
-        O_SilKit_Config
-        O_SilKit_Dashboard
-        I_SilKit_Core_Internal
-        I_SilKit_Core_Mock_Participant
-        )
 
     add_silkit_test_to_executable(SilKitDashboardTests
-        SOURCES Service/Test_DashboardSilKitEventQueue.cpp 
+        SOURCES Test_DashboardSilKitEventQueue.cpp 
         LIBS
         S_SilKitImpl
         O_SilKit_Dashboard
@@ -147,7 +114,7 @@ if(SILKIT_BUILD_DASHBOARD)
         )
 
     add_silkit_test_to_executable(SilKitDashboardTests
-        SOURCES Service/Test_DashboardSilKitEventHandler.cpp 
+        SOURCES service/Test_DashboardRestClient.cpp 
         LIBS
         S_SilKitImpl
         O_SilKit_Dashboard
@@ -157,7 +124,7 @@ if(SILKIT_BUILD_DASHBOARD)
         )
 
     add_silkit_test_to_executable(SilKitDashboardTests
-        SOURCES Service/Test_DashboardSilKitToOatppMapper.cpp 
+        SOURCES service/Test_DashboardSilKitToOatppMapper.cpp 
         LIBS
         S_SilKitImpl
         O_SilKit_Dashboard
@@ -166,7 +133,7 @@ if(SILKIT_BUILD_DASHBOARD)
         )
 
     add_silkit_test_to_executable(SilKitDashboardTests
-        SOURCES Client/Test_DashboardSystemServiceClient.cpp 
+        SOURCES client/Test_DashboardSystemServiceClient.cpp 
         LIBS
         S_SilKitImpl
         O_SilKit_Dashboard

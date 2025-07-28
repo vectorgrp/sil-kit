@@ -139,6 +139,8 @@ auto SystemStateTracker::UpdateParticipantStatus(const ParticipantStatus& newPar
 
     const auto oldParticipantState{participantStatus.state};
     const auto newParticipantState{newParticipantStatus.state};
+
+    if(_logger != nullptr)
     {
         Log::LoggerMessage lm{_logger, Log::Level::Debug};
         lm.SetMessage("Updating participant status");
@@ -151,17 +153,19 @@ auto SystemStateTracker::UpdateParticipantStatus(const ParticipantStatus& newPar
     // Check if transition from the old to the new participant state is valid
     if (!ValidateParticipantStateUpdate(oldParticipantState, newParticipantState))
     {
-        const auto logLevel = IsRequiredParticipant(participantName) ? Log::Level::Warn : Log::Level::Debug;
+        if (_logger != nullptr)
+        {
+            const auto logLevel = IsRequiredParticipant(participantName) ? Log::Level::Warn : Log::Level::Debug;
 
-        Log::LoggerMessage lm{_logger, logLevel};
-        lm.SetMessage("SystemMonitor detected invalid ParticipantState transition!");
-        lm.SetKeyValue(Log::Keys::participantName, participantName);
-        lm.FormatKeyValue(Log::Keys::oldParticipantState, "{}", oldParticipantState);
-        lm.FormatKeyValue(Log::Keys::newParticipantState, "{}", newParticipantState);
-        lm.SetKeyValue(Log::Keys::enterTime, FormatTimePoint(newParticipantStatus.enterTime));
-        lm.SetKeyValue(Log::Keys::enterReason, newParticipantStatus.enterReason);
-        lm.Dispatch();
-
+            Log::LoggerMessage lm{_logger, logLevel};
+            lm.SetMessage("SystemMonitor detected invalid ParticipantState transition!");
+            lm.SetKeyValue(Log::Keys::participantName, participantName);
+            lm.FormatKeyValue(Log::Keys::oldParticipantState, "{}", oldParticipantState);
+            lm.FormatKeyValue(Log::Keys::newParticipantState, "{}", newParticipantState);
+            lm.SetKeyValue(Log::Keys::enterTime, FormatTimePoint(newParticipantStatus.enterTime));
+            lm.SetKeyValue(Log::Keys::enterReason, newParticipantStatus.enterReason);
+            lm.Dispatch();
+        }
         // NB: Failing validation doesn't actually stop the participants state from being changed, it just logs the
         //     invalid transition
     }
@@ -180,6 +184,7 @@ auto SystemStateTracker::UpdateParticipantStatus(const ParticipantStatus& newPar
     if (oldParticipantState != newParticipantState)
     {
         result.participantStateChanged = true;
+        if(_logger != nullptr)
         {
             Log::LoggerMessage lm{_logger, Log::Level::Debug};
             lm.SetMessage("The participant state has changed!");
@@ -192,6 +197,7 @@ auto SystemStateTracker::UpdateParticipantStatus(const ParticipantStatus& newPar
             const auto oldSystemState{_systemState};
             const auto newSystemState{ComputeSystemState(newParticipantState)};
 
+            if(_logger != nullptr)
             {
                 Log::LoggerMessage lm{_logger, Log::Level::Debug};
                 lm.SetMessage("Computed new system state update!");
@@ -203,12 +209,15 @@ auto SystemStateTracker::UpdateParticipantStatus(const ParticipantStatus& newPar
 
             if (oldSystemState != newSystemState)
             {
-                Log::LoggerMessage lm{_logger, Log::Level::Debug};
-                lm.SetMessage("The system state has changed!");
-                lm.SetKeyValue(Log::Keys::participantName, participantName);
-                lm.FormatKeyValue(Log::Keys::oldParticipantState, "{}", oldSystemState);
-                lm.FormatKeyValue(Log::Keys::newParticipantState, "{}", newSystemState);
-                lm.Dispatch();
+                if (_logger != nullptr)
+                {
+                    Log::LoggerMessage lm{_logger, Log::Level::Debug};
+                    lm.SetMessage("The system state has changed!");
+                    lm.SetKeyValue(Log::Keys::participantName, participantName);
+                    lm.FormatKeyValue(Log::Keys::oldParticipantState, "{}", oldSystemState);
+                    lm.FormatKeyValue(Log::Keys::newParticipantState, "{}", newSystemState);
+                    lm.Dispatch();
+                }
 
                 _systemState = newSystemState;
                 result.systemStateChanged = true;

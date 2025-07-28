@@ -48,7 +48,7 @@ VAsioRegistry::VAsioRegistry(std::shared_ptr<SilKit::Config::IParticipantConfigu
 
     if (_registryEventListener != nullptr)
     {
-        _registryEventListener->OnLoggerInternalCreated(_logger.get());
+        _registryEventListener->OnLoggerCreated(dynamic_cast<SilKit::Services::Logging::ILogger*>(_logger.get()));
     }
 
     dynamic_cast<VSilKit::MetricsProcessor&>(*_metricsProcessor).SetLogger(*_logger);

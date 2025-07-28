@@ -16,8 +16,9 @@
 namespace SilKit {
 namespace Dashboard {
 
-struct DashboardBulkUpdate
+class DashboardBulkUpdate
 {
+public:
     using ParticipantConnectionInformation = SilKit::Services::Orchestration::ParticipantConnectionInformation;
     using SystemState = SilKit::Services::Orchestration::SystemState;
     using ParticipantStatus = SilKit::Services::Orchestration::ParticipantStatus;
@@ -26,7 +27,7 @@ struct DashboardBulkUpdate
     std::vector<SystemState> systemStates;
     std::vector<ParticipantConnectionInformation> participantConnectionInformations;
     std::vector<ParticipantStatus> participantStatuses;
-    std::vector<ServiceData> serviceDatas;
+    std::vector<VSilKit::ServiceData> serviceDatas;
 
     auto Empty() const -> bool
     {
