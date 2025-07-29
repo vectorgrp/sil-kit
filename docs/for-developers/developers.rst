@@ -30,6 +30,8 @@ The |ProductName| implements a layered architecture:
 Prerequisites for Compilation
 -----------------------------
 
+A C++17 compatible compiler and standard library.
+
 * For Windows:
     * Visual Studio 2017 (toolset v141) and higher
 * For Ubuntu 18.04 LTS:
@@ -255,9 +257,9 @@ Since these are not part of the CI pipeline, compatibility with these platforms 
    * - Platform
      - Architecture
      - Notes
-   * - QNX 7.1 RTOS
+   * - QNX 8 RTOS
      - X86 64bit
-     - QNX GCC 8
+     - QCC
    * - FreeBSD 14
      - X86 64bit
      - FreeBSD Clang 18
