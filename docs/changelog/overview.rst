@@ -8,7 +8,7 @@ versions page.
    :maxdepth: 1
    :glob:
 
-   versions/5.*
+   versions/latest.md
    versions/4.rst
    versions/3.rst
    versions/2-and-older.rst
