@@ -182,7 +182,7 @@ Changed
 - The LIN API was redesigned to provide a clearer and simpler interface. To make
   the transition to the new API as simple as possible, we provided extensive
   documentation on the new API itself including usage examples and information
-  about what changed in the new API: :doc:`../api/services/lin`
+  about what changed in the new API: :doc:`../../api/services/lin`
 - Removed spdlog from the public IB API. Spdlog is still used internally but it
   has been removed from the public API to avoid conflicts with user specific
   spdlog installations.
@@ -219,7 +219,7 @@ Added
 ~~~~~
 - New VAsio middleware as an alternative to Fast-RTPS, the VAsio middleware was
   specifically developped for the integration bus to provide high performance and
-  stability. Cf. :doc:`../configuration/middleware-configuration`.
+  stability. Cf. :doc:`../../configuration/middleware-configuration`.
 
 Changed
 ~~~~~~~
