@@ -17,4 +17,4 @@ Contents
   faq/faq
   for-developers/versioning
   licenses/license
-  CHANGELOG
+  changelog/overview

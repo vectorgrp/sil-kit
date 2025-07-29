@@ -111,9 +111,10 @@ install(DIRECTORY ${SPHINX_BUILD}/
         )
 install(
     FILES
-        CHANGELOG.rst
+        changelog/versions/5.0.0.md
     DESTINATION .
     COMPONENT docs
+    RENAME CHANGELOG.md
     )
 #add sample code so it shows in the IDE, but don't build or install it
 add_executable(sample_silkit_new_config EXCLUDE_FROM_ALL code-samples/simple/simple.cpp)
