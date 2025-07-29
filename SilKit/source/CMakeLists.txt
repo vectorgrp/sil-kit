@@ -140,29 +140,6 @@ target_link_libraries(O_SilKit_VersionImpl
 )
 
 
-add_library(O_SilKitLegacyAbi OBJECT
-    # Exported "Legacy" ABI Functions:
-    # - SilKit::Config::ParticipantConfigurationFromFile
-    # - SilKit::Config::ParticipantConfigurationFromString
-    # - SilKit::Experimental::Participant::CreateSystemController
-    # - SilKit::Experimental::Services::Lin::AddLinSlaveConfigurationHandler
-    # - SilKit::Experimental::Services::Lin::RemoveLinSlaveConfigurationHandler
-    # - SilKit::Experimental::Services::Lin::GetSlaveConfiguration
-    # - SilKit::Vendor::Vector::CreateSilKitRegistry
-    # - SilKit::Version::{Major, Minor, Patch, BuildNumber, String, VersionSuffix, GitHash}
-    # - SilKit::CreateParticipant (x2)
-    LegacyAbi.cpp
-)
-
-target_link_libraries(O_SilKitLegacyAbi
-    PRIVATE SilKitInterface
-    PRIVATE I_SilKit_CreateParticipantImpl
-    PRIVATE I_SilKit_CreateSilKitRegistryImpl
-    PRIVATE I_SilKit_VersionImpl
-    PRIVATE I_SilKit_Config
-    PRIVATE I_SilKit_Experimental
-)
-
 
 set(SilKitImplObjectLibraries "")
 list(APPEND SilKitImplObjectLibraries
@@ -199,8 +176,6 @@ list(APPEND SilKitImplObjectLibraries
     O_SilKit_CreateParticipantImpl
     O_SilKit_CreateSilKitRegistryImpl
     O_SilKit_VersionImpl
-
-    O_SilKitLegacyAbi
 )
 
 
