@@ -28,7 +28,7 @@ def die(status, fmt, *args):
     sys.exit(status)
 
 # File Set
-exceptional_files = {'README.rst', 'CHANGELOG.rst', 'LICENSE', 'CONTRIBUTING.md',
+exceptional_files = {'README.rst', 'latest.md', 'LICENSE', 'CONTRIBUTING.md',
                      'SilKitVersion.cmake'}
 
 parser = argparse.ArgumentParser(prog="JobStatusChecker",
