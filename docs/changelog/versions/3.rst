@@ -443,7 +443,7 @@ Changed
   The command line tools were updated to accept a new parameter for this.
 - The command line tools were modified to use lower case names with dashes:
   E.g., the ``IbRegistry`` is now called ``sil-kit-registry``.
-  See  :doc:`./utilities/utilities`  for details.
+  See  :doc:`../../utilities/utilities`  for details.
 
 - The trivial simulation and the detailed simulation have been made more consistent:
 
@@ -2832,7 +2832,7 @@ Removed
 Changed
 ~~~~~~~
 
-- Updated documentation of :doc:`./demos/demos`, :doc:`./utilities/utilities` and :doc:`./configuration/configuration`
+- Updated documentation of :doc:`../../demos/demos`, :doc:`../../utilities/utilities` and :doc:`../../configuration/configuration`
 
 
 - Participant (formerly 'ComAdapter') methods to create DataPublisher, DataSubscriber, RpcClient and RpcServer now have an additional 
@@ -3601,7 +3601,7 @@ Changed
   - Ethernet Demo only uses Set/GetRawFrame calls
   - CAN & Ethernet demo can now run as asynchronous participants (add `--async` as command line argument)
 
-- Updated documentation of network simulator and :doc:`./simulation/simulation`
+- Updated documentation of network simulator and :doc:`../../simulation/simulation`
 
 
 [3.7.13] - 2022-03-24
@@ -4721,7 +4721,7 @@ Fixed
 
 Changed
 ~~~~~~~
-- Building the documentation now requires Sphinx version >= 3.0 (cf. :doc:`../development/build`).
+- Building the documentation now requires Sphinx version >= 3.0 (cf. :doc:`../../development/build`).
   
 Compatibility with 3.3.0
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -4880,7 +4880,7 @@ Compatibility with 3.1.0
 Added
 ~~~~~
 - New optional configuration section for extension-related settings,
-  cf. :doc:`../configuration/extension-configuration`. Its only property
+  cf. :doc:`../../configuration/extension-configuration`. Its only property
   is the list of extension search path hints, which allows to configure
   the additional search paths for shared library extensions loaded by the VIB.
 
@@ -5227,17 +5227,17 @@ This is a Quality Assured Release.
 
 Added
 ~~~~~
-- Documentation for the CAN controller API: :doc:`CAN Vehicle Network Controllers <api/services/can>`.
+- Documentation for the CAN controller API: :doc:`CAN Vehicle Network Controllers <../../api/services/can>`.
 - Documentation for the Participant Controller API: :ref:`changelog-outdated-reference` (``api/participantcontroller``) (AFTMAGT-206).
 - Documentation for the IO Port services (AFTMAGT-201).
 - Documented Generic Messages API: (AFTMAGT-204).
-- Documented the simulation state machine and synchronization types: :doc:`simulation/simulation`
+- Documented the simulation state machine and synchronization types: :doc:`../../simulation/simulation`
 - Added docs for the ComAdapter:
 - Added quick start guide: usage/quickstart
-- Elaborate the user APIs and overview pages: :doc:`api/api`
-- Add docs for :doc:`api/system-utilities/systemcontroller` (AFTMAGT-242).
-- Add docs for :doc:`api/system-utilities/systemmonitor` (AFTMAGT-242).
-- Add docs for :doc:`api/services/ethernet` (AFTMAGT-239).
+- Elaborate the user APIs and overview pages: :doc:`../../api/api`
+- Add docs for :doc:`../../api/system-utilities/systemcontroller` (AFTMAGT-242).
+- Add docs for :doc:`../../api/system-utilities/systemmonitor` (AFTMAGT-242).
+- Add docs for :doc:`../../api/services/ethernet` (AFTMAGT-239).
 
 Changed
 ~~~~~~~
@@ -5282,8 +5282,8 @@ Added
   set the history size for all FastRTPS topics.
 - New WithHistoryDepth method for FastRtpsConfigBuilder. When using the builder pattern to
   generate an Ib Config, the new FastRTPS HistoryDepth can be configured this way.
-- New documentation for the configuration mechanism, cf. :doc:`../configuration/configuration`
-- New documentation for FastRTPS configuration, cf. :doc:`../configuration/middleware-configuration`
+- New documentation for the configuration mechanism, cf. :doc:`../../configuration/configuration`
+- New documentation for FastRTPS configuration, cf. :doc:`../../configuration/middleware-configuration`
 - Extend the simulation setup documentation, cf. ../configuration/simulation-setup
 
 Changed
