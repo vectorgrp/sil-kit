@@ -7,6 +7,7 @@ project("sil-kit-monitor" LANGUAGES CXX C)
 set(CMAKE_CXX_STANDARD 14)
 
 include(SilKitInstall)
+include(SilKitBuildTools)
 
 add_executable(sil-kit-monitor
     PassiveSystemMonitor.cpp
@@ -43,3 +44,4 @@ install(TARGETS sil-kit-monitor
     RUNTIME DESTINATION ${INSTALL_BIN_DIR}
     COMPONENT utils
 )
+silkit_split_debugsymbols(sil-kit-monitor)

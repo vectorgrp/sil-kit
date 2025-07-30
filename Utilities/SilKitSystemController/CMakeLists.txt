@@ -7,6 +7,7 @@ project("sil-kit-system-controller" LANGUAGES CXX C)
 set(CMAKE_CXX_STANDARD 14)
 
 include(SilKitInstall)
+include(SilKitBuildTools)
 
 add_executable(sil-kit-system-controller
     SystemController.cpp
@@ -43,3 +44,4 @@ install(TARGETS sil-kit-system-controller
     RUNTIME DESTINATION ${INSTALL_BIN_DIR}
     COMPONENT utils
 )
+silkit_split_debugsymbols(sil-kit-system-controller)
