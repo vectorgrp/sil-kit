@@ -118,7 +118,6 @@
         },
         {
             "name": "x-cross-qnx-x86_64",
-            "displayName": "QNX cross-build x86_64",
             "generator": "Unix Makefiles",
             "environment": {
                 "SILKIT_CMAKE_PRESET_BUILD_PLATFORM": "qnx"
@@ -138,13 +137,11 @@
         {
             "inherits": "x-cross-qnx-x86_64",
             "name": "x-cross-qnx-armv7",
-            "displayName": "QNX cross-build armv7",
             "toolchainFile": "${sourceDir}/SilKit/cmake/toolchain-qnx-armv7.cmake"
         },
         {
             "inherits": "x-cross-qnx-x86_64",
             "name": "x-cross-qnx-aarch64",
-            "displayName": "QNX cross-build aarch64",
             "toolchainFile": "${sourceDir}/SilKit/cmake/toolchain-qnx-aarch64.cmake"
         }
     ],
