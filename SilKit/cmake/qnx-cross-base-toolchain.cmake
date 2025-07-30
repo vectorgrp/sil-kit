@@ -73,7 +73,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Y_cxx -stdlib=libc++")
 set(CMAKE_EXE_LINKER_FLAGS "-Wl,-z,origin")
 
 if($ENV{QNX_HOST} MATCHES ".*qnx710.*")
-    message(STATUS "QNX700 detected: Linking against libc++fs")
+    message(STATUS "QNX710 detected: Linking against libc++fs")
     link_libraries(-lc++fs)
 endif()
 
