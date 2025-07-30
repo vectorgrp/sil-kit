@@ -72,7 +72,7 @@ set(CMAKE_CXX_COMPILER_TARGET ${qcc_arch})
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Y_cxx -stdlib=libc++ -Wc,-std=c++17")
 set(CMAKE_EXE_LINKER_FLAGS "-Wl,-z,origin")
 
-link_libraries(-lstdc++fs)
+link_libraries(-lc++fs)
 
 set(CMAKE_ASM_COMPILER "${QCC_EXE}" -V${qcc_arch})
 set(CMAKE_ASM_DEFINE_FLAG "-Wa,--defsym,")
