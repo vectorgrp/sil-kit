@@ -52,9 +52,9 @@ macro(silkit_install_debugsymbols targetName)
             return()
         endif()
 
+        file(MAKE_DIRECTORY "${SILKIT_SYMBOLS_DIR}")
         silkit_split_debugsymbols("${targetName}")
 
-        file(MAKE_DIRECTORY "${SILKIT_SYMBOLS_DIR}")
 
 	message(STATUS "Installing ELF debug file")
 	install(
