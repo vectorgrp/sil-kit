@@ -204,6 +204,10 @@
     ],
     "buildPresets": [
         {
+            "name": "distrib",
+            "configurePreset": "distrib"
+        },
+        {
             "name": "debug",
             "configurePreset": "debug"
         },
@@ -255,6 +259,10 @@
     ],
 
     "testPresets": [
+        {
+            "name": "distrib",
+            "configurePreset": "distrib"
+        },
         {
             "name": "debug",
             "configurePreset": "debug"
