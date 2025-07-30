@@ -8,6 +8,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD_EXTENSIONS OFF)
 
 include(SilKitInstall)
+include(SilKitBuildTools)
 
 if(MSVC)
     #disable warnings on visual studio 2015 v14
@@ -65,3 +66,4 @@ install(TARGETS sil-kit-registry
     RUNTIME DESTINATION ${INSTALL_BIN_DIR}
     COMPONENT utils
 )
+silkit_split_debugsymbols(sil-kit-registry)
