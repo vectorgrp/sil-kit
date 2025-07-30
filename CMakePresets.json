@@ -26,6 +26,10 @@
                 "SILKIT_INSTALL_SOURCE": "ON",
                 "SILKIT_PACKAGE_SYMBOLS": "ON",
                 "SILKIT_WARNINGS_AS_ERRORS": "ON"
+            },
+            "architecture": {
+                "value": "x64",
+                "strategy": "external"
             }
         },
         {
@@ -39,6 +43,10 @@
                 "SILKIT_WARNINGS_AS_ERRORS": "ON",
                 "SILKIT_PACKAGE_SYMBOLS": "OFF",
                 "SILKIT_INSTALL_SOURCE": "OFF"
+            },
+            "architecture": {
+                "value": "x64",
+                "strategy": "external"
             }
         },
         {
@@ -87,49 +95,6 @@
                 "strategy": "external"
             }
         },
-        {
-            "name": "mixin-toolset-v140",
-            "description": "Set MSVC toolset v140",
-            "hidden": true,
-            "cacheVariables": {
-                "SILKIT_REQUIRED_MSVC_TOOLSET_VERSION": "v140"
-            },
-            "toolset": {
-                "value": "v140",
-                "strategy": "external"
-            }
-        },
-        {
-            "name": "mixin-arch-x64",
-            "description": "Set MSVC arch x64",
-            "hidden": true,
-            "architecture": {
-                "value": "x64",
-                "strategy": "external"
-            }
-        },
-        {
-            "name": "mixin-arch-x86",
-            "description": "Set MSVC arch x86",
-            "hidden": true,
-            "architecture": {
-                "value": "x86",
-                "strategy": "external"
-            }
-        },
-        {
-            "name": "mixin-crossarmeabihf",
-            "description": "Crossbuild with toolchain file",
-            "hidden": true,
-            "toolchainFile": "${sourceDir}/SilKit/cmake/toolchain-arm-linux-gnueabihf.cmake"
-        },
-
-        {
-            "name": "mixin-crossarmeabi",
-            "description": "Crossbuild with toolchain file",
-            "hidden": true,
-            "toolchainFile": "${sourceDir}/SilKit/cmake/toolchain-arm-linux-gnueabi.cmake"
-        },
 
         {
             "name": "vs141-x86-debug",
@@ -137,20 +102,22 @@
         },
         {
             "name": "vs141-x64-debug",
-            "inherits": [ "mixin-arch-x64", "vs141-x86-debug" ]
+            "inherits": ["mixin-toolset-v141", "debug" ]
         },
 
 
         {
-            "name": "cross-armeabihf-debug",
-            "inherits": [ "mixin-crossarmeabihf", "debug" ]
+            "name": "99-cross-armeabihf-debug",
+            "inherits": [ "debug" ],
+            "toolchainFile": "${sourceDir}/SilKit/cmake/toolchain-arm-linux-gnueabihf.cmake"
         },
         {
-            "name": "cross-armeabi-debug",
-            "inherits": [ "mixin-crossarmeabi", "debug" ]
+            "name": "99-cross-armeabi-debug",
+            "inherits": [ "debug" ],
+            "toolchainFile": "${sourceDir}/SilKit/cmake/toolchain-arm-linux-gnueabi.cmake"
         },
         {
-            "name": "cross-qnx-x86_64",
+            "name": "99-cross-qnx-x86_64",
             "displayName": "QNX cross-build x86_64",
             "generator": "Unix Makefiles",
             "environment": {
@@ -169,14 +136,14 @@
             }
         },
         {
-            "inherits": "cross-qnx-x86_64",
-            "name": "cross-qnx-armv7",
+            "inherits": "99-cross-qnx-x86_64",
+            "name": "99-cross-qnx-armv7",
             "displayName": "QNX cross-build armv7",
             "toolchainFile": "${sourceDir}/SilKit/cmake/toolchain-qnx-armv7.cmake"
         },
         {
-            "inherits": "cross-qnx-x86_64",
-            "name": "cross-qnx-aarch64",
+            "inherits": "99-cross-qnx-x86_64",
+            "name": "99-cross-qnx-aarch64",
             "displayName": "QNX cross-build aarch64",
             "toolchainFile": "${sourceDir}/SilKit/cmake/toolchain-qnx-aarch64.cmake"
         }
@@ -216,24 +183,24 @@
         },
 
         {
-            "name": "cross-qnx-x86_64",
-            "configurePreset": "cross-qnx-x86_64"
+            "name": "99-cross-qnx-x86_64",
+            "configurePreset": "99-cross-qnx-x86_64"
         },
         {
-            "name": "cross-qnx-armv7",
-            "configurePreset": "cross-qnx-armv7"
+            "name": "99-cross-qnx-armv7",
+            "configurePreset": "99-cross-qnx-armv7"
         },
         {
-            "name": "cross-qnx-aarch64",
-            "configurePreset": "cross-qnx-aarch64"
+            "name": "99-cross-qnx-aarch64",
+            "configurePreset": "99-cross-qnx-aarch64"
         },
         {
-            "name": "cross-armeabihf-debug",
-            "configurePreset": "cross-armeabihf-debug"
+            "name": "99-cross-armeabihf-debug",
+            "configurePreset": "99-cross-armeabihf-debug"
         },
         {
-            "name": "cross-armeabi-debug",
-            "configurePreset": "cross-armeabi-debug"
+            "name": "99-cross-armeabi-debug",
+            "configurePreset": "99-cross-armeabi-debug"
         }
     ],
 
@@ -276,27 +243,27 @@
         },
 
         {
-            "name": "cross-qnx-x86_64",
-            "configurePreset": "cross-qnx-x86_64"
+            "name": "99-cross-qnx-x86_64",
+            "configurePreset": "99-cross-qnx-x86_64"
         },
         {
-            "name": "cross-qnx-armv7",
-            "configurePreset": "cross-qnx-armv7"
+            "name": "99-cross-qnx-armv7",
+            "configurePreset": "99-cross-qnx-armv7"
         },
         {
-            "name": "cross-qnx-aarch64",
-            "configurePreset": "cross-qnx-aarch64"
+            "name": "99-cross-qnx-aarch64",
+            "configurePreset": "99-cross-qnx-aarch64"
         },
 
 
 
         {
-            "name": "cross-armeabihf-debug",
-            "configurePreset": "cross-armeabihf-debug"
+            "name": "99-cross-armeabihf-debug",
+            "configurePreset": "99-cross-armeabihf-debug"
         },
         {
-            "name": "cross-armeabi-debug",
-            "configurePreset": "cross-armeabi-debug"
+            "name": "99-cross-armeabi-debug",
+            "configurePreset": "99-cross-armeabi-debug"
         }
     ]
 }
