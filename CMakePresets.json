@@ -2,12 +2,6 @@
     "version": 3,
     "configurePresets": [
         {
-            "name": "mixin-ninja",
-            "description": "Use Ninja Generator",
-            "hidden": true,
-            "generator": "Ninja"
-        },
-        {
             "name": "mixin-dirs",
             "description": "Set default binary / install dirs",
             "hidden": true,
@@ -20,34 +14,11 @@
                 }
             }
         },
-        {
-            "name": "mixin-debug",
-            "description": "CMake build type Debug",
-            "hidden": true,
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug"
-            }
-        },
-        {
-            "name": "mixin-release",
-            "description": "CMake build type Release",
-            "hidden": true,
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Release"
-            }
-        },
-        {
-            "name": "mixin-relwithdebinfo",
-            "description": "CMake build type RelWithDebInfo",
-            "hidden": true,
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "RelWithDebInfo"
-            }
-        },
 
         {
             "name": "distrib",
-            "inherits": [ "mixin-dirs", "mixin-ninja"],
+            "inherits": [ "mixin-dirs"],
+            "generator": "Ninja",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release",
                 "SILKIT_BUILD_TESTS": "ON",
@@ -59,8 +30,10 @@
         },
         {
             "name": "debug",
-            "inherits": [  "mixin-dirs", "mixin-ninja", "mixin-debug"],
+            "inherits": [  "mixin-dirs"],
+            "generator": "Ninja",
             "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
                 "SILKIT_BUILD_TESTS": "ON",
                 "SILKIT_BUILD_UTILITIES": "ON",
                 "SILKIT_WARNINGS_AS_ERRORS": "ON",
@@ -70,11 +43,17 @@
         },
         {
             "name": "release",
-            "inherits": [ "mixin-release", "debug"]
+            "inherits": ["debug"],
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            }
         },
         {
             "name": "relwithdebinfo",
-            "inherits": [ "mixin-relwithdebinfo", "debug"]
+            "inherits": [ "debug"],
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+            }
         },
         {
             "name": "x86-debug",
