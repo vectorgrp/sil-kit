@@ -69,8 +69,13 @@ set(CMAKE_CXX_COMPILER_TARGET ${qcc_arch})
 
 # Use LLVM stdlib for now, since GNU is segfaulting with future.waits
 # -Y and -stdlib should be redundant
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Y_cxx -stdlib=libc++ -Wc,-std=c++14")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Y_cxx -stdlib=libc++")
 set(CMAKE_EXE_LINKER_FLAGS "-Wl,-z,origin")
+
+if($ENV{QNX_HOST} MATCHES ".*qnx710.*")
+    message(STATUS "QNX710 detected: Linking against libc++fs")
+    link_libraries(-lc++fs)
+endif()
 
 set(CMAKE_ASM_COMPILER "${QCC_EXE}" -V${qcc_arch})
 set(CMAKE_ASM_DEFINE_FLAG "-Wa,--defsym,")

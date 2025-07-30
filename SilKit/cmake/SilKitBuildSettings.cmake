@@ -174,6 +174,9 @@ function(silkit_enable_warnings isOn)
                 -Wno-dangling-reference
                 )
         endif()
+	if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "9")
+		link_libraries(-lstdc++fs)
+	endif()
     endif()
 
     add_compile_options(${_flags})
