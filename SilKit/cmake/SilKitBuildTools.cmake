@@ -5,27 +5,31 @@
 include(CMakeFindBinUtils)
 
 macro(silkit_split_debugsymbols targetName)
-    set(_targetFile "$<TARGET_FILE:${targetName}>")
-    set(_debugFile "${SILKIT_SYMBOLS_DIR}/${targetName}${CMAKE_DEBUG_POSTFIX}.debug")
-    message(DEBUG "Split debugsymbols from ${_targetName} into ${_debugFile}")
-    add_custom_command(
-        TARGET ${targetName}
-        POST_BUILD
-        COMMAND ${CMAKE_OBJCOPY} --only-keep-debug "${_targetFile}" "${_debugFile}"
-        COMMAND ${CMAKE_STRIP} "${_targetFile}"
-        COMMAND ${CMAKE_OBJCOPY} --add-gnu-debuglink="${_debugFile}" "${_targetFile}"
-        COMMENT "SIL Kit: SILKIT_PACKAGE_SYMBOLS: splitting ELF debug symbols"
-    )
-endmacro()
-macro(silkit_strip_distrib targetName)
-    if(SILKIT_PACKAGE_SYMBOLS)
+    if(NOT MSVC)
         set(_targetFile "$<TARGET_FILE:${targetName}>")
+        set(_debugFile "${SILKIT_SYMBOLS_DIR}/${targetName}${CMAKE_DEBUG_POSTFIX}.debug")
+        message(DEBUG "Split debugsymbols from ${_targetName} into ${_debugFile}")
         add_custom_command(
             TARGET ${targetName}
             POST_BUILD
+            COMMAND ${CMAKE_OBJCOPY} --only-keep-debug "${_targetFile}" "${_debugFile}"
             COMMAND ${CMAKE_STRIP} "${_targetFile}"
-            COMMENT "SIL Kit: stripping ${_targetName}"
+            COMMAND ${CMAKE_OBJCOPY} --add-gnu-debuglink="${_debugFile}" "${_targetFile}"
+            COMMENT "SIL Kit: SILKIT_PACKAGE_SYMBOLS: splitting ELF debug symbols"
         )
+    endif()
+endmacro()
+macro(silkit_strip_distrib targetName)
+    if(NOT MSVC)
+        if(SILKIT_PACKAGE_SYMBOLS)
+            set(_targetFile "$<TARGET_FILE:${targetName}>")
+            add_custom_command(
+                TARGET ${targetName}
+                POST_BUILD
+                COMMAND ${CMAKE_STRIP} "${_targetFile}"
+                COMMENT "SIL Kit: stripping ${_targetName}"
+            )
+        endif()
     endif()
 endmacro()
 
