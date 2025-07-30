@@ -17,14 +17,16 @@ macro(silkit_split_debugsymbols targetName)
         COMMENT "SIL Kit: SILKIT_PACKAGE_SYMBOLS: splitting ELF debug symbols"
     )
 endmacro()
-macro(silkit_strip targetName)
-    set(_targetFile "$<TARGET_FILE:${targetName}>")
-    add_custom_command(
-        TARGET ${targetName}
-        POST_BUILD
-        COMMAND ${CMAKE_STRIP} "${_targetFile}"
-        COMMENT "SIL Kit: stripping ${_targetName}"
-    )
+macro(silkit_strip_distrib targetName)
+    if(SILKIT_PACKAGE_SYMBOLS)
+        set(_targetFile "$<TARGET_FILE:${targetName}>")
+        add_custom_command(
+            TARGET ${targetName}
+            POST_BUILD
+            COMMAND ${CMAKE_STRIP} "${_targetFile}"
+            COMMENT "SIL Kit: stripping ${_targetName}"
+        )
+    endif()
 endmacro()
 
 macro(silkit_install_debugsymbols targetName)

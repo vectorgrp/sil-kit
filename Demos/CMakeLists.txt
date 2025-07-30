@@ -127,7 +127,7 @@ macro(make_silkit_demo executableName demoSourceFile addToPackage)
             COMPONENT demos
         )
     endif()
-    silkit_strip(${executableName})
+    silkit_strip_distrib(${executableName})
 endmacro()
 
 macro(make_silkit_communication_demo executableName demoSourceFile)
