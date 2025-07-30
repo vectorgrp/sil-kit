@@ -5,7 +5,10 @@
 include(CMakeFindBinUtils)
 
 macro(silkit_split_debugsymbols targetName)
-    if(NOT MSVC AND CMAKE_STRIP AND EXISTS ${CMAKE_STRIP})
+    if(NOT MSVC 
+       AND (CMAKE_STRIP AND EXISTS ${CMAKE_STRIP})
+       AND (CMAKE_OBJCOPY AND EXISTS ${CMAKE_OBJCOPY})
+      )
 
         set(_targetFile "$<TARGET_FILE:${targetName}>")
         set(_debugFile "${SILKIT_SYMBOLS_DIR}/${targetName}${CMAKE_DEBUG_POSTFIX}.debug")
