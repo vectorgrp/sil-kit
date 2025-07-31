@@ -27,7 +27,7 @@ jobs:
           submodules: true
       - uses: ./.github/actions/build-cmake-preset
         with:
-          preset-name: linux-release
+          preset-name: release
           cmake-args: "-DCMAKE_C_COMPILER=${{ matrix.toolchain.cc }} \
                        -DCMAKE_CXX_COMPILER=${{ matrix.toolchain.cxx }}"
           artifact-label: ${{ github.job }}
