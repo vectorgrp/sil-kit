@@ -9,6 +9,7 @@ versions page.
    :glob:
 
    versions/latest.md
+   versions/5.0.0.md
    versions/4.rst
    versions/3.rst
    versions/2-and-older.rst
