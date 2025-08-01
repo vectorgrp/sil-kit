@@ -56,7 +56,7 @@ runs:
     - name: Build ${{ inputs.preset-name }}
       run: |
         export PATH=${{ inputs.extra-path }}$PATH
-        cmake --build --preset ${{ inputs.preset-name }}
+        cmake --build --preset ${{ inputs.preset-name }} --verbose
 
       shell: ${{ inputs.shell }}
 
