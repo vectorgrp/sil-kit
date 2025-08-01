@@ -2,50 +2,6 @@
 #
 # SPDX-License-Identifier: MIT
 
-function(silkit_enable_asan isOn)
-    if(NOT isOn)
-        return()
-    endif()
-    message(STATUS "SIL Kit -- Enabling Address Sanitizer")
-    if(MSVC)
-        add_compile_options(/fsanitize=address)
-    else()
-        #clang, gcc
-        add_compile_options(-fsanitize=address -fno-omit-frame-pointer )
-        #ensures that -lasan is linked in as first library
-        add_link_options(-fsanitize=address)
-    endif()
-endfunction()
-
-function(silkit_enable_ubsan isOn)
-    if(NOT isOn)
-        return()
-    endif()
-    if(MSVC)
-        message(STATUS "SIL Kit -- UBSAN not supported on MSVC")
-    else()
-        message(STATUS "SIL Kit -- Enabling Undefined Behavior Sanitizer")
-        #clang, gcc
-        add_compile_options(-fsanitize=undefined) 
-        #ensures that -lasan is linked in as first library
-        add_link_options(-fsanitize=undefined)
-    endif()
-endfunction()
-
-function(silkit_enable_threadsan isOn)
-    if(NOT isOn)
-        return()
-    endif()
-    if(MSVC)
-        message(STATUS "SIL Kit -- Thread Sanitizer not supported on MSVC")
-    else()
-        message(STATUS "SIL Kit -- Enabling Thread Sanitizer")
-        #clang, gcc
-        add_compile_options(-fsanitize=thread -fno-omit-frame-pointer -g3) 
-        #ensures that -lasan is linked in as first library
-        add_link_options(-fsanitize=thread -fno-omit-frame-pointer -g3)
-    endif()
-endfunction()
 
 function(silkit_enable_coverage isOn)
     if(NOT isOn)
