@@ -22,7 +22,8 @@ jobs:
       - uses: ./.github/actions/build-cmake-preset
         with:
           preset-name: relwithdebinfo
-          cmake-args: "-D SILKIT_ENABLE_ASAN=ON -D SILKIT_BUILD_DASHBOARD=OFF \
+          cmake-args: "-D SILKIT_BUILD_DASHBOARD=OFF \
                        -DCMAKE_C_COMPILER=clang-18 \
-                       -DCMAKE_CXX_COMPILER=clang++-18"
+                       -DCMAKE_CXX_COMPILER=clang++-18 \
+                       -DCMAKE_CXX_FLAGS='-fsanitize=address -fno-omit-frame-pointer -g3'"
           artifact-label: ${{ github.job }}
