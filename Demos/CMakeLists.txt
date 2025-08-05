@@ -10,7 +10,6 @@ cmake_minimum_required(VERSION 3.12)
 project("SilKit-Demos" LANGUAGES CXX C)
 set(CMAKE_CXX_STANDARD 14)
 
-include(SilKitBuildTools)
 
 set(_is_standalone FALSE)
 if(NOT TARGET SilKit)
@@ -43,6 +42,7 @@ else()
     include(SilKitInstall)
     include(SilKitVersion)
     configure_silkit_version(${PROJECT_NAME})
+    include(SilKitBuildTools)
 endif()
 
 
@@ -127,7 +127,9 @@ macro(make_silkit_demo executableName demoSourceFile addToPackage)
             COMPONENT demos
         )
     endif()
-    silkit_strip_distrib(${executableName})
+    if(NOT _is_standalone)
+        silkit_strip_distrib(${executableName})
+    endif()
 endmacro()
 
 macro(make_silkit_communication_demo executableName demoSourceFile)
