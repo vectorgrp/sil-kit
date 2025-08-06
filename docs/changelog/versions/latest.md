@@ -1,3 +1,4 @@
 # [5.0.1] - UNRELEASED
 
-> This changelog entry is still empty.
+## Fixed
+* build: Fix building SIL Kit from source
