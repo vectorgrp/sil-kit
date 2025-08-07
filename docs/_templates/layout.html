@@ -1,0 +1,14 @@
+{# SPDX-FileCopyrightText: 2025 Vector Informatik GmbH #}
+{# SPDX-License-Identifier: MIT #}
+
+{% extends "!layout.html" %}
+{% block sidebartitle %}
+	<a class="icon icon-home" href="contents.html">
+		Vector SIL Kit
+	</a>
+	<div class="version" style="margin-bottom: 0.5em;">
+		Version: {{ release }}
+	</div>
+	<br/>
+	{% include "searchbox.html" %}
+{% endblock %}

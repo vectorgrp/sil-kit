@@ -1,4 +1,4 @@
-# [5.0.1] - UNRELEASED
+# [5.0.1] - 2025-08-07
 
 ## Fixed
-* build: Fix building SIL Kit from source
+* build: fix building from source of the SIL Kit Demos in the distribution packages   
