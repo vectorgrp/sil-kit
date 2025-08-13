@@ -39,6 +39,10 @@ running on 'localhost' listening on port 8500. These values can be changed via t
       TcpReceiveBufferSize: 1024
       RegistryAsFallbackProxy: false
       ConnectTimeoutSeconds: 5.0
+      EnableDomainSockets: false
+      AcceptorUris:
+        - tcp://0.0.0.0:0
+        - local:///tmp/my.own.socket
 
 .. list-table:: Middleware Configuration
    :widths: 15 85
@@ -70,13 +74,6 @@ running on 'localhost' listening on port 8500. These values can be changed via t
    * - TcpReceiveBufferSize
      - Sets the TCP receive buffer size. Be careful when changing the OS defaults!
 
-   * - AcceptorUris
-     - Overwrite the default acceptor URIs of the participant. The configuration
-       field exists to support more complicated network setups, where the
-       listening ports of the participant must have a known, fixed port number
-       and address.
-       |NormalOperationNotice|
-
    * - RegistryAsFallbackProxy
      - Disable using the registry as a proxy for participant-to-participant
        communication as a fallback, if the direct connection attempts fail.
@@ -87,4 +84,30 @@ running on 'localhost' listening on port 8500. These values can be changed via t
    * - ConnectTimeoutSeconds
      - The timeout (in seconds) until a connection attempt is aborted or a handshake is considered failed.
        This timeout applies to each attempt (TCP, Local-Domain) individually.
+       |NormalOperationNotice|
+
+   * - EnableDomainSockets
+     - By default, a participant connects to, and listens for connections on a local domain socket (in addition to TCP).
+       Setting this flag to ``false`` disables connection attempts and listening for connections on domain sockets.
+       This can be useful for testing and debugging.
+       |NormalOperationNotice|
+
+   * - AcceptorUris
+     - Overwrite the default acceptor URIs of the participant. The configuration
+       field exists to support more complicated network setups, where the
+       listening ports of the participant must have a known, fixed port number
+       and address.
+       This field expects a list of strings.
+
+       Each string identifies a socket endpoint used to listen for incoming connections, for TCP or local domain sockets.
+
+       * ``tcp://<ip>:<port>``, e.g.,
+
+         * ``tcp://10.123.15.33:36812`` to listen on ``10.123.15.33`` for incoming TCP connections on port ``36812``
+         * ``tcp://[::]:33445`` to listen for connections on any IPv6 address of the host on port ``33445``
+
+       * ``local://<path>``, e.g.,
+
+         * ``local:///tmp/my.socket`` to listen on a local domain socket identified by the path ``/tmp/my.socket``
+
        |NormalOperationNotice|
