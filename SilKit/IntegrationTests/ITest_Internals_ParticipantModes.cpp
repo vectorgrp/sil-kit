@@ -41,6 +41,8 @@ std::atomic<bool> abortSystemControllerRequested{false};
 static size_t expectedReceptions = 0;
 static size_t globalParticipantIndex = 0;
 
+static constexpr std::chrono::seconds TEST_TIMEOUT{20};
+
 std::chrono::milliseconds communicationTimeout{10000ms};
 std::chrono::milliseconds asyncDelayBetweenPublication{50ms};
 
@@ -595,7 +597,7 @@ protected:
             {
                 try
                 {
-                    shutdownFuture.wait();
+                    (void)shutdownFuture.wait_for(TEST_TIMEOUT);
                 }
                 catch (...)
                 {
@@ -623,6 +625,8 @@ protected:
         {
             if (thread.shutdownFuture.valid())
             {
+                auto&& status = thread.shutdownFuture.wait_for(TEST_TIMEOUT);
+                ASSERT_EQ(status, std::future_status::ready); // signal failure
                 thread.shutdownFuture.get();
             }
         }
