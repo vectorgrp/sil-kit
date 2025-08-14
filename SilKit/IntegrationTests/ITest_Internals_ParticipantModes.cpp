@@ -41,6 +41,8 @@ std::atomic<bool> abortSystemControllerRequested{false};
 static size_t expectedReceptions = 0;
 static size_t globalParticipantIndex = 0;
 
+static constexpr std::chrono::seconds TEST_TIMEOUT{20};
+
 std::chrono::milliseconds communicationTimeout{10000ms};
 std::chrono::milliseconds asyncDelayBetweenPublication{50ms};
 
@@ -256,7 +258,7 @@ protected:
         if (testParticipant.lifeCycleOperationMode != OperationMode::Invalid)
         {
             auto finalStateFuture = lifecycleService->StartLifecycle();
-            finalStateFuture.get();
+            finalStateFuture.wait_for(TEST_TIMEOUT);
         }
     }
 
@@ -364,12 +366,12 @@ protected:
 
             // Wait for task to have received a stop request
             auto simTaskFinishedFuture = testParticipant.simTaskFinishedPromise.get_future();
-            simTaskFinishedFuture.get();
+            (void)simTaskFinishedFuture.wait_for(TEST_TIMEOUT);
 
             // Stop the lifecycle
             lifecycleService->Stop("End Test");
 
-            finalStateFuture.get();
+            (void)finalStateFuture.wait_for(TEST_TIMEOUT);
 
             if (runTaskThread.joinable())
             {
@@ -466,14 +468,14 @@ protected:
         };
         std::thread abortThread{waitForAbortTask};
         abortThread.detach();
-        abortThreadDone.get_future().get();
+        abortThreadDone.get_future().wait_for(TEST_TIMEOUT);
         if (abortThread.joinable())
         {
             abortThread.join();
         }
         abortSystemControllerRequested = false;
 
-        finalState.get();
+        finalState.wait_for(TEST_TIMEOUT);
     }
 
     void RunSystemController(const std::vector<std::string>& requiredParticipants)
@@ -495,7 +497,7 @@ protected:
     void AbortSystemController()
     {
         abortSystemControllerRequested = true;
-        participantThread_SystemController.shutdownFuture.get();
+        participantThread_SystemController.shutdownFuture.wait_for(TEST_TIMEOUT);
         if (participantThread_SystemController.thread.joinable())
         {
             participantThread_SystemController.thread.join();
@@ -595,7 +597,7 @@ protected:
             {
                 try
                 {
-                    shutdownFuture.wait();
+                    (void)shutdownFuture.wait_for(TEST_TIMEOUT);
                 }
                 catch (...)
                 {
@@ -623,6 +625,8 @@ protected:
         {
             if (thread.shutdownFuture.valid())
             {
+                auto&& status = thread.shutdownFuture.wait_for(TEST_TIMEOUT);
+                ASSERT_EQ(status, std::future_status::ready); // signal failure
                 thread.shutdownFuture.get();
             }
         }

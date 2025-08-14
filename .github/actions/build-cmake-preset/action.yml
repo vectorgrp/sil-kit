@@ -65,7 +65,7 @@ runs:
       id: ctests
       run: |
         export PATH=${{ inputs.extra-path }}$PATH
-        ctest --preset ${{ inputs.preset-name }} --output-on-failure -R '^(I|T)'
+        ctest --preset ${{ inputs.preset-name }} --output-on-failure -R '^(I|T)' --timeout 300
 
       shell: ${{ inputs.shell }}
 
