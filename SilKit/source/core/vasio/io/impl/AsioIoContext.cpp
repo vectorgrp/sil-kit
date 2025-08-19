@@ -164,14 +164,14 @@ void AsioIoContext::Run()
 void AsioIoContext::Post(std::function<void()> function)
 {
     SILKIT_TRACE_METHOD_(_logger, "(...)");
-    _asioIoContext->post(std::move(function));
+    asio::post(*_asioIoContext, std::move(function));
 }
 
 
 void AsioIoContext::Dispatch(std::function<void()> function)
 {
     SILKIT_TRACE_METHOD_(_logger, "(...)");
-    _asioIoContext->dispatch(std::move(function));
+    asio::dispatch(*_asioIoContext, std::move(function));
 }
 
 
