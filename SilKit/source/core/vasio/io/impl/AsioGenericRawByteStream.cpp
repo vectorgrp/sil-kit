@@ -283,7 +283,7 @@ void AsioGenericRawByteStream::HandleShutdownOrError()
 
             _shutdownPosted = true;
 
-            _asioIoContext->post([this] { _listener->OnShutdown(*this); });
+            asio::post(*_asioIoContext, [this] { _listener->OnShutdown(*this); });
         }
     }
 }
