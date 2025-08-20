@@ -50,7 +50,7 @@ jobs:
 
     - uses: ./.github/actions/build-cmake-preset
       with:
-        preset-name: x64-release
+        preset-name: release
         build-arch: x64
         artifact-label: ${{ github.job }}
 
