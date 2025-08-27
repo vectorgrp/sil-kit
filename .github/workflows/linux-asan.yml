@@ -25,5 +25,6 @@ jobs:
           cmake-args: "-D SILKIT_BUILD_DASHBOARD=OFF \
                        -DCMAKE_C_COMPILER=clang-18 \
                        -DCMAKE_CXX_COMPILER=clang++-18 \
-                       -DCMAKE_CXX_FLAGS='-fsanitize=address -fno-omit-frame-pointer -g3'"
+                       -DCMAKE_CXX_FLAGS='-fsanitize=address -fno-omit-frame-pointer' \
+                       -DCMAKE_CXX_FLAGS_RELWITHDEBINFO=' -g3'"
           artifact-label: ${{ github.job }}
