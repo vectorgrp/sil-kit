@@ -466,9 +466,9 @@ void ParticipantsThread(std::shared_ptr<SilKit::Config::IParticipantConfiguratio
 
 void PrintParameters(BenchmarkConfig benchmark)
 {
-#ifndef NDEBUG
-    std::cout << "WARNING: The benchmark demo is executed in a DEBUG build configuration." << std::endl
-              << "For more reliable timings, please use a RELEASE build configuration" << std::endl
+#ifdef SILKIT_BUILD_IS_DEBUG
+    std::cout << "WARNING: The benchmark demo is executed in a Debug build configuration." << std::endl
+              << "For more reliable timings, please use a Release/RelWithDebInfo build configuration" << std::endl
               << "of the SIL Kit library and the benchmark demo." << std::endl;
     std::this_thread::sleep_for(2s);
 #endif
