@@ -135,6 +135,7 @@ DataPublishers
   DataPublishers: 
   - Name: DataPublisher1
     Topic: SomeTopic1
+    History: 1
     Labels:
       - Key: SomeKey
         Value: SomeValue
@@ -154,9 +155,15 @@ DataPublishers
      - The name of the data publisher.
    * - Topic
      - The topic on which the data publisher publishes its information. (optional)
+   * - History
+     - The history length determines if the last message published by this data publisher is cached
+       and automatically sent to any new subscribers.
+       Note that the value will replace the programmatically provided history length.
+       The default for the programmatically provided history length is ``0``.
+       If set, the value must be either ``0`` or ``1``. (optional)
    * - Labels
-     - The labels determining matching subscribers with the same topic and media type. (optional)
-        Note that these labels will replace all programmatically provided labels.
+     - The labels determining matching subscribers with the same topic and media type.
+       Note that these labels will replace all programmatically provided labels. (optional)
 
 
 .. _sec:cfg-participant-data-subscribers:
