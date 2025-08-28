@@ -119,6 +119,10 @@ macro(make_silkit_demo executableName demoSourceFile addToPackage)
         target_compile_options(${executableName} PRIVATE /wd4996)
     endif()
 
+    if(CMAKE_BUILD_TYPE MATCHES "Debug")
+        target_compile_definitions(${executableName} PRIVATE -D SILKIT_BUILD_IS_DEBUG)
+    endif()
+
     add_dependencies(Demos ${executableName})
 
     if(${addToPackage})

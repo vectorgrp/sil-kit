@@ -16,9 +16,6 @@ option(SILKIT_BUILD_TESTS "Enable unit and integration tests for the SIL Kit" ON
 option(SILKIT_BUILD_UTILITIES "Build the SIL Kit utility tools" ON)
 option(SILKIT_BUILD_DOCS "Build documentation for the SIL Kit (requires Doxygen and Sphinx)" OFF)
 option(SILKIT_INSTALL_SOURCE "Install and package the source tree" OFF)
-option(SILKIT_ENABLE_ASAN "Enable -f sanitize=address for builds (requires gcc, clang,  VS2019)" OFF)
-option(SILKIT_ENABLE_UBSAN "Enable -f sanitize=undefined for builds (requires gcc, clang)" OFF)
-option(SILKIT_ENABLE_THREADSAN "Enable -f sanitize=thread for builds (requires gcc, clang)" OFF)
 option(SILKIT_ENABLE_COVERAGE "Enable coverage for builds (requires gcc, clang)" OFF)
 option(SILKIT_WARNINGS_AS_ERRORS "Treat compiler warnings as errors" OFF)
 option(SILKIT_PACKAGE_SYMBOLS "Add a post-build step to create PDB/Symbol archives" OFF)
@@ -75,9 +72,6 @@ endif()
 
 # Configure build settings like warning and sanitizers
 include(SilKitBuildSettings)
-silkit_enable_asan(${SILKIT_ENABLE_ASAN})
-silkit_enable_ubsan(${SILKIT_ENABLE_UBSAN})
-silkit_enable_threadsan(${SILKIT_ENABLE_THREADSAN})
 silkit_enable_coverage(${SILKIT_ENABLE_COVERAGE})
 silkit_check_reproducible()
 silkit_clean_default_compileflags()
@@ -100,6 +94,8 @@ message(STATUS "SIL Kit - CMAKE_COMMAND ${CMAKE_COMMAND}")
 message(STATUS "SIL Kit - SILKIT_HOST_PLATFORM ${SILKIT_HOST_PLATFORM}")
 message(STATUS "SIL Kit - SILKIT_HOST_ARCHITECTURE ${SILKIT_HOST_ARCHITECTURE}")
 message(STATUS "SIL Kit - SILKIT_HOST_COMPILER ${SILKIT_HOST_COMPILER}")
+message(STATUS "SIL Kit - CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS}")
+message(STATUS "SIL Kit - CMAKE_C_FLAGS ${CMAKE_C_FLAGS}")
 
 include("SilKit_Platform_${SILKIT_HOST_PLATFORM}" OPTIONAL)
 

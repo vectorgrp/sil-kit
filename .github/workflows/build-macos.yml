@@ -25,5 +25,5 @@ jobs:
 
     - uses: ./.github/actions/build-cmake-preset
       with:
-        preset-name: clang-release
+        preset-name: release
         artifact-label: ${{ github.job }}

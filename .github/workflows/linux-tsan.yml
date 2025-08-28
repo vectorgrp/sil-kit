@@ -23,8 +23,10 @@ jobs:
           submodules: true
       - uses: ./.github/actions/build-cmake-preset
         with:
-          preset-name: clang-relwithdebinfo
-          cmake-args: "-D SILKIT_ENABLE_THREADSAN=ON -D SILKIT_BUILD_DASHBOARD=OFF \
+          preset-name: relwithdebinfo
+          cmake-args: "-D SILKIT_BUILD_DASHBOARD=OFF \
                        -DCMAKE_C_COMPILER=clang-18 \
-                       -DCMAKE_CXX_COMPILER=clang++-18"
+                       -DCMAKE_CXX_COMPILER=clang++-18 \
+                       -DCMAKE_CXX_FLAGS='-fsanitize=thread -fno-omit-frame-pointer' \
+                       -DCMAKE_CXX_FLAGS_RELWITHDEBINFO='-Og -g3'"
           artifact-label: ${{ github.job }}
