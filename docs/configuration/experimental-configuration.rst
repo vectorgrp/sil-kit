@@ -107,5 +107,5 @@ Refer to the documentation of the `Vector SIL Kit Dashboard <https://vector.com/
    * - Property Name
      - Description
 
-   * - collectFromRemote
-     - Collect metrics from all connected participants. Defaults to `true`.
+   * - CollectFromRemote
+     - Collect metrics from all connected participants. Defaults to ``true``.
