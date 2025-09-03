@@ -530,8 +530,7 @@ void MergeMetricsCache(const MetricsCache& cache, Metrics& metrics)
     }
     MergeCacheSet(cache.jsonFileSinks, metrics.sinks);
 
-    const bool enableCollectFromRemote = cache.collectFromRemote.has_value() && cache.collectFromRemote.value();
-    if (cache.remoteSink.has_value() && enableCollectFromRemote)
+    if (cache.remoteSink.has_value() && cache.collectFromRemote.value_or(false))
     {
         throw SilKit::ConfigurationError{
             "Cannot have 'Remote' metrics sink together with 'CollectFromRemote' being true"};
