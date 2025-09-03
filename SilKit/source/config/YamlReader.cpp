@@ -243,7 +243,7 @@ void YamlReader::Read(SilKit::Config::Metrics& obj)
     OptionalRead(obj.sinks, "Sinks");
     OptionalRead(obj.collectFromRemote, "CollectFromRemote");
 
-    if (obj.collectFromRemote)
+    if (obj.collectFromRemote.value_or(false))
     {
         for (auto&& sink : obj.sinks)
         {
