@@ -157,7 +157,7 @@ auto VAsioRegistry::StartListening(const std::string& listenUri) -> std::string
     _connection.StartIoWorker();
 
     _connection.RegisterSilKitService(this);
-    if (_vasioConfig->experimental.metrics.collectFromRemote)
+    if (_vasioConfig->experimental.metrics.collectFromRemote.value_or(false))
     {
         _connection.RegisterSilKitService(_metricsReceiver.get());
     }
@@ -323,7 +323,7 @@ void VAsioRegistry::SetupMetrics()
         processor.SetSinks(std::move(sinks));
     }
 
-    if (_vasioConfig->experimental.metrics.collectFromRemote)
+    if (_vasioConfig->experimental.metrics.collectFromRemote.value_or(false))
     {
         auto metricsReceiver = std::make_unique<VSilKit::MetricsReceiver>(nullptr, *this);
 
