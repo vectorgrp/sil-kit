@@ -242,18 +242,6 @@ void YamlReader::Read(SilKit::Config::Metrics& obj)
 {
     OptionalRead(obj.sinks, "Sinks");
     OptionalRead(obj.collectFromRemote, "CollectFromRemote");
-
-    if (obj.collectFromRemote.value_or(false))
-    {
-        for (auto&& sink : obj.sinks)
-        {
-            if (sink.type == SilKit::Config::MetricsSink::Type::Remote)
-            {
-                throw SilKit::ConfigurationError{
-                    "Metrics collectFromRemote is enabled while having a Remote MetricsSink active"};
-            }
-        }
-    }
 }
 
 void YamlReader::Read(SilKit::Config::MdfChannel& obj)
