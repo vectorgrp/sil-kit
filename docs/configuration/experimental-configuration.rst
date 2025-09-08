@@ -55,3 +55,57 @@ TimeSynchronization
          Option *Auto* can be chosen without any concerns. 
          In the case of option *On*, however, it is necessary to verify that the transmission of messages within a time step does not depend on incoming messages from other participants.
          In this case, the time step will not be terminated and the communication will block.
+
+Metrics for participants
+------------------------
+Each participant supports collecting static attributes of a simulation and
+runtime performance metrics.
+They are collected and distributed to the configured sinks at the given update interval.
+
+.. code-block:: yaml
+
+    Experimental:
+        Metrics:
+          Sinks:
+            - Name: SomeSink1
+              Type: Remote
+
+
+.. list-table:: Participant Metrics Configuration
+   :widths: 15 85
+   :header-rows: 1
+
+   * - Property Name
+     - Description
+
+   * - Sinks
+     - A list of named metric sinks. They can be of type ``JsonFile`` or ``Remote``.
+   * - updateInterval
+     - The time between sending batches of metrics to the registry in seconds.
+
+.. _sec:cfg-registry-experimental:
+
+Metrics for the registry
+------------------------
+
+The registry configuration supports collecting metrics from remote participants
+and forwarding the collected data to the SIL Kit Dashboard for further
+analysis and visualization.
+Refer to the documentation of the `Vector SIL Kit Dashboard <https://vector.com/sil-kit-dashboard>`_ for further instructions.
+
+.. code-block:: yaml
+
+    Experimental:
+        Metrics:
+          CollectFromRemote: true
+
+
+.. list-table:: Registry Metrics Configuration
+   :widths: 15 85
+   :header-rows: 1
+
+   * - Property Name
+     - Description
+
+   * - CollectFromRemote
+     - Collect metrics from all connected participants. Defaults to ``true``.

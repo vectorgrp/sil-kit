@@ -202,7 +202,7 @@ The Registry Configuration File
 
 An instance of the |ProductName| Registry (``sil-kit-registry(.exe)``) can be configured via a YAML file.
 The configuration file is optional and overrides the settings specified on the command line.
-It also allows extended configuration, beyond what the command line allows, particularly for logging.
+It also allows extended configuration, beyond what the command line allows, particularly for logging and data export to a `Vector SIL Kit Dashboard <https://vector.com/sil-kit-dashboard>`_ instance.
 
 The outline of a registry configuration file is as follows:
 
@@ -266,15 +266,19 @@ Overview
 
        **NOTE** The default URI to use for a local |ProductName| dashboard setup is http://localhost:8082.
 
+   * - :ref:`Experimental<sec:cfg-registry-experimental>`
+     - Experimental configuration options for the |ProductName|.
+
 .. _subsec:registry-config-options:
 
 Configuration Options
 ~~~~~~~~~~~~~~~~~~~~~
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    logging-configuration
+   experimental-configuration
 
 
 API and Data Type Reference

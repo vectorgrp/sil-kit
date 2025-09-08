@@ -33,6 +33,7 @@ Most issues can be identified based on log messages by the application.
     interoperability.rst
     connection-guides.rst
     performance.rst
+    advanced.rst
 
 ..
     .. include:: connectivity.rst
@@ -40,3 +41,4 @@ Most issues can be identified based on log messages by the application.
     .. include:: interoperability.rst
     .. include:: connection-guides.rst
     .. include:: performance.rst
+    .. include:: advanced.rst
