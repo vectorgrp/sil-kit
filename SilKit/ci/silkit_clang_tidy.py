@@ -1,4 +1,9 @@
 #! /bin/env python3
+
+# SPDX-FileCopyrightText: 2025 Vector Informatik GmbH
+#
+# SPDX-License-Identifier: MIT
+
 import json
 import os
 import subprocess
