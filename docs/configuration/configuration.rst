@@ -202,7 +202,7 @@ The Registry Configuration File
 
 An instance of the |ProductName| Registry (``sil-kit-registry(.exe)``) can be configured via a YAML file.
 The configuration file is optional and overrides the settings specified on the command line.
-It also allows extended configuration, beyond what the command line allows, particularly for logging and configuration of the `Vector SIL Kit Dashboard <https://vector.com/sil-kit-dashboard>`_.
+It also allows extended configuration, beyond what the command line allows, particularly for logging and data export to a `Vector SIL Kit Dashboard <https://vector.com/sil-kit-dashboard>`_ instance.
 
 The outline of a registry configuration file is as follows:
 

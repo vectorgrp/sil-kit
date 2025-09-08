@@ -1,13 +1,13 @@
 Advanced 
 ========
 
-This section shows how to use advanced tools like the `Vector SIL Kit Dashboard <https://vector.com/sil-kit-dashboard>`_ to visualize simulations and analyze the performance of participants.
+This section shows how to use advanced tools like the `Vector SIL Kit Dashboard <https://vector.com/sil-kit-dashboard>`_ to visualize simulations, in order to identitfy participant misconfigurations, detect system misbehavior or analyze participant performance.
 
-Getting Started with the Dashboard
+Getting Started with the dashboard
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 The dashboard is a freeware application that collects and visualizes SIL Kit simulation data.
 It can be used to show static attributes of participants and also show their simulation properties like active peer connections and simulated, active networks.
-In addition, the collection of performance metrics can be enabled in the SIL Kit participants.
+In addition, the collection of performance metrics can be enabled in the configuration files of the SIL Kit participants.
 
 This section shows how to enable the data collection of simulations for the Vector SIL Kit Dashboard.
 Please refer to the SIL Kit Dashboard documentation for updated instructions.
