@@ -9,6 +9,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+
   check-licenses:
     name: License checks for SIL Kit sources
     runs-on: ubuntu-22.04
@@ -57,6 +58,20 @@ jobs:
         id: formatting-check
         run: |
           python3 ./SilKit/ci/check_formatting.py
+        shell: bash
+
+  clang-tidy:
+    name: Running clang-tidy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: Run clang-tidy
+        id: clang-tidy
+        run: |
+          cmake -S . -B build_tidy -GNinja -DSILKIT_BUILD_DASHBOARD=OFF -DSILKIT_BUILD_DEMOS=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo
+          python3 ./SilKit/ci/silkit_clang_tidy.py
         shell: bash
 
   clang14-tsan:
