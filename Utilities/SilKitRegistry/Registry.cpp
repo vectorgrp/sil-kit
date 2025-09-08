@@ -128,6 +128,12 @@ void OverrideFromRegistryConfiguration(std::shared_ptr<SilKit::Config::IParticip
         config->middleware.enableDomainSockets = registryConfiguration.enableDomainSockets.value();
     }
 
+    if(!registryConfiguration.experimental.metrics.collectFromRemote.has_value())
+    {
+        // implicitly enable collectFromRemote for the registry, if the user did not set it
+        config->experimental.metrics.collectFromRemote = true;
+    }
+
     config->experimental.metrics = registryConfiguration.experimental.metrics;
 }
 

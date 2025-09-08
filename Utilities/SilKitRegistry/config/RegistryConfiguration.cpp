@@ -19,11 +19,6 @@ auto Parse(const std::string& string) -> V1::RegistryConfiguration
     {
         throw SilKit::ConfigurationError{fmt::format("Unknown schema version '{}' found in registry configuration!", configuration.schemaVersion)};
     }
-    if(!configuration.experimental.metrics.collectFromRemote.has_value())
-    {
-        // implicitly enable collectFromRemote for the registry, if the user did not set it
-        configuration.experimental.metrics.collectFromRemote = true;
-    }
     return configuration;
 }
 
