@@ -282,9 +282,9 @@ void YamlWriter::Write(const SilKit::Config::Metrics& obj)
 {
     MakeMap();
     OptionalWrite(obj.sinks, "Sinks");
-    if (obj.collectFromRemote)
+    if (obj.collectFromRemote.has_value())
     {
-        WriteKeyValue("CollectFromRemote", obj.collectFromRemote);
+        WriteKeyValue("CollectFromRemote", obj.collectFromRemote.value());
     }
 }
 

@@ -352,8 +352,11 @@ void Cache(const TimeSynchronization& root, TimeSynchronizationCache& cache)
 void Cache(const Metrics& root, MetricsCache& cache)
 {
     static const Metrics defaultObject;
-    CacheNonDefault(defaultObject.collectFromRemote, root.collectFromRemote, "Metrics.CollectFromRemote",
-                    cache.collectFromRemote);
+    if(root.collectFromRemote.has_value())
+    {
+        CacheNonDefault(false, root.collectFromRemote.value(), "Metrics.CollectFromRemote",
+                        cache.collectFromRemote);
+    }
 
     for (const auto& sink : root.sinks)
     {
@@ -521,10 +524,13 @@ void MergeTimeSynchronizationCache(const TimeSynchronizationCache& cache, TimeSy
 
 void MergeMetricsCache(const MetricsCache& cache, Metrics& metrics)
 {
-    MergeCacheField(cache.collectFromRemote, metrics.collectFromRemote);
+    if(metrics.collectFromRemote.has_value())
+    {
+        MergeCacheField(cache.collectFromRemote, metrics.collectFromRemote.value());
+    }
     MergeCacheSet(cache.jsonFileSinks, metrics.sinks);
 
-    if (cache.remoteSink.has_value() && metrics.collectFromRemote)
+    if (cache.remoteSink.has_value() && cache.collectFromRemote.value_or(false))
     {
         throw SilKit::ConfigurationError{
             "Cannot have 'Remote' metrics sink together with 'CollectFromRemote' being true"};

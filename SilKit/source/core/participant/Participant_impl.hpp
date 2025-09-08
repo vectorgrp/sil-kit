@@ -222,7 +222,7 @@ void Participant<SilKitConnectionT>::SetupMetrics()
     (void)GetMetricsManager();
 
     // NB: Create the metrics receiver if enabled in the configuration
-    if (_participantConfig.experimental.metrics.collectFromRemote)
+    if (_participantConfig.experimental.metrics.collectFromRemote.value_or(false))
     {
         Core::SupplementalData supplementalData;
         supplementalData[SilKit::Core::Discovery::controllerType] =
