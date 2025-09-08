@@ -9,6 +9,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+
   check-licenses:
     name: License checks for SIL Kit sources
     runs-on: ubuntu-22.04
@@ -35,6 +36,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: false
+
       - name: Check if build CI should run
         id: build_check
         run: |
@@ -58,6 +60,31 @@ jobs:
         run: |
           python3 ./SilKit/ci/check_formatting.py
         shell: bash
+
+  clang-tidy:
+    name: Running clang-tidy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: Run clang-tidy
+        id: clang-tidy
+        run: |
+          mkdir _o
+          export CC=clang && export CXX=clang++
+          cmake -S . -B build_tidy -GNinja -DSILKIT_BUILD_DASHBOARD=OFF -DSILKIT_BUILD_DEMOS=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo
+          python3 ./SilKit/ci/silkit_clang_tidy.py build_tidy/ _o/
+        shell: bash
+
+      - name: Artifact
+        id: artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: clang_tidy_reports
+          path: |
+            ./_o/*.yaml
+          retention-days: 1
 
   clang14-tsan:
     name: Thread Sanitizer Tests
