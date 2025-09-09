@@ -71,6 +71,26 @@ void TraceTx(Logging::ILoggerInternal* logger, const Core::IServiceEndpoint* add
     }
 }
 
+// targeted messages
+template <class SilKitMessageT>
+void TraceTx(Logging::ILoggerInternal* logger, const Core::IServiceEndpoint* addr, const std::string_view target, const SilKitMessageT& msg)
+{
+    if (logger->GetLogLevel() == Logging::Level::Trace)
+    {
+        Logging::LoggerMessage lm{logger, Logging::Level::Trace};
+        lm.SetMessage("Send message");
+        lm.SetKeyValue(addr->GetServiceDescriptor());
+        lm.FormatKeyValue(Logging::Keys::msg, "{}", msg);
+        lm.FormatKeyValue(Logging::Keys::to, "{}", target);
+
+        auto virtualTimeStamp = GetTimestamp(msg);
+        if (virtualTimeStamp != std::chrono::nanoseconds::duration::min())
+        {
+                lm.FormatKeyValue(Logging::Keys::virtualTimeNS, "{}", virtualTimeStamp.count());
+        }
+        lm.Dispatch();
+    }
+}
 // Don't trace LogMessages - this could cause cycles!
 inline void TraceRx(Logging::ILoggerInternal* /*logger*/, Core::IServiceEndpoint* /*addr*/, const Logging::LogMsg& /*msg*/) {}
 inline void TraceTx(Logging::ILoggerInternal* /*logger*/, Core::IServiceEndpoint* /*addr*/, const Logging::LogMsg& /*msg*/) {}
