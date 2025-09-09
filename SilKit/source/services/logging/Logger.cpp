@@ -170,7 +170,7 @@ struct fmt::formatter<SilKit::Services::Logging::JsonString>
     }
 
     template <typename FormatContext>
-    auto format(const SilKit::Services::Logging::JsonString& msg, FormatContext& ctx)
+    auto format(const SilKit::Services::Logging::JsonString& msg, FormatContext& ctx) const
     {
         // format the message output string
         // "msg": "This is the log message", "kv":{ "key1": "value1", key2: "value2"}
@@ -256,7 +256,7 @@ Logger::Logger(const std::string& participantName, Config::Logging config)
     const auto logFileTimestamp = SilKit::Util::CurrentTimestampString();
 
     // Defined JSON pattern for the logger output
-    std::string jsonpattern{R"({"ts":"%E","log":"%n","lvl":"%l", %v })"};
+    const std::string jsonpattern{R"({"ts":"%E","log":"%n","lvl":"%l", %v })"};
 
     for (auto sink : _config.sinks)
     {
@@ -413,7 +413,7 @@ void Logger::Log(Level level, const std::string& msg)
     if (nullptr != _loggerJson)
     {
         JsonString jsonString{msg};
-        _loggerJson->log(now, spdlog::source_loc{}, to_spdlog(level), fmt::format("{}", jsonString.m));
+        _loggerJson->log(now, spdlog::source_loc{}, to_spdlog(level), fmt::format("{}", jsonString));
     }
     if (nullptr != _loggerSimple)
     {
