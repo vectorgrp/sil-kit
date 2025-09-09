@@ -92,10 +92,24 @@ void TraceTx(Logging::ILoggerInternal* logger, const Core::IServiceEndpoint* add
     }
 }
 // Don't trace LogMessages - this could cause cycles!
-inline void TraceRx(Logging::ILoggerInternal* /*logger*/, Core::IServiceEndpoint* /*addr*/, const Logging::LogMsg& /*msg*/) {}
-inline void TraceTx(Logging::ILoggerInternal* /*logger*/, Core::IServiceEndpoint* /*addr*/, const Logging::LogMsg& /*msg*/) {}
+inline void TraceRx(Logging::ILoggerInternal* /*logger*/, Core::IServiceEndpoint* /*addr*/,
+                    const Logging::LogMsg& /*msg*/)
+{
+}
+inline void TraceTx(Logging::ILoggerInternal* /*logger*/, const Core::IServiceEndpoint* /*addr*/,
+             const std::string_view /*target*/, const Logging::LogMsg& /*msg*/)
+{
+}
+inline void TraceTx(Logging::ILoggerInternal* /*logger*/, Core::IServiceEndpoint* /*addr*/,
+                    const Logging::LogMsg& /*msg*/)
+{
+}
 
-inline void TraceRx(Logging::ILoggerInternal* /*logger*/, Core::IServiceEndpoint* /*addr*/, Logging::LogMsg&& /*msg*/) {}
-inline void TraceTx(Logging::ILoggerInternal* /*logger*/, Core::IServiceEndpoint* /*addr*/, Logging::LogMsg&& /*msg*/) {}
+inline void TraceRx(Logging::ILoggerInternal* /*logger*/, Core::IServiceEndpoint* /*addr*/, Logging::LogMsg&& /*msg*/)
+{
+}
+inline void TraceTx(Logging::ILoggerInternal* /*logger*/, Core::IServiceEndpoint* /*addr*/, Logging::LogMsg&& /*msg*/)
+{
+}
 } // namespace Services
 } // namespace SilKit
