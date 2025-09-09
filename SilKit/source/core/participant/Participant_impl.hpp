@@ -1633,7 +1633,7 @@ template <typename SilKitMessageT>
 void Participant<SilKitConnectionT>::SendMsgImpl(const IServiceEndpoint* from, const std::string& targetParticipantName,
                                                  SilKitMessageT&& msg)
 {
-    TraceTx(GetLoggerInternal(), from, msg);
+    TraceTx(GetLoggerInternal(), from, targetParticipantName, msg);
     _connection.SendMsg(from, targetParticipantName, std::forward<SilKitMessageT>(msg));
 }
 

@@ -6,6 +6,7 @@
 
 #include <atomic>
 #include <string>
+#include <string_view>
 
 namespace SilKit {
 namespace Services {
@@ -15,6 +16,7 @@ namespace Keys {
 const std::string virtualTimeNS{"VirtualTimeNS"};
 const std::string msg{"Msg"};
 const std::string from{"From"};
+constexpr std::string_view to{"To"};
 
 const std::string waitingTime{"WaitingTime"};
 const std::string executionTime{"ExecutionTime"};
