@@ -41,7 +41,7 @@ def run_clang_tidy(source_file: str):
                                  '--quiet'],
                                 capture_output=True, encoding='utf-8')
 
-    if clang_tidy.stdout != "":
+    if clang_tidy.stdout != "" and "ThirdParty" not in clang_tidy.stdout:
         print(f"Processing source file {source_file}", flush=True)
         print(f"{source_file} o:\n{clang_tidy.stdout}", flush=True)
 
