@@ -75,6 +75,13 @@ jobs:
           python3 ./SilKit/ci/silkit_clang_tidy.py build_tidy/ _o/
         shell: bash
 
+
+      - name: Check Artifacts
+        shell: bash
+        run: |
+          ls -la
+          ls -la _o
+
       - name: Artifact
         id: artifact
         uses: actions/upload-artifact@v4
