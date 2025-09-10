@@ -36,6 +36,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: false
+
       - name: Check if build CI should run
         id: build_check
         run: |
@@ -71,8 +72,17 @@ jobs:
         id: clang-tidy
         run: |
           cmake -S . -B build_tidy -GNinja -DSILKIT_BUILD_DASHBOARD=OFF -DSILKIT_BUILD_DEMOS=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo
-          python3 ./SilKit/ci/silkit_clang_tidy.py
+          python3 ./SilKit/ci/silkit_clang_tidy.py build_tidy/ _o/
         shell: bash
+
+      - name: Artifact
+        id: artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: clang_tidy_reports
+          path: |
+            ./_o/*.yaml
+          retention-days: 1
 
   clang14-tsan:
     name: Thread Sanitizer Tests
