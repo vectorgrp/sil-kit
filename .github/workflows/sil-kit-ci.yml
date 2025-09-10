@@ -71,6 +71,7 @@ jobs:
       - name: Run clang-tidy
         id: clang-tidy
         run: |
+          mkdir _o
           cmake -S . -B build_tidy -GNinja -DSILKIT_BUILD_DASHBOARD=OFF -DSILKIT_BUILD_DEMOS=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo
           python3 ./SilKit/ci/silkit_clang_tidy.py build_tidy/ _o/
         shell: bash
