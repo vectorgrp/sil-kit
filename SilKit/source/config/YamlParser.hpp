@@ -13,6 +13,10 @@
 #include "YamlWriter.hpp"
 #include "rapidyaml.hpp"
 
+//rapidyaml pulls in some windows nonsense
+#ifdef GetCurrentTime
+#undef GetCurrentTime
+#endif
 
 namespace VSilKit {
 
