@@ -187,6 +187,9 @@ public:
     void Write(const SilKit::Config::HealthCheck& obj);
     void Write(const SilKitRegistry::Config::V1::Experimental& obj);
     void Write(const SilKitRegistry::Config::V1::RegistryConfiguration& obj);
+
+    // used for debug logging
+    void Write(const SilKit::Services::Flexray::FlexrayControllerConfig& obj);
 };
 
 } // namespace VSilKit

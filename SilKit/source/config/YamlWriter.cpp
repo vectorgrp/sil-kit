@@ -630,4 +630,13 @@ void YamlWriter::Write(const SilKitRegistry::Config::V1::RegistryConfiguration& 
     NonDefaultWrite(obj.experimental, "Experimental", defaultObject.experimental);
 }
 
+void YamlWriter::Write(const SilKit::Services::Flexray::FlexrayControllerConfig& obj)
+{
+    // Parse parameters as an int value; uint8_t would be interpreted as a character
+    MakeMap();
+    WriteKeyValue("clusterParams", obj.clusterParams);
+    WriteKeyValue("nodeParams", obj.nodeParams);
+    OptionalWrite(obj.bufferConfigs, "bufferConfigs");
+}
+
 } // namespace VSilKit

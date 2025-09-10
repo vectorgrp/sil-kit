@@ -54,7 +54,7 @@ public:
     inline bool operator==(const ServiceDescriptor& rhs) const;
     inline bool operator!=(const ServiceDescriptor& rhs) const;
     inline std::string to_string() const;
-    inline std::vector<std::pair<std::string, std::string>> to_keyValues() const;
+    inline std::vector<std::pair<std::string_view, std::string>> to_keyValues() const;
 
     inline Core::EndpointAddress to_endpointAddress() const;
 
@@ -291,11 +291,11 @@ std::string ServiceDescriptor::to_string() const
 }
 
 
- std::vector<std::pair<std::string, std::string>> ServiceDescriptor::to_keyValues() const
+ std::vector<std::pair<std::string_view, std::string>> ServiceDescriptor::to_keyValues() const
 {
     namespace Keys = SilKit::Services::Logging::Keys;
 
-    std::vector<std::pair<std::string, std::string>> kv;
+    std::vector<std::pair<std::string_view, std::string>> kv;
     std::string controllerTypeName;
     std::stringstream ss;
 
