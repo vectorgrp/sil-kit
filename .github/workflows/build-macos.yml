@@ -26,4 +26,5 @@ jobs:
     - uses: ./.github/actions/build-cmake-preset
       with:
         preset-name: release
+        cmake-args: "-DCMAKE_POLICY_VERSION_MINIMUM=3.5"
         artifact-label: ${{ github.job }}
