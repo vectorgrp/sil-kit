@@ -17,12 +17,14 @@ Please refer to the SIL Kit Dashboard documentation for updated instructions.
    Ensure that the registry is able to connect to the Dashboard when started, e.g. by verifying the log output.
    The registry's configuration of ``CollectFromRemotes: true`` defaults to true -- it can be disabled explicitly.
 #. Each participant that should be included in the dashboard visualization, must add a remot metric sink to its conifugration file:
-   ```
-   Experimental:
-     Metrics:
-       Sinks:
-        - Name: RemoteSink1
-          Type: Remote 
-   ```
-    This will enable the data updates from the participant to the registry, which will forward it to the dashboard.
+
+   .. code-block:: yaml
+
+      Experimental:
+        Metrics:
+          Sinks:
+            - Name: RemoteSink1
+              Type: Remote
+
+   This will enable the data updates from the participant to the registry, which will forward it to the dashboard.
 #. Start a simulation run, the dashboard will show the simulation's state, including the participant states, attributes and simulated network details. If the metrics sinks are enabled, detailed performance counters will be available for analysis.
