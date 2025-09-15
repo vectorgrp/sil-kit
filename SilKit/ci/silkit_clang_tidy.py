@@ -49,7 +49,7 @@ def run_clang_tidy(source_file: Path, outdir: Path):
                                 capture_output=True, encoding='utf-8')
 
     if clang_tidy.stdout != "" and "ThirdParty" not in clang_tidy.stdout:
-        print(f"{source_file}:\n{clang_tidy.stdout}", flush=True)
+        warn(f"{source_file}:\n{clang_tidy.stdout}", flush=True)
 
 
 def main():
