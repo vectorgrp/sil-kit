@@ -769,7 +769,7 @@ extern "C"
         return globalCapi->SilKit_Participant_GetLogger(outLogger, participant);
     }
 
-    SilKit_ReturnCode SilKitCALL SilKit_Participant_GetParameter(char* outParameterValue,
+    SilKit_ReturnCode SilKitCALL SilKit_Participant_GetParameter(void* outParameterValue,
                                                                  size_t* inOutParameterValueSize,
                                                                  SilKit_Parameter parameter,
                                                                  SilKit_Participant* participant)

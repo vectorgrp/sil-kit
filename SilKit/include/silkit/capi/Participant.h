@@ -76,12 +76,12 @@ typedef SilKit_ReturnCode(SilKitFPTR* SilKit_Participant_GetLogger_t)(SilKit_Log
  * Returns the current value of the given parameter. 
  * Useful for parameters that are passed to the participant via the API and the participant configuration.
  */
-SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Participant_GetParameter(char* outParameterValue,
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Participant_GetParameter(void* outParameterValue,
                                                                        size_t* inOutParameterValueSize,
                                                                        SilKit_Parameter parameter,
                                                                        SilKit_Participant* participant);
 
-typedef SilKit_ReturnCode(SilKitFPTR* SilKit_Participant_GetParameter_t)(char* outParameterValue,
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_Participant_GetParameter_t)(void* outParameterValue,
                                                                          size_t* inOutParameterValueSize,
                                                                          SilKit_Parameter parameter,
                                                                          SilKit_Participant* participant);

@@ -86,7 +86,7 @@ try
 }
 CAPI_CATCH_EXCEPTIONS
 
-SilKit_ReturnCode SilKitCALL SilKit_Participant_GetParameter(char* outParameterValue, size_t* inOutParameterValueSize,
+SilKit_ReturnCode SilKitCALL SilKit_Participant_GetParameter(void* outParameterValue, size_t* inOutParameterValueSize,
                                                              SilKit_Parameter parameter,
                                                              SilKit_Participant* participant)
 try
@@ -102,7 +102,7 @@ try
     if (outParameterValue != nullptr)
     {
         size_t sizeToCopy;
-        if (*inOutParameterValueSize >= parameterValue.size() + 1)
+        if (*inOutParameterValueSize > parameterValue.size())
         {
             // Don't copy more than we actually have
             sizeToCopy = parameterValue.size();
@@ -110,12 +110,11 @@ try
         else
         {
             // Don't copy more than the given size
-            sizeToCopy = *inOutParameterValueSize - 1;
+            sizeToCopy = *inOutParameterValueSize;
         }
-        parameterValue.copy(outParameterValue, sizeToCopy);
-        outParameterValue[sizeToCopy] = '\0';
+        parameterValue.copy(static_cast<char*>(outParameterValue), sizeToCopy);
     }
-    *inOutParameterValueSize = parameterValue.size() + 1;
+    *inOutParameterValueSize = parameterValue.size();
     return SilKit_ReturnCode_SUCCESS;
 }
 CAPI_CATCH_EXCEPTIONS

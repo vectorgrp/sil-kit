@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2024 Vector Informatik GmbH
 //
 // SPDX-License-Identifier: MIT
+
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 #include "silkit/capi/SilKit.h"
@@ -31,8 +32,10 @@ TEST_F(Test_CapiGetParameter, getparameter_bad_params)
     char* parameterValue{nullptr};
     size_t parameterSize;
 
-    returnCode =
-        SilKit_Participant_GetParameter(nullptr, &parameterSize, SilKit_Parameter_ParticipantName, cMockParticipant);
+    EXPECT_CALL(mockParticipant, GetParameter(SilKit::Parameter::ParticipantName)).Times(testing::Exactly(1));
+
+    returnCode = SilKit_Participant_GetParameter(nullptr, &parameterSize, SilKit_Parameter_ParticipantName,
+                                                    cMockParticipant);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 
     returnCode =

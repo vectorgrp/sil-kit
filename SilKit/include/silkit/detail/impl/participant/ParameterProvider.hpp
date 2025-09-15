@@ -46,17 +46,23 @@ auto ParameterProvider::GetParameter(SilKit_Participant* participant, Parameter 
     std::vector<char> buffer;
     size_t size = 0;
     SilKit_Parameter cParameter = static_cast<SilKit_Parameter>(parameter);
+
+    // Query the size by passing nullptr for the outParameterValue
     {
         const auto returnCode = SilKit_Participant_GetParameter(nullptr, &size, cParameter, participant);
         ThrowOnError(returnCode);
     }
+
+    // Loop as the size might changed intermediately
     while (size > buffer.size())
     {
         buffer.resize(size);
         const auto returnCode = SilKit_Participant_GetParameter(buffer.data(), &size, cParameter, participant);
         ThrowOnError(returnCode);
     }
-    buffer.resize(size);
+
+    // Value-initialized to nul
+    buffer.resize(size + 1); 
 
     return std::string{buffer.data()};
 }
