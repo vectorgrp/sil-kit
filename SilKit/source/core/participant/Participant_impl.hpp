@@ -1049,6 +1049,25 @@ auto Participant<SilKitConnectionT>::GetLoggerInternal() -> Services::Logging::I
 }
 
 template <class SilKitConnectionT>
+auto Participant<SilKitConnectionT>::GetParameter(Parameter parameter) -> std::string
+{
+    switch (parameter)
+    {
+    case Parameter::ParticipantName:
+        return GetParticipantName();
+        break;
+    case Parameter::RegistryUri:
+        return GetRegistryUri();
+        break;
+    case Parameter::Undefined:
+        break;
+    }
+
+    throw SilKit::SilKitError("Unknown parameter.");
+}
+
+
+template <class SilKitConnectionT>
 void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const Can::WireCanFrameEvent& msg)
 {
     SendMsgImpl(from, msg);

@@ -15,6 +15,7 @@
 
 #include "silkit/services/all.hpp"
 #include "silkit/services/logging/ILogger.hpp"
+#include "silkit/participant/parameters.hpp"
 
 #include "ParticipantConfiguration.hpp"
 #include "ReplayScheduler.hpp"
@@ -149,6 +150,9 @@ public:
     auto GetMetricsManager() -> IMetricsManager* override;
 
     auto GetLogger() -> Services::Logging::ILogger* override;
+    
+    auto GetParameter(Parameter parameter) -> std::string override;
+
     auto CreateLifecycleService(Services::Orchestration::LifecycleConfiguration startConfiguration)
         -> Services::Orchestration::ILifecycleService* override;
     auto GetLifecycleService() -> Services::Orchestration::ILifecycleService* override;

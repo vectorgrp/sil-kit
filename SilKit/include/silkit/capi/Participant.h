@@ -8,6 +8,7 @@
 #include "silkit/capi/SilKitMacros.h"
 #include "silkit/capi/Types.h"
 #include "silkit/capi/Logger.h"
+#include "silkit/capi/Parameters.h"
 
 #pragma pack(push)
 #pragma pack(8)
@@ -62,6 +63,28 @@ SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Participant_GetLogger(SilKit_Logge
 
 typedef SilKit_ReturnCode(SilKitFPTR* SilKit_Participant_GetLogger_t)(SilKit_Logger** outLogger,
                                                                       SilKit_Participant* participant);
+
+
+/*! \brief Retrieve a parameter from a participant.
+ *
+ * \param outParameterValue A buffer to copy the null-terminated parameter value to. 
+                            Passing a nullptr is valid and indicates a size-check via inOutParameterValueSize to allocate the buffer.
+ * \param inOutParameterValueSize The size of the parameter including null-termination. 
+ * \param parameter The parameter to get.
+ * \param participant The participant to get the parameter from.
+ *
+ * Returns the current value of the given parameter. 
+ * Useful for parameters that are passed to the participant via the API and the participant configuration.
+ */
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Participant_GetParameter(void* outParameterValue,
+                                                                       size_t* inOutParameterValueSize,
+                                                                       SilKit_Parameter parameter,
+                                                                       SilKit_Participant* participant);
+
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_Participant_GetParameter_t)(void* outParameterValue,
+                                                                         size_t* inOutParameterValueSize,
+                                                                         SilKit_Parameter parameter,
+                                                                         SilKit_Participant* participant);
 
 SILKIT_END_DECLS
 
