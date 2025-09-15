@@ -81,7 +81,7 @@ namespace SilKit {
 namespace Core {
 
 template <class SilKitConnectionT>
-class Participant : public IParticipantInternal
+class Participant final : public IParticipantInternal
 {
 public:
     // ----------------------------------------
