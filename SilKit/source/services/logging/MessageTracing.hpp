@@ -9,6 +9,8 @@
 #include "ServiceDescriptor.hpp"
 #include "traits/SilKitMsgTraits.hpp"
 
+#include "YamlParser.hpp"
+
 
 namespace SilKit {
 namespace Services {
@@ -29,8 +31,6 @@ std::chrono::nanoseconds GetTimestamp(MsgT& /*msg*/,
 }
 
 
-
-
 template <class SilKitMessageT>
 void TraceRx(Logging::ILoggerInternal* logger, const Core::IServiceEndpoint* addr, const SilKitMessageT& msg,
              const Core::ServiceDescriptor& from)
@@ -48,7 +48,12 @@ void TraceRx(Logging::ILoggerInternal* logger, const Core::IServiceEndpoint* add
         {
             lm.FormatKeyValue(Logging::Keys::virtualTimeNS, "{}", virtualTimeStamp.count());
         }
-    lm.Dispatch();
+        if constexpr ( std::is_same_v<SilKitMessageT, SilKit::Services::Flexray::FlexrayControllerConfig>)
+        {
+            lm.SetKeyValue(Logging::Keys::raw, SilKit::Config::SerializeAsJson(msg));
+        }
+
+        lm.Dispatch();
     }
 }
 
@@ -66,6 +71,11 @@ void TraceTx(Logging::ILoggerInternal* logger, const Core::IServiceEndpoint* add
         if (virtualTimeStamp != std::chrono::nanoseconds::duration::min())
         {
                 lm.FormatKeyValue(Logging::Keys::virtualTimeNS, "{}", virtualTimeStamp.count());
+        }
+
+        if constexpr ( std::is_same_v<SilKitMessageT, SilKit::Services::Flexray::FlexrayControllerConfig>)
+        {
+            lm.SetKeyValue(Logging::Keys::raw, SilKit::Config::SerializeAsJson(msg));
         }
         lm.Dispatch();
     }
@@ -88,6 +98,12 @@ void TraceTx(Logging::ILoggerInternal* logger, const Core::IServiceEndpoint* add
         {
                 lm.FormatKeyValue(Logging::Keys::virtualTimeNS, "{}", virtualTimeStamp.count());
         }
+
+        if constexpr ( std::is_same_v<SilKitMessageT, SilKit::Services::Flexray::FlexrayControllerConfig>)
+        {
+            lm.SetKeyValue(Logging::Keys::raw, SilKit::Config::SerializeAsJson(msg));
+        }
+
         lm.Dispatch();
     }
 }
