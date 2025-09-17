@@ -12,7 +12,7 @@
 namespace SilKit {
 namespace Tracing {
 
-class PcapReader : public SilKit::IReplayChannelReader
+class PcapReader final : public SilKit::IReplayChannelReader
 {
 public:
     // Constructors

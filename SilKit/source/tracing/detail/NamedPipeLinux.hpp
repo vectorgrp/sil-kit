@@ -11,7 +11,7 @@ namespace SilKit {
 namespace Tracing {
 namespace Detail {
 
-class NamedPipeLinux : public NamedPipe
+class NamedPipeLinux final : public NamedPipe
 {
 public:
     // ----------------------------------------
