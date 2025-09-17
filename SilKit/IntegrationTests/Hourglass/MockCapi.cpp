@@ -791,8 +791,8 @@ extern "C"
         return globalCapi->SilKit_ParticipantConfiguration_Destroy(participantConfiguration);
     }
 
-    SilKit_ReturnCode SilKitCALL SilKit_ParticipantConfiguration_ToJson(const SilKit_ParticipantConfiguration* inParticipantConfiguration,
-                 char** outString, size_t* requiredSize)
+    SilKit_ReturnCode SilKitCALL SilKit_ParticipantConfiguration_ToJson(
+        const SilKit_ParticipantConfiguration* inParticipantConfiguration, char** outString, size_t* requiredSize)
     {
         return globalCapi->SilKit_ParticipantConfiguration_ToJson(inParticipantConfiguration, outString, requiredSize);
     }

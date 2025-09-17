@@ -20,20 +20,21 @@
 #include "WireLinMessages.hpp"
 #include "WireRpcMessages.hpp"
 
-#include "ServiceDatatypes.hpp" //concrete, no forwards
-#include "RequestReplyDatatypes.hpp" //concrete, no forwards
-#include "LoggingDatatypesInternal.hpp" //concrete, no forwards
-#include "OrchestrationDatatypes.hpp" //concrete, no forwards
+#include "ServiceDatatypes.hpp"
+#include "RequestReplyDatatypes.hpp"
+#include "LoggingDatatypesInternal.hpp"
+#include "OrchestrationDatatypes.hpp"
 
 #include "ProtocolVersion.hpp"
-#include "TestDataTypes.hpp" // must be included before VAsioConnection
+// must be included before VAsioConnection
+#include "TestDataTypes.hpp"
 
 #include "IVAsioPeer.hpp"
 #include "IMessageReceiver.hpp"
 
 #include "VAsioConnection.hpp"
 #include "VAsioConstants.hpp"
-#include "MockParticipant.hpp" // for DummyLogger
+#include "MockParticipant.hpp"
 #include "VAsioSerdes.hpp"
 #include "SerializedMessage.hpp"
 #include "TimeProvider.hpp"

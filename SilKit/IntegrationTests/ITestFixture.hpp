@@ -22,7 +22,6 @@ namespace Tests {
 class ITest_SimTestHarness : public testing::Test
 {
 protected: //CTor and operators
-
     auto TestHarness() -> SimTestHarness&
     {
         return *_simTestHarness;
@@ -65,8 +64,7 @@ protected:
         args.deferParticipantCreation = true;
         args.deferSystemControllerCreation = true;
 
-        _simTestHarness =
-            std::make_unique<SimTestHarness>(args);
+        _simTestHarness = std::make_unique<SimTestHarness>(args);
         _registryUri = _simTestHarness->GetRegistryUri();
     }
 

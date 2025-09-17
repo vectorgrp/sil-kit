@@ -87,8 +87,11 @@ protected:
             if (numAcks >= _testFrames.size())
             {
                 std::cout << "All eth acks received" << std::endl;
-                _ethWriterAllAcksReceivedPromise.set_value(); // Promise for ethReader
-                ethWriterAllAcksReceivedPromiseLocal.set_value(); // Promise for this thread
+
+                // Promise for ethReader
+                _ethWriterAllAcksReceivedPromise.set_value();
+                // Promise for this thread
+                ethWriterAllAcksReceivedPromiseLocal.set_value();
             }
         });
 
@@ -131,7 +134,7 @@ protected:
             if (numReceived >= _testFrames.size())
             {
                 std::cout << "All eth messages received" << std::endl;
-                _ethReaderAllReceivedPromise.set_value(); // Promise for ethWriter
+                _ethReaderAllReceivedPromise.set_value();     // Promise for ethWriter
                 ethReaderAllReceivedPromiseLocal.set_value(); // Promise for this thread
             }
         });

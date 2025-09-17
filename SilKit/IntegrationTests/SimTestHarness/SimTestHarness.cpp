@@ -209,7 +209,7 @@ bool SimTestHarness::Run(std::chrono::nanoseconds testRunTimeout, const std::vec
     const auto startTime = Now();
     auto timeRemaining = testRunTimeout;
 
-    for (auto& [name, participant]: _simParticipants)
+    for (auto& [name, participant] : _simParticipants)
     {
         if (std::find(keepAlive.begin(), keepAlive.end(), name) != keepAlive.end())
         {

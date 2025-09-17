@@ -19,7 +19,6 @@ class BulkSystemDto : public oatpp::DTO
     DTO_INIT(BulkSystemDto, DTO)
 
     DTO_FIELD(Vector<Object<SystemStatusDto>>, statuses) = Vector<Object<SystemStatusDto>>::createShared();
-
 };
 
 class BulkControllerDto : public oatpp::DTO
@@ -85,7 +84,6 @@ class BulkParticipantDto : public oatpp::DTO
     DTO_FIELD(Vector<String>, ethernetNetworks) = Vector<String>::createShared();
     DTO_FIELD(Vector<String>, flexrayNetworks) = Vector<String>::createShared();
     DTO_FIELD(Vector<String>, linNetworks) = Vector<String>::createShared();
-
 };
 
 class BulkSimulationDto : public oatpp::DTO

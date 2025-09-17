@@ -43,7 +43,7 @@ public:
 private:
     template <typename MsgT>
     void SendBroadcastMsgImpl(MsgT&& msg);
-    
+
     template <typename MsgT>
     void SendTargettedMsgImpl(MsgT&& msg);
 

@@ -5,26 +5,19 @@
 #include "ApplicationBase.hpp"
 #include "PubSubDemoCommon.hpp"
 
-class Subscriber: public ApplicationBase
+class Subscriber : public ApplicationBase
 {
 public:
     // Inherit constructors
     using ApplicationBase::ApplicationBase;
 
 private:
-
     IDataSubscriber* _gpsSubscriber;
     IDataSubscriber* _temperatureSubscriber;
 
-    void AddCommandLineArgs() override
-    {
+    void AddCommandLineArgs() override {}
 
-    }
-
-    void EvaluateCommandLineArgs() override
-    {
-
-    }
+    void EvaluateCommandLineArgs() override {}
 
     void CreateControllers() override
     {
@@ -51,20 +44,11 @@ private:
         });
     }
 
-    void InitControllers() override
-    {
+    void InitControllers() override {}
 
-    }
+    void DoWorkSync(std::chrono::nanoseconds /*now*/) override {}
 
-    void DoWorkSync(std::chrono::nanoseconds /*now*/) override
-    {
-
-    }
-
-    void DoWorkAsync() override
-    {
-
-    }
+    void DoWorkAsync() override {}
 };
 
 int main(int argc, char** argv)
@@ -73,7 +57,6 @@ int main(int argc, char** argv)
     args.participantName = "Subscriber";
     Subscriber app{args};
     app.SetupCommandLineArgs(argc, argv, "SIL Kit Demo - Subscriber: Receive GPS and Temperature data");
-    
+
     return app.Run();
 }
-

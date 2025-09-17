@@ -145,7 +145,8 @@ public:
         return Get<SimulationStart>();
     }
 
-    auto GetParticipantConnectionInformation() const -> const SilKit::Services::Orchestration::ParticipantConnectionInformation&
+    auto GetParticipantConnectionInformation() const
+        -> const SilKit::Services::Orchestration::ParticipantConnectionInformation&
     {
         return Get<SilKit::Services::Orchestration::ParticipantConnectionInformation>();
     }

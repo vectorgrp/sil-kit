@@ -18,8 +18,10 @@ namespace Flexray {
 
 struct WireFlexrayFrame
 {
-    FlexrayHeader header; //!< Header flags, slot, crc, and cycle indidcators
-    Util::SharedVector<uint8_t> payload; //!< Raw payload containing 0 to 254 bytes
+    //! Header flags, slot, crc, and cycle indidcators
+    FlexrayHeader header;
+    //! Raw payload containing 0 to 254 bytes
+    Util::SharedVector<uint8_t> payload;
 };
 
 inline auto ToFlexrayFrame(const WireFlexrayFrame& wireFlexrayFramea) -> FlexrayFrame;
@@ -28,9 +30,12 @@ inline auto MakeWireFlexrayFrame(const FlexrayFrame& flexrayFrame) -> WireFlexra
 // Receive a frame from the Bus.
 struct WireFlexrayFrameEvent
 {
-    std::chrono::nanoseconds timestamp; //!< Time at end of frame transmission
-    FlexrayChannel channel; //!< FlexRay channel A or B. (Valid values: FlexrayChannel::A, FlexrayChannel::B).
-    WireFlexrayFrame frame; //!< Received FlexRay frame
+    //! Time at end of frame transmission
+    std::chrono::nanoseconds timestamp;
+    //! FlexRay channel A or B. (Valid values: FlexrayChannel::A, FlexrayChannel::B).
+    FlexrayChannel channel;
+    //! Received FlexRay frame
+    WireFlexrayFrame frame;
 };
 
 inline auto ToFlexrayFrameEvent(const WireFlexrayFrameEvent& wireFlexrayFrameEvent) -> FlexrayFrameEvent;
@@ -38,10 +43,14 @@ inline auto MakeWireFlexrayFrameEvent(const FlexrayFrameEvent& flexrayFrameEvent
 
 struct WireFlexrayFrameTransmitEvent
 {
-    std::chrono::nanoseconds timestamp; //!< Time at end of frame transmission
-    uint16_t txBufferIndex; //!< Tx buffer, that was used for the transmission
-    FlexrayChannel channel; //!< FlexRay channel A or B. (Valid values: FlexrayChannel::A, FlexrayChannel::B).
-    WireFlexrayFrame frame; //!< Copy of the FlexRay frame that was successfully transmitted
+    //! Time at end of frame transmission
+    std::chrono::nanoseconds timestamp;
+    //! Tx buffer, that was used for the transmission
+    uint16_t txBufferIndex;
+    //! FlexRay channel A or B. (Valid values: FlexrayChannel::A, FlexrayChannel::B).
+    FlexrayChannel channel;
+    //! Copy of the FlexRay frame that was successfully transmitted
+    WireFlexrayFrame frame;
 };
 
 inline auto ToFlexrayFrameTransmitEvent(const WireFlexrayFrameTransmitEvent& wireFlexrayFrameTransmitEvent)
@@ -78,12 +87,18 @@ struct FlexrayTxBufferConfigUpdate
 
 enum class FlexrayChiCommand : uint8_t
 {
-    RUN, //!< ChiCommand RUN
-    DEFERRED_HALT, //!< ChiCommand DEFERRED_HALT
-    FREEZE, //!< ChiCommand FREEZE
-    ALLOW_COLDSTART, //!< ChiCommand ALLOW_COLDSTART
-    ALL_SLOTS, //!< ChiCommand ALL_SLOTS
-    WAKEUP //!< ChiCommand WAKEUP
+    //! ChiCommand RUN
+    RUN,
+    //! ChiCommand DEFERRED_HALT
+    DEFERRED_HALT,
+    //! ChiCommand FREEZE
+    FREEZE,
+    //! ChiCommand ALLOW_COLDSTART
+    ALLOW_COLDSTART,
+    //! ChiCommand ALL_SLOTS
+    ALL_SLOTS,
+    //! ChiCommand WAKEUP
+    WAKEUP
 };
 
 struct FlexrayHostCommand
@@ -221,8 +236,7 @@ std::ostream& operator<<(std::ostream& out, const WireFlexrayTxBufferUpdate& msg
 
 std::ostream& operator<<(std::ostream& out, const FlexrayTxBufferConfigUpdate& msg)
 {
-    return out << "fr::FlexrayTxBufferConfigUpdate{"
-               << "idx=" << msg.txBufferIndex << " " << msg.txBufferConfig << "}";
+    return out << "fr::FlexrayTxBufferConfigUpdate{" << "idx=" << msg.txBufferIndex << " " << msg.txBufferConfig << "}";
 }
 
 std::ostream& operator<<(std::ostream& out, FlexrayChiCommand command)

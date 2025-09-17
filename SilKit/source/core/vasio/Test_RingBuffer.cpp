@@ -159,8 +159,10 @@ TEST(Test_RingBuffer, writeMultiple_fixedCapacity)
     RingBuffer ringBuffer(capacity);
 
     const size_t numBlockSets = 100;
-    const size_t numDataBlocks = 500; // same number of data blocks for every group
-    const size_t maxSizeDataBlock = 200; // size smaller than capacity reasonable in this case
+    // same number of data blocks for every group
+    const size_t numDataBlocks = 500;
+    // size smaller than capacity reasonable in this case
+    const size_t maxSizeDataBlock = 200;
 
     std::vector<uint8_t> currentDataBlock;
 

@@ -71,4 +71,4 @@ void FrameHandler(const EthernetFrameEvent& ethernetFrameEvent, ILogger* logger,
     logger->Info(ss.str());
 }
 
-} // namespace EthernetDemoBehavior
+} // namespace EthernetDemoCommon
