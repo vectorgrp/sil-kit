@@ -128,10 +128,13 @@ auto GetDummyConfigWithValues() -> SilKit::Config::FlexrayController
 class MockParticipant : public DummyParticipant
 {
 public:
-    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint *, const std::string&, const FlexrayHostCommand &), (override));
-    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint *, const std::string&, const FlexrayControllerConfig &), (override));
-    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint *, const std::string&, const FlexrayTxBufferConfigUpdate &), (override));
-    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint *, const std::string&, const WireFlexrayTxBufferUpdate &), (override));
+    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint *, const std::string &, const FlexrayHostCommand &), (override));
+    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint *, const std::string &, const FlexrayControllerConfig &),
+                (override));
+    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint *, const std::string &, const FlexrayTxBufferConfigUpdate &),
+                (override));
+    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint *, const std::string &, const WireFlexrayTxBufferUpdate &),
+                (override));
 };
 
 class Test_FlexrayController : public testing::Test
@@ -162,7 +165,6 @@ protected:
 
         referencePayload.resize(20);
         std::iota(referencePayload.begin(), referencePayload.end(), '\000');
-
     }
 
 protected:
@@ -227,7 +229,7 @@ TEST_F(Test_FlexrayController, send_controller_config_override_cluster_params)
     // Change clusterParams in tester and make sure they are ignored
     testControllerCfg.clusterParams = MakeValidClusterParams();
     testControllerCfg.clusterParams.gNumberOfMiniSlots = 999; // was 0
-    testControllerCfg.clusterParams.gMacroPerCycle = 1337; // was 0
+    testControllerCfg.clusterParams.gMacroPerCycle = 1337;    // was 0
 
     // default values (not configured)
     testControllerCfg.nodeParams = MakeValidNodeParams();
@@ -249,7 +251,7 @@ TEST_F(Test_FlexrayController, send_controller_config_override_node_params)
 
     // Change clusterParams in tester and make sure they are ignored
     testControllerCfg.nodeParams = MakeValidNodeParams();
-    testControllerCfg.nodeParams.pKeySlotId = 42; // was 0
+    testControllerCfg.nodeParams.pKeySlotId = 42;               // was 0
     testControllerCfg.nodeParams.pChannels = FlexrayChannel::B; // was A
 
     // default values (not configured)

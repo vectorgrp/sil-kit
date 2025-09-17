@@ -58,8 +58,11 @@ private:
         // Build a CAN FD frame
         CanFrame canFrame{};
         canFrame.canId = 3;
-        canFrame.flags = static_cast<CanFrameFlagMask>(CanFrameFlag::Fdf) // FD Format Indicator
-                         | static_cast<CanFrameFlagMask>(CanFrameFlag::Brs); // Bit Rate Switch (for FD Format only)
+
+        // Fdf = FD Format Indicator
+        // Brs = Bit Rate Switch (for FD Format only)
+        canFrame.flags = static_cast<CanFrameFlagMask>(CanFrameFlag::Fdf)
+                         | static_cast<CanFrameFlagMask>(CanFrameFlag::Brs);
 
         // Build a payload with the frame Id
         std::stringstream payloadBuilder;
@@ -95,7 +98,6 @@ private:
     {
         SendFrame();
     }
-
 };
 
 int main(int argc, char** argv)

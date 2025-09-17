@@ -41,13 +41,10 @@ using VSilKit::ServiceData;
 namespace VSilKit {
 
 
-DashboardInstance::DashboardInstance()
-{
-}
+DashboardInstance::DashboardInstance() {}
 
 DashboardInstance::~DashboardInstance()
 {
-
     try
     {
         _eventQueueWorkerThreadAbort.set_value();
@@ -63,7 +60,6 @@ DashboardInstance::~DashboardInstance()
     {
         _eventQueueWorkerThread.join();
     }
-
 }
 
 auto DashboardInstance::GetRegistryEventListener() -> SilKit::Core::IRegistryEventListener *
@@ -73,7 +69,6 @@ auto DashboardInstance::GetRegistryEventListener() -> SilKit::Core::IRegistryEve
 
 void DashboardInstance::SetupDashboardConnection(std::string const &dashboardUri)
 {
-
     _dashboardRestClient = std::make_shared<SilKit::Dashboard::DashboardRestClient>(_logger, dashboardUri);
     RunEventQueueWorkerThread();
 }
@@ -83,14 +78,14 @@ using namespace SilKit::Services::Logging;
 using namespace SilKit::Dashboard;
 class EventQueueWorkerThread
 {
-    ILogger* _logger{nullptr};
-    IRestClient* _dashboardRestClient{nullptr};
-    LockedQueue<SilKitEvent>* _eventQueue{nullptr};
+    ILogger *_logger{nullptr};
+    IRestClient *_dashboardRestClient{nullptr};
+    LockedQueue<SilKitEvent> *_eventQueue{nullptr};
     std::future<void> _abort;
 
 public: //CTor
-    EventQueueWorkerThread(ILogger* logger, IRestClient* dashboardRestClient,
-                           LockedQueue<SilKitEvent>* eventQueue, std::future<void> abort)
+    EventQueueWorkerThread(ILogger *logger, IRestClient *dashboardRestClient, LockedQueue<SilKitEvent> *eventQueue,
+                           std::future<void> abort)
         : _logger{logger}
         , _dashboardRestClient{dashboardRestClient}
         , _eventQueue{eventQueue}
@@ -115,7 +110,6 @@ public: //CTor
 
     void ProcessEventsWithBulkUpdates() const
     {
-
         std::unordered_map<std::string, uint64_t> simulationNameToId;
         std::unordered_map<uint64_t, SilKit::Dashboard::DashboardBulkUpdate> simulationBulkUpdates;
 
@@ -262,7 +256,7 @@ public: //CTor
         else
         {
             throw SilKit::SilKitError{"Bulk update for REST API is required!"};
-        }   
+        }
     }
     catch (const std::exception &exception)
     {
@@ -280,7 +274,7 @@ void DashboardInstance::RunEventQueueWorkerThread()
 
     _eventQueueWorkerThreadAbort = std::promise<void>{};
 
-    EventQueueWorkerThread workerThread{_logger,  _dashboardRestClient.get(), &_silKitEventQueue,
+    EventQueueWorkerThread workerThread{_logger, _dashboardRestClient.get(), &_silKitEventQueue,
                                         _eventQueueWorkerThreadAbort.get_future()};
 
     _eventQueueWorkerThread = std::thread{std::move(workerThread)};
@@ -299,20 +293,20 @@ void DashboardInstance::RemoveSimulationData(const std::string &simulationName)
     _simulationEventHandlers.erase(simulationName);
 }
 
-void DashboardInstance::OnLoggerCreated(SilKit::Services::Logging::ILogger* logger)
+void DashboardInstance::OnLoggerCreated(SilKit::Services::Logging::ILogger *logger)
 {
     SILKIT_ASSERT(_logger == nullptr);
     _logger = logger;
 }
 
-void DashboardInstance::OnRegistryUri(const std::string& registryUri)
+void DashboardInstance::OnRegistryUri(const std::string &registryUri)
 {
     Log::Debug(_logger, "DashboardInstance::OnRegistryUri: registryUri={}", registryUri);
     SILKIT_ASSERT(_registryUri == nullptr);
     _registryUri = std::make_unique<SilKit::Core::Uri>(registryUri);
 }
 
-void DashboardInstance::OnParticipantConnected(const std::string& simulationName, const std::string& participantName)
+void DashboardInstance::OnParticipantConnected(const std::string &simulationName, const std::string &participantName)
 {
     Log::Trace(_logger, "DashboardInstance::OnParticipantConnected: simulationName={} participantName={}",
                simulationName, participantName);
@@ -331,7 +325,7 @@ void DashboardInstance::OnParticipantConnected(const std::string& simulationName
         simulationName, SilKit::Services::Orchestration::ParticipantConnectionInformation{participantName}});
 }
 
-void DashboardInstance::OnParticipantDisconnected(const std::string& simulationName, const std::string& participantName)
+void DashboardInstance::OnParticipantDisconnected(const std::string &simulationName, const std::string &participantName)
 {
     Log::Debug(_logger, "DashboardInstance::OnParticipantDisconnected: simulationName={} participantName={}",
                simulationName, participantName);

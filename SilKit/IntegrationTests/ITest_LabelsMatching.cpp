@@ -15,12 +15,12 @@ using namespace SilKit::Services::PubSub;
 using namespace SilKit::Services::Rpc;
 using namespace std::chrono_literals;
 
-struct ITest_LabelMatching: ITest_SimTestHarness
+struct ITest_LabelMatching : ITest_SimTestHarness
 {
     using ITest_SimTestHarness::ITest_SimTestHarness;
 };
 
-TEST_F(ITest_LabelMatching,  pubsub_multiple_controllers_same_topic_different_labels)
+TEST_F(ITest_LabelMatching, pubsub_multiple_controllers_same_topic_different_labels)
 {
     SetupFromParticipantList({"Pub1", "Sub1"});
 
@@ -99,8 +99,7 @@ TEST_F(ITest_LabelMatching,  pubsub_multiple_controllers_same_topic_different_la
             {
                 lifecycleService->Stop("Stopping test");
             }
-        },
-            1ms);
+        }, 1ms);
     }
 
 
@@ -136,9 +135,8 @@ TEST_F(ITest_LabelMatching, rpc_multiple_controllers_same_topic_different_labels
 
         RpcSpec spec1{functionName, mediaType};
         spec1.AddLabel("K", "L1", MatchingLabel::Kind::Mandatory);
-        participant->CreateRpcServer(
-            "ServerCtrl1", spec1,
-            [&numReceivedCalls1](IRpcServer* server, RpcCallEvent event) {
+        participant->CreateRpcServer("ServerCtrl1", spec1,
+                                     [&numReceivedCalls1](IRpcServer* server, RpcCallEvent event) {
             numReceivedCalls1++;
             server->SubmitResult(event.callHandle, std::vector<uint8_t>{1});
         });
@@ -159,7 +157,7 @@ TEST_F(ITest_LabelMatching, rpc_multiple_controllers_same_topic_different_labels
             server->SubmitResult(event.callHandle, std::vector<uint8_t>{3});
         });
     }
-    
+
     {
         /////////////////////////////////////////////////////////////////////////
         // Client1
@@ -175,8 +173,7 @@ TEST_F(ITest_LabelMatching, rpc_multiple_controllers_same_topic_different_labels
         auto&& client1 = participant->CreateRpcClient(
             "ClientCtrl1", spec1, [&numReceivedCallResults1](auto*, const auto&) { numReceivedCallResults1++; });
 
-        timeSyncService->SetSimulationStepHandler(
-            [client1, lifecycleService](auto now, auto) {
+        timeSyncService->SetSimulationStepHandler([client1, lifecycleService](auto now, auto) {
             if (now == 0ms)
             {
                 client1->Call(std::vector<uint8_t>{1});

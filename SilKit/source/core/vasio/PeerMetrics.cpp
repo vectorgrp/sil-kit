@@ -4,8 +4,7 @@
 #include "PeerMetrics.hpp"
 
 
-namespace VSilKit
-{
+namespace VSilKit {
 void NoMetrics::InitializeMetrics(VSilKit::IMetricsManager*, SilKit::Core::IVAsioPeer*)
 {
     // no op
@@ -39,10 +38,9 @@ void NoMetrics::TxQueueSize(size_t)
 
 // PeerMetrics
 
-void PeerMetrics::InitializeMetrics(VSilKit::IMetricsManager* manager,
-                                    SilKit::Core::IVAsioPeer* peer)
+void PeerMetrics::InitializeMetrics(VSilKit::IMetricsManager* manager, SilKit::Core::IVAsioPeer* peer)
 {
-    if(_initialized)
+    if (_initialized)
     {
         return;
     }
@@ -110,4 +108,4 @@ void PeerMetrics::TxQueueSize(size_t queueSize)
 }
 
 
-}
+} // namespace VSilKit

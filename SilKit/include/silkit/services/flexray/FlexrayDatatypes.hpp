@@ -25,17 +25,17 @@ using FlexrayMicroTick = SilKit_FlexrayMicroTick; //!< FlexRay micro tick
 enum class FlexrayChannel : SilKit_FlexrayChannel
 {
     None = SilKit_FlexrayChannel_None, //!< Invalid Channel
-    A = SilKit_FlexrayChannel_A, //!< Channel A
-    B = SilKit_FlexrayChannel_B, //!< Channel B
-    AB = SilKit_FlexrayChannel_AB, //!< Channel AB
+    A = SilKit_FlexrayChannel_A,       //!< Channel A
+    B = SilKit_FlexrayChannel_B,       //!< Channel B
+    AB = SilKit_FlexrayChannel_AB,     //!< Channel AB
 };
 
 //! \brief Period of the clock (used for micro tick period and sample clock period).
 enum class FlexrayClockPeriod : SilKit_FlexrayClockPeriod
 {
     T12_5NS = SilKit_FlexrayClockPeriod_T12_5NS, //!< 12.5ns / 80MHz
-    T25NS = SilKit_FlexrayClockPeriod_T25NS, //!< 25ns   / 40MHz
-    T50NS = SilKit_FlexrayClockPeriod_T50NS, //!< 50ns   / 20MHz
+    T25NS = SilKit_FlexrayClockPeriod_T25NS,     //!< 25ns   / 40MHz
+    T50NS = SilKit_FlexrayClockPeriod_T50NS,     //!< 50ns   / 20MHz
 };
 
 /*!
@@ -320,15 +320,15 @@ struct FlexrayHeader
      *  - [0]: SuFIndicator: 0, not a startup frame; 1, a startup frame
      */
     FlagMask flags = 0;
-    uint16_t frameId = 0; //!< Slot ID in which the frame was sent: 1 - 2047
+    uint16_t frameId = 0;      //!< Slot ID in which the frame was sent: 1 - 2047
     uint8_t payloadLength = 0; //!< Payload length, 7 bits
-    uint16_t headerCrc = 0; //!< Header CRC, 11 bits
-    uint8_t cycleCount = 0; //!< Cycle in which the frame was sent: 0 - 63
+    uint16_t headerCrc = 0;    //!< Header CRC, 11 bits
+    uint8_t cycleCount = 0;    //!< Cycle in which the frame was sent: 0 - 63
 };
 
 struct FlexrayFrame
 {
-    FlexrayHeader header; //!< Header flags, slot, crc, and cycle indidcators
+    FlexrayHeader header;              //!< Header flags, slot, crc, and cycle indidcators
     Util::Span<const uint8_t> payload; //!< Raw payload containing 0 to 254 bytes
 };
 
@@ -337,7 +337,7 @@ struct FlexrayFrameEvent
 {
     std::chrono::nanoseconds timestamp; //!< Time at end of frame transmission
     FlexrayChannel channel; //!< FlexRay channel A or B. (Valid values: FlexrayChannel::A, FlexrayChannel::B).
-    FlexrayFrame frame; //!< Received FlexRay frame
+    FlexrayFrame frame;     //!< Received FlexRay frame
 };
 
 /*!
@@ -346,9 +346,9 @@ struct FlexrayFrameEvent
 struct FlexrayFrameTransmitEvent
 {
     std::chrono::nanoseconds timestamp; //!< Time at end of frame transmission
-    uint16_t txBufferIndex; //!< Tx buffer, that was used for the transmission
+    uint16_t txBufferIndex;             //!< Tx buffer, that was used for the transmission
     FlexrayChannel channel; //!< FlexRay channel A or B. (Valid values: FlexrayChannel::A, FlexrayChannel::B).
-    FlexrayFrame frame; //!< Copy of the FlexRay frame that was successfully transmitted
+    FlexrayFrame frame;     //!< Copy of the FlexRay frame that was successfully transmitted
 };
 
 /*!
@@ -357,8 +357,8 @@ struct FlexrayFrameTransmitEvent
 enum class FlexraySymbolPattern : SilKit_FlexraySymbolPattern
 {
     CasMts =
-        SilKit_FlexraySymbolPattern_CasMts, //!< Collision avoidance symbol (CAS) OR media access test symbol (MTS).
-    Wus = SilKit_FlexraySymbolPattern_Wus, //!< Wakeup symbol (WUS).
+        SilKit_FlexraySymbolPattern_CasMts,    //!< Collision avoidance symbol (CAS) OR media access test symbol (MTS).
+    Wus = SilKit_FlexraySymbolPattern_Wus,     //!< Wakeup symbol (WUS).
     Wudop = SilKit_FlexraySymbolPattern_Wudop, //!< Wakeup During Operation Pattern (WUDOP).
 };
 
@@ -368,8 +368,8 @@ enum class FlexraySymbolPattern : SilKit_FlexraySymbolPattern
 struct FlexraySymbolEvent
 {
     std::chrono::nanoseconds timestamp; //!< End time of symbol reception.
-    FlexrayChannel channel; //!< FlexRay channel A or B (values: FlexrayChannel::A, FlexrayChannel::B).
-    FlexraySymbolPattern pattern; //!< The received symbol, e.g. wakeup pattern
+    FlexrayChannel channel;             //!< FlexRay channel A or B (values: FlexrayChannel::A, FlexrayChannel::B).
+    FlexraySymbolPattern pattern;       //!< The received symbol, e.g. wakeup pattern
 };
 
 /*!
@@ -396,7 +396,7 @@ struct FlexrayWakeupEvent : FlexraySymbolEvent
 struct FlexrayCycleStartEvent
 {
     std::chrono::nanoseconds timestamp; //!< Cycle starting time.
-    uint8_t cycleCounter; //!< Counter of FlexRay cycles.
+    uint8_t cycleCounter;               //!< Counter of FlexRay cycles.
 };
 
 /*!
@@ -406,11 +406,11 @@ struct FlexrayCycleStartEvent
 enum class FlexrayPocState : SilKit_FlexrayPocState
 {
     DefaultConfig = SilKit_FlexrayPocState_DefaultConfig, //!< CC expects configuration. Initial state after reset.
-    Config = SilKit_FlexrayPocState_Config, //!< CC is in configuration mode for setting communication parameters
-    Ready = SilKit_FlexrayPocState_Ready, //!< intermediate state for initialization process (after Config).
+    Config = SilKit_FlexrayPocState_Config,   //!< CC is in configuration mode for setting communication parameters
+    Ready = SilKit_FlexrayPocState_Ready,     //!< intermediate state for initialization process (after Config).
     Startup = SilKit_FlexrayPocState_Startup, //!< FlexRay startup phase
-    Wakeup = SilKit_FlexrayPocState_Wakeup, //!< FlexRay wakeup phase
-    NormalActive = SilKit_FlexrayPocState_NormalActive, //!< Normal operating mode
+    Wakeup = SilKit_FlexrayPocState_Wakeup,   //!< FlexRay wakeup phase
+    NormalActive = SilKit_FlexrayPocState_NormalActive,   //!< Normal operating mode
     NormalPassive = SilKit_FlexrayPocState_NormalPassive, //!< Operating mode with transient or tolerable errors
     Halt =
         SilKit_FlexrayPocState_Halt, //!< CC is halted (caused by the application (FlexrayChiCommand::DEFERRED_HALT) or by a fatal error).
@@ -487,13 +487,13 @@ struct FlexrayPocStatusEvent
     std::chrono::nanoseconds timestamp; //!< SIL Kit timestamp
 
     FlexrayPocState state; //!< Status of the Protocol Operation Control (POC).
-    bool chiHaltRequest; //!< indicates whether a halt request was received from the CHI
-    bool coldstartNoise; //!< indicates noisy channel conditions during coldstart
+    bool chiHaltRequest;   //!< indicates whether a halt request was received from the CHI
+    bool coldstartNoise;   //!< indicates noisy channel conditions during coldstart
     bool freeze; //!< indicates that the POC entered a halt state due to an error condition requiring immediate halt.
     bool
         chiReadyRequest; //!< indicates that the CHI requested to enter ready state at the end of the communication cycle.
-    FlexrayErrorModeType errorMode; //!< indicates the error mode of the POC
-    FlexraySlotModeType slotMode; //!< indicates the slot mode of the POC
+    FlexrayErrorModeType errorMode;       //!< indicates the error mode of the POC
+    FlexraySlotModeType slotMode;         //!< indicates the slot mode of the POC
     FlexrayStartupStateType startupState; //!< indicates states within the STARTUP mechanism
     FlexrayWakeupStatusType wakeupStatus; //!< outcome of the execution of the WAKEUP mechanism
 };

@@ -89,12 +89,10 @@ Logging:
 )";
 
     auto&& config = SilKit::Config::ParticipantConfigurationFromString(configString);
-    EXPECT_CALL(capi, SilKit_ParticipantConfiguration_ToJson(testing::_, testing::_, testing::_))
-        .Times(1);
+    EXPECT_CALL(capi, SilKit_ParticipantConfiguration_ToJson(testing::_, testing::_, testing::_)).Times(1);
     {
         auto jsonString = SilKit::Config::ParticipantConfigurationToJson(config);
     }
-
 }
 
 TEST_F(Test_HourglassParticipantLogger, SilKit_Participant_Create1)

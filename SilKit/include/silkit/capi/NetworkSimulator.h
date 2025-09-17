@@ -58,8 +58,8 @@ struct SilKit_Experimental_SimulatedNetworkFunctions
 struct SilKit_Experimental_NetSim_CanFrameRequest
 {
     SilKit_StructHeader structHeader; //!< The interface id specifying which version of this struct was obtained
-    SilKit_CanFrame* frame; //!< The CAN Frame that corresponds to the meta data
-    void* userContext; //!< Optional pointer provided by user when sending the frame
+    SilKit_CanFrame* frame;           //!< The CAN Frame that corresponds to the meta data
+    void* userContext;                //!< Optional pointer provided by user when sending the frame
 };
 typedef struct SilKit_Experimental_NetSim_CanFrameRequest SilKit_Experimental_NetSim_CanFrameRequest;
 
@@ -76,7 +76,7 @@ typedef int32_t SilKit_Experimental_NetSim_CanControllerModeFlags;
 
 /*! Reset the error counters to zero and the error state to error active. */
 #define SilKit_Experimental_NetSim_CanControllerModeFlags_ResetErrorHandling \
-    ((SilKit_Experimental_NetSim_CanControllerModeFlags)BIT(0)) 
+    ((SilKit_Experimental_NetSim_CanControllerModeFlags)BIT(0))
 
 /*! Cancel all outstanding transmit requests (flush transmit queue of controller). */
 #define SilKit_Experimental_NetSim_CanControllerModeFlags_CancelTransmitRequests \

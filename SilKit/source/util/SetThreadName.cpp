@@ -9,7 +9,7 @@
 
 #if _WIN32
 #include <windows.h> // HANDLE, PCWSTR
-#else // posix
+#else                // posix
 #include <pthread.h>
 #endif
 

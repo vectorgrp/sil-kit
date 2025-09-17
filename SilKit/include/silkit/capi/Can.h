@@ -16,8 +16,8 @@ SILKIT_BEGIN_DECLS
 /*! The available flags within the flags member of a CAN frame.
 */
 typedef uint32_t SilKit_CanFrameFlag;
-#define SilKit_CanFrameFlag_ide ((SilKit_CanFrameFlag)BIT(9)) //!< Identifier Extension
-#define SilKit_CanFrameFlag_rtr ((SilKit_CanFrameFlag)BIT(4)) //!< Remote Transmission Request
+#define SilKit_CanFrameFlag_ide ((SilKit_CanFrameFlag)BIT(9))  //!< Identifier Extension
+#define SilKit_CanFrameFlag_rtr ((SilKit_CanFrameFlag)BIT(4))  //!< Remote Transmission Request
 #define SilKit_CanFrameFlag_fdf ((SilKit_CanFrameFlag)BIT(12)) //!< FD Format Indicator
 #define SilKit_CanFrameFlag_brs ((SilKit_CanFrameFlag)BIT(13)) //!< Bit Rate Switch  (for FD Format only)
 #define SilKit_CanFrameFlag_esi ((SilKit_CanFrameFlag)BIT(14)) //!< Error State indicator (for FD Format only)
@@ -29,12 +29,12 @@ typedef uint32_t SilKit_CanFrameFlag;
 struct SilKit_CanFrame
 {
     SilKit_StructHeader structHeader; //!< The interface id specifying which version of this struct was obtained
-    uint32_t id; //!< CAN Identifier
-    SilKit_CanFrameFlag flags; //!< CAN Arbitration and Control Field Flags; see SilKit_CanFrameFlag
-    uint16_t dlc; //!< Data Length Code - determined by a network simulator if available
-    uint8_t sdt; //!< SDU type - describes the structure of the frames Data Field content (for XL Format only)
+    uint32_t id;                      //!< CAN Identifier
+    SilKit_CanFrameFlag flags;        //!< CAN Arbitration and Control Field Flags; see SilKit_CanFrameFlag
+    uint16_t dlc;                     //!< Data Length Code - determined by a network simulator if available
+    uint8_t sdt;  //!< SDU type - describes the structure of the frames Data Field content (for XL Format only)
     uint8_t vcid; //!< Virtual CAN network ID (for XL Format only)
-    uint32_t af; //!< Acceptance field (for XL Format only)
+    uint32_t af;  //!< Acceptance field (for XL Format only)
 
     SilKit_ByteVector data; //!< Data field containing the payload
 };
@@ -44,9 +44,9 @@ struct SilKit_CanFrameEvent
 {
     SilKit_StructHeader structHeader; //!< The interface id specifying which version of this struct was obtained
     SilKit_NanosecondsTime timestamp; //!< Reception time
-    SilKit_CanFrame* frame; //!< The CAN Frame that corresponds to the meta data
-    SilKit_Direction direction; //!< The transmit direction of the CAN frame (TX/RX)
-    void* userContext; //!< Optional pointer provided by user when sending the frame
+    SilKit_CanFrame* frame;           //!< The CAN Frame that corresponds to the meta data
+    SilKit_Direction direction;       //!< The transmit direction of the CAN frame (TX/RX)
+    void* userContext;                //!< Optional pointer provided by user when sending the frame
 };
 typedef struct SilKit_CanFrameEvent SilKit_CanFrameEvent;
 
@@ -82,7 +82,7 @@ struct SilKit_CanFrameTransmitEvent
     SilKit_StructHeader structHeader; //!< The interface id specifying which version of this struct was obtained
     void* userContext; //!< Value that was provided by user in corresponding parameter on send of CAN frame
     SilKit_NanosecondsTime timestamp; //!< Reception time
-    SilKit_CanTransmitStatus status; //!< Status of the CanTransmitRequest
+    SilKit_CanTransmitStatus status;  //!< Status of the CanTransmitRequest
     /*! Identifies the CAN id to which this CanFrameTransmitEvent refers to.
      *
      * \version Check: SK_ID_GET_VERSION(SilKit_Struct_GetId(event)) >= 2
@@ -116,7 +116,7 @@ struct SilKit_CanStateChangeEvent
 {
     SilKit_StructHeader structHeader; //!< The interface id specifying which version of this struct was obtained
     SilKit_NanosecondsTime timestamp; //!< Reception time
-    SilKit_CanControllerState state; //!< CAN controller state
+    SilKit_CanControllerState state;  //!< CAN controller state
 };
 typedef struct SilKit_CanStateChangeEvent SilKit_CanStateChangeEvent;
 
@@ -146,7 +146,7 @@ struct SilKit_CanErrorStateChangeEvent
 {
     SilKit_StructHeader structHeader; //!< The interface id specifying which version of this struct was obtained
     SilKit_NanosecondsTime timestamp; //!< Reception time
-    SilKit_CanErrorState errorState; //!< CAN controller error state
+    SilKit_CanErrorState errorState;  //!< CAN controller error state
 };
 typedef struct SilKit_CanErrorStateChangeEvent SilKit_CanErrorStateChangeEvent;
 

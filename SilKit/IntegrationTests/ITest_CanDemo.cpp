@@ -190,11 +190,9 @@ TEST_F(ITest_CanDemo, can_demo)
                 Log() << "---   CanWriter sending XL Frame";
                 canController->SendFrame(state->xlFrame, (void*)(intptr_t)(0xFDFDFDFD));
             }
-            },
-            1ms);
+        }, 1ms);
 
-        canController->AddFrameHandler(
-            [state](auto, const Can::CanFrameEvent& frameEvent) {
+        canController->AddFrameHandler([state](auto, const Can::CanFrameEvent& frameEvent) {
             //ignore early test messages
             if (frameEvent.direction == SilKit::Services::TransmitDirection::TX)
             {
@@ -205,8 +203,7 @@ TEST_F(ITest_CanDemo, can_demo)
             {
                 state->writerHasReceivedRx = true;
             }
-            },
-            ((DirectionMask)TransmitDirection::RX | (DirectionMask)TransmitDirection::TX));
+        }, ((DirectionMask)TransmitDirection::RX | (DirectionMask)TransmitDirection::TX));
     }
 
     {
@@ -234,8 +231,7 @@ TEST_F(ITest_CanDemo, can_demo)
             {
                 canController->SendFrame(state->msg);
             }
-            },
-            1ms);
+        }, 1ms);
 
         canController->AddFrameHandler([state, lifecycleService](auto, const Can::CanFrameEvent& frameEvent) {
             if (frameEvent.timestamp < 20ms)

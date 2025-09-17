@@ -140,7 +140,7 @@ auto SystemStateTracker::UpdateParticipantStatus(const ParticipantStatus& newPar
     const auto oldParticipantState{participantStatus.state};
     const auto newParticipantState{newParticipantStatus.state};
 
-    if(_logger != nullptr)
+    if (_logger != nullptr)
     {
         Log::LoggerMessage lm{_logger, Log::Level::Debug};
         lm.SetMessage("Updating participant status");
@@ -184,7 +184,7 @@ auto SystemStateTracker::UpdateParticipantStatus(const ParticipantStatus& newPar
     if (oldParticipantState != newParticipantState)
     {
         result.participantStateChanged = true;
-        if(_logger != nullptr)
+        if (_logger != nullptr)
         {
             Log::LoggerMessage lm{_logger, Log::Level::Debug};
             lm.SetMessage("The participant state has changed!");
@@ -197,7 +197,7 @@ auto SystemStateTracker::UpdateParticipantStatus(const ParticipantStatus& newPar
             const auto oldSystemState{_systemState};
             const auto newSystemState{ComputeSystemState(newParticipantState)};
 
-            if(_logger != nullptr)
+            if (_logger != nullptr)
             {
                 Log::LoggerMessage lm{_logger, Log::Level::Debug};
                 lm.SetMessage("Computed new system state update!");

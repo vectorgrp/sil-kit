@@ -80,10 +80,10 @@ public:
     Experimental::Services::Lin::LinSlaveConfiguration GetSlaveConfiguration() override; // Exprimental
     HandlerId AddLinSlaveConfigurationHandler(
         Experimental::Services::Lin::LinSlaveConfigurationHandler handler) override; // Exprimental
-    void RemoveLinSlaveConfigurationHandler(HandlerId handlerId) override; // Exprimental
+    void RemoveLinSlaveConfigurationHandler(HandlerId handlerId) override;           // Exprimental
 
     auto AddFrameHeaderHandler(SilKit::Experimental::Services::Lin::LinFrameHeaderHandler handler)
-        -> HandlerId override; // Experimental
+        -> HandlerId override;                                   // Experimental
     void RemoveFrameHeaderHandler(HandlerId handlerId) override; // Experimental
 
     HandlerId AddFrameStatusHandler(FrameStatusHandler handler) override;

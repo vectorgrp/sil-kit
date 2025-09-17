@@ -773,7 +773,6 @@ TEST_F(ITest_CommunicationGuarantees, test_receive_in_comm_ready_handler_mixed)
 
     try
     {
-
         auto registryUri = SetupSystem("silkit://localhost:0", coordinatedSyncParticipantsSub);
 
         // Start the coordinated participants

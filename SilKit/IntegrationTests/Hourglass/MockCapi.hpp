@@ -421,8 +421,8 @@ public:
                 (SilKit_ParticipantConfiguration * participantConfiguration));
 
     MOCK_METHOD(SilKit_ReturnCode, SilKit_ParticipantConfiguration_ToJson,
-                (const SilKit_ParticipantConfiguration* inParticipantConfiguration,
-                 char** outString, size_t* requiredSize));
+                (const SilKit_ParticipantConfiguration* inParticipantConfiguration, char** outString,
+                 size_t* requiredSize));
 
     // Logger
 

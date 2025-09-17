@@ -217,14 +217,14 @@ auto GetCurrentProcessDacl() -> PACL
     PACL dacl;
 
     const auto result = GetSecurityInfo(
-        GetCurrentProcess(), // process handle (result of GetCurrentProcess always has PROCESS_ALL_ACCESS rights)
-        SE_KERNEL_OBJECT, // object type
+        GetCurrentProcess(),       // process handle (result of GetCurrentProcess always has PROCESS_ALL_ACCESS rights)
+        SE_KERNEL_OBJECT,          // object type
         DACL_SECURITY_INFORMATION, // security info
-        nullptr, // owner
-        nullptr, // group
+        nullptr,                   // owner
+        nullptr,                   // group
         &dacl,
         nullptr, // sacl
-        nullptr // security descriptor
+        nullptr  // security descriptor
     );
 
     if (result != ERROR_SUCCESS)
@@ -271,11 +271,11 @@ auto AddProcessQueryLimitedInformationToDacl(PACL dacl) -> WinLocalPtr<ACL>
 void SetCurrentProcessDacl(PACL dacl)
 {
     const auto result = SetSecurityInfo(
-        GetCurrentProcess(), // process handle (result of GetCurrentProcess always has PROCESS_ALL_ACCESS rights)
-        SE_KERNEL_OBJECT, // object type
+        GetCurrentProcess(),       // process handle (result of GetCurrentProcess always has PROCESS_ALL_ACCESS rights)
+        SE_KERNEL_OBJECT,          // object type
         DACL_SECURITY_INFORMATION, // security info
-        nullptr, // owner
-        nullptr, // group
+        nullptr,                   // owner
+        nullptr,                   // group
         dacl,
         nullptr // sacl
     );

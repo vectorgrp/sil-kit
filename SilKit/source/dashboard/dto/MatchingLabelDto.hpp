@@ -11,7 +11,7 @@
 namespace SilKit {
 namespace Dashboard {
 
-ENUM(LabelKind, v_int32, //
+ENUM(LabelKind, v_int32,             //
      VALUE(Optional, 1, "optional"), //
      VALUE(Mandatory, 2, "mandatory"))
 

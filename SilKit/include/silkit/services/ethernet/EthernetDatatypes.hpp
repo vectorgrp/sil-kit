@@ -34,9 +34,9 @@ struct EthernetFrame
 struct EthernetFrameEvent
 {
     std::chrono::nanoseconds timestamp; //!< Reception time
-    EthernetFrame frame; //!< The Ethernet frame
-    TransmitDirection direction; //!< Receive/Transmit direction
-    void* userContext; //!< Optional pointer provided by user when sending the frame
+    EthernetFrame frame;                //!< The Ethernet frame
+    TransmitDirection direction;        //!< Receive/Transmit direction
+    void* userContext;                  //!< Optional pointer provided by user when sending the frame
 };
 
 using EthernetTransmitStatusMask = SilKit_EthernetTransmitStatus;
@@ -64,8 +64,8 @@ enum class EthernetTransmitStatus : EthernetTransmitStatusMask
 struct EthernetFrameTransmitEvent
 {
     std::chrono::nanoseconds timestamp; //!< Timestamp of the Ethernet acknowledge.
-    EthernetTransmitStatus status; //!< Status of the EthernetTransmitRequest.
-    void* userContext; //!< Optional pointer provided by user when sending the frame
+    EthernetTransmitStatus status;      //!< Status of the EthernetTransmitRequest.
+    void* userContext;                  //!< Optional pointer provided by user when sending the frame
 };
 
 //! \brief State of the Ethernet controller
@@ -83,14 +83,14 @@ enum class EthernetState : SilKit_EthernetState
 struct EthernetStateChangeEvent
 {
     std::chrono::nanoseconds timestamp; //!< Timestamp of the state change.
-    EthernetState state; //!< State of the Ethernet controller.
+    EthernetState state;                //!< State of the Ethernet controller.
 };
 
 //! \brief A bitrate change event of the Ethernet controller
 struct EthernetBitrateChangeEvent
 {
     std::chrono::nanoseconds timestamp; //!< Timestamp of the state change.
-    EthernetBitrate bitrate; //!< Bit rate in kBit/sec of the link when in state LinkUp, otherwise zero.
+    EthernetBitrate bitrate;            //!< Bit rate in kBit/sec of the link when in state LinkUp, otherwise zero.
 };
 
 } // namespace Ethernet

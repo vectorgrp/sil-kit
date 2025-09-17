@@ -53,7 +53,6 @@ protected:
 protected:
     ITest_ThreeEthController()
     {
-
         testMessages.resize(5);
         for (auto index = 0u; index < testMessages.size(); index++)
         {

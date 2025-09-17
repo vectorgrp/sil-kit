@@ -62,10 +62,10 @@ const LinDataLength LinDataLengthUnknown = SilKit_LinDataLengthUnknown;
  */
 struct LinFrame
 {
-    LinId id{0}; //!< Lin Identifier
+    LinId id{0};                                               //!< Lin Identifier
     LinChecksumModel checksumModel{LinChecksumModel::Unknown}; //!< Checksum Model
-    LinDataLength dataLength{0}; //!< Data length
-    std::array<uint8_t, 8> data{}; //!< The actual payload
+    LinDataLength dataLength{0};                               //!< Data length
+    std::array<uint8_t, 8> data{};                             //!< The actual payload
 };
 
 //! \brief Create a LinFrame that corresponds to a Go-To-Sleep command
@@ -283,7 +283,7 @@ struct LinFrameStatusEvent
 struct LinWakeupEvent
 {
     std::chrono::nanoseconds timestamp; //!< Time of the event.
-    TransmitDirection direction; //!< The direction of the wakeup pulse.
+    TransmitDirection direction;        //!< The direction of the wakeup pulse.
 };
 
 //! \brief A LIN wakeup event delivered in the \ref ILinController::GoToSleepHandler.
@@ -297,7 +297,7 @@ struct LinGoToSleepEvent
 struct LinSendFrameHeaderRequest
 {
     std::chrono::nanoseconds timestamp; //!< Time of the header request.
-    LinId id; //!< The LinId of the header to be transmitted
+    LinId id;                           //!< The LinId of the header to be transmitted
 };
 
 // ================================================================================
