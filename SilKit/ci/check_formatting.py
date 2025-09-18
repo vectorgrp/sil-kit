@@ -69,7 +69,7 @@ def main():
 
             for file in files:
                 totalFiles = totalFiles + 1
-                formatResult = subprocess.run([CLANG_FORMAT, '--Werror', '-i', '--style=file', file], capture_output=True, encoding='utf-8')
+                formatResult = subprocess.run([CLANG_FORMAT, '--Werror', '--dry-run', '-i', '--style=file', file], capture_output=True, encoding='utf-8')
                 if formatResult.returncode != 0:
                     formattingCorrect = False
                     totalWarnings = totalWarnings + 1
