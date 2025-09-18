@@ -237,8 +237,7 @@ void MergeCacheSet(const std::set<T>& cache, std::vector<T>& root)
 // ================================================================================
 
 template <typename T>
-void CacheNonDefault(const T& defaultValue, const T& value, const std::string& configName,
-                     std::optional<T>& cacheValue)
+void CacheNonDefault(const T& defaultValue, const T& value, const std::string& configName, std::optional<T>& cacheValue)
 {
     if (defaultValue != value)
     {
@@ -352,10 +351,9 @@ void Cache(const TimeSynchronization& root, TimeSynchronizationCache& cache)
 void Cache(const Metrics& root, MetricsCache& cache)
 {
     static const Metrics defaultObject;
-    if(root.collectFromRemote.has_value())
+    if (root.collectFromRemote.has_value())
     {
-        CacheNonDefault(false, root.collectFromRemote.value(), "Metrics.CollectFromRemote",
-                        cache.collectFromRemote);
+        CacheNonDefault(false, root.collectFromRemote.value(), "Metrics.CollectFromRemote", cache.collectFromRemote);
     }
 
     for (const auto& sink : root.sinks)
@@ -524,7 +522,7 @@ void MergeTimeSynchronizationCache(const TimeSynchronizationCache& cache, TimeSy
 
 void MergeMetricsCache(const MetricsCache& cache, Metrics& metrics)
 {
-    if(metrics.collectFromRemote.has_value())
+    if (metrics.collectFromRemote.has_value())
     {
         MergeCacheField(cache.collectFromRemote, metrics.collectFromRemote.value());
     }
@@ -657,7 +655,7 @@ auto PaticipantConfigurationWithIncludes(const std::string& text, struct ConfigI
     -> SilKit::Config::ParticipantConfiguration
 {
     auto configuration = SilKit::Config::Deserialize<ParticipantConfiguration>(text);
-    if(configuration.schemaVersion.empty())
+    if (configuration.schemaVersion.empty())
     {
         configuration.schemaVersion = SilKit::Config::GetSchemaVersion();
     }

@@ -37,22 +37,26 @@ namespace Can {
 
 struct CanFrameRequest
 {
-    SilKit::Services::Can::CanFrame frame; //!< The incoming CAN Frame
-    void* userContext; //!< Optional pointer provided by user when sending the frame
+    //! The incoming CAN Frame
+    SilKit::Services::Can::CanFrame frame;
+    //! Optional pointer provided by user when sending the frame
+    void* userContext;
 };
 struct CanConfigureBaudrate
 {
-    uint32_t baudRate; //!< Specifies the baud rate of the controller in bps (range 0..2000000).
-    uint32_t
-        fdBaudRate; //!< Specifies the data segment baud rate of the controller in bps for CAN FD (range 0..16000000).
-    uint32_t
-        xlBaudRate; //!< Specifies the data segment baud rate of the controller in bps for CAN XL (range 0..16000000).
+    //! Specifies the baud rate of the controller in bps (range 0..2000000).
+    uint32_t baudRate;
+    //! Specifies the data segment baud rate of the controller in bps for CAN FD (range 0..16000000).
+    uint32_t fdBaudRate;
+    //! Specifies the data segment baud rate of the controller in bps for CAN XL (range 0..16000000).
+    uint32_t xlBaudRate;
 };
 struct CanControllerMode
 {
-    SilKit_Experimental_NetSim_CanControllerModeFlags
-        canControllerModeFlags; //!< Flag for resetting the error handling and/or canceling all outstanding transmit requests
-    SilKit::Services::Can::CanControllerState state; //!< State that the CAN controller should reach.
+    //! Flag for resetting the error handling and/or canceling all outstanding transmit requests
+    SilKit_Experimental_NetSim_CanControllerModeFlags canControllerModeFlags;
+    //! State that the CAN controller should reach.
+    SilKit::Services::Can::CanControllerState state;
 };
 
 } // namespace Can
@@ -98,12 +102,18 @@ struct FlexrayControllerConfig
 
 enum class FlexrayChiCommand : uint8_t
 {
-    RUN = SilKit_FlexrayChiCommand_RUN, //!< ChiCommand RUN
-    DEFERRED_HALT = SilKit_FlexrayChiCommand_DEFERRED_HALT, //!< ChiCommand DEFERRED_HALT
-    FREEZE = SilKit_FlexrayChiCommand_FREEZE, //!< ChiCommand FREEZE
-    ALLOW_COLDSTART = SilKit_FlexrayChiCommand_ALLOW_COLDSTART, //!< ChiCommand ALLOW_COLDSTART
-    ALL_SLOTS = SilKit_FlexrayChiCommand_ALL_SLOTS, //!< ChiCommand ALL_SLOTS
-    WAKEUP = SilKit_FlexrayChiCommand_WAKEUP //!< ChiCommand WAKEUP
+    //! ChiCommand RUN
+    RUN = SilKit_FlexrayChiCommand_RUN,
+    //! ChiCommand DEFERRED_HALT
+    DEFERRED_HALT = SilKit_FlexrayChiCommand_DEFERRED_HALT,
+    //! ChiCommand FREEZE
+    FREEZE = SilKit_FlexrayChiCommand_FREEZE,
+    //! ChiCommand ALLOW_COLDSTART
+    ALLOW_COLDSTART = SilKit_FlexrayChiCommand_ALLOW_COLDSTART,
+    //! ChiCommand ALL_SLOTS
+    ALL_SLOTS = SilKit_FlexrayChiCommand_ALL_SLOTS,
+    //! ChiCommand WAKEUP
+    WAKEUP = SilKit_FlexrayChiCommand_WAKEUP
 };
 
 struct FlexrayHostCommand
@@ -117,20 +127,25 @@ namespace Ethernet {
 
 struct EthernetFrameRequest
 {
-    SilKit::Services::Ethernet::EthernetFrame ethernetFrame; //!< The Ethernet frame
-    void* userContext; //!< Optional pointer provided by user when sending the frame
+    //! The Ethernet frame
+    SilKit::Services::Ethernet::EthernetFrame ethernetFrame;
+    //! Optional pointer provided by user when sending the frame
+    void* userContext;
 };
 
 //! \brief Mode for switching an Ethernet Controller on or off
 enum class EthernetMode : uint8_t
 {
-    Inactive = SilKit_EthernetControllerMode_Inactive, //!< The controller is inactive (default after reset).
-    Active = SilKit_EthernetControllerMode_Active, //!< The controller is active.
+    //! The controller is inactive (default after reset).
+    Inactive = SilKit_EthernetControllerMode_Inactive,
+    //! The controller is active.
+    Active = SilKit_EthernetControllerMode_Active,
 };
 
 struct EthernetControllerMode
 {
-    EthernetMode mode; //!< EthernetMode that the Ethernet controller should reach.
+    //! EthernetMode that the Ethernet controller should reach.
+    EthernetMode mode;
 };
 
 } // namespace Ethernet
@@ -139,20 +154,22 @@ namespace Lin {
 
 struct LinFrameRequest
 {
-    SilKit::Services::Lin::LinFrame
-        frame; //!< Provide the LIN ID, checksum model, expected data length and optional data.
-    SilKit::Services::Lin::LinFrameResponseType
-        responseType; //!< Determines whether to provide a frame response or not.
+    //! Provide the LIN ID, checksum model, expected data length and optional data.
+    SilKit::Services::Lin::LinFrame frame;
+    //! Determines whether to provide a frame response or not.
+    SilKit::Services::Lin::LinFrameResponseType responseType;
 };
 
 struct LinFrameHeaderRequest
 {
-    SilKit::Services::Lin::LinId id; //!< The LinId of the header to be transmitted
+    //! The LinId of the header to be transmitted
+    SilKit::Services::Lin::LinId id;
 };
 
 struct LinWakeupPulse
 {
-    std::chrono::nanoseconds timestamp; //!< Time of the WakeUp pulse. Only valid in detailed Simulation.
+    //! Time of the WakeUp pulse. Only valid in detailed Simulation.
+    std::chrono::nanoseconds timestamp;
 };
 
 struct LinControllerConfig
@@ -183,13 +200,16 @@ struct LinControllerConfig
 
 struct LinFrameResponseUpdate
 {
-    std::vector<SilKit::Services::Lin::LinFrameResponse> frameResponses; //!< Vector of new FrameResponses.
+    //! Vector of new FrameResponses.
+    std::vector<SilKit::Services::Lin::LinFrameResponse> frameResponses;
 };
 
 struct LinControllerStatusUpdate
 {
-    std::chrono::nanoseconds timestamp; //!< Time of the controller status change.
-    SilKit::Services::Lin::LinControllerStatus status; //!< The new controller status
+    //! Time of the controller status change.
+    std::chrono::nanoseconds timestamp;
+    //! The new controller status
+    SilKit::Services::Lin::LinControllerStatus status;
 };
 
 } // namespace Lin

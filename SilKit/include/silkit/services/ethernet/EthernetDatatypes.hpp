@@ -27,16 +27,21 @@ using EthernetBitrate = uint32_t;
 //! \brief An Ethernet frame (layer 2)
 struct EthernetFrame
 {
-    Util::Span<const uint8_t> raw; //!< The Ethernet raw frame without the frame check sequence
+    //! The Ethernet raw frame without the frame check sequence
+    Util::Span<const uint8_t> raw;
 };
 
 //! \brief An Ethernet frame including the raw frame, Transmit ID and timestamp
 struct EthernetFrameEvent
 {
-    std::chrono::nanoseconds timestamp; //!< Reception time
-    EthernetFrame frame; //!< The Ethernet frame
-    TransmitDirection direction; //!< Receive/Transmit direction
-    void* userContext; //!< Optional pointer provided by user when sending the frame
+    //! Reception time
+    std::chrono::nanoseconds timestamp;
+    //! The Ethernet frame
+    EthernetFrame frame;
+    //! Receive/Transmit direction
+    TransmitDirection direction;
+    //! Optional pointer provided by user when sending the frame
+    void* userContext;
 };
 
 using EthernetTransmitStatusMask = SilKit_EthernetTransmitStatus;
@@ -63,9 +68,12 @@ enum class EthernetTransmitStatus : EthernetTransmitStatusMask
 //! \brief Publishes status of the simulated Ethernet controller
 struct EthernetFrameTransmitEvent
 {
-    std::chrono::nanoseconds timestamp; //!< Timestamp of the Ethernet acknowledge.
-    EthernetTransmitStatus status; //!< Status of the EthernetTransmitRequest.
-    void* userContext; //!< Optional pointer provided by user when sending the frame
+    //! Timestamp of the Ethernet acknowledge.
+    std::chrono::nanoseconds timestamp;
+    //! Status of the EthernetTransmitRequest.
+    EthernetTransmitStatus status;
+    //! Optional pointer provided by user when sending the frame
+    void* userContext;
 };
 
 //! \brief State of the Ethernet controller
@@ -82,15 +90,19 @@ enum class EthernetState : SilKit_EthernetState
 //! \brief A state change event of the Ethernet controller
 struct EthernetStateChangeEvent
 {
-    std::chrono::nanoseconds timestamp; //!< Timestamp of the state change.
-    EthernetState state; //!< State of the Ethernet controller.
+    //! Timestamp of the state change.
+    std::chrono::nanoseconds timestamp;
+    //! State of the Ethernet controller.
+    EthernetState state;
 };
 
 //! \brief A bitrate change event of the Ethernet controller
 struct EthernetBitrateChangeEvent
 {
-    std::chrono::nanoseconds timestamp; //!< Timestamp of the state change.
-    EthernetBitrate bitrate; //!< Bit rate in kBit/sec of the link when in state LinkUp, otherwise zero.
+    //! Timestamp of the state change.
+    std::chrono::nanoseconds timestamp;
+    //! Bit rate in kBit/sec of the link when in state LinkUp, otherwise zero.
+    EthernetBitrate bitrate;
 };
 
 } // namespace Ethernet

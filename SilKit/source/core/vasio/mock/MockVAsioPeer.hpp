@@ -24,7 +24,6 @@ namespace Core {
 
 struct MockVAsioPeer : IVAsioPeer
 {
-
     // IVAsioPeer
 
     MOCK_METHOD(void, SendSilKitMsg, (SerializedMessage), (override));
@@ -40,7 +39,7 @@ struct MockVAsioPeer : IVAsioPeer
     MOCK_METHOD(void, EnableAggregation, (), (override));
     MOCK_METHOD(void, SetProtocolVersion, (ProtocolVersion), (override));
     MOCK_METHOD(ProtocolVersion, GetProtocolVersion, (), (const, override));
-    MOCK_METHOD(void, InitializeMetrics, (VSilKit::IMetricsManager*), (override));
+    MOCK_METHOD(void, InitializeMetrics, (VSilKit::IMetricsManager *), (override));
 
     // IServiceEndpoint (via IVAsioPeer)
 

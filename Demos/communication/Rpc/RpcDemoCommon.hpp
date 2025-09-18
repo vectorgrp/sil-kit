@@ -156,4 +156,4 @@ bool EvaluateCallStatus(RpcCallResultEvent callResult, ILogger* logger)
     return isSuccessful;
 }
 
-} // namespace PubSubDemoCommon
+} // namespace RpcDemoCommon

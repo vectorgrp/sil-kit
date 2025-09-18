@@ -8,7 +8,6 @@
 
 struct MockInputStream : public oatpp::data::stream::InputStream
 {
-
     MOCK_METHOD(void, setInputStreamIOMode, (oatpp::data::stream::IOMode), (override));
 
     MOCK_METHOD(oatpp::data::stream::IOMode, getInputStreamIOMode, (), (override));

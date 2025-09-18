@@ -55,7 +55,7 @@ typedef struct
 {
     SilKit_StructHeader structHeader; //!< The interface id that specifies which version of this struct was obtained
     SilKit_NanosecondsTime timestamp; //!< Timestamp of the state change event
-    SilKit_EthernetState state; //!< New state of the Ethernet controller
+    SilKit_EthernetState state;       //!< New state of the Ethernet controller
 } SilKit_EthernetStateChangeEvent;
 
 typedef uint32_t SilKit_EthernetBitrate; //!< Bitrate in kBit/sec
@@ -64,7 +64,7 @@ typedef struct
 {
     SilKit_StructHeader structHeader; //!< The interface id that specifies which version of this struct was obtained
     SilKit_NanosecondsTime timestamp; //!< Timestamp of the bitrate change event
-    SilKit_EthernetBitrate bitrate; //!< New bitrate in kBit/sec
+    SilKit_EthernetBitrate bitrate;   //!< New bitrate in kBit/sec
 } SilKit_EthernetBitrateChangeEvent;
 
 //! A raw Ethernet frame
@@ -77,18 +77,18 @@ typedef struct
 
 typedef struct
 {
-    SilKit_StructHeader structHeader; //!< The interface id that specifies which version of this struct was obtained
-    SilKit_NanosecondsTime timestamp; //!< Send time
+    SilKit_StructHeader structHeader;    //!< The interface id that specifies which version of this struct was obtained
+    SilKit_NanosecondsTime timestamp;    //!< Send time
     SilKit_EthernetFrame* ethernetFrame; //!< The raw Ethernet frame
-    SilKit_Direction direction; //!< Receive/Transmit direction
-    void* userContext; //!< Optional pointer provided by user when sending the frame
+    SilKit_Direction direction;          //!< Receive/Transmit direction
+    void* userContext;                   //!< Optional pointer provided by user when sending the frame
 } SilKit_EthernetFrameEvent;
 
 struct SilKit_EthernetFrameTransmitEvent
 {
     SilKit_StructHeader structHeader; //!< The interface id that specifies which version of this struct was obtained
     void* userContext; //!< Value that was provided by user in corresponding parameter on send of Ethernet frame
-    SilKit_NanosecondsTime timestamp; //!< Reception time
+    SilKit_NanosecondsTime timestamp;     //!< Reception time
     SilKit_EthernetTransmitStatus status; //!< Status of the EthernetTransmitRequest
 };
 typedef struct SilKit_EthernetFrameTransmitEvent SilKit_EthernetFrameTransmitEvent;

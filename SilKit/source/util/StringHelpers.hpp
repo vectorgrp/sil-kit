@@ -28,7 +28,7 @@ auto LowerCase(std::string input) -> std::string;
 
 auto PrintableString(const std::string& input) -> std::string;
 
-auto SplitString(std::string_view input, const std::string_view& separator)  -> std::vector<std::string>;
+auto SplitString(std::string_view input, const std::string_view& separator) -> std::vector<std::string>;
 
 } // namespace Util
 } // namespace SilKit

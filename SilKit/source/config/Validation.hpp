@@ -13,7 +13,7 @@ inline namespace V1 {
 
 void Validate(const SilKit::Config::V1::ParticipantConfiguration& configuration);
 
-} // namespace v1
+} // namespace V1
 
 } // namespace Config
 } // namespace SilKit

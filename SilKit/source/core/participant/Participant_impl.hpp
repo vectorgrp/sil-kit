@@ -57,7 +57,6 @@
 #include "fmt/ranges.h"
 
 
-
 namespace SilKit {
 namespace Core {
 
@@ -529,7 +528,6 @@ auto Participant<SilKitConnectionT>::CreateDataPublisher(const std::string& cano
 
     if (GetLogger()->GetLogLevel() <= Logging::Level::Trace)
     {
-
         Logging::LoggerMessage lm{_logger.get(), Logging::Level::Trace};
         lm.SetMessage("Created controller");
         lm.SetKeyValue(Logging::Keys::controllerType, supplementalData[SilKit::Core::Discovery::controllerType]);
@@ -2007,7 +2005,7 @@ void Participant<SilKitConnectionT>::CreateParticipantAttributeMetrics()
         GetMetricsManager()->GetAttribute({"SilKit", "Process", "Executable"})->Add(ee.executable);
         GetMetricsManager()->GetAttribute({"SilKit", "Process", "Username"})->Add(ee.username);
     }
- 
+
     GetMetricsManager()
         ->GetAttribute({"SilKit", "Participant", "JsonConfig"})
         ->Add(SilKit::Config::SerializeAsJson(_participantConfig));
@@ -2022,11 +2020,9 @@ auto Participant<SilKitConnectionT>::MakeTimerThread() -> std::unique_ptr<IMetri
         return nullptr;
     }
 
-    return std::make_unique<VSilKit::MetricsTimerThread>(_participantConfig.experimental.metrics.updateInterval,
-        [this] { ExecuteDeferred([this] {
-            GetMetricsManager()->SubmitUpdates();
-            });
-        });
+    return std::make_unique<VSilKit::MetricsTimerThread>(
+        _participantConfig.experimental.metrics.updateInterval,
+        [this] { ExecuteDeferred([this] { GetMetricsManager()->SubmitUpdates(); }); });
 }
 
 

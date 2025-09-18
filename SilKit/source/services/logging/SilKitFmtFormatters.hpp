@@ -34,8 +34,10 @@
 
 #include "ParticipantConfiguration.hpp"
 
-#include "TestDataTypes.hpp" // for operator<<
-#include "IServiceEndpoint.hpp" // for operator<<(... ServiceDescriptor)
+// for operator<<
+#include "TestDataTypes.hpp"
+// for operator<<(... ServiceDescriptor)
+#include "IServiceEndpoint.hpp"
 
 
 #define MAKE_FORMATTER(TYPE) \

@@ -18,7 +18,8 @@ namespace Ethernet {
 
 struct WireEthernetFrame
 {
-    Util::SharedVector<uint8_t> raw; //!< The Ethernet raw frame without the frame check sequence
+    //! The Ethernet raw frame without the frame check sequence
+    Util::SharedVector<uint8_t> raw;
 };
 
 inline auto ToEthernetFrame(const WireEthernetFrame& wireEthernetFrame) -> EthernetFrame;
@@ -26,10 +27,14 @@ inline auto MakeWireEthernetFrame(const EthernetFrame& ethernetFrame) -> WireEth
 
 struct WireEthernetFrameEvent
 {
-    std::chrono::nanoseconds timestamp; //!< Reception time
-    WireEthernetFrame frame; //!< The Ethernet frame
-    TransmitDirection direction; //!< Receive/Transmit direction
-    void* userContext; //!< Optional pointer provided by user when sending the frame
+    //! Reception time
+    std::chrono::nanoseconds timestamp;
+    //! The Ethernet frame
+    WireEthernetFrame frame;
+    //! Receive/Transmit direction
+    TransmitDirection direction;
+    //! Optional pointer provided by user when sending the frame
+    void* userContext;
 };
 
 inline auto ToEthernetFrameEvent(const WireEthernetFrameEvent& wireEthernetFrameEvent) -> EthernetFrameEvent;
@@ -38,22 +43,28 @@ inline auto MakeWireEthernetFrameEvent(const EthernetFrameEvent& ethernetFrameEv
 //! \brief Publishes status of the simulated Ethernet controller
 struct EthernetStatus
 {
-    std::chrono::nanoseconds timestamp; //!< Timestamp of the status change.
-    EthernetState state; //!< State of the Ethernet controller.
-    EthernetBitrate bitrate; //!< Bit rate in kBit/sec of the link when in state LinkUp, otherwise zero.
+    //! Timestamp of the status change.
+    std::chrono::nanoseconds timestamp;
+    //! State of the Ethernet controller.
+    EthernetState state;
+    //! Bit rate in kBit/sec of the link when in state LinkUp, otherwise zero.
+    EthernetBitrate bitrate;
 };
 
 //! \brief Mode for switching an Ethernet Controller on or off
 enum class EthernetMode : uint8_t
 {
-    Inactive = 0, //!< The controller is inactive (default after reset).
-    Active = 1, //!< The controller is active.
+    //! The controller is inactive (default after reset).
+    Inactive = 0,
+    //! The controller is active.
+    Active = 1,
 };
 
 //! \brief Set the Mode of the Ethernet Controller.
 struct EthernetSetMode
 {
-    EthernetMode mode; //!< EthernetMode that the Ethernet controller should reach.
+    //! EthernetMode that the Ethernet controller should reach.
+    EthernetMode mode;
 };
 
 inline std::string to_string(const WireEthernetFrame& msg);

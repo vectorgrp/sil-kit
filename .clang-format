@@ -16,7 +16,7 @@ AlignConsecutiveDeclarations: false
 AlignEscapedNewlines: DontAlign
 AlignOperands:   true
 
-AlignTrailingComments: false
+AlignTrailingComments: true
 # > clang-format-13, looks weird
 #    Kind: Leave
 #    OverEmptyLines: 2

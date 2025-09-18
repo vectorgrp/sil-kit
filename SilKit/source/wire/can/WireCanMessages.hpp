@@ -19,16 +19,22 @@ namespace Can {
 struct WireCanFrame
 {
     // CAN frame content
-    uint32_t canId; //!< CAN Identifier
-    uint32_t flags; //!< CAN Arbitration and Control Field Flags
+    //! CAN Identifier
+    uint32_t canId;
+    //! CAN Arbitration and Control Field Flags
+    uint32_t flags;
     //! \brief Data Length Code - describes the length of the dataField
     //! The acceptable bit-patterns and their semantics differ between CAN, CAN FD and CAN XL. The user is responsible
     //! for setting this field correctly. Please consult the CAN specifications for further information.
     uint16_t dlc;
-    uint8_t sdt; //!< SDU type - describes the structure of the frames Data Field content (for XL Format only)
-    uint8_t vcid; //!< Virtual CAN network ID (for XL Format only)
-    uint32_t af; //!< Acceptance field (for XL Format only)
-    Util::SharedVector<uint8_t> dataField; //!< The raw CAN data field
+    //! SDU type - describes the structure of the frames Data Field content (for XL Format only)
+    uint8_t sdt;
+    //! Virtual CAN network ID (for XL Format only)
+    uint8_t vcid;
+    //! Acceptance field (for XL Format only)
+    uint32_t af;
+    //! The raw CAN data field
+    Util::SharedVector<uint8_t> dataField;
 };
 
 inline auto ToCanFrame(const WireCanFrame& wireCanFrame) -> CanFrame;
@@ -38,10 +44,14 @@ inline auto MakeWireCanFrame(const CanFrame& canFrame) -> WireCanFrame;
  */
 struct WireCanFrameEvent
 {
-    std::chrono::nanoseconds timestamp; //!< Send time
-    WireCanFrame frame; //!< The incoming CAN Frame
-    TransmitDirection direction; //!< Receive/Transmit direction
-    void* userContext; //!< Optional pointer provided by user when sending the frame
+    //! Send time
+    std::chrono::nanoseconds timestamp;
+    //! The incoming CAN Frame
+    WireCanFrame frame;
+    //! Receive/Transmit direction
+    TransmitDirection direction;
+    //! Optional pointer provided by user when sending the frame
+    void* userContext;
 };
 
 inline auto ToCanFrameEvent(const WireCanFrameEvent& wireCanFrameEvent) -> CanFrameEvent;
@@ -51,20 +61,24 @@ inline auto MakeWireCanFrameEvent(const CanFrameEvent& canFrameEvent) -> WireCan
  */
 struct CanControllerStatus
 {
-    std::chrono::nanoseconds timestamp; //!< Timestamp of the status change
-    CanControllerState controllerState; //!< General State of the CAN controller
-    CanErrorState errorState; //!< State of Error Handling
+    //! Timestamp of the status change
+    std::chrono::nanoseconds timestamp;
+    //! General State of the CAN controller
+    CanControllerState controllerState;
+    //! State of Error Handling
+    CanErrorState errorState;
 };
 
 /*! \brief The baud rate, sent to the simulator
  */
 struct CanConfigureBaudrate
 {
-    uint32_t baudRate; //!< Specifies the baud rate of the controller in bps (range 0..2000000).
-    uint32_t
-        fdBaudRate; //!< Specifies the data segment baud rate of the controller in bps for CAN FD (range 0..16000000).
-    uint32_t
-        xlBaudRate; //!< Specifies the data segment baud rate of the controller in bps for CAN XL (range 0..16000000).
+    //! Specifies the baud rate of the controller in bps (range 0..2000000).
+    uint32_t baudRate;
+    //! Specifies the data segment baud rate of the controller in bps for CAN FD (range 0..16000000).
+    uint32_t fdBaudRate;
+    //! Specifies the data segment baud rate of the controller in bps for CAN XL (range 0..16000000).
+    uint32_t xlBaudRate;
 };
 
 /*! \brief The CAN controller mode, sent to the simulator
@@ -73,11 +87,13 @@ struct CanSetControllerMode
 {
     struct Flags
     {
-        uint8_t resetErrorHandling : 1; //!< Reset the error counters to zero and the error state to error active.
-        uint8_t
-            cancelTransmitRequests : 1; //!< Cancel all outstanding transmit requests (flush transmit queue of controller).
+        //! Reset the error counters to zero and the error state to error active.
+        uint8_t resetErrorHandling : 1;
+        //! Cancel all outstanding transmit requests (flush transmit queue of controller).
+        uint8_t cancelTransmitRequests : 1;
     } flags;
-    CanControllerState mode; //!< State that the CAN controller should reach.
+    //! State that the CAN controller should reach.
+    CanControllerState mode;
 };
 
 inline std::string to_string(const WireCanFrame& msg);

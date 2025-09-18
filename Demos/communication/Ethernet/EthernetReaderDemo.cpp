@@ -5,7 +5,7 @@
 #include "ApplicationBase.hpp"
 #include "EthernetDemoCommon.hpp"
 
-class EthernetReader: public ApplicationBase
+class EthernetReader : public ApplicationBase
 {
 public:
     // Inherit constructors
@@ -38,10 +38,12 @@ private:
     {
         _ethernetController = GetParticipant()->CreateEthernetController("EthernetController1", _networkName);
 
-        _ethernetController->AddFrameTransmitHandler([this](IEthernetController* /*ctrl*/, const EthernetFrameTransmitEvent& ack) {
+        _ethernetController->AddFrameTransmitHandler(
+            [this](IEthernetController* /*ctrl*/, const EthernetFrameTransmitEvent& ack) {
             EthernetDemoCommon::FrameTransmitHandler(ack, GetLogger());
         });
-        _ethernetController->AddFrameHandler([this](IEthernetController* /*ctrl*/, const EthernetFrameEvent& frameEvent) {
+        _ethernetController->AddFrameHandler(
+            [this](IEthernetController* /*ctrl*/, const EthernetFrameEvent& frameEvent) {
             EthernetDemoCommon::FrameHandler(frameEvent, GetLogger(), _printHex);
         });
     }
@@ -50,7 +52,7 @@ private:
     {
         _ethernetController->Activate();
     }
-    
+
     void DoWorkSync(std::chrono::nanoseconds /*now*/) override
     {
         // NOP
@@ -68,7 +70,6 @@ int main(int argc, char** argv)
     args.participantName = "EthernetReader";
     EthernetReader app{args};
     app.SetupCommandLineArgs(argc, argv, "SIL Kit Demo - Ethernet: Log received frames");
-    
+
     return app.Run();
 }
-
