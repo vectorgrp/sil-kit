@@ -61,8 +61,8 @@ private:
 
         // Fdf = FD Format Indicator
         // Brs = Bit Rate Switch (for FD Format only)
-        canFrame.flags = static_cast<CanFrameFlagMask>(CanFrameFlag::Fdf)
-                         | static_cast<CanFrameFlagMask>(CanFrameFlag::Brs);
+        canFrame.flags =
+            static_cast<CanFrameFlagMask>(CanFrameFlag::Fdf) | static_cast<CanFrameFlagMask>(CanFrameFlag::Brs);
 
         // Build a payload with the frame Id
         std::stringstream payloadBuilder;

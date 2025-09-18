@@ -16,17 +16,17 @@ SILKIT_BEGIN_DECLS
 */
 typedef uint32_t SilKit_LoggingLevel;
 //! Detailed debug-level messages
-#define SilKit_LoggingLevel_Trace ((uint32_t)0)       
+#define SilKit_LoggingLevel_Trace ((uint32_t)0)
 //! Normal debug-level messages
-#define SilKit_LoggingLevel_Debug ((uint32_t)1)       
+#define SilKit_LoggingLevel_Debug ((uint32_t)1)
 //! Informational content
-#define SilKit_LoggingLevel_Info ((uint32_t)2)        
+#define SilKit_LoggingLevel_Info ((uint32_t)2)
 //! Warnings
-#define SilKit_LoggingLevel_Warn ((uint32_t)3)        
+#define SilKit_LoggingLevel_Warn ((uint32_t)3)
 //! Non-critical errors
-#define SilKit_LoggingLevel_Error ((uint32_t)4)       
+#define SilKit_LoggingLevel_Error ((uint32_t)4)
 //! Critical errors
-#define SilKit_LoggingLevel_Critical ((uint32_t)5)    
+#define SilKit_LoggingLevel_Critical ((uint32_t)5)
 //! Logging is disabled
 #define SilKit_LoggingLevel_Off ((uint32_t)0xffffffff)
 

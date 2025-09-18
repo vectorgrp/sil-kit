@@ -57,18 +57,18 @@ struct SilKit_Experimental_SimulatedNetworkFunctions
 
 struct SilKit_Experimental_NetSim_CanFrameRequest
 {
-//! The interface id specifying which version of this struct was obtained
+    //! The interface id specifying which version of this struct was obtained
     SilKit_StructHeader structHeader;
-//! The CAN Frame that corresponds to the meta data
-    SilKit_CanFrame* frame;          
-//! Optional pointer provided by user when sending the frame
-    void* userContext;               
+    //! The CAN Frame that corresponds to the meta data
+    SilKit_CanFrame* frame;
+    //! Optional pointer provided by user when sending the frame
+    void* userContext;
 };
 typedef struct SilKit_Experimental_NetSim_CanFrameRequest SilKit_Experimental_NetSim_CanFrameRequest;
 
 struct SilKit_Experimental_NetSim_CanConfigureBaudrate
 {
-//! The interface id specifying which version of this struct was obtained
+    //! The interface id specifying which version of this struct was obtained
     SilKit_StructHeader structHeader;
     uint32_t rate;
     uint32_t fdRate;
@@ -88,7 +88,7 @@ typedef int32_t SilKit_Experimental_NetSim_CanControllerModeFlags;
 
 struct SilKit_Experimental_NetSim_CanControllerMode
 {
-//! The interface id specifying which version of this struct was obtained
+    //! The interface id specifying which version of this struct was obtained
     SilKit_StructHeader structHeader;
     SilKit_Experimental_NetSim_CanControllerModeFlags canControllerModeFlags;
     SilKit_CanControllerState state;
@@ -109,7 +109,7 @@ struct SilKit_Experimental_SimulatedCanControllerFunctions
 
 struct SilKit_Experimental_NetSim_FlexrayHostCommand
 {
-//! The interface id specifying which version of this struct was obtained
+    //! The interface id specifying which version of this struct was obtained
     SilKit_StructHeader structHeader;
     SilKit_FlexrayChiCommand chiCommand;
 };
@@ -131,7 +131,7 @@ typedef struct SilKit_Experimental_NetSim_FlexrayControllerConfig SilKit_Experim
 
 struct SilKit_Experimental_NetSim_FlexrayTxBufferConfigUpdate
 {
-//! The interface id specifying which version of this struct was obtained
+    //! The interface id specifying which version of this struct was obtained
     SilKit_StructHeader structHeader;
     uint16_t txBufferIdx;
     SilKit_FlexrayTxBufferConfig* txBufferConfig;
@@ -170,10 +170,10 @@ struct SilKit_Experimental_SimulatedFlexRayControllerFunctions
 
 struct SilKit_Experimental_NetSim_EthernetFrameRequest
 {
-//! The interface id specifying which version of this struct was obtained
+    //! The interface id specifying which version of this struct was obtained
     SilKit_StructHeader structHeader;
     SilKit_EthernetFrame* ethernetFrame;
-//! Optional pointer provided by user when sending the frame
+    //! Optional pointer provided by user when sending the frame
     void* userContext;
 };
 typedef struct SilKit_Experimental_NetSim_EthernetFrameRequest SilKit_Experimental_NetSim_EthernetFrameRequest;
@@ -184,7 +184,7 @@ typedef uint8_t SilKit_EthernetControllerMode;
 
 struct SilKit_Experimental_NetSim_EthernetControllerMode
 {
-//! The interface id specifying which version of this struct was obtained
+    //! The interface id specifying which version of this struct was obtained
     SilKit_StructHeader structHeader;
     SilKit_EthernetControllerMode mode;
 };
@@ -208,7 +208,7 @@ typedef uint8_t SilKit_Experimental_NetSim_LinSimulationMode;
 
 struct SilKit_Experimental_NetSim_LinFrameRequest
 {
-//! The interface id specifying which version of this struct was obtained
+    //! The interface id specifying which version of this struct was obtained
     SilKit_StructHeader structHeader;
     SilKit_LinFrame* frame;
     SilKit_LinFrameResponseType responseType;
@@ -217,7 +217,7 @@ typedef struct SilKit_Experimental_NetSim_LinFrameRequest SilKit_Experimental_Ne
 
 struct SilKit_Experimental_NetSim_LinFrameHeaderRequest
 {
-//! The interface id specifying which version of this struct was obtained
+    //! The interface id specifying which version of this struct was obtained
     SilKit_StructHeader structHeader;
     SilKit_LinId id;
 };
@@ -225,16 +225,16 @@ typedef struct SilKit_Experimental_NetSim_LinFrameHeaderRequest SilKit_Experimen
 
 struct SilKit_Experimental_NetSim_LinWakeupPulse
 {
-//! The interface id specifying which version of this struct was obtained
+    //! The interface id specifying which version of this struct was obtained
     SilKit_StructHeader structHeader;
-//! Timestamp of the wakeup pulse
+    //! Timestamp of the wakeup pulse
     SilKit_NanosecondsTime timestamp;
 };
 typedef struct SilKit_Experimental_NetSim_LinWakeupPulse SilKit_Experimental_NetSim_LinWakeupPulse;
 
 struct SilKit_Experimental_NetSim_LinControllerConfig
 {
-//! The interface id specifying which version of this struct was obtained
+    //! The interface id specifying which version of this struct was obtained
     SilKit_StructHeader structHeader;
     SilKit_LinControllerMode controllerMode;
     SilKit_LinBaudRate baudRate;
@@ -246,7 +246,7 @@ typedef struct SilKit_Experimental_NetSim_LinControllerConfig SilKit_Experimenta
 
 struct SilKit_Experimental_NetSim_LinFrameResponseUpdate
 {
-//! The interface id specifying which version of this struct was obtained
+    //! The interface id specifying which version of this struct was obtained
     SilKit_StructHeader structHeader;
     size_t numFrameResponses;
     SilKit_LinFrameResponse* frameResponses;
@@ -255,10 +255,10 @@ typedef struct SilKit_Experimental_NetSim_LinFrameResponseUpdate SilKit_Experime
 
 struct SilKit_Experimental_NetSim_LinControllerStatusUpdate
 {
-//! The interface id specifying which version of this struct was obtained
+    //! The interface id specifying which version of this struct was obtained
     SilKit_StructHeader structHeader;
     SilKit_LinControllerStatus status;
-//! Timestamp of the wakeup pulse
+    //! Timestamp of the wakeup pulse
     SilKit_NanosecondsTime timestamp;
 };
 typedef struct SilKit_Experimental_NetSim_LinControllerStatusUpdate

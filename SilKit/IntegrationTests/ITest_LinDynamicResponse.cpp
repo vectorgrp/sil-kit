@@ -131,9 +131,9 @@ struct TestResult
     bool gotoSleepReceived{false};
     bool gotoSleepSent{false};
     //! Number of received frames in slave
-    size_t numberReceived{0};        
+    size_t numberReceived{0};
     //! Number of received frames while in sleepMode
-    size_t numberReceivedInSleep{0}; 
+    size_t numberReceivedInSleep{0};
     std::vector<std::chrono::nanoseconds> sendTimes;
     std::vector<std::chrono::nanoseconds> receiveTimes;
     std::map<LinFrameStatus, std::vector<LinFrame>> receivedFrames;

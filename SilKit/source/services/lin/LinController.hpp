@@ -60,7 +60,7 @@ public:
     // ILinController
     void Init(LinControllerConfig config) override;
     void InitDynamic(
-// Experimental
+        // Experimental
         const SilKit::Experimental::Services::Lin::LinControllerDynamicConfig& config) override;
 
     auto Status() const noexcept -> LinControllerStatus override;
@@ -68,7 +68,7 @@ public:
     void SendFrame(LinFrame frame, LinFrameResponseType responseType) override;
     void SendFrameHeader(LinId linId) override;
 
-// Experimental
+    // Experimental
     void SendDynamicResponse(const LinFrame& frame) override;
 
     void UpdateTxBuffer(LinFrame frame) override;
@@ -79,18 +79,18 @@ public:
     void Wakeup() override;
     void WakeupInternal() override;
 
-// Exprimental
+    // Exprimental
     Experimental::Services::Lin::LinSlaveConfiguration GetSlaveConfiguration() override;
     HandlerId AddLinSlaveConfigurationHandler(
-// Exprimental
+        // Exprimental
         Experimental::Services::Lin::LinSlaveConfigurationHandler handler) override;
-// Exprimental
-    void RemoveLinSlaveConfigurationHandler(HandlerId handlerId) override;          
+    // Exprimental
+    void RemoveLinSlaveConfigurationHandler(HandlerId handlerId) override;
 
     auto AddFrameHeaderHandler(SilKit::Experimental::Services::Lin::LinFrameHeaderHandler handler)
-// Experimental
-        -> HandlerId override;                                  
-// Experimental
+        // Experimental
+        -> HandlerId override;
+    // Experimental
     void RemoveFrameHeaderHandler(HandlerId handlerId) override;
 
     HandlerId AddFrameStatusHandler(FrameStatusHandler handler) override;

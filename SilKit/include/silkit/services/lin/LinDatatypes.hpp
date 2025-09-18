@@ -62,14 +62,14 @@ const LinDataLength LinDataLengthUnknown = SilKit_LinDataLengthUnknown;
  */
 struct LinFrame
 {
-//! Lin Identifier
-    LinId id{0};                                              
-//! Checksum Model
+    //! Lin Identifier
+    LinId id{0};
+    //! Checksum Model
     LinChecksumModel checksumModel{LinChecksumModel::Unknown};
-//! Data length
-    LinDataLength dataLength{0};                              
-//! The actual payload
-    std::array<uint8_t, 8> data{};                            
+    //! Data length
+    LinDataLength dataLength{0};
+    //! The actual payload
+    std::array<uint8_t, 8> data{};
 };
 
 //! \brief Create a LinFrame that corresponds to a Go-To-Sleep command
@@ -278,7 +278,7 @@ enum class LinControllerStatus : SilKit_LinControllerStatus
 //! \brief A LIN frame status event delivered in the \ref ILinController::FrameStatusHandler.
 struct LinFrameStatusEvent
 {
-//! Time of the event.
+    //! Time of the event.
     std::chrono::nanoseconds timestamp;
     LinFrame frame;
     LinFrameStatus status;
@@ -287,16 +287,16 @@ struct LinFrameStatusEvent
 //! \brief A LIN wakeup event delivered in the \ref ILinController::WakeupHandler.
 struct LinWakeupEvent
 {
-//! Time of the event.
+    //! Time of the event.
     std::chrono::nanoseconds timestamp;
-//! The direction of the wakeup pulse.
-    TransmitDirection direction;       
+    //! The direction of the wakeup pulse.
+    TransmitDirection direction;
 };
 
 //! \brief A LIN wakeup event delivered in the \ref ILinController::GoToSleepHandler.
 struct LinGoToSleepEvent
 {
-//! Time of the event.
+    //! Time of the event.
     std::chrono::nanoseconds timestamp;
 };
 
@@ -304,10 +304,10 @@ struct LinGoToSleepEvent
 */
 struct LinSendFrameHeaderRequest
 {
-//! Time of the header request.
+    //! Time of the header request.
     std::chrono::nanoseconds timestamp;
-//! The LinId of the header to be transmitted
-    LinId id;                          
+    //! The LinId of the header to be transmitted
+    LinId id;
 };
 
 // ================================================================================

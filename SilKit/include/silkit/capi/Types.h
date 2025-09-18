@@ -44,23 +44,23 @@ typedef int32_t SilKit_ReturnCode;
 // exception and thrown in ThrowOnError.hpp.
 
 // SilKit::StateError
-#define SilKit_ReturnCode_WRONGSTATE ((SilKit_ReturnCode)8)         
+#define SilKit_ReturnCode_WRONGSTATE ((SilKit_ReturnCode)8)
 // SilKit::TypeConversionError
 #define SilKit_ReturnCode_TYPECONVERSIONERROR ((SilKit_ReturnCode)9)
 // SilKit::ConfigurationError
 #define SilKit_ReturnCode_CONFIGURATIONERROR ((SilKit_ReturnCode)10)
 // SilKit::ProtocolError
-#define SilKit_ReturnCode_PROTOCOLERROR ((SilKit_ReturnCode)11)     
+#define SilKit_ReturnCode_PROTOCOLERROR ((SilKit_ReturnCode)11)
 // SilKit::AssertionError
-#define SilKit_ReturnCode_ASSERTIONERROR ((SilKit_ReturnCode)12)    
+#define SilKit_ReturnCode_ASSERTIONERROR ((SilKit_ReturnCode)12)
 // SilKit::ExtensionError
-#define SilKit_ReturnCode_EXTENSIONERROR ((SilKit_ReturnCode)13)    
+#define SilKit_ReturnCode_EXTENSIONERROR ((SilKit_ReturnCode)13)
 // SilKit::LogicError
-#define SilKit_ReturnCode_LOGICERROR ((SilKit_ReturnCode)14)        
+#define SilKit_ReturnCode_LOGICERROR ((SilKit_ReturnCode)14)
 // SilKit::LengthError
-#define SilKit_ReturnCode_LENGTHERROR ((SilKit_ReturnCode)15)       
+#define SilKit_ReturnCode_LENGTHERROR ((SilKit_ReturnCode)15)
 // SilKit::OutOfRangeError
-#define SilKit_ReturnCode_OUTOFRANGEERROR ((SilKit_ReturnCode)16)   
+#define SilKit_ReturnCode_OUTOFRANGEERROR ((SilKit_ReturnCode)16)
 
 typedef uint64_t SilKit_NanosecondsTime;
 
@@ -84,7 +84,7 @@ typedef uint32_t SilKit_LabelKind;
 //! Undefined
 #define SilKit_LabelKind_Undefined ((uint32_t)0)
 //! If this label is available, its value must match
-#define SilKit_LabelKind_Optional ((uint32_t)1) 
+#define SilKit_LabelKind_Optional ((uint32_t)1)
 //! This label must be available and its value must match
 #define SilKit_LabelKind_Mandatory ((uint32_t)2)
 

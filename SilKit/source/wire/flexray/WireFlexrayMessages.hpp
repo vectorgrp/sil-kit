@@ -18,9 +18,9 @@ namespace Flexray {
 
 struct WireFlexrayFrame
 {
-//! Header flags, slot, crc, and cycle indidcators
-    FlexrayHeader header;               
-//! Raw payload containing 0 to 254 bytes
+    //! Header flags, slot, crc, and cycle indidcators
+    FlexrayHeader header;
+    //! Raw payload containing 0 to 254 bytes
     Util::SharedVector<uint8_t> payload;
 };
 
@@ -30,11 +30,11 @@ inline auto MakeWireFlexrayFrame(const FlexrayFrame& flexrayFrame) -> WireFlexra
 // Receive a frame from the Bus.
 struct WireFlexrayFrameEvent
 {
-//! Time at end of frame transmission
+    //! Time at end of frame transmission
     std::chrono::nanoseconds timestamp;
-//! FlexRay channel A or B. (Valid values: FlexrayChannel::A, FlexrayChannel::B).
+    //! FlexRay channel A or B. (Valid values: FlexrayChannel::A, FlexrayChannel::B).
     FlexrayChannel channel;
-//! Received FlexRay frame
+    //! Received FlexRay frame
     WireFlexrayFrame frame;
 };
 
@@ -43,13 +43,13 @@ inline auto MakeWireFlexrayFrameEvent(const FlexrayFrameEvent& flexrayFrameEvent
 
 struct WireFlexrayFrameTransmitEvent
 {
-//! Time at end of frame transmission
+    //! Time at end of frame transmission
     std::chrono::nanoseconds timestamp;
-//! Tx buffer, that was used for the transmission
-    uint16_t txBufferIndex;            
-//! FlexRay channel A or B. (Valid values: FlexrayChannel::A, FlexrayChannel::B).
+    //! Tx buffer, that was used for the transmission
+    uint16_t txBufferIndex;
+    //! FlexRay channel A or B. (Valid values: FlexrayChannel::A, FlexrayChannel::B).
     FlexrayChannel channel;
-//! Copy of the FlexRay frame that was successfully transmitted
+    //! Copy of the FlexRay frame that was successfully transmitted
     WireFlexrayFrame frame;
 };
 
@@ -87,18 +87,18 @@ struct FlexrayTxBufferConfigUpdate
 
 enum class FlexrayChiCommand : uint8_t
 {
-//! ChiCommand RUN
-    RUN,            
-//! ChiCommand DEFERRED_HALT
-    DEFERRED_HALT,  
-//! ChiCommand FREEZE
-    FREEZE,         
-//! ChiCommand ALLOW_COLDSTART
+    //! ChiCommand RUN
+    RUN,
+    //! ChiCommand DEFERRED_HALT
+    DEFERRED_HALT,
+    //! ChiCommand FREEZE
+    FREEZE,
+    //! ChiCommand ALLOW_COLDSTART
     ALLOW_COLDSTART,
-//! ChiCommand ALL_SLOTS
-    ALL_SLOTS,      
-//! ChiCommand WAKEUP
-    WAKEUP          
+    //! ChiCommand ALL_SLOTS
+    ALL_SLOTS,
+    //! ChiCommand WAKEUP
+    WAKEUP
 };
 
 struct FlexrayHostCommand

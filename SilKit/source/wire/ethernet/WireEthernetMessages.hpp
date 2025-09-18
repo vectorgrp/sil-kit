@@ -18,7 +18,7 @@ namespace Ethernet {
 
 struct WireEthernetFrame
 {
-//! The Ethernet raw frame without the frame check sequence
+    //! The Ethernet raw frame without the frame check sequence
     Util::SharedVector<uint8_t> raw;
 };
 
@@ -27,14 +27,14 @@ inline auto MakeWireEthernetFrame(const EthernetFrame& ethernetFrame) -> WireEth
 
 struct WireEthernetFrameEvent
 {
-//! Reception time
+    //! Reception time
     std::chrono::nanoseconds timestamp;
-//! The Ethernet frame
-    WireEthernetFrame frame;           
-//! Receive/Transmit direction
-    TransmitDirection direction;       
-//! Optional pointer provided by user when sending the frame
-    void* userContext;                 
+    //! The Ethernet frame
+    WireEthernetFrame frame;
+    //! Receive/Transmit direction
+    TransmitDirection direction;
+    //! Optional pointer provided by user when sending the frame
+    void* userContext;
 };
 
 inline auto ToEthernetFrameEvent(const WireEthernetFrameEvent& wireEthernetFrameEvent) -> EthernetFrameEvent;
@@ -43,27 +43,27 @@ inline auto MakeWireEthernetFrameEvent(const EthernetFrameEvent& ethernetFrameEv
 //! \brief Publishes status of the simulated Ethernet controller
 struct EthernetStatus
 {
-//! Timestamp of the status change.
+    //! Timestamp of the status change.
     std::chrono::nanoseconds timestamp;
-//! State of the Ethernet controller.
-    EthernetState state;               
-//! Bit rate in kBit/sec of the link when in state LinkUp, otherwise zero.
-    EthernetBitrate bitrate;           
+    //! State of the Ethernet controller.
+    EthernetState state;
+    //! Bit rate in kBit/sec of the link when in state LinkUp, otherwise zero.
+    EthernetBitrate bitrate;
 };
 
 //! \brief Mode for switching an Ethernet Controller on or off
 enum class EthernetMode : uint8_t
 {
-//! The controller is inactive (default after reset).
+    //! The controller is inactive (default after reset).
     Inactive = 0,
-//! The controller is active.
-    Active = 1,  
+    //! The controller is active.
+    Active = 1,
 };
 
 //! \brief Set the Mode of the Ethernet Controller.
 struct EthernetSetMode
 {
-//! EthernetMode that the Ethernet controller should reach.
+    //! EthernetMode that the Ethernet controller should reach.
     EthernetMode mode;
 };
 

@@ -51,15 +51,15 @@ enum class ParticipantState : SilKit_ParticipantState
 //! \brief Details about a participant state change.
 struct ParticipantStatus
 {
-//! Name of the participant (UTF-8).
-    std::string participantName;                      
-//! The new state of the participant.
+    //! Name of the participant (UTF-8).
+    std::string participantName;
+    //! The new state of the participant.
     ParticipantState state{ParticipantState::Invalid};
-//! The reason for the participant to enter the new state (UTF-8).
-    std::string enterReason;                        
-//! The enter time of the participant.
+    //! The reason for the participant to enter the new state (UTF-8).
+    std::string enterReason;
+    //! The enter time of the participant.
     std::chrono::system_clock::time_point enterTime;
-//! The refresh time.
+    //! The refresh time.
     std::chrono::system_clock::time_point refreshTime;
 };
 

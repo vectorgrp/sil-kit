@@ -12,7 +12,7 @@
 //for RegistryMsgHeader
 #include "VAsioDatatypes.hpp"
 //for ProtocolVersion
-#include "MessageBuffer.hpp" 
+#include "MessageBuffer.hpp"
 
 namespace SilKit {
 namespace Core {

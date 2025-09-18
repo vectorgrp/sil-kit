@@ -35,7 +35,7 @@
 #include "ParticipantConfiguration.hpp"
 
 // for operator<<
-#include "TestDataTypes.hpp"   
+#include "TestDataTypes.hpp"
 // for operator<<(... ServiceDescriptor)
 #include "IServiceEndpoint.hpp"
 

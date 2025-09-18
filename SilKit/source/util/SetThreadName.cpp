@@ -11,7 +11,7 @@
 // HANDLE, PCWSTR
 #include <windows.h>
 // posix
-#else               
+#else
 #include <pthread.h>
 #endif
 

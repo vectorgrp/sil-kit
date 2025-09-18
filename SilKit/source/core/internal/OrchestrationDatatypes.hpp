@@ -27,9 +27,9 @@ struct SystemCommand
     //!< The different kinds of a SystemCommand
     enum class Kind : uint8_t
     {
-//! An invalid command
-        Invalid = 0,       
-//! The abort simulation command
+        //! An invalid command
+        Invalid = 0,
+        //! The abort simulation command
         AbortSimulation = 1
     };
 

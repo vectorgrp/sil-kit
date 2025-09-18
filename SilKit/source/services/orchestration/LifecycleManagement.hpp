@@ -28,19 +28,19 @@ public: //CTors
                         LifecycleService* parentService);
 
     // Triggered by Public API calls
-// ILifecycleService::Pause
-    void Pause(std::string reason);          
-// ILifecycleService::Continue
-    void Continue(std::string reason);       
-// ILifecycleService::Stop
-    void Stop(std::string reason);           
-// ISystemController::AbortSimulation
+    // ILifecycleService::Pause
+    void Pause(std::string reason);
+    // ILifecycleService::Continue
+    void Continue(std::string reason);
+    // ILifecycleService::Stop
+    void Stop(std::string reason);
+    // ISystemController::AbortSimulation
     void AbortSimulation(std::string reason);
-// ILifecycleService::ReportError
-    void Error(std::string reason);          
+    // ILifecycleService::ReportError
+    void Error(std::string reason);
 
     // Currently not part of ILifecycleService
-// LifecycleService::Restart
+    // LifecycleService::Restart
     void Restart(std::string reason);
 
     // Common internal actions

@@ -8,7 +8,7 @@
 //getenv
 #include <cstdlib>
 //access
-#include <io.h>   
+#include <io.h>
 
 #include "SilKitExtensions.hpp"
 #include "LoadExtension.hpp"

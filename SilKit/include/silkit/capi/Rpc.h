@@ -35,11 +35,11 @@ typedef struct SilKit_RpcClient SilKit_RpcClient;
 */
 typedef uint32_t SilKit_RpcCallStatus;
 //! Call was successful
-#define SilKit_RpcCallStatus_Success ((SilKit_RpcCallStatus)0)           
+#define SilKit_RpcCallStatus_Success ((SilKit_RpcCallStatus)0)
 //! No server matching the RpcSpec was found
 #define SilKit_RpcCallStatus_ServerNotReachable ((SilKit_RpcCallStatus)1)
 //! An unidentified error occured
-#define SilKit_RpcCallStatus_UndefinedError ((SilKit_RpcCallStatus)2)    
+#define SilKit_RpcCallStatus_UndefinedError ((SilKit_RpcCallStatus)2)
 /*! \brief The Call lead to an internal RpcServer error.
  * This might happen if no CallHandler was specified for the RpcServer.
  */
