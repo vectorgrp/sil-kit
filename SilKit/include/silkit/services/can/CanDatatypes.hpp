@@ -23,13 +23,20 @@ using CanFrameFlagMask = SilKit_CanFrameFlag;
 
 enum class CanFrameFlag : CanFrameFlagMask
 {
-    Ide = SilKit_CanFrameFlag_ide, //!< Identifier Extension
-    Rtr = SilKit_CanFrameFlag_rtr, //!< Remote Transmission Request
-    Fdf = SilKit_CanFrameFlag_fdf, //!< FD Format Indicator
-    Brs = SilKit_CanFrameFlag_brs, //!< Bit Rate Switch  (for FD Format only)
-    Esi = SilKit_CanFrameFlag_esi, //!< Error State indicator (for FD Format only)
-    Xlf = SilKit_CanFrameFlag_xlf, //!< XL Format Indicator
-    Sec = SilKit_CanFrameFlag_sec, //!< Simple Extended Content (for XL Format only)
+//! Identifier Extension
+    Ide = SilKit_CanFrameFlag_ide,
+//! Remote Transmission Request
+    Rtr = SilKit_CanFrameFlag_rtr,
+//! FD Format Indicator
+    Fdf = SilKit_CanFrameFlag_fdf,
+//! Bit Rate Switch  (for FD Format only)
+    Brs = SilKit_CanFrameFlag_brs,
+//! Error State indicator (for FD Format only)
+    Esi = SilKit_CanFrameFlag_esi,
+//! XL Format Indicator
+    Xlf = SilKit_CanFrameFlag_xlf,
+//! Simple Extended Content (for XL Format only)
+    Sec = SilKit_CanFrameFlag_sec,
 };
 
 /*! \brief A CAN Frame
@@ -37,26 +44,36 @@ enum class CanFrameFlag : CanFrameFlagMask
 struct CanFrame
 {
     // CAN frame content
-    uint32_t canId;         //!< CAN Identifier
-    CanFrameFlagMask flags; //!< CAN Arbitration and Control Field Flags
+//! CAN Identifier
+    uint32_t canId;        
+//! CAN Arbitration and Control Field Flags
+    CanFrameFlagMask flags;
     //! \brief Data Length Code - describes the length of the dataField
     //! The acceptable bit-patterns and their semantics differ between CAN, CAN FD and CAN XL. The user is responsible
     //! for setting this field correctly. Please consult the CAN specifications for further information.
     uint16_t dlc;
-    uint8_t sdt;  //!< SDU type - describes the structure of the frames Data Field content (for XL Format only)
-    uint8_t vcid; //!< Virtual CAN network ID (for XL Format only)
-    uint32_t af;  //!< Acceptance field (for XL Format only)
-    Util::Span<const uint8_t> dataField; //!< The raw CAN data field
+//! SDU type - describes the structure of the frames Data Field content (for XL Format only)
+    uint8_t sdt; 
+//! Virtual CAN network ID (for XL Format only)
+    uint8_t vcid;
+//! Acceptance field (for XL Format only)
+    uint32_t af; 
+//! The raw CAN data field
+    Util::Span<const uint8_t> dataField;
 };
 
 /*! \brief The event of an incoming CAN frame including transmit ID, timestamp and the actual frame
  */
 struct CanFrameEvent
 {
-    std::chrono::nanoseconds timestamp; //!< Send time
-    CanFrame frame;                     //!< The incoming CAN Frame
-    TransmitDirection direction;        //!< Receive/Transmit direction
-    void* userContext;                  //!< Optional pointer provided by user when sending the frame
+//! Send time
+    std::chrono::nanoseconds timestamp;
+//! The incoming CAN Frame
+    CanFrame frame;                    
+//! Receive/Transmit direction
+    TransmitDirection direction;       
+//! Optional pointer provided by user when sending the frame
+    void* userContext;                 
 };
 
 /*! \brief CAN Controller state according to AUTOSAR specification AUTOSAR_SWS_CANDriver 4.3.1
@@ -122,26 +139,34 @@ enum class CanTransmitStatus : CanTransmitStatusMask
  */
 struct CanFrameTransmitEvent
 {
-    uint32_t canId;                     //!< Identifies the CAN id to which this CanFrameTransmitEvent refers to.
-    std::chrono::nanoseconds timestamp; //!< Timestamp of the CAN acknowledge.
-    CanTransmitStatus status;           //!< Status of the CanTransmitRequest.
-    void* userContext;                  //!< Optional pointer provided by user when sending the frame
+//! Identifies the CAN id to which this CanFrameTransmitEvent refers to.
+    uint32_t canId;                    
+//! Timestamp of the CAN acknowledge.
+    std::chrono::nanoseconds timestamp;
+//! Status of the CanTransmitRequest.
+    CanTransmitStatus status;          
+//! Optional pointer provided by user when sending the frame
+    void* userContext;                 
 };
 
 /*! \brief An incoming state change event
  */
 struct CanStateChangeEvent
 {
-    std::chrono::nanoseconds timestamp; //!< Timestamp of the state change.
-    CanControllerState state;           //!< The new state
+//! Timestamp of the state change.
+    std::chrono::nanoseconds timestamp;
+//! The new state
+    CanControllerState state;          
 };
 
 /*! \brief An incoming error state change event
  */
 struct CanErrorStateChangeEvent
 {
-    std::chrono::nanoseconds timestamp; //!< Timestamp of the state change.
-    CanErrorState errorState;           //!< The new error state
+//! Timestamp of the state change.
+    std::chrono::nanoseconds timestamp;
+//! The new error state
+    CanErrorState errorState;          
 };
 
 } // namespace Can

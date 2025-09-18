@@ -5,8 +5,10 @@
 #include <vector>
 #include <string>
 
-#include <cstdlib> //getenv
-#include <io.h>    //access
+//getenv
+#include <cstdlib>
+//access
+#include <io.h>   
 
 #include "SilKitExtensions.hpp"
 #include "LoadExtension.hpp"

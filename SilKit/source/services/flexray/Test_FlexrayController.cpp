@@ -228,8 +228,10 @@ TEST_F(Test_FlexrayController, send_controller_config_override_cluster_params)
 
     // Change clusterParams in tester and make sure they are ignored
     testControllerCfg.clusterParams = MakeValidClusterParams();
-    testControllerCfg.clusterParams.gNumberOfMiniSlots = 999; // was 0
-    testControllerCfg.clusterParams.gMacroPerCycle = 1337;    // was 0
+// was 0
+    testControllerCfg.clusterParams.gNumberOfMiniSlots = 999;
+// was 0
+    testControllerCfg.clusterParams.gMacroPerCycle = 1337;   
 
     // default values (not configured)
     testControllerCfg.nodeParams = MakeValidNodeParams();
@@ -251,8 +253,10 @@ TEST_F(Test_FlexrayController, send_controller_config_override_node_params)
 
     // Change clusterParams in tester and make sure they are ignored
     testControllerCfg.nodeParams = MakeValidNodeParams();
-    testControllerCfg.nodeParams.pKeySlotId = 42;               // was 0
-    testControllerCfg.nodeParams.pChannels = FlexrayChannel::B; // was A
+// was 0
+    testControllerCfg.nodeParams.pKeySlotId = 42;              
+// was A
+    testControllerCfg.nodeParams.pChannels = FlexrayChannel::B;
 
     // default values (not configured)
     testControllerCfg.clusterParams = MakeValidClusterParams();
@@ -372,7 +376,8 @@ TEST_F(Test_FlexrayController, throw_on_unconfigured_tx_buffer_update)
     controller.Configure(controllerCfg);
 
     FlexrayTxBufferUpdate update;
-    update.txBufferIndex = 7; // only txBufferIdx = 0 is configured
+// only txBufferIdx = 0 is configured
+    update.txBufferIndex = 7;
     EXPECT_CALL(participant,
                 SendMsg(An<const IServiceEndpoint *>(), netsimName, A<const FlexrayTxBufferConfigUpdate &>()))
         .Times(0);
@@ -577,7 +582,8 @@ TEST_F(Test_FlexrayController, txbuffer_update_in_static_segment_produces_warnin
 {
     // Configure Controller
     auto config = GetDummyConfigWithValues();
-    config.txBufferConfigurations.at(0).slotId = 2; //must be in static segment
+//must be in static segment
+    config.txBufferConfigurations.at(0).slotId = 2;
     FlexrayControllerConfig controllerConfig{};
 
 
@@ -601,7 +607,9 @@ TEST_F(Test_FlexrayController, txbuffer_update_in_static_segment_produces_warnin
     myController.UpdateTxBuffer(txBuffer);
 
     // now update the static buffer to be bigger than max size ( forcing a warning about truncating)
-    payload.resize(maxSize + 2u); // ensure we get a 'truncated' warning
+
+// ensure we get a 'truncated' warning
+    payload.resize(maxSize + 2u);
     txBuffer.payload = payload;
     txBuffer.payloadDataValid = true;
     EXPECT_CALL(participant.logger, Log(LogLevel::Warn, testing::HasSubstr("truncated"))).Times(1);

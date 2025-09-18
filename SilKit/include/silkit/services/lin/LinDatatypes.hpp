@@ -62,10 +62,14 @@ const LinDataLength LinDataLengthUnknown = SilKit_LinDataLengthUnknown;
  */
 struct LinFrame
 {
-    LinId id{0};                                               //!< Lin Identifier
-    LinChecksumModel checksumModel{LinChecksumModel::Unknown}; //!< Checksum Model
-    LinDataLength dataLength{0};                               //!< Data length
-    std::array<uint8_t, 8> data{};                             //!< The actual payload
+//! Lin Identifier
+    LinId id{0};                                              
+//! Checksum Model
+    LinChecksumModel checksumModel{LinChecksumModel::Unknown};
+//! Data length
+    LinDataLength dataLength{0};                              
+//! The actual payload
+    std::array<uint8_t, 8> data{};                            
 };
 
 //! \brief Create a LinFrame that corresponds to a Go-To-Sleep command
@@ -274,7 +278,8 @@ enum class LinControllerStatus : SilKit_LinControllerStatus
 //! \brief A LIN frame status event delivered in the \ref ILinController::FrameStatusHandler.
 struct LinFrameStatusEvent
 {
-    std::chrono::nanoseconds timestamp; //!< Time of the event.
+//! Time of the event.
+    std::chrono::nanoseconds timestamp;
     LinFrame frame;
     LinFrameStatus status;
 };
@@ -282,22 +287,27 @@ struct LinFrameStatusEvent
 //! \brief A LIN wakeup event delivered in the \ref ILinController::WakeupHandler.
 struct LinWakeupEvent
 {
-    std::chrono::nanoseconds timestamp; //!< Time of the event.
-    TransmitDirection direction;        //!< The direction of the wakeup pulse.
+//! Time of the event.
+    std::chrono::nanoseconds timestamp;
+//! The direction of the wakeup pulse.
+    TransmitDirection direction;       
 };
 
 //! \brief A LIN wakeup event delivered in the \ref ILinController::GoToSleepHandler.
 struct LinGoToSleepEvent
 {
-    std::chrono::nanoseconds timestamp; //!< Time of the event.
+//! Time of the event.
+    std::chrono::nanoseconds timestamp;
 };
 
 /*! \brief Data type representing a request to perform an non-AUTOSAR send operation.
 */
 struct LinSendFrameHeaderRequest
 {
-    std::chrono::nanoseconds timestamp; //!< Time of the header request.
-    LinId id;                           //!< The LinId of the header to be transmitted
+//! Time of the header request.
+    std::chrono::nanoseconds timestamp;
+//! The LinId of the header to be transmitted
+    LinId id;                          
 };
 
 // ================================================================================

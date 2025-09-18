@@ -60,14 +60,16 @@ public:
     // ILinController
     void Init(LinControllerConfig config) override;
     void InitDynamic(
-        const SilKit::Experimental::Services::Lin::LinControllerDynamicConfig& config) override; // Experimental
+// Experimental
+        const SilKit::Experimental::Services::Lin::LinControllerDynamicConfig& config) override;
 
     auto Status() const noexcept -> LinControllerStatus override;
 
     void SendFrame(LinFrame frame, LinFrameResponseType responseType) override;
     void SendFrameHeader(LinId linId) override;
 
-    void SendDynamicResponse(const LinFrame& frame) override; // Experimental
+// Experimental
+    void SendDynamicResponse(const LinFrame& frame) override;
 
     void UpdateTxBuffer(LinFrame frame) override;
     void SetFrameResponse(LinFrameResponse response) override;
@@ -77,14 +79,19 @@ public:
     void Wakeup() override;
     void WakeupInternal() override;
 
-    Experimental::Services::Lin::LinSlaveConfiguration GetSlaveConfiguration() override; // Exprimental
+// Exprimental
+    Experimental::Services::Lin::LinSlaveConfiguration GetSlaveConfiguration() override;
     HandlerId AddLinSlaveConfigurationHandler(
-        Experimental::Services::Lin::LinSlaveConfigurationHandler handler) override; // Exprimental
-    void RemoveLinSlaveConfigurationHandler(HandlerId handlerId) override;           // Exprimental
+// Exprimental
+        Experimental::Services::Lin::LinSlaveConfigurationHandler handler) override;
+// Exprimental
+    void RemoveLinSlaveConfigurationHandler(HandlerId handlerId) override;          
 
     auto AddFrameHeaderHandler(SilKit::Experimental::Services::Lin::LinFrameHeaderHandler handler)
-        -> HandlerId override;                                   // Experimental
-    void RemoveFrameHeaderHandler(HandlerId handlerId) override; // Experimental
+// Experimental
+        -> HandlerId override;                                  
+// Experimental
+    void RemoveFrameHeaderHandler(HandlerId handlerId) override;
 
     HandlerId AddFrameStatusHandler(FrameStatusHandler handler) override;
     HandlerId AddGoToSleepHandler(GoToSleepHandler handler) override;

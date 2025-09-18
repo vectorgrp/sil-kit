@@ -43,15 +43,24 @@ typedef int32_t SilKit_ReturnCode;
 // For the C++-Api, the return code is translated back to the specific SIL Kit
 // exception and thrown in ThrowOnError.hpp.
 
-#define SilKit_ReturnCode_WRONGSTATE ((SilKit_ReturnCode)8)          // SilKit::StateError
-#define SilKit_ReturnCode_TYPECONVERSIONERROR ((SilKit_ReturnCode)9) // SilKit::TypeConversionError
-#define SilKit_ReturnCode_CONFIGURATIONERROR ((SilKit_ReturnCode)10) // SilKit::ConfigurationError
-#define SilKit_ReturnCode_PROTOCOLERROR ((SilKit_ReturnCode)11)      // SilKit::ProtocolError
-#define SilKit_ReturnCode_ASSERTIONERROR ((SilKit_ReturnCode)12)     // SilKit::AssertionError
-#define SilKit_ReturnCode_EXTENSIONERROR ((SilKit_ReturnCode)13)     // SilKit::ExtensionError
-#define SilKit_ReturnCode_LOGICERROR ((SilKit_ReturnCode)14)         // SilKit::LogicError
-#define SilKit_ReturnCode_LENGTHERROR ((SilKit_ReturnCode)15)        // SilKit::LengthError
-#define SilKit_ReturnCode_OUTOFRANGEERROR ((SilKit_ReturnCode)16)    // SilKit::OutOfRangeError
+// SilKit::StateError
+#define SilKit_ReturnCode_WRONGSTATE ((SilKit_ReturnCode)8)         
+// SilKit::TypeConversionError
+#define SilKit_ReturnCode_TYPECONVERSIONERROR ((SilKit_ReturnCode)9)
+// SilKit::ConfigurationError
+#define SilKit_ReturnCode_CONFIGURATIONERROR ((SilKit_ReturnCode)10)
+// SilKit::ProtocolError
+#define SilKit_ReturnCode_PROTOCOLERROR ((SilKit_ReturnCode)11)     
+// SilKit::AssertionError
+#define SilKit_ReturnCode_ASSERTIONERROR ((SilKit_ReturnCode)12)    
+// SilKit::ExtensionError
+#define SilKit_ReturnCode_EXTENSIONERROR ((SilKit_ReturnCode)13)    
+// SilKit::LogicError
+#define SilKit_ReturnCode_LOGICERROR ((SilKit_ReturnCode)14)        
+// SilKit::LengthError
+#define SilKit_ReturnCode_LENGTHERROR ((SilKit_ReturnCode)15)       
+// SilKit::OutOfRangeError
+#define SilKit_ReturnCode_OUTOFRANGEERROR ((SilKit_ReturnCode)16)   
 
 typedef uint64_t SilKit_NanosecondsTime;
 
@@ -72,9 +81,12 @@ typedef struct SilKit_ByteVector SilKit_ByteVector;
 /*! \brief Information level of log messages
 */
 typedef uint32_t SilKit_LabelKind;
-#define SilKit_LabelKind_Undefined ((uint32_t)0) //!< Undefined
-#define SilKit_LabelKind_Optional ((uint32_t)1)  //!< If this label is available, its value must match
-#define SilKit_LabelKind_Mandatory ((uint32_t)2) //!< This label must be available and its value must match
+//! Undefined
+#define SilKit_LabelKind_Undefined ((uint32_t)0)
+//! If this label is available, its value must match
+#define SilKit_LabelKind_Optional ((uint32_t)1) 
+//! This label must be available and its value must match
+#define SilKit_LabelKind_Mandatory ((uint32_t)2)
 
 /*! \brief Struct that contains a label as used in PubSub and RPC for matching publisher, subscribers, servers, and clients */
 typedef struct SilKit_Label

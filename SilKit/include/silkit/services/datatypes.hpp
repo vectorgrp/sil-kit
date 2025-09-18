@@ -37,13 +37,18 @@ struct MatchingLabel
     */
     enum class Kind : uint32_t
     {
-        Optional = 1, //!< If this label is available, its value must match.
-        Mandatory = 2 //!< This label must be available and its value must match.
+//! If this label is available, its value must match.
+        Optional = 1,
+//! This label must be available and its value must match.
+        Mandatory = 2
     };
 
-    std::string key;   //!< The label's key.
-    std::string value; //!< The label's key.
-    Kind kind;         //!< The matching kind to apply for this label.
+//! The label's key.
+    std::string key;  
+//! The label's key.
+    std::string value;
+//! The matching kind to apply for this label.
+    Kind kind;        
 };
 
 using SilKit::Util::HandlerId;

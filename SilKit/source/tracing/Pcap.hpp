@@ -17,22 +17,33 @@ const uint16_t MinorVersion = 4;
 
 struct GlobalHeader
 {
-    uint32_t magic_number = NativeMagic;   /* magic number */
-    uint16_t version_major = MajorVersion; /* major version number */
-    uint16_t version_minor = MinorVersion; /* minor version number */
-    int32_t thiszone = 0;                  /* GMT to local correction */
-    uint32_t sigfigs = 0;                  /* accuracy of timestamps */
-    uint32_t snaplen = 65535;              /* max length of captured packets, in octets */
-    uint32_t network = 1;                  /* data link type */
+// magic number
+    uint32_t magic_number = NativeMagic;  
+// major version number
+    uint16_t version_major = MajorVersion;
+// minor version number
+    uint16_t version_minor = MinorVersion;
+// GMT to local correction
+    int32_t thiszone = 0;                 
+// accuracy of timestamps
+    uint32_t sigfigs = 0;                 
+// max length of captured packets, in octets
+    uint32_t snaplen = 65535;             
+// data link type
+    uint32_t network = 1;                 
 };
 static_assert(sizeof(GlobalHeader) == GlobalHeaderSize, "GlobalHeader size must be equal to 24 bytes");
 
 struct PacketHeader
 {
-    uint32_t ts_sec;   /* timestamp seconds */
-    uint32_t ts_usec;  /* timestamp microseconds */
-    uint32_t incl_len; /* number of octets of packet saved in file */
-    uint32_t orig_len; /* actual length of packet */
+// timestamp seconds
+    uint32_t ts_sec;  
+// timestamp microseconds
+    uint32_t ts_usec; 
+// number of octets of packet saved in file
+    uint32_t incl_len;
+// actual length of packet
+    uint32_t orig_len;
 };
 static_assert(sizeof(PacketHeader) == PacketHeaderSize, "PacketHeader size must be equal to 16 bytes");
 

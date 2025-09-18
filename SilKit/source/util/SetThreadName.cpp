@@ -8,8 +8,10 @@
 #include "silkit/capi/SilKitMacros.h"
 
 #if _WIN32
-#include <windows.h> // HANDLE, PCWSTR
-#else                // posix
+// HANDLE, PCWSTR
+#include <windows.h>
+// posix
+#else               
 #include <pthread.h>
 #endif
 

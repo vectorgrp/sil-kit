@@ -13,8 +13,10 @@ SILKIT_BEGIN_DECLS
 
 typedef struct
 {
-    uint64_t version;      //!< Version encoded using SK_ID_MAKE
-    uint64_t _reserved[3]; //!< For future expansions
+//! Version encoded using SK_ID_MAKE
+    uint64_t version;     
+//! For future expansions
+    uint64_t _reserved[3];
 } SilKit_StructHeader;
 
 
