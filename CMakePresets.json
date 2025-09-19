@@ -119,11 +119,11 @@
         {
             "name": "x-cross-qnx-x86_64",
             "generator": "Unix Makefiles",
+            "inherits": [ "mixin-dirs" ],
             "environment": {
                 "SILKIT_CMAKE_PRESET_BUILD_PLATFORM": "qnx"
             },
             "toolchainFile": "${sourceDir}/SilKit/cmake/toolchain-qnx-x86_64.cmake",
-            "binaryDir": "${sourceDir}/_build/${presetName}",
             "cacheVariables": {
                 "SILKIT_BUILD_DASHBOARD": "OFF"
             },
