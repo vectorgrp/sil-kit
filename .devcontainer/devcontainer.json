@@ -1,0 +1,16 @@
+{
+  "name": "Clang-format container",
+  "build": {
+    "dockerfile": "clangformat.Dockerfile"
+  },
+  "settings": {},
+  "extensions": [
+    "ms-vscode.cpptools"
+  ],
+  "postCreateCommand": "echo 'Container ready!'",
+  "postStartCommand": "python3 SilKit/ci/check_formatting.py",
+  "runArgs": ["--init"],
+  "workspaceFolder": "/workspace",
+  "mounts": [
+    "source=${localWorkspaceFolder},target=/workspace,type=bind"
+  ]
