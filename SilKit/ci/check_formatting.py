@@ -5,6 +5,8 @@
 # SPDX-License-Identifier: MIT
 from pathlib import Path
 from shutil import which
+
+import argparse
 import os
 import re
 import subprocess
@@ -37,6 +39,18 @@ def main():
         warn("No {} found!", CLANG_FORMAT)
         die(1, "Please install {}!", CLANG_FORMAT)
 
+    parser = argparse.ArgumentParser(
+            prog="ClangFormatRunner",
+            description="Run clang tidy on select source files")
+
+    parser.add_argument(
+        '--git_commit', help="The Git commit to be reformatted", type=str)
+    parser.add_argument(
+        '--dry_run', help="Only produce warnings", action='store_true')
+    parser.add_argument(
+        '--werror', help="Treat clang-format warnings as errors", action='store_true')
+    args = parser.parse_args()
+
     # Check for supported clang-format version
     format_version = subprocess.run([CLANG_FORMAT, '--version'], capture_output=True, encoding='utf-8')
 
@@ -61,26 +75,37 @@ def main():
     totalWarnings = 0
 
     # Check  the Formatting!
-    for directory in dirs:
-        rootPath = Path("./" + directory)
-        for ext in fileExtensions:
-            files = sorted(rootPath.rglob(ext))
-            #print("INFO: Found {} {} files in {}!".format(len(files), ext, directory))
+    files = []
 
-            for file in files:
-                totalFiles = totalFiles + 1
-                formatResult = subprocess.run([CLANG_FORMAT, '--Werror', '--dry-run', '-i', '--style=file', file], capture_output=True, encoding='utf-8')
-                if formatResult.returncode != 0:
-                    formattingCorrect = False
-                    totalWarnings = totalWarnings + 1
-                    warn("File not formatted correctly: {}", file)
+    if args.git_commit is not None and args.git_commit != "":
+        commit_files = subprocess.run(['git', 'diff-tree', '--no-commit-id', '--name-only', '-r', args.git_commit],
+                                      capture_output=True, encoding='utf8')
+        files = commit_files.stdout.splitlines()
+    else:
+        for directory in dirs:
+            rootPath = Path("./" + directory)
+            for ext in fileExtensions:
+                files = files + (sorted(rootPath.rglob(ext)))
+
+    dry_run = ''
+    if args.dry_run:
+        dry_run = "--dry-run"
+    print(dry_run)
+    for file in files:
+        totalFiles = totalFiles + 1
+        formatResult = subprocess.run([CLANG_FORMAT, '--Werror', dry_run, '-i', '--style=file', file], capture_output=True, encoding='utf-8')
+        if formatResult.returncode != 0:
+            formattingCorrect = False
+            totalWarnings = totalWarnings + 1
+            warn("File not formatted correctly: {}", file)
 
     info("{} files checked, {} produced a warning!", totalFiles, totalWarnings)
     if formattingCorrect is False:
         # Only warn for now
         warn("Formatting for one or more SilKit source code files not correct.!")
         warn("Please format your source code properly using the SilKit .clang-format config file!")
-        exit(0)
+        ret_code = 64 if args.werror else 0
+        exit(ret_code)
 
     info("All source code files properly formatted!")
     exit(0)
