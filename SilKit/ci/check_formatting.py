@@ -1,14 +1,15 @@
-#!/usr/bin/env python3
+#!/ usr / bin / env python3
 
-# SPDX-FileCopyrightText: 2024 Vector Informatik GmbH
+#SPDX - FileCopyrightText : 2024 Vector Informatik GmbH
 #
-# SPDX-License-Identifier: MIT
+#SPDX - License - Identifier : MIT
 from pathlib import Path
 from shutil import which
 
 import argparse
 import os
 import re
+import requests
 import subprocess
 import sys
 
@@ -34,6 +35,39 @@ def die(status, fmt, *args):
 CLANG_VERSION = "18"
 CLANG_FORMAT = "clang-format-" + CLANG_VERSION
 
+def get_pr_files(pr: str, repo: str):
+
+    url = 'https://api.github.com/repos/' + repo + '/pulls/' + pr + '/files'
+
+    log("Checking at {}".format(url))
+
+    r = requests.get(url)
+
+    max_page = 1
+    if 'link' in r.headers:
+        last_page_link_header = r.headers["link"].split(',')[-1].split(';')[0]
+        page_reg = re.compile('.+page=([0-9]+)>')
+        page = re.match(page_reg, last_page_link_header).group(1)
+
+        if page.isnumeric():
+            max_page = int(page)
+
+    files = []
+    for fileObject in r.json():
+        
+        files.append(fileObject["filename"])
+
+    if max_page > 1:
+        print(f"Need to check {max_page} pages")
+        for page in range(2, max_page+1):
+            page_url = url + f'?page={page}'
+            r = requests.get(page_url)
+            for fileObject in r.json():
+                files.append(fileObject["filename"])
+
+    print(f"Found {len(files)} files")
+    return files
+
 def main():
     if which(CLANG_FORMAT) is None:
         warn("No {} found!", CLANG_FORMAT)
@@ -44,14 +78,14 @@ def main():
             description="Run clang tidy on select source files")
 
     parser.add_argument(
-        '--git_commit', help="The Git commit to be reformatted", type=str)
+        '--pr', help="The Github PR to be reformatted", type=str)
     parser.add_argument(
-        '--dry_run', help="Only produce warnings", action='store_true')
+        '--repo', help="The Github repo to be reformatted", type=str)
     parser.add_argument(
-        '--werror', help="Treat clang-format warnings as errors", action='store_true')
+        '--dryrun', help="Only produce warnings", action='store_true')
     args = parser.parse_args()
 
-    # Check for supported clang-format version
+#Check for supported clang - format version
     format_version = subprocess.run([CLANG_FORMAT, '--version'], capture_output=True, encoding='utf-8')
 
     version_reg = re.compile('^.* clang-format version (\d+)\.(\d+)\.(\d+).*')
@@ -74,37 +108,43 @@ def main():
     totalFiles = 0
     totalWarnings = 0
 
-    # Check  the Formatting!
+#Check the Formatting !
     files = []
 
-    if args.git_commit is not None and args.git_commit != "":
-        commit_files = subprocess.run(['git', 'diff-tree', '--no-commit-id', '--name-only', '-r', args.git_commit],
-                                      capture_output=True, encoding='utf8')
-        files = commit_files.stdout.splitlines()
+    if args.pr is not None and args.repo is not None:
+        files = get_pr_files(args.pr, args.repo)
     else:
         for directory in dirs:
             rootPath = Path("./" + directory)
             for ext in fileExtensions:
                 files = files + (sorted(rootPath.rglob(ext)))
 
-    dry_run = ''
-    if args.dry_run:
-        dry_run = "--dry-run"
-    print(dry_run)
+    clang_format_cmd = [CLANG_FORMAT]
+    if args.dryrun:
+        clang_format_cmd.append('--Werror')
+        clang_format_cmd.append('--dry-run')
+
+    clang_format_cmd = clang_format_cmd + ['-i', '--style=file']
+    print(clang_format_cmd)
     for file in files:
-        totalFiles = totalFiles + 1
-        formatResult = subprocess.run([CLANG_FORMAT, '--Werror', dry_run, '-i', '--style=file', file], capture_output=True, encoding='utf-8')
-        if formatResult.returncode != 0:
-            formattingCorrect = False
-            totalWarnings = totalWarnings + 1
-            warn("File not formatted correctly: {}", file)
+
+        if any(p in file for p in dirs):
+
+            totalFiles = totalFiles + 1
+            formatResult = subprocess.run(clang_format_cmd + [file], capture_output=True, encoding='utf-8')
+            if formatResult.returncode != 0:
+                formattingCorrect = False
+                totalWarnings = totalWarnings + 1
+                warn("File not formatted correctly: {}", file)
+        else:
+            print(f"Skip: {file}")
 
     info("{} files checked, {} produced a warning!", totalFiles, totalWarnings)
     if formattingCorrect is False:
-        # Only warn for now
+#Only warn for now
         warn("Formatting for one or more SilKit source code files not correct.!")
         warn("Please format your source code properly using the SilKit .clang-format config file!")
-        ret_code = 64 if args.werror else 0
+        ret_code = 64 if args.dryrun else 0
         exit(ret_code)
 
     info("All source code files properly formatted!")
