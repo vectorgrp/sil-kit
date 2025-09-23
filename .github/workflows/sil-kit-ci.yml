@@ -46,9 +46,7 @@ jobs:
 
   check-formatting:
     name: Format checks for SIL Kit sources
-    runs-on: ubuntu-22.04
-    container:
-      image: ghcr.io/vectorgrp/sil-kit-docker-build/sil-kit-ci-public-runner:main
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
         with:
@@ -56,7 +54,7 @@ jobs:
       - name: Check Formatting
         id: formatting-check
         run: |
-          python3 ./SilKit/ci/check_formatting.py
+          python3 ./SilKit/ci/check_formatting.py --dryrun pr ${{ github.event.number }} ${{ github.repository }}
         shell: bash
 
   clang14-tsan:

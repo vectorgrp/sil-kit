@@ -16,6 +16,7 @@ RUN \
     lsb-release \
     clang-format \
     python3 \
+    python3-requests \
     && \
     apt-get clean
 
