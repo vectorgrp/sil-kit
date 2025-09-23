@@ -8,7 +8,7 @@
     "ms-vscode.cpptools"
   ],
   "postCreateCommand": "echo 'Container ready!'",
-  "postStartCommand": "git config --global --add safe.directory /workspace && python3 SilKit/ci/check_formatting.py",
+  "postStartCommand": "python3 SilKit/ci/check_formatting.py changes",
   "runArgs": ["--init"],
   "workspaceFolder": "/workspace",
   "mounts": [
