@@ -125,7 +125,7 @@ public:
     AttributeMetric();
 
     void Clear() override;
-    void Add(const std::string& value) override;
+    void Add(const std::string &value) override;
 
     auto GetMetricKind() const -> MetricKind override;
     auto GetUpdateTime() const -> MetricTimePoint override;
@@ -163,7 +163,7 @@ void MetricsManager::SubmitUpdates()
             return std::chrono::duration_cast<std::chrono::nanoseconds>(timepoint.time_since_epoch()).count();
         };
 
-        for (auto&& [name, metric] : _metrics)
+        for (auto &&[name, metric] : _metrics)
         {
             const auto timepoint = metric->GetUpdateTime();
             if (timepoint <= _lastSubmitUpdate)
@@ -207,9 +207,9 @@ auto MetricsManager::GetStringList(MetricName name) -> IStringListMetric *
     return &dynamic_cast<IStringListMetric &>(*GetOrCreateMetric(name, MetricKind::STRING_LIST));
 }
 
-auto MetricsManager::GetAttribute(MetricName name) -> IAttributeMetric*
+auto MetricsManager::GetAttribute(MetricName name) -> IAttributeMetric *
 {
-    return &dynamic_cast<IAttributeMetric&>(*GetOrCreateMetric(name, MetricKind::ATTRIBUTE));
+    return &dynamic_cast<IAttributeMetric &>(*GetOrCreateMetric(name, MetricKind::ATTRIBUTE));
 }
 
 
@@ -396,7 +396,7 @@ void MetricsManager::AttributeMetric::Clear()
     _value.clear();
 }
 
-void MetricsManager::AttributeMetric::Add(const std::string& value)
+void MetricsManager::AttributeMetric::Add(const std::string &value)
 {
     _timestamp = MetricClockNow();
     _value = value;

@@ -118,7 +118,8 @@ TEST(Test_Logger, send_log_message_from_logger)
 
     EXPECT_CALL(mockParticipant, SendMsg_LogMsg(testing::_, ALogMsgWith(loggerName, Level::Info, payload))).Times(1);
 
-    EXPECT_CALL(mockParticipant, SendMsg_LogMsg(testing::_, ALogMsgWith(loggerName, Level::Critical, payload))).Times(1);
+    EXPECT_CALL(mockParticipant, SendMsg_LogMsg(testing::_, ALogMsgWith(loggerName, Level::Critical, payload)))
+        .Times(1);
 
     logger.Info(payload);
     logger.Critical(payload);

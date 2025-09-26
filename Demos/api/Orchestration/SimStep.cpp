@@ -42,11 +42,11 @@ int main(int argc, char** argv)
         timeSyncService->SetSimulationStepHandler(
             [logger](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
             // The invocation of this handler marks the beginning of a simulation step.
-            
+
             std::stringstream ss;
             ss << "--------- Simulation step T=" << now << " ---------";
             logger->Info(ss.str());
-            
+
             // All messages sent here are guaranteed to arrive at other participants before their next simulation step is called.
             // So here, we can rely on having received all messages from the past (< now).
             // Note that this guarantee only holds for messages sent within a simulation step,

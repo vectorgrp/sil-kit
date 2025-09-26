@@ -15,20 +15,16 @@ namespace Services {
 
 
 template <typename MsgT>
-std::chrono::nanoseconds GetTimestamp(MsgT& msg,
-                                      std::enable_if_t<Core::HasTimestamp<MsgT>::value, bool> = true)
+std::chrono::nanoseconds GetTimestamp(MsgT& msg, std::enable_if_t<Core::HasTimestamp<MsgT>::value, bool> = true)
 {
     return msg.timestamp;
 }
 
 template <typename MsgT>
-std::chrono::nanoseconds GetTimestamp(MsgT& /*msg*/,
-                  std::enable_if_t<!Core::HasTimestamp<MsgT>::value, bool> = false)
+std::chrono::nanoseconds GetTimestamp(MsgT& /*msg*/, std::enable_if_t<!Core::HasTimestamp<MsgT>::value, bool> = false)
 {
     return std::chrono::nanoseconds::duration::min();
 }
-
-
 
 
 template <class SilKitMessageT>
@@ -48,7 +44,7 @@ void TraceRx(Logging::ILoggerInternal* logger, const Core::IServiceEndpoint* add
         {
             lm.FormatKeyValue(Logging::Keys::virtualTimeNS, "{}", virtualTimeStamp.count());
         }
-    lm.Dispatch();
+        lm.Dispatch();
     }
 }
 
@@ -65,7 +61,7 @@ void TraceTx(Logging::ILoggerInternal* logger, const Core::IServiceEndpoint* add
         auto virtualTimeStamp = GetTimestamp(msg);
         if (virtualTimeStamp != std::chrono::nanoseconds::duration::min())
         {
-                lm.FormatKeyValue(Logging::Keys::virtualTimeNS, "{}", virtualTimeStamp.count());
+            lm.FormatKeyValue(Logging::Keys::virtualTimeNS, "{}", virtualTimeStamp.count());
         }
         lm.Dispatch();
     }
@@ -73,7 +69,8 @@ void TraceTx(Logging::ILoggerInternal* logger, const Core::IServiceEndpoint* add
 
 // targeted messages
 template <class SilKitMessageT>
-void TraceTx(Logging::ILoggerInternal* logger, const Core::IServiceEndpoint* addr, const std::string_view target, const SilKitMessageT& msg)
+void TraceTx(Logging::ILoggerInternal* logger, const Core::IServiceEndpoint* addr, const std::string_view target,
+             const SilKitMessageT& msg)
 {
     if (logger->GetLogLevel() == Logging::Level::Trace)
     {
@@ -86,7 +83,7 @@ void TraceTx(Logging::ILoggerInternal* logger, const Core::IServiceEndpoint* add
         auto virtualTimeStamp = GetTimestamp(msg);
         if (virtualTimeStamp != std::chrono::nanoseconds::duration::min())
         {
-                lm.FormatKeyValue(Logging::Keys::virtualTimeNS, "{}", virtualTimeStamp.count());
+            lm.FormatKeyValue(Logging::Keys::virtualTimeNS, "{}", virtualTimeStamp.count());
         }
         lm.Dispatch();
     }
@@ -97,7 +94,7 @@ inline void TraceRx(Logging::ILoggerInternal* /*logger*/, Core::IServiceEndpoint
 {
 }
 inline void TraceTx(Logging::ILoggerInternal* /*logger*/, const Core::IServiceEndpoint* /*addr*/,
-             const std::string_view /*target*/, const Logging::LogMsg& /*msg*/)
+                    const std::string_view /*target*/, const Logging::LogMsg& /*msg*/)
 {
 }
 inline void TraceTx(Logging::ILoggerInternal* /*logger*/, Core::IServiceEndpoint* /*addr*/,

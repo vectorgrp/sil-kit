@@ -9,8 +9,10 @@
 #include <string>
 #include <ostream>
 
-#include "VAsioDatatypes.hpp" //for RegistryMsgHeader
-#include "MessageBuffer.hpp" //for ProtocolVersion
+//for RegistryMsgHeader
+#include "VAsioDatatypes.hpp"
+//for ProtocolVersion
+#include "MessageBuffer.hpp"
 
 namespace SilKit {
 namespace Core {

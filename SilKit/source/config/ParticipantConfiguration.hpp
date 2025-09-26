@@ -281,16 +281,20 @@ struct Extensions
 
 struct Middleware
 {
-    std::string registryUri{}; //!< Registry URI to connect to (configuration has priority)
-    int connectAttempts{1}; //!<  Number of connection attempts to the registry a participant should perform.
+    //! Registry URI to connect to (configuration has priority)
+    std::string registryUri{};
+    //!  Number of connection attempts to the registry a participant should perform.
+    int connectAttempts{1};
     int tcpReceiveBufferSize{-1};
     int tcpSendBufferSize{-1};
-    bool tcpNoDelay{
-        true}; //!< Setting this option to true disables Nagle's algorithm on all TCP/IP sockets. Defaults to true for performance reasons.
-    bool tcpQuickAck{false}; //!< Setting this Linux specific flag disables delayed TCP/IP acknowledgements.
-    bool enableDomainSockets{true}; //!< By default local domain socket is preferred to TCP/IP sockets.
-    std::vector<std::string>
-        acceptorUris{}; //!< Explicit list of endpoints this participant will accept connections on.
+    //! Setting this option to true disables Nagle's algorithm on all TCP/IP sockets. Defaults to true for performance reasons.
+    bool tcpNoDelay{true};
+    //! Setting this Linux specific flag disables delayed TCP/IP acknowledgements.
+    bool tcpQuickAck{false};
+    //! By default local domain socket is preferred to TCP/IP sockets.
+    bool enableDomainSockets{true};
+    //! Explicit list of endpoints this participant will accept connections on.
+    std::vector<std::string> acceptorUris{};
     //! By default, communication with other participants using the registry as a proxy is enabled.
     bool registryAsFallbackProxy{true};
     //! By default, requesting connection of other participants, and honoring these requests by other participants is enabled.

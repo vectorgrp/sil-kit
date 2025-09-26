@@ -16,8 +16,7 @@
 
 #include "YamlParser.hpp"
 
-namespace VSilKit
-{
+namespace VSilKit {
 
 bool read(const ryml::ConstNodeRef& node, MetricData* obj)
 {
@@ -39,7 +38,6 @@ bool read(const ryml::ConstNodeRef& node, MetricData* obj)
     }
     else if (kind == "STRING_LIST")
     {
-
         obj->kind = MetricKind::STRING_LIST;
         std::vector<std::string> stringList;
         node["mv"] >> stringList;
@@ -49,7 +47,7 @@ bool read(const ryml::ConstNodeRef& node, MetricData* obj)
         throw SilKit::ConfigurationError{"Invalid MetricData.kind " + kind};
     return true;
 }
-}
+} // namespace VSilKit
 namespace {
 
 using VSilKit::MetricData;
@@ -83,9 +81,24 @@ TEST(Test_MetricsJsonSink, test_json_escaping_and_structure)
     const std::string mv3{fmt::format(R"(["{}","{}"])", EscapeString(mv3a), EscapeString(mv3b))};
 
     MetricsUpdate update;
-    update.metrics.emplace_back(MetricData{ts1, mn1, mk1, mv1, });
-    update.metrics.emplace_back(MetricData{ts2, mn2, mk2, mv2, });
-    update.metrics.emplace_back(MetricData{ts3, mn3, mk3, mv3, });
+    update.metrics.emplace_back(MetricData{
+        ts1,
+        mn1,
+        mk1,
+        mv1,
+    });
+    update.metrics.emplace_back(MetricData{
+        ts2,
+        mn2,
+        mk2,
+        mv2,
+    });
+    update.metrics.emplace_back(MetricData{
+        ts3,
+        mn3,
+        mk3,
+        mv3,
+    });
 
     auto ownedOstream = std::make_unique<std::ostringstream>();
     auto& ostream = *ownedOstream;

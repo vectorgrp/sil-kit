@@ -98,47 +98,30 @@ DataSubscribers:
     auto configPubSub2 = SilKit::Config::ParticipantConfigurationFromStringImpl(configStringPubSub2);
 
     std::vector<PubSubParticipant> pubsubs;
-    pubsubs.push_back(
-        {"PubSub1",
-         {
-             {"PubCtrl1",
-              "ShouldBeOverwritten",
-              "A",
-              {},
-              0,
-              defaultMsgSize,
-              numMsgToPublish}, // Publishes for PubSub2->SubCtrl1
-             {"PubCtrl2", "TopicC", "A", {}, 0, defaultMsgSize, numMsgToPublish} // Has no topic configured.
-         },
-         {{"SubCtrl1",
-           "ShouldBeOverwritten",
-           "A",
-           {},
-           defaultMsgSize,
-           numMsgToReceive,
-           6}}, // Receives by PubSub2->PubCtrl1
-         configPubSub1});
+    pubsubs.push_back({"PubSub1",
+                       {// Publishes for PubSub2->SubCtrl1
+                        {"PubCtrl1", "ShouldBeOverwritten", "A", {}, 0, defaultMsgSize, numMsgToPublish},
+                        // Has no topic configured.
+                        {"PubCtrl2", "TopicC", "A", {}, 0, defaultMsgSize, numMsgToPublish}},
+                       {{"SubCtrl1",
+                         "ShouldBeOverwritten",
+                         "A",
+                         {},
+                         defaultMsgSize,
+                         numMsgToReceive,
+                         6}}, // Receives by PubSub2->PubCtrl1
+                       configPubSub1});
 
-    pubsubs.push_back(
-        {"PubSub2",
-         {{"PubCtrl1",
-           "ShouldBeOverwritten",
-           {"A"},
-           {},
-           0,
-           defaultMsgSize,
-           numMsgToPublish}}, // Publishes for PubSub1->SubCtrl1
-         {
-             {"SubCtrl1",
-              "ShouldBeOverwritten",
-              {"A"},
-              {},
-              defaultMsgSize,
-              numMsgToReceive,
-              6}, // Receives by PubSub1->PubCtrl1
-             {"SubCtrl2", "TopicC", {"A"}, {}, defaultMsgSize, numMsgToReceive, 6}, // Has no topic configured.
-         },
-         configPubSub2});
+    pubsubs.push_back({"PubSub2",
+                       // Publishes for PubSub1->SubCtrl1
+                       {{"PubCtrl1", "ShouldBeOverwritten", {"A"}, {}, 0, defaultMsgSize, numMsgToPublish}},
+                       {
+                           // Receives by PubSub1->PubCtrl1
+                           {"SubCtrl1", "ShouldBeOverwritten", {"A"}, {}, defaultMsgSize, numMsgToReceive, 6},
+                           // Has no topic configured.
+                           {"SubCtrl2", "TopicC", {"A"}, {}, defaultMsgSize, numMsgToReceive, 6},
+                       },
+                       configPubSub2});
 
     RunSyncTest(pubsubs);
 }
@@ -679,7 +662,7 @@ TEST_F(ITest_Internals_DataPubSub, test_1_participant_selfdelivery)
 
     std::vector<PubSubParticipant> pubsubs;
     pubsubs.push_back({"PubSub1",
-                       {{"PubCtrl1", "TopicA", {"A"}, {}, 0, defaultMsgSize, numMsgToPublish}}, // Pub
+                       {{"PubCtrl1", "TopicA", {"A"}, {}, 0, defaultMsgSize, numMsgToPublish}},   // Pub
                        {{"SubCtrl1", "TopicA", {"A"}, {}, defaultMsgSize, numMsgToReceive, 1}}}); // Sub
 
     RunSyncTest(pubsubs);

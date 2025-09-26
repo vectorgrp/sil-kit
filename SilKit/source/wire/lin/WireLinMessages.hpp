@@ -21,8 +21,8 @@ namespace Lin {
 struct LinTransmission
 {
     std::chrono::nanoseconds timestamp; //!< Time at the end of the transmission. Only valid in detailed simulation.
-    LinFrame frame; //!< The transmitted frame
-    LinFrameStatus status; //!< The status of the transmitted frame
+    LinFrame frame;                     //!< The transmitted frame
+    LinFrameStatus status;              //!< The status of the transmitted frame
 };
 
 /*! \brief Data type representing a request to perform an AUTOSAR SendFrame operation.
@@ -31,7 +31,7 @@ struct LinTransmission
  */
 struct LinSendFrameRequest
 {
-    LinFrame frame; //!< Provide the LIN ID, checksum model, expected data length and optional data.
+    LinFrame frame;                    //!< Provide the LIN ID, checksum model, expected data length and optional data.
     LinFrameResponseType responseType; //!< Determines whether to provide a frame response or not.
 };
 
@@ -39,14 +39,14 @@ struct LinSendFrameRequest
 struct LinWakeupPulse
 {
     std::chrono::nanoseconds timestamp; //!< Time of the WakeUp pulse. Only valid in detailed Simulation.
-    TransmitDirection direction; //!< The direction of the wakeup pulse.
+    TransmitDirection direction;        //!< The direction of the wakeup pulse.
 };
 
 //! \brief Data type used to inform other LIN participants (LIN controllers and detailed Simulator) about changed LinControllerStatus.
 struct LinControllerStatusUpdate
 {
     std::chrono::nanoseconds timestamp; //!< Time of the controller status change.
-    LinControllerStatus status; //!< The new controller status
+    LinControllerStatus status;         //!< The new controller status
 };
 
 //! \brief Data type used to inform other LIN participants about changed LinFrameResponse data.

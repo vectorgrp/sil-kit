@@ -396,10 +396,10 @@ auto SilKitToOatppMapper::CreateBulkSimulationDto(const DashboardBulkUpdate& bul
     return bulkSimulationDto;
 }
 
-auto SilKitToOatppMapper::CreateMetricsUpdateDto(const std::string& participantName, const VSilKit::MetricsUpdate& metricsUpdate)
-    -> Object<MetricsUpdateDto>
+auto SilKitToOatppMapper::CreateMetricsUpdateDto(
+    const std::string& participantName, const VSilKit::MetricsUpdate& metricsUpdate) -> Object<MetricsUpdateDto>
 {
-    auto objectMapper = oatpp::parser::json::mapping::ObjectMapper::createShared();       
+    auto objectMapper = oatpp::parser::json::mapping::ObjectMapper::createShared();
     auto dto = MetricsUpdateDto::createShared();
     for (const auto& metricData : metricsUpdate.metrics)
     {
@@ -408,7 +408,6 @@ auto SilKitToOatppMapper::CreateMetricsUpdateDto(const std::string& participantN
             dataDto->ts = metricData.timestamp;
             auto&& nameList = SilKit::Util::SplitString(metricData.name, "/");
             std::copy(nameList.begin(), nameList.end(), std::back_inserter(*dataDto->mn));
-
         };
 
         switch (metricData.kind)

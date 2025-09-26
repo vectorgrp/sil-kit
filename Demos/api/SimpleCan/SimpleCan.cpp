@@ -33,7 +33,8 @@ int main(int argc, char** argv)
         // CAN controller
         auto* canController = participant->CreateCanController("CanController1", "CAN1");
 
-        canController->AddFrameTransmitHandler([logger](ICanController* /*ctrl*/, const CanFrameTransmitEvent& /*ack*/) {
+        canController->AddFrameTransmitHandler(
+            [logger](ICanController* /*ctrl*/, const CanFrameTransmitEvent& /*ack*/) {
             logger->Info("Receive CAN frame transmit acknowledge");
         });
         canController->AddFrameHandler([logger](ICanController* /*ctrl*/, const CanFrameEvent& canFrameEvent) {
@@ -50,7 +51,8 @@ int main(int argc, char** argv)
         // Simulation steps
         const auto stepSize = 1ms;
         timeSyncService->SetSimulationStepHandler(
-            [participantName, canController, logger](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
+            [participantName, canController, logger](std::chrono::nanoseconds now,
+                                                     std::chrono::nanoseconds /*duration*/) {
             // Send CAN Frame every 10 seconds
             if (now.count() % std::chrono::nanoseconds(10s).count() == 0)
             {
@@ -68,7 +70,8 @@ int main(int argc, char** argv)
                 logger->Info("Sending CAN frame: data='" + payloadStr + "'");
                 canController->SendFrame(canFrame);
             }
-        }, stepSize);
+        },
+            stepSize);
 
         // Start and wait
         auto finalStateFuture = lifecycleService->StartLifecycle();

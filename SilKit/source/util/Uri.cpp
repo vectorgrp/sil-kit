@@ -158,7 +158,7 @@ auto Uri::Parse(std::string rawUri) -> Uri
     {
 #if defined(__QNX__)
         //must be a path, might contain ':' (currently not quoted)
-        if(!rawUri.empty() && !fs::path(rawUri).is_absolute())
+        if (!rawUri.empty() && !fs::path(rawUri).is_absolute())
         {
             // Make sure we always get a proper absolute Path
             // Treat all relative paths as relative from CWD
@@ -171,7 +171,6 @@ auto Uri::Parse(std::string rawUri) -> Uri
 #else
         uri._path = rawUri;
 #endif
-
     }
     else
     {

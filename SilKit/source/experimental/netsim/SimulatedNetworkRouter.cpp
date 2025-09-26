@@ -68,7 +68,7 @@ void SimulatedNetworkRouter::AddSimulatedController(const std::string& fromParti
     fromCopy.SetServiceType(Core::ServiceType::SimulatedController);
     fromCopy.SetServiceName(controllerName);
     fromCopy.SetSupplementalDataItem(SilKit::Core::Discovery::controllerType, controllerTypeName);
-    
+
     targetController->SetServiceDescriptor(std::move(fromCopy));
     _targetControllers.insert({controllerDescriptor, std::move(targetController)});
 }

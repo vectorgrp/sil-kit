@@ -112,7 +112,6 @@ public:
     }
 
 private:
-
     struct Task
     {
         Task(std::chrono::nanoseconds delay, std::function<void(std::chrono::nanoseconds)> action)
