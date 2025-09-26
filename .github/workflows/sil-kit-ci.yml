@@ -54,7 +54,7 @@ jobs:
       - name: Check Formatting
         id: formatting-check
         run: |
-          python3 ./SilKit/ci/check_formatting.py --repo ${{ github.repository }} --pr ${{ github.event.number }} --dryrun
+          python3 ./SilKit/ci/check_formatting.py --dryrun pr ${{ github.event.number }} ${{ github.repository }}
         shell: bash
 
   clang14-tsan:
