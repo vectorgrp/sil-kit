@@ -30,102 +30,67 @@ std::chrono::nanoseconds GetTimestamp(MsgT& /*msg*/,
     return std::chrono::nanoseconds::duration::min();
 }
 
+namespace Detail {
+template <class SilKitMessageT>
+void TraceMessageCommon(Logging::ILoggerInternal* logger,
+                       const char* messageString,
+                       const Core::IServiceEndpoint* addr,
+                       const SilKitMessageT& msg,
+                       std::string_view keyString = {},
+                       std::string_view valueString = {})
+{
 
+    if constexpr (std::is_same_v<SilKitMessageT, SilKit::Services::Logging::LogMsg>)
+    {
+        // Don't trace LogMessages - this could cause cycles!
+        return;
+    }
+    else
+    {
+        if (logger->GetLogLevel() == Logging::Level::Trace)
+        {
+            Logging::LoggerMessage lm{logger, Logging::Level::Trace};
+            lm.SetMessage(messageString);
+            lm.SetKeyValue(addr->GetServiceDescriptor());
+            lm.FormatKeyValue(Logging::Keys::msg, "{}", msg);
+
+            if (!keyString.empty() && ! valueString.empty())
+            {
+                lm.SetKeyValue(keyString, valueString);
+            }
+
+            auto virtualTimeStamp = GetTimestamp(msg);
+            if (virtualTimeStamp != std::chrono::nanoseconds::duration::min())
+            {
+                lm.FormatKeyValue(Logging::Keys::virtualTimeNS, "{}", virtualTimeStamp.count());
+            }
+            // Turn the Raw-logging into a trait when we have enough types that implement it
+            if constexpr (std::is_same_v<SilKitMessageT, SilKit::Services::Flexray::FlexrayControllerConfig>)
+            {
+                lm.SetKeyValue(Logging::Keys::raw, SilKit::Config::SerializeAsJson(msg));
+            }
+            lm.Dispatch();
+        }
+    }
+}
+} // namespace Detail
 template <class SilKitMessageT>
 void TraceRx(Logging::ILoggerInternal* logger, const Core::IServiceEndpoint* addr, const SilKitMessageT& msg,
              const Core::ServiceDescriptor& from)
 {
-    if (logger->GetLogLevel() == Logging::Level::Trace)
-    {
-        Logging::LoggerMessage lm{logger, Logging::Level::Trace};
-        lm.SetMessage("Recv message");
-        lm.SetKeyValue(addr->GetServiceDescriptor());
-        lm.SetKeyValue(Logging::Keys::from, from.GetParticipantName());
-        lm.FormatKeyValue(Logging::Keys::msg, "{}", msg);
-
-        auto virtualTimeStamp = GetTimestamp(msg);
-        if (virtualTimeStamp != std::chrono::nanoseconds::duration::min())
-        {
-            lm.FormatKeyValue(Logging::Keys::virtualTimeNS, "{}", virtualTimeStamp.count());
-        }
-        if constexpr ( std::is_same_v<SilKitMessageT, SilKit::Services::Flexray::FlexrayControllerConfig>)
-        {
-            lm.SetKeyValue(Logging::Keys::raw, SilKit::Config::SerializeAsJson(msg));
-        }
-
-        lm.Dispatch();
-    }
+    Detail::TraceMessageCommon(logger, "Recv message", addr, msg, Logging::Keys::from, from.GetParticipantName());
 }
 
 template <class SilKitMessageT>
 void TraceTx(Logging::ILoggerInternal* logger, const Core::IServiceEndpoint* addr, const SilKitMessageT& msg)
 {
-    if (logger->GetLogLevel() == Logging::Level::Trace)
-    {
-        Logging::LoggerMessage lm{logger, Logging::Level::Trace};
-        lm.SetMessage("Send message");
-        lm.SetKeyValue(addr->GetServiceDescriptor());
-        lm.FormatKeyValue(Logging::Keys::msg, "{}", msg);
-
-        auto virtualTimeStamp = GetTimestamp(msg);
-        if (virtualTimeStamp != std::chrono::nanoseconds::duration::min())
-        {
-                lm.FormatKeyValue(Logging::Keys::virtualTimeNS, "{}", virtualTimeStamp.count());
-        }
-
-        if constexpr ( std::is_same_v<SilKitMessageT, SilKit::Services::Flexray::FlexrayControllerConfig>)
-        {
-            lm.SetKeyValue(Logging::Keys::raw, SilKit::Config::SerializeAsJson(msg));
-        }
-        lm.Dispatch();
-    }
+    Detail::TraceMessageCommon(logger, "Send message", addr, msg);
 }
 
-// targeted messages
 template <class SilKitMessageT>
 void TraceTx(Logging::ILoggerInternal* logger, const Core::IServiceEndpoint* addr, const std::string_view target, const SilKitMessageT& msg)
 {
-    if (logger->GetLogLevel() == Logging::Level::Trace)
-    {
-        Logging::LoggerMessage lm{logger, Logging::Level::Trace};
-        lm.SetMessage("Send message");
-        lm.SetKeyValue(addr->GetServiceDescriptor());
-        lm.FormatKeyValue(Logging::Keys::msg, "{}", msg);
-        lm.FormatKeyValue(Logging::Keys::to, "{}", target);
-
-        auto virtualTimeStamp = GetTimestamp(msg);
-        if (virtualTimeStamp != std::chrono::nanoseconds::duration::min())
-        {
-                lm.FormatKeyValue(Logging::Keys::virtualTimeNS, "{}", virtualTimeStamp.count());
-        }
-
-        if constexpr ( std::is_same_v<SilKitMessageT, SilKit::Services::Flexray::FlexrayControllerConfig>)
-        {
-            lm.SetKeyValue(Logging::Keys::raw, SilKit::Config::SerializeAsJson(msg));
-        }
-
-        lm.Dispatch();
-    }
-}
-// Don't trace LogMessages - this could cause cycles!
-inline void TraceRx(Logging::ILoggerInternal* /*logger*/, Core::IServiceEndpoint* /*addr*/,
-                    const Logging::LogMsg& /*msg*/)
-{
-}
-inline void TraceTx(Logging::ILoggerInternal* /*logger*/, const Core::IServiceEndpoint* /*addr*/,
-             const std::string_view /*target*/, const Logging::LogMsg& /*msg*/)
-{
-}
-inline void TraceTx(Logging::ILoggerInternal* /*logger*/, Core::IServiceEndpoint* /*addr*/,
-                    const Logging::LogMsg& /*msg*/)
-{
-}
-
-inline void TraceRx(Logging::ILoggerInternal* /*logger*/, Core::IServiceEndpoint* /*addr*/, Logging::LogMsg&& /*msg*/)
-{
-}
-inline void TraceTx(Logging::ILoggerInternal* /*logger*/, Core::IServiceEndpoint* /*addr*/, Logging::LogMsg&& /*msg*/)
-{
+    Detail::TraceMessageCommon(logger, "Send targetted message", addr, msg, Logging::Keys::to, target);
 }
 } // namespace Services
 } // namespace SilKit
