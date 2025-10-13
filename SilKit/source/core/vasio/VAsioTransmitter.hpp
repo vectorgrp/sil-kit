@@ -12,6 +12,8 @@
 #include "IMessageReceiver.hpp"
 #include "IServiceEndpoint.hpp"
 #include "traits/SilKitMsgTraits.hpp"
+#include "ILoggerInternal.hpp"
+#include "MessageTracing.hpp"
 
 #include "SerializedMessage.hpp"
 
@@ -29,7 +31,7 @@ struct MessageHistory<MsgT, 0>
 {
     void SetHistoryLength(size_t) {}
     void Save(const IServiceEndpoint*, const MsgT&) {}
-    void NotifyPeer(IVAsioPeer*, EndpointId) {}
+    void NotifyPeer(Services::Logging::ILoggerInternal*, IVAsioPeer*, EndpointId) {}
 };
 // MessageHistory<.., 1>: save last message and notify peers about it
 template <typename MsgT>
@@ -49,12 +51,13 @@ struct MessageHistory<MsgT, 1>
         _last = msg;
         _hasValue = true;
     }
-    void NotifyPeer(IVAsioPeer* peer, EndpointId remoteIdx)
+    void NotifyPeer(Services::Logging::ILoggerInternal* logger, IVAsioPeer* peer, EndpointId remoteIdx)
     {
         if (!_hasValue || !_hasHistory)
             return;
 
         auto buffer = SerializedMessage(_last, _from, remoteIdx);
+        Services::TraceTx(logger, peer, _last);
         peer->SendSilKitMsg(std::move(buffer));
     }
 
@@ -77,8 +80,15 @@ class VAsioTransmitter
     : public IMessageReceiver<MsgT>
     , public IServiceEndpoint
 {
+    Services::Logging::ILoggerInternal* _logger{nullptr};
     using History = MessageHistory<MsgT, SilKitMsgTraits<MsgT>::HistSize()>;
     History _hist;
+
+public:
+    VAsioTransmitter(Services::Logging::ILoggerInternal* logger)
+        :_logger{logger}
+    {
+    }
 
 public:
     // ----------------------------------------
@@ -95,7 +105,7 @@ public:
 
         _serviceDescriptor.SetParticipantNameAndComputeId(peer->GetInfo().participantName);
         _remoteReceivers.push_back(remoteReceiver);
-        _hist.NotifyPeer(peer, remoteIdx);
+        _hist.NotifyPeer(_logger, peer, remoteIdx);
     }
 
     void RemoveRemoteReceiver(IVAsioPeer* peer)

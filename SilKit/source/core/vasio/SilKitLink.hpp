@@ -86,6 +86,7 @@ SilKitLink<MsgT>::SilKitLink(std::string name, Services::Logging::ILoggerInterna
     : _name{std::move(name)}
     , _logger{logger}
     , _timeProvider{timeProvider}
+    , _vasioTransmitter{logger}
 {
 }
 
