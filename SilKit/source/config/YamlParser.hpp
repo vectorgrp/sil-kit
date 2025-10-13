@@ -13,7 +13,6 @@
 #include "YamlWriter.hpp"
 #include "rapidyaml.hpp"
 
-
 namespace VSilKit {
 
 // Utility for parsing key-value lists for protocol capabilities

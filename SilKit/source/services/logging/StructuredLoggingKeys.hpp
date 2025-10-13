@@ -13,37 +13,38 @@ namespace Services {
 namespace Logging {
 namespace Keys {
 
-const std::string virtualTimeNS{"VirtualTimeNS"};
-const std::string msg{"Msg"};
-const std::string from{"From"};
+constexpr std::string_view virtualTimeNS{"VirtualTimeNS"};
+constexpr std::string_view msg{"Msg"};
+constexpr std::string_view from{"From"};
 constexpr std::string_view to{"To"};
+constexpr std::string_view raw{"Raw"};
 
-const std::string waitingTime{"WaitingTime"};
-const std::string executionTime{"ExecutionTime"};
+constexpr std::string_view waitingTime{"WaitingTime"};
+constexpr std::string_view executionTime{"ExecutionTime"};
 
-const std::string participantName{"ParticipantName"};
-const std::string registryUri{"RegistryUri"};
-const std::string silKitVersion{"SilKitVersion"};
+constexpr std::string_view participantName{"ParticipantName"};
+constexpr std::string_view registryUri{"RegistryUri"};
+constexpr std::string_view silKitVersion{"SilKitVersion"};
 
-const std::string newParticipantState{"NewParticipantState"};
-const std::string oldParticipantState{"OldParticipantState"};
-const std::string enterTime{"EnterTime"};
-const std::string enterReason{"EnterReason"};
+constexpr std::string_view newParticipantState{"NewParticipantState"};
+constexpr std::string_view oldParticipantState{"OldParticipantState"};
+constexpr std::string_view enterTime{"EnterTime"};
+constexpr std::string_view enterReason{"EnterReason"};
 
-const std::string serviceType{"ServiceType"};
-const std::string serviceName{"ServiceName"};
-const std::string networkType{"NetworkType"};
-const std::string networkName{"NetworkName"};
-const std::string controllerTypeName{"ControllerTypeName"};
+constexpr std::string_view serviceType{"ServiceType"};
+constexpr std::string_view serviceName{"ServiceName"};
+constexpr std::string_view networkType{"NetworkType"};
+constexpr std::string_view networkName{"NetworkName"};
+constexpr std::string_view controllerTypeName{"ControllerTypeName"};
 
 
-const std::string controllerName{"ControllerName"};
-const std::string controllerType{"ControllerType"};
-const std::string pubSubTopic{"PubSubTopic"};
-const std::string controllerFuncName{"ControllerFuncName"};
-const std::string mediaType{"MediaType"};
-const std::string network{"Network"};
-const std::string label{"Label"};
+constexpr std::string_view controllerName{"ControllerName"};
+constexpr std::string_view controllerType{"ControllerType"};
+constexpr std::string_view pubSubTopic{"PubSubTopic"};
+constexpr std::string_view controllerFuncName{"ControllerFuncName"};
+constexpr std::string_view mediaType{"MediaType"};
+constexpr std::string_view network{"Network"};
+constexpr std::string_view label{"Label"};
 
 
 } // namespace Keys

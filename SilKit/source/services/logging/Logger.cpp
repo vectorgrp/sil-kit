@@ -104,8 +104,18 @@ std::string KeyValuesToJsonString(const std::vector<std::pair<std::string, std::
         {
             result.append(",");
         }
-        result.append("\"" + SilKit::Util::EscapeString(it->first) + "\"" + ":" + "\""
-                      + SilKit::Util::EscapeString(it->second) + "\"");
+
+
+        if(it->first == SilKit::Services::Logging::Keys::raw)
+        {
+            result.append("\"" + SilKit::Util::EscapeString(it->first) + "\"" + ":"
+                          + it->second);
+        }
+        else
+        {
+            result.append("\"" + SilKit::Util::EscapeString(it->first) + "\"" + ":" + "\""
+                          + SilKit::Util::EscapeString(it->second) + "\"");
+        }
         ++it;
     }
     result.append("}");

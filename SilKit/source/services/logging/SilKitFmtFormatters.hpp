@@ -37,7 +37,6 @@
 #include "TestDataTypes.hpp" // for operator<<
 #include "IServiceEndpoint.hpp" // for operator<<(... ServiceDescriptor)
 
-
 #define MAKE_FORMATTER(TYPE) \
     template <> \
     struct fmt::formatter<TYPE> : ostream_formatter \
