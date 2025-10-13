@@ -15,21 +15,6 @@
 namespace SilKit {
 namespace Services {
 
-
-template <typename MsgT>
-std::chrono::nanoseconds GetTimestamp(MsgT& msg,
-                                      std::enable_if_t<Core::HasTimestamp<MsgT>::value, bool> = true)
-{
-    return msg.timestamp;
-}
-
-template <typename MsgT>
-std::chrono::nanoseconds GetTimestamp(MsgT& /*msg*/,
-                  std::enable_if_t<!Core::HasTimestamp<MsgT>::value, bool> = false)
-{
-    return std::chrono::nanoseconds::duration::min();
-}
-
 namespace Detail {
 template <class SilKitMessageT>
 void TraceMessageCommon(Logging::ILoggerInternal* logger,
@@ -59,11 +44,11 @@ void TraceMessageCommon(Logging::ILoggerInternal* logger,
                 lm.SetKeyValue(keyString, valueString);
             }
 
-            auto virtualTimeStamp = GetTimestamp(msg);
-            if (virtualTimeStamp != std::chrono::nanoseconds::duration::min())
+            if constexpr (Core::HasTimestamp<SilKitMessageT>::value)
             {
-                lm.FormatKeyValue(Logging::Keys::virtualTimeNS, "{}", virtualTimeStamp.count());
+                lm.FormatKeyValue(Logging::Keys::virtualTimeNS, "{}", msg.timestamp.count());
             }
+
             // Turn the Raw-logging into a trait when we have enough types that implement it
             if constexpr (std::is_same_v<SilKitMessageT, SilKit::Services::Flexray::FlexrayControllerConfig>)
             {

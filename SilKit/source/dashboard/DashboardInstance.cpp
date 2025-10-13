@@ -15,7 +15,7 @@ namespace Log = SilKit::Services::Logging;
 namespace {
 
 
-uint64_t GetCurrentTime()
+uint64_t GetCurrentSystemTime()
 {
     auto now = std::chrono::system_clock::now().time_since_epoch();
     return std::chrono::duration_cast<std::chrono::milliseconds>(now).count();
@@ -324,7 +324,7 @@ void DashboardInstance::OnParticipantConnected(const std::string& simulationName
         const auto connectUri{
             SilKit::Core::Uri::MakeSilKit(_registryUri->Host(), _registryUri->Port(), simulationName)};
         _silKitEventQueue.Enqueue(
-            SilKitEvent{simulationName, SimulationStart{connectUri.EncodedString(), GetCurrentTime()}});
+            SilKitEvent{simulationName, SimulationStart{connectUri.EncodedString(), GetCurrentSystemTime()}});
     }
 
     _silKitEventQueue.Enqueue(SilKitEvent{
@@ -352,7 +352,7 @@ void DashboardInstance::OnParticipantDisconnected(const std::string& simulationN
 
     if (isEmpty)
     {
-        _silKitEventQueue.Enqueue(SilKitEvent{simulationName, SimulationEnd{GetCurrentTime()}});
+        _silKitEventQueue.Enqueue(SilKitEvent{simulationName, SimulationEnd{GetCurrentSystemTime()}});
         RemoveSimulationData(simulationName);
     }
 }
