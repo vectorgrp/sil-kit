@@ -115,7 +115,7 @@ protected:
                 expectedData.resize(message.expectedData.size());
                 std::copy(message.expectedData.begin(), message.expectedData.end(), expectedData.begin());
 
-                CanFrame msg;
+                CanFrame msg{};
                 msg.canId = 1;
                 msg.dataField = expectedData;
                 msg.dlc = static_cast<uint16_t>(msg.dataField.size());
