@@ -24,10 +24,15 @@ void TraceMessageCommon(Logging::ILoggerInternal* logger,
                        std::string_view keyString = {},
                        std::string_view valueString = {})
 {
-
     if constexpr (std::is_same_v<SilKitMessageT, SilKit::Services::Logging::LogMsg>)
     {
         // Don't trace LogMessages - this could cause cycles!
+        SILKIT_UNUSED_ARG(logger);
+        SILKIT_UNUSED_ARG(messageString);
+        SILKIT_UNUSED_ARG(addr);
+        SILKIT_UNUSED_ARG(msg);
+        SILKIT_UNUSED_ARG(keyString);
+        SILKIT_UNUSED_ARG(valueString);
         return;
     }
     else
@@ -58,7 +63,9 @@ void TraceMessageCommon(Logging::ILoggerInternal* logger,
         }
     }
 }
+
 } // namespace Detail
+
 template <class SilKitMessageT>
 void TraceRx(Logging::ILoggerInternal* logger, const Core::IServiceEndpoint* addr, const SilKitMessageT& msg,
              const Core::ServiceDescriptor& from)
@@ -77,5 +84,6 @@ void TraceTx(Logging::ILoggerInternal* logger, const Core::IServiceEndpoint* add
 {
     Detail::TraceMessageCommon(logger, "Send targetted message", addr, msg, Logging::Keys::to, target);
 }
+
 } // namespace Services
 } // namespace SilKit
