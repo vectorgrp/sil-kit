@@ -53,6 +53,7 @@
 #include "Uuid.hpp"
 #include "Assert.hpp"
 #include "ExecutionEnvironment.hpp"
+#include "traits/SilKitMsgTraits.hpp"
 
 #include "fmt/ranges.h"
 
@@ -1331,8 +1332,18 @@ void Participant<SilKitConnectionT>::SendMsgImpl(const IServiceEndpoint* from, S
 {
     TraceTx(GetLoggerInternal(), from, msg);
     _connection.SendMsg(from, std::forward<SilKitMessageT>(msg));
+    if constexpr (SilKitMsgTraits<RemoveCvRef<SilKitMessageT>::type>::IsSynchronizationPoint())
+    {
+        if (auto* lifecycle = static_cast<Orchestration::LifecycleService*>(GetLifecycleService()); lifecycle)
+        {
+            if (auto* timesync = static_cast<Orchestration::TimeSyncService*>(lifecycle->GetTimeSyncService());
+                timesync)
+            {
+                timesync->TriggerSynchronization();
+            }
+        }
+    }
 }
-
 // Targeted messaging
 template <class SilKitConnectionT>
 void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName,

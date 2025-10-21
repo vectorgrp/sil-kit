@@ -21,6 +21,12 @@ struct NextSimTask
     std::chrono::nanoseconds duration{0};
 };
 
+static constexpr NextSimTask ZeroSimTask{std::chrono::nanoseconds{0}, std::chrono::nanoseconds{0}};
+inline auto operator==(const NextSimTask& lhs, const NextSimTask& rhs)
+{
+    return lhs.duration == rhs.duration && lhs.timePoint == rhs.timePoint;
+}
+
 //! System-wide command for the simulation flow.
 struct SystemCommand
 {

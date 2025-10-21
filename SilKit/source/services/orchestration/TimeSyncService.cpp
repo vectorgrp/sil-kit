@@ -112,39 +112,48 @@ public:
 
     void ReceiveNextSimTask(const Core::IServiceEndpoint* from, const NextSimTask& task) override
     {
-        _configuration->OnReceiveNextSimStep(from->GetServiceDescriptor().GetParticipantName(), task);
-
-        switch (_controller.State())
+        if(task == ZeroSimTask)
         {
-        case ParticipantState::Invalid:
-            [[fallthrough]];
-        case ParticipantState::ServicesCreated:
-            [[fallthrough]];
-        case ParticipantState::CommunicationInitializing:
-            [[fallthrough]];
-        case ParticipantState::CommunicationInitialized:
-            [[fallthrough]];
-        case ParticipantState::ReadyToRun:
-            return;
-        case ParticipantState::Paused:
-            [[fallthrough]];
-        case ParticipantState::Running:
-            ProcessSimulationTimeUpdate();
-            return;
-        case ParticipantState::Stopping:
-            [[fallthrough]];
-        case ParticipantState::Stopped:
-            [[fallthrough]];
-        case ParticipantState::Error:
-            [[fallthrough]];
-        case ParticipantState::ShuttingDown:
-            [[fallthrough]];
-        case ParticipantState::Shutdown:
-            return;
-        default:
-            _participant->GetLifecycleService()->ReportError("Received NextSimTask in state ParticipantState::"
-                                                             + to_string(_controller.State()));
-            return;
+            auto currentStep = _configuration->CurrentSimStep();
+            _controller.ExecuteSimStep(currentStep.timePoint, 0ns);
+
+        }
+        else 
+        {
+            _configuration->OnReceiveNextSimStep(from->GetServiceDescriptor().GetParticipantName(), task);
+
+            switch (_controller.State())
+            {
+            case ParticipantState::Invalid:
+                [[fallthrough]];
+            case ParticipantState::ServicesCreated:
+                [[fallthrough]];
+            case ParticipantState::CommunicationInitializing:
+                [[fallthrough]];
+            case ParticipantState::CommunicationInitialized:
+                [[fallthrough]];
+            case ParticipantState::ReadyToRun:
+                return;
+            case ParticipantState::Paused:
+                [[fallthrough]];
+            case ParticipantState::Running:
+                ProcessSimulationTimeUpdate();
+                return;
+            case ParticipantState::Stopping:
+                [[fallthrough]];
+            case ParticipantState::Stopped:
+                [[fallthrough]];
+            case ParticipantState::Error:
+                [[fallthrough]];
+            case ParticipantState::ShuttingDown:
+                [[fallthrough]];
+            case ParticipantState::Shutdown:
+                return;
+            default:
+                _participant->GetLifecycleService()->ReportError("Received NextSimTask in state ParticipantState::"
+                                                                 + to_string(_controller.State()));
+                return;
+            }
         }
     }
 
