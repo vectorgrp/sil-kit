@@ -16,8 +16,8 @@ namespace SilKit {
 namespace Core {
 
 
-VAsioProxyPeer::VAsioProxyPeer(IVAsioPeerListener *listener, std::string participantName, VAsioPeerInfo peerInfo,
-                               IVAsioPeer *peer, SilKit::Services::Logging::ILogger *logger)
+VAsioProxyPeer::VAsioProxyPeer(IVAsioPeerListener* listener, std::string participantName, VAsioPeerInfo peerInfo,
+                               IVAsioPeer* peer, SilKit::Services::Logging::ILogger* logger)
     : _listener{listener}
     , _participantName{std::move(participantName)}
     , _peer{peer}
@@ -56,7 +56,7 @@ void VAsioProxyPeer::Subscribe(VAsioMsgSubscriber subscriber)
     SendSilKitMsg(SerializedMessage{subscriber});
 }
 
-auto VAsioProxyPeer::GetInfo() const -> const VAsioPeerInfo &
+auto VAsioProxyPeer::GetInfo() const -> const VAsioPeerInfo&
 {
     return _peerInfo;
 }
@@ -104,12 +104,12 @@ auto VAsioProxyPeer::GetProtocolVersion() const -> ProtocolVersion
     return _protocolVersion;
 }
 
-void VAsioProxyPeer::SetSimulationName(const std::string &simulationName)
+void VAsioProxyPeer::SetSimulationName(const std::string& simulationName)
 {
     _simulationName = simulationName;
 }
 
-auto VAsioProxyPeer::GetSimulationName() const -> const std::string &
+auto VAsioProxyPeer::GetSimulationName() const -> const std::string&
 {
     return _simulationName;
 }
@@ -118,12 +118,12 @@ auto VAsioProxyPeer::GetSimulationName() const -> const std::string &
 //  IServiceEndpoint via IVAsioConnectionPeer
 // ================================================================================
 
-void VAsioProxyPeer::SetServiceDescriptor(ServiceDescriptor const &serviceDescriptor)
+void VAsioProxyPeer::SetServiceDescriptor(const ServiceDescriptor& serviceDescriptor)
 {
     _serviceDescriptor = serviceDescriptor;
 }
 
-auto VAsioProxyPeer::GetServiceDescriptor() const -> ServiceDescriptor const &
+auto VAsioProxyPeer::GetServiceDescriptor() const -> const ServiceDescriptor&
 {
     return _serviceDescriptor;
 }
@@ -132,12 +132,12 @@ auto VAsioProxyPeer::GetServiceDescriptor() const -> ServiceDescriptor const &
 //  IVAsioPeerConnection
 // ================================================================================
 
-void VAsioProxyPeer::OnSocketData(IVAsioPeer *from, SerializedMessage &&buffer)
+void VAsioProxyPeer::OnSocketData(IVAsioPeer* from, SerializedMessage&& buffer)
 {
     _listener->OnSocketData(from, std::move(buffer));
 }
 
-void VAsioProxyPeer::OnPeerShutdown(IVAsioPeer *peer)
+void VAsioProxyPeer::OnPeerShutdown(IVAsioPeer* peer)
 {
     _listener->OnPeerShutdown(peer);
 }
@@ -146,7 +146,7 @@ void VAsioProxyPeer::OnPeerShutdown(IVAsioPeer *peer)
 //  VAsioProxyPeer
 // ================================================================================
 
-auto VAsioProxyPeer::GetPeer() const -> IVAsioPeer *
+auto VAsioProxyPeer::GetPeer() const -> IVAsioPeer*
 {
     return _peer;
 }

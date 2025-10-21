@@ -20,8 +20,8 @@ namespace Can {
 class CanController : public SilKit::Services::Can::ICanController
 {
 public:
-    inline CanController(SilKit_Participant *participant, const std::string &canonicalName,
-                         const std::string &networkName);
+    inline CanController(SilKit_Participant* participant, const std::string& canonicalName,
+                         const std::string& networkName);
 
     inline ~CanController() override = default;
 
@@ -35,7 +35,7 @@ public:
 
     inline void Sleep() override;
 
-    inline void SendFrame(const SilKit::Services::Can::CanFrame &msg, void *userContext) override;
+    inline void SendFrame(const SilKit::Services::Can::CanFrame& msg, void* userContext) override;
 
     inline auto AddFrameHandler(FrameHandler handler,
                                 SilKit::Services::DirectionMask directionMask) -> Util::HandlerId override;
@@ -60,7 +60,7 @@ private:
     template <typename HandlerFunction>
     struct HandlerData
     {
-        SilKit::Services::Can::ICanController *controller{nullptr};
+        SilKit::Services::Can::ICanController* controller{nullptr};
         HandlerFunction handler{};
     };
 
@@ -68,7 +68,7 @@ private:
     using HandlerDataMap = std::unordered_map<SilKit::Util::HandlerId, std::unique_ptr<HandlerData<HandlerFunction>>>;
 
 private:
-    SilKit_CanController *_canController{nullptr};
+    SilKit_CanController* _canController{nullptr};
 
     HandlerDataMap<FrameHandler> _frameHandlers;
     HandlerDataMap<StateChangeHandler> _stateChangeHandlers;
@@ -97,8 +97,8 @@ namespace Impl {
 namespace Services {
 namespace Can {
 
-CanController::CanController(SilKit_Participant *participant, const std::string &canonicalName,
-                             const std::string &networkName)
+CanController::CanController(SilKit_Participant* participant, const std::string& canonicalName,
+                             const std::string& networkName)
 {
     const auto returnCode =
         SilKit_CanController_Create(&_canController, participant, canonicalName.c_str(), networkName.c_str());
@@ -135,7 +135,7 @@ void CanController::Sleep()
     ThrowOnError(returnCode);
 }
 
-void CanController::SendFrame(const SilKit::Services::Can::CanFrame &msg, void *userContext)
+void CanController::SendFrame(const SilKit::Services::Can::CanFrame& msg, void* userContext)
 {
     SilKit_CanFrame canFrame;
     SilKit_Struct_Init(SilKit_CanFrame, canFrame);
@@ -154,7 +154,7 @@ void CanController::SendFrame(const SilKit::Services::Can::CanFrame &msg, void *
 auto CanController::AddFrameHandler(FrameHandler handler,
                                     SilKit::Services::DirectionMask directionMask) -> Util::HandlerId
 {
-    const auto cHandler = [](void *context, SilKit_CanController *controller, SilKit_CanFrameEvent *frameEvent) {
+    const auto cHandler = [](void* context, SilKit_CanController* controller, SilKit_CanFrameEvent* frameEvent) {
         SILKIT_UNUSED_ARG(controller);
 
         SilKit::Services::Can::CanFrameEvent event{};
@@ -169,7 +169,7 @@ auto CanController::AddFrameHandler(FrameHandler handler,
         event.direction = static_cast<SilKit::Services::TransmitDirection>(frameEvent->direction);
         event.userContext = frameEvent->userContext;
 
-        const auto data = static_cast<HandlerData<FrameHandler> *>(context);
+        const auto data = static_cast<HandlerData<FrameHandler>*>(context);
         data->handler(data->controller, event);
     };
 
@@ -199,15 +199,15 @@ void CanController::RemoveFrameHandler(Util::HandlerId handlerId)
 
 auto CanController::AddStateChangeHandler(StateChangeHandler handler) -> Util::HandlerId
 {
-    const auto cHandler = [](void *context, SilKit_CanController *controller,
-                             SilKit_CanStateChangeEvent *stateChangeEvent) {
+    const auto cHandler = [](void* context, SilKit_CanController* controller,
+                             SilKit_CanStateChangeEvent* stateChangeEvent) {
         SILKIT_UNUSED_ARG(controller);
 
         SilKit::Services::Can::CanStateChangeEvent event{};
         event.timestamp = std::chrono::nanoseconds{stateChangeEvent->timestamp};
         event.state = static_cast<SilKit::Services::Can::CanControllerState>(stateChangeEvent->state);
 
-        const auto data = static_cast<HandlerData<StateChangeHandler> *>(context);
+        const auto data = static_cast<HandlerData<StateChangeHandler>*>(context);
         data->handler(data->controller, event);
     };
 
@@ -237,15 +237,15 @@ void CanController::RemoveStateChangeHandler(Util::HandlerId handlerId)
 
 auto CanController::AddErrorStateChangeHandler(ErrorStateChangeHandler handler) -> Util::HandlerId
 {
-    const auto cHandler = [](void *context, SilKit_CanController *controller,
-                             SilKit_CanErrorStateChangeEvent *errorStateChangeEvent) {
+    const auto cHandler = [](void* context, SilKit_CanController* controller,
+                             SilKit_CanErrorStateChangeEvent* errorStateChangeEvent) {
         SILKIT_UNUSED_ARG(controller);
 
         SilKit::Services::Can::CanErrorStateChangeEvent event{};
         event.timestamp = std::chrono::nanoseconds{errorStateChangeEvent->timestamp};
         event.errorState = static_cast<SilKit::Services::Can::CanErrorState>(errorStateChangeEvent->errorState);
 
-        const auto data = static_cast<HandlerData<ErrorStateChangeHandler> *>(context);
+        const auto data = static_cast<HandlerData<ErrorStateChangeHandler>*>(context);
         data->handler(data->controller, event);
     };
 
@@ -276,8 +276,8 @@ void CanController::RemoveErrorStateChangeHandler(Util::HandlerId handlerId)
 auto CanController::AddFrameTransmitHandler(FrameTransmitHandler handler,
                                             SilKit::Services::Can::CanTransmitStatusMask statusMask) -> Util::HandlerId
 {
-    const auto cHandler = [](void *context, SilKit_CanController *controller,
-                             SilKit_CanFrameTransmitEvent *frameTransmitEvent) {
+    const auto cHandler = [](void* context, SilKit_CanController* controller,
+                             SilKit_CanFrameTransmitEvent* frameTransmitEvent) {
         SILKIT_UNUSED_ARG(controller);
 
         SilKit::Services::Can::CanFrameTransmitEvent event{};
@@ -290,7 +290,7 @@ auto CanController::AddFrameTransmitHandler(FrameTransmitHandler handler,
             event.canId = frameTransmitEvent->canId;
         }
 
-        const auto data = static_cast<HandlerData<FrameTransmitHandler> *>(context);
+        const auto data = static_cast<HandlerData<FrameTransmitHandler>*>(context);
         data->handler(data->controller, event);
     };
 

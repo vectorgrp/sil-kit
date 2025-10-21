@@ -15,7 +15,7 @@ class INetworkSimulatorInternal
 public:
     // Returns the corresponding serviceDescriptor string to a given controllerDescriptor.
     // Returns an empty string and logs a warning if the controllerDescriptor is unknown.
-    virtual auto GetServiceDescriptorString(ControllerDescriptor controllerDescriptor) -> std::string const = 0;
+    virtual auto GetServiceDescriptorString(ControllerDescriptor controllerDescriptor) -> const std::string = 0;
 };
 
 } // namespace NetworkSimulation

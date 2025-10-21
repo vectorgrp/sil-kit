@@ -52,7 +52,7 @@ public:
         return _minor;
     }
 
-    void PublishValue(SilKit::Services::PubSub::IDataPublisher *publisher) const
+    void PublishValue(SilKit::Services::PubSub::IDataPublisher* publisher) const
     {
         const uint64_t value = Value();
 
@@ -230,8 +230,8 @@ TEST(ITest_SimTask, blocking_during_simtask_does_not_affect_processing_order)
         const auto sTimeSyncService = sLifecycleService->CreateTimeSyncService();
 
         s->CreateDataSubscriber("Sub", spec,
-                                [&received](SilKit::Services::PubSub::IDataSubscriber *,
-                                            const SilKit::Services::PubSub::DataMessageEvent &event) {
+                                [&received](SilKit::Services::PubSub::IDataSubscriber*,
+                                            const SilKit::Services::PubSub::DataMessageEvent& event) {
             ASSERT_EQ(event.data.size(), 8u);
             const auto value = Counter::ExtractValue(event.data);
             ASSERT_GT(Counter::ExtractMajor(value), uint32_t{0})

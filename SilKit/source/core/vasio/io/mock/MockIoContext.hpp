@@ -25,17 +25,17 @@ struct MockIoContext : IIoContext
 
     MOCK_METHOD(void, Dispatch, (std::function<void()>), (override));
 
-    MOCK_METHOD(std::unique_ptr<IAcceptor>, MakeTcpAcceptor, (std::string const&, uint16_t), (override));
+    MOCK_METHOD(std::unique_ptr<IAcceptor>, MakeTcpAcceptor, (const std::string&, uint16_t), (override));
 
-    MOCK_METHOD(std::unique_ptr<IAcceptor>, MakeLocalAcceptor, (std::string const&), (override));
+    MOCK_METHOD(std::unique_ptr<IAcceptor>, MakeLocalAcceptor, (const std::string&), (override));
 
-    MOCK_METHOD(std::unique_ptr<IConnector>, MakeTcpConnector, (std::string const&, uint16_t), (override));
+    MOCK_METHOD(std::unique_ptr<IConnector>, MakeTcpConnector, (const std::string&, uint16_t), (override));
 
-    MOCK_METHOD(std::unique_ptr<IConnector>, MakeLocalConnector, (std::string const&), (override));
+    MOCK_METHOD(std::unique_ptr<IConnector>, MakeLocalConnector, (const std::string&), (override));
 
     MOCK_METHOD(std::unique_ptr<ITimer>, MakeTimer, (), (override));
 
-    MOCK_METHOD(std::vector<std::string>, Resolve, (std::string const&), (override));
+    MOCK_METHOD(std::vector<std::string>, Resolve, (const std::string&), (override));
 
     MOCK_METHOD(void, SetLogger, (SilKit::Services::Logging::ILogger&), (override));
 };
@@ -78,17 +78,17 @@ struct MockIoContextWithExecutionQueue : IIoContext
         }
     }
 
-    MOCK_METHOD(std::unique_ptr<IAcceptor>, MakeTcpAcceptor, (std::string const&, uint16_t), (override));
+    MOCK_METHOD(std::unique_ptr<IAcceptor>, MakeTcpAcceptor, (const std::string&, uint16_t), (override));
 
-    MOCK_METHOD(std::unique_ptr<IAcceptor>, MakeLocalAcceptor, (std::string const&), (override));
+    MOCK_METHOD(std::unique_ptr<IAcceptor>, MakeLocalAcceptor, (const std::string&), (override));
 
-    MOCK_METHOD(std::unique_ptr<IConnector>, MakeTcpConnector, (std::string const&, uint16_t), (override));
+    MOCK_METHOD(std::unique_ptr<IConnector>, MakeTcpConnector, (const std::string&, uint16_t), (override));
 
-    MOCK_METHOD(std::unique_ptr<IConnector>, MakeLocalConnector, (std::string const&), (override));
+    MOCK_METHOD(std::unique_ptr<IConnector>, MakeLocalConnector, (const std::string&), (override));
 
     MOCK_METHOD(std::unique_ptr<ITimer>, MakeTimer, (), (override));
 
-    MOCK_METHOD(std::vector<std::string>, Resolve, (std::string const&), (override));
+    MOCK_METHOD(std::vector<std::string>, Resolve, (const std::string&), (override));
 
     MOCK_METHOD(void, SetLogger, (SilKit::Services::Logging::ILogger&), (override));
 };

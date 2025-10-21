@@ -207,8 +207,7 @@ std::string to_string(const Config::MdfChannel& mdf)
     auto printField = [&result](const auto& name, const auto field) {
         if (field.has_value())
         {
-            result << name << ": "
-                   << "\"" << field.value() << "\", ";
+            result << name << ": " << "\"" << field.value() << "\", ";
         }
     };
     printField("ChannelName", mdf.channelName);

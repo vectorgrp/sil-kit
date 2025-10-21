@@ -20,7 +20,7 @@ using namespace SilKit::Services::Lin;
 class Test_LinControllerConfig : public testing::Test
 {
 public:
-    Test_LinControllerConfig() {};
+    Test_LinControllerConfig(){};
 };
 
 auto PrepareParticipantConfiguration() -> std::shared_ptr<SilKit::Config::ParticipantConfiguration>

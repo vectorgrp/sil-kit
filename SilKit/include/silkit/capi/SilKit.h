@@ -44,7 +44,7 @@ typedef SilKit_ReturnCode(SilKitFPTR* SilKit_ReturnCodeToString_t)(const char** 
  * \return A specific string containing the last error message of the current thread.
  *
  */
-SilKitAPI const char* SilKitCALL SilKit_GetLastErrorString();
+const SilKitAPI char* SilKitCALL SilKit_GetLastErrorString();
 
 typedef const char*(SilKitFPTR* SilKit_GetLastErrorString_t)();
 

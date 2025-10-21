@@ -14,7 +14,8 @@ namespace CanDemoCommon {
 void FrameTransmitHandler(const CanFrameTransmitEvent& canFrameAck, ILogger* logger)
 {
     std::stringstream ss;
-    ss << "Receive CAN frame transmit acknowledge: canId=" << canFrameAck.canId << ", status='" << canFrameAck.status << "'";
+    ss << "Receive CAN frame transmit acknowledge: canId=" << canFrameAck.canId << ", status='" << canFrameAck.status
+       << "'";
     logger->Info(ss.str());
 }
 
@@ -42,4 +43,4 @@ void FrameHandler(const CanFrameEvent& canFrameEvent, ILogger* logger, bool prin
     logger->Info(ss.str());
 }
 
-} // namespace CanDemoBehavior
+} // namespace CanDemoCommon

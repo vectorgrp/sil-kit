@@ -18,19 +18,19 @@ namespace Flexray {
 class FlexrayController : public SilKit::Services::Flexray::IFlexrayController
 {
 public:
-    inline FlexrayController(SilKit_Participant *participant, const std::string &canonicalName,
-                             const std::string &networkName);
+    inline FlexrayController(SilKit_Participant* participant, const std::string& canonicalName,
+                             const std::string& networkName);
 
     inline ~FlexrayController() override = default;
 
-    inline void Configure(SilKit::Services::Flexray::FlexrayControllerConfig const &config) override;
+    inline void Configure(const SilKit::Services::Flexray::FlexrayControllerConfig& config) override;
 
     inline void ReconfigureTxBuffer(
         uint16_t txBufferIdx,
-        SilKit::Services::Flexray::FlexrayTxBufferConfig const &cxxFlexrayTxBufferConfig) override;
+        const SilKit::Services::Flexray::FlexrayTxBufferConfig& cxxFlexrayTxBufferConfig) override;
 
     inline void UpdateTxBuffer(
-        const SilKit::Services::Flexray::FlexrayTxBufferUpdate &cxxFlexrayTxBufferUpdate) override;
+        const SilKit::Services::Flexray::FlexrayTxBufferUpdate& cxxFlexrayTxBufferUpdate) override;
 
     inline void Run() override;
 
@@ -76,7 +76,7 @@ private:
     template <typename HandlerFunction>
     struct HandlerData
     {
-        SilKit::Services::Flexray::IFlexrayController *controller{nullptr};
+        SilKit::Services::Flexray::IFlexrayController* controller{nullptr};
         HandlerFunction handler{};
     };
 
@@ -84,7 +84,7 @@ private:
     using HandlerDataMap = std::unordered_map<SilKit::Util::HandlerId, std::unique_ptr<HandlerData<HandlerFunction>>>;
 
 private:
-    SilKit_FlexrayController *_flexrayController{nullptr};
+    SilKit_FlexrayController* _flexrayController{nullptr};
 
     HandlerDataMap<FrameHandler> _frameHandlers;
     HandlerDataMap<FrameTransmitHandler> _frameTransmitHandlers;
@@ -116,32 +116,32 @@ namespace Flexray {
 
 namespace {
 
-inline void CxxToC(const SilKit::Services::Flexray::FlexrayClusterParameters &cxxFlexrayClusterParameters,
-                   SilKit_FlexrayClusterParameters &cFlexrayClusterParameters);
+inline void CxxToC(const SilKit::Services::Flexray::FlexrayClusterParameters& cxxFlexrayClusterParameters,
+                   SilKit_FlexrayClusterParameters& cFlexrayClusterParameters);
 
-inline void CxxToC(const SilKit::Services::Flexray::FlexrayNodeParameters &cxxFlexrayNodeParameters,
-                   SilKit_FlexrayNodeParameters &cFlexrayNodeParameters);
+inline void CxxToC(const SilKit::Services::Flexray::FlexrayNodeParameters& cxxFlexrayNodeParameters,
+                   SilKit_FlexrayNodeParameters& cFlexrayNodeParameters);
 
-inline void CxxToC(const SilKit::Services::Flexray::FlexrayTxBufferConfig &cxxFlexrayTxBufferConfig,
-                   SilKit_FlexrayTxBufferConfig &cFlexrayTxBufferConfig);
+inline void CxxToC(const SilKit::Services::Flexray::FlexrayTxBufferConfig& cxxFlexrayTxBufferConfig,
+                   SilKit_FlexrayTxBufferConfig& cFlexrayTxBufferConfig);
 
-inline void CxxToC(const SilKit::Services::Flexray::FlexrayTxBufferUpdate &cxxFlexrayTxBufferUpdate,
-                   SilKit_FlexrayTxBufferUpdate &cFlexrayTxBufferUpdate);
+inline void CxxToC(const SilKit::Services::Flexray::FlexrayTxBufferUpdate& cxxFlexrayTxBufferUpdate,
+                   SilKit_FlexrayTxBufferUpdate& cFlexrayTxBufferUpdate);
 
-inline void CToCxx(const SilKit_FlexrayHeader &cFlexrayHeader,
-                   SilKit::Services::Flexray::FlexrayHeader &cxxFlexrayHeader);
+inline void CToCxx(const SilKit_FlexrayHeader& cFlexrayHeader,
+                   SilKit::Services::Flexray::FlexrayHeader& cxxFlexrayHeader);
 
 } // namespace
 
-FlexrayController::FlexrayController(SilKit_Participant *participant, const std::string &canonicalName,
-                                     const std::string &networkName)
+FlexrayController::FlexrayController(SilKit_Participant* participant, const std::string& canonicalName,
+                                     const std::string& networkName)
 {
     const auto returnCode =
         SilKit_FlexrayController_Create(&_flexrayController, participant, canonicalName.c_str(), networkName.c_str());
     ThrowOnError(returnCode);
 }
 
-void FlexrayController::Configure(SilKit::Services::Flexray::FlexrayControllerConfig const &config)
+void FlexrayController::Configure(const SilKit::Services::Flexray::FlexrayControllerConfig& config)
 {
     SilKit_FlexrayClusterParameters cFlexrayClusterParameters;
     CxxToC(config.clusterParams, cFlexrayClusterParameters);
@@ -150,7 +150,7 @@ void FlexrayController::Configure(SilKit::Services::Flexray::FlexrayControllerCo
     CxxToC(config.nodeParams, cFlexrayNodeParameters);
 
     std::vector<SilKit_FlexrayTxBufferConfig> cFlexrayTxBufferConfigs;
-    for (const auto &cxxFlexrayTxBufferConfigs : config.bufferConfigs)
+    for (const auto& cxxFlexrayTxBufferConfigs : config.bufferConfigs)
     {
         SilKit_FlexrayTxBufferConfig cFlexrayTxBufferConfig;
         CxxToC(cxxFlexrayTxBufferConfigs, cFlexrayTxBufferConfig);
@@ -170,7 +170,7 @@ void FlexrayController::Configure(SilKit::Services::Flexray::FlexrayControllerCo
 }
 
 void FlexrayController::ReconfigureTxBuffer(
-    uint16_t txBufferIdx, SilKit::Services::Flexray::FlexrayTxBufferConfig const &cxxFlexrayTxBufferConfig)
+    uint16_t txBufferIdx, const SilKit::Services::Flexray::FlexrayTxBufferConfig& cxxFlexrayTxBufferConfig)
 {
     SilKit_FlexrayTxBufferConfig cFlexrayTxBufferConfig;
     CxxToC(cxxFlexrayTxBufferConfig, cFlexrayTxBufferConfig);
@@ -180,7 +180,7 @@ void FlexrayController::ReconfigureTxBuffer(
     ThrowOnError(returnCode);
 }
 
-void FlexrayController::UpdateTxBuffer(const SilKit::Services::Flexray::FlexrayTxBufferUpdate &cxxFlexrayTxBufferUpdate)
+void FlexrayController::UpdateTxBuffer(const SilKit::Services::Flexray::FlexrayTxBufferUpdate& cxxFlexrayTxBufferUpdate)
 {
     SilKit_FlexrayTxBufferUpdate cFlexrayTxBufferUpdate;
     CxxToC(cxxFlexrayTxBufferUpdate, cFlexrayTxBufferUpdate);
@@ -229,8 +229,8 @@ void FlexrayController::Wakeup()
 
 auto FlexrayController::AddFrameHandler(FrameHandler handler) -> Util::HandlerId
 {
-    const auto cHandler = [](void *context, SilKit_FlexrayController *controller,
-                             const SilKit_FlexrayFrameEvent *message) {
+    const auto cHandler = [](void* context, SilKit_FlexrayController* controller,
+                             const SilKit_FlexrayFrameEvent* message) {
         SILKIT_UNUSED_ARG(controller);
 
         SilKit::Services::Flexray::FlexrayFrameEvent event{};
@@ -239,7 +239,7 @@ auto FlexrayController::AddFrameHandler(FrameHandler handler) -> Util::HandlerId
         CToCxx(*message->frame->header, event.frame.header);
         event.frame.payload = SilKit::Util::ToSpan(message->frame->payload);
 
-        const auto data = static_cast<HandlerData<FrameHandler> *>(context);
+        const auto data = static_cast<HandlerData<FrameHandler>*>(context);
         data->handler(data->controller, event);
     };
 
@@ -269,8 +269,8 @@ void FlexrayController::RemoveFrameHandler(Util::HandlerId handlerId)
 
 auto FlexrayController::AddFrameTransmitHandler(FrameTransmitHandler handler) -> Util::HandlerId
 {
-    const auto cHandler = [](void *context, SilKit_FlexrayController *controller,
-                             const SilKit_FlexrayFrameTransmitEvent *cEvent) {
+    const auto cHandler = [](void* context, SilKit_FlexrayController* controller,
+                             const SilKit_FlexrayFrameTransmitEvent* cEvent) {
         SILKIT_UNUSED_ARG(controller);
 
         SilKit::Services::Flexray::FlexrayFrameTransmitEvent cxxEvent{};
@@ -280,7 +280,7 @@ auto FlexrayController::AddFrameTransmitHandler(FrameTransmitHandler handler) ->
         cxxEvent.frame.payload = SilKit::Util::ToSpan(cEvent->frame->payload);
         cxxEvent.txBufferIndex = cEvent->txBufferIndex;
 
-        const auto data = static_cast<HandlerData<FrameTransmitHandler> *>(context);
+        const auto data = static_cast<HandlerData<FrameTransmitHandler>*>(context);
         data->handler(data->controller, cxxEvent);
     };
 
@@ -310,8 +310,8 @@ void FlexrayController::RemoveFrameTransmitHandler(Util::HandlerId handlerId)
 
 auto FlexrayController::AddWakeupHandler(WakeupHandler handler) -> Util::HandlerId
 {
-    const auto cHandler = [](void *context, SilKit_FlexrayController *controller,
-                             const SilKit_FlexrayWakeupEvent *cEvent) {
+    const auto cHandler = [](void* context, SilKit_FlexrayController* controller,
+                             const SilKit_FlexrayWakeupEvent* cEvent) {
         SILKIT_UNUSED_ARG(controller);
 
         SilKit::Services::Flexray::FlexrayWakeupEvent cxxEvent{};
@@ -319,7 +319,7 @@ auto FlexrayController::AddWakeupHandler(WakeupHandler handler) -> Util::Handler
         cxxEvent.channel = static_cast<SilKit::Services::Flexray::FlexrayChannel>(cEvent->channel);
         cxxEvent.pattern = static_cast<SilKit::Services::Flexray::FlexraySymbolPattern>(cEvent->pattern);
 
-        const auto data = static_cast<HandlerData<WakeupHandler> *>(context);
+        const auto data = static_cast<HandlerData<WakeupHandler>*>(context);
         data->handler(data->controller, cxxEvent);
     };
 
@@ -349,8 +349,8 @@ void FlexrayController::RemoveWakeupHandler(Util::HandlerId handlerId)
 
 auto FlexrayController::AddPocStatusHandler(PocStatusHandler handler) -> Util::HandlerId
 {
-    const auto cHandler = [](void *context, SilKit_FlexrayController *controller,
-                             const SilKit_FlexrayPocStatusEvent *cEvent) {
+    const auto cHandler = [](void* context, SilKit_FlexrayController* controller,
+                             const SilKit_FlexrayPocStatusEvent* cEvent) {
         SILKIT_UNUSED_ARG(controller);
 
         SilKit::Services::Flexray::FlexrayPocStatusEvent cxxEvent{};
@@ -365,7 +365,7 @@ auto FlexrayController::AddPocStatusHandler(PocStatusHandler handler) -> Util::H
         cxxEvent.startupState = static_cast<SilKit::Services::Flexray::FlexrayStartupStateType>(cEvent->startupState);
         cxxEvent.wakeupStatus = static_cast<SilKit::Services::Flexray::FlexrayWakeupStatusType>(cEvent->wakeupStatus);
 
-        const auto data = static_cast<HandlerData<PocStatusHandler> *>(context);
+        const auto data = static_cast<HandlerData<PocStatusHandler>*>(context);
         data->handler(data->controller, cxxEvent);
     };
 
@@ -395,8 +395,8 @@ void FlexrayController::RemovePocStatusHandler(Util::HandlerId handlerId)
 
 auto FlexrayController::AddSymbolHandler(SymbolHandler handler) -> Util::HandlerId
 {
-    const auto cHandler = [](void *context, SilKit_FlexrayController *controller,
-                             const SilKit_FlexraySymbolEvent *cEvent) {
+    const auto cHandler = [](void* context, SilKit_FlexrayController* controller,
+                             const SilKit_FlexraySymbolEvent* cEvent) {
         SILKIT_UNUSED_ARG(controller);
 
         SilKit::Services::Flexray::FlexraySymbolEvent cxxEvent{};
@@ -404,7 +404,7 @@ auto FlexrayController::AddSymbolHandler(SymbolHandler handler) -> Util::Handler
         cxxEvent.channel = static_cast<SilKit::Services::Flexray::FlexrayChannel>(cEvent->channel);
         cxxEvent.pattern = static_cast<SilKit::Services::Flexray::FlexraySymbolPattern>(cEvent->pattern);
 
-        const auto data = static_cast<HandlerData<SymbolHandler> *>(context);
+        const auto data = static_cast<HandlerData<SymbolHandler>*>(context);
         data->handler(data->controller, cxxEvent);
     };
 
@@ -434,8 +434,8 @@ void FlexrayController::RemoveSymbolHandler(Util::HandlerId handlerId)
 
 auto FlexrayController::AddSymbolTransmitHandler(SymbolTransmitHandler handler) -> Util::HandlerId
 {
-    const auto cHandler = [](void *context, SilKit_FlexrayController *controller,
-                             const SilKit_FlexraySymbolTransmitEvent *cEvent) {
+    const auto cHandler = [](void* context, SilKit_FlexrayController* controller,
+                             const SilKit_FlexraySymbolTransmitEvent* cEvent) {
         SILKIT_UNUSED_ARG(controller);
 
         SilKit::Services::Flexray::FlexraySymbolTransmitEvent cxxEvent{};
@@ -443,7 +443,7 @@ auto FlexrayController::AddSymbolTransmitHandler(SymbolTransmitHandler handler) 
         cxxEvent.channel = static_cast<SilKit::Services::Flexray::FlexrayChannel>(cEvent->channel);
         cxxEvent.pattern = static_cast<SilKit::Services::Flexray::FlexraySymbolPattern>(cEvent->pattern);
 
-        const auto data = static_cast<HandlerData<SymbolTransmitHandler> *>(context);
+        const auto data = static_cast<HandlerData<SymbolTransmitHandler>*>(context);
         data->handler(data->controller, cxxEvent);
     };
 
@@ -473,15 +473,15 @@ void FlexrayController::RemoveSymbolTransmitHandler(Util::HandlerId handlerId)
 
 auto FlexrayController::AddCycleStartHandler(CycleStartHandler handler) -> Util::HandlerId
 {
-    const auto cHandler = [](void *context, SilKit_FlexrayController *controller,
-                             const SilKit_FlexrayCycleStartEvent *cEvent) {
+    const auto cHandler = [](void* context, SilKit_FlexrayController* controller,
+                             const SilKit_FlexrayCycleStartEvent* cEvent) {
         SILKIT_UNUSED_ARG(controller);
 
         SilKit::Services::Flexray::FlexrayCycleStartEvent cxxEvent{};
         cxxEvent.timestamp = std::chrono::nanoseconds{cEvent->timestamp};
         cxxEvent.cycleCounter = cEvent->cycleCounter;
 
-        const auto data = static_cast<HandlerData<CycleStartHandler> *>(context);
+        const auto data = static_cast<HandlerData<CycleStartHandler>*>(context);
         data->handler(data->controller, cxxEvent);
     };
 
@@ -511,8 +511,8 @@ void FlexrayController::RemoveCycleStartHandler(Util::HandlerId handlerId)
 
 namespace {
 
-void CxxToC(const SilKit::Services::Flexray::FlexrayClusterParameters &cxxFlexrayClusterParameters,
-            SilKit_FlexrayClusterParameters &cFlexrayClusterParameters)
+void CxxToC(const SilKit::Services::Flexray::FlexrayClusterParameters& cxxFlexrayClusterParameters,
+            SilKit_FlexrayClusterParameters& cFlexrayClusterParameters)
 {
     SilKit_Struct_Init(SilKit_FlexrayClusterParameters, cFlexrayClusterParameters);
     cFlexrayClusterParameters.gColdstartAttempts = cxxFlexrayClusterParameters.gColdstartAttempts;
@@ -540,8 +540,8 @@ void CxxToC(const SilKit::Services::Flexray::FlexrayClusterParameters &cxxFlexra
     cFlexrayClusterParameters.gSyncFrameIDCountMax = cxxFlexrayClusterParameters.gSyncFrameIDCountMax;
 }
 
-void CxxToC(const SilKit::Services::Flexray::FlexrayNodeParameters &cxxFlexrayNodeParameters,
-            SilKit_FlexrayNodeParameters &cFlexrayNodeParameters)
+void CxxToC(const SilKit::Services::Flexray::FlexrayNodeParameters& cxxFlexrayNodeParameters,
+            SilKit_FlexrayNodeParameters& cFlexrayNodeParameters)
 {
     SilKit_Struct_Init(SilKit_FlexrayNodeParameters, cFlexrayNodeParameters);
     cFlexrayNodeParameters.pAllowHaltDueToClock = cxxFlexrayNodeParameters.pAllowHaltDueToClock;
@@ -569,8 +569,8 @@ void CxxToC(const SilKit::Services::Flexray::FlexrayNodeParameters &cxxFlexrayNo
     cFlexrayNodeParameters.pSamplesPerMicrotick = cxxFlexrayNodeParameters.pSamplesPerMicrotick;
 }
 
-void CxxToC(const SilKit::Services::Flexray::FlexrayTxBufferConfig &cxxFlexrayTxBufferConfig,
-            SilKit_FlexrayTxBufferConfig &cFlexrayTxBufferConfig)
+void CxxToC(const SilKit::Services::Flexray::FlexrayTxBufferConfig& cxxFlexrayTxBufferConfig,
+            SilKit_FlexrayTxBufferConfig& cFlexrayTxBufferConfig)
 {
     SilKit_Struct_Init(SilKit_FlexrayTxBufferConfig, cFlexrayTxBufferConfig);
     cFlexrayTxBufferConfig.channels = static_cast<SilKit_FlexrayChannel>(cxxFlexrayTxBufferConfig.channels);
@@ -583,8 +583,8 @@ void CxxToC(const SilKit::Services::Flexray::FlexrayTxBufferConfig &cxxFlexrayTx
         static_cast<SilKit_FlexrayTransmissionMode>(cxxFlexrayTxBufferConfig.transmissionMode);
 }
 
-void CxxToC(const SilKit::Services::Flexray::FlexrayTxBufferUpdate &cxxFlexrayTxBufferUpdate,
-            SilKit_FlexrayTxBufferUpdate &cFlexrayTxBufferUpdate)
+void CxxToC(const SilKit::Services::Flexray::FlexrayTxBufferUpdate& cxxFlexrayTxBufferUpdate,
+            SilKit_FlexrayTxBufferUpdate& cFlexrayTxBufferUpdate)
 {
     SilKit_Struct_Init(SilKit_FlexrayTxBufferUpdate, cFlexrayTxBufferUpdate);
     cFlexrayTxBufferUpdate.txBufferIndex = cxxFlexrayTxBufferUpdate.txBufferIndex;
@@ -592,7 +592,7 @@ void CxxToC(const SilKit::Services::Flexray::FlexrayTxBufferUpdate &cxxFlexrayTx
     cFlexrayTxBufferUpdate.payload = ToSilKitByteVector(cxxFlexrayTxBufferUpdate.payload);
 }
 
-void CToCxx(const SilKit_FlexrayHeader &cFlexrayHeader, SilKit::Services::Flexray::FlexrayHeader &cxxFlexrayHeader)
+void CToCxx(const SilKit_FlexrayHeader& cFlexrayHeader, SilKit::Services::Flexray::FlexrayHeader& cxxFlexrayHeader)
 {
     cxxFlexrayHeader.cycleCount = cFlexrayHeader.cycleCount;
     cxxFlexrayHeader.flags = cFlexrayHeader.flags;

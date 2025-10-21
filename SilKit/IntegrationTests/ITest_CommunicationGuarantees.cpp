@@ -407,18 +407,15 @@ protected:
         switch (newState)
         {
         case SystemState::Error:
-            Log() << "[Monitor] "
-                  << "SystemState = " << newState;
+            Log() << "[Monitor] " << "SystemState = " << newState;
             AbortAndFailTest("Reached SystemState::Error");
             break;
         case SystemState::Running:
-            Log() << "[Monitor] "
-                  << "SystemState = " << newState;
+            Log() << "[Monitor] " << "SystemState = " << newState;
             systemController.systemStateRunningPromise.set_value();
             break;
         default:
-            Log() << "[Monitor] "
-                  << "SystemState = " << newState;
+            Log() << "[Monitor] " << "SystemState = " << newState;
             break;
         }
     }
@@ -773,7 +770,6 @@ TEST_F(ITest_CommunicationGuarantees, test_receive_in_comm_ready_handler_mixed)
 
     try
     {
-
         auto registryUri = SetupSystem("silkit://localhost:0", coordinatedSyncParticipantsSub);
 
         // Start the coordinated participants

@@ -87,7 +87,7 @@ VOID SvcReportStatus(DWORD dwCurrentState, DWORD dwWin32ExitCode, DWORD dwWaitHi
     SetServiceStatus(gServiceStatusHandle, &gServiceStatus);
 }
 
-VOID SvcInit(DWORD dwArgc, LPTSTR *lpszArgv)
+VOID SvcInit(DWORD dwArgc, LPTSTR* lpszArgv)
 {
     SILKIT_UNUSED_ARG(dwArgc);
     SILKIT_UNUSED_ARG(lpszArgv);
@@ -159,7 +159,7 @@ VOID WINAPI SvcControlHandler(DWORD controlCode)
 //  Main Service Entrypoint
 // ============================================================
 
-VOID WINAPI SvcMain(DWORD dwArgc, LPTSTR *lpszArgv)
+VOID WINAPI SvcMain(DWORD dwArgc, LPTSTR* lpszArgv)
 {
     gServiceStatusHandle = RegisterServiceCtrlHandler(GetServiceName(), &SvcControlHandler);
     if (!gServiceStatusHandle)
@@ -200,12 +200,12 @@ struct SilKitWinError : SilKit::SilKitError
 // ============================================================
 
 template <typename T>
-using WinLocalPtr = std::unique_ptr<T, std::function<void(T *)>>;
+using WinLocalPtr = std::unique_ptr<T, std::function<void(T*)>>;
 
 template <typename T>
-auto MakeWinLocalPtr(T *pointer) -> WinLocalPtr<T>
+auto MakeWinLocalPtr(T* pointer) -> WinLocalPtr<T>
 {
-    return WinLocalPtr<T>(pointer, [](T *pointer) { LocalFree(pointer); });
+    return WinLocalPtr<T>(pointer, [](T* pointer) { LocalFree(pointer); });
 }
 
 // ============================================================
@@ -217,14 +217,14 @@ auto GetCurrentProcessDacl() -> PACL
     PACL dacl;
 
     const auto result = GetSecurityInfo(
-        GetCurrentProcess(), // process handle (result of GetCurrentProcess always has PROCESS_ALL_ACCESS rights)
-        SE_KERNEL_OBJECT, // object type
+        GetCurrentProcess(),       // process handle (result of GetCurrentProcess always has PROCESS_ALL_ACCESS rights)
+        SE_KERNEL_OBJECT,          // object type
         DACL_SECURITY_INFORMATION, // security info
-        nullptr, // owner
-        nullptr, // group
+        nullptr,                   // owner
+        nullptr,                   // group
         &dacl,
         nullptr, // sacl
-        nullptr // security descriptor
+        nullptr  // security descriptor
     );
 
     if (result != ERROR_SUCCESS)
@@ -271,11 +271,11 @@ auto AddProcessQueryLimitedInformationToDacl(PACL dacl) -> WinLocalPtr<ACL>
 void SetCurrentProcessDacl(PACL dacl)
 {
     const auto result = SetSecurityInfo(
-        GetCurrentProcess(), // process handle (result of GetCurrentProcess always has PROCESS_ALL_ACCESS rights)
-        SE_KERNEL_OBJECT, // object type
+        GetCurrentProcess(),       // process handle (result of GetCurrentProcess always has PROCESS_ALL_ACCESS rights)
+        SE_KERNEL_OBJECT,          // object type
         DACL_SECURITY_INFORMATION, // security info
-        nullptr, // owner
-        nullptr, // group
+        nullptr,                   // owner
+        nullptr,                   // group
         dacl,
         nullptr // sacl
     );

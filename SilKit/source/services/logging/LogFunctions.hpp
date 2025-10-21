@@ -13,7 +13,6 @@
 #include <string>
 
 
-
 namespace SilKit {
 namespace Services {
 namespace Logging {
@@ -131,8 +130,7 @@ inline auto FormatLabelsForLogging(const std::vector<MatchingLabel>& labels) -> 
             os << "Mandatory";
             break;
         default:
-            os << "MatchingLabel::Kind(" << static_cast<std::underlying_type_t<MatchingLabel::Kind>>(label.kind)
-               << ")";
+            os << "MatchingLabel::Kind(" << static_cast<std::underlying_type_t<MatchingLabel::Kind>>(label.kind) << ")";
             break;
         }
 

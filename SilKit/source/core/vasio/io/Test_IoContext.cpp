@@ -50,7 +50,6 @@ struct Test_IoContext : ::testing::Test
 
     void SetUp() override
     {
-
         acceptorLocalDomainSocketPath =
             (fs::temp_directory_path() / (to_string(SilKit::Util::Uuid::GenerateRandom()) + ".silkit")).string();
     }

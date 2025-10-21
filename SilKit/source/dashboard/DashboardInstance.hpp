@@ -47,7 +47,7 @@ public:
     ~DashboardInstance() override;
 
     auto GetRegistryEventListener() -> SilKit::Core::IRegistryEventListener* override;
-    void SetupDashboardConnection(std::string const& dashboardUri) override;
+    void SetupDashboardConnection(const std::string& dashboardUri) override;
 
 private:
     auto GetOrCreateSimulationData(const std::string& simulationName) -> SimulationData&;
@@ -59,16 +59,17 @@ private:
 private: // SilKit::Core::IRegistryEventListener
     void OnLoggerCreated(SilKit::Services::Logging::ILogger* logger) override;
     void OnRegistryUri(const std::string& registryUri) override;
-    void OnParticipantConnected(std::string const& simulationName, std::string const& participantName) override;
-    void OnParticipantDisconnected(std::string const& simulationName, std::string const& participantName) override;
+    void OnParticipantConnected(const std::string& simulationName, const std::string& participantName) override;
+    void OnParticipantDisconnected(const std::string& simulationName, const std::string& participantName) override;
     void OnRequiredParticipantsUpdate(const std::string& simulationName, const std::string& participantName,
                                       SilKit::Util::Span<const std::string> requiredParticipantNames) override;
     void OnParticipantStatusUpdate(
-        std::string const& simulationName, std::string const& participantName,
-        SilKit::Services::Orchestration::ParticipantStatus const& participantStatus) override;
-    void OnServiceDiscoveryEvent(std::string const& simulationName, std::string const& participantName,
-                                 SilKit::Core::Discovery::ServiceDiscoveryEvent const& serviceDiscoveryEvent) override;
-    void OnMetricsUpdate(const std::string &simulationName, const std::string &origin, const VSilKit::MetricsUpdate &metricsUpdate) override;
+        const std::string& simulationName, const std::string& participantName,
+        const SilKit::Services::Orchestration::ParticipantStatus& participantStatus) override;
+    void OnServiceDiscoveryEvent(const std::string& simulationName, const std::string& participantName,
+                                 const SilKit::Core::Discovery::ServiceDiscoveryEvent& serviceDiscoveryEvent) override;
+    void OnMetricsUpdate(const std::string& simulationName, const std::string& origin,
+                         const VSilKit::MetricsUpdate& metricsUpdate) override;
 
 private:
     /// Assigned in OnLoggerCreated

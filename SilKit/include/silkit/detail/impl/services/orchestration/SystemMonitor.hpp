@@ -21,7 +21,7 @@ namespace Orchestration {
 class SystemMonitor final : public SilKit::Services::Orchestration::ISystemMonitor
 {
 public:
-    inline explicit SystemMonitor(SilKit_Participant *participant);
+    inline explicit SystemMonitor(SilKit_Participant* participant);
 
     inline auto AddSystemStateHandler(SystemStateHandler handler) -> Util::HandlerId override;
 
@@ -33,20 +33,20 @@ public:
 
     inline auto SystemState() const -> SilKit::Services::Orchestration::SystemState override;
 
-    inline auto ParticipantStatus(const std::string &participantName) const
-        -> SilKit::Services::Orchestration::ParticipantStatus const & override;
+    inline auto ParticipantStatus(const std::string& participantName) const
+        -> const SilKit::Services::Orchestration::ParticipantStatus& override;
 
     inline void SetParticipantConnectedHandler(ParticipantConnectedHandler handler) override;
 
     inline void SetParticipantDisconnectedHandler(ParticipantDisconnectedHandler handler) override;
 
-    inline auto IsParticipantConnected(const std::string &participantName) const -> bool override;
+    inline auto IsParticipantConnected(const std::string& participantName) const -> bool override;
 
 private:
     template <typename HandlerFunction>
     struct HandlerData
     {
-        SilKit::Services::Orchestration::ISystemMonitor *systemMonitor{nullptr};
+        SilKit::Services::Orchestration::ISystemMonitor* systemMonitor{nullptr};
         HandlerFunction handler{};
     };
 
@@ -54,7 +54,7 @@ private:
     using HandlerDataMap = std::unordered_map<SilKit::Util::HandlerId, std::unique_ptr<HandlerData<HandlerFunction>>>;
 
 private:
-    SilKit_SystemMonitor *_systemMonitor{nullptr};
+    SilKit_SystemMonitor* _systemMonitor{nullptr};
 
     mutable SilKit::Services::Orchestration::ParticipantStatus _lastParticipantStatus;
 
@@ -87,12 +87,12 @@ namespace Orchestration {
 namespace {
 
 inline void CToCxx(
-    const SilKit_ParticipantConnectionInformation &cParticipantConnectionInformation,
-    SilKit::Services::Orchestration::ParticipantConnectionInformation &cxxParticipantConnectionInformation);
+    const SilKit_ParticipantConnectionInformation& cParticipantConnectionInformation,
+    SilKit::Services::Orchestration::ParticipantConnectionInformation& cxxParticipantConnectionInformation);
 
 } // namespace
 
-SystemMonitor::SystemMonitor(SilKit_Participant *participant)
+SystemMonitor::SystemMonitor(SilKit_Participant* participant)
 {
     const auto returnCode = SilKit_SystemMonitor_Create(&_systemMonitor, participant);
     ThrowOnError(returnCode);
@@ -100,10 +100,10 @@ SystemMonitor::SystemMonitor(SilKit_Participant *participant)
 
 auto SystemMonitor::AddSystemStateHandler(SystemStateHandler handler) -> Util::HandlerId
 {
-    const auto cHandler = [](void *context, SilKit_SystemMonitor *systemMonitor, SilKit_SystemState state) {
+    const auto cHandler = [](void* context, SilKit_SystemMonitor* systemMonitor, SilKit_SystemState state) {
         SILKIT_UNUSED_ARG(systemMonitor);
 
-        const auto data = static_cast<HandlerData<SystemStateHandler> *>(context);
+        const auto data = static_cast<HandlerData<SystemStateHandler>*>(context);
         data->handler(static_cast<SilKit::Services::Orchestration::SystemState>(state));
     };
 
@@ -137,8 +137,8 @@ auto SystemMonitor::AddParticipantStatusHandler(ParticipantStatusHandler handler
     using time_point_duration = typename time_point::duration;
     using duration = std::chrono::nanoseconds;
 
-    const auto cHandler = [](void *context, SilKit_SystemMonitor *systemMonitor, char const *participantName,
-                             SilKit_ParticipantStatus *cParticipantStatus) {
+    const auto cHandler = [](void* context, SilKit_SystemMonitor* systemMonitor, const char* participantName,
+                             SilKit_ParticipantStatus* cParticipantStatus) {
         SILKIT_UNUSED_ARG(systemMonitor);
         SILKIT_UNUSED_ARG(participantName);
 
@@ -152,7 +152,7 @@ auto SystemMonitor::AddParticipantStatusHandler(ParticipantStatusHandler handler
         cxxParticipantStatus.refreshTime =
             time_point{std::chrono::duration_cast<time_point_duration>(duration{cParticipantStatus->enterTime})};
 
-        const auto data = static_cast<HandlerData<ParticipantStatusHandler> *>(context);
+        const auto data = static_cast<HandlerData<ParticipantStatusHandler>*>(context);
         data->handler(cxxParticipantStatus);
     };
 
@@ -190,8 +190,8 @@ auto SystemMonitor::SystemState() const -> SilKit::Services::Orchestration::Syst
     return static_cast<SilKit::Services::Orchestration::SystemState>(systemState);
 }
 
-auto SystemMonitor::ParticipantStatus(const std::string &participantName) const
-    -> SilKit::Services::Orchestration::ParticipantStatus const &
+auto SystemMonitor::ParticipantStatus(const std::string& participantName) const
+    -> const SilKit::Services::Orchestration::ParticipantStatus&
 {
     SilKit_ParticipantStatus cParticipantStatus;
     SilKit_Struct_Init(SilKit_ParticipantStatus, cParticipantStatus);
@@ -229,14 +229,14 @@ void SystemMonitor::SetParticipantConnectedHandler(ParticipantConnectedHandler h
 {
     auto ownedHandlerPtr = std::make_unique<ParticipantConnectedHandler>(std::move(handler));
 
-    const auto cHandler = [](void *context, SilKit_SystemMonitor *systemMonitor,
-                             const SilKit_ParticipantConnectionInformation *cParticipantConnectionInformation) {
+    const auto cHandler = [](void* context, SilKit_SystemMonitor* systemMonitor,
+                             const SilKit_ParticipantConnectionInformation* cParticipantConnectionInformation) {
         SILKIT_UNUSED_ARG(systemMonitor);
 
         SilKit::Services::Orchestration::ParticipantConnectionInformation cxxParticipantConnectionInformation;
         CToCxx(*cParticipantConnectionInformation, cxxParticipantConnectionInformation);
 
-        const auto handlerPtr = static_cast<ParticipantConnectedHandler *>(context);
+        const auto handlerPtr = static_cast<ParticipantConnectedHandler*>(context);
         (*handlerPtr)(cxxParticipantConnectionInformation);
     };
 
@@ -251,12 +251,12 @@ void SystemMonitor::SetParticipantDisconnectedHandler(ParticipantDisconnectedHan
 {
     auto ownedHandlerPtr = std::make_unique<ParticipantDisconnectedHandler>(std::move(handler));
 
-    const auto cHandler = [](void *context, SilKit_SystemMonitor *,
-                             const SilKit_ParticipantConnectionInformation *cParticipantConnectionInformation) {
+    const auto cHandler = [](void* context, SilKit_SystemMonitor*,
+                             const SilKit_ParticipantConnectionInformation* cParticipantConnectionInformation) {
         SilKit::Services::Orchestration::ParticipantConnectionInformation cxxParticipantConnectionInformation;
         CToCxx(*cParticipantConnectionInformation, cxxParticipantConnectionInformation);
 
-        const auto handlerPtr = static_cast<ParticipantDisconnectedHandler *>(context);
+        const auto handlerPtr = static_cast<ParticipantDisconnectedHandler*>(context);
         (*handlerPtr)(cxxParticipantConnectionInformation);
     };
 
@@ -267,7 +267,7 @@ void SystemMonitor::SetParticipantDisconnectedHandler(ParticipantDisconnectedHan
     _participantDisconnectedHandler = std::move(ownedHandlerPtr);
 }
 
-auto SystemMonitor::IsParticipantConnected(const std::string &participantName) const -> bool
+auto SystemMonitor::IsParticipantConnected(const std::string& participantName) const -> bool
 {
     SilKit_Bool result;
 
@@ -280,8 +280,8 @@ auto SystemMonitor::IsParticipantConnected(const std::string &participantName) c
 
 namespace {
 
-void CToCxx(const SilKit_ParticipantConnectionInformation &cParticipantConnectionInformation,
-            SilKit::Services::Orchestration::ParticipantConnectionInformation &cxxParticipantConnectionInformation)
+void CToCxx(const SilKit_ParticipantConnectionInformation& cParticipantConnectionInformation,
+            SilKit::Services::Orchestration::ParticipantConnectionInformation& cxxParticipantConnectionInformation)
 {
     cxxParticipantConnectionInformation.participantName =
         std::string{cParticipantConnectionInformation.participantName};

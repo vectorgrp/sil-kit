@@ -6,33 +6,26 @@
 #include "RpcDemoCommon.hpp"
 #include <cmath>
 
-class RpcServer: public ApplicationBase
+class RpcServer : public ApplicationBase
 {
 public:
     // Inherit constructors
     using ApplicationBase::ApplicationBase;
 
 private:
-
     IRpcServer* _rpcServerSignalStrength;
     IRpcServer* _rpcServerSort;
-    
 
-    void AddCommandLineArgs() override
-    {
 
-    }
+    void AddCommandLineArgs() override {}
 
-    void EvaluateCommandLineArgs() override
-    {
-
-    }
+    void EvaluateCommandLineArgs() override {}
 
     void CreateControllers() override
     {
-        _rpcServerSignalStrength = GetParticipant()->CreateRpcServer("ServerSignalStrength", RpcDemoCommon::rpcSpecSignalStrength,
-                                                             [this](IRpcServer* server, RpcCallEvent event) {
-            
+        _rpcServerSignalStrength =
+            GetParticipant()->CreateRpcServer("ServerSignalStrength", RpcDemoCommon::rpcSpecSignalStrength,
+                                              [this](IRpcServer* server, RpcCallEvent event) {
             auto tunerData = RpcDemoCommon::DeserializeTunerData(SilKit::Util::ToStdVector(event.argumentData));
 
             // Calculation
@@ -56,7 +49,7 @@ private:
             default:
                 break;
             }
-            
+
             std::stringstream ss;
             ss << "Receive call to 'GetSignalStrength' with arguments: band=" << band
                << ", frequency=" << tunerData.frequency << "; returning signalStrength=" << signalStrength;
@@ -80,7 +73,8 @@ private:
             std::sort(resultData.begin(), resultData.end());
 
             std::stringstream ss;
-            ss << "Receive call to 'Sort' with argumentData=" << argumentData << "; returning resultData=" << resultData;
+            ss << "Receive call to 'Sort' with argumentData=" << argumentData
+               << "; returning resultData=" << resultData;
             GetLogger()->Info(ss.str());
 
             // Serialize result data
@@ -92,20 +86,11 @@ private:
         });
     }
 
-    void InitControllers() override
-    {
+    void InitControllers() override {}
 
-    }
+    void DoWorkSync(std::chrono::nanoseconds /*now*/) override {}
 
-    void DoWorkSync(std::chrono::nanoseconds /*now*/) override
-    {
-
-    }
-
-    void DoWorkAsync() override
-    {
-
-    }
+    void DoWorkAsync() override {}
 };
 
 int main(int argc, char** argv)
@@ -113,8 +98,9 @@ int main(int argc, char** argv)
     Arguments args;
     args.participantName = "RpcServer";
     RpcServer app{args};
-    app.SetupCommandLineArgs(argc, argv, "SIL Kit Demo - RPC Server: Provide remotely accessible procedures with arguments and return values");
-    
+    app.SetupCommandLineArgs(
+        argc, argv,
+        "SIL Kit Demo - RPC Server: Provide remotely accessible procedures with arguments and return values");
+
     return app.Run();
 }
-

@@ -18,7 +18,7 @@ namespace Flexray {
 
 struct WireFlexrayFrame
 {
-    FlexrayHeader header; //!< Header flags, slot, crc, and cycle indidcators
+    FlexrayHeader header;                //!< Header flags, slot, crc, and cycle indidcators
     Util::SharedVector<uint8_t> payload; //!< Raw payload containing 0 to 254 bytes
 };
 
@@ -39,7 +39,7 @@ inline auto MakeWireFlexrayFrameEvent(const FlexrayFrameEvent& flexrayFrameEvent
 struct WireFlexrayFrameTransmitEvent
 {
     std::chrono::nanoseconds timestamp; //!< Time at end of frame transmission
-    uint16_t txBufferIndex; //!< Tx buffer, that was used for the transmission
+    uint16_t txBufferIndex;             //!< Tx buffer, that was used for the transmission
     FlexrayChannel channel; //!< FlexRay channel A or B. (Valid values: FlexrayChannel::A, FlexrayChannel::B).
     WireFlexrayFrame frame; //!< Copy of the FlexRay frame that was successfully transmitted
 };
@@ -78,12 +78,12 @@ struct FlexrayTxBufferConfigUpdate
 
 enum class FlexrayChiCommand : uint8_t
 {
-    RUN, //!< ChiCommand RUN
-    DEFERRED_HALT, //!< ChiCommand DEFERRED_HALT
-    FREEZE, //!< ChiCommand FREEZE
+    RUN,             //!< ChiCommand RUN
+    DEFERRED_HALT,   //!< ChiCommand DEFERRED_HALT
+    FREEZE,          //!< ChiCommand FREEZE
     ALLOW_COLDSTART, //!< ChiCommand ALLOW_COLDSTART
-    ALL_SLOTS, //!< ChiCommand ALL_SLOTS
-    WAKEUP //!< ChiCommand WAKEUP
+    ALL_SLOTS,       //!< ChiCommand ALL_SLOTS
+    WAKEUP           //!< ChiCommand WAKEUP
 };
 
 struct FlexrayHostCommand
@@ -221,8 +221,7 @@ std::ostream& operator<<(std::ostream& out, const WireFlexrayTxBufferUpdate& msg
 
 std::ostream& operator<<(std::ostream& out, const FlexrayTxBufferConfigUpdate& msg)
 {
-    return out << "fr::FlexrayTxBufferConfigUpdate{"
-               << "idx=" << msg.txBufferIndex << " " << msg.txBufferConfig << "}";
+    return out << "fr::FlexrayTxBufferConfigUpdate{" << "idx=" << msg.txBufferIndex << " " << msg.txBufferConfig << "}";
 }
 
 std::ostream& operator<<(std::ostream& out, FlexrayChiCommand command)

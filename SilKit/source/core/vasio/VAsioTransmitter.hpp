@@ -86,7 +86,7 @@ class VAsioTransmitter
 
 public:
     VAsioTransmitter(Services::Logging::ILoggerInternal* logger)
-        :_logger{logger}
+        : _logger{logger}
     {
     }
 

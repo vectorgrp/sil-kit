@@ -128,10 +128,13 @@ auto GetDummyConfigWithValues() -> SilKit::Config::FlexrayController
 class MockParticipant : public DummyParticipant
 {
 public:
-    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint *, const std::string&, const FlexrayHostCommand &), (override));
-    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint *, const std::string&, const FlexrayControllerConfig &), (override));
-    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint *, const std::string&, const FlexrayTxBufferConfigUpdate &), (override));
-    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint *, const std::string&, const WireFlexrayTxBufferUpdate &), (override));
+    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint*, const std::string&, const FlexrayHostCommand&), (override));
+    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint*, const std::string&, const FlexrayControllerConfig&),
+                (override));
+    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint*, const std::string&, const FlexrayTxBufferConfigUpdate&),
+                (override));
+    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint*, const std::string&, const WireFlexrayTxBufferUpdate&),
+                (override));
 };
 
 class Test_FlexrayController : public testing::Test
@@ -139,13 +142,13 @@ class Test_FlexrayController : public testing::Test
 protected:
     struct Callbacks
     {
-        MOCK_METHOD2(MessageHandler, void(IFlexrayController *, const FlexrayFrameEvent &));
-        MOCK_METHOD2(MessageAckHandler, void(IFlexrayController *, const FlexrayFrameTransmitEvent &));
-        MOCK_METHOD2(WakeupHandler, void(IFlexrayController *, const FlexrayWakeupEvent &));
-        MOCK_METHOD2(PocStatusHandler, void(IFlexrayController *, const FlexrayPocStatusEvent &));
-        MOCK_METHOD2(SymbolHandler, void(IFlexrayController *, const FlexraySymbolEvent &));
-        MOCK_METHOD2(SymbolAckHandler, void(IFlexrayController *, const FlexraySymbolTransmitEvent &));
-        MOCK_METHOD2(CycleStartHandler, void(IFlexrayController *, const FlexrayCycleStartEvent &));
+        MOCK_METHOD2(MessageHandler, void(IFlexrayController*, const FlexrayFrameEvent&));
+        MOCK_METHOD2(MessageAckHandler, void(IFlexrayController*, const FlexrayFrameTransmitEvent&));
+        MOCK_METHOD2(WakeupHandler, void(IFlexrayController*, const FlexrayWakeupEvent&));
+        MOCK_METHOD2(PocStatusHandler, void(IFlexrayController*, const FlexrayPocStatusEvent&));
+        MOCK_METHOD2(SymbolHandler, void(IFlexrayController*, const FlexraySymbolEvent&));
+        MOCK_METHOD2(SymbolAckHandler, void(IFlexrayController*, const FlexraySymbolTransmitEvent&));
+        MOCK_METHOD2(CycleStartHandler, void(IFlexrayController*, const FlexrayCycleStartEvent&));
     };
 
 protected:
@@ -162,7 +165,6 @@ protected:
 
         referencePayload.resize(20);
         std::iota(referencePayload.begin(), referencePayload.end(), '\000');
-
     }
 
 protected:
@@ -227,7 +229,7 @@ TEST_F(Test_FlexrayController, send_controller_config_override_cluster_params)
     // Change clusterParams in tester and make sure they are ignored
     testControllerCfg.clusterParams = MakeValidClusterParams();
     testControllerCfg.clusterParams.gNumberOfMiniSlots = 999; // was 0
-    testControllerCfg.clusterParams.gMacroPerCycle = 1337; // was 0
+    testControllerCfg.clusterParams.gMacroPerCycle = 1337;    // was 0
 
     // default values (not configured)
     testControllerCfg.nodeParams = MakeValidNodeParams();
@@ -249,7 +251,7 @@ TEST_F(Test_FlexrayController, send_controller_config_override_node_params)
 
     // Change clusterParams in tester and make sure they are ignored
     testControllerCfg.nodeParams = MakeValidNodeParams();
-    testControllerCfg.nodeParams.pKeySlotId = 42; // was 0
+    testControllerCfg.nodeParams.pKeySlotId = 42;               // was 0
     testControllerCfg.nodeParams.pChannels = FlexrayChannel::B; // was A
 
     // default values (not configured)
@@ -330,7 +332,7 @@ TEST_F(Test_FlexrayController, throw_on_unconfigured_tx_buffer_configupdate)
     // Attempt to reconfigure TxBuffer 6, which should be out of range
     FlexrayTxBufferConfig bufferCfg{};
     EXPECT_CALL(participant,
-                SendMsg(An<const IServiceEndpoint *>(), netsimName, A<const FlexrayTxBufferConfigUpdate &>()))
+                SendMsg(An<const IServiceEndpoint*>(), netsimName, A<const FlexrayTxBufferConfigUpdate&>()))
         .Times(0);
     EXPECT_THROW(controller.ReconfigureTxBuffer(6, bufferCfg), SilKit::OutOfRangeError);
 }
@@ -372,7 +374,7 @@ TEST_F(Test_FlexrayController, throw_on_unconfigured_tx_buffer_update)
     FlexrayTxBufferUpdate update;
     update.txBufferIndex = 7; // only txBufferIdx = 0 is configured
     EXPECT_CALL(participant,
-                SendMsg(An<const IServiceEndpoint *>(), netsimName, A<const FlexrayTxBufferConfigUpdate &>()))
+                SendMsg(An<const IServiceEndpoint*>(), netsimName, A<const FlexrayTxBufferConfigUpdate&>()))
         .Times(0);
     EXPECT_THROW(controller.UpdateTxBuffer(update), SilKit::OutOfRangeError);
 }
@@ -562,7 +564,7 @@ TEST_F(Test_FlexrayController, add_remove_handler)
     EXPECT_CALL(callbacks, MessageHandler(&controller, ToFlexrayFrameEvent(message))).Times(numHandlers);
     controller.ReceiveMsg(&controllerBusSim, message);
 
-    for (auto &&handlerId : handlerIds)
+    for (auto&& handlerId : handlerIds)
     {
         controller.RemoveFrameHandler(handlerId);
     }

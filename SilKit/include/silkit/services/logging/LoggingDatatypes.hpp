@@ -14,12 +14,12 @@ namespace Logging {
  */
 enum class Level : uint32_t
 {
-    Trace = 0, //!< Detailed debug-level messages
-    Debug = 1, //!< Normal debug-level messages
-    Info = 2, //!< Informational content
-    Warn = 3, //!< Warnings
-    Error = 4, //!< Non-critical errors
-    Critical = 5, //!< Critical errors
+    Trace = 0,       //!< Detailed debug-level messages
+    Debug = 1,       //!< Normal debug-level messages
+    Info = 2,        //!< Informational content
+    Warn = 3,        //!< Warnings
+    Error = 4,       //!< Non-critical errors
+    Critical = 5,    //!< Critical errors
     Off = 0xffffffff //!< Logging is disabled
 };
 

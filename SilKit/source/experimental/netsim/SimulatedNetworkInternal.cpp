@@ -83,9 +83,8 @@ void SimulatedNetworkInternal::AddSimulatedController(const SilKit::Core::Servic
     if (userSimulatedController)
     {
         std::string controllerTypeName = ExtractControllerTypeName(serviceDescriptor);
-        _simulatedNetworkRouter->AddSimulatedController(fromParticipantName, controllerName,
-                                                        controllerTypeName, serviceId,
-                                                        controllerDescriptor, userSimulatedController);
+        _simulatedNetworkRouter->AddSimulatedController(fromParticipantName, controllerName, controllerTypeName,
+                                                        serviceId, controllerDescriptor, userSimulatedController);
     }
     else
     {

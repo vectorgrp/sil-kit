@@ -14,8 +14,7 @@ namespace VSilKit {
 struct IPeerMetrics
 {
     virtual ~IPeerMetrics() = default;
-    virtual void InitializeMetrics(VSilKit::IMetricsManager* manager,
-                                   SilKit::Core::IVAsioPeer* peer) = 0;
+    virtual void InitializeMetrics(VSilKit::IMetricsManager* manager, SilKit::Core::IVAsioPeer* peer) = 0;
     virtual void RxPacket() = 0;
     virtual void TxPacket() = 0;
     virtual void RxBytes(const SilKit::Core::SerializedMessage&) = 0;

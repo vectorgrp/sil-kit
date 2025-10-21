@@ -77,8 +77,8 @@ std::string to_string(const SourceLoc& sourceLoc)
 
 std::ostream& operator<<(std::ostream& out, const SourceLoc& sourceLoc)
 {
-    return out << "SourceLoc{filename=\"" << sourceLoc.filename << "\","
-               << "line=" << sourceLoc.line << ", funcname={\"" << sourceLoc.funcname << "\"}";
+    return out << "SourceLoc{filename=\"" << sourceLoc.filename << "\"," << "line=" << sourceLoc.line
+               << ", funcname={\"" << sourceLoc.funcname << "\"}";
 }
 
 

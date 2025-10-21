@@ -20,8 +20,8 @@ namespace Ethernet {
 class EthernetController : public SilKit::Services::Ethernet::IEthernetController
 {
 public:
-    inline EthernetController(SilKit_Participant *participant, const std::string &canonicalName,
-                              const std::string &networkName);
+    inline EthernetController(SilKit_Participant* participant, const std::string& canonicalName,
+                              const std::string& networkName);
 
     inline ~EthernetController() override = default;
 
@@ -48,13 +48,13 @@ public:
 
     inline void RemoveBitrateChangeHandler(Util::HandlerId handlerId) override;
 
-    inline void SendFrame(SilKit::Services::Ethernet::EthernetFrame msg, void *userContext) override;
+    inline void SendFrame(SilKit::Services::Ethernet::EthernetFrame msg, void* userContext) override;
 
 private:
     template <typename HandlerFunction>
     struct HandlerData
     {
-        SilKit::Services::Ethernet::IEthernetController *controller{nullptr};
+        SilKit::Services::Ethernet::IEthernetController* controller{nullptr};
         HandlerFunction handler{};
     };
 
@@ -62,7 +62,7 @@ private:
     using HandlerDataMap = std::unordered_map<SilKit::Util::HandlerId, std::unique_ptr<HandlerData<HandlerFunction>>>;
 
 private:
-    SilKit_EthernetController *_ethernetController{nullptr};
+    SilKit_EthernetController* _ethernetController{nullptr};
 
     HandlerDataMap<FrameHandler> _frameHandlers;
     HandlerDataMap<FrameTransmitHandler> _frameTransmitHandlers;
@@ -89,8 +89,8 @@ namespace Impl {
 namespace Services {
 namespace Ethernet {
 
-EthernetController::EthernetController(SilKit_Participant *participant, const std::string &canonicalName,
-                                       const std::string &networkName)
+EthernetController::EthernetController(SilKit_Participant* participant, const std::string& canonicalName,
+                                       const std::string& networkName)
 {
     const auto returnCode =
         SilKit_EthernetController_Create(&_ethernetController, participant, canonicalName.c_str(), networkName.c_str());
@@ -112,8 +112,8 @@ void EthernetController::Deactivate()
 auto EthernetController::AddFrameHandler(FrameHandler handler,
                                          SilKit::Services::DirectionMask directionMask) -> Util::HandlerId
 {
-    const auto cHandler = [](void *context, SilKit_EthernetController *controller,
-                             SilKit_EthernetFrameEvent *frameEvent) {
+    const auto cHandler = [](void* context, SilKit_EthernetController* controller,
+                             SilKit_EthernetFrameEvent* frameEvent) {
         SILKIT_UNUSED_ARG(controller);
 
         SilKit::Services::Ethernet::EthernetFrameEvent event{};
@@ -122,7 +122,7 @@ auto EthernetController::AddFrameHandler(FrameHandler handler,
         event.direction = static_cast<SilKit::Services::TransmitDirection>(frameEvent->direction);
         event.userContext = frameEvent->userContext;
 
-        const auto data = static_cast<HandlerData<FrameHandler> *>(context);
+        const auto data = static_cast<HandlerData<FrameHandler>*>(context);
         data->handler(data->controller, event);
     };
 
@@ -154,8 +154,8 @@ auto EthernetController::AddFrameTransmitHandler(
     FrameTransmitHandler handler,
     SilKit::Services::Ethernet::EthernetTransmitStatusMask transmitStatusMask) -> Util::HandlerId
 {
-    const auto cHandler = [](void *context, SilKit_EthernetController *controller,
-                             SilKit_EthernetFrameTransmitEvent *frameTransmitEvent) {
+    const auto cHandler = [](void* context, SilKit_EthernetController* controller,
+                             SilKit_EthernetFrameTransmitEvent* frameTransmitEvent) {
         SILKIT_UNUSED_ARG(controller);
 
         SilKit::Services::Ethernet::EthernetFrameTransmitEvent event{};
@@ -163,7 +163,7 @@ auto EthernetController::AddFrameTransmitHandler(
         event.status = static_cast<SilKit::Services::Ethernet::EthernetTransmitStatus>(frameTransmitEvent->status);
         event.userContext = frameTransmitEvent->userContext;
 
-        const auto data = static_cast<HandlerData<FrameTransmitHandler> *>(context);
+        const auto data = static_cast<HandlerData<FrameTransmitHandler>*>(context);
         data->handler(data->controller, event);
     };
 
@@ -194,15 +194,15 @@ void EthernetController::RemoveFrameTransmitHandler(Util::HandlerId handlerId)
 
 auto EthernetController::AddStateChangeHandler(StateChangeHandler handler) -> Util::HandlerId
 {
-    const auto cHandler = [](void *context, SilKit_EthernetController *controller,
-                             SilKit_EthernetStateChangeEvent *stateChangeEvent) {
+    const auto cHandler = [](void* context, SilKit_EthernetController* controller,
+                             SilKit_EthernetStateChangeEvent* stateChangeEvent) {
         SILKIT_UNUSED_ARG(controller);
 
         SilKit::Services::Ethernet::EthernetStateChangeEvent event{};
         event.timestamp = std::chrono::nanoseconds{stateChangeEvent->timestamp};
         event.state = static_cast<SilKit::Services::Ethernet::EthernetState>(stateChangeEvent->state);
 
-        const auto data = static_cast<HandlerData<StateChangeHandler> *>(context);
+        const auto data = static_cast<HandlerData<StateChangeHandler>*>(context);
         data->handler(data->controller, event);
     };
 
@@ -232,15 +232,15 @@ void EthernetController::RemoveStateChangeHandler(Util::HandlerId handlerId)
 
 auto EthernetController::AddBitrateChangeHandler(BitrateChangeHandler handler) -> Util::HandlerId
 {
-    const auto cHandler = [](void *context, SilKit_EthernetController *controller,
-                             SilKit_EthernetBitrateChangeEvent *bitrateChangeEvent) {
+    const auto cHandler = [](void* context, SilKit_EthernetController* controller,
+                             SilKit_EthernetBitrateChangeEvent* bitrateChangeEvent) {
         SILKIT_UNUSED_ARG(controller);
 
         SilKit::Services::Ethernet::EthernetBitrateChangeEvent event{};
         event.timestamp = std::chrono::nanoseconds{bitrateChangeEvent->timestamp};
         event.bitrate = static_cast<SilKit::Services::Ethernet::EthernetBitrate>(bitrateChangeEvent->bitrate);
 
-        const auto data = static_cast<HandlerData<BitrateChangeHandler> *>(context);
+        const auto data = static_cast<HandlerData<BitrateChangeHandler>*>(context);
         data->handler(data->controller, event);
     };
 
@@ -268,7 +268,7 @@ void EthernetController::RemoveBitrateChangeHandler(Util::HandlerId handlerId)
     _bitrateChangeHandlers.erase(handlerId);
 }
 
-void EthernetController::SendFrame(SilKit::Services::Ethernet::EthernetFrame msg, void *userContext)
+void EthernetController::SendFrame(SilKit::Services::Ethernet::EthernetFrame msg, void* userContext)
 {
     SilKit_EthernetFrame ethernetFrame;
     SilKit_Struct_Init(SilKit_EthernetFrame, ethernetFrame);

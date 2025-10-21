@@ -16,7 +16,7 @@ namespace VSilKit {
 
 
 void SetAsioSocketOptions(SilKit::Services::Logging::ILogger* logger, asio::ip::tcp::socket& socket,
-                          AsioSocketOptions const& socketOptions, std::error_code& errorCode);
+                          const AsioSocketOptions& socketOptions, std::error_code& errorCode);
 
 
 void SetAsioSocketOptions(SilKit::Services::Logging::ILogger* logger, asio::local::stream_protocol::socket& socket,

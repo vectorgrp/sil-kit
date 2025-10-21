@@ -126,7 +126,7 @@ struct TestResult
     bool wakeupReceived{false};
     bool gotoSleepReceived{false};
     bool gotoSleepSent{false};
-    size_t numberReceived{0}; //!< Number of received frames in slave
+    size_t numberReceived{0};        //!< Number of received frames in slave
     size_t numberReceivedInSleep{0}; //!< Number of received frames while in sleepMode
     std::vector<std::chrono::nanoseconds> sendTimes;
     std::vector<std::chrono::nanoseconds> receiveTimes;

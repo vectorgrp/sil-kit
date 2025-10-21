@@ -183,9 +183,8 @@ protected:
         EXPECT_CALL(callbacks, AckHandler(AnAckWithCanIdAndFrameCounter(1, 0))).Times(0);
         EXPECT_CALL(callbacks, AckHandler(AnAckWithCanIdAndFrameCounter(1, 6))).Times(0);
 
-        EXPECT_TRUE(testHarness.Run(30s))
-            << "TestHarness timeout occurred!"
-            << " numSent=" << numSent << " numReceived=" << numReceived << " numReceived2=" << numReceived2;
+        EXPECT_TRUE(testHarness.Run(30s)) << "TestHarness timeout occurred!" << " numSent=" << numSent
+                                          << " numReceived=" << numReceived << " numReceived2=" << numReceived2;
 
         for (auto&& message : testMessages)
         {

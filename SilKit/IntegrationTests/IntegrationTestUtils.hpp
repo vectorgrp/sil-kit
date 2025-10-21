@@ -22,7 +22,7 @@
 
 #if _WIN32
 #include <Windows.h> //for 'HANDLE'
-#endif //__WIN32
+#endif               //__WIN32
 
 #include "silkit/participant/exception.hpp"
 

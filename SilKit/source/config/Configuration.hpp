@@ -49,7 +49,7 @@ inline auto to_string(NetworkType networkType) -> std::string;
 enum class Aggregation : uint32_t
 {
     Off = 0, // disable aggregation
-    On = 1, // enable aggregation for time synchronization (synchronous and asynchronous case)
+    On = 1,  // enable aggregation for time synchronization (synchronous and asynchronous case)
     Auto = 2 // enable aggregation for time synchronization (synchronous case)
 };
 
@@ -128,13 +128,13 @@ struct TraceSource
 struct MdfChannel
 {
     // A user supplied empty string in the configuration is valid
-    std::optional<std::string> channelName; //!< maps to MDF cn_tx_name
+    std::optional<std::string> channelName;   //!< maps to MDF cn_tx_name
     std::optional<std::string> channelSource; //!< maps to MDF si_tx_name of cn_si_source
-    std::optional<std::string> channelPath; //!< maps to MDF si_tx_path of cn_si_source
+    std::optional<std::string> channelPath;   //!< maps to MDF si_tx_path of cn_si_source
 
-    std::optional<std::string> groupName; //!< maps to MDF cg_tx_name
+    std::optional<std::string> groupName;   //!< maps to MDF cg_tx_name
     std::optional<std::string> groupSource; //!< maps to MDF si_tx_name of cg_si_acq_source
-    std::optional<std::string> groupPath; //!< maps to MDF si_tx_path of cn_si_acq_source
+    std::optional<std::string> groupPath;   //!< maps to MDF si_tx_path of cn_si_acq_source
 };
 
 struct Replay

@@ -185,8 +185,7 @@ private:
                 defaultArgName.at(DefaultArg::Log), "l", "info",
                 "-l, --" + defaultArgName.at(DefaultArg::Log) + " <level>",
                 std::vector<std::string>{
-                    "Log to stdout with level:", 
-                    "'trace', 'debug', 'warn', 'info', 'error', 'critical' or 'off'.",
+                    "Log to stdout with level:", "'trace', 'debug', 'warn', 'info', 'error', 'critical' or 'off'.",
                     "Defaults to 'info'.",
                     "Cannot be used together with '--" + defaultArgName.at(DefaultArg::Config) + "'."});
         }
@@ -216,8 +215,7 @@ private:
                 defaultArgName.at(DefaultArg::Autonomous), "A", "-A, --" + defaultArgName.at(DefaultArg::Autonomous),
                 std::vector<std::string>{"Start the simulation autonomously.",
                                          "Without this flag, a coordinated start is performed",
-                                         "which requires the SIL Kit System Controller."
-                    });
+                                         "which requires the SIL Kit System Controller."});
         }
 
 
@@ -227,9 +225,8 @@ private:
             _commandLineParser->Add<CommandlineParser::Option>(
                 defaultArgName.at(DefaultArg::Duration), "d", defaultValue,
                 "-d, --" + defaultArgName.at(DefaultArg::Duration) + " <us>",
-                std::vector<std::string>{"The duration of a simulation step in microseconds.",
-                                         "Defaults to " + defaultValue
-                                             + "us.",
+                std::vector<std::string>{
+                    "The duration of a simulation step in microseconds.", "Defaults to " + defaultValue + "us.",
                     "Cannot be used together with '--" + defaultArgName.at(DefaultArg::Async) + "'."});
         }
 
@@ -316,7 +313,7 @@ private:
                 _commandLineParser->Get<CommandlineParser::Flag>(defaultArgName.at(DefaultArg::Async)).Value();
         }
 
-        
+
         bool hasAutonomousFlag = false;
         if (!excludedCommandLineArgs.count(DefaultArg::Autonomous))
         {
@@ -346,8 +343,7 @@ private:
             if (hasSleepOption)
             {
                 int sleepDurationMs = std::stoi(
-                    _commandLineParser->Get<CommandlineParser::Option>(defaultArgName.at(DefaultArg::Sleep))
-                        .Value());
+                    _commandLineParser->Get<CommandlineParser::Option>(defaultArgName.at(DefaultArg::Sleep)).Value());
                 _arguments.sleep = std::chrono::milliseconds(sleepDurationMs);
                 _sleepingEnabled = true;
             }
@@ -567,21 +563,21 @@ private:
             _gracefulStop = true;
             _stopWorkPromise.set_value();
         });
-        
+
         _lifecycleService->SetShutdownHandler([this]() {
             if (!_gracefulStop)
             {
-                // If the simulation was aborted, the stop handler has been skipped and the promise must be set here. 
+                // If the simulation was aborted, the stop handler has been skipped and the promise must be set here.
                 _stopWorkPromise.set_value();
             }
         });
-        
+
         // Start the worker thread
         _workerThread = std::thread{&ApplicationBase::WorkerThread, this};
     }
 
     void SetupSync()
-    { 
+    {
         // With time sync: Work by the app is done in the SimulationStepHandler
         _timeSyncService = _lifecycleService->CreateTimeSyncService();
         _timeSyncService->SetSimulationStepHandler(
@@ -778,4 +774,3 @@ public:
         }
     }
 };
-

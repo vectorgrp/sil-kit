@@ -11,8 +11,10 @@
 
 //! \brief Return build info array for the current platform
 #define SILKIT_MAKE_BUILDINFOS() \
-    {SilKit::BuildinfoCPlusPlus(), SilKit::BuildinfoCompiler(), SilKit::BuildinfoMultithread(), \
-     SilKit::BuildinfoDebug()}
+    { \
+        SilKit::BuildinfoCPlusPlus(), SilKit::BuildinfoCompiler(), SilKit::BuildinfoMultithread(), \
+            SilKit::BuildinfoDebug() \
+    }
 
 //! Declare extern C entry points for a extension and instantiate the
 //  C++ interface.

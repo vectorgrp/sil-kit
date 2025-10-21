@@ -58,7 +58,7 @@ private:
         // Build a CAN FD frame
         CanFrame canFrame{};
         canFrame.canId = 3;
-        canFrame.flags = static_cast<CanFrameFlagMask>(CanFrameFlag::Fdf) // FD Format Indicator
+        canFrame.flags = static_cast<CanFrameFlagMask>(CanFrameFlag::Fdf)    // FD Format Indicator
                          | static_cast<CanFrameFlagMask>(CanFrameFlag::Brs); // Bit Rate Switch (for FD Format only)
 
         // Build a payload with the frame Id
@@ -95,7 +95,6 @@ private:
     {
         SendFrame();
     }
-
 };
 
 int main(int argc, char** argv)

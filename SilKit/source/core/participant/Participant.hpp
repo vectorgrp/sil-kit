@@ -391,7 +391,8 @@ private:
                                                 const ValueT& configuredValue);
 
     template <typename ValueT>
-    void LogMismatchBetweenConfigAndPassedValue(const std::string& controllerName, const std::vector<ValueT>& passedValue,
+    void LogMismatchBetweenConfigAndPassedValue(const std::string& controllerName,
+                                                const std::vector<ValueT>& passedValue,
                                                 const std::vector<ValueT>& configuredValue);
 
     void OnSilKitSimulationJoined();

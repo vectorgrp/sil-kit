@@ -1060,7 +1060,6 @@ void VAsioConnection::HandleConnectedPeer(IVAsioPeer* peer)
     peer->SetServiceDescriptor(peerId);
 
     AssociateParticipantNameAndPeer(_simulationName, peer->GetInfo().participantName, peer);
-
 }
 
 
@@ -1072,7 +1071,7 @@ void VAsioConnection::AssociateParticipantNameAndPeer(const std::string& simulat
         _participantNameToPeer[simulationName].insert({participantName, peer});
     }
 
-    if(_config.experimental.metrics.sinks.empty())
+    if (_config.experimental.metrics.sinks.empty())
     {
         return;
     }
@@ -1081,8 +1080,7 @@ void VAsioConnection::AssociateParticipantNameAndPeer(const std::string& simulat
     metric = _metricsManager->GetStringList({"Peer", simulationName, participantName, "LocalEndpoint"});
     metric->Add(peer->GetLocalAddress());
 
-    metric =
-        _metricsManager->GetStringList({"Peer", simulationName, participantName, "RemoteEndpoint"});
+    metric = _metricsManager->GetStringList({"Peer", simulationName, participantName, "RemoteEndpoint"});
     metric->Add(peer->GetRemoteAddress());
 
     peer->InitializeMetrics(_metricsManager);
@@ -1698,7 +1696,7 @@ std::vector<std::string> VAsioConnection::GetConnectedParticipantsNames()
         std::unique_lock<decltype(_mutex)> lock{_mutex};
         for (const auto& item : _participantNameToPeer)
         {
-            for(const auto& peer: item.second)
+            for (const auto& peer : item.second)
             {
                 participants.push_back(peer.first);
             }
@@ -1848,8 +1846,7 @@ auto VAsioConnection::MakeConnectPeer(const VAsioPeerInfo& peerInfo) -> std::uni
 
 auto VAsioConnection::MakeVAsioPeer(std::unique_ptr<IRawByteStream> stream) -> std::unique_ptr<IVAsioPeer>
 {
-
-    if(_config.experimental.metrics.sinks.empty())
+    if (_config.experimental.metrics.sinks.empty())
     {
         return std::make_unique<VAsioPeer>(this, _ioContext.get(), std::move(stream), _logger,
                                            std::make_unique<VSilKit::NoMetrics>());
@@ -1858,7 +1855,6 @@ auto VAsioConnection::MakeVAsioPeer(std::unique_ptr<IRawByteStream> stream) -> s
     {
         return std::make_unique<VAsioPeer>(this, _ioContext.get(), std::move(stream), _logger,
                                            std::make_unique<VSilKit::PeerMetrics>());
-
     }
 }
 
@@ -1989,7 +1985,7 @@ void VAsioConnection::OnRemoteConnectionFailure(SilKit::Core::VAsioPeerInfo peer
 }
 
 
-bool VAsioConnection::TryRemoteConnectRequest(VAsioPeerInfo const& peerInfo)
+bool VAsioConnection::TryRemoteConnectRequest(const VAsioPeerInfo& peerInfo)
 {
     SILKIT_TRACE_METHOD_(_logger, "({})", peerInfo.participantName);
 
@@ -2041,7 +2037,7 @@ bool VAsioConnection::TryRemoteConnectRequest(VAsioPeerInfo const& peerInfo)
 }
 
 
-bool VAsioConnection::TryProxyConnect(VAsioPeerInfo const& peerInfo)
+bool VAsioConnection::TryProxyConnect(const VAsioPeerInfo& peerInfo)
 {
     SILKIT_TRACE_METHOD_(_logger, "({})", peerInfo.participantName);
 

@@ -5,7 +5,7 @@
 #include "ApplicationBase.hpp"
 #include "CanDemoCommon.hpp"
 
-class CanReader: public ApplicationBase
+class CanReader : public ApplicationBase
 {
 public:
     // Inherit constructors
@@ -51,7 +51,7 @@ private:
         _canController->SetBaudRate(10'000, 1'000'000, 2'000'000);
         _canController->Start();
     }
-    
+
     void DoWorkSync(std::chrono::nanoseconds /*now*/) override
     {
         // NOP
@@ -70,7 +70,6 @@ int main(int argc, char** argv)
     args.duration = 5ms;
     CanReader app{args};
     app.SetupCommandLineArgs(argc, argv, "SIL Kit Demo - Can: Log received frames");
-    
+
     return app.Run();
 }
-

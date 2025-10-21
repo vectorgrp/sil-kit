@@ -46,7 +46,7 @@ auto ParticipantConfigurationToJson(std::shared_ptr<SilKit::Config::IParticipant
     Impl::ThrowOnError(returnCode);
 
     std::vector<char> buffer;
-    if( size > 0)
+    if (size > 0)
     {
         buffer.resize(size);
         auto&& data = buffer.data();

@@ -13,7 +13,7 @@ namespace VSilKit {
 
 auto ToString(MetricName stringList) -> std::string
 {
-    if(stringList.size() == 0)
+    if (stringList.size() == 0)
     {
         return {};
     }

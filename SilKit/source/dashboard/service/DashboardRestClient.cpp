@@ -37,14 +37,15 @@ DashboardRestClient::DashboardRestClient(Services::Logging::ILogger* logger, con
     OATPP_COMPONENT(std::shared_ptr<oatpp::network::ClientConnectionProvider>, connectionProvider);
     auto requestExecutor = oatpp::web::client::HttpRequestExecutor::createShared(connectionProvider, _retryPolicy);
     _apiClient = SilKit::Dashboard::DashboardSystemApiClient::createShared(requestExecutor, objectMapper);
-    _serviceClient = std::make_shared<SilKit::Dashboard::DashboardSystemServiceClient>(_logger, _apiClient, objectMapper);
+    _serviceClient =
+        std::make_shared<SilKit::Dashboard::DashboardSystemServiceClient>(_logger, _apiClient, objectMapper);
 }
 
 DashboardRestClient::DashboardRestClient(std::shared_ptr<LibraryInitializer> libraryInit,
                                          Services::Logging::ILogger* logger,
                                          std::shared_ptr<IDashboardSystemServiceClient> serviceClient,
                                          std::shared_ptr<ISilKitToOatppMapper> mapper)
-                                         
+
 {
     _logger = logger;
     _libraryInit = libraryInit;
@@ -80,7 +81,7 @@ bool DashboardRestClient::IsBulkUpdateSupported()
     if (response)
     {
         const auto statusCode = response->getStatusCode();
-        return  200 <= statusCode && statusCode < 300;
+        return 200 <= statusCode && statusCode < 300;
     }
     return false;
 }
@@ -88,8 +89,8 @@ bool DashboardRestClient::IsBulkUpdateSupported()
 uint64_t DashboardRestClient::OnSimulationStart(const std::string& connectUri, uint64_t time)
 {
     Services::Logging::Info(_logger, "Dashboard: creating simulation {} {}", connectUri, time);
-    auto simulation = _serviceClient->CreateSimulation(
-        _silKitToOatppMapper->CreateSimulationCreationRequestDto(connectUri, time));
+    auto simulation =
+        _serviceClient->CreateSimulation(_silKitToOatppMapper->CreateSimulationCreationRequestDto(connectUri, time));
     if (simulation)
     {
         Services::Logging::Info(_logger, "Dashboard: created simulation with id {}", *simulation->id.get());
@@ -105,7 +106,7 @@ void DashboardRestClient::OnBulkUpdate(uint64_t simulationId, const DashboardBul
 }
 
 void DashboardRestClient::OnMetricsUpdate(uint64_t simulationId, const std::string& origin,
-                                         const VSilKit::MetricsUpdate& metricsUpdate)
+                                          const VSilKit::MetricsUpdate& metricsUpdate)
 {
     _serviceClient->UpdateSimulationMetrics(simulationId,
                                             _silKitToOatppMapper->CreateMetricsUpdateDto(origin, metricsUpdate));

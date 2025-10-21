@@ -13,7 +13,7 @@ namespace Log = SilKit::Services::Logging;
 namespace VSilKit {
 
 
-MetricsSender::MetricsSender(SilKit::Core::IParticipantInternal *participant)
+MetricsSender::MetricsSender(SilKit::Core::IParticipantInternal* participant)
     : _participant{participant}
     , _logger{participant->GetLogger()}
 {
@@ -23,7 +23,7 @@ MetricsSender::MetricsSender(SilKit::Core::IParticipantInternal *participant)
 
 // IMetricsSender
 
-void MetricsSender::Send(const VSilKit::MetricsUpdate &msg)
+void MetricsSender::Send(const VSilKit::MetricsUpdate& msg)
 {
     _participant->SendMsg(this, msg);
 }
@@ -31,12 +31,12 @@ void MetricsSender::Send(const VSilKit::MetricsUpdate &msg)
 
 // IServiceEndpoint
 
-void MetricsSender::SetServiceDescriptor(const SilKit::Core::ServiceDescriptor &serviceDescriptor)
+void MetricsSender::SetServiceDescriptor(const SilKit::Core::ServiceDescriptor& serviceDescriptor)
 {
     _serviceDescriptor = serviceDescriptor;
 }
 
-auto MetricsSender::GetServiceDescriptor() const -> const SilKit::Core::ServiceDescriptor &
+auto MetricsSender::GetServiceDescriptor() const -> const SilKit::Core::ServiceDescriptor&
 {
     return _serviceDescriptor;
 }

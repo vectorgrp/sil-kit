@@ -24,17 +24,16 @@ namespace Core {
 
 struct MockVAsioPeer : IVAsioPeer
 {
-
     // IVAsioPeer
 
     MOCK_METHOD(void, SendSilKitMsg, (SerializedMessage), (override));
     MOCK_METHOD(void, Subscribe, (VAsioMsgSubscriber), (override));
-    MOCK_METHOD(const VAsioPeerInfo &, GetInfo, (), (const, override));
+    MOCK_METHOD(const VAsioPeerInfo&, GetInfo, (), (const, override));
     MOCK_METHOD(void, SetInfo, (VAsioPeerInfo), (override));
     MOCK_METHOD(std::string, GetRemoteAddress, (), (const, override));
     MOCK_METHOD(std::string, GetLocalAddress, (), (const, override));
-    MOCK_METHOD(void, SetSimulationName, (const std::string &), (override));
-    MOCK_METHOD(const std::string &, GetSimulationName, (), (const, override));
+    MOCK_METHOD(void, SetSimulationName, (const std::string&), (override));
+    MOCK_METHOD(const std::string&, GetSimulationName, (), (const, override));
     MOCK_METHOD(void, StartAsyncRead, (), (override));
     MOCK_METHOD(void, Shutdown, (), (override));
     MOCK_METHOD(void, EnableAggregation, (), (override));
@@ -44,8 +43,8 @@ struct MockVAsioPeer : IVAsioPeer
 
     // IServiceEndpoint (via IVAsioPeer)
 
-    MOCK_METHOD(void, SetServiceDescriptor, (const ServiceDescriptor &), (override));
-    MOCK_METHOD(const ServiceDescriptor &, GetServiceDescriptor, (), (const, override));
+    MOCK_METHOD(void, SetServiceDescriptor, (const ServiceDescriptor&), (override));
+    MOCK_METHOD(const ServiceDescriptor&, GetServiceDescriptor, (), (const, override));
 };
 
 

@@ -17,14 +17,9 @@ namespace Services {
 
 namespace Detail {
 template <class SilKitMessageT>
-void TraceMessageCommon(Logging::ILoggerInternal* logger,
-                       const char* messageString,
-                       const Core::IServiceEndpoint* addr,
-                       const SilKitMessageT& msg,
-                       std::string_view keyString = {},
-                       std::string_view valueString = {})
+void TraceMessageCommon(Logging::ILoggerInternal* logger, const char* messageString, const Core::IServiceEndpoint* addr,
+                        const SilKitMessageT& msg, std::string_view keyString = {}, std::string_view valueString = {})
 {
-
     if constexpr (std::is_same_v<SilKitMessageT, SilKit::Services::Logging::LogMsg>)
     {
         // Don't trace LogMessages - this could cause cycles!
@@ -39,7 +34,7 @@ void TraceMessageCommon(Logging::ILoggerInternal* logger,
             lm.SetKeyValue(addr->GetServiceDescriptor());
             lm.FormatKeyValue(Logging::Keys::msg, "{}", msg);
 
-            if (!keyString.empty() && ! valueString.empty())
+            if (!keyString.empty() && !valueString.empty())
             {
                 lm.SetKeyValue(keyString, valueString);
             }
@@ -73,7 +68,8 @@ void TraceTx(Logging::ILoggerInternal* logger, const Core::IServiceEndpoint* add
 }
 
 template <class SilKitMessageT>
-void TraceTx(Logging::ILoggerInternal* logger, const Core::IServiceEndpoint* addr, const std::string_view target, const SilKitMessageT& msg)
+void TraceTx(Logging::ILoggerInternal* logger, const Core::IServiceEndpoint* addr, const std::string_view target,
+             const SilKitMessageT& msg)
 {
     Detail::TraceMessageCommon(logger, "Send targetted message", addr, msg, Logging::Keys::to, target);
 }

@@ -48,7 +48,7 @@ public:
 
     virtual void EnableAggregation() = 0;
 
-    virtual void InitializeMetrics( VSilKit::IMetricsManager*) = 0;
+    virtual void InitializeMetrics(VSilKit::IMetricsManager*) = 0;
 };
 
 

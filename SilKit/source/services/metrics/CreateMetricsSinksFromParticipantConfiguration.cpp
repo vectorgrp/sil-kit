@@ -20,14 +20,14 @@ namespace VSilKit {
 namespace Log = SilKit::Services::Logging;
 
 auto CreateMetricsSinksFromParticipantConfiguration(
-    SilKit::Services::Logging::ILogger *logger, IMetricsSender *sender, const std::string &participantName,
-    const std::vector<SilKit::Config::MetricsSink> &configuredSinks) -> std::vector<std::unique_ptr<IMetricsSink>>
+    SilKit::Services::Logging::ILogger* logger, IMetricsSender* sender, const std::string& participantName,
+    const std::vector<SilKit::Config::MetricsSink>& configuredSinks) -> std::vector<std::unique_ptr<IMetricsSink>>
 {
     std::vector<std::unique_ptr<IMetricsSink>> sinks;
 
     auto metricsFileTimestamp = SilKit::Util::CurrentTimestampString();
 
-    for (const auto &config : configuredSinks)
+    for (const auto& config : configuredSinks)
     {
         std::unique_ptr<IMetricsSink> sink;
 

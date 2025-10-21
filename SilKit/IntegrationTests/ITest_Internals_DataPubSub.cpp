@@ -107,7 +107,7 @@ DataSubscribers:
               {},
               0,
               defaultMsgSize,
-              numMsgToPublish}, // Publishes for PubSub2->SubCtrl1
+              numMsgToPublish},                                                  // Publishes for PubSub2->SubCtrl1
              {"PubCtrl2", "TopicC", "A", {}, 0, defaultMsgSize, numMsgToPublish} // Has no topic configured.
          },
          {{"SubCtrl1",
@@ -135,7 +135,7 @@ DataSubscribers:
               {},
               defaultMsgSize,
               numMsgToReceive,
-              6}, // Receives by PubSub1->PubCtrl1
+              6},                                                                   // Receives by PubSub1->PubCtrl1
              {"SubCtrl2", "TopicC", {"A"}, {}, defaultMsgSize, numMsgToReceive, 6}, // Has no topic configured.
          },
          configPubSub2});
@@ -679,7 +679,7 @@ TEST_F(ITest_Internals_DataPubSub, test_1_participant_selfdelivery)
 
     std::vector<PubSubParticipant> pubsubs;
     pubsubs.push_back({"PubSub1",
-                       {{"PubCtrl1", "TopicA", {"A"}, {}, 0, defaultMsgSize, numMsgToPublish}}, // Pub
+                       {{"PubCtrl1", "TopicA", {"A"}, {}, 0, defaultMsgSize, numMsgToPublish}},   // Pub
                        {{"SubCtrl1", "TopicA", {"A"}, {}, defaultMsgSize, numMsgToReceive, 1}}}); // Sub
 
     RunSyncTest(pubsubs);

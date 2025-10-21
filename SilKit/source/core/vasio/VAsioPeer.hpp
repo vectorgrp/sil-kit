@@ -80,7 +80,7 @@ public:
 
     void EnableAggregation() override;
 
-    void InitializeMetrics( VSilKit::IMetricsManager* manager) override;
+    void InitializeMetrics(VSilKit::IMetricsManager* manager) override;
 
 private:
     // ----------------------------------------

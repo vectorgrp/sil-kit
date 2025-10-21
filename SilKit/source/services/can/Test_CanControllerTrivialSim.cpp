@@ -74,7 +74,7 @@ public:
 class Test_CanControllerTrivialSim : public testing::Test
 {
 public:
-    Test_CanControllerTrivialSim() {};
+    Test_CanControllerTrivialSim(){};
 };
 
 TEST(Test_CanControllerTrivialSim, send_can_frame)
