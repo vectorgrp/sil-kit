@@ -1332,7 +1332,7 @@ void Participant<SilKitConnectionT>::SendMsgImpl(const IServiceEndpoint* from, S
 {
     TraceTx(GetLoggerInternal(), from, msg);
     _connection.SendMsg(from, std::forward<SilKitMessageT>(msg));
-    if constexpr (SilKitMsgTraits<RemoveCvRef<SilKitMessageT>::type>::IsSynchronizationPoint())
+    if constexpr (SilKitMsgTraits<typename RemoveCvRef<SilKitMessageT>::type>::IsSynchronizationPoint())
     {
         if (auto* lifecycle = static_cast<Orchestration::LifecycleService*>(GetLifecycleService()); lifecycle)
         {
