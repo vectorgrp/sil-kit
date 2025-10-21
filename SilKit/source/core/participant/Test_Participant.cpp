@@ -14,7 +14,7 @@
 #include "WireLinMessages.hpp"
 #include "WireFlexrayMessages.hpp"
 #include "WireRpcMessages.hpp"
-#include "LoggingDataTypesInternal.hpp"
+#include "LoggingDatatypesInternal.hpp"
 #include "OrchestrationDatatypes.hpp"
 #include "ServiceDatatypes.hpp"
 #include "RequestReplyDatatypes.hpp"
