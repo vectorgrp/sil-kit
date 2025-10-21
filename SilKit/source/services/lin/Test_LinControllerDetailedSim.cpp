@@ -74,7 +74,6 @@ protected:
     LinController::GoToSleepHandler goToSleepHandler;
     LinController::WakeupHandler wakeupHandler;
     SilKit::Experimental::Services::Lin::LinSlaveConfigurationHandler slaveConfigurationHandler;
-
 };
 
 TEST_F(Test_LinControllerDetailedSim, send_frame_unitialized)

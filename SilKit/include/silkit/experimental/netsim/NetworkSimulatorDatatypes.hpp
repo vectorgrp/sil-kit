@@ -38,7 +38,7 @@ namespace Can {
 struct CanFrameRequest
 {
     SilKit::Services::Can::CanFrame frame; //!< The incoming CAN Frame
-    void* userContext; //!< Optional pointer provided by user when sending the frame
+    void* userContext;                     //!< Optional pointer provided by user when sending the frame
 };
 struct CanConfigureBaudrate
 {
@@ -98,12 +98,12 @@ struct FlexrayControllerConfig
 
 enum class FlexrayChiCommand : uint8_t
 {
-    RUN = SilKit_FlexrayChiCommand_RUN, //!< ChiCommand RUN
-    DEFERRED_HALT = SilKit_FlexrayChiCommand_DEFERRED_HALT, //!< ChiCommand DEFERRED_HALT
-    FREEZE = SilKit_FlexrayChiCommand_FREEZE, //!< ChiCommand FREEZE
+    RUN = SilKit_FlexrayChiCommand_RUN,                         //!< ChiCommand RUN
+    DEFERRED_HALT = SilKit_FlexrayChiCommand_DEFERRED_HALT,     //!< ChiCommand DEFERRED_HALT
+    FREEZE = SilKit_FlexrayChiCommand_FREEZE,                   //!< ChiCommand FREEZE
     ALLOW_COLDSTART = SilKit_FlexrayChiCommand_ALLOW_COLDSTART, //!< ChiCommand ALLOW_COLDSTART
-    ALL_SLOTS = SilKit_FlexrayChiCommand_ALL_SLOTS, //!< ChiCommand ALL_SLOTS
-    WAKEUP = SilKit_FlexrayChiCommand_WAKEUP //!< ChiCommand WAKEUP
+    ALL_SLOTS = SilKit_FlexrayChiCommand_ALL_SLOTS,             //!< ChiCommand ALL_SLOTS
+    WAKEUP = SilKit_FlexrayChiCommand_WAKEUP                    //!< ChiCommand WAKEUP
 };
 
 struct FlexrayHostCommand
@@ -125,7 +125,7 @@ struct EthernetFrameRequest
 enum class EthernetMode : uint8_t
 {
     Inactive = SilKit_EthernetControllerMode_Inactive, //!< The controller is inactive (default after reset).
-    Active = SilKit_EthernetControllerMode_Active, //!< The controller is active.
+    Active = SilKit_EthernetControllerMode_Active,     //!< The controller is active.
 };
 
 struct EthernetControllerMode
@@ -188,7 +188,7 @@ struct LinFrameResponseUpdate
 
 struct LinControllerStatusUpdate
 {
-    std::chrono::nanoseconds timestamp; //!< Time of the controller status change.
+    std::chrono::nanoseconds timestamp;                //!< Time of the controller status change.
     SilKit::Services::Lin::LinControllerStatus status; //!< The new controller status
 };
 

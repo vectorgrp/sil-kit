@@ -33,21 +33,20 @@ using ::SilKit::Core::Tests::DummyParticipant;
 
 class MockParticipant : public DummyParticipant
 {
-
 public:
-    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint *, const std::string &, const WireCanFrameEvent &), (override));
-    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint *, const std::string &, const CanFrameTransmitEvent &), (override));
-    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint *, const std::string &, const CanConfigureBaudrate &), (override));
-    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint *, const std::string &, const CanSetControllerMode &), (override));
+    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint*, const std::string&, const WireCanFrameEvent&), (override));
+    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint*, const std::string&, const CanFrameTransmitEvent&), (override));
+    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint*, const std::string&, const CanConfigureBaudrate&), (override));
+    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint*, const std::string&, const CanSetControllerMode&), (override));
 };
 
 class CanControllerCallbacks
 {
 public:
-    MOCK_METHOD2(FrameHandler, void(ICanController *, CanFrameEvent));
-    MOCK_METHOD2(StateChangeHandler, void(ICanController *, CanStateChangeEvent));
-    MOCK_METHOD2(ErrorStateChangeHandler, void(ICanController *, CanErrorStateChangeEvent));
-    MOCK_METHOD2(FrameTransmitHandler, void(ICanController *, CanFrameTransmitEvent));
+    MOCK_METHOD2(FrameHandler, void(ICanController*, CanFrameEvent));
+    MOCK_METHOD2(StateChangeHandler, void(ICanController*, CanStateChangeEvent));
+    MOCK_METHOD2(ErrorStateChangeHandler, void(ICanController*, CanErrorStateChangeEvent));
+    MOCK_METHOD2(FrameTransmitHandler, void(ICanController*, CanFrameTransmitEvent));
 };
 
 const std::string netsimName = "bussim";
@@ -197,8 +196,8 @@ TEST(Test_CanControllerDetailedSim, receive_ack)
 
     CanFrame msg{};
 
-    CanFrameTransmitEvent ack1{msg.canId, 0ns, CanTransmitStatus::Transmitted, (void *)1};
-    CanFrameTransmitEvent ack2{msg.canId, 0ns, CanTransmitStatus::Transmitted, (void *)2};
+    CanFrameTransmitEvent ack1{msg.canId, 0ns, CanTransmitStatus::Transmitted, (void*)1};
+    CanFrameTransmitEvent ack2{msg.canId, 0ns, CanTransmitStatus::Transmitted, (void*)2};
 
     EXPECT_CALL(callbackProvider, FrameTransmitHandler(&canController, ack1)).Times(1);
     EXPECT_CALL(callbackProvider, FrameTransmitHandler(&canController, ack2)).Times(1);
@@ -231,8 +230,7 @@ TEST(Test_CanControllerDetailedSim, must_not_generate_ack)
     canController.SetServiceDescriptor(controllerAddress);
 
     WireCanFrameEvent msg{};
-    EXPECT_CALL(mockParticipant,
-                SendMsg(An<const IServiceEndpoint *>(), netsimName, A<const CanFrameTransmitEvent &>()))
+    EXPECT_CALL(mockParticipant, SendMsg(An<const IServiceEndpoint*>(), netsimName, A<const CanFrameTransmitEvent&>()))
         .Times(0);
 
     CanController canControllerFrom(&mockParticipant, {}, mockParticipant.GetTimeProvider());

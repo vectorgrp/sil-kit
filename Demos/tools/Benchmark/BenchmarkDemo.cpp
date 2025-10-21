@@ -55,14 +55,9 @@ void PrintUsage(const std::string& executableName)
 {
     std::cout
         << "Usage:" << std::endl
-        << executableName << " [numberOfSimulationRuns]"
-        << " [simulationDuration]"
-        << " [simulationStepSize]"
-        << " [service]"
-        << " [numberOfParticipants]"
-        << " [messageCount]"
-        << " [messageSizeInBytes]"
-        << " [registryURi]" << std::endl
+        << executableName << " [numberOfSimulationRuns]" << " [simulationDuration]" << " [simulationStepSize]"
+        << " [service]" << " [numberOfParticipants]" << " [messageCount]" << " [messageSizeInBytes]" << " [registryURi]"
+        << std::endl
         << "If no arguments are given, default values will be used." << std::endl
         << "\t--help\tshow this message." << std::endl
         << "\t--registry-uri\tThe URI of the registry to start. Default: silkit://localhost:0" << std::endl

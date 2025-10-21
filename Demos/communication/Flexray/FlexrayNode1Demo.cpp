@@ -66,7 +66,8 @@ private:
         // The specific keyslotID for this node
         config.nodeParams.pKeySlotId = 60;
 
-        _flexrayNode = std::make_unique<FlexrayDemoCommon::FlexrayNode>(flexrayController, std::move(config), GetLogger());
+        _flexrayNode =
+            std::make_unique<FlexrayDemoCommon::FlexrayNode>(flexrayController, std::move(config), GetLogger());
     }
 
     void InitControllers() override
@@ -90,9 +91,8 @@ int main(int argc, char** argv)
     Arguments args;
     args.participantName = "Node1";
     FlexrayNode0 app{args};
-    app.SetupCommandLineArgs(argc, argv, "SIL Kit Demo - Flexray: Node1 of a two-node Flexray system", {ApplicationBase::DefaultArg::Async});
+    app.SetupCommandLineArgs(argc, argv, "SIL Kit Demo - Flexray: Node1 of a two-node Flexray system",
+                             {ApplicationBase::DefaultArg::Async});
 
     return app.Run();
 }
-
-

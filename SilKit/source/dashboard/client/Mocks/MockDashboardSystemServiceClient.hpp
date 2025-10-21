@@ -13,7 +13,6 @@ namespace Dashboard {
 class MockDashboardSystemServiceClient : public IDashboardSystemServiceClient
 {
 public:
-
     MOCK_METHOD(oatpp::Object<SimulationCreationResponseDto>, CreateSimulation,
                 (oatpp::Object<SimulationCreationRequestDto>), (override));
 

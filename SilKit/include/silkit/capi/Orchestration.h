@@ -98,10 +98,10 @@ typedef int8_t SilKit_OperationMode;
 typedef struct
 {
     SilKit_StructHeader structHeader;
-    const char* participantName; /*!< Name of the participant (UTF-8). */
-    SilKit_ParticipantState participantState; /*!< The new state of the participant. */
-    const char* enterReason; /*!< The reason for the participant to enter the new state (UTF-8). */
-    SilKit_NanosecondsWallclockTime enterTime; /*!< The enter time of the participant. */
+    const char* participantName;                 /*!< Name of the participant (UTF-8). */
+    SilKit_ParticipantState participantState;    /*!< The new state of the participant. */
+    const char* enterReason;                     /*!< The reason for the participant to enter the new state (UTF-8). */
+    SilKit_NanosecondsWallclockTime enterTime;   /*!< The enter time of the participant. */
     SilKit_NanosecondsWallclockTime refreshTime; /*!< The refresh time. */
 } SilKit_ParticipantStatus;
 

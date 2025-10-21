@@ -25,9 +25,9 @@ struct WireCanFrame
     //! The acceptable bit-patterns and their semantics differ between CAN, CAN FD and CAN XL. The user is responsible
     //! for setting this field correctly. Please consult the CAN specifications for further information.
     uint16_t dlc;
-    uint8_t sdt; //!< SDU type - describes the structure of the frames Data Field content (for XL Format only)
+    uint8_t sdt;  //!< SDU type - describes the structure of the frames Data Field content (for XL Format only)
     uint8_t vcid; //!< Virtual CAN network ID (for XL Format only)
-    uint32_t af; //!< Acceptance field (for XL Format only)
+    uint32_t af;  //!< Acceptance field (for XL Format only)
     Util::SharedVector<uint8_t> dataField; //!< The raw CAN data field
 };
 
@@ -39,9 +39,9 @@ inline auto MakeWireCanFrame(const CanFrame& canFrame) -> WireCanFrame;
 struct WireCanFrameEvent
 {
     std::chrono::nanoseconds timestamp; //!< Send time
-    WireCanFrame frame; //!< The incoming CAN Frame
-    TransmitDirection direction; //!< Receive/Transmit direction
-    void* userContext; //!< Optional pointer provided by user when sending the frame
+    WireCanFrame frame;                 //!< The incoming CAN Frame
+    TransmitDirection direction;        //!< Receive/Transmit direction
+    void* userContext;                  //!< Optional pointer provided by user when sending the frame
 };
 
 inline auto ToCanFrameEvent(const WireCanFrameEvent& wireCanFrameEvent) -> CanFrameEvent;
@@ -53,7 +53,7 @@ struct CanControllerStatus
 {
     std::chrono::nanoseconds timestamp; //!< Timestamp of the status change
     CanControllerState controllerState; //!< General State of the CAN controller
-    CanErrorState errorState; //!< State of Error Handling
+    CanErrorState errorState;           //!< State of Error Handling
 };
 
 /*! \brief The baud rate, sent to the simulator

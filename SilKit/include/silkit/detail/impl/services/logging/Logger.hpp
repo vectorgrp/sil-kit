@@ -18,29 +18,29 @@ namespace Logging {
 class Logger : public SilKit::Services::Logging::ILogger
 {
 public:
-    inline Logger(SilKit_Participant *participant);
-    inline Logger(SilKit_Vendor_Vector_SilKitRegistry *silKitRegistry);
+    inline Logger(SilKit_Participant* participant);
+    inline Logger(SilKit_Vendor_Vector_SilKitRegistry* silKitRegistry);
 
     inline ~Logger() override = default;
 
-    inline void Log(SilKit::Services::Logging::Level level, std::string const &msg) override;
+    inline void Log(SilKit::Services::Logging::Level level, const std::string& msg) override;
 
-    inline void Trace(const std::string &msg) override;
+    inline void Trace(const std::string& msg) override;
 
-    inline void Debug(const std::string &msg) override;
+    inline void Debug(const std::string& msg) override;
 
-    inline void Info(const std::string &msg) override;
+    inline void Info(const std::string& msg) override;
 
-    inline void Warn(const std::string &msg) override;
+    inline void Warn(const std::string& msg) override;
 
-    inline void Error(const std::string &msg) override;
+    inline void Error(const std::string& msg) override;
 
-    inline void Critical(const std::string &msg) override;
+    inline void Critical(const std::string& msg) override;
 
     inline auto GetLogLevel() const -> SilKit::Services::Logging::Level override;
 
 private:
-    SilKit_Logger *_logger{nullptr};
+    SilKit_Logger* _logger{nullptr};
 };
 
 } // namespace Logging
@@ -62,19 +62,19 @@ namespace Impl {
 namespace Services {
 namespace Logging {
 
-Logger::Logger(SilKit_Participant *participant)
+Logger::Logger(SilKit_Participant* participant)
 {
     const auto returnCode = SilKit_Participant_GetLogger(&_logger, participant);
     ThrowOnError(returnCode);
 }
 
-Logger::Logger(SilKit_Vendor_Vector_SilKitRegistry *silKitRegistry)
+Logger::Logger(SilKit_Vendor_Vector_SilKitRegistry* silKitRegistry)
 {
     const auto returnCode = SilKit_Vendor_Vector_SilKitRegistry_GetLogger(&_logger, silKitRegistry);
     ThrowOnError(returnCode);
 }
 
-void Logger::Log(SilKit::Services::Logging::Level level, std::string const &msg)
+void Logger::Log(SilKit::Services::Logging::Level level, const std::string& msg)
 {
     const auto loggingLevel = static_cast<SilKit_LoggingLevel>(level);
 
@@ -82,37 +82,37 @@ void Logger::Log(SilKit::Services::Logging::Level level, std::string const &msg)
     ThrowOnError(returnCode);
 }
 
-void Logger::Trace(const std::string &msg)
+void Logger::Trace(const std::string& msg)
 {
     const auto returnCode = SilKit_Logger_Log(_logger, SilKit_LoggingLevel_Trace, msg.c_str());
     ThrowOnError(returnCode);
 }
 
-void Logger::Debug(const std::string &msg)
+void Logger::Debug(const std::string& msg)
 {
     const auto returnCode = SilKit_Logger_Log(_logger, SilKit_LoggingLevel_Debug, msg.c_str());
     ThrowOnError(returnCode);
 }
 
-void Logger::Info(const std::string &msg)
+void Logger::Info(const std::string& msg)
 {
     const auto returnCode = SilKit_Logger_Log(_logger, SilKit_LoggingLevel_Info, msg.c_str());
     ThrowOnError(returnCode);
 }
 
-void Logger::Warn(const std::string &msg)
+void Logger::Warn(const std::string& msg)
 {
     const auto returnCode = SilKit_Logger_Log(_logger, SilKit_LoggingLevel_Warn, msg.c_str());
     ThrowOnError(returnCode);
 }
 
-void Logger::Error(const std::string &msg)
+void Logger::Error(const std::string& msg)
 {
     const auto returnCode = SilKit_Logger_Log(_logger, SilKit_LoggingLevel_Error, msg.c_str());
     ThrowOnError(returnCode);
 }
 
-void Logger::Critical(const std::string &msg)
+void Logger::Critical(const std::string& msg)
 {
     const auto returnCode = SilKit_Logger_Log(_logger, SilKit_LoggingLevel_Critical, msg.c_str());
     ThrowOnError(returnCode);

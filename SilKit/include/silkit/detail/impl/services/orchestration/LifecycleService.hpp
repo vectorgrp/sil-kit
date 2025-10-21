@@ -29,7 +29,7 @@ class LifecycleService : public SilKit::Services::Orchestration::ILifecycleServi
     using AbortHandler = SilKit::Services::Orchestration::AbortHandler;
 
 public:
-    inline explicit LifecycleService(SilKit_Participant *participant,
+    inline explicit LifecycleService(SilKit_Participant* participant,
                                      SilKit::Services::Orchestration::LifecycleConfiguration startConfiguration);
 
     inline ~LifecycleService() override = default;
@@ -62,12 +62,12 @@ public:
 
     inline auto State() const -> SilKit::Services::Orchestration::ParticipantState override;
 
-    inline auto Status() const -> SilKit::Services::Orchestration::ParticipantStatus const & override;
+    inline auto Status() const -> const SilKit::Services::Orchestration::ParticipantStatus& override;
 
-    inline auto CreateTimeSyncService() -> SilKit::Services::Orchestration::ITimeSyncService * override;
+    inline auto CreateTimeSyncService() -> SilKit::Services::Orchestration::ITimeSyncService* override;
 
 private:
-    SilKit_LifecycleService *_lifecycleService{nullptr};
+    SilKit_LifecycleService* _lifecycleService{nullptr};
 
     std::unique_ptr<StartingHandler> _startingHandler;
     std::unique_ptr<CommunicationReadyHandler> _communicationReadyHandler;
@@ -100,7 +100,7 @@ namespace Impl {
 namespace Services {
 namespace Orchestration {
 
-LifecycleService::LifecycleService(SilKit_Participant *participant,
+LifecycleService::LifecycleService(SilKit_Participant* participant,
                                    SilKit::Services::Orchestration::LifecycleConfiguration startConfiguration)
 {
     SilKit_LifecycleConfiguration lifecycleConfiguration;
@@ -115,10 +115,10 @@ void LifecycleService::SetCommunicationReadyHandler(SilKit::Services::Orchestrat
 {
     auto ownedHandlerPtr = std::make_unique<CommunicationReadyHandler>(std::move(handler));
 
-    const auto cHandler = [](void *context, SilKit_LifecycleService *lifecycleService) {
+    const auto cHandler = [](void* context, SilKit_LifecycleService* lifecycleService) {
         SILKIT_UNUSED_ARG(lifecycleService);
 
-        const auto handlerPtr = static_cast<CommunicationReadyHandler *>(context);
+        const auto handlerPtr = static_cast<CommunicationReadyHandler*>(context);
         (*handlerPtr)();
     };
 
@@ -134,10 +134,10 @@ void LifecycleService::SetCommunicationReadyHandlerAsync(
 {
     auto ownedHandlerPtr = std::make_unique<CommunicationReadyHandler>(std::move(handler));
 
-    const auto cHandler = [](void *context, SilKit_LifecycleService *lifecycleService) {
+    const auto cHandler = [](void* context, SilKit_LifecycleService* lifecycleService) {
         SILKIT_UNUSED_ARG(lifecycleService);
 
-        const auto handlerPtr = static_cast<CommunicationReadyHandler *>(context);
+        const auto handlerPtr = static_cast<CommunicationReadyHandler*>(context);
         (*handlerPtr)();
     };
 
@@ -158,10 +158,10 @@ void LifecycleService::SetStartingHandler(SilKit::Services::Orchestration::Start
 {
     auto ownedHandlerPtr = std::make_unique<StartingHandler>(std::move(handler));
 
-    const auto cHandler = [](void *context, SilKit_LifecycleService *lifecycleService) {
+    const auto cHandler = [](void* context, SilKit_LifecycleService* lifecycleService) {
         SILKIT_UNUSED_ARG(lifecycleService);
 
-        const auto handlerPtr = static_cast<StartingHandler *>(context);
+        const auto handlerPtr = static_cast<StartingHandler*>(context);
         (*handlerPtr)();
     };
 
@@ -176,10 +176,10 @@ void LifecycleService::SetStopHandler(SilKit::Services::Orchestration::StopHandl
 {
     auto ownedHandlerPtr = std::make_unique<SilKit::Services::Orchestration::StopHandler>(std::move(handler));
 
-    const auto cHandler = [](void *context, SilKit_LifecycleService *lifecycleService) {
+    const auto cHandler = [](void* context, SilKit_LifecycleService* lifecycleService) {
         SILKIT_UNUSED_ARG(lifecycleService);
 
-        auto handlerPtr = static_cast<SilKit::Services::Orchestration::StopHandler *>(context);
+        auto handlerPtr = static_cast<SilKit::Services::Orchestration::StopHandler*>(context);
         (*handlerPtr)();
     };
 
@@ -193,10 +193,10 @@ void LifecycleService::SetShutdownHandler(SilKit::Services::Orchestration::Shutd
 {
     auto ownedHandlerPtr = std::make_unique<ShutdownHandler>(std::move(handler));
 
-    const auto cHandler = [](void *context, SilKit_LifecycleService *lifecycleService) {
+    const auto cHandler = [](void* context, SilKit_LifecycleService* lifecycleService) {
         SILKIT_UNUSED_ARG(lifecycleService);
 
-        const auto handlerPtr = static_cast<ShutdownHandler *>(context);
+        const auto handlerPtr = static_cast<ShutdownHandler*>(context);
         (*handlerPtr)();
     };
 
@@ -211,11 +211,11 @@ void LifecycleService::SetAbortHandler(SilKit::Services::Orchestration::AbortHan
 {
     auto ownedHandlerPtr = std::make_unique<AbortHandler>(std::move(handler));
 
-    const auto cHandler = [](void *context, SilKit_LifecycleService *lifecycleService,
+    const auto cHandler = [](void* context, SilKit_LifecycleService* lifecycleService,
                              SilKit_ParticipantState lastParticipantState) {
         SILKIT_UNUSED_ARG(lifecycleService);
 
-        const auto handlerPtr = static_cast<AbortHandler *>(context);
+        const auto handlerPtr = static_cast<AbortHandler*>(context);
         (*handlerPtr)(static_cast<SilKit::Services::Orchestration::ParticipantState>(lastParticipantState));
     };
 
@@ -289,7 +289,7 @@ auto LifecycleService::State() const -> SilKit::Services::Orchestration::Partici
     return static_cast<SilKit::Services::Orchestration::ParticipantState>(participantState);
 }
 
-auto LifecycleService::Status() const -> SilKit::Services::Orchestration::ParticipantStatus const &
+auto LifecycleService::Status() const -> const SilKit::Services::Orchestration::ParticipantStatus&
 {
     using time_point = decltype(SilKit::Services::Orchestration::ParticipantStatus::enterTime);
     using time_point_duration = typename time_point::duration;
@@ -313,7 +313,7 @@ auto LifecycleService::Status() const -> SilKit::Services::Orchestration::Partic
     return _lastParticipantStatus;
 }
 
-auto LifecycleService::CreateTimeSyncService() -> SilKit::Services::Orchestration::ITimeSyncService *
+auto LifecycleService::CreateTimeSyncService() -> SilKit::Services::Orchestration::ITimeSyncService*
 {
     _timeSyncService = std::make_unique<TimeSyncService>(_lifecycleService);
 

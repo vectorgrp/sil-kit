@@ -44,7 +44,7 @@ public:
     void Start() override;
 
     // INetworkSimulatorInternal
-    auto GetServiceDescriptorString(ControllerDescriptor controllerDescriptor) -> std::string const override;
+    auto GetServiceDescriptorString(ControllerDescriptor controllerDescriptor) -> const std::string override;
 
 
 private:

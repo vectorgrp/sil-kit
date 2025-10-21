@@ -298,7 +298,8 @@ TimeSyncService::TimeSyncService(Core::IParticipantInternal* participant, ITimeP
           {"SimStep", "execution_duration", "[s]"})}
     , _simStepCompletionTimeStatisticMetric{participant->GetMetricsManager()->GetStatistic(
           {"SimStep", "completion_duration", "[s]"})}
-    , _simStepWaitingTimeStatisticMetric{participant->GetMetricsManager()->GetStatistic({"SimStep", "waiting_duration", "[s]"})}
+    , _simStepWaitingTimeStatisticMetric{participant->GetMetricsManager()->GetStatistic(
+          {"SimStep", "waiting_duration", "[s]"})}
     , _watchDog{healthCheckConfig}
     , _animationFactor{animationFactor}
 {

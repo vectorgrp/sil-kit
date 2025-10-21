@@ -21,6 +21,7 @@ class MetricsTimerThread : public IMetricsTimerThread
     std::function<void()> _callback;
 
     std::thread _thread;
+
 public:
     explicit MetricsTimerThread(std::chrono::seconds interval, std::function<void()> callback);
 

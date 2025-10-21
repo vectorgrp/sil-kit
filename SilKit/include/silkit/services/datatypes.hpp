@@ -41,9 +41,9 @@ struct MatchingLabel
         Mandatory = 2 //!< This label must be available and its value must match.
     };
 
-    std::string key; //!< The label's key.
+    std::string key;   //!< The label's key.
     std::string value; //!< The label's key.
-    Kind kind; //!< The matching kind to apply for this label.
+    Kind kind;         //!< The matching kind to apply for this label.
 };
 
 using SilKit::Util::HandlerId;

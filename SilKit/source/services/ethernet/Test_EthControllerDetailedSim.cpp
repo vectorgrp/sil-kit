@@ -36,7 +36,7 @@ using namespace SilKit::Services::Ethernet;
 
 using ::SilKit::Core::Tests::DummyParticipant;
 
-auto AnEthMessageWith(std::chrono::nanoseconds timestamp) -> testing::Matcher<const WireEthernetFrameEvent &>
+auto AnEthMessageWith(std::chrono::nanoseconds timestamp) -> testing::Matcher<const WireEthernetFrameEvent&>
 {
     return testing::Field(&WireEthernetFrameEvent::timestamp, timestamp);
 }
@@ -44,10 +44,12 @@ auto AnEthMessageWith(std::chrono::nanoseconds timestamp) -> testing::Matcher<co
 class MockParticipant : public DummyParticipant
 {
 public:
-    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint *,const std::string&, const WireEthernetFrameEvent &), (override));
-    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint *,const std::string&, const EthernetFrameTransmitEvent &), (override));
-    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint *,const std::string&, const EthernetStatus &), (override));
-    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint *,const std::string&, const EthernetSetMode &), (override));
+    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint*, const std::string&, const WireEthernetFrameEvent&),
+                (override));
+    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint*, const std::string&, const EthernetFrameTransmitEvent&),
+                (override));
+    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint*, const std::string&, const EthernetStatus&), (override));
+    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint*, const std::string&, const EthernetSetMode&), (override));
 };
 
 class Test_EthControllerDetailedSim : public testing::Test
@@ -55,11 +57,10 @@ class Test_EthControllerDetailedSim : public testing::Test
 protected:
     struct Callbacks
     {
-        MOCK_METHOD2(FrameHandler, void(Ethernet::IEthernetController *, const Ethernet::EthernetFrameEvent &));
-        MOCK_METHOD2(FrameTransmitHandler, void(Ethernet::IEthernetController *, Ethernet::EthernetFrameTransmitEvent));
-        MOCK_METHOD2(StateChangeHandler, void(Ethernet::IEthernetController *, Ethernet::EthernetStateChangeEvent));
-        MOCK_METHOD2(BitrateChangedHandler,
-                     void(Ethernet::IEthernetController *, Ethernet::EthernetBitrateChangeEvent));
+        MOCK_METHOD2(FrameHandler, void(Ethernet::IEthernetController*, const Ethernet::EthernetFrameEvent&));
+        MOCK_METHOD2(FrameTransmitHandler, void(Ethernet::IEthernetController*, Ethernet::EthernetFrameTransmitEvent));
+        MOCK_METHOD2(StateChangeHandler, void(Ethernet::IEthernetController*, Ethernet::EthernetStateChangeEvent));
+        MOCK_METHOD2(BitrateChangedHandler, void(Ethernet::IEthernetController*, Ethernet::EthernetBitrateChangeEvent));
     };
 
 protected:
@@ -166,7 +167,7 @@ TEST_F(Test_EthControllerDetailedSim, trigger_callback_on_receive_message)
  */
 TEST_F(Test_EthControllerDetailedSim, trigger_callback_on_receive_ack)
 {
-    EthernetFrameTransmitEvent expectedAck{42ms, EthernetTransmitStatus::Transmitted, reinterpret_cast<void *>(17)};
+    EthernetFrameTransmitEvent expectedAck{42ms, EthernetTransmitStatus::Transmitted, reinterpret_cast<void*>(17)};
 
     EXPECT_CALL(callbacks, FrameTransmitHandler(&controller, expectedAck)).Times(1);
 
@@ -182,10 +183,9 @@ TEST_F(Test_EthControllerDetailedSim, trigger_callback_on_receive_ack)
 TEST_F(Test_EthControllerDetailedSim, must_not_generate_ack)
 {
     WireEthernetFrameEvent msg{};
-    msg.userContext = reinterpret_cast<void *>(17);
+    msg.userContext = reinterpret_cast<void*>(17);
 
-    EXPECT_CALL(participant,
-                SendMsg(An<const IServiceEndpoint *>(), netsimName, A<const EthernetFrameTransmitEvent &>()))
+    EXPECT_CALL(participant, SendMsg(An<const IServiceEndpoint*>(), netsimName, A<const EthernetFrameTransmitEvent&>()))
         .Times(0);
 
     controller.ReceiveMsg(&controllerBusSim, msg);

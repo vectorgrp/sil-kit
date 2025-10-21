@@ -301,8 +301,8 @@ std::ostream& operator<<(std::ostream& out, const FlexrayCycleStartEvent& cycleS
 std::ostream& operator<<(std::ostream& out, const FlexrayFrameEvent& msg)
 {
     auto timestamp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(msg.timestamp);
-    out << "Flexray::FlexrayFrameEvent{"
-        << "ch=" << msg.channel << ", " << msg.frame.header << " @" << timestamp.count() << "ms";
+    out << "Flexray::FlexrayFrameEvent{" << "ch=" << msg.channel << ", " << msg.frame.header << " @"
+        << timestamp.count() << "ms";
     if (msg.frame.header.flags & static_cast<FlexrayHeader::FlagMask>(FlexrayHeader::Flag::NFIndicator))
     {
         // if payload is valid, provide it as hex dump
@@ -326,16 +326,14 @@ std::ostream& operator<<(std::ostream& out, const FlexrayControllerConfig& /*msg
 
 std::ostream& operator<<(std::ostream& out, const FlexrayTxBufferConfig& msg)
 {
-    return out << "Flexray::FlexrayTxBufferConfig{"
-               << "ch=" << msg.channels << ", slot=" << msg.slotId << (msg.hasPayloadPreambleIndicator ? ", PP" : "")
-               << ", crc=" << msg.headerCrc << ", off=" << msg.offset << ", rep=" << msg.repetition
-               << ", txMode=" << msg.transmissionMode << "}";
+    return out << "Flexray::FlexrayTxBufferConfig{" << "ch=" << msg.channels << ", slot=" << msg.slotId
+               << (msg.hasPayloadPreambleIndicator ? ", PP" : "") << ", crc=" << msg.headerCrc << ", off=" << msg.offset
+               << ", rep=" << msg.repetition << ", txMode=" << msg.transmissionMode << "}";
 }
 
 std::ostream& operator<<(std::ostream& out, const FlexrayTxBufferUpdate& msg)
 {
-    out << "Flexray::FlexrayTxBufferUpdate{"
-        << "idx=" << msg.txBufferIndex << ", payloadValid=";
+    out << "Flexray::FlexrayTxBufferUpdate{" << "idx=" << msg.txBufferIndex << ", payloadValid=";
 
     if (msg.payloadDataValid)
     {
@@ -352,8 +350,8 @@ std::ostream& operator<<(std::ostream& out, const FlexrayTxBufferUpdate& msg)
 std::ostream& operator<<(std::ostream& out, const FlexrayPocStatusEvent& msg)
 {
     auto timestamp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(msg.timestamp);
-    return out << "Flexray::POCStatus{"
-               << "State=" << msg.state << ", Freeze=" << msg.freeze << " @" << timestamp.count() << "ms}";
+    return out << "Flexray::POCStatus{" << "State=" << msg.state << ", Freeze=" << msg.freeze << " @"
+               << timestamp.count() << "ms}";
 }
 
 std::ostream& operator<<(std::ostream& out, FlexraySlotModeType msg)

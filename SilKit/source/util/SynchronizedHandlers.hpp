@@ -19,7 +19,7 @@ class Handlers
 {
 public:
     template <typename... T>
-    auto Add(T &&...t) -> HandlerId
+    auto Add(T&&... t) -> HandlerId
     {
         const auto handlerId = MakeHandlerId();
         _entries.emplace(handlerId, Callable{std::forward<T>(t)...});
@@ -33,9 +33,9 @@ public:
     }
 
     template <typename... T>
-    bool InvokeAll(T &&...t)
+    bool InvokeAll(T&&... t)
     {
-        for (const auto &kv : _entries)
+        for (const auto& kv : _entries)
         {
             kv.second(t...);
         }
@@ -53,7 +53,7 @@ public:
         return _entries.size();
     }
 
-    friend void swap(Handlers &a, Handlers &b) noexcept
+    friend void swap(Handlers& a, Handlers& b) noexcept
     {
         using std::swap;
         swap(a._entries, b._entries);
@@ -82,7 +82,7 @@ public:
     SynchronizedHandlers() = default;
 
     template <typename... T>
-    auto Add(T &&...t) -> HandlerId
+    auto Add(T&&... t) -> HandlerId
     {
         const auto lock = MakeUniqueLock();
         return _handlers.Add(std::forward<T>(t)...);
@@ -95,7 +95,7 @@ public:
     }
 
     template <typename... T>
-    bool InvokeAll(T &&...t)
+    bool InvokeAll(T&&... t)
     {
         const auto lock = MakeUniqueLock();
         return _handlers.InvokeAll(std::forward<T>(t)...);
@@ -113,7 +113,7 @@ public:
     }
 
 public:
-    friend void swap(SynchronizedHandlers &a, SynchronizedHandlers &b) noexcept
+    friend void swap(SynchronizedHandlers& a, SynchronizedHandlers& b) noexcept
     {
         if (&a == &b)
         {

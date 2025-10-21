@@ -120,7 +120,9 @@ TEST_F(ITest_SystemMonitor, discover_services)
             .InSequence(secondSequence);
     }
 
-    EXPECT_CALL(sequencePoints, A_BeforeCreateThirdParticipant()).Times(1).InSequence(sequence, secondSequence, thirdSequence);
+    EXPECT_CALL(sequencePoints, A_BeforeCreateThirdParticipant())
+        .Times(1)
+        .InSequence(sequence, secondSequence, thirdSequence);
     {
         EXPECT_CALL(callbacks, ParticipantConnectedHandler(thirdParticipantConnection)).Times(1).InSequence(sequence);
         EXPECT_CALL(secondCallbacks, ParticipantConnectedHandler(thirdParticipantConnection))

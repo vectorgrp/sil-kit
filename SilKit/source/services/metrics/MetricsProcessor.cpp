@@ -16,7 +16,7 @@ MetricsProcessor::MetricsProcessor(std::string participantName)
 {
 }
 
-void MetricsProcessor::SetLogger(SilKit::Services::Logging::ILogger &logger)
+void MetricsProcessor::SetLogger(SilKit::Services::Logging::ILogger& logger)
 {
     _logger = &logger;
 }
@@ -33,9 +33,9 @@ void MetricsProcessor::SetSinks(std::vector<std::unique_ptr<IMetricsSink>> sinks
 
     _sinks = std::move(sinks);
 
-    for (const auto &sink : _sinks)
+    for (const auto& sink : _sinks)
     {
-        for (const auto &[origin, update] : _updateCache)
+        for (const auto& [origin, update] : _updateCache)
         {
             sink->Process(origin, update);
         }
@@ -54,8 +54,8 @@ void MetricsProcessor::Process(const std::string& origin, const VSilKit::Metrics
 
         if (!_sinksSetUp)
         {
-            auto &cache = _updateCache[origin].metrics;
-            const auto &metrics = metricsUpdate.metrics;
+            auto& cache = _updateCache[origin].metrics;
+            const auto& metrics = metricsUpdate.metrics;
 
             cache.insert(cache.end(), metrics.begin(), metrics.end());
 
@@ -63,7 +63,7 @@ void MetricsProcessor::Process(const std::string& origin, const VSilKit::Metrics
         }
     }
 
-    for (const auto &sink : _sinks)
+    for (const auto& sink : _sinks)
     {
         sink->Process(origin, metricsUpdate);
     }

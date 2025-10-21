@@ -29,7 +29,7 @@ TEST(Test_EthernetSerdes, SimEthernet_EthMessage)
         destinationMac, sourceMac, etherType,
         "Hello from ethernet writer!  msgId = 1 -------------------------------------------------------");
     in.direction = SilKit::Services::TransmitDirection::TX;
-    in.userContext = reinterpret_cast<void *>(0x1234);
+    in.userContext = reinterpret_cast<void*>(0x1234);
 
     Serialize(buffer, in);
     Deserialize(buffer, out);
@@ -50,7 +50,7 @@ TEST(Test_EthernetSerdes, SimEthernet_EthTransmitAcknowledge)
 
     in.timestamp = 13ns;
     in.status = EthernetTransmitStatus::Transmitted;
-    in.userContext = reinterpret_cast<void *>(0x1234);
+    in.userContext = reinterpret_cast<void*>(0x1234);
 
     Serialize(buffer, in);
     Deserialize(buffer, out);

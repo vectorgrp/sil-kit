@@ -164,8 +164,7 @@ struct HasStructHeader : std::false_type
 };
 
 template <typename T>
-struct HasStructHeader<
-    T, std::void_t<decltype(std::declval<std::decay_t<T>>().structHeader = SilKit_StructHeader{})>>
+struct HasStructHeader<T, std::void_t<decltype(std::declval<std::decay_t<T>>().structHeader = SilKit_StructHeader{})>>
     : std::true_type
 {
 };

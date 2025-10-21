@@ -55,7 +55,7 @@ bool TimeConfiguration::RemoveSynchronizedParticipant(const std::string& otherPa
 auto TimeConfiguration::GetSynchronizedParticipantNames() -> std::vector<std::string>
 {
     std::vector<std::string> participantNames;
-    for (auto const& it : _otherNextTasks)
+    for (const auto& it : _otherNextTasks)
     {
         participantNames.push_back(it.first);
     }

@@ -13,7 +13,7 @@ namespace Log = SilKit::Services::Logging;
 namespace VSilKit {
 
 
-MetricsReceiver::MetricsReceiver(SilKit::Core::IParticipantInternal *, IMetricsReceiverListener &listener)
+MetricsReceiver::MetricsReceiver(SilKit::Core::IParticipantInternal*, IMetricsReceiverListener& listener)
     : _listener{&listener}
 {
     _serviceDescriptor.SetNetworkName("default");
@@ -22,14 +22,14 @@ MetricsReceiver::MetricsReceiver(SilKit::Core::IParticipantInternal *, IMetricsR
 
 // IMsgForMetricsReceiver
 
-void MetricsReceiver::ReceiveMsg(const SilKit::Core::IServiceEndpoint *from, const VSilKit::MetricsUpdate &msg)
+void MetricsReceiver::ReceiveMsg(const SilKit::Core::IServiceEndpoint* from, const VSilKit::MetricsUpdate& msg)
 {
     if (_listener == nullptr)
     {
         return;
     }
 
-    const auto &serviceDescriptor = from->GetServiceDescriptor();
+    const auto& serviceDescriptor = from->GetServiceDescriptor();
 
     _listener->OnMetricsUpdate(serviceDescriptor.GetSimulationName(), serviceDescriptor.GetParticipantName(), msg);
 }
@@ -37,12 +37,12 @@ void MetricsReceiver::ReceiveMsg(const SilKit::Core::IServiceEndpoint *from, con
 
 // IServiceEndpoint
 
-void MetricsReceiver::SetServiceDescriptor(const SilKit::Core::ServiceDescriptor &serviceDescriptor)
+void MetricsReceiver::SetServiceDescriptor(const SilKit::Core::ServiceDescriptor& serviceDescriptor)
 {
     _serviceDescriptor = serviceDescriptor;
 }
 
-auto MetricsReceiver::GetServiceDescriptor() const -> const SilKit::Core::ServiceDescriptor &
+auto MetricsReceiver::GetServiceDescriptor() const -> const SilKit::Core::ServiceDescriptor&
 {
     return _serviceDescriptor;
 }

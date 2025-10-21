@@ -23,7 +23,7 @@ struct IDashboardInstance
     virtual ~IDashboardInstance() = default;
 
     virtual auto GetRegistryEventListener() -> SilKit::Core::IRegistryEventListener* = 0;
-    virtual void SetupDashboardConnection(std::string const& dashboardUri) = 0;
+    virtual void SetupDashboardConnection(const std::string& dashboardUri) = 0;
 };
 
 

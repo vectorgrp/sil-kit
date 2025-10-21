@@ -41,10 +41,10 @@ namespace Log = SilKit::Services::Logging;
 
 auto IsErrorToTryAgain(const asio::error_code& ec) -> bool
 {
-    return ec == asio::error::no_descriptors //
+    return ec == asio::error::no_descriptors     //
            || ec == asio::error::no_buffer_space //
-           || ec == asio::error::no_memory //
-           || ec == asio::error::timed_out //
+           || ec == asio::error::no_memory       //
+           || ec == asio::error::timed_out       //
            || ec == asio::error::try_again;
 }
 
@@ -176,7 +176,7 @@ void AsioGenericRawByteStream::Shutdown()
 }
 
 
-void AsioGenericRawByteStream::OnAsioAsyncReadSomeComplete(asio::error_code const& errorCode, size_t bytesTransferred)
+void AsioGenericRawByteStream::OnAsioAsyncReadSomeComplete(const asio::error_code& errorCode, size_t bytesTransferred)
 {
     SILKIT_TRACE_METHOD_(_logger, "({}, {})", errorCode.message(), bytesTransferred);
 
@@ -216,7 +216,7 @@ void AsioGenericRawByteStream::OnAsioAsyncReadSomeComplete(asio::error_code cons
 }
 
 
-void AsioGenericRawByteStream::OnAsioAsyncWriteSomeComplete(asio::error_code const& errorCode, size_t bytesTransferred)
+void AsioGenericRawByteStream::OnAsioAsyncWriteSomeComplete(const asio::error_code& errorCode, size_t bytesTransferred)
 {
     SILKIT_TRACE_METHOD_(_logger, "({}, {})", errorCode.message(), bytesTransferred);
 

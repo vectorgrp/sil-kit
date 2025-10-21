@@ -66,7 +66,8 @@ TEST_F(Test_CapiExceptions, throw_on_error)
 {
     EXPECT_THROW(SilKit::_detail_v1::Impl::ThrowOnError(SilKit_ReturnCode_TYPECONVERSIONERROR),
                  SilKit::TypeConversionError);
-    EXPECT_THROW(SilKit::_detail_v1::Impl::ThrowOnError(SilKit_ReturnCode_CONFIGURATIONERROR), SilKit::ConfigurationError);
+    EXPECT_THROW(SilKit::_detail_v1::Impl::ThrowOnError(SilKit_ReturnCode_CONFIGURATIONERROR),
+                 SilKit::ConfigurationError);
     EXPECT_THROW(SilKit::_detail_v1::Impl::ThrowOnError(SilKit_ReturnCode_WRONGSTATE), SilKit::StateError);
     EXPECT_THROW(SilKit::_detail_v1::Impl::ThrowOnError(SilKit_ReturnCode_PROTOCOLERROR), SilKit::ProtocolError);
     EXPECT_THROW(SilKit::_detail_v1::Impl::ThrowOnError(SilKit_ReturnCode_ASSERTIONERROR), SilKit::AssertionError);

@@ -104,7 +104,7 @@ public:
 
 public: // IStringListMetric
     void Clear() override;
-    void Add(std::string const &value) override;
+    void Add(const std::string& value) override;
 
 public: // MetricsManager::IMetric
     auto GetMetricKind() const -> MetricKind override;
@@ -137,7 +137,7 @@ private:
 };
 
 
-MetricsManager::MetricsManager(std::string participantName, IMetricsProcessor &processor)
+MetricsManager::MetricsManager(std::string participantName, IMetricsProcessor& processor)
     : _participantName{std::move(participantName)}
     , _processor{&processor}
     , _lastSubmitUpdate{MetricClockNow()}
@@ -145,7 +145,7 @@ MetricsManager::MetricsManager(std::string participantName, IMetricsProcessor &p
 }
 
 
-void MetricsManager::SetLogger(SilKit::Services::Logging::ILogger &logger)
+void MetricsManager::SetLogger(SilKit::Services::Logging::ILogger& logger)
 {
     _logger = &logger;
 }
@@ -192,19 +192,19 @@ void MetricsManager::SubmitUpdates()
 
 // IMetricsManager
 
-auto MetricsManager::GetCounter(MetricName name) -> ICounterMetric *
+auto MetricsManager::GetCounter(MetricName name) -> ICounterMetric*
 {
-    return &dynamic_cast<ICounterMetric &>(*GetOrCreateMetric(name, MetricKind::COUNTER));
+    return &dynamic_cast<ICounterMetric&>(*GetOrCreateMetric(name, MetricKind::COUNTER));
 }
 
-auto MetricsManager::GetStatistic(MetricName name) -> IStatisticMetric *
+auto MetricsManager::GetStatistic(MetricName name) -> IStatisticMetric*
 {
-    return &dynamic_cast<IStatisticMetric &>(*GetOrCreateMetric(name, MetricKind::STATISTIC));
+    return &dynamic_cast<IStatisticMetric&>(*GetOrCreateMetric(name, MetricKind::STATISTIC));
 }
 
-auto MetricsManager::GetStringList(MetricName name) -> IStringListMetric *
+auto MetricsManager::GetStringList(MetricName name) -> IStringListMetric*
 {
-    return &dynamic_cast<IStringListMetric &>(*GetOrCreateMetric(name, MetricKind::STRING_LIST));
+    return &dynamic_cast<IStringListMetric&>(*GetOrCreateMetric(name, MetricKind::STRING_LIST));
 }
 
 auto MetricsManager::GetAttribute(MetricName name) -> IAttributeMetric*
@@ -215,7 +215,7 @@ auto MetricsManager::GetAttribute(MetricName name) -> IAttributeMetric*
 
 // MetricsManager
 
-auto MetricsManager::GetOrCreateMetric(MetricName nameList, MetricKind kind) -> IMetric *
+auto MetricsManager::GetOrCreateMetric(MetricName nameList, MetricKind kind) -> IMetric*
 {
     std::lock_guard<decltype(_mutex)> lock{_mutex};
     auto name = ToString(nameList);
@@ -331,7 +331,7 @@ void MetricsManager::StringListMetric::Clear()
     _strings.clear();
 }
 
-void MetricsManager::StringListMetric::Add(std::string const &value)
+void MetricsManager::StringListMetric::Add(const std::string& value)
 {
     _timestamp = MetricClockNow();
     _strings.emplace_back(value);
@@ -350,7 +350,7 @@ auto MetricsManager::StringListMetric::GetUpdateTime() const -> MetricTimePoint
 auto MetricsManager::StringListMetric::FormatValue() const -> std::string
 {
     std::string result;
-    const auto formatString = [](std::string &result, const std::string &string) {
+    const auto formatString = [](std::string& result, const std::string& string) {
         result.push_back('"');
         for (const char ch : string)
         {

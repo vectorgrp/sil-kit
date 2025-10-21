@@ -659,7 +659,6 @@ protected:
     const Services::Logging::Level logLevel = Services::Logging::Level::Trace;
 
     std::string _registryUri{"not yet defined"};
-
 };
 
 // --------------------------

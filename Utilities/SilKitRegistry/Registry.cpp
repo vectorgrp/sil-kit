@@ -64,7 +64,6 @@ void ConfigureLogging(std::shared_ptr<SilKit::Config::IParticipantConfiguration>
 void ConfigureLoggingForWindowsService(std::shared_ptr<SilKit::Config::IParticipantConfiguration> configuration,
                                        const std::string& logLevel, bool explicitWorkingDirectory)
 {
-
     auto config = std::dynamic_pointer_cast<SilKit::Config::ParticipantConfiguration>(configuration);
     SILKIT_ASSERT(config != nullptr);
 
@@ -130,12 +129,11 @@ void OverrideFromRegistryConfiguration(std::shared_ptr<SilKit::Config::IParticip
 
     config->experimental.metrics = registryConfiguration.experimental.metrics;
 
-    if(!registryConfiguration.experimental.metrics.collectFromRemote.has_value())
+    if (!registryConfiguration.experimental.metrics.collectFromRemote.has_value())
     {
         // implicitly enable collectFromRemote for the registry, if the user did not set it
         config->experimental.metrics.collectFromRemote = true;
     }
-
 }
 
 void OverrideRegistryUri(std::shared_ptr<SilKit::Config::IParticipantConfiguration> configuration,

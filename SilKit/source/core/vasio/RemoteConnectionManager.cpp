@@ -26,20 +26,20 @@ namespace SilKit {
 namespace Core {
 
 
-RemoteConnectionManager::RemoteConnectionManager(VAsioConnection &vAsioConnection,
-                                                 const RemoteConnectionManagerSettings &settings)
+RemoteConnectionManager::RemoteConnectionManager(VAsioConnection& vAsioConnection,
+                                                 const RemoteConnectionManagerSettings& settings)
     : _vAsioConnection{&vAsioConnection}
     , _settings{settings}
 {
 }
 
 
-void RemoteConnectionManager::StartConnectingTo(const VAsioPeerInfo &peerInfo)
+void RemoteConnectionManager::StartConnectingTo(const VAsioPeerInfo& peerInfo)
 {
     auto connectPeerPtr{_vAsioConnection->MakeConnectPeer(peerInfo)};
     connectPeerPtr->SetListener(*this);
 
-    auto &connectPeer = *connectPeerPtr;
+    auto& connectPeer = *connectPeerPtr;
     _connectPeers.emplace_back(std::move(connectPeerPtr));
 
     connectPeer.AsyncConnect(1, _settings.connectTimeout);
@@ -50,23 +50,23 @@ void RemoteConnectionManager::Shutdown()
 {
     std::lock_guard<decltype(_mutex)> lock{_mutex};
 
-    for (const auto &connectPeer : _connectPeers)
+    for (const auto& connectPeer : _connectPeers)
     {
         connectPeer->Shutdown();
     }
 }
 
 
-void RemoteConnectionManager::Remove(const IConnectPeer &connectPeer)
+void RemoteConnectionManager::Remove(const IConnectPeer& connectPeer)
 {
     std::lock_guard<decltype(_mutex)> lock{_mutex};
 
     _connectPeers.erase(std::remove_if(_connectPeers.begin(), _connectPeers.end(),
-                                       [needle = &connectPeer](const auto &hay) { return needle == hay.get(); }));
+                                       [needle = &connectPeer](const auto& hay) { return needle == hay.get(); }));
 }
 
 
-void RemoteConnectionManager::OnConnectPeerSuccess(IConnectPeer &connectPeer, VAsioPeerInfo peerInfo,
+void RemoteConnectionManager::OnConnectPeerSuccess(IConnectPeer& connectPeer, VAsioPeerInfo peerInfo,
                                                    std::unique_ptr<IRawByteStream> stream)
 {
     SilKit::Services::Logging::Debug(_vAsioConnection->_logger,
@@ -81,7 +81,7 @@ void RemoteConnectionManager::OnConnectPeerSuccess(IConnectPeer &connectPeer, VA
     _vAsioConnection->OnRemoteConnectionSuccess(std::move(vAsioPeer));
 }
 
-void RemoteConnectionManager::OnConnectPeerFailure(IConnectPeer &connectPeer, VAsioPeerInfo peerInfo)
+void RemoteConnectionManager::OnConnectPeerFailure(IConnectPeer& connectPeer, VAsioPeerInfo peerInfo)
 {
     SilKit::Services::Logging::Debug(_vAsioConnection->_logger,
                                      "Failed to connect to {} after receiving a remote connect request",

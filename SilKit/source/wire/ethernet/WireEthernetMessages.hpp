@@ -27,9 +27,9 @@ inline auto MakeWireEthernetFrame(const EthernetFrame& ethernetFrame) -> WireEth
 struct WireEthernetFrameEvent
 {
     std::chrono::nanoseconds timestamp; //!< Reception time
-    WireEthernetFrame frame; //!< The Ethernet frame
-    TransmitDirection direction; //!< Receive/Transmit direction
-    void* userContext; //!< Optional pointer provided by user when sending the frame
+    WireEthernetFrame frame;            //!< The Ethernet frame
+    TransmitDirection direction;        //!< Receive/Transmit direction
+    void* userContext;                  //!< Optional pointer provided by user when sending the frame
 };
 
 inline auto ToEthernetFrameEvent(const WireEthernetFrameEvent& wireEthernetFrameEvent) -> EthernetFrameEvent;
@@ -39,15 +39,15 @@ inline auto MakeWireEthernetFrameEvent(const EthernetFrameEvent& ethernetFrameEv
 struct EthernetStatus
 {
     std::chrono::nanoseconds timestamp; //!< Timestamp of the status change.
-    EthernetState state; //!< State of the Ethernet controller.
-    EthernetBitrate bitrate; //!< Bit rate in kBit/sec of the link when in state LinkUp, otherwise zero.
+    EthernetState state;                //!< State of the Ethernet controller.
+    EthernetBitrate bitrate;            //!< Bit rate in kBit/sec of the link when in state LinkUp, otherwise zero.
 };
 
 //! \brief Mode for switching an Ethernet Controller on or off
 enum class EthernetMode : uint8_t
 {
     Inactive = 0, //!< The controller is inactive (default after reset).
-    Active = 1, //!< The controller is active.
+    Active = 1,   //!< The controller is active.
 };
 
 //! \brief Set the Mode of the Ethernet Controller.
@@ -143,9 +143,8 @@ std::ostream& operator<<(std::ostream& out, EthernetMode value)
 std::ostream& operator<<(std::ostream& out, const EthernetStatus& msg)
 {
     auto timestamp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(msg.timestamp);
-    return out << "EthernetStatus{"
-               << "state=" << msg.state << "bitrate=" << msg.bitrate << " @" << timestamp.count() << "ms"
-               << "}";
+    return out << "EthernetStatus{" << "state=" << msg.state << "bitrate=" << msg.bitrate << " @" << timestamp.count()
+               << "ms" << "}";
 }
 
 std::ostream& operator<<(std::ostream& out, const EthernetSetMode& msg)

@@ -20,7 +20,7 @@ using namespace SilKit::Services::Can;
 class Test_CanControllerConfig : public testing::Test
 {
 public:
-    Test_CanControllerConfig() {};
+    Test_CanControllerConfig(){};
 };
 
 auto PrepareParticipantConfiguration() -> std::shared_ptr<SilKit::Config::ParticipantConfiguration>

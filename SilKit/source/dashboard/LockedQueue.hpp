@@ -12,7 +12,7 @@
 
 namespace VSilKit {
 
-template<typename T>
+template <typename T>
 class LockedQueue
 {
 public:
@@ -30,13 +30,13 @@ protected:
 };
 
 
-template<typename T>
+template <typename T>
 LockedQueue<T>::~LockedQueue()
 {
     Stop();
 }
 
-template<typename T>
+template <typename T>
 void LockedQueue<T>::Enqueue(const T& obj)
 {
     {
@@ -49,7 +49,7 @@ void LockedQueue<T>::Enqueue(const T& obj)
     _cv.notify_one();
 }
 
-template<typename T>
+template <typename T>
 void LockedQueue<T>::Enqueue(T&& obj)
 {
     {
@@ -61,7 +61,7 @@ void LockedQueue<T>::Enqueue(T&& obj)
     }
     _cv.notify_one();
 }
-template<typename T>
+template <typename T>
 bool LockedQueue<T>::DequeueAllInto(std::vector<T>& events)
 {
     std::unique_lock<decltype(_mutex)> lock{_mutex};
@@ -71,7 +71,7 @@ bool LockedQueue<T>::DequeueAllInto(std::vector<T>& events)
     return !events.empty();
 }
 
-template<typename T>
+template <typename T>
 void LockedQueue<T>::Stop()
 {
     {

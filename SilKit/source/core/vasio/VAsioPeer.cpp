@@ -31,7 +31,7 @@ namespace SilKit {
 namespace Core {
 
 VAsioPeer::VAsioPeer(IVAsioPeerListener* listener, IIoContext* ioContext, std::unique_ptr<IRawByteStream> stream,
-              Services::Logging::ILogger* logger, std::unique_ptr<VSilKit::IPeerMetrics> peerMetrics)
+                     Services::Logging::ILogger* logger, std::unique_ptr<VSilKit::IPeerMetrics> peerMetrics)
     : _listener{listener}
     , _ioContext{ioContext}
     , _socket{std::move(stream)}
@@ -133,9 +133,7 @@ void VAsioPeer::SendSilKitMsgInternal(std::vector<uint8_t> blob)
 
         lock.unlock();
 
-        _ioContext->Dispatch([this] {
-            StartAsyncWrite();
-            });
+        _ioContext->Dispatch([this] { StartAsyncWrite(); });
     }
 }
 

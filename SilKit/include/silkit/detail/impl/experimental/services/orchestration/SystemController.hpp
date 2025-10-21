@@ -31,7 +31,7 @@ public:
     inline void AbortSimulation() const override;
 
     inline void SetWorkflowConfiguration(
-        SilKit::Services::Orchestration::WorkflowConfiguration const& workflowConfiguration) override;
+        const SilKit::Services::Orchestration::WorkflowConfiguration& workflowConfiguration) override;
 
 public:
     inline auto Get() const -> SilKit_Experimental_SystemController*;
@@ -72,7 +72,7 @@ inline void SystemController::AbortSimulation() const
 }
 
 inline void SystemController::SetWorkflowConfiguration(
-    SilKit::Services::Orchestration::WorkflowConfiguration const& workflowConfiguration)
+    const SilKit::Services::Orchestration::WorkflowConfiguration& workflowConfiguration)
 {
     std::vector<const char*> requiredParticipantNames;
     for (const auto& string : workflowConfiguration.requiredParticipantNames)

@@ -11,7 +11,6 @@
 #include "ParticipantConfiguration.hpp"
 
 
-
 namespace SilKitRegistry {
 namespace Config {
 

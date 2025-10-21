@@ -31,7 +31,7 @@ public:
     std::shared_ptr<DashboardRestClient> CreateService()
     {
         return std::make_shared<DashboardRestClient>(_libraryInit, &_dummyLogger, _mockServiceClient,
-                                                    _mockSilKitToOatppMapper );
+                                                     _mockSilKitToOatppMapper);
     }
 
     Core::Tests::MockLogger _dummyLogger;

@@ -22,7 +22,7 @@ MetricsTimerThread::~MetricsTimerThread()
         {
             _go.set_value();
         }
-        catch (const std::future_error &)
+        catch (const std::future_error&)
         {
         }
     }
@@ -31,7 +31,7 @@ MetricsTimerThread::~MetricsTimerThread()
     {
         _done.set_value();
     }
-    catch (const std::future_error &)
+    catch (const std::future_error&)
     {
     }
 
@@ -49,7 +49,7 @@ void MetricsTimerThread::Start()
         {
             _go.set_value();
         }
-        catch (const std::future_error &)
+        catch (const std::future_error&)
         {
         }
     }

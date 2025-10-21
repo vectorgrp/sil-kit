@@ -128,16 +128,14 @@ std::ostream& operator<<(std::ostream& out, const EthernetFrameEvent& msg)
 {
     auto timestamp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(msg.timestamp);
     return out << "EthernetFrameEvent{" << msg.frame << ", direction=" << msg.direction
-               << ", userContext=" << msg.userContext << " @" << timestamp.count() << "ms"
-               << "}";
+               << ", userContext=" << msg.userContext << " @" << timestamp.count() << "ms" << "}";
 }
 
 std::ostream& operator<<(std::ostream& out, const EthernetFrameTransmitEvent& msg)
 {
     auto timestamp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(msg.timestamp);
     out << "EthernetFrameTransmitEvent{status=" << msg.status << ", userContext=" << msg.userContext << " @"
-        << timestamp.count() << "ms"
-        << "}";
+        << timestamp.count() << "ms" << "}";
 
     return out;
 }

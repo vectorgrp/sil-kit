@@ -20,8 +20,8 @@ namespace VSilKit {
 
 
 template <typename... Args>
-void TraceEvent(SilKit::Services::Logging::ILogger *logger, fmt::string_view fileName, size_t line,
-                fmt::string_view function, const void *object, Args &&...args)
+void TraceEvent(SilKit::Services::Logging::ILogger* logger, fmt::string_view fileName, size_t line,
+                fmt::string_view function, const void* object, Args&&... args)
 {
     if (logger == nullptr)
     {
@@ -64,7 +64,7 @@ inline constexpr auto ExtractFileNameFromFileMacro(fmt::string_view s) -> fmt::s
         return s;
     }
 
-    const char *ptr{s.data() + s.size() - 1};
+    const char* ptr{s.data() + s.size() - 1};
 
     while (ptr >= s.data())
     {

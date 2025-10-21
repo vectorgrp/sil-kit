@@ -154,7 +154,7 @@ try
     auto&& jsonString = SilKit::Config::SerializeAsJson(*cppParticipantConfiguration);
     *requiredSize = jsonString.size();
 
-    if(outputString != nullptr && origOutputSize > 0)
+    if (outputString != nullptr && origOutputSize > 0)
     {
         const auto sizeToWrite = std::min(origOutputSize, jsonString.size());
         std::copy(std::cbegin(jsonString), std::cbegin(jsonString) + sizeToWrite, *outputString);

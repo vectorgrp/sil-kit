@@ -178,7 +178,8 @@ TEST_F(Test_TimeSyncService, hop_on_during_simulation_step)
     ASSERT_EQ(serviceDiscoveryHandlers.size(), 1u);
 
     std::vector<std::chrono::nanoseconds> simulationStepNows;
-    timeSyncService->SetSimulationStepHandlerAsync([&simulationStepNows](auto now, auto) { simulationStepNows.emplace_back(now); }, 1ms);
+    timeSyncService->SetSimulationStepHandlerAsync(
+        [&simulationStepNows](auto now, auto) { simulationStepNows.emplace_back(now); }, 1ms);
 
     PrepareLifecycle();
 
@@ -224,7 +225,8 @@ TEST_F(Test_TimeSyncService, hop_on_outside_simulation_step)
     ASSERT_EQ(serviceDiscoveryHandlers.size(), 1u);
 
     std::vector<std::chrono::nanoseconds> simulationStepNows;
-    timeSyncService->SetSimulationStepHandlerAsync([&simulationStepNows](auto now, auto) { simulationStepNows.emplace_back(now); }, 1ms);
+    timeSyncService->SetSimulationStepHandlerAsync(
+        [&simulationStepNows](auto now, auto) { simulationStepNows.emplace_back(now); }, 1ms);
 
     PrepareLifecycle();
 

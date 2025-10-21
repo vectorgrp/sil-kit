@@ -108,7 +108,7 @@ TEST(Test_TransformAcceptorUris, GetUriInfo)
 
 struct MethodNotImplementedError : std::exception
 {
-    char const* what() const noexcept override
+    const char* what() const noexcept override
     {
         return "method not implemented";
     }
@@ -228,7 +228,7 @@ struct AudienceVAsioPeer final : DummyVAsioPeerBase
 
 struct DummyLogger : SilKit::Services::Logging::ILogger
 {
-    void Log(SilKit::Services::Logging::Level level, std::string const& msg) override
+    void Log(SilKit::Services::Logging::Level level, const std::string& msg) override
     {
         const auto now = std::chrono::steady_clock::now();
         std::cout << "[DummyLogger:" << level << ":"
@@ -236,32 +236,32 @@ struct DummyLogger : SilKit::Services::Logging::ILogger
                   << std::endl;
     }
 
-    void Trace(std::string const& msg) override
+    void Trace(const std::string& msg) override
     {
         Log(SilKit::Services::Logging::Level::Trace, msg);
     }
 
-    void Debug(std::string const& msg) override
+    void Debug(const std::string& msg) override
     {
         Log(SilKit::Services::Logging::Level::Debug, msg);
     }
 
-    void Info(std::string const& msg) override
+    void Info(const std::string& msg) override
     {
         Log(SilKit::Services::Logging::Level::Info, msg);
     }
 
-    void Warn(std::string const& msg) override
+    void Warn(const std::string& msg) override
     {
         Log(SilKit::Services::Logging::Level::Warn, msg);
     }
 
-    void Error(std::string const& msg) override
+    void Error(const std::string& msg) override
     {
         Log(SilKit::Services::Logging::Level::Error, msg);
     }
 
-    void Critical(std::string const& msg) override
+    void Critical(const std::string& msg) override
     {
         Log(SilKit::Services::Logging::Level::Critical, msg);
     }

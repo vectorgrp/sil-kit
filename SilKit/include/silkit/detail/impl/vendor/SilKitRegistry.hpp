@@ -36,7 +36,7 @@ public:
 
     inline auto GetLogger() -> SilKit::Services::Logging::ILogger* override;
 
-    inline auto StartListening(std::string const& listenUri) -> std::string override;
+    inline auto StartListening(const std::string& listenUri) -> std::string override;
 
 private:
     SilKit_Vendor_Vector_SilKitRegistry* _silKitRegistry{nullptr};
