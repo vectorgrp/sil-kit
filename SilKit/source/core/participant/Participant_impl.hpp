@@ -53,6 +53,7 @@
 #include "Uuid.hpp"
 #include "Assert.hpp"
 #include "ExecutionEnvironment.hpp"
+#include "traits/SilKitMsgTraits.hpp"
 
 #include "fmt/ranges.h"
 
@@ -1323,14 +1324,35 @@ void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from,
     SendMsgImpl(from, std::move(msg));
 }
 
+template <typename SilKitConnectionT>
+template <typename MessageT>
+void Participant<SilKitConnectionT>::HandleSynchronizationPoint()
+{
+    if constexpr (SilKitMsgTraits<typename RemoveCvRef<MessageT>>::IsSynchronizationPoint())
+    {
+        if (auto* lifecycle = static_cast<Orchestration::LifecycleService*>(GetLifecycleService()); lifecycle)
+        {
+            if (auto* timesync = static_cast<Orchestration::TimeSyncService*>(lifecycle->GetTimeSyncService());
+                timesync)
+            {
+                if(_participantConfig.enableSynchronizationPoints)
+                {
+                    timesync->TriggerSynchronization();
+                }
+            }
+        }
+    }
+
+}
+
 template <class SilKitConnectionT>
 template <typename SilKitMessageT>
 void Participant<SilKitConnectionT>::SendMsgImpl(const IServiceEndpoint* from, SilKitMessageT&& msg)
 {
     TraceTx(GetLoggerInternal(), from, msg);
     _connection.SendMsg(from, std::forward<SilKitMessageT>(msg));
+    HandleSynchronizationPoint<SilKitMessageT>();
 }
-
 // Targeted messaging
 template <class SilKitConnectionT>
 void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName,
@@ -1633,6 +1655,7 @@ void Participant<SilKitConnectionT>::SendMsgImpl(const IServiceEndpoint* from, c
 {
     TraceTx(GetLoggerInternal(), from, targetParticipantName, msg);
     _connection.SendMsg(from, targetParticipantName, std::forward<SilKitMessageT>(msg));
+    HandleSynchronizationPoint<SilKitMessageT>();
 }
 
 
@@ -2023,6 +2046,11 @@ auto Participant<SilKitConnectionT>::MakeTimerThread() -> std::unique_ptr<IMetri
     return std::make_unique<VSilKit::MetricsTimerThread>(
         _participantConfig.experimental.metrics.updateInterval,
         [this] { ExecuteDeferred([this] { GetMetricsManager()->SubmitUpdates(); }); });
+}
+template <class SilKitConnectionT>
+auto Participant<SilKitConnectionT>::GetConfiguration() -> const Config::ParticipantConfiguration&
+{
+    return _participantConfig;
 }
 
 

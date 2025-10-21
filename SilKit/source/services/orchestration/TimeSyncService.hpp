@@ -99,6 +99,17 @@ public:
     void RemoveOtherSimulationStepsCompletedHandler(HandlerId handlerId);
     void InvokeOtherSimulationStepsCompletedHandlers();
 
+
+    // synchronization point design proposal
+    void TriggerSynchronization()
+    {
+        //TODO check that no async timestep is happening?
+        constexpr NextSimTask zeroStep{0ns, 0ns};
+        static_assert(zeroStep.duration == 0ns);
+        static_assert(zeroStep.timePoint == 0ns);
+        _participant->SendMsg(this, zeroStep);
+    }
+
 private:
     // ----------------------------------------
     // private methods
