@@ -2039,6 +2039,11 @@ auto Participant<SilKitConnectionT>::MakeTimerThread() -> std::unique_ptr<IMetri
             });
         });
 }
+template <class SilKitConnectionT>
+auto Participant<SilKitConnectionT>::GetConfiguration() -> const Config::ParticipantConfiguration&
+{
+    return _participantConfig;
+}
 
 
 } // namespace Core

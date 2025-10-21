@@ -70,9 +70,10 @@ struct SynchronizedPolicy : public ITimeSyncPolicy
 public:
     SynchronizedPolicy(TimeSyncService& controller, Core::IParticipantInternal* participant,
                        TimeConfiguration* configuration)
-        : _controller(controller)
-        , _participant(participant)
-        , _configuration(configuration)
+        : _controller{controller}
+        , _participant{participant}
+        , _configuration{configuration}
+        , _enableSynchronizationPoints{participant->GetConfiguration().enableSynchronizationPoints}
     {
     }
 
@@ -112,7 +113,7 @@ public:
 
     void ReceiveNextSimTask(const Core::IServiceEndpoint* from, const NextSimTask& task) override
     {
-        if(task == ZeroSimTask)
+        if (_enableSynchronizationPoints && task == ZeroSimTask)
         {
             auto currentStep = _configuration->CurrentSimStep();
             _controller.ExecuteSimStep(currentStep.timePoint, 0ns);
@@ -291,7 +292,8 @@ private:
     std::chrono::nanoseconds _lastSentNextSimTask{-1ns};
     Core::IParticipantInternal* _participant;
     TimeConfiguration* _configuration;
-    bool _hopOnEvaluated = false;
+    bool _hopOnEvaluated{false};
+    bool _enableSynchronizationPoints{false};
 };
 
 TimeSyncService::TimeSyncService(Core::IParticipantInternal* participant, ITimeProvider* timeProvider,
