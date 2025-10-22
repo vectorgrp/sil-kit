@@ -441,6 +441,9 @@ private:
 
     auto GetConfiguration() -> const Config::ParticipantConfiguration&;
 
+    template<typename MessageT>
+    void HandleSynchronizationPoint();
+
 private:
     // ----------------------------------------
     // private members

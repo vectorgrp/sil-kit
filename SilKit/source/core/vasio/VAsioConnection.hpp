@@ -397,6 +397,14 @@ private:
     {
         const auto& key = from->GetServiceDescriptor().GetNetworkName();
 
+        if constexpr (std::is_same_v<Orchestration::NextSimTask, std::decay_t<SilKitMessageT>>)
+        {
+            if(msg.duration == 0ns)
+            {
+                (void)msg;
+            }
+        }
+
         auto& linkMap = std::get<SilKitServiceToLinkMap<std::decay_t<SilKitMessageT>>>(_serviceToLinkMap);
         if (linkMap.count(key) < 1)
         {

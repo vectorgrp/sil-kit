@@ -1326,13 +1326,11 @@ void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from,
     SendMsgImpl(from, std::move(msg));
 }
 
-template <class SilKitConnectionT>
-template <typename SilKitMessageT>
-void Participant<SilKitConnectionT>::SendMsgImpl(const IServiceEndpoint* from, SilKitMessageT&& msg)
+template <typename SilKitConnectionT>
+template <typename MessageT>
+void Participant<SilKitConnectionT>::HandleSynchronizationPoint()
 {
-    TraceTx(GetLoggerInternal(), from, msg);
-    _connection.SendMsg(from, std::forward<SilKitMessageT>(msg));
-    if constexpr (SilKitMsgTraits<typename RemoveCvRef<SilKitMessageT>::type>::IsSynchronizationPoint())
+    if constexpr (SilKitMsgTraits<typename RemoveCvRef<MessageT>::type>::IsSynchronizationPoint())
     {
         if (auto* lifecycle = static_cast<Orchestration::LifecycleService*>(GetLifecycleService()); lifecycle)
         {
@@ -1343,6 +1341,16 @@ void Participant<SilKitConnectionT>::SendMsgImpl(const IServiceEndpoint* from, S
             }
         }
     }
+
+}
+
+template <class SilKitConnectionT>
+template <typename SilKitMessageT>
+void Participant<SilKitConnectionT>::SendMsgImpl(const IServiceEndpoint* from, SilKitMessageT&& msg)
+{
+    TraceTx(GetLoggerInternal(), from, msg);
+    _connection.SendMsg(from, std::forward<SilKitMessageT>(msg));
+    HandleSynchronizationPoint<SilKitMessageT>();
 }
 // Targeted messaging
 template <class SilKitConnectionT>
@@ -1646,6 +1654,7 @@ void Participant<SilKitConnectionT>::SendMsgImpl(const IServiceEndpoint* from, c
 {
     TraceTx(GetLoggerInternal(), from, targetParticipantName, msg);
     _connection.SendMsg(from, targetParticipantName, std::forward<SilKitMessageT>(msg));
+    HandleSynchronizationPoint<SilKitMessageT>();
 }
 
 
