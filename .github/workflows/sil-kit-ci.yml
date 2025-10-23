@@ -45,6 +45,14 @@ jobs:
           else \
             python3 ./SilKit/ci/check_files_changed.py ${{ github.repository }} ${{ github.event.number }}; \
           fi
+      - name: Comment DCO
+        id: comment_dco
+        if: ${{ failure() }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          gh pr comment $PR_NUMBER --repo ${{ github.repository }} -b "No \"Signed-off-by:\" in non fixup commit message. Please sign off your commits to accept our DCO: https://developercertificate.org/"
 
   check-formatting:
     name: Format checks for SIL Kit sources
