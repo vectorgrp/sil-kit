@@ -75,6 +75,8 @@ void TryStop(ILifecycleService* lifecycleService)
 
 int main(int argc, char** argv)
 {
+    int rc = 0;
+
     if (argc != 2)
     {
         std::cerr << "Wrong number of arguments! Start demo with: " << argv[0] << " <ParticipantName>" << std::endl;
@@ -126,27 +128,19 @@ int main(int argc, char** argv)
             });
 
         auto finalStateFuture = lifecycleService->StartLifecycle();
-        try
-        {
-            finalStateFuture.get();
-        }
-        catch (const std::exception& /*e*/)
-        {
-            std::cout << "Participant already destroyed" << std::endl;
-        }
-
-        // Clean up the timeout thread.
-        if (timeoutThread && timeoutThread.get()->joinable())
-        {
-            timeoutThread.get()->join();
-        }
-        
+        finalStateFuture.get();
     }
     catch (const std::exception& error)
     {
         std::cerr << "Something went wrong: " << error.what() << std::endl;
-        return -2;
+        rc = -2;
     }
 
-    return 0;
+    // Clean up the timeout thread.
+    if (timeoutThread && timeoutThread->joinable())
+    {
+        timeoutThread->join();
+    }
+
+    return rc;
 }
