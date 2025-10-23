@@ -17,9 +17,9 @@ using namespace std::chrono_literals;
 using namespace SilKit::Services::Orchestration;
 
 std::unique_ptr<std::thread> timeoutThread;
-std::atomic_bool participantDeleted{false};
 std::atomic_bool timerActive{false};
-std::atomic_bool startWorkPromiseSet{false};
+std::atomic_bool stopRequested{false};
+std::atomic_bool participantIsOperational{true};
 std::unique_ptr<SilKit::IParticipant> participant;
 
 void OnTimerTimeout()
@@ -28,12 +28,12 @@ void OnTimerTimeout()
     timerActive = false;
     if (participant)
     {
-        participantDeleted = true;
+        participantIsOperational = false;
         participant.reset();
     }
 }
 
-void StartTimeoutTimer(std::chrono::seconds timeout)
+void StartForceStopTimer(std::chrono::seconds timeout)
 {
     timerActive = true;
     timeoutThread = std::make_unique<std::thread>([timeout]() {
@@ -51,9 +51,7 @@ void StartTimeoutTimer(std::chrono::seconds timeout)
     });
 }
 
-std::atomic_bool stopRequested{false};	
 
-// Try to stop if running, otherwise request a stop and start a timer
 void TryStop(ILifecycleService* lifecycleService)
 {
     if (stopRequested)
@@ -71,7 +69,7 @@ void TryStop(ILifecycleService* lifecycleService)
     }
     else
     {
-        StartTimeoutTimer(std::chrono::seconds{5});
+        StartForceStopTimer(std::chrono::seconds{5});
     }
 }
 
@@ -98,12 +96,6 @@ int main(int argc, char** argv)
         auto* lifecycleService =
             participant->CreateLifecycleService({SilKit::Services::Orchestration::OperationMode::Coordinated});
 
-         // Future / promise to control entrance of the main loop in the worker thread
-        std::promise<void> startWorkPromise;
-        std::future<void> startWorkFuture;
-        startWorkFuture = startWorkPromise.get_future();
-
-
 		// Wait for the "Running" state on this participant and handle the requested stop
         auto* systemMonitor = participant->CreateSystemMonitor();
         systemMonitor->AddParticipantStatusHandler(
@@ -128,31 +120,12 @@ int main(int argc, char** argv)
             }
         });
 
-        // The worker thread is 'unleashed' in the starting handler...
-        lifecycleService->SetStartingHandler([&startWorkPromise]() { 
-            startWorkPromiseSet = true;
-            startWorkPromise.set_value(); 
+        lifecycleService->SetShutdownHandler([]() { 
+            // Cancel ForceStopTimer timer if shutdown happened already
+            timerActive = false; 
             });
 
-        // Start the worker thread and wait for the go from the starting handler.
-        std::atomic<bool> workerThreadDone{false};
-        auto workerThread =
-            std::thread([&startWorkFuture, &workerThreadDone, logger]() {
-
-            startWorkFuture.get();
-            while (!workerThreadDone)
-            {
-                std::this_thread::sleep_for(1s);
-                if (!participantDeleted)
-                    logger->Info("Simulation running.");
-            };
-        });
-
-        // Start and wait until the sil-kit-system-controller is stopped.
-        logger->Info(
-            "Start the participant lifecycle and wait for the sil-kit-system-controller to start the simulation.");
         auto finalStateFuture = lifecycleService->StartLifecycle();
-
         try
         {
             finalStateFuture.get();
@@ -162,24 +135,7 @@ int main(int argc, char** argv)
             std::cout << "Participant already destroyed" << std::endl;
         }
 
-        if (participant)
-        {
-            participantDeleted = true;
-            participant.reset();
-        }
-
-        // Clean up the worker/timeout thread.
-        workerThreadDone = true;
-        if (!startWorkPromiseSet)
-        {
-            startWorkPromise.set_value(); 
-        }
-
-        if (workerThread.joinable())
-        {
-            workerThread.join();
-        }
-
+        // Clean up the timeout thread.
         if (timeoutThread && timeoutThread.get()->joinable())
         {
             timeoutThread.get()->join();
