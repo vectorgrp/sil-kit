@@ -46,6 +46,18 @@ jobs:
             python3 ./SilKit/ci/check_files_changed.py ${{ github.repository }} ${{ github.event.number }}; \
           fi
 
+  check-dco-signed:
+    name: 🦙 DCO Signing Check
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: false
+
+      - name: Check if DCO is signed
+        run:
+          python3 ./SilKit/ci/check_dco_signed.py ${{ github.repository }} ${{ github.event.number }}
+
   check-formatting:
     name: Format checks for SIL Kit sources
     runs-on: ubuntu-24.04
@@ -62,7 +74,7 @@ jobs:
   clang-tidy:
     name: Running clang-tidy
     runs-on: ubuntu-latest
-    needs: [check-run-builds]
+    needs: [check-run-builds, check-dco-signed]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -87,51 +99,51 @@ jobs:
 
   clang14-tsan:
     name: Thread Sanitizer Tests
-    needs: [check-licenses, check-run-builds, check-formatting]
+    needs: [check-licenses, check-run-builds, check-formatting, check-dco-signed]
     uses: ./.github/workflows/linux-tsan.yml
     with:
       run_build: ${{ needs.check-run-builds.outputs.run_builds == 'true' }}
 
   clang14-ubsan:
     name: Undefined Behavior Sanitizer Tests
-    needs: [check-licenses, check-run-builds, check-formatting]
+    needs: [check-licenses, check-run-builds, check-formatting, check-dco-signed]
     uses: ./.github/workflows/linux-ubsan.yml
     with:
       run_build: ${{ needs.check-run-builds.outputs.run_builds == 'true' }}
 
   clang14-asan:
     name: Address Sanitizer Tests
-    needs: [check-licenses, check-run-builds, check-formatting]
+    needs: [check-licenses, check-run-builds, check-formatting, check-dco-signed]
     uses: ./.github/workflows/linux-asan.yml
     with:
       run_build: ${{ needs.check-run-builds.outputs.run_builds == 'true' }}
 
   ubuntu-release-builds:
     uses: ./.github/workflows/build-linux.yml
-    needs: [check-licenses, check-run-builds, check-formatting]
+    needs: [check-licenses, check-run-builds, check-formatting, check-dco-signed]
     with:
       run_build: ${{ needs.check-run-builds.outputs.run_builds == 'true' }}
 
   ubuntu-arm-release-builds:
     uses: ./.github/workflows/build-linux-arm64.yml
-    needs: [check-licenses, check-run-builds, check-formatting]
+    needs: [check-licenses, check-run-builds, check-formatting, check-dco-signed]
     with:
       run_build: ${{ needs.check-run-builds.outputs.run_builds == 'true' }}
 
   windows-release-builds:
     uses: ./.github/workflows/build-win.yml
-    needs: [check-licenses, check-run-builds, check-formatting]
+    needs: [check-licenses, check-run-builds, check-formatting, check-dco-signed]
     with:
       run_build: ${{ needs.check-run-builds.outputs.run_builds == 'true' }}
 
   mingw-release-builds:
     uses: ./.github/workflows/build-mingw64.yml
-    needs: [check-licenses, check-run-builds, check-formatting]
+    needs: [check-licenses, check-run-builds, check-formatting, check-dco-signed]
     with:
       run_build: ${{ needs.check-run-builds.outputs.run_builds == 'true' }}
 
   macos-release-builds:
     uses: ./.github/workflows/build-macos.yml
-    needs: [check-licenses, check-run-builds, check-formatting]
+    needs: [check-licenses, check-run-builds, check-formatting, check-dco-signed]
     with:
       run_build: ${{ needs.check-run-builds.outputs.run_builds == 'true' }}
