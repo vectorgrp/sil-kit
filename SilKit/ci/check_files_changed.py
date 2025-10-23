@@ -8,24 +8,30 @@ import requests
 import argparse
 import os
 
-isCI = os.getenv('CI')
-INFO_PREFIX = "::notice ::" if isCI != None else "INFO: "
-WARN_PREFIX = "::warning ::" if isCI != None else "WARNING: "
-ERROR_PREFIX = "::error ::" if isCI != None else "ERROR: "
+from ci_utils import log, isCI
 
-## Convenience
-def log(fmt, *args):
-    print(fmt.format(*args))
 
-def info(fmt, *args):
-    log(INFO_PREFIX + fmt, *args)
+def check_run_build(url: str):
+    run_builds = "false"
+    files_url = url + '/files'
+    r = requests.get(files_url, verify=False)
 
-def warn(fmt, *args):
-    log(WARN_PREFIX + fmt, *args)
+    for fileObject in r.json():
 
-def die(status, fmt, *args):
-    log(ERROR_PREFIX + fmt, *args)
-    sys.exit(status)
+        file_path = fileObject["filename"]
+        file = file_path.split(sep="/")[-1]
+
+        if file not in exceptional_files:
+            run_builds = "true"
+            break
+
+    log("Builds should run: {}".format(run_builds))
+
+    if isCI is not None:
+        log("Setting GITHUB_OUTPUT!")
+        with open(os.environ["GITHUB_OUTPUT"], 'a') as f:
+            print("run_builds={}".format(run_builds), file=f)
+
 
 # File Set
 exceptional_files = {'README.rst', 'latest.md', 'LICENSE', 'CONTRIBUTING.md',
@@ -37,26 +43,8 @@ parser.add_argument('repo', type=str)
 parser.add_argument('PR', type=str)
 args = parser.parse_args()
 
-run_builds = "false"
-
-url = 'https://api.github.com/repos/' + args.repo + '/pulls/' + args.PR + '/files'
+url = 'https://api.github.com/repos/' + args.repo + '/pulls/' + args.PR
 
 log("Checking at {}".format(url))
 
-r = requests.get(url, verify=False)
-
-for fileObject in r.json():
-
-    file_path = fileObject["filename"];
-    file = file_path.split(sep="/")[-1]
-
-    if file not in exceptional_files:
-        run_builds = "true"
-        break
-
-log("Builds should run: {}".format(run_builds))
-
-if isCI != None:
-    log("Setting GITHUB_OUTPUT!")
-    with open(os.environ["GITHUB_OUTPUT"], 'a') as f:
-        print("run_builds={}".format(run_builds), file=f)
+check_run_build(url)
