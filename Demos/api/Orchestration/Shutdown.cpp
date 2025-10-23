@@ -119,7 +119,7 @@ int main(int argc, char** argv)
             if (status.state == ParticipantState::ServicesCreated)
             {
                 logger->Info("TryStop in ServicesCreated");
-                //TryStop(lifecycleService);
+                TryStop(lifecycleService);
             }
 
             if (stopRequested && (status.state == ParticipantState::Running || status.state == ParticipantState::Paused))
