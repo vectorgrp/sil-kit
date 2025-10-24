@@ -36,6 +36,8 @@
 
 #include "silkit/detail/impl/netsim/NetworkSimulator.hpp"
 
+#include "silkit/detail/impl/participant/ParameterProvider.hpp"
+
 namespace SilKit {
 DETAIL_SILKIT_DETAIL_VN_NAMESPACE_BEGIN
 namespace Impl {
@@ -83,6 +85,8 @@ public:
 
     inline auto GetLogger() -> SilKit::Services::Logging::ILogger* override;
 
+    inline auto GetParameter(SilKit::Parameter parameter) -> std::string override;
+
     inline auto ExperimentalCreateNetworkSimulator() -> SilKit::Experimental::NetworkSimulation::INetworkSimulator*;
 
     inline auto ExperimentalCreateSystemController()
@@ -124,6 +128,8 @@ private:
     std::unique_ptr<Impl::Services::Logging::Logger> _logger;
 
     std::unique_ptr<Impl::Experimental::NetworkSimulation::NetworkSimulator> _networkSimulator;
+
+    std::unique_ptr<Impl::ParameterProvider> _parameterProvider;
 };
 
 } // namespace Impl
@@ -143,6 +149,7 @@ Participant::Participant(SilKit_Participant* participant)
     : _participant{participant}
 {
     _logger = std::make_unique<Services::Logging::Logger>(_participant);
+    _parameterProvider = std::make_unique<ParameterProvider>();
 }
 
 Participant::~Participant()
@@ -222,6 +229,12 @@ auto Participant::CreateSystemMonitor() -> SilKit::Services::Orchestration::ISys
 auto Participant::GetLogger() -> SilKit::Services::Logging::ILogger*
 {
     return _logger.get();
+}
+
+
+auto Participant::GetParameter(SilKit::Parameter parameter) -> std::string
+{
+    return _parameterProvider->GetParameter(_participant, parameter);
 }
 
 auto Participant::ExperimentalCreateSystemController()
