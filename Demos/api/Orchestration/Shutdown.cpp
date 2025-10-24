@@ -1,5 +1,6 @@
 // SPDX-FileCopyrightText: 2024 Vector Informatik GmbH
 //
+// SPDX-License-Identifier: MIT
 
 #include <iostream>
 #include <thread>
@@ -86,7 +87,7 @@ int main(int argc, char** argv)
 
     try
     {
-        // Setup participant, lifecycle, time synchronization and logging.
+        // Setup participant, lifecycle and logging.
         const std::string registryUri = "silkit://localhost:8500";
         const std::string configString = R"({"Logging":{"Sinks":[{"Type":"Stdout","Level":"Info"}]}})";
         auto participantConfiguration = SilKit::Config::ParticipantConfigurationFromString(configString);
@@ -118,7 +119,7 @@ int main(int argc, char** argv)
 
             if (stopRequested && (status.state == ParticipantState::Running || status.state == ParticipantState::Paused))
             {
-                lifecycleService->Stop("Requested stop."); // graceful
+                lifecycleService->Stop("Requested stop."); // Graceful
             }
         });
 
@@ -129,6 +130,7 @@ int main(int argc, char** argv)
 
         auto finalStateFuture = lifecycleService->StartLifecycle();
         finalStateFuture.get();
+
     }
     catch (const std::exception& error)
     {
