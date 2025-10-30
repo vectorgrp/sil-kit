@@ -13,6 +13,7 @@
 #include <sstream>
 #include <iterator>
 #include <thread>
+#include <set>
 
 #include "silkit/SilKitVersion.hpp"
 #include "silkit/SilKit.hpp"
@@ -46,32 +47,78 @@ class SilKitController
 public:
     SilKitController(SilKit::IParticipant* participant,
                      std::shared_ptr<SilKit::Config::IParticipantConfiguration> config,
-                     const std::vector<std::string>& expectedParticipantNames)
+                     const std::set<std::string>& requiredParticipantNames, const std::string& systemControllerName)
         : _config{std::move(config)}
-        , _expectedParticipantNames{expectedParticipantNames}
+        , _requiredParticipantNames{requiredParticipantNames}
     {
         _controller = SilKit::Experimental::Participant::CreateSystemController(participant);
-        _controller->SetWorkflowConfiguration({expectedParticipantNames});
         _monitor = participant->CreateSystemMonitor();
         _logger = participant->GetLogger();
 
         _monitor->SetParticipantConnectedHandler(
+            [this, systemControllerName](const ParticipantConnectionInformation& participantInformation) {
+            std::ostringstream ss;
+            ss << "Participant '" << participantInformation.participantName << "' connected.";
+            LogInfo(ss.str());
+
+            if (_workflowConfigSet)
+            {
+                return;
+            }
+
+            if (_requiredParticipantNames.count(participantInformation.participantName) == 0)
+            {
+                return;
+            }
+
+            _connectedParticipantNames.insert(participantInformation.participantName);
+
+            if (_connectedParticipantNames == _requiredParticipantNames)
+            {
+                LogInfo("All required participants connected to initiate the coordinated simulation start.");
+
+                std::vector<std::string> requiredParticipantNames(_requiredParticipantNames.begin(),
+                                                                  _requiredParticipantNames.end());
+                requiredParticipantNames.push_back(systemControllerName);
+                _workflowConfigSet = true;
+                _controller->SetWorkflowConfiguration({requiredParticipantNames});
+            }
+            else if (_requiredParticipantNames.count(participantInformation.participantName) > 0)
+            {
+                LogRemainingRequiredParticipants();
+            }
+        });
+
+        _monitor->SetParticipantDisconnectedHandler(
             [this](const ParticipantConnectionInformation& participantInformation) {
             std::ostringstream ss;
-            ss << "Participant '" << participantInformation.participantName << "' joined the simulation";
+            ss << "Participant '" << participantInformation.participantName << "' disconnected.";
             LogInfo(ss.str());
+
+            if (_workflowConfigSet)
+            {
+                return;
+            }
+
+            if (_requiredParticipantNames.count(participantInformation.participantName) > 0)
+            {
+                _connectedParticipantNames.erase(participantInformation.participantName);
+                LogRemainingRequiredParticipants();
+            }
         });
+
         _monitor->AddSystemStateHandler([&](const SystemState& systemState) {
             if (systemState == SystemState::Stopping)
             {
                 if (!_isStopRequested)
                 {
-                    LogInfo("Another participant causes the simulation to stop");
+                    LogInfo("Another participant causes the simulation to stop.");
                 }
             }
             else if (systemState == SystemState::Error)
             {
-                LogInfo("Simulation is in error state");
+                LogInfo("Simulation is in error state. This requires restarting all required participants and the "
+                        "System Controller");
             }
         });
 
@@ -79,6 +126,28 @@ public:
             participant->CreateLifecycleService({SilKit::Services::Orchestration::OperationMode::Coordinated});
         auto finalStatePromise = _lifecycleService->StartLifecycle();
         _finalStatePromise = finalStatePromise.share();
+    }
+
+    void LogRemainingRequiredParticipants()
+    {
+        std::set<std::string> remaining;
+        std::set_difference(_requiredParticipantNames.begin(), _requiredParticipantNames.end(),
+                            _connectedParticipantNames.begin(), _connectedParticipantNames.end(),
+                            std::inserter(remaining, remaining.begin()));
+        if (!remaining.empty())
+        {
+            std::ostringstream ss;
+            ss << "Waiting for participant" << (remaining.size() > 1 ? "s" : "") << ": ";
+            bool first = true;
+            for (const auto& name : remaining)
+            {
+                if (!first)
+                    ss << ", ";
+                ss << "'" << name << "'";
+                first = false;
+            }
+            LogInfo(ss.str());
+        }
     }
 
     void RegisterSignalHandler()
@@ -185,9 +254,11 @@ private:
 
 private:
     std::shared_ptr<SilKit::Config::IParticipantConfiguration> _config;
-    std::vector<std::string> _expectedParticipantNames;
+    const std::set<std::string> _requiredParticipantNames;
+    std::set<std::string> _connectedParticipantNames;
 
     std::atomic<bool> _isStopRequested{false};
+    bool _workflowConfigSet = false;
     bool _aborted = false;
     SilKit::Experimental::Services::Orchestration::ISystemController* _controller;
     ISystemMonitor* _monitor;
@@ -300,7 +371,7 @@ int main(int argc, char** argv)
     }
 
     const auto configurationFilename{commandlineParser.Get<CliParser::Option>("configuration").Value()};
-    const auto participantNames{commandlineParser.Get<CliParser::PositionalList>("participantNames").Values()};
+    const auto requiredParticipantNames{commandlineParser.Get<CliParser::PositionalList>("participantNames").Values()};
     const auto connectUri{commandlineParser.Get<CliParser::Option>("connect-uri").Value()};
 
     const auto logLevel{commandlineParser.Get<CliParser::Option>("log").Value()};
@@ -356,17 +427,24 @@ int main(int argc, char** argv)
         auto* logger{participant->GetLogger()};
         {
             std::ostringstream ss;
-            ss << "System controller is expecting " << participantNames.size() << " participant"
-               << (participantNames.size() > 1 ? "s" : "") << ": '";
-            std::copy(participantNames.begin(), std::prev(participantNames.end()),
+            ss << "Coordinated simulation start requires " << requiredParticipantNames.size() << " participant"
+               << (requiredParticipantNames.size() > 1 ? "s" : "") << ": '";
+            std::copy(requiredParticipantNames.begin(), std::prev(requiredParticipantNames.end()),
                       std::ostream_iterator<std::string>(ss, "', '"));
-            ss << participantNames.back() << "'";
+            ss << requiredParticipantNames.back() << "'";
             logger->Info(ss.str());
         }
 
-        auto expectedParticipantNames{participantNames};
-        expectedParticipantNames.push_back(participantName);
-        SilKitController controller(participant.get(), configuration, expectedParticipantNames);
+        const std::set<std::string> requiredParticipantNamesSet{requiredParticipantNames.begin(),
+                                                                requiredParticipantNames.end()};
+
+        if (requiredParticipantNamesSet.size() != requiredParticipantNames.size())
+        {
+            std::cerr << "Error: Duplicate name in list of required participant" << std::endl;
+            return -2;
+        }
+
+        SilKitController controller(participant.get(), configuration, requiredParticipantNamesSet, participantName);
 
         std::cout << "Press Ctrl-C to end the simulation..." << std::endl;
         controller.RegisterSignalHandler();
