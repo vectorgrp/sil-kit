@@ -83,7 +83,7 @@ public:
                 _workflowConfigSet = true;
                 _controller->SetWorkflowConfiguration({requiredParticipantNames});
             }
-            else if (_requiredParticipantNames.count(participantInformation.participantName) > 0)
+            else
             {
                 LogRemainingRequiredParticipants();
             }
@@ -118,7 +118,7 @@ public:
             else if (systemState == SystemState::Error)
             {
                 LogInfo("Simulation is in error state. This requires restarting all required participants and the "
-                        "System Controller");
+                        "System Controller.");
             }
         });
 
@@ -440,7 +440,7 @@ int main(int argc, char** argv)
 
         if (requiredParticipantNamesSet.size() != requiredParticipantNames.size())
         {
-            std::cerr << "Error: Duplicate name in list of required participant" << std::endl;
+            std::cerr << "Error: Duplicate name in list of required participants" << std::endl;
             return -2;
         }
 
