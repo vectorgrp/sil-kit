@@ -290,6 +290,9 @@ public:
     //! \brief Return the ILogger at this SIL Kit participant.
     virtual auto GetLogger() -> Services::Logging::ILogger* = 0;
 
+    //! \brief Get a parameter set by an API call and/or the participant configuration.
+    virtual auto GetParameter(Parameter parameter) -> std::string = 0;
+
     //! \brief Return the LifecycleService at this SIL Kit participant.
     virtual auto GetLifecycleService() -> Services::Orchestration::ILifecycleService* = 0;
 
