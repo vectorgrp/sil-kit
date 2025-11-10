@@ -1328,7 +1328,7 @@ template <typename SilKitConnectionT>
 template <typename MessageT>
 void Participant<SilKitConnectionT>::HandleSynchronizationPoint()
 {
-    if constexpr (SilKitMsgTraits<typename RemoveCvRef<MessageT>>::IsSynchronizationPoint())
+    if constexpr (SilKitMsgTraits<RemoveCvRef<MessageT>>::IsSynchronizationPoint())
     {
         if (auto* lifecycle = static_cast<Orchestration::LifecycleService*>(GetLifecycleService()); lifecycle)
         {
