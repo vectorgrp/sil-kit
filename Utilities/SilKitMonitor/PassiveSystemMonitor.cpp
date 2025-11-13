@@ -35,6 +35,26 @@ std::ostream& operator<<(std::ostream& out, std::chrono::nanoseconds timestamp)
     return out;
 }
 
+auto getConfig(const std::string& configurationFilename, const std::string& logLevel)
+{
+    if (!configurationFilename.empty())
+    {
+        if (!logLevel.empty())
+        {
+            std::cout << "warning: loglevel provided via commandline will be ignored in favor of the provided "
+                         "participant config!"
+                      << std::endl;
+        }
+        return SilKit::Config::ParticipantConfigurationFromFile(configurationFilename);
+    }
+    else
+    {
+        std::stringstream defaultConfig;
+        defaultConfig << R"({"Logging": {"Sinks": [{"Type": "Stdout", "Level":")" << logLevel << R"("}]}})";
+        return SilKit::Config::ParticipantConfigurationFromString(defaultConfig.str());
+    }
+}
+
 int main(int argc, char** argv)
 {
     CliParser commandlineParser;
@@ -47,6 +67,11 @@ int main(int argc, char** argv)
         "name", "n", "SystemMonitor", "[--name <participantName>]",
         "-n, --name <participantName>: The participant name used to take part in the simulation. Defaults to "
         "'SystemMonitor'.");
+    commandlineParser.Add<CliParser::Option>("loglevel", "l", "",
+                                             "[--loglevel <Critical|Error|Warning|Info|Debug|Trace>]",
+                                             "-l, --loglevel <Critical|Error|Warning|Info|Debug|Trace>: The log level "
+                                             "used for the sil-kit-monitor. Defaults to "
+                                             "Info.");
     commandlineParser.Add<CliParser::Option>("configuration", "c", "", "[--configuration <filePath>]",
                                              "-c, --configuration <filePath>: Path to the Participant configuration "
                                              "YAML or JSON file. Note that the format was changed in v3.6.11.");
@@ -99,6 +124,9 @@ int main(int argc, char** argv)
     const auto connectUri{commandlineParser.Get<CliParser::Option>("connect-uri").Value()};
     const auto participantName{commandlineParser.Get<CliParser::Option>("name").Value()};
     const auto configurationFilename{commandlineParser.Get<CliParser::Option>("configuration").Value()};
+    const auto logLevel = commandlineParser.Get<CliParser::Option>("loglevel").HasValue()
+                              ? commandlineParser.Get<CliParser::Option>("loglevel").Value()
+                              : "Info";
 
     bool autonomousMode = (commandlineParser.Get<CliParser::Flag>("autonomous").Value()) ? true : false;
     bool coordinatedMode = (commandlineParser.Get<CliParser::Flag>("coordinated").Value()) ? true : false;
@@ -120,9 +148,7 @@ int main(int argc, char** argv)
     std::shared_ptr<SilKit::Config::IParticipantConfiguration> configuration;
     try
     {
-        configuration = !configurationFilename.empty()
-                            ? SilKit::Config::ParticipantConfigurationFromFile(configurationFilename)
-                            : SilKit::Config::ParticipantConfigurationFromString("");
+        configuration = getConfig(configurationFilename, logLevel);
     }
     catch (const SilKit::ConfigurationError& error)
     {
@@ -140,6 +166,13 @@ int main(int argc, char** argv)
 
         auto* logger = participant->GetLogger();
         auto* systemMonitor = participant->CreateSystemMonitor();
+
+        systemMonitor->SetParticipantConnectedHandler(
+            [logger](const Services::Orchestration::ParticipantConnectionInformation& status) {
+            std::stringstream buffer;
+            buffer << "New Participant: \'" << status.participantName << "\'" << std::endl;
+            logger->Info(buffer.str());
+        });
 
         systemMonitor->AddParticipantStatusHandler([logger](const Services::Orchestration::ParticipantStatus& status) {
             std::stringstream buffer;
