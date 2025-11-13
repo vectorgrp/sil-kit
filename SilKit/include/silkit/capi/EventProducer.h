@@ -5,10 +5,10 @@
 #pragma once
 
 #include <stdint.h>
+
 #include "silkit/capi/Types.h"
 #include "silkit/capi/InterfaceIdentifiers.h"
 #include "silkit/capi/SilKitMacros.h"
-#include "silkit/capi/NetworkSimulator.h"
 
 #include "silkit/capi/Can.h"
 #include "silkit/capi/Flexray.h"
