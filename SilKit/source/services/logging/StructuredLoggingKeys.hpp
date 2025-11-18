@@ -25,6 +25,7 @@ constexpr std::string_view executionTime{"ExecutionTime"};
 constexpr std::string_view participantName{"ParticipantName"};
 constexpr std::string_view registryUri{"RegistryUri"};
 constexpr std::string_view silKitVersion{"SilKitVersion"};
+constexpr std::string_view gitHash{"GitHash"};
 
 constexpr std::string_view newParticipantState{"NewParticipantState"};
 constexpr std::string_view oldParticipantState{"OldParticipantState"};
