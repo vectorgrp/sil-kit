@@ -107,6 +107,7 @@ Participant<SilKitConnectionT>::Participant(Config::ParticipantConfiguration par
     lm.SetKeyValue(Logging::Keys::participantName, GetParticipantName());
     lm.SetKeyValue(Logging::Keys::registryUri, _participantConfig.middleware.registryUri);
     lm.SetKeyValue(Logging::Keys::silKitVersion, Version::StringImpl());
+    lm.SetKeyValue("GitHash", Version::GitHashImpl());
     lm.Dispatch();
 }
 
