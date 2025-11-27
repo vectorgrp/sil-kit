@@ -14,6 +14,8 @@ namespace Core {
 // ==================================================================
 //  Trait which checks that '.timestamp' works
 // ==================================================================
+template<class T>
+using RemoveCvRef = std::remove_cv_t<std::remove_reference_t<T>>;
 
 template <typename T, typename = void>
 struct HasTimestamp : std::false_type
@@ -58,6 +60,15 @@ struct SilKitMsgTraitForbidSelfDelivery
     }
 };
 
+template <class MsgT>
+struct SilKitMsgTraitIsSynchronizationPoint
+{
+    static constexpr bool IsSynchronizationPoint()
+    {
+        return false;
+    }
+};
+
 // The final message traits
 template <class MsgT>
 struct SilKitMsgTraits
@@ -67,6 +78,7 @@ struct SilKitMsgTraits
     , SilKitMsgTraitVersion<MsgT>
     , SilKitMsgTraitSerdesName<MsgT>
     , SilKitMsgTraitForbidSelfDelivery<MsgT>
+    , SilKitMsgTraitIsSynchronizationPoint<MsgT>
 {
 };
 
@@ -105,6 +117,16 @@ struct SilKitMsgTraits
     struct SilKitMsgTraitForbidSelfDelivery<Namespace::MsgName> \
     { \
         static constexpr bool IsSelfDeliveryForbidden() \
+        { \
+            return true; \
+        } \
+    }
+
+#define DefineSilKitMsgTrait_IsSynchronizationPoint(Namespace, MsgName) \
+    template <> \
+    struct SilKitMsgTraitIsSynchronizationPoint<Namespace::MsgName> \
+    { \
+        static constexpr bool IsSynchronizationPoint() \
         { \
             return true; \
         } \
@@ -163,6 +185,10 @@ DefineSilKitMsgTrait_EnforceSelfDelivery(SilKit::Services::Lin, LinSendFrameHead
 
 // Messages with forbidden self delivery
 DefineSilKitMsgTrait_ForbidSelfDelivery(SilKit::Services::Orchestration, SystemCommand);
+
+// Messages which are Synchronization Points
+DefineSilKitMsgTrait_IsSynchronizationPoint(SilKit::Services::Flexray, FlexrayCycleStartEvent);
+DefineSilKitMsgTrait_IsSynchronizationPoint(SilKit::Services::PubSub, WireDataMessageEvent); //for testing
 
 } // namespace Core
 } // namespace SilKit
