@@ -26,9 +26,9 @@ struct Participant; //fwd
 
 struct Arguments
 {
-    int stepSizeNs = 1000000;
-    int bandwidthKbits = 1000;
-    int durationSec = 1;
+    std::chrono::nanoseconds stepSizeNs{1ms};
+    int64_t bandwidthKbits = 1000;
+    std::chrono::nanoseconds durationSec{1s};
     std::string registryUri = "silkit://localhost:0";
 };
 
@@ -46,6 +46,8 @@ struct Participant
     std::chrono::nanoseconds firstReceiveTime = {};
     std::chrono::nanoseconds lastReceiveTime = {};
     std::chrono::nanoseconds lastPrintTime = {};
+    std::chrono::nanoseconds testDurationNs = {};
+    double bytesAccumulator = 0.0;
 };
 
 
@@ -128,9 +130,14 @@ void OnEthernetFrameReceived(Participant& participant, IEthernetController* /*ct
         gPrinter.Print("[RECV] Bandwidth: " + std::to_string(bandwidthKbits) + " Kbit/s, Error: " + std::to_string(errorMargin) + "%");
         participant.lastPrintTime = now;
     }
+    if (now >= participant.testDurationNs)
+    {
+        gPrinter.Print("Test duration reached at " + std::to_string(now.count()) + " ns");
+        participant.lifecycleService->Stop("Test duration reached");
+    }
 }
 
-void OnEthernetFrameTransmitted(IEthernetController* /*ctrl*/, const EthernetFrameTransmitEvent& event)
+void OnEthernetFrameTransmitted(Participant& participant, IEthernetController* /*ctrl*/, const EthernetFrameTransmitEvent& event)
 {
     //gPrinter.Print("Ethernet frame transmitted at t=" + std::to_string(event.timestamp.count()));
 }
@@ -139,23 +146,26 @@ void OnEthernetFrameTransmitted(IEthernetController* /*ctrl*/, const EthernetFra
 
 void OnSimulationStep(Participant& participant, std::chrono::nanoseconds now, std::chrono::nanoseconds duration)
 {
-    // Calculate bytes to send for this step
+    constexpr size_t minFrameSize = 63;
     double seconds = duration.count() / 1e9;
-    size_t bytesPerStep = static_cast<size_t>((participant.args.bandwidthKbits * 1000 / 8) * seconds);
-    if (bytesPerStep == 0) return;
+    double bytesPerStep = (participant.args.bandwidthKbits * 1000.0 / 8.0) * seconds;
+    participant.bytesAccumulator += bytesPerStep;
 
-    // Send frames (one frame per step, or split into multiple if needed)
-    std::vector<uint8_t> payload(bytesPerStep, 0xAB); // Example payload
-    // Optionally add frameId or timestamp to payload
-    if (payload.size() >= sizeof(size_t))
+    if (participant.bytesAccumulator >= minFrameSize)
     {
-        std::memcpy(payload.data(), &participant.frameId, sizeof(size_t));
+        size_t bytesToSend = static_cast<size_t>(participant.bytesAccumulator);
+        bytesToSend = std::max(bytesToSend, minFrameSize);
+        std::vector<uint8_t> payload(bytesToSend, 0xAB);
+        if (payload.size() >= sizeof(size_t))
+        {
+            std::memcpy(payload.data(), &participant.frameId, sizeof(size_t));
+        }
+        EthernetFrame frame{payload};
+        participant.ethernetController->SendFrame(frame, reinterpret_cast<void*>(&participant));
+        participant.bytesSent += bytesToSend;
+        participant.frameId++;
+        participant.bytesAccumulator -= bytesToSend;
     }
-    EthernetFrame frame{payload};
-    participant.ethernetController->SendFrame(frame, reinterpret_cast<void*>(&participant));
-    participant.bytesSent += bytesPerStep;
-    participant.frameId++;
-
 }
 
 auto MakeParticipant(std::string_view name, const Arguments& args)
@@ -176,36 +186,59 @@ Logging:
     auto* ethernetController = participant->CreateEthernetController("EthernetController1", "ETH1");
 
     // Register handlers
-    ethernetController->AddFrameTransmitHandler(OnEthernetFrameTransmitted);
-    ethernetController->AddFrameHandler([p](IEthernetController* ctrl, const EthernetFrameEvent& event) {
+    ethernetController->AddFrameTransmitHandler([p](auto&& ctrl, auto&& event) {
+        OnEthernetFrameTransmitted(*p, ctrl, event);
+    });
+    ethernetController->AddFrameHandler([p](auto&& ctrl, auto&& event) {
         OnEthernetFrameReceived(*p, ctrl, event);
     });
 
     auto* lifecycleService = participant->CreateLifecycleService({SilKit::Services::Orchestration::OperationMode::Coordinated});
     auto* timeSyncService = lifecycleService->CreateTimeSyncService();
 
-    p->participant = std::move(participant);
-    p->ethernetController = ethernetController;
     p->lifecycleService = lifecycleService;
     p->timeSyncService = timeSyncService;
-    p->args = args;
-    p->bytesSent = 0;
-    p->frameId = 0;
 
     // Register simulation step handler
     timeSyncService->SetSimulationStepHandler(
         [p](auto now, auto duration) {
             OnSimulationStep(*p, now, duration);
         },
-        std::chrono::nanoseconds{args.stepSizeNs});
+        args.stepSizeNs);
 
     lifecycleService->SetCommunicationReadyHandler([ethernetController]() {
         ethernetController->Activate();
     });
 
+
+    p->participant = std::move(participant);
+    p->ethernetController = ethernetController;
+    p->args = args;
+    p->bytesSent = 0;
+    p->frameId = 0;
+    p->testDurationNs = args.durationSec;
     p->finalStateFuture = lifecycleService->StartLifecycle();
 
     return p;
+}
+
+std::chrono::nanoseconds ParseDurationToNanoseconds(const std::string& str)
+{
+    size_t pos = 0;
+    while (pos < str.size() && std::isdigit(str[pos])) ++pos;
+    std::string numPart = str.substr(0, pos);
+    std::string suffix = str.substr(pos);
+    int64_t value = numPart.empty() ? 0 : std::stoll(numPart);
+    if (suffix == "ns")
+        return std::chrono::nanoseconds(value);
+    else if (suffix == "us" || suffix.empty())
+        return std::chrono::microseconds(value);
+    else if (suffix == "ms")
+        return std::chrono::milliseconds(value);
+    else if (suffix == "s" || suffix.empty())
+        return std::chrono::seconds(value);
+    else
+        throw std::runtime_error{"Cannot parse time string '" + str + "'"};
 }
 
 int main(int argc, char** argv)
@@ -219,11 +252,11 @@ int main(int argc, char** argv)
         "bandwidth", "b", "1000", "[--bandwidth <VALUE>]",
         std::vector<std::string>{"Bandwidth value to use KBit/s (default: 1000)"});
     cmdParser.Add<SilKit::Util::CommandlineParser::Option>(
-        "step-size", "s", "1000000", "[--step-size <NANOSECONDS>]",
-        std::vector<std::string>{"Simulation step size in nanoseconds (default: 1000000, i.e. 1ms)"});
+        "step-size", "s", "1ms", "[--step-size <NANOSECONDS>]",
+        std::vector<std::string>{"Simulation step size in [ms,ns,s] defaulting to seconds (default: 1000000ns, i.e. 1ms)"});
     cmdParser.Add<SilKit::Util::CommandlineParser::Option>(
-        "duration", "d", "1", "[--duration <SECONDS>]",
-        std::vector<std::string>{"Simulation duration in seconds (default: 1)"});
+        "duration", "d", "1s", "[--duration <SECONDS>]",
+        std::vector<std::string>{"Simulation duration in [ms,ns,s] defaulting to seconds [s] (default: 1ms)"});
     try {
         cmdParser.ParseArguments(argc, argv);
     } catch (const std::exception& e) {
@@ -234,12 +267,20 @@ int main(int argc, char** argv)
     int numberOfParticipants = std::stoi(cmdParser.Get<SilKit::Util::CommandlineParser::Option>("number-of-participants").Value());
     Arguments args;
     args.bandwidthKbits = std::stoi(cmdParser.Get<SilKit::Util::CommandlineParser::Option>("bandwidth").Value());
-    args.stepSizeNs = std::stoi(cmdParser.Get<SilKit::Util::CommandlineParser::Option>("step-size").Value());
-    args.durationSec = std::stoi(cmdParser.Get<SilKit::Util::CommandlineParser::Option>("duration").Value());
+    args.stepSizeNs = ParseDurationToNanoseconds(cmdParser.Get<SilKit::Util::CommandlineParser::Option>("step-size").Value());
+    auto durationStr = cmdParser.Get<SilKit::Util::CommandlineParser::Option>("duration").Value();
+    args.durationSec = ParseDurationToNanoseconds(durationStr);
 
     auto&& config = SilKit::Config::ParticipantConfigurationFromString("{}");
     auto&& registry = SilKit::Vendor::Vector::CreateSilKitRegistry(config);
     args.registryUri = registry->StartListening("silkit://localhost:0"); // get actual listening address
+
+    gPrinter.Print("Bandwidth Parameters:");
+    gPrinter.Print("  number-of-participants: " + std::to_string(numberOfParticipants));
+    gPrinter.Print("  bandwidth: " + std::to_string(args.bandwidthKbits) + " KBit/s");
+    gPrinter.Print("  step-size: " + std::to_string(args.stepSizeNs.count()) + " ns");
+    gPrinter.Print("  duration: " + durationStr + " (" + std::to_string(args.durationSec.count()) + " ns)");
+    gPrinter.Print("  registry-uri: " + args.registryUri);
 
     std::vector<std::string> participantNames;
     std::vector<std::shared_ptr<Participant>> participants;
@@ -255,11 +296,6 @@ int main(int argc, char** argv)
         SilKit::Experimental::Participant::CreateSystemController(firstParticipant->participant.get());
     systemController->SetWorkflowConfiguration({participantNames});
 
-    // Sleep for the requested duration before waiting for lifecycle completion
-    gPrinter.Print("Main thread sleeping for " + std::to_string(args.durationSec) + " seconds...");
-    std::this_thread::sleep_for(std::chrono::seconds(args.durationSec));
-
-    firstParticipant->lifecycleService->Stop("Test stopped.");
     for (auto& participant : participants)
     {
         participant->finalStateFuture.get();
