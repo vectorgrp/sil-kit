@@ -155,6 +155,7 @@ add_subdirectory(communication/PubSub)
 add_subdirectory(communication/Rpc)
 
 add_subdirectory(tools/Benchmark)
+add_subdirectory(tools/Bandwidth)
 
 add_subdirectory(api/SimpleCan)
 add_subdirectory(api/NetworkSimulator)
