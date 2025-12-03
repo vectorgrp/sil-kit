@@ -12,6 +12,7 @@
 
 - Improved the behavior of the `sil-kit-system-controller`, allowing single participants to drop out and rejoin before
   all required participants are connected without having to restart other required participants or the system controller.
+- `docs`: document the ability to override the history length of ``DataPublisher`` controllers in the participant configuration
 
 ## Added
 
