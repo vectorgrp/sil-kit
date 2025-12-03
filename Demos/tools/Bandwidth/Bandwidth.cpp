@@ -176,7 +176,7 @@ auto MakeParticipant(std::string_view name, const Arguments& args)
 Logging:
   Sinks:
     - Type: Stdout
-      Level: Info
+      Level: Error
 )";
     auto p = std::make_shared<Participant>();
     auto participantConfiguration = SilKit::Config::ParticipantConfigurationFromString(configString);
@@ -275,12 +275,8 @@ int main(int argc, char** argv)
     auto&& registry = SilKit::Vendor::Vector::CreateSilKitRegistry(config);
     args.registryUri = registry->StartListening("silkit://localhost:0"); // get actual listening address
 
-    gPrinter.Print("Bandwidth Parameters:");
-    gPrinter.Print("  number-of-participants: " + std::to_string(numberOfParticipants));
-    gPrinter.Print("  bandwidth: " + std::to_string(args.bandwidthKbits) + " KBit/s");
-    gPrinter.Print("  step-size: " + std::to_string(args.stepSizeNs.count()) + " ns");
-    gPrinter.Print("  duration: " + durationStr + " (" + std::to_string(args.durationSec.count()) + " ns)");
-    gPrinter.Print("  registry-uri: " + args.registryUri);
+
+    auto wallclockStart = std::chrono::high_resolution_clock::now();
 
     std::vector<std::string> participantNames;
     std::vector<std::shared_ptr<Participant>> participants;
@@ -300,6 +296,15 @@ int main(int argc, char** argv)
     {
         participant->finalStateFuture.get();
     }
+
+    auto wallclockEnd = std::chrono::high_resolution_clock::now();
+    auto wallclockDuration = std::chrono::duration_cast<std::chrono::duration<double>>(wallclockEnd - wallclockStart);
+    gPrinter.Print("Bandwidth Test Tool Parameters:");
+    gPrinter.Print("  number-of-participants: " + std::to_string(numberOfParticipants));
+    gPrinter.Print("  bandwidth: " + std::to_string(args.bandwidthKbits) + " KBit/s");
+    gPrinter.Print("  step-size: " + std::to_string(args.stepSizeNs.count()) + " ns");
+    gPrinter.Print("  duration: " + durationStr + " (" + std::to_string(args.durationSec.count()) + " ns)");
+    gPrinter.Print("  run time: " + std::to_string(wallclockDuration.count()) + "s");
 
     return 0;
 }
