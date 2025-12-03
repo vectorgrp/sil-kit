@@ -26,10 +26,12 @@ struct Participant; //fwd
 
 struct Arguments
 {
+    std::string participantName;
     std::chrono::nanoseconds stepSizeNs{1ms};
     int64_t bandwidthKbits = 1000;
     std::chrono::nanoseconds durationSec{1s};
     std::string registryUri = "silkit://localhost:0";
+    bool isSender{false};
 };
 
 struct Participant
@@ -127,7 +129,7 @@ void OnEthernetFrameReceived(Participant& participant, IEthernetController* /*ct
     // Print only every second
     if (now - participant.lastPrintTime >= std::chrono::seconds(1))
     {
-        gPrinter.Print("[RECV] Bandwidth: " + std::to_string(bandwidthKbits) + " Kbit/s, Error: " + std::to_string(errorMargin) + "%");
+        gPrinter.Print(participant.args.participantName + " Bandwidth: " + std::to_string(bandwidthKbits) + " Kbit/s, Error: " + std::to_string(errorMargin) + "%");
         participant.lastPrintTime = now;
     }
     if (now >= participant.testDurationNs)
@@ -146,6 +148,11 @@ void OnEthernetFrameTransmitted(Participant& participant, IEthernetController* /
 
 void OnSimulationStep(Participant& participant, std::chrono::nanoseconds now, std::chrono::nanoseconds duration)
 {
+    if(!participant.args.isSender)
+    {
+        return;
+    }
+
     constexpr size_t minFrameSize = 63;
     double seconds = duration.count() / 1e9;
     double bytesPerStep = (participant.args.bandwidthKbits * 1000.0 / 8.0) * seconds;
@@ -168,7 +175,7 @@ void OnSimulationStep(Participant& participant, std::chrono::nanoseconds now, st
     }
 }
 
-auto MakeParticipant(std::string_view name, const Arguments& args)
+auto MakeParticipant( const Arguments& args)
     -> std::shared_ptr<Participant>
 {
     // Setup participant configuration and registry URI
@@ -180,7 +187,7 @@ Logging:
 )";
     auto p = std::make_shared<Participant>();
     auto participantConfiguration = SilKit::Config::ParticipantConfigurationFromString(configString);
-    auto participant = SilKit::CreateParticipant(participantConfiguration, std::string{name}, args.registryUri);
+    auto participant = SilKit::CreateParticipant(participantConfiguration, std::string{args.participantName}, args.registryUri);
 
     // Create EthernetController
     auto* ethernetController = participant->CreateEthernetController("EthernetController1", "ETH1");
@@ -282,9 +289,11 @@ int main(int argc, char** argv)
     std::vector<std::shared_ptr<Participant>> participants;
     for (auto i = 0; i < numberOfParticipants; i++)
     {
-        auto&& name = "Participant_" + std::to_string(i);
+        auto&& name = "P_" + std::to_string(i);
         participantNames.push_back(name);
-        participants.emplace_back(MakeParticipant(name, args));
+        args.participantName = name;
+        args.isSender = i == 0;
+        participants.emplace_back(MakeParticipant(args));
     }
 
     auto&& firstParticipant = participants.at(0);
