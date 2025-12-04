@@ -260,10 +260,10 @@ int main(int argc, char** argv)
         std::vector<std::string>{"Bandwidth value to use KBit/s (default: 1000)"});
     cmdParser.Add<SilKit::Util::CommandlineParser::Option>(
         "step-size", "s", "1ms", "[--step-size <NANOSECONDS>]",
-        std::vector<std::string>{"Simulation step size in [ms,ns,s] defaulting to seconds (default: 1000000ns, i.e. 1ms)"});
+        std::vector<std::string>{"Simulation step size in virtual time [ms,ns,s] defaulting to seconds (default: 1000000ns, i.e. 1ms)"});
     cmdParser.Add<SilKit::Util::CommandlineParser::Option>(
         "duration", "d", "1s", "[--duration <SECONDS>]",
-        std::vector<std::string>{"Simulation duration in [ms,ns,s] defaulting to seconds [s] (default: 1ms)"});
+        std::vector<std::string>{"Simulation duration in virtual time [ms,ns,s] defaulting to seconds [s] (default: 1ms)"});
     try {
         cmdParser.ParseArguments(argc, argv);
     } catch (const std::exception& e) {
@@ -283,6 +283,7 @@ int main(int argc, char** argv)
     args.registryUri = registry->StartListening("silkit://localhost:0"); // get actual listening address
 
 
+    gPrinter.Print("----- starting  step-size@ " + std::to_string(args.stepSizeNs.count()) + " ns");
     auto wallclockStart = std::chrono::high_resolution_clock::now();
 
     std::vector<std::string> participantNames;
