@@ -147,7 +147,7 @@ void OnEthernetFrameTransmitted(Participant& /*participant*/, IEthernetControlle
 
 
 
-void OnSimulationStep(Participant& participant, std::chrono::nanoseconds now, std::chrono::nanoseconds duration)
+void OnSimulationStep(Participant& participant, std::chrono::nanoseconds /*now*/, std::chrono::nanoseconds duration)
 {
     if(!participant.args.isSender)
     {
