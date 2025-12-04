@@ -13,7 +13,7 @@
 
 #include "silkit/SilKit.hpp"
 #include "silkit/vendor/CreateSilKitRegistry.hpp"
-#include "silkit/Services/Orchestration/ILifecycleService.hpp"
+#include "silkit/Services/Orchestration/ILifeCycleService.hpp"
 #include "silkit/Services/Orchestration/ITimeSyncService.hpp"
 #include "silkit/experimental/participant/ParticipantExtensions.hpp"
 
@@ -42,14 +42,14 @@ struct Participant
     SilKit::Services::Orchestration::ITimeSyncService* timeSyncService{};
     std::future<SilKit::Services::Orchestration::ParticipantState> finalStateFuture;
     Arguments args;
-    size_t bytesSent = 0;
-    size_t frameId = 0;
-    size_t bytesReceived = 0;
-    std::chrono::nanoseconds firstReceiveTime = {};
-    std::chrono::nanoseconds lastReceiveTime = {};
-    std::chrono::nanoseconds lastPrintTime = {};
-    std::chrono::nanoseconds testDurationNs = {};
-    double bytesAccumulator = 0.0;
+    size_t bytesSent{0};
+    size_t frameId{0};
+    size_t bytesReceived{0};
+    std::chrono::nanoseconds firstReceiveTime{};
+    std::chrono::nanoseconds lastReceiveTime{};
+    std::chrono::nanoseconds lastPrintTime{};
+    std::chrono::nanoseconds testDurationNs{};
+    double bytesAccumulator{0.0};
 };
 
 
@@ -139,9 +139,9 @@ void OnEthernetFrameReceived(Participant& participant, IEthernetController* /*ct
     }
 }
 
-void OnEthernetFrameTransmitted(Participant& participant, IEthernetController* /*ctrl*/, const EthernetFrameTransmitEvent& event)
+void OnEthernetFrameTransmitted(Participant& /*participant*/, IEthernetController* /*ctrl*/, const EthernetFrameTransmitEvent& /*event*/)
 {
-    //gPrinter.Print("Ethernet frame transmitted at t=" + std::to_string(event.timestamp.count()));
+    // No op
 }
 
 
