@@ -13,8 +13,8 @@
 
 #include "silkit/SilKit.hpp"
 #include "silkit/vendor/CreateSilKitRegistry.hpp"
-#include "silkit/Services/Orchestration/ILifeCycleService.hpp"
-#include "silkit/Services/Orchestration/ITimeSyncService.hpp"
+#include "silkit/services/orchestration/ILifecycleService.hpp"
+#include "silkit/services/orchestration/ITimeSyncService.hpp"
 #include "silkit/experimental/participant/ParticipantExtensions.hpp"
 
 #include "../../communication/include/CommandlineParser.hpp"
