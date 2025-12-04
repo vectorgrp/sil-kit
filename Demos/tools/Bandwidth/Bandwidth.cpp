@@ -1,7 +1,7 @@
-// SPDX-FileCopyrightText: 2024 Vector Informatik GmbH
+// SPDX-FileCopyrightText: 2025 Vector Informatik GmbH
 //
 // SPDX-License-Identifier: MIT
-
+// This tool sends ethernet frames at a given bandwidth. It allows adjusting the simulation steps and simulation duration.
 #include <iostream>
 #include <memory>
 #include <string_view>
@@ -309,7 +309,7 @@ int main(int argc, char** argv)
 
     auto wallclockEnd = std::chrono::high_resolution_clock::now();
     auto wallclockDuration = std::chrono::duration_cast<std::chrono::duration<double>>(wallclockEnd - wallclockStart);
-    gPrinter.Print("Bandwidth Test Tool Parameters:");
+    gPrinter.Print("SilKitBandwidth Test Tool Parameters:");
     gPrinter.Print("  number-of-participants: " + std::to_string(numberOfParticipants));
     gPrinter.Print("  bandwidth: " + std::to_string(args.bandwidthKbits) + " KBit/s");
     gPrinter.Print("  step-size: " + std::to_string(args.stepSizeNs.count()) + " ns");
