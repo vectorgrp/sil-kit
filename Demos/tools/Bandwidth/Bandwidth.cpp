@@ -10,6 +10,7 @@
 #include <mutex>
 #include <condition_variable>
 #include <atomic>
+#include <cstring>
 
 #include "silkit/SilKit.hpp"
 #include "silkit/vendor/CreateSilKitRegistry.hpp"
