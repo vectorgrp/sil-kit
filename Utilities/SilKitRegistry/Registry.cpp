@@ -207,10 +207,12 @@ auto StartRegistry(std::shared_ptr<SilKit::Config::IParticipantConfiguration> co
         catch (const std::exception& exception)
         {
             std::cerr << "error during dashboard instance creation: " << exception.what() << std::endl;
+            enableDashboard = false;
         }
         catch (...)
         {
             std::cerr << "unknown error during dashboard instance creation" << std::endl;
+            enableDashboard = false;
         }
     }
 
