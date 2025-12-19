@@ -90,6 +90,23 @@ try
 }
 CAPI_CATCH_EXCEPTIONS
 
+SilKit_ReturnCode SilKitCALL SilKit_TimeSyncService_Create_With_TimeAdvanceMode(
+    SilKit_TimeSyncService** outTimeSyncService, SilKit_LifecycleService* lifecycleService,
+    SilKit_TimeAdvanceMode timeAdvanceMode)
+try
+{
+    ASSERT_VALID_OUT_PARAMETER(outTimeSyncService);
+    ASSERT_VALID_POINTER_PARAMETER(lifecycleService);
+
+    auto cppLifecycleService = reinterpret_cast<SilKit::Services::Orchestration::ILifecycleService*>(lifecycleService);
+    auto cppTimeSyncService = cppLifecycleService->CreateTimeSyncService(SilKit::Services::Orchestration::TimeAdvanceMode(timeAdvanceMode));
+
+    *outTimeSyncService = reinterpret_cast<SilKit_TimeSyncService*>(cppTimeSyncService);
+
+    return SilKit_ReturnCode_SUCCESS;
+}
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL
 SilKit_LifecycleService_SetCommunicationReadyHandler(SilKit_LifecycleService* lifecycleService, void* context,
@@ -423,6 +440,26 @@ try
 
     auto* timeSyncService = reinterpret_cast<SilKit::Services::Orchestration::ITimeSyncService*>(cTimeSyncService);
     *outNanosecondsTime = timeSyncService->Now().count();
+    return SilKit_ReturnCode_SUCCESS;
+}
+CAPI_CATCH_EXCEPTIONS
+
+
+SilKit_ReturnCode SilKitCALL SilKit_TimeSyncService_SetStepDuration(SilKit_TimeSyncService* cTimeSyncService,
+                                                        SilKit_NanosecondsTime stepDuration)
+try
+{
+    ASSERT_VALID_POINTER_PARAMETER(cTimeSyncService);
+
+    auto* timeSyncService = reinterpret_cast<SilKit::Services::Orchestration::ITimeSyncService*>(cTimeSyncService);
+
+    if (stepDuration <= 0)
+    {
+        SilKit_error_string = "Step duration must be positive";
+        return SilKit_ReturnCode_BADPARAMETER;
+    }
+
+    timeSyncService->SetStepDuration(std::chrono::nanoseconds(stepDuration));
     return SilKit_ReturnCode_SUCCESS;
 }
 CAPI_CATCH_EXCEPTIONS

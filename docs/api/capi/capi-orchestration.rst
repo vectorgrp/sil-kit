@@ -18,6 +18,7 @@ Orchestration C API
 .. doxygenfunction:: SilKit_LifecycleService_Continue
 
 .. doxygenfunction:: SilKit_TimeSyncService_Create
+.. doxygenfunction:: SilKit_TimeSyncService_Create_With_TimeAdvanceMode
 .. doxygenfunction:: SilKit_TimeSyncService_SetSimulationStepHandler
 .. doxygenfunction:: SilKit_TimeSyncService_SetSimulationStepHandlerAsync
 .. doxygenfunction:: SilKit_TimeSyncService_CompleteSimulationStep

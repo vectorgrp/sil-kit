@@ -325,6 +325,9 @@ public:
     MOCK_METHOD(SilKit_ReturnCode, SilKit_TimeSyncService_Create,
                 (SilKit_TimeSyncService * *outTimeSyncService, SilKit_LifecycleService* lifecycleService));
 
+    MOCK_METHOD(SilKit_ReturnCode, SilKit_TimeSyncService_Create_With_TimeAdvanceMode,
+                (SilKit_TimeSyncService * *outTimeSyncService, SilKit_LifecycleService* lifecycleService, SilKit_TimeAdvanceMode timeAdvanceMode));
+
     MOCK_METHOD(SilKit_ReturnCode, SilKit_TimeSyncService_SetSimulationStepHandler,
                 (SilKit_TimeSyncService * timeSyncService, void* context,
                  SilKit_TimeSyncService_SimulationStepHandler_t handler, SilKit_NanosecondsTime initialStepSize));
@@ -338,6 +341,9 @@ public:
 
     MOCK_METHOD(SilKit_ReturnCode, SilKit_TimeSyncService_Now,
                 (SilKit_TimeSyncService * timeSyncService, SilKit_NanosecondsTime* outNanosecondsTime));
+
+    MOCK_METHOD(SilKit_ReturnCode, SilKit_TimeSyncService_SetStepDuration,
+                (SilKit_TimeSyncService * timeSyncService, SilKit_NanosecondsTime stepDuration));
 
     MOCK_METHOD(SilKit_ReturnCode, SilKit_Experimental_TimeSyncService_AddOtherSimulationStepsCompletedHandler,
                 (SilKit_TimeSyncService * timeSyncService, void* context,

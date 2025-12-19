@@ -119,6 +119,14 @@ struct ParticipantConnectionInformation
     std::string participantName;
 };
 
+enum class TimeAdvanceMode : SilKit_TimeAdvanceMode
+{
+    //! Advance time based on the participant's own step duration
+    ByOwnDuration = SilKit_TimeAdvanceMode_ByOwnDuration,
+    //! Advance time based on the minimal step duration among all participants
+    ByMinimalDuration = SilKit_TimeAdvanceMode_ByMinimalDuration,
+};
+
 } // namespace Orchestration
 } // namespace Services
 } // namespace SilKit

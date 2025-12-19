@@ -87,6 +87,7 @@ TEST(Test_CapiSymbols, DISABLED_link_all_public_symbols)
     (void)SilKit_SystemMonitor_Create(nullptr, nullptr);
     (void)SilKit_LifecycleService_Create(nullptr, nullptr, nullptr);
     (void)SilKit_TimeSyncService_Create(nullptr, nullptr);
+    (void)SilKit_TimeSyncService_Create_With_TimeAdvanceMode(nullptr, nullptr, 0);
     (void)SilKit_LifecycleService_SetCommunicationReadyHandler(nullptr, nullptr, nullptr);
     (void)SilKit_LifecycleService_SetCommunicationReadyHandlerAsync(nullptr, nullptr, nullptr);
     (void)SilKit_LifecycleService_CompleteCommunicationReadyHandlerAsync(nullptr);

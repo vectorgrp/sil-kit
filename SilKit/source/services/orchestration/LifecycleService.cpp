@@ -407,6 +407,22 @@ auto LifecycleService::CreateTimeSyncService() -> ITimeSyncService*
     {
         _participant->RegisterTimeSyncService(_timeSyncService);
         _timeSyncActive = true;
+        _timeSyncService->SetTimeAdvanceMode(TimeAdvanceMode::ByOwnDuration);
+        return _timeSyncService;
+    }
+    else
+    {
+        throw ConfigurationError("You may not create the time synchronization service more than once.");
+    }
+}
+
+auto LifecycleService::CreateTimeSyncService(TimeAdvanceMode timeAdvanceMode) -> ITimeSyncService*
+{
+    if (!_timeSyncActive)
+    {
+        _participant->RegisterTimeSyncService(_timeSyncService);
+        _timeSyncActive = true;
+        _timeSyncService->SetTimeAdvanceMode(timeAdvanceMode);
         return _timeSyncService;
     }
     else
