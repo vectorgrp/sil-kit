@@ -192,6 +192,7 @@ private:
             return false;
         }
 
+        // No other participant has a lower time point
         if (_configuration->OtherParticipantHasLowerTimepoint())
         {
             return false;
@@ -461,11 +462,6 @@ void TimeSyncService::SetSimulationStepHandlerAsync(SimulationStepHandler task,
     _simTask = std::move(task);
     _timeConfiguration.SetBlockingMode(false);
     _timeConfiguration.SetStepDuration(initialStepSize);
-}
-
-void TimeSyncService::SetPeriod(std::chrono::nanoseconds period)
-{
-    _timeConfiguration.SetStepDuration(period);
 }
 
 bool TimeSyncService::SetupTimeSyncPolicy(bool isSynchronizingVirtualTime)
@@ -843,6 +839,12 @@ bool TimeSyncService::IsBlocking() const
 {
     return _timeConfiguration.IsBlocking();
 }
+
+void TimeSyncService::SetDynamicStepSizeEnabled(bool enabled)
+{
+    _timeConfiguration.SetDynamicStepSizeEnabled(enabled);
+}
+
 
 } // namespace Orchestration
 } // namespace Services

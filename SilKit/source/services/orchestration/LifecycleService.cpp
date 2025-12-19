@@ -424,16 +424,21 @@ auto LifecycleService::GetTimeSyncService() -> ITimeSyncService*
 
 auto LifecycleService::CreateTimeSyncService() -> ITimeSyncService*
 {
-    if (!_timeSyncActive)
-    {
-        _participant->RegisterTimeSyncService(_timeSyncService);
-        _timeSyncActive = true;
-        return _timeSyncService;
-    }
-    else
+    if (_timeSyncActive)
     {
         throw ConfigurationError("You may not create the time synchronization service more than once.");
     }
+
+    _participant->RegisterTimeSyncService(_timeSyncService);
+    _timeSyncActive = true;
+
+    // Dynamic simulation step sizes are enabled by default and can be disabled per participant via
+    // Experimental.TimeSynchronization.DynamicSimulationStep.
+    const auto& participantConfiguration = _participant->GetParticipantConfiguration();
+    _timeSyncService->SetDynamicStepSizeEnabled(
+        participantConfiguration.experimental.timeSynchronization.dynamicSimulationStep);
+
+    return _timeSyncService;
 }
 
 void LifecycleService::ReceiveMsg(const IServiceEndpoint*, const SystemCommand& command)

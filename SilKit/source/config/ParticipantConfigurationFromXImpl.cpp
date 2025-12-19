@@ -62,6 +62,7 @@ struct TimeSynchronizationCache
 {
     std::optional<double> animationFactor;
     std::optional<Aggregation> enableMessageAggregation;
+    std::optional<bool> dynamicSimulationStep;
 };
 
 struct MetricsCache
@@ -346,6 +347,8 @@ void Cache(const TimeSynchronization& root, TimeSynchronizationCache& cache)
                     cache.animationFactor);
     CacheNonDefault(defaultObject.enableMessageAggregation, root.enableMessageAggregation,
                     "TimeSynchronization.EnableMessageAggregation", cache.enableMessageAggregation);
+    CacheNonDefault(defaultObject.dynamicSimulationStep, root.dynamicSimulationStep,
+                    "TimeSynchronization.DynamicSimulationStep", cache.dynamicSimulationStep);
 }
 
 void Cache(const Metrics& root, MetricsCache& cache)
@@ -518,6 +521,7 @@ void MergeTimeSynchronizationCache(const TimeSynchronizationCache& cache, TimeSy
 {
     MergeCacheField(cache.animationFactor, timeSynchronization.animationFactor);
     MergeCacheField(cache.enableMessageAggregation, timeSynchronization.enableMessageAggregation);
+    MergeCacheField(cache.dynamicSimulationStep, timeSynchronization.dynamicSimulationStep);
 }
 
 void MergeMetricsCache(const MetricsCache& cache, Metrics& metrics)

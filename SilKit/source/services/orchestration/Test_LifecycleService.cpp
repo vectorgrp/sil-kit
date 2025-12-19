@@ -44,7 +44,6 @@ public:
     MOCK_METHOD(void, SetSimulationStepHandlerAsync,
                 (SimulationStepHandler task, std::chrono::nanoseconds initialStepSize), (override));
     MOCK_METHOD(void, CompleteSimulationStep, (), (override));
-    MOCK_METHOD(void, SetPeriod, (std::chrono::nanoseconds));
     MOCK_METHOD(std::chrono::nanoseconds, Now, (), (override, const));
 };
 
@@ -1155,6 +1154,9 @@ TEST_F(Test_LifecycleService, error_on_create_time_sync_service_twice)
     // Goal: make sure that CreateTimeSync cannot be called more than once (must throw exception)
     LifecycleService lifecycleService(&participant);
     lifecycleService.SetLifecycleConfiguration(StartCoordinated());
+
+    MockTimeSync mockTimeSync(&participant, &participant.mockTimeProvider, healthCheckConfig, &lifecycleService);
+    lifecycleService.SetTimeSyncService(&mockTimeSync);
 
     EXPECT_NO_THROW({
         try
