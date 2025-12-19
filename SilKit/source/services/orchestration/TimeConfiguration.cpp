@@ -20,6 +20,16 @@ TimeConfiguration::TimeConfiguration(Logging::ILoggerInternal* logger)
     _myNextTask.duration = 1ms;
 }
 
+void TimeConfiguration::SetTimeAdvanceMode(TimeAdvanceMode timeAdvanceMode)
+{
+    _timeAdvanceMode = timeAdvanceMode;
+}
+
+auto TimeConfiguration::GetTimeAdvanceMode() const -> TimeAdvanceMode
+{
+    return _timeAdvanceMode;
+}
+
 void TimeConfiguration::SetBlockingMode(bool blocking)
 {
     _blocking = blocking;
@@ -82,36 +92,61 @@ void TimeConfiguration::OnReceiveNextSimStep(const std::string& participantName,
             participantName, nextStep.timePoint.count(), itOtherNextTask->second.timePoint.count());
     }
 
-    _otherNextTasks.at(participantName) = std::move(nextStep);
+    _otherNextTasks.at(participantName) = nextStep;
     Logging::Debug(_logger, "Updated _otherNextTasks for participant {} with time {}", participantName,
                    nextStep.timePoint.count());
 }
 
-void TimeConfiguration::SynchronizedParticipantRemoved(const std::string& otherParticipantName)
-{
-    Lock lock{_mx};
-    if (_otherNextTasks.find(otherParticipantName) != _otherNextTasks.end())
-    {
-        const std::string errorMessage{"Participant " + otherParticipantName + " unknown."};
-        throw SilKitError{errorMessage};
-    }
-    auto it = _otherNextTasks.find(otherParticipantName);
-    if (it != _otherNextTasks.end())
-    {
-        _otherNextTasks.erase(it);
-    }
-}
+
 void TimeConfiguration::SetStepDuration(std::chrono::nanoseconds duration)
 {
     Lock lock{_mx};
     _myNextTask.duration = duration;
 }
 
-void TimeConfiguration::AdvanceTimeStep()
+auto TimeConfiguration::GetMinimalOtherDuration() const -> std::chrono::nanoseconds
 {
     Lock lock{_mx};
-    _currentTask = _myNextTask;
-    _myNextTask.timePoint = _currentTask.timePoint + _currentTask.duration;
+    if (_otherNextTasks.empty())
+    {
+        return std::chrono::nanoseconds{0};
+    }
+
+    auto minDuration = std::chrono::nanoseconds::max();
+    for (const auto& entry : _otherNextTasks)
+    {
+        if (entry.second.duration < minDuration)
+        {
+            minDuration = entry.second.duration;
+        }
+    }
+    return minDuration;
+}
+
+
+void TimeConfiguration::AdvanceTimeStep()
+{
+    {
+        Lock lock{_mx};
+        _currentTask = _myNextTask;
+    }
+    
+    if (_timeAdvanceMode == TimeAdvanceMode::ByMinimalDuration)
+    {
+        auto minOtherDuration = GetMinimalOtherDuration();
+        if (minOtherDuration < _currentTask.duration)
+        {
+            Logging::Info(_logger, "Adjusting my step duration from {}ms to minimal other duration {}ms",
+                          _currentTask.duration.count() / 1000000, minOtherDuration.count() / 1000000);
+            Lock lock{_mx};
+            _currentTask.duration = minOtherDuration;
+        }
+    }
+
+    {
+        Lock lock{_mx};
+        _myNextTask.timePoint = _currentTask.timePoint + _currentTask.duration;
+    }
 }
 
 auto TimeConfiguration::CurrentSimStep() const -> NextSimTask

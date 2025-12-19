@@ -26,8 +26,6 @@ public: //Methods
     bool RemoveSynchronizedParticipant(const std::string& otherParticipantName);
     auto GetSynchronizedParticipantNames() -> std::vector<std::string>;
     void OnReceiveNextSimStep(const std::string& participantName, NextSimTask nextStep);
-    void SynchronizedParticipantRemoved(const std::string& otherParticipantName);
-    void SetStepDuration(std::chrono::nanoseconds duration);
     void AdvanceTimeStep();
     auto CurrentSimStep() const -> NextSimTask;
     auto NextSimStep() const -> NextSimTask;
@@ -41,6 +39,12 @@ public: //Methods
     bool IsHopOn();
     bool HoppedOn();
 
+    void SetStepDuration(std::chrono::nanoseconds duration);
+    auto GetMinimalOtherDuration() const -> std::chrono::nanoseconds;
+
+    auto GetTimeAdvanceMode() const -> TimeAdvanceMode;
+    void SetTimeAdvanceMode(TimeAdvanceMode timeAdvanceMode);
+
 private: //Members
     mutable std::mutex _mx;
     using Lock = std::unique_lock<decltype(_mx)>;
@@ -51,6 +55,9 @@ private: //Members
 
     bool _hoppedOn = false;
     Logging::ILoggerInternal* _logger;
+
+    TimeAdvanceMode _timeAdvanceMode{TimeAdvanceMode::ByOwnDuration};
+
 };
 
 } // namespace Orchestration

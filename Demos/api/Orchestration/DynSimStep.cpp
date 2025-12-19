@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 #include <iostream>
+#include <random>
 
 #include "silkit/SilKit.hpp"
 
@@ -36,16 +37,34 @@ int main(int argc, char** argv)
         auto* lifecycleService =
             participant->CreateLifecycleService({SilKit::Services::Orchestration::OperationMode::Coordinated});
 
-        auto* timeSyncService = lifecycleService->CreateTimeSyncService();
+        auto* timeSyncService = lifecycleService->CreateTimeSyncService(SilKit::Services::Orchestration::TimeAdvanceMode::ByMinimalDuration);
 
-        const auto stepSize = 2ms;
+        const auto stepSize = 10ms;
+        static int stepCounter = 0;
+        std::random_device rd;
+        std::mt19937 rng(rd());
+        auto bounded_rand = [&rng](unsigned range) {
+            std::uniform_int_distribution<unsigned> dist(1, range);
+            return dist(rng);
+        };
+
 
         timeSyncService->SetSimulationStepHandler(
-            [logger](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {
+            [logger, timeSyncService, participantName, bounded_rand](std::chrono::nanoseconds now,
+                                                                     std::chrono::nanoseconds duration) {
             // The invocation of this handler marks the beginning of a simulation step.
             {
                 std::stringstream ss;
                 ss << "--------- Simulation step T=" << now << ", duration=" << duration << " ---------";
+                logger->Info(ss.str());
+            }
+
+            if (bounded_rand(10) == 1)// && participantName == "P1")
+            {
+                auto rndStepDuration = bounded_rand(10);
+                timeSyncService->SetStepDuration(std::chrono::milliseconds(rndStepDuration));
+                std::stringstream ss;
+                ss << "--------- Changing step size to " << rndStepDuration << "ms ---------";
                 logger->Info(ss.str());
             }
 

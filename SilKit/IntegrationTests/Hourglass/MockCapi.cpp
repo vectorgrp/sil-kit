@@ -614,6 +614,12 @@ extern "C"
         return globalCapi->SilKit_TimeSyncService_Create(outTimeSyncService, lifecycleService);
     }
 
+    SilKit_ReturnCode SilKitCALL SilKit_TimeSyncService_Create_With_TimeAdvanceMode(SilKit_TimeSyncService** outTimeSyncService,
+                                                               SilKit_LifecycleService* lifecycleService, SilKit_TimeAdvanceMode timeAdvanceMode)
+    {
+        return globalCapi->SilKit_TimeSyncService_Create_With_TimeAdvanceMode(outTimeSyncService, lifecycleService, timeAdvanceMode);
+    }
+
     SilKit_ReturnCode SilKitCALL SilKit_TimeSyncService_SetSimulationStepHandler(
         SilKit_TimeSyncService* timeSyncService, void* context, SilKit_TimeSyncService_SimulationStepHandler_t handler,
         SilKit_NanosecondsTime initialStepSize)
@@ -639,6 +645,12 @@ extern "C"
                                                             SilKit_NanosecondsTime* outNanosecondsTime)
     {
         return globalCapi->SilKit_TimeSyncService_Now(timeSyncService, outNanosecondsTime);
+    }
+
+    SilKit_ReturnCode SilKitCALL SilKit_TimeSyncService_SetStepDuration(SilKit_TimeSyncService* timeSyncService,
+                                                            SilKit_NanosecondsTime stepDuration)
+    {
+        return globalCapi->SilKit_TimeSyncService_SetStepDuration(timeSyncService, stepDuration);
     }
 
     SilKit_ReturnCode SilKitCALL SilKit_Experimental_TimeSyncService_AddOtherSimulationStepsCompletedHandler(

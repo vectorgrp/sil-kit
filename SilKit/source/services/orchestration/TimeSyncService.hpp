@@ -56,7 +56,9 @@ public:
     void SetSimulationStepHandler(SimulationStepHandler task, std::chrono::nanoseconds initialStepSize) override;
     void SetSimulationStepHandlerAsync(SimulationStepHandler task, std::chrono::nanoseconds initialStepSize) override;
     void CompleteSimulationStep() override;
-    void SetPeriod(std::chrono::nanoseconds period);
+    void SetStepDuration(std::chrono::nanoseconds stepDuration);
+
+
     void ReceiveMsg(const IServiceEndpoint* from, const NextSimTask& task) override;
     auto Now() const -> std::chrono::nanoseconds override;
 
@@ -98,6 +100,8 @@ public:
     auto AddOtherSimulationStepsCompletedHandler(std::function<void()> handler) -> HandlerId;
     void RemoveOtherSimulationStepsCompletedHandler(HandlerId handlerId);
     void InvokeOtherSimulationStepsCompletedHandlers();
+
+    void SetTimeAdvanceMode(TimeAdvanceMode timeAdvanceMode);
 
 private:
     // ----------------------------------------
@@ -154,6 +158,7 @@ private:
     std::atomic<bool> _wallClockReachedBeforeCompletion{false};
 
     Util::SynchronizedHandlers<std::function<void()>> _otherSimulationStepsCompletedHandlers;
+
 };
 
 // ================================================================================
