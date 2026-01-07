@@ -476,17 +476,19 @@ int main(int argc, char** argv)
 
         const auto generatedConfigurationPathOpt = commandlineParser.Get<CliParser::Option>("generate-configuration");
 
+
+        auto callStartRegistry = [=]() {
+            return StartRegistry(configuration, configuredListenUri, dashboardUri, enableDashboard,
+                                 generatedConfigurationPathOpt);
+        };
+
         if (windowsService)
         {
-            SilKitRegistry::RunWindowsService([=] {
-                return StartRegistry(configuration, listenUri, dashboardUri, enableDashboard,
-                                     generatedConfigurationPathOpt);
-            });
+            SilKitRegistry::RunWindowsService(callStartRegistry);
         }
         else
         {
-            const auto registry = StartRegistry(configuration, configuredListenUri, dashboardUri, enableDashboard,
-                                                generatedConfigurationPathOpt);
+            const auto registry = callStartRegistry();
 
             std::cout << "Press Ctrl-C to terminate..." << std::endl;
 
