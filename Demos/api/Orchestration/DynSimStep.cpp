@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <random>
+#include <thread>
 
 #include "silkit/SilKit.hpp"
 
@@ -17,12 +18,73 @@ std::ostream& operator<<(std::ostream& out, std::chrono::nanoseconds timestamp)
 
 int main(int argc, char** argv)
 {
-    if (argc != 2)
+    if (argc != 5 && argc != 6)
     {
-        std::cerr << "Wrong number of arguments! Start demo with: " << argv[0] << " <ParticipantName>" << std::endl;
+        std::cerr << "Wrong number of arguments! Start demo with: " << argv[0] << 
+            " <ParticipantName> "
+            "<StepSize> "
+            "[-A (Autonomous) | -C (Coordinated)] "
+            "[-M (ByMinimalDuration) | -D (ByOwnDuration)] "
+            "[-R (Optional; Randomize StepSize (1ms to 10ms) with 10% probability every step)]" << std::endl;
         return -1;
     }
+    // Arg 1: Participant Name
     std::string participantName(argv[1]);
+
+    // Arg 2: Step Size
+    auto stepSize = std::chrono::milliseconds(std::stoi(argv[2]));
+    std::cout << "Starting with stepSize=" << stepSize << std::endl;
+
+    // Arg 3: Operation Mode
+    auto operationMode = SilKit::Services::Orchestration::OperationMode::Coordinated;
+    if (std::string(argv[3]) == "-A")
+    {
+        std::cout << "Using OperationMode::Autonomous" << std::endl;
+        operationMode = SilKit::Services::Orchestration::OperationMode::Autonomous;
+    }
+    else if (std::string(argv[3]) == "-C")
+    {
+        std::cout << "Using OperationMode::Coordinated" << std::endl;
+    }
+    else
+    {
+        std::cerr << "Unknown third argument '" << argv[3] << "'. Did you mean '-A' for autonomous mode or '-C' for coordinated mode?" << std::endl;
+        return -1;
+    }
+
+    // Arg 4: Time Advance Mode
+    auto timeAdvanceMode = SilKit::Services::Orchestration::TimeAdvanceMode::ByMinimalDuration;
+    if (std::string(argv[4]) == "-M")
+    {
+        std::cout << "Using TimeAdvanceMode::ByMinimalDuration" << std::endl;
+    }
+    else if (std::string(argv[4]) == "-D")
+    {
+        timeAdvanceMode = SilKit::Services::Orchestration::TimeAdvanceMode::ByOwnDuration;
+        std::cout << "Using TimeAdvanceMode::ByOwnDuration" << std::endl;
+    }
+    else
+    {
+        std::cerr << "Unknown argument '" << argv[4]
+                  << "'. Did you mean '-M' for TimeAdvanceMode::ByMinimalDuration or '-D' for TimeAdvanceMode::ByOwnDuration?" << std::endl;
+        return -1;
+    }
+
+    // Arg 5: Optional Randomize Step Size
+    bool randomizeStepSize = false;
+    if (argc == 6)
+    {
+        if (std::string(argv[5]) == "-R")
+        {
+            randomizeStepSize = true;
+            std::cout << "Randomizing step size every 10 steps." << std::endl << std::endl;
+        }
+        else
+        {
+            std::cerr << "Unknown argument '" << argv[5] << "'. Did you mean '-R' to randomize the step size every 10 steps?" << std::endl;
+            return -1;
+        }
+    }
 
     try
     {
@@ -34,13 +96,10 @@ int main(int argc, char** argv)
         auto participant = SilKit::CreateParticipant(participantConfiguration, participantName, registryUri);
         auto logger = participant->GetLogger();
 
-        auto* lifecycleService =
-            participant->CreateLifecycleService({SilKit::Services::Orchestration::OperationMode::Coordinated});
+        auto* lifecycleService = participant->CreateLifecycleService({operationMode});
 
-        auto* timeSyncService = lifecycleService->CreateTimeSyncService(SilKit::Services::Orchestration::TimeAdvanceMode::ByMinimalDuration);
+        auto* timeSyncService = lifecycleService->CreateTimeSyncService(timeAdvanceMode);
 
-        const auto stepSize = 10ms;
-        static int stepCounter = 0;
         std::random_device rd;
         std::mt19937 rng(rd());
         auto bounded_rand = [&rng](unsigned range) {
@@ -48,9 +107,9 @@ int main(int argc, char** argv)
             return dist(rng);
         };
 
-
         timeSyncService->SetSimulationStepHandler(
-            [logger, timeSyncService, participantName, bounded_rand](std::chrono::nanoseconds now,
+            [randomizeStepSize, logger, timeSyncService, participantName, bounded_rand](
+                std::chrono::nanoseconds now,
                                                                      std::chrono::nanoseconds duration) {
             // The invocation of this handler marks the beginning of a simulation step.
             {
@@ -59,7 +118,7 @@ int main(int argc, char** argv)
                 logger->Info(ss.str());
             }
 
-            if (bounded_rand(10) == 1)// && participantName == "P1")
+            if (randomizeStepSize && bounded_rand(10) == 1)
             {
                 auto rndStepDuration = bounded_rand(10);
                 timeSyncService->SetStepDuration(std::chrono::milliseconds(rndStepDuration));
@@ -69,12 +128,7 @@ int main(int argc, char** argv)
             }
 
             std::this_thread::sleep_for(500ms);
-            // All messages sent here are guaranteed to arrive at other participants before their next simulation step is called.
-            // So here, we can rely on having received all messages from the past (< now).
-            // Note that this guarantee only holds for messages sent within a simulation step,
-            // not for messages send outside of this handler (e.g. directly in a reception handler).
 
-            // Returning from the handler marks the end of a simulation step.
         }, stepSize);
 
         auto finalStateFuture = lifecycleService->StartLifecycle();

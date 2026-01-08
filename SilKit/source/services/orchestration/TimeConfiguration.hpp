@@ -40,7 +40,7 @@ public: //Methods
     bool HoppedOn();
 
     void SetStepDuration(std::chrono::nanoseconds duration);
-    auto GetMinimalOtherDuration() const -> std::chrono::nanoseconds;
+    auto GetMinimalAlignedDuration() const -> std::chrono::nanoseconds;
 
     auto GetTimeAdvanceMode() const -> TimeAdvanceMode;
     void SetTimeAdvanceMode(TimeAdvanceMode timeAdvanceMode);
@@ -57,7 +57,6 @@ private: //Members
     Logging::ILoggerInternal* _logger;
 
     TimeAdvanceMode _timeAdvanceMode{TimeAdvanceMode::ByOwnDuration};
-
 };
 
 } // namespace Orchestration
