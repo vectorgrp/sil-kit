@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 #include <iostream>
+#include <thread>
 
 #include "silkit/SilKit.hpp"
 
@@ -38,7 +39,7 @@ int main(int argc, char** argv)
 
         auto* timeSyncService = lifecycleService->CreateTimeSyncService();
 
-        const auto stepSize = 2ms;
+        const auto stepSize = 5ms;
 
         timeSyncService->SetSimulationStepHandler(
             [logger](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {

@@ -56,8 +56,7 @@ public:
     void SetSimulationStepHandler(SimulationStepHandler task, std::chrono::nanoseconds initialStepSize) override;
     void SetSimulationStepHandlerAsync(SimulationStepHandler task, std::chrono::nanoseconds initialStepSize) override;
     void CompleteSimulationStep() override;
-    void SetStepDuration(std::chrono::nanoseconds stepDuration);
-
+    void SetStepDuration(std::chrono::nanoseconds stepDuration) override;
 
     void ReceiveMsg(const IServiceEndpoint* from, const NextSimTask& task) override;
     auto Now() const -> std::chrono::nanoseconds override;

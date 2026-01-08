@@ -447,7 +447,6 @@ TEST_F(Test_HourglassOrchestration, SilKit_TimeSyncService_SetStepDuration)
     timeSyncService.SetStepDuration(stepDuration);
 }
 
-
 TEST_F(Test_HourglassOrchestration, SilKit_Experimental_TimeSyncService_AddOtherSimulationStepsCompletedHandler)
 {
     using testing::_;

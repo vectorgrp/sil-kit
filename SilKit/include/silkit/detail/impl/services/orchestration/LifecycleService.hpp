@@ -324,7 +324,7 @@ auto LifecycleService::CreateTimeSyncService() -> SilKit::Services::Orchestratio
     return _timeSyncService.get();
 }
 
-// TODO bkd: Needed  or can I use a default in the function above? 
+// TODO bkd: Needed or can I use a default in the function above? 
 auto LifecycleService::CreateTimeSyncService(SilKit::Services::Orchestration::TimeAdvanceMode timeAdvanceMode)
     -> SilKit::Services::Orchestration::ITimeSyncService*
 {

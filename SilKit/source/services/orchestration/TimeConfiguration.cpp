@@ -101,52 +101,72 @@ void TimeConfiguration::OnReceiveNextSimStep(const std::string& participantName,
 void TimeConfiguration::SetStepDuration(std::chrono::nanoseconds duration)
 {
     Lock lock{_mx};
+
+    if (duration == 0ns)
+    {
+        throw SilKitError("Attempted to set step duration to zero.");
+    }
+
     _myNextTask.duration = duration;
 }
 
-auto TimeConfiguration::GetMinimalOtherDuration() const -> std::chrono::nanoseconds
+auto TimeConfiguration::GetMinimalAlignedDuration() const -> std::chrono::nanoseconds
 {
-    Lock lock{_mx};
     if (_otherNextTasks.empty())
     {
-        return std::chrono::nanoseconds{0};
+        return std::chrono::nanoseconds::max();
     }
 
-    auto minDuration = std::chrono::nanoseconds::max();
+    auto earliestOtherTimepoint = std::chrono::nanoseconds::max();
     for (const auto& entry : _otherNextTasks)
     {
-        if (entry.second.duration < minDuration)
+        // Both start and end of other participant's step could be the earliest next timepoint
+        auto nextStepStart = entry.second.timePoint;
+        auto nextStepEnd = entry.second.timePoint + entry.second.duration;
+        if (nextStepStart > _currentTask.timePoint && nextStepStart < earliestOtherTimepoint)
         {
-            minDuration = entry.second.duration;
+            earliestOtherTimepoint = nextStepStart;
+        }
+        else if (nextStepEnd < earliestOtherTimepoint)
+        {
+            earliestOtherTimepoint = nextStepEnd;
         }
     }
-    return minDuration;
-}
+    //Logging::Info(_logger, "Earliest next timepoint among other participants is {}ms",
+    //              std::chrono::duration_cast<std::chrono::milliseconds>(earliestOtherTimepoint).count());
 
+    auto minAlignedDuration = earliestOtherTimepoint - _currentTask.timePoint;
+
+    if (minAlignedDuration < 0ns)
+    {
+        Logging::Error(_logger,
+                       "Chonology error: Calculated minimal aligned duration is non-positive ({}ns). This indicates "
+                       "that at least one participant has not advanced its time correctly.",
+                       minAlignedDuration.count());
+        return std::chrono::nanoseconds::max();
+    }
+
+    return minAlignedDuration;
+}
 
 void TimeConfiguration::AdvanceTimeStep()
 {
-    {
-        Lock lock{_mx};
-        _currentTask = _myNextTask;
-    }
+    Lock lock{_mx};
+    _currentTask = _myNextTask;
     
     if (_timeAdvanceMode == TimeAdvanceMode::ByMinimalDuration)
     {
-        auto minOtherDuration = GetMinimalOtherDuration();
-        if (minOtherDuration < _currentTask.duration)
+        auto minAlignedDuration = GetMinimalAlignedDuration();
+        if (minAlignedDuration < _currentTask.duration)
         {
-            Logging::Info(_logger, "Adjusting my step duration from {}ms to minimal other duration {}ms",
-                          _currentTask.duration.count() / 1000000, minOtherDuration.count() / 1000000);
-            Lock lock{_mx};
-            _currentTask.duration = minOtherDuration;
+            //Logging::Info(_logger, "Adjusting my step duration from {}ms to {}ms",
+            //              std::chrono::duration_cast<std::chrono::milliseconds>(_currentTask.duration).count(),
+            //              std::chrono::duration_cast<std::chrono::milliseconds>(minAlignedDuration).count());
+            _currentTask.duration = minAlignedDuration;
         }
     }
 
-    {
-        Lock lock{_mx};
-        _myNextTask.timePoint = _currentTask.timePoint + _currentTask.duration;
-    }
+    _myNextTask.timePoint = _currentTask.timePoint + _currentTask.duration;
 }
 
 auto TimeConfiguration::CurrentSimStep() const -> NextSimTask

@@ -302,11 +302,12 @@ auto MakeCompletionThread(SimParticipant* p, ParticipantData* d) -> std::thread
 
 TEST(ITest_AsyncSimTask, test_async_simtask_other_simulation_steps_completed_handler)
 {
-    SimTestHarness testHarness({"A", "B", "C"}, "silkit://localhost:0");
+    SimTestHarness testHarness({"A", "B", "C", "D"}, "silkit://localhost:0");
 
     const auto a = testHarness.GetParticipant("A");
     const auto b = testHarness.GetParticipant("B");
     const auto c = testHarness.GetParticipant("C");
+    const auto d = testHarness.GetParticipant("D");
 
     ParticipantData ad, bd, cd;
 
@@ -315,6 +316,8 @@ TEST(ITest_AsyncSimTask, test_async_simtask_other_simulation_steps_completed_han
     a->GetOrCreateLifecycleService()->SetStopHandler([&ad] { ad.running = false; });
     b->GetOrCreateLifecycleService()->SetStopHandler([&bd] { bd.running = false; });
     c->GetOrCreateLifecycleService()->SetStopHandler([&cd] { cd.running = false; });
+
+    d->GetOrCreateTimeSyncService()->SetSimulationStepHandler([](auto, auto) {}, 1ms);
 
     const auto aLifecycleService = a->GetOrCreateLifecycleService();
 

@@ -53,7 +53,6 @@ public:
 
     virtual void SetStepDuration(std::chrono::nanoseconds stepDuration) = 0;
 
-
 };
 
 } // namespace Orchestration
