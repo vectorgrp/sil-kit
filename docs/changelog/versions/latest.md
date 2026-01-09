@@ -1,3 +1,5 @@
 # [5.0.3] - UNRELEASED
 
-> This changelog entry is still empty.
+## Fixed
+
+- `sil-kit-registry`: fixed the configurability of the listen URI, when used as Windows System Service.
