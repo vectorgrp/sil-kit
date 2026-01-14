@@ -216,12 +216,6 @@ struct SilKit_FlexrayNodeParameters
     //! Maximum permissible rate correction value (range 3-3846 MicroTicks).
     SilKit_FlexrayMicroTick pRateCorrectionOut;
 
-    ////! Not used by network simulator
-    // pSecondKeySlotID
-
-    ////! Not used by network simulator
-    // pTwoKeySlotMode
-
     //! Channel used by the node to send a wakeup pattern (values FlexrayChannel::A, FlexrayChannel::B).
     SilKit_FlexrayChannel pWakeupChannel;
 
@@ -242,6 +236,12 @@ struct SilKit_FlexrayNodeParameters
 
     //! Number of samples per MicroTick (values 1 or 2).
     uint8_t pSamplesPerMicrotick;
+
+    //! Second Key Slot ID of the key slot (range 0-1023, value 0 means that there is no key slot).
+    uint16_t pSecondKeySlotID;
+
+    //! Second Key slot is used for startup with a single cold start node (range 0, 1).
+    uint8_t pTwoKeySlotMode;
 };
 typedef struct SilKit_FlexrayNodeParameters SilKit_FlexrayNodeParameters;
 

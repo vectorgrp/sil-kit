@@ -211,13 +211,6 @@ struct FlexrayNodeParameters
 
     //! Maximum permissible rate correction value (range 3-3846 MicroTicks).
     FlexrayMicroTick pRateCorrectionOut;
-
-    ////! Not used by network simulator
-    //pSecondKeySlotID
-
-    ////! Not used by network simulator
-    //pTwoKeySlotMode
-
     //! Channel used by the node to send a wakeup pattern (values FlexrayChannel::A, FlexrayChannel::B).
     FlexrayChannel pWakeupChannel;
 
@@ -238,6 +231,12 @@ struct FlexrayNodeParameters
 
     //! Number of samples per MicroTick (values 1 or 2).
     uint8_t pSamplesPerMicrotick;
+
+    //! Second Key Slot ID of the key slot (range 0-1023, value 0 means that there is no key slot).
+    uint16_t pSecondKeySlotID;
+
+    //! Second Key slot is used for startup with a single cold start node (range 0, 1).
+    uint8_t pTwoKeySlotMode;
 };
 
 //! Transmission mode for FlexRay Tx-Buffer
@@ -537,7 +536,9 @@ inline bool operator==(const FlexrayNodeParameters& lhs, const FlexrayNodeParame
            && lhs.pOffsetCorrectionStart == rhs.pOffsetCorrectionStart
            && lhs.pRateCorrectionOut == rhs.pRateCorrectionOut && lhs.pWakeupChannel == rhs.pWakeupChannel
            && lhs.pWakeupPattern == rhs.pWakeupPattern && lhs.pdMicrotick == rhs.pdMicrotick
-           && lhs.pSamplesPerMicrotick == rhs.pSamplesPerMicrotick;
+           && lhs.pSamplesPerMicrotick == rhs.pSamplesPerMicrotick && lhs.pSecondKeySlotID == rhs.pSecondKeySlotID
+           && lhs.pTwoKeySlotMode == rhs.pTwoKeySlotMode
+        ;
 }
 
 inline bool operator==(const FlexrayTxBufferConfig& lhs, const FlexrayTxBufferConfig& rhs)

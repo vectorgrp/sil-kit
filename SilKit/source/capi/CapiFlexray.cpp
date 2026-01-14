@@ -54,29 +54,40 @@ void assign(SilKit::Services::Flexray::FlexrayClusterParameters& cppClusterParam
 void assign(SilKit::Services::Flexray::FlexrayNodeParameters& cppNodeParameters,
             const SilKit_FlexrayNodeParameters* nodeParameters)
 {
-    cppNodeParameters.pAllowHaltDueToClock = nodeParameters->pAllowHaltDueToClock;
-    cppNodeParameters.pAllowPassiveToActive = nodeParameters->pAllowPassiveToActive;
-    cppNodeParameters.pChannels = (SilKit::Services::Flexray::FlexrayChannel)nodeParameters->pChannels;
-    cppNodeParameters.pClusterDriftDamping = nodeParameters->pClusterDriftDamping;
-    cppNodeParameters.pdAcceptedStartupRange = nodeParameters->pdAcceptedStartupRange;
-    cppNodeParameters.pdListenTimeout = nodeParameters->pdListenTimeout;
-    cppNodeParameters.pKeySlotId = nodeParameters->pKeySlotId;
-    cppNodeParameters.pKeySlotOnlyEnabled = nodeParameters->pKeySlotOnlyEnabled;
-    cppNodeParameters.pKeySlotUsedForStartup = nodeParameters->pKeySlotUsedForStartup;
-    cppNodeParameters.pKeySlotUsedForSync = nodeParameters->pKeySlotUsedForSync;
-    cppNodeParameters.pLatestTx = nodeParameters->pLatestTx;
-    cppNodeParameters.pMacroInitialOffsetA = nodeParameters->pMacroInitialOffsetA;
-    cppNodeParameters.pMacroInitialOffsetB = nodeParameters->pMacroInitialOffsetB;
-    cppNodeParameters.pMicroInitialOffsetA = nodeParameters->pMicroInitialOffsetA;
-    cppNodeParameters.pMicroInitialOffsetB = nodeParameters->pMicroInitialOffsetB;
-    cppNodeParameters.pMicroPerCycle = nodeParameters->pMicroPerCycle;
-    cppNodeParameters.pOffsetCorrectionOut = nodeParameters->pOffsetCorrectionOut;
-    cppNodeParameters.pOffsetCorrectionStart = nodeParameters->pOffsetCorrectionStart;
-    cppNodeParameters.pRateCorrectionOut = nodeParameters->pRateCorrectionOut;
-    cppNodeParameters.pWakeupChannel = (SilKit::Services::Flexray::FlexrayChannel)nodeParameters->pWakeupChannel;
-    cppNodeParameters.pWakeupPattern = nodeParameters->pWakeupPattern;
-    cppNodeParameters.pdMicrotick = (SilKit::Services::Flexray::FlexrayClockPeriod)nodeParameters->pdMicrotick;
-    cppNodeParameters.pSamplesPerMicrotick = nodeParameters->pSamplesPerMicrotick;
+    const auto inputVersion = SK_ID_GET_VERSION(SilKit_Struct_GetId(*nodeParameters));
+
+    if (inputVersion == 1 || inputVersion == 2)
+    {
+        cppNodeParameters.pAllowHaltDueToClock = nodeParameters->pAllowHaltDueToClock;
+        cppNodeParameters.pAllowPassiveToActive = nodeParameters->pAllowPassiveToActive;
+        cppNodeParameters.pChannels = (SilKit::Services::Flexray::FlexrayChannel)nodeParameters->pChannels;
+        cppNodeParameters.pClusterDriftDamping = nodeParameters->pClusterDriftDamping;
+        cppNodeParameters.pdAcceptedStartupRange = nodeParameters->pdAcceptedStartupRange;
+        cppNodeParameters.pdListenTimeout = nodeParameters->pdListenTimeout;
+        cppNodeParameters.pKeySlotId = nodeParameters->pKeySlotId;
+        cppNodeParameters.pKeySlotOnlyEnabled = nodeParameters->pKeySlotOnlyEnabled;
+        cppNodeParameters.pKeySlotUsedForStartup = nodeParameters->pKeySlotUsedForStartup;
+        cppNodeParameters.pKeySlotUsedForSync = nodeParameters->pKeySlotUsedForSync;
+        cppNodeParameters.pLatestTx = nodeParameters->pLatestTx;
+        cppNodeParameters.pMacroInitialOffsetA = nodeParameters->pMacroInitialOffsetA;
+        cppNodeParameters.pMacroInitialOffsetB = nodeParameters->pMacroInitialOffsetB;
+        cppNodeParameters.pMicroInitialOffsetA = nodeParameters->pMicroInitialOffsetA;
+        cppNodeParameters.pMicroInitialOffsetB = nodeParameters->pMicroInitialOffsetB;
+        cppNodeParameters.pMicroPerCycle = nodeParameters->pMicroPerCycle;
+        cppNodeParameters.pOffsetCorrectionOut = nodeParameters->pOffsetCorrectionOut;
+        cppNodeParameters.pOffsetCorrectionStart = nodeParameters->pOffsetCorrectionStart;
+        cppNodeParameters.pRateCorrectionOut = nodeParameters->pRateCorrectionOut;
+        cppNodeParameters.pWakeupChannel = (SilKit::Services::Flexray::FlexrayChannel)nodeParameters->pWakeupChannel;
+        cppNodeParameters.pWakeupPattern = nodeParameters->pWakeupPattern;
+        cppNodeParameters.pdMicrotick = (SilKit::Services::Flexray::FlexrayClockPeriod)nodeParameters->pdMicrotick;
+        cppNodeParameters.pSamplesPerMicrotick = nodeParameters->pSamplesPerMicrotick;
+    }
+
+    if ( inputVersion == 2)
+    {
+        cppNodeParameters.pTwoKeySlotMode = nodeParameters->pTwoKeySlotMode;
+        cppNodeParameters.pSecondKeySlotID = nodeParameters->pSecondKeySlotID;
+    }
 }
 
 void assign(SilKit::Services::Flexray::FlexrayControllerConfig& cppConfig, const SilKit_FlexrayControllerConfig* config)
