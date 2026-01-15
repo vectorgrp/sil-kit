@@ -86,7 +86,7 @@ void assign(SilKit::Services::Flexray::FlexrayNodeParameters& cppNodeParameters,
     if ( inputVersion == 2)
     {
         cppNodeParameters.pTwoKeySlotMode = nodeParameters->pTwoKeySlotMode;
-        cppNodeParameters.pSecondKeySlotID = nodeParameters->pSecondKeySlotID;
+        cppNodeParameters.pSecondKeySlotId = nodeParameters->pSecondKeySlotId;
     }
 }
 

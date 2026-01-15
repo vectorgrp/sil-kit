@@ -149,7 +149,7 @@ inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buff
            << nodeParams.pMacroInitialOffsetB << nodeParams.pMicroInitialOffsetA << nodeParams.pMicroInitialOffsetB
            << nodeParams.pMicroPerCycle << nodeParams.pOffsetCorrectionOut << nodeParams.pOffsetCorrectionStart
            << nodeParams.pRateCorrectionOut << nodeParams.pWakeupChannel << nodeParams.pWakeupPattern
-           << nodeParams.pdMicrotick << nodeParams.pSamplesPerMicrotick << nodeParams.pSecondKeySlotID
+           << nodeParams.pdMicrotick << nodeParams.pSamplesPerMicrotick << nodeParams.pSecondKeySlotId
            << nodeParams.pTwoKeySlotMode;
     return buffer;
 }
@@ -166,7 +166,7 @@ inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buff
         >> nodeParams.pdMicrotick >> nodeParams.pSamplesPerMicrotick;
     if (buffer.RemainingBytesLeft() > 0)
     {
-        buffer >> nodeParams.pSecondKeySlotID >> nodeParams.pTwoKeySlotMode;
+        buffer >> nodeParams.pSecondKeySlotId >> nodeParams.pTwoKeySlotMode;
     }
     return buffer;
 }

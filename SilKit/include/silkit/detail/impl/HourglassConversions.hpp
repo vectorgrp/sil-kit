@@ -222,7 +222,7 @@ inline void assignCxxToC(const SilKit::Services::Flexray::FlexrayNodeParameters&
     cOut.pdMicrotick = static_cast<SilKit_FlexrayClockPeriod>(cxxIn.pdMicrotick);
     cOut.pSamplesPerMicrotick = cxxIn.pSamplesPerMicrotick;
     cOut.pTwoKeySlotMode = cxxIn.pTwoKeySlotMode;
-    cOut.pSecondKeySlotID = cxxIn.pSecondKeySlotID;
+    cOut.pSecondKeySlotId = cxxIn.pSecondKeySlotId;
 }
 
 inline void assignCxxToC(const SilKit::Services::Flexray::FlexrayTxBufferConfig& cxxIn,
@@ -654,7 +654,7 @@ inline void assignCToCxx(const SilKit_FlexrayNodeParameters* cIn,
     cxxOut.pdMicrotick = (SilKit::Services::Flexray::FlexrayClockPeriod)cIn->pdMicrotick;
     cxxOut.pSamplesPerMicrotick = cIn->pSamplesPerMicrotick;
     cxxOut.pTwoKeySlotMode = cIn->pTwoKeySlotMode;
-    cxxOut.pSecondKeySlotID = cIn->pSecondKeySlotID;
+    cxxOut.pSecondKeySlotId = cIn->pSecondKeySlotId;
 }
 
 // -----------------------------------

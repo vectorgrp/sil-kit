@@ -238,7 +238,7 @@ struct SilKit_FlexrayNodeParameters
     uint8_t pSamplesPerMicrotick;
 
     //! Second Key Slot ID of the key slot (range 0-1023, value 0 means that there is no key slot).
-    uint16_t pSecondKeySlotID;
+    uint16_t pSecondKeySlotId;
 
     //! Second Key slot is used for startup with a single cold start node (range 0, 1).
     uint8_t pTwoKeySlotMode;
