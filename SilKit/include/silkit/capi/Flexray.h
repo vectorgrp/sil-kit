@@ -237,6 +237,9 @@ struct SilKit_FlexrayNodeParameters
     //! Number of samples per MicroTick (values 1 or 2).
     uint8_t pSamplesPerMicrotick;
 
+    // ----------------------------------------------------------------------
+    // Parameters according to B.3.2.1 (added in SIL Kit 5.0.3)
+    
     //! Second Key Slot ID of the key slot (range 0-1023, value 0 means that there is no key slot).
     uint16_t pSecondKeySlotId;
 
