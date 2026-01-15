@@ -46,7 +46,7 @@ auto GetDummyConfig() -> SilKit::Config::FlexrayController
 
 auto MakeValidClusterParams() -> FlexrayClusterParameters
 {
-    FlexrayClusterParameters clusterParams;
+    FlexrayClusterParameters clusterParams{};
     clusterParams.gColdstartAttempts = 2;
     clusterParams.gCycleCountMax = 7;
     clusterParams.gdActionPointOffset = 1;
@@ -73,7 +73,7 @@ auto MakeValidClusterParams() -> FlexrayClusterParameters
 
 auto MakeValidNodeParams() -> FlexrayNodeParameters
 {
-    FlexrayNodeParameters nodeParams;
+    FlexrayNodeParameters nodeParams{};
     nodeParams.pAllowHaltDueToClock = 0;
     nodeParams.pAllowPassiveToActive = 0;
     nodeParams.pChannels = FlexrayChannel::A;
@@ -116,7 +116,7 @@ auto MakeValidTxBufferConfig() -> FlexrayTxBufferConfig
 
 auto GetDummyConfigWithValues() -> SilKit::Config::FlexrayController
 {
-    SilKit::Config::FlexrayController dummyConfig;
+    SilKit::Config::FlexrayController dummyConfig{};
     dummyConfig.network = "testNetwork";
     dummyConfig.name = "testController";
     dummyConfig.clusterParameters = MakeValidClusterParams();
