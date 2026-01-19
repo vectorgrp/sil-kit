@@ -13,7 +13,7 @@ Extensions Configuration
 Overview
 ========================================
 
-The Vector SIL Kit Extensions are developed by Vector and provided in binary form.
+The SIL Kit Extensions are developed by Vector and provided in binary form.
 To facilitate the lookup of these binaries, specific search paths can be configured as explained below.
 
 Configuration

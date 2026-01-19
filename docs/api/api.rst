@@ -4,7 +4,7 @@
 C/C++ API
 =========
 
-This document describes the user available programming interfaces of the Vector |ProductName|.
+This document describes the user available programming interfaces of the |ProductName|.
 If you are not yet familiar with the |ProductName|, have a look at the :doc:`Developers Guide<../for-developers/developers>`.
 Information on API organization in the |ProductName|:
 

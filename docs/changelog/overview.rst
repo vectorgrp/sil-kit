@@ -1,7 +1,7 @@
 Changelog
 =========
 
-All notable changes to the Vector SIL Kit project are listed on the respective
+All notable changes to the SIL Kit project are listed on the respective
 versions page.
 
 .. toctree::
