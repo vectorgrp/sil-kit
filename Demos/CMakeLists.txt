@@ -98,7 +98,7 @@ macro(make_silkit_demo executableName demoSourceFile addToPackage)
     set_target_properties(${executableName} PROPERTIES
         FOLDER "Demos"
         RUNTIME_OUTPUT_DIRECTORY "${_DEMO_OUTPUT_DIR}"
-        INSTALL_RPATH "$ORIGIN/../lib:$ORIGIN"
+        INSTALL_RPATH "$ORIGIN/../${CMAKE_INSTALL_LIBDIR}:$ORIGIN"
         )
 
     foreach(_build_type ${CMAKE_CONFIGURATION_TYPES})

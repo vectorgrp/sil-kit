@@ -18,7 +18,7 @@ add_executable(sil-kit-monitor
 set_target_properties(sil-kit-monitor PROPERTIES
      FOLDER "Utilities"
      RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"
-     INSTALL_RPATH "$ORIGIN/../lib"
+     INSTALL_RPATH "$ORIGIN/../${CMAKE_INSTALL_LIBDIR}"
 )
 
 target_link_libraries(sil-kit-monitor
