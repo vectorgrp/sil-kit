@@ -120,11 +120,13 @@
             "name": "x-cross-qnx-x86_64",
             "generator": "Unix Makefiles",
             "inherits": [ "mixin-dirs" ],
-            "environment": {
-                "SILKIT_CMAKE_PRESET_BUILD_PLATFORM": "qnx"
-            },
             "toolchainFile": "${sourceDir}/SilKit/cmake/toolchain-qnx-x86_64.cmake",
             "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+                "SILKIT_BUILD_TESTS": "ON",
+                "SILKIT_BUILD_UTILITIES": "ON",
+                "SILKIT_WARNINGS_AS_ERRORS": "OFF",
+                "SILKIT_PACKAGE_SYMBOLS": "ON",
                 "SILKIT_BUILD_DASHBOARD": "OFF"
             },
             "vendor": {
@@ -135,13 +137,13 @@
             }
         },
         {
-            "inherits": "x-cross-qnx-x86_64",
             "name": "x-cross-qnx-armv7",
+            "inherits": "x-cross-qnx-x86_64",
             "toolchainFile": "${sourceDir}/SilKit/cmake/toolchain-qnx-armv7.cmake"
         },
         {
-            "inherits": "x-cross-qnx-x86_64",
             "name": "x-cross-qnx-aarch64",
+            "inherits": "x-cross-qnx-x86_64",
             "toolchainFile": "${sourceDir}/SilKit/cmake/toolchain-qnx-aarch64.cmake"
         }
     ],
