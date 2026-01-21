@@ -93,7 +93,7 @@ macro(make_silkit_demo executableName demoSourceFile addToPackage)
         $<$<CXX_COMPILER_ID:MSVC>: "${CMAKE_CURRENT_SOURCE_DIR}/../../demo.manifest" >
     )
     remove_definitions(-DEXPORT_SilKitAPI)
-    
+
     # Group this demo project into a folder
     set_target_properties(${executableName} PROPERTIES
         FOLDER "Demos"
@@ -111,8 +111,8 @@ macro(make_silkit_demo executableName demoSourceFile addToPackage)
 
     find_package(Threads)
     target_link_libraries(${executableName}
-        PRIVATE 
-            SilKit::SilKit 
+        PRIVATE
+            SilKit::SilKit
             Threads::Threads
     )
     if(MSVC)

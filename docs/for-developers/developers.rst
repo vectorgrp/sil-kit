@@ -145,7 +145,7 @@ For convenience and to reduce code duplication, these utility programs are imple
 The final simulation setup can be run through the following commands:
 
 .. code-block::
-      
+
       # Start the Middleware Registry
       ./sil-kit-registry.exe
 
@@ -153,7 +153,7 @@ The final simulation setup can be run through the following commands:
       ./sil-kit-system-controller.exe PublisherParticipant SubscriberParticipant
 
       # Start the application running the two participants
-      # Make sure that the SilKit.dll and simple.yaml are available 
+      # Make sure that the SilKit.dll and simple.yaml are available
       ./SampleSilKit.exe
 
 The complete source code of this sample can be found here: :download:`CMakeLists.txt<../code-samples/simple/CMakeLists.txt>`
@@ -267,4 +267,3 @@ Since these are not part of the CI pipeline, compatibility with these platforms 
    * - Ubuntu 18.04
      - amd64
      -
-
