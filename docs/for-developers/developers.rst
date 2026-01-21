@@ -46,7 +46,7 @@ Using the |ProductName| package
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The |ProductName| distribution contains a self-contained and deployable installation in the *SilKit* directory.
-The CMake build configuration required is exported to ``SilKit/lib/cmake/SilKit`` and defines the ``SilKit::SilKit`` target.
+The CMake build configuration required is exported to ``SilKit/{lib,lib64}/cmake/SilKit`` and defines the ``SilKit::SilKit`` target.
 
 From CMake this can be consumed via the ``find_package(SilKit CONFIG)`` mechanism.
 For example, the following CMakeLists.txt imports the |ProductName| library based on its file system path.
@@ -57,7 +57,7 @@ For example, the following CMakeLists.txt imports the |ProductName| library base
    :lines: 22-31
 
 Properties, like include directories and compile flags, are automatically handled by the imported target.
-If you use another method to build your software you can directly use the ``SilKit/include`` and ``SilKit/lib`` directories for C++ headers and libraries.
+If you use another method to build your software you can directly use the ``SilKit/include`` and ``SilKit/{lib,lib64}`` directories for C++ headers and libraries.
 
 .. _sec:developer-simple:
 
