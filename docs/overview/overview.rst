@@ -26,7 +26,7 @@ It provides:
 
 * Implemented in C++ w/o platform dependencies
 
-* Interoperability between Windows, Linux, and other UNIX derivates​
+* Interoperability between Windows, Linux, and other UNIX derivatives​
 
 * Stable API and ABI as well as long-term network layer compatibility
 
@@ -50,6 +50,7 @@ Vehicle Networks
 The |ProductName| provides means to simulate |CANBuses|, Ethernet, FlexRay, and LIN networks.
 All networks except for FlexRay can be simulated with two different levels of detail: a simple, functional simulation or a detailed simulation.
 The simple simulation assumes no delay and unlimited bandwidth.
+
 The detailed simulation is enabled by using an additional |ProductName| |NetSim|, which considers these aspects as well.
 The |NetSim| is not part of |ProductName| itself.
 Because of its sensitivity regarding time, FlexRay is only supported in a detailed simulation.
@@ -57,7 +58,12 @@ Because of its sensitivity regarding time, FlexRay is only supported in a detail
 Vehicle networks are accessed through their corresponding services (e.g., a CAN controller).
 The service interfaces are the same for simple and detailed simulation.
 As a result, an application that works in the simple use case also works when switching to a detailed simulation using the |NetSim|.
-The section :ref:`sec:api-services` describes how to configure and use vehicle network services in detail.
+
+In general, |ProductName| deliberately avoids imposing restrictions on bus protocols.
+This enables user applications to freely determine the desired level of detail for vehicle network simulations.
+For example, a test participant can inject faulty frames without being blocked by |ProductName|.
+
+The section :ref:`sec:api-services` describes how to configure and use the vehicle network services in detail.
 
 Simulation Basics
 -----------------
@@ -78,8 +84,8 @@ Furthermore, |ProductName| participants can use a virtual simulation time that i
 While participants are first configured in the |ProductName| API by the developer, they can be reconfigured by the user by providing a YAML-based participant configuration file when starting the participant.
 A similar configuration file is available for the |ProductName| Registry as well.
 
-* For getting started operating/orchestrating a |ProductName| simulation, see the :doc:`User Guide <../for-users/users>`.
-* For getting started developing with the |ProductName|, see the :doc:`Developer Guide <../for-developers/developers>`.
+* To get started operating/orchestrating a |ProductName| simulation, see the :doc:`User Guide <../for-users/users>`.
+* To get started developing with the |ProductName|, see the :doc:`Developer Guide <../for-developers/developers>`.
 
 .. _sec:overview-ecosystem:
 
@@ -104,10 +110,10 @@ The |ProductName| ecosystem comprises the following turn-key solutions:
   can be used to attach a virtual CAN (Controller Area Network) interface (SocketCAN) to a Vector SIL Kit CAN bus.
 
 * The `SIL Kit Adapter for Generic Linux IO <https://github.com/vectorgrp/sil-kit-adapters-generic-linux-io>`_
-  allows to attach SIL Kit to a generic Linux IO device, such as character devices or GPIOs.
+  allows attaching SIL Kit to a generic Linux IO device, such as character devices or GPIOs.
 
 * The `SIL Kit FMU Importer <https://github.com/vectorgrp/sil-kit-fmu-importer>`_
-  allows to import Functional Mockup Units (FMUs) as SIL Kit participants.
+  can import Functional Mockup Units (FMUs) as SIL Kit participants.
 
 Related Applications
 ~~~~~~~~~~~~~~~~~~~~
@@ -127,12 +133,12 @@ Guiding Principles
 
 * **Local view:** Participants do not require knowledge about the overall system setup or other participants.
   Communication between participants is made possible by using a common bus network or topic name.
-* **Distributed simulation:** Communication between participants is based on a peer-to-peer connections.
+* **Distributed simulation:** Communication between participants is based on peer-to-peer connections.
   There is no central simulation participant that handles the distribution of messages or controls the virtual time.
 * **Stability:** |ProductName| has a stable network layer and provides API and ABI guarantees.
   This means that participants of different versions can partake in the same simulation.
   Further, the |ProductName| library can be updated to newer versions without having to adapt or recompile already existing |ProductName| applications.
-* **Reconfigurability:** Users should be able to provide a configuration file to the SIL Kit application to change the its behavior (e.g., configure logging or change the network a bus controller connects to).
+* **Reconfigurability:** Users should be able to provide a configuration file to the SIL Kit application to change its behavior (e.g., configure logging or change the network a bus controller connects to).
 
 .. _sec:overview-terminology:
 
@@ -149,7 +155,7 @@ Terminology
    - A participant is a communication node in the distributed simulation that provides access to the |ProductName| services.
  * - :ref:`Services<sec:api-services>`
    - Participants interact with each other through the means of services.
-     These can be communication services, e.g., a :doc:`CAN Controller</api/services/can>` and orchestration services, such as the the Lifecycle Service, Time Synchronization Service, and the Logging Service.
+     These can be communication services, e.g., a :doc:`CAN Controller</api/services/can>` and orchestration services, such as the Lifecycle Service, Time Synchronization Service, and the Logging Service.
  * - :doc:`Configuration<../configuration/configuration>`
    - The optional participant configuration file allows easy configuration of a participant and its interconnection within the simulation.
      It can be used to change a participant's behavior without recompiling its sources.
@@ -183,7 +189,7 @@ Terminology
 Further Reading
 ---------------
 
-More real-world examples involving time synchronization and simulated automotive networks, can be found in the :doc:`API sections<../api/api>`.
+More real-world examples involving time synchronization and simulated automotive networks can be found in the :doc:`API sections<../api/api>`.
 Also, studying the source code of the bundled :doc:`demo applications<../demos/demos>` is a good start.
 The simulation lifecycle and supported simulation time synchronization are discussed in :doc:`../simulation/simulation`.
 Additionally, :doc:`../configuration/configuration` describes how the participant configuration file can be used to change the behavior of participants.

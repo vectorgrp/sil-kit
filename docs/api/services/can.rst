@@ -67,8 +67,12 @@ CAN controllers will only communicate within the same network.
 Sending CAN Frames
 ~~~~~~~~~~~~~~~~~~
 
-Data is transferred in the form of a |CanFrame| and received as a |CanFrameEvent|. To send a |CanFrame|, it must be setup 
-with a CAN ID and the data to be transmitted. Furthermore, valid |CanFrameFlag| have to be set::
+Data is transferred in the form of a |CanFrame| and received as a |CanFrameEvent|. 
+To send a |CanFrame|, it must be set up with a CAN ID and the data to be transmitted. 
+Furthermore, valid |CanFrameFlag| must be set.
+The |CanFrame| struct allows any payload size via its dataField member, messages that exceed CAN/CAN FD limits are 
+passed through unchanged.
+The following snippet shows how to send a CAN FD frame::
 
   // Prepare a CAN message with id 0x17
   CanFrame canFrame;
@@ -91,14 +95,14 @@ To be notified of the success or failure of the transmission, a ``FrameTransmitH
   };
   canController->AddFrameTransmitHandler(frameTransmitHandler);
 
-An optional second parameter of |AddFrameTransmitHandler| allows to specify the status (|Transmitted|, ...) of the
+An optional second parameter of |AddFrameTransmitHandler| allows specifying the status (|Transmitted|, ...) of the
 |CanFrameTransmitEvent| to be received. By default, each status is enabled.
 
 .. admonition:: Note
 
   In a simple simulation without the network simulator, the |CanTransmitStatus| of the |CanFrameTransmitEvent| will
   always be |Transmitted|. If a detailed simulation is used, it is possible that the transmit queue overflows
-  causing the handler to be called with |TransmitQueueFull| signaling a transmission failure.
+  which causes the handler to be called with |TransmitQueueFull|, signaling a transmission failure.
 
 Receiving CAN Frame Events
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -112,8 +116,9 @@ frame, a timestamp and the actual |CanFrame|. The handler is called whenever a |
   };
   canController->AddFrameHandler(frameHandler);
 
-An optional second parameter of |AddFrameHandler| allows to specify the direction (TX, RX, TX/RX) of the CAN frames to be
-received. By default, only frames of RX direction are handled.
+An optional second parameter of |AddFrameHandler| allows specifying the direction (TX, RX, TX/RX) of the CAN frames to 
+be received.
+By default, only frames of RX direction are handled.
 
 Receiving State Change Events
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -137,16 +142,18 @@ Then, the controller must be started explicitly by calling |Start|. Now the cont
 Additional control commands are |Stop| and |Reset|.
 
 The following example configures a CAN controller with a baud rate of 10'000 baud for regular CAN messages and a baud 
-rate of 1'000'000 baud for CAN |_| FD messages and 1'000'000 baud for CAN |_| XL, respectively. Then, the controller is started::
+rate of 1'000'000 baud for CAN |_| FD messages and 1'000'000 baud for CAN |_| XL, respectively. Then, the controller
+is started::
 
     canController->SetBaudRate(10000, 1000000, 1000000);
     canController->Start();
 
 .. admonition:: Note
 
-   Both |SetBaudRate| and |Start| should not be called earlier than in the lifecycle service's
-   :cpp:func:`communication ready handler<SilKit::Core::synd::ILifecycleService::SetCommunicationReadyHandler()>`. Otherwise, it is not guaranteed 
-   that all participants are already connected, which can cause the call to have no effect.
+   Both |SetBaudRate| and |Start| should be called in the lifecycle service's 
+   :cpp:func:`communication ready handler<SilKit::Core::synd::ILifecycleService::SetCommunicationReadyHandler()>`.
+   Otherwise, it is not guaranteed that all participants are already connected, which can cause the call to have no 
+   effect.
 
 Managing the Event Handlers
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -189,9 +196,11 @@ Enumerations and Typedefs
 Usage Examples
 --------------
 
-This section contains complete examples that show the usage of the CAN controller and the interaction of two or more 
-controllers. Although the CAN controllers would typically belong to different participants and reside in different
-processes, their interaction is shown sequentially to demonstrate cause and effect.
+This section contains complete examples that demonstrate the use of the CAN controller and the interaction between
+two or more controllers.
+
+Although the CAN controllers would typically belong to different participants and reside in different 
+processes, their interaction is shown sequentially here to demonstrate cause and effect.
 
 Assumptions:
 
