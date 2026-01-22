@@ -196,7 +196,7 @@ Enumerations and Typedefs
 Usage Examples
 --------------
 
-This section contains complete examples that demonstrate the usage of the CAN controller and the interaction between
+This section contains complete examples that demonstrate the use of the CAN controller and the interaction between
 two or more controllers.
 
 Although the CAN controllers would typically belong to different participants and reside in different 
