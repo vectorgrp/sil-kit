@@ -114,6 +114,10 @@ add_silkit_test_to_executable(SilKitIntegrationTests
     SOURCES ITest_SimTask.cpp
 )
 
+add_silkit_test_to_executable(SilKitIntegrationTests
+    SOURCES ITest_GetParameter.cpp
+)
+
 add_silkit_test_to_executable(SilKitFunctionalTests
     SOURCES FTest_WallClockCoupling.cpp
 )
