@@ -10,9 +10,9 @@
 #  |- bin/+
 #         |- *{.exe,dll}
 #         |- SilKitLauncher
-#  |- lib/+
-#         |- *.{so,a,lib} <artifacts>
-#         |- python/site-packages/Launcher <launcher support>
+#  |- {lib,lib64}/+
+#                 |- *.{so,a,lib} <artifacts>
+#                 |- python/site-packages/Launcher <launcher support>
 #  |
 #  |- share/+
 #           |- cmake/ <exports>

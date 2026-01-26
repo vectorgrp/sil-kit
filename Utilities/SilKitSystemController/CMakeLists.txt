@@ -18,7 +18,7 @@ add_executable(sil-kit-system-controller
 set_target_properties(sil-kit-system-controller PROPERTIES
     FOLDER "Utilities"
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"
-    INSTALL_RPATH "$ORIGIN/../lib:$ORIGIN"
+    INSTALL_RPATH "$ORIGIN/../${CMAKE_INSTALL_LIBDIR}:$ORIGIN"
 )
 
 target_link_libraries(sil-kit-system-controller
