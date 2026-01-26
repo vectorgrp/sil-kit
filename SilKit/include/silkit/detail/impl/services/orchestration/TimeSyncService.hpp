@@ -22,7 +22,11 @@ namespace Orchestration {
 class TimeSyncService : public SilKit::Services::Orchestration::ITimeSyncService
 {
 public:
+
     inline explicit TimeSyncService(SilKit_LifecycleService* lifecycleService);
+
+    inline explicit TimeSyncService(SilKit_LifecycleService* lifecycleService,
+                                    SilKit::Services::Orchestration::TimeAdvanceMode timeAdvanceMode);
 
     inline ~TimeSyncService() override = default;
 
@@ -35,7 +39,9 @@ public:
 
     inline auto Now() const -> std::chrono::nanoseconds override;
 
-public:
+    inline void SetStepDuration(std::chrono::nanoseconds stepDuration) override;
+
+    public:
     inline auto ExperimentalAddOtherSimulationStepsCompletedHandler(
         SilKit::Experimental::Services::Orchestration::OtherSimulationStepsCompletedHandler) -> SilKit::Util::HandlerId;
 
@@ -82,6 +88,12 @@ namespace Orchestration {
 TimeSyncService::TimeSyncService(SilKit_LifecycleService* lifecycleService)
 {
     const auto returnCode = SilKit_TimeSyncService_Create(&_timeSyncService, lifecycleService);
+    ThrowOnError(returnCode);
+}
+
+TimeSyncService::TimeSyncService(SilKit_LifecycleService* lifecycleService, SilKit::Services::Orchestration::TimeAdvanceMode timeAdvanceMode)
+{
+    const auto returnCode = SilKit_TimeSyncService_Create_With_TimeAdvanceMode(&_timeSyncService, lifecycleService, static_cast<SilKit_TimeAdvanceMode>(timeAdvanceMode));
     ThrowOnError(returnCode);
 }
 
@@ -138,6 +150,12 @@ auto TimeSyncService::Now() const -> std::chrono::nanoseconds
     ThrowOnError(returnCode);
 
     return std::chrono::nanoseconds{nanosecondsTime};
+}
+
+void TimeSyncService::SetStepDuration(std::chrono::nanoseconds stepDuration)
+{
+    const auto returnCode = SilKit_TimeSyncService_SetStepDuration(_timeSyncService, stepDuration.count());
+    ThrowOnError(returnCode);
 }
 
 inline auto TimeSyncService::ExperimentalAddOtherSimulationStepsCompletedHandler(std::function<void()> handler)

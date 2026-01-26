@@ -71,6 +71,8 @@ public:
     MOCK_METHOD(Services::Orchestration::ParticipantStatus&, Status, (), (override, const));
     MOCK_METHOD(Services::Orchestration::ITimeSyncService*, GetTimeSyncService, (), ());
     MOCK_METHOD(Services::Orchestration::ITimeSyncService*, CreateTimeSyncService, (), (override));
+    MOCK_METHOD(Services::Orchestration::ITimeSyncService*, CreateTimeSyncService,
+                (SilKit::Services::Orchestration::TimeAdvanceMode), (override));
     MOCK_METHOD(void, AddAsyncSubscriptionsCompletionHandler, (std::function<void()> /*handler*/));
     MOCK_METHOD(Services::Orchestration::OperationMode, GetOperationMode, (), (const));
 };
@@ -84,6 +86,7 @@ public:
                 (SimulationStepHandler task, std::chrono::nanoseconds initialStepSize), (override));
     MOCK_METHOD(void, CompleteSimulationStep, (), (override));
     MOCK_METHOD(std::chrono::nanoseconds, Now, (), (override, const));
+    MOCK_METHOD(void, SetStepDuration, (std::chrono::nanoseconds));
 };
 
 class MockSystemMonitor : public Services::Orchestration::ISystemMonitor
@@ -248,7 +251,8 @@ public:
     DummyParticipant()
     {
         ON_CALL(mockLifecycleService, GetTimeSyncService).WillByDefault(testing::Return(&mockTimeSyncService));
-        ON_CALL(mockLifecycleService, CreateTimeSyncService).WillByDefault(testing::Return(&mockTimeSyncService));
+        ON_CALL(mockLifecycleService, CreateTimeSyncService()).WillByDefault(testing::Return(&mockTimeSyncService));
+        ON_CALL(mockLifecycleService, CreateTimeSyncService(testing::_)).WillByDefault(testing::Return(&mockTimeSyncService));
         ON_CALL(logger, GetLogLevel()).WillByDefault(testing::Return(Services::Logging::Level::Debug));
     }
 
