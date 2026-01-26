@@ -89,11 +89,14 @@ FlexrayControllers:
     pOffsetCorrectionStart: 3632
     pRateCorrectionOut: 81
     pSamplesPerMicrotick: 2
+    pSecondKeySlotId: 1337
+    pTwoKeySlotMode: 1
     pWakeupChannel: A
     pWakeupPattern: 33
     pdAcceptedStartupRange: 212
     pdListenTimeout: 400162
     pdMicrotick: 25ns
+    
   TxBufferConfigurations:
   - channels: A
     headerCrc: 0
