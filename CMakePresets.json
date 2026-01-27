@@ -25,7 +25,8 @@
                 "SILKIT_BUILD_UTILITIES": "ON",
                 "SILKIT_INSTALL_SOURCE": "ON",
                 "SILKIT_PACKAGE_SYMBOLS": "ON",
-                "SILKIT_WARNINGS_AS_ERRORS": "ON"
+                "SILKIT_WARNINGS_AS_ERRORS": "ON",
+                "CMAKE_POLICY_VERSION_MINIMUM": "3.5"
             },
             "architecture": {
                 "value": "x64",
@@ -42,7 +43,8 @@
                 "SILKIT_BUILD_UTILITIES": "ON",
                 "SILKIT_WARNINGS_AS_ERRORS": "ON",
                 "SILKIT_PACKAGE_SYMBOLS": "OFF",
-                "SILKIT_INSTALL_SOURCE": "OFF"
+                "SILKIT_INSTALL_SOURCE": "OFF",
+                "CMAKE_POLICY_VERSION_MINIMUM": "3.5"
             },
             "architecture": {
                 "value": "x64",
