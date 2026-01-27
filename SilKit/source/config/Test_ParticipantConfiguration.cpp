@@ -71,6 +71,7 @@ TEST_F(Test_ParticipantConfiguration, full_configuration_file_with_includes)
     auto participantConfig = *std::dynamic_pointer_cast<ParticipantConfiguration>(cfg);
     auto participantConfigRef = *std::dynamic_pointer_cast<ParticipantConfiguration>(ref_cfg);
 
+    EXPECT_EQ(participantConfig.flexrayControllers.at(0).nodeParameters, participantConfigRef.flexrayControllers.at(0).nodeParameters);
     ASSERT_EQ(participantConfig, participantConfigRef);
 }
 
