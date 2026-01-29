@@ -22,7 +22,9 @@ private:
     void CreateControllers() override
     {
         auto pubSpec = PubSubDemoCommon::dataSpecGps;
-        pubSpec.AddLabel("Key1", "Value1", SilKit::Services::MatchingLabel::Kind::Optional);
+        pubSpec.AddLabel(
+            "Key1", "Value1",
+            SilKit::Services::MatchingLabel::Kind::Optional); // BUGHUNT: Missing second label breaks communication
         _gpsPublisher = GetParticipant()->CreateDataPublisher("GpsPublisher", pubSpec, 0);
     }
 

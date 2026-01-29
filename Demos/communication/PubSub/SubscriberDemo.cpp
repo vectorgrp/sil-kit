@@ -23,7 +23,7 @@ private:
     {
         auto subSpec = PubSubDemoCommon::dataSpecGps;
         subSpec.AddLabel("Key1", "Value1", SilKit::Services::MatchingLabel::Kind::Optional);
-        subSpec.AddLabel("Key2", "Value2", SilKit::Services::MatchingLabel::Kind::Optional);
+        subSpec.AddLabel("Key2", "Value2", SilKit::Services::MatchingLabel::Kind::Optional); // BUGHUNT: Missing second on publisher label breaks communication
 
         _gpsSubscriber = GetParticipant()->CreateDataSubscriber(
             "GpsSubscriber", subSpec,
