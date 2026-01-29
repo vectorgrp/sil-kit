@@ -380,7 +380,7 @@ protected:
                     participant.allSentPromise.set_value();
                 }
 
-                if (!participant.dataSubscribers.empty())
+                if (!participant.dataSubscribers.empty() && !participant.allReceived)
                 {
                     participant.WaitForAllReceived();
                 }
