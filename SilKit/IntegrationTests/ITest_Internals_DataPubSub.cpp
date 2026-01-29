@@ -805,4 +805,83 @@ TEST_F(ITest_Internals_DataPubSub, test_1pub_1sub_async_rejoin)
     ShutdownSystem();
 }
 
+
+// Two publishers (optional label1), one subscriber (optional label1, label2); publishers start first; subscriber joins
+TEST_F(ITest_Internals_DataPubSub, test_2pub_1sub_async_starting_order)
+{
+    const uint32_t numMsgToPublish = 1;
+    const uint32_t numMsgToReceive = 1 * numMsgToPublish;
+
+    std::vector<PubSubParticipant> publishers;
+    publishers.push_back({"Pub1",
+                          {{"PubCtrl1",
+                            "TopicA",
+                            {"A"},
+                            {{"K1", "V1", SilKit::Services::MatchingLabel::Kind::Optional}},
+                            1,
+                            defaultMsgSize,
+                            numMsgToPublish}},
+                          {}});
+    publishers.push_back({"Pub2",
+                          {{"PubCtrl1",
+                            "TopicA",
+                            {"A"},
+                            {{"K1", "V1", SilKit::Services::MatchingLabel::Kind::Optional}},
+                            1,
+                            defaultMsgSize,
+                            numMsgToPublish}},
+                          {}});
+
+    std::vector<PubSubParticipant> subscribers;
+    std::vector<std::vector<uint8_t>> expectedDataUnordered;
+    expectedDataUnordered.reserve(numMsgToReceive);
+    for (uint32_t d = 0; d < numMsgToReceive; d++)
+    {
+        // Receive the same blob several times (once from every publisher)
+        expectedDataUnordered.emplace_back(std::vector<uint8_t>(defaultMsgSize, 0));
+    }
+    subscribers.push_back(
+        {"Sub1",
+         {},
+         {{
+             "SubCtrl1",
+             "TopicA",
+             {"A"},
+             {{"K1", "V1", SilKit::Services::MatchingLabel::Kind::Optional},
+              {"K2", "V2", SilKit::Services::MatchingLabel::Kind::Optional}
+              }, // BUGHUNT: Second label breaks communication 
+             defaultMsgSize,
+             numMsgToReceive,
+             1,
+             expectedDataUnordered,
+         }}});
+
+    for (auto& sub : subscribers)
+    {
+        sub.communicationTimeout = std::chrono::milliseconds(1000);
+    }
+
+    _testSystem.SetupRegistryAndSystemMaster("silkit://localhost:0", false, {});
+
+
+    //BUGHUNT: Subscribers start first fails SOMETIMES
+    //RunParticipants(subscribers, _testSystem.GetRegistryUri(), false);
+
+    //BUGHUNT: Publishers start first fails ALWAYS
+
+    // Start publishers
+    RunParticipants(publishers, _testSystem.GetRegistryUri(), false);
+    for (auto& p : publishers)
+    {
+        p.WaitForAllSent();
+    }
+
+    // Start subscriber
+    RunParticipants(subscribers, _testSystem.GetRegistryUri(), false);
+    
+
+    JoinPubSubThreads();
+    ShutdownSystem();
+}
+
 } // anonymous namespace

@@ -21,9 +21,9 @@ private:
 
     void CreateControllers() override
     {
-        _gpsPublisher = GetParticipant()->CreateDataPublisher("GpsPublisher", PubSubDemoCommon::dataSpecGps, 0);
-        _temperaturePublisher =
-            GetParticipant()->CreateDataPublisher("TemperaturePublisher", PubSubDemoCommon::dataSpecTemperature, 0);
+        auto pubSpec = PubSubDemoCommon::dataSpecGps;
+        pubSpec.AddLabel("Key1", "Value1", SilKit::Services::MatchingLabel::Kind::Optional);
+        _gpsPublisher = GetParticipant()->CreateDataPublisher("GpsPublisher", pubSpec, 0);
     }
 
     void InitControllers() override {}
@@ -44,28 +44,14 @@ private:
         _gpsPublisher->Publish(gpsSerialized);
     }
 
-    void PublishTemperatureData()
-    {
-        double temperature = 25.0 + static_cast<double>(rand() % 10) / 10.0;
-        auto temperatureSerialized = PubSubDemoCommon::SerializeTemperature(temperature);
-
-        std::stringstream ss;
-        ss << "Publishing temperature data: temperature=" << temperature;
-        GetLogger()->Info(ss.str());
-
-        _temperaturePublisher->Publish(temperatureSerialized);
-    }
-
     void DoWorkSync(std::chrono::nanoseconds /*now*/) override
     {
         PublishGPSData();
-        PublishTemperatureData();
     }
 
     void DoWorkAsync() override
     {
         PublishGPSData();
-        PublishTemperatureData();
     }
 };
 
