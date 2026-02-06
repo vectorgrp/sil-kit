@@ -6,7 +6,7 @@ Configuration
 
 .. _sec:sil-kit-config-yaml:
 
-The Vector |ProductName| provides optional configuration to enhance flexibility and control through use of YAML files.
+The |ProductName| provides optional configuration to enhance flexibility and control through use of YAML files.
 This allows users to modify behavior without recompiling source code.
 Further, it allows configuration of services which are inactive by default, such as tracing and logging.
 Different configuration options are available for |ProductName| participants and the |ProductName| Registry.
@@ -202,7 +202,7 @@ The Registry Configuration File
 
 An instance of the |ProductName| Registry (``sil-kit-registry(.exe)``) can be configured via a YAML file.
 The configuration file is optional and overrides the settings specified on the command line.
-It also allows extended configuration, beyond what the command line allows, particularly for logging and data export to a `Vector SIL Kit Dashboard <https://vector.com/sil-kit-dashboard>`_ instance.
+It also allows extended configuration, beyond what the command line allows, particularly for logging and data export to a `SIL Kit Dashboard <https://vector.com/sil-kit-dashboard>`_ instance.
 
 The outline of a registry configuration file is as follows:
 

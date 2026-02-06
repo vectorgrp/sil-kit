@@ -8,7 +8,7 @@ Utilities
    :local:
    :depth: 1
 
-Running a Vector |ProductName| system is supported by several utilities.
+Running a |ProductName| system is supported by several utilities.
 The **Registry** is a mandatory part of the |ProductName| integrated middleware.
 It is needed to establish the connections between simulation participants at the start of a simulation.
 The **System Controller** implements a simulation-wide state handling.
@@ -25,7 +25,7 @@ sil-kit-registry
 
 Abstract
     The ``sil-kit-registry`` enables discovery between |ProductName| participants. 
-    It is needed for Vector |ProductName| simulations.
+    It is needed for |ProductName| simulations.
 Source location
     ``Utilities/SilKitRegistry``
 Requirements
