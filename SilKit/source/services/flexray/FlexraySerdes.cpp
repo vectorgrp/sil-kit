@@ -149,8 +149,7 @@ inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buff
            << nodeParams.pMacroInitialOffsetB << nodeParams.pMicroInitialOffsetA << nodeParams.pMicroInitialOffsetB
            << nodeParams.pMicroPerCycle << nodeParams.pOffsetCorrectionOut << nodeParams.pOffsetCorrectionStart
            << nodeParams.pRateCorrectionOut << nodeParams.pWakeupChannel << nodeParams.pWakeupPattern
-           << nodeParams.pdMicrotick << nodeParams.pSamplesPerMicrotick << nodeParams.pSecondKeySlotId
-           << nodeParams.pTwoKeySlotMode;
+           << nodeParams.pdMicrotick << nodeParams.pSamplesPerMicrotick;
     return buffer;
 }
 
@@ -164,10 +163,6 @@ inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buff
         >> nodeParams.pMicroPerCycle >> nodeParams.pOffsetCorrectionOut >> nodeParams.pOffsetCorrectionStart
         >> nodeParams.pRateCorrectionOut >> nodeParams.pWakeupChannel >> nodeParams.pWakeupPattern
         >> nodeParams.pdMicrotick >> nodeParams.pSamplesPerMicrotick;
-    if (buffer.RemainingBytesLeft() > 0)
-    {
-        buffer >> nodeParams.pSecondKeySlotId >> nodeParams.pTwoKeySlotMode;
-    }
     return buffer;
 }
 
@@ -189,12 +184,22 @@ inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buff
                                                const FlexrayControllerConfig& config)
 {
     buffer << config.clusterParams << config.nodeParams << config.bufferConfigs;
+    // Support for struct FlexrayControllerConfig version 2:
+    // ensure that the pSecondKeySlotId and pTwoKeySlotMode are also serialized after the bufferConfigs
+    // otherwise we will confuse the buffer deserialization of the bufferConfigs
+    buffer << config.nodeParams.pSecondKeySlotId << config.nodeParams.pTwoKeySlotMode;
     return buffer;
 }
 
 inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, FlexrayControllerConfig& config)
 {
     buffer >> config.clusterParams >> config.nodeParams >> config.bufferConfigs;
+    // Support for struct FlexrayControllerConfig version 2:
+    // the pSecondKeySlotId and pTwoKeySlotMode were added after the bufferConfigs
+    if (buffer.RemainingBytesLeft() > 0)
+    {
+        buffer >> config.nodeParams.pSecondKeySlotId >> config.nodeParams.pTwoKeySlotMode;
+    }
     return buffer;
 }
 
