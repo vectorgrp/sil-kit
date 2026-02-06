@@ -99,6 +99,7 @@ void YamlWriter::Write(const SilKit::Services::Flexray::FlexrayClusterParameters
 
 void YamlWriter::Write(const SilKit::Services::Flexray::FlexrayNodeParameters& obj)
 {
+    static const SilKit::Services::Flexray::FlexrayNodeParameters defaultNodeParams{};
     MakeMap();
     WriteKeyValue("pAllowHaltDueToClock", obj.pAllowHaltDueToClock);
     WriteKeyValue("pAllowPassiveToActive", obj.pAllowPassiveToActive);
@@ -123,6 +124,8 @@ void YamlWriter::Write(const SilKit::Services::Flexray::FlexrayNodeParameters& o
     WriteKeyValue("pWakeupChannel", obj.pWakeupChannel);
     WriteKeyValue("pdMicrotick", obj.pdMicrotick);
     WriteKeyValue("pChannels", obj.pChannels);
+    NonDefaultWrite(obj.pSecondKeySlotId, "pSecondKeySlotId", defaultNodeParams.pSecondKeySlotId);
+    NonDefaultWrite(obj.pTwoKeySlotMode, "pTwoKeySlotMode", defaultNodeParams.pTwoKeySlotMode);
 }
 
 

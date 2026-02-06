@@ -57,7 +57,7 @@ public:
         auto&& child = GetChildSafe(name);
         if (child.IsValid())
         {
-            T tmp;
+            T tmp{};
             child.Read(tmp);
             val = std::move(tmp); // needs a proper setter to set "has_value"
         }

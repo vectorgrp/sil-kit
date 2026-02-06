@@ -116,7 +116,9 @@
         "pWakeupPattern": 33,
         "pdAcceptedStartupRange": 212,
         "pdListenTimeout": 400162,
-        "pdMicrotick": "25ns"
+        "pdMicrotick": "25ns",
+        "pSecondKeySlotId": 1337,
+        "pTwoKeySlotMode": 1
       },
       "TxBufferConfigurations": [
         {
