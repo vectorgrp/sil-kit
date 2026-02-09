@@ -137,7 +137,7 @@ typedef struct
 #define SilKit_FlexrayWakeupEvent_VERSION 1
 #define SilKit_FlexrayControllerConfig_VERSION 1
 #define SilKit_FlexrayClusterParameters_VERSION 1
-#define SilKit_FlexrayNodeParameters_VERSION 1
+#define SilKit_FlexrayNodeParameters_VERSION 2
 #define SilKit_FlexrayHostCommand_VERSION 1
 #define SilKit_FlexrayHeader_VERSION 1
 #define SilKit_FlexrayFrame_VERSION 1

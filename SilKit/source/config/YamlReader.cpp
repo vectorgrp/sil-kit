@@ -97,6 +97,8 @@ void YamlReader::Read(SilKit::Services::Flexray::FlexrayNodeParameters& obj)
     ReadKeyValue(obj.pWakeupChannel, "pWakeupChannel");
     ReadKeyValue(obj.pdMicrotick, "pdMicrotick");
     ReadKeyValue(obj.pChannels, "pChannels");
+    OptionalRead(obj.pSecondKeySlotId, "pSecondKeySlotId");
+    OptionalRead(obj.pTwoKeySlotMode, "pTwoKeySlotMode");
 }
 
 void YamlReader::Read(SilKit::Services::Flexray::FlexrayTxBufferConfig& obj)

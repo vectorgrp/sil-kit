@@ -49,7 +49,7 @@ auto Deserialize(const std::string& input) -> T
         auto root = tree.crootref();
 
         R reader{parser, root};
-        T result;
+        T result{};
         reader.Read(result);
         return result;
     }
