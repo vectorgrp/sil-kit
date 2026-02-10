@@ -54,7 +54,7 @@ auto MakePeerInfo() -> VAsioPeerInfo
 
 TEST(Test_VAsioSerdes, vasio_participantAnouncement)
 {
-    MessageBuffer buffer;
+    MessageBuffer buffer{std::pmr::get_default_resource()};
     ParticipantAnnouncement in{}, out{};
 
     in.messageHeader = RegistryMsgHeader{};
@@ -80,7 +80,7 @@ auto MakeSubscriber() -> VAsioMsgSubscriber
 
 TEST(Test_VAsioSerdes, vasio_VasioMsgSubscribers)
 {
-    MessageBuffer buffer;
+    MessageBuffer buffer{std::pmr::get_default_resource()};
     VAsioMsgSubscriber in = MakeSubscriber();
     VAsioMsgSubscriber out{};
 
@@ -91,7 +91,7 @@ TEST(Test_VAsioSerdes, vasio_VasioMsgSubscribers)
 }
 TEST(Test_VAsioSerdes, vasio_participantAnouncementReply)
 {
-    MessageBuffer buffer;
+    MessageBuffer buffer{std::pmr::get_default_resource()};
     ParticipantAnnouncementReply in{}, out{};
 
     for (auto i = 0; i < 10; i++)
@@ -107,7 +107,7 @@ TEST(Test_VAsioSerdes, vasio_participantAnouncementReply)
 
 TEST(Test_VAsioSerdes, vasio_knownParticipants)
 {
-    MessageBuffer buffer;
+    MessageBuffer buffer{std::pmr::get_default_resource()};
     KnownParticipants in{};
     KnownParticipants out{};
 

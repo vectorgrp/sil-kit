@@ -38,9 +38,9 @@ template <typename T>
 struct SerializedSize
 {
     size_t _size{};
-    SerializedSize(const T& message)
+    SerializedSize(const T& message, std::pmr::memory_resource* memoryResource)
     {
-        MessageBuffer buffer;
+        MessageBuffer buffer{memoryResource};
         Serialize(buffer, message);
         _size = buffer.ReleaseStorage().size();
     }
@@ -61,17 +61,17 @@ public: //defaulted CTors
 
 public: // Sending a SerializedMessage: from T to binary blob
     template <typename MessageT>
-    explicit SerializedMessage(const MessageT& message);
+    explicit SerializedMessage(const MessageT& message, std::pmr::memory_resource* memoryResource);
     // Sim messages have additional parameters:
     template <typename MessageT>
-    explicit SerializedMessage(const MessageT& message, EndpointAddress endpointAddress, EndpointId remoteIndex);
+    explicit SerializedMessage(const MessageT& message, EndpointAddress endpointAddress, EndpointId remoteIndex, std::pmr::memory_resource* memoryResource);
     template <typename MessageT>
-    explicit SerializedMessage(ProtocolVersion version, const MessageT& message);
+    explicit SerializedMessage(ProtocolVersion version, const MessageT& message, std::pmr::memory_resource* memoryResource);
 
-    auto ReleaseStorage() -> std::vector<uint8_t>;
+    auto ReleaseStorage() -> std::pmr::vector<uint8_t>;
 
 public: // Receiving a SerializedMessage: from binary blob to SilKitMessage<T>
-    explicit SerializedMessage(std::vector<uint8_t>&& blob);
+    explicit SerializedMessage(std::pmr::vector<uint8_t>&& blob, std::pmr::memory_resource* memoryResource);
 
     template <typename ApiMessageT>
     auto Deserialize() -> ApiMessageT;
@@ -117,9 +117,10 @@ private:
 // Inline Implementations
 //////////////////////////////////////////////////////////////////////
 template <typename MessageT>
-SerializedMessage::SerializedMessage(const MessageT& message)
+SerializedMessage::SerializedMessage(const MessageT& message, std::pmr::memory_resource* memoryResource)
+    :_buffer{memoryResource}
 {
-    static SerializedSize<MessageT> messageSize{message};
+    static SerializedSize<MessageT> messageSize{message, memoryResource};
     _buffer.IncreaseCapacity(messageSize.Size());
 
     _messageKind = messageKind<MessageT>();
@@ -132,9 +133,11 @@ SerializedMessage::SerializedMessage(const MessageT& message)
 }
 
 template <typename MessageT>
-SerializedMessage::SerializedMessage(ProtocolVersion version, const MessageT& message)
+SerializedMessage::SerializedMessage(ProtocolVersion version, const MessageT& message,
+                                     std::pmr::memory_resource* memoryResource)
+    : _buffer{memoryResource}
 {
-    static SerializedSize<MessageT> messageSize{message};
+    static SerializedSize<MessageT> messageSize{message, memoryResource};
     _buffer.IncreaseCapacity(messageSize.Size());
 
     _messageKind = messageKind<MessageT>();
@@ -148,9 +151,11 @@ SerializedMessage::SerializedMessage(ProtocolVersion version, const MessageT& me
 }
 
 template <typename MessageT>
-SerializedMessage::SerializedMessage(const MessageT& message, EndpointAddress endpointAddress, EndpointId remoteIndex)
+SerializedMessage::SerializedMessage(const MessageT& message, EndpointAddress endpointAddress, EndpointId remoteIndex,
+                                     std::pmr::memory_resource* memoryResource)
+    : _buffer{memoryResource}
 {
-    static SerializedSize<MessageT> messageSize{message};
+    static SerializedSize<MessageT> messageSize{message, memoryResource};
     _buffer.IncreaseCapacity(messageSize.Size());
 
     _remoteIndex = remoteIndex;

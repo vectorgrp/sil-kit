@@ -7,6 +7,7 @@
 #include "silkit/participant/exception.hpp"
 
 #include "gtest/gtest.h"
+#include "gmock/gmock.h"
 
 #include <chrono>
 #include <iostream>
@@ -179,6 +180,11 @@ struct DummyVAsioPeerBase : IVAsioPeer
     }
 
     void InitializeMetrics(VSilKit::IMetricsManager*) override
+    {
+        throw MethodNotImplementedError{};
+    }
+
+    auto GetMemoryResource() -> std::pmr::memory_resource* override
     {
         throw MethodNotImplementedError{};
     }

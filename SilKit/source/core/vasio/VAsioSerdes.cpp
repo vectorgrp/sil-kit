@@ -279,11 +279,11 @@ auto PeekRegistryMessageHeader(MessageBuffer& buffer) -> RegistryMsgHeader
     // read only the header into a new MessageBuffer
     auto data = buffer.PeekData();
     const auto readPos = buffer.ReadPos();
-    std::vector<uint8_t> rawHeader;
+    std::pmr::vector<uint8_t> rawHeader{buffer.GetMemoryResource()};
     rawHeader.resize(sizeof(RegistryMsgHeader));
     memcpy(rawHeader.data(), (data.data() + readPos), sizeof(RegistryMsgHeader));
 
-    MessageBuffer headerBuffer(std::move(rawHeader));
+    MessageBuffer headerBuffer{std::move(rawHeader), buffer.GetMemoryResource()};
     RegistryMsgHeader header;
     headerBuffer >> header;
     return header;

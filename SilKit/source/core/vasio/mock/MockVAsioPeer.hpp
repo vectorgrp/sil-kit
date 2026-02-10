@@ -45,6 +45,7 @@ struct MockVAsioPeer : IVAsioPeer
 
     MOCK_METHOD(void, SetServiceDescriptor, (const ServiceDescriptor&), (override));
     MOCK_METHOD(const ServiceDescriptor&, GetServiceDescriptor, (), (const, override));
+    MOCK_METHOD(std::pmr::memory_resource*, GetMemoryResource, (), (override));
 };
 
 

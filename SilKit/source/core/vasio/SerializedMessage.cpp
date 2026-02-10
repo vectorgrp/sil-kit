@@ -8,13 +8,13 @@ namespace SilKit {
 namespace Core {
 
 // Constructor from raw data (reading)
-SerializedMessage::SerializedMessage(std::vector<uint8_t>&& blob)
-    : _buffer{std::move(blob)}
+SerializedMessage::SerializedMessage(std::pmr::vector<uint8_t>&& blob, std::pmr::memory_resource* memoryResource)
+    : _buffer{std::move(blob), memoryResource}
 {
     ReadNetworkHeaders();
 }
 
-auto SerializedMessage::ReleaseStorage() -> std::vector<uint8_t>
+auto SerializedMessage::ReleaseStorage() -> std::pmr::vector<uint8_t>
 {
     auto buffer = _buffer.ReleaseStorage();
     if (buffer.size() > std::numeric_limits<uint32_t>::max())

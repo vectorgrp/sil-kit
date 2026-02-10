@@ -12,7 +12,7 @@ using namespace std::chrono_literals;
 
 TEST(Test_MessageBuffer, integral_types)
 {
-    SilKit::Core::MessageBuffer buffer;
+    SilKit::Core::MessageBuffer buffer{std::pmr::get_default_resource()};
 
     int32_t in{7};
     int32_t out{1};
@@ -26,7 +26,7 @@ TEST(Test_MessageBuffer, integral_types)
 
 TEST(Test_MessageBuffer, integral_types_multiple)
 {
-    SilKit::Core::MessageBuffer buffer;
+    SilKit::Core::MessageBuffer buffer{std::pmr::get_default_resource()};
 
     std::vector<int32_t> in{1, 2, 3, 4, 5, 6, 7};
     std::vector<int32_t> out(in.size(), -1);
@@ -42,7 +42,7 @@ TEST(Test_MessageBuffer, integral_types_multiple)
 
 TEST(Test_MessageBuffer, floating_types)
 {
-    SilKit::Core::MessageBuffer buffer;
+    SilKit::Core::MessageBuffer buffer{std::pmr::get_default_resource()};
 
     double in{7};
     double out{1};
@@ -55,7 +55,7 @@ TEST(Test_MessageBuffer, floating_types)
 
 TEST(Test_MessageBuffer, floating_types_multiple)
 {
-    SilKit::Core::MessageBuffer buffer;
+    SilKit::Core::MessageBuffer buffer{std::pmr::get_default_resource()};
 
     std::vector<double> in{1, 2, 3, 4, 5, 6, 7};
     std::vector<double> out(in.size(), -1);
@@ -81,7 +81,7 @@ enum class TestEnumT : uint8_t
 
 TEST(Test_MessageBuffer, enum_types)
 {
-    SilKit::Core::MessageBuffer buffer;
+    SilKit::Core::MessageBuffer buffer{std::pmr::get_default_resource()};
 
     TestEnumT in{TestEnumT::A};
     TestEnumT out{TestEnumT::B};
@@ -94,7 +94,7 @@ TEST(Test_MessageBuffer, enum_types)
 
 TEST(Test_MessageBuffer, std_string)
 {
-    SilKit::Core::MessageBuffer buffer;
+    SilKit::Core::MessageBuffer buffer{std::pmr::get_default_resource()};
 
     std::string in{"This_is_a_test_string"};
     std::string out;
@@ -107,7 +107,7 @@ TEST(Test_MessageBuffer, std_string)
 
 TEST(Test_MessageBuffer, std_vector_uint8_t)
 {
-    SilKit::Core::MessageBuffer buffer;
+    SilKit::Core::MessageBuffer buffer{std::pmr::get_default_resource()};
 
     std::string helperString{"This_is_a_test_string"};
 
@@ -122,7 +122,7 @@ TEST(Test_MessageBuffer, std_vector_uint8_t)
 
 TEST(Test_MessageBuffer, std_vector_string)
 {
-    SilKit::Core::MessageBuffer buffer;
+    SilKit::Core::MessageBuffer buffer{std::pmr::get_default_resource()};
 
     std::vector<std::string> in{"this", "is", "a", "test", "string"};
     std::vector<std::string> out;
@@ -135,7 +135,7 @@ TEST(Test_MessageBuffer, std_vector_string)
 
 TEST(Test_MessageBuffer, std_array_uint8_t)
 {
-    SilKit::Core::MessageBuffer buffer;
+    SilKit::Core::MessageBuffer buffer{std::pmr::get_default_resource()};
 
     std::array<uint8_t, 8> in{'A', 2, 3, 4, '.'};
     std::array<uint8_t, 8> out;
@@ -148,7 +148,7 @@ TEST(Test_MessageBuffer, std_array_uint8_t)
 
 TEST(Test_MessageBuffer, std_array_string)
 {
-    SilKit::Core::MessageBuffer buffer;
+    SilKit::Core::MessageBuffer buffer{std::pmr::get_default_resource()};
 
     std::array<std::string, 6> in{"this", "is", "a", "test", "string"};
     std::array<std::string, 6> out;
@@ -161,7 +161,7 @@ TEST(Test_MessageBuffer, std_array_string)
 
 TEST(Test_MessageBuffer, std_chrono_nanoseconds)
 {
-    SilKit::Core::MessageBuffer buffer;
+    SilKit::Core::MessageBuffer buffer{std::pmr::get_default_resource()};
 
     std::chrono::nanoseconds in{1500ns};
     std::chrono::nanoseconds out;
@@ -174,7 +174,7 @@ TEST(Test_MessageBuffer, std_chrono_nanoseconds)
 
 TEST(Test_MessageBuffer, std_chrono_system_time)
 {
-    SilKit::Core::MessageBuffer buffer;
+    SilKit::Core::MessageBuffer buffer{std::pmr::get_default_resource()};
 
     auto now = std::chrono::system_clock::now();
 
@@ -208,7 +208,7 @@ bool operator==(const TestData& lhs, const TestData& rhs)
 
 TEST(Test_MessageBuffer, mixed_types)
 {
-    SilKit::Core::MessageBuffer buffer;
+    SilKit::Core::MessageBuffer buffer{std::pmr::get_default_resource()};
 
     TestData in{3.333, std::numeric_limits<uint32_t>::max() - 1, -13, TestEnumT::A, 17ns, "This looks nice!"};
     TestData out{0.01, 0, 0, TestEnumT::B, 0ns, std::string{}};

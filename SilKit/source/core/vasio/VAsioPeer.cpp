@@ -36,7 +36,7 @@ VAsioPeer::VAsioPeer(IVAsioPeerListener* listener, IIoContext* ioContext, std::u
     , _ioContext{ioContext}
     , _socket{std::move(stream)}
     , _logger{logger}
-    , _msgBuffer{4096}
+    , _msgBuffer{4096, listener->GetMemoryResource()}
     , _peerMetrics{std::move(peerMetrics)}
 {
     _socket->SetListener(*this);
@@ -120,7 +120,7 @@ void VAsioPeer::SendSilKitMsg(SerializedMessage buffer)
     }
 }
 
-void VAsioPeer::SendSilKitMsgInternal(std::vector<uint8_t> blob)
+void VAsioPeer::SendSilKitMsgInternal(std::pmr::vector<uint8_t> blob)
 {
     // Prevent sending when shutting down
     if (!_isShuttingDown && _socket != nullptr)
@@ -137,7 +137,7 @@ void VAsioPeer::SendSilKitMsgInternal(std::vector<uint8_t> blob)
     }
 }
 
-void VAsioPeer::Aggregate(const std::vector<uint8_t>& blob)
+void VAsioPeer::Aggregate(const std::pmr::vector<uint8_t>& blob)
 {
     // start initial timer
     // NB: resetting timer in every Aggregate() is costly
@@ -201,7 +201,7 @@ void VAsioPeer::Subscribe(VAsioMsgSubscriber subscriber)
     Services::Logging::Debug(_logger,
                              "VAsioTcpPeer: Subscribing to messages of type '{}' on link '{}' from participant '{}'",
                              subscriber.msgTypeName, subscriber.networkName, _info.participantName);
-    SendSilKitMsg(SerializedMessage{subscriber});
+    SendSilKitMsg(SerializedMessage{subscriber, GetMemoryResource()});
 }
 
 void VAsioPeer::StartAsyncRead()
@@ -231,7 +231,7 @@ void VAsioPeer::DispatchBuffer()
         }
         if (_msgBuffer.Size() >= sizeof(uint32_t))
         {
-            std::vector<uint8_t> msgSizeInBytes(sizeof(uint32_t));
+            std::pmr::vector<uint8_t> msgSizeInBytes(sizeof(uint32_t), _listener->GetMemoryResource());
             if (!_msgBuffer.Peek(msgSizeInBytes))
             {
                 throw SilKitError("Reading message size from ring buffer failed.");
@@ -268,13 +268,13 @@ void VAsioPeer::DispatchBuffer()
     }
     else
     {
-        std::vector<uint8_t> currentMsg(_currentMsgSize);
+        std::pmr::vector<uint8_t> currentMsg(_currentMsgSize);
         if (!_msgBuffer.Read(currentMsg))
         {
             throw SilKitError("Reading data from ring buffer failed.");
         }
 
-        SerializedMessage message{std::move(currentMsg)};
+        SerializedMessage message{std::move(currentMsg), GetMemoryResource()};
         message.SetProtocolVersion(GetProtocolVersion());
 
         _peerMetrics->RxBytes(message);

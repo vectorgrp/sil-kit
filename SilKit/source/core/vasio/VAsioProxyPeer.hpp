@@ -46,6 +46,7 @@ public: // IVAsioPeer
 
     void InitializeMetrics(VSilKit::IMetricsManager*) override {}
 
+
 public: // IVAsioPeer (IServiceEndpoint)
     void SetServiceDescriptor(const ServiceDescriptor& serviceDescriptor) override;
     auto GetServiceDescriptor() const -> const ServiceDescriptor& override;
@@ -53,6 +54,10 @@ public: // IVAsioPeer (IServiceEndpoint)
 public: // IVAsioPeerListener
     void OnSocketData(IVAsioPeer* from, SerializedMessage&& buffer) override;
     void OnPeerShutdown(IVAsioPeer* peer) override;
+    auto GetMemoryResource() -> std::pmr::memory_resource* override
+    {
+        return _listener->GetMemoryResource();
+    }
 
 public:
     auto GetPeer() const -> IVAsioPeer*;

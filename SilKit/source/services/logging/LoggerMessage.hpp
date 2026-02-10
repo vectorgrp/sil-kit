@@ -10,6 +10,7 @@
 #include "LogFunctions.hpp"
 
 #include <string>
+#include <string_view>
 
 
 namespace SilKit {
@@ -55,11 +56,11 @@ public:
         }
     }
 
-    void SetMessage(std::string newMsg)
+    void SetMessage(std::string_view newMsg)
     {
         if (_logger->GetLogLevel() <= _level)
         {
-            _msg = std::move(newMsg);
+            _msg = newMsg;
         }
     }
 

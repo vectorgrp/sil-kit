@@ -176,7 +176,7 @@ TEST_F(Test_VAsioConnection, unsupported_version_connect)
     announcement.peerInfo = _from.GetInfo();
     announcement.messageHeader.versionHigh = 1;
 
-    SerializedMessage message(announcement);
+    SerializedMessage message{announcement, std::pmr::get_default_resource()};
 
     auto validator = [](const ParticipantAnnouncementReply& reply) {
         return reply.status == ParticipantAnnouncementReply::Status::Failed;
@@ -195,7 +195,7 @@ TEST_F(Test_VAsioConnection, unsupported_version_reply_from_registry_should_thro
     // a failed connection to a registry is fatal
     _from._peerInfo.participantId = REGISTRY_PARTICIPANT_ID;
 
-    SerializedMessage message(reply);
+    SerializedMessage message{reply, std::pmr::get_default_resource()};
     EXPECT_THROW(_connection.OnSocketData(&_from, std::move(message)), SilKit::ProtocolError);
 }
 
@@ -206,7 +206,7 @@ TEST_F(Test_VAsioConnection, supported_version_reply_from_registry_must_not_thro
 
     _from._peerInfo.participantId = REGISTRY_PARTICIPANT_ID;
 
-    SerializedMessage message(reply);
+    SerializedMessage message{reply, std::pmr::get_default_resource()};
     EXPECT_NO_THROW(_connection.OnSocketData(&_from, std::move(message)));
 }
 
@@ -215,7 +215,7 @@ TEST_F(Test_VAsioConnection, current_version_connect)
     ParticipantAnnouncement announcement{}; //sets correct version in header
     announcement.peerInfo = _from.GetInfo();
 
-    SerializedMessage message(announcement);
+    SerializedMessage message{announcement, std::pmr::get_default_resource()};
 
     auto validator = [](const ParticipantAnnouncementReply& reply) {
         return reply.status == ParticipantAnnouncementReply::Status::Success;
@@ -249,7 +249,7 @@ TEST_F(Test_VAsioConnection, DISABLED_versioned_send_testmessage)
     EXPECT_TRUE(subscriber.version == 1);
 
     // ReceiveSubscriptionAnnouncement -> sets internal structures up
-    auto subscriberBuffer = SerializedMessage(subscriber);
+    auto subscriberBuffer = SerializedMessage(subscriber, std::pmr::get_default_resource());
     EXPECT_CALL(_from, SendSilKitMsg(SubscriptionAcknowledgeMatcher(subscriber))).Times(1);
     _connection.OnSocketData(&_from, std::move(subscriberBuffer));
 
@@ -258,7 +258,8 @@ TEST_F(Test_VAsioConnection, DISABLED_versioned_send_testmessage)
     RegisterSilKitMsgReceiver<Tests::Version2::TestMessage, MockSilKitMessageReceiver>(&mockReceiver);
 
     // the actual message
-    auto buffer = SerializedMessage(message, _from.GetServiceDescriptor().to_endpointAddress(), subscriber.receiverIdx);
+    auto buffer = SerializedMessage(message, _from.GetServiceDescriptor().to_endpointAddress(), subscriber.receiverIdx,
+                                    std::pmr::get_default_resource());
 
     _connection.OnSocketData(&_from, std::move(buffer));
 }

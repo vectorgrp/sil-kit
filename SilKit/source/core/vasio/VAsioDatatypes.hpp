@@ -127,7 +127,7 @@ struct ProxyMessage
     ProxyMessageHeader header{0};
     std::string source;
     std::string destination;
-    std::vector<uint8_t> payload;
+    std::pmr::vector<uint8_t> payload;
 };
 
 enum class MessageAggregationKind : uint8_t

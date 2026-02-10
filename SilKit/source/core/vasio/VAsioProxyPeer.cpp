@@ -42,7 +42,7 @@ void VAsioProxyPeer::SendSilKitMsg(SerializedMessage buffer)
     Log::Trace(_logger, "VAsioProxyPeer ({}): SendSilKitMsg({})", _peerInfo.participantName, msg.payload.size());
 
     // keep track of aggregation kind
-    auto bufferProxy = SerializedMessage{msg};
+    auto bufferProxy = SerializedMessage{msg, GetMemoryResource()};
     bufferProxy.SetAggregationKind(buffer.GetAggregationKind());
 
     _peer->SendSilKitMsg(std::move(bufferProxy));
@@ -53,7 +53,7 @@ void VAsioProxyPeer::Subscribe(VAsioMsgSubscriber subscriber)
     Log::Debug(_logger, "VAsioProxyPeer: Subscribing to messages of type '{}' on link '{}' from participant '{}'",
                subscriber.msgTypeName, subscriber.networkName, _peerInfo.participantName);
 
-    SendSilKitMsg(SerializedMessage{subscriber});
+    SendSilKitMsg(SerializedMessage{subscriber, GetMemoryResource()});
 }
 
 auto VAsioProxyPeer::GetInfo() const -> const VAsioPeerInfo&

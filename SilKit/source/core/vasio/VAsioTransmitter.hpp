@@ -56,7 +56,7 @@ struct MessageHistory<MsgT, 1>
         if (!_hasValue || !_hasHistory)
             return;
 
-        auto buffer = SerializedMessage(_last, _from, remoteIdx);
+        auto buffer = SerializedMessage(_last, _from, remoteIdx, peer->GetMemoryResource());
         Services::TraceTx(logger, peer, _last);
         peer->SendSilKitMsg(std::move(buffer));
     }
@@ -150,7 +150,8 @@ public:
                << "', which is not a valid remote receiver.";
             throw SilKitError{ss.str()};
         }
-        auto buffer = SerializedMessage(msg, to_endpointAddress(from->GetServiceDescriptor()), receiverIter->remoteIdx);
+        auto buffer = SerializedMessage(msg, to_endpointAddress(from->GetServiceDescriptor()), receiverIter->remoteIdx,
+                                        receiverIter->peer->GetMemoryResource());
         receiverIter->peer->SendSilKitMsg(std::move(buffer));
     }
 
@@ -167,7 +168,8 @@ public:
         _hist.Save(from, msg);
         for (auto& receiver : _remoteReceivers)
         {
-            auto buffer = SerializedMessage(msg, to_endpointAddress(from->GetServiceDescriptor()), receiver.remoteIdx);
+            auto buffer = SerializedMessage(msg, to_endpointAddress(from->GetServiceDescriptor()), receiver.remoteIdx,
+                                            receiver.peer->GetMemoryResource());
             receiver.peer->SendSilKitMsg(std::move(buffer));
         }
     }

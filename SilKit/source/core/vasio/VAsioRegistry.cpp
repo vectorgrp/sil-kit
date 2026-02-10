@@ -262,7 +262,7 @@ void VAsioRegistry::SendKnownParticipants(IVAsioPeer* peer, const std::string& s
         knownParticipantsMsg.peerInfos.push_back(peerInfo);
     }
 
-    peer->SendSilKitMsg(SerializedMessage{peer->GetProtocolVersion(), knownParticipantsMsg});
+    peer->SendSilKitMsg(SerializedMessage{peer->GetProtocolVersion(), knownParticipantsMsg, peer->GetMemoryResource()});
 }
 
 void VAsioRegistry::OnPeerShutdown(IVAsioPeer* peer)

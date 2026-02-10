@@ -52,12 +52,23 @@ class MessageBuffer
 public:
     // ----------------------------------------
     // Public Data Types
-
+public: // memory pool
+    std::pmr::memory_resource* _memoryResource{nullptr};
+    auto GetMemoryResource() -> std::pmr::memory_resource*
+    {
+        return _memoryResource;
+    }
 public:
     // ----------------------------------------
     // Constructors and Destructor
+    explicit MessageBuffer(std::pmr::memory_resource* memoryResource)
+        : _storage{memoryResource}
+        , _memoryResource{memoryResource}
+    {
+    }
+
     inline MessageBuffer() = default;
-    inline MessageBuffer(std::vector<uint8_t> data);
+    inline MessageBuffer(std::pmr::vector<uint8_t> data, std::pmr::memory_resource* memoryResource);
 
     MessageBuffer(const MessageBuffer& other) = default;
     MessageBuffer(MessageBuffer&& other) = default;
@@ -87,7 +98,7 @@ public:
     // Public methods
 
     //! \brief Return the underlying data storage by std::move and reset pointers
-    inline auto ReleaseStorage() -> std::vector<uint8_t>;
+    inline auto ReleaseStorage() -> std::pmr::vector<uint8_t>;
     inline auto RemainingBytesLeft() const noexcept -> size_t;
 
 public:
@@ -180,6 +191,8 @@ public:
     // std::vector<uint8_t>
     inline MessageBuffer& operator<<(const std::vector<uint8_t>& vector);
     inline MessageBuffer& operator>>(std::vector<uint8_t>& vector);
+    inline MessageBuffer& operator<<(const std::pmr::vector<uint8_t>& vector);
+    inline MessageBuffer& operator>>(std::pmr::vector<uint8_t>& vector);
     // --------------------------------------------------------------------------------
     // std::vector<T>
     template <typename ValueT>
@@ -255,7 +268,7 @@ private:
     // ----------------------------------------
     // private members
     ProtocolVersion _protocolVersion{CurrentProtocolVersion()};
-    std::vector<uint8_t> _storage;
+    std::pmr::vector<uint8_t> _storage;
     std::size_t _wPos{0u};
     std::size_t _rPos{0u};
 };
@@ -263,14 +276,15 @@ private:
 // ================================================================================
 //  Inline Implementations
 // ================================================================================
-MessageBuffer::MessageBuffer(std::vector<uint8_t> data)
+MessageBuffer::MessageBuffer(std::pmr::vector<uint8_t> data, std::pmr::memory_resource* memoryResource)
     : _storage{std::move(data)}
+    , _memoryResource{memoryResource}
     , _wPos{_storage.size()}
     , _rPos{0u}
 {
 }
 
-auto MessageBuffer::ReleaseStorage() -> std::vector<uint8_t>
+auto MessageBuffer::ReleaseStorage() -> std::pmr::vector<uint8_t>
 {
     _wPos = 0u;
     _rPos = 0u;
@@ -333,6 +347,25 @@ MessageBuffer& MessageBuffer::operator>>(std::vector<uint8_t>& vector)
         throw end_of_buffer{};
 
     vector = std::vector<uint8_t>(_storage.begin() + _rPos, _storage.begin() + _rPos + vectorSize);
+    _rPos += vectorSize;
+
+    return *this;
+}
+
+MessageBuffer& MessageBuffer::operator<<(const std::pmr::vector<uint8_t>& vector)
+{
+    const auto span = Util::ToSpan(vector);
+    return *this << span;
+}
+MessageBuffer& MessageBuffer::operator>>(std::pmr::vector<uint8_t>& vector)
+{
+    uint32_t vectorSize{0u};
+    *this >> vectorSize;
+
+    if (_rPos + vectorSize > _storage.size())
+        throw end_of_buffer{};
+
+    vector = std::pmr::vector<uint8_t>(_storage.begin() + _rPos, _storage.begin() + _rPos + vectorSize);
     _rPos += vectorSize;
 
     return *this;

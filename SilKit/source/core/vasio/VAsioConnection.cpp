@@ -627,7 +627,7 @@ void VAsioConnection::SendParticipantAnnouncement(IVAsioPeer* peer)
 
     Services::Logging::Debug(_logger, "Sending participant announcement to '{}' ('{}')",
                              peer->GetInfo().participantName, peer->GetSimulationName());
-    peer->SendSilKitMsg(SerializedMessage{announcement});
+    peer->SendSilKitMsg(SerializedMessage{announcement, GetMemoryResource()});
 }
 
 void VAsioConnection::ReceiveParticipantAnnouncement(IVAsioPeer* from, SerializedMessage&& buffer)
@@ -727,7 +727,7 @@ void VAsioConnection::SendParticipantAnnouncementReply(IVAsioPeer* peer)
                              peer->GetInfo().participantName, peer->GetSimulationName(),
                              ExtractProtocolVersion(reply.remoteHeader));
 
-    peer->SendSilKitMsg(SerializedMessage{peer->GetProtocolVersion(), reply});
+    peer->SendSilKitMsg(SerializedMessage{peer->GetProtocolVersion(), reply, GetMemoryResource()});
 
     if (const auto proxyPeer = dynamic_cast<VAsioProxyPeer*>(peer); proxyPeer != nullptr)
     {
@@ -750,7 +750,7 @@ void VAsioConnection::SendFailedParticipantAnnouncementReply(IVAsioPeer* peer, P
         _logger, "Sending failed ParticipantAnnouncementReply to '{}' ('{}') with protocol version {}",
         peer->GetInfo().participantName, peer->GetSimulationName(), ExtractProtocolVersion(reply.remoteHeader));
 
-    peer->SendSilKitMsg(SerializedMessage{peer->GetProtocolVersion(), reply});
+    peer->SendSilKitMsg(SerializedMessage{peer->GetProtocolVersion(), reply, GetMemoryResource()});
 }
 
 void VAsioConnection::ReceiveParticipantAnnouncementReply(IVAsioPeer* from, SerializedMessage&& buffer)
@@ -836,7 +836,7 @@ void VAsioConnection::ReceiveKnownParticpants(IVAsioPeer* peer, SerializedMessag
         reply.status = ParticipantAnnouncementReply::Status::Failed;
         reply.remoteHeader = MakeRegistryMsgHeader(_version);
 
-        peer->SendSilKitMsg(SerializedMessage{peer->GetProtocolVersion(), reply});
+        peer->SendSilKitMsg(SerializedMessage{peer->GetProtocolVersion(), reply, GetMemoryResource()});
 
         return;
     }
@@ -952,7 +952,7 @@ void VAsioConnection::ReceiveRemoteParticipantConnectRequest_Registry(IVAsioPeer
         return;
     }
 
-    SerializedMessage buffer{msg};
+    SerializedMessage buffer{msg, GetMemoryResource()};
     destination->SendSilKitMsg(std::move(buffer));
 }
 
@@ -981,7 +981,7 @@ void VAsioConnection::ReceiveRemoteParticipantConnectRequest_Participant(IVAsioP
             // incoming connection, or the FAILED_TO_CONNECT status message, which will initiate the connection via the
             // registry proxy.
             msg.status = RemoteParticipantConnectRequest::CONNECTING;
-            SerializedMessage buffer{msg};
+            SerializedMessage buffer{msg, GetMemoryResource()};
             peer->SendSilKitMsg(std::move(buffer));
 
             return;
@@ -1305,7 +1305,7 @@ void VAsioConnection::SendProxyPeerShutdownNotification(IVAsioPeer* peer)
                 msg.destination = destination;
                 msg.payload.clear();
 
-                destinationPeer->SendSilKitMsg(SerializedMessage{msg});
+                destinationPeer->SendSilKitMsg(SerializedMessage{msg,GetMemoryResource()});
             }
         }
     }
@@ -1428,7 +1428,7 @@ void VAsioConnection::ReceiveProxyMessage(IVAsioPeer* from, SerializedMessage&& 
             return;
         }
 
-        peer->SendSilKitMsg(SerializedMessage{proxyMessage});
+        peer->SendSilKitMsg(SerializedMessage{proxyMessage, GetMemoryResource()});
 
         // We are relaying a message from source to destination and acting as a proxy. Record the association between
         // source and destination. This is used during disconnects, where we create empty ProxyMessages on behalf of
@@ -1468,7 +1468,7 @@ void VAsioConnection::ReceiveProxyMessage(IVAsioPeer* from, SerializedMessage&& 
         }
         else
         {
-            OnSocketData(peer, SerializedMessage{std::move(proxyMessage.payload)});
+            OnSocketData(peer, SerializedMessage{std::move(proxyMessage.payload), GetMemoryResource()});
         }
 
         return;
@@ -1518,7 +1518,7 @@ void VAsioConnection::ReceiveSubscriptionAnnouncement(IVAsioPeer* from, Serializ
     ack.subscriber = std::move(subscriber);
     ack.status = wasAdded ? SubscriptionAcknowledge::Status::Success : SubscriptionAcknowledge::Status::Failed;
 
-    from->SendSilKitMsg(SerializedMessage{from->GetProtocolVersion(), ack});
+    from->SendSilKitMsg(SerializedMessage{from->GetProtocolVersion(), ack, GetMemoryResource()});
 }
 
 void VAsioConnection::ReceiveSubscriptionAcknowledge(IVAsioPeer* from, SerializedMessage&& buffer)
@@ -1964,7 +1964,7 @@ void VAsioConnection::OnRemoteConnectionSuccess(std::unique_ptr<SilKit::Core::IV
     msg.requestTarget = MakePeerInfo();
     msg.status = RemoteParticipantConnectRequest::ANNOUNCEMENT;
 
-    SerializedMessage buffer{msg};
+    SerializedMessage buffer{msg, GetMemoryResource()};
     vAsioPeer->SendSilKitMsg(std::move(buffer));
 
     AddPeer(std::move(vAsioPeer));
@@ -1980,7 +1980,7 @@ void VAsioConnection::OnRemoteConnectionFailure(SilKit::Core::VAsioPeerInfo peer
     msg.requestTarget = MakePeerInfo();
     msg.status = RemoteParticipantConnectRequest::FAILED_TO_CONNECT;
 
-    SerializedMessage buffer{msg};
+    SerializedMessage buffer{msg, GetMemoryResource()};
     _registry->SendSilKitMsg(std::move(buffer));
 }
 
@@ -2030,7 +2030,7 @@ bool VAsioConnection::TryRemoteConnectRequest(const VAsioPeerInfo& peerInfo)
     request.requestTarget = peerInfo;
     request.status = RemoteParticipantConnectRequest::REQUEST;
 
-    SerializedMessage buffer{request};
+    SerializedMessage buffer{request, GetMemoryResource()};
     _registry->SendSilKitMsg(std::move(buffer));
 
     return true;

@@ -13,9 +13,9 @@ using namespace SilKit::Core;
 
 static std::mt19937 generator{0}; // constant seed for deterministic behaviour
 
-std::vector<std::vector<uint8_t> > GenerateDataBlocks(const size_t maxSize, const size_t numDataBlocks)
+std::pmr::vector<std::pmr::vector<uint8_t> > GenerateDataBlocks(const size_t maxSize, const size_t numDataBlocks)
 {
-    std::vector<std::vector<uint8_t> > dataBlocks;
+    std::pmr::vector<std::pmr::vector<uint8_t> > dataBlocks;
 
     // configure random number generators
     std::uniform_int_distribution<size_t> distrSize(1, maxSize);
@@ -24,7 +24,7 @@ std::vector<std::vector<uint8_t> > GenerateDataBlocks(const size_t maxSize, cons
     for (size_t i = 0; i < numDataBlocks; i++)
     {
         // random size
-        std::vector<uint8_t> block(distrSize(generator));
+        std::pmr::vector<uint8_t> block(distrSize(generator));
 
         // random values
         for (auto& elem : block)
@@ -39,7 +39,7 @@ std::vector<std::vector<uint8_t> > GenerateDataBlocks(const size_t maxSize, cons
 }
 
 // mimic use of ring buffer in VAsioPeer (writing into ring buffer)
-void Write(RingBuffer& ringBuffer, const std::vector<uint8_t>& dataBlock)
+void Write(RingBuffer& ringBuffer, const std::pmr::vector<uint8_t>& dataBlock)
 {
     std::vector<MutableBuffer> bufferArrays;
     ringBuffer.GetWritingBuffers(bufferArrays);
@@ -66,7 +66,7 @@ void Write(RingBuffer& ringBuffer, const std::vector<uint8_t>& dataBlock)
 TEST(Test_RingBuffer, writeSingle)
 {
     const size_t capacity{1000};
-    RingBuffer ringBuffer(capacity);
+    RingBuffer ringBuffer{capacity, std::pmr::get_default_resource()};
 
     const size_t numDataBlocks{500};
     auto dataBlocks = GenerateDataBlocks(capacity, numDataBlocks);
@@ -75,7 +75,7 @@ TEST(Test_RingBuffer, writeSingle)
     {
         Write(ringBuffer, elem);
 
-        std::vector<uint8_t> readData(ringBuffer.Size());
+        std::pmr::vector<uint8_t> readData(ringBuffer.Size());
         ringBuffer.Read(readData);
 
         ASSERT_EQ(elem, readData);
@@ -86,10 +86,10 @@ TEST(Test_RingBuffer, writeSingle)
 TEST(Test_RingBuffer, resizeRingBuffer)
 {
     const size_t capacity{1000};
-    RingBuffer ringBuffer(capacity);
+    RingBuffer ringBuffer{capacity, std::pmr::get_default_resource()};
 
     const size_t numDataBlocks{500};
-    std::vector<size_t> blockSizes{2000, 3000, 4000, 5000};
+    std::pmr::vector<size_t> blockSizes{2000, 3000, 4000, 5000};
 
     for (const auto& maxSize : blockSizes)
     {
@@ -104,7 +104,7 @@ TEST(Test_RingBuffer, resizeRingBuffer)
             }
             Write(ringBuffer, elem);
 
-            std::vector<uint8_t> readData(ringBuffer.Size());
+            std::pmr::vector<uint8_t> readData(ringBuffer.Size());
             ringBuffer.Read(readData);
 
             ASSERT_EQ(elem, readData);
@@ -116,12 +116,12 @@ TEST(Test_RingBuffer, resizeRingBuffer)
 TEST(Test_RingBuffer, writeMultiple_resizeAllowed)
 {
     const size_t capacity{1000};
-    RingBuffer ringBuffer(capacity);
+    RingBuffer ringBuffer{capacity, std::pmr::get_default_resource()};
 
     const size_t numBlockSets = 100;
     const size_t numDataBlocks = 500; // same number of data blocks for every group
 
-    std::vector<uint8_t> currentDataBlock;
+    std::pmr::vector<uint8_t> currentDataBlock;
 
     for (size_t i = 0; i < numBlockSets; i++)
     {
@@ -143,7 +143,7 @@ TEST(Test_RingBuffer, writeMultiple_resizeAllowed)
         }
 
         // read all data available
-        std::vector<uint8_t> readData(ringBuffer.Size());
+        std::pmr::vector<uint8_t> readData(ringBuffer.Size());
         ringBuffer.Read(readData);
 
         ASSERT_EQ(currentDataBlock, readData);
@@ -156,13 +156,13 @@ TEST(Test_RingBuffer, writeMultiple_resizeAllowed)
 TEST(Test_RingBuffer, writeMultiple_fixedCapacity)
 {
     const size_t capacity{1000};
-    RingBuffer ringBuffer(capacity);
+    RingBuffer ringBuffer{capacity, std::pmr::get_default_resource()};
 
     const size_t numBlockSets = 100;
     const size_t numDataBlocks = 500;    // same number of data blocks for every group
     const size_t maxSizeDataBlock = 200; // size smaller than capacity reasonable in this case
 
-    std::vector<uint8_t> currentDataBlock;
+    std::pmr::vector<uint8_t> currentDataBlock;
 
     for (size_t i = 0; i < numBlockSets; i++)
     {
@@ -196,7 +196,7 @@ TEST(Test_RingBuffer, writeMultiple_fixedCapacity)
             dataBlocks.erase(dataBlocks.begin(), dataBlocks.begin() + numWrittenBlocks);
 
             // read all data
-            std::vector<uint8_t> readData(ringBuffer.Size());
+            std::pmr::vector<uint8_t> readData(ringBuffer.Size());
             ringBuffer.Read(readData);
 
             ASSERT_EQ(currentDataBlock, readData);

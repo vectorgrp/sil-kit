@@ -5,6 +5,7 @@
 #pragma once
 
 #include <tuple>
+#include <memory_resource>
 
 #include "IServiceEndpoint.hpp"
 
@@ -49,6 +50,8 @@ public:
     virtual void EnableAggregation() = 0;
 
     virtual void InitializeMetrics(VSilKit::IMetricsManager*) = 0;
+
+    virtual auto GetMemoryResource() -> std::pmr::memory_resource* = 0;
 };
 
 
@@ -58,6 +61,7 @@ struct IVAsioPeerListener
 
     virtual void OnSocketData(IVAsioPeer* peer, SerializedMessage&& buffer) = 0;
     virtual void OnPeerShutdown(IVAsioPeer* peer) = 0;
+    virtual auto GetMemoryResource() -> std::pmr::memory_resource* = 0;
 };
 
 

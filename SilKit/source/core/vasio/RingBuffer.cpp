@@ -12,7 +12,9 @@
 namespace SilKit {
 namespace Core {
 
-RingBuffer::RingBuffer(size_t capacity)
+RingBuffer:: RingBuffer(std::size_t capacity, std::pmr::memory_resource* memoryResource)
+    : _buffer {memoryResource}
+    , _memoryResource{memoryResource}
 {
     _buffer.resize(capacity);
 }
@@ -33,7 +35,7 @@ void RingBuffer::AdvanceRPos(size_t numBytes)
     SizeCheck();
 }
 
-bool RingBuffer::Peek(std::vector<uint8_t>& elem) const
+bool RingBuffer::Peek(std::pmr::vector<uint8_t>& elem) const
 {
     // make sure, we only copy as many bytes as are contained in the buffer
     if (elem.size() > _size)
@@ -55,7 +57,7 @@ bool RingBuffer::Peek(std::vector<uint8_t>& elem) const
     return true;
 }
 
-bool RingBuffer::Read(std::vector<uint8_t>& elem)
+bool RingBuffer::Read(std::pmr::vector<uint8_t>& elem)
 {
     if (!Peek(elem))
     {
@@ -152,7 +154,7 @@ void RingBuffer::Reserve(size_t newCapacity)
     }
 
     // copy all data available to temporary vector (we aim at contiguous memory)
-    std::vector<uint8_t> newBuffer(_size);
+    std::pmr::vector<uint8_t> newBuffer(_size, _memoryResource);
     Peek(newBuffer);
 
     _buffer = std::move(newBuffer);

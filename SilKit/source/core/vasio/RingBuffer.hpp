@@ -5,6 +5,7 @@
 #pragma once
 
 #include <vector>
+#include <memory_resource>
 #include <stdint.h>
 
 #include "util/Buffer.hpp"
@@ -16,15 +17,15 @@ class RingBuffer
 {
 public:
     // constructors and destructors
-    RingBuffer(std::size_t capacity);
+    RingBuffer(std::size_t capacity, std::pmr::memory_resource* memoryResource);
 
 public:
     // public methods
     std::size_t Capacity() const;
     std::size_t Size() const;
 
-    bool Peek(std::vector<uint8_t>& elem) const;
-    bool Read(std::vector<uint8_t>& elem);
+    bool Peek(std::pmr::vector<uint8_t>& elem) const;
+    bool Read(std::pmr::vector<uint8_t>& elem);
 
     void GetWritingBuffers(std::vector<MutableBuffer>& buffers);
 
@@ -48,7 +49,8 @@ private:
 
 private:
     // member variables
-    std::vector<uint8_t> _buffer;
+    std::pmr::memory_resource* _memoryResource;
+    std::pmr::vector<uint8_t> _buffer;
 
     std::size_t _size{0};
 

@@ -52,7 +52,7 @@ TEST(Test_SerializedMessage, packed_handshake_message)
     // check that the default-constructed announcement contains the correct preamble
     ASSERT_EQ(announcement.messageHeader.preamble, REGISTRY_MESSAGE_HEADER_PREAMBLE_VALUE);
 
-    SerializedMessage msg{announcement};
+    SerializedMessage msg{announcement, std::pmr::get_default_resource()};
     auto blob = msg.ReleaseStorage();
     const auto* ptr = reinterpret_cast<const PackedHandshake*>(blob.data());
 

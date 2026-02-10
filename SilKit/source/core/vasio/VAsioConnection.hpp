@@ -16,6 +16,7 @@
 #include <list>
 #include <set>
 #include <condition_variable>
+#include <memory_resource>
 
 #include "ParticipantConfiguration.hpp"
 
@@ -92,6 +93,14 @@ public:
     auto GetLoggerInternal() -> SilKit::Services::Logging::ILoggerInternal*;
 
     void JoinSimulation(std::string registryUri);
+
+public:
+    // Memory pools
+    std::pmr::unsynchronized_pool_resource _memoryPool;
+    auto GetMemoryResource() -> std::pmr::memory_resource*
+    {
+        return &_memoryPool;
+    }
 
 private: // JoinSimulation Helper Functions
     void OpenParticipantAcceptors(const std::string& connectUri);

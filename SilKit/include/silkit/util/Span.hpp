@@ -10,6 +10,9 @@
 #include <string>
 #include <stdexcept>
 #include <type_traits>
+#if defined(__cpp_lib_memory_resource) && __cpp_lib_memory_resource >= 201603L
+    #include <memory_resource>
+#endif
 
 #include "silkit/capi/Types.h"
 #include "silkit/participant/exception.hpp"
@@ -63,6 +66,20 @@ public:
         : Span(vector.data(), vector.size())
     {
     }
+
+#if defined(__cpp_lib_memory_resource) && __cpp_lib_memory_resource >= 201603L
+    template <typename U, enable_if_non_const_T_while_T_const_t<U> = true>
+    Span(const std::pmr::vector<U>& vector)
+        : Span(vector.data(), vector.size())
+    {
+    }
+
+    template <typename U, enable_if_non_const_T_t<U> = true>
+    Span(std::pmr::vector<U>& vector)
+        : Span(vector.data(), vector.size())
+    {
+    }
+#endif
 
     auto operator=(const Span& other) -> Span& = default;
     auto operator=(Span&& other) noexcept -> Span& = default;
@@ -148,6 +165,16 @@ auto ToSpan(std::vector<T>& vector) -> Span<T>;
 
 template <typename T>
 auto ToSpan(const std::vector<T>& vector) -> Span<const T>;
+
+#if defined(__cpp_lib_memory_resource) && __cpp_lib_memory_resource >= 201603L
+template <typename T>
+auto ToSpan(std::pmr::vector<T>& vector) -> Span<T>;
+
+template <typename T>
+auto ToSpan(const std::pmr::vector<T>& vector) -> Span<const T>;
+#endif
+
+
 
 inline auto ToSpan(const SilKit_ByteVector& skByteVector) -> Span<const uint8_t>;
 
@@ -335,6 +362,20 @@ auto ToSpan(const std::vector<T>& vector) -> Span<const T>
 {
     return {vector.data(), vector.size()};
 }
+
+#if defined(__cpp_lib_memory_resource) && __cpp_lib_memory_resource >= 201603L
+template <typename T>
+auto ToSpan(std::pmr::vector<T>& vector) -> Span<T>
+{
+    return {vector.data(), vector.size()};
+}
+
+template <typename T>
+auto ToSpan(const std::pmr::vector<T>& vector) -> Span<const T>
+{
+    return {vector.data(), vector.size()};
+}
+#endif
 
 auto ToSpan(const SilKit_ByteVector& skByteVector) -> Span<const uint8_t>
 {

@@ -82,6 +82,11 @@ public:
 
     void InitializeMetrics(VSilKit::IMetricsManager* manager) override;
 
+    auto GetMemoryResource() -> std::pmr::memory_resource* override
+    {
+        return _listener->GetMemoryResource();
+    }
+
 private:
     // ----------------------------------------
     // Private Methods
@@ -89,8 +94,8 @@ private:
     void WriteSomeAsync();
     void ReadSomeAsync();
     void DispatchBuffer();
-    void SendSilKitMsgInternal(std::vector<uint8_t> blob);
-    void Aggregate(const std::vector<uint8_t>& blob);
+    void SendSilKitMsgInternal(std::pmr::vector<uint8_t> blob);
+    void Aggregate(const std::pmr::vector<uint8_t>& blob);
     void Flush();
 
 private: // IRawByteStreamListener
@@ -122,10 +127,10 @@ private:
 
     // sending
     mutable std::mutex _sendingQueueMutex;
-    std::deque<std::vector<uint8_t>> _sendingQueue;
+    std::deque<std::pmr::vector<uint8_t>> _sendingQueue;
     ConstBuffer _currentSendingBuffer;
-    std::vector<uint8_t> _currentSendingBufferData;
-    std::vector<uint8_t> _aggregatedMessages;
+    std::pmr::vector<uint8_t> _currentSendingBufferData;
+    std::pmr::vector<uint8_t> _aggregatedMessages;
 
     std::atomic_bool _sending{false};
     Core::ServiceDescriptor _serviceDescriptor;
