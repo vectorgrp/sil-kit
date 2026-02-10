@@ -94,6 +94,12 @@ typedef int8_t SilKit_OperationMode;
 #define SilKit_OperationMode_Autonomous ((SilKit_OperationMode)20)
 
 
+/*! The TimeAdvanceMode. */
+typedef int8_t SilKit_TimeAdvanceMode;
+
+#define SilKit_TimeAdvanceMode_ByOwnDuration ((SilKit_TimeAdvanceMode)0)
+#define SilKit_TimeAdvanceMode_ByMinimalDuration ((SilKit_TimeAdvanceMode)10)
+
 /*! Details about a status change of a participant. */
 typedef struct
 {
@@ -452,6 +458,20 @@ SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_TimeSyncService_Create(SilKit_Time
 typedef SilKit_ReturnCode(SilKitFPTR* SilKit_TimeSyncService_Create_t)(SilKit_TimeSyncService** outTimeSyncService,
                                                                        SilKit_LifecycleService* lifecycleService);
 
+/*! \brief Create a time sync service at this SIL Kit simulation participant.
+ * \param outTimeSyncService Pointer that refers to the resulting time sync service (out parameter).
+ * \param lifecycleService The lifecyle service at which the time sync service should be created.
+ * \param timeAdvanceMode The time advance mode for this time sync service.
+ *
+ * The object returned must not be deallocated using free()!
+ */
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_TimeSyncService_Create_With_TimeAdvanceMode(SilKit_TimeSyncService** outTimeSyncService,
+                                                                     SilKit_LifecycleService* lifecycleService, SilKit_TimeAdvanceMode timeAdvanceMode);
+
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_TimeSyncService_Create_With_TimeAdvanceMode_t)(SilKit_TimeSyncService** outTimeSyncService,
+                                                                       SilKit_LifecycleService* lifecycleService,
+                                                                       SilKit_TimeAdvanceMode timeAdvanceMode);
+
 /*! \brief The handler to be called if the simulation task is due
  *
  * \param context The user provided context passed in \ref SilKit_TimeSyncService_SetSimulationStepHandler
@@ -526,6 +546,18 @@ SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_TimeSyncService_Now(SilKit_TimeSyn
 
 typedef SilKit_ReturnCode(SilKitFPTR* SilKit_TimeSyncService_Now_t)(SilKit_TimeSyncService* timeSyncService,
                                                                     SilKit_NanosecondsTime* outNanosecondsTime);
+
+
+/*! \brief Set the duration of the next simulation step
+ *
+ * \param timeSyncService The time sync service obtained via \ref SilKit_TimeSyncService_Create.
+ * \param stepDuration The step size in nanoseconds.
+ */
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_TimeSyncService_SetStepDuration(SilKit_TimeSyncService* timeSyncService,
+                                                                        SilKit_NanosecondsTime stepDuration);
+
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_TimeSyncService_SetStepDuration_t)(SilKit_TimeSyncService* timeSyncService,
+                                                                                SilKit_NanosecondsTime stepDuration);
 
 
 /*

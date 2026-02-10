@@ -148,6 +148,8 @@ public:
             .WillByDefault(DoAll(SetArgPointee<0>(mockLifecycleService), Return(SilKit_ReturnCode_SUCCESS)));
         ON_CALL(capi, SilKit_TimeSyncService_Create(_, _))
             .WillByDefault(DoAll(SetArgPointee<0>(mockTimeSyncService), Return(SilKit_ReturnCode_SUCCESS)));
+        ON_CALL(capi, SilKit_TimeSyncService_Create_With_TimeAdvanceMode(_, _, _))
+            .WillByDefault(DoAll(SetArgPointee<0>(mockTimeSyncService), Return(SilKit_ReturnCode_SUCCESS)));
         ON_CALL(capi, SilKit_SystemMonitor_Create(_, _))
             .WillByDefault(DoAll(SetArgPointee<0>(mockSystemMonitor), Return(SilKit_ReturnCode_SUCCESS)));
         ON_CALL(capi, SilKit_Experimental_SystemController_Create(_, _))
@@ -362,6 +364,23 @@ TEST_F(Test_HourglassOrchestration, SilKit_TimeSyncService_Create)
         mockLifecycleService};
 }
 
+TEST_F(Test_HourglassOrchestration, SilKit_TimeSyncService_Create_With_TimeAdvanceMode)
+{
+    EXPECT_CALL(capi, SilKit_TimeSyncService_Create_With_TimeAdvanceMode(testing::_, mockLifecycleService,
+                                                                         SilKit_TimeAdvanceMode_ByMinimalDuration));
+
+    SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Orchestration::TimeSyncService
+        timeSyncService_ByMinimalDuration{
+        mockLifecycleService, SilKit::Services::Orchestration::TimeAdvanceMode::ByMinimalDuration};
+
+    EXPECT_CALL(capi, SilKit_TimeSyncService_Create_With_TimeAdvanceMode(testing::_, mockLifecycleService,
+                                                                         SilKit_TimeAdvanceMode_ByOwnDuration));
+
+    SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Orchestration::TimeSyncService
+        timeSyncService_ByOwnDuration{
+        mockLifecycleService, SilKit::Services::Orchestration::TimeAdvanceMode::ByOwnDuration};
+}
+
 TEST_F(Test_HourglassOrchestration, SilKit_TimeSyncService_SetSimulationStepHandler)
 {
     const std::chrono::nanoseconds initialStepSize{0x123456};
@@ -413,6 +432,19 @@ TEST_F(Test_HourglassOrchestration, SilKit_TimeSyncService_Now)
         .WillOnce(DoAll(SetArgPointee<1>(nanoseconds.count()), Return(SilKit_ReturnCode_SUCCESS)));
 
     EXPECT_EQ(timeSyncService.Now(), nanoseconds);
+}
+
+TEST_F(Test_HourglassOrchestration, SilKit_TimeSyncService_SetStepDuration)
+{
+    const std::chrono::nanoseconds stepDuration{0x123456};
+
+    SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Orchestration::TimeSyncService timeSyncService{
+        mockLifecycleService};
+
+    EXPECT_CALL(capi, SilKit_TimeSyncService_SetStepDuration(mockTimeSyncService, testing::_))
+            .WillOnce(Return(SilKit_ReturnCode_SUCCESS));
+
+    timeSyncService.SetStepDuration(stepDuration);
 }
 
 TEST_F(Test_HourglassOrchestration, SilKit_Experimental_TimeSyncService_AddOtherSimulationStepsCompletedHandler)

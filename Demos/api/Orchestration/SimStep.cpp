@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 #include <iostream>
+#include <thread>
 
 #include "silkit/SilKit.hpp"
 
@@ -38,15 +39,18 @@ int main(int argc, char** argv)
 
         auto* timeSyncService = lifecycleService->CreateTimeSyncService();
 
-        const auto stepSize = 1ms;
+        const auto stepSize = 5ms;
+
         timeSyncService->SetSimulationStepHandler(
-            [logger](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
+            [logger](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {
             // The invocation of this handler marks the beginning of a simulation step.
+            {
+                std::stringstream ss;
+                ss << "--------- Simulation step T=" << now << ", duration=" << duration << " ---------";
+                logger->Info(ss.str());
+            }
 
-            std::stringstream ss;
-            ss << "--------- Simulation step T=" << now << " ---------";
-            logger->Info(ss.str());
-
+            std::this_thread::sleep_for(500ms);
             // All messages sent here are guaranteed to arrive at other participants before their next simulation step is called.
             // So here, we can rely on having received all messages from the past (< now).
             // Note that this guarantee only holds for messages sent within a simulation step,

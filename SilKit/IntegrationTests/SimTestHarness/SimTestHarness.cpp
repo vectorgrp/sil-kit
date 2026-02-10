@@ -304,11 +304,6 @@ void SimTestHarness::AddParticipant(const std::string& participantName, const st
     // mandatory sim task for time synced simulation
     // by default, we do no operation during simulation task, the user should override this
     auto* lifecycleService = participant->GetOrCreateLifecycleService(startConfiguration);
-    if (startConfiguration.operationMode == SilKit::Services::Orchestration::OperationMode::Coordinated)
-    {
-        auto* timeSyncService = participant->GetOrCreateTimeSyncService();
-        timeSyncService->SetSimulationStepHandler([](auto, auto) {}, 1ms);
-    }
 
     lifecycleService->SetCommunicationReadyHandler([]() {});
 

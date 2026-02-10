@@ -66,6 +66,9 @@ public:
 
     inline auto CreateTimeSyncService() -> SilKit::Services::Orchestration::ITimeSyncService* override;
 
+    inline auto CreateTimeSyncService(SilKit::Services::Orchestration::TimeAdvanceMode timeAdvanceMode)
+        -> SilKit::Services::Orchestration::ITimeSyncService* override;
+
 private:
     SilKit_LifecycleService* _lifecycleService{nullptr};
 
@@ -315,10 +318,21 @@ auto LifecycleService::Status() const -> const SilKit::Services::Orchestration::
 
 auto LifecycleService::CreateTimeSyncService() -> SilKit::Services::Orchestration::ITimeSyncService*
 {
-    _timeSyncService = std::make_unique<TimeSyncService>(_lifecycleService);
+    _timeSyncService = std::make_unique<TimeSyncService>(
+        _lifecycleService, SilKit::Services::Orchestration::TimeAdvanceMode::ByOwnDuration);
 
     return _timeSyncService.get();
 }
+
+// TODO bkd: Needed or can I use a default in the function above? 
+auto LifecycleService::CreateTimeSyncService(SilKit::Services::Orchestration::TimeAdvanceMode timeAdvanceMode)
+    -> SilKit::Services::Orchestration::ITimeSyncService*
+{
+    _timeSyncService = std::make_unique<TimeSyncService>(_lifecycleService, timeAdvanceMode);
+
+    return _timeSyncService.get();
+}
+
 
 } // namespace Orchestration
 } // namespace Services
