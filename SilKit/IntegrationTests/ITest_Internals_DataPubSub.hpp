@@ -187,6 +187,7 @@ protected:
         std::string name;
         std::vector<DataSubscriberInfo> dataSubscribers;
         std::vector<DataPublisherInfo> dataPublishers;
+        std::unique_ptr<std::atomic<bool>> allReceived;
         std::unique_ptr<SilKit::IParticipant> participant;
         SilKit::Core::IParticipantInternal* participantImpl = nullptr;
 
@@ -197,7 +198,6 @@ protected:
         std::promise<void> allDiscoveredPromise;
         bool allDiscovered{false};
         std::promise<void> allReceivedPromise;
-        std::unique_ptr<std::atomic<bool>> allReceived;
         // Pub
         std::promise<void> allSentPromise;
         bool allSent{false};
