@@ -359,7 +359,7 @@ TEST_F(Test_IoContext_AcceptorConnector_PingPong, tcp_connect_send_buffer_size)
     AsioSocketOptions asioSocketOptions{};
     asioSocketOptions.tcp.sendBufferSize = 1024;
 
-    auto ioContext = VSilKit::MakeAsioIoContext({}, std::pmr::get_default_resource());
+    auto ioContext = VSilKit::MakeAsioIoContext(asioSocketOptions, std::pmr::get_default_resource());
     ioContext->SetLogger(logger);
 
     auto acceptor = ioContext->MakeTcpAcceptor("127.0.0.1", 0);

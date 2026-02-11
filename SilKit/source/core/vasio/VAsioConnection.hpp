@@ -100,7 +100,7 @@ public:
                                              /*max_memory_block_size =*/ 16 * 1024 * 1024};
     std::pmr::unsynchronized_pool_resource _memoryPool{poolOptions};
     //std::pmr::synchronized_pool_resource _memoryPool{poolOptions};
-    auto GetMemoryResource() -> std::pmr::memory_resource*
+    auto GetMemoryResource() -> std::pmr::memory_resource* override
     {
         return &_memoryPool;
     }

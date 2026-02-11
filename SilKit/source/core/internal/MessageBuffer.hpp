@@ -62,8 +62,8 @@ public:
     // ----------------------------------------
     // Constructors and Destructor
     explicit MessageBuffer(std::pmr::memory_resource* memoryResource)
-        : _storage{memoryResource}
-        , _memoryResource{memoryResource}
+        : _memoryResource{memoryResource}
+        , _storage{memoryResource}
     {
     }
 
@@ -277,8 +277,8 @@ private:
 //  Inline Implementations
 // ================================================================================
 MessageBuffer::MessageBuffer(std::pmr::vector<uint8_t> data, std::pmr::memory_resource* memoryResource)
-    : _storage{std::move(data)}
-    , _memoryResource{memoryResource}
+    : _memoryResource{memoryResource}
+    , _storage{std::move(data)}
     , _wPos{_storage.size()}
     , _rPos{0u}
 {

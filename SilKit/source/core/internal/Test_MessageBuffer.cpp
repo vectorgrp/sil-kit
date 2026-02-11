@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 #include <vector>
+#include <memory_resource>
 
 #include "gtest/gtest.h"
 

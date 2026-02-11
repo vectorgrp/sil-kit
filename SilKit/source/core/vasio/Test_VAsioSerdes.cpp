@@ -5,6 +5,7 @@
 #include "VAsioSerdes.hpp"
 
 #include <chrono>
+#include <memory_resource>
 
 #include "gtest/gtest.h"
 

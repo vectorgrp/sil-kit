@@ -13,8 +13,8 @@ namespace SilKit {
 namespace Core {
 
 RingBuffer:: RingBuffer(std::size_t capacity, std::pmr::memory_resource* memoryResource)
-    : _buffer {memoryResource}
-    , _memoryResource{memoryResource}
+    : _memoryResource{memoryResource}
+    , _buffer {memoryResource}
 {
     _buffer.resize(capacity);
 }

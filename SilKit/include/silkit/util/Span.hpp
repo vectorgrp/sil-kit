@@ -55,31 +55,17 @@ public:
     {
     }
 
-    template <typename U, enable_if_non_const_T_while_T_const_t<U> = true>
-    Span(const std::vector<U>& vector)
+    template <typename U, typename AllocatorT, enable_if_non_const_T_while_T_const_t<U> = true>
+    Span(const std::vector<U, AllocatorT>& vector)
         : Span(vector.data(), vector.size())
     {
     }
 
-    template <typename U, enable_if_non_const_T_t<U> = true>
-    Span(std::vector<U>& vector)
+    template <typename U, typename AllocatorT,  enable_if_non_const_T_t<U> = true>
+    Span(std::vector<U, AllocatorT>& vector)
         : Span(vector.data(), vector.size())
     {
     }
-
-#if defined(__cpp_lib_memory_resource) && __cpp_lib_memory_resource >= 201603L
-    template <typename U, enable_if_non_const_T_while_T_const_t<U> = true>
-    Span(const std::pmr::vector<U>& vector)
-        : Span(vector.data(), vector.size())
-    {
-    }
-
-    template <typename U, enable_if_non_const_T_t<U> = true>
-    Span(std::pmr::vector<U>& vector)
-        : Span(vector.data(), vector.size())
-    {
-    }
-#endif
 
     auto operator=(const Span& other) -> Span& = default;
     auto operator=(Span&& other) noexcept -> Span& = default;
@@ -160,20 +146,11 @@ private:
 
 // Non-member functions
 
-template <typename T>
-auto ToSpan(std::vector<T>& vector) -> Span<T>;
+template <typename T, typename AllocatorT>
+auto ToSpan(std::vector<T, AllocatorT>& vector) -> Span<T>;
 
-template <typename T>
-auto ToSpan(const std::vector<T>& vector) -> Span<const T>;
-
-#if defined(__cpp_lib_memory_resource) && __cpp_lib_memory_resource >= 201603L
-template <typename T>
-auto ToSpan(std::pmr::vector<T>& vector) -> Span<T>;
-
-template <typename T>
-auto ToSpan(const std::pmr::vector<T>& vector) -> Span<const T>;
-#endif
-
+template <typename T, typename AllocatorT>
+auto ToSpan(const std::vector<T, AllocatorT>& vector) -> Span<const T>;
 
 
 inline auto ToSpan(const SilKit_ByteVector& skByteVector) -> Span<const uint8_t>;
@@ -351,31 +328,17 @@ auto MakeSpan(const std::array<T, N>& array) -> Span<const T>
     return {array.data(), N};
 }
 
-template <typename T>
-auto ToSpan(std::vector<T>& vector) -> Span<T>
+template <typename T, typename AllocatorT>
+auto ToSpan(std::vector<T, AllocatorT>& vector) -> Span<T>
 {
     return {vector.data(), vector.size()};
 }
 
-template <typename T>
-auto ToSpan(const std::vector<T>& vector) -> Span<const T>
+template <typename T, typename AllocatorT>
+auto ToSpan(const std::vector<T, AllocatorT>& vector) -> Span<const T>
 {
     return {vector.data(), vector.size()};
 }
-
-#if defined(__cpp_lib_memory_resource) && __cpp_lib_memory_resource >= 201603L
-template <typename T>
-auto ToSpan(std::pmr::vector<T>& vector) -> Span<T>
-{
-    return {vector.data(), vector.size()};
-}
-
-template <typename T>
-auto ToSpan(const std::pmr::vector<T>& vector) -> Span<const T>
-{
-    return {vector.data(), vector.size()};
-}
-#endif
 
 auto ToSpan(const SilKit_ByteVector& skByteVector) -> Span<const uint8_t>
 {

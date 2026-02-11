@@ -58,12 +58,12 @@ namespace VSilKit {
 AsioGenericRawByteStream::AsioGenericRawByteStream(const AsioGenericRawByteStreamOptions& options,
                                                    std::shared_ptr<asio::io_context> asioIoContext, AsioSocket socket,
                                                    SilKit::Services::Logging::ILogger& logger, std::pmr::memory_resource* memoryResource)
-    : _options{options}
+    : _readBufferSequence{memoryResource}
+    , _writeBufferSequence{memoryResource}
+    , _options{options}
     , _asioIoContext{std::move(asioIoContext)}
     , _socket{std::move(socket)}
     , _logger{&logger}
-    , _readBufferSequence{memoryResource}
-    , _writeBufferSequence{memoryResource}
 {
     SILKIT_TRACE_METHOD_(_logger, "(...)");
 
