@@ -178,6 +178,7 @@ protected:
             , name{newName}
             , dataSubscribers{newDataSubscribers}
             , dataPublishers{newDataPublishers}
+            , allReceived{std::make_unique<std::atomic<bool>>(false)}
         {
         }
 
@@ -196,7 +197,7 @@ protected:
         std::promise<void> allDiscoveredPromise;
         bool allDiscovered{false};
         std::promise<void> allReceivedPromise;
-        bool allReceived{false};
+        std::unique_ptr<std::atomic<bool>> allReceived;
         // Pub
         std::promise<void> allSentPromise;
         bool allSent{false};
@@ -208,7 +209,7 @@ protected:
             if (std::all_of(dataSubscribers.begin(), dataSubscribers.end(),
                             [](const auto& dsInfo) { return dsInfo.numMsgToReceive == 0; }))
             {
-                allReceived = true;
+                *allReceived = true;
                 allReceivedPromise.set_value();
             }
         }
@@ -224,11 +225,11 @@ protected:
 
         void CheckAllReceivedPromise()
         {
-            if (!allReceived && std::all_of(dataSubscribers.begin(), dataSubscribers.end(), [](const auto& dsInfo) {
+            if (!*allReceived && std::all_of(dataSubscribers.begin(), dataSubscribers.end(), [](const auto& dsInfo) {
                 return dsInfo.allReceived;
             }))
             {
-                allReceived = true;
+                *allReceived = true;
                 allReceivedPromise.set_value();
             }
         }
@@ -380,7 +381,7 @@ protected:
                     participant.allSentPromise.set_value();
                 }
 
-                if (!participant.dataSubscribers.empty() && !participant.allReceived)
+                if (!participant.dataSubscribers.empty())
                 {
                     participant.WaitForAllReceived();
                 }
