@@ -14,7 +14,7 @@ namespace {
 auto MakeIoContextWithDefaultSocketOptions() -> std::unique_ptr<VSilKit::IIoContext>
 {
     VSilKit::AsioSocketOptions asioSocketOptions{};
-    return VSilKit::MakeAsioIoContext(asioSocketOptions);
+    return VSilKit::MakeAsioIoContext(asioSocketOptions,std::pmr::get_default_resource());
 }
 
 

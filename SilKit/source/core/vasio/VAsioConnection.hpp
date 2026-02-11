@@ -96,7 +96,10 @@ public:
 
 public:
     // Memory pools
-    std::pmr::unsynchronized_pool_resource _memoryPool;
+    const std::pmr::pool_options poolOptions{/*largest_required_pool_block =*/ 8192,
+                                             /*max_memory_block_size =*/ 16 * 1024 * 1024};
+    std::pmr::unsynchronized_pool_resource _memoryPool{poolOptions};
+    //std::pmr::synchronized_pool_resource _memoryPool{poolOptions};
     auto GetMemoryResource() -> std::pmr::memory_resource*
     {
         return &_memoryPool;

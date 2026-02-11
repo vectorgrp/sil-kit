@@ -132,12 +132,17 @@ void SetListenOptions(SilKit::Services::Logging::ILogger*, asio::ip::tcp::accept
 } // namespace
 
 
-AsioIoContext::AsioIoContext(const AsioSocketOptions& socketOptions)
+AsioIoContext::AsioIoContext(const AsioSocketOptions& socketOptions, std::pmr::memory_resource* memoryResource)
     : _socketOptions{socketOptions}
     , _asioIoContext{std::make_shared<asio::io_context>()}
+    , _memoryResource{memoryResource}
 {
 }
 
+auto AsioIoContext::GetMemoryResource() -> std::pmr::memory_resource*
+{
+    return _memoryResource;
+}
 
 AsioIoContext::~AsioIoContext()
 {
@@ -224,7 +229,7 @@ auto AsioIoContext::MakeTcpAcceptor(const std::string& ipAddress, uint16_t port)
     OpenAcceptor(acceptor, endpoint, *_logger);
 
     return std::make_unique<AsioAcceptor<decltype(acceptor)>>(_socketOptions, _asioIoContext, std::move(acceptor),
-                                                              *_logger);
+                                                              *_logger, GetMemoryResource());
 }
 
 
@@ -238,7 +243,7 @@ auto AsioIoContext::MakeLocalAcceptor(const std::string& path) -> std::unique_pt
     OpenAcceptor(acceptor, endpoint, *_logger);
 
     return std::make_unique<AsioAcceptor<decltype(acceptor)>>(_socketOptions, _asioIoContext, std::move(acceptor),
-                                                              *_logger);
+                                                              *_logger, GetMemoryResource());
 }
 
 
@@ -252,7 +257,7 @@ auto AsioIoContext::MakeTcpConnector(const std::string& ipAddress, uint16_t port
     auto address = CleanIpAddress(ipAddress);
     AsioProtocolType::endpoint endpoint{asio::ip::make_address(address), port};
 
-    return std::make_unique<ConnectorType>(_asioIoContext, _socketOptions, endpoint, *_logger);
+    return std::make_unique<ConnectorType>(_asioIoContext, _socketOptions, endpoint, *_logger, _memoryResource);
 }
 
 
@@ -265,7 +270,7 @@ auto AsioIoContext::MakeLocalConnector(const std::string& path) -> std::unique_p
 
     AsioProtocolType::endpoint endpoint{path};
 
-    return std::make_unique<ConnectorType>(_asioIoContext, _socketOptions, endpoint, *_logger);
+    return std::make_unique<ConnectorType>(_asioIoContext, _socketOptions, endpoint, *_logger, _memoryResource);
 }
 
 

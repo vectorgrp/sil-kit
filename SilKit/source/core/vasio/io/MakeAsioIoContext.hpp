@@ -16,7 +16,8 @@
 namespace VSilKit {
 
 
-auto MakeAsioIoContext(const AsioSocketOptions& socketOptions) -> std::unique_ptr<IIoContext>;
+auto MakeAsioIoContext(const AsioSocketOptions& socketOptions, std::pmr::memory_resource* memoryResource)
+    -> std::unique_ptr<IIoContext>;
 
 
 } // namespace VSilKit

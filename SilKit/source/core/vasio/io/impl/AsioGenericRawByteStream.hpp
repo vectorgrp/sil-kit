@@ -13,6 +13,7 @@
 #include "LoggerMessage.hpp"
 
 #include <memory>
+#include <memory_resource>
 #include <mutex>
 
 #include "asio.hpp"
@@ -42,8 +43,8 @@ class AsioGenericRawByteStream final : public IRawByteStream
     bool _reading{false};
     bool _writing{false};
 
-    std::vector<asio::mutable_buffer> _readBufferSequence;
-    std::vector<asio::const_buffer> _writeBufferSequence;
+    std::pmr::vector<asio::mutable_buffer> _readBufferSequence;
+    std::pmr::vector<asio::const_buffer> _writeBufferSequence;
 
     AsioGenericRawByteStreamOptions _options;
 
@@ -55,7 +56,7 @@ class AsioGenericRawByteStream final : public IRawByteStream
 public:
     AsioGenericRawByteStream(const AsioGenericRawByteStreamOptions& options,
                              std::shared_ptr<asio::io_context> asioIoContext, AsioSocket socket,
-                             SilKit::Services::Logging::ILogger& logger);
+                             SilKit::Services::Logging::ILogger& logger, std::pmr::memory_resource* memoryResource);
     ~AsioGenericRawByteStream() override;
 
 public: // IRawByteStream

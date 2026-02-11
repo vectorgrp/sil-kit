@@ -29,9 +29,10 @@ class AsioIoContext final : public IIoContext
     AsioSocketOptions _socketOptions;
     std::shared_ptr<asio::io_context> _asioIoContext;
     SilKit::Services::Logging::ILogger* _logger{nullptr};
+    std::pmr::memory_resource* _memoryResource{nullptr};
 
 public:
-    explicit AsioIoContext(const AsioSocketOptions& socketOptions);
+    explicit AsioIoContext(const AsioSocketOptions& socketOptions, std::pmr::memory_resource* resource);
     ~AsioIoContext() override;
 
 public: // IIoContext
@@ -45,6 +46,7 @@ public: // IIoContext
     auto MakeTimer() -> std::unique_ptr<ITimer> override;
     auto Resolve(const std::string& name) -> std::vector<std::string> override;
     void SetLogger(SilKit::Services::Logging::ILogger& logger) override;
+    auto GetMemoryResource() -> std::pmr::memory_resource* override;
 };
 
 

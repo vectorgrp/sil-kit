@@ -20,6 +20,7 @@
 #include "LoggerMessage.hpp"
 
 #include <memory>
+#include <memory_resource>
 
 #include "asio.hpp"
 
@@ -65,9 +66,11 @@ class AsioAcceptor final : public IAcceptor
 
     SilKit::Services::Logging::ILogger* _logger{nullptr};
 
+    std::pmr::memory_resource* _memoryResource{nullptr};
+
 public:
     AsioAcceptor(const AsioSocketOptions& socketOptions, std::shared_ptr<asio::io_context> asioIoContext,
-                 AsioAcceptorType acceptor, SilKit::Services::Logging::ILogger& logger);
+                 AsioAcceptorType acceptor, SilKit::Services::Logging::ILogger& logger, std::pmr::memory_resource* memoryResource);
     ~AsioAcceptor() override;
 
 public: // IAcceptor
@@ -84,13 +87,14 @@ private:
 
 template <typename T>
 AsioAcceptor<T>::AsioAcceptor(const AsioSocketOptions& socketOptions, std::shared_ptr<asio::io_context> asioIoContext,
-                              AsioAcceptorType acceptor, SilKit::Services::Logging::ILogger& logger)
+                              AsioAcceptorType acceptor, SilKit::Services::Logging::ILogger& logger, std::pmr::memory_resource* memoryResource)
     : _socketOptions{socketOptions}
     , _asioIoContext{std::move(asioIoContext)}
     , _acceptor{std::move(acceptor)}
     , _timeoutTimer{_acceptor.get_executor()}
     , _localEndpoint{_acceptor.local_endpoint()}
     , _logger{&logger}
+    , _memoryResource{memoryResource}
 {
     SILKIT_TRACE_METHOD_(_logger, "(...)");
 }
@@ -186,7 +190,7 @@ void AsioAcceptor<T>::OnAsioAsyncAcceptComplete(const asio::error_code& asioErro
     AsioGenericRawByteStreamOptions options{};
     options.tcp.quickAck = isTcp && _socketOptions.tcp.quickAck;
 
-    auto stream{std::make_unique<AsioGenericRawByteStream>(options, _asioIoContext, std::move(socket), *_logger)};
+    auto stream{std::make_unique<AsioGenericRawByteStream>(options, _asioIoContext, std::move(socket), *_logger, _memoryResource)};
 
     _timeoutCancelSignal.emit(asio::cancellation_type::total);
     _listener->OnAsyncAcceptSuccess(*this, std::move(stream));

@@ -15,6 +15,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <memory_resource>
 
 
 namespace VSilKit {
@@ -43,6 +44,8 @@ struct IIoContext
     virtual auto Resolve(const std::string& name) -> std::vector<std::string> = 0;
 
     virtual void SetLogger(SilKit::Services::Logging::ILogger& logger) = 0;
+
+    virtual auto GetMemoryResource() -> std::pmr::memory_resource* = 0;
 };
 
 

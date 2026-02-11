@@ -93,8 +93,12 @@ class AsioConnector final : public IConnector
     std::shared_ptr<Op> _op;
 
 public:
+    std::pmr::memory_resource* _memoryResource{nullptr};
+
+public:
     AsioConnector(std::shared_ptr<asio::io_context> asioIoContext, const AsioSocketOptions& socketOptions,
-                  const AsioEndpointType& remoteEndpoint, SilKit::Services::Logging::ILogger& logger);
+                  const AsioEndpointType& remoteEndpoint, SilKit::Services::Logging::ILogger& logger,
+                  std::pmr::memory_resource* memoryResource);
     ~AsioConnector() override;
 
 public: // IAcceptor
@@ -106,10 +110,12 @@ public: // IAcceptor
 
 template <typename T>
 AsioConnector<T>::AsioConnector(std::shared_ptr<asio::io_context> asioIoContext, const AsioSocketOptions& socketOptions,
-                                const AsioEndpointType& remoteEndpoint, SilKit::Services::Logging::ILogger& logger)
+                                const AsioEndpointType& remoteEndpoint, SilKit::Services::Logging::ILogger& logger,
+                                std::pmr::memory_resource* memoryResource)
     : _asioIoContext{std::move(asioIoContext)}
     , _logger{&logger}
     , _op{std::make_shared<Op>(*this, socketOptions, remoteEndpoint)}
+    , _memoryResource{memoryResource}
 {
     SILKIT_TRACE_METHOD_(_logger, "(...)");
 }
@@ -288,7 +294,7 @@ void AsioConnector<T>::Op::OnAsioAsyncConnectComplete(const asio::error_code& as
     options.tcp.quickAck = isTcp && _asioSocketOptions.tcp.quickAck;
 
     auto stream{
-        std::make_unique<AsioGenericRawByteStream>(options, std::move(asioIoContext), std::move(socket), *_logger)};
+        std::make_unique<AsioGenericRawByteStream>(options, std::move(asioIoContext), std::move(socket), *_logger, _parent.load()->_memoryResource)};
 
     _timeoutCancelSignal.emit(asio::cancellation_type::total);
     HandleSuccess(std::move(stream));

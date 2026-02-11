@@ -75,7 +75,8 @@ TEST_F(Test_IoContext, sequential_post_keeps_order)
     EXPECT_CALL(callbacks, Handle(0)).Times(1).InSequence(s1);
     EXPECT_CALL(callbacks, Handle(1)).Times(1).InSequence(s1);
 
-    auto ioContext = VSilKit::MakeAsioIoContext({});
+    auto ioContext = VSilKit::MakeAsioIoContext({}, std::pmr::get_default_resource());
+
 
     ioContext->Post([&callbacks]() { callbacks.Handle(0); });
 
@@ -94,7 +95,7 @@ TEST_F(Test_IoContext, nested_post_is_executed_last)
     EXPECT_CALL(callbacks, Handle(2)).Times(1).InSequence(s1);
     EXPECT_CALL(callbacks, Handle(3)).Times(1).InSequence(s1);
 
-    auto ioContext = VSilKit::MakeAsioIoContext({});
+    auto ioContext = VSilKit::MakeAsioIoContext({}, std::pmr::get_default_resource());
 
     ioContext->Post([&ioContext, &callbacks]() {
         callbacks.Handle(0);
@@ -115,7 +116,7 @@ TEST_F(Test_IoContext, sequential_dispatch_keeps_order)
     EXPECT_CALL(callbacks, Handle(0)).Times(1).InSequence(s1);
     EXPECT_CALL(callbacks, Handle(1)).Times(1).InSequence(s1);
 
-    auto ioContext = VSilKit::MakeAsioIoContext({});
+    auto ioContext = VSilKit::MakeAsioIoContext({}, std::pmr::get_default_resource());
 
     ioContext->Dispatch([&callbacks]() { callbacks.Handle(0); });
 
@@ -134,7 +135,7 @@ TEST_F(Test_IoContext, nested_dispatch_is_executed_immediately)
     EXPECT_CALL(callbacks, Handle(2)).Times(1).InSequence(s1);
     EXPECT_CALL(callbacks, Handle(3)).Times(1).InSequence(s1);
 
-    auto ioContext = VSilKit::MakeAsioIoContext({});
+    auto ioContext = VSilKit::MakeAsioIoContext({}, std::pmr::get_default_resource());
 
     ioContext->Dispatch([&ioContext, &callbacks]() {
         callbacks.Handle(0);
@@ -149,7 +150,7 @@ TEST_F(Test_IoContext, nested_dispatch_is_executed_immediately)
 
 TEST_F(Test_IoContext, resolve)
 {
-    auto ioContext = VSilKit::MakeAsioIoContext({});
+    auto ioContext = VSilKit::MakeAsioIoContext({}, std::pmr::get_default_resource());
 
     auto resolveStrings = ioContext->Resolve("localhost");
 
@@ -159,7 +160,7 @@ TEST_F(Test_IoContext, resolve)
 
 TEST_F(Test_IoContext, timers_execute_and_wait)
 {
-    auto ioContext = VSilKit::MakeAsioIoContext({});
+    auto ioContext = VSilKit::MakeAsioIoContext({}, std::pmr::get_default_resource());
 
     auto timer1 = ioContext->MakeTimer();
     auto timer2 = ioContext->MakeTimer();
@@ -199,7 +200,7 @@ TEST_F(Test_IoContext, timer_expires_with_zero_wait_duration)
 
     EXPECT_CALL(listener1, OnTimerExpired).Times(1);
 
-    auto ioContext = VSilKit::MakeAsioIoContext({});
+    auto ioContext = VSilKit::MakeAsioIoContext({}, std::pmr::get_default_resource());
 
     auto timer1 = ioContext->MakeTimer();
     timer1->SetListener(listener1);
@@ -214,7 +215,7 @@ TEST_F(Test_IoContext, tcp_acceptor_timeout)
     EXPECT_CALL(listener, OnAsyncAcceptSuccess).Times(0);
     EXPECT_CALL(listener, OnAsyncAcceptFailure).Times(1);
 
-    auto ioContext{VSilKit::MakeAsioIoContext({})};
+    auto ioContext = VSilKit::MakeAsioIoContext({}, std::pmr::get_default_resource());
 
     auto acceptor{ioContext->MakeTcpAcceptor("127.0.0.1", 0)};
     acceptor->SetListener(listener);
@@ -229,7 +230,7 @@ TEST_F(Test_IoContext, local_domain_acceptor_timeout)
     EXPECT_CALL(listener, OnAsyncAcceptSuccess).Times(0);
     EXPECT_CALL(listener, OnAsyncAcceptFailure).Times(1);
 
-    auto ioContext{VSilKit::MakeAsioIoContext({})};
+    auto ioContext = VSilKit::MakeAsioIoContext({}, std::pmr::get_default_resource());
 
     auto acceptor{ioContext->MakeLocalAcceptor(acceptorLocalDomainSocketPath)};
     acceptor->SetListener(listener);
@@ -332,7 +333,7 @@ TEST_F(Test_IoContext_AcceptorConnector_PingPong, tcp)
 {
     SetupExpectations();
 
-    auto ioContext = VSilKit::MakeAsioIoContext({});
+    auto ioContext = VSilKit::MakeAsioIoContext({}, std::pmr::get_default_resource());
     ioContext->SetLogger(logger);
 
     auto acceptor = ioContext->MakeTcpAcceptor("127.0.0.1", 0);
@@ -358,7 +359,7 @@ TEST_F(Test_IoContext_AcceptorConnector_PingPong, tcp_connect_send_buffer_size)
     AsioSocketOptions asioSocketOptions{};
     asioSocketOptions.tcp.sendBufferSize = 1024;
 
-    auto ioContext = VSilKit::MakeAsioIoContext(asioSocketOptions);
+    auto ioContext = VSilKit::MakeAsioIoContext({}, std::pmr::get_default_resource());
     ioContext->SetLogger(logger);
 
     auto acceptor = ioContext->MakeTcpAcceptor("127.0.0.1", 0);
@@ -381,7 +382,7 @@ TEST_F(Test_IoContext_AcceptorConnector_PingPong, local_domain)
 {
     SetupExpectations();
 
-    auto ioContext = VSilKit::MakeAsioIoContext({});
+    auto ioContext = VSilKit::MakeAsioIoContext({}, std::pmr::get_default_resource());
     ioContext->SetLogger(logger);
 
     auto acceptor = ioContext->MakeLocalAcceptor(acceptorLocalDomainSocketPath);

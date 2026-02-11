@@ -237,7 +237,7 @@ VAsioConnection::VAsioConnection(IParticipantInternal* participant, IMetricsMana
     , _participantId{participantId}
     , _timeProvider{timeProvider}
     , _capabilities{MakeCapabilitiesFromConfiguration(_config)}
-    , _ioContext{MakeAsioIoContext(MakeAsioSocketOptionsFromConfiguration(_config))}
+    , _ioContext{MakeAsioIoContext(MakeAsioSocketOptionsFromConfiguration(_config), GetMemoryResource())}
     , _connectKnownParticipants{*_ioContext, *this, *this, MakeConnectKnownParticipantsSettings(_config)}
     , _remoteConnectionManager{*this, MakeRemoteConnectionManagerSettings(_config)}
     , _version{version}
