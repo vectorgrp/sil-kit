@@ -1,7 +1,7 @@
 Advanced 
 ========
 
-This section shows how to use advanced tools like the `Vector SIL Kit Dashboard <https://vector.com/sil-kit-dashboard>`_ to visualize simulations, in order to identitfy participant misconfigurations, detect system misbehavior or analyze participant performance.
+This section shows how to use advanced tools like the `SIL Kit Dashboard <https://vector.com/sil-kit-dashboard>`_ to visualize simulations, in order to identitfy participant misconfigurations, detect system misbehavior or analyze participant performance.
 
 Getting Started with the dashboard
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -9,10 +9,10 @@ The dashboard is a freeware application that collects and visualizes SIL Kit sim
 It can be used to show static attributes of participants and also show their simulation properties like active peer connections and simulated, active networks.
 In addition, the collection of performance metrics can be enabled in the configuration files of the SIL Kit participants.
 
-This section shows how to enable the data collection of simulations for the Vector SIL Kit Dashboard.
+This section shows how to enable the data collection of simulations for the SIL Kit Dashboard.
 Please refer to the SIL Kit Dashboard documentation for updated instructions.
 
-#. The SIL Kit registry will forward simulation data to a running Vector SIL Kit Dashboard instance, if configured properly.
+#. The SIL Kit registry will forward simulation data to a running SIL Kit Dashboard instance, if configured properly.
    The ``sil-kit-registry`` executable supports the ``--dashboard-uri https://1.2.3.4`` command line flag and the registry's configuration supports the ``DashboardUri: https://1.2.3.4`` declaration.
    Ensure that the registry is able to connect to the Dashboard when started, e.g. by verifying the log output.
    The registry's configuration of ``CollectFromRemotes: true`` defaults to true -- it can be disabled explicitly.

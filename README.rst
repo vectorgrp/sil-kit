@@ -1,5 +1,5 @@
 ================================
-The Vector SIL Kit
+The SIL Kit Project
 ================================
 .. |VectorSite| image:: https://img.shields.io/badge/vector-sil--kit-red
    :target: https://vector.com/sil-kit
@@ -26,11 +26,11 @@ The Vector SIL Kit
 | |AsanBadge| |UbsanBadge| |TsanBadge| |Linux/Arm64|
 | |WinBadge|
 
-The Vector SIL Kit is an open-source library for connecting Software-in-the-Loop Environments.
-This README is intended to provide you with quick start on how to build the Vector SIL Kit.
+The SIL Kit is an open-source library for connecting Software-in-the-Loop Environments.
+This README is intended to provide you with quick start on how to build the SIL Kit.
 
-For documentation on using the Vector SIL Kit, see the HTML documentation,
-which can be generated when building the Vector SIL Kit (cf. Customizing the
+For documentation on using the SIL Kit, see the HTML documentation,
+which can be generated when building the SIL Kit (cf. Customizing the
 Build) and is provided in pre-built form with the SIL Kit packages.
 
 The SIL Kit source and documentation is licensed under a permissible open
@@ -54,7 +54,7 @@ The SIL Kit ecosystem comprises the following turn-key solutions:
   project provides first-class support for TAP devices of the host operating system.
 
 * The `SIL Kit Adapter for virtual CAN <https://github.com/vectorgrp/sil-kit-adapters-vcan>`_
-  can be used to attach a virtual CAN interface (SocketCAN) to a Vector SIL Kit CAN bus.
+  can be used to attach a virtual CAN interface (SocketCAN) to a SIL Kit CAN bus.
 
 * The `SIL Kit Adapter for Generic Linux IO <https://github.com/vectorgrp/sil-kit-adapters-generic-linux-io>`_
   allows to attach SIL Kit to a generic Linux IO device, such as character devices or GPIOs.
@@ -99,7 +99,7 @@ directory and configure CMake::
     cmake ..
 
 
-3. Build the Vector SIL Kit
+3. Build the SIL Kit
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Once the project has been generated, you can build the SIL Kit using the

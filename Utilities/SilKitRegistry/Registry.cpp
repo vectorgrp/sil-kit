@@ -351,7 +351,7 @@ int main(int argc, char** argv)
                                                "-W, --windows-service: Run as a Windows service.", CliParser::Hidden);
     }
 
-    std::cout << "Vector SIL Kit -- Registry, SIL Kit version: " << SilKit::Version::String() << std::endl << std::endl;
+    std::cout << "SIL Kit -- Registry, SIL Kit version: " << SilKit::Version::String() << std::endl << std::endl;
 
     try
     {
@@ -403,7 +403,7 @@ int main(int argc, char** argv)
         std::string hash{SilKit::Version::GitHash()};
         auto shortHash = hash.substr(0, 7);
         std::cout << "Version Info:" << std::endl
-                  << " - Vector SilKit: " << SilKit::Version::String() << ", #" << shortHash << std::endl;
+                  << " - SilKit: " << SilKit::Version::String() << ", #" << shortHash << std::endl;
 
         return 0;
     }

@@ -1,7 +1,7 @@
 ﻿.. include:: substitutions.rst
 
 =======================
-Vector SIL Kit Overview
+SIL Kit Overview
 =======================
 
 .. |_| unicode:: 0xA0 
@@ -15,7 +15,7 @@ Vector SIL Kit Overview
 .. |Timesync-API| replace:: :ref:`time synchronization<chap:timesync-service-api>`
 .. |Logging-API| replace:: :ref:`logging<chap:logging-service-api>`
 
-The Vector |ProductName| is an open source library for connecting Software-in-the-Loop Environments.
+The |ProductName| is an open source library for connecting Software-in-the-Loop Environments.
 It provides:
 
 * Communication infrastructure for automotive and non-automotive applications
@@ -107,7 +107,7 @@ The |ProductName| ecosystem comprises the following turn-key solutions:
   project provides first-class support for TAP devices of the host operating system.
 
 * The `SIL Kit Adapter for virtual CAN <https://github.com/vectorgrp/sil-kit-adapters-vcan>`_
-  can be used to attach a virtual CAN (Controller Area Network) interface (SocketCAN) to a Vector SIL Kit CAN bus.
+  can be used to attach a virtual CAN (Controller Area Network) interface (SocketCAN) to a SIL Kit CAN bus.
 
 * The `SIL Kit Adapter for Generic Linux IO <https://github.com/vectorgrp/sil-kit-adapters-generic-linux-io>`_
   allows attaching SIL Kit to a generic Linux IO device, such as character devices or GPIOs.

@@ -91,7 +91,7 @@ Metrics for the registry
 The registry configuration supports collecting metrics from remote participants
 and forwarding the collected data to the SIL Kit Dashboard for further
 analysis and visualization.
-Refer to the documentation of the `Vector SIL Kit Dashboard <https://vector.com/sil-kit-dashboard>`_ for further instructions.
+Refer to the documentation of the `SIL Kit Dashboard <https://vector.com/sil-kit-dashboard>`_ for further instructions.
 
 .. code-block:: yaml
 
