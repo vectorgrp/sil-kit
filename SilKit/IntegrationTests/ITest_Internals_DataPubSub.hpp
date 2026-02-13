@@ -178,6 +178,7 @@ protected:
             , name{newName}
             , dataSubscribers{newDataSubscribers}
             , dataPublishers{newDataPublishers}
+            , allReceived{std::make_unique<std::atomic<bool>>(false)}
         {
         }
 
@@ -186,6 +187,7 @@ protected:
         std::string name;
         std::vector<DataSubscriberInfo> dataSubscribers;
         std::vector<DataPublisherInfo> dataPublishers;
+        std::unique_ptr<std::atomic<bool>> allReceived;
         std::unique_ptr<SilKit::IParticipant> participant;
         SilKit::Core::IParticipantInternal* participantImpl = nullptr;
 
@@ -196,7 +198,6 @@ protected:
         std::promise<void> allDiscoveredPromise;
         bool allDiscovered{false};
         std::promise<void> allReceivedPromise;
-        bool allReceived{false};
         // Pub
         std::promise<void> allSentPromise;
         bool allSent{false};
@@ -208,7 +209,7 @@ protected:
             if (std::all_of(dataSubscribers.begin(), dataSubscribers.end(),
                             [](const auto& dsInfo) { return dsInfo.numMsgToReceive == 0; }))
             {
-                allReceived = true;
+                *allReceived = true;
                 allReceivedPromise.set_value();
             }
         }
@@ -224,11 +225,11 @@ protected:
 
         void CheckAllReceivedPromise()
         {
-            if (!allReceived && std::all_of(dataSubscribers.begin(), dataSubscribers.end(), [](const auto& dsInfo) {
+            if (!*allReceived && std::all_of(dataSubscribers.begin(), dataSubscribers.end(), [](const auto& dsInfo) {
                 return dsInfo.allReceived;
             }))
             {
-                allReceived = true;
+                *allReceived = true;
                 allReceivedPromise.set_value();
             }
         }
