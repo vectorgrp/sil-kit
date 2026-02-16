@@ -1327,7 +1327,7 @@ void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from,
 
 template <typename SilKitConnectionT>
 template <typename MessageT>
-void Participant<SilKitConnectionT>::HandleSynchronizationPoint()
+void Participant<SilKitConnectionT>::HandleSynchronizationPoint(const IServiceEndpoint* service)
 {
     if constexpr (SilKitMsgTraits<RemoveCvRef<MessageT>>::IsSynchronizationPoint())
     {
@@ -1338,7 +1338,9 @@ void Participant<SilKitConnectionT>::HandleSynchronizationPoint()
             {
                 if(_participantConfig.enableSynchronizationPoints)
                 {
-                    timesync->TriggerSynchronization();
+                    const auto& serdesName = SilKitMsgTraits<RemoveCvRef<MessageT>>::SerdesName();
+                    const auto numReceivers = _connection.GetNumberOfRemoteReceivers(service, serdesName);
+                    timesync->TriggerSynchronization(numReceivers);
                 }
             }
         }
@@ -1352,7 +1354,7 @@ void Participant<SilKitConnectionT>::SendMsgImpl(const IServiceEndpoint* from, S
 {
     TraceTx(GetLoggerInternal(), from, msg);
     _connection.SendMsg(from, std::forward<SilKitMessageT>(msg));
-    HandleSynchronizationPoint<SilKitMessageT>();
+    HandleSynchronizationPoint<SilKitMessageT>(from);
 }
 // Targeted messaging
 template <class SilKitConnectionT>
@@ -1656,7 +1658,7 @@ void Participant<SilKitConnectionT>::SendMsgImpl(const IServiceEndpoint* from, c
 {
     TraceTx(GetLoggerInternal(), from, targetParticipantName, msg);
     _connection.SendMsg(from, targetParticipantName, std::forward<SilKitMessageT>(msg));
-    HandleSynchronizationPoint<SilKitMessageT>();
+    HandleSynchronizationPoint<SilKitMessageT>(from);
 }
 
 

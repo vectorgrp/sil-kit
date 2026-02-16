@@ -5,6 +5,9 @@
 #include <future>
 #include <functional>
 #include <atomic>
+#include <random>
+#include <limits>
+#include <chrono>
 
 #include "silkit/services/orchestration/string_utils.hpp"
 #include "silkit/services/orchestration/ISystemMonitor.hpp"
@@ -30,6 +33,18 @@ auto GetDefaultTimerResolution() -> std::chrono::nanoseconds
     return 1ms;
 }
 #endif
+
+auto GetRandomSerialNumber() -> uint64_t
+{
+    thread_local static std::mt19937_64 gen(std::random_device{}());
+    thread_local static std::uniform_int_distribution<uint64_t> dist(1, std::numeric_limits<uint64_t>::max());
+    return dist(gen);
+}
+auto GetCurrentTimeMillis()
+{
+    return std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::steady_clock::now().time_since_epoch());
+}
 } // namespace
 
 namespace SilKit {
@@ -46,6 +61,7 @@ public:
     virtual auto IsExecutingSimStep() -> bool = 0;
     virtual void ReceiveNextSimTask(const Core::IServiceEndpoint* from, const NextSimTask& task) = 0;
     virtual void ProcessSimulationTimeUpdate() = 0;
+    virtual void TriggerSynchronization(size_t numberOfRemoteReceivers) = 0;
 };
 
 //! brief Synchronization policy for unsynchronized participants
@@ -56,30 +72,29 @@ public:
     void Initialize() override {}
     void RequestNextStep() override {}
     void SetSimStepCompleted() override {}
-    auto IsExecutingSimStep() -> bool override
+    bool IsExecutingSimStep() override
     {
         return false;
     }
     void ReceiveNextSimTask(const Core::IServiceEndpoint* /*from*/, const NextSimTask& /*task*/) override {}
-    void ProcessSimulationTimeUpdate() override {};
+    void ProcessSimulationTimeUpdate() override {}
+    void TriggerSynchronization(size_t /*numberOfRemoteReceivers*/) override {}
 };
 
 //! brief Synchronization policy of the VAsio middleware
 struct SynchronizedPolicy : public ITimeSyncPolicy
 {
 public:
-    SynchronizedPolicy(TimeSyncService& controller, Core::IParticipantInternal* participant,
-                       TimeConfiguration* configuration)
+    SynchronizedPolicy(TimeSyncService& controller, Core::IParticipantInternal* participant)
         : _controller{controller}
         , _participant{participant}
-        , _configuration{configuration}
         , _enableSynchronizationPoints{participant->GetConfiguration().enableSynchronizationPoints}
     {
     }
 
     void Initialize() override
     {
-        _configuration->Initialize();
+        _controller.GetTimeConfiguration()->Initialize();
     }
 
     void SetSimStepCompleted() override
@@ -100,10 +115,10 @@ public:
             && !_controller.PauseRequested())
         {
             if (_lastSentNextSimTask
-                != _configuration->NextSimStep().timePoint) // Prevent sending same step more than once
+                != _controller.GetTimeConfiguration()->NextSimStep().timePoint) // Prevent sending same step more than once
             {
-                _lastSentNextSimTask = _configuration->NextSimStep().timePoint;
-                _controller.SendMsg(_configuration->NextSimStep());
+                _lastSentNextSimTask = _controller.GetTimeConfiguration()->NextSimStep().timePoint;
+                _controller.SendMsg(_controller.GetTimeConfiguration()->NextSimStep());
             }
             // Bootstrap checked execution, in case there is no other participant.
             // Else, checked execution is initiated when we receive their NextSimTask messages.
@@ -111,18 +126,127 @@ public:
         }
     }
 
-    void ReceiveNextSimTask(const Core::IServiceEndpoint* from, const NextSimTask& task) override
+    void TriggerSynchronization(size_t numberOfRemoteReceivers) override
     {
-        if (_enableSynchronizationPoints && task == ZeroSimTask)
+        if(numberOfRemoteReceivers < 1)
         {
-            // zero time step requested for SynchronzationPoint
-            auto currentStep = _configuration->CurrentSimStep();
-            _controller.ExecuteSimStep(currentStep.timePoint, 0ns);
             return;
         }
 
-        // normal operation
-        _configuration->OnReceiveNextSimStep(from->GetServiceDescriptor().GetParticipantName(), task);
+        const auto serialNumber = GetRandomSerialNumber();
+        auto&& transaction = _transactions[serialNumber];
+
+        transaction.isInitialized = true;
+        transaction.requester = &_controller;
+        transaction.synchronizationRequested = true;
+        transaction.numberOfAcknowledgesReceived = 0;
+        transaction.numberOfExpectedAcknowledges = numberOfRemoteReceivers;
+        transaction.wallclockStartTime = GetCurrentTimeMillis();
+        transaction.serialNumber = serialNumber;
+
+
+        auto&& currentStep = _controller.GetTimeConfiguration()->CurrentSimStep();
+        const NextSimTask zeroStep{currentStep.timePoint, 0ns, SynchronizationKind::RequestSynchronization,
+                                   serialNumber};
+        _controller.SendMsg( zeroStep);
+        Logging::Info(_participant->GetLogger(), "Started transaction {}", serialNumber);
+    }
+
+    void ReceiveNextSimTask(const Core::IServiceEndpoint* from, const NextSimTask& task) override
+    {
+        auto isTransaction = [](auto&& simTask) {
+            return simTask.serialNumber > 0 && simTask.synchronizationKind != SynchronizationKind::None;
+        };
+
+        if (_enableSynchronizationPoints)
+        {
+            if (isTransaction(task))
+            {
+                switch (task.synchronizationKind)
+                {
+                case SynchronizationKind::RequestSynchronization:
+                    //if (transaction.requester != &_controller)
+                    {
+                        auto&& currentStep = _controller.GetTimeConfiguration()->CurrentSimStep();
+                        // trigger local callback
+                        _controller.ExecuteSimStep(currentStep.timePoint, 0ns);
+                        // send acknowledge for synchronization request
+                        _controller.SendMsg(NextSimTask{currentStep.timePoint, 0ns,
+                                                        SynchronizationKind::AcknowledgeSynchronization,
+                                                        task.serialNumber});
+                        //Logging::Info(_participant->GetLogger(), "Acknowledging transaction {}", task.serialNumber);
+                        return;
+                    }
+                    //else
+                    //{
+                        //Logging::Info(_participant->GetLogger(), "Doing nothing transaction {}", task.serialNumber);
+                    //    return; // do nothing until acknowledges arrive
+                    //}
+                    break;
+                case SynchronizationKind::AcknowledgeSynchronization:
+                    //if (transaction.synchronizationRequested)
+                    if (_transactions.count(task.serialNumber) > 0)
+                    {
+                        auto&& transaction = _transactions[task.serialNumber];
+                        transaction.numberOfAcknowledgesReceived++;
+                        if (transaction.numberOfAcknowledgesReceived
+                            >= transaction.numberOfExpectedAcknowledges)
+                        {
+                            // All participants have acknowledged the synchronization request, we can continue with the next step
+                            auto duration = GetCurrentTimeMillis() - transaction.wallclockStartTime;
+                            Logging::Info(_participant->GetLogger(), "Completed transaction {} duration {}", task.serialNumber, duration);
+                            transaction = {}; // reset state and run NextSimTask as usual
+                            _transactions.erase(task.serialNumber);
+                        }
+                        else
+                        {
+                            //Logging::Info(_participant->GetLogger(), "Waiting for more acks transaction {}", task.serialNumber);
+                            return; // wait until all acknowledges are received before triggering the next step
+                        }
+                    }
+                    break;
+                default:
+                    break;
+                }
+            }
+            else
+            {
+                // cache a non-transaction NextSimTask until all transactions are completed, then process it as usual
+                _deferredSimTasks[from->GetServiceDescriptor().GetParticipantName()] = task;
+            }
+        }
+        if (_enableSynchronizationPoints && _transactions.size() > 0)
+        {
+            //Logging::Info(_participant->GetLogger(), "Not advancing time because of {} outstanding transactions",
+            //              _transactions.size());
+            return;
+        }
+
+        if (isTransaction(task))
+        {
+            if (!_enableSynchronizationPoints)
+            {
+                Logging::Info(_participant->GetLogger(), "Synchronization Points disabled, ignoring {}", task);
+                return;
+            }
+            for(auto&& [participantName, deferredSimTask]: _deferredSimTasks)
+            {
+                Logging::Info(_participant->GetLogger(), "No transactions active, processing {}", deferredSimTask);
+                // process the cached non-transaction NextSimTask if it exists
+                _controller.GetTimeConfiguration()->OnReceiveNextSimStep(participantName, deferredSimTask);
+            }
+            _deferredSimTasks.clear();
+        }
+        else
+        {
+            // normal operation
+            if (task.serialNumber > 0 || task.synchronizationKind != SynchronizationKind::None)
+            {
+                throw SilKitError{"Transaction error in NextSimTask"};
+            }
+            _controller.GetTimeConfiguration()->OnReceiveNextSimStep(from->GetServiceDescriptor().GetParticipantName(),
+                                                                     task);
+        }
 
         switch (_controller.State())
         {
@@ -174,10 +298,25 @@ public:
         }
     }
 
+    struct ActiveTransaction
+    {
+        bool isInitialized{false};
+        uint64_t serialNumber{0};
+        std::chrono::milliseconds wallclockStartTime{0};
+        size_t numberOfAcknowledgesReceived{0};
+        size_t numberOfExpectedAcknowledges{0};
+        Core::IServiceEndpoint* requester{nullptr};
+        bool synchronizationRequested{false};
+    };
+
+    std::unordered_map<uint64_t /*serialNumber*/, ActiveTransaction> _transactions;
+    std::unordered_map<std::string /*participantName*/, NextSimTask /* deferred sim task */> _deferredSimTasks;
+
+
 private:
     bool IsSimStepSync() const
     {
-        return _configuration->IsBlocking();
+        return _controller.GetTimeConfiguration()->IsBlocking();
     }
 
     bool IsTimeAdvancePossible()
@@ -202,7 +341,7 @@ private:
             return false;
         }
 
-        if (_configuration->OtherParticipantHasLowerTimepoint())
+        if (_controller.GetTimeConfiguration()->OtherParticipantHasLowerTimepoint())
         {
             return false;
         }
@@ -210,7 +349,7 @@ private:
         // With real-time sync, the time advance is not possible if less then current real-time.
         if (_controller.IsCoupledToWallClock())
         {
-            if (_configuration->NextSimStep().timePoint > _controller.GetCurrentWallClockSyncPoint())
+            if (_controller.GetTimeConfiguration()->NextSimStep().timePoint > _controller.GetCurrentWallClockSyncPoint())
             {
                 return false;
             }
@@ -264,7 +403,7 @@ private:
             if (!_hopOnEvaluated)
             {
                 _hopOnEvaluated = true;
-                if (_configuration->IsHopOn())
+                if (_controller.GetTimeConfiguration()->IsHopOn())
                 {
                     if (_controller.AbortHopOnForCoordinatedParticipants())
                     {
@@ -275,14 +414,14 @@ private:
                 if (_controller.IsCoupledToWallClock())
                 {
                     // Start the wall clock coupling thread, possibly with an offset in case of an hop-on.
-                    _controller.StartWallClockCouplingThread(_configuration->NextSimStep().timePoint);
+                    _controller.StartWallClockCouplingThread(_controller.GetTimeConfiguration()->NextSimStep().timePoint);
                 }
             }
 
             // update the current and next sim. step timestamps
-            _configuration->AdvanceTimeStep();
+            _controller.GetTimeConfiguration()->AdvanceTimeStep();
             // Execute the simulation step callback with the current simulation time
-            auto currentStep = _configuration->CurrentSimStep();
+            auto currentStep = _controller.GetTimeConfiguration()->CurrentSimStep();
             _controller.ExecuteSimStep(currentStep.timePoint, currentStep.duration);
         }
     }
@@ -290,8 +429,7 @@ private:
     std::atomic<bool> _isExecutingSimStep{false};
     TimeSyncService& _controller;
     std::chrono::nanoseconds _lastSentNextSimTask{-1ns};
-    Core::IParticipantInternal* _participant;
-    TimeConfiguration* _configuration;
+    Core::IParticipantInternal* _participant{nullptr};
     bool _hopOnEvaluated{false};
     bool _enableSynchronizationPoints{false};
 };
@@ -481,7 +619,7 @@ bool TimeSyncService::SetupTimeSyncPolicy(bool isSynchronizingVirtualTime)
     _timeSyncConfigured = true;
     if (isSynchronizingVirtualTime)
     {
-        _timeSyncPolicy = std::make_shared<SynchronizedPolicy>(*this, _participant, &_timeConfiguration);
+        _timeSyncPolicy = std::make_shared<SynchronizedPolicy>(*this, _participant);
     }
     else
     {
@@ -823,6 +961,13 @@ void TimeSyncService::InvokeOtherSimulationStepsCompletedHandlers()
 {
     _otherSimulationStepsCompletedHandlers.InvokeAll();
 }
+
+void TimeSyncService::TriggerSynchronization(size_t numberOfRemoteReceivers)
+{
+    GetTimeSyncPolicy()->TriggerSynchronization(numberOfRemoteReceivers);
+}
+
+
 
 void TimeSyncService::StopWallClockCouplingThread()
 {

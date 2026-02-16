@@ -443,7 +443,7 @@ private:
     auto GetConfiguration() -> const Config::ParticipantConfiguration& override;
 
     template<typename MessageT>
-    void HandleSynchronizationPoint();
+    void HandleSynchronizationPoint(const IServiceEndpoint* service);
 
 private:
     // ----------------------------------------

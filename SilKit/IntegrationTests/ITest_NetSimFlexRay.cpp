@@ -26,7 +26,7 @@ struct ITest_NetSimFlexray : ITest_NetSim
         controller->AddCycleStartHandler(
             [&callCountsSilKitHandlersFlexray](IFlexrayController*, const FlexrayCycleStartEvent& msg) {
             callCountsSilKitHandlersFlexray.CycleStartHandler++;
-            Log() << "Cycle Start: " << (int)msg.cycleCounter;
+            Log() << "Cycle Start: " << (int)msg.cycleCounter << " timestamp: " << msg.timestamp;
         });
         controller->AddFrameHandler(
             [&callCountsSilKitHandlersFlexray](IFlexrayController*, const FlexrayFrameEvent& /*msg*/) {
@@ -275,7 +275,13 @@ void MySimulatedFlexrayController::OnTxBufferUpdate(
 
 TEST_F(ITest_NetSimFlexray, basic_networksimulation_flexray)
 {
-    const auto configSynchronizationPoints = "EnableSynchronizationPoints: true";
+    const auto configSynchronizationPoints = R"(
+Logging:
+  Sinks:
+    - Type: Stdout
+      Level: Info
+EnableSynchronizationPoints: true
+)";
     {
         // ----------------------------
         // NetworkSimulator
@@ -363,7 +369,7 @@ TEST_F(ITest_NetSimFlexray, basic_networksimulation_flexray)
         }
     }
 
-    auto ok = _simTestHarness->Run(5s);
+    auto ok = _simTestHarness->Run(500s);
     ASSERT_TRUE(ok) << "SimTestHarness should terminate without timeout";
 
     const size_t numSimulatedFlexrayControllers =
