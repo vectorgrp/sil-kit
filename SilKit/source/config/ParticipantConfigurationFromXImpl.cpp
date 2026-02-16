@@ -96,6 +96,7 @@ struct ConfigIncludeData
     std::map<std::string, SilKit::Config::RpcClient> rpcClientCache;
     std::map<std::string, SilKit::Config::TraceSink> traceSinkCache;
     std::map<std::string, SilKit::Config::TraceSource> traceSourceCache;
+    bool enableSynchronizationPoints;
 };
 
 
@@ -550,6 +551,8 @@ void MergeExperimentalCache(const ExperimentalCache& cache, Experimental& experi
 auto MergeConfigs(ConfigIncludeData& configIncludeData) -> SilKit::Config::ParticipantConfiguration
 {
     SilKit::Config::ParticipantConfiguration config;
+    config.enableSynchronizationPoints = configIncludeData.enableSynchronizationPoints;
+
     for (const auto& include : configIncludeData.configBuffer)
     {
         // Merge all vectors first!
@@ -666,6 +669,8 @@ auto PaticipantConfigurationWithIncludes(const std::string& text, struct ConfigI
         throw SilKit::ConfigurationError{fmt::format("Unknown schema version '{}' found in participant configuration!",
                                                      configuration.schemaVersion)};
     }
+    configData.enableSynchronizationPoints = configuration.enableSynchronizationPoints;
+
     configData.configBuffer.push_back(ConfigInclude("root", configuration));
 
     AppendToSearchPaths(configuration, configData);

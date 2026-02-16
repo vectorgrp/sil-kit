@@ -8,6 +8,20 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
+#include "WireDataMessages.hpp"
+#include "WireCanMessages.hpp"
+#include "WireEthernetMessages.hpp"
+#include "WireLinMessages.hpp"
+#include "WireFlexrayMessages.hpp"
+#include "WireRpcMessages.hpp"
+#include "LoggingDatatypesInternal.hpp"
+#include "OrchestrationDatatypes.hpp"
+#include "ServiceDatatypes.hpp"
+#include "RequestReplyDatatypes.hpp"
+#include "MetricsDatatypes.hpp"
+
+#include "traits/SilKitMsgTraits.hpp"
+
 #include "NullConnectionParticipant.hpp"
 #include "CanController.hpp"
 #include "ConfigurationTestUtils.hpp"
@@ -23,6 +37,13 @@ class Test_Participant : public testing::Test
 protected:
     Test_Participant() {}
 };
+
+TEST(Test_Traits, ensure_traits)
+{
+    EXPECT_EQ(SilKitMsgTraits<SilKit::Services::PubSub::WireDataMessageEvent>::TypeName(),
+              std::string{"SilKit::Services::PubSub::WireDataMessageEvent"});
+    EXPECT_TRUE(SilKitMsgTraits<SilKit::Services::PubSub::WireDataMessageEvent>::IsSynchronizationPoint());
+}
 
 TEST_F(Test_Participant, throw_on_empty_participant_name)
 {

@@ -99,6 +99,10 @@ public:
     void RemoveOtherSimulationStepsCompletedHandler(HandlerId handlerId);
     void InvokeOtherSimulationStepsCompletedHandlers();
 
+
+    // synchronization point design proposal
+    void TriggerSynchronization(size_t numberOfRemoteReceivers);
+
 private:
     // ----------------------------------------
     // private methods

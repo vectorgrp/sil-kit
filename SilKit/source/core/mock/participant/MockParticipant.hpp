@@ -242,7 +242,7 @@ private:
     std::unordered_map<std::string, DummyAttributeMetric> _attributes;
 };
 
-class DummyParticipant : public IParticipantInternal
+class DummyParticipant: public IParticipantInternal
 {
 public:
     DummyParticipant()
@@ -250,6 +250,7 @@ public:
         ON_CALL(mockLifecycleService, GetTimeSyncService).WillByDefault(testing::Return(&mockTimeSyncService));
         ON_CALL(mockLifecycleService, CreateTimeSyncService).WillByDefault(testing::Return(&mockTimeSyncService));
         ON_CALL(logger, GetLogLevel()).WillByDefault(testing::Return(Services::Logging::Level::Debug));
+        ON_CALL(*this, GetConfiguration()).WillByDefault(testing::ReturnRef(_participantConfiguration));
     }
 
     auto CreateCanController(const std::string& /*canonicalName*/,
@@ -720,6 +721,8 @@ public:
         return nullptr;
     }
 
+    MOCK_METHOD(const Config::ParticipantConfiguration&, GetConfiguration, (), (override));
+
     const std::string _name = "MockParticipant";
     const std::string _registryUri = "silkit://mock.participant.silkit:0";
     testing::NiceMock<MockLogger> logger;
@@ -733,6 +736,8 @@ public:
     MockParticipantReplies mockParticipantReplies;
     DummyNetworkSimulator mockNetworkSimulator;
     DummyMetricsManager mockMetricsManager;
+    Config::ParticipantConfiguration _participantConfiguration;
+
 };
 
 // ================================================================================

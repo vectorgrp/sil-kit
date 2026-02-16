@@ -379,6 +379,8 @@ struct ParticipantConfiguration : public IParticipantConfiguration
     Includes includes;
     Middleware middleware;
     Experimental experimental;
+    // experimental synchronization points
+    bool enableSynchronizationPoints{false};
 };
 
 bool operator==(const CanController& lhs, const CanController& rhs);

@@ -330,6 +330,8 @@ public:
 
     virtual auto GetMetricsProcessor() -> IMetricsProcessor* = 0;
     virtual auto GetMetricsSender() -> IMetricsSender* = 0;
+
+    virtual auto GetConfiguration() -> const Config::ParticipantConfiguration& = 0;
 };
 
 } // namespace Core

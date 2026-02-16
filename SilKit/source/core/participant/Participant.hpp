@@ -81,7 +81,7 @@ namespace SilKit {
 namespace Core {
 
 template <class SilKitConnectionT>
-class Participant final : public IParticipantInternal
+class Participant final: public IParticipantInternal
 {
 public:
     // ----------------------------------------
@@ -439,6 +439,11 @@ private:
     void CreateParticipantAttributeMetrics();
 
     auto MakeTimerThread() -> std::unique_ptr<IMetricsTimerThread>;
+
+    auto GetConfiguration() -> const Config::ParticipantConfiguration& override;
+
+    template<typename MessageT>
+    void HandleSynchronizationPoint(const IServiceEndpoint* service);
 
 private:
     // ----------------------------------------

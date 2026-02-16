@@ -77,7 +77,7 @@ void TimeConfiguration::OnReceiveNextSimStep(const std::string& participantName,
     {
         Logging::Error(
             _logger,
-            "Chonology error: Received NextSimTask from participant \'{}\' with lower timePoint {} than last "
+            "Chronology error: Received NextSimTask from participant '{}' with lower timePoint {} than last "
             "known timePoint {}",
             participantName, nextStep.timePoint.count(), itOtherNextTask->second.timePoint.count());
     }

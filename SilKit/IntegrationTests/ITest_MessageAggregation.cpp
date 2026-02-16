@@ -83,7 +83,7 @@ TEST_F(ITest_MessageAggregation, timeout_in_case_of_deadlock_when_using_async_si
     SilKit::Services::PubSub::PubSubSpec dataSpecPing{"ping", {}};
     SilKit::Services::PubSub::PubSubSpec dataSpecPong{"pong", {}};
 
-    bool msgReceived{false};
+    std::atomic_bool msgReceived{false};
 
     // participant with async simulation step handler & enabled message aggregation
     {
@@ -105,8 +105,8 @@ TEST_F(ITest_MessageAggregation, timeout_in_case_of_deadlock_when_using_async_si
         });
 
         timeSyncService->SetSimulationStepHandlerAsync(
-            [dataPublisher, lifecycleService, &msgReceived](std::chrono::nanoseconds /*now*/,
-                                                            std::chrono::nanoseconds /*duration*/) {
+            [dataPublisher, lifecycleService, &msgReceived](std::chrono::nanoseconds,
+                                                            std::chrono::nanoseconds) {
             // send ping
             std::vector<uint8_t> ping(1, '?');
             dataPublisher->Publish(std::move(ping));
@@ -135,7 +135,7 @@ TEST_F(ITest_MessageAggregation, timeout_in_case_of_deadlock_when_using_async_si
         });
 
         timeSyncService->SetSimulationStepHandlerAsync(
-            [timeSyncService](std::chrono::nanoseconds /*now*/, std::chrono::nanoseconds /*duration*/) {
+            [timeSyncService](std::chrono::nanoseconds, std::chrono::nanoseconds) {
             timeSyncService->CompleteSimulationStep();
         }, 1s);
     }
