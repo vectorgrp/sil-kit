@@ -608,6 +608,7 @@ void LinController::SetControllerStatusInternal(LinControllerStatus status)
 
     LinControllerStatusUpdate msg;
     msg.status = status;
+    msg.timestamp = _timeProvider->Now();
 
     SendMsg(msg);
 }

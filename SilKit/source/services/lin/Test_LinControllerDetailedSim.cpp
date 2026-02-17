@@ -56,6 +56,8 @@ protected:
         controllerBusSim.SetServiceDescriptor(addr1_netsim);
         master.SetDetailedBehavior(addr1_netsim);
         slave1.SetDetailedBehavior(addr1_netsim);
+
+        ON_CALL(participant.mockTimeProvider, Now()).WillByDefault(testing::Return(35s));
     }
 
 protected:
@@ -197,7 +199,8 @@ TEST_F(Test_LinControllerDetailedSim, go_to_sleep)
     expectedMsg.responseType = LinFrameResponseType::MasterResponse;
 
     EXPECT_CALL(participant, SendMsg(&master, netsimName, expectedMsg)).Times(1);
-    EXPECT_CALL(participant, SendMsg(&master, AControllerStatusUpdateWith(LinControllerStatus::SleepPending))).Times(1);
+    EXPECT_CALL(participant, SendMsg(&master, AControllerStatusUpdateWith(LinControllerStatus::SleepPending, 35s))).Times(1);
+    EXPECT_CALL(participant.mockTimeProvider, Now()).Times(1);
 
     master.GoToSleep();
 }
@@ -210,7 +213,8 @@ TEST_F(Test_LinControllerDetailedSim, go_to_sleep_internal)
     master.Init(config);
 
     EXPECT_CALL(participant, SendMsg(&master, netsimName, A<const LinSendFrameRequest&>())).Times(0);
-    EXPECT_CALL(participant, SendMsg(&master, AControllerStatusUpdateWith(LinControllerStatus::Sleep))).Times(1);
+    EXPECT_CALL(participant, SendMsg(&master, AControllerStatusUpdateWith(LinControllerStatus::Sleep, 35s))).Times(1);
+    EXPECT_CALL(participant.mockTimeProvider, Now()).Times(1);
 
     master.GoToSleepInternal();
 }
@@ -262,7 +266,8 @@ TEST_F(Test_LinControllerDetailedSim, wake_up)
     master.Init(config);
 
     EXPECT_CALL(participant, SendMsg(&master, netsimName, A<const LinWakeupPulse&>())).Times(1);
-    EXPECT_CALL(participant, SendMsg(&master, AControllerStatusUpdateWith(LinControllerStatus::Operational))).Times(1);
+    EXPECT_CALL(participant, SendMsg(&master, AControllerStatusUpdateWith(LinControllerStatus::Operational, 35s))).Times(1);
+    EXPECT_CALL(participant.mockTimeProvider, Now()).Times(1);
 
     master.Wakeup();
 }
@@ -275,7 +280,8 @@ TEST_F(Test_LinControllerDetailedSim, wake_up_internal)
     master.Init(config);
 
     EXPECT_CALL(participant, SendMsg(&master, netsimName, A<const LinWakeupPulse&>())).Times(0);
-    EXPECT_CALL(participant, SendMsg(&master, AControllerStatusUpdateWith(LinControllerStatus::Operational))).Times(1);
+    EXPECT_CALL(participant, SendMsg(&master, AControllerStatusUpdateWith(LinControllerStatus::Operational, 35s))).Times(1);
+    EXPECT_CALL(participant.mockTimeProvider, Now()).Times(1);
 
     master.WakeupInternal();
 }
