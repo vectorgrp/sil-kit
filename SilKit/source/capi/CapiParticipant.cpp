@@ -11,6 +11,7 @@
 #include "silkit/SilKit.hpp"
 #include "silkit/services/logging/ILogger.hpp"
 #include "silkit/services/orchestration/all.hpp"
+#include "silkit/participant/parameters.hpp"
 
 #include "CapiImpl.hpp"
 #include "TypeConversion.hpp"
@@ -19,7 +20,6 @@
 #include <map>
 #include <mutex>
 #include <fstream>
-
 
 SilKit_ReturnCode SilKitCALL SilKit_Participant_Create(SilKit_Participant** outParticipant,
                                                        SilKit_ParticipantConfiguration* participantConfiguration,
@@ -82,6 +82,39 @@ try
     auto cppParticipant = reinterpret_cast<SilKit::IParticipant*>(participant);
     auto logger = cppParticipant->GetLogger();
     *outLogger = reinterpret_cast<SilKit_Logger*>(logger);
+    return SilKit_ReturnCode_SUCCESS;
+}
+CAPI_CATCH_EXCEPTIONS
+
+SilKit_ReturnCode SilKitCALL SilKit_Participant_GetParameter(void* outParameterValue, size_t* inOutParameterValueSize,
+                                                             SilKit_Parameter parameter,
+                                                             SilKit_Participant* participant)
+try
+{
+    ASSERT_VALID_OUT_PARAMETER(inOutParameterValueSize);
+    ASSERT_VALID_POINTER_PARAMETER(participant);
+
+    auto cppParticipant = reinterpret_cast<SilKit::IParticipant*>(participant);
+    auto cppParameter = static_cast<SilKit::Parameter>(parameter);
+    auto parameterValue = cppParticipant->GetParameter(cppParameter);
+
+    // outParameterValue == nullptr indicates a size-check only, otherwise copy
+    if (outParameterValue != nullptr)
+    {
+        size_t sizeToCopy;
+        if (*inOutParameterValueSize > parameterValue.size())
+        {
+            // Don't copy more than we actually have
+            sizeToCopy = parameterValue.size();
+        }
+        else
+        {
+            // Don't copy more than the given size
+            sizeToCopy = *inOutParameterValueSize;
+        }
+        parameterValue.copy(static_cast<char*>(outParameterValue), sizeToCopy);
+    }
+    *inOutParameterValueSize = parameterValue.size();
     return SilKit_ReturnCode_SUCCESS;
 }
 CAPI_CATCH_EXCEPTIONS
