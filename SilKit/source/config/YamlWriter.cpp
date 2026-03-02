@@ -603,6 +603,9 @@ void YamlWriter::Write(const SilKit::Config::ParticipantConfiguration& obj)
     NonDefaultWrite(obj.middleware, "Middleware", defaultObj.middleware);
     NonDefaultWrite(obj.includes, "Includes", defaultObj.includes);
     NonDefaultWrite(obj.experimental, "Experimental", defaultObj.experimental);
+
+    //design proposal
+    NonDefaultWrite(obj.enableSynchronizationPoints, "EnableSynchronizationPoints", defaultObj.enableSynchronizationPoints);
 }
 
 void YamlWriter::Write(const SilKit::Config::HealthCheck& obj)

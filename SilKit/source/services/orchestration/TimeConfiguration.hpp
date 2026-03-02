@@ -35,6 +35,14 @@ public: //Methods
     void Initialize();
     bool IsBlocking() const;
 
+    auto GetNumberOfOtherParticipants() const -> size_t
+    {
+        Lock lock{_mx};
+        return _otherNextTasks.size();
+    }
+
+
+
     bool ShouldResendNextSimStep();
 
     // Returns true (only once) in the step the actual hop-on happened

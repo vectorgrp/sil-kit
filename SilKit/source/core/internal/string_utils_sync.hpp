@@ -13,6 +13,7 @@ namespace Services {
 namespace Orchestration {
 
 inline std::string to_string(const NextSimTask& nextTask);
+inline std::string to_string(SynchronizationKind kind);
 inline std::string to_string(SystemCommand::Kind command);
 inline std::string to_string(const SystemCommand& command);
 
@@ -31,11 +32,26 @@ std::string to_string(const NextSimTask& nextTask)
     return outStream.str();
 }
 
+std::string to_string(SynchronizationKind kind)
+{
+    switch (kind)
+    {
+    case SynchronizationKind::None:
+        return "None";
+    case SynchronizationKind::RequestSynchronization:
+        return "RequestSynchronization";
+    case SynchronizationKind::AcknowledgeSynchronization:
+        return "AcknowledgeSynchronization";
+    default:
+        return {};
+    }
+}
 std::ostream& operator<<(std::ostream& out, const NextSimTask& nextTask)
 {
     auto tp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(nextTask.timePoint);
     auto duration = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(nextTask.duration);
-    out << "Orchestration::NextSimTask{tp=" << tp.count() << "ms, duration=" << duration.count() << "ms}";
+    out << "NextSimTask{tp=" << tp.count() << "ms, duration=" << duration.count()
+        << "ms, serial=" << nextTask.serialNumber << ", kind=" << to_string(nextTask.synchronizationKind) << "}";
     return out;
 }
 

@@ -15,11 +15,25 @@ namespace SilKit {
 namespace Services {
 namespace Orchestration {
 
+enum class SynchronizationKind: uint8_t
+{
+    None = 0,
+    RequestSynchronization = 1,
+    AcknowledgeSynchronization = 2,
+};
+
 struct NextSimTask
 {
     std::chrono::nanoseconds timePoint{0};
     std::chrono::nanoseconds duration{0};
+    SynchronizationKind synchronizationKind{SynchronizationKind::None};
+    uint64_t serialNumber{0};
 };
+
+inline auto operator==(const NextSimTask& lhs, const NextSimTask& rhs)
+{
+    return lhs.duration == rhs.duration && lhs.timePoint == rhs.timePoint;
+}
 
 //! System-wide command for the simulation flow.
 struct SystemCommand

@@ -12,13 +12,17 @@ namespace Orchestration {
 inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer,
                                                const SilKit::Services::Orchestration::NextSimTask& task)
 {
-    buffer << task.timePoint << task.duration;
+    buffer << task.timePoint << task.duration << task.synchronizationKind << task.serialNumber;
     return buffer;
 }
 inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer,
                                                SilKit::Services::Orchestration::NextSimTask& task)
 {
     buffer >> task.timePoint >> task.duration;
+    if(buffer.RemainingBytesLeft() > 0)
+    {
+        buffer >> task.synchronizationKind >> task.serialNumber;
+    }
     return buffer;
 }
 

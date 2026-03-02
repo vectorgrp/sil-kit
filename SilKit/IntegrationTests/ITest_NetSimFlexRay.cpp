@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 #include "ITest_NetSim.hpp"
+#include "ITestThreadSafeLogger.hpp"
 #include "silkit/services/flexray/all.hpp"
 
 namespace {
@@ -23,8 +24,9 @@ struct ITest_NetSimFlexray : ITest_NetSim
                                 CallCountsSilKitHandlersFlexray& callCountsSilKitHandlersFlexray)
     {
         controller->AddCycleStartHandler(
-            [&callCountsSilKitHandlersFlexray](IFlexrayController*, const FlexrayCycleStartEvent& /*msg*/) {
+            [&callCountsSilKitHandlersFlexray](IFlexrayController*, const FlexrayCycleStartEvent& msg) {
             callCountsSilKitHandlersFlexray.CycleStartHandler++;
+            Log() << "Cycle Start: " << (int)msg.cycleCounter << " timestamp: " << msg.timestamp;
         });
         controller->AddFrameHandler(
             [&callCountsSilKitHandlersFlexray](IFlexrayController*, const FlexrayFrameEvent& /*msg*/) {
@@ -273,13 +275,20 @@ void MySimulatedFlexrayController::OnTxBufferUpdate(
 
 TEST_F(ITest_NetSimFlexray, basic_networksimulation_flexray)
 {
+    const auto configSynchronizationPoints = R"(
+Logging:
+  Sinks:
+    - Type: Stdout
+      Level: Info
+EnableSynchronizationPoints: true
+)";
     {
         // ----------------------------
         // NetworkSimulator
         // ----------------------------
 
         //auto configWithLogging = MakeParticipantConfigurationStringWithLogging(SilKit::Services::Logging::Level::Info);
-        auto&& simParticipant = _simTestHarness->GetParticipant(_participantNameNetSim);
+        auto&& simParticipant = _simTestHarness->GetParticipant(_participantNameNetSim, configSynchronizationPoints);
         auto&& lifecycleService = simParticipant->GetOrCreateLifecycleService();
         auto&& timeSyncService = simParticipant->GetOrCreateTimeSyncService();
         auto&& networkSimulator = simParticipant->GetOrCreateNetworkSimulator();
@@ -307,7 +316,8 @@ TEST_F(ITest_NetSimFlexray, basic_networksimulation_flexray)
 
         timeSyncService->SetSimulationStepHandler(
             [this, simulatedNetworkPtr, lifecycleService, flexrayController](
-                auto now, const std::chrono::nanoseconds /*duration*/) {
+                auto now, const std::chrono::nanoseconds duration) {
+            (void)duration;
             if (now == _stopAtMs)
             {
                 lifecycleService->Stop("stopping the simulation");
@@ -328,7 +338,7 @@ TEST_F(ITest_NetSimFlexray, basic_networksimulation_flexray)
 
         for (const auto& participantName : _participantNamesSimulated)
         {
-            auto&& simParticipant = _simTestHarness->GetParticipant(participantName);
+            auto&& simParticipant = _simTestHarness->GetParticipant(participantName, configSynchronizationPoints);
             auto&& lifecycleService = simParticipant->GetOrCreateLifecycleService();
             auto&& timeSyncService = simParticipant->GetOrCreateTimeSyncService();
 
@@ -337,8 +347,9 @@ TEST_F(ITest_NetSimFlexray, basic_networksimulation_flexray)
             SetupFlexrayController(lifecycleService, flexrayController, callCounts.silKitHandlersFlexray);
 
             timeSyncService->SetSimulationStepHandler(
-                [this, flexrayController](auto now, const std::chrono::nanoseconds /*duration*/) {
+                [this, flexrayController](auto now, const std::chrono::nanoseconds duration) {
                 OnetimeActions(now, flexrayController);
+                Log() << "Simulation step: " << now.count() << " : " << duration.count();
             }, _stepSize);
         }
     }
@@ -358,7 +369,7 @@ TEST_F(ITest_NetSimFlexray, basic_networksimulation_flexray)
         }
     }
 
-    auto ok = _simTestHarness->Run(5s);
+    auto ok = _simTestHarness->Run(500s);
     ASSERT_TRUE(ok) << "SimTestHarness should terminate without timeout";
 
     const size_t numSimulatedFlexrayControllers =

@@ -53,6 +53,7 @@
 #include "Uuid.hpp"
 #include "Assert.hpp"
 #include "ExecutionEnvironment.hpp"
+#include "traits/SilKitMsgTraits.hpp"
 
 #include "fmt/ranges.h"
 
@@ -106,6 +107,7 @@ Participant<SilKitConnectionT>::Participant(Config::ParticipantConfiguration par
     lm.SetKeyValue(Logging::Keys::participantName, GetParticipantName());
     lm.SetKeyValue(Logging::Keys::registryUri, _participantConfig.middleware.registryUri);
     lm.SetKeyValue(Logging::Keys::silKitVersion, Version::StringImpl());
+    lm.SetKeyValue("GitHash", Version::GitHashImpl());
     lm.Dispatch();
 }
 
@@ -1323,14 +1325,37 @@ void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from,
     SendMsgImpl(from, std::move(msg));
 }
 
+template <typename SilKitConnectionT>
+template <typename MessageT>
+void Participant<SilKitConnectionT>::HandleSynchronizationPoint(const IServiceEndpoint* service)
+{
+    if constexpr (SilKitMsgTraits<RemoveCvRef<MessageT>>::IsSynchronizationPoint())
+    {
+        if (auto* lifecycle = static_cast<Orchestration::LifecycleService*>(GetLifecycleService()); lifecycle)
+        {
+            if (auto* timesync = static_cast<Orchestration::TimeSyncService*>(lifecycle->GetTimeSyncService());
+                timesync)
+            {
+                if(_participantConfig.enableSynchronizationPoints)
+                {
+                    const auto& serdesName = SilKitMsgTraits<RemoveCvRef<MessageT>>::SerdesName();
+                    const auto numReceivers = _connection.GetNumberOfRemoteReceivers(service, serdesName);
+                    timesync->TriggerSynchronization(numReceivers);
+                }
+            }
+        }
+    }
+
+}
+
 template <class SilKitConnectionT>
 template <typename SilKitMessageT>
 void Participant<SilKitConnectionT>::SendMsgImpl(const IServiceEndpoint* from, SilKitMessageT&& msg)
 {
     TraceTx(GetLoggerInternal(), from, msg);
     _connection.SendMsg(from, std::forward<SilKitMessageT>(msg));
+    HandleSynchronizationPoint<SilKitMessageT>(from);
 }
-
 // Targeted messaging
 template <class SilKitConnectionT>
 void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName,
@@ -1633,6 +1658,7 @@ void Participant<SilKitConnectionT>::SendMsgImpl(const IServiceEndpoint* from, c
 {
     TraceTx(GetLoggerInternal(), from, targetParticipantName, msg);
     _connection.SendMsg(from, targetParticipantName, std::forward<SilKitMessageT>(msg));
+    HandleSynchronizationPoint<SilKitMessageT>(from);
 }
 
 
@@ -2023,6 +2049,11 @@ auto Participant<SilKitConnectionT>::MakeTimerThread() -> std::unique_ptr<IMetri
     return std::make_unique<VSilKit::MetricsTimerThread>(
         _participantConfig.experimental.metrics.updateInterval,
         [this] { ExecuteDeferred([this] { GetMetricsManager()->SubmitUpdates(); }); });
+}
+template <class SilKitConnectionT>
+auto Participant<SilKitConnectionT>::GetConfiguration() -> const Config::ParticipantConfiguration&
+{
+    return _participantConfig;
 }
 
 

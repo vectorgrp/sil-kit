@@ -486,6 +486,9 @@ void YamlReader::Read(SilKit::Config::ParticipantConfiguration& obj)
     OptionalRead(obj.middleware, "Middleware");
     OptionalRead(obj.includes, "Includes");
     OptionalRead(obj.experimental, "Experimental");
+
+    // design proposal
+    OptionalRead(obj.enableSynchronizationPoints, "EnableSynchronizationPoints");
 }
 
 void YamlReader::Read(SilKit::Config::HealthCheck& obj)
