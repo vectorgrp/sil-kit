@@ -12,13 +12,13 @@ Logging Configuration
 Overview
 ========================================
 
-Within the Vector SIL Kit, the Logger provides features for local and distributed logging on different log 
+Within the SIL Kit, the Logger provides features for local and distributed logging on different log 
 levels.
 
 Configuration
 ========================================
 The Logging configuration allows to configure the logging behavior of the simulation participant.
-Within the Vector SIL Kit, the Logger uses so-called sinks to store log messages.
+Within the SIL Kit, the Logger uses so-called sinks to store log messages.
 Multiple sinks can be configured at the same time. For example, to send log
 messages with log level ``Debug`` or higher to a remote logger and write ``Trace`` level
 logs to a file, the following configuration could be used:
