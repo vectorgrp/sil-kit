@@ -108,6 +108,14 @@ inline auto AControllerStatusUpdateWith(LinControllerStatus status)
     return Field(&LinControllerStatusUpdate::status, status);
 }
 
+inline auto AControllerStatusUpdateWith(LinControllerStatus status, std::chrono::nanoseconds timestamp)
+    -> testing::Matcher<const LinControllerStatusUpdate&>
+{
+    using namespace testing;
+    return AllOf(Field(&LinControllerStatusUpdate::status, status),
+                 Field(&LinControllerStatusUpdate::timestamp, timestamp));
+}
+
 struct Callbacks
 {
     MOCK_METHOD3(FrameStatusHandler, void(ILinController*, const LinFrame&, LinFrameStatus));
