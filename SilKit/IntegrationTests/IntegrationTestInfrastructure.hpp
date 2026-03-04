@@ -25,7 +25,10 @@ public:
     {
         std::stringstream ss;
         ss << "Something went wrong: " << error.what() << std::endl;
-        _systemMaster.systemController->AbortSimulation();
+        if (_systemMaster.systemController)
+        {
+            _systemMaster.systemController->AbortSimulation();
+        }
         FAIL() << ss.str();
     }
 
@@ -127,7 +130,7 @@ private:
     struct SystemMaster
     {
         std::unique_ptr<IParticipant> participant;
-        SilKit::Experimental::Services::Orchestration::ISystemController* systemController;
+        SilKit::Experimental::Services::Orchestration::ISystemController* systemController{nullptr};
         ISystemMonitor* systemMonitor;
         ILifecycleService* lifecycleService;
 
