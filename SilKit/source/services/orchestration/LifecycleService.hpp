@@ -54,6 +54,7 @@ public:
     void SetAbortHandler(AbortHandler handler) override;
 
     auto CreateTimeSyncService() -> ITimeSyncService* override;
+    auto CreateTimeSyncService(TimeAdvanceMode timeAdvanceMode) -> ITimeSyncService* override;
     auto GetTimeSyncService() -> ITimeSyncService*;
 
     auto StartLifecycle() -> std::future<ParticipantState> override;
