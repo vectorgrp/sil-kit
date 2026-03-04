@@ -55,16 +55,8 @@ void RpcClient::RegisterServiceDiscovery()
 {
     auto matchHandler = [this](SilKit::Core::Discovery::ServiceDiscoveryEvent::Type discoveryType,
                                const SilKit::Core::ServiceDescriptor& serviceDescriptor) {
-        auto getVal = [serviceDescriptor](const std::string& key) {
-            std::string tmp;
-            if (!serviceDescriptor.GetSupplementalDataItem(key, tmp))
-            {
-                throw SilKit::StateError{"Unknown key in supplementalData"};
-            }
-            return tmp;
-        };
 
-        auto clientUUID = getVal(Core::Discovery::supplKeyRpcServerInternalClientUUID);
+        auto clientUUID = serviceDescriptor.getVal(Core::Discovery::supplKeyRpcServerInternalClientUUID);
 
         if (clientUUID == _clientUUID)
         {

@@ -32,16 +32,7 @@ void RpcServer::RegisterServiceDiscovery()
                                const SilKit::Core::ServiceDescriptor& serviceDescriptor) {
         if (discoveryType == SilKit::Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated)
         {
-            auto getVal = [serviceDescriptor](const std::string& key) {
-                std::string tmp;
-                if (!serviceDescriptor.GetSupplementalDataItem(key, tmp))
-                {
-                    throw SilKit::StateError{"Unknown key in supplementalData"};
-                }
-                return tmp;
-            };
-
-            auto clientUUID = getVal(Core::Discovery::supplKeyRpcClientUUID);
+            auto clientUUID = serviceDescriptor.getVal(Core::Discovery::supplKeyRpcClientUUID);
 
             // Early abort creation if Client is already connected
             if (_internalRpcServers.count(clientUUID) > 0)
@@ -49,9 +40,9 @@ void RpcServer::RegisterServiceDiscovery()
                 return;
             }
 
-            auto functionName = getVal(Core::Discovery::supplKeyRpcClientFunctionName);
-            auto clientMediaType = getVal(Core::Discovery::supplKeyRpcClientMediaType);
-            std::string labelsStr = getVal(Core::Discovery::supplKeyRpcClientLabels);
+            auto functionName = serviceDescriptor.getVal(Core::Discovery::supplKeyRpcClientFunctionName);
+            auto clientMediaType = serviceDescriptor.getVal(Core::Discovery::supplKeyRpcClientMediaType);
+            std::string labelsStr = serviceDescriptor.getVal(Core::Discovery::supplKeyRpcClientLabels);
             auto clientLabels = SilKit::Config::Deserialize<std::vector<SilKit::Services::MatchingLabel>>(labelsStr);
 
             if (functionName == _dataSpec.FunctionName() && MatchMediaType(clientMediaType, _dataSpec.MediaType())
