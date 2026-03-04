@@ -77,7 +77,7 @@ void SpecificDiscoveryStore::CallHandlerOnHandlerRegistration(
     const ServiceDiscoveryHandler& handler, const std::string& controllerType_, const std::string& key,
     const std::vector<SilKit::Services::MatchingLabel>& labels)
 {
-    // pre filter key and mediaType
+    // pre filter controllerType and Topic/Function
     auto& entry = _lookup[MakeFilter(controllerType_, key)];
 
     auto* greedyLabel = GetLabelWithMinimalNodeSet(entry, labels);
@@ -211,7 +211,7 @@ auto SpecificDiscoveryStore::GetLabelWithMinimalHandlerSet(DiscoveryKeyNode& key
             auto& not_label_handlers = keyNode.notLabelMap[l.key].handlers;
 
             size_t relevantNodeCount = fit_handlers.size() + not_label_handlers.size();
-            if (relevantNodeCount < matchCount)
+            if ( relevantNodeCount > 0 && relevantNodeCount < matchCount)
             {
                 matchCount = relevantNodeCount;
                 outGreedyLabel = &l;
@@ -251,7 +251,7 @@ auto SpecificDiscoveryStore::GetLabelWithMinimalNodeSet(DiscoveryKeyNode& keyNod
             auto& not_label_nodes = keyNode.notLabelMap[l.key].nodes;
 
             size_t relevantNodeCount = fit_nodes.size() + not_label_nodes.size();
-            if (relevantNodeCount < matchCount)
+            if ( relevantNodeCount > 0 && relevantNodeCount < matchCount)
             {
                 matchCount = relevantNodeCount;
                 outGreedyLabel = &l;
