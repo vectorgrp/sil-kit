@@ -10,6 +10,7 @@
 #include <string>
 #include <functional>
 #include <map>
+#include <unordered_set>
 
 #include "IServiceDiscovery.hpp"
 #include "Hash.hpp"
@@ -31,14 +32,42 @@ struct FilterTypeHash
     }
 };
 
+struct MatchingLabelHash {
+    size_t operator ()(const SilKit::Services::MatchingLabel& label) const {
+
+        auto key_hash = std::hash<std::string>()(label.key);
+        auto val_hash = std::hash<std::string>()(label.value);
+        auto kind_hash = std::hash<uint32_t>()(static_cast<uint32_t>(label.kind));
+
+        auto final_hash = SilKit::Util::Hash::HashCombine(key_hash, val_hash);
+        final_hash = SilKit::Util::Hash::HashCombine(final_hash, kind_hash);
+
+        return final_hash;
+
+    }
+};
+
 using HandlerValue = std::shared_ptr<ServiceDiscoveryHandler>;
+
+struct ControllerCluster {
+    ServiceDiscoveryHandler handler;
+    std::unordered_set<SilKit::Services::MatchingLabel, MatchingLabelHash> labels;
+
+    ControllerCluster(ServiceDiscoveryHandler ahandler, const std::vector<SilKit::Services::MatchingLabel>& alabels) :
+        handler(ahandler) {
+        for(auto& label: alabels) {
+            labels.insert(label);
+        }
+    };
+
+};
 
 //! Stores all potential nodes (service descriptors) and handlers to call for a specific data matching branch
 class DiscoveryCluster
 {
 public:
     std::vector<ServiceDescriptor> nodes;
-    std::vector<HandlerValue> handlers;
+    std::vector<std::shared_ptr<ControllerCluster>> controllerInfo;
 };
 
 //! Holds all relevant information for a controllerType and key (topic/functionName/clientUUID)
