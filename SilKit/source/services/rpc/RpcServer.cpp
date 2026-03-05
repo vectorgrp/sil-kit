@@ -45,8 +45,8 @@ void RpcServer::RegisterServiceDiscovery()
             std::string labelsStr = serviceDescriptor.getVal(Core::Discovery::supplKeyRpcClientLabels);
             auto clientLabels = SilKit::Config::Deserialize<std::vector<SilKit::Services::MatchingLabel>>(labelsStr);
 
-            if (functionName == _dataSpec.FunctionName() && MatchMediaType(clientMediaType, _dataSpec.MediaType())
-                && Util::MatchLabels(_dataSpec.Labels(), clientLabels))
+            // Match only on the MediaType, FunctionName and Labels are already prefiltered by the DiscoveryService
+            if (MatchMediaType(clientMediaType, _dataSpec.MediaType()))
             {
                 AddInternalRpcServer(clientUUID, clientMediaType, clientLabels);
             }
