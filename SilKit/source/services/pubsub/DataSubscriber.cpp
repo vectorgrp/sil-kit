@@ -42,27 +42,23 @@ void DataSubscriber::RegisterServiceDiscovery()
         }
 
         const auto topic = serviceDescriptor.getVal(Core::Discovery::supplKeyDataPublisherTopic);
-        if (topic == _topic)
+
+        // We need to just match the MediaType, the topic and labels were already prefiltered by the ServiceDiscovery
+        const std::string pubMediaType{serviceDescriptor.getVal(Core::Discovery::supplKeyDataPublisherMediaType)};
+        if (MatchMediaType(_mediaType, pubMediaType))
         {
-            const std::string pubMediaType{serviceDescriptor.getVal(Core::Discovery::supplKeyDataPublisherMediaType)};
-            if (MatchMediaType(_mediaType, pubMediaType))
+            std::unique_lock<decltype(_internalSubscribersMx)> lock(_internalSubscribersMx);
+
+            if (discoveryType == SilKit::Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated)
             {
                 const std::string labelsStr = serviceDescriptor.getVal(Core::Discovery::supplKeyDataPublisherPubLabels);
-                const std::vector<SilKit::Services::MatchingLabel> publisherLabels =
+                const auto publisherLabels =
                     SilKit::Config::Deserialize<std::vector<SilKit::Services::MatchingLabel>>(labelsStr);
-                if (Util::MatchLabels(_labels, publisherLabels))
-                {
-                    std::unique_lock<decltype(_internalSubscribersMx)> lock(_internalSubscribersMx);
-
-                    if (discoveryType == SilKit::Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated)
-                    {
-                        AddInternalSubscriber(pubUUID, pubMediaType, publisherLabels);
-                    }
-                    else if (discoveryType == SilKit::Core::Discovery::ServiceDiscoveryEvent::Type::ServiceRemoved)
-                    {
-                        RemoveInternalSubscriber(pubUUID);
-                    }
-                }
+                AddInternalSubscriber(pubUUID, pubMediaType, publisherLabels);
+            }
+            else if (discoveryType == SilKit::Core::Discovery::ServiceDiscoveryEvent::Type::ServiceRemoved)
+            {
+                RemoveInternalSubscriber(pubUUID);
             }
         }
     };

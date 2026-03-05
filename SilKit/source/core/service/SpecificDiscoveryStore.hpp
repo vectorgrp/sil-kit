@@ -10,6 +10,7 @@
 #include <string>
 #include <functional>
 #include <map>
+#include <unordered_set>
 
 #include "IServiceDiscovery.hpp"
 #include "Hash.hpp"
@@ -33,12 +34,23 @@ struct FilterTypeHash
 
 using HandlerValue = std::shared_ptr<ServiceDiscoveryHandler>;
 
+struct ControllerCluster {
+    ServiceDiscoveryHandler handler;
+    std::vector<SilKit::Services::MatchingLabel> labels;
+
+    ControllerCluster(ServiceDiscoveryHandler ahandler, const std::vector<SilKit::Services::MatchingLabel>& alabels) :
+        handler(ahandler),
+        labels(alabels) {
+    };
+
+};
+
 //! Stores all potential nodes (service descriptors) and handlers to call for a specific data matching branch
 class DiscoveryCluster
 {
 public:
     std::vector<ServiceDescriptor> nodes;
-    std::vector<HandlerValue> handlers;
+    std::vector<std::shared_ptr<ControllerCluster>> controllerInfo;
 };
 
 //! Holds all relevant information for a controllerType and key (topic/functionName/clientUUID)
@@ -125,6 +137,9 @@ private: //methods
     void InsertLookupHandler(const std::string& controllerType, const std::string& key,
                              const std::vector<SilKit::Services::MatchingLabel>& labels,
                              ServiceDiscoveryHandler handler);
+
+    //!< Get serviceDescriptorLabels
+    const std::vector<SilKit::Services::MatchingLabel> GetLabels(const ServiceDescriptor& descriptor);
 
 private: //member
     //!< SpecificDiscoveryStore is only available to a a sub set of controllers

@@ -4,7 +4,6 @@
 
 #include <chrono>
 #include <functional>
-#include <set>
 #include <string>
 
 #include "gtest/gtest.h"
@@ -310,7 +309,7 @@ TEST_F(Test_SpecificDiscoveryStore, lookup_service_discovery_then_handler_labels
     testStore.ServiceChange(ServiceDiscoveryEvent::Type::ServiceCreated, noLabelTestDescriptor);
 
     EXPECT_CALL(callbacks, ServiceDiscoveryHandler(ServiceDiscoveryEvent::Type::ServiceCreated, noLabelTestDescriptor))
-        .Times(1);
+        .Times(0);
 
     testStore.RegisterSpecificServiceDiscoveryHandler(
         [this](ServiceDiscoveryEvent::Type discoveryType, const ServiceDescriptor& sd) {
