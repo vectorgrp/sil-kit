@@ -47,21 +47,18 @@ void DataSubscriber::RegisterServiceDiscovery()
             const std::string pubMediaType{serviceDescriptor.getVal(Core::Discovery::supplKeyDataPublisherMediaType)};
             if (MatchMediaType(_mediaType, pubMediaType))
             {
-                const std::string labelsStr = serviceDescriptor.getVal(Core::Discovery::supplKeyDataPublisherPubLabels);
-                const std::vector<SilKit::Services::MatchingLabel> publisherLabels =
-                    SilKit::Config::Deserialize<std::vector<SilKit::Services::MatchingLabel>>(labelsStr);
-                if (Util::MatchLabels(_labels, publisherLabels))
-                {
-                    std::unique_lock<decltype(_internalSubscribersMx)> lock(_internalSubscribersMx);
+                std::unique_lock<decltype(_internalSubscribersMx)> lock(_internalSubscribersMx);
 
-                    if (discoveryType == SilKit::Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated)
-                    {
-                        AddInternalSubscriber(pubUUID, pubMediaType, publisherLabels);
-                    }
-                    else if (discoveryType == SilKit::Core::Discovery::ServiceDiscoveryEvent::Type::ServiceRemoved)
-                    {
-                        RemoveInternalSubscriber(pubUUID);
-                    }
+                if (discoveryType == SilKit::Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated)
+                {
+                    const std::string labelsStr = serviceDescriptor.getVal(Core::Discovery::supplKeyDataPublisherPubLabels);
+                    const auto publisherLabels =
+                        SilKit::Config::Deserialize<std::vector<SilKit::Services::MatchingLabel>>(labelsStr);
+                    AddInternalSubscriber(pubUUID, pubMediaType, publisherLabels);
+                }
+                else if (discoveryType == SilKit::Core::Discovery::ServiceDiscoveryEvent::Type::ServiceRemoved)
+                {
+                    RemoveInternalSubscriber(pubUUID);
                 }
             }
         }

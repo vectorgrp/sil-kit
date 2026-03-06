@@ -3,7 +3,9 @@
 // SPDX-License-Identifier: MIT
 
 #include "SpecificDiscoveryStore.hpp"
+#include "LabelMatching.hpp"
 #include "YamlParser.hpp"
+
 namespace {
 inline auto MakeFilter(const std::string& type,
                        const std::string& topicOrFunction) -> SilKit::Core::Discovery::FilterType
@@ -92,22 +94,41 @@ void SpecificDiscoveryStore::CallHandlerOnHandlerRegistration(
     }
     else
     {
+
         if (greedyLabel->kind == SilKit::Services::MatchingLabel::Kind::Optional)
         {
             // trigger notlabel handlers
             for (auto&& serviceDescriptor : entry.notLabelMap[greedyLabel->key].nodes)
             {
-                handler(ServiceDiscoveryEvent::Type::ServiceCreated, serviceDescriptor);
+                const std::string labelsStr = serviceDescriptor.getVal(Core::Discovery::supplKeyDataPublisherPubLabels);
+                const auto descriptorLabels =
+                    SilKit::Config::Deserialize<std::vector<SilKit::Services::MatchingLabel>>(labelsStr);
+                if(Util::MatchLabels(labels, descriptorLabels))
+                {
+                    handler(ServiceDiscoveryEvent::Type::ServiceCreated, serviceDescriptor);
+                }
             }
             for (auto&& serviceDescriptor : entry.noLabelCluster.nodes)
             {
-                handler(ServiceDiscoveryEvent::Type::ServiceCreated, serviceDescriptor);
+                const std::string labelsStr = serviceDescriptor.getVal(Core::Discovery::supplKeyDataPublisherPubLabels);
+                const auto descriptorLabels =
+                    SilKit::Config::Deserialize<std::vector<SilKit::Services::MatchingLabel>>(labelsStr);
+                if(Util::MatchLabels(labels, descriptorLabels))
+                {
+                    handler(ServiceDiscoveryEvent::Type::ServiceCreated, serviceDescriptor);
+                }
             }
         }
         // trigger label handlers
         for (auto&& serviceDescriptor : entry.labelMap[MakeFilter(greedyLabel->key, greedyLabel->value)].nodes)
         {
-            handler(ServiceDiscoveryEvent::Type::ServiceCreated, serviceDescriptor);
+            const std::string labelsStr = serviceDescriptor.getVal(Core::Discovery::supplKeyDataPublisherPubLabels);
+            const auto descriptorLabels =
+                SilKit::Config::Deserialize<std::vector<SilKit::Services::MatchingLabel>>(labelsStr);
+            if(Util::MatchLabels(labels, descriptorLabels))
+            {
+                handler(ServiceDiscoveryEvent::Type::ServiceCreated, serviceDescriptor);
+            }
         }
     }
 }
@@ -137,19 +158,23 @@ void SpecificDiscoveryStore::CallHandlersOnServiceChange(ServiceDiscoveryEvent::
     }
     else
     {
+        const std::string labelsStr = serviceDescriptor.getVal(Core::Discovery::supplKeyDataPublisherPubLabels);
+        const auto descriptorLabels =
+            SilKit::Config::Deserialize<std::vector<SilKit::Services::MatchingLabel>>(labelsStr);
+
         if (greedyLabel->kind == SilKit::Services::MatchingLabel::Kind::Optional)
         {
             // trigger notlabel handlers
             for (auto&& controllerInfo : entry.notLabelMap[greedyLabel->key].controllerInfo)
             {
-                if (controllerInfo->handler)
+                if (controllerInfo->handler && Util::MatchLabels(controllerInfo->labels, descriptorLabels))
                 {
                     controllerInfo->handler(eventType, serviceDescriptor);
                 }
             }
             for (auto&& controllerInfo : entry.noLabelCluster.controllerInfo)
             {
-                if (controllerInfo->handler)
+                if (controllerInfo->handler && Util::MatchLabels(controllerInfo->labels, descriptorLabels))
                 {
                     controllerInfo->handler(eventType, serviceDescriptor);
                 }
@@ -158,7 +183,7 @@ void SpecificDiscoveryStore::CallHandlersOnServiceChange(ServiceDiscoveryEvent::
         // trigger label handlers
         for (auto&& controllerInfo : entry.labelMap[MakeFilter(greedyLabel->key, greedyLabel->value)].controllerInfo)
         {
-            if (controllerInfo->handler)
+            if (controllerInfo->handler && Util::MatchLabels(controllerInfo->labels, descriptorLabels))
             {
                 controllerInfo->handler(eventType, serviceDescriptor);
             }
