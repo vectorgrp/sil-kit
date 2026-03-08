@@ -191,6 +191,7 @@ Experimental:
   TimeSynchronization:
     AnimationFactor: 1.5
     EnableMessageAggregation: Off
+    DynamicSimulationStep: true
   Metrics:
     CollectFromRemote: false
     Sinks:

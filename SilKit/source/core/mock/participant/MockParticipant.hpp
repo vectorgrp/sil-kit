@@ -633,6 +633,10 @@ public:
     {
         return _registryUri;
     }
+    auto GetParticipantConfiguration() const -> const SilKit::Config::ParticipantConfiguration& override
+    {
+        return _participantConfiguration;
+    }
 
     virtual auto GetTimeProvider() -> Services::Orchestration::ITimeProvider*
     {
@@ -737,6 +741,7 @@ public:
     MockParticipantReplies mockParticipantReplies;
     DummyNetworkSimulator mockNetworkSimulator;
     DummyMetricsManager mockMetricsManager;
+    SilKit::Config::ParticipantConfiguration _participantConfiguration;
 };
 
 // ================================================================================

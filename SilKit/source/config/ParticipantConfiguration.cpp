@@ -169,7 +169,8 @@ bool operator==(const ParticipantConfiguration& lhs, const ParticipantConfigurat
 
 bool operator==(const TimeSynchronization& lhs, const TimeSynchronization& rhs)
 {
-    return lhs.animationFactor == rhs.animationFactor && lhs.enableMessageAggregation == rhs.enableMessageAggregation;
+    return lhs.animationFactor == rhs.animationFactor && lhs.enableMessageAggregation == rhs.enableMessageAggregation
+           && lhs.dynamicSimulationStep == rhs.dynamicSimulationStep;
 }
 
 bool operator==(const Experimental& lhs, const Experimental& rhs)

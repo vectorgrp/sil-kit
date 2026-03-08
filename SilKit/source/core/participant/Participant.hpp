@@ -166,6 +166,11 @@ public:
         return _participantConfig.middleware.registryUri;
     }
 
+    auto GetParticipantConfiguration() const -> const SilKit::Config::ParticipantConfiguration& override
+    {
+        return _participantConfig;
+    }
+
     void SendMsg(const IServiceEndpoint* from, const Services::Can::WireCanFrameEvent& msg) override;
     void SendMsg(const IServiceEndpoint* from, const Services::Can::CanFrameTransmitEvent& msg) override;
     void SendMsg(const IServiceEndpoint* from, const Services::Can::CanControllerStatus& msg) override;

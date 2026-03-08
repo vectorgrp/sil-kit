@@ -264,7 +264,8 @@
   "Experimental": {
     "TimeSynchronization": {
       "AnimationFactor": 1.5,
-      "EnableMessageAggregation": "Off" 
+      "EnableMessageAggregation": "Off",
+      "DynamicSimulationStep": true
     },
     "Metrics": {
       "CollectFromRemote": false,

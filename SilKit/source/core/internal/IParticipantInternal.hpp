@@ -10,6 +10,7 @@
 #include "silkit/experimental/services/orchestration/ISystemController.hpp"
 #include "silkit/experimental/netsim/NetworkSimulatorDatatypes.hpp"
 
+#include "ParticipantConfiguration.hpp"
 
 #include "internal_fwd.hpp"
 #include "IServiceEndpoint.hpp"
@@ -52,6 +53,8 @@ public:
     // ----------------------------------------
     // Public methods
     virtual auto GetParticipantName() const -> const std::string& = 0;
+
+    virtual auto GetParticipantConfiguration() const -> const SilKit::Config::ParticipantConfiguration& = 0;
 
     /*! \brief Returns the URI of the registry this participant is connecting to.
      *

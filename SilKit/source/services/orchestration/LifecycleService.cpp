@@ -403,20 +403,19 @@ auto LifecycleService::GetTimeSyncService() -> ITimeSyncService*
 
 auto LifecycleService::CreateTimeSyncService() -> ITimeSyncService*
 {
-    if (!_timeSyncActive)
+    const auto participantConfiguration = _participant->GetParticipantConfiguration();
+
+    auto timeAdvanceMode = TimeAdvanceMode::ByOwnDuration;
+
+    if (participantConfiguration.experimental.timeSynchronization.dynamicSimulationStep)
     {
-        _participant->RegisterTimeSyncService(_timeSyncService);
-        _timeSyncActive = true;
-        _timeSyncService->SetTimeAdvanceMode(TimeAdvanceMode::ByOwnDuration);
-        return _timeSyncService;
+        timeAdvanceMode = TimeAdvanceMode::ByMinimalDuration;
     }
-    else
-    {
-        throw ConfigurationError("You may not create the time synchronization service more than once.");
-    }
+
+    return CreateTimeSyncService(timeAdvanceMode);
 }
 
-auto LifecycleService::CreateTimeSyncService(TimeAdvanceMode timeAdvanceMode) -> ITimeSyncService*
+auto LifecycleService::CreateTimeSyncService(const TimeAdvanceMode timeAdvanceMode) -> ITimeSyncService*
 {
     if (!_timeSyncActive)
     {

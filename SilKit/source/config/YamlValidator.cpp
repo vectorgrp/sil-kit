@@ -147,6 +147,7 @@ const std::set<std::string> schemaPaths_v1 = {
     "/Experimental/Metrics/Sinks/Type",
     "/Experimental/TimeSynchronization",
     "/Experimental/TimeSynchronization/AnimationFactor",
+    "/Experimental/TimeSynchronization/DynamicSimulationStep",
     "/Experimental/TimeSynchronization/EnableMessageAggregation",
     "/Extensions",
     "/Extensions/SearchPathHints",

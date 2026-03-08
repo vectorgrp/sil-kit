@@ -318,8 +318,7 @@ auto LifecycleService::Status() const -> const SilKit::Services::Orchestration::
 
 auto LifecycleService::CreateTimeSyncService() -> SilKit::Services::Orchestration::ITimeSyncService*
 {
-    _timeSyncService = std::make_unique<TimeSyncService>(
-        _lifecycleService, SilKit::Services::Orchestration::TimeAdvanceMode::ByOwnDuration);
+    _timeSyncService = std::make_unique<TimeSyncService>(_lifecycleService);
 
     return _timeSyncService.get();
 }
