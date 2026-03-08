@@ -92,12 +92,13 @@ struct ParticipantParams
     std::string name{};
     std::chrono::nanoseconds initialStepSize{1ms};
     TimeAdvanceMode timeAdvanceMode{TimeAdvanceMode::ByOwnDuration};
-    
+
     // Change step size at these time points
-    std::map<std::chrono::nanoseconds /*changeTimePoint*/, std::chrono::nanoseconds /*newStepSize*/> changeStepSizeAtTimePoints{};
-    
+    std::map<std::chrono::nanoseconds /*changeTimePoint*/, std::chrono::nanoseconds /*newStepSize*/>
+        changeStepSizeAtTimePoints{};
+
     // Result: recorded time points and durations
-    std::vector<std::pair<std::chrono::nanoseconds, std::chrono::nanoseconds>> timePointsAndDurations{}; 
+    std::vector<std::pair<std::chrono::nanoseconds, std::chrono::nanoseconds>> timePointsAndDurations{};
 };
 
 struct ITest_DynStepSizes : ITest_SimTestHarness
@@ -124,10 +125,16 @@ void ITest_DynStepSizes::RunTestSetup(std::vector<ParticipantParams>& participan
 
     for (auto& participantParams : participantsParams)
     {
-        auto&& simParticipant = _simTestHarness->GetParticipant(participantParams.name);
+        std::string participantConfiguration;
+        participantConfiguration += R"({"Logging":{"Sinks":[{"Type":"File","Level":"Trace","LogName":")";
+        participantConfiguration += "DynStepSizes_" + participantParams.name;
+        participantConfiguration += R"("}]}})";
+
+        auto&& simParticipant = _simTestHarness->GetParticipant(participantParams.name, participantConfiguration);
         auto&& lifecycleService = simParticipant->GetOrCreateLifecycleService();
         auto* timeSyncService = lifecycleService->CreateTimeSyncService(participantParams.timeAdvanceMode);
-        timeSyncService->SetSimulationStepHandler([timeSyncService, &participantParams, &mx, lifecycleService](auto now, auto duration) {
+        timeSyncService->SetSimulationStepHandler(
+            [timeSyncService, &participantParams, &mx, lifecycleService](auto now, auto duration) {
             if (now >= 100ms)
             {
                 lifecycleService->Stop("stopping the test at 100ms");
@@ -165,7 +172,8 @@ void ITest_DynStepSizes::AssertAllStepsEqual(const std::vector<ParticipantParams
         for (size_t j = 0; j < ref.size(); ++j)
         {
             EXPECT_EQ(ref[j], cmp[j]) << "Differenz at index " << j << ": " << participantsParams[0].name
-                                      << "(now=" << ToString(ref[j].first) << ", duration=" << ToString(ref[j].second) << ")"
+                                      << "(now=" << ToString(ref[j].first) << ", duration=" << ToString(ref[j].second)
+                                      << ")"
                                       << " vs " << participantsParams[i].name << "(now=" << ToString(cmp[j].first)
                                       << ", duration=" << ToString(cmp[j].second) << ")";
         }
@@ -183,8 +191,9 @@ void ITest_DynStepSizes::AssertAscendingStepsWithReferenceDuration(
         for (size_t i = 0; i < steps.size(); ++i)
         {
             // Check if duration matches the reference duration
-            EXPECT_EQ(steps[i].second, refDuration) << "Duration mismatch for " << participant.name << " at index " << i
-                                                    << ": expected " << ToString(refDuration) << ", got " << ToString(steps[i].second);
+            EXPECT_EQ(steps[i].second, refDuration)
+                << "Duration mismatch for " << participant.name << " at index " << i << ": expected "
+                << ToString(refDuration) << ", got " << ToString(steps[i].second);
 
             // Check if time points are strictly increasing by refDuration
             if (i > 0)
@@ -207,7 +216,7 @@ void ITest_DynStepSizes::AssertStepsEqual(const std::vector<std::chrono::nanosec
     for (size_t j = 0; j < s1.size(); ++j)
     {
         SILKIT_EXPECT_CHRONO_EQ(s1[j], s2[j]) << "Differenz at index " << j << ": "
-                                << "s1 now=" << ToString(s1[j]) << " vs s2 now=" << ToString(s2[j]);
+                                              << "s1 now=" << ToString(s1[j]) << " vs s2 now=" << ToString(s2[j]);
     }
 }
 
@@ -291,7 +300,6 @@ TEST_F(ITest_DynStepSizes, three_participants_MixedTimeAdvanceModes)
     }
     // Compare P3 nows with union of P1 and P2 nows
     AssertStepsEqual(p3Nows, unionNowsVec);
-
 }
 
 // Change to a different step size during simulation
@@ -316,8 +324,7 @@ TEST_F(ITest_DynStepSizes, two_participants_mixed_change_step_size)
 {
     std::vector<ParticipantParams> participantsParams = {
         {"P1", 1ms, TimeAdvanceMode::ByOwnDuration, {{9ms, 10ms}, {80ms, 2ms}}},
-        {"P2", 20ms, TimeAdvanceMode::ByMinimalDuration}
-    };
+        {"P2", 20ms, TimeAdvanceMode::ByMinimalDuration}};
 
     RunTestSetup(participantsParams);
 
@@ -331,7 +338,7 @@ TEST_F(ITest_DynStepSizes, two_participants_mixed_change_step_size)
 
     AssertAllStepsEqual({participantsParams[0], refData});
     // P2 (ByMinimalDuration) follows P1 (ByOwnDuration)
-    AssertAllStepsEqual({participantsParams[0], participantsParams[1]}); 
+    AssertAllStepsEqual({participantsParams[0], participantsParams[1]});
 }
 
 // Change to different step sizes during simulation; both participants with ByMinimalDuration

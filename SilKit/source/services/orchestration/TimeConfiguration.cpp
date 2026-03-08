@@ -123,19 +123,21 @@ auto TimeConfiguration::GetMinimalAlignedDuration() const -> std::chrono::nanose
         // Both start and end of other participant's step could be the earliest next timepoint
         auto nextStepStart = entry.second.timePoint;
         auto nextStepEnd = entry.second.timePoint + entry.second.duration;
-        if (nextStepStart > _currentTask.timePoint && nextStepStart < earliestOtherTimepoint)
+
+        if (nextStepStart > _currentTask.timePoint)
         {
-            earliestOtherTimepoint = nextStepStart;
+            earliestOtherTimepoint = std::min(earliestOtherTimepoint, nextStepStart);
         }
-        else if (nextStepEnd < earliestOtherTimepoint)
+
+        if (nextStepEnd > _currentTask.timePoint)
         {
-            earliestOtherTimepoint = nextStepEnd;
+            earliestOtherTimepoint = std::min(earliestOtherTimepoint, nextStepEnd);
         }
     }
-    //Logging::Info(_logger, "Earliest next timepoint among other participants is {}ms",
-    //              std::chrono::duration_cast<std::chrono::milliseconds>(earliestOtherTimepoint).count());
 
-    auto minAlignedDuration = earliestOtherTimepoint - _currentTask.timePoint;
+    Logging::Debug(_logger, "Earliest next timepoint among other participants is {}ns", earliestOtherTimepoint.count());
+
+    const auto minAlignedDuration = earliestOtherTimepoint - _currentTask.timePoint;
 
     if (minAlignedDuration < 0ns)
     {
@@ -153,15 +155,16 @@ void TimeConfiguration::AdvanceTimeStep()
 {
     Lock lock{_mx};
     _currentTask = _myNextTask;
-    
+
     if (_timeAdvanceMode == TimeAdvanceMode::ByMinimalDuration)
     {
-        auto minAlignedDuration = GetMinimalAlignedDuration();
+        const auto minAlignedDuration = GetMinimalAlignedDuration();
+
         if (minAlignedDuration < _currentTask.duration)
         {
-            //Logging::Info(_logger, "Adjusting my step duration from {}ms to {}ms",
-            //              std::chrono::duration_cast<std::chrono::milliseconds>(_currentTask.duration).count(),
-            //              std::chrono::duration_cast<std::chrono::milliseconds>(minAlignedDuration).count());
+            Logging::Debug(_logger, "Adjusting my step duration from {}ms to {}ms",
+                           std::chrono::duration_cast<std::chrono::nanoseconds>(_currentTask.duration).count(),
+                           std::chrono::duration_cast<std::chrono::nanoseconds>(minAlignedDuration).count());
             _currentTask.duration = minAlignedDuration;
         }
     }
