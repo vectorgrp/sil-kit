@@ -617,9 +617,9 @@ TEST_F(Test_LinControllerTrivialSim, go_to_sleep)
 {
     master.Init(MakeControllerConfig(LinControllerMode::Master));
 
-    EXPECT_CALL(participant, SendMsg(&master, ATransmissionWith(GoToSleepFrame(), LinFrameStatus::LIN_RX_OK))).Times(1);
-    EXPECT_CALL(participant, SendMsg(&master, AControllerStatusUpdateWith(LinControllerStatus::Sleep))).Times(1);
-    EXPECT_CALL(participant.mockTimeProvider, Now()).Times(1);
+    EXPECT_CALL(participant, SendMsg(&master, ATransmissionWith(GoToSleepFrame(), LinFrameStatus::LIN_RX_OK, 35s))).Times(1);
+    EXPECT_CALL(participant, SendMsg(&master, AControllerStatusUpdateWith(LinControllerStatus::Sleep, 35s))).Times(1);
+    EXPECT_CALL(participant.mockTimeProvider, Now()).Times(2);
     master.GoToSleep();
 }
 
@@ -627,8 +627,9 @@ TEST_F(Test_LinControllerTrivialSim, go_to_sleep_internal)
 {
     master.Init(MakeControllerConfig(LinControllerMode::Master));
 
-    EXPECT_CALL(participant, SendMsg(&master, ATransmissionWith(GoToSleepFrame(), LinFrameStatus::LIN_RX_OK))).Times(0);
-    EXPECT_CALL(participant, SendMsg(&master, AControllerStatusUpdateWith(LinControllerStatus::Sleep))).Times(1);
+    EXPECT_CALL(participant, SendMsg(&master, ATransmissionWith(GoToSleepFrame(), LinFrameStatus::LIN_RX_OK, 35s))).Times(0);
+    EXPECT_CALL(participant, SendMsg(&master, AControllerStatusUpdateWith(LinControllerStatus::Sleep, 35s))).Times(1);
+    EXPECT_CALL(participant.mockTimeProvider, Now()).Times(1);
 
     master.GoToSleepInternal();
 }
@@ -668,8 +669,8 @@ TEST_F(Test_LinControllerTrivialSim, wake_up)
     master.Init(MakeControllerConfig(LinControllerMode::Master));
 
     EXPECT_CALL(participant, SendMsg(&master, A<const LinWakeupPulse&>())).Times(1);
-    EXPECT_CALL(participant, SendMsg(&master, AControllerStatusUpdateWith(LinControllerStatus::Operational))).Times(1);
-    EXPECT_CALL(participant.mockTimeProvider, Now()).Times(1);
+    EXPECT_CALL(participant, SendMsg(&master, AControllerStatusUpdateWith(LinControllerStatus::Operational, 35s))).Times(1);
+    EXPECT_CALL(participant.mockTimeProvider, Now()).Times(2);
 
     master.Wakeup();
 }
@@ -680,7 +681,8 @@ TEST_F(Test_LinControllerTrivialSim, wake_up_internal)
     master.Init(config);
 
     EXPECT_CALL(participant, SendMsg(&master, A<const LinWakeupPulse&>())).Times(0);
-    EXPECT_CALL(participant, SendMsg(&master, AControllerStatusUpdateWith(LinControllerStatus::Operational))).Times(1);
+    EXPECT_CALL(participant, SendMsg(&master, AControllerStatusUpdateWith(LinControllerStatus::Operational, 35s))).Times(1);
+    EXPECT_CALL(participant.mockTimeProvider, Now()).Times(1);
 
     master.WakeupInternal();
 }
