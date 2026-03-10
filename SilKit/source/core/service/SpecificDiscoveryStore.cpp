@@ -251,7 +251,7 @@ auto SpecificDiscoveryStore::GetLabelWithMinimalNodeSet(DiscoveryKeyNode& keyNod
             auto& not_label_nodes = keyNode.notLabelMap[l.key].nodes;
 
             size_t relevantNodeCount = fit_nodes.size() + not_label_nodes.size();
-            if (relevantNodeCount < matchCount)
+            if (relevantNodeCount > 0)
             {
                 matchCount = relevantNodeCount;
                 outGreedyLabel = &l;

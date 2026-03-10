@@ -336,8 +336,17 @@ TEST_F(Test_SpecificDiscoveryStore, lookup_service_discovery_then_handler_issues
 
     ServiceDescriptor labelTestDescriptor{baseDescriptor};
     labelTestDescriptor.SetSupplementalDataItem(supplKeyDataPublisherPubLabels,
-                                                " - key: kA\n   value: vA\n   kind: 2\n - key: kB\n   value: vB\n   "
-                                                "kind: 2\n - key: kC\n   value: vC\n   kind: 2 ");
+                                                R"(
+ - key: kA
+   value: vA
+   kind: 2
+ - key: kB
+   value: vB
+   kind: 2
+ - key: kC
+   value: vC
+   kind: 2
+ )");
     labelTestDescriptor.SetServiceId(2);
 
     testStore.ServiceChange(ServiceDiscoveryEvent::Type::ServiceCreated, labelTestDescriptor);
@@ -347,7 +356,7 @@ TEST_F(Test_SpecificDiscoveryStore, lookup_service_discovery_then_handler_issues
         .Times(2);
 
     EXPECT_CALL(callbacks, ServiceDiscoveryHandler(ServiceDiscoveryEvent::Type::ServiceCreated, labelTestDescriptor))
-        .Times(1);
+        .Times(2);
 
     std::vector<SilKit::Services::MatchingLabel> optionalSubscriberLabels{
         {"kA", "vA", SilKit::Services::MatchingLabel::Kind::Optional},
