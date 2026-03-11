@@ -3,6 +3,8 @@ The SIL Kit Project
 ================================
 .. |VectorSite| image:: https://img.shields.io/badge/vector-product%20site-red.svg
    :target: https://vector.com/sil-kit
+.. |SynopsysSite| image:: https://img.shields.io/badge/synopsys-product%20site-purple.svg
+   :target: https://www.synopsys.com/verification/virtual-prototyping/sil-kit.html
 
 .. |ReleaseBadge| image:: https://img.shields.io/github/v/release/vectorgrp/sil-kit.svg
    :target: https://github.com/vectorgrp/sil-kit/releases
@@ -24,7 +26,7 @@ The SIL Kit Project
 | |ReleaseBadge| |LicenseBadge| |DocsBadge| 
 | |AsanBadge| |UbsanBadge| |TsanBadge| |Linux/Arm64|
 | |WinBadge|
-| |VectorSite|
+| |VectorSite| |SynopsysSite|
 
 The SIL Kit is an open-source library for connecting Software-in-the-Loop Environments.
 This README is intended to provide you with quick start on how to build the SIL Kit.
