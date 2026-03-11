@@ -1,7 +1,7 @@
 ================================
 The SIL Kit Project
 ================================
-.. |VectorSite| image:: https://img.shields.io/badge/vector-product site-purple.svg
+.. |VectorSite| image:: https://img.shields.io/badge/vector-product%20site-purple.svg
    :target: https://vector.com/sil-kit
 
 .. |ReleaseBadge| image:: https://img.shields.io/github/v/release/vectorgrp/sil-kit.svg
