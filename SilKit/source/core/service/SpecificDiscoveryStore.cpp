@@ -101,7 +101,7 @@ void SpecificDiscoveryStore::CallHandlerOnHandlerRegistration(
 
         if (greedyLabel->kind == SilKit::Services::MatchingLabel::Kind::Optional)
         {
-            // trigger notlabel handlers
+            // Get all services that do not have the same optional label present
             for (auto&& serviceDescriptor : entry.notLabelMap[greedyLabel->key].nodes)
             {
                 const auto descriptorLabels = GetLabels(serviceDescriptor);
@@ -110,6 +110,7 @@ void SpecificDiscoveryStore::CallHandlerOnHandlerRegistration(
                     handler(ServiceDiscoveryEvent::Type::ServiceCreated, serviceDescriptor);
                 }
             }
+            // Get all services that do not have any labels attached, thus matching our optional label
             for (auto&& serviceDescriptor : entry.noLabelCluster.nodes)
             {
                 const auto descriptorLabels = GetLabels(serviceDescriptor);
@@ -119,7 +120,7 @@ void SpecificDiscoveryStore::CallHandlerOnHandlerRegistration(
                 }
             }
         }
-        // trigger label handlers
+        // trigger label handlers for exact matches (optional and mandatory)
         for (auto&& serviceDescriptor : entry.labelMap[MakeFilter(greedyLabel->key, greedyLabel->value)].nodes)
         {
             const auto descriptorLabels = GetLabels(serviceDescriptor);
@@ -161,7 +162,7 @@ void SpecificDiscoveryStore::CallHandlersOnServiceChange(ServiceDiscoveryEvent::
     {
         if (greedyLabel->kind == SilKit::Services::MatchingLabel::Kind::Optional)
         {
-            // trigger notlabel handlers
+            // trigger handlers that do not have the same optional label
             for (auto&& controllerInfo : entry.notLabelMap[greedyLabel->key].controllerInfo)
             {
                 if (controllerInfo->handler && Util::MatchLabels(controllerInfo->labels, labels))
@@ -169,6 +170,7 @@ void SpecificDiscoveryStore::CallHandlersOnServiceChange(ServiceDiscoveryEvent::
                     controllerInfo->handler(eventType, serviceDescriptor);
                 }
             }
+            // trigger handlers with no labels attached, thus matching our optional label
             for (auto&& controllerInfo : entry.noLabelCluster.controllerInfo)
             {
                 if (controllerInfo->handler && Util::MatchLabels(controllerInfo->labels, labels))
@@ -177,7 +179,7 @@ void SpecificDiscoveryStore::CallHandlersOnServiceChange(ServiceDiscoveryEvent::
                 }
             }
         }
-        // trigger label handlers
+        // trigger label handlers with exact matches (optional and mandatory)
         for (auto&& controllerInfo : entry.labelMap[MakeFilter(greedyLabel->key, greedyLabel->value)].controllerInfo)
         {
             if (controllerInfo->handler && Util::MatchLabels(controllerInfo->labels, labels))
