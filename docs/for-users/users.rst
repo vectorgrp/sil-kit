@@ -4,7 +4,7 @@
 User Guide
 ==============================
 
-The following section explains how to bring together Vector |ProductName| enabled applications and how to successfully run a simulation.
+The following section explains how to bring together |ProductName| enabled applications and how to successfully run a simulation.
 
 .. contents::
    :local:

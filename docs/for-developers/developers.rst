@@ -4,7 +4,7 @@
 Developer Guide
 =============================
 
-The following sections explain, how to consume the Vector |ProductName| library in your own application and how to use the |ProductName| API to communicate with other participants of a simulation.
+The following sections explain, how to consume the |ProductName| library in your own application and how to use the |ProductName| API to communicate with other participants of a simulation.
 
 .. contents::
    :local:

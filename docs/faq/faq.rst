@@ -51,10 +51,10 @@ The registry does not partake in the simulation itself.
 It especially does not route messages between participants.
 Please note that it is mandatory that all |ProductName| simulation participants can reach the |ProductName| registry for a proper simulation setup.
 
-Can I use Vector |ProductName| together with real hardware/in a Hardware-in-the-Loop setup?
+Can I use |ProductName| together with real hardware/in a Hardware-in-the-Loop setup?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Vector |ProductName| was designed deliberately with Software-in-the-Loop environments in mind.
+|ProductName| was designed deliberately with Software-in-the-Loop environments in mind.
 Many aspects of it are designed for SIL settings (especially the virtual time synchronization, that adapts its speed to the execution speed of the participants) and not HIL settings.
 These aspects might imply that |ProductName| does not fit the needs of your hardware setup.
 Furthermore, |ProductName| itself does not provide capabilities to connect it to a hardware setup.

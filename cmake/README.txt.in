@@ -1,10 +1,10 @@
-Vector SIL Kit Release Version: @PROJECT_VERSION@
+SIL Kit Release Version: @PROJECT_VERSION@
 ---------------------------------------------
 
 The layout of this release bundle is as follows:
 
 + SilKit/
-  - the binary Vector SIL Kit release including the object files,
+  - the binary SIL Kit release including the object files,
     the C++ interface headers and CMake exported targets.
 
 + SilKit-Demos/
