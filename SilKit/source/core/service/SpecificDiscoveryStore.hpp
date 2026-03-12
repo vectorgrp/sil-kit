@@ -114,12 +114,22 @@ private: //methods
                                  const std::vector<SilKit::Services::MatchingLabel>& labels,
                                  std::function<void(DiscoveryCluster&)>);
 
-    //!< Looks for the label that returns a minimal handler set
+    /*! \brief Looks for the label that returns a minimal handler set
+    *
+    * For a suitable controller, ALL its labels must match ALL of our controllers labels
+    * So we can preselect them via checking which of the controllers labels matches with the least amount of services
+    * since the others have labels present that are not in the controllers label list, thus they are never going to match.
+    */
     auto GetLabelWithMinimalHandlerSet(DiscoveryKeyNode& keyNode,
                                        const std::vector<SilKit::Services::MatchingLabel>& labels)
         -> const SilKit::Services::MatchingLabel*;
 
-    //!< Looks for the label that returns a minimal ServiceDescriptor set
+    /*! \brief Looks for the label that returns a minimal ServiceDescriptor set
+    *
+    * For a suitable service, ALL its labels must match ALL of our controllers labels
+    * So we can preselect them via checking which of the stored service labels match with the least amount of handlers
+    * since the others have labels present that are not in the services label list, they are never going to match.
+    */
     auto GetLabelWithMinimalNodeSet(DiscoveryKeyNode& keyNode,
                                     const std::vector<SilKit::Services::MatchingLabel>& labels)
         -> const SilKit::Services::MatchingLabel*;
