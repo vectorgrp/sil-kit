@@ -4,7 +4,6 @@
 
 #include "LabelMatching.hpp"
 #include <optional>
-#include <iostream>
 
 namespace SilKit {
 namespace Util {
