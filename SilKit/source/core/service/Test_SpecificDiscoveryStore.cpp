@@ -303,12 +303,12 @@ TEST_F(Test_SpecificDiscoveryStore, lookup_service_discovery_then_handler_labels
     baseDescriptor.SetSupplementalDataItem(supplKeyDataPublisherMediaType, "text/json");
     baseDescriptor.SetSupplementalDataItem(supplKeyDataPublisherPubLabels, "- key: kA\n  value: vA\n  kind: 2");
 
-    ServiceDescriptor noLabelTestDescriptor{baseDescriptor};
-    noLabelTestDescriptor.SetServiceId(1);
+    ServiceDescriptor testDescriptor{baseDescriptor};
+    testDescriptor.SetServiceId(1);
 
-    testStore.ServiceChange(ServiceDiscoveryEvent::Type::ServiceCreated, noLabelTestDescriptor);
+    testStore.ServiceChange(ServiceDiscoveryEvent::Type::ServiceCreated, testDescriptor);
 
-    EXPECT_CALL(callbacks, ServiceDiscoveryHandler(ServiceDiscoveryEvent::Type::ServiceCreated, noLabelTestDescriptor))
+    EXPECT_CALL(callbacks, ServiceDiscoveryHandler(ServiceDiscoveryEvent::Type::ServiceCreated, testDescriptor))
         .Times(0);
 
     testStore.RegisterSpecificServiceDiscoveryHandler(
