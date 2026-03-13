@@ -62,6 +62,7 @@ bool MatchLabels(const std::vector<MatchingLabel>& labels1, const std::vector<Ma
             return false;
         }
     }
+
     return true; // All of the labels match according to their rules -> match
 }
 

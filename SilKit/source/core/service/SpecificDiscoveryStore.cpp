@@ -3,7 +3,9 @@
 // SPDX-License-Identifier: MIT
 
 #include "SpecificDiscoveryStore.hpp"
+#include "LabelMatching.hpp"
 #include "YamlParser.hpp"
+
 namespace {
 inline auto MakeFilter(const std::string& type,
                        const std::string& topicOrFunction) -> SilKit::Core::Discovery::FilterType
@@ -77,7 +79,7 @@ void SpecificDiscoveryStore::CallHandlerOnHandlerRegistration(
     const ServiceDiscoveryHandler& handler, const std::string& controllerType_, const std::string& key,
     const std::vector<SilKit::Services::MatchingLabel>& labels)
 {
-    // pre filter key and mediaType
+    // pre filter controllerType and Topic/Function
     auto& entry = _lookup[MakeFilter(controllerType_, key)];
 
     auto* greedyLabel = GetLabelWithMinimalNodeSet(entry, labels);
@@ -87,27 +89,45 @@ void SpecificDiscoveryStore::CallHandlerOnHandlerRegistration(
         // no labels present trigger all
         for (auto&& serviceDescriptor : entry.allCluster.nodes)
         {
-            handler(ServiceDiscoveryEvent::Type::ServiceCreated, serviceDescriptor);
+            const auto descriptorLabels = GetLabels(serviceDescriptor);
+            if(Util::MatchLabels(labels, descriptorLabels))
+            {
+                handler(ServiceDiscoveryEvent::Type::ServiceCreated, serviceDescriptor);
+            }
         }
     }
     else
     {
+
         if (greedyLabel->kind == SilKit::Services::MatchingLabel::Kind::Optional)
         {
-            // trigger notlabel handlers
+            // Get all services that do not have the same optional label present
             for (auto&& serviceDescriptor : entry.notLabelMap[greedyLabel->key].nodes)
             {
-                handler(ServiceDiscoveryEvent::Type::ServiceCreated, serviceDescriptor);
+                const auto descriptorLabels = GetLabels(serviceDescriptor);
+                if(Util::MatchLabels(labels, descriptorLabels))
+                {
+                    handler(ServiceDiscoveryEvent::Type::ServiceCreated, serviceDescriptor);
+                }
             }
+            // Get all services that do not have any labels attached, thus matching our optional label
             for (auto&& serviceDescriptor : entry.noLabelCluster.nodes)
+            {
+                const auto descriptorLabels = GetLabels(serviceDescriptor);
+                if(Util::MatchLabels(labels, descriptorLabels))
+                {
+                    handler(ServiceDiscoveryEvent::Type::ServiceCreated, serviceDescriptor);
+                }
+            }
+        }
+        // trigger label handlers for exact matches (optional and mandatory)
+        for (auto&& serviceDescriptor : entry.labelMap[MakeFilter(greedyLabel->key, greedyLabel->value)].nodes)
+        {
+            const auto descriptorLabels = GetLabels(serviceDescriptor);
+            if(Util::MatchLabels(labels, descriptorLabels))
             {
                 handler(ServiceDiscoveryEvent::Type::ServiceCreated, serviceDescriptor);
             }
-        }
-        // trigger label handlers
-        for (auto&& serviceDescriptor : entry.labelMap[MakeFilter(greedyLabel->key, greedyLabel->value)].nodes)
-        {
-            handler(ServiceDiscoveryEvent::Type::ServiceCreated, serviceDescriptor);
         }
     }
 }
@@ -126,12 +146,15 @@ void SpecificDiscoveryStore::CallHandlersOnServiceChange(ServiceDiscoveryEvent::
 
     if (greedyLabel == nullptr)
     {
+
+        bool skipLabelCheck = supplControllerTypeName == controllerTypeRpcServerInternal;
         // no labels present trigger all
-        for (auto&& handler : entry.allCluster.handlers)
+        for (auto&& controllerInfo : entry.allCluster.controllerInfo)
         {
-            if (handler)
+            bool run_handler = skipLabelCheck ? true : Util::MatchLabels(controllerInfo->labels, labels);
+            if (controllerInfo->handler && run_handler)
             {
-                (*handler)(eventType, serviceDescriptor);
+                controllerInfo->handler(eventType, serviceDescriptor);
             }
         }
     }
@@ -139,28 +162,29 @@ void SpecificDiscoveryStore::CallHandlersOnServiceChange(ServiceDiscoveryEvent::
     {
         if (greedyLabel->kind == SilKit::Services::MatchingLabel::Kind::Optional)
         {
-            // trigger notlabel handlers
-            for (auto&& handler : entry.notLabelMap[greedyLabel->key].handlers)
+            // trigger handlers that do not have the same optional label
+            for (auto&& controllerInfo : entry.notLabelMap[greedyLabel->key].controllerInfo)
             {
-                if (handler)
+                if (controllerInfo->handler && Util::MatchLabels(controllerInfo->labels, labels))
                 {
-                    (*handler)(eventType, serviceDescriptor);
+                    controllerInfo->handler(eventType, serviceDescriptor);
                 }
             }
-            for (auto&& handler : entry.noLabelCluster.handlers)
+            // trigger handlers with no labels attached, thus matching our optional label
+            for (auto&& controllerInfo : entry.noLabelCluster.controllerInfo)
             {
-                if (handler)
+                if (controllerInfo->handler && Util::MatchLabels(controllerInfo->labels, labels))
                 {
-                    (*handler)(eventType, serviceDescriptor);
+                    controllerInfo->handler(eventType, serviceDescriptor);
                 }
             }
         }
-        // trigger label handlers
-        for (auto&& handler : entry.labelMap[MakeFilter(greedyLabel->key, greedyLabel->value)].handlers)
+        // trigger label handlers with exact matches (optional and mandatory)
+        for (auto&& controllerInfo : entry.labelMap[MakeFilter(greedyLabel->key, greedyLabel->value)].controllerInfo)
         {
-            if (handler)
+            if (controllerInfo->handler && Util::MatchLabels(controllerInfo->labels, labels))
             {
-                (*handler)(eventType, serviceDescriptor);
+                controllerInfo->handler(eventType, serviceDescriptor);
             }
         }
     }
@@ -188,7 +212,7 @@ auto SpecificDiscoveryStore::GetLabelWithMinimalHandlerSet(DiscoveryKeyNode& key
 {
     const SilKit::Services::MatchingLabel* outGreedyLabel = nullptr;
 
-    size_t matchCount = keyNode.allCluster.handlers.size();
+    size_t matchCount = keyNode.allCluster.controllerInfo.size();
     // search greedy Cluster guess
     for (auto&& l : labels)
     {
@@ -197,8 +221,7 @@ auto SpecificDiscoveryStore::GetLabelWithMinimalHandlerSet(DiscoveryKeyNode& key
         const auto keyTuple = std::make_tuple(l.key, l.value);
         if (l.kind == SilKit::Services::MatchingLabel::Kind::Mandatory)
         {
-            auto& handlers = keyNode.labelMap[keyTuple].handlers;
-            const auto relevantNodeCount = handlers.size();
+            const auto& relevantNodeCount = keyNode.labelMap[keyTuple].controllerInfo.size();
             if (relevantNodeCount < matchCount)
             {
                 matchCount = relevantNodeCount;
@@ -207,11 +230,11 @@ auto SpecificDiscoveryStore::GetLabelWithMinimalHandlerSet(DiscoveryKeyNode& key
         }
         else if (l.kind == SilKit::Services::MatchingLabel::Kind::Optional)
         {
-            auto& fit_handlers = keyNode.labelMap[keyTuple].handlers;
-            auto& not_label_handlers = keyNode.notLabelMap[l.key].handlers;
+            const auto labeled_matches = keyNode.labelMap[keyTuple].controllerInfo.size();
+            const auto distinct_matches = keyNode.notLabelMap[l.key].controllerInfo.size();
 
-            size_t relevantNodeCount = fit_handlers.size() + not_label_handlers.size();
-            if (relevantNodeCount < matchCount)
+            const size_t relevantNodeCount = labeled_matches + distinct_matches;
+            if ( relevantNodeCount > 0 && relevantNodeCount < matchCount)
             {
                 matchCount = relevantNodeCount;
                 outGreedyLabel = &l;
@@ -251,7 +274,7 @@ auto SpecificDiscoveryStore::GetLabelWithMinimalNodeSet(DiscoveryKeyNode& keyNod
             auto& not_label_nodes = keyNode.notLabelMap[l.key].nodes;
 
             size_t relevantNodeCount = fit_nodes.size() + not_label_nodes.size();
-            if (relevantNodeCount < matchCount)
+            if ( relevantNodeCount > 0 && relevantNodeCount < matchCount)
             {
                 matchCount = relevantNodeCount;
                 outGreedyLabel = &l;
@@ -292,9 +315,9 @@ void SpecificDiscoveryStore::UpdateDiscoveryClusters(const std::string& controll
                     entry.notLabelMap[l.key].nodes.emplace_back(serviceDescriptor);
                 }
                 // label is seen for the first time (add all earlier handlers to notLabelEntry
-                for (auto& handler : entry.allCluster.handlers)
+                for (auto& controllerInfo : entry.allCluster.controllerInfo)
                 {
-                    entry.notLabelMap[l.key].handlers.emplace_back(handler);
+                    entry.notLabelMap[l.key].controllerInfo.emplace_back(controllerInfo);
                 }
             }
         }
@@ -356,9 +379,38 @@ void SpecificDiscoveryStore::InsertLookupHandler(const std::string& controllerTy
                                                  const std::vector<SilKit::Services::MatchingLabel>& labels,
                                                  ServiceDiscoveryHandler handler)
 {
-    auto handlerPtr = std::make_shared<decltype(handler)>(std::move(handler));
+    auto controllerInfo = std::make_shared<ControllerCluster>(ControllerCluster(std::move(handler), labels));
     UpdateDiscoveryClusters(controllerType_, key, labels,
-                            [handlerPtr](auto& cluster) { cluster.handlers.push_back(handlerPtr); });
+                            [controllerInfo](auto& cluster) { cluster.controllerInfo.push_back(controllerInfo); });
+}
+
+const std::vector<SilKit::Services::MatchingLabel> SpecificDiscoveryStore::GetLabels(
+    const ServiceDescriptor& descriptor)
+{
+
+
+    const auto ctrlType = descriptor.getVal(Core::Discovery::controllerType);
+
+    std::string labelsStr;
+
+    if(ctrlType == controllerTypeDataPublisher)
+    {
+        labelsStr = descriptor.getVal(Core::Discovery::supplKeyDataPublisherPubLabels);
+    }
+    else if(ctrlType == controllerTypeRpcClient)
+    {
+        labelsStr = descriptor.getVal(Core::Discovery::supplKeyRpcClientLabels);
+    }
+    else
+    {
+        // Don't need labels return an empty vector
+        return std::vector<SilKit::Services::MatchingLabel>();
+    }
+
+    const auto descriptorLabels =
+        SilKit::Config::Deserialize<std::vector<SilKit::Services::MatchingLabel>>(labelsStr);
+    return descriptorLabels;
+
 }
 
 void SpecificDiscoveryStore::RegisterSpecificServiceDiscoveryHandler(

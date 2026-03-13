@@ -31,16 +31,8 @@ void DataSubscriber::RegisterServiceDiscovery()
 {
     auto matchHandler = [this](SilKit::Core::Discovery::ServiceDiscoveryEvent::Type discoveryType,
                                const SilKit::Core::ServiceDescriptor& serviceDescriptor) {
-        auto getVal = [serviceDescriptor](const std::string& key) {
-            std::string tmp;
-            if (!serviceDescriptor.GetSupplementalDataItem(key, tmp))
-            {
-                throw SilKitError{"Unknown key in supplementalData"};
-            }
-            return tmp;
-        };
 
-        const auto pubUUID = getVal(Core::Discovery::supplKeyDataPublisherPubUUID);
+        const auto pubUUID = serviceDescriptor.getVal(Core::Discovery::supplKeyDataPublisherPubUUID);
 
         // Early abort creation if Publisher is already connected
         if (discoveryType == SilKit::Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated
@@ -49,28 +41,24 @@ void DataSubscriber::RegisterServiceDiscovery()
             return;
         }
 
-        const auto topic = getVal(Core::Discovery::supplKeyDataPublisherTopic);
-        if (topic == _topic)
-        {
-            const std::string pubMediaType{getVal(Core::Discovery::supplKeyDataPublisherMediaType)};
-            if (MatchMediaType(_mediaType, pubMediaType))
-            {
-                const std::string labelsStr = getVal(Core::Discovery::supplKeyDataPublisherPubLabels);
-                const std::vector<SilKit::Services::MatchingLabel> publisherLabels =
-                    SilKit::Config::Deserialize<std::vector<SilKit::Services::MatchingLabel>>(labelsStr);
-                if (Util::MatchLabels(_labels, publisherLabels))
-                {
-                    std::unique_lock<decltype(_internalSubscribersMx)> lock(_internalSubscribersMx);
+        const auto topic = serviceDescriptor.getVal(Core::Discovery::supplKeyDataPublisherTopic);
 
-                    if (discoveryType == SilKit::Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated)
-                    {
-                        AddInternalSubscriber(pubUUID, pubMediaType, publisherLabels);
-                    }
-                    else if (discoveryType == SilKit::Core::Discovery::ServiceDiscoveryEvent::Type::ServiceRemoved)
-                    {
-                        RemoveInternalSubscriber(pubUUID);
-                    }
-                }
+        // We need to just match the MediaType, the topic and labels were already prefiltered by the ServiceDiscovery
+        const std::string pubMediaType{serviceDescriptor.getVal(Core::Discovery::supplKeyDataPublisherMediaType)};
+        if (MatchMediaType(_mediaType, pubMediaType))
+        {
+            std::unique_lock<decltype(_internalSubscribersMx)> lock(_internalSubscribersMx);
+
+            if (discoveryType == SilKit::Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated)
+            {
+                const std::string labelsStr = serviceDescriptor.getVal(Core::Discovery::supplKeyDataPublisherPubLabels);
+                const auto publisherLabels =
+                    SilKit::Config::Deserialize<std::vector<SilKit::Services::MatchingLabel>>(labelsStr);
+                AddInternalSubscriber(pubUUID, pubMediaType, publisherLabels);
+            }
+            else if (discoveryType == SilKit::Core::Discovery::ServiceDiscoveryEvent::Type::ServiceRemoved)
+            {
+                RemoveInternalSubscriber(pubUUID);
             }
         }
     };

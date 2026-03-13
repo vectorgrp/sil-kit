@@ -6,6 +6,7 @@
 
 #include <cstdint>
 #include <string>
+#include <tuple>
 
 #include "silkit/util/HandlerId.hpp"
 
@@ -44,6 +45,11 @@ struct MatchingLabel
     std::string key;   //!< The label's key.
     std::string value; //!< The label's key.
     Kind kind;         //!< The matching kind to apply for this label.
+
+    friend bool operator==(const MatchingLabel& lhs, const MatchingLabel& rhs) noexcept
+    {
+        return std::tie(lhs.key, lhs.value, lhs.kind) == std::tie(rhs.key, rhs.value, rhs.kind);
+    }
 };
 
 using SilKit::Util::HandlerId;

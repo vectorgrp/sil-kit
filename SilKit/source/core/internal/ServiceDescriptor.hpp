@@ -85,6 +85,7 @@ public:
 
     inline bool GetSupplementalDataItem(const std::string& key, std::string& value) const;
     inline void SetSupplementalDataItem(std::string key, std::string val);
+    inline std::string getVal(const std::string& key) const;
 
     inline auto GetSimulationName() const -> const std::string&;
     inline void SetSimulationName(const std::string& simulationName);
@@ -135,6 +136,17 @@ bool ServiceDescriptor::GetSupplementalDataItem(const std::string& key, std::str
 void ServiceDescriptor::SetSupplementalDataItem(std::string key, std::string val)
 {
     _supplementalData[key] = std::move(val);
+}
+
+std::string ServiceDescriptor::getVal(const std::string& key) const
+{
+    std::string tmp;
+    if(GetSupplementalDataItem(key, tmp) == false)
+    {
+        throw SilKit::StateError{"Unknown key in supplementalData"};
+    }
+
+    return tmp;
 }
 
 auto ServiceDescriptor::GetParticipantId() const -> ParticipantId
