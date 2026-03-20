@@ -220,6 +220,12 @@ void LinController::WarnOnReceptionWhileInactive() const
     _logger->Warn(errorMsg);
 }
 
+void LinController::WarnOnReceptionWhileSleeping() const
+{
+    std::string warnMsg = fmt::format("Sleeping LinController received a transmission. This transmission is ignored!");
+    _logger->Warn(warnMsg);
+}
+
 void LinController::WarnOnUnneededStatusChange(LinControllerStatus status) const
 {
     std::string errorMsg =
@@ -753,6 +759,12 @@ void LinController::ReceiveMsg(const IServiceEndpoint* from, const LinTransmissi
     if (_controllerMode == LinControllerMode::Inactive)
     {
         WarnOnReceptionWhileInactive();
+        return;
+    }
+
+    if(_controllerStatus == LinControllerStatus::Sleep || _controllerStatus == LinControllerStatus::Unknown)
+    {
+        WarnOnReceptionWhileSleeping();
         return;
     }
 

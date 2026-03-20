@@ -187,6 +187,7 @@ private:
     void WarnOnReceptionWithInvalidLinId(LinId invalidLinId, const std::string& fromParticipantName,
                                          const std::string& fromServiceName) const;
     void WarnOnReceptionWhileInactive() const;
+    void WarnOnReceptionWhileSleeping() const;
     void WarnOnUnneededStatusChange(LinControllerStatus status) const;
     void WarnOnInvalidLinId(LinId invalidLinId, const std::string& callingMethodName) const;
     void WarnOnUnusedResponseMode(const std::string& callingMethodName) const;

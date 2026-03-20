@@ -557,8 +557,8 @@ TEST_F(ITest_NetSimLin, networksimulation_lin_dynamic)
                 {
                     SendLinFrames(now, linController, callCounts.silKitSentMsgLin.SentFramesTrivial);
                     SendLinFrameHeaders(now, linController, callCounts.silKitSentMsgLin.SentFrameHeadersTrivial);
-                    WakeupOnce(now, linController);
                     GoToSleepOnce(now, linController);
+                    WakeupOnce(now, linController);
                 }
             }, _stepSize);
 

@@ -5,6 +5,7 @@
 #include "LinController.hpp"
 #include "SimBehaviorTrivial.hpp"
 #include "Assert.hpp"
+#include "LoggerMessage.hpp"
 
 namespace SilKit {
 namespace Services {
@@ -88,11 +89,25 @@ void SimBehaviorTrivial::SendMsgImpl(MsgT&& msg)
 
 void SimBehaviorTrivial::SendMsg(LinSendFrameRequest&& msg)
 {
+    auto controllerStatus = _parentController->Status();
+    if(controllerStatus == LinControllerStatus::Sleep || controllerStatus == LinControllerStatus::Unknown)
+    {
+        Logging::Warn(_participant->GetLogger(),
+                      "LinController not operational. SendFrameRequest will not be sent!");
+        return;
+    }
     _parentController->SendFrameHeader(msg.frame.id);
 }
 
 void SimBehaviorTrivial::SendMsg(LinTransmission&& msg)
 {
+    auto controllerStatus = _parentController->Status();
+    if(controllerStatus == LinControllerStatus::Sleep || controllerStatus == LinControllerStatus::Unknown)
+    {
+        Logging::Warn(_participant->GetLogger(),
+                      "LinController not operational. LinTransmission will not be sent!");
+        return;
+    }
     SendMsgImpl(msg);
 }
 
