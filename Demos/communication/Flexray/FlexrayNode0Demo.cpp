@@ -88,8 +88,9 @@ private:
 
 int main(int argc, char** argv)
 {
-    Arguments args;
+    Arguments args{};
     args.participantName = "Node0";
+
     FlexrayNode0 app{args};
     app.SetupCommandLineArgs(argc, argv, "SIL Kit Demo - Flexray: Node0 of a two-node Flexray system",
                              {ApplicationBase::DefaultArg::Async});
