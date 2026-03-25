@@ -44,7 +44,9 @@
                 "SILKIT_WARNINGS_AS_ERRORS": "ON",
                 "SILKIT_PACKAGE_SYMBOLS": "OFF",
                 "SILKIT_INSTALL_SOURCE": "OFF",
-                "CMAKE_POLICY_VERSION_MINIMUM": "3.5"
+                "CMAKE_POLICY_VERSION_MINIMUM": "3.5",
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+
             },
             "architecture": {
                 "value": "x64",
