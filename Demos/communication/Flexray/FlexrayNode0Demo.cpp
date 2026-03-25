@@ -37,7 +37,7 @@ private:
 
         // The specific buffer configs for this node
         std::vector<FlexrayTxBufferConfig> bufferConfigs;
-        FlexrayTxBufferConfig baseBufferCfg;
+        FlexrayTxBufferConfig baseBufferCfg{};
         baseBufferCfg.offset = 0;
         baseBufferCfg.repetition = 1;
         baseBufferCfg.hasPayloadPreambleIndicator = false;
