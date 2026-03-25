@@ -7,7 +7,7 @@
 
 using namespace SilKit::Services::Flexray;
 
-class FlexrayNode0 : public ApplicationBase
+class FlexrayNode1 : public ApplicationBase
 {
 public:
     // Inherit constructors
@@ -37,7 +37,7 @@ private:
 
         // The specific buffer configs for this node
         std::vector<FlexrayTxBufferConfig> bufferConfigs;
-        FlexrayTxBufferConfig baseBufferCfg;
+        FlexrayTxBufferConfig baseBufferCfg{};
         baseBufferCfg.offset = 0;
         baseBufferCfg.repetition = 1;
         baseBufferCfg.hasPayloadPreambleIndicator = false;
@@ -88,9 +88,10 @@ private:
 
 int main(int argc, char** argv)
 {
-    Arguments args;
+    Arguments args{};
     args.participantName = "Node1";
-    FlexrayNode0 app{args};
+
+    FlexrayNode1 app{args};
     app.SetupCommandLineArgs(argc, argv, "SIL Kit Demo - Flexray: Node1 of a two-node Flexray system",
                              {ApplicationBase::DefaultArg::Async});
 

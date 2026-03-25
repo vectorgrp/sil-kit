@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
+#pragma once
 
 #include "silkit/services/flexray/all.hpp"
 #include "silkit/services/flexray/string_utils.hpp"
@@ -91,7 +92,7 @@ public:
 
 private:
     IFlexrayController* _flexrayController{nullptr};
-    FlexrayControllerConfig _controllerConfig;
+    FlexrayControllerConfig _controllerConfig{};
     FlexrayPocStatusEvent _lastPocStatus{};
     int _msgId = 0;
     bool _configured{false};
@@ -217,9 +218,9 @@ public:
     }
 };
 
-auto MakeControllerConfig() -> FlexrayControllerConfig
+inline auto MakeControllerConfig() -> FlexrayControllerConfig
 {
-    FlexrayClusterParameters clusterParams;
+    FlexrayClusterParameters clusterParams{};
     clusterParams.gColdstartAttempts = 8;
     clusterParams.gCycleCountMax = 63;
     clusterParams.gdActionPointOffset = 2;
@@ -241,7 +242,7 @@ auto MakeControllerConfig() -> FlexrayControllerConfig
     clusterParams.gPayloadLengthStatic = 13;
     clusterParams.gSyncFrameIDCountMax = 15;
 
-    FlexrayNodeParameters nodeParams;
+    FlexrayNodeParameters nodeParams{};
     nodeParams.pAllowHaltDueToClock = 1;
     nodeParams.pAllowPassiveToActive = 0;
     nodeParams.pChannels = FlexrayChannel::AB;
@@ -265,7 +266,7 @@ auto MakeControllerConfig() -> FlexrayControllerConfig
     nodeParams.pdMicrotick = FlexrayClockPeriod::T25NS;
     nodeParams.pSamplesPerMicrotick = 2;
 
-    FlexrayControllerConfig config;
+    FlexrayControllerConfig config{};
     config.clusterParams = clusterParams;
     config.nodeParams = nodeParams;
 

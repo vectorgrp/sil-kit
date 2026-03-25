@@ -55,6 +55,8 @@ public:
         _commandLineParser = std::make_shared<CommandlineParser>();
     }
 
+    virtual ~ApplicationBase() = default;
+
 protected:
     // Must be implemented by the actual application
 
