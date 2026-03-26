@@ -69,7 +69,7 @@ bool RingBuffer::Read(std::pmr::vector<uint8_t>& elem)
     return true;
 }
 
-void RingBuffer::GetWritingBuffers(std::vector<MutableBuffer>& buffers)
+void RingBuffer::GetWritingBuffers(std::pmr::vector<MutableBuffer>& buffers)
 {
     auto arrayOne = GetFreeMemoryArrayOne();
     if (arrayOne.GetSize() > 0)

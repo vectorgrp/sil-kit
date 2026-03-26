@@ -27,7 +27,7 @@ public:
     bool Peek(std::pmr::vector<uint8_t>& elem) const;
     bool Read(std::pmr::vector<uint8_t>& elem);
 
-    void GetWritingBuffers(std::vector<MutableBuffer>& buffers);
+    void GetWritingBuffers(std::pmr::vector<MutableBuffer>& buffers);
 
     void AdvanceWPos(std::size_t numBytes); // public for access from VAsioPeer
 

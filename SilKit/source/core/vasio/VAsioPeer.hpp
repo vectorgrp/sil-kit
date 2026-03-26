@@ -123,11 +123,11 @@ private:
     // receiving
     std::atomic<uint32_t> _currentMsgSize{0u};
     RingBuffer _msgBuffer;
-    std::vector<MutableBuffer> _currentReceivingBuffers;
+    std::pmr::vector<MutableBuffer> _currentReceivingBuffers;
 
     // sending
     mutable std::mutex _sendingQueueMutex;
-    std::deque<std::pmr::vector<uint8_t>> _sendingQueue;
+    std::pmr::deque<std::pmr::vector<uint8_t>> _sendingQueue;
     ConstBuffer _currentSendingBuffer;
     std::pmr::vector<uint8_t> _currentSendingBufferData;
     std::pmr::vector<uint8_t> _aggregatedMessages;
