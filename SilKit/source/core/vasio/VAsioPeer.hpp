@@ -7,8 +7,10 @@
 
 #include <vector>
 #include <queue>
+#include <list>
 #include <mutex>
 #include <sstream>
+#include <memory_resource>
 
 #include "silkit/services/logging/ILogger.hpp"
 
@@ -102,6 +104,30 @@ private: // IRawByteStreamListener
     void OnTimerExpired(ITimer& timer) override;
 
 private:
+    struct MemoryResource : std::pmr::memory_resource
+    {
+        std::pmr::memory_resource * memoryResource{std::pmr::get_default_resource()};
+        int64_t currentAllocated{0};
+
+        void* do_allocate(size_t bytes, size_t align) override
+        {
+            currentAllocated += bytes;
+            return memoryResource->allocate(bytes, align);
+        }
+
+        void do_deallocate(void* ptr, size_t bytes, size_t align) override
+        {
+            currentAllocated -= bytes;
+            return memoryResource->deallocate(ptr, bytes, align);
+        }
+
+        bool do_is_equal(const memory_resource& that) const noexcept override
+        {
+            return this == &that;
+        }
+    };
+
+private:
     // ----------------------------------------
     // Private Members
     ProtocolVersion _protocolVersion{};
@@ -120,9 +146,11 @@ private:
     RingBuffer _msgBuffer;
     std::vector<MutableBuffer> _currentReceivingBuffers;
 
+    MemoryResource _memoryResource;
+
     // sending
     mutable std::mutex _sendingQueueMutex;
-    std::deque<std::vector<uint8_t>> _sendingQueue;
+    std::pmr::list<std::vector<uint8_t>> _sendingQueue;
     ConstBuffer _currentSendingBuffer;
     std::vector<uint8_t> _currentSendingBufferData;
     std::vector<uint8_t> _aggregatedMessages;

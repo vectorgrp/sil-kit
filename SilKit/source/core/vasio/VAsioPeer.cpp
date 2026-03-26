@@ -38,6 +38,7 @@ VAsioPeer::VAsioPeer(IVAsioPeerListener* listener, IIoContext* ioContext, std::u
     , _logger{logger}
     , _msgBuffer{4096}
     , _peerMetrics{std::move(peerMetrics)}
+    , _sendingQueue{&_memoryResource}
 {
     _socket->SetListener(*this);
 
