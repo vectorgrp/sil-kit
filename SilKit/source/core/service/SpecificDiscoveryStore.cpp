@@ -387,19 +387,17 @@ void SpecificDiscoveryStore::InsertLookupHandler(const std::string& controllerTy
 const std::vector<SilKit::Services::MatchingLabel> SpecificDiscoveryStore::GetLabels(
     const ServiceDescriptor& descriptor)
 {
-
-
-    const auto ctrlType = descriptor.getVal(Core::Discovery::controllerType);
+    const auto ctrlType = descriptor.GetSupplementalDataValue(Core::Discovery::controllerType);
 
     std::string labelsStr;
 
     if(ctrlType == controllerTypeDataPublisher)
     {
-        labelsStr = descriptor.getVal(Core::Discovery::supplKeyDataPublisherPubLabels);
+        labelsStr = descriptor.GetSupplementalDataValue(Core::Discovery::supplKeyDataPublisherPubLabels);
     }
     else if(ctrlType == controllerTypeRpcClient)
     {
-        labelsStr = descriptor.getVal(Core::Discovery::supplKeyRpcClientLabels);
+        labelsStr = descriptor.GetSupplementalDataValue(Core::Discovery::supplKeyRpcClientLabels);
     }
     else
     {

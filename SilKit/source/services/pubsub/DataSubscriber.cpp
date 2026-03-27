@@ -32,7 +32,7 @@ void DataSubscriber::RegisterServiceDiscovery()
     auto matchHandler = [this](SilKit::Core::Discovery::ServiceDiscoveryEvent::Type discoveryType,
                                const SilKit::Core::ServiceDescriptor& serviceDescriptor) {
 
-        const auto pubUUID = serviceDescriptor.getVal(Core::Discovery::supplKeyDataPublisherPubUUID);
+        const auto pubUUID = serviceDescriptor.GetSupplementalDataValue(Core::Discovery::supplKeyDataPublisherPubUUID);
 
         // Early abort creation if Publisher is already connected
         if (discoveryType == SilKit::Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated
@@ -41,17 +41,19 @@ void DataSubscriber::RegisterServiceDiscovery()
             return;
         }
 
-        const auto topic = serviceDescriptor.getVal(Core::Discovery::supplKeyDataPublisherTopic);
+        const auto topic = serviceDescriptor.GetSupplementalDataValue(Core::Discovery::supplKeyDataPublisherTopic);
 
         // We need to just match the MediaType, the topic and labels were already prefiltered by the ServiceDiscovery
-        const std::string pubMediaType{serviceDescriptor.getVal(Core::Discovery::supplKeyDataPublisherMediaType)};
+        const std::string pubMediaType{
+            serviceDescriptor.GetSupplementalDataValue(Core::Discovery::supplKeyDataPublisherMediaType)};
         if (MatchMediaType(_mediaType, pubMediaType))
         {
             std::unique_lock<decltype(_internalSubscribersMx)> lock(_internalSubscribersMx);
 
             if (discoveryType == SilKit::Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated)
             {
-                const std::string labelsStr = serviceDescriptor.getVal(Core::Discovery::supplKeyDataPublisherPubLabels);
+                const std::string labelsStr =
+                    serviceDescriptor.GetSupplementalDataValue(Core::Discovery::supplKeyDataPublisherPubLabels);
                 const auto publisherLabels =
                     SilKit::Config::Deserialize<std::vector<SilKit::Services::MatchingLabel>>(labelsStr);
                 AddInternalSubscriber(pubUUID, pubMediaType, publisherLabels);

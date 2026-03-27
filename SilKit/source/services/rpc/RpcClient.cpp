@@ -55,8 +55,8 @@ void RpcClient::RegisterServiceDiscovery()
 {
     auto matchHandler = [this](SilKit::Core::Discovery::ServiceDiscoveryEvent::Type discoveryType,
                                const SilKit::Core::ServiceDescriptor& serviceDescriptor) {
-
-        auto clientUUID = serviceDescriptor.getVal(Core::Discovery::supplKeyRpcServerInternalClientUUID);
+        auto clientUUID =
+            serviceDescriptor.GetSupplementalDataValue(Core::Discovery::supplKeyRpcServerInternalClientUUID);
 
         if (clientUUID == _clientUUID)
         {
