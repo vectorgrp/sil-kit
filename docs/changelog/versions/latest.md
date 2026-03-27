@@ -1,5 +1,7 @@
 # [5.0.4] - 2026-03-27
 
+This is a Quality Assured Release.
+
 ## Changed
 
 - `docs`: removed 'Vector' prefix where SIL Kit is mentioned in multiple places
