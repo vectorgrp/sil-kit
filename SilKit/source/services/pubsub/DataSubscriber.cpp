@@ -31,7 +31,6 @@ void DataSubscriber::RegisterServiceDiscovery()
 {
     auto matchHandler = [this](SilKit::Core::Discovery::ServiceDiscoveryEvent::Type discoveryType,
                                const SilKit::Core::ServiceDescriptor& serviceDescriptor) {
-
         const auto pubUUID = serviceDescriptor.GetSupplementalDataValue(Core::Discovery::supplKeyDataPublisherPubUUID);
 
         // Early abort creation if Publisher is already connected
