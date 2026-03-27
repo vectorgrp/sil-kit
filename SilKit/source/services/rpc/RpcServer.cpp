@@ -32,16 +32,7 @@ void RpcServer::RegisterServiceDiscovery()
                                const SilKit::Core::ServiceDescriptor& serviceDescriptor) {
         if (discoveryType == SilKit::Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated)
         {
-            auto getVal = [serviceDescriptor](const std::string& key) {
-                std::string tmp;
-                if (!serviceDescriptor.GetSupplementalDataItem(key, tmp))
-                {
-                    throw SilKit::StateError{"Unknown key in supplementalData"};
-                }
-                return tmp;
-            };
-
-            auto clientUUID = getVal(Core::Discovery::supplKeyRpcClientUUID);
+            auto clientUUID = serviceDescriptor.GetSupplementalDataValue(Core::Discovery::supplKeyRpcClientUUID);
 
             // Early abort creation if Client is already connected
             if (_internalRpcServers.count(clientUUID) > 0)
@@ -49,13 +40,16 @@ void RpcServer::RegisterServiceDiscovery()
                 return;
             }
 
-            auto functionName = getVal(Core::Discovery::supplKeyRpcClientFunctionName);
-            auto clientMediaType = getVal(Core::Discovery::supplKeyRpcClientMediaType);
-            std::string labelsStr = getVal(Core::Discovery::supplKeyRpcClientLabels);
+            auto functionName =
+                serviceDescriptor.GetSupplementalDataValue(Core::Discovery::supplKeyRpcClientFunctionName);
+            auto clientMediaType =
+                serviceDescriptor.GetSupplementalDataValue(Core::Discovery::supplKeyRpcClientMediaType);
+            std::string labelsStr =
+                serviceDescriptor.GetSupplementalDataValue(Core::Discovery::supplKeyRpcClientLabels);
             auto clientLabels = SilKit::Config::Deserialize<std::vector<SilKit::Services::MatchingLabel>>(labelsStr);
 
-            if (functionName == _dataSpec.FunctionName() && MatchMediaType(clientMediaType, _dataSpec.MediaType())
-                && Util::MatchLabels(_dataSpec.Labels(), clientLabels))
+            // Match only on the MediaType, FunctionName and Labels are already prefiltered by the DiscoveryService
+            if (MatchMediaType(clientMediaType, _dataSpec.MediaType()))
             {
                 AddInternalRpcServer(clientUUID, clientMediaType, clientLabels);
             }

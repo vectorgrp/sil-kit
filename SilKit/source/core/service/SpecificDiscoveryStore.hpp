@@ -10,6 +10,7 @@
 #include <string>
 #include <functional>
 #include <map>
+#include <unordered_set>
 
 #include "IServiceDiscovery.hpp"
 #include "Hash.hpp"
@@ -33,12 +34,23 @@ struct FilterTypeHash
 
 using HandlerValue = std::shared_ptr<ServiceDiscoveryHandler>;
 
+struct ControllerCluster {
+    ServiceDiscoveryHandler handler;
+    std::vector<SilKit::Services::MatchingLabel> labels;
+
+    ControllerCluster(ServiceDiscoveryHandler ahandler, const std::vector<SilKit::Services::MatchingLabel>& alabels) :
+        handler(ahandler),
+        labels(alabels) {
+    };
+
+};
+
 //! Stores all potential nodes (service descriptors) and handlers to call for a specific data matching branch
 class DiscoveryCluster
 {
 public:
     std::vector<ServiceDescriptor> nodes;
-    std::vector<HandlerValue> handlers;
+    std::vector<std::shared_ptr<ControllerCluster>> controllerInfo;
 };
 
 //! Holds all relevant information for a controllerType and key (topic/functionName/clientUUID)
@@ -102,12 +114,22 @@ private: //methods
                                  const std::vector<SilKit::Services::MatchingLabel>& labels,
                                  std::function<void(DiscoveryCluster&)>);
 
-    //!< Looks for the label that returns a minimal handler set
+    /*! \brief Looks for the label that returns a minimal handler set
+    *
+    * For a suitable controller, ALL its labels must match ALL of our controllers labels
+    * So we can preselect them via checking which of the controllers labels matches with the least amount of services
+    * since the others have labels present that are not in the controllers label list, thus they are never going to match.
+    */
     auto GetLabelWithMinimalHandlerSet(DiscoveryKeyNode& keyNode,
                                        const std::vector<SilKit::Services::MatchingLabel>& labels)
         -> const SilKit::Services::MatchingLabel*;
 
-    //!< Looks for the label that returns a minimal ServiceDescriptor set
+    /*! \brief Looks for the label that returns a minimal ServiceDescriptor set
+    *
+    * For a suitable service, ALL its labels must match ALL of our controllers labels
+    * So we can preselect them via checking which of the stored service labels match with the least amount of handlers
+    * since the others have labels present that are not in the services label list, they are never going to match.
+    */
     auto GetLabelWithMinimalNodeSet(DiscoveryKeyNode& keyNode,
                                     const std::vector<SilKit::Services::MatchingLabel>& labels)
         -> const SilKit::Services::MatchingLabel*;
@@ -125,6 +147,9 @@ private: //methods
     void InsertLookupHandler(const std::string& controllerType, const std::string& key,
                              const std::vector<SilKit::Services::MatchingLabel>& labels,
                              ServiceDiscoveryHandler handler);
+
+    //!< Get serviceDescriptorLabels
+    const std::vector<SilKit::Services::MatchingLabel> GetLabels(const ServiceDescriptor& descriptor);
 
 private: //member
     //!< SpecificDiscoveryStore is only available to a a sub set of controllers
