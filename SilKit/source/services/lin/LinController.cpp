@@ -180,88 +180,77 @@ void LinController::ThrowIfNotConfiguredTxUnconditional(LinId linId)
 
 void LinController::WarnOnWrongDataLength(const LinFrame& receivedFrame, const LinFrame& configuredFrame) const
 {
-    std::string errorMsg =
-        fmt::format("Mismatch between configured ({}) and received ({}) LinDataLength in LinFrame with ID {}",
-                    configuredFrame.dataLength, receivedFrame.dataLength, static_cast<uint16_t>(receivedFrame.id));
-    _logger->Warn(errorMsg);
+    Logging::Warn(_logger, "Mismatch between configured ({}) and received ({}) LinDataLength in LinFrame with ID {}",
+                  configuredFrame.dataLength, receivedFrame.dataLength, static_cast<uint16_t>(receivedFrame.id));
 }
 
 void LinController::WarnOnWrongChecksum(const LinFrame& receivedFrame, const LinFrame& configuredFrame) const
 {
-    std::string errorMsg = fmt::format(
-        "Mismatch between configured ({}) and received ({}) LinChecksumModel in LinFrame with ID {}",
-        configuredFrame.checksumModel, receivedFrame.checksumModel, static_cast<uint16_t>(receivedFrame.id));
-    _logger->Warn(errorMsg);
+    Logging::Warn(_logger, "Mismatch between configured ({}) and received ({}) LinChecksumModel in LinFrame with ID {}",
+                  configuredFrame.checksumModel, receivedFrame.checksumModel, static_cast<uint16_t>(receivedFrame.id));
 }
 
 void LinController::WarnOnReceptionWithInvalidDataLength(LinDataLength invalidDataLength,
                                                          const std::string& fromParticipantName,
                                                          const std::string& fromServiceName) const
 {
-    std::string errorMsg =
-        fmt::format("LinController received transmission with invalid payload length {} from {{{}, {}}}. This "
-                    "tranmission is ignored.",
-                    static_cast<uint16_t>(invalidDataLength), fromParticipantName, fromServiceName);
-    _logger->Warn(errorMsg);
+    Logging::Warn(_logger,
+                  "LinController received transmission with invalid payload length {} from {{{}, {}}}. This "
+                  "tranmission is ignored.",
+                  static_cast<uint16_t>(invalidDataLength), fromParticipantName, fromServiceName);
 }
 
 void LinController::WarnOnReceptionWithInvalidLinId(LinId invalidLinId, const std::string& fromParticipantName,
                                                     const std::string& fromServiceName) const
 {
-    std::string errorMsg = fmt::format(
+    Logging::Warn(
+        _logger,
         "LinController received transmission with invalid LIN ID {} from {{{}, {}}}. This transmission is ignored.",
         static_cast<uint16_t>(invalidLinId), fromParticipantName, fromServiceName);
-    _logger->Warn(errorMsg);
 }
 
-void LinController::WarnOnReceptionWhileInactive() const
+void LinController::WarnOnReceptionWhileInactive(const LinTransmission& msg) const
 {
-    std::string errorMsg = fmt::format("Inactive LinController received a transmission. This transmission is ignored.");
-    _logger->Warn(errorMsg);
+    Logging::Warn(_logger, "Inactive LinController received a transmission ({}). This transmission is ignored.", msg);
+}
+
+void LinController::WarnOnReceptionWhileSleeping() const
+{
+    Logging::Warn(_logger, "Sleeping LinController received a transmission. This transmission is ignored!");
 }
 
 void LinController::WarnOnUnneededStatusChange(LinControllerStatus status) const
 {
-    std::string errorMsg =
-        fmt::format("Invalid LinController status change: controller is already in {} mode.", status);
-    _logger->Warn(errorMsg);
+    Logging::Warn(_logger, "Invalid LinController status change: controller is already in {} mode.", status);
 }
 
 void LinController::WarnOnInvalidLinId(LinId invalidLinId, const std::string& callingMethodName) const
 {
-    std::string errorMsg =
-        fmt::format("Invalid ID={} in call to '{}'", static_cast<uint16_t>(invalidLinId), callingMethodName);
-    _logger->Warn(errorMsg);
+    Logging::Warn(_logger, "Invalid ID={} in call to '{}'", static_cast<uint16_t>(invalidLinId), callingMethodName);
 }
 
 void LinController::WarnOnUnusedResponseMode(const std::string& callingMethodName) const
 {
-    std::string errorMsg =
-        fmt::format("LinFrameResponseMode::Unused is not allowed in call to '{}'.", callingMethodName);
-    _logger->Warn(errorMsg);
+    Logging::Warn(_logger, "LinFrameResponseMode::Unused is not allowed in call to '{}'.", callingMethodName);
 }
 
 void LinController::WarnOnResponseModeReconfiguration(LinId id, LinFrameResponseMode currentResponseMode) const
 {
-    std::string errorMsg =
-        fmt::format("Can't set response mode for ID={}. Mode is already configured to {}.", id, currentResponseMode);
-    _logger->Warn(errorMsg);
+    Logging::Warn(_logger, "Can't set response mode for ID={}. Mode is already configured to {}.", id, currentResponseMode);
 }
 
 
 void LinController::WarnOnUnconfiguredSlaveResponse(LinId id) const
 {
-    std::string errorMsg = fmt::format("No slave has configured a response for ID={}. Use Init() or SetFrameResponse() "
-                                       "on the slave node to configure responses.",
-                                       id);
-    _logger->Warn(errorMsg);
+    Logging::Warn(_logger,
+                  "No slave has configured a response for ID={}. Use Init() or SetFrameResponse() on the slave node to "
+                  "configure responses.",
+                  id);
 }
 
 void LinController::WarnOnSendFrameSlaveResponseWithMasterTx(LinId id) const
 {
-    std::string errorMsg =
-        fmt::format("Master has already configured a response on ID={}. Ignoring this call to SendFrame()", id);
-    _logger->Warn(errorMsg);
+    Logging::Warn(_logger, "Master has already configured a response on ID={}. Ignoring this call to SendFrame()", id);
 }
 
 void LinController::ThrowOnSendAttemptWithUndefinedChecksum(const LinFrame& frame) const
@@ -752,7 +741,13 @@ void LinController::ReceiveMsg(const IServiceEndpoint* from, const LinTransmissi
 
     if (_controllerMode == LinControllerMode::Inactive)
     {
-        WarnOnReceptionWhileInactive();
+        WarnOnReceptionWhileInactive(msg);
+        return;
+    }
+
+    if(_controllerStatus == LinControllerStatus::Sleep || _controllerStatus == LinControllerStatus::Unknown)
+    {
+        WarnOnReceptionWhileSleeping();
         return;
     }
 

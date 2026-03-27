@@ -104,14 +104,6 @@ private:
     {
         const auto linId{static_cast<unsigned>(linFrame.id)};
 
-        if (_linController->Status() != LinControllerStatus::Operational)
-        {
-            std::stringstream ss;
-            ss << "LIN Frame with ID=" << linId << " not sent, since the controller is not operational";
-            GetLogger()->Warn(ss.str());
-            return;
-        }
-
         _linController->SendFrame(linFrame, responseType);
 
         std::stringstream ss;
