@@ -14,6 +14,7 @@
 #include "rapidyaml.hpp"
 
 #include "ParticipantConfiguration.hpp"
+#include "YamlParserUtils.hpp"
 
 namespace VSilKit {
 
@@ -125,6 +126,14 @@ public:
     void ReadKeyValue(T& value, const std::string& name)
     {
         auto&& child = GetChildSafe(name);
+
+        if (!child.IsValid())
+        {
+            std::ostringstream s;
+            s << "missing key: " << name;
+            throw MakeConfigurationError(s.str());
+        }
+
         child.Read(value);
     }
 
@@ -205,25 +214,10 @@ protected:
         return node.is_map() && !node.find_child(ryml::to_csubstr(name)).invalid();
     }
 
-    auto MakeConfigurationError(const char* message) const -> SilKit::ConfigurationError
+    auto MakeConfigurationError(const std::string_view message) const -> SilKit::ConfigurationError
     {
         const auto location = _parser.location(_node);
-
-        std::ostringstream s;
-
-        s << "error parsing configuration";
-        if (location.name.empty())
-        {
-            s << " file " << location.name << ": ";
-        }
-        else
-        {
-            s << " string: ";
-        }
-
-        s << "line " << location.line << " column " << location.col << ": " << message;
-
-        return SilKit::ConfigurationError{s.str()};
+        return VSilKit::MakeConfigurationError(location, message);
     }
 
     auto GetChildSafe(const std::string& name) const -> Impl

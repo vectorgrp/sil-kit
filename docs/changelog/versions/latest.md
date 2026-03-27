@@ -15,3 +15,5 @@ This is a Quality Assured Release.
 - `lin`: fixed TX/RX behavior when controller is not operational
 
 - `lin`: populate the `timestamp` field in `LinControllerStatusUpdate` message
+
+- `config`: print proper error message for missing keys

@@ -4,21 +4,12 @@
 // SPDX-License-Identifier: MIT
 
 #include <string>
-#include <memory>
-#include <sstream>
-#include <map>
-#include <vector>
 
 #include "YamlReader.hpp"
 #include "YamlWriter.hpp"
+#include "YamlParserUtils.hpp"
+
 #include "rapidyaml.hpp"
-
-namespace VSilKit {
-
-// Utility for parsing key-value lists for protocol capabilities
-auto ParseCapabilities(const std::string& input) -> std::vector<std::map<std::string, std::string>>;
-
-} // namespace VSilKit
 
 
 namespace SilKit {
@@ -36,6 +27,8 @@ auto Deserialize(const std::string& input) -> T
         return {};
     }
 
+    const auto rapidyamlCallbacks = VSilKit::GetRapidyamlCallbacks();
+
     ryml::ParserOptions options{};
     options.locations(true);
 
@@ -46,6 +39,11 @@ auto Deserialize(const std::string& input) -> T
     try
     {
         auto tree = ryml::parse_in_arena(&parser, cinput);
+
+        // Install the error-handling callbacks. This will nicely format errors and throw an exception.
+        tree.callbacks(rapidyamlCallbacks);
+
+        // Extract a reference to the root node of the document tree.
         auto root = tree.crootref();
 
         R reader{parser, root};

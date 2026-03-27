@@ -517,4 +517,66 @@ TEST_F(Test_YamlParser, yaml_deprecated_RpcServer_configuration)
     ASSERT_TRUE(participantConfiguration.rpcServers[2].functionName.has_value());
     EXPECT_EQ(participantConfiguration.rpcServers[2].functionName.value(), "TheFunction3");
 }
+
+TEST_F(Test_YamlParser, yaml_throw_on_missing_keyword) {
+    // the config has the pKeySlotId missing, but it is required
+    auto configWithoutKeyslot = R"(
+FlexrayControllers:
+- ClusterParameters:
+    gColdstartAttempts: 8
+    gCycleCountMax: 63
+    gListenNoise: 2
+    gMacroPerCycle: 3636
+    gMaxWithoutClockCorrectionFatal: 2
+    gMaxWithoutClockCorrectionPassive: 2
+    gNumberOfMiniSlots: 291
+    gNumberOfStaticSlots: 70
+    gPayloadLengthStatic: 16
+    gSyncFrameIDCountMax: 15
+    gdActionPointOffset: 2
+    gdDynamicSlotIdlePhase: 1
+    gdMiniSlot: 5
+    gdMiniSlotActionPointOffset: 2
+    gdStaticSlot: 31
+    gdSymbolWindow: 1
+    gdSymbolWindowActionPointOffset: 1
+    gdTSSTransmitter: 9
+    gdWakeupTxActive: 60
+    gdWakeupTxIdle: 180
+  Name: FlexRay1
+  NodeParameters:
+    pAllowHaltDueToClock: 1
+    pAllowPassiveToActive: 0
+    pChannels: AB
+    pClusterDriftDamping: 2
+    #pKeySlotId: 10
+    pKeySlotOnlyEnabled: 0
+    pKeySlotUsedForStartup: 1
+    pKeySlotUsedForSync: 0
+    pLatestTx: 249
+    pMacroInitialOffsetA: 3
+    pMacroInitialOffsetB: 3
+    pMicroInitialOffsetA: 6
+    pMicroInitialOffsetB: 6
+    pMicroPerCycle: 200000
+    pOffsetCorrectionOut: 127
+    pOffsetCorrectionStart: 3632
+    pRateCorrectionOut: 81
+    pSamplesPerMicrotick: 2
+    pWakeupChannel: A
+    pWakeupPattern: 33
+    pdAcceptedStartupRange: 212
+    pdListenTimeout: 400162
+    pdMicrotick: 25ns
+
+)";
+
+    EXPECT_THROW(
+        {
+            auto cfg = Deserialize<ParticipantConfiguration>(
+                configWithoutKeyslot);
+        },
+        SilKit::ConfigurationError);
+}
+
 } // anonymous namespace
