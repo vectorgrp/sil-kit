@@ -31,7 +31,10 @@ add_library(O_SilKit_Config OBJECT
     YamlReader.cpp
     YamlWriter.hpp
     YamlWriter.cpp
-    
+
+    YamlParserUtils.hpp
+    YamlParserUtils.cpp
+
     YamlValidator.hpp
     YamlValidator.cpp
 )
