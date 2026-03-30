@@ -410,9 +410,19 @@ private:
     void SendMsgToTargetImpl(const IServiceEndpoint* from, const std::string& targetParticipantName,
                              SilKitMessageT&& msg)
     {
+        using typename MsgT = std::decay_t<SilKitMessageT>;
         const auto& key = from->GetServiceDescriptor().GetNetworkName();
 
-        auto& linkMap = std::get<SilKitServiceToLinkMap<std::decay_t<SilKitMessageT>>>(_serviceToLinkMap);
+        if (targetParticipantName.empty())
+        {
+            std::stringstream ss;
+            ss << "Error: Sending message of type '" << SilKitMsgTraits<MsgT>::TypeName() << "'"
+               << " on the network '" << key << "'which has no active SIL Kit Network Simulator."
+               << " Please ensure that the SIL Kit Network Simulator is configured to simulate the given network.";
+            throw SilKitError{ss.str()};
+        }
+
+        auto& linkMap = std::get<SilKitServiceToLinkMap<MsgT>>(_serviceToLinkMap);
         if (linkMap.count(key) < 1)
         {
             throw SilKitError{"SendMsgToTargetImpl: sending on empty link for " + key};
