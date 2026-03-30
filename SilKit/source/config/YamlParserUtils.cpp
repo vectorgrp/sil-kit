@@ -76,12 +76,12 @@ namespace {
 
 auto RapidyamlAllocate(const size_t length, void* /*hint*/, void* /*userData*/) -> void*
 {
-    return ::operator new(length);
+    return std::malloc(length);
 }
 
 void RapidyamlFree(void* ptr, size_t /*length*/, void* /*userData*/)
 {
-    ::operator delete(ptr);
+    std::free(ptr);
 }
 
 void RapidyamlError(const char* message, const size_t length, ryml::Location location, void* /*userData*/)
