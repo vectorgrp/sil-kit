@@ -59,7 +59,6 @@ auto MakeConfigurationError(ryml::Location location, const std::string_view mess
         s << " file " << location.name << ": ";
     }
 
-    // NB: The line number seems off-by-one. This might be a bug in rapidyaml, or a misunderstanding on my end.
     s << "line " << (location.line + 1) << " column " << location.col << ": " << message;
 
     return SilKit::ConfigurationError{s.str()};
