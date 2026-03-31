@@ -17,3 +17,7 @@ This is a Quality Assured Release.
 - `lin`: populate the `timestamp` field in `LinControllerStatusUpdate` message
 
 - `config`: print proper error message for missing keys
+
+- `netsim`: print error when network is not simulated
+
+- `extensions`: load transitive dependencies from the extensions dir
