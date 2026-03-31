@@ -38,7 +38,7 @@ const std::string lib_prefix = "";
 
 LibraryHandle OpenLibrary(const std::string& path)
 {
-    LibraryHandle tmp = ::LoadLibraryA(path.c_str());
+    LibraryHandle tmp = ::LoadLibraryExA(path.c_str(), nullptr, LOAD_WITH_ALTERED_SEARCH_PATH);
     if (tmp == nullptr)
     {
         throw ExtensionError("::LoadLibrary() failed: " + lastErrorMessage());
