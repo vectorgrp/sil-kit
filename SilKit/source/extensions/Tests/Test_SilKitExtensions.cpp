@@ -59,7 +59,7 @@ public:
 };
 } // namespace
 
-class Test_SilKitExtensions : public Test
+class ITest_SilKitExtensions : public Test
 {
 protected:
     void TearDown() override
@@ -77,11 +77,11 @@ protected:
     StdoutLogger logger;
 };
 
-std::string Test_SilKitExtensions::currentWorkingDir;
+std::string ITest_SilKitExtensions::currentWorkingDir;
 
 using triple = std::tuple<uint32_t, uint32_t, uint32_t>;
 
-TEST_F(Test_SilKitExtensions, load_dummy_lib)
+TEST_F(ITest_SilKitExtensions, load_dummy_lib)
 {
     {
         const auto testDir = std::filesystem::path{"silkit_library_test"};
@@ -110,7 +110,7 @@ TEST_F(Test_SilKitExtensions, load_dummy_lib)
 }
 
 
-TEST_F(Test_SilKitExtensions, static_cast)
+TEST_F(ITest_SilKitExtensions, static_cast)
 {
     const auto testDir = std::filesystem::path{"silkit_library_test"};
     std::filesystem::current_path(testDir);
@@ -122,7 +122,7 @@ TEST_F(Test_SilKitExtensions, static_cast)
     ASSERT_EQ(dummy->GetDummyValue(), 12345L);
 }
 
-TEST_F(Test_SilKitExtensions, wrong_version_number)
+TEST_F(ITest_SilKitExtensions, wrong_version_number)
 {
     try
     {
@@ -142,13 +142,13 @@ TEST_F(Test_SilKitExtensions, wrong_version_number)
         wrong version number";
 }
 
-TEST_F(Test_SilKitExtensions, wrong_build_system)
+TEST_F(ITest_SilKitExtensions, wrong_build_system)
 {
     auto extension = SilKit::LoadExtension(&logger, "WrongBuildSystem");
     //should print a harmless warning on stdout
 }
 
-TEST_F(Test_SilKitExtensions, multiple_extensions_loaded)
+TEST_F(ITest_SilKitExtensions, multiple_extensions_loaded)
 {
     const auto testDir = std::filesystem::path{"silkit_library_test"};
     std::filesystem::current_path(testDir);
@@ -166,7 +166,7 @@ TEST_F(Test_SilKitExtensions, multiple_extensions_loaded)
 }
 
 #if !defined(_WIN32)
-TEST_F(Test_SilKitExtensions, load_from_envvar)
+TEST_F(ITest_SilKitExtensions, load_from_envvar)
 {
     const auto testDir = std::filesystem::path{"silkit_library_test"};
     setenv("TEST_VAR", testDir.c_str(), 1); // should be invariant
