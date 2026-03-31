@@ -8,6 +8,9 @@ add_subdirectory(SimTestHarness)
 # local headers as interface lib
 add_subdirectory(Hourglass)
 
+# extension loading 
+add_subdirectory(ExtensionTests)
+
 add_library(ITest_Utils INTERFACE)
 target_include_directories(ITest_Utils
     INTERFACE ${CMAKE_CURRENT_LIST_DIR})

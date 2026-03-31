@@ -84,8 +84,3 @@ target_compile_definitions(O_SilKit_Extensions
     PRIVATE
     SILKIT_EXTENSION_OS="${extension_os}"
 )
-
-if(SILKIT_BUILD_TESTS)
-    add_subdirectory(Tests)
-endif()
-

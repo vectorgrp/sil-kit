@@ -142,7 +142,7 @@ std::vector<std::string> FindLibrary(const std::string& name, const SilKit::Exte
             const auto current = std::filesystem::path{dir} / path;
             if (std::filesystem::exists(current))
             {
-                rv.push_back(current.string());
+                rv.push_back(std::filesystem::absolute(current).string());
             }
         }
     }
