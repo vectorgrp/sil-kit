@@ -416,8 +416,8 @@ private:
         if (targetParticipantName.empty())
         {
             std::stringstream ss;
-            ss << "Error: Sending message of type '" << SilKitMsgTraits<MsgT>::TypeName() << "'"
-               << " on the network '" << key << "'which has no active SIL Kit Network Simulator."
+            ss << "Error: Sending message of type " << std::quoted(SilKitMsgTraits<MsgT>::TypeName())
+               << " on the network " << std::quoted(key) << " which has no active SIL Kit Network Simulator."
                << " Please ensure that the SIL Kit Network Simulator is configured to simulate the given network.";
             throw SilKitError{ss.str()};
         }
