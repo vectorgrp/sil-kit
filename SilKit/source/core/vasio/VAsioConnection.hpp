@@ -410,7 +410,7 @@ private:
     void SendMsgToTargetImpl(const IServiceEndpoint* from, const std::string& targetParticipantName,
                              SilKitMessageT&& msg)
     {
-        using typename MsgT = std::decay_t<SilKitMessageT>;
+        using MsgT = std::decay_t<SilKitMessageT>;
         const auto& key = from->GetServiceDescriptor().GetNetworkName();
 
         if (targetParticipantName.empty())
