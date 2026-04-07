@@ -16,15 +16,14 @@ add_executable(sil-kit-monitor
 
 # Group this demo project into a folder
 set_target_properties(sil-kit-monitor PROPERTIES
-     FOLDER "Utilities"
-     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"
-     INSTALL_RPATH "$ORIGIN/../${CMAKE_INSTALL_LIBDIR}"
+    FOLDER "Utilities"
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"
+    INSTALL_RPATH "$ORIGIN/../${CMAKE_INSTALL_LIBDIR}"
 )
 
 target_link_libraries(sil-kit-monitor
     SilKit
     I_SilKit_Util
-
     O_SilKit_Util_SignalHandler
 )
 
