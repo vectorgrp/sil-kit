@@ -1978,4 +1978,58 @@ TEST_F(ITest_LinDynamicResponse, normal_master_dynamic_slave_out_of_band_respons
     // requested via SendFrameHeader or SendFrame(..., SlaveResponse)
 }
 
+TEST_F(ITest_LinDynamicResponse, go_to_sleep_triggers_header_handler)
+{
+    std::vector<std::string> participantNames = {"Master", "Slave"};
+
+    _simTestHarness = std::make_unique<SimTestHarness>(participantNames, "silkit://localhost:0", false);
+
+    ILinController* master{nullptr};
+    {
+        auto* participant = _simTestHarness->GetParticipant("Master")->Participant();
+        auto* lifecycleService = _simTestHarness->GetParticipant("Master")->GetOrCreateLifecycleService();
+        auto* timeSyncService = _simTestHarness->GetParticipant("Master")->GetOrCreateTimeSyncService();
+        master = participant->CreateLinController("Controller", "LIN");
+
+        lifecycleService->SetCommunicationReadyHandler([master]() {
+            auto config = MakeMasterConfig();
+            master->Init(config);
+        });
+
+        timeSyncService->SetSimulationStepHandler([master, lifecycleService](auto now, auto /*duration*/) {
+            if (now == 10ms)
+            {
+                master->GoToSleep();
+            }
+
+            if (now == 20ms)
+            {
+                lifecycleService->Stop("done");
+            }
+        }, 1ms);
+    }
+
+    bool goToSleepHeaderReceived{false};
+    {
+        auto* participant = _simTestHarness->GetParticipant("Slave")->Participant();
+        auto* lifecycleService = _simTestHarness->GetParticipant("Slave")->GetOrCreateLifecycleService();
+        [[maybe_unused]] auto* timeSyncService = _simTestHarness->GetParticipant("Slave")->GetOrCreateTimeSyncService();
+        auto* slave = participant->CreateLinController("Controller", "LIN");
+
+        lifecycleService->SetCommunicationReadyHandler([slave]() {
+            auto config = MakeDynamicSlaveConfig();
+            SilKit::Experimental::Services::Lin::InitDynamic(slave, config);
+        });
+
+        SilKit::Experimental::Services::Lin::AddFrameHeaderHandler(slave,
+                                                                   [&goToSleepHeaderReceived](auto*, auto&& event) {
+            EXPECT_EQ(event.id, 0x3C) << "Received header with unexpected ID: " << event.id;
+            goToSleepHeaderReceived = true;
+        });
+    }
+
+    _simTestHarness->Run(5s);
+    EXPECT_TRUE(goToSleepHeaderReceived) << "No frame header for GoToSleep received";
+}
+
 } //end namespace
