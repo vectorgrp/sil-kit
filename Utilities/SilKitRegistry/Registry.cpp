@@ -483,9 +483,7 @@ int main(int argc, char** argv)
     auto dashboardUri{commandlineParser.Get<CliParser::Option>("dashboard-uri").Value()};
     const auto useSignalHandler{commandlineParser.Get<CliParser::Flag>("use-signal-handler").Value()};
     auto enableDashboard{commandlineParser.Get<CliParser::Option>("dashboard-uri").HasValue()};
-
     const auto argStatusFile{commandlineParser.Get<CliParser::Option>("x-status-file").Value()};
-    auto statusFile = argStatusFile.empty() ? StatusFile{} : StatusFile{argStatusFile};
 
     if (commandlineParser.Get<CliParser::Flag>("enable-dashboard").Value())
     {
@@ -503,6 +501,9 @@ int main(int argc, char** argv)
 
     bool windowsService{SilKitRegistry::HasWindowsServiceSupport()
                         && commandlineParser.Get<CliParser::Flag>("windows-service").Value()};
+
+    // Use the status file only if the path isn't empty and the registry is not running as a Windows service.
+    auto statusFile = argStatusFile.empty() || windowsService ? StatusFile{} : StatusFile{argStatusFile};
 
     if (!isValidLogLevel(logLevel))
     {
