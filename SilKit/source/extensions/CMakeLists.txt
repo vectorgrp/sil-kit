@@ -28,7 +28,6 @@ add_library(O_SilKit_Extensions OBJECT
     SilKitExtensionApi/SilKitExtensionABI.h
     SilKitExtensionApi/SilKitExtensionUtils.hpp
 
-
     # Imlplementation Helpers
     SilKitExtensionImpl/DllCache.hpp
     SilKitExtensionImpl/SilKitExtensionLoader.hpp

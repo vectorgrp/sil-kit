@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: MIT
 
 add_subdirectory(util)
-add_subdirectory(wire)
 add_subdirectory(config)
 add_subdirectory(tracing)
 add_subdirectory(core)
@@ -87,6 +86,7 @@ target_include_directories(I_SilKit
     INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/experimental"
     INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/experimental/netsim"
     INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/extensions"
+    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/extensions/SilKitExtensionsImpl"
     INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/services/can"
     INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/services/ethernet"
     INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/services/flexray"

@@ -44,4 +44,3 @@ add_silkit_test_to_executable(SilKitUnitTests
     LIBS S_SilKitImpl I_SilKit
 )
 add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_LoggingSerdes.cpp LIBS S_SilKitImpl)
-
