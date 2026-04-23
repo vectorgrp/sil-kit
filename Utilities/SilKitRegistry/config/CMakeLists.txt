@@ -2,32 +2,17 @@
 #
 # SPDX-License-Identifier: MIT
 
-add_library(I_SilKitRegistry_Config INTERFACE)
-
-target_include_directories(I_SilKitRegistry_Config
-    INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
-)
-
-target_link_libraries(I_SilKitRegistry_Config
-    INTERFACE SilKitInterface
-
-    INTERFACE I_SilKit_Config
-
-    INTERFACE ${SILKIT_THIRD_PARTY_YAML_INTERFACE}
-)
-
-
 add_library(O_SilKitRegistry_Config OBJECT
     RegistryConfiguration.cpp
 )
 
+target_include_directories(O_SilKitRegistry_Config
+    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
 target_link_libraries(O_SilKitRegistry_Config
-    PUBLIC I_SilKitRegistry_Config
-
-    PUBLIC I_SilKit_Config
-
-    PUBLIC fmt::fmt
-    PUBLIC O_SilKit_Config
+    PRIVATE I_SilKit
+    PRIVATE fmt::fmt
     PRIVATE rapidyaml
 )
 
@@ -45,6 +30,7 @@ add_silkit_test_to_executable(SilKitRegistryTests
     Test_RegistryConfiguration.cpp
 
     LIBS
+    I_SilKit
     S_SilKitImpl
     O_SilKitRegistry_Config
     O_SilKit_Config

@@ -22,15 +22,6 @@ if(SILKIT_BUILD_DASHBOARD)
         silkit_dashboard_target_compile_flags(SilKitDashboardTests)
     endif ()
 
-    add_library(I_SilKit_Dashboard INTERFACE)
-    target_include_directories(I_SilKit_Dashboard
-        INTERFACE
-            ${CMAKE_CURRENT_SOURCE_DIR}
-            ${CMAKE_CURRENT_SOURCE_DIR}/client
-            ${CMAKE_CURRENT_SOURCE_DIR}/dto
-            ${CMAKE_CURRENT_SOURCE_DIR}/service
-    )
-
     add_library(O_SilKit_Dashboard STATIC
         client/DashboardComponents.hpp
         client/DashboardSystemApiClient.hpp
@@ -59,7 +50,6 @@ if(SILKIT_BUILD_DASHBOARD)
         LockedQueue.hpp
         SilKitEvent.hpp
 
-        
         DashboardBulkUpdate.hpp
         OatppHeaders.cpp
         OatppHeaders.hpp
@@ -68,17 +58,10 @@ if(SILKIT_BUILD_DASHBOARD)
         CreateDashboardInstance.cpp
     )
     target_link_libraries(O_SilKit_Dashboard
-        PUBLIC
-            I_SilKit_Dashboard
-            SilKitInterface
-            I_SilKit_Core_Internal
-            I_SilKit_Util
-            I_SilKit_Core_Participant
-            I_SilKit_Services_Logging
-        PRIVATE
-            S_SilKitImpl
-            Threads::Threads
-            oatpp
+        PRIVATE I_SilKit
+        PRIVATE S_SilKitImpl
+        PRIVATE Threads::Threads
+        PRIVATE oatpp
     )
 
     silkit_target_clean_compileflags(O_SilKit_Dashboard)
@@ -92,37 +75,35 @@ if(SILKIT_BUILD_DASHBOARD)
         LIBS
         S_SilKitImpl
         O_SilKit_Dashboard
-        I_SilKit_Core_Internal
-        )
+        I_SilKit
+    )
 
     add_silkit_test_to_executable(SilKitDashboardTests
         SOURCES service/Test_DashboardRestClient.cpp 
         LIBS
         S_SilKitImpl
         O_SilKit_Dashboard
-        I_SilKit_Core_Internal
-        I_SilKit_Core_Mock_Participant
+        I_SilKit
         oatpp
-        )
+    )
 
     add_silkit_test_to_executable(SilKitDashboardTests
         SOURCES service/Test_DashboardSilKitToOatppMapper.cpp 
         LIBS
         S_SilKitImpl
         O_SilKit_Dashboard
-        I_SilKit_Core_Internal
+        I_SilKit
         oatpp
-        )
+    )
 
     add_silkit_test_to_executable(SilKitDashboardTests
         SOURCES client/Test_DashboardSystemServiceClient.cpp 
         LIBS
         S_SilKitImpl
         O_SilKit_Dashboard
-        I_SilKit_Core_Internal
-        I_SilKit_Core_Mock_Participant
+        I_SilKit
         oatpp
-        )
+    )
 
 else()
 
@@ -131,20 +112,11 @@ else()
     )
 
     target_include_directories(O_SilKit_Dashboard
-        PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}
-        INTERFACE
-        ${CMAKE_CURRENT_SOURCE_DIR}
+        PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
     )
 
     target_link_libraries(O_SilKit_Dashboard
-        PUBLIC
-            SilKitInterface
-            I_SilKit_Core_Internal
-            I_SilKit_Util
-            I_SilKit_Core_Participant
+        PRIVATE I_SilKit
     )
 
 endif()
-
-

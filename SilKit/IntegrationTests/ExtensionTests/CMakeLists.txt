@@ -6,7 +6,7 @@ add_library(DummyExtension SHARED
     DummyExtension.cpp
     DummyExtension.hpp
 )
-target_link_libraries(DummyExtension PRIVATE O_SilKit_Extensions O_SilKit_VersionImpl SilKit)
+target_link_libraries(DummyExtension PRIVATE O_SilKit_Extensions O_SilKit_VersionImpl SilKit I_SilKit_Extensions)
 target_compile_definitions(DummyExtension PRIVATE SILKIT_EXTENSION_OS="Dummy")
 set_property(TARGET DummyExtension PROPERTY FOLDER "Tests")
 set_target_properties(DummyExtension PROPERTIES
@@ -16,7 +16,7 @@ set_target_properties(DummyExtension PROPERTIES
 )
 
 add_library(WrongVersionExtension SHARED WrongVersionExtension.cpp)
-target_link_libraries(WrongVersionExtension PRIVATE O_SilKit_Extensions O_SilKit_VersionImpl SilKit)
+target_link_libraries(WrongVersionExtension PRIVATE O_SilKit_Extensions O_SilKit_VersionImpl SilKit I_SilKit_Extensions)
 set_property(TARGET WrongVersionExtension PROPERTY FOLDER "Tests")
 target_compile_definitions(WrongVersionExtension PRIVATE SILKIT_EXTENSION_OS="WrongVersion")
 set_target_properties(WrongVersionExtension PROPERTIES
@@ -26,7 +26,7 @@ set_target_properties(WrongVersionExtension PROPERTIES
 )
 
 add_library(WrongBuildSystem  SHARED WrongBuildSystem.cpp) 
-target_link_libraries(WrongBuildSystem PRIVATE O_SilKit_Extensions O_SilKit_VersionImpl SilKit)
+target_link_libraries(WrongBuildSystem PRIVATE O_SilKit_Extensions O_SilKit_VersionImpl SilKit I_SilKit_Extensions)
 target_compile_definitions(WrongBuildSystem PRIVATE SILKIT_EXTENSION_OS="WrongBuildSystem")
 set_property(TARGET WrongBuildSystem PROPERTY FOLDER "Tests")
 set_target_properties(WrongBuildSystem PROPERTIES
@@ -35,7 +35,7 @@ set_target_properties(WrongBuildSystem PROPERTIES
     ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"
 )
 
-add_silkit_test_to_executable(SilKitIntegrationTests SOURCES ITest_SilKitExtensions.cpp LIBS O_SilKit_Extensions O_SilKit_VersionImpl I_SilKit_Core_Mock_Participant SilKit)
+add_silkit_test_to_executable(SilKitIntegrationTests SOURCES ITest_SilKitExtensions.cpp LIBS O_SilKit_Extensions O_SilKit_VersionImpl SilKit I_SilKit I_SilKit_Extensions)
 
 if(${SILKIT_BUILD_TESTS})
     add_dependencies(SilKitIntegrationTests
@@ -44,4 +44,3 @@ if(${SILKIT_BUILD_TESTS})
         WrongBuildSystem
     )
 endif()
-
