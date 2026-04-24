@@ -1,3 +1,5 @@
 # [5.0.5] - UNRELEASED
 
-> This changelog entry is still empty.
+## Changed
+
+- `cmake`: merged almost all internal CMake `INTERFACE` libraries into `I_SilKit`

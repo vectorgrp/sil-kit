@@ -2,22 +2,9 @@
 #
 # SPDX-License-Identifier: MIT
 
-add_library(I_SilKit_Core_RequestReply INTERFACE)
-
-target_include_directories(I_SilKit_Core_RequestReply
-    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}"
-)
-
-target_link_libraries(I_SilKit_Core_RequestReply
-    INTERFACE SilKitInterface
-
-    INTERFACE I_SilKit_Core_Internal
-    INTERFACE I_SilKit_Util_Uuid
-)
-
 add_library(O_SilKit_Core_RequestReply OBJECT
     RequestReplyDatatypes.hpp
-    
+
     RequestReplyService.hpp
     RequestReplyService.cpp
 
@@ -26,12 +13,12 @@ add_library(O_SilKit_Core_RequestReply OBJECT
 )
 
 target_link_libraries(O_SilKit_Core_RequestReply
-    PUBLIC I_SilKit_Core_RequestReply
+    PRIVATE I_SilKit
 )
 
 add_subdirectory(procs)
 
 add_silkit_test_to_executable(SilKitUnitTests
     SOURCES Test_RequestReplyService.cpp 
-    LIBS S_SilKitImpl I_SilKit_Core_Mock_Participant)
-
+    LIBS S_SilKitImpl I_SilKit
+)

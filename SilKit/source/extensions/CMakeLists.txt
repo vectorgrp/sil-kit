@@ -13,11 +13,10 @@ target_include_directories(I_SilKit_Extensions
     INTERFACE ${CMAKE_CURRENT_LIST_DIR}/SilKitExtensionImpl
 )
 
-target_link_libraries(I_SilKit_Extensions INTERFACE
-    INTERFACE SilKitInterface
-    INTERFACE I_SilKit_Config
-    INTERFACE I_SilKit_Tracing
+target_link_libraries(I_SilKit_Extensions
+    INTERFACE I_SilKit
 )
+
 
 add_library(O_SilKit_Extensions OBJECT
     SilKitExtensions.cpp
@@ -29,7 +28,6 @@ add_library(O_SilKit_Extensions OBJECT
     SilKitExtensionApi/SilKitExtensionABI.h
     SilKitExtensionApi/SilKitExtensionUtils.hpp
 
-
     # Imlplementation Helpers
     SilKitExtensionImpl/DllCache.hpp
     SilKitExtensionImpl/SilKitExtensionLoader.hpp
@@ -40,9 +38,8 @@ add_library(O_SilKit_Extensions OBJECT
 )
 
 target_link_libraries(O_SilKit_Extensions
-    PUBLIC I_SilKit_Extensions
-    PRIVATE I_SilKit_Core_Internal
-    PRIVATE I_SilKit_VersionImpl
+    PRIVATE I_SilKit
+    PRIVATE I_SilKit_Extensions
 )
 
 #Reproducible build: do not include CMAKE_SYSTEM_VERSION, it contains kernel version

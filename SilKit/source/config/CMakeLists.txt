@@ -2,19 +2,6 @@
 #
 # SPDX-License-Identifier: MIT
 
-add_library(I_SilKit_Config INTERFACE)
-
-target_include_directories(I_SilKit_Config
-    INTERFACE ${CMAKE_CURRENT_LIST_DIR}
-)
-
-target_link_libraries(I_SilKit_Config
-    INTERFACE
-        ${SILKIT_THIRD_PARTY_YAML_INTERFACE}
-        I_SilKit_Util
-        rapidyaml
-)
-
 add_library(O_SilKit_Config OBJECT
     Configuration.hpp
     Configuration.cpp
@@ -40,13 +27,9 @@ add_library(O_SilKit_Config OBJECT
 )
 
 target_link_libraries(O_SilKit_Config
-    PUBLIC I_SilKit_Config
-
-    PRIVATE SilKitInterface
-    PRIVATE I_SilKit_Util_FileHelpers
-    PUBLIC rapidyaml
-    PRIVATE fmt::fmt
+    PRIVATE I_SilKit
 )
+
 
 target_include_directories(O_SilKit_Config
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
@@ -134,14 +117,4 @@ copy_participant_configs(CopyTestConfigs "${ParticipantTestMiddlewareConfigs}" "
 
 if(SILKIT_BUILD_TESTS)
     add_dependencies(SilKitUnitTests CopyTestConfigs)
-
-    add_library(I_SilKit_Config_TestUtils INTERFACE)
-
-    target_include_directories(I_SilKit_Config_TestUtils
-        INTERFACE ${CMAKE_CURRENT_LIST_DIR}
-    )
-    target_link_libraries(I_SilKit_Config_TestUtils
-        INTERFACE I_SilKit_Config
-    )
 endif()
-

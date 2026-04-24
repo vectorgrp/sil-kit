@@ -22,10 +22,9 @@ set_target_properties(sil-kit-monitor PROPERTIES
 )
 
 target_link_libraries(sil-kit-monitor
-    SilKit
-    I_SilKit_Util
-
-    O_SilKit_Util_SignalHandler
+    PRIVATE SilKit
+    PRIVATE I_SilKit
+    PRIVATE O_SilKit_Util_SignalHandler
 )
 
 # Set versioning infos on exe

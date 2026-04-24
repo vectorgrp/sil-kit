@@ -2,17 +2,6 @@
 #
 # SPDX-License-Identifier: MIT
 
-add_library(I_SilKit_Experimental_NetworkSimulatorInternals INTERFACE)
-
-target_include_directories(I_SilKit_Experimental_NetworkSimulatorInternals 
-    INTERFACE ${CMAKE_CURRENT_LIST_DIR}
-    INTERFACE SilKitInterface
-)
-
-target_link_libraries(I_SilKit_Experimental_NetworkSimulatorInternals
-    INTERFACE I_SilKit_Core_Internal
-)
-
 add_library(O_SilKit_Experimental_NetworkSimulatorInternals OBJECT
     INetworkSimulatorInternal.hpp
     NetworkSimulatorInternal.cpp
@@ -33,6 +22,5 @@ add_library(O_SilKit_Experimental_NetworkSimulatorInternals OBJECT
 )
 
 target_link_libraries(O_SilKit_Experimental_NetworkSimulatorInternals
-    PUBLIC I_SilKit_Experimental_NetworkSimulatorInternals
-    PRIVATE I_SilKit_Core_Internal
+    PRIVATE I_SilKit
 )

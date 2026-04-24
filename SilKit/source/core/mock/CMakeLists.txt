@@ -2,5 +2,4 @@
 #
 # SPDX-License-Identifier: MIT
 
-add_subdirectory(participant)
 add_subdirectory(nullconnection)

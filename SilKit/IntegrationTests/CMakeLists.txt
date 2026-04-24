@@ -22,6 +22,7 @@ target_link_libraries(SilKitIntegrationTests
 )
 
 target_link_libraries(SilKitInternalIntegrationTests
+    PRIVATE I_SilKit
     PRIVATE S_SilKitImpl
     PRIVATE S_ITests_STH_Internals
 )

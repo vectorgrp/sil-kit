@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: MIT
 
 add_subdirectory(util)
-add_subdirectory(wire)
 add_subdirectory(config)
 add_subdirectory(tracing)
 add_subdirectory(core)
@@ -62,11 +61,99 @@ if(SILKIT_BUILD_STATIC)
 endif()
 
 
-add_library(I_SilKit_CreateParticipantImpl INTERFACE)
+add_library(I_SilKit INTERFACE)
 
-target_include_directories(I_SilKit_CreateParticipantImpl
-    INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
+target_include_directories(I_SilKit
+    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}"
+    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/capi"
+    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/config"
+    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/config/mock"
+    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/core/internal"
+    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/core/mock/nullconnection"
+    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/core/mock/participant"
+    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/core/participant"
+    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/core/requests"
+    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/core/requests/procs"
+    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/core/service"
+    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/core/vasio"
+    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/core/vasio/io"
+    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/core/vasio/io/mock"
+    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/core/vasio/mock"
+    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/dashboard"
+    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/dashboard/client"
+    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dto"
+    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/dashboard/service"
+    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/experimental"
+    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/experimental/netsim"
+    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/extensions"
+    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/extensions/SilKitExtensionsImpl"
+    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/services/can"
+    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/services/ethernet"
+    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/services/flexray"
+    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/services/lin"
+    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/services/logging"
+    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/services/metrics"
+    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/services/orchestration"
+    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/services/pubsub"
+    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/services/rpc"
+    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/tracing"
+    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/tracing/mock"
+    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/util"
+    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/wire/can"
+    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/wire/ethernet"
+    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/wire/flexray"
+    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/wire/lin"
+    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/wire/pubsub"
+    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/wire/rpc"
+    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/wire/util"
 )
+
+if (MSVC)
+    target_compile_definitions(I_SilKit
+        INTERFACE _WIN32_WINNT=0x0601
+    )
+endif()
+
+if(MINGW)
+    target_compile_definitions(I_SilKit
+        INTERFACE _WIN32_WINNT=0x0601
+    )
+endif()
+
+target_link_libraries(I_SilKit
+    INTERFACE SilKitInterface
+    INTERFACE Threads::Threads
+)
+
+if (TARGET ${SILKIT_THIRD_PARTY_FMT_HEADER_ONLY_TARGET})
+    message(STATUS "SIL Kit: Third-Party Library: fmt-header-only")
+
+    target_link_libraries(I_SilKit
+        INTERFACE $<BUILD_INTERFACE:${SILKIT_THIRD_PARTY_FMT_HEADER_ONLY_TARGET}>
+    )
+
+    target_compile_definitions(I_SilKit
+        INTERFACE $<BUILD_INTERFACE:HAVE_FMTLIB>
+        INTERFACE $<BUILD_INTERFACE:FMT_HEADER_ONLY>
+    )
+endif()
+
+if (TARGET ${SILKIT_THIRD_PARTY_ASIO})
+    message(STATUS "SIL Kit: Third-Party Library: asio")
+
+    target_link_libraries(I_SilKit
+        INTERFACE $<BUILD_INTERFACE:${SILKIT_THIRD_PARTY_ASIO}>
+    )
+endif()
+
+if (TARGET rapidyaml)
+    message(STATUS "SIL Kit: Third-Party Library: rapidyaml")
+
+    target_link_libraries(I_SilKit
+        INTERFACE $<BUILD_INTERFACE:rapidyaml>
+    )
+endif()
+
 
 add_library(O_SilKit_CreateParticipantImpl OBJECT
     CreateParticipantImpl.hpp
@@ -74,21 +161,10 @@ add_library(O_SilKit_CreateParticipantImpl OBJECT
 )
 
 target_link_libraries(O_SilKit_CreateParticipantImpl
-    PUBLIC I_SilKit_CreateParticipantImpl
-    PUBLIC SilKitInterface
-
-    PRIVATE I_SilKit_Config
-    PRIVATE I_SilKit_Core_Internal
-
+    PRIVATE I_SilKit
     PRIVATE O_SilKit_Core_Participant
 )
 
-
-add_library(I_SilKit_CreateSilKitRegistryImpl INTERFACE)
-
-target_include_directories(I_SilKit_CreateSilKitRegistryImpl
-    INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
-)
 
 add_library(O_SilKit_CreateSilKitRegistryImpl OBJECT
     CreateSilKitRegistryImpl.hpp
@@ -99,28 +175,20 @@ add_library(O_SilKit_CreateSilKitRegistryImpl OBJECT
 )
 
 target_link_libraries(O_SilKit_CreateSilKitRegistryImpl
-    PUBLIC I_SilKit_CreateSilKitRegistryImpl
-    PUBLIC SilKitInterface
-
+    PRIVATE I_SilKit
     PRIVATE O_SilKit_Core_VAsio
 )
 
-
-add_library(I_SilKit_VersionImpl INTERFACE)
-target_include_directories(I_SilKit_VersionImpl
-    INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
-)
 
 add_library(O_SilKit_VersionImpl OBJECT
     SilKitVersionImpl.cpp
     SilKitVersionImpl.hpp
     ${VERSION_MACROS_HPP}
 )
-target_link_libraries(O_SilKit_VersionImpl
-    PUBLIC I_SilKit_VersionImpl
-    PUBLIC SilKitInterface
-)
 
+target_link_libraries(O_SilKit_VersionImpl
+    PRIVATE I_SilKit
+)
 
 
 set(SilKitImplObjectLibraries "")
@@ -246,10 +314,10 @@ endif()
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 target_link_libraries(SilKit
+    PRIVATE I_SilKit
+    PRIVATE ${SilKitImplObjectLibraries}
     PUBLIC SilKitInterface
     PUBLIC Threads::Threads
-
-    PRIVATE ${SilKitImplObjectLibraries}
 )
 
 #add an alias for the exported name which includes a namespace
