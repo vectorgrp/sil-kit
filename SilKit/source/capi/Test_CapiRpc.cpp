@@ -6,12 +6,15 @@
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 
-#include "gtest/gtest.h"
-#include "gmock/gmock.h"
-#include "silkit/capi/SilKit.h"
+#include "core/mock/participant/MockParticipant.hpp"
+#include "services/rpc/RpcCallHandle.hpp"
+
+#include "silkit/capi/Rpc.h"
 #include "silkit/services/rpc/all.hpp"
-#include "MockParticipant.hpp"
-#include "RpcCallHandle.hpp"
+
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
+
 
 namespace {
 using namespace SilKit::Services::Rpc;

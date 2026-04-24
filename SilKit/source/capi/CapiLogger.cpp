@@ -2,11 +2,11 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "silkit/capi/SilKit.h"
-#include "silkit/SilKit.hpp"
-#include "silkit/services/logging/ILogger.hpp"
+#include "silkit/capi/Logger.h"
 
-#include "CapiImpl.hpp"
+#include "capi/CapiImpl.hpp"
+
+#include "silkit/services/logging/ILogger.hpp"
 
 #include <string>
 

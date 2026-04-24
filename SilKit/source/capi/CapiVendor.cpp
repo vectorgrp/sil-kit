@@ -2,19 +2,16 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "ParticipantConfiguration.hpp"
-#include "CreateSilKitRegistryImpl.hpp"
+#include "silkit/capi/Vendor.h"
 
-#include "silkit/capi/SilKit.h"
+#include "CreateSilKitRegistryImpl.hpp"
+#include "capi/CapiImpl.hpp"
+#include "config/ParticipantConfiguration.hpp"
 
 #include "silkit/vendor/ISilKitRegistry.hpp"
 
-#include "CapiImpl.hpp"
-#include "TypeConversion.hpp"
-
 #include <memory>
-#include <map>
-#include <mutex>
+#include <string>
 
 
 SilKit_ReturnCode SilKitCALL SilKit_Vendor_Vector_SilKitRegistry_Create(

@@ -2,14 +2,15 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "gtest/gtest.h"
-#include "gmock/gmock.h"
+#include "core/mock/participant/MockParticipant.hpp"
+#include "services/lin/ILinControllerExtensions.hpp"
 
-#include "silkit/capi/SilKit.h"
+#include "silkit/capi/Lin.h"
 #include "silkit/services/lin/all.hpp"
 
-#include "MockParticipant.hpp"
-#include "ILinControllerExtensions.hpp"
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
+
 
 namespace {
 using namespace SilKit::Services::Lin;

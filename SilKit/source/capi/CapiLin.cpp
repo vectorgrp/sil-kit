@@ -2,16 +2,16 @@
 //
 // SPDX-License-Identifier: MIT
 
+#include "silkit/capi/Lin.h"
+
+#include "capi/CapiImpl.hpp"
 #include "services/lin/LinControllerExtensionsImpl.hpp"
 
-#include "silkit/capi/SilKit.h"
-#include "silkit/SilKit.hpp"
-#include "silkit/services/lin/all.hpp"
 #include "silkit/experimental/services/lin/LinControllerExtensions.hpp"
+#include "silkit/participant/IParticipant.hpp"
+#include "silkit/services/lin/all.hpp"
 
-#include "CapiImpl.hpp"
-
-#include <cstring>
+#include <vector>
 
 
 namespace {

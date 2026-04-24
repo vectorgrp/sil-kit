@@ -2,14 +2,12 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "silkit/capi/SilKit.h"
-#include "silkit/SilKit.hpp"
-#include "silkit/services/logging/ILogger.hpp"
-#include "silkit/services/orchestration/all.hpp"
-#include "silkit/services/ethernet/all.hpp"
+#include "silkit/capi/Ethernet.h"
 
-#include <cstring>
-#include "CapiImpl.hpp"
+#include "capi/CapiImpl.hpp"
+
+#include "silkit/participant/IParticipant.hpp"
+#include "silkit/services/ethernet/all.hpp"
 
 
 SilKit_ReturnCode SilKitCALL SilKit_EthernetController_Create(SilKit_EthernetController** outController,

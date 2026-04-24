@@ -6,12 +6,14 @@
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 
-#include "gtest/gtest.h"
-#include "gmock/gmock.h"
-#include "silkit/capi/SilKit.h"
+#include "core/mock/participant/MockParticipant.hpp"
+
+#include "silkit/capi/Orchestration.h"
 #include "silkit/services/orchestration/all.hpp"
 
-#include "MockParticipant.hpp"
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
+
 
 namespace {
 using testing::Return;
