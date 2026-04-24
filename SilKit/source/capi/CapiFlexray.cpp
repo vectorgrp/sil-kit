@@ -2,15 +2,12 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include <string>
-#include <cstring>
+#include "silkit/capi/Flexray.h"
 
-#include "silkit/capi/SilKit.h"
-#include "silkit/SilKit.hpp"
+#include "silkit/participant/IParticipant.hpp"
 #include "silkit/services/flexray/all.hpp"
 
-#include "IParticipantInternal.hpp"
-#include "CapiImpl.hpp"
+#include "capi/CapiImpl.hpp"
 
 
 namespace {

@@ -2,23 +2,15 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "ParticipantConfiguration.hpp"
-#include "ParticipantConfigurationFromXImpl.hpp"
+#include "silkit/capi/Participant.h"
+
+#include "silkit/participant/IParticipant.hpp"
+
 #include "CreateParticipantImpl.hpp"
-#include "YamlParser.hpp"
-
-#include "silkit/capi/SilKit.h"
-#include "silkit/SilKit.hpp"
-#include "silkit/services/logging/ILogger.hpp"
-#include "silkit/services/orchestration/all.hpp"
-
-#include "CapiImpl.hpp"
-#include "TypeConversion.hpp"
-
-#include <memory>
-#include <map>
-#include <mutex>
-#include <fstream>
+#include "capi/CapiImpl.hpp"
+#include "config/ParticipantConfiguration.hpp"
+#include "config/ParticipantConfigurationFromXImpl.hpp"
+#include "config/YamlParser.hpp"
 
 
 SilKit_ReturnCode SilKitCALL SilKit_Participant_Create(SilKit_Participant** outParticipant,

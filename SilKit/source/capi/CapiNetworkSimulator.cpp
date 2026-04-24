@@ -2,21 +2,15 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include <iostream>
-#include <string>
-#include <algorithm>
-#include <map>
-#include <mutex>
-#include <cstring>
-
-#include "silkit/capi/SilKit.h"
-#include "silkit/SilKit.hpp"
-#include "CapiImpl.hpp"
-
-#include "silkit/experimental/netsim/all.hpp"
+#include "silkit/capi/NetworkSimulator.h"
 
 #include "silkit/detail/impl/HourglassConversions.hpp"
+#include "silkit/experimental/netsim/all.hpp"
+#include "silkit/participant/IParticipant.hpp"
+
+#include "capi/CapiImpl.hpp"
 #include "participant/ParticipantExtensionsImpl.hpp"
+
 
 namespace SilKit {
 namespace Experimental {

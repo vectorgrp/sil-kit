@@ -6,11 +6,15 @@
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 
-#include "gtest/gtest.h"
+#include "silkit/capi/DataPubSub.h"
+
 #include "gmock/gmock.h"
-#include "silkit/capi/SilKit.h"
+#include "gtest/gtest.h"
+
 #include "silkit/services/pubsub/all.hpp"
-#include "MockParticipant.hpp"
+
+#include "core/mock/participant/MockParticipant.hpp"
+
 
 namespace {
 using namespace SilKit::Services::PubSub;

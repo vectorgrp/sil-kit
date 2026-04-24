@@ -2,15 +2,12 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include <map>
-#include <mutex>
-#include <cstring>
-#include <sstream>
+#include "silkit/capi/Can.h"
 
-#include "silkit/capi/SilKit.h"
-#include "silkit/SilKit.hpp"
-#include "CapiImpl.hpp"
+#include "silkit/participant/IParticipant.hpp"
 #include "silkit/services/can/all.hpp"
+
+#include "capi/CapiImpl.hpp"
 
 
 SilKit_ReturnCode SilKitCALL SilKit_CanController_Create(SilKit_CanController** outController,

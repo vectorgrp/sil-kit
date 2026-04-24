@@ -2,11 +2,15 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "gtest/gtest.h"
+#include "silkit/capi/NetworkSimulator.h"
+
 #include "gmock/gmock.h"
-#include "silkit/capi/SilKit.h"
+#include "gtest/gtest.h"
+
 #include "silkit/experimental/netsim/all.hpp"
-#include "MockParticipant.hpp"
+
+#include "core/mock/participant/MockParticipant.hpp"
+
 
 namespace {
 using namespace SilKit::Experimental::NetworkSimulation;

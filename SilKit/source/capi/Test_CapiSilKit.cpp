@@ -2,11 +2,13 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "gtest/gtest.h"
-#include "gmock/gmock.h"
 #include "silkit/capi/SilKit.h"
 
-#include "MockParticipant.hpp"
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
+
+#include "core/mock/participant/MockParticipant.hpp"
+
 
 namespace {
 
