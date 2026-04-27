@@ -4,11 +4,11 @@
 
 #include "silkit/capi/Vendor.h"
 
-#include "silkit/vendor/ISilKitRegistry.hpp"
-
 #include "CreateSilKitRegistryImpl.hpp"
 #include "capi/CapiImpl.hpp"
 #include "config/ParticipantConfiguration.hpp"
+
+#include "silkit/vendor/ISilKitRegistry.hpp"
 
 
 SilKit_ReturnCode SilKitCALL SilKit_Vendor_Vector_SilKitRegistry_Create(

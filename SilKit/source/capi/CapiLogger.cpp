@@ -4,9 +4,9 @@
 
 #include "silkit/capi/Logger.h"
 
-#include "silkit/services/logging/ILogger.hpp"
-
 #include "capi/CapiImpl.hpp"
+
+#include "silkit/services/logging/ILogger.hpp"
 
 
 SilKit_ReturnCode SilKitCALL SilKit_Logger_Log(SilKit_Logger* self, SilKit_LoggingLevel level, const char* message)

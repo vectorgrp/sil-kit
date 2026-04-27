@@ -4,10 +4,10 @@
 
 #include "silkit/capi/Can.h"
 
+#include "capi/CapiImpl.hpp"
+
 #include "silkit/participant/IParticipant.hpp"
 #include "silkit/services/can/all.hpp"
-
-#include "capi/CapiImpl.hpp"
 
 
 SilKit_ReturnCode SilKitCALL SilKit_CanController_Create(SilKit_CanController** outController,

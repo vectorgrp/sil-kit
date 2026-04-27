@@ -4,11 +4,11 @@
 
 #include "silkit/capi/Rpc.h"
 
-#include "silkit/participant/IParticipant.hpp"
-#include "silkit/services/rpc/all.hpp"
-
 #include "capi/CapiImpl.hpp"
 #include "capi/TypeConversion.hpp"
+
+#include "silkit/participant/IParticipant.hpp"
+#include "silkit/services/rpc/all.hpp"
 
 
 namespace {

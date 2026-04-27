@@ -4,12 +4,12 @@
 
 #include "silkit/capi/Lin.h"
 
+#include "capi/CapiImpl.hpp"
+#include "services/lin/LinControllerExtensionsImpl.hpp"
+
 #include "silkit/experimental/services/lin/LinControllerExtensions.hpp"
 #include "silkit/participant/IParticipant.hpp"
 #include "silkit/services/lin/all.hpp"
-
-#include "capi/CapiImpl.hpp"
-#include "services/lin/LinControllerExtensionsImpl.hpp"
 
 
 namespace {

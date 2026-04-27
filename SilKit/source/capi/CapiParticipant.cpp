@@ -4,13 +4,13 @@
 
 #include "silkit/capi/Participant.h"
 
-#include "silkit/participant/IParticipant.hpp"
-
 #include "CreateParticipantImpl.hpp"
 #include "capi/CapiImpl.hpp"
 #include "config/ParticipantConfiguration.hpp"
 #include "config/ParticipantConfigurationFromXImpl.hpp"
 #include "config/YamlParser.hpp"
+
+#include "silkit/participant/IParticipant.hpp"
 
 
 SilKit_ReturnCode SilKitCALL SilKit_Participant_Create(SilKit_Participant** outParticipant,

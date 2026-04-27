@@ -3,13 +3,14 @@
 // SPDX-License-Identifier: MIT
 
 #include "silkit/capi/NetworkSimulator.h"
+#include "silkit/capi/EventProducer.h"
+
+#include "capi/CapiImpl.hpp"
+#include "participant/ParticipantExtensionsImpl.hpp"
 
 #include "silkit/detail/impl/HourglassConversions.hpp"
 #include "silkit/experimental/netsim/all.hpp"
 #include "silkit/participant/IParticipant.hpp"
-
-#include "capi/CapiImpl.hpp"
-#include "participant/ParticipantExtensionsImpl.hpp"
 
 
 namespace SilKit {

@@ -4,11 +4,11 @@
 
 #include "silkit/capi/DataPubSub.h"
 
-#include "silkit/participant/IParticipant.hpp"
-#include "silkit/services/pubsub/all.hpp"
-
 #include "capi/CapiImpl.hpp"
 #include "capi/TypeConversion.hpp"
+
+#include "silkit/participant/IParticipant.hpp"
+#include "silkit/services/pubsub/all.hpp"
 
 
 SilKit_ReturnCode SilKitCALL SilKit_DataPublisher_Create(SilKit_DataPublisher** outPublisher,

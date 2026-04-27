@@ -6,14 +6,13 @@
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 
+#include "core/mock/participant/MockParticipant.hpp"
+
 #include "silkit/capi/DataPubSub.h"
+#include "silkit/services/pubsub/all.hpp"
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
-
-#include "silkit/services/pubsub/all.hpp"
-
-#include "core/mock/participant/MockParticipant.hpp"
 
 
 namespace {

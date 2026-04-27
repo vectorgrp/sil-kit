@@ -4,10 +4,10 @@
 
 #include "silkit/capi/Ethernet.h"
 
+#include "capi/CapiImpl.hpp"
+
 #include "silkit/participant/IParticipant.hpp"
 #include "silkit/services/ethernet/all.hpp"
-
-#include "capi/CapiImpl.hpp"
 
 
 SilKit_ReturnCode SilKitCALL SilKit_EthernetController_Create(SilKit_EthernetController** outController,

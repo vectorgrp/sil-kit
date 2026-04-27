@@ -4,15 +4,15 @@
 
 #include "silkit/capi/Orchestration.h"
 
-#include <map>
+#include "capi/CapiImpl.hpp"
+#include "participant/ParticipantExtensionsImpl.hpp"
+#include "services/orchestration/TimeSyncServiceExtensionsImpl.hpp"
 
 #include "silkit/experimental/services/orchestration/ISystemController.hpp"
 #include "silkit/participant/IParticipant.hpp"
 #include "silkit/services/orchestration/all.hpp"
 
-#include "capi/CapiImpl.hpp"
-#include "participant/ParticipantExtensionsImpl.hpp"
-#include "services/orchestration/TimeSyncServiceExtensionsImpl.hpp"
+#include <map>
 
 
 namespace {

@@ -2,15 +2,14 @@
 //
 // SPDX-License-Identifier: MIT
 
+#include "core/mock/participant/MockParticipant.hpp"
+#include "services/ethernet/EthDatatypeUtils.hpp"
+
 #include "silkit/capi/Ethernet.h"
+#include "silkit/services/ethernet/all.hpp"
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
-
-#include "silkit/services/ethernet/all.hpp"
-
-#include "core/mock/participant/MockParticipant.hpp"
-#include "services/ethernet/EthDatatypeUtils.hpp"
 
 
 namespace {

@@ -4,11 +4,11 @@
 
 #pragma once
 
+#include "capi/CapiExceptions.hpp"
+
 #include "silkit/capi/InterfaceIdentifiers.h"
 #include "silkit/capi/Types.h"
 #include "silkit/participant/exception.hpp"
-
-#include "capi/CapiExceptions.hpp"
 
 
 #define CAPI_CATCH_EXCEPTIONS \

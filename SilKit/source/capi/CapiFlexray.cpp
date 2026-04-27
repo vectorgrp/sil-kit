@@ -4,10 +4,10 @@
 
 #include "silkit/capi/Flexray.h"
 
+#include "capi/CapiImpl.hpp"
+
 #include "silkit/participant/IParticipant.hpp"
 #include "silkit/services/flexray/all.hpp"
-
-#include "capi/CapiImpl.hpp"
 
 
 namespace {
