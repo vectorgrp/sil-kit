@@ -19,7 +19,7 @@
 
 namespace SilKit {
 
-auto CreateMdf4Tracing(Config::ParticipantConfiguration config, SilKit::Services::Logging::ILogger* logger,
+auto CreateMdf4Tracing(Config::ParticipantConfiguration config, SilKit::Services::Logging::ILoggerInternal* logger,
                        const std::string& participantName,
                        const std::string& sinkName) -> std::unique_ptr<ITraceMessageSink>
 {
@@ -27,7 +27,7 @@ auto CreateMdf4Tracing(Config::ParticipantConfiguration config, SilKit::Services
     return factory.Create(std::move(config), logger, participantName, sinkName);
 }
 
-auto CreateMdf4Replay(Config::ParticipantConfiguration config, SilKit::Services::Logging::ILogger* logger,
+auto CreateMdf4Replay(Config::ParticipantConfiguration config, SilKit::Services::Logging::ILoggerInternal* logger,
                       const std::string& fileName) -> std::shared_ptr<IReplayFile>
 {
     auto& factory = SilKitExtensionLoader<IReplayDataProvider>(logger, "SilKitExtension_Mdf", config.extensions);

@@ -24,8 +24,9 @@ SimulatedNetworkRouter::SimulatedNetworkRouter(Core::IParticipantInternal* parti
     _participant->RegisterSimulator(this, _networkName, _networkType);
 
     _participant->AddAsyncSubscriptionsCompletionHandler([this]() {
-        SilKit::Services::Logging::Debug(_participant->GetLogger(), "Announce simulation of network '{}' of type {}",
-                                         _networkName, to_string(_networkType));
+        _participant->GetLoggerInternal()->MakeMessage(SilKit::Services::Logging::Level::Debug, TopicOf(*this))
+            .SetMessage("Announce simulation of network '{}' of type {}", _networkName, to_string(_networkType))
+            .Dispatch();
         // Announcing the network via ServiceDiscovery. Controllers on that network switch to simulated mode.
         AnnounceNetwork(_networkName, _networkType);
     });
@@ -114,9 +115,12 @@ auto SimulatedNetworkRouter::GetSimulatedControllerFromServiceEndpoint(const Sil
             return it_simulatedControllersByServiceId->second;
         }
     }
-    _participant->GetLogger()->Error(
-        "NetworkSimulation: No simulated controller was found to route message from participant '" + fromParticipant
-        + "', serviceId " + std::to_string(fromServiceId));
+
+    _participant->GetLoggerInternal()->MakeMessage(SilKit::Services::Logging::Level::Error, TopicOf(*this))
+        .SetMessage("NetworkSimulation: No simulated controller was found to route message from participant '{}' serviceId {}",
+                    fromParticipant, fromServiceId)
+        .Dispatch();
+
     return {};
 }
 

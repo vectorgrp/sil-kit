@@ -69,9 +69,10 @@ void RemoteConnectionManager::Remove(const IConnectPeer& connectPeer)
 void RemoteConnectionManager::OnConnectPeerSuccess(IConnectPeer& connectPeer, VAsioPeerInfo peerInfo,
                                                    std::unique_ptr<IRawByteStream> stream)
 {
-    SilKit::Services::Logging::Debug(_vAsioConnection->_logger,
-                                     "Successfully connected to {} after receiving a remote connect request",
-                                     peerInfo.participantName);
+    _vAsioConnection->_logger->MakeMessage(Log::Level::Debug, TopicOf(*this))
+        .SetMessage("Successfully connected to {} after receiving a remote connect request",
+                                     peerInfo.participantName)
+        .Dispatch();
 
     Remove(connectPeer);
 
@@ -83,9 +84,10 @@ void RemoteConnectionManager::OnConnectPeerSuccess(IConnectPeer& connectPeer, VA
 
 void RemoteConnectionManager::OnConnectPeerFailure(IConnectPeer& connectPeer, VAsioPeerInfo peerInfo)
 {
-    SilKit::Services::Logging::Debug(_vAsioConnection->_logger,
-                                     "Failed to connect to {} after receiving a remote connect request",
-                                     peerInfo.participantName);
+    _vAsioConnection->_logger->MakeMessage(Log::Level::Debug, TopicOf(*this))
+        .SetMessage("Failed to connect to {} after receiving a remote connect request",
+                                     peerInfo.participantName)
+        .Dispatch();
 
     Remove(connectPeer);
     _vAsioConnection->OnRemoteConnectionFailure(std::move(peerInfo));

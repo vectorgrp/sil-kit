@@ -12,6 +12,7 @@
 
 #include "silkit/services/logging/LoggingDatatypes.hpp"
 #include "silkit/services/logging/string_utils.hpp"
+#include "string_utils_internal.hpp"
 
 namespace SilKit {
 namespace Services {
@@ -34,6 +35,7 @@ struct LogMsg
 {
     std::string loggerName;
     Level level{Level::Off};
+    Topic topic{Topic::None};
     log_clock::time_point time;
     SourceLoc source;
     std::string payload;
@@ -49,7 +51,6 @@ inline std::ostream& operator<<(std::ostream& out, const SourceLoc& sourceLoc);
 inline std::string to_string(const LogMsg& msg);
 inline std::ostream& operator<<(std::ostream& out, const LogMsg& msg);
 
-
 inline std::string to_string(const std::vector<std::pair<std::string, std::string>>& kv);
 inline std::ostream& operator<<(std::ostream& out, const std::vector<std::pair<std::string, std::string>>& kv);
 
@@ -64,7 +65,8 @@ bool operator==(const SourceLoc& lhs, const SourceLoc& rhs)
 
 inline bool operator==(const LogMsg& lhs, const LogMsg& rhs)
 {
-    return lhs.loggerName == rhs.loggerName && lhs.level == rhs.level && lhs.time == rhs.time
+    return lhs.loggerName == rhs.loggerName && lhs.level == rhs.level && lhs.topic == rhs.topic
+           && lhs.time == rhs.time
            && lhs.source == rhs.source && lhs.payload == rhs.payload && lhs.keyValues == rhs.keyValues;
 }
 
@@ -127,6 +129,7 @@ std::string to_string(const LogMsg& msg)
 std::ostream& operator<<(std::ostream& out, const LogMsg& msg)
 {
     out << "LogMsg{logger=" << msg.loggerName << ", level=" << msg.level
+        << ", topic=" << msg.topic
         << ", time=" << std::chrono::duration_cast<std::chrono::microseconds>(msg.time.time_since_epoch()).count()
         << ", source=" << msg.source << ", payload=\"" << msg.payload << "\"" << msg.keyValues << "}";
     return out;

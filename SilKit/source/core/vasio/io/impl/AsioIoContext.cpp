@@ -46,12 +46,12 @@ void SetSocketPermissions(const EndpointT&)
 }
 
 template <typename AcceptorT>
-void SetListenOptions(SilKit::Services::Logging::ILogger*, AcceptorT&)
+void SetListenOptions(SilKit::Services::Logging::ILoggerInternal*, AcceptorT&)
 {
 }
 
 template <typename SocketT>
-void SetConnectOptions(SilKit::Services::Logging::ILogger*, SocketT&)
+void SetConnectOptions(SilKit::Services::Logging::ILoggerInternal*, SocketT&)
 {
 }
 
@@ -70,7 +70,7 @@ void SetPlatformOptions(asio::ip::tcp::acceptor& acceptor)
 #if !defined(__MINGW32__)
 
 template <>
-void SetListenOptions(SilKit::Services::Logging::ILogger* logger, asio::ip::tcp::acceptor& acceptor)
+void SetListenOptions(SilKit::Services::Logging::ILoggerInternal* logger, asio::ip::tcp::acceptor& acceptor)
 {
     // This should improve loopback performance, and have no effect on remote TCP/IP
     int enabled = 1;
@@ -81,13 +81,15 @@ void SetListenOptions(SilKit::Services::Logging::ILogger* logger, asio::ip::tcp:
     if (result == SOCKET_ERROR)
     {
         auto lastError = ::GetLastError();
-        SilKit::Services::Logging::Warn(
-            logger, "SetListenOptions: Setting Loopback FastPath failed: WSA IOCtl last error: {}", lastError);
+
+        logger->MakeMessage(SilKit::Services::Logging::Level::Warn, SilKit::Services::Logging::Topic::Asio)
+            .SetMessage("SetListenOptions: Setting Loopback FastPath failed: WSA IOCtl last error: {}", lastError)
+            .Dispatch();
     }
 }
 
 template <>
-void SetConnectOptions(SilKit::Services::Logging::ILogger* logger, asio::ip::tcp::socket& socket)
+void SetConnectOptions(SilKit::Services::Logging::ILoggerInternal* logger, asio::ip::tcp::socket& socket)
 {
     // This should improve loopback performance, and have no effect on remote TCP/IP
     int enabled = 1;
@@ -98,8 +100,9 @@ void SetConnectOptions(SilKit::Services::Logging::ILogger* logger, asio::ip::tcp
     if (result == SOCKET_ERROR)
     {
         auto lastError = ::GetLastError();
-        SilKit::Services::Logging::Warn(
-            logger, "SetListenOptions: Setting Loopback FastPath failed: WSA IOCtl last error: {}", lastError);
+        logger->MakeMessage(SilKit::Services::Logging::Level::Warn, SilKit::Services::Logging::Topic::Asio)
+            .SetMessage("SetListenOptions: Setting Loopback FastPath failed: WSA IOCtl last error: {}", lastError)
+            .Dispatch();
     }
 }
 
@@ -122,7 +125,7 @@ void SetSocketPermissions(const asio::local::stream_protocol::endpoint& endpoint
 }
 
 template <>
-void SetListenOptions(SilKit::Services::Logging::ILogger*, asio::ip::tcp::acceptor&)
+void SetListenOptions(SilKit::Services::Logging::ILoggerInternal*, asio::ip::tcp::acceptor&)
 {
     // no op
 }
@@ -202,7 +205,7 @@ static auto CleanIpAddress(const std::string& string) -> std::string
 }
 
 template <typename AsioAcceptorType, typename AsioEndpointType>
-void OpenAcceptor(AsioAcceptorType& acceptor, AsioEndpointType endpoint, SilKit::Services::Logging::ILogger& logger)
+void OpenAcceptor(AsioAcceptorType& acceptor, AsioEndpointType endpoint, SilKit::Services::Logging::ILoggerInternal& logger)
 {
     acceptor.open(endpoint.protocol());
     SetPlatformOptions(acceptor);
@@ -299,7 +302,7 @@ auto AsioIoContext::Resolve(const std::string& name) -> std::vector<std::string>
 }
 
 
-void AsioIoContext::SetLogger(SilKit::Services::Logging::ILogger& logger)
+void AsioIoContext::SetLogger(SilKit::Services::Logging::ILoggerInternal& logger)
 {
     SILKIT_TRACE_METHOD_(&logger, "({})", static_cast<const void*>(&logger));
     _logger = &logger;

@@ -15,7 +15,7 @@
 #include <type_traits>
 
 #include "SilKitVersionImpl.hpp"
-
+#include "LoggerMessage.hpp"
 #include "detail/LoadExtension.hpp"
 #include "SilKitExtensionBase.hpp"
 #include "SilKitExtensionMacros.hpp"
@@ -48,7 +48,7 @@ bool isBuildCompatible(const BuildInfoType& myInfos, const BuildInfoType& otherI
     return ok;
 }
 
-void VerifyExtension(SilKit::Services::Logging::ILogger* logger, const SilKitExtensionDescriptor_t* descr)
+void VerifyExtension(SilKit::Services::Logging::ILoggerInternal* logger, const SilKitExtensionDescriptor_t* descr)
 {
     if (descr == nullptr)
     {
@@ -79,7 +79,9 @@ void VerifyExtension(SilKit::Services::Logging::ILogger* logger, const SilKitExt
            << ", module build info is: " << to_string(extensionBuild) << ".";
         if (logger)
         {
-            logger->Warn(ss.str());
+            logger->MakeMessage(Services::Logging::Level::Warn, Services::Logging::Topic::Extension) 
+                .SetMessage(ss.str())
+                .Dispatch();
         }
         throw ExtensionError(ss.str());
     }
@@ -90,7 +92,9 @@ void VerifyExtension(SilKit::Services::Logging::ILogger* logger, const SilKitExt
     {
         if (logger)
         {
-            logger->Warn("SIL Kit extension verification: build system is misconfigured, the host system is UNKNOWN");
+            logger->MakeMessage(Services::Logging::Level::Warn, Services::Logging::Topic::Extension)
+                .SetMessage("SIL Kit extension verification: build system is misconfigured, the host system is UNKNOWN")
+                .Dispatch();
         }
     }
 
@@ -101,7 +105,9 @@ void VerifyExtension(SilKit::Services::Logging::ILogger* logger, const SilKitExt
             << "'";
         if (logger)
         {
-            logger->Warn(msg.str());
+            logger->MakeMessage(Services::Logging::Level::Warn, Services::Logging::Topic::Extension)
+                .SetMessage(msg.str())
+                .Dispatch();
         }
     }
 }
@@ -161,12 +167,12 @@ SymType* GetSymbol(detail::LibraryHandle hnd, const std::string& sym_name)
 
 ///////////////////////////////////////////////////////////////////////////
 
-auto LoadExtension(Services::Logging::ILogger* logger, const std::string& name) -> std::shared_ptr<ISilKitExtension>
+auto LoadExtension(Services::Logging::ILoggerInternal* logger, const std::string& name) -> std::shared_ptr<ISilKitExtension>
 {
     return LoadExtension(logger, name, Config::Extensions{});
 }
 
-auto LoadExtension(Services::Logging::ILogger* logger, const std::string& name,
+auto LoadExtension(Services::Logging::ILoggerInternal* logger, const std::string& name,
                    const Config::Extensions& config) -> std::shared_ptr<ISilKitExtension>
 {
     using namespace detail;
@@ -194,7 +200,9 @@ auto LoadExtension(Services::Logging::ILogger* logger, const std::string& name,
             msg << "Failed to verify SIL Kit extension located at path'" << path << "': " << ex.what();
             if (logger)
             {
-                logger->Debug(msg.str());
+                logger->MakeMessage(Services::Logging::Level::Debug, Services::Logging::Topic::Extension)
+                    .SetMessage(msg.str())
+                    .Dispatch();
             }
             return nullptr;
         }
@@ -211,7 +219,9 @@ auto LoadExtension(Services::Logging::ILogger* logger, const std::string& name,
             msg << "Loaded SIL Kit extension '" << name << "' from path '" << path << "'";
             if (logger)
             {
-                logger->Info(msg.str());
+                logger->MakeMessage(Services::Logging::Level::Info, Services::Logging::Topic::Extension)
+                    .SetMessage(msg.str())
+                    .Dispatch();
             }
             break;
         }

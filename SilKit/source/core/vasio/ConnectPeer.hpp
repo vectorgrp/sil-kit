@@ -38,7 +38,7 @@ class ConnectPeer
     using Uri = SilKit::Core::Uri;
 
     IIoContext* _ioContext{nullptr};
-    SilKit::Services::Logging::ILogger* _logger{nullptr};
+    SilKit::Services::Logging::ILoggerInternal* _logger{nullptr};
     SilKit::Core::VAsioPeerInfo _peerInfo;
     bool _enableDomainSockets{false};
 
@@ -53,7 +53,7 @@ class ConnectPeer
     std::unique_ptr<IConnector> _connector;
 
 public:
-    ConnectPeer(IIoContext* ioContext, SilKit::Services::Logging::ILogger* logger,
+    ConnectPeer(IIoContext* ioContext, SilKit::Services::Logging::ILoggerInternal* logger,
                 const SilKit::Core::VAsioPeerInfo& peerInfo, bool enableDomainSockets);
     ~ConnectPeer() override;
 

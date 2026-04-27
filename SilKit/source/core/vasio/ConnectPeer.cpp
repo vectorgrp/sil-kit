@@ -29,7 +29,7 @@ namespace Log = SilKit::Services::Logging;
 namespace VSilKit {
 
 
-ConnectPeer::ConnectPeer(IIoContext* ioContext, SilKit::Services::Logging::ILogger* logger,
+ConnectPeer::ConnectPeer(IIoContext* ioContext, SilKit::Services::Logging::ILoggerInternal* logger,
                          const SilKit::Core::VAsioPeerInfo& peerInfo, bool enableDomainSockets)
     : _ioContext{ioContext}
     , _logger{logger}
@@ -127,11 +127,15 @@ void ConnectPeer::UpdateUris()
         }
         catch (const std::exception& exception)
         {
-            Log::Warn(_logger, "Error occurred while processing acceptor URI '{}': {}", str, exception.what());
+            _logger->MakeMessage(Log::Level::Warn, TopicOf(*this))
+                .SetMessage("Error occurred while processing acceptor URI '{}': {}", str, exception.what())
+                .Dispatch();
         }
         catch (...)
         {
-            Log::Warn(_logger, "Error occurred while processing acceptor URI '{}'", str);
+            _logger->MakeMessage(Log::Level::Warn, TopicOf(*this))
+                .SetMessage("Error occurred while processing acceptor URI '{}'", str)
+                .Dispatch();
         }
     }
 
@@ -192,8 +196,9 @@ void ConnectPeer::TryNextUri()
     const auto& uri{_uris[_uriIndex]};
     _uriIndex += 1;
 
-    Log::Debug(_logger, "Trying to connect to {} on {}", _peerInfo.participantName, uri.EncodedString());
-
+    _logger->MakeMessage(SilKit::Services::Logging::Level::Debug, TopicOf(*this))
+        .SetMessage("Trying to connect to {} on {}", _peerInfo.participantName, uri.EncodedString())
+        .Dispatch();
     try
     {
         switch (uri.Type())
@@ -205,7 +210,9 @@ void ConnectPeer::TryNextUri()
         case Uri::UriType::Local:
             if (!_enableDomainSockets)
             {
-                Log::Debug(_logger, "Unable to connect via local-domain because it is disabled via configuration");
+                _logger->MakeMessage(SilKit::Services::Logging::Level::Debug, TopicOf(*this))
+                    .SetMessage("Unable to connect via local-domain because it is disabled via configuration")
+                    .Dispatch();
             }
             else
             {
@@ -214,7 +221,9 @@ void ConnectPeer::TryNextUri()
             break;
 
         default:
-            Log::Warn(_logger, "Invalid uri type {}", static_cast<std::underlying_type_t<Uri::UriType>>(uri.Type()));
+            _logger->MakeMessage(SilKit::Services::Logging::Level::Warn, TopicOf(*this))
+                .SetMessage("Invalid uri type {}", static_cast<std::underlying_type_t<Uri::UriType>>(uri.Type()))
+                .Dispatch();
             break;
         }
 
@@ -227,12 +236,16 @@ void ConnectPeer::TryNextUri()
     catch (const std::exception& exception)
     {
         _connector.reset();
-        Log::Warn(_logger, "Failed to start connecting to '{}': {}", uri.EncodedString(), exception.what());
+        _logger->MakeMessage(SilKit::Services::Logging::Level::Warn, TopicOf(*this))
+            .SetMessage("Failed to start connecting to '{}': {}", uri.EncodedString(), exception.what())
+            .Dispatch();
     }
     catch (...)
     {
         _connector.reset();
-        Log::Warn(_logger, "Failed to start connecting to '{}'", uri.EncodedString());
+         _logger->MakeMessage(SilKit::Services::Logging::Level::Warn, TopicOf(*this))
+            .SetMessage("Failed to start connecting to '{}'", uri.EncodedString())
+            .Dispatch();
     }
 
     if (_connector == nullptr)

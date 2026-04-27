@@ -19,6 +19,16 @@ auto CreateSilKitRegistryImpl(std::shared_ptr<SilKit::Config::IParticipantConfig
     return std::make_unique<Core::VAsioRegistry>(config);
 }
 
+auto GetLoggerInternal(ISilKitRegistry* participant) -> SilKit::Services::Logging::ILoggerInternal*
+{
+    auto participantImpl = dynamic_cast<Core::VAsioRegistry*>(participant);
+    if (participantImpl == nullptr)
+    {
+        throw SilKit::ConfigurationError("The provided participant is not a valid SilKit::Core::IParticipantInternal");
+    }
+    return participantImpl->GetLoggerInternal();
+}
+
 } // namespace Vector
 } // namespace Vendor
 } // namespace SilKit

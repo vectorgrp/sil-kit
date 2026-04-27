@@ -316,6 +316,8 @@ const std::set<std::string> schemaPaths_v1 = {
     "/Logging/Sinks/Level",
     "/Logging/Sinks/LogName",
     "/Logging/Sinks/Type",
+    "/Logging/Sinks/EnabledTopics",
+    "/Logging/Sinks/DisabledTopics",
     "/Middleware",
     "/Middleware/AcceptorUris",
     "/Middleware/ConnectAttempts",

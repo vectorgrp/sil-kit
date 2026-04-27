@@ -28,10 +28,12 @@ auto CreateParticipantT(std::shared_ptr<SilKit::Config::IParticipantConfiguratio
     auto&& participant = std::make_unique<Participant<ConnectionT>>(std::move(result.participantConfiguration),
                                                                     std::forward<Args>(args)...);
 
-    auto* logger = participant->GetLogger();
+    auto* logger = participant->GetLoggerInternal();
     for (const auto& logMessage : result.logMessages)
     {
-        logger->Log(logMessage.first, logMessage.second);
+        logger->MakeMessage(logMessage.first, TopicOf(*participant))
+            .SetMessage(logMessage.second)
+            .Dispatch();
     }
 
     return std::move(participant);

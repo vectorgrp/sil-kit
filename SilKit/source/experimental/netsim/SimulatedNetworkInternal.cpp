@@ -18,7 +18,7 @@ SimulatedNetworkInternal::SimulatedNetworkInternal(Core::IParticipantInternal* p
                                                    const std::string& networkName, SimulatedNetworkType networkType,
                                                    std::unique_ptr<ISimulatedNetwork> userSimulatedNetwork)
     : _participant{participant}
-    , _logger{participant->GetLogger()}
+    , _logger{participant->GetLoggerInternal()}
     , _networkName{networkName}
     , _networkType{networkType}
     , _userSimulatedNetwork{std::move(userSimulatedNetwork)}
@@ -88,9 +88,10 @@ void SimulatedNetworkInternal::AddSimulatedController(const SilKit::Core::Servic
     }
     else
     {
-        SilKit::Services::Logging::Warn(
-            _logger, "NetworkSimulation: No simulated controller was provided for controller '{}' on participant '{}'",
-            controllerName, fromParticipantName);
+        _logger->MakeMessage(SilKit::Services::Logging::Level::Warn, TopicOf(*this))
+            .SetMessage("NetworkSimulation: No simulated controller was provided for controller '{}' on participant '{}'",
+                        controllerName, fromParticipantName)
+            .Dispatch();
     }
 }
 
@@ -106,8 +107,9 @@ auto SimulatedNetworkInternal::LookupControllerDescriptor(
             return {true, it_controllerDescriptorByServiceId->second};
         }
     }
-    SilKit::Services::Logging::Error(
-        _logger, "NetworkSimulation: Cannot associate participant name + service Id to controller descriptor.");
+    _logger->MakeMessage(SilKit::Services::Logging::Level::Error, TopicOf(*this))
+        .SetMessage("NetworkSimulation: Cannot associate participant name + service Id to controller descriptor.")
+        .Dispatch();
     return {false, {}};
 }
 

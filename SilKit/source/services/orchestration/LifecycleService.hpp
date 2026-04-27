@@ -129,7 +129,7 @@ private:
     // private members
     Core::IParticipantInternal* _participant{nullptr};
     Core::ServiceDescriptor _serviceDescriptor{};
-    Services::Logging::ILogger* _logger{nullptr};
+    SilKit::Services::Logging::ILoggerInternal* _logger{nullptr};
 
     TimeSyncService* _timeSyncService;
 

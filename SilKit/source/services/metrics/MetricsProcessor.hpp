@@ -8,6 +8,8 @@
 #include "MetricsDatatypes.hpp"
 #include "MetricsReceiver.hpp"
 
+#include "ILoggerInternal.hpp"
+
 #include <atomic>
 #include <memory>
 #include <mutex>
@@ -23,7 +25,7 @@ class MetricsProcessor
     std::mutex _mutex;
 
     std::string _participantName;
-    SilKit::Services::Logging::ILogger* _logger{nullptr};
+    SilKit::Services::Logging::ILoggerInternal* _logger{nullptr};
 
     std::atomic<bool> _sinksSetUp{false};
     std::vector<std::unique_ptr<IMetricsSink>> _sinks;
@@ -34,7 +36,7 @@ public:
     explicit MetricsProcessor(std::string participantName);
 
 public:
-    void SetLogger(SilKit::Services::Logging::ILogger& logger);
+    void SetLogger(SilKit::Services::Logging::ILoggerInternal& logger);
     void SetSinks(std::vector<std::unique_ptr<IMetricsSink>> sinks);
 
 public: // IMetricsProcessor

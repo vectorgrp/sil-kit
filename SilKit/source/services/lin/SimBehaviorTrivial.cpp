@@ -92,8 +92,9 @@ void SimBehaviorTrivial::SendMsg(LinSendFrameRequest&& msg)
     auto controllerStatus = _parentController->Status();
     if(controllerStatus == LinControllerStatus::Sleep || controllerStatus == LinControllerStatus::Unknown)
     {
-        Logging::Warn(_participant->GetLogger(),
-                      "LinController not operational. SendFrameRequest will not be sent!");
+        _participant->GetLoggerInternal()->MakeMessage(Logging::Level::Warn, TopicOf(*this))
+            .SetMessage("LinController not operational. SendFrameRequest will not be sent!")
+            .Dispatch();
         return;
     }
     _parentController->SendFrameHeader(msg.frame.id);
@@ -104,8 +105,10 @@ void SimBehaviorTrivial::SendMsg(LinTransmission&& msg)
     auto controllerStatus = _parentController->Status();
     if(controllerStatus == LinControllerStatus::Sleep || controllerStatus == LinControllerStatus::Unknown)
     {
-        Logging::Warn(_participant->GetLogger(),
-                      "LinController not operational. LinTransmission will not be sent!");
+        _participant->GetLoggerInternal()
+            ->MakeMessage(Logging::Level::Warn, TopicOf(*this))
+            .SetMessage("LinController not operational. LinTransmission will not be sent!")
+            .Dispatch();
         return;
     }
     SendMsgImpl(msg);

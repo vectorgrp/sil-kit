@@ -57,7 +57,7 @@ namespace VSilKit {
 
 AsioGenericRawByteStream::AsioGenericRawByteStream(const AsioGenericRawByteStreamOptions& options,
                                                    std::shared_ptr<asio::io_context> asioIoContext, AsioSocket socket,
-                                                   SilKit::Services::Logging::ILogger& logger)
+                                                   SilKit::Services::Logging::ILoggerInternal& logger)
     : _options{options}
     , _asioIoContext{std::move(asioIoContext)}
     , _socket{std::move(socket)}
@@ -270,8 +270,10 @@ void AsioGenericRawByteStream::HandleShutdownOrError()
         _socket.close(errorCode);
         if (errorCode)
         {
-            Log::Warn(_logger, "AsioGenericRawByteStream::HandleShutdownOrError: socket close failed: {}",
-                      errorCode.message());
+            _logger->MakeMessage(Log::Level::Warn, TopicOf(*this))
+                .SetMessage("AsioGenericRawByteStream::HandleShutdownOrError: socket close failed: {}",
+                            errorCode.message())
+                .Dispatch();
         }
     }
 
@@ -304,10 +306,10 @@ void AsioGenericRawByteStream::EnableQuickAck()
     int e = setsockopt(_socket.native_handle(), IPPROTO_TCP, TCP_QUICKACK, (void*)&val, sizeof(val));
     if (e != 0)
     {
-        Log::Warn(
-            _logger,
-            "AsioGenericRawByteStream({})::EnableQuickAck: failed to set Linux-specific socket option 'TCP_QUICKACK'",
-            static_cast<const void*>(this));
+        _logger->MakeMessage(Log::Level::Warn, TopicOf(*this))
+            .SetMessage("AsioGenericRawByteStream({})::EnableQuickAck: failed to set Linux-specific socket option "
+                        "'TCP_QUICKACK'", static_cast<const void*>(this))
+            .Dispatch();
     }
 }
 

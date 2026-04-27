@@ -145,7 +145,7 @@ MetricsManager::MetricsManager(std::string participantName, IMetricsProcessor& p
 }
 
 
-void MetricsManager::SetLogger(SilKit::Services::Logging::ILogger& logger)
+void MetricsManager::SetLogger(SilKit::Services::Logging::ILoggerInternal& logger)
 {
     _logger = &logger;
 }

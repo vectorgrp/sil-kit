@@ -16,53 +16,78 @@ namespace Services {
 namespace Logging {
 
 
+inline auto ALoggerMessageWith(SilKit::Services::Logging::Level level, std::string payload)
+    -> testing::Matcher<const SilKit::Services::Logging::LoggerMessage&>
+{
+    return testing::AllOf(
+        testing::Property(&SilKit::Services::Logging::LoggerMessage::GetLevel, testing::Eq(level)),
+        testing::Property(&SilKit::Services::Logging::LoggerMessage::GetMsgString, testing::HasSubstr(payload)));
+}
+
+inline auto ALoggerMessageWith(SilKit::Services::Logging::Level level)
+    -> testing::Matcher<const SilKit::Services::Logging::LoggerMessage&>
+{
+    return testing::Property(&SilKit::Services::Logging::LoggerMessage::GetLevel, testing::Eq(level));
+}
+
+
 class MockLogger : public ::SilKit::Services::Logging::ILoggerInternal
 {
     using Level = ::SilKit::Services::Logging::Level;
     using LoggerMessage = ::SilKit::Services::Logging::LoggerMessage;
     using LogMsg = ::SilKit::Services::Logging::LogMsg;
+    using Topic = ::SilKit::Services::Logging::Topic;
 
 public:
     MockLogger()
     {
         ON_CALL(*this, GetLogLevel).WillByDefault(testing::Return(Level::Trace));
+        // Topic filtering for Log methods
+        /* ON_CALL(*this, Log(testing::_, testing::_, testing::_))
+            .WillByDefault(
+            [this](Level level, Topic topic, const std::string& msg) {
+                if (!IsTopicEnabled(topic)) return;
+                LogImpl(level, topic, msg);
+            });*/
+    }
+
+    std::vector<Topic> disabledTopics;
+    std::vector<Topic> EnabledTopics;
+
+    SilKit::Services::Logging::ILogger* AsILogger() override
+    {
+        throw SilKit::SilKitError("Not implemented!");
+    }
+
+    bool IsTopicEnabled(Topic topic) const
+    {
+
+        if (!disabledTopics.empty())
+        {
+            return std::find(disabledTopics.begin(), disabledTopics.end(), topic) == disabledTopics.end();
+        }
+        return true;
+    }
+
+    void LogImpl(Level , Topic , const std::string& )
+    {
+        // Call the mock method for test verification
+        // This is just for demonstration, actual test code will use EXPECT_CALL
+    }
+
+    void Log(Level lvl, Topic topic, const std::string& msg) override
+    {
+        this->MakeMessage(lvl, topic).SetMessage(msg).Dispatch();
     }
 
 public:
-    MOCK_METHOD(void, Log, (Level level, const std::string& msg), (override));
     MOCK_METHOD(void, ProcessLoggerMessage, (const LoggerMessage& msg), (override));
     MOCK_METHOD(void, LogReceivedMsg, (const LogMsg& msg), (override));
 
-    void Trace(const std::string& msg) override
+    LoggerMessage MakeMessage(Level level, Topic topic) override
     {
-        Log(Level::Trace, msg);
+        return LoggerMessage(this, level, topic);
     }
-
-    void Debug(const std::string& msg) override
-    {
-        Log(Level::Debug, msg);
-    }
-
-    void Info(const std::string& msg) override
-    {
-        Log(Level::Info, msg);
-    }
-
-    void Warn(const std::string& msg) override
-    {
-        Log(Level::Warn, msg);
-    }
-
-    void Error(const std::string& msg) override
-    {
-        Log(Level::Error, msg);
-    }
-
-    void Critical(const std::string& msg) override
-    {
-        Log(Level::Critical, msg);
-    }
-
     MOCK_METHOD(SilKit::Services::Logging::Level, GetLogLevel, (), (const, override));
 };
 

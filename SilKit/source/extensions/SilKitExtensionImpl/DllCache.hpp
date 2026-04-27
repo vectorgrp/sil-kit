@@ -8,7 +8,7 @@
 #include <memory>
 
 #include "ParticipantConfiguration.hpp"
-
+#include "LoggerMessage.hpp"
 #include "SilKitExtensions.hpp"
 
 namespace SilKit {
@@ -25,7 +25,7 @@ namespace SilKit {
 class DllCache
 {
 public:
-    auto Get(Services::Logging::ILogger* logger, const std::string& extensionName,
+    auto Get(Services::Logging::ILoggerInternal* logger, const std::string& extensionName,
              const Config::Extensions& config) -> SilKit::ISilKitExtension&
     {
         try
@@ -50,7 +50,9 @@ public:
             msg << "Error loading SIL Kit extension '" << extensionName << "': " << err.what();
             if (logger)
             {
-                logger->Error(msg.str());
+                logger->MakeMessage(Services::Logging::Level::Error, Services::Logging::Topic::Extension)
+                    .SetMessage(msg.str())
+                    .Dispatch();
             }
             throw SilKit::ExtensionError{msg.str()};
         }

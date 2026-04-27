@@ -37,7 +37,7 @@ struct MockIoContext : IIoContext
 
     MOCK_METHOD(std::vector<std::string>, Resolve, (const std::string&), (override));
 
-    MOCK_METHOD(void, SetLogger, (SilKit::Services::Logging::ILogger&), (override));
+    MOCK_METHOD(void, SetLogger, (SilKit::Services::Logging::ILoggerInternal&), (override));
 };
 
 
@@ -90,7 +90,7 @@ struct MockIoContextWithExecutionQueue : IIoContext
 
     MOCK_METHOD(std::vector<std::string>, Resolve, (const std::string&), (override));
 
-    MOCK_METHOD(void, SetLogger, (SilKit::Services::Logging::ILogger&), (override));
+    MOCK_METHOD(void, SetLogger, (SilKit::Services::Logging::ILoggerInternal&), (override));
 };
 
 

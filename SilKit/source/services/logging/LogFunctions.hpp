@@ -34,28 +34,28 @@ public:
 };
 
 template <typename... Args>
-void Log(ILogger* logger, Level level, const char* fmt, const Args&... args)
+void Log(ILoggerInternal* logger, Level level, const char* fmt, const Args&... args)
 {
     if (logger && (logger->GetLogLevel() <= level))
     {
         const std::string msg = fmt::format(fmt, args...);
-        logger->Log(level, msg);
+        logger->Log(level, Topic::None, msg);
     }
 }
 
 template <typename... Args>
-void Trace(ILogger* logger, const char* fmt, const Args&... args)
+void Trace(ILoggerInternal* logger, const char* fmt, const Args&... args)
 {
     Log(logger, Level::Trace, fmt, args...);
 }
 template <typename... Args>
-void Debug(ILogger* logger, const char* fmt, const Args&... args)
+void Debug(ILoggerInternal* logger, const char* fmt, const Args&... args)
 {
     Log(logger, Level::Debug, fmt, args...);
 }
 
 template <typename... Args>
-void Debug(ILogger* logger, LogOnceFlag& onceflag, const char* fmt, const Args&... args)
+void Debug(ILoggerInternal* logger, LogOnceFlag& onceflag, const char* fmt, const Args&... args)
 {
     if (onceflag.WasCalled())
     {
@@ -66,18 +66,18 @@ void Debug(ILogger* logger, LogOnceFlag& onceflag, const char* fmt, const Args&.
 }
 
 template <typename... Args>
-void Info(ILogger* logger, const char* fmt, const Args&... args)
+void Info(ILoggerInternal* logger, const char* fmt, const Args&... args)
 {
     Log(logger, Level::Info, fmt, args...);
 }
 template <typename... Args>
-void Warn(ILogger* logger, const char* fmt, const Args&... args)
+void Warn(ILoggerInternal* logger, const char* fmt, const Args&... args)
 {
     Log(logger, Level::Warn, fmt, args...);
 }
 
 template <typename... Args>
-void Warn(ILogger* logger, LogOnceFlag& onceFlag, const char* fmt, const Args&... args)
+void Warn(ILoggerInternal* logger, LogOnceFlag& onceFlag, const char* fmt, const Args&... args)
 {
     if (onceFlag.WasCalled())
     {
@@ -88,12 +88,12 @@ void Warn(ILogger* logger, LogOnceFlag& onceFlag, const char* fmt, const Args&..
 }
 
 template <typename... Args>
-void Error(ILogger* logger, const char* fmt, const Args&... args)
+void Error(ILoggerInternal* logger, const char* fmt, const Args&... args)
 {
     Log(logger, Level::Error, fmt, args...);
 }
 template <typename... Args>
-void Critical(ILogger* logger, const char* fmt, const Args&... args)
+void Critical(ILoggerInternal* logger, const char* fmt, const Args&... args)
 {
     Log(logger, Level::Critical, fmt, args...);
 }

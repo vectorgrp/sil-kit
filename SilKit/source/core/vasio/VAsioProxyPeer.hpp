@@ -11,7 +11,7 @@
 namespace SilKit {
 namespace Services {
 namespace Logging {
-class ILogger;
+struct ILoggerInternal;
 } // namespace Logging
 } // namespace Services
 } // namespace SilKit
@@ -27,7 +27,7 @@ class VAsioProxyPeer
 {
 public:
     VAsioProxyPeer(IVAsioPeerListener* listener, std::string participantName, VAsioPeerInfo peerInfo, IVAsioPeer* peer,
-                   SilKit::Services::Logging::ILogger* logger);
+                   SilKit::Services::Logging::ILoggerInternal* logger);
 
 public: // IVAsioPeer
     void SendSilKitMsg(SerializedMessage buffer) override;
@@ -64,7 +64,7 @@ private:
     IVAsioPeer* _peer;
     VAsioPeerInfo _peerInfo;
     ServiceDescriptor _serviceDescriptor;
-    SilKit::Services::Logging::ILogger* _logger;
+    SilKit::Services::Logging::ILoggerInternal* _logger;
     ProtocolVersion _protocolVersion;
 };
 

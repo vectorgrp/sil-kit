@@ -7,7 +7,9 @@
 #include "IParticipantInternal.hpp"
 #include "LoggerMessage.hpp"
 
-namespace Log = SilKit::Services::Logging;
+using SilKit::Services::Logging::Level;
+using SilKit::Services::Logging::Topic;
+using SilKit::Services::Logging::LoggerMessage;
 
 namespace VSilKit {
 
@@ -16,7 +18,7 @@ MetricsProcessor::MetricsProcessor(std::string participantName)
 {
 }
 
-void MetricsProcessor::SetLogger(SilKit::Services::Logging::ILogger& logger)
+void MetricsProcessor::SetLogger(SilKit::Services::Logging::ILoggerInternal& logger)
 {
     _logger = &logger;
 }
@@ -27,7 +29,9 @@ void MetricsProcessor::SetSinks(std::vector<std::unique_ptr<IMetricsSink>> sinks
 
     if (_sinksSetUp)
     {
-        Log::Error(_logger, "Refusing to setup metrics sinks again");
+        _logger->MakeMessage(Level::Error, TopicOf(*this))
+            .SetMessage("Refusing to setup metrics sinks again")
+            .Dispatch();
         return;
     }
 

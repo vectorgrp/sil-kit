@@ -24,7 +24,7 @@ class LifecycleService;
 class LifecycleManagement
 {
 public: //CTors
-    LifecycleManagement(Core::IParticipantInternal* participant, Services::Logging::ILogger* logger,
+    LifecycleManagement(Core::IParticipantInternal* participant, Services::Logging::ILoggerInternal* logger,
                         LifecycleService* parentService);
 
     // Triggered by Public API calls
@@ -102,7 +102,7 @@ public: //CTors
     OperationMode GetOperationMode() const;
 
     // Interface getters
-    Logging::ILogger* GetLogger();
+    Logging::ILoggerInternal* GetLogger();
     LifecycleService* GetService();
     Core::IParticipantInternal* GetParticipant();
 
@@ -131,7 +131,7 @@ private:
     ILifecycleState* _lastBeforeAbortingState{nullptr};
     LifecycleService* _lifecycleService;
 
-    Services::Logging::ILogger* _logger;
+    Services::Logging::ILoggerInternal* _logger;
     std::recursive_mutex _mutex;
 };
 

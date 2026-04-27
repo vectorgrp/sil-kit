@@ -8,7 +8,7 @@
 
 #include <memory>
 
-#include "silkit/services/logging/ILogger.hpp"
+#include "ILoggerInternal.hpp"
 
 #include "DashboardSystemApiClient.hpp"
 
@@ -18,7 +18,7 @@ namespace Dashboard {
 class DashboardSystemServiceClient : public IDashboardSystemServiceClient
 {
 public:
-    DashboardSystemServiceClient(Services::Logging::ILogger* logger,
+    DashboardSystemServiceClient(Services::Logging::ILoggerInternal* logger,
                                  std::shared_ptr<DashboardSystemApiClient> dashboardSystemApiClient,
                                  std::shared_ptr<oatpp::data::mapping::ObjectMapper> objectMapper);
     ~DashboardSystemServiceClient();
@@ -33,7 +33,7 @@ private:
     void Log(std::shared_ptr<oatpp::web::client::RequestExecutor::Response> response, const std::string& message);
 
 private:
-    Services::Logging::ILogger* _logger;
+    Services::Logging::ILoggerInternal* _logger;
     std::shared_ptr<DashboardSystemApiClient> _dashboardSystemApiClient;
     std::shared_ptr<oatpp::data::mapping::ObjectMapper> _objectMapper;
 };

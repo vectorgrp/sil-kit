@@ -138,7 +138,7 @@ private:
     Orchestration::ITimeProvider* _timeProvider{nullptr};
     Tracer _tracer;
     bool _replayActive{false};
-    Services::Logging::ILogger* _logger;
+    Services::Logging::ILoggerInternal* _logger;
     Services::Logging::LogOnceFlag _logOnce;
 
     template <typename MsgT>

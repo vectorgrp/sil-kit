@@ -4,7 +4,7 @@
 
 #include "TransformAcceptorUris.hpp"
 
-#include "Logger.hpp"
+#include "LoggerMessage.hpp"
 
 #include <asio/ip/address.hpp>
 
@@ -17,6 +17,9 @@ namespace {
 
 using SilKit::Core::Uri;
 using SilKit::SilKitError;
+using SilKit::Services::Logging::Level;
+using SilKit::Services::Logging::Topic;
+using SilKit::Services::Logging::LoggerMessage;
 
 struct UriLexicographicLess
 {
@@ -70,7 +73,7 @@ inline auto GetUriInfo(const Uri& uri) -> UriInfo
     return UriInfo{};
 }
 
-auto TransformAcceptorUris(SilKit::Services::Logging::ILogger* logger, IVAsioPeer* advertisedPeer,
+auto TransformAcceptorUris(SilKit::Services::Logging::ILoggerInternal* logger, IVAsioPeer* advertisedPeer,
                            IVAsioPeer* audiencePeer) -> std::vector<std::string>
 {
     const auto src = Uri::Parse(advertisedPeer->GetRemoteAddress());
@@ -82,18 +85,22 @@ auto TransformAcceptorUris(SilKit::Services::Logging::ILogger* logger, IVAsioPee
     std::set<Uri, UriLexicographicLess> acceptorUris;
 
     const auto acceptUri = [logger, &acceptorUris, audiencePeer, advertisedPeer](const Uri& uri) {
-        Services::Logging::Debug(logger, "SIL Kit Registry: TransformAcceptorUris: '{}' to '{}': Accept: {}",
-                                 advertisedPeer->GetInfo().participantName, audiencePeer->GetInfo().participantName,
-                                 uri.EncodedString());
+        logger->MakeMessage(Level::Debug, Topic::Participant)
+            .SetMessage("SIL Kit Registry: TransformAcceptorUris: '{}' to '{}': Accept: {}",
+                        advertisedPeer->GetInfo().participantName, audiencePeer->GetInfo().participantName,
+                        uri.EncodedString())
+            .Dispatch();
         acceptorUris.emplace(uri);
     };
 
     const auto acceptNewTcpUri = [logger, &acceptorUris, audiencePeer, advertisedPeer](const std::string& host,
                                                                                        uint16_t port) {
         auto uri = Uri::MakeTcp(host, port);
-        Services::Logging::Debug(logger, "SIL Kit Registry: TransformAcceptorUris: '{}' to '{}': Accept: {}",
-                                 advertisedPeer->GetInfo().participantName, audiencePeer->GetInfo().participantName,
-                                 uri.EncodedString());
+        logger->MakeMessage(Level::Debug, Topic::Participant)
+            .SetMessage("SIL Kit Registry: TransformAcceptorUris: '{}' to '{}': Accept: {}",
+                        advertisedPeer->GetInfo().participantName, audiencePeer->GetInfo().participantName,
+                        uri.EncodedString())
+            .Dispatch();
         acceptorUris.emplace(std::move(uri));
     };
 
@@ -118,9 +125,11 @@ auto TransformAcceptorUris(SilKit::Services::Logging::ILogger* logger, IVAsioPee
         const auto uri = Uri::Parse(uriString);
         const auto uriInfo = GetUriInfo(uri);
 
-        Services::Logging::Debug(logger, "SIL Kit Registry: TransformAcceptorUris: '{}' to '{}': Decide: {}",
-                                 advertisedPeer->GetInfo().participantName, audiencePeer->GetInfo().participantName,
-                                 uri.EncodedString());
+        LoggerMessage(logger, Level::Debug, Topic::Participant)
+            .SetMessage("SIL Kit Registry: TransformAcceptorUris: '{}' to '{}': Decide: {}",
+                        advertisedPeer->GetInfo().participantName, audiencePeer->GetInfo().participantName,
+                        uri.EncodedString())
+            .Dispatch();
 
         if (uriInfo.catchallIp)
         {
