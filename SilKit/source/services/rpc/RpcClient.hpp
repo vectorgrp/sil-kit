@@ -93,7 +93,7 @@ private:
     Core::ServiceDescriptor _serviceDescriptor{};
     std::atomic<uint32_t> _numCounterparts{0};
     std::map<std::string, std::pair<uint32_t, std::unique_ptr<RpcCallHandle>>> _detachedCallHandles;
-    Services::Logging::ILogger* _logger;
+    Services::Logging::ILoggerInternal* _logger;
     Services::Orchestration::ITimeProvider* _timeProvider{nullptr};
     Core::IParticipantInternal* _participant{nullptr};
 

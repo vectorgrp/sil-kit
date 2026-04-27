@@ -120,11 +120,18 @@ public:
 
         if (!SilKitServiceTraits<SilKitServiceT>::UseAsyncRegistration())
         {
-            Trace(_logger, "SIL Kit waiting for subscription acknowledges for SilKitService {}.",
-                  typeid(*service).name());
+
+            _logger->MakeMessage(Services::Logging::Level::Trace, TopicOf(*this))
+                .SetMessage("SIL Kit waiting for subscription acknowledges for SilKitService")
+                .AddKeyValue(Services::Logging::Keys::serviceName, typeid(*service).name())
+                .Dispatch();
+
             allAcked.wait();
-            Trace(_logger, "SIL Kit received all subscription acknowledges for SilKitService {}.",
-                  typeid(*service).name());
+
+            _logger->MakeMessage(Services::Logging::Level::Trace, TopicOf(*this))
+                .SetMessage("SIL Kit received all subscription acknowledges for SilKitService")
+                .AddKeyValue(Services::Logging::Keys::serviceName, typeid(*service).name())
+                .Dispatch();
         }
     }
 

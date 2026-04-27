@@ -20,7 +20,7 @@ namespace VSilKit {
 
 
 template <typename... Args>
-void TraceEvent(SilKit::Services::Logging::ILogger* logger, fmt::string_view fileName, size_t line,
+void TraceEvent(SilKit::Services::Logging::ILoggerInternal* logger, fmt::string_view fileName, size_t line,
                 fmt::string_view function, const void* object, Args&&... args)
 {
     if (logger == nullptr)
@@ -50,7 +50,9 @@ void TraceEvent(SilKit::Services::Logging::ILogger* logger, fmt::string_view fil
     formattedArguments.clear();
     fmt::format_to(std::back_inserter(formattedArguments), std::forward<Args>(args)...);
 
-    SilKit::Services::Logging::Trace(logger, "{} {}", formattedPrefix, formattedArguments);
+    logger->MakeMessage(SilKit::Services::Logging::Level::Trace, SilKit::Services::Logging::Topic::Asio)
+        .SetMessage("{} {}", formattedPrefix, formattedArguments)
+        .Dispatch();
 }
 
 

@@ -82,8 +82,9 @@ public:
             }
             else
             {
-                _participant->GetLogger()->Warn("EventProvider has no receiving controller on network '" + _networkName
-                                                + "'");
+                _participant->GetLoggerInternal()->MakeMessage(SilKit::Services::Logging::Level::Warn, TopicOf(*this))
+                    .SetMessage("EventProvider has no receiving controller on network '{}'", _networkName)
+                    .Dispatch();
             }
         }
     }

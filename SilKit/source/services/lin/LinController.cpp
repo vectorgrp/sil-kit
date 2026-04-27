@@ -46,7 +46,7 @@ LinController::LinController(Core::IParticipantInternal* participant, SilKit::Co
                              Services::Orchestration::ITimeProvider* timeProvider)
     : _participant{participant}
     , _config{config}
-    , _logger{participant->GetLogger()}
+    , _logger{participant->GetLoggerInternal()}
     , _simulationBehavior{participant, this, timeProvider}
     , _timeProvider{timeProvider}
     , _replayActive{Tracing::IsValidReplayConfig(_config.replay)}
@@ -69,11 +69,9 @@ void LinController::RegisterServiceDiscovery()
             if (discoveryType == Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated
                 && IsRelevantNetwork(remoteServiceDescriptor))
             {
-                Logging::Info(_logger,
-                              "Controller '{}' is using the simulated network '{}' and will route all messages to "
-                              "the network simulator '{}'",
-                              _config.name, remoteServiceDescriptor.GetNetworkName(),
-                              remoteServiceDescriptor.GetParticipantName());
+                _logger->MakeMessage(Logging::Level::Info, TopicOf(*this))
+                    .SetMessage("Controller using simulated network")
+                    .Dispatch();
                 SetDetailedBehavior(remoteServiceDescriptor);
             }
         }
@@ -83,10 +81,9 @@ void LinController::RegisterServiceDiscovery()
                 && IsRelevantNetwork(remoteServiceDescriptor))
 
             {
-                Logging::Warn(_logger,
-                              "The network simulator for controller '{}' left the simulation. The controller is no "
-                              "longer simulated.",
-                              _config.name);
+                _logger->MakeMessage(Logging::Level::Warn, TopicOf(*this))
+                    .SetMessage("The network simulator left the simulation")
+                    .Dispatch();
                 SetTrivialBehavior();
             }
         }
@@ -131,7 +128,9 @@ void LinController::ThrowIfUninitialized(const std::string& callingMethodName) c
         std::string errorMsg = callingMethodName
                                + " must only be called when the controller is initialized! Check "
                                  "whether a call to LinController::Init is missing.";
-        _logger->Error(errorMsg);
+        _logger->MakeMessage(Logging::Level::Error, TopicOf(*this))
+            .SetMessage(errorMsg)
+            .Dispatch();
         throw SilKit::StateError{errorMsg};
     }
 }
@@ -141,7 +140,9 @@ void LinController::ThrowIfNotMaster(const std::string& callingMethodName) const
     if (_controllerMode != LinControllerMode::Master)
     {
         std::string errorMsg = callingMethodName + " must only be called in master mode!";
-        _logger->Error(errorMsg);
+        _logger->MakeMessage(Logging::Level::Error, TopicOf(*this))
+            .SetMessage(errorMsg)
+            .Dispatch();
         throw SilKitError{errorMsg};
     }
 }
@@ -151,7 +152,9 @@ void LinController::ThrowIfDynamic(const std::string& callingMethodName) const
     if (_useDynamicResponse)
     {
         std::string errorMsg = callingMethodName + " can not be called if the node was initialized using InitDynamic!";
-        _logger->Error(errorMsg);
+        _logger->MakeMessage(Logging::Level::Error, TopicOf(*this))
+            .SetMessage(errorMsg)
+            .Dispatch();
         throw SilKitError{errorMsg};
     }
 }
@@ -161,7 +164,9 @@ void LinController::ThrowIfNotDynamic(const std::string& callingMethodName) cons
     if (_useDynamicResponse)
     {
         std::string errorMsg = callingMethodName + " can only be called if the node was initialized using InitDynamic!";
-        _logger->Error(errorMsg);
+        _logger->MakeMessage(Logging::Level::Error, TopicOf(*this))
+            .SetMessage(errorMsg)
+            .Dispatch();
         throw SilKitError{errorMsg};
     }
 }
@@ -173,91 +178,116 @@ void LinController::ThrowIfNotConfiguredTxUnconditional(LinId linId)
         std::string errorMsg = fmt::format("This node must be configured with LinFrameResponseMode::TxUnconditional to "
                                            "update the TxBuffer for ID {}",
                                            static_cast<uint16_t>(linId));
-        _logger->Error(errorMsg);
+        _logger->MakeMessage(Logging::Level::Error, TopicOf(*this))
+            .SetMessage(errorMsg)
+            .Dispatch();
         throw SilKit::ConfigurationError{errorMsg};
     }
 }
 
 void LinController::WarnOnWrongDataLength(const LinFrame& receivedFrame, const LinFrame& configuredFrame) const
 {
-    Logging::Warn(_logger, "Mismatch between configured ({}) and received ({}) LinDataLength in LinFrame with ID {}",
-                  configuredFrame.dataLength, receivedFrame.dataLength, static_cast<uint16_t>(receivedFrame.id));
+    _logger->MakeMessage(Logging::Level::Warn, TopicOf(*this))
+        .SetMessage("Mismatch between configured ({}) and received ({}) LinDataLength in LinFrame with ID {}",
+                    configuredFrame.dataLength, receivedFrame.dataLength, static_cast<uint16_t>(receivedFrame.id))
+        .Dispatch();
+
 }
 
 void LinController::WarnOnWrongChecksum(const LinFrame& receivedFrame, const LinFrame& configuredFrame) const
 {
-    Logging::Warn(_logger, "Mismatch between configured ({}) and received ({}) LinChecksumModel in LinFrame with ID {}",
-                  configuredFrame.checksumModel, receivedFrame.checksumModel, static_cast<uint16_t>(receivedFrame.id));
+    _logger->MakeMessage(Logging::Level::Warn, TopicOf(*this))
+        .SetMessage("Mismatch between configured ({}) and received ({}) LinChecksumModel in LinFrame with ID {}",
+                    configuredFrame.checksumModel, receivedFrame.checksumModel, static_cast<uint16_t>(receivedFrame.id))
+        .Dispatch();
 }
 
 void LinController::WarnOnReceptionWithInvalidDataLength(LinDataLength invalidDataLength,
                                                          const std::string& fromParticipantName,
                                                          const std::string& fromServiceName) const
 {
-    Logging::Warn(_logger,
-                  "LinController received transmission with invalid payload length {} from {{{}, {}}}. This "
-                  "tranmission is ignored.",
-                  static_cast<uint16_t>(invalidDataLength), fromParticipantName, fromServiceName);
+    _logger->MakeMessage(Logging::Level::Warn, TopicOf(*this))
+        .SetMessage("LinController received transmission with invalid payload length {} from {{{}, {}}}. This "
+                    "tranmission is ignored.",
+                    static_cast<uint16_t>(invalidDataLength), fromParticipantName, fromServiceName)
+        .Dispatch();
 }
 
 void LinController::WarnOnReceptionWithInvalidLinId(LinId invalidLinId, const std::string& fromParticipantName,
                                                     const std::string& fromServiceName) const
 {
-    Logging::Warn(
-        _logger,
-        "LinController received transmission with invalid LIN ID {} from {{{}, {}}}. This transmission is ignored.",
-        static_cast<uint16_t>(invalidLinId), fromParticipantName, fromServiceName);
+    _logger->MakeMessage(Logging::Level::Warn, TopicOf(*this))
+        .SetMessage(
+            "LinController received transmission with invalid LIN ID {} from {{{}, {}}}. This transmission is ignored.",
+            static_cast<uint16_t>(invalidLinId), fromParticipantName, fromServiceName)
+        .Dispatch();
 }
 
 void LinController::WarnOnReceptionWhileInactive(const LinTransmission& msg) const
 {
-    Logging::Warn(_logger, "Inactive LinController received a transmission ({}). This transmission is ignored.", msg);
+    _logger->MakeMessage(Logging::Level::Warn, TopicOf(*this))
+        .SetMessage("Inactive LinController received a transmission ({}). This transmission is ignored.", msg)
+        .Dispatch();
 }
 
 void LinController::WarnOnReceptionWhileSleeping() const
 {
-    Logging::Warn(_logger, "Sleeping LinController received a transmission. This transmission is ignored!");
+    _logger->MakeMessage(Logging::Level::Warn, TopicOf(*this))
+        .SetMessage("Sleeping LinController received a transmission. This transmission is ignored!")
+        .Dispatch();
 }
 
 void LinController::WarnOnUnneededStatusChange(LinControllerStatus status) const
 {
-    Logging::Warn(_logger, "Invalid LinController status change: controller is already in {} mode.", status);
+    _logger->MakeMessage(Logging::Level::Warn, TopicOf(*this))
+        .SetMessage("Invalid LinController status change: controller is already in {} mode.", status)
+        .Dispatch();
 }
 
 void LinController::WarnOnInvalidLinId(LinId invalidLinId, const std::string& callingMethodName) const
 {
-    Logging::Warn(_logger, "Invalid ID={} in call to '{}'", static_cast<uint16_t>(invalidLinId), callingMethodName);
+    _logger->MakeMessage(Logging::Level::Warn, TopicOf(*this))
+        .SetMessage("Invalid ID={} in call to '{}'", static_cast<uint16_t>(invalidLinId), callingMethodName)
+        .Dispatch();
 }
 
 void LinController::WarnOnUnusedResponseMode(const std::string& callingMethodName) const
 {
-    Logging::Warn(_logger, "LinFrameResponseMode::Unused is not allowed in call to '{}'.", callingMethodName);
+    _logger->MakeMessage(Logging::Level::Warn, TopicOf(*this))
+        .SetMessage("LinFrameResponseMode::Unused is not allowed in call to '{}'.", callingMethodName)
+        .Dispatch();
 }
 
 void LinController::WarnOnResponseModeReconfiguration(LinId id, LinFrameResponseMode currentResponseMode) const
 {
-    Logging::Warn(_logger, "Can't set response mode for ID={}. Mode is already configured to {}.", id, currentResponseMode);
+    _logger->MakeMessage(Logging::Level::Warn, TopicOf(*this))
+        .SetMessage("Can't set response mode for ID={}. Mode is already configured to {}.", id, currentResponseMode)
+        .Dispatch();
 }
 
 
 void LinController::WarnOnUnconfiguredSlaveResponse(LinId id) const
 {
-    Logging::Warn(_logger,
-                  "No slave has configured a response for ID={}. Use Init() or SetFrameResponse() on the slave node to "
-                  "configure responses.",
-                  id);
+    _logger->MakeMessage(Logging::Level::Warn, TopicOf(*this))
+        .SetMessage("No slave has configured a response for ID={}. Use Init() or SetFrameResponse() on the slave node to "
+            "configure responses.", id)
+        .Dispatch();
 }
 
 void LinController::WarnOnSendFrameSlaveResponseWithMasterTx(LinId id) const
 {
-    Logging::Warn(_logger, "Master has already configured a response on ID={}. Ignoring this call to SendFrame()", id);
+    _logger->MakeMessage(Logging::Level::Warn, TopicOf(*this))
+        .SetMessage("Master has already configured a response on ID={}. Ignoring this call to SendFrame()", id)
+        .Dispatch();
 }
 
 void LinController::ThrowOnSendAttemptWithUndefinedChecksum(const LinFrame& frame) const
 {
     std::string errorMsg =
         fmt::format("LinFrame with ID {} has an undefined checksum model.", static_cast<uint16_t>(frame.id));
-    _logger->Error(errorMsg);
+    _logger->MakeMessage(Logging::Level::Error, TopicOf(*this))
+        .SetMessage(errorMsg)
+        .Dispatch();
     throw SilKit::StateError{errorMsg};
 }
 
@@ -265,21 +295,27 @@ void LinController::ThrowOnSendAttemptWithUndefinedDataLength(const LinFrame& fr
 {
     std::string errorMsg =
         fmt::format("LinFrame with ID {} has an undefined data length.", static_cast<uint16_t>(frame.id));
-    _logger->Error(errorMsg);
+    _logger->MakeMessage(Logging::Level::Error, TopicOf(*this))
+        .SetMessage(errorMsg)
+        .Dispatch();
     throw SilKit::StateError{errorMsg};
 }
 
 void LinController::ThrowOnErroneousInitialization() const
 {
     std::string errorMsg{"A LinController can't be initialized with LinControllerMode::Inactive!"};
-    _logger->Error(errorMsg);
+    _logger->MakeMessage(Logging::Level::Error, TopicOf(*this))
+        .SetMessage(errorMsg)
+        .Dispatch();
     throw SilKit::StateError{errorMsg};
 }
 
 void LinController::ThrowOnDuplicateInitialization() const
 {
     std::string errorMsg{"LinController::Init() must only be called once!"};
-    _logger->Error(errorMsg);
+    _logger->MakeMessage(Logging::Level::Error, TopicOf(*this))
+        .SetMessage(errorMsg)
+        .Dispatch();
     throw SilKit::StateError{errorMsg};
 }
 
@@ -425,8 +461,12 @@ void LinController::SendFrame(LinFrame frame, LinFrameResponseType responseType)
 
     if (Tracing::IsReplayEnabledFor(_config.replay, Config::Replay::Direction::Send))
     {
-        Logging::Debug(_logger, _logOnce, "LinController: Ignoring SendFrame API call due to Replay config on {}",
-                       _config.name);
+        if (!_logOnce.WasCalled())
+        {
+            _logger->MakeMessage(Logging::Level::Debug, TopicOf(*this))
+            .SetMessage("LinController: Ignoring SendFrame API call due to Replay config on {}", _config.name)
+            .Dispatch();
+        }
         return;
     }
 
@@ -484,8 +524,12 @@ void LinController::SetFrameResponse(LinFrameResponse response)
 
     if (Tracing::IsReplayEnabledFor(_config.replay, Config::Replay::Direction::Send))
     {
-        Logging::Debug(_logger, _logOnce,
-                       "LinController: Ignoring SetFrameResponse API call due to Replay config on {}", _config.name);
+        if (!_logOnce.WasCalled())
+        {
+            _logger->MakeMessage(Logging::Level::Debug, TopicOf(*this))
+            .SetMessage("LinController: Ignoring SetFrameResponse API call due to Replay config on {}", _config.name)
+            .Dispatch();
+        }
         return;
     }
 
@@ -510,8 +554,12 @@ void LinController::GoToSleep()
 
     if (Tracing::IsReplayEnabledFor(_config.replay, Config::Replay::Direction::Send))
     {
-        Logging::Debug(_logger, _logOnce, "LinController: Ignoring GoToSleep API call due to Replay config on {}",
-                       _config.name);
+        if (!_logOnce.WasCalled()) 
+        {
+            _logger->MakeMessage(Logging::Level::Debug, TopicOf(*this))
+            .SetMessage("LinController: Ignoring GoToSleep API call due to Replay config on {}", _config.name)
+            .Dispatch();
+        }
         return;
     }
 
@@ -631,14 +679,16 @@ void LinController::HandleResponsesUpdate(const IServiceEndpoint* from,
 //------------------------
 
 void LinController::LinNode::UpdateResponses(std::vector<LinFrameResponse> responsesToUpdate,
-                                             Services::Logging::ILogger* logger)
+                                             Services::Logging::ILoggerInternal* logger)
 {
     for (auto&& response : responsesToUpdate)
     {
         auto linId = response.frame.id;
         if (linId >= responses.size())
         {
-            Logging::Warn(logger, "Ignoring LinFrameResponse update for invalid ID={}", static_cast<uint16_t>(linId));
+            logger->MakeMessage(Logging::Level::Warn, TopicOf(*this))
+                .SetMessage("Ignoring LinFrameResponse update for invalid ID={}", static_cast<uint16_t>(linId))
+                .Dispatch();
             continue;
         }
         responses[linId] = std::move(response);
@@ -646,11 +696,13 @@ void LinController::LinNode::UpdateResponses(std::vector<LinFrameResponse> respo
 }
 
 void LinController::LinNode::UpdateTxBuffer(LinId linId, std::array<uint8_t, 8> data,
-                                            Services::Logging::ILogger* logger)
+                                            Services::Logging::ILoggerInternal* logger)
 {
     if (linId >= responses.size())
     {
-        Logging::Warn(logger, "Ignoring LinFrameResponse update for invalid ID={}", static_cast<uint16_t>(linId));
+        logger->MakeMessage(Logging::Level::Warn, TopicOf(*this))
+            .SetMessage("Ignoring LinFrameResponse update for invalid ID={}", static_cast<uint16_t>(linId))
+            .Dispatch();
         return;
     }
     responses[linId].frame.data = data;
@@ -844,7 +896,9 @@ void LinController::RemoveFrameStatusHandler(HandlerId handlerId)
 {
     if (!RemoveHandler<LinFrameStatusEvent>(handlerId))
     {
-        _participant->GetLogger()->Warn("RemoveFrameStatusHandler failed: Unknown HandlerId.");
+        _participant->GetLoggerInternal()->MakeMessage(Logging::Level::Warn, TopicOf(*this))
+            .SetMessage("RemoveFrameStatusHandler failed: Unknown HandlerId.")
+            .Dispatch();
     }
 }
 
@@ -857,7 +911,9 @@ void LinController::RemoveGoToSleepHandler(HandlerId handlerId)
 {
     if (!RemoveHandler<LinGoToSleepEvent>(handlerId))
     {
-        _participant->GetLogger()->Warn("RemoveGoToSleepHandler failed: Unknown HandlerId.");
+        _participant->GetLoggerInternal()->MakeMessage(Logging::Level::Warn, TopicOf(*this))
+            .SetMessage("RemoveGoToSleepHandler failed: Unknown HandlerId.")
+            .Dispatch();
     }
 }
 
@@ -876,7 +932,9 @@ void LinController::RemoveWakeupHandler(HandlerId handlerId)
 {
     if (!RemoveHandler<LinWakeupEvent>(handlerId))
     {
-        _participant->GetLogger()->Warn("RemoveWakeupHandler failed: Unknown HandlerId.");
+        _participant->GetLoggerInternal()->MakeMessage(Logging::Level::Warn, TopicOf(*this))
+            .SetMessage("RemoveWakeupHandler failed: Unknown HandlerId.")
+            .Dispatch();
     }
 }
 
@@ -884,7 +942,9 @@ void LinController::RemoveFrameHeaderHandler(HandlerId handlerId)
 {
     if (!RemoveHandler<SilKit::Experimental::Services::Lin::LinFrameHeaderEvent>(handlerId))
     {
-        _participant->GetLogger()->Warn("RemoveFrameHeaderHandler failed: Unknown HandlerId.");
+        _participant->GetLoggerInternal()->MakeMessage(Logging::Level::Warn, TopicOf(*this))
+            .SetMessage("RemoveFrameHeaderHandler failed: Unknown HandlerId.")
+            .Dispatch();
     }
 }
 
@@ -908,7 +968,9 @@ void LinController::RemoveLinSlaveConfigurationHandler(HandlerId handlerId)
 {
     if (!RemoveHandler<Experimental::Services::Lin::LinSlaveConfigurationEvent>(handlerId))
     {
-        _participant->GetLogger()->Warn("RemoveLinSlaveConfigurationHandler failed: Unknown HandlerId.");
+        _participant->GetLoggerInternal()->MakeMessage(Logging::Level::Warn, TopicOf(*this))
+            .SetMessage("RemoveLinSlaveConfigurationHandler failed: Unknown HandlerId.")
+            .Dispatch();
     }
 }
 
@@ -945,7 +1007,9 @@ void LinController::ReplayMessage(const IReplayMessage* replayMessage)
 
     if (_controllerMode != LinControllerMode::Master)
     {
-        Logging::Debug(_logger, "ReplayMessage: skipping, because controller mode is {}", _controllerMode);
+        _logger->MakeMessage(Logging::Level::Debug, TopicOf(*this))
+            .SetMessage("ReplayMessage: skipping, because controller mode is {}", _controllerMode)
+            .Dispatch();
         return;
     }
     // The LinFrame Response Updates ensures that all controllers have the same notion of the

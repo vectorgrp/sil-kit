@@ -16,7 +16,9 @@
 
 #include "silkit/participant/exception.hpp"
 #include "silkit/SilKitMacros.hpp"
+
 #include "silkit/services/logging/LoggingDatatypes.hpp"
+#include "LoggingTopics.hpp"
 
 #include "StringHelpers.hpp"
 
@@ -81,6 +83,8 @@ struct Sink
     Type type{Type::Remote};
     Services::Logging::Level level{Services::Logging::Level::Info};
     std::string logName;
+    std::vector<Services::Logging::Topic> disabledTopics{};
+    std::vector<Services::Logging::Topic> enabledTopics{};
 };
 
 //! \brief Logger service

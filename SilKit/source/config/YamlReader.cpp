@@ -2,6 +2,8 @@
 //
 // SPDX-License-Identifier: MIT
 #include "YamlReader.hpp"
+#include "silkit/services/logging/string_utils.hpp"
+#include "string_utils_internal.hpp"
 
 namespace VSilKit {
 
@@ -45,6 +47,25 @@ void YamlReader::Read(SilKit::Services::Logging::Level& obj)
     {
         throw MakeConfigurationError("Unknown SilKit::Services::Logging::Level.");
     }
+}
+
+void YamlReader::Read(SilKit::Services::Logging::Topic& obj)
+{
+    if (!IsScalar() )
+    {
+        throw MakeConfigurationError("Topic should be a string.");
+    }
+
+    std::string value;
+    Read(value);
+
+    const auto topic = SilKit::Services::Logging::from_topic_string(value);
+
+    if (topic == SilKit::Services::Logging::Topic::Invalid)
+    {
+        throw MakeConfigurationError("Unknown SilKit::Services::Logging::Topic");
+    }
+    obj = topic;
 }
 
 void YamlReader::Read(SilKit::Services::Flexray::FlexrayClusterParameters& obj)
@@ -195,6 +216,8 @@ void YamlReader::Read(SilKit::Config::Sink& obj)
     OptionalRead(obj.type, "Type");
     OptionalRead(obj.level, "Level");
     OptionalRead(obj.format, "Format");
+    OptionalRead(obj.disabledTopics, "DisabledTopics");
+    OptionalRead(obj.enabledTopics, "EnabledTopics");
 
     if (obj.type == SilKit::Config::Sink::Type::File)
     {

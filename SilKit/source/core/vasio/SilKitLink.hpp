@@ -200,12 +200,15 @@ void SilKitLink<MsgT>::DispatchSilKitMessage(ReceiverT* to, const IServiceEndpoi
     }
     catch (const std::exception& e)
     {
-        Services::Logging::Warn(_logger, "Callback for {}[\"{}\"] threw an exception: {}", MsgTypeName(), Name(),
-                                e.what());
+        _logger->MakeMessage(Services::Logging::Level::Warn, TopicOf(*this))
+            .SetMessage("Callback for {}[\"{}\"] threw an exception: {}", MsgTypeName(), Name(), e.what())
+            .Dispatch();
     }
     catch (...)
     {
-        Services::Logging::Warn(_logger, "Callback for {}[\"{}\"] threw an unknown exception", MsgTypeName(), Name());
+        _logger->MakeMessage(Services::Logging::Level::Warn, TopicOf(*this))
+            .SetMessage("Callback for {}[\"{}\"] threw an unknown exception", MsgTypeName(), Name())
+            .Dispatch();
     }
 }
 

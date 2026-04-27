@@ -35,11 +35,11 @@ void TraceMessageCommon(Logging::ILoggerInternal* logger, const char* messageStr
     {
         if (logger->GetLogLevel() == Logging::Level::Trace)
         {
-            Logging::LoggerMessage lm{logger, Logging::Level::Trace};
-            lm.SetMessage(messageString);
-            lm.SetKeyValue(addr->GetServiceDescriptor());
-            lm.FormatKeyValue(Logging::Keys::msg, "{}", msg);
-
+            auto lm = logger->MakeMessage(Logging::Level::Trace, Logging::Topic::MessageTracing)
+                          .SetMessage(messageString)
+                          .AddKeyValue(addr->GetServiceDescriptor())
+                          .AddKeyValue(Logging::Keys::msg, msg);
+             
             if (!keyString.empty() && !valueString.empty())
             {
                 lm.SetKeyValue(keyString, valueString);
@@ -47,7 +47,7 @@ void TraceMessageCommon(Logging::ILoggerInternal* logger, const char* messageStr
 
             if constexpr (Core::HasTimestamp<SilKitMessageT>::value)
             {
-                lm.FormatKeyValue(Logging::Keys::virtualTimeNS, "{}", msg.timestamp.count());
+                lm.AddKeyValue(Logging::Keys::virtualTimeNS, "{}", msg.timestamp.count());
             }
 
             // Turn the Raw-logging into a trait when we have enough types that implement it

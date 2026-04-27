@@ -89,7 +89,8 @@ TEST_F(Test_DashboardSystemServiceClient, CreateSimulation_Success)
     auto expectedResponse = SimulationCreationResponseDto::createShared();
     expectedResponse->id = 123;
     EXPECT_CALL(*_mockObjectMapper, read).WillOnce(Return(expectedResponse));
-    EXPECT_CALL(_dummyLogger, Log(Services::Logging::Level::Debug, "Dashboard: creating simulation returned 201"));
+    EXPECT_CALL(_dummyLogger, ProcessLoggerMessage(Services::Logging::ALoggerMessageWith(
+                                  Services::Logging::Level::Debug, "Dashboard: creating simulation returned 201")));
 
     // Act
     oatpp::Object<SimulationCreationResponseDto> response;
@@ -116,7 +117,8 @@ TEST_F(Test_DashboardSystemServiceClient, CreateSimulation_Failure)
         actualMethod = currentMethod;
         actualPath = pathTemplate.format(map);
     });
-    EXPECT_CALL(_dummyLogger, Log(Services::Logging::Level::Error, "Dashboard: creating simulation returned 500"));
+    EXPECT_CALL(_dummyLogger, ProcessLoggerMessage(Services::Logging::ALoggerMessageWith(
+                                  Services::Logging::Level::Error, "Dashboard: creating simulation returned 500")));
 
     // Act
     oatpp::Object<SimulationCreationResponseDto> response;

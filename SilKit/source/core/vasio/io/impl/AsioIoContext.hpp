@@ -28,7 +28,7 @@ class AsioIoContext final : public IIoContext
 {
     AsioSocketOptions _socketOptions;
     std::shared_ptr<asio::io_context> _asioIoContext;
-    SilKit::Services::Logging::ILogger* _logger{nullptr};
+    SilKit::Services::Logging::ILoggerInternal* _logger{nullptr};
 
 public:
     explicit AsioIoContext(const AsioSocketOptions& socketOptions);
@@ -44,7 +44,7 @@ public: // IIoContext
     auto MakeLocalConnector(const std::string& path) -> std::unique_ptr<IConnector> override;
     auto MakeTimer() -> std::unique_ptr<ITimer> override;
     auto Resolve(const std::string& name) -> std::vector<std::string> override;
-    void SetLogger(SilKit::Services::Logging::ILogger& logger) override;
+    void SetLogger(SilKit::Services::Logging::ILoggerInternal& logger) override;
 };
 
 

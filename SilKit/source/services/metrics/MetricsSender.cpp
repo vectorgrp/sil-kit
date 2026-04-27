@@ -7,15 +7,12 @@
 #include "LoggerMessage.hpp"
 
 
-namespace Log = SilKit::Services::Logging;
-
-
 namespace VSilKit {
 
 
 MetricsSender::MetricsSender(SilKit::Core::IParticipantInternal* participant)
     : _participant{participant}
-    , _logger{participant->GetLogger()}
+    , _logger{participant->GetLoggerInternal()}
 {
     _serviceDescriptor.SetNetworkName("default");
 }

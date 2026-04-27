@@ -7,8 +7,8 @@
 #include <memory>
 #include <sstream>
 
-#include "silkit/services/logging/ILogger.hpp"
 
+#include "ILoggerInternal.hpp"
 #include "SilKitExtensions.hpp"
 #include "DllCache.hpp"
 
@@ -19,7 +19,7 @@ namespace SilKit {
 // which keeps the shared library loaded during the lifetime of the calling process.
 
 template <typename FactoryT>
-auto SilKitExtensionLoader(Services::Logging::ILogger* logger, const std::string& extensionName,
+auto SilKitExtensionLoader(Services::Logging::ILoggerInternal* logger, const std::string& extensionName,
                            const Config::Extensions& config) -> FactoryT&
 {
     static DllCache cache;
@@ -33,8 +33,12 @@ auto SilKitExtensionLoader(Services::Logging::ILogger* logger, const std::string
     catch (const std::bad_cast& err)
     {
         std::stringstream msg;
+      
         msg << "Error loading SIL Kit extension '" << extensionName << "': " << err.what();
-        logger->Error(msg.str());
+        logger->MakeMessage(Services::Logging::Level::Error, Services::Logging::Topic::Extension)
+            .SetMessage(msg.str())
+            .Dispatch();
+
         throw ExtensionError(msg.str());
     }
 }

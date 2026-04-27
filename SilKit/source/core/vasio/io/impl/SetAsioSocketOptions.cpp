@@ -15,7 +15,7 @@ namespace Log = SilKit::Services::Logging;
 namespace VSilKit {
 
 
-void SetAsioSocketOptions(SilKit::Services::Logging::ILogger* logger, asio::ip::tcp::socket& socket,
+void SetAsioSocketOptions(Log::ILoggerInternal* logger, asio::ip::tcp::socket& socket,
                           const AsioSocketOptions& socketOptions, std::error_code& errorCode)
 {
     if (socketOptions.tcp.noDelay)
@@ -23,7 +23,9 @@ void SetAsioSocketOptions(SilKit::Services::Logging::ILogger* logger, asio::ip::
         socket.set_option(asio::ip::tcp::no_delay{true}, errorCode);
         if (errorCode)
         {
-            Log::Warn(logger, "SetAsioSocketOptions: failed to enable 'no delay' option");
+            logger->MakeMessage(SilKit::Services::Logging::Level::Warn, SilKit::Services::Logging::Topic::Asio)
+                .SetMessage("SetAsioSocketOptions: failed to enable 'no delay' option")
+                .Dispatch();
             return;
         }
     }
@@ -33,8 +35,10 @@ void SetAsioSocketOptions(SilKit::Services::Logging::ILogger* logger, asio::ip::
         socket.set_option(asio::socket_base::receive_buffer_size{socketOptions.tcp.receiveBufferSize}, errorCode);
         if (errorCode)
         {
-            Log::Warn(logger, "SetAsioSocketOptions: failed to set receive buffer size to {}: {}",
-                      socketOptions.tcp.receiveBufferSize, errorCode.message());
+            logger->MakeMessage(SilKit::Services::Logging::Level::Warn, SilKit::Services::Logging::Topic::Asio)
+                .SetMessage("SetAsioSocketOptions: failed to set receive buffer size to {}: {}",
+                            socketOptions.tcp.receiveBufferSize, errorCode.message())
+                .Dispatch();
             return;
         }
     }
@@ -44,15 +48,18 @@ void SetAsioSocketOptions(SilKit::Services::Logging::ILogger* logger, asio::ip::
         socket.set_option(asio::socket_base::send_buffer_size{socketOptions.tcp.sendBufferSize}, errorCode);
         if (errorCode)
         {
-            Log::Warn(logger, "SetAsioSocketOptions: failed to set send buffer size to {}: {}",
-                      socketOptions.tcp.sendBufferSize, errorCode.message());
+
+            logger->MakeMessage(SilKit::Services::Logging::Level::Warn, SilKit::Services::Logging::Topic::Asio)
+                .SetMessage("SetAsioSocketOptions: failed to set send buffer size to {}: {}",
+                            socketOptions.tcp.sendBufferSize, errorCode.message())
+                .Dispatch();
             return;
         }
     }
 }
 
 
-void SetAsioSocketOptions(SilKit::Services::Logging::ILogger*, asio::local::stream_protocol::socket&,
+void SetAsioSocketOptions(SilKit::Services::Logging::ILoggerInternal*, asio::local::stream_protocol::socket&,
                           const AsioSocketOptions&, std::error_code&)
 {
     // no local-domain specific options

@@ -20,7 +20,7 @@ namespace VSilKit {
 namespace Log = SilKit::Services::Logging;
 
 auto CreateMetricsSinksFromParticipantConfiguration(
-    SilKit::Services::Logging::ILogger* logger, IMetricsSender* sender, const std::string& participantName,
+    SilKit::Services::Logging::ILoggerInternal* logger, IMetricsSender* sender, const std::string& participantName,
     const std::vector<SilKit::Config::MetricsSink>& configuredSinks) -> std::vector<std::unique_ptr<IMetricsSink>>
 {
     std::vector<std::unique_ptr<IMetricsSink>> sinks;

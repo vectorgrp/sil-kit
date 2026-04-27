@@ -26,6 +26,16 @@ class IParticipantConfiguration;
 // Function Declarations
 
 namespace SilKit {
+namespace Services {
+namespace Logging {
+struct ILoggerInternal; // todo check or remove, move to own file
+} // namespace Logging
+} // namespace Services
+} // namespace SilKit
+
+// Function Declarations
+
+namespace SilKit {
 
 auto CreateParticipantImpl(std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig,
                            const std::string& participantName,
@@ -34,4 +44,5 @@ auto CreateParticipantImpl(std::shared_ptr<SilKit::Config::IParticipantConfigura
 auto CreateParticipantImpl(std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig,
                            const std::string& participantName) -> std::unique_ptr<IParticipant>;
 
+auto GetLoggerInternal(SilKit::IParticipant* participant ) -> SilKit::Services::Logging::ILoggerInternal*;// todo check or remove, move to own file
 } // namespace SilKit

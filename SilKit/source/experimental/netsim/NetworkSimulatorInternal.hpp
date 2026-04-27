@@ -70,7 +70,7 @@ private:
     ControllerDescriptor NextControllerDescriptor();
 
     Core::IParticipantInternal* _participant = nullptr;
-    SilKit::Services::Logging::ILogger* _logger;
+    SilKit::Services::Logging::ILoggerInternal* _logger{nullptr};
     std::mutex _discoveredNetworksMutex;
     std::set<std::string> _discoveredNetworks;
     std::unordered_map<std::string, size_t> _controllerCountPerNetwork;

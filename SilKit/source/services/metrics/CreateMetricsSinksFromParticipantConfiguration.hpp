@@ -6,8 +6,7 @@
 
 #include "IMetricsSink.hpp"
 #include "IMetricsSender.hpp"
-#include "silkit/services/logging/ILogger.hpp"
-
+#include "ILoggerInternal.hpp"
 #include "ParticipantConfiguration.hpp"
 
 #include <memory>
@@ -17,7 +16,7 @@
 namespace VSilKit {
 
 auto CreateMetricsSinksFromParticipantConfiguration(
-    SilKit::Services::Logging::ILogger* logger, IMetricsSender* sender, const std::string& participantName,
+    SilKit::Services::Logging::ILoggerInternal* logger, IMetricsSender* sender, const std::string& participantName,
     const std::vector<SilKit::Config::MetricsSink>& configuredSinks) -> std::vector<std::unique_ptr<IMetricsSink>>;
 
 } // namespace VSilKit

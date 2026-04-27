@@ -9,6 +9,7 @@
 #include "WireEthernetMessages.hpp"
 #include "Pcap.hpp"
 #include "Assert.hpp"
+#include "LoggerMessage.hpp"
 
 namespace SilKit {
 namespace Tracing {
@@ -71,13 +72,13 @@ auto PcapMessage::Type() const -> TraceMessageType
 // PcapReader
 //////////////////////////////////////////////////////////////////////
 
-PcapReader::PcapReader(std::istream* stream, SilKit::Services::Logging::ILogger* logger)
+PcapReader::PcapReader(std::istream* stream, SilKit::Services::Logging::ILoggerInternal* logger)
     : _stream{stream}
     , _log{logger}
 {
     Reset();
 }
-PcapReader::PcapReader(const std::string& filePath, ILogger* logger)
+PcapReader::PcapReader(const std::string& filePath, ILoggerInternal* logger)
     : _filePath{filePath}
     , _log{logger}
 {
@@ -101,7 +102,9 @@ void PcapReader::Reset()
 {
     if (_filePath.empty() && _stream == nullptr)
     {
-        _log->Error("PcapReader::Reset(): no input file or stream pointer given!");
+        _log->MakeMessage(Level::Error, TopicOf(*this))
+            .SetMessage("PcapReader::Reset(): no input file or stream pointer given!")
+            .Dispatch();
         throw SilKitError("PcapReader::Reset(): no input file or stream pointer given!");
     }
 
@@ -114,7 +117,9 @@ void PcapReader::Reset()
         }
         if (!_file.good())
         {
-            _log->Error("Cannot open file " + _filePath);
+            _log->MakeMessage(Level::Error, TopicOf(*this))
+                .SetMessage("Cannot open file {}", _filePath)
+                .Dispatch();
             throw SilKitError("Cannot open file " + _filePath);
         }
     }
@@ -175,7 +180,9 @@ bool PcapReader::Seek(size_t messageNumber)
         _stream->read(buf.data(), buf.size());
         if (!_stream->good())
         {
-            _log->Warn("PCAP file: " + _filePath + ": short read on packet header.");
+            _log->MakeMessage(Level::Warn, TopicOf(*this))
+                .SetMessage("PCAP file: {}: short read on packet header.", _filePath)
+                .Dispatch();
             return false;
         }
         auto msg = std::make_shared<PcapMessage>();
@@ -187,8 +194,9 @@ bool PcapReader::Seek(size_t messageNumber)
         _stream->read(reinterpret_cast<char*>(msgBuf.data()), hdr->incl_len);
         if (!_stream->good())
         {
-            _log->Warn("PCAP file: " + _filePath + ": Cannot read packet at offset "
-                       + std::to_string(_stream->tellg()));
+            _log->MakeMessage(Level::Warn, TopicOf(*this))
+                .SetMessage("PCAP file: {}: Cannot read packet at offset {}", _filePath, std::to_string(_stream->tellg()))
+                .Dispatch();
             return false;
         }
         msg->raw = std::move(msgBuf);

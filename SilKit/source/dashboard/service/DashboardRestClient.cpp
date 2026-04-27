@@ -11,6 +11,10 @@
 #include "SilKitToOatppMapper.hpp"
 #include "client/DashboardSystemServiceClient.hpp"
 
+using SilKit::Services::Logging::Level;
+using SilKit::Services::Logging::Topic;
+using SilKit::Services::Logging::LoggerMessage;
+
 namespace SilKit {
 namespace Dashboard {
 
@@ -23,7 +27,7 @@ LibraryInitializer::~LibraryInitializer()
     oatpp::base::Environment::destroy();
 }
 
-DashboardRestClient::DashboardRestClient(Services::Logging::ILogger* logger, const std::string& dashboardServerUri)
+DashboardRestClient::DashboardRestClient(Services::Logging::ILoggerInternal* logger, const std::string& dashboardServerUri)
     : _logger(logger)
 {
     _libraryInit = std::make_shared<LibraryInitializer>();
@@ -42,7 +46,7 @@ DashboardRestClient::DashboardRestClient(Services::Logging::ILogger* logger, con
 }
 
 DashboardRestClient::DashboardRestClient(std::shared_ptr<LibraryInitializer> libraryInit,
-                                         Services::Logging::ILogger* logger,
+                                         Services::Logging::ILoggerInternal* logger,
                                          std::shared_ptr<IDashboardSystemServiceClient> serviceClient,
                                          std::shared_ptr<ISilKitToOatppMapper> mapper)
 
@@ -88,15 +92,21 @@ bool DashboardRestClient::IsBulkUpdateSupported()
 
 uint64_t DashboardRestClient::OnSimulationStart(const std::string& connectUri, uint64_t time)
 {
-    Services::Logging::Info(_logger, "Dashboard: creating simulation {} {}", connectUri, time);
+    _logger->MakeMessage(Level::Info, TopicOf(*this))
+        .SetMessage("Dashboard: creating simulation {} {}", connectUri, time)
+        .Dispatch();
     auto simulation =
         _serviceClient->CreateSimulation(_silKitToOatppMapper->CreateSimulationCreationRequestDto(connectUri, time));
     if (simulation)
     {
-        Services::Logging::Info(_logger, "Dashboard: created simulation with id {}", *simulation->id.get());
+        _logger->MakeMessage(Level::Info, TopicOf(*this))
+            .SetMessage("Dashboard: created simulation with id {}", *simulation->id.get())
+            .Dispatch();
         return simulation->id;
     }
-    _logger->Warn("Dashboard: creating simulation failed");
+    _logger->MakeMessage(Level::Warn, TopicOf(*this))
+        .SetMessage("Dashboard: creating simulation failed")
+        .Dispatch();
     return 0;
 }
 

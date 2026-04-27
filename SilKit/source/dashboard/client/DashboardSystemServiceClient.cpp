@@ -9,12 +9,15 @@
 #include OATPP_CODEGEN_BEGIN(ApiClient)
 
 using namespace std::chrono_literals;
+using SilKit::Services::Logging::Level;
+using SilKit::Services::Logging::Topic;
+using SilKit::Services::Logging::LoggerMessage;
 
 namespace SilKit {
 namespace Dashboard {
 
 DashboardSystemServiceClient::DashboardSystemServiceClient(
-    Services::Logging::ILogger* logger, std::shared_ptr<DashboardSystemApiClient> dashboardSystemApiClient,
+    Services::Logging::ILoggerInternal* logger, std::shared_ptr<DashboardSystemApiClient> dashboardSystemApiClient,
     std::shared_ptr<oatpp::data::mapping::ObjectMapper> objectMapper)
     : _logger(logger)
     , _dashboardSystemApiClient(dashboardSystemApiClient)
@@ -56,15 +59,21 @@ void DashboardSystemServiceClient::Log(std::shared_ptr<oatpp::web::client::Reque
 {
     if (!response)
     {
-        Services::Logging::Error(_logger, "Dashboard: {} server unavailable", message);
+        _logger->MakeMessage(Level::Error, TopicOf(*this))
+            .SetMessage("Dashboard: {} server unavailable", message)
+            .Dispatch();
     }
     else if (response->getStatusCode() >= 400)
     {
-        Services::Logging::Error(_logger, "Dashboard: {} returned {}", message, response->getStatusCode());
+        _logger->MakeMessage(Level::Error, TopicOf(*this))
+            .SetMessage("Dashboard: {} returned {}", message, response->getStatusCode())
+            .Dispatch();
     }
     else
     {
-        Services::Logging::Debug(_logger, "Dashboard: {} returned {}", message, response->getStatusCode());
+        _logger->MakeMessage(Level::Debug, TopicOf(*this))
+            .SetMessage("Dashboard: {} returned {}", message, response->getStatusCode())
+            .Dispatch();
     }
 }
 

@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include "silkit/services/logging/ILogger.hpp"
 
+#include "LoggerMessage.hpp"
 #include "IVAsioPeer.hpp"
 #include "Uri.hpp"
 
@@ -27,7 +27,7 @@ struct UriInfo
 
 auto GetUriInfo(const Uri& uri) -> UriInfo;
 
-auto TransformAcceptorUris(SilKit::Services::Logging::ILogger* logger, IVAsioPeer* advertisedPeer,
+auto TransformAcceptorUris(SilKit::Services::Logging::ILoggerInternal* logger, IVAsioPeer* advertisedPeer,
                            IVAsioPeer* audiencePeer) -> std::vector<std::string>;
 
 } // namespace Core
