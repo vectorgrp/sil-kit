@@ -74,7 +74,9 @@ TEST_F(Test_DashboardRestClient, OnSimulationStart_CreateSimulationFailure)
     auto request = SimulationCreationRequestDto::createShared();
     EXPECT_CALL(*_mockSilKitToOatppMapper, CreateSimulationCreationRequestDto).WillOnce(Return(request));
     EXPECT_CALL(*_mockServiceClient, CreateSimulation).WillOnce(Return(nullptr));
-    EXPECT_CALL(_dummyLogger, Log(SilKit::Services::Logging::Level::Warn, "Dashboard: creating simulation failed"));
+    EXPECT_CALL(_dummyLogger, ProcessLoggerMessage(Services::Logging::ALoggerMessageWith(
+                                  Services::Logging::Level::Warn, "Dashboard: creating simulation failed")));
+
     const auto service = CreateService();
 
     // Act

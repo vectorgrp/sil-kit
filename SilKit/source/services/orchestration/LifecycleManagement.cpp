@@ -13,7 +13,7 @@ namespace SilKit {
 namespace Services {
 namespace Orchestration {
 
-LifecycleManagement::LifecycleManagement(Core::IParticipantInternal* participant, Services::Logging::ILogger* logger,
+LifecycleManagement::LifecycleManagement(Core::IParticipantInternal* participant, Services::Logging::ILoggerInternal* logger,
                                          LifecycleService* parentService)
     : _participant{participant}
     , _lifecycleService(parentService)
@@ -125,7 +125,9 @@ void LifecycleManagement::AbortSimulation(std::string reason)
     _currentState->AbortSimulation(std::move(reason));
     if (_currentState == GetErrorState())
     {
-        GetLogger()->Warn("AbortSimulation caused a transition to an error state");
+        GetLogger()->MakeMessage(Logging::Level::Warn, TopicOf(*this))
+            .SetMessage("AbortSimulation caused a transition to an error state")
+            .Dispatch();
     }
 }
 
@@ -153,7 +155,9 @@ CallbackResult LifecycleManagement::HandleCommunicationReady()
     {
         std::stringstream ss;
         ss << "Detected exception in callback:\n" << e.what();
-        _logger->Warn(ss.str());
+        _logger->MakeMessage(Logging::Level::Warn, TopicOf(*this))
+            .SetMessage(ss.str())
+            .Dispatch();
         return CallbackResult::Error;
     }
 }
@@ -169,7 +173,9 @@ bool LifecycleManagement::HandleStarting()
     {
         std::stringstream ss;
         ss << "Detected exception in callback:\n" << e.what();
-        _logger->Warn(ss.str());
+        _logger->MakeMessage(Logging::Level::Warn, TopicOf(*this))
+            .SetMessage(ss.str())
+            .Dispatch();
         return false;
     }
 }
@@ -185,7 +191,9 @@ bool LifecycleManagement::HandleStop()
     {
         std::stringstream ss;
         ss << "Detected exception in callback:\n" << e.what();
-        _logger->Warn(ss.str());
+        _logger->MakeMessage(Logging::Level::Warn, TopicOf(*this))
+            .SetMessage(ss.str())
+            .Dispatch();
         return false;
     }
 }
@@ -201,7 +209,9 @@ bool LifecycleManagement::HandleShutdown()
     {
         std::stringstream ss;
         ss << "Detected exception in callback:\n" << e.what();
-        _logger->Warn(ss.str());
+        _logger->MakeMessage(Logging::Level::Warn, TopicOf(*this))
+            .SetMessage(ss.str())
+            .Dispatch();
         return false;
     }
 }
@@ -223,7 +233,9 @@ bool LifecycleManagement::HandleAbort()
     {
         std::stringstream ss;
         ss << "Detected exception in callback:\n" << e.what();
-        _logger->Warn(ss.str());
+        _logger->MakeMessage(Logging::Level::Warn, TopicOf(*this))
+            .SetMessage(ss.str())
+            .Dispatch();
         return false;
     }
 }
@@ -351,7 +363,7 @@ ILifecycleState* LifecycleManagement::GetShutdownState()
     return _shutDownState.get();
 }
 
-Services::Logging::ILogger* LifecycleManagement::GetLogger()
+Services::Logging::ILoggerInternal* LifecycleManagement::GetLogger()
 {
     return _logger;
 }

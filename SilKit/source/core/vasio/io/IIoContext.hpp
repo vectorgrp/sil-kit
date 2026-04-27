@@ -42,7 +42,7 @@ struct IIoContext
 
     virtual auto Resolve(const std::string& name) -> std::vector<std::string> = 0;
 
-    virtual void SetLogger(SilKit::Services::Logging::ILogger& logger) = 0;
+    virtual void SetLogger(SilKit::Services::Logging::ILoggerInternal& logger) = 0;
 };
 
 

@@ -16,6 +16,14 @@
 // Forward Declarations
 
 namespace SilKit {
+namespace Services {
+namespace Logging {
+struct ILoggerInternal; // todo check or remove, move to own file
+} // namespace Logging
+} // namespace Services
+} // namespace SilKit
+
+namespace SilKit {
 namespace Config {
 class IParticipantConfiguration;
 } // namespace Config
@@ -39,6 +47,8 @@ namespace Vector {
 auto CreateSilKitRegistryImpl(std::shared_ptr<SilKit::Config::IParticipantConfiguration> config)
     -> std::unique_ptr<ISilKitRegistry>;
 
+auto GetLoggerInternal(ISilKitRegistry* participant)
+    -> SilKit::Services::Logging::ILoggerInternal*; // todo check or remove, move to own file
 } // namespace Vector
 } // namespace Vendor
 } // namespace SilKit

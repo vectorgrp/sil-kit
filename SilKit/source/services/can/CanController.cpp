@@ -8,6 +8,7 @@
 #include "ServiceDatatypes.hpp"
 #include "CanController.hpp"
 #include "Tracing.hpp"
+#include "LoggerMessage.hpp"
 
 namespace SilKit {
 namespace Services {
@@ -19,7 +20,7 @@ CanController::CanController(Core::IParticipantInternal* participant, SilKit::Co
     , _config{std::move(config)}
     , _simulationBehavior{participant, this, timeProvider}
     , _replayActive{Tracing::IsValidReplayConfig(_config.replay)}
-    , _logger{participant->GetLogger()}
+    , _logger{participant->GetLoggerInternal()}
 {
 }
 
@@ -38,11 +39,12 @@ void CanController::RegisterServiceDiscovery()
             if (discoveryType == Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated
                 && IsRelevantNetwork(remoteServiceDescriptor))
             {
-                Logging::Info(_logger,
-                              "Controller '{}' is using the simulated network '{}' and will route all messages to "
-                              "the network simulator '{}'",
-                              _config.name, remoteServiceDescriptor.GetNetworkName(),
-                              remoteServiceDescriptor.GetParticipantName());
+                _logger->MakeMessage(Logging::Level::Info, TopicOf(*this))
+                    .SetMessage("Controller '{}' is using the simulated network '{}' and will route all messages to "
+                                "the network simulator '{}'",
+                                _config.name, remoteServiceDescriptor.GetNetworkName(),
+                                remoteServiceDescriptor.GetParticipantName())
+                    .Dispatch();
                 SetDetailedBehavior(remoteServiceDescriptor);
             }
         }
@@ -51,10 +53,11 @@ void CanController::RegisterServiceDiscovery()
             if (discoveryType == Core::Discovery::ServiceDiscoveryEvent::Type::ServiceRemoved
                 && IsRelevantNetwork(remoteServiceDescriptor))
             {
-                Logging::Warn(_logger,
-                              "The network simulator for controller '{}' left the simulation. The controller is no "
+                _logger->MakeMessage(Logging::Level::Warn, TopicOf(*this))
+                    .SetMessage("The network simulator for controller '{}' left the simulation. The controller is no "
                               "longer simulated.",
-                              _config.name);
+                              _config.name)
+                    .Dispatch();
                 SetTrivialBehavior();
             }
         }
@@ -148,8 +151,12 @@ void CanController::SendFrame(const CanFrame& frame, void* userContext)
     {
         // do not allow user messages from the public API.
         // ReplaySend will send all frames.
-        Logging::Debug(_logger, _logOnce, "CanController: Ignoring SendFrame API call due to Replay config on {}",
-                       _config.name);
+        if (!_logOnce.WasCalled()) 
+        {
+            _logger->MakeMessage(Logging::Level::Debug, TopicOf(*this))
+            .SetMessage("CanController: Ignoring SendFrame API call due to Replay config on {}", _config.name)
+            .Dispatch();
+        }
         return;
     }
     WireCanFrameEvent wireCanFrameEvent{};
@@ -172,8 +179,12 @@ void CanController::ReceiveMsg(const IServiceEndpoint* from, const WireCanFrameE
 
     if (Tracing::IsReplayEnabledFor(_config.replay, Config::Replay::Direction::Receive))
     {
-        Logging::Debug(_logger, _logOnce, "CanController: Ignoring ReceiveMsg API call due to Replay config on {}",
-                       _config.name);
+        if (!_logOnce.WasCalled()) 
+        {
+            _logger->MakeMessage(Logging::Level::Debug, TopicOf(*this))
+            .SetMessage("CanController: Ignoring ReceiveMsg API call due to Replay config on {}", _config.name)
+            .Dispatch(); 
+        }
         return;
     }
 
@@ -293,7 +304,9 @@ void CanController::RemoveFrameHandler(HandlerId handlerId)
 {
     if (!RemoveHandler<CanFrameEvent>(handlerId))
     {
-        _participant->GetLogger()->Warn("RemoveFrameHandler failed: Unknown HandlerId.");
+        _participant->GetLoggerInternal()->MakeMessage(Logging::Level::Warn, TopicOf(*this))
+            .SetMessage("RemoveFrameHandler failed: Unknown HandlerId.")
+            .Dispatch();
     }
 }
 
@@ -306,7 +319,9 @@ void CanController::RemoveStateChangeHandler(HandlerId handlerId)
 {
     if (!RemoveHandler<CanStateChangeEvent>(handlerId))
     {
-        _participant->GetLogger()->Warn("RemoveStateChangeHandler failed: Unknown HandlerId.");
+        _participant->GetLoggerInternal()->MakeMessage(Logging::Level::Warn, TopicOf(*this))
+            .SetMessage("RemoveStateChangeHandler failed: Unknown HandlerId.")
+            .Dispatch();
     }
 }
 
@@ -319,7 +334,9 @@ void CanController::RemoveErrorStateChangeHandler(HandlerId handlerId)
 {
     if (!RemoveHandler<CanErrorStateChangeEvent>(handlerId))
     {
-        _participant->GetLogger()->Warn("RemoveErrorStateChangeHandler failed: Unknown HandlerId.");
+        _participant->GetLoggerInternal()->MakeMessage(Logging::Level::Warn, TopicOf(*this))
+            .SetMessage("RemoveErrorStateChangeHandler failed: Unknown HandlerId.")
+            .Dispatch();
     }
 }
 
@@ -335,7 +352,9 @@ void CanController::RemoveFrameTransmitHandler(HandlerId handlerId)
 {
     if (!RemoveHandler<CanFrameTransmitEvent>(handlerId))
     {
-        _participant->GetLogger()->Warn("RemoveFrameTransmitHandler failed: Unknown HandlerId.");
+        _participant->GetLoggerInternal()->MakeMessage(Logging::Level::Warn, TopicOf(*this))
+            .SetMessage("RemoveFrameTransmitHandler failed: Unknown HandlerId.")
+            .Dispatch();
     }
 }
 

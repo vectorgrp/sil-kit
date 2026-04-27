@@ -8,7 +8,7 @@
 #include "IServiceDiscovery.hpp"
 #include "ServiceDatatypes.hpp"
 #include "Tracing.hpp"
-
+#include "LoggerMessage.hpp"
 
 namespace SilKit {
 namespace Services {
@@ -21,7 +21,7 @@ EthController::EthController(Core::IParticipantInternal* participant, Config::Et
     , _simulationBehavior{participant, this, timeProvider}
     , _timeProvider{timeProvider}
     , _replayActive{Tracing::IsValidReplayConfig(_config.replay)}
-    , _logger{participant->GetLogger()}
+    , _logger{participant->GetLoggerInternal()}
 {
 }
 
@@ -40,11 +40,12 @@ void EthController::RegisterServiceDiscovery()
             if (discoveryType == Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated
                 && IsRelevantNetwork(remoteServiceDescriptor))
             {
-                Logging::Info(_logger,
-                              "Controller '{}' is using the simulated network '{}' and will route all messages to "
-                              "the network simulator '{}'",
-                              _config.name, remoteServiceDescriptor.GetNetworkName(),
-                              remoteServiceDescriptor.GetParticipantName());
+                _logger->MakeMessage(Logging::Level::Info, TopicOf(*this))
+                    .SetMessage("Controller '{}' is using the simulated network '{}' and will route all messages to "
+                                "the network simulator '{}'",
+                                _config.name, remoteServiceDescriptor.GetNetworkName(),
+                                remoteServiceDescriptor.GetParticipantName())
+                    .Dispatch();
                 SetDetailedBehavior(remoteServiceDescriptor);
             }
         }
@@ -53,10 +54,11 @@ void EthController::RegisterServiceDiscovery()
             if (discoveryType == Core::Discovery::ServiceDiscoveryEvent::Type::ServiceRemoved
                 && IsRelevantNetwork(remoteServiceDescriptor))
             {
-                Logging::Warn(_logger,
-                              "The network simulator for controller '{}' left the simulation. The controller is no "
-                              "longer simulated.",
-                              _config.name);
+                _logger->MakeMessage(Logging::Level::Warn, TopicOf(*this))
+                    .SetMessage("The network simulator for controller '{}' left the simulation. The controller is no "
+                                "longer simulated.",
+                                _config.name)
+                    .Dispatch();
                 SetTrivialBehavior();
             }
         }
@@ -124,8 +126,12 @@ void EthController::SendFrame(EthernetFrame frame, void* userContext)
 {
     if (Tracing::IsReplayEnabledFor(_config.replay, Config::Replay::Direction::Send))
     {
-        Logging::Debug(_logger, _logOnce, "EthController: Ignoring SendFrame API call due to Replay config on {}",
-                       _config.name);
+        if (!_logOnce.WasCalled())
+        { 
+            _logger->MakeMessage(Logging::Level::Debug, TopicOf(*this))
+                .SetMessage("EthController: Ignoring SendFrame API call due to Replay config on {}", _config.name)
+                .Dispatch();
+        }
         return;
     }
     return SendFrameInternal(frame, userContext);
@@ -153,8 +159,12 @@ void EthController::ReceiveMsg(const IServiceEndpoint* from, const WireEthernetF
     }
     if (Tracing::IsReplayEnabledFor(_config.replay, Config::Replay::Direction::Receive))
     {
-        Logging::Debug(_logger, _logOnce, "EthController: Ignoring ReceiveMsg API call due to Replay config on {}",
-                       _config.name);
+        if (!_logOnce.WasCalled())
+        {
+            _logger->MakeMessage(Logging::Level::Debug, TopicOf(*this))
+                .SetMessage("EthController: Ignoring ReceiveMsg API call due to Replay config on {}", _config.name)
+                .Dispatch();
+        }
         return;
     }
     return ReceiveMsgInternal(from, msg);
@@ -295,7 +305,9 @@ void EthController::RemoveFrameHandler(HandlerId handlerId)
 {
     if (!RemoveHandler<EthernetFrameEvent>(handlerId))
     {
-        _participant->GetLogger()->Warn("RemoveFrameHandler failed: Unknown HandlerId.");
+        _participant->GetLoggerInternal()->MakeMessage(Logging::Level::Warn, TopicOf(*this))
+            .SetMessage("RemoveFrameHandler failed: Unknown HandlerId.")
+            .Dispatch();
     }
 }
 
@@ -316,7 +328,9 @@ void EthController::RemoveFrameTransmitHandler(HandlerId handlerId)
 {
     if (!RemoveHandler<EthernetFrameTransmitEvent>(handlerId))
     {
-        _participant->GetLogger()->Warn("RemoveFrameTransmitHandler failed: Unknown HandlerId.");
+        _participant->GetLoggerInternal()->MakeMessage(Logging::Level::Warn, TopicOf(*this))
+            .SetMessage("RemoveFrameTransmitHandler failed: Unknown HandlerId.")
+            .Dispatch();
     }
 }
 
@@ -329,7 +343,9 @@ void EthController::RemoveStateChangeHandler(HandlerId handlerId)
 {
     if (!RemoveHandler<EthernetStateChangeEvent>(handlerId))
     {
-        _participant->GetLogger()->Warn("RemoveStateChangeHandler failed: Unknown HandlerId.");
+        _participant->GetLoggerInternal()->MakeMessage(Logging::Level::Warn, TopicOf(*this))
+            .SetMessage("RemoveStateChangeHandler failed: Unknown HandlerId.")
+            .Dispatch();
     }
 }
 
@@ -342,7 +358,9 @@ void EthController::RemoveBitrateChangeHandler(HandlerId handlerId)
 {
     if (!RemoveHandler<EthernetBitrateChangeEvent>(handlerId))
     {
-        _participant->GetLogger()->Warn("RemoveBitrateChangeHandler failed: Unknown HandlerId.");
+        _participant->GetLoggerInternal()->MakeMessage(Logging::Level::Warn, TopicOf(*this))
+            .SetMessage("RemoveBitrateChangeHandler failed: Unknown HandlerId.")
+            .Dispatch();
     }
 }
 

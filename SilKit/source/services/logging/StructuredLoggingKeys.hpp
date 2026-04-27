@@ -18,9 +18,19 @@ constexpr std::string_view msg{"Msg"};
 constexpr std::string_view from{"From"};
 constexpr std::string_view to{"To"};
 constexpr std::string_view raw{"Raw"};
+constexpr std::string_view fromSimulationName{"FromSimulationName"};
+
+constexpr std::string_view protocolVersion{"ProtocolVersion"};
+constexpr std::string_view requestOrigin{"RequestOrigin"};
+constexpr std::string_view requestTarget{"RequestTarget"};
+constexpr std::string_view status{"Status"};
+
 
 constexpr std::string_view waitingTime{"WaitingTime"};
 constexpr std::string_view executionTime{"ExecutionTime"};
+constexpr std::string_view animationFactor{"AnimationFactor"};
+constexpr std::string_view timeoutTime{"TimeoutTime"};
+
 
 constexpr std::string_view participantName{"ParticipantName"};
 constexpr std::string_view registryUri{"RegistryUri"};
@@ -46,6 +56,14 @@ constexpr std::string_view mediaType{"MediaType"};
 constexpr std::string_view network{"Network"};
 constexpr std::string_view label{"Label"};
 
+constexpr std::string_view uriString{"UriString"};
+constexpr std::string_view uriHost{"UriHost"};
+constexpr std::string_view uriPort{"UriPort"};
+constexpr std::string_view uriPath{"UriPath"};
+constexpr std::string_view exception{"Exception"};
+constexpr std::string_view error{"Error"};
+
+constexpr std::string_view connectAttempts{"ConnectAttempts"};
 
 } // namespace Keys
 } // namespace Logging

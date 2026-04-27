@@ -13,6 +13,7 @@
 #include "ITimeProvider.hpp"
 #include "IReplayDataController.hpp"
 #include "ISimulator.hpp"
+#include "ILoggerInternal.hpp"
 
 namespace SilKit {
 namespace Tracing {
@@ -50,7 +51,7 @@ private:
     };
 
     std::chrono::nanoseconds _startTime{std::chrono::nanoseconds::min()};
-    Services::Logging::ILogger* _log{nullptr};
+    Services::Logging::ILoggerInternal* _log{nullptr};
     Core::IParticipantInternal* _participant{nullptr};
     Services::Orchestration::ITimeProvider* _timeProvider{nullptr};
     std::vector<ReplayTask> _replayTasks;

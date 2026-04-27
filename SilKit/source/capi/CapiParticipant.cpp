@@ -80,7 +80,7 @@ try
     ASSERT_VALID_POINTER_PARAMETER(participant);
 
     auto cppParticipant = reinterpret_cast<SilKit::IParticipant*>(participant);
-    auto logger = cppParticipant->GetLogger();
+    auto logger = GetLoggerInternal(cppParticipant);
     *outLogger = reinterpret_cast<SilKit_Logger*>(logger);
     return SilKit_ReturnCode_SUCCESS;
 }

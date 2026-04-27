@@ -24,7 +24,7 @@ using namespace SilKit::Tracing;
 class ReplayPcapChannel : public SilKit::IReplayChannel
 {
 public:
-    ReplayPcapChannel(const std::string& filePath, ILogger* logger)
+    ReplayPcapChannel(const std::string& filePath, ILoggerInternal* logger)
         : _reader{filePath, logger}
     {
     }
@@ -72,7 +72,7 @@ private:
 class ReplayPcapFile : public SilKit::IReplayFile
 {
 public:
-    ReplayPcapFile(std::string filePath, SilKit::Services::Logging::ILogger* logger)
+    ReplayPcapFile(std::string filePath, SilKit::Services::Logging::ILoggerInternal* logger)
         : _filePath{std::move(filePath)}
     {
         auto channel = std::make_shared<ReplayPcapChannel>(_filePath, logger);
@@ -113,7 +113,7 @@ namespace SilKit {
 namespace Tracing {
 
 auto PcapReplay::OpenFile(const SilKit::Config::ParticipantConfiguration&, const std::string& filePath,
-                          SilKit::Services::Logging::ILogger* logger) -> std::shared_ptr<IReplayFile>
+                          SilKit::Services::Logging::ILoggerInternal* logger) -> std::shared_ptr<IReplayFile>
 {
     return std::make_shared<ReplayPcapFile>(filePath, logger);
 }

@@ -34,7 +34,7 @@ public: // IServiceEndpoint
 
 private:
     SilKit::Core::IParticipantInternal* _participant{nullptr};
-    SilKit::Services::Logging::ILogger* _logger{nullptr};
+    SilKit::Services::Logging::ILoggerInternal* _logger{nullptr};
 
     SilKit::Core::ServiceDescriptor _serviceDescriptor;
 };

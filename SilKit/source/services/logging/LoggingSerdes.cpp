@@ -24,7 +24,8 @@ inline MessageBuffer& operator>>(MessageBuffer& buffer, SourceLoc& sourceLoc)
 
 inline MessageBuffer& operator<<(MessageBuffer& buffer, const LogMsg& msg)
 {
-    buffer << msg.loggerName << msg.level << msg.time << msg.source << msg.payload << msg.keyValues;
+    buffer << msg.loggerName << msg.level << msg.time << msg.source << msg.payload << msg.keyValues
+           << SilKit::Services::Logging::to_string(msg.topic);
     return buffer;
 }
 inline MessageBuffer& operator>>(MessageBuffer& buffer, LogMsg& msg)
@@ -33,6 +34,12 @@ inline MessageBuffer& operator>>(MessageBuffer& buffer, LogMsg& msg)
     if (buffer.RemainingBytesLeft() > 0)
     {
         buffer >> msg.keyValues;
+    }
+    if (buffer.RemainingBytesLeft() > 0)
+    {
+        std::string tempTopic;
+        buffer >> tempTopic;
+        msg.topic = from_topic_string(tempTopic);
     }
     return buffer;
 }

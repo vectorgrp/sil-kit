@@ -19,7 +19,7 @@ namespace Tracing {
 // Tracing
 
 //! \brief Creates the ITraceMessageSink's as declared in the configuration.
-auto CreateTraceMessageSinks(Services::Logging::ILogger* logger,
+auto CreateTraceMessageSinks(Services::Logging::ILoggerInternal* logger,
                              const Config::ParticipantConfiguration& participantConfig)
     -> std::vector<std::unique_ptr<ITraceMessageSink>>
 {
@@ -60,10 +60,10 @@ auto CreateTraceMessageSinks(Services::Logging::ILogger* logger,
     {
         if (!sinkInUse(sinkCfg.name))
         {
-            Services::Logging::Warn(
-                logger,
-                "Tracing: the trace sink '{}' on participant '{}' is not referenced in the config, creating anyway!",
-                sinkCfg.name, participantConfig.participantName);
+            logger->MakeMessage(Services::Logging::Level::Warn, Services::Logging::Topic::Tracing)
+                .SetMessage("Tracing: the trace sink '{}' on participant '{}' is not referenced in the config, creating anyway!",
+                            sinkCfg.name, participantConfig.participantName)
+                .Dispatch();
         }
 
         switch (sinkCfg.type)
@@ -99,7 +99,7 @@ auto CreateTraceMessageSinks(Services::Logging::ILogger* logger,
     return newSinks;
 }
 
-auto CreateReplayFiles(Services::Logging::ILogger* logger, const Config::ParticipantConfiguration& participantConfig)
+auto CreateReplayFiles(Services::Logging::ILoggerInternal* logger, const Config::ParticipantConfiguration& participantConfig)
     -> std::map<std::string, std::shared_ptr<IReplayFile>>
 {
     std::map<std::string, std::shared_ptr<IReplayFile>> replayFiles;
@@ -116,7 +116,7 @@ auto CreateReplayFiles(Services::Logging::ILogger* logger, const Config::Partici
         }
         case Config::TraceSource::Type::PcapFile:
         {
-            auto provider = PcapReplay{};
+            PcapReplay provider{};
             auto file = provider.OpenFile(participantConfig, source.inputPath, logger);
             replayFiles.insert({source.name, std::move(file)});
             break;

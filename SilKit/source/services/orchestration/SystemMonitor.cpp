@@ -55,7 +55,9 @@ void SystemMonitor::RemoveSystemStateHandler(HandlerId handlerId)
 {
     if (!_systemStateHandlers.Remove(handlerId))
     {
-        _logger->Warn("RemoveSystemStateHandler failed: Unknown HandlerId.");
+        _logger->MakeMessage(Logging::Level::Warn, TopicOf(*this))
+            .SetMessage("RemoveSystemStateHandler failed: Unknown HandlerId.")
+            .Dispatch();
     }
 }
 
@@ -86,7 +88,9 @@ void SystemMonitor::RemoveParticipantStatusHandler(HandlerId handlerId)
 {
     if (!_participantStatusHandlers.Remove(handlerId))
     {
-        _logger->Warn("RemoveParticipantStatusHandler failed: Unknown HandlerId.");
+        _logger->MakeMessage(Logging::Level::Warn, TopicOf(*this))
+            .SetMessage("RemoveParticipantStatusHandler failed: Unknown HandlerId.")
+            .Dispatch();
     }
 }
 
@@ -181,9 +185,10 @@ void SystemMonitor::OnParticipantDisconnected(const ParticipantConnectionInforma
 
         if (participantState == Orchestration::ParticipantState::Shutdown)
         {
-            // If current known participant state is ParticipantState::Shutdown, we do not bother changing state
-            Logging::Info(_logger, "Participant \'{}\' has disconnected after gracefully shutting down",
-                          participantName);
+            _logger->MakeMessage(Logging::Level::Info, TopicOf(*this))
+                .SetMessage("Participant \'{}\' has disconnected after gracefully shutting down",
+                          participantName)
+                .Dispatch();
         }
         else if (participantState != ParticipantState::Invalid)
         {
@@ -200,20 +205,24 @@ void SystemMonitor::OnParticipantDisconnected(const ParticipantConnectionInforma
 
             ReceiveMsg(nullptr, status);
 
-            Logging::Error(_logger, "Participant \'{}\' has disconnected without gracefully shutting down.",
-                           participantName);
+            _logger->MakeMessage(Logging::Level::Error, TopicOf(*this))
+                .SetMessage("Participant \'{}\' has disconnected without gracefully shutting down.",
+                           participantName)
+                .Dispatch();
         }
     }
     else if (participantName == VSilKit::REGISTRY_PARTICIPANT_NAME)
     {
-        Logging::Error(_logger,
-                       "Connection to SIL Kit Registry was lost - no new participant connections can be established.");
+        _logger->MakeMessage(Logging::Level::Error, TopicOf(*this))
+            .SetMessage("Connection to SIL Kit Registry was lost - no new participant connections can be established.")
+            .Dispatch();
     }
     else
     {
-        // This disconnecting participant is not the SIL Kit Registry and has no lifecycle.
-        Logging::Info(_logger, "Participant \'{}\' has disconnected.",
-                      participantConnectionInformation.participantName);
+        _logger->MakeMessage(Logging::Level::Info, TopicOf(*this))
+            .SetMessage("Participant \'{}\' has disconnected.",
+                      participantConnectionInformation.participantName)
+            .Dispatch();
     }
 
     // Erase participant from connectedParticipant map

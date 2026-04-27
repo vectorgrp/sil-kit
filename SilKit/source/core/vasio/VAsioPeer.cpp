@@ -31,7 +31,7 @@ namespace SilKit {
 namespace Core {
 
 VAsioPeer::VAsioPeer(IVAsioPeerListener* listener, IIoContext* ioContext, std::unique_ptr<IRawByteStream> stream,
-                     Services::Logging::ILogger* logger, std::unique_ptr<VSilKit::IPeerMetrics> peerMetrics)
+                     Services::Logging::ILoggerInternal* logger, std::unique_ptr<VSilKit::IPeerMetrics> peerMetrics)
     : _listener{listener}
     , _ioContext{ioContext}
     , _socket{std::move(stream)}
@@ -152,10 +152,11 @@ void VAsioPeer::Aggregate(const std::vector<uint8_t>& blob)
     // ensure that the aggregation buffer does not exceed a certain size
     if (_aggregatedMessages.size() > _aggregationBufferThreshold)
     {
-        Services::Logging::Debug(_logger,
-                                 "VAsioPeer: Automated flush of aggregation buffer has been triggered, since the "
-                                 "maximum buffer size of {}Byte has been exceeded.",
-                                 _aggregationBufferThreshold);
+        _logger->MakeMessage(Services::Logging::Level::Debug, TopicOf(*this))
+            .SetMessage("VAsioPeer: Automated flush of aggregation buffer has been triggered, since the "
+                        "maximum buffer size of {}Byte has been exceeded.",
+                        _aggregationBufferThreshold)
+            .Dispatch();
         Flush();
     }
 }
@@ -198,9 +199,10 @@ void VAsioPeer::WriteSomeAsync()
 
 void VAsioPeer::Subscribe(VAsioMsgSubscriber subscriber)
 {
-    Services::Logging::Debug(_logger,
-                             "VAsioTcpPeer: Subscribing to messages of type '{}' on link '{}' from participant '{}'",
-                             subscriber.msgTypeName, subscriber.networkName, _info.participantName);
+    _logger->MakeMessage(Services::Logging::Level::Debug, TopicOf(*this))
+        .SetMessage("VAsioTcpPeer: Subscribing to messages of type '{}' on link '{}' from participant '{}'",
+                    subscriber.msgTypeName, subscriber.networkName, _info.participantName)
+        .Dispatch();
     SendSilKitMsg(SerializedMessage{subscriber});
 }
 
@@ -250,7 +252,9 @@ void VAsioPeer::DispatchBuffer()
     // validate the received size
     if (_currentMsgSize == 0 || _currentMsgSize > 1024 * 1024 * 1024)
     {
-        SilKit::Services::Logging::Error(_logger, "Received invalid Message Size: {}", _currentMsgSize.load());
+        _logger->MakeMessage(Services::Logging::Level::Error, TopicOf(*this))
+            .SetMessage("Received invalid Message Size: {}", _currentMsgSize.load())
+            .Dispatch();
         Shutdown();
     }
 
@@ -334,13 +338,12 @@ void VAsioPeer::OnTimerExpired(ITimer& timer)
 
     if (!_aggregatedMessages.empty())
     {
-        Services::Logging::Warn(
-            _logger,
-            "VAsioPeer: Automated flush of aggregation buffer has been triggered, since the "
-            "maximum allowed time step duration of {}milliseconds has been exceeded. Consider switching off the "
-            "message aggregation via the config option 'EnableMessageAggregation'.",
-            _flushTimeout.count());
-
+        _logger->MakeMessage(Services::Logging::Level::Warn, TopicOf(*this))
+            .SetMessage("VAsioPeer: Automated flush of aggregation buffer has been triggered, since the "
+                "maximum allowed time step duration of {}milliseconds has been exceeded. Consider switching off the "
+                "message aggregation via the config option 'EnableMessageAggregation'.",
+                _flushTimeout.count())
+            .Dispatch();
         Flush();
     }
 }
@@ -348,7 +351,10 @@ void VAsioPeer::OnTimerExpired(ITimer& timer)
 void VAsioPeer::EnableAggregation()
 {
     _useAggregation = true;
-    SilKit::Services::Logging::Debug(_logger, "VAsioPeer: Enable aggregation for peer {}", _info.participantName);
+
+    _logger->MakeMessage(Services::Logging::Level::Debug, TopicOf(*this))
+        .SetMessage("VAsioPeer: Enable aggregation for peer {}", _info.participantName)
+        .Dispatch();
 }
 
 void VAsioPeer::InitializeMetrics(VSilKit::IMetricsManager* manager)

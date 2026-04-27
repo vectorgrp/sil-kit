@@ -9,7 +9,7 @@
 #include <chrono>
 #include <tuple>
 
-#include "silkit/services/logging/ILogger.hpp"
+#include "ILoggerInternal.hpp"
 
 #include "ServiceDescriptor.hpp"
 #include "TraceMessage.hpp"
@@ -35,7 +35,7 @@ public:
 
     virtual void Open(SinkType type, const std::string& outputPath) = 0;
     virtual void Close() = 0;
-    virtual auto GetLogger() const -> Services::Logging::ILogger* = 0;
+    virtual auto GetLogger() const -> Services::Logging::ILoggerInternal* = 0;
     virtual auto Name() const -> const std::string& = 0;
 
     virtual void Trace(
@@ -49,7 +49,8 @@ class ITraceMessageSinkFactory
 {
 public:
     virtual ~ITraceMessageSinkFactory() = default;
-    virtual auto Create(SilKit::Config::ParticipantConfiguration config, SilKit::Services::Logging::ILogger* logger,
+    virtual auto Create(SilKit::Config::ParticipantConfiguration config,
+                        SilKit::Services::Logging::ILoggerInternal* logger,
                         std::string participantName, std::string sinkName) -> std::unique_ptr<ITraceMessageSink> = 0;
 };
 

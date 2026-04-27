@@ -167,7 +167,7 @@ private:
     Core::ServiceDescriptor _serviceDescriptor;
     Tracer _tracer;
     bool _replayActive{false};
-    Services::Logging::ILogger* _logger;
+    Services::Logging::ILoggerInternal* _logger;
     Services::Logging::LogOnceFlag _logOnce;
 
     CanControllerState _controllerState = CanControllerState::Uninit;
