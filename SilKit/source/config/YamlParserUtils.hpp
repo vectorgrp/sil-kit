@@ -4,11 +4,11 @@
 
 #pragma once
 
+#include "silkit/participant/exception.hpp"
+
 #include <map>
 #include <string>
 #include <vector>
-
-#include "silkit/participant/exception.hpp"
 
 #include "rapidyaml.hpp"
 

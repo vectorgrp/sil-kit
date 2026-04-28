@@ -2,7 +2,14 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "ParticipantConfiguration.hpp"
+#include "config/ParticipantConfigurationFromXImpl.hpp"
+
+#include "config/ParticipantConfiguration.hpp"
+#include "config/YamlParser.hpp"
+#include "config/YamlValidator.hpp"
+#include "util/FileHelpers.hpp"
+
+#include "silkit/services/logging/string_utils.hpp"
 
 #include <filesystem>
 #include <fstream>
@@ -12,13 +19,6 @@
 #include <set>
 #include <utility>
 #include <vector>
-
-#include "FileHelpers.hpp"
-#include "ParticipantConfigurationFromXImpl.hpp"
-#include "silkit/services/logging/string_utils.hpp"
-
-#include "YamlParser.hpp"
-#include "YamlValidator.hpp"
 
 #include "fmt/format.h"
 

@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "ParticipantConfiguration.hpp"
+#include "config/ParticipantConfiguration.hpp"
 
 #include <string>
 #include <type_traits>

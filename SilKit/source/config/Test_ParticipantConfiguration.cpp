@@ -2,17 +2,18 @@
 //
 // SPDX-License-Identifier: MIT
 
+#include "core/mock/nullconnection/NullConnectionParticipant.hpp"
+#include "config/ParticipantConfiguration.hpp"
+#include "config/ParticipantConfigurationFromXImpl.hpp"
+#include "util/functional.hpp"
+
+#include "silkit/services/all.hpp"
+
 #include <chrono>
 #include <cstdlib>
 #include <thread>
 #include <future>
 #include <memory>
-
-#include "NullConnectionParticipant.hpp"
-#include "ParticipantConfiguration.hpp"
-#include "ParticipantConfigurationFromXImpl.hpp"
-#include "silkit/services/all.hpp"
-#include "functional.hpp"
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"

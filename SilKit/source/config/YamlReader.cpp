@@ -1,7 +1,8 @@
 // SPDX-FileCopyrightText: 2025 Vector Informatik GmbH
 //
 // SPDX-License-Identifier: MIT
-#include "YamlReader.hpp"
+
+#include "config/YamlReader.hpp"
 
 namespace VSilKit {
 

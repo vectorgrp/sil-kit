@@ -2,7 +2,10 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "YamlValidator.hpp"
+#include "config/YamlValidator.hpp"
+
+#include "config/Configuration.hpp"
+#include "config/YamlParser.hpp"
 
 #include <stdexcept>
 #include <set>
@@ -11,13 +14,7 @@
 #include <vector>
 #include <sstream>
 
-
-#include "Configuration.hpp"
 #include "rapidyaml.hpp"
-
-//#include "YamlConversion.hpp"
-//#include "SilKitYamlHelper.hpp" // ParserContext
-#include "YamlParser.hpp" // ParserContext
 
 namespace {
 

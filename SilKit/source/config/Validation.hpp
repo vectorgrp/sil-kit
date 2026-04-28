@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "ParticipantConfiguration.hpp"
+#include "config/ParticipantConfiguration.hpp"
 
 namespace SilKit {
 namespace Config {
