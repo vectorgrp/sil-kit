@@ -1,6 +1,13 @@
 # SPDX-FileCopyrightText: 2024 Vector Informatik GmbH
 #
 # SPDX-License-Identifier: MIT
+import platform
+
+min_python_version = (3, 11, 0)
+current_python_version = tuple(map(int, platform.python_version_tuple()))
+if current_python_version < min_python_version:
+    raise RuntimeError("The minimum Python version needed is " +
+                       ".".join(str(c) for c in min_python_version))
 
 import dataclasses
 import tomllib
@@ -10,7 +17,6 @@ import signal
 import csv
 import argparse
 import typing
-import platform
 
 from git import Repo  # PyPI: GitPython
 
