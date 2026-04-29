@@ -9,6 +9,7 @@
 #include <locale>
 #include <iostream>
 #include <iomanip>
+#include <optional>
 
 #include "silkit/config/IParticipantConfiguration.hpp"
 #include "silkit/services/logging/string_utils.hpp"
@@ -307,6 +308,69 @@ auto StartRegistry(std::shared_ptr<SilKit::Config::IParticipantConfiguration> co
     return result;
 }
 
+class StatusFile
+{
+    std::optional<std::filesystem::path> path;
+
+public:
+    StatusFile() = default;
+
+    explicit StatusFile(const std::filesystem::path& path) : path{Resolve(path)}
+    {
+        Write("starting");
+    }
+
+    ~StatusFile()
+    {
+        Write("stopped");
+
+        if (path.has_value())
+        {
+            try
+            {
+                std::filesystem::remove(path.value());
+            }
+            catch (const std::exception& exception)
+            {
+                std::cerr << "Error: Failed to remove status file " << path.value() << ": " << exception.what() << std::endl;
+            }
+        }
+    }
+
+    void Write(const std::string_view content)
+    {
+        if (!path.has_value())
+        {
+            return;
+        }
+
+        try
+        {
+            std::ofstream file{path.value(), std::ios::out | std::ios::trunc | std::ios::binary};
+            file << content;
+            file.flush();
+            file.close();
+        }
+        catch (const std::exception & exception)
+        {
+            std::cerr << "Error: Failed to write status file " << path.value() << ": " << exception.what() << std::endl;
+        }
+    }
+
+    static auto Resolve(const std::filesystem::path& path) -> std::optional<std::filesystem::path>
+    {
+        try
+        {
+            return std::filesystem::absolute(path);
+        }
+        catch (const std::exception& exception)
+        {
+            std::cerr << "Error: Failed to resolve status file path " << path << ": " << exception.what() << std::endl;
+            return std::nullopt;
+        }
+    }
+};
+
 } // namespace
 
 int main(int argc, char** argv)
@@ -344,6 +408,12 @@ int main(int argc, char** argv)
                                            "-s, --use-signal-handler: Exit this process when a signal is received. If "
                                            "not set, the process runs infinitely.",
                                            CliParser::Hidden);
+
+    commandlineParser.Add<CliParser::Option>(
+        "x-status-file", "", "", "[--x-status-file <path>]",
+        "--x-status-file <path>: The registry process will write the current status ('starting' or 'running') as the "
+        "entire content of the file. This option is ignored if the registry is run as a Windows service.",
+        CliParser::Hidden);
 
     if (SilKitRegistry::HasWindowsServiceSupport())
     {
@@ -413,6 +483,7 @@ int main(int argc, char** argv)
     auto dashboardUri{commandlineParser.Get<CliParser::Option>("dashboard-uri").Value()};
     const auto useSignalHandler{commandlineParser.Get<CliParser::Flag>("use-signal-handler").Value()};
     auto enableDashboard{commandlineParser.Get<CliParser::Option>("dashboard-uri").HasValue()};
+    const auto argStatusFile{commandlineParser.Get<CliParser::Option>("x-status-file").Value()};
 
     if (commandlineParser.Get<CliParser::Flag>("enable-dashboard").Value())
     {
@@ -430,6 +501,9 @@ int main(int argc, char** argv)
 
     bool windowsService{SilKitRegistry::HasWindowsServiceSupport()
                         && commandlineParser.Get<CliParser::Flag>("windows-service").Value()};
+
+    // Use the status file only if the path isn't empty and the registry is not running as a Windows service.
+    auto statusFile = argStatusFile.empty() || windowsService ? StatusFile{} : StatusFile{argStatusFile};
 
     if (!isValidLogLevel(logLevel))
     {
@@ -489,6 +563,8 @@ int main(int argc, char** argv)
         else
         {
             const auto registry = callStartRegistry();
+
+            statusFile.Write("running");
 
             std::cout << "Press Ctrl-C to terminate..." << std::endl;
 
