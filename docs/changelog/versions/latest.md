@@ -3,3 +3,4 @@
 ## Changed
 
 - `cmake`: merged almost all internal CMake `INTERFACE` libraries into `I_SilKit`
+- `third-party`: update `oatpp` to version 1.3.1
