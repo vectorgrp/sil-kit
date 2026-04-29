@@ -212,6 +212,12 @@ Essential targets. Automatically tested and provided as official binary packages
    * - Ubuntu 20.04
      - amd64
      - Clang 10, `.deb`
+   * - Ubuntu 22.04
+     - ARM64
+     - Clang 14, `.deb`
+   * - Alma Linux 9
+     - amd64
+     - Clang 20, `.rpm`
 
 Tier 2: CI Support
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -242,6 +248,11 @@ Officially supported and automatically tested. NO binary packages provided
    * - macOS
      - ARM64
      - AppleClang 15
+   * - QNX 8\ [#label]_
+     - amd64
+     - QCC 12
+
+.. [#label] Nightly builds and tests of the main branch every six (6) hours
 
 Tier 3: Known to build
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -257,7 +268,7 @@ Since these are not part of the CI pipeline, compatibility with these platforms 
      - Notes
    * - QNX 7.1 RTOS
      - X86 64bit
-     - QNX GCC 8
+     -
    * - FreeBSD 14
      - X86 64bit
      - FreeBSD Clang 18
