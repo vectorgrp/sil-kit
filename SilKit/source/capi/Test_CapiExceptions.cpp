@@ -2,11 +2,14 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "gtest/gtest.h"
-#include "gmock/gmock.h"
+#include "capi/CapiExceptions.hpp"
+#include "capi/CapiImpl.hpp"
 
-#include "CapiImpl.hpp"
 #include "silkit/detail/impl/ThrowOnError.hpp"
+
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
+
 
 namespace {
 

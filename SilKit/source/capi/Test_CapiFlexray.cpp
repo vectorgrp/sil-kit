@@ -2,12 +2,14 @@
 //
 // SPDX-License-Identifier: MIT
 
+#include "core/mock/participant/MockParticipant.hpp"
+
 #include "silkit/capi/Flexray.h"
-#include "silkit/capi/SilKit.h"
 #include "silkit/services/flexray/all.hpp"
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
-#include "MockParticipant.hpp"
+
 
 namespace {
 using namespace SilKit::Core;

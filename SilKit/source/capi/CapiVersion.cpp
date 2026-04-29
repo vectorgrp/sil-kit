@@ -2,9 +2,10 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "silkit/capi/SilKit.h"
+#include "silkit/capi/Version.h"
+
 #include "SilKitVersionImpl.hpp"
-#include "CapiImpl.hpp"
+#include "capi/CapiImpl.hpp"
 
 
 SilKit_ReturnCode SilKitCALL SilKit_Version_Major(uint32_t* outVersionMajor)

@@ -2,21 +2,13 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "silkit/capi/SilKit.h"
-#include "silkit/SilKit.hpp"
-#include "silkit/services/logging/ILogger.hpp"
-#include "silkit/services/orchestration/all.hpp"
-#include "silkit/services/orchestration/string_utils.hpp"
+#include "silkit/capi/Rpc.h"
+
+#include "capi/CapiImpl.hpp"
+#include "capi/TypeConversion.hpp"
+
+#include "silkit/participant/IParticipant.hpp"
 #include "silkit/services/rpc/all.hpp"
-
-#include "CapiImpl.hpp"
-#include "TypeConversion.hpp"
-
-#include <string>
-#include <algorithm>
-#include <map>
-#include <mutex>
-#include <cstring>
 
 
 namespace {

@@ -4,11 +4,12 @@
 
 #pragma once
 
-#include "silkit/capi/Types.h"
+#include "capi/CapiExceptions.hpp"
+
 #include "silkit/capi/InterfaceIdentifiers.h"
+#include "silkit/capi/Types.h"
 #include "silkit/participant/exception.hpp"
 
-#include "CapiExceptions.hpp"
 
 #define CAPI_CATCH_EXCEPTIONS \
     catch (const SilKit::CapiBadParameterError& e) \

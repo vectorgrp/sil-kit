@@ -4,13 +4,15 @@
 
 #pragma once
 
+#include "silkit/capi/DataPubSub.h"
+#include "silkit/capi/Rpc.h"
 #include "silkit/capi/Types.h"
-
 #include "silkit/services/pubsub/PubSubSpec.hpp"
 #include "silkit/services/rpc/RpcSpec.hpp"
 
-#include <vector>
 #include <string>
+#include <vector>
+
 
 namespace {
 

@@ -2,13 +2,11 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "silkit/capi/SilKit.h"
-#include "silkit/SilKit.hpp"
+#include "silkit/capi/Logger.h"
+
+#include "capi/CapiImpl.hpp"
+
 #include "silkit/services/logging/ILogger.hpp"
-
-#include "CapiImpl.hpp"
-
-#include <string>
 
 
 SilKit_ReturnCode SilKitCALL SilKit_Logger_Log(SilKit_Logger* self, SilKit_LoggingLevel level, const char* message)
