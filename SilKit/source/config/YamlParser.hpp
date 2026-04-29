@@ -1,13 +1,14 @@
-#pragma once
 // SPDX-FileCopyrightText: 2025 Vector Informatik GmbH
 //
 // SPDX-License-Identifier: MIT
 
-#include <string>
+#pragma once
 
-#include "YamlReader.hpp"
-#include "YamlWriter.hpp"
-#include "YamlParserUtils.hpp"
+#include "config/YamlReader.hpp"
+#include "config/YamlWriter.hpp"
+#include "config/YamlParserUtils.hpp"
+
+#include <string>
 
 #include "rapidyaml.hpp"
 

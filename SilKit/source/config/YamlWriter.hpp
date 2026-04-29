@@ -1,7 +1,10 @@
-#pragma once
 // SPDX-FileCopyrightText: 2025 Vector Informatik GmbH
 //
 // SPDX-License-Identifier: MIT
+
+#pragma once
+
+#include "config/ParticipantConfiguration.hpp"
 
 #include <string>
 #include <memory>
@@ -11,8 +14,6 @@
 #include <vector>
 
 #include "rapidyaml.hpp"
-
-#include "ParticipantConfiguration.hpp"
 
 namespace VSilKit {
 

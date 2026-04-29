@@ -4,13 +4,7 @@
 
 #pragma once
 
-#include <array>
-#include <chrono>
-#include <iostream>
-#include <optional>
-#include <ostream>
-#include <string>
-#include <vector>
+#include "config/Configuration.hpp"
 
 #include "silkit/config/IParticipantConfiguration.hpp"
 #include "silkit/services/flexray/FlexrayDatatypes.hpp"
@@ -19,7 +13,13 @@
 #include "silkit/services/rpc/RpcDatatypes.hpp"
 #include "silkit/services/datatypes.hpp"
 
-#include "Configuration.hpp"
+#include <array>
+#include <chrono>
+#include <iostream>
+#include <optional>
+#include <ostream>
+#include <string>
+#include <vector>
 
 namespace SilKit {
 namespace Config {

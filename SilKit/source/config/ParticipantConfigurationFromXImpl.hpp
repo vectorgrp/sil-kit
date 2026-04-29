@@ -9,6 +9,7 @@
 //             nor public), as it is used to implement the 'legacy' ABI functions.
 // ================================================================================
 
+#include <memory>
 #include <string>
 
 namespace SilKit {

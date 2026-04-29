@@ -2,15 +2,14 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "YamlParser.hpp"
-#include "YamlValidator.hpp"
+#include "config/YamlParser.hpp"
+#include "config/YamlValidator.hpp"
+#include "config/ParticipantConfiguration.hpp"
 
-#include "ParticipantConfiguration.hpp"
+#include <fstream>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
-
-#include <fstream>
 
 namespace {
 

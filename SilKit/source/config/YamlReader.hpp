@@ -1,8 +1,13 @@
-#pragma once
-
 // SPDX-FileCopyrightText: 2025 Vector Informatik GmbH
 //
 // SPDX-License-Identifier: MIT
+
+#pragma once
+
+#include "silkit/participant/exception.hpp"
+
+#include "config/ParticipantConfiguration.hpp"
+#include "config/YamlParserUtils.hpp"
 
 #include <string>
 #include <memory>
@@ -12,9 +17,6 @@
 #include <vector>
 
 #include "rapidyaml.hpp"
-
-#include "ParticipantConfiguration.hpp"
-#include "YamlParserUtils.hpp"
 
 namespace VSilKit {
 

@@ -4,13 +4,13 @@
 
 #pragma once
 
-#include <memory>
-#include <sstream>
+#include "config/ParticipantConfiguration.hpp"
 
 #include "silkit/services/logging/LoggingDatatypes.hpp"
 #include "silkit/services/logging/string_utils.hpp"
 
-#include "ParticipantConfiguration.hpp"
+#include <memory>
+#include <sstream>
 
 namespace SilKit {
 namespace Config {

@@ -4,6 +4,11 @@
 
 #pragma once
 
+#include "util/StringHelpers.hpp"
+
+#include "silkit/participant/exception.hpp"
+#include "silkit/services/logging/LoggingDatatypes.hpp"
+
 #include <algorithm>
 #include <iostream>
 #include <optional>
@@ -13,12 +18,6 @@
 #include <tuple>
 #include <vector>
 #include <cctype>
-
-#include "silkit/participant/exception.hpp"
-#include "silkit/SilKitMacros.hpp"
-#include "silkit/services/logging/LoggingDatatypes.hpp"
-
-#include "StringHelpers.hpp"
 
 namespace SilKit {
 namespace Config {
