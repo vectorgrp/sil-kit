@@ -401,7 +401,7 @@ inline MessageBuffer& MessageBuffer::operator<<(const Util::Span<const uint8_t>&
         _storage.resize(_wPos + span.size());
     }
 
-    std::copy(span.begin(), span.end(), _storage.begin() + _wPos);
+    std::copy(span.begin(), span.end(), _storage.begin() + static_cast<decltype(_storage)::difference_type>(_wPos));
     _wPos += span.size();
     return *this;
 }
