@@ -243,11 +243,11 @@ struct DummyLogger : SilKit::Services::Logging::ILoggerInternal
         throw SilKit::SilKitError("Not implemented!");
     }
 
-     void ProcessLoggerMessage(const SilKit::Services::Logging::LoggerMessage& msg) override
+     void ProcessLoggerMessage(const SilKit::Services::Logging::LoggerMessage&) override
      {
      }
 
-    void LogReceivedMsg(const SilKit::Services::Logging::LogMsg& msg) override
+    void LogReceivedMsg(const SilKit::Services::Logging::LogMsg& ) override
     {}
 
     virtual SilKit::Services::Logging::LoggerMessage MakeMessage(SilKit::Services::Logging::Level level,
