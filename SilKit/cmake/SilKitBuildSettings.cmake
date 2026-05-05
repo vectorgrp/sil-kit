@@ -88,6 +88,12 @@ function(silkit_enable_warnings isOn)
                 /wd4389 # too many bogus signed/unsigned warnings in VS2017 Win32
             )
         endif()
+
+        if ("${SILKIT_HOST_ARCHITECTURE}" STREQUAL "x86")
+            set(_flags ${_flags}
+                /wd4244 # possible loss of data after conversion (fmt 12.1.0 produces these on 32-bit MSVC builds)
+            )
+        endif()
     elseif(MINGW)
         set(_flags
             -pedantic
