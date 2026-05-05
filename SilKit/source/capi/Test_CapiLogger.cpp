@@ -11,27 +11,6 @@
 
 namespace {
 using namespace SilKit::Services::Logging;
-/*
-class MockLogger : public SilKit::Services::Logging::ILogger
-{
-public:
-    MOCK_METHOD2(Log, void(Level, const std::string&));
-    MOCK_METHOD(void, Log, (Level, Topic, const std::string&), ());
-    MOCK_METHOD1(Trace, void(const std::string&));
-    MOCK_METHOD(void, Trace, (Topic, const std::string&), ());
-    MOCK_METHOD1(Debug, void(const std::string&));
-    MOCK_METHOD(void, Debug, (Topic, const std::string&), ());
-    MOCK_METHOD1(Info, void(const std::string&));
-    MOCK_METHOD(void, Info, (Topic, const std::string&), ());
-    MOCK_METHOD1(Warn, void(const std::string&));
-    MOCK_METHOD(void, Warn, (Topic, const std::string&), ());
-    MOCK_METHOD1(Error, void(const std::string&));
-    MOCK_METHOD(void, Error, (Topic, const std::string&), ());
-    MOCK_METHOD1(Critical, void(const std::string&));
-    MOCK_METHOD(void, Critical, (Topic, const std::string&), ());
-
-    MOCK_CONST_METHOD0(GetLogLevel, Level());
-};*/
 
 class Test_CapiLogger : public testing::Test
 {
