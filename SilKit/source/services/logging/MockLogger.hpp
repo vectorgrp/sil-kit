@@ -10,7 +10,6 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-
 namespace SilKit {
 namespace Services {
 namespace Logging {
@@ -61,7 +60,6 @@ public:
 
     bool IsTopicEnabled(Topic topic) const
     {
-
         if (!disabledTopics.empty())
         {
             return std::find(disabledTopics.begin(), disabledTopics.end(), topic) == disabledTopics.end();
