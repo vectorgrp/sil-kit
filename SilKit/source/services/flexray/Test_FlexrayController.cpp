@@ -573,6 +573,7 @@ TEST_F(Test_FlexrayController, add_remove_handler)
     controller.ReceiveMsg(&controllerBusSim, message);
 }
 
+
 TEST_F(Test_FlexrayController, txbuffer_update_in_static_segment_produces_warning)
 {
     // Configure Controller
@@ -594,24 +595,24 @@ TEST_F(Test_FlexrayController, txbuffer_update_in_static_segment_produces_warnin
     txBuffer.txBufferIndex = 0;
 
     using LogLevel = SilKit::Services::Logging::Level;
-
+//testing::HasSubstr("zero padded")
     // now update the static buffer to be smaller than max size ( forcing a warning about padding)
     payload.resize(maxSize - 2u); // ensure we get a 'zero padding' warning
-    EXPECT_CALL(participant.logger, Log(LogLevel::Warn, testing::HasSubstr("zero padded"))).Times(1);
+    EXPECT_CALL(participant.logger, ProcessLoggerMessage( ALoggerMessageWith(LogLevel::Warn, "zero padded"))).Times(1);
     myController.UpdateTxBuffer(txBuffer);
 
     // now update the static buffer to be bigger than max size ( forcing a warning about truncating)
     payload.resize(maxSize + 2u); // ensure we get a 'truncated' warning
     txBuffer.payload = payload;
     txBuffer.payloadDataValid = true;
-    EXPECT_CALL(participant.logger, Log(LogLevel::Warn, testing::HasSubstr("truncated"))).Times(1);
+    EXPECT_CALL(participant.logger, ProcessLoggerMessage(ALoggerMessageWith(LogLevel::Warn, "truncated"))).Times(1);
     myController.UpdateTxBuffer(txBuffer);
 
     //now update the static  buffer to have the correct size
     payload.resize(maxSize);
     txBuffer.payload = payload;
     txBuffer.payloadDataValid = true;
-    EXPECT_CALL(participant.logger, Log(LogLevel::Warn, _)).Times(0);
+    EXPECT_CALL(participant.logger, ProcessLoggerMessage(ALoggerMessageWith(LogLevel::Warn))).Times(0);
     myController.UpdateTxBuffer(txBuffer);
 }
 

@@ -66,7 +66,7 @@ class AsioConnector final : public IConnector
         asio::steady_timer _timeoutTimer;
         asio::cancellation_signal _timeoutCancelSignal;
 
-        SilKit::Services::Logging::ILogger* _logger{nullptr};
+        SilKit::Services::Logging::ILoggerInternal* _logger{nullptr};
 
     public:
         Op(AsioConnector& connector, const AsioSocketOptions& asioSocketOptions,
@@ -86,7 +86,7 @@ class AsioConnector final : public IConnector
     };
 
     std::shared_ptr<asio::io_context> _asioIoContext;
-    SilKit::Services::Logging::ILogger* _logger{nullptr};
+    SilKit::Services::Logging::ILoggerInternal* _logger{nullptr};
 
     IConnectorListener* _listener{nullptr};
 
@@ -94,7 +94,7 @@ class AsioConnector final : public IConnector
 
 public:
     AsioConnector(std::shared_ptr<asio::io_context> asioIoContext, const AsioSocketOptions& socketOptions,
-                  const AsioEndpointType& remoteEndpoint, SilKit::Services::Logging::ILogger& logger);
+                  const AsioEndpointType& remoteEndpoint, SilKit::Services::Logging::ILoggerInternal& logger);
     ~AsioConnector() override;
 
 public: // IAcceptor
@@ -106,7 +106,8 @@ public: // IAcceptor
 
 template <typename T>
 AsioConnector<T>::AsioConnector(std::shared_ptr<asio::io_context> asioIoContext, const AsioSocketOptions& socketOptions,
-                                const AsioEndpointType& remoteEndpoint, SilKit::Services::Logging::ILogger& logger)
+                                const AsioEndpointType& remoteEndpoint,
+                                SilKit::Services::Logging::ILoggerInternal& logger)
     : _asioIoContext{std::move(asioIoContext)}
     , _logger{&logger}
     , _op{std::make_shared<Op>(*this, socketOptions, remoteEndpoint)}

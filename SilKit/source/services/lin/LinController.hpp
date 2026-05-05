@@ -129,8 +129,8 @@ public:
         WireLinControllerConfig::SimulationMode simulationMode{WireLinControllerConfig::SimulationMode::Default};
         std::array<LinFrameResponse, 64> responses;
 
-        void UpdateResponses(std::vector<LinFrameResponse> responsesToUpdate, Services::Logging::ILogger* logger);
-        void UpdateTxBuffer(LinId linId, std::array<uint8_t, 8> data, Services::Logging::ILogger* logger);
+        void UpdateResponses(std::vector<LinFrameResponse> responsesToUpdate, Services::Logging::ILoggerInternal* logger);
+        void UpdateTxBuffer(LinId linId, std::array<uint8_t, 8> data, Services::Logging::ILoggerInternal* logger);
     };
     auto GetResponse(LinId id) -> std::pair<int, LinFrame>;
     auto GetThisLinNode() -> LinNode&;
@@ -210,7 +210,7 @@ private:
     Logging::LogOnceFlag _logOnce;
     Core::IParticipantInternal* _participant;
     Config::LinController _config;
-    Services::Logging::ILogger* _logger;
+    Services::Logging::ILoggerInternal* _logger;
     Tracer _tracer;
     SimBehavior _simulationBehavior;
     ::SilKit::Core::ServiceDescriptor _serviceDescriptor;

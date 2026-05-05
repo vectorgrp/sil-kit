@@ -51,13 +51,15 @@ protected:
         monitor.UpdateRequiredParticipantNames(syncParticipantNames);
         monitor.SetServiceDescriptor(addr);
 
-        ON_CALL(participant.logger,
-                Log(testing::An<::SilKit::Services::Logging::Level>(), testing::An<const std::string&>()))
-            .WillByDefault([](SilKit::Services::Logging::Level level, const std::string& message) {
+        /* ON_CALL(participant.logger,
+                Log(testing::An<::SilKit::Services::Logging::Level>(),
+                    testing::An<::SilKit::Services::Logging::Topic>(), testing::An<const std::string&>()))
+            .WillByDefault([](SilKit::Services::Logging::Level level, SilKit::Services::Logging::Topic,
+                              const std::string& message) {
             std::ostringstream ss;
             ss << "[" << to_string(level) << "] " << message << '\n';
             std::cout << ss.str() << std::flush;
-        });
+        });*/
     }
 
     auto AddSystemStateHandler() -> HandlerId

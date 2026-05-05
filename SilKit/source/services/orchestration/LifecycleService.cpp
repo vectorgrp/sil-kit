@@ -22,8 +22,8 @@ namespace Orchestration {
 
 LifecycleService::LifecycleService(Core::IParticipantInternal* participant)
     : _participant{participant}
-    , _logger{participant->GetLogger()}
-    , _lifecycleManager{participant, participant->GetLogger(), this}
+    , _logger{participant->GetLoggerInternal()}
+    , _lifecycleManager{participant, participant->GetLoggerInternal(), this}
     , _finalStatePromise{std::make_unique<std::promise<ParticipantState>>()}
     , _finalStateFuture{_finalStatePromise->get_future()}
 {
@@ -46,17 +46,23 @@ void LifecycleService::SetCommunicationReadyHandlerAsync(CommunicationReadyHandl
 
 void LifecycleService::CompleteCommunicationReadyHandlerAsync()
 {
-    _logger->Debug("LifecycleService::CompleteCommunicationReadyHandler: enter");
+    _logger->MakeMessage(Logging::Level::Debug, TopicOf(*this))
+        .SetMessage("LifecycleService::CompleteCommunicationReadyHandler: enter")
+        .Dispatch();
     // async handler is finished, now continue to the Running state without triggering the CommunicationReadyHandler again
     if (!_commReadyHandlerInvoked)
     {
-        _logger->Debug("LifecycleService::CompleteCommunicationReadyHandler was called without invoking the "
-                       "CommunicationReadyHandler, ignoring.");
+        _logger->MakeMessage(Logging::Level::Debug, TopicOf(*this))
+            .SetMessage("LifecycleService::CompleteCommunicationReadyHandler was called without invoking the "
+                        "CommunicationReadyHandler, ignoring.")
+            .Dispatch();
         return;
     }
     if (_commReadyHandlerCompleted)
     {
-        _logger->Debug("LifecycleService::CompleteCommunicationReadyHandler has been called already, ignoring.");
+        _logger->MakeMessage(Logging::Level::Debug, TopicOf(*this))
+            .SetMessage("LifecycleService::CompleteCommunicationReadyHandler has been called already, ignoring.")
+            .Dispatch();
         return;
     }
     _commReadyHandlerCompleted = true;
@@ -91,7 +97,10 @@ auto LifecycleService::StartLifecycle() -> std::future<ParticipantState>
 {
     std::stringstream ss;
     ss << "Lifecycle of participant " << _participant->GetParticipantName() << " started";
-    _logger->Debug(ss.str());
+
+    _logger->MakeMessage(Logging::Level::Debug, TopicOf(*this))
+        .SetMessage(ss.str())
+        .Dispatch();
 
     _isLifecycleStarted = true;
 
@@ -103,8 +112,10 @@ auto LifecycleService::StartLifecycle() -> std::future<ParticipantState>
     if (_abortedBeforeLifecycleStart)
     {
         _participant->ExecuteDeferred([this] {
-            _logger->Warn(
-                "LifecycleService::StartLifecycle(...) was called after receiving SystemCommand::AbortSimulation;");
+
+            _logger->MakeMessage(Logging::Level::Warn, TopicOf(*this))
+                .SetMessage("LifecycleService::StartLifecycle(...) was called after receiving SystemCommand::AbortSimulation;")
+                .Dispatch();
             _lifecycleManager.AbortSimulation("Lifecycle was aborted by SystemCommand::AbortSimulation");
         });
         return std::move(_finalStateFuture);
@@ -169,19 +180,24 @@ auto LifecycleService::StartLifecycle() -> std::future<ParticipantState>
 void LifecycleService::ReportError(std::string errorMsg)
 {
     _participant->ExecuteDeferred([errorMsg, this] {
-        _logger->Error(errorMsg);
+        _logger->MakeMessage(Logging::Level::Error, TopicOf(*this))
+            .SetMessage(errorMsg)
+            .Dispatch();
 
         if (!_isLifecycleStarted)
         {
-            _logger->Warn(
-                "LifecycleService::ReportError() was called before LifecycleService::StartLifecycle() was called;"
-                "transition to ParticipantState::Error is ignored.");
+            _logger->MakeMessage(Logging::Level::Warn, TopicOf(*this))
+                .SetMessage( "LifecycleService::ReportError() was called before LifecycleService::StartLifecycle() was called;"
+                "transition to ParticipantState::Error is ignored.")
+                .Dispatch();
             return;
         }
         else if (State() == ParticipantState::Shutdown)
         {
-            _logger->Warn("LifecycleService::ReportError() was called in terminal state ParticipantState::Shutdown; "
-                          "transition to ParticipantState::Error is ignored.");
+            _logger->MakeMessage(Logging::Level::Warn, TopicOf(*this))
+                .SetMessage("LifecycleService::ReportError() was called in terminal state ParticipantState::Shutdown; "
+                            "transition to ParticipantState::Error is ignored.")
+                .Dispatch();
             return;
         }
 
@@ -305,7 +321,10 @@ void LifecycleService::AbortSimulation(std::string reason)
     {
         std::stringstream msg;
         msg << "Received SystemCommand::AbortSimulation before LifecycleService::StartLifecycle(...) was called.";
-        _logger->Warn(msg.str());
+
+        _logger->MakeMessage(Logging::Level::Warn, TopicOf(*this))
+            .SetMessage(msg.str())
+            .Dispatch();
         // If StartLifecycle is called afterwards, this flag is checked to trigger the actual abort handling.
         _abortedBeforeLifecycleStart = true;
         return;
@@ -345,7 +364,9 @@ void LifecycleService::SetFinalStatePromise()
 {
     try
     {
-        _logger->Debug("Setting the final state promise");
+        _logger->MakeMessage(Logging::Level::Debug, TopicOf(*this))
+            .SetMessage("Setting the final state promise")
+            .Dispatch();
         _finalStatePromise->set_value(State());
     }
     catch (const std::future_error&)
@@ -455,7 +476,9 @@ void LifecycleService::ChangeParticipantState(ParticipantState newState, std::st
 
     std::stringstream ss;
     ss << "New ParticipantState: " << newState << "; reason: " << status.enterReason;
-    _logger->Debug(ss.str());
+    _logger->MakeMessage(Logging::Level::Debug, TopicOf(*this))
+        .SetMessage(ss.str())
+        .Dispatch();
 
     // assign the current status under lock (copy)
     {
@@ -487,8 +510,10 @@ void LifecycleService::NewSystemState(SystemState systemState)
 
     std::stringstream ss;
     ss << "Received new system state: " << systemState;
-    Logging::Debug(_logger, ss.str().c_str());
 
+    _logger->MakeMessage(Logging::Level::Debug, TopicOf(*this))
+        .SetMessage(ss.str().c_str())
+        .Dispatch();
     switch (systemState)
     {
     case SystemState::Invalid:
@@ -505,13 +530,19 @@ void LifecycleService::NewSystemState(SystemState systemState)
         _lifecycleManager.ReadyToRun(ss.str());
         break;
     case SystemState::Running:
-        _logger->Info("Simulation is now running");
+        _logger->MakeMessage(Logging::Level::Info, TopicOf(*this))
+            .SetMessage("Simulation is now running")
+            .Dispatch();
         break;
     case SystemState::Paused:
-        _logger->Info("Simulation is paused");
+        _logger->MakeMessage(Logging::Level::Info, TopicOf(*this))
+            .SetMessage("Simulation is paused")
+            .Dispatch();
         break;
     case SystemState::Stopping:
-        _logger->Info("Simulation is stopping");
+        _logger->MakeMessage(Logging::Level::Info, TopicOf(*this))
+            .SetMessage("Simulation is stopping")
+            .Dispatch();
         // Only allow external stop signal if we are actually running or paused
         if (_lifecycleManager.GetCurrentState() == _lifecycleManager.GetRunningState()
             || _lifecycleManager.GetCurrentState() == _lifecycleManager.GetPausedState())
@@ -524,7 +555,9 @@ void LifecycleService::NewSystemState(SystemState systemState)
     case SystemState::ShuttingDown:
         break;
     case SystemState::Shutdown:
-        _logger->Info("Simulation is shut down");
+        _logger->MakeMessage(Logging::Level::Info, TopicOf(*this))
+            .SetMessage("Simulation is shut down")
+            .Dispatch();
         break;
     case SystemState::Aborting:
         break;

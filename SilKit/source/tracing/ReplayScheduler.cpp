@@ -16,10 +16,14 @@
 #include "IReplayDataController.hpp"
 #include "Tracing.hpp"
 #include "Assert.hpp"
-#include "Logger.hpp"
+#include "LoggerMessage.hpp"
 #include "string_utils.hpp"
 
 using namespace std::literals::chrono_literals;
+
+using SilKit::Services::Logging::Level;
+using SilKit::Services::Logging::Topic;
+using SilKit::Services::Logging::LoggerMessage;
 
 namespace SilKit {
 namespace Tracing {
@@ -221,7 +225,7 @@ std::string to_string(const Config::MdfChannel& mdf)
 }
 
 // Find the MDF channels associated with the given participant/controller names and types or an MdfChannel identification.
-auto FindReplayChannel(SilKit::Services::Logging::ILogger* log, IReplayFile* replayFile,
+auto FindReplayChannel(SilKit::Services::Logging::ILoggerInternal* log, IReplayFile* replayFile,
                        const Config::Replay& replayConfig, const std::string& controllerName,
                        const std::string& participantName, const std::string& networkName,
                        const Config::NetworkType networkType) -> std::shared_ptr<IReplayChannel>
@@ -234,8 +238,10 @@ auto FindReplayChannel(SilKit::Services::Logging::ILogger* log, IReplayFile* rep
         if (replayFile->Type() == IReplayFile::FileType::PcapFile && channel->Type() == type)
         {
             // PCAP only has a single replay channel
-            Services::Logging::Info(log, "Replay: using channel '{}' from '{}' on {}", channel->Name(),
-                                    replayFile->FilePath(), controllerName);
+            log->MakeMessage(Level::Info, Topic::Tracing)
+                .SetMessage("Replay: using channel '{}' from '{}' on {}", channel->Name(),
+                            replayFile->FilePath(), controllerName)
+                .Dispatch();
             return channel;
         }
 
@@ -252,14 +258,18 @@ auto FindReplayChannel(SilKit::Services::Logging::ILogger* log, IReplayFile* rep
             // SIL Kit builtin channel lookup
             if (channel->Type() != type)
             {
-                Services::Logging::Trace(log, "Replay: skipping channel '{}' of type {}", channel->Name(),
-                                         to_string(channel->Type()));
+                log->MakeMessage(Level::Trace, Topic::Tracing)
+                    .SetMessage("Replay: skipping channel '{}' of type {}", channel->Name(),
+                                to_string(channel->Type()))
+                    .Dispatch();
                 continue;
             }
             if (MatchSilKitChannel(channel, networkName, participantName, controllerName))
             {
-                Services::Logging::Debug(log, "Replay: found channel '{}' from file '{}' for type {}", channel->Name(),
-                                         replayFile->FilePath(), to_string(channel->Type()));
+                log->MakeMessage(Level::Debug, Topic::Tracing)
+                    .SetMessage("Replay: found channel '{}' from file '{}' for type {}", channel->Name(),
+                                replayFile->FilePath(), to_string(channel->Type()))
+                    .Dispatch();
                 channelList.emplace_back(std::move(channel));
             }
         }
@@ -288,7 +298,7 @@ ReplayScheduler::ReplayScheduler(const Config::ParticipantConfiguration& partici
                                  Core::IParticipantInternal* participant)
     : _participant{participant}
 {
-    _log = _participant->GetLogger();
+    _log = _participant->GetLoggerInternal();
 
     CreateReplayFiles(participantConfiguration);
 }
@@ -308,6 +318,8 @@ void ReplayScheduler::ConfigureController(const std::string& controllerName, IRe
                                           const Config::Replay& replayConfig, const std::string& networkName,
                                           const Config::NetworkType networkType)
 {
+    using namespace Services::Logging;
+
     try
     {
         ReplayTask task{};
@@ -316,10 +328,10 @@ void ReplayScheduler::ConfigureController(const std::string& controllerName, IRe
         // controller has replaying active.
         if (!IsValidReplayConfig(replayConfig))
         {
-            Services::Logging::Debug(_log,
-                                     "ReplayScheduler::ConfigureController: skipping controller {} because it has no "
-                                     "active Replay!",
-                                     controllerName);
+            _log->MakeMessage(Level::Debug,  TopicOf(*this))
+                .SetMessage("ReplayScheduler::ConfigureController: skipping controller {} because it has no "
+                            "active Replay!", controllerName)
+                .Dispatch();
             return;
         }
 
@@ -334,7 +346,9 @@ void ReplayScheduler::ConfigureController(const std::string& controllerName, IRe
 
         if (!replayChannel)
         {
-            Services::Logging::Warn(_log, "{}: could not find a replay channel!", controllerName);
+            _log->MakeMessage(Level::Warn,  TopicOf(*this))
+                .SetMessage("{}: could not find a replay channel!", controllerName)
+                .Dispatch();
             throw SilKitError("Could not find a replay channel");
         }
 
@@ -347,22 +361,30 @@ void ReplayScheduler::ConfigureController(const std::string& controllerName, IRe
     }
     catch (const SilKit::ConfigurationError& ex)
     {
-        _log->Error("ReplayScheduler: misconfiguration of controller " + controllerName + ": " + ex.what());
+        _log->MakeMessage(Level::Error,  TopicOf(*this))
+            .SetMessage("ReplayScheduler: misconfiguration of controller {}: {}", controllerName, ex.what())
+            .Dispatch();
         throw;
     }
     catch (const SilKitError& ex)
     {
-        _log->Warn("ReplayScheduler: Could not configure controller " + controllerName + ": " + ex.what());
+        _log->MakeMessage(Level::Warn,  TopicOf(*this))
+            .SetMessage("ReplayScheduler: Could not configure controller {}: {}", controllerName, ex.what())
+            .Dispatch();
     }
 }
 
 void ReplayScheduler::CreateReplayFiles(const Config::ParticipantConfiguration& participantConfiguration)
 {
+    using namespace Services::Logging;
+
     // create trace sources (aka IReplayFile)
     _replayFiles = Tracing::CreateReplayFiles(_log, participantConfiguration);
     if (_replayFiles.empty())
     {
-        _log->Error("ReplayScheduler: cannot open replay files.");
+        _log->MakeMessage(Level::Error,  TopicOf(*this))
+            .SetMessage("ReplayScheduler: cannot open replay files.")
+            .Dispatch();
         throw SilKitError("ReplayScheduler: cannot open replay files.");
     }
 }
@@ -374,6 +396,8 @@ ReplayScheduler::~ReplayScheduler()
 
 void ReplayScheduler::ReplayMessages(std::chrono::nanoseconds now, std::chrono::nanoseconds duration)
 {
+    using namespace Services::Logging;
+
     if (_isDone)
     {
         return;
@@ -405,8 +429,9 @@ void ReplayScheduler::ReplayMessages(std::chrono::nanoseconds now, std::chrono::
             auto msg = task.replayReader->Read();
             if (!msg)
             {
-                Services::Logging::Trace(_log, "ReplayTask on channel '{}' returned invalid message @{}ns", task.name,
-                                         now.count());
+                _log->MakeMessage(Level::Trace,  TopicOf(*this))
+                    .SetMessage("ReplayTask on channel '{}' returned invalid message @{}ns", task.name, now.count())
+                    .Dispatch();
                 task.doneReplaying = true;
                 break;
             }

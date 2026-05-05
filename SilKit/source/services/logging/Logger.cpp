@@ -36,17 +36,20 @@ struct SimpleLogMessage
 {
     const std::string& msg;
     const std::vector<std::pair<std::string, std::string>>& kv;
+    Topic topic;
 };
 
 struct JsonLogMessage
 {
     const std::string& msg;
     const std::vector<std::pair<std::string, std::string>>& kv;
+    Topic topic;
 };
 
 struct JsonString
 {
     const std::string& m;
+    Topic topic;
 };
 
 } // namespace Logging
@@ -134,7 +137,19 @@ struct fmt::formatter<SilKit::Services::Logging::SimpleLogMessage>
     template <typename FormatContext>
     auto format(const SilKit::Services::Logging::SimpleLogMessage& msg, FormatContext& ctx) const
     {
-        if (!msg.kv.empty())
+        bool hasTopic = !(msg.topic == SilKit::Services::Logging::Topic::None);
+        bool hasKv = !msg.kv.empty();
+
+        if (hasTopic && hasKv)
+        {
+            return fmt::format_to(ctx.out(), "[{}] {}, {}", to_string(msg.topic), msg.msg,
+                                  KeyValuesToSimpleString(msg.kv));
+        }
+        else if (hasTopic)
+        {
+            return fmt::format_to(ctx.out(), "[{}] {}", to_string(msg.topic), msg.msg);
+        }
+        else if (hasKv)
         {
             return fmt::format_to(ctx.out(), "{}, {}", msg.msg, KeyValuesToSimpleString(msg.kv));
         }
@@ -157,9 +172,26 @@ struct fmt::formatter<SilKit::Services::Logging::JsonLogMessage>
     template <typename FormatContext>
     auto format(const SilKit::Services::Logging::JsonLogMessage& msg, FormatContext& ctx) const
     {
-        if (!msg.kv.empty())
+        bool hasTopic = !(msg.topic == SilKit::Services::Logging::Topic::None);
+        bool hasKv = !msg.kv.empty();
+
+        if (hasTopic && hasKv)
         {
-            return fmt::format_to(ctx.out(), "\"msg\": \"{}\", \"kv\": {}", SilKit::Util::EscapeString(msg.msg),
+            return fmt::format_to(ctx.out(), "\"topic\": \"{}\", \"msg\": \"{}\", \"kv\": {}",
+                                  SilKit::Util::EscapeString(to_string(msg.topic)),
+                                  SilKit::Util::EscapeString(msg.msg),
+                                  KeyValuesToJsonString(msg.kv));
+        }
+        else if (hasTopic)
+        {
+            return fmt::format_to(ctx.out(), "\"topic\": \"{}\", \"msg\": \"{}\"",
+                                  SilKit::Util::EscapeString(to_string(msg.topic)),
+                                  SilKit::Util::EscapeString(msg.msg));
+        }
+        else if (hasKv)
+        {
+            return fmt::format_to(ctx.out(), "\"msg\": \"{}\", \"kv\": {}",
+                                  SilKit::Util::EscapeString(msg.msg),
                                   KeyValuesToJsonString(msg.kv));
         }
         else
@@ -180,10 +212,10 @@ struct fmt::formatter<SilKit::Services::Logging::JsonString>
     template <typename FormatContext>
     auto format(const SilKit::Services::Logging::JsonString& msg, FormatContext& ctx) const
     {
-        // format the message output string
-        // "msg": "This is the log message", "kv":{ "key1": "value1", key2: "value2"}
-        // the message, key and value strings needed to be escaped
-        return fmt::format_to(ctx.out(), "\"msg\": \"{}\"", SilKit::Util::EscapeString(msg.m));
+
+        return fmt::format_to(ctx.out(), "\"topic\": \"{}\", \"msg\": \"{}\"",
+                                SilKit::Util::EscapeString(to_string(msg.topic)),
+                                SilKit::Util::EscapeString(msg.m));
     }
 };
 
@@ -238,20 +270,20 @@ Logger::Logger(const std::string& participantName, Config::Logging config)
     {
         if (sink.type == Config::Sink::Type::Remote)
         {
-            _loggerRemote = std::make_shared<RemoteLogger>(sink.level, participantName);
+            _remoteLogger.emplace(std::make_shared<RemoteLogger>(sink.level, participantName), sink);
         }
         else
         {
             // NB: logger gets dropped from registry immediately after creating so that two participant with the same
             // participantName won't lead to a spdlog exception because a logger with this name does already exist.
-            if (sink.format == Config::Sink::Format::Json && nullptr == _loggerJson)
+            if (sink.format == Config::Sink::Format::Json)
             {
-                _loggerJson = spdlog::create<spdlog::sinks::null_sink_st>(participantName);
+                _spdlogLogger.emplace(spdlog::create<spdlog::sinks::null_sink_st>(participantName), sink);
                 spdlog::drop(participantName);
             }
-            if (sink.format == Config::Sink::Format::Simple && nullptr == _loggerSimple)
+            if (sink.format == Config::Sink::Format::Simple)
             {
-                _loggerSimple = spdlog::create<spdlog::sinks::null_sink_st>(participantName);
+                _spdlogLogger.emplace(spdlog::create<spdlog::sinks::null_sink_st>(participantName), sink);
                 spdlog::drop(participantName);
             }
         }
@@ -266,41 +298,19 @@ Logger::Logger(const std::string& participantName, Config::Logging config)
     // Defined JSON pattern for the logger output
     const std::string jsonpattern{R"({"ts":"%E","log":"%n","lvl":"%l", %v })"};
 
-    for (auto sink : _config.sinks)
+    for (const auto& pair : _spdlogLogger)
     {
-        auto log_level = to_spdlog(sink.level);
-        if (sink.format == Config::Sink::Format::Json && sink.type != Config::Sink::Type::Remote)
-        {
-            if (log_level < _loggerJson->level())
-            {
-                _loggerJson->set_level(log_level);
-            }
-        }
-        if (sink.format == Config::Sink::Format::Simple && sink.type != Config::Sink::Type::Remote)
-        {
-            if (log_level < _loggerSimple->level())
-            {
-                _loggerSimple->set_level(log_level);
-            }
-        }
+        auto log_level = to_spdlog(pair.second.level);
+        pair.first->set_level(log_level);
 
-        switch (sink.type)
-        {
-        case Config::Sink::Type::Remote:
-            // The remote sink is instantiated and added later together with setting up
-            // all necessary connection logic to avoid segmentation errors if sth. goes wrong
-            break;
-
-        case Config::Sink::Type::Stdout:
+        if (pair.second.type == Config::Sink::Type::Stdout)
         {
 #if _WIN32
             auto stdoutSink = std::make_shared<spdlog::sinks::stdout_sink_mt>();
-
 #else
             auto stdoutSink = std::make_shared<spdlog::sinks::ansicolor_stdout_sink_mt>();
 #endif
-
-            if (sink.format == Config::Sink::Format::Json && sink.type != Config::Sink::Type::Remote)
+            if (pair.second.format == Config::Sink::Format::Json)
             {
                 using spdlog::details::make_unique; // for pre c++14
                 auto formatter = make_unique<spdlog::pattern_formatter>();
@@ -308,20 +318,19 @@ Logger::Logger(const std::string& participantName, Config::Logging config)
                 formatter->set_pattern(jsonpattern);
                 stdoutSink->set_formatter(std::move(formatter));
                 stdoutSink->set_level(log_level);
-                _loggerJson->sinks().emplace_back(std::move(stdoutSink));
+                pair.first->sinks().emplace_back(std::move(stdoutSink));
             }
-            else if (sink.type != Config::Sink::Type::Remote)
+            else // Simple format 
             {
                 stdoutSink->set_level(log_level);
-                _loggerSimple->sinks().emplace_back(std::move(stdoutSink));
+                pair.first->sinks().emplace_back(std::move(stdoutSink));
             }
-            break;
         }
-        case Config::Sink::Type::File:
+        else if (pair.second.type == Config::Sink::Type::File)
         {
-            if (sink.format == Config::Sink::Format::Json)
+            if (pair.second.format == Config::Sink::Format::Json)
             {
-                auto filename = fmt::format("{}_{}_{}.jsonl", sink.logName,
+                auto filename = fmt::format("{}_{}_{}.jsonl", pair.second.logName,
                                             SilKit::Util::PrintableString(participantName), logFileTimestamp);
                 auto fileSink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(filename);
                 using spdlog::details::make_unique; // for pre c++14
@@ -330,156 +339,164 @@ Logger::Logger(const std::string& participantName, Config::Logging config)
                 formatter->set_pattern(jsonpattern);
                 fileSink->set_formatter(std::move(formatter));
                 fileSink->set_level(log_level);
-                _loggerJson->sinks().push_back(fileSink);
+                pair.first->sinks().push_back(fileSink);
             }
             else
             {
-                auto filename = fmt::format("{}_{}_{}.txt", sink.logName,
+                auto filename = fmt::format("{}_{}_{}.txt", pair.second.logName,
                                             SilKit::Util::PrintableString(participantName), logFileTimestamp);
                 auto fileSink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(filename);
                 fileSink->set_level(log_level);
-                _loggerSimple->sinks().push_back(fileSink);
+                pair.first->sinks().push_back(fileSink);
             }
         }
+    }
+
+    for (const auto& pair : _spdlogLogger)
+    {
+        pair.first->flush_on(to_spdlog(_config.flushLevel));
+    }
+}
+
+void Logger::DispatchToSinks(log_clock::time_point now, Level level, Topic topic,
+                             const std::function<std::string(Config::Sink::Format)>& formatter,
+                             const std::function<void(const std::shared_ptr<RemoteLogger>&, log_clock::time_point)>& remoteDispatcher)
+{
+    for (const auto& pair : _spdlogLogger)
+    {
+        if (!IsLevelMatching(pair.second.level, level))
+        {
+            continue;
         }
+
+        if (IsTopicDisabled(pair.second.enabledTopics, pair.second.disabledTopics, topic))
+        {
+            continue;
+        }
+
+        auto formatted = formatter(pair.second.format);
+        pair.first->log(now, spdlog::source_loc{}, to_spdlog(level), formatted);
     }
-    if (nullptr != _loggerSimple)
+
+    for (const auto& pair : _remoteLogger)
     {
-        _loggerSimple->flush_on(to_spdlog(_config.flushLevel));
-    }
-    if (nullptr != _loggerJson)
-    {
-        _loggerJson->flush_on(to_spdlog(_config.flushLevel));
+        if (!IsLevelMatching(pair.second.level, level))
+        {
+            continue;
+        }
+
+        if (IsTopicDisabled(pair.second.enabledTopics, pair.second.disabledTopics, topic))
+        {
+            continue;
+        }
+
+        if (remoteDispatcher)
+        {
+            remoteDispatcher(pair.first, now);
+        }
+        else
+        {
+            pair.first->Log(now, level, topic, formatter(Config::Sink::Format::Simple));
+        }
     }
 }
 
 void Logger::ProcessLoggerMessage(const LoggerMessage& msg)
 {
     const auto now = log_clock::now();
-    if (nullptr != _loggerJson)
-    {
-        JsonLogMessage myJsonMsg{msg.GetMsgString(), msg.GetKeyValues()};
 
-        _loggerJson->log(now, spdlog::source_loc{}, to_spdlog(msg.GetLevel()), fmt::format("{}", myJsonMsg));
-    }
-
-    if (nullptr != _loggerSimple)
-    {
-        SimpleLogMessage myMsg{msg.GetMsgString(), msg.GetKeyValues()};
-        _loggerSimple->log(now, spdlog::source_loc{}, to_spdlog(msg.GetLevel()), fmt::format("{}", myMsg));
-    }
-    if (nullptr != _loggerRemote)
-    {
-        _loggerRemote->Log(now, msg);
-    }
+    DispatchToSinks(now, msg.GetLevel(), msg.GetTopic(),
+        [&msg](Config::Sink::Format format) -> std::string {
+            if (format == Config::Sink::Format::Json)
+            {
+                JsonLogMessage myJsonMsg{msg.GetMsgString(), msg.GetKeyValues(), msg.GetTopic()};
+                return fmt::format("{}", myJsonMsg);
+            }
+            else
+            {
+                SimpleLogMessage myMsg{msg.GetMsgString(), msg.GetKeyValues(), msg.GetTopic()};
+                return fmt::format("{}", myMsg);
+            }
+        },
+        [&msg](const std::shared_ptr<RemoteLogger>& remote, log_clock::time_point tp) {
+            remote->Log(tp, msg);
+        });
 }
 
 void Logger::LogReceivedMsg(const LogMsg& msg)
 {
-    if (nullptr != _loggerJson)
+    for (const auto& pair : _spdlogLogger)
     {
-        JsonLogMessage jsonMsg{msg.payload, msg.keyValues};
-
-        auto fmt{fmt::format("{}", jsonMsg)};
-        auto spdlog_msg = to_spdlog(msg, fmt);
-
-
-        for (auto&& sink : _loggerJson->sinks())
+        if (pair.second.format == Config::Sink::Format::Json)
         {
-            if (to_spdlog(msg.level) < sink->level())
-                continue;
+            JsonLogMessage jsonMsg{msg.payload, msg.keyValues, msg.topic};
 
-            sink->log(spdlog_msg);
+            auto fmt{fmt::format("{}", jsonMsg)};
+            auto spdlog_msg = to_spdlog(msg, fmt);
 
-            if (_config.flushLevel <= msg.level)
-                sink->flush();
+            for (auto&& sink : pair.first->sinks())
+            {
+                if (to_spdlog(msg.level) < sink->level())
+                    continue;
+
+                sink->log(spdlog_msg);
+
+                if (_config.flushLevel <= msg.level)
+                    sink->flush();
+            }
         }
-    }
-
-    if (nullptr != _loggerSimple)
-    {
-        SimpleLogMessage simpleMsg{msg.payload, msg.keyValues};
-
-        auto fmt{fmt::format("{}", simpleMsg)};
-        auto spdlog_msg = to_spdlog(msg, fmt);
-
-        for (auto&& sink : _loggerSimple->sinks())
+        else
         {
-            if (to_spdlog(msg.level) < sink->level())
-                continue;
+            SimpleLogMessage simpleMsg{msg.payload, msg.keyValues, msg.topic};
 
-            sink->log(spdlog_msg);
+            auto fmt{fmt::format("{}", simpleMsg)};
+            auto spdlog_msg = to_spdlog(msg, fmt);
 
-            if (_config.flushLevel <= msg.level)
-                sink->flush();
+            for (auto&& sink : pair.first->sinks())
+            {
+                if (to_spdlog(msg.level) < sink->level())
+                    continue;
+
+                sink->log(spdlog_msg);
+
+                if (_config.flushLevel <= msg.level)
+                    sink->flush();
+            }
         }
     }
 }
 
-
-void Logger::Log(Level level, const std::string& msg)
+void Logger::Log(Level level, Topic topic, const std::string& msg)
 {
     const auto now = log_clock::now();
-    if (nullptr != _loggerJson)
-    {
-        JsonString jsonString{msg};
-        _loggerJson->log(now, spdlog::source_loc{}, to_spdlog(level), fmt::format("{}", jsonString));
-    }
-    if (nullptr != _loggerSimple)
-    {
-        _loggerSimple->log(now, spdlog::source_loc{}, to_spdlog(level), msg);
-    }
-    if (nullptr != _loggerRemote)
-    {
-        _loggerRemote->Log(now, level, msg);
-    }
-}
 
-
-void Logger::Trace(const std::string& msg)
-{
-    Log(Level::Trace, msg);
-}
-
-void Logger::Debug(const std::string& msg)
-{
-    Log(Level::Debug, msg);
-}
-
-void Logger::Info(const std::string& msg)
-{
-    Log(Level::Info, msg);
-}
-
-void Logger::Warn(const std::string& msg)
-{
-    Log(Level::Warn, msg);
-}
-
-void Logger::Error(const std::string& msg)
-{
-    Log(Level::Error, msg);
-}
-
-void Logger::Critical(const std::string& msg)
-{
-    Log(Level::Critical, msg);
+    DispatchToSinks(now, level, topic, [&msg, topic](Config::Sink::Format format) -> std::string {
+        if (format == Config::Sink::Format::Json)
+        {
+            JsonString jsonString{msg, topic};
+            return fmt::format("{}", jsonString);
+        }
+        else
+        {
+            return fmt::format("[{}] {}", to_string(topic), msg);
+        }
+    });
 }
 
 
 void Logger::RegisterRemoteLogging(const LogMsgHandler& handler)
 {
-    if (nullptr != _loggerRemote)
+    for (const auto& pair : _remoteLogger)
     {
-        _loggerRemote->RegisterRemoteLogging(handler);
+        pair.first->RegisterRemoteLogging(handler);
     }
 }
 
 void Logger::DisableRemoteLogging()
 {
-    if (nullptr != _loggerRemote)
+    for (const auto& pair : _remoteLogger)
     {
-        _loggerRemote->DisableRemoteLogging();
+        pair.first->DisableRemoteLogging();
     }
 }
 
@@ -487,19 +504,15 @@ Level Logger::GetLogLevel() const
 {
     auto lvl = to_spdlog(Level::Critical);
 
-    if (nullptr != _loggerSimple)
+    for (const auto& pair : _spdlogLogger)
     {
-        lvl = lvl < _loggerSimple->level() ? lvl : _loggerSimple->level();
-    }
-    if (nullptr != _loggerJson)
-    {
-        lvl = lvl < _loggerJson->level() ? lvl : _loggerJson->level();
-    }
-    if (nullptr != _loggerRemote)
-    {
-        lvl = lvl < to_spdlog(_loggerRemote->level()) ? lvl : to_spdlog(_loggerRemote->level());
+        lvl = lvl < pair.first->level() ? lvl : pair.first->level();
     }
 
+    for (const auto& pair : _remoteLogger)
+    {
+        lvl = lvl < to_spdlog(pair.first->level()) ? lvl : to_spdlog(pair.first->level());
+    }
     return from_spdlog(lvl);
 }
 

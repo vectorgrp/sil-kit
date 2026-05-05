@@ -329,12 +329,20 @@ void VAsioConnection::OpenTcpAcceptors(const std::vector<std::string>& acceptorE
 
         if (uri.Type() == Uri::UriType::Tcp && uri.Scheme() == "tcp")
         {
-            SilKit::Services::Logging::Debug(_logger, "Found TCP acceptor endpoint URI {} with host {} and port {}",
-                                             uriString, uri.Host(), uri.Port());
+            _logger->MakeMessage(Log::Level::Debug, TopicOf(*this))
+                .SetMessage("Found TCP acceptor endpoint.")
+                .AddKeyValue(Log::Keys::uriString, uriString)
+                .AddKeyValue(Log::Keys::uriHost, uri.Host())
+                .AddKeyValue(Log::Keys::uriPort, uri.Port())
+                .Dispatch();
 
             for (const auto& host : _ioContext->Resolve(uri.Host()))
             {
-                Services::Logging::Debug(_logger, "Accepting TCP connections on {}:{}", host, uri.Port());
+                _logger->MakeMessage(Log::Level::Debug, TopicOf(*this))
+                    .SetMessage("Accepting TCP connections on host")
+                    .AddKeyValue(Log::Keys::uriHost, host)
+                    .AddKeyValue(Log::Keys::uriPort, uri.Port())
+                    .Dispatch();
 
                 try
                 {
@@ -349,8 +357,12 @@ void VAsioConnection::OpenTcpAcceptors(const std::vector<std::string>& acceptorE
                 }
                 catch (const std::exception& exception)
                 {
-                    Services::Logging::Error(_logger, "Unable to accept TCP connections on {}:{}: {}", host, uri.Port(),
-                                             exception.what());
+                    _logger->MakeMessage(Log::Level::Error, TopicOf(*this))
+                        .SetMessage("Unable to accept TCP connections on")
+                        .AddKeyValue(Log::Keys::uriHost, host)
+                        .AddKeyValue(Log::Keys::uriPort, uri.Port())
+                        .AddKeyValue(Log::Keys::exception, exception.what())
+                        .Dispatch();
                 }
 
                 metric->Add(fmt::format("{}:{}", host, uri.Port()));
@@ -362,7 +374,10 @@ void VAsioConnection::OpenTcpAcceptors(const std::vector<std::string>& acceptorE
         }
         else
         {
-            SilKit::Services::Logging::Warn(_logger, "OpenTcpAcceptors: Unused acceptor endpoint URI: {}", uriString);
+            _logger->MakeMessage(Log::Level::Warn, TopicOf(*this))
+                .SetMessage("OpenTcpAcceptors: Unused acceptor endpoint URI")
+                .AddKeyValue(Log::Keys::uriHost, uriString)
+                .Dispatch();
         }
     }
 }
@@ -378,8 +393,11 @@ void VAsioConnection::OpenLocalAcceptors(const std::vector<std::string>& accepto
 
         if (uri.Type() == Uri::UriType::Local && uri.Scheme() == "local")
         {
-            SilKit::Services::Logging::Debug(_logger, "Found local domain acceptor endpoint URI {} with path {}",
-                                             uriString, uri.Path());
+            _logger->MakeMessage(Log::Level::Debug, TopicOf(*this))
+                .SetMessage("Found local domain acceptor endpoint URI")
+                .AddKeyValue(Log::Keys::uriHost, uriString)
+                .AddKeyValue(Log::Keys::uriPath, uri.Path())
+                .Dispatch();
 
             // file must not exist before we bind/listen on it
             (void)fs::remove(uri.Path());
@@ -397,8 +415,11 @@ void VAsioConnection::OpenLocalAcceptors(const std::vector<std::string>& accepto
             }
             catch (const std::exception& exception)
             {
-                Services::Logging::Error(_logger, "Unable to accept local domain connections on '{}': {}", uri.Path(),
-                                         exception.what());
+                _logger->MakeMessage(Log::Level::Error, TopicOf(*this))
+                    .SetMessage("Unable to accept local domain connections on")
+                    .AddKeyValue(Log::Keys::uriPath, uri.Path())
+                    .AddKeyValue(Log::Keys::exception, exception.what())
+                    .Dispatch();
             }
 
             metric->Add(fmt::format("{}", uri.Path()));
@@ -409,7 +430,10 @@ void VAsioConnection::OpenLocalAcceptors(const std::vector<std::string>& accepto
         }
         else
         {
-            SilKit::Services::Logging::Warn(_logger, "OpenLocalAcceptors: Unused acceptor endpoint URI: {}", uriString);
+            _logger->MakeMessage(Log::Level::Warn, TopicOf(*this))
+                .SetMessage("OpenLocalAcceptors: Unused acceptor endpoint URI")
+                .AddKeyValue(Log::Keys::uriString, uriString)
+                .Dispatch();
         }
     }
 }
@@ -436,7 +460,9 @@ void VAsioConnection::JoinSimulation(std::string connectUri)
     // Wait for a fixed amount of time for all handshakes to complete.
     WaitForAllReplies(GetParticipantHandshakeTimeout(_config));
 
-    _logger->Debug("Connected to all known participants");
+    _logger->MakeMessage(Log::Level::Debug, TopicOf(*this))
+        .SetMessage("Connected to all known participants")
+        .Dispatch();
 }
 
 void VAsioConnection::OpenParticipantAcceptors(const std::string& connectUri)
@@ -453,14 +479,18 @@ void VAsioConnection::OpenParticipantAcceptors(const std::string& connectUri)
 
     if (_acceptors.empty())
     {
-        SilKit::Services::Logging::Error(_logger, "JoinSimulation: no acceptors available");
+        _logger->MakeMessage(Log::Level::Error, TopicOf(*this))
+            .SetMessage("JoinSimulation: no acceptors available")
+            .Dispatch();
         throw SilKitError{"JoinSimulation: no acceptors available"};
     }
 }
 
 void VAsioConnection::ConnectParticipantToRegistryAndStartIoWorker(const std::string& connectUriString)
 {
-    _logger->Debug("Connecting to SIL Kit Registry");
+    _logger->MakeMessage(Log::Level::Debug, TopicOf(*this))
+        .SetMessage("Connecting to SIL Kit Registry")
+        .Dispatch();
 
     VAsioPeerInfo registryPeerInfo;
     registryPeerInfo.participantName = REGISTRY_PARTICIPANT_NAME;
@@ -502,29 +532,38 @@ void VAsioConnection::ConnectParticipantToRegistryAndStartIoWorker(const std::st
     auto registryStream{registryStreamFuture.get()};
     if (registryStream == nullptr)
     {
-        Services::Logging::Error(_logger, "Failed to connect to SIL Kit Registry (number of attempts: {})",
-                                 _config.middleware.connectAttempts);
+        _logger->MakeMessage(Log::Level::Error, TopicOf(*this))
+            .SetMessage("Failed to connect to SIL Kit Registry")
+            .AddKeyValue(Log::Keys::connectAttempts, _config.middleware.connectAttempts)
+            .Dispatch();
 
-        Services::Logging::Info(
-            _logger,
-            "   Make sure that the SIL Kit Registry is up and running and is listening on the following URIs: {}.",
-            printUris(registryPeerInfo.acceptorUris));
-        _logger->Info("   If a registry is unable to open a listening socket it will only be reachable"
+
+       auto lm = _logger->MakeMessage(Log::Level::Info, TopicOf(*this))
+            .SetMessage("   Make sure that the SIL Kit Registry is up and running and is listening on the following URIs: {}.",printUris(registryPeerInfo.acceptorUris))
+            .Dispatch();
+        lm.SetMessage("   If a registry is unable to open a listening socket it will only be reachable"
                       " via local domain sockets, which depend on the working directory"
-                      " and the middleware configuration ('enableDomainSockets').");
-        _logger->Info("   Make sure that the hostname can be resolved and is reachable.");
-        _logger->Info("   You can configure the SIL Kit Registry hostname and port via the SilKitConfig.");
-        _logger->Info("   The SIL Kit Registry executable can be found in your SIL Kit installation folder:");
-        _logger->Info("     INSTALL_DIR/bin/sil-kit-registry[.exe]");
+                      " and the middleware configuration ('enableDomainSockets').")
+           .Dispatch();
+
+       lm.SetMessage("   Make sure that the hostname can be resolved and is reachable.")
+           .Dispatch();
+        lm.SetMessage("   The SIL Kit Registry executable can be found in your SIL Kit installation folder:")
+            .Dispatch();
+       lm.SetMessage("     INSTALL_DIR/bin/sil-kit-registry[.exe]").Dispatch();
+
         throw SilKitError{"ERROR: Failed to connect to SIL Kit Registry"};
     }
 
     _registry = MakeVAsioPeer(std::move(registryStream));
     _registry->SetInfo(registryPeerInfo);
 
-    SilKit::Services::Logging::Info(_logger, "Connected to registry at '{}' via '{}' ({})",
-                                    _registry->GetRemoteAddress(), _registry->GetLocalAddress(),
-                                    printUris(_registry->GetInfo().acceptorUris));
+    _logger->MakeMessage(Log::Level::Info, TopicOf(*this))
+        .SetMessage("Connected to registry at '{}' via '{}' ({})",
+                     _registry->GetRemoteAddress(), _registry->GetLocalAddress(),
+                     printUris(_registry->GetInfo().acceptorUris))
+        .Dispatch();
+
 
     _registry->StartAsyncRead();
 
@@ -533,7 +572,10 @@ void VAsioConnection::ConnectParticipantToRegistryAndStartIoWorker(const std::st
 
 void VAsioConnection::WaitForRegistryHandshakeToComplete(std::chrono::milliseconds timeout)
 {
-    SilKit::Services::Logging::Debug(_logger, "Waiting {}ms for the registry to reply", timeout.count());
+    _logger->MakeMessage(Log::Level::Debug, TopicOf(*this))
+        .SetMessage("Waiting {}ms for the registry to reply", timeout.count())
+        .AddKeyValue(Log::Keys::waitingTime, timeout.count())
+        .Dispatch();
 
     auto future{_registryHandshakeComplete.get_future()};
     auto futureStatus{future.wait_for(timeout)};
@@ -545,7 +587,9 @@ void VAsioConnection::WaitForRegistryHandshakeToComplete(std::chrono::millisecon
             "with the same name ('{}') has already connected to the registry.",
             _participantName)};
 
-        _logger->Error(errorMessage);
+        _logger->MakeMessage(Log::Level::Error, TopicOf(*this))
+            .SetMessage(errorMessage)
+            .Dispatch();
         throw SilKit::ProtocolError{errorMessage};
     }
 
@@ -557,7 +601,9 @@ void VAsioConnection::WaitForRegistryHandshakeToComplete(std::chrono::millisecon
 
 void VAsioConnection::ConnectToKnownParticipants()
 {
-    _logger->Debug("Connecting to known participants");
+    _logger->MakeMessage(Log::Level::Debug, TopicOf(*this))
+        .SetMessage("Connecting to known participants")
+        .Dispatch();
 
     _connectKnownParticipants.StartConnecting();
 
@@ -569,7 +615,10 @@ void VAsioConnection::ConnectToKnownParticipants()
 
 void VAsioConnection::WaitForAllReplies(std::chrono::milliseconds timeout)
 {
-    SilKit::Services::Logging::Debug(_logger, "Waiting {}ms for all known participants to reply", timeout.count());
+    _logger->MakeMessage(Log::Level::Debug, TopicOf(*this))
+        .SetMessage("Waiting {}ms for all known participants to reply", timeout.count())
+        .AddKeyValue(Log::Keys::waitingTime, timeout.count())
+        .Dispatch();
 
     auto future{_allKnownParticipantHandshakesComplete.get_future()};
     auto futureStatus{future.wait_for(timeout)};
@@ -579,7 +628,10 @@ void VAsioConnection::WaitForAllReplies(std::chrono::milliseconds timeout)
         std::string errorMessage{fmt::format("Timeout while waiting for replies from known participants: {}",
                                              _connectKnownParticipants.Describe())};
 
-        _logger->Error(errorMessage);
+        _logger->MakeMessage(Log::Level::Error, TopicOf(*this))
+            .SetMessage(errorMessage)
+            .Dispatch();
+
         throw SilKit::ProtocolError{errorMessage};
     }
 
@@ -593,12 +645,15 @@ void VAsioConnection::WaitForAllReplies(std::chrono::milliseconds timeout)
 void VAsioConnection::LogAndPrintNetworkIncompatibility(const RegistryMsgHeader& other,
                                                         const std::string& otherParticipantName)
 {
-    const auto errorMsg = fmt::format("Network incompatibility between this version range ({})"
+    const auto errorMessage = fmt::format("Network incompatibility between this version range ({})"
                                       " and connecting participant '{}' ({})",
                                       MapVersionToRelease(MakeRegistryMsgHeader(_version)), otherParticipantName,
                                       MapVersionToRelease(other));
-    _logger->Critical(errorMsg);
-    std::cerr << "ERROR: " << errorMsg << std::endl;
+    _logger->MakeMessage(Log::Level::Critical, TopicOf(*this))
+        .SetMessage(errorMessage)
+        .Dispatch();
+
+    std::cerr << "ERROR: " << errorMessage << std::endl;
 }
 
 void VAsioConnection::SendParticipantAnnouncement(IVAsioPeer* peer)
@@ -607,16 +662,18 @@ void VAsioConnection::SendParticipantAnnouncement(IVAsioPeer* peer)
 
     for (const auto& uri : myPeerInfo.acceptorUris)
     {
-        Services::Logging::Trace(_logger, "SendParticipantAnnouncement: Peer '{}' ('{}'): Acceptor Uri: {}",
-                                 peer->GetInfo().participantName, peer->GetSimulationName(), uri);
+        _logger->MakeMessage(Log::Level::Trace, TopicOf(*this))
+            .SetMessage("SendParticipantAnnouncement: Peer '{}' ('{}'): Acceptor Uri: {}",
+                        peer->GetInfo().participantName, peer->GetSimulationName(), uri)
+            .Dispatch();
     }
 
     if (myPeerInfo.acceptorUris.empty())
     {
-        const auto message = "SendParticipantAnnouncement: Cannot send announcement: All acceptors "
+        const auto errorMessage = "SendParticipantAnnouncement: Cannot send announcement: All acceptors "
                              "(both Local-Domain and TCP) are missing";
-        SilKit::Services::Logging::Error(_logger, message);
-        throw SilKitError{message};
+        std::cerr << "ERROR: " << errorMessage << std::endl;
+        throw SilKitError{errorMessage};
     }
 
     ParticipantAnnouncement announcement;
@@ -625,8 +682,11 @@ void VAsioConnection::SendParticipantAnnouncement(IVAsioPeer* peer)
     announcement.peerInfo = std::move(myPeerInfo);
     announcement.simulationName = _simulationName;
 
-    Services::Logging::Debug(_logger, "Sending participant announcement to '{}' ('{}')",
-                             peer->GetInfo().participantName, peer->GetSimulationName());
+    _logger->MakeMessage(Log::Level::Debug, TopicOf(*this))
+        .SetMessage("Sending participant announcement to '{}' ('{}')", peer->GetInfo().participantName,
+                    peer->GetSimulationName())
+        .Dispatch();
+
     peer->SendSilKitMsg(SerializedMessage{announcement});
 }
 
@@ -660,10 +720,11 @@ void VAsioConnection::ReceiveParticipantAnnouncement(IVAsioPeer* from, Serialize
     buffer.SetProtocolVersion(from->GetProtocolVersion());
     auto announcement = buffer.Deserialize<ParticipantAnnouncement>();
 
-    Services::Logging::Debug(_logger,
-                             "Received participant announcement from {}, protocol version {}.{}, simulation name '{}'",
-                             announcement.peerInfo.participantName, announcement.messageHeader.versionHigh,
-                             announcement.messageHeader.versionLow, announcement.simulationName);
+    _logger->MakeMessage(Log::Level::Debug, TopicOf(*this))
+        .SetMessage("Received participant announcement from {}, protocol version {}.{}, simulation name '{}'",
+                    announcement.peerInfo.participantName, announcement.messageHeader.versionHigh,
+                    announcement.messageHeader.versionLow, announcement.simulationName)
+        .Dispatch();
 
     if (!_allowAnySimulationName && announcement.simulationName != _simulationName)
     {
@@ -723,16 +784,20 @@ void VAsioConnection::SendParticipantAnnouncementReply(IVAsioPeer* peer)
     std::transform(_vasioReceivers.begin(), _vasioReceivers.end(), std::back_inserter(reply.subscribers),
                    [](const auto& subscriber) { return subscriber->GetDescriptor(); });
 
-    Services::Logging::Debug(_logger, "Sending ParticipantAnnouncementReply to '{}' ('{}') with protocol version {}",
-                             peer->GetInfo().participantName, peer->GetSimulationName(),
-                             ExtractProtocolVersion(reply.remoteHeader));
+        _logger->MakeMessage(Log::Level::Debug, TopicOf(*this))
+        .SetMessage("Sending ParticipantAnnouncementReply to '{}' ('{}')",
+                    peer->GetInfo().participantName, peer->GetSimulationName())
+        .AddKeyValue(Log::Keys::protocolVersion, ExtractProtocolVersion(reply.remoteHeader))
+        .Dispatch();
 
     peer->SendSilKitMsg(SerializedMessage{peer->GetProtocolVersion(), reply});
 
     if (const auto proxyPeer = dynamic_cast<VAsioProxyPeer*>(peer); proxyPeer != nullptr)
     {
-        Log::Warn(_logger, "Connected to {:?} ({:?}) using {:?} as a proxy", proxyPeer->GetInfo().participantName,
-                  proxyPeer->GetSimulationName(), proxyPeer->GetPeer()->GetInfo().participantName);
+        _logger->MakeMessage(Log::Level::Warn, TopicOf(*this))
+            .SetMessage("Connected to {:?} ({:?}) using {:?} as a proxy", proxyPeer->GetInfo().participantName,
+                        proxyPeer->GetSimulationName(), proxyPeer->GetPeer()->GetInfo().participantName)
+            .Dispatch();
     }
 }
 
@@ -746,9 +811,11 @@ void VAsioConnection::SendFailedParticipantAnnouncementReply(IVAsioPeer* peer, P
     reply.status = ParticipantAnnouncementReply::Status::Failed;
     reply.diagnostic = std::move(diagnostic);
 
-    Services::Logging::Debug(
-        _logger, "Sending failed ParticipantAnnouncementReply to '{}' ('{}') with protocol version {}",
-        peer->GetInfo().participantName, peer->GetSimulationName(), ExtractProtocolVersion(reply.remoteHeader));
+    _logger->MakeMessage(Log::Level::Debug, TopicOf(*this))
+        .SetMessage("Sending failed ParticipantAnnouncementReply to '{}' ('{}')",
+                    peer->GetInfo().participantName, peer->GetSimulationName())
+        .AddKeyValue(Log::Keys::protocolVersion, ExtractProtocolVersion(reply.remoteHeader))
+        .Dispatch();
 
     peer->SendSilKitMsg(SerializedMessage{peer->GetProtocolVersion(), reply});
 }
@@ -764,14 +831,15 @@ void VAsioConnection::ReceiveParticipantAnnouncementReply(IVAsioPeer* from, Seri
     {
         const auto message = fmt::format(
             "SIL Kit Connection Handshake: Received failed ParticipantAnnouncementReply from '{}' ('{}') with "
-            "protocol version {} and diagnostic message: {}",
+            "diagnostic message: {}",
             from->GetInfo().participantName, from->GetSimulationName(),
-            // extract the version delivered in the reply (
-            ExtractProtocolVersion(reply.remoteHeader),
             // provide a non-empty default string for the diagnostic message
             reply.diagnostic.empty() ? "(no diagnostic message was delivered)" : reply.diagnostic.c_str());
 
-        _logger->Warn(message);
+            _logger->MakeMessage(Log::Level::Warn, TopicOf(*this))
+                .SetMessage(message)
+                .AddKeyValue(Log::Keys::protocolVersion, ExtractProtocolVersion(reply.remoteHeader)) // extract the version delivered in the reply 
+                .Dispatch();
 
         // tear down the participant if we are talking to the registry
         if (from->GetInfo().participantId == REGISTRY_PARTICIPANT_ID)
@@ -795,8 +863,11 @@ void VAsioConnection::ReceiveParticipantAnnouncementReply(IVAsioPeer* from, Seri
         TryAddRemoteSubscriber(from, subscriber);
     }
 
-    Services::Logging::Debug(_logger, "Received participant announcement reply from '{}' ('{}') protocol version {}",
-                             from->GetInfo().participantName, from->GetSimulationName(), remoteVersion);
+    _logger->MakeMessage(Log::Level::Debug, TopicOf(*this))
+        .SetMessage("Received participant announcement reply from '{}' ('{}')",
+                    from->GetInfo().participantName, from->GetSimulationName())
+        .AddKeyValue(Log::Keys::protocolVersion, remoteVersion)
+        .Dispatch();
 
     if (from->GetInfo().participantId == REGISTRY_PARTICIPANT_ID)
     {
@@ -810,8 +881,10 @@ void VAsioConnection::ReceiveParticipantAnnouncementReply(IVAsioPeer* from, Seri
 
     if (const auto proxyPeer = dynamic_cast<VAsioProxyPeer*>(from); proxyPeer != nullptr)
     {
-        Log::Warn(_logger, "Connected to {:?} ({:?}) using {:?} as a proxy", proxyPeer->GetInfo().participantName,
-                  proxyPeer->GetSimulationName(), proxyPeer->GetPeer()->GetInfo().participantName);
+        _logger->MakeMessage(Log::Level::Warn, TopicOf(*this))
+            .SetMessage("Connected to {:?} ({:?}) using {:?} as a proxy", proxyPeer->GetInfo().participantName,
+                  proxyPeer->GetSimulationName(), proxyPeer->GetPeer()->GetInfo().participantName)
+            .Dispatch();
     }
 }
 
@@ -821,9 +894,11 @@ void VAsioConnection::ReceiveKnownParticpants(IVAsioPeer* peer, SerializedMessag
 
     auto msg = buffer.Deserialize<KnownParticipants>();
 
-    Services::Logging::Debug(_logger, "Received known participants list from '{}' ('{}') protocol {}.{}",
-                             peer->GetInfo().participantName, peer->GetSimulationName(), msg.messageHeader.versionHigh,
-                             msg.messageHeader.versionLow);
+    _logger->MakeMessage(Log::Level::Debug, TopicOf(*this))
+        .SetMessage("Received known participants list from '{}' ('{}')", peer->GetInfo().participantName,
+                    peer->GetSimulationName())
+        .AddKeyValue(Log::Keys::protocolVersion, "{}.{}", msg.messageHeader.versionHigh, msg.messageHeader.versionLow)
+        .Dispatch();
 
     // After receiving a ParticipantAnnouncement the Registry will send a KnownParticipants message
     // check if we support its version here
@@ -863,16 +938,20 @@ void VAsioConnection::ReceiveRemoteParticipantConnectRequest(IVAsioPeer* peer, S
     }
     else
     {
-        Log::Warn(_logger,
-                  "Received RemoteParticipantConnectRequest from peer '{}' ('{}' at '{}') with unsupported protocol "
-                  "version {}.{}",
-                  peer->GetInfo().participantName, peer->GetSimulationName(), peer->GetRemoteAddress(),
-                  registryMsgHeader.versionHigh, registryMsgHeader.versionLow);
+        _logger->MakeMessage(Log::Level::Warn, TopicOf(*this))
+            .SetMessage("Received RemoteParticipantConnectRequest from peer '{}' ('{}' at '{}') with unsupported protocol "
+                "version",
+                peer->GetInfo().participantName, peer->GetSimulationName(), peer->GetRemoteAddress())
+            .AddKeyValue(Log::Keys::protocolVersion, "{}.{}", registryMsgHeader.versionHigh,
+                         registryMsgHeader.versionLow)
+            .Dispatch();
 
         // ignore the request if it is sent via the registry (we cannot deserialize it anyway)
         if (peer->GetInfo().participantId == REGISTRY_PARTICIPANT_ID)
         {
-            Log::Debug(_logger, "Dropping invalid RemoteParticipantConnectRequest from registry");
+            _logger->MakeMessage(Log::Level::Debug, TopicOf(*this))
+                .SetMessage("Dropping invalid RemoteParticipantConnectRequest from registry")
+                .Dispatch();
             return;
         }
 
@@ -886,10 +965,12 @@ void VAsioConnection::ReceiveRemoteParticipantConnectRequest(IVAsioPeer* peer, S
 
     if (!_capabilities.HasRequestParticipantConnectionCapability())
     {
-        SilKit::Services::Logging::Warn(_logger,
-                                        "Ignoring RemoteParticipantConnectRequest because feature is disabled via "
-                                        "configuration: origin {}, target {}",
-                                        msg.requestOrigin.participantName, msg.requestTarget.participantName);
+        _logger->MakeMessage(Log::Level::Warn, TopicOf(*this))
+            .SetMessage("Ignoring RemoteParticipantConnectRequest because feature is disabled via "
+                        "configuration")
+            .AddKeyValue(Log::Keys::requestOrigin, msg.requestOrigin.participantName)
+            .AddKeyValue(Log::Keys::requestTarget, msg.requestTarget.participantName)
+            .Dispatch();
         return;
     }
 
@@ -913,9 +994,11 @@ void VAsioConnection::ReceiveRemoteParticipantConnectRequest_Registry(IVAsioPeer
 
     if (msg.status == RemoteParticipantConnectRequest::ANNOUNCEMENT)
     {
-        SilKit::Services::Logging::Error(_logger,
-                                         "Ignoring RemoteParticipantConnectRequest announcement (origin={}, target={})",
-                                         msg.requestOrigin.participantName, msg.requestTarget.participantName);
+        _logger->MakeMessage(Log::Level::Error, TopicOf(*this))
+            .SetMessage("Ignoring RemoteParticipantConnectRequest announcement")
+            .AddKeyValue(Log::Keys::requestOrigin, msg.requestOrigin.participantName)
+            .AddKeyValue(Log::Keys::requestTarget, msg.requestTarget.participantName)
+            .Dispatch();
         return;
     }
 
@@ -946,9 +1029,12 @@ void VAsioConnection::ReceiveRemoteParticipantConnectRequest_Registry(IVAsioPeer
 
     if (destination == nullptr)
     {
-        SilKit::Services::Logging::Error(
-            _logger, "Ignoring invalid RemoteParticipantConnectRequest (origin={}, target={}, status={})",
-            msg.requestOrigin.participantName, msg.requestTarget.participantName, static_cast<int>(msg.status));
+        _logger->MakeMessage(Log::Level::Error, TopicOf(*this))
+            .SetMessage("Ignoring invalid RemoteParticipantConnectRequest")
+            .AddKeyValue(Log::Keys::requestOrigin, msg.requestOrigin.participantName)
+            .AddKeyValue(Log::Keys::requestTarget, msg.requestTarget.participantName)
+            .AddKeyValue(Log::Keys::status, static_cast<int>(msg.status))
+            .Dispatch();
         return;
     }
 
@@ -969,9 +1055,11 @@ void VAsioConnection::ReceiveRemoteParticipantConnectRequest_Participant(IVAsioP
     {
         if (msg.status == RemoteParticipantConnectRequest::REQUEST)
         {
-            SilKit::Services::Logging::Debug(
-                _logger, "Received RemoteParticipantConnectRequest::REQUEST (request origin {}, request target {})",
-                msg.requestOrigin.participantName, msg.requestTarget.participantName);
+            _logger->MakeMessage(Log::Level::Debug, TopicOf(*this))
+                .SetMessage("Received RemoteParticipantConnectRequest::REQUEST")
+                .AddKeyValue(Log::Keys::requestOrigin, msg.requestOrigin.participantName)
+                .AddKeyValue(Log::Keys::requestTarget, msg.requestTarget.participantName)
+                .Dispatch();
 
             // XXX check if already connected to origin
 
@@ -992,10 +1080,11 @@ void VAsioConnection::ReceiveRemoteParticipantConnectRequest_Participant(IVAsioP
     {
         if (msg.status == RemoteParticipantConnectRequest::ANNOUNCEMENT)
         {
-            SilKit::Services::Logging::Debug(
-                _logger,
-                "Received RemoteParticipantConnectRequest::ANNOUNCEMENT (request origin {}, request target {})",
-                msg.requestOrigin.participantName, msg.requestTarget.participantName);
+            _logger->MakeMessage(Log::Level::Debug, TopicOf(*this))
+                .SetMessage("Received RemoteParticipantConnectRequest::ANNOUNCEMENT")
+                .AddKeyValue(Log::Keys::requestOrigin, msg.requestOrigin.participantName)
+                .AddKeyValue(Log::Keys::requestTarget, msg.requestTarget.participantName)
+                .Dispatch();
 
             // The remote participant informs us that this is a remote-connection and we should start the
             // participant-participant handshake (i.e., send the ParticipantAnnouncement).
@@ -1011,9 +1100,11 @@ void VAsioConnection::ReceiveRemoteParticipantConnectRequest_Participant(IVAsioP
 
         if (msg.status == RemoteParticipantConnectRequest::CONNECTING)
         {
-            SilKit::Services::Logging::Debug(
-                _logger, "Received RemoteParticipantConnectRequest::CONNECTING (request origin {}, request target {})",
-                msg.requestOrigin.participantName, msg.requestTarget.participantName);
+            _logger->MakeMessage(Log::Level::Debug, TopicOf(*this))
+                .SetMessage("Received RemoteParticipantConnectRequest::CONNECTING")
+                .AddKeyValue(Log::Keys::requestOrigin, msg.requestOrigin.participantName)
+                .AddKeyValue(Log::Keys::requestTarget, msg.requestTarget.participantName)
+                .Dispatch();
 
             // The remote participant informs us that it received the REQUEST and is starting to connect to us.
             _connectKnownParticipants.HandlePeerEvent(
@@ -1025,10 +1116,11 @@ void VAsioConnection::ReceiveRemoteParticipantConnectRequest_Participant(IVAsioP
 
         if (msg.status == RemoteParticipantConnectRequest::FAILED_TO_CONNECT)
         {
-            SilKit::Services::Logging::Debug(
-                _logger,
-                "Received RemoteParticipantConnectRequest::FAILED_TO_CONNECT (request origin {}, request target {})",
-                msg.requestOrigin.participantName, msg.requestTarget.participantName);
+            _logger->MakeMessage(Log::Level::Debug, TopicOf(*this))
+                .SetMessage("Received RemoteParticipantConnectRequest::FAILED_TO_CONNECT")
+                .AddKeyValue(Log::Keys::requestOrigin, msg.requestOrigin.participantName)
+                .AddKeyValue(Log::Keys::requestTarget, msg.requestTarget.participantName)
+                .Dispatch();
 
             _connectKnownParticipants.HandlePeerEvent(
                 msg.requestTarget.participantName,
@@ -1038,9 +1130,12 @@ void VAsioConnection::ReceiveRemoteParticipantConnectRequest_Participant(IVAsioP
         }
     }
 
-    SilKit::Services::Logging::Error(
-        _logger, "Ignoring invalid RemoteParticipantConnectRequest (origin={}, target={}, status={})",
-        msg.requestOrigin.participantName, msg.requestTarget.participantName, static_cast<int>(msg.status));
+    _logger->MakeMessage(Log::Level::Error, TopicOf(*this))
+        .SetMessage("Ignoring invalid RemoteParticipantConnectRequest")
+        .AddKeyValue(Log::Keys::requestOrigin, msg.requestOrigin.participantName)
+        .AddKeyValue(Log::Keys::requestTarget, msg.requestTarget.participantName)
+        .AddKeyValue(Log::Keys::status, static_cast<int>(msg.status))
+        .Dispatch();
 }
 
 
@@ -1125,9 +1220,12 @@ void VAsioConnection::StartIoWorker()
                 _ioContext->Run();
                 return;
             }
-            catch (const std::exception& error)
+            catch (const std::exception& exception)
             {
-                Services::Logging::Error(_logger, "SilKit-IOWorker: Something went wrong: {}", error.what());
+                _logger->MakeMessage(Log::Level::Error, TopicOf(*this))
+                    .SetMessage("SilKit-IOWorker: Something went wrong")
+                    .AddKeyValue(Log::Keys::exception, exception.what())
+                    .Dispatch();
             }
         }
     }};
@@ -1146,7 +1244,9 @@ void VAsioConnection::AcceptLocalConnections(const std::string& uniqueId)
         acceptor->SetListener(*this);
         acceptor->AsyncAccept({});
 
-        Services::Logging::Debug(_logger, "SIL Kit is listening on {}", acceptor->GetLocalEndpoint());
+        _logger->MakeMessage(Log::Level::Debug, TopicOf(*this))
+            .SetMessage("SIL Kit is listening on {}", acceptor->GetLocalEndpoint())
+            .Dispatch();
 
         {
             std::unique_lock<decltype(_acceptorsMutex)> lock{_acceptorsMutex};
@@ -1155,8 +1255,10 @@ void VAsioConnection::AcceptLocalConnections(const std::string& uniqueId)
     }
     catch (const std::exception& exception)
     {
-        Services::Logging::Error(_logger, "SIL Kit failed to listening on {}: {}", localEndpoint.path(),
-                                 exception.what());
+        _logger->MakeMessage(Log::Level::Error, TopicOf(*this))
+            .SetMessage("SIL Kit failed to listening on {}", localEndpoint.path())
+            .AddKeyValue(Log::Keys::exception, exception.what())
+            .Dispatch();
         throw;
     }
 }
@@ -1173,8 +1275,10 @@ auto VAsioConnection::AcceptTcpConnectionsOn(const std::string& hostName,
 
         if (resolverResults.empty())
         {
-            Services::Logging::Error(_logger, "AcceptTcpConnectionsOn: Unable to resolve hostname\"{}:{}\"", hostName,
-                                     port);
+            _logger->MakeMessage(Log::Level::Error, TopicOf(*this))
+                .SetMessage("AcceptTcpConnectionsOn: Unable to resolve hostname\"{}:{}\"", hostName,
+                                     port)
+                .Dispatch();
             throw SilKit::StateError{"Unable to resolve hostname and service."};
         }
 
@@ -1186,8 +1290,10 @@ auto VAsioConnection::AcceptTcpConnectionsOn(const std::string& hostName,
 
         endpoint = selectBestEndpointFromResolverResults(endpoints);
 
-        Services::Logging::Debug(_logger, "Accepting connections at {}:{} @{}", endpoint.address().to_string(),
-                                 endpoint.port(), (endpoint.address().is_v4() ? "TCPv4" : "TCPv6"));
+        _logger->MakeMessage(Log::Level::Debug, TopicOf(*this))
+            .SetMessage("Accepting connections at {}:{} @{}", endpoint.address().to_string(),
+                                 endpoint.port(), (endpoint.address().is_v4() ? "TCPv4" : "TCPv6"))
+            .Dispatch();
     }
 
     try
@@ -1198,7 +1304,9 @@ auto VAsioConnection::AcceptTcpConnectionsOn(const std::string& hostName,
 
         auto localEndpointUri{Uri::Parse(acceptor->GetLocalEndpoint())};
 
-        Services::Logging::Debug(_logger, "SIL Kit is listening on {}", localEndpointUri.EncodedString());
+        _logger->MakeMessage(Log::Level::Debug, TopicOf(*this))
+            .SetMessage("SIL Kit is listening on {}", localEndpointUri.EncodedString())
+            .Dispatch();
 
         {
             std::unique_lock<decltype(_acceptorsMutex)> lock{_acceptorsMutex};
@@ -1209,8 +1317,11 @@ auto VAsioConnection::AcceptTcpConnectionsOn(const std::string& hostName,
     }
     catch (const std::exception& exception)
     {
-        Services::Logging::Error(_logger, "SIL Kit failed to listening on {}:{}: {}", endpoint.address().to_string(),
-                                 endpoint.port(), exception.what());
+        _logger->MakeMessage(Log::Level::Error, TopicOf(*this))
+            .SetMessage("SIL Kit failed to listening on {}:{}", endpoint.address().to_string(),
+                                 endpoint.port())
+            .AddKeyValue(Log::Keys::exception, exception.what())
+            .Dispatch();
         throw;
     }
 }
@@ -1368,7 +1479,9 @@ void VAsioConnection::OnSocketData(IVAsioPeer* from, SerializedMessage&& buffer)
     switch (messageKind)
     {
     case VAsioMsgKind::Invalid:
-        _logger->Warn("Received message with VAsioMsgKind::Invalid");
+        _logger->MakeMessage(Log::Level::Warn, TopicOf(*this))
+            .SetMessage("Received message with VAsioMsgKind::Invalid")
+            .Dispatch();
         break;
     case VAsioMsgKind::SubscriptionAnnouncement:
         return ReceiveSubscriptionAnnouncement(from, std::move(buffer));
@@ -1391,10 +1504,13 @@ void VAsioConnection::ReceiveProxyMessage(IVAsioPeer* from, SerializedMessage&& 
     if (proxyMessageHeader.version != 0)
     {
         static SilKit::Services::Logging::LogOnceFlag onceFlag;
-        SilKit::Services::Logging::Warn(
-            _logger, onceFlag,
-            "Ignoring VAsioMsgKind::SilKitProxyMessage because message version is not supported: version {}",
-            proxyMessageHeader.version);
+        if (!onceFlag.WasCalled())
+        {
+            _logger->MakeMessage(Log::Level::Warn, TopicOf(*this))
+                .SetMessage("Ignoring VAsioMsgKind::SilKitProxyMessage because message version is not supported: version {}",
+                proxyMessageHeader.version)
+                .Dispatch();
+        }
         return;
     }
 
@@ -1403,19 +1519,25 @@ void VAsioConnection::ReceiveProxyMessage(IVAsioPeer* from, SerializedMessage&& 
     if (!_capabilities.HasProxyMessageCapability())
     {
         static SilKit::Services::Logging::LogOnceFlag onceFlag;
-        SilKit::Services::Logging::Warn(
-            _logger, onceFlag,
-            "Ignoring VAsioMsgKind::SilKitProxyMessage because feature is disabled via configuration: From {}, To {}",
-            proxyMessage.source, proxyMessage.destination);
+        if (!onceFlag.WasCalled())
+        {
+            _logger->MakeMessage(Log::Level::Warn, TopicOf(*this))
+                .SetMessage("Ignoring VAsioMsgKind::SilKitProxyMessage because feature is disabled via configuration")
+                .AddKeyValue(Log::Keys::from, proxyMessage.source)
+                .AddKeyValue(Log::Keys::to, proxyMessage.destination)
+                .Dispatch();
+        }
         return;
     }
 
     const auto& fromSimulationName{from->GetSimulationName()};
 
-    SilKit::Services::Logging::Trace(_logger,
-                                     "Received message with VAsioMsgKind::SilKitProxyMessage: From {} ({}), To {}",
-                                     proxyMessage.source, fromSimulationName, proxyMessage.destination);
-
+    _logger->MakeMessage(Log::Level::Trace, TopicOf(*this))
+        .SetMessage("Received message with VAsioMsgKind::SilKitProxyMessage")
+        .AddKeyValue(Log::Keys::from, proxyMessage.source)
+        .AddKeyValue(Log::Keys::to, proxyMessage.destination)
+        .AddKeyValue(Log::Keys::fromSimulationName, fromSimulationName)
+        .Dispatch();
 
     const bool fromIsSource = from->GetInfo().participantName == proxyMessage.source;
     if (fromIsSource)
@@ -1423,8 +1545,12 @@ void VAsioConnection::ReceiveProxyMessage(IVAsioPeer* from, SerializedMessage&& 
         auto peer{FindPeerByName(fromSimulationName, proxyMessage.destination)};
         if (peer == nullptr)
         {
-            SilKit::Services::Logging::Error(_logger, "Unable to deliver proxy message from {} to {} in simulation {}",
-                                             proxyMessage.source, proxyMessage.destination, fromSimulationName);
+            _logger->MakeMessage(Log::Level::Error, TopicOf(*this))
+                .SetMessage("Unable to deliver proxy message")
+                .AddKeyValue(Log::Keys::from, proxyMessage.source)
+                .AddKeyValue(Log::Keys::to, proxyMessage.destination)
+                .AddKeyValue(Log::Keys::fromSimulationName, fromSimulationName)
+                .Dispatch();
             return;
         }
 
@@ -1439,8 +1565,13 @@ void VAsioConnection::ReceiveProxyMessage(IVAsioPeer* from, SerializedMessage&& 
 
         if (inserted)
         {
-            Log::Warn(_logger, "Acting as proxy between {:?} ({:?}) and {:?} ({:?})", proxyMessage.source,
-                      fromSimulationName, proxyMessage.destination, fromSimulationName);
+            _logger->MakeMessage(Log::Level::Warn, TopicOf(*this))
+                .SetMessage("Acting as proxy between {:?} ({:?}) and {:?} ({:?})", proxyMessage.source,
+                      fromSimulationName, proxyMessage.destination, fromSimulationName)
+                .AddKeyValue(Log::Keys::from, proxyMessage.source)
+                .AddKeyValue(Log::Keys::to, proxyMessage.destination)
+                .AddKeyValue(Log::Keys::fromSimulationName, fromSimulationName)
+                .Dispatch();
         }
 
         return;
@@ -1453,7 +1584,10 @@ void VAsioConnection::ReceiveProxyMessage(IVAsioPeer* from, SerializedMessage&& 
 
         if (peer == nullptr)
         {
-            SilKit::Services::Logging::Debug(_logger, "Creating VAsioProxyPeer ({})", proxyMessage.source);
+            _logger->MakeMessage(Log::Level::Debug, TopicOf(*this))
+                .SetMessage("Creating VAsioProxyPeer ({})", proxyMessage.source)
+                .AddKeyValue(Log::Keys::from, proxyMessage.source)
+                .Dispatch();
 
             auto proxyPeer = std::make_unique<VAsioProxyPeer>(this, _participantName, VAsioPeerInfo{}, from, _logger);
             peer = proxyPeer.get();
@@ -1503,10 +1637,11 @@ void VAsioConnection::ReceiveSubscriptionAnnouncement(IVAsioPeer* from, Serializ
     auto myMessageVersion = getVersionForSerdes(subscriber.msgTypeName, subscriber.version);
     if (myMessageVersion == 0)
     {
-        Services::Logging::Warn(_logger,
-                                "Received SubscriptionAnnouncement from {} for message type {}"
+        _logger->MakeMessage(Log::Level::Warn, TopicOf(*this))
+            .SetMessage("Received SubscriptionAnnouncement from {} for message type {}"
                                 " for an unknown subscriber version {}",
-                                from->GetInfo().participantName, subscriber.msgTypeName, subscriber.version);
+                                from->GetInfo().participantName, subscriber.msgTypeName, subscriber.version)
+            .Dispatch();
     }
     else
     {
@@ -1527,8 +1662,10 @@ void VAsioConnection::ReceiveSubscriptionAcknowledge(IVAsioPeer* from, Serialize
 
     if (ack.status != SubscriptionAcknowledge::Status::Success)
     {
-        Services::Logging::Error(_logger, "Failed to subscribe [{}] {} from {}", ack.subscriber.networkName,
-                                 ack.subscriber.msgTypeName, from->GetInfo().participantName);
+        _logger->MakeMessage(Log::Level::Error, TopicOf(*this))
+            .SetMessage("Failed to subscribe [{}] {} from {}", ack.subscriber.networkName,
+                                 ack.subscriber.msgTypeName, from->GetInfo().participantName)
+            .Dispatch();
     }
 
     // We remove the pending subscription in any case as there will not follow a new, successful acknowledge from that peer
@@ -1588,14 +1725,18 @@ bool VAsioConnection::TryAddRemoteSubscriber(IVAsioPeer* from, const VAsioMsgSub
 
     if (wasAdded)
     {
-        Services::Logging::Debug(_logger, "Messages of type '{}' on link '{}' will be sent to participant '{}'",
-                                 subscriber.msgTypeName, subscriber.networkName, from->GetInfo().participantName);
+        _logger->MakeMessage(Log::Level::Debug, TopicOf(*this))
+            .SetMessage("Messages of type '{}' on link '{}' will be sent to participant '{}'",
+
+                         subscriber.msgTypeName, subscriber.networkName, from->GetInfo().participantName)
+            .Dispatch();
     }
     else
     {
-        Services::Logging::Warn(
-            _logger, "Participant '{}' could not be registered as receiver for messages of type '{}' on link '{}'",
-            from->GetInfo().participantName, subscriber.msgTypeName, subscriber.networkName);
+        _logger->MakeMessage(Log::Level::Warn, TopicOf(*this))
+            .SetMessage("Participant '{}' could not be registered as receiver for messages of type '{}' on link '{}'",
+            from->GetInfo().participantName, subscriber.msgTypeName, subscriber.networkName)
+            .Dispatch();
     }
 
     return wasAdded;
@@ -1606,7 +1747,9 @@ void VAsioConnection::ReceiveRawSilKitMessage(IVAsioPeer* from, SerializedMessag
     auto receiverIdx = static_cast<size_t>(buffer.GetRemoteIndex()); //ExtractEndpointId(buffer);
     if (receiverIdx >= _vasioReceivers.size())
     {
-        Services::Logging::Warn(_logger, "Ignoring RawSilKitMessage for unknown receiverIdx={}", receiverIdx);
+        _logger->MakeMessage(Log::Level::Warn, TopicOf(*this))
+            .SetMessage("Ignoring RawSilKitMessage for unknown receiverIdx={}", receiverIdx)
+            .Dispatch();
         return;
     }
 
@@ -1654,8 +1797,10 @@ void VAsioConnection::ReceiveRegistryMessage(IVAsioPeer* from, SerializedMessage
     if (PreambleIsPresent(from->GetProtocolVersion(), buffer)
         && header.preamble != REGISTRY_MESSAGE_HEADER_PREAMBLE_VALUE)
     {
-        Services::Logging::Warn(_logger, "Ignoring registry message from '{}' with invalid preamble {}",
-                                from->GetInfo().participantName, header.preamble);
+        _logger->MakeMessage(Log::Level::Warn, TopicOf(*this))
+            .SetMessage("Ignoring registry message from '{}' with invalid preamble {}",
+                                from->GetInfo().participantName, header.preamble)
+            .Dispatch();
         return;
     }
 
@@ -1663,7 +1808,9 @@ void VAsioConnection::ReceiveRegistryMessage(IVAsioPeer* from, SerializedMessage
     switch (kind)
     {
     case RegistryMessageKind::Invalid:
-        _logger->Warn("Received message with RegistryMessageKind::Invalid");
+        _logger->MakeMessage(Log::Level::Warn, TopicOf(*this))
+            .SetMessage("Received message with RegistryMessageKind::Invalid")
+            .Dispatch();
         return;
     case RegistryMessageKind::ParticipantAnnouncement:
         return ReceiveParticipantAnnouncement(from, std::move(buffer));
@@ -1779,7 +1926,9 @@ bool VAsioConnection::ParticipantHasCapability(const std::string& participantNam
     const auto peer{FindPeerByName(_simulationName, participantName)};
     if (peer == nullptr)
     {
-        SilKit::Services::Logging::Warn(_logger, "ParticipantHasCapability: Participant '{}' unknown", participantName);
+        _logger->MakeMessage(Log::Level::Warn, TopicOf(*this))
+            .SetMessage("ParticipantHasCapability: Participant '{}' unknown", participantName)
+            .Dispatch();
         return false;
     }
 
@@ -1866,8 +2015,10 @@ void VAsioConnection::OnAsyncAcceptSuccess(IAcceptor& acceptor, std::unique_ptr<
 {
     SILKIT_TRACE_METHOD_(_logger, "({})", static_cast<const void*>(&acceptor));
 
-    Services::Logging::Debug(_logger, "New connection from [local={}, remote={}]", stream->GetLocalEndpoint(),
-                             stream->GetRemoteEndpoint());
+    _logger->MakeMessage(Log::Level::Debug, TopicOf(*this))
+        .SetMessage("New connection from [local={}, remote={}]", stream->GetLocalEndpoint(),
+                             stream->GetRemoteEndpoint())
+        .Dispatch();
 
     try
     {
@@ -1876,7 +2027,10 @@ void VAsioConnection::OnAsyncAcceptSuccess(IAcceptor& acceptor, std::unique_ptr<
     }
     catch (const std::exception& exception)
     {
-        Services::Logging::Error(_logger, "SIL Kit cannot create listener socket: {}", exception.what());
+        _logger->MakeMessage(Log::Level::Error, TopicOf(*this))
+            .SetMessage("SIL Kit cannot create listener socket")
+            .AddKeyValue(Log::Keys::exception, exception.what())
+            .Dispatch();
         throw;
     }
 
@@ -1908,7 +2062,9 @@ void VAsioConnection::OnAsyncAcceptFailure(IAcceptor& acceptor)
 void VAsioConnection::OnConnectKnownParticipantsFailure(ConnectKnownParticipants& connectKnownParticipants)
 {
     auto message{fmt::format("Failed to connect to known participants: {}", connectKnownParticipants.Describe())};
-    _logger->Error(message);
+    _logger->MakeMessage(Log::Level::Error, TopicOf(*this))
+        .SetMessage(message)
+        .Dispatch();
 
     try
     {
@@ -1929,7 +2085,9 @@ void VAsioConnection::OnConnectKnownParticipantsFailure(ConnectKnownParticipants
 
 void VAsioConnection::OnConnectKnownParticipantsWaitingForAllReplies(ConnectKnownParticipants&)
 {
-    Log::Debug(_logger, "Waiting for completion of all handshakes with all known participants");
+    _logger->MakeMessage(Log::Level::Debug, TopicOf(*this))
+        .SetMessage("Waiting for completion of all handshakes with all known participants")
+        .Dispatch();
 
     try
     {
@@ -1942,7 +2100,9 @@ void VAsioConnection::OnConnectKnownParticipantsWaitingForAllReplies(ConnectKnow
 
 void VAsioConnection::OnConnectKnownParticipantsAllRepliesReceived(ConnectKnownParticipants&)
 {
-    Log::Debug(_logger, "All handshakes with all known participants are complete");
+    _logger->MakeMessage(Log::Level::Debug, TopicOf(*this))
+        .SetMessage("All handshakes with all known participants are complete")
+        .Dispatch();
 
     try
     {
@@ -1989,14 +2149,17 @@ bool VAsioConnection::TryRemoteConnectRequest(const VAsioPeerInfo& peerInfo)
 {
     SILKIT_TRACE_METHOD_(_logger, "({})", peerInfo.participantName);
 
-    SilKit::Services::Logging::Debug(_logger, "Trying to request remote connection from {} via the registry",
-                                     peerInfo.participantName);
+    _logger->MakeMessage(Log::Level::Debug, TopicOf(*this))
+        .SetMessage("Trying to request remote connection from {} via the registry",
+                                     peerInfo.participantName)
+        .Dispatch();
 
     if (!_capabilities.HasCapability(Capabilities::RequestParticipantConnection))
     {
-        SilKit::Services::Logging::Warn(
-            _logger, "Cannot request remote connection from {}, because it is disabled in the configuration",
-            peerInfo.participantName);
+        _logger->MakeMessage(Log::Level::Warn, TopicOf(*this))
+            .SetMessage("Cannot request remote connection from {}, because it is disabled in the configuration",
+            peerInfo.participantName)
+            .Dispatch();
 
         return false;
     }
@@ -2006,21 +2169,27 @@ bool VAsioConnection::TryRemoteConnectRequest(const VAsioPeerInfo& peerInfo)
         const VAsioCapabilities peerCapabilities{peerInfo.capabilities};
         if (!peerCapabilities.HasCapability(Capabilities::RequestParticipantConnection))
         {
-            SilKit::Services::Logging::Warn(_logger,
-                                            "Cannot request remote connection from {}, because {} does not support it",
-                                            peerInfo.participantName, peerInfo.participantName);
+            _logger->MakeMessage(Log::Level::Warn, TopicOf(*this))
+                .SetMessage("Cannot request remote connection from {}, because {} does not support it",
+                                            peerInfo.participantName, peerInfo.participantName)
+                .Dispatch();
 
             return false;
         }
     }
-    catch (const std::exception& error)
+    catch (const std::exception& exception)
     {
-        SilKit::Services::Logging::Error(_logger, "Failed to parse capabilities string: {}", error.what());
+        _logger->MakeMessage(Log::Level::Error, TopicOf(*this))
+            .SetMessage("Failed to parse capabilities string")
+            .AddKeyValue(Log::Keys::exception, exception.what())
+            .Dispatch();
         return false;
     }
     catch (...)
     {
-        SilKit::Services::Logging::Error(_logger, "Failed to parse capabilities string: unknown error");
+        _logger->MakeMessage(Log::Level::Error, TopicOf(*this))
+            .SetMessage("Failed to parse capabilities string: unknown error")
+            .Dispatch();
         return false;
     }
 
@@ -2041,8 +2210,10 @@ bool VAsioConnection::TryProxyConnect(const VAsioPeerInfo& peerInfo)
 {
     SILKIT_TRACE_METHOD_(_logger, "({})", peerInfo.participantName);
 
-    SilKit::Services::Logging::Debug(_logger, "Trying to use the registry as a proxy to communicate with {}",
-                                     peerInfo.participantName);
+    _logger->MakeMessage(Log::Level::Debug, TopicOf(*this))
+        .SetMessage("Trying to use the registry as a proxy to communicate with {}",
+                                     peerInfo.participantName)
+        .Dispatch();
 
     // NB: Cannot check the capabilities of the registry, since we do not receive the PeerInfo from the
     //       registry over the network, but build it ourselves in VAsioConnection::JoinSimulation.
@@ -2052,10 +2223,10 @@ bool VAsioConnection::TryProxyConnect(const VAsioPeerInfo& peerInfo)
 
     if (!_capabilities.HasProxyMessageCapability())
     {
-        SilKit::Services::Logging::Warn(
-            _logger,
-            "Cannot use the registry as a proxy to communicate with {}, because it is disabled in the configuration",
-            peerInfo.participantName);
+        _logger->MakeMessage(Log::Level::Warn, TopicOf(*this))
+            .SetMessage("Cannot use the registry as a proxy to communicate with {}, because it is disabled in the configuration",
+            peerInfo.participantName)
+            .Dispatch();
 
         return false;
     }
@@ -2063,10 +2234,11 @@ bool VAsioConnection::TryProxyConnect(const VAsioPeerInfo& peerInfo)
     const VAsioCapabilities peerCapabilities{peerInfo.capabilities};
     if (!peerCapabilities.HasCapability(Capabilities::ProxyMessage))
     {
-        SilKit::Services::Logging::Warn(_logger,
-                                        "VAsioConnection: Cannot use the registry as a proxy to communicate with {}, "
+        _logger->MakeMessage(Log::Level::Warn, TopicOf(*this))
+            .SetMessage("VAsioConnection: Cannot use the registry as a proxy to communicate with {}, "
                                         "because {} does not support it",
-                                        peerInfo.participantName, peerInfo.participantName);
+                                        peerInfo.participantName, peerInfo.participantName)
+            .Dispatch();
 
         return false;
     }

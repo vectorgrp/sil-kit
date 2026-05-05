@@ -52,7 +52,7 @@ private:
 public:
     MetricsManager(std::string participantName, IMetricsProcessor& processor);
 
-    void SetLogger(SilKit::Services::Logging::ILogger& logger);
+    void SetLogger(SilKit::Services::Logging::ILoggerInternal& logger);
 
 public: // IMetricsManager
     void SubmitUpdates() override;
@@ -67,7 +67,7 @@ private:
 private:
     std::string _participantName;
     IMetricsProcessor* _processor{nullptr};
-    SilKit::Services::Logging::ILogger* _logger{nullptr};
+    SilKit::Services::Logging::ILoggerInternal* _logger{nullptr};
 
     // Metrics
 

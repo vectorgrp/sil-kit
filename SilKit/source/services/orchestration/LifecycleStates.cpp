@@ -99,7 +99,9 @@ void State::InvalidStateTransition(std::string transitionName, bool triggerError
     }
     else
     {
-        _lifecycleManager->GetLogger()->Warn(ss.str());
+        _lifecycleManager->GetLogger()->MakeMessage(Logging::Level::Warn, TopicOf(*this))
+            .SetMessage(ss.str())
+            .Dispatch();
     }
 }
 
@@ -276,7 +278,9 @@ void CommunicationInitializedState::CommunicationInitialized(std::string reason)
         }
         break;
     case SilKit::Services::Orchestration::CallbackResult::Deferred:
-        _lifecycleManager->GetLogger()->Debug("Deferred CommunicationReady callback.");
+        _lifecycleManager->GetLogger()->MakeMessage(Logging::Level::Debug, TopicOf(*this))
+            .SetMessage("Deferred CommunicationReady callback.")
+            .Dispatch();
         break;
     default:
         break;
@@ -627,8 +631,9 @@ void ShuttingDownState::ShutdownParticipant(std::string reason)
     auto success = _lifecycleManager->HandleShutdown();
     if (!success)
     {
-        _lifecycleManager->GetLogger()->Warn(
-            "ShutdownHandler threw an exception. This is ignored. The participant will now shut down.");
+        _lifecycleManager->GetLogger()->MakeMessage(Logging::Level::Warn, TopicOf(*this))
+            .SetMessage("ShutdownHandler threw an exception. This is ignored. The participant will now shut down.")
+            .Dispatch();
     }
     _lifecycleManager->SetStateAndForwardIntent(_lifecycleManager->GetShutdownState(),
                                                 &ILifecycleState::ShutdownParticipant, std::move(reason));
@@ -641,7 +646,10 @@ void ShuttingDownState::AbortSimulation(std::string /*reason*/)
 
 void ShuttingDownState::ResolveAbortSimulation(std::string /*reason*/)
 {
-    _lifecycleManager->GetLogger()->Info("Received abort signal while shutting down - ignoring abort.");
+    _lifecycleManager->GetLogger()
+        ->MakeMessage(Logging::Level::Info, TopicOf(*this))
+        .SetMessage("Received abort signal while shutting down - ignoring abort.")
+        .Dispatch();
 }
 
 auto ShuttingDownState::toString() -> std::string
@@ -695,9 +703,10 @@ void ShutdownState::ShutdownParticipant(std::string reason)
         }
         else
         {
-            Logging::Warn(_lifecycleManager->GetLogger(),
-                          "lifecycle failed to shut down correctly - original shutdown reason was '{}'.",
-                          std::move(reason));
+            _lifecycleManager->GetLogger()
+                ->MakeMessage(Logging::Level::Warn, TopicOf(*this))
+                .SetMessage("lifecycle failed to shut down correctly - original shutdown reason was '{}'.", std::move(reason))
+                .Dispatch();
         }
     });
 }
@@ -709,7 +718,10 @@ void ShutdownState::AbortSimulation(std::string /*reason*/)
 
 void ShutdownState::ResolveAbortSimulation(std::string /*reason*/)
 {
-    _lifecycleManager->GetLogger()->Info("Received abort signal after shutdown - ignoring abort.");
+    _lifecycleManager->GetLogger()
+        ->MakeMessage(Logging::Level::Info, TopicOf(*this))
+        .SetMessage("Received abort signal after shutdown - ignoring abort.")
+        .Dispatch();
 }
 
 auto ShutdownState::toString() -> std::string
@@ -752,7 +764,9 @@ void AbortingState::ResolveAbortSimulation(std::string reason)
     else
     {
         std::string msg = "ShutdownHandler threw an exception. This is ignored. The participant will now shut down.";
-        _lifecycleManager->GetLogger()->Warn(msg);
+        _lifecycleManager->GetLogger()->MakeMessage(Logging::Level::Warn, TopicOf(*this))
+            .SetMessage(msg)
+            .Dispatch();
     }
     _lifecycleManager->ShutdownAfterAbort(std::move(reason));
 }
@@ -804,8 +818,9 @@ void ErrorState::ResolveAbortSimulation(std::string reason)
 
 void ErrorState::Error(std::string reason)
 {
-    _lifecycleManager->GetLogger()->Warn("Received error transition within error state. Original reason: "
-                                         + std::move(reason));
+    _lifecycleManager->GetLogger()->MakeMessage(Logging::Level::Warn, TopicOf(*this))
+        .SetMessage("Received error transition within error state. Original reason: " + std::move(reason))
+        .Dispatch();
 }
 
 auto ErrorState::toString() -> std::string

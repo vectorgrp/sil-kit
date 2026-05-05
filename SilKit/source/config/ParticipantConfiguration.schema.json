@@ -471,6 +471,18 @@
                 "type": "string",
                 "enum": [ "Simple", "Json" ]
               },
+              "DisabledTopics": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "EnabledTopics": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
               "Level": {
                 "type": "string",
                 "enum": [

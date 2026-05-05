@@ -57,7 +57,7 @@ private:
     void RunEventQueueWorkerThread();
 
 private: // SilKit::Core::IRegistryEventListener
-    void OnLoggerCreated(SilKit::Services::Logging::ILogger* logger) override;
+    void OnLoggerCreated(SilKit::Services::Logging::ILoggerInternal* logger) override;
     void OnRegistryUri(const std::string& registryUri) override;
     void OnParticipantConnected(const std::string& simulationName, const std::string& participantName) override;
     void OnParticipantDisconnected(const std::string& simulationName, const std::string& participantName) override;
@@ -73,7 +73,7 @@ private: // SilKit::Core::IRegistryEventListener
 
 private:
     /// Assigned in OnLoggerCreated
-    SilKit::Services::Logging::ILogger* _logger{nullptr};
+    SilKit::Services::Logging::ILoggerInternal* _logger{nullptr};
     /// Assigned in OnRegistryUri
     std::unique_ptr<SilKit::Core::Uri> _registryUri;
 

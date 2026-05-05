@@ -16,16 +16,18 @@
 
 #include "LoggerMessage.hpp"
 
+using SilKit::Services::Logging::Level;
+using SilKit::Services::Logging::Topic;
+using SilKit::Services::Logging::LoggerMessage;
+
 namespace SilKit {
 namespace Tracing {
-
-using namespace SilKit::Services::Logging;
 
 namespace {
 constexpr Pcap::GlobalHeader g_pcapGlobalHeader{};
 } // namespace
 
-PcapSink::PcapSink(Services::Logging::ILogger* logger, std::string name)
+PcapSink::PcapSink(Services::Logging::ILoggerInternal* logger, std::string name)
     : _name{std::move(name)}
     , _logger{logger}
 {
@@ -59,7 +61,7 @@ void PcapSink::Open(SinkType outputType, const std::string& outputPath)
     }
 }
 
-auto PcapSink::GetLogger() const -> Services::Logging::ILogger*
+auto PcapSink::GetLogger() const -> Services::Logging::ILoggerInternal*
 {
     return _logger;
 }
@@ -85,7 +87,9 @@ void PcapSink::Close()
         }
         catch (const SilKitError& err)
         {
-            Services::Logging::Warn(_logger, "Failed to close PCAP sink: {}", err.what());
+            _logger->MakeMessage(Level::Warn, TopicOf(*this))
+                .SetMessage("Failed to close PCAP sink: {}", err.what())
+                .Dispatch();
         }
         _pipe.reset();
     }
@@ -126,11 +130,14 @@ void PcapSink::Trace(SilKit::Services::TransmitDirection /*unused*/,
     {
         if (!_headerWritten)
         {
-            Services::Logging::Info(_logger, "Sink {}: Waiting for a reader to connect to PCAP pipe {} ... ", _name,
-                                    _outputPath);
+            _logger->MakeMessage(Level::Info, TopicOf(*this))
+                .SetMessage("Sink {}: Waiting for a reader to connect to PCAP pipe {} ... ", _name, _outputPath)
+                .Dispatch();
 
             ok &= _pipe->Write(reinterpret_cast<const char*>(&g_pcapGlobalHeader), sizeof(g_pcapGlobalHeader));
-            Services::Logging::Debug(_logger, "Sink {}: PCAP pipe: {} is connected successfully", _name, _outputPath);
+            _logger->MakeMessage(Level::Debug, TopicOf(*this))
+                .SetMessage("Sink {}: PCAP pipe: {} is connected successfully", _name, _outputPath)
+                .Dispatch();
 
             _headerWritten = true;
         }

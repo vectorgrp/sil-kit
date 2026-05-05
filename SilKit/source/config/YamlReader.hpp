@@ -277,6 +277,7 @@ public:
     void Read(SilKit::Services::MatchingLabel& value);
     void Read(SilKit::Services::MatchingLabel::Kind& value);
     void Read(SilKit::Services::Logging::Level& obj);
+    void Read(SilKit::Services::Logging::Topic& obj);
     void Read(SilKit::Services::Flexray::FlexrayClusterParameters& obj);
     void Read(SilKit::Services::Flexray::FlexrayNodeParameters& obj);
     void Read(SilKit::Services::Flexray::FlexrayTxBufferConfig& obj);

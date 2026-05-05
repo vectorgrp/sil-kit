@@ -152,7 +152,7 @@ private:
     ::SilKit::Core::ServiceDescriptor _serviceDescriptor;
     std::vector<FlexrayTxBufferConfig> _bufferConfigs;
     Tracer _tracer;
-    Services::Logging::ILogger* _logger;
+    Services::Logging::ILoggerInternal* _logger;
     bool _simulatedLinkDetected = false;
     Core::ServiceDescriptor _simulatedLink;
 

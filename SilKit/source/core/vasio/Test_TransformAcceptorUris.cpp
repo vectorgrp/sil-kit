@@ -226,44 +226,34 @@ struct AudienceVAsioPeer final : DummyVAsioPeerBase
     }
 };
 
-struct DummyLogger : SilKit::Services::Logging::ILogger
+struct DummyLogger : SilKit::Services::Logging::ILoggerInternal
 {
-    void Log(SilKit::Services::Logging::Level level, const std::string& msg) override
+
+    void Log(SilKit::Services::Logging::Level level, SilKit::Services::Logging::Topic topic,
+             const std::string& msg) override
     {
         const auto now = std::chrono::steady_clock::now();
-        std::cout << "[DummyLogger:" << level << ":"
+        std::cout << "[DummyLogger:" << level << ":" << topic << ":"
                   << std::chrono::duration_cast<std::chrono::nanoseconds>(now.time_since_epoch()).count() << "] " << msg
                   << std::endl;
     }
 
-    void Trace(const std::string& msg) override
+    SilKit::Services::Logging::ILogger* AsILogger() override
     {
-        Log(SilKit::Services::Logging::Level::Trace, msg);
+        throw SilKit::SilKitError("Not implemented!");
     }
 
-    void Debug(const std::string& msg) override
-    {
-        Log(SilKit::Services::Logging::Level::Debug, msg);
-    }
+     void ProcessLoggerMessage(const SilKit::Services::Logging::LoggerMessage&) override
+     {
+     }
 
-    void Info(const std::string& msg) override
-    {
-        Log(SilKit::Services::Logging::Level::Info, msg);
-    }
+    void LogReceivedMsg(const SilKit::Services::Logging::LogMsg& ) override
+    {}
 
-    void Warn(const std::string& msg) override
+    virtual SilKit::Services::Logging::LoggerMessage MakeMessage(SilKit::Services::Logging::Level level,
+                                                                 SilKit::Services::Logging::Topic topic) override
     {
-        Log(SilKit::Services::Logging::Level::Warn, msg);
-    }
-
-    void Error(const std::string& msg) override
-    {
-        Log(SilKit::Services::Logging::Level::Error, msg);
-    }
-
-    void Critical(const std::string& msg) override
-    {
-        Log(SilKit::Services::Logging::Level::Critical, msg);
+        return SilKit::Services::Logging::LoggerMessage(this, level, topic);
     }
 
     SilKit::Services::Logging::Level GetLogLevel() const override

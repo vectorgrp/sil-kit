@@ -7,7 +7,6 @@
 #include "silkit/capi/SilKitMacros.h"
 #include "silkit/capi/Types.h"
 #include "silkit/capi/InterfaceIdentifiers.h"
-#include "silkit/capi/Logger.h"
 
 SILKIT_BEGIN_DECLS
 

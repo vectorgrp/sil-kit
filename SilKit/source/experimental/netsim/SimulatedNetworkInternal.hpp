@@ -38,7 +38,7 @@ private:
     auto ExtractControllerTypeName(const SilKit::Core::ServiceDescriptor& serviceDescriptor) -> std::string;
 
     Core::IParticipantInternal* _participant = nullptr;
-    SilKit::Services::Logging::ILogger* _logger;
+    SilKit::Services::Logging::ILoggerInternal* _logger{nullptr};
 
     std::string _networkName;
     SimulatedNetworkType _networkType;

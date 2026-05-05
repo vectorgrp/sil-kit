@@ -63,6 +63,7 @@ enable_testing()
 if(MSVC)
     #make sure Release is built with debug PDBs
     add_compile_options(/Zi )
+    add_compile_options(/utf-8)
 endif()
 
 if(SILKIT_ENABLE_TRACING_INSTRUMENTATION)

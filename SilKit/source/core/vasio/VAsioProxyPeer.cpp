@@ -17,15 +17,17 @@ namespace Core {
 
 
 VAsioProxyPeer::VAsioProxyPeer(IVAsioPeerListener* listener, std::string participantName, VAsioPeerInfo peerInfo,
-                               IVAsioPeer* peer, SilKit::Services::Logging::ILogger* logger)
+                               IVAsioPeer* peer, SilKit::Services::Logging::ILoggerInternal* logger)
     : _listener{listener}
     , _participantName{std::move(participantName)}
     , _peer{peer}
     , _peerInfo{std::move(peerInfo)}
     , _logger{logger}
 {
-    Log::Debug(_logger, "VAsioProxyPeer ({}): Created with proxy {}", _peerInfo.participantName,
-               _peer->GetInfo().participantName);
+    _logger->MakeMessage(Services::Logging::Level::Debug, TopicOf(*this))
+        .SetMessage("VAsioProxyPeer ({}): Created with proxy {}", _peerInfo.participantName,
+                    _peer->GetInfo().participantName)
+        .Dispatch();
 }
 
 // ================================================================================
@@ -39,7 +41,9 @@ void VAsioProxyPeer::SendSilKitMsg(SerializedMessage buffer)
     msg.destination = GetInfo().participantName;
     msg.payload = buffer.ReleaseStorage();
 
-    Log::Trace(_logger, "VAsioProxyPeer ({}): SendSilKitMsg({})", _peerInfo.participantName, msg.payload.size());
+    _logger->MakeMessage(Services::Logging::Level::Trace, TopicOf(*this))
+        .SetMessage("VAsioProxyPeer ({}): SendSilKitMsg({})", _peerInfo.participantName, msg.payload.size())
+        .Dispatch();
 
     // keep track of aggregation kind
     auto bufferProxy = SerializedMessage{msg};
@@ -50,8 +54,10 @@ void VAsioProxyPeer::SendSilKitMsg(SerializedMessage buffer)
 
 void VAsioProxyPeer::Subscribe(VAsioMsgSubscriber subscriber)
 {
-    Log::Debug(_logger, "VAsioProxyPeer: Subscribing to messages of type '{}' on link '{}' from participant '{}'",
-               subscriber.msgTypeName, subscriber.networkName, _peerInfo.participantName);
+    _logger->MakeMessage(Services::Logging::Level::Debug, TopicOf(*this))
+        .SetMessage("VAsioProxyPeer: Subscribing to messages of type '{}' on link '{}' from participant '{}'",
+                    subscriber.msgTypeName, subscriber.networkName, _peerInfo.participantName)
+        .Dispatch();
 
     SendSilKitMsg(SerializedMessage{subscriber});
 }
@@ -78,29 +84,39 @@ auto VAsioProxyPeer::GetLocalAddress() const -> std::string
 
 void VAsioProxyPeer::StartAsyncRead()
 {
-    Log::Debug(_logger, "VAsioProxyPeer ({}): StartAsyncRead: Ignored", _peerInfo.participantName);
+    _logger->MakeMessage(Services::Logging::Level::Debug, TopicOf(*this))
+        .SetMessage("VAsioProxyPeer ({}): StartAsyncRead: Ignored", _peerInfo.participantName)
+        .Dispatch();
 }
 
 void VAsioProxyPeer::Shutdown()
 {
-    Log::Debug(_logger, "VAsioProxyPeer ({}): Shutdown: Ignored", _peerInfo.participantName);
+    _logger->MakeMessage(Services::Logging::Level::Debug, TopicOf(*this))
+        .SetMessage("VAsioProxyPeer ({}): Shutdown: Ignored", _peerInfo.participantName)
+        .Dispatch();
 }
 
 void VAsioProxyPeer::EnableAggregation()
 {
-    Log::Debug(_logger, "VAsioProxyPeer ({}): EnableAggregation: Ignored", _peerInfo.participantName);
+    _logger->MakeMessage(Services::Logging::Level::Debug, TopicOf(*this))
+        .SetMessage("VAsioProxyPeer ({}): EnableAggregation: Ignored", _peerInfo.participantName)
+        .Dispatch();
 }
 
 void VAsioProxyPeer::SetProtocolVersion(ProtocolVersion v)
 {
-    Log::Debug(_logger, "VAsioProxyPeer ({}): SetProtocolVersion: {}.{}", _peerInfo.participantName, v.major, v.minor);
+    _logger->MakeMessage(Services::Logging::Level::Debug, TopicOf(*this))
+        .SetMessage("VAsioProxyPeer ({}): SetProtocolVersion: {}.{}", _peerInfo.participantName, v.major, v.minor)
+        .Dispatch();
     _protocolVersion = v;
 }
 
 auto VAsioProxyPeer::GetProtocolVersion() const -> ProtocolVersion
 {
-    Log::Trace(_logger, "VAsioProxyPeer ({}): GetProtocolVersion: {}.{}", _peerInfo.participantName,
-               _protocolVersion.major, _protocolVersion.minor);
+    _logger->MakeMessage(Services::Logging::Level::Debug, TopicOf(*this))
+        .SetMessage("VAsioProxyPeer ({}): GetProtocolVersion: {}.{}", _peerInfo.participantName, _protocolVersion.major,
+                    _protocolVersion.minor)
+        .Dispatch();
     return _protocolVersion;
 }
 

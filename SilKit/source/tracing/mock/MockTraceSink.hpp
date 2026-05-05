@@ -57,7 +57,7 @@ public:
     }
 
 
-    auto GetLogger() const -> Services::Logging::ILogger* override
+    auto GetLogger() const -> Services::Logging::ILoggerInternal* override
     {
         return nullptr;
     }
