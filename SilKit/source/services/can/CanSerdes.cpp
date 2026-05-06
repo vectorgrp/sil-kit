@@ -11,63 +11,63 @@ namespace SilKit {
 namespace Services {
 namespace Can {
 
-SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const WireCanFrameEvent& msg)
+static SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const WireCanFrameEvent& msg)
 {
     buffer << msg.timestamp << msg.frame.canId << msg.frame.flags << msg.frame.dlc << msg.frame.sdt << msg.frame.vcid
            << msg.frame.af << msg.frame.dataField << msg.direction << msg.userContext;
     return buffer;
 }
 
-SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, WireCanFrameEvent& msg)
+static SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, WireCanFrameEvent& msg)
 {
     buffer >> msg.timestamp >> msg.frame.canId >> msg.frame.flags >> msg.frame.dlc >> msg.frame.sdt >> msg.frame.vcid
         >> msg.frame.af >> msg.frame.dataField >> msg.direction >> msg.userContext;
     return buffer;
 }
 
-SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const CanFrameTransmitEvent& ack)
+static SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const CanFrameTransmitEvent& ack)
 {
     buffer << ack.canId << ack.timestamp << ack.status << ack.userContext;
     return buffer;
 }
 
-SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, CanFrameTransmitEvent& ack)
+static SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, CanFrameTransmitEvent& ack)
 {
     buffer >> ack.canId >> ack.timestamp >> ack.status >> ack.userContext;
     return buffer;
 }
 
-SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const CanControllerStatus& msg)
+static SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const CanControllerStatus& msg)
 {
     buffer << msg.timestamp << msg.controllerState << msg.errorState;
     return buffer;
 }
 
-SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, CanControllerStatus& msg)
+static SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, CanControllerStatus& msg)
 {
     buffer >> msg.timestamp >> msg.controllerState >> msg.errorState;
     return buffer;
 }
 
-SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const CanConfigureBaudrate& msg)
+static SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const CanConfigureBaudrate& msg)
 {
     buffer << msg.baudRate << msg.fdBaudRate << msg.xlBaudRate;
     return buffer;
 }
 
-SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, CanConfigureBaudrate& msg)
+static SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, CanConfigureBaudrate& msg)
 {
     buffer >> msg.baudRate >> msg.fdBaudRate >> msg.xlBaudRate;
     return buffer;
 }
 
-SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const CanSetControllerMode& msg)
+static SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const CanSetControllerMode& msg)
 {
     buffer << *reinterpret_cast<const uint8_t*>(&msg.flags) << msg.mode;
     return buffer;
 }
 
-SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, CanSetControllerMode& msg)
+static SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, CanSetControllerMode& msg)
 {
     uint8_t flags;
     buffer >> flags >> msg.mode;

@@ -2,6 +2,8 @@
 //
 // SPDX-License-Identifier: MIT
 
+#pragma once
+
 #include "silkit/services/pubsub/all.hpp"
 #include "silkit/services/pubsub/string_utils.hpp"
 #include "silkit/services/logging/ILogger.hpp"
@@ -12,9 +14,15 @@ using namespace SilKit::Services::PubSub;
 // This are the common data structures used in PublisherDemo and SubscriberDemo
 namespace PubSubDemoCommon {
 
-const std::string mediaType{SilKit::Util::SerDes::MediaTypeData()};
-PubSubSpec dataSpecGps{"Gps", mediaType};
-PubSubSpec dataSpecTemperature{"Temperature", mediaType};
+inline PubSubSpec MakeGpsSpec()
+{
+    return {"Gps", SilKit::Util::SerDes::MediaTypeData()};
+}
+
+inline PubSubSpec MakeTemperatureSpec()
+{
+    return {"Temperature", SilKit::Util::SerDes::MediaTypeData()};
+}
 
 // ----------------------------------------------------------------
 // Data structure, serialization and deserialization for GPS Data
@@ -26,7 +34,8 @@ struct GpsData
     double longitude;
     std::string signalQuality;
 };
-std::vector<uint8_t> SerializeGPSData(const PubSubDemoCommon::GpsData& gpsData)
+
+inline std::vector<uint8_t> SerializeGPSData(const PubSubDemoCommon::GpsData& gpsData)
 {
     SilKit::Util::SerDes::Serializer serializer;
     serializer.BeginStruct();
@@ -38,7 +47,7 @@ std::vector<uint8_t> SerializeGPSData(const PubSubDemoCommon::GpsData& gpsData)
     return serializer.ReleaseBuffer();
 }
 
-PubSubDemoCommon::GpsData DeserializeGPSData(const std::vector<uint8_t>& eventData)
+inline PubSubDemoCommon::GpsData DeserializeGPSData(const std::vector<uint8_t>& eventData)
 {
     PubSubDemoCommon::GpsData gpsData;
 
@@ -56,7 +65,7 @@ PubSubDemoCommon::GpsData DeserializeGPSData(const std::vector<uint8_t>& eventDa
 // Serialization and deserialization for a double (temperature)
 // -----------------------------------------------------------------
 
-std::vector<uint8_t> SerializeTemperature(double temperature)
+inline std::vector<uint8_t> SerializeTemperature(double temperature)
 {
     SilKit::Util::SerDes::Serializer temperatureSerializer;
     temperatureSerializer.Serialize(temperature);
@@ -64,7 +73,7 @@ std::vector<uint8_t> SerializeTemperature(double temperature)
     return temperatureSerializer.ReleaseBuffer();
 }
 
-double DeserializeTemperature(const std::vector<uint8_t>& eventData)
+inline double DeserializeTemperature(const std::vector<uint8_t>& eventData)
 {
     double temperature;
 

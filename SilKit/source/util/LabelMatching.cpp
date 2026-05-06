@@ -10,7 +10,7 @@ namespace Util {
 
 using namespace SilKit::Services;
 
-std::optional<MatchingLabel> TryFindLabelByKey(const std::string& key, const std::vector<MatchingLabel>& labels)
+static std::optional<MatchingLabel> TryFindLabelByKey(const std::string& key, const std::vector<MatchingLabel>& labels)
 {
     for (auto it : labels)
     {
@@ -22,7 +22,7 @@ std::optional<MatchingLabel> TryFindLabelByKey(const std::string& key, const std
     return std::optional<MatchingLabel>();
 }
 
-bool LabelMatchesLabelList(MatchingLabel label, const std::vector<MatchingLabel>& labels)
+static bool LabelMatchesLabelList(MatchingLabel label, const std::vector<MatchingLabel>& labels)
 {
     auto foundLabel = TryFindLabelByKey(label.key, labels);
 

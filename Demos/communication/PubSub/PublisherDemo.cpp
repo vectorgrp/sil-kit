@@ -21,9 +21,9 @@ private:
 
     void CreateControllers() override
     {
-        _gpsPublisher = GetParticipant()->CreateDataPublisher("GpsPublisher", PubSubDemoCommon::dataSpecGps, 0);
+        _gpsPublisher = GetParticipant()->CreateDataPublisher("GpsPublisher", PubSubDemoCommon::MakeGpsSpec(), 0);
         _temperaturePublisher =
-            GetParticipant()->CreateDataPublisher("TemperaturePublisher", PubSubDemoCommon::dataSpecTemperature, 0);
+            GetParticipant()->CreateDataPublisher("TemperaturePublisher", PubSubDemoCommon::MakeTemperatureSpec(), 0);
     }
 
     void InitControllers() override {}

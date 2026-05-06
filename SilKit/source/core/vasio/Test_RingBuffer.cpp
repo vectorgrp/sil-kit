@@ -13,7 +13,7 @@ using namespace SilKit::Core;
 
 static std::mt19937 generator{0}; // constant seed for deterministic behaviour
 
-std::vector<std::vector<uint8_t> > GenerateDataBlocks(const size_t maxSize, const size_t numDataBlocks)
+static std::vector<std::vector<uint8_t> > GenerateDataBlocks(const size_t maxSize, const size_t numDataBlocks)
 {
     std::vector<std::vector<uint8_t> > dataBlocks;
 
@@ -39,7 +39,7 @@ std::vector<std::vector<uint8_t> > GenerateDataBlocks(const size_t maxSize, cons
 }
 
 // mimic use of ring buffer in VAsioPeer (writing into ring buffer)
-void Write(RingBuffer& ringBuffer, const std::vector<uint8_t>& dataBlock)
+static void Write(RingBuffer& ringBuffer, const std::vector<uint8_t>& dataBlock)
 {
     std::vector<MutableBuffer> bufferArrays;
     ringBuffer.GetWritingBuffers(bufferArrays);

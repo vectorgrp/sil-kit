@@ -18,8 +18,8 @@ static std::unique_ptr<SignalMonitor> gSignalMonitor;
 ////////////////////////////////////////////
 // Inline Platform Specific Implementations
 ////////////////////////////////////////////
-#if WIN32
-#include <windows.h>
+#if defined(_WIN32)
+#include <Windows.h>
 
 namespace {
 using namespace SilKit::Util;

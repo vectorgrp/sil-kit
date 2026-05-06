@@ -7,8 +7,8 @@
 
 #include "silkit/capi/SilKitMacros.h"
 
-#if _WIN32
-#include <windows.h> // HANDLE, PCWSTR
+#if defined(_WIN32)
+#include <Windows.h> // HANDLE, PCWSTR
 #else                // posix
 #include <pthread.h>
 #endif

@@ -13,23 +13,23 @@ using namespace std::chrono_literals;
 namespace SilKit {
 namespace Core {
 
-bool operator==(const VAsioPeerInfo& lhs, const VAsioPeerInfo& rhs)
+static bool operator==(const VAsioPeerInfo& lhs, const VAsioPeerInfo& rhs)
 {
     return lhs.participantId == rhs.participantId && lhs.participantName == rhs.participantName
            && lhs.acceptorUris == rhs.acceptorUris && lhs.capabilities == rhs.capabilities;
 }
 
-bool operator==(const ParticipantAnnouncement& lhs, const ParticipantAnnouncement& rhs)
+static bool operator==(const ParticipantAnnouncement& lhs, const ParticipantAnnouncement& rhs)
 {
     return lhs.messageHeader == rhs.messageHeader && lhs.peerInfo == rhs.peerInfo;
 }
 
-bool operator==(const ParticipantAnnouncementReply& lhs, const ParticipantAnnouncementReply& rhs)
+static bool operator==(const ParticipantAnnouncementReply& lhs, const ParticipantAnnouncementReply& rhs)
 {
     return lhs.subscribers == rhs.subscribers;
 }
 
-bool operator==(const KnownParticipants& lhs, const KnownParticipants& rhs)
+static bool operator==(const KnownParticipants& lhs, const KnownParticipants& rhs)
 {
     return lhs.messageHeader == rhs.messageHeader && lhs.peerInfos == rhs.peerInfos;
 }

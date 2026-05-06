@@ -44,14 +44,14 @@ using namespace SilKit::Services::Ethernet;
 using namespace SilKit::Services::Can;
 using namespace std::chrono_literals;
 
-std::ostream& operator<<(std::ostream& out, std::chrono::nanoseconds timestamp)
+static std::ostream& operator<<(std::ostream& out, std::chrono::nanoseconds timestamp)
 {
     const auto seconds = std::chrono::duration_cast<std::chrono::duration<double, std::ratio<1, 1>>>(timestamp);
     out << seconds.count() << "s";
     return out;
 }
 
-void PrintUsage(const std::string& executableName)
+static void PrintUsage(const std::string& executableName)
 {
     std::cout
         << "Usage:" << std::endl
@@ -83,7 +83,7 @@ enum class ServiceType
     Ethernet
 };
 
-std::ostream& operator<<(std::ostream& outStream, const ServiceType& service)
+static std::ostream& operator<<(std::ostream& outStream, const ServiceType& service)
 {
     switch (service)
     {
@@ -102,13 +102,6 @@ std::ostream& operator<<(std::ostream& outStream, const ServiceType& service)
     return outStream;
 }
 
-std::string to_string(const ServiceType& service)
-{
-    std::stringstream outStream;
-    outStream << service;
-    return outStream.str();
-}
-
 struct BenchmarkConfig
 {
     uint32_t numberOfSimulationRuns = 4;
@@ -123,7 +116,7 @@ struct BenchmarkConfig
     ServiceType service = ServiceType::PubSub;
 };
 
-bool Parse(int argc, char** argv, BenchmarkConfig& config)
+static bool Parse(int argc, char** argv, BenchmarkConfig& config)
 {
     // skip argv[0] and collect all arguments
     std::vector<std::string> args;
@@ -287,7 +280,7 @@ bool Parse(int argc, char** argv, BenchmarkConfig& config)
     return true;
 }
 
-bool Validate(const BenchmarkConfig& config)
+static bool Validate(const BenchmarkConfig& config)
 {
     if (config.numberOfParticipants < 2)
     {
@@ -324,7 +317,7 @@ bool Validate(const BenchmarkConfig& config)
     return true;
 }
 
-void CheckAndTruncateMessageSize(BenchmarkConfig& benchmark)
+static void CheckAndTruncateMessageSize(BenchmarkConfig& benchmark)
 {
     const uint32_t maxSizeEth = 1500;
     const uint32_t maxSizeCan = 8;
@@ -345,7 +338,7 @@ void CheckAndTruncateMessageSize(BenchmarkConfig& benchmark)
     }
 }
 
-void PublishMessages(IDataPublisher* publisher, uint32_t messageCount, uint32_t messageSizeInBytes)
+static void PublishMessages(IDataPublisher* publisher, uint32_t messageCount, uint32_t messageSizeInBytes)
 {
     std::vector<uint8_t> data(messageSizeInBytes, '*');
     for (uint32_t i = 0; i < messageCount; i++)
@@ -354,7 +347,7 @@ void PublishMessages(IDataPublisher* publisher, uint32_t messageCount, uint32_t 
     }
 }
 
-void SendEthernetFrames(IEthernetController* ethernetController, uint32_t messageCount, uint32_t messageSizeInBytes)
+static void SendEthernetFrames(IEthernetController* ethernetController, uint32_t messageCount, uint32_t messageSizeInBytes)
 {
     std::vector<uint8_t> frameData(messageSizeInBytes, '*');
     for (uint32_t i = 0; i < messageCount; i++)
@@ -363,7 +356,7 @@ void SendEthernetFrames(IEthernetController* ethernetController, uint32_t messag
     }
 }
 
-void SendCanFrames(ICanController* canController, uint32_t messageCount, uint32_t messageSizeInBytes)
+static void SendCanFrames(ICanController* canController, uint32_t messageCount, uint32_t messageSizeInBytes)
 {
     std::vector<uint8_t> frameData(messageSizeInBytes, '*');
     for (uint32_t i = 0; i < messageCount; i++)
@@ -375,7 +368,7 @@ void SendCanFrames(ICanController* canController, uint32_t messageCount, uint32_
     }
 }
 
-void ParticipantsThread(std::shared_ptr<SilKit::Config::IParticipantConfiguration> config,
+static void ParticipantsThread(std::shared_ptr<SilKit::Config::IParticipantConfiguration> config,
                         const BenchmarkConfig& benchmark, const std::string& participantName, uint32_t participantIndex)
 {
     auto participant = SilKit::CreateParticipant(config, participantName, benchmark.registryUri);
@@ -459,7 +452,7 @@ void ParticipantsThread(std::shared_ptr<SilKit::Config::IParticipantConfiguratio
     lifecycleFuture.get();
 }
 
-void PrintParameters(BenchmarkConfig benchmark)
+static void PrintParameters(BenchmarkConfig benchmark)
 {
 #ifdef SILKIT_BUILD_IS_DEBUG
     std::cout << "WARNING: The benchmark demo is executed in a Debug build configuration." << std::endl
