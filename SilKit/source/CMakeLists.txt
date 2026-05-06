@@ -244,7 +244,7 @@ target_link_libraries(S_SilKitImpl
 
 
 add_library(SilKit ${silkitLibType}
-    SilKitForceIncludes.cpp
+    SilKit.cpp
 )
 
 if(SILKIT_BUILD_STATIC)

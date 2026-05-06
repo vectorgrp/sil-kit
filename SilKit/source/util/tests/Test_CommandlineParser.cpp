@@ -22,7 +22,7 @@ using ::testing::InSequence;
 using ::testing::NiceMock;
 using ::testing::Throw;
 
-auto BuildArguments(const std::vector<const char*>& arguments) -> std::vector<char*>
+static auto BuildArguments(const std::vector<const char*>& arguments) -> std::vector<char*>
 {
     std::vector<char*> argv;
     for (const auto& arg : arguments)

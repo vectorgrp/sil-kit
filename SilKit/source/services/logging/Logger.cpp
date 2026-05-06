@@ -72,7 +72,7 @@ public:
 };
 
 
-std::string KeyValuesToSimpleString(const std::vector<std::pair<std::string, std::string>>& input)
+static std::string KeyValuesToSimpleString(const std::vector<std::pair<std::string, std::string>>& input)
 {
     std::string result;
     result.reserve(input.size() * 2);
@@ -91,7 +91,7 @@ std::string KeyValuesToSimpleString(const std::vector<std::pair<std::string, std
     return result;
 }
 
-std::string KeyValuesToJsonString(const std::vector<std::pair<std::string, std::string>>& input)
+static std::string KeyValuesToJsonString(const std::vector<std::pair<std::string, std::string>>& input)
 {
     std::string result;
     result.reserve(input.size() * 2);
@@ -293,9 +293,8 @@ Logger::Logger(const std::string& participantName, Config::Logging config)
 
         case Config::Sink::Type::Stdout:
         {
-#if _WIN32
+#if defined(_WIN32)
             auto stdoutSink = std::make_shared<spdlog::sinks::stdout_sink_mt>();
-
 #else
             auto stdoutSink = std::make_shared<spdlog::sinks::ansicolor_stdout_sink_mt>();
 #endif

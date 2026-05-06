@@ -2,6 +2,8 @@
 //
 // SPDX-License-Identifier: MIT
 
+#pragma once
+
 #include "silkit/services/can/all.hpp"
 #include "silkit/services/can/string_utils.hpp"
 #include "silkit/services/logging/ILogger.hpp"
@@ -11,7 +13,7 @@ using namespace SilKit::Services::Can;
 // This is the common behavior used in CanReaderDemo and CanWriterDemo
 namespace CanDemoCommon {
 
-void FrameTransmitHandler(const CanFrameTransmitEvent& canFrameAck, ILogger* logger)
+inline void FrameTransmitHandler(const CanFrameTransmitEvent& canFrameAck, ILogger* logger)
 {
     std::stringstream ss;
     ss << "Receive CAN frame transmit acknowledge: canId=" << canFrameAck.canId << ", status='" << canFrameAck.status
@@ -19,7 +21,7 @@ void FrameTransmitHandler(const CanFrameTransmitEvent& canFrameAck, ILogger* log
     logger->Info(ss.str());
 }
 
-void FrameHandler(const CanFrameEvent& canFrameEvent, ILogger* logger, bool printHex)
+inline void FrameHandler(const CanFrameEvent& canFrameEvent, ILogger* logger, bool printHex)
 {
     std::string frameTypeHint = "";
     if ((canFrameEvent.frame.flags & static_cast<CanFrameFlagMask>(CanFrameFlag::Fdf)) != 0)

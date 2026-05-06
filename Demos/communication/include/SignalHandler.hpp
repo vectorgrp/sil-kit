@@ -22,7 +22,7 @@ static std::unique_ptr<SignalMonitor> gSignalMonitor;
 ////////////////////////////////////////////
 // Inline Platform Specific Implementations
 ////////////////////////////////////////////
-#if WIN32
+#if defined(_WIN32)
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif
@@ -251,12 +251,12 @@ void systemHandler(const int sigNum)
 //! \brief RegisterSignalHandler can be used to portably register a single signal handler.
 // It only relies on async-signal-safe C functions internally, but
 // it uses a dedicated thread which safely runs the user-provided handler.
-void RegisterSignalHandler(SignalHandler handler)
+inline void RegisterSignalHandler(SignalHandler handler)
 {
     gSignalMonitor.reset(new SignalMonitor(std::move(handler)));
 }
 
-void ShutdownSignalHandler()
+inline void ShutdownSignalHandler()
 {
     gSignalMonitor.reset();
 }

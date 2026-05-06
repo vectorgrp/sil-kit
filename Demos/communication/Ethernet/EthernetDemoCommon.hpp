@@ -2,6 +2,8 @@
 //
 // SPDX-License-Identifier: MIT
 
+#pragma once
+
 #include "silkit/services/ethernet/all.hpp"
 #include "silkit/services/ethernet/string_utils.hpp"
 #include "silkit/services/logging/ILogger.hpp"
@@ -14,7 +16,7 @@ namespace EthernetDemoCommon {
 using EtherType = uint16_t;
 using EthernetMac = std::array<uint8_t, 6>;
 
-void FrameTransmitHandler(const EthernetFrameTransmitEvent& frameTransmitEvent, ILogger* logger)
+inline void FrameTransmitHandler(const EthernetFrameTransmitEvent& frameTransmitEvent, ILogger* logger)
 {
     std::stringstream ss;
     if (frameTransmitEvent.status == EthernetTransmitStatus::Transmitted)
@@ -45,7 +47,7 @@ void FrameTransmitHandler(const EthernetFrameTransmitEvent& frameTransmitEvent, 
     logger->Info(ss.str());
 }
 
-auto PrintPayload(const std::vector<uint8_t>& payload, bool printHex)
+inline auto PrintPayload(const std::vector<uint8_t>& payload, bool printHex)
 {
     std::stringstream ss;
     if (printHex)
@@ -59,7 +61,7 @@ auto PrintPayload(const std::vector<uint8_t>& payload, bool printHex)
     return ss.str();
 }
 
-void FrameHandler(const EthernetFrameEvent& ethernetFrameEvent, ILogger* logger, bool printHex)
+inline void FrameHandler(const EthernetFrameEvent& ethernetFrameEvent, ILogger* logger, bool printHex)
 {
     const size_t FrameHeaderSize = 2 * sizeof(EthernetMac) + sizeof(EtherType);
     std::vector<uint8_t> payloadWithoutHeader;

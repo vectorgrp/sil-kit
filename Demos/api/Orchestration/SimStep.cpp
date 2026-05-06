@@ -8,7 +8,7 @@
 
 using namespace std::chrono_literals;
 
-std::ostream& operator<<(std::ostream& out, std::chrono::nanoseconds timestamp)
+static std::ostream& operator<<(std::ostream& out, std::chrono::nanoseconds timestamp)
 {
     out << std::chrono::duration_cast<std::chrono::milliseconds>(timestamp).count() << "ms";
     return out;

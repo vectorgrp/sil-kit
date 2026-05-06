@@ -42,14 +42,7 @@ using namespace SilKit::Config;
 using namespace SilKit::Services::PubSub;
 using namespace std::chrono_literals;
 
-std::ostream& operator<<(std::ostream& out, std::chrono::nanoseconds timestamp)
-{
-    const auto seconds = std::chrono::duration_cast<std::chrono::duration<double, std::ratio<1, 1>>>(timestamp);
-    out << seconds.count() << "s";
-    return out;
-}
-
-void PrintUsage(const std::string& executableName)
+static void PrintUsage(const std::string& executableName)
 {
     std::cout
         << "Usage:" << std::endl
@@ -77,7 +70,7 @@ struct BenchmarkConfig
     std::string writeCsv = "";
 };
 
-bool Parse(int argc, char** argv, BenchmarkConfig& config)
+static bool Parse(int argc, char** argv, BenchmarkConfig& config)
 {
     // skip argv[0] and collect all arguments
     std::vector<std::string> args;
@@ -206,7 +199,7 @@ bool Parse(int argc, char** argv, BenchmarkConfig& config)
     return true;
 }
 
-bool Validate(const BenchmarkConfig& config)
+static bool Validate(const BenchmarkConfig& config)
 {
     if (config.messageCount < 1)
     {
@@ -222,7 +215,7 @@ bool Validate(const BenchmarkConfig& config)
     return true;
 }
 
-void PrintParameters(BenchmarkConfig benchmark)
+static void PrintParameters(BenchmarkConfig benchmark)
 {
 #ifndef NDEBUG
     std::cout << "WARNING: The latency demo is executed in a DEBUG build configuration." << std::endl

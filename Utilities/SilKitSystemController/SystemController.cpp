@@ -33,13 +33,6 @@ using CliParser = SilKit::Util::CommandlineParser;
 
 using namespace std::chrono_literals;
 
-std::ostream& operator<<(std::ostream& out, std::chrono::nanoseconds timestamp)
-{
-    auto seconds = std::chrono::duration_cast<std::chrono::duration<double, std::ratio<1, 1>>>(timestamp);
-    out << seconds.count() << "s";
-    return out;
-}
-
 namespace {
 
 class SilKitController
