@@ -23,11 +23,11 @@ private:
     void CreateControllers() override
     {
         _rpcClientSignalStrength = GetParticipant()->CreateRpcClient(
-            "ClientSignalStrength", RpcDemoCommon::rpcSpecSignalStrength,
+            "ClientSignalStrength", RpcDemoCommon::MakeSignalStrengthSpec(),
             [this](IRpcClient* /*client*/, RpcCallResultEvent event) { CallReturnGetSignalStrength(event); });
 
         _rpcClientSort = GetParticipant()->CreateRpcClient(
-            "ClientSort", RpcDemoCommon::rpcSpecSort,
+            "ClientSort", RpcDemoCommon::MakeSortSpec(),
             [this](IRpcClient* /*client*/, RpcCallResultEvent event) { CallReturnSort(event); });
     }
 

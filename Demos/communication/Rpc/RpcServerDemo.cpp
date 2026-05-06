@@ -24,7 +24,7 @@ private:
     void CreateControllers() override
     {
         _rpcServerSignalStrength =
-            GetParticipant()->CreateRpcServer("ServerSignalStrength", RpcDemoCommon::rpcSpecSignalStrength,
+            GetParticipant()->CreateRpcServer("ServerSignalStrength", RpcDemoCommon::MakeSignalStrengthSpec(),
                                               [this](IRpcServer* server, RpcCallEvent event) {
             auto tunerData = RpcDemoCommon::DeserializeTunerData(SilKit::Util::ToStdVector(event.argumentData));
 
@@ -63,7 +63,7 @@ private:
             server->SubmitResult(event.callHandle, serializer.ReleaseBuffer());
         });
 
-        _rpcServerSort = GetParticipant()->CreateRpcServer("ServerSort", RpcDemoCommon::rpcSpecSort,
+        _rpcServerSort = GetParticipant()->CreateRpcServer("ServerSort", RpcDemoCommon::MakeSortSpec(),
                                                            [this](IRpcServer* server, RpcCallEvent event) {
             // Deserialize incoming data
             auto argumentData = RpcDemoCommon::DeserializeSortData(SilKit::Util::ToStdVector(event.argumentData));

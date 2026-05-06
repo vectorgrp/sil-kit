@@ -2,6 +2,8 @@
 //
 // SPDX-License-Identifier: MIT
 
+#pragma once
+
 #include "silkit/services/rpc/all.hpp"
 #include "silkit/services/rpc/string_utils.hpp"
 #include "silkit/services/logging/ILogger.hpp"
@@ -9,7 +11,7 @@
 
 using namespace SilKit::Services::Rpc;
 
-static std::ostream& operator<<(std::ostream& os, const SilKit::Util::Span<const uint8_t>& v)
+inline std::ostream& operator<<(std::ostream& os, const SilKit::Util::Span<const uint8_t>& v)
 {
     os << "[ ";
     for (auto i : v)
@@ -18,7 +20,7 @@ static std::ostream& operator<<(std::ostream& os, const SilKit::Util::Span<const
     return os;
 }
 
-static std::ostream& operator<<(std::ostream& os, const std::vector<uint8_t>& v)
+inline std::ostream& operator<<(std::ostream& os, const std::vector<uint8_t>& v)
 {
     return os << SilKit::Util::ToSpan(v);
 }
@@ -26,9 +28,15 @@ static std::ostream& operator<<(std::ostream& os, const std::vector<uint8_t>& v)
 // This are the common data structures used in RpcServerDemo and RpcClientDemo
 namespace RpcDemoCommon {
 
-std::string mediaType{SilKit::Util::SerDes::MediaTypeRpc()};
-RpcSpec rpcSpecSignalStrength{"GetSignalStrength", mediaType};
-RpcSpec rpcSpecSort{"Sort", mediaType};
+inline RpcSpec MakeSignalStrengthSpec()
+{
+    return {"GetSignalStrength", SilKit::Util::SerDes::MediaTypeRpc()};
+}
+
+inline RpcSpec MakeSortSpec()
+{
+    return {"Sort", SilKit::Util::SerDes::MediaTypeRpc()};
+}
 
 // ----------------------------------------------------------------
 // Data structure, serialization and deserialization for Tuner Data
@@ -46,7 +54,7 @@ struct TunerData
     TunerBand tunerBand;
 };
 
-std::vector<uint8_t> SerializeTunerData(const TunerData& tunerData)
+inline std::vector<uint8_t> SerializeTunerData(const TunerData& tunerData)
 {
     SilKit::Util::SerDes::Serializer serializer;
     serializer.BeginStruct();
@@ -57,7 +65,7 @@ std::vector<uint8_t> SerializeTunerData(const TunerData& tunerData)
     return serializer.ReleaseBuffer();
 }
 
-TunerData DeserializeTunerData(const std::vector<uint8_t>& eventData)
+inline TunerData DeserializeTunerData(const std::vector<uint8_t>& eventData)
 {
     TunerData tunerData;
 
@@ -74,7 +82,7 @@ TunerData DeserializeTunerData(const std::vector<uint8_t>& eventData)
 // Serialization and deserialization for a double (signal strength)
 // ----------------------------------------------------------------
 
-std::vector<uint8_t> SerializeSignalStrength(double signalStrength)
+inline std::vector<uint8_t> SerializeSignalStrength(double signalStrength)
 {
     SilKit::Util::SerDes::Serializer signalStrengthSerializer;
     signalStrengthSerializer.Serialize(signalStrength);
@@ -82,7 +90,7 @@ std::vector<uint8_t> SerializeSignalStrength(double signalStrength)
     return signalStrengthSerializer.ReleaseBuffer();
 }
 
-double DeserializeSignalStrength(const std::vector<uint8_t>& eventData)
+inline double DeserializeSignalStrength(const std::vector<uint8_t>& eventData)
 {
     double signalStrength;
 
@@ -96,7 +104,7 @@ double DeserializeSignalStrength(const std::vector<uint8_t>& eventData)
 // Serialization and deserialization for a std::vector<uint8_t>
 // ----------------------------------------------------------------
 
-std::vector<uint8_t> SerializeSortData(const std::vector<uint8_t>& numberList)
+inline std::vector<uint8_t> SerializeSortData(const std::vector<uint8_t>& numberList)
 {
     SilKit::Util::SerDes::Serializer serializer;
     serializer.Serialize(numberList);
@@ -104,7 +112,7 @@ std::vector<uint8_t> SerializeSortData(const std::vector<uint8_t>& numberList)
     return serializer.ReleaseBuffer();
 }
 
-std::vector<uint8_t> DeserializeSortData(const std::vector<uint8_t>& eventData)
+inline std::vector<uint8_t> DeserializeSortData(const std::vector<uint8_t>& eventData)
 {
     SilKit::Util::SerDes::Deserializer deserializer(eventData);
     std::vector<uint8_t> numberList = deserializer.Deserialize<std::vector<uint8_t>>();
@@ -112,7 +120,7 @@ std::vector<uint8_t> DeserializeSortData(const std::vector<uint8_t>& eventData)
     return numberList;
 }
 
-bool EvaluateCallStatus(RpcCallResultEvent callResult, ILogger* logger)
+inline bool EvaluateCallStatus(RpcCallResultEvent callResult, ILogger* logger)
 {
     std::stringstream ss;
     bool isSuccessful = false;

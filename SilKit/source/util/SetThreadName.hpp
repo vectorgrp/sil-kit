@@ -2,9 +2,10 @@
 //
 // SPDX-License-Identifier: MIT
 
+#pragma once
+
 #include <string>
 
-#pragma once
 namespace SilKit {
 namespace Util {
 

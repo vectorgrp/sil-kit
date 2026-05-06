@@ -59,7 +59,7 @@ auto GetSupplementalDataValueAsEndpointId(const SilKit::Core::ServiceDescriptor&
 
 } // namespace
 
-oatpp::Object<SimulationConfigurationDto> CreateSimulationConfigurationDto(const std::string& connectUri)
+static oatpp::Object<SimulationConfigurationDto> CreateSimulationConfigurationDto(const std::string& connectUri)
 {
     auto configuration = SimulationConfigurationDto::createShared();
     configuration->connectUri = connectUri;
@@ -75,7 +75,7 @@ oatpp::Object<SimulationCreationRequestDto> SilKitToOatppMapper::CreateSimulatio
     return simulation;
 }
 
-SystemState MapSystemState(Services::Orchestration::SystemState systemState)
+static SystemState MapSystemState(Services::Orchestration::SystemState systemState)
 {
     switch (systemState)
     {
@@ -118,7 +118,7 @@ oatpp::Object<SystemStatusDto> SilKitToOatppMapper::CreateSystemStatusDto(
     return status;
 }
 
-ParticipantState MapParticipantState(Services::Orchestration::ParticipantState state)
+static ParticipantState MapParticipantState(Services::Orchestration::ParticipantState state)
 {
     switch (state)
     {
@@ -164,7 +164,7 @@ oatpp::Object<ParticipantStatusDto> SilKitToOatppMapper::CreateParticipantStatus
     return status;
 }
 
-LabelKind MapLabelKind(Services::MatchingLabel::Kind labelKind)
+static LabelKind MapLabelKind(Services::MatchingLabel::Kind labelKind)
 {
     switch (labelKind)
     {
@@ -177,7 +177,7 @@ LabelKind MapLabelKind(Services::MatchingLabel::Kind labelKind)
     }
 }
 
-oatpp::Object<MatchingLabelDto> CreateMatchingLabelDto(const Services::MatchingLabel& matchingLabel)
+static oatpp::Object<MatchingLabelDto> CreateMatchingLabelDto(const Services::MatchingLabel& matchingLabel)
 {
     auto label = oatpp::Object<MatchingLabelDto>::createShared();
     label->key = matchingLabel.key;
@@ -186,7 +186,7 @@ oatpp::Object<MatchingLabelDto> CreateMatchingLabelDto(const Services::MatchingL
     return label;
 }
 
-oatpp::Vector<oatpp::Object<MatchingLabelDto>> CreateMatchingLabels(const Core::ServiceDescriptor& serviceDescriptor,
+static oatpp::Vector<oatpp::Object<MatchingLabelDto>> CreateMatchingLabels(const Core::ServiceDescriptor& serviceDescriptor,
                                                                     const std::string& labelsKey)
 {
     auto labels = oatpp::Vector<oatpp::Object<MatchingLabelDto>>::createShared();
@@ -213,7 +213,7 @@ oatpp::Object<ServiceDto> SilKitToOatppMapper::CreateServiceDto(const Core::Serv
     return controller;
 }
 
-oatpp::Object<DataSpecDto> CreateDataSpecDto(const Core::ServiceDescriptor& serviceDescriptor,
+static oatpp::Object<DataSpecDto> CreateDataSpecDto(const Core::ServiceDescriptor& serviceDescriptor,
                                              const std::string& topicKey, const std::string& mediaTypeKey,
                                              const std::string& labelsKey)
 {
@@ -225,7 +225,7 @@ oatpp::Object<DataSpecDto> CreateDataSpecDto(const Core::ServiceDescriptor& serv
 }
 
 
-oatpp::Object<RpcSpecDto> CreateRpcSpecDto(const Core::ServiceDescriptor& serviceDescriptor,
+static oatpp::Object<RpcSpecDto> CreateRpcSpecDto(const Core::ServiceDescriptor& serviceDescriptor,
                                            const std::string& functionNameKey, const std::string& mediaTypeKey,
                                            const std::string& labelsKey)
 {

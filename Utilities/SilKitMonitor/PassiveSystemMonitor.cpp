@@ -28,14 +28,14 @@ using namespace std::chrono_literals;
 
 using CliParser = SilKit::Util::CommandlineParser;
 
-std::ostream& operator<<(std::ostream& out, std::chrono::nanoseconds timestamp)
+static std::ostream& operator<<(std::ostream& out, std::chrono::nanoseconds timestamp)
 {
     auto seconds = std::chrono::duration_cast<std::chrono::duration<double, std::ratio<1, 1>>>(timestamp);
     out << seconds.count() << "s";
     return out;
 }
 
-auto getConfig(const std::string& configurationFilename, const std::string& logLevel)
+static auto getConfig(const std::string& configurationFilename, const std::string& logLevel)
 {
     if (!configurationFilename.empty())
     {

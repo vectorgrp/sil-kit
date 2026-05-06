@@ -22,7 +22,7 @@ private:
     void CreateControllers() override
     {
         _gpsSubscriber = GetParticipant()->CreateDataSubscriber(
-            "GpsSubscriber", PubSubDemoCommon::dataSpecGps,
+            "GpsSubscriber", PubSubDemoCommon::MakeGpsSpec(),
             [this](IDataSubscriber* /*subscriber*/, const DataMessageEvent& dataMessageEvent) {
             auto gpsData = PubSubDemoCommon::DeserializeGPSData(SilKit::Util::ToStdVector(dataMessageEvent.data));
 
@@ -33,7 +33,7 @@ private:
         });
 
         _temperatureSubscriber = GetParticipant()->CreateDataSubscriber(
-            "TemperatureSubscriber", PubSubDemoCommon::dataSpecTemperature,
+            "TemperatureSubscriber", PubSubDemoCommon::MakeTemperatureSpec(),
             [this](IDataSubscriber* /*subscriber*/, const DataMessageEvent& dataMessageEvent) {
             double temperature =
                 PubSubDemoCommon::DeserializeTemperature(SilKit::Util::ToStdVector(dataMessageEvent.data));

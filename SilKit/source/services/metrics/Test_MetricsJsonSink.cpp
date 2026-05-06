@@ -18,7 +18,7 @@
 
 namespace VSilKit {
 
-bool read(const ryml::ConstNodeRef& node, MetricData* obj)
+static bool read(const ryml::ConstNodeRef& node, MetricData* obj)
 {
     std::string kind;
     node["ts"] >> obj->timestamp;
@@ -52,7 +52,9 @@ bool read(const ryml::ConstNodeRef& node, MetricData* obj)
         throw SilKit::ConfigurationError{"Invalid MetricData.kind " + kind};
     return true;
 }
+
 } // namespace VSilKit
+
 namespace {
 
 using VSilKit::MetricData;
