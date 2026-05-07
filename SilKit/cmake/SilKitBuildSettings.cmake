@@ -88,38 +88,35 @@ function(silkit_enable_warnings isOn)
                 /wd4389 # too many bogus signed/unsigned warnings in VS2017 Win32
             )
         endif()
-    elseif(MINGW)
-        set(_flags
-            -pedantic
-            -Wall
-            -Wextra
-            -Wcast-align
-            -Wpacked
-            -Wno-implicit-fallthrough
-            -Wno-error=dangling-reference
-
-            -Wno-shadow                 # Appears in ThirdParty/spdlog/include/spdlog/common.h:214:9
-            -Wno-format                 # MinGW-gcc does not recognize %zu
-            -Wno-unused-parameter       # follow up of the %zu format bug, a lot of unused parameters
-            -Wstrict-overflow=1         # > 1 fails in fmt-6.1.0
-            ${_warnAsError}
-            )
     else()
         set(_flags
             -pedantic
             -Wall
             -Wextra
+
             -Wcast-align
             -Wpacked
-            -Wno-implicit-fallthrough
             -Wformat=2
+            -Wmissing-declarations
+            -Wundef
+            -Wunused
+            -Wstrict-overflow=2
 
-            -Wno-shadow                 # Appears in ThirdParty/spdlog/include/spdlog/common.h:214:9
-            -Wno-format-nonliteral      # Warning in fmt-6.1.0/include/fmt/chrono.h:392:48
-            -Wstrict-overflow=1         # > 1 fails in fmt-6.1.0
             ${_warnAsError}
-            )
+        )
+    endif()
 
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        set(_flags ${_flags}
+            -Wimplicit-fallthrough=2
+        )
+    endif()
+
+    if(CMAKE_CXX_COMPILER_ID MATCHES ".*Clang")
+        set(_flags ${_flags}
+            -Wno-implicit-fallthrough
+            -Wno-undef
+        )
     endif()
 
     # Suppress flaky dangling-reference warning
