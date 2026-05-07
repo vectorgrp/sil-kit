@@ -19,8 +19,6 @@ Common generated directories that should usually be ignored during development:
 
 - `_build/`, `_build*/`: local build trees
 - `_install/`, `install*/`: install trees
-- `out/`: local output directory
-- `.vs/`: Visual Studio workspace state
 
 ## Entry Points
 
