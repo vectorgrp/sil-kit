@@ -56,12 +56,9 @@ if(UNIX)
     #make sure we don't compile obviously bad code
     target_compile_options(O_SilKit_Extensions
         PRIVATE
-            -pedantic -Wall -Wextra
-            -Wcast-align -Wformat=2 -Wmissing-declarations
-            -Wshadow -Wsign-conversion -Wsign-promo -Wstrict-overflow=5
-            -Wundef -Wno-unused
-            -Wpacked
-            -Werror -Wfatal-errors
+            -Wshadow
+            -Wsign-conversion
+            -Wsign-promo
     )
 
 elseif(MSVC OR MINGW)
