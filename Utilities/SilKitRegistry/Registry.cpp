@@ -411,8 +411,9 @@ int main(int argc, char** argv)
 
     commandlineParser.Add<CliParser::Option>(
         "x-status-file", "", "", "[--x-status-file <path>]",
-        "--x-status-file <path>: The registry process will write the current status ('starting' or 'running') as the "
-        "entire content of the file. This option is ignored if the registry is run as a Windows service.",
+        "--x-status-file <path>: The registry process will write the current status ('starting', 'running', or "
+        "'stopped') as the entire content of the file. This option is ignored if the registry is run as a Windows "
+        "service.",
         CliParser::Hidden);
 
     if (SilKitRegistry::HasWindowsServiceSupport())
