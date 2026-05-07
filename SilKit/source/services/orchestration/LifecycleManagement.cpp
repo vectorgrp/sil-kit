@@ -6,8 +6,8 @@
 
 #include "LifecycleManagement.hpp"
 #include "LifecycleService.hpp"
-#include "LifecycleStates.hpp"
 #include "TimeSyncService.hpp"
+#include "procs/IParticipantReplies.hpp"
 
 namespace SilKit {
 namespace Services {
@@ -18,58 +18,44 @@ LifecycleManagement::LifecycleManagement(Core::IParticipantInternal* participant
     : _participant{participant}
     , _lifecycleService(parentService)
     , _logger(logger)
+    , _stateMachine{*this}
 {
-    _invalidState = std::make_shared<InvalidState>(this);
-    _servicesCreatedState = std::make_shared<ServicesCreatedState>(this);
-    _communicationInitializingState = std::make_shared<CommunicationInitializingState>(this);
-    _communicationInitializedState = std::make_shared<CommunicationInitializedState>(this);
-    _readyToRunState = std::make_shared<ReadyToRunState>(this);
-    _runningState = std::make_shared<RunningState>(this);
-    _pausedState = std::make_shared<PausedState>(this);
-    _stoppingState = std::make_shared<StoppingState>(this);
-    _stoppedState = std::make_shared<StoppedState>(this);
-    _shuttingDownState = std::make_shared<ShuttingDownState>(this);
-    _shutDownState = std::make_shared<ShutdownState>(this);
-    _errorState = std::make_shared<ErrorState>(this);
-    _abortingState = std::make_shared<AbortingState>(this);
-
-    _currentState = _invalidState.get();
 }
 
 // ILifecycleManagement
 void LifecycleManagement::Initialize(std::string reason)
 {
-    _currentState->Initialize(std::move(reason));
+    _stateMachine.Initialize(std::move(reason));
 }
 
 void LifecycleManagement::ServicesCreated(std::string reason)
 {
-    _currentState->ServicesCreated(std::move(reason));
+    _stateMachine.ServicesCreated(std::move(reason));
 }
 
 void LifecycleManagement::CommunicationInitialized(std::string reason)
 {
-    _currentState->CommunicationInitialized(std::move(reason));
+    _stateMachine.CommunicationInitialized(std::move(reason));
 }
 
 void LifecycleManagement::CompleteCommunicationReadyHandler(std::string reason)
 {
-    _currentState->CompleteCommunicationReadyHandler(std::move(reason));
+    _stateMachine.CompleteCommunicationReadyHandler(std::move(reason));
 }
 
 void LifecycleManagement::ReadyToRun(std::string reason)
 {
-    _currentState->ReadyToRun(std::move(reason));
+    _stateMachine.ReadyToRun(std::move(reason));
 }
 
 void LifecycleManagement::Restart(std::string reason)
 {
-    _currentState->RestartParticipant(std::move(reason));
+    _stateMachine.Restart(std::move(reason));
 }
 
 void LifecycleManagement::Shutdown(std::string reason)
 {
-    _currentState->ShutdownParticipant(std::move(reason));
+    _stateMachine.Shutdown(std::move(reason));
 }
 
 void LifecycleManagement::NotifyShutdownInConnection()
@@ -79,51 +65,33 @@ void LifecycleManagement::NotifyShutdownInConnection()
 
 void LifecycleManagement::Pause(std::string reason)
 {
-    _currentState->PauseSimulation(std::move(reason));
+    _stateMachine.Pause(std::move(reason));
 }
 
 void LifecycleManagement::Continue(std::string reason)
 {
-    _currentState->ContinueSimulation(std::move(reason));
+    _stateMachine.Continue(std::move(reason));
 }
 
 void LifecycleManagement::Stop(std::string reason)
 {
-    _currentState->StopSimulation(std::move(reason));
-}
-
-void LifecycleManagement::ResolveAbortSimulation(std::string reason)
-{
-    _currentState->ResolveAbortSimulation(reason);
-    ShutdownAfterAbort(std::move(reason));
-}
-
-void LifecycleManagement::RestartAfterStop(std::string reason)
-{
-    // for now, the participant will always shut down after stopping
-    _lifecycleService->Restart(std::move(reason));
-}
-
-void LifecycleManagement::ShutdownAfterAbort(std::string reason)
-{
-    // for now, the participant will always shut down after stopping
-    Shutdown(std::move(reason));
+    _stateMachine.Stop(std::move(reason));
 }
 
 void LifecycleManagement::StartAutonomous(std::string reason)
 {
-    _currentState->ServicesCreated(reason);
+    _stateMachine.StartAutonomous(std::move(reason));
 }
 
 void LifecycleManagement::Error(std::string reason)
 {
-    _currentState->Error(std::move(reason));
+    _stateMachine.Error(std::move(reason));
 }
 
 void LifecycleManagement::AbortSimulation(std::string reason)
 {
-    _currentState->AbortSimulation(std::move(reason));
-    if (_currentState == GetErrorState())
+    _stateMachine.AbortSimulation(std::move(reason));
+    if (_stateMachine.CurrentState() == LifecycleState::Error)
     {
         GetLogger()->Warn("AbortSimulation caused a transition to an error state");
     }
@@ -131,7 +99,7 @@ void LifecycleManagement::AbortSimulation(std::string reason)
 
 void LifecycleManagement::CommunicationInitializing(std::string reason)
 {
-    _currentState->CommunicationInitializing(std::move(reason));
+    _stateMachine.CommunicationInitializing(std::move(reason));
 }
 
 // Callback handling
@@ -206,17 +174,36 @@ bool LifecycleManagement::HandleShutdown()
     }
 }
 
-bool LifecycleManagement::HandleAbort()
+void LifecycleManagement::AddAsyncSubscriptionsCompletionHandler(std::function<void()> handler)
 {
-    if (!_lastBeforeAbortingState)
-    {
-        throw SilKit::StateError("Abort handler was about to be triggered without knowing which state was active "
-                                 "before abort was called.");
-    }
+    _lifecycleService->AddAsyncSubscriptionsCompletionHandler(std::move(handler));
+}
 
+auto LifecycleManagement::CurrentState() const -> LifecycleState
+{
+    return _stateMachine.CurrentState();
+}
+
+OperationMode LifecycleManagement::GetOperationMode() const
+{
+    return _lifecycleService->GetOperationMode();
+}
+
+auto LifecycleManagement::IsTimeSyncActive() const -> bool
+{
+    return _lifecycleService->IsTimeSyncActive();
+}
+
+void LifecycleManagement::ChangeParticipantState(ParticipantState newState, std::string reason)
+{
+    _lifecycleService->ChangeParticipantState(newState, std::move(reason));
+}
+
+auto LifecycleManagement::HandleAbort(ParticipantState lastState) -> bool
+{
     try
     {
-        _lifecycleService->TriggerAbortHandler(_lastBeforeAbortingState->GetParticipantState());
+        _lifecycleService->TriggerAbortHandler(lastState);
         return true;
     }
     catch (const std::exception& e)
@@ -238,137 +225,19 @@ void LifecycleManagement::StopTime()
     (dynamic_cast<TimeSyncService*>(_lifecycleService->GetTimeSyncService()))->StopTime();
 }
 
-void LifecycleManagement::AddAsyncSubscriptionsCompletionHandler(std::function<void()> handler)
+void LifecycleManagement::CallAfterAllParticipantsReplied(std::function<void()> handler)
 {
-    _lifecycleService->AddAsyncSubscriptionsCompletionHandler(std::move(handler));
+    _participant->GetParticipantRepliesProcedure()->CallAfterAllParticipantsReplied(std::move(handler));
 }
 
-void LifecycleManagement::SetState(ILifecycleState* newState, std::string reason)
+void LifecycleManagement::SetFinalStatePromise()
 {
-    UpdateLifecycleState(newState);
-    UpdateParticipantState(std::move(reason));
+    _lifecycleService->SetFinalStatePromise();
 }
 
-void LifecycleManagement::SetStateAndForwardIntent(ILifecycleState* newState,
-                                                   void (ILifecycleState::*intent)(std::string), std::string reason)
-{
-    UpdateLifecycleState(newState);
-    // NB: UpdateParticipantState can alter _currentState if the ParticipantState change causes a SystemState change.
-    // This addressed by NOPs in the new state for the original intent.
-    UpdateParticipantState(reason);
-    (_currentState->*intent)(std::move(reason));
-}
-
-void LifecycleManagement::UpdateLifecycleState(ILifecycleState* newState)
-{
-    std::unique_lock<decltype(_mutex)> lock{_mutex};
-
-    if (newState == GetAbortingState())
-    {
-        _lastBeforeAbortingState = _currentState;
-    }
-    _currentState = newState;
-}
-
-void LifecycleManagement::UpdateParticipantState(std::string reason)
-{
-    _lifecycleService->ChangeParticipantState(_currentState->GetParticipantState(), std::move(reason));
-}
-
-ILifecycleState* LifecycleManagement::GetCurrentState()
-{
-    std::unique_lock<decltype(_mutex)> lock{_mutex};
-    return _currentState;
-}
-
-ILifecycleState* LifecycleManagement::GetInvalidState()
-{
-    return _invalidState.get();
-}
-
-ILifecycleState* LifecycleManagement::GetOperationalState()
-{
-    return _operationalState.get();
-}
-
-ILifecycleState* LifecycleManagement::GetErrorState()
-{
-    return _errorState.get();
-}
-
-ILifecycleState* LifecycleManagement::GetAbortingState()
-{
-    return _abortingState.get();
-}
-
-ILifecycleState* LifecycleManagement::GetServicesCreatedState()
-{
-    return _servicesCreatedState.get();
-}
-
-ILifecycleState* LifecycleManagement::GetCommunicationInitializingState()
-{
-    return _communicationInitializingState.get();
-}
-
-ILifecycleState* LifecycleManagement::GetCommunicationInitializedState()
-{
-    return _communicationInitializedState.get();
-}
-
-ILifecycleState* LifecycleManagement::GetReadyToRunState()
-{
-    return _readyToRunState.get();
-}
-
-ILifecycleState* LifecycleManagement::GetRunningState()
-{
-    return _runningState.get();
-}
-
-ILifecycleState* LifecycleManagement::GetPausedState()
-{
-    return _pausedState.get();
-}
-
-ILifecycleState* LifecycleManagement::GetStoppingState()
-{
-    return _stoppingState.get();
-}
-
-ILifecycleState* LifecycleManagement::GetStoppedState()
-{
-    return _stoppedState.get();
-}
-
-ILifecycleState* LifecycleManagement::GetShuttingDownState()
-{
-    return _shuttingDownState.get();
-}
-
-ILifecycleState* LifecycleManagement::GetShutdownState()
-{
-    return _shutDownState.get();
-}
-
-Services::Logging::ILogger* LifecycleManagement::GetLogger()
+auto LifecycleManagement::GetLogger() -> Services::Logging::ILogger*
 {
     return _logger;
-}
-
-LifecycleService* LifecycleManagement::GetService()
-{
-    return _lifecycleService;
-}
-
-OperationMode LifecycleManagement::GetOperationMode() const
-{
-    return _lifecycleService->GetOperationMode();
-}
-
-Core::IParticipantInternal* LifecycleManagement::GetParticipant()
-{
-    return _participant;
 }
 
 } // namespace Orchestration

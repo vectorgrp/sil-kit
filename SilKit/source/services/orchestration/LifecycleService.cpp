@@ -513,8 +513,8 @@ void LifecycleService::NewSystemState(SystemState systemState)
     case SystemState::Stopping:
         _logger->Info("Simulation is stopping");
         // Only allow external stop signal if we are actually running or paused
-        if (_lifecycleManager.GetCurrentState() == _lifecycleManager.GetRunningState()
-            || _lifecycleManager.GetCurrentState() == _lifecycleManager.GetPausedState())
+        if (_lifecycleManager.CurrentState() == LifecycleState::Running
+            || _lifecycleManager.CurrentState() == LifecycleState::Paused)
         {
             _lifecycleManager.Stop(ss.str());
         }

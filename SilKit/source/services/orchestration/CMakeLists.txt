@@ -19,11 +19,10 @@ target_link_libraries(I_SilKit_Services_Orchestration
 
 
 add_library(O_SilKit_Services_Orchestration OBJECT
-    ILifecycleStates.hpp
+    LifecycleState.hpp
+    LifecycleStateMachine.hpp
     LifecycleManagement.hpp
     LifecycleManagement.cpp
-    LifecycleStates.hpp
-    LifecycleStates.cpp
     LifecycleService.hpp
     LifecycleService.cpp
     
@@ -62,6 +61,10 @@ target_link_libraries(O_SilKit_Services_Orchestration
 add_silkit_test_to_executable(SilKitUnitTests
     SOURCES Test_LifecycleService.cpp 
     LIBS S_SilKitImpl I_SilKit_Core_Mock_Participant
+)
+add_silkit_test_to_executable(SilKitUnitTests
+    SOURCES Test_LifecycleStateMachine.cpp
+    LIBS S_SilKitImpl
 )
 add_silkit_test_to_executable(SilKitUnitTests
     SOURCES Test_SystemController.cpp 

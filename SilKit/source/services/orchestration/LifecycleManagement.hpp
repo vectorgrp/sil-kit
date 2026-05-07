@@ -4,14 +4,13 @@
 
 #pragma once
 
-#include <memory>
-#include <atomic>
-#include <mutex>
+#include <functional>
 
 #include "silkit/services/logging/ILogger.hpp"
 
 #include "OrchestrationDatatypes.hpp"
-#include "ILifecycleStates.hpp"
+#include "LifecycleState.hpp"
+#include "LifecycleStateMachine.hpp"
 #include "IParticipantInternal.hpp"
 
 namespace SilKit {
@@ -49,90 +48,30 @@ public: //CTors
     // Autonomous lifecycle state initialization
     void StartAutonomous(std::string reason);
 
-    // Check capabilites, potentially start the wall clock coupling thread and send the initial NextSimTask
-    void StartTime();
-    // Potentially stop the wall clock coupling thread
-    void StopTime();
+    auto CurrentState() const -> LifecycleState;
 
-    // Callback handling
-    CallbackResult HandleCommunicationReady();
-    bool HandleStarting();
-    bool HandleStop();
-    bool HandleShutdown();
-    bool HandleAbort();
-
-    // Wait for pending subscriptions before advancing from CommunicationInitializing to CommunicationInitialized
-    void AddAsyncSubscriptionsCompletionHandler(std::function<void()> handler);
-
-    // Abort handling
-    void ResolveAbortSimulation(std::string reason);
-
-    // Actions after Stop
-    void RestartAfterStop(std::string reason);
-    void ShutdownAfterAbort(std::string reason);
-
-    // Ignore peer disconnects after stop
-    void NotifyShutdownInConnection();
-
-    // State setter
-    void SetState(ILifecycleState* newState, std::string message);
-
-    // Set state and trigger an action on the new state.
-    void SetStateAndForwardIntent(ILifecycleState* nextState, void (ILifecycleState::*intent)(std::string),
-                                  std::string reason);
-
-    // State getter
-    ILifecycleState* GetCurrentState();
-    ILifecycleState* GetInvalidState();
-    ILifecycleState* GetOperationalState();
-    ILifecycleState* GetErrorState();
-    ILifecycleState* GetAbortingState();
-    ILifecycleState* GetServicesCreatedState();
-    ILifecycleState* GetCommunicationInitializingState();
-    ILifecycleState* GetCommunicationInitializedState();
-    ILifecycleState* GetReadyToRunState();
-    ILifecycleState* GetRunningState();
-    ILifecycleState* GetPausedState();
-    ILifecycleState* GetStoppingState();
-    ILifecycleState* GetStoppedState();
-    ILifecycleState* GetShuttingDownState();
-    ILifecycleState* GetShutdownState();
-
-    // Property getters
+    // Machine effects
     OperationMode GetOperationMode() const;
-
-    // Interface getters
-    Logging::ILogger* GetLogger();
-    LifecycleService* GetService();
-    Core::IParticipantInternal* GetParticipant();
-
-private:
-    void UpdateLifecycleState(ILifecycleState* newState);
-    void UpdateParticipantState(std::string reason);
+    auto IsTimeSyncActive() const -> bool;
+    void ChangeParticipantState(ParticipantState newState, std::string reason);
+    auto HandleCommunicationReady() -> CallbackResult;
+    auto HandleStarting() -> bool;
+    auto HandleStop() -> bool;
+    auto HandleShutdown() -> bool;
+    auto HandleAbort(ParticipantState lastState) -> bool;
+    void StartTime();
+    void StopTime();
+    void AddAsyncSubscriptionsCompletionHandler(std::function<void()> handler);
+    void CallAfterAllParticipantsReplied(std::function<void()> handler);
+    void NotifyShutdownInConnection();
+    void SetFinalStatePromise();
+    auto GetLogger() -> Logging::ILogger*;
 
     Core::IParticipantInternal* _participant{nullptr};
-
-    std::shared_ptr<ILifecycleState> _invalidState;
-    std::shared_ptr<ILifecycleState> _operationalState;
-    std::shared_ptr<ILifecycleState> _errorState;
-    std::shared_ptr<ILifecycleState> _abortingState;
-    std::shared_ptr<ILifecycleState> _servicesCreatedState;
-    std::shared_ptr<ILifecycleState> _communicationInitializingState;
-    std::shared_ptr<ILifecycleState> _communicationInitializedState;
-    std::shared_ptr<ILifecycleState> _readyToRunState;
-    std::shared_ptr<ILifecycleState> _runningState;
-    std::shared_ptr<ILifecycleState> _pausedState;
-    std::shared_ptr<ILifecycleState> _stoppingState;
-    std::shared_ptr<ILifecycleState> _stoppedState;
-    std::shared_ptr<ILifecycleState> _shuttingDownState;
-    std::shared_ptr<ILifecycleState> _shutDownState;
-
-    ILifecycleState* _currentState;
-    ILifecycleState* _lastBeforeAbortingState{nullptr};
     LifecycleService* _lifecycleService;
 
     Services::Logging::ILogger* _logger;
-    std::recursive_mutex _mutex;
+    LifecycleStateMachine<LifecycleManagement> _stateMachine;
 };
 
 } // namespace Orchestration
