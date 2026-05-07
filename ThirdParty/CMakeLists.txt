@@ -85,7 +85,8 @@ function(include_asio)
 
     silkit_clean_default_compileflags()
     add_library(asio INTERFACE)
-    target_include_directories(asio INTERFACE "${ASIO_INCLUDE_DIR}")
+    # mark asio headers as system headers, which avoids warnings from asio to break our build
+    target_include_directories(asio SYSTEM INTERFACE "${ASIO_INCLUDE_DIR}")
     set(SILKIT_THIRD_PARTY_ASIO "asio" CACHE STRING "Name of the third party asio target")
 endfunction()
 
@@ -95,6 +96,9 @@ function(include_fmt)
         # function() adds an additional scope
         #set(FMT_INSTALL ON CACHE BOOL "Make sure the fmt-header-only interface target is exported" FORCE)
         silkit_clean_default_compileflags()
+
+        # mark fmt headers as system headers, which avoids warnings from fmt to break our build
+        set(FMT_SYSTEM_HEADERS ON CACHE BOOL "" FORCE)
 
         message(STATUS "Add subdirectory ${CMAKE_CURRENT_LIST_DIR}/fmt")
         add_subdirectory(
@@ -130,6 +134,9 @@ function(include_spdlog)
         # Temporarily patch some CMake variables to trick spdlog's install commands into using our install-folder layout
 
         silkit_clean_default_compileflags()
+
+        # mark spdlog headers as system headers, which avoids warnings from spdlog to break our build
+        set(SPDLOG_SYSTEM_INCLUDES ON CACHE BOOL "" FORCE)
 
         set(CMAKE_INSTALL_LIBDIR "${INSTALL_LIB_DIR}")
         set(CMAKE_INSTALL_INCLUDEDIR  "${INSTALL_INCLUDE_DIR}")
@@ -171,7 +178,11 @@ function(include_oatpp)
     silkit_target_clean_compileflags(oatpp)
 
     if (CMAKE_CXX_COMPILER_ID MATCHES MSVC)
-        target_compile_options(oatpp PRIVATE "/wd4244")
+        target_compile_options(oatpp PRIVATE "/wd4244" "/wd4068")
+    endif ()
+
+    if (CMAKE_CXX_COMPILER_ID MATCHES GNU)
+        target_compile_options(oatpp PRIVATE "-Wno-useless-cast")
     endif ()
 
     set_property(TARGET oatpp PROPERTY CXX_VISIBILITY_PRESET hidden)
