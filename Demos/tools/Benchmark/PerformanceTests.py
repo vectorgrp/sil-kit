@@ -18,8 +18,6 @@ import csv
 import argparse
 import typing
 
-from git import Repo  # PyPI: GitPython
-
 SCRIPT_PATH = os.path.abspath(__file__)
 WINDOWS = platform.system() == "Windows"
 
@@ -32,6 +30,7 @@ class Config:
     repositories: 'ConfigRepositories'
     verbose: bool | None = None
     work_dir: str | None = None
+    cmake_configure_arg: list[str] | None = None
 
     def __post_init__(self):
         self.repositories = ConfigRepositories(**typing.cast(dict, self.repositories))
@@ -146,17 +145,16 @@ def clone(repository: 'ConfigRepository'):
     url = "https://github.com/vectorgrp/sil-kit.git"
 
     print(f"Cloning {url!r} into {source_dir!r}")
-    repo = Repo.clone_from(url, source_dir)
+    subprocess.run(["git", "clone", str(url), str(source_dir)])
 
     print(f"Checking out version {version!r}")
-    repo.git.checkout(version)
+    subprocess.run(["git", "-C", source_dir, "checkout", str(version)])
 
     print(f"Updating submodules")
-    output = repo.git.submodule('update', '--init', '--recursive')
-    print(output)
+    subprocess.run(["git", "-C", source_dir, "submodule", "update", "--init", "--recursive"])
 
 
-def configure(repository: 'ConfigRepository'):
+def configure(config: Config, repository: 'ConfigRepository'):
     source_dir = repository.source_dir
     build_dir = repository.build_dir
 
@@ -168,7 +166,9 @@ def configure(repository: 'ConfigRepository'):
         print(f"Skipping configure because the directory {build_dir!r} already exists")
         return
 
-    run(['cmake', f"-S{source_dir}", f"-B{build_dir}", "-DCMAKE_BUILD_TYPE=Release", "-DSILKIT_BUILD_TESTS=OFF"])
+    cmd = ["cmake", f"-S{source_dir}", f"-B{build_dir}", "-DCMAKE_BUILD_TYPE=Release", "-DSILKIT_BUILD_TESTS=OFF"]
+    cmd += config.cmake_configure_arg
+    run(cmd)
 
 
 def build(repository: 'ConfigRepository'):
@@ -191,7 +191,7 @@ def kill_process(pid: int):
     os.kill(pid, signal.SIGTERM)
 
 
-def prepare_repository(repository: ConfigRepository, force: bool):
+def prepare_repository(config: Config, repository: ConfigRepository, force: bool):
     results_dir = repository.results_dir
 
     if not force and os.path.exists(results_dir):
@@ -200,7 +200,7 @@ def prepare_repository(repository: ConfigRepository, force: bool):
         return
 
     clone(repository)
-    configure(repository)
+    configure(config, repository)
     build(repository)
 
 
@@ -292,7 +292,7 @@ def assess_test(test: Test, reference: ConfigRepository, under_test: ConfigRepos
         reference_lower_threshold < under_test_mean < reference_upper_threshold,
         f" with {under_test_mean} {test.unit} (acceptance interval: {reference_lower_threshold} - {reference_upper_threshold} {test.unit})",
         warn
-    )    
+    )
 
 def assess_kpis(reference: ConfigRepository, under_test: ConfigRepository, config: Config):
     print("\n" + "----- Test Report (start) -----" + "\n")
@@ -326,10 +326,9 @@ def override_with_or(obj: T, key: str, value: U | None, default=U | None):
 
 
 def update_config(config: Config, args: object):
-    override_or(config, args, "work_dir", os.path.join(os.getcwd(), "_work"))
+    override_or(config, args, "work_dir", os.path.abspath("_work"))
     override_or(config, args, "verbose", False)
-
-    config.work_dir = os.path.abspath("_work")
+    override_or(config, args, "cmake_configure_arg", [])
 
     for name, repository in vars(config.repositories).items():
         override_with_or(repository, "source_dir", None, os.path.join(config.work_dir, "s", name))
@@ -345,6 +344,8 @@ def main():
     parser.add_argument('--version-under-test', type=str, default=None,
                         help='Reference tag or commit id for the version under test')
     parser.add_argument('--work-dir', type=str, default=None)
+    parser.add_argument('--cmake-configure-arg', action='append',
+                        help='Additional CMake configure argument')
     parser.add_argument('-v', '--verbose', action='store_true', default=None,
                         help='Print output of SIL Kit applications to stdout')
     args = parser.parse_args()
@@ -354,8 +355,8 @@ def main():
 
     update_config(config, args)
 
-    prepare_repository(config.repositories.reference, force=False)
-    prepare_repository(config.repositories.under_test, force=True)
+    prepare_repository(config, config.repositories.reference, force=False)
+    prepare_repository(config, config.repositories.under_test, force=True)
 
     run_tests(config.repositories.reference, config, force=False)
     run_tests(config.repositories.under_test, config, force=True)
