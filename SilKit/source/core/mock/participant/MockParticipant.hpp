@@ -13,7 +13,6 @@
 
 #include "silkit/services/orchestration/OrchestrationDatatypes.hpp"
 #include "silkit/services/logging/LoggingDatatypes.hpp"
-//#include "silkit/services/logging/ILogger.hpp"
 #include "silkit/services/orchestration/ILifecycleService.hpp"
 #include "silkit/services/orchestration/ITimeSyncService.hpp"
 #include "silkit/services/orchestration/ISystemMonitor.hpp"
