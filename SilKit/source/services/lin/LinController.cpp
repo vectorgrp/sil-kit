@@ -515,11 +515,9 @@ void LinController::GoToSleep()
         return;
     }
 
-    // Detailed: Send LinSendFrameRequest with GoToSleep-Frame and set LinControllerStatus::SleepPending. BusSim will trigger LinTransmission.
+    // Detailed: Send LinSendFrameRequest with GoToSleep-Frame and set LinControllerStatus::SleepPending. BusSim will trigger LinTransmission. Sleep after frame is received.
     // Trivial: Directly send LinTransmission with GoToSleep-Frame and call GoToSleepInternal() on this controller.
     _simulationBehavior.GoToSleep();
-
-    _controllerStatus = LinControllerStatus::Sleep;
 }
 
 void LinController::GoToSleepInternal()
@@ -784,10 +782,18 @@ void LinController::ReceiveMsg(const IServiceEndpoint* from, const LinTransmissi
     // Dispatch GoToSleep frames to dedicated handlers
     if (isGoToSleepFrame)
     {
-        // only call GoToSleepHandlers for slaves, i.e., not for the master that issued the GoToSleep command.
         if (_controllerMode == LinControllerMode::Slave)
         {
+            // Only call GoToSleepHandlers for slaves, i.e., not for the master that issued the GoToSleep command.
             CallHandlers(LinGoToSleepEvent{msg.timestamp});
+        }
+        // Detailed: Go to sleep after go-to-sleep frame was received by master
+        else if (_controllerMode == LinControllerMode::Master)
+        {
+            if (_controllerStatus == LinControllerStatus::SleepPending)
+            {
+                _controllerStatus = LinControllerStatus::Sleep;
+            }
         }
     }
 }
