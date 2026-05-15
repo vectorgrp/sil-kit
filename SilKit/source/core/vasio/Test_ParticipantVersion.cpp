@@ -104,6 +104,10 @@ protected:
 
             SilKit::Services::Can::CanFrame frame;
             frame.canId = 5;
+            frame.flags = 0;
+            frame.sdt = 0;
+            frame.vcid = 0;
+            frame.af = 0;
             frame.dataField = SilKit::Util::MakeSpan(frameDataField);
             frame.dlc = static_cast<uint16_t>(frame.dataField.size());
             sendCan->SendFrame(frame);
