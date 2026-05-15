@@ -47,11 +47,24 @@ void MetricsJsonSink::Process(const std::string& origin, const MetricsUpdate& me
 
     for (const auto& data : metricsUpdate.metrics)
     {
-        *_ostream << R"({"ts":)" << data.timestamp << R"(,"pn":")" << SilKit::Util::EscapedJsonString{origin}
-                  << R"(","mn":")" << SilKit::Util::EscapedJsonString{data.name} << R"(","mk":")"
-                  << MetricKindString{data.kind} << R"(","mv":")" << SilKit::Util::EscapedJsonString{data.value}
-                  << R"("})"
-                  << '\n';
+        *_ostream << R"({"ts":)" << data.timestamp
+                  << R"(,"pn":")" << SilKit::Util::EscapedJsonString{origin} << R"(")"
+                  << R"(,"mn":")" << SilKit::Util::EscapedJsonString{data.name} << R"(")"
+                  << R"(,"mk":")" << MetricKindString{data.kind} << R"(")"
+                  << R"(,"mv":)";
+
+        if (data.kind == MetricKind::ATTRIBUTE)
+        {
+            // Quotes and escape the value for attributes. 
+            // For other metric kinds, the value is already a json-formatted string, so we can write it as is.
+            *_ostream << R"(")" << SilKit::Util::EscapedJsonString{data.value} << R"(")";
+        }
+        else
+        {
+            *_ostream << data.value;
+        }
+
+        *_ostream << "}\n";
     }
 
     *_ostream << std::flush;
