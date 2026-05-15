@@ -18,6 +18,8 @@ struct MetricKindString
     {
         switch (self.kind)
         {
+        case VSilKit::MetricKind::ATTRIBUTE:
+            return ostream << "ATTRIBUTE";
         case VSilKit::MetricKind::COUNTER:
             return ostream << "COUNTER";
         case VSilKit::MetricKind::STATISTIC:
@@ -47,7 +49,9 @@ void MetricsJsonSink::Process(const std::string& origin, const MetricsUpdate& me
     {
         *_ostream << R"({"ts":)" << data.timestamp << R"(,"pn":")" << SilKit::Util::EscapedJsonString{origin}
                   << R"(","mn":")" << SilKit::Util::EscapedJsonString{data.name} << R"(","mk":")"
-                  << MetricKindString{data.kind} << R"(","mv":)" << data.value << R"(})" << '\n';
+                  << MetricKindString{data.kind} << R"(","mv":")" << SilKit::Util::EscapedJsonString{data.value}
+                  << R"("})"
+                  << '\n';
     }
 
     *_ostream << std::flush;
