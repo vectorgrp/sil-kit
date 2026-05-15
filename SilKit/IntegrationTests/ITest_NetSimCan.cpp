@@ -28,6 +28,9 @@ struct ITest_NetSimCan : ITest_NetSim
         frame.flags = {};
         frame.canId = 0x12;
         frame.dlc = 1;
+        frame.sdt = 0;
+        frame.vcid = 0;
+        frame.af = 0;
         frame.dataField = SilKit::Util::MakeSpan(dataBytes);
 
         if (now < _sendUntilMs)
@@ -140,6 +143,7 @@ void MySimulatedCanController::OnFrameRequest(const CanFrameRequest& frameReques
 
     // Distribute the frame to all controllers in the network
     CanFrameEvent frameEvent;
+    frameEvent.timestamp = std::chrono::nanoseconds{0};
     frameEvent.direction = TransmitDirection::RX;
     frameEvent.frame = frameRequest.frame;
     frameEvent.userContext = frameRequest.userContext;

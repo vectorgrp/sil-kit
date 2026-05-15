@@ -128,6 +128,7 @@ void MySimulatedEthernetController::OnFrameRequest(const EthernetFrameRequest& f
 
     // Distribute the frame to all controllers in the network
     EthernetFrameEvent frameEvent;
+    frameEvent.timestamp = std::chrono::nanoseconds{0};
     frameEvent.direction = TransmitDirection::RX;
     frameEvent.frame = frameRequest.ethernetFrame;
     frameEvent.userContext = frameRequest.userContext;
