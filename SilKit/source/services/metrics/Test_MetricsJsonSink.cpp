@@ -43,6 +43,11 @@ bool read(const ryml::ConstNodeRef& node, MetricData* obj)
         node["mv"] >> stringList;
         obj->value = SilKit::Config::SerializeAsJson(stringList);
     }
+    else if (kind == "ATTRIBUTE")
+    {
+        obj->kind = MetricKind::ATTRIBUTE;
+        node["mv"] >> obj->value;
+    }
     else
         throw SilKit::ConfigurationError{"Invalid MetricData.kind " + kind};
     return true;
@@ -80,6 +85,12 @@ TEST(Test_MetricsJsonSink, test_json_escaping_and_structure)
     const std::string mv3b{"D\tE\nF\tG"};
     const std::string mv3{fmt::format(R"(["{}","{}"])", EscapeString(mv3a), EscapeString(mv3b))};
 
+    const MetricTimestamp ts4{4};
+    const std::string mn4{"Metric\rName\n4"};
+    const auto mk4 = MetricKind::ATTRIBUTE;
+    const std::string mv4{"Attribute\tValue\nWith\"Special\\Characters"};
+
+
     MetricsUpdate update;
     update.metrics.emplace_back(MetricData{
         ts1,
@@ -98,6 +109,12 @@ TEST(Test_MetricsJsonSink, test_json_escaping_and_structure)
         mn3,
         mk3,
         mv3,
+    });
+    update.metrics.emplace_back(MetricData{
+        ts4,
+        mn4,
+        mk4,
+        mv4,
     });
 
     auto ownedOstream = std::make_unique<std::ostringstream>();
@@ -127,7 +144,7 @@ TEST(Test_MetricsJsonSink, test_json_escaping_and_structure)
 
     // checks
 
-    ASSERT_EQ(nodes.size(), 3u);
+    ASSERT_EQ(nodes.size(), 4u);
 
     ASSERT_EQ(nodes[0].timestamp, ts1);
     ASSERT_EQ(nodes[0].name, mn1);
@@ -143,6 +160,11 @@ TEST(Test_MetricsJsonSink, test_json_escaping_and_structure)
     ASSERT_EQ(nodes[2].name, mn3);
     ASSERT_EQ(nodes[2].kind, MetricKind::STRING_LIST);
     ASSERT_EQ(nodes[2].value, mv3);
+
+    ASSERT_EQ(nodes[3].timestamp, ts4);
+    ASSERT_EQ(nodes[3].name, mn4);
+    ASSERT_EQ(nodes[3].kind, MetricKind::ATTRIBUTE);
+    ASSERT_EQ(nodes[3].value, mv4);
 }
 
 
