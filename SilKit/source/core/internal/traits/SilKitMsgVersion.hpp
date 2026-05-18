@@ -45,6 +45,9 @@ DefineSilKitMsgTrait_Version(SilKit::Services::Ethernet::WireEthernetFrameEvent,
 DefineSilKitMsgTrait_Version(SilKit::Services::Ethernet::EthernetFrameTransmitEvent, 1);
 DefineSilKitMsgTrait_Version(SilKit::Services::Ethernet::EthernetStatus, 1);
 DefineSilKitMsgTrait_Version(SilKit::Services::Ethernet::EthernetSetMode, 1);
+DefineSilKitMsgTrait_Version(SilKit::Services::I2c::WireI2cFrameEvent, 1);
+DefineSilKitMsgTrait_Version(SilKit::Services::I2c::I2cAcknowledge, 1);
+DefineSilKitMsgTrait_Version(SilKit::Services::I2c::WireI2cControllerConfig, 1);
 DefineSilKitMsgTrait_Version(SilKit::Services::Lin::LinSendFrameRequest, 1);
 DefineSilKitMsgTrait_Version(SilKit::Services::Lin::LinSendFrameHeaderRequest, 1);
 DefineSilKitMsgTrait_Version(SilKit::Services::Lin::LinTransmission, 1);

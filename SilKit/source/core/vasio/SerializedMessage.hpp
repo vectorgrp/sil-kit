@@ -12,6 +12,7 @@
 // Component specific Serialize/Deserialize functions
 #include "VAsioSerdes.hpp"
 #include "CanSerdes.hpp"
+#include "I2cSerdes.hpp"
 #include "LinSerdes.hpp"
 #include "EthernetSerdes.hpp"
 #include "FlexraySerdes.hpp"

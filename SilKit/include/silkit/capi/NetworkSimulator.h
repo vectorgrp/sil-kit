@@ -15,6 +15,7 @@
 #include "silkit/capi/Flexray.h"
 #include "silkit/capi/Ethernet.h"
 #include "silkit/capi/Lin.h"
+#include "silkit/capi/I2c.h"
 
 #pragma pack(push)
 #pragma pack(8)
@@ -27,6 +28,7 @@ typedef uint32_t SilKit_Experimental_SimulatedNetworkType;
 #define SilKit_NetworkType_LIN ((SilKit_Experimental_SimulatedNetworkType)2)
 #define SilKit_NetworkType_Ethernet ((SilKit_Experimental_SimulatedNetworkType)3)
 #define SilKit_NetworkType_FlexRay ((SilKit_Experimental_SimulatedNetworkType)4)
+#define SilKit_NetworkType_I2C ((SilKit_Experimental_SimulatedNetworkType)5)
 
 typedef struct SilKit_Experimental_NetworkSimulator SilKit_Experimental_NetworkSimulator;
 typedef struct SilKit_Experimental_SimulatedNetwork SilKit_Experimental_SimulatedNetwork;
@@ -39,6 +41,9 @@ typedef struct SilKit_Experimental_SimulatedControllerFunctions SilKit_Experimen
 typedef struct SilKit_Experimental_SimulatedCanControllerFunctions SilKit_Experimental_SimulatedCanControllerFunctions;
 typedef struct SilKit_Experimental_SimulatedFlexRayControllerFunctions
     SilKit_Experimental_SimulatedFlexRayControllerFunctions;
+typedef struct SilKit_Experimental_SimulatedI2cController SilKit_Experimental_SimulatedI2cController;
+typedef struct SilKit_Experimental_SimulatedI2cControllerFunctions
+    SilKit_Experimental_SimulatedI2cControllerFunctions;
 
 struct SilKit_Experimental_SimulatedNetworkFunctions
 {
@@ -259,6 +264,36 @@ struct SilKit_Experimental_SimulatedLinControllerFunctions
                                   const SilKit_Experimental_NetSim_LinFrameResponseUpdate* frameResponseUpdate);
     void (*OnControllerStatusUpdate)(void* controller,
                                      const SilKit_Experimental_NetSim_LinControllerStatusUpdate* statusUpdate);
+};
+
+// --------------------------------
+// I2c
+// --------------------------------
+
+struct SilKit_Experimental_NetSim_I2cFrameRequest
+{
+    SilKit_StructHeader structHeader; //!< The interface id specifying which version of this struct was obtained
+    SilKit_I2cFrame* frame;           //!< The I2C frame requested to be sent
+    void* userContext;                //!< Optional pointer provided by user when sending the frame
+};
+typedef struct SilKit_Experimental_NetSim_I2cFrameRequest SilKit_Experimental_NetSim_I2cFrameRequest;
+
+struct SilKit_Experimental_NetSim_I2cControllerConfig
+{
+    SilKit_StructHeader      structHeader;    //!< The interface id specifying which version of this struct was obtained
+    SilKit_I2cControllerMode mode;            //!< Master or Slave
+    SilKit_I2cAddress        slaveAddress;    //!< Address of this controller when in Slave mode
+    SilKit_I2cAddressMode    slaveAddressMode; //!< 7-bit or 10-bit address mode
+    SilKit_I2cSpeedMode      speedMode;       //!< Standard, Fast, FastPlus, or HighSpeed
+};
+typedef struct SilKit_Experimental_NetSim_I2cControllerConfig SilKit_Experimental_NetSim_I2cControllerConfig;
+
+struct SilKit_Experimental_SimulatedI2cControllerFunctions
+{
+    SilKit_StructHeader structHeader;
+    void (*OnFrameRequest)(void* controller, const SilKit_Experimental_NetSim_I2cFrameRequest* frameRequest);
+    void (*OnControllerConfig)(void* controller,
+                               const SilKit_Experimental_NetSim_I2cControllerConfig* controllerConfig);
 };
 
 // --------------------------------

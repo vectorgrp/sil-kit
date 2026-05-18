@@ -19,6 +19,8 @@
 
 #include "silkit/detail/impl/services/flexray/FlexrayController.hpp"
 
+#include "silkit/detail/impl/services/i2c/I2cController.hpp"
+
 #include "silkit/detail/impl/services/lin/LinController.hpp"
 
 #include "silkit/detail/impl/services/logging/Logger.hpp"
@@ -55,6 +57,9 @@ public:
 
     inline auto CreateFlexrayController(const std::string& canonicalName, const std::string& networkName)
         -> SilKit::Services::Flexray::IFlexrayController* override;
+
+    inline auto CreateI2cController(const std::string& canonicalName, const std::string& networkName)
+        -> SilKit::Services::I2c::II2cController* override;
 
     inline auto CreateLinController(const std::string& canonicalName,
                                     const std::string& networkName) -> SilKit::Services::Lin::ILinController* override;
@@ -110,6 +115,7 @@ private:
     ControllerStorage<Services::Can::CanController> _canControllers;
     ControllerStorage<Services::Ethernet::EthernetController> _ethernetControllers;
     ControllerStorage<Services::Flexray::FlexrayController> _flexrayControllers;
+    ControllerStorage<Services::I2c::I2cController> _i2cControllers;
     ControllerStorage<Services::Lin::LinController> _linControllers;
     ControllerStorage<Services::PubSub::DataPublisher> _dataPublishers;
     ControllerStorage<Services::PubSub::DataSubscriber> _dataSubscribers;
@@ -169,6 +175,12 @@ auto Participant::CreateFlexrayController(const std::string& canonicalName, cons
     -> SilKit::Services::Flexray::IFlexrayController*
 {
     return _flexrayControllers.Create(_participant, canonicalName, networkName);
+}
+
+auto Participant::CreateI2cController(const std::string& canonicalName,
+                                      const std::string& networkName) -> SilKit::Services::I2c::II2cController*
+{
+    return _i2cControllers.Create(_participant, canonicalName, networkName);
 }
 
 auto Participant::CreateLinController(const std::string& canonicalName,

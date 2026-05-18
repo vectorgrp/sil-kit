@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: MIT
 
 add_subdirectory(can)
+add_subdirectory(i2c)
 add_subdirectory(ethernet)
 add_subdirectory(flexray)
 add_subdirectory(pubsub)

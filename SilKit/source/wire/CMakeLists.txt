@@ -5,6 +5,7 @@
 add_subdirectory(util)
 
 add_subdirectory(can)
+add_subdirectory(i2c)
 add_subdirectory(pubsub)
 add_subdirectory(ethernet)
 add_subdirectory(flexray)

@@ -29,6 +29,9 @@
 #include "IMsgForCanSimulator.hpp"
 #include "IMsgForCanController.hpp"
 
+#include "IMsgForI2cSimulator.hpp"
+#include "IMsgForI2cController.hpp"
+
 #include "IMsgForEthSimulator.hpp"
 #include "IMsgForEthController.hpp"
 
@@ -108,6 +111,8 @@ public:
     // IParticipant
     auto CreateCanController(const std::string& canonicalName,
                              const std::string& networkName) -> Services::Can::ICanController* override;
+    auto CreateI2cController(const std::string& canonicalName,
+                             const std::string& networkName) -> Services::I2c::II2cController* override;
     auto CreateEthernetController(const std::string& canonicalName,
                                   const std::string& networkName) -> Services::Ethernet::IEthernetController* override;
     auto CreateFlexrayController(const std::string& canonicalName,
@@ -196,6 +201,10 @@ public:
     void SendMsg(const IServiceEndpoint* from, const Services::Lin::LinControllerStatusUpdate& msg) override;
     void SendMsg(const IServiceEndpoint* from, const Services::Lin::LinFrameResponseUpdate& msg) override;
 
+    void SendMsg(const IServiceEndpoint* from, const Services::I2c::WireI2cFrameEvent& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const Services::I2c::I2cAcknowledge& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const Services::I2c::WireI2cControllerConfig& msg) override;
+
     void SendMsg(const IServiceEndpoint*, const Services::Orchestration::NextSimTask& msg) override;
     void SendMsg(const IServiceEndpoint*, const Services::Orchestration::ParticipantStatus& msg) override;
     void SendMsg(const IServiceEndpoint*, const Services::Orchestration::SystemCommand& msg) override;
@@ -274,6 +283,13 @@ public:
                  const Services::Lin::LinControllerStatusUpdate& msg) override;
     void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName,
                  const Services::Lin::LinFrameResponseUpdate& msg) override;
+
+    void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName,
+                 const Services::I2c::WireI2cFrameEvent& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName,
+                 const Services::I2c::I2cAcknowledge& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName,
+                 const Services::I2c::WireI2cControllerConfig& msg) override;
 
     void SendMsg(const IServiceEndpoint*, const std::string& targetParticipantName,
                  const Services::Orchestration::NextSimTask& msg) override;
@@ -455,7 +471,9 @@ private:
 
     std::tuple<
         ControllerMap<Services::Can::IMsgForCanController>, ControllerMap<Services::Ethernet::IMsgForEthController>,
-        ControllerMap<Services::Flexray::IMsgForFlexrayController>, ControllerMap<Services::Lin::IMsgForLinController>,
+        ControllerMap<Services::Flexray::IMsgForFlexrayController>,
+        ControllerMap<Services::I2c::IMsgForI2cController>,
+        ControllerMap<Services::Lin::IMsgForLinController>,
         ControllerMap<Services::PubSub::IMsgForDataPublisher>, ControllerMap<Services::PubSub::IMsgForDataSubscriber>,
         ControllerMap<Services::PubSub::IMsgForDataSubscriberInternal>, ControllerMap<Services::Rpc::IMsgForRpcClient>,
         ControllerMap<Services::Rpc::IMsgForRpcServer>, ControllerMap<Services::Rpc::IMsgForRpcServerInternal>,

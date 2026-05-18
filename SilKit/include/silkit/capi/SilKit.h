@@ -7,6 +7,7 @@
 #include "silkit/capi/SilKitMacros.h"
 #include "silkit/capi/Types.h"
 #include "silkit/capi/Can.h"
+#include "silkit/capi/I2c.h"
 #include "silkit/capi/Lin.h"
 #include "silkit/capi/DataPubSub.h"
 #include "silkit/capi/Rpc.h"

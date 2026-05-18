@@ -43,6 +43,10 @@ public:
     virtual auto CreateCanController(const std::string& canonicalName,
                                      const std::string& networkName) -> Services::Can::ICanController* = 0;
 
+    //! \brief Create an I2C controller at this SIL Kit participant.
+    virtual auto CreateI2cController(const std::string& canonicalName,
+                                     const std::string& networkName) -> Services::I2c::II2cController* = 0;
+
     //! \brief Create an Ethernet controller at this SIL Kit participant.
     virtual auto CreateEthernetController(const std::string& canonicalName, const std::string& networkName)
         -> Services::Ethernet::IEthernetController* = 0;

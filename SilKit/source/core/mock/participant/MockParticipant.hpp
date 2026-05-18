@@ -267,6 +267,11 @@ public:
     {
         return nullptr;
     }
+    auto CreateI2cController(const std::string& /*canonicalName*/,
+                             const std::string& /*networkName*/) -> Services::I2c::II2cController* override
+    {
+        return nullptr;
+    }
     auto CreateLinController(const std::string& /*canonicalName*/,
                              const std::string& /*networkName*/) -> Services::Lin::ILinController* override
     {
@@ -404,6 +409,10 @@ public:
     void SendMsg(const IServiceEndpoint* /*from*/, const Services::Lin::LinControllerStatusUpdate& /*msg*/) override {}
     void SendMsg(const IServiceEndpoint* /*from*/, const Services::Lin::LinWakeupPulse& /*msg*/) override {}
 
+    void SendMsg(const IServiceEndpoint* /*from*/, const Services::I2c::WireI2cFrameEvent& /*msg*/) override {}
+    void SendMsg(const IServiceEndpoint* /*from*/, const Services::I2c::I2cAcknowledge& /*msg*/) override {}
+    void SendMsg(const IServiceEndpoint* /*from*/, const Services::I2c::WireI2cControllerConfig& /*msg*/) override {}
+
     void SendMsg(const IServiceEndpoint* /*from*/, const Services::PubSub::WireDataMessageEvent& /*msg*/) override {}
 
     void SendMsg(const IServiceEndpoint* /*from*/, const Services::Rpc::FunctionCall& /*msg*/) override {}
@@ -539,6 +548,19 @@ public:
     }
     void SendMsg(const IServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/,
                  const Services::Lin::LinWakeupPulse& /*msg*/) override
+    {
+    }
+
+    void SendMsg(const IServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/,
+                 const Services::I2c::WireI2cFrameEvent& /*msg*/) override
+    {
+    }
+    void SendMsg(const IServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/,
+                 const Services::I2c::I2cAcknowledge& /*msg*/) override
+    {
+    }
+    void SendMsg(const IServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/,
+                 const Services::I2c::WireI2cControllerConfig& /*msg*/) override
     {
     }
 

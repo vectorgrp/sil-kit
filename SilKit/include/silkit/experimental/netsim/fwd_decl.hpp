@@ -23,6 +23,9 @@ class ISimulatedEthernetController;
 namespace Lin {
 class ISimulatedLinController;
 }
+namespace I2c {
+class ISimulatedI2cController;
+}
 
 } // namespace NetworkSimulation
 } // namespace Experimental

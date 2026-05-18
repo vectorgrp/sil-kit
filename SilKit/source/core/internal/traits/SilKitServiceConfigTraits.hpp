@@ -31,6 +31,7 @@ using SilKitServiceTraitConfigType_t = typename SilKitServiceTraitConfigType<Ser
 
 DefineSilKitServiceTrait_ConfigType(SilKit::Services::Can::CanController, SilKit::Config::CanController);
 DefineSilKitServiceTrait_ConfigType(SilKit::Services::Ethernet::EthController, SilKit::Config::EthernetController);
+DefineSilKitServiceTrait_ConfigType(SilKit::Services::I2c::I2cController, SilKit::Config::I2cController);
 DefineSilKitServiceTrait_ConfigType(SilKit::Services::Lin::LinController, SilKit::Config::LinController);
 DefineSilKitServiceTrait_ConfigType(SilKit::Services::Flexray::FlexrayController, SilKit::Config::FlexrayController);
 

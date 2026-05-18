@@ -46,6 +46,9 @@ DefineSilKitMsgTrait_SerdesName(SilKit::Services::Ethernet::WireEthernetFrameEve
 DefineSilKitMsgTrait_SerdesName(SilKit::Services::Ethernet::EthernetFrameTransmitEvent, "ETHERNETFRAMETRANSMITEVENT");
 DefineSilKitMsgTrait_SerdesName(SilKit::Services::Ethernet::EthernetStatus, "ETHERNETSTATUS");
 DefineSilKitMsgTrait_SerdesName(SilKit::Services::Ethernet::EthernetSetMode, "ETHERNETSETMODE");
+DefineSilKitMsgTrait_SerdesName(SilKit::Services::I2c::WireI2cFrameEvent, "I2CFRAMEEVENT");
+DefineSilKitMsgTrait_SerdesName(SilKit::Services::I2c::I2cAcknowledge, "I2CACKNOWLEDGE");
+DefineSilKitMsgTrait_SerdesName(SilKit::Services::I2c::WireI2cControllerConfig, "I2CCONTROLLERCONFIG");
 DefineSilKitMsgTrait_SerdesName(SilKit::Services::Lin::LinSendFrameRequest, "SENDFRAMEREQUEST");
 DefineSilKitMsgTrait_SerdesName(SilKit::Services::Lin::LinSendFrameHeaderRequest, "SENDFRAMEHEADERREQUEST");
 DefineSilKitMsgTrait_SerdesName(SilKit::Services::Lin::LinTransmission, "TRANSMISSION");

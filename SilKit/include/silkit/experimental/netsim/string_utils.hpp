@@ -41,6 +41,8 @@ std::ostream& operator<<(std::ostream& out, SimulatedNetworkType type)
         return out << "FlexRay";
     case SimulatedNetworkType::Ethernet:
         return out << "Ethernet";
+    case SimulatedNetworkType::I2C:
+        return out << "I2C";
     }
 
     return out << "unknown(" << static_cast<uint32_t>(type) << ")";

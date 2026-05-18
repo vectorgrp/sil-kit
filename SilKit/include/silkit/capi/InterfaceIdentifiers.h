@@ -29,7 +29,8 @@ typedef struct
 #define SK_ID_SERVICE_Rpc 6
 #define SK_ID_SERVICE_Participant 7
 #define SK_ID_SERVICE_NetworkSimulation 8
-#define SK_ID_SERVICE_END 9 //!< sentinel
+#define SK_ID_SERVICE_I2c 9
+#define SK_ID_SERVICE_END 10 //!< sentinel
 
 #define SK_INVALID_DATATYPE_ID 0
 #define SK_INVALID_VERSION 0
@@ -345,5 +346,25 @@ typedef struct
     SK_ID_MAKE(NetworkSimulation, SilKit_Experimental_NetSim_LinFrameResponseUpdate)
 #define SilKit_Experimental_NetSim_LinControllerStatusUpdate_STRUCT_VERSION \
     SK_ID_MAKE(NetworkSimulation, SilKit_Experimental_NetSim_LinControllerStatusUpdate)
+
+// I2C
+
+// I2C data type IDs
+#define SilKit_I2cFrame_DATATYPE_ID               1
+#define SilKit_I2cFrameEvent_DATATYPE_ID          2
+#define SilKit_I2cFrameTransmitEvent_DATATYPE_ID  3
+#define SilKit_I2cControllerConfig_DATATYPE_ID    4
+
+// I2C data type versions
+#define SilKit_I2cFrame_VERSION               1
+#define SilKit_I2cFrameEvent_VERSION          1
+#define SilKit_I2cFrameTransmitEvent_VERSION  1
+#define SilKit_I2cControllerConfig_VERSION    1
+
+// I2C make versioned IDs
+#define SilKit_I2cFrame_STRUCT_VERSION              SK_ID_MAKE(I2c, SilKit_I2cFrame)
+#define SilKit_I2cFrameEvent_STRUCT_VERSION         SK_ID_MAKE(I2c, SilKit_I2cFrameEvent)
+#define SilKit_I2cFrameTransmitEvent_STRUCT_VERSION SK_ID_MAKE(I2c, SilKit_I2cFrameTransmitEvent)
+#define SilKit_I2cControllerConfig_STRUCT_VERSION   SK_ID_MAKE(I2c, SilKit_I2cControllerConfig)
 
 SILKIT_END_DECLS

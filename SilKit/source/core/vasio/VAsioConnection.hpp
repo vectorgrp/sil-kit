@@ -43,6 +43,7 @@
 #include "LoggerMessage.hpp"
 #include "VAsioCapabilities.hpp"
 #include "WireLinMessages.hpp"
+#include "WireI2cMessages.hpp"
 #include "Uri.hpp"
 #include "Metrics.hpp"
 
@@ -235,7 +236,9 @@ private: // data types
         Services::Flexray::FlexraySymbolTransmitEvent, Services::Flexray::FlexrayCycleStartEvent,
         Services::Flexray::FlexrayHostCommand, Services::Flexray::FlexrayControllerConfig,
         Services::Flexray::FlexrayTxBufferConfigUpdate, Services::Flexray::WireFlexrayTxBufferUpdate,
-        Services::Flexray::FlexrayPocStatusEvent, Core::Discovery::ParticipantDiscoveryEvent,
+        Services::Flexray::FlexrayPocStatusEvent, Services::I2c::WireI2cFrameEvent,
+        Services::I2c::I2cAcknowledge, Services::I2c::WireI2cControllerConfig,
+        Core::Discovery::ParticipantDiscoveryEvent,
         Core::Discovery::ServiceDiscoveryEvent, Core::RequestReply::RequestReplyCall,
         Core::RequestReply::RequestReplyCallReturn, VSilKit::MetricsUpdate,
 

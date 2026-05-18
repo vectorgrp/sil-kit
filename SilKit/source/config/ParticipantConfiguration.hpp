@@ -61,6 +61,25 @@ struct CanController
 };
 
 // ================================================================================
+//  I2C controller service
+// ================================================================================
+
+//! \brief I2C controller service
+struct I2cController
+{
+    static constexpr auto GetNetworkType() -> NetworkType
+    {
+        return NetworkType::I2C;
+    }
+
+    std::string name;
+    std::optional<std::string> network;
+
+    std::vector<std::string> useTraceSinks;
+    Replay replay;
+};
+
+// ================================================================================
 //  LIN controller service
 // ================================================================================
 
@@ -362,6 +381,7 @@ struct ParticipantConfiguration : public IParticipantConfiguration
     std::string participantName;
 
     std::vector<CanController> canControllers;
+    std::vector<I2cController> i2cControllers;
     std::vector<LinController> linControllers;
     std::vector<EthernetController> ethernetControllers;
     std::vector<FlexrayController> flexrayControllers;

@@ -11,6 +11,7 @@
 #include "silkit/services/flexray/FlexrayDatatypes.hpp"
 #include "silkit/services/ethernet/EthernetDatatypes.hpp"
 #include "silkit/services/lin/LinDatatypes.hpp"
+#include "silkit/services/i2c/I2cDatatypes.hpp"
 
 namespace SilKit {
 namespace Experimental {
@@ -27,6 +28,7 @@ enum class SimulatedNetworkType
     LIN = SilKit_NetworkType_LIN,
     Ethernet = SilKit_NetworkType_Ethernet,
     FlexRay = SilKit_NetworkType_FlexRay,
+    I2C = SilKit_NetworkType_I2C,
 };
 
 // --------------------------------
@@ -193,6 +195,24 @@ struct LinControllerStatusUpdate
 };
 
 } // namespace Lin
+
+namespace I2c {
+
+struct I2cFrameRequest
+{
+    SilKit::Services::I2c::I2cFrame frame; //!< The I2C frame requested to be sent
+    void* userContext;                     //!< Optional pointer provided by user when sending the frame
+};
+
+struct I2cControllerConfig
+{
+    SilKit::Services::I2c::I2cControllerMode mode;         //!< Master or Slave
+    SilKit::Services::I2c::I2cAddress        slaveAddress; //!< Address of this controller when in Slave mode
+    SilKit::Services::I2c::I2cAddressMode    slaveAddressMode; //!< 7-bit or 10-bit address mode
+    SilKit::Services::I2c::I2cSpeedMode      speedMode;    //!< Standard, Fast, FastPlus, or HighSpeed
+};
+
+} // namespace I2c
 
 } // namespace NetworkSimulation
 } // namespace Experimental

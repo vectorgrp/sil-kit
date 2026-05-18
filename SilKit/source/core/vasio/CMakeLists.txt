@@ -22,6 +22,7 @@ target_link_libraries(I_SilKit_Core_VAsio
     INTERFACE I_SilKit_Services_Can
     INTERFACE I_SilKit_Services_Ethernet
     INTERFACE I_SilKit_Services_Flexray
+    INTERFACE I_SilKit_Services_I2c
     INTERFACE I_SilKit_Services_Lin
     INTERFACE I_SilKit_Services_Logging
     INTERFACE I_SilKit_Services_Metrics

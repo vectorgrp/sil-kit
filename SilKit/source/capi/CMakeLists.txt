@@ -4,6 +4,7 @@
 
 add_library(O_SilKit_Capi OBJECT
     CapiCan.cpp
+    CapiI2c.cpp
     CapiDataPubSub.cpp
     CapiEthernet.cpp
     CapiExceptions.hpp

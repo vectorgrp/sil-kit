@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 #include "can/fwd_decl.hpp"
+#include "i2c/fwd_decl.hpp"
 #include "ethernet/fwd_decl.hpp"
 #include "flexray/fwd_decl.hpp"
 #include "lin/fwd_decl.hpp"

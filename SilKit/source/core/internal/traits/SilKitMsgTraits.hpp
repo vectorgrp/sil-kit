@@ -128,6 +128,9 @@ DefineSilKitMsgTrait_TypeName(SilKit::Services::Ethernet, WireEthernetFrameEvent
 DefineSilKitMsgTrait_TypeName(SilKit::Services::Ethernet, EthernetFrameTransmitEvent);
 DefineSilKitMsgTrait_TypeName(SilKit::Services::Ethernet, EthernetStatus);
 DefineSilKitMsgTrait_TypeName(SilKit::Services::Ethernet, EthernetSetMode);
+DefineSilKitMsgTrait_TypeName(SilKit::Services::I2c, WireI2cFrameEvent);
+DefineSilKitMsgTrait_TypeName(SilKit::Services::I2c, I2cAcknowledge);
+DefineSilKitMsgTrait_TypeName(SilKit::Services::I2c, WireI2cControllerConfig);
 DefineSilKitMsgTrait_TypeName(SilKit::Services::Lin, LinSendFrameRequest);
 DefineSilKitMsgTrait_TypeName(SilKit::Services::Lin, LinSendFrameHeaderRequest);
 DefineSilKitMsgTrait_TypeName(SilKit::Services::Lin, LinTransmission);
@@ -156,6 +159,7 @@ DefineSilKitMsgTrait_HistSize(SilKit::Core::Discovery, ParticipantDiscoveryEvent
 DefineSilKitMsgTrait_HistSize(SilKit::Services::PubSub, WireDataMessageEvent, 1);
 DefineSilKitMsgTrait_HistSize(SilKit::Services::Orchestration, WorkflowConfiguration, 1);
 DefineSilKitMsgTrait_HistSize(SilKit::Services::Lin, WireLinControllerConfig, 1);
+DefineSilKitMsgTrait_HistSize(SilKit::Services::I2c, WireI2cControllerConfig, 1);
 
 // Messages with enforced self delivery
 DefineSilKitMsgTrait_EnforceSelfDelivery(SilKit::Services::Orchestration, ParticipantStatus);

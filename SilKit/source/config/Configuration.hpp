@@ -38,7 +38,8 @@ enum class NetworkType
     Ethernet,
     FlexRay,
     Data,
-    RPC
+    RPC,
+    I2C
 };
 inline auto to_string(NetworkType networkType) -> std::string;
 
@@ -218,6 +219,8 @@ auto to_string(NetworkType networkType) -> std::string
         return "Data";
     case NetworkType::RPC:
         return "RPC";
+    case NetworkType::I2C:
+        return "I2C";
     default:
         return "Unknown";
     }

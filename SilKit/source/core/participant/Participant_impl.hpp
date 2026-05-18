@@ -8,6 +8,7 @@
 #include <string>
 
 #include "CanController.hpp"
+#include "I2cController.hpp"
 #include "EthController.hpp"
 #include "FlexrayController.hpp"
 #include "LinController.hpp"
@@ -318,6 +319,39 @@ auto Participant<SilKitConnectionT>::CreateCanController(const std::string& cano
         _replayScheduler->ConfigureController(controllerConfig.name, controller, controllerConfig.replay,
                                               controllerConfig.network.value(), controllerConfig.GetNetworkType());
     }
+
+    auto* traceSource = dynamic_cast<ITraceMessageSource*>(controller);
+    if (traceSource)
+    {
+        AddTraceSinksToSourceInternal(traceSource, controllerConfig);
+    }
+
+    return controller;
+}
+
+template <class SilKitConnectionT>
+auto Participant<SilKitConnectionT>::CreateI2cController(const std::string& canonicalName,
+                                                          const std::string& networkName) -> I2c::II2cController*
+{
+    SilKit::Config::I2cController controllerConfig =
+        GetConfigByControllerName(_participantConfig.i2cControllers, canonicalName);
+    UpdateOptionalConfigValue(canonicalName, controllerConfig.network, networkName);
+
+    Core::SupplementalData supplementalData;
+    supplementalData[SilKit::Core::Discovery::controllerType] = SilKit::Core::Discovery::controllerTypeI2c;
+
+    auto controller = CreateController<I2c::I2cController>(controllerConfig, std::move(supplementalData), true, true,
+                                                            controllerConfig, &_timeProvider);
+
+    controller->RegisterServiceDiscovery();
+
+    Logging::LoggerMessage lm{_logger.get(), Logging::Level::Trace};
+    lm.SetMessage("Created controller");
+    lm.SetKeyValue(Logging::Keys::controllerType, supplementalData[SilKit::Core::Discovery::controllerType]);
+    lm.SetKeyValue(Logging::Keys::controllerName, controllerConfig.name);
+    lm.SetKeyValue(Logging::Keys::network, controllerConfig.network.value());
+    lm.SetKeyValue(Logging::Keys::serviceName, controller->GetServiceDescriptor().to_string());
+    lm.Dispatch();
 
     auto* traceSource = dynamic_cast<ITraceMessageSource*>(controller);
     if (traceSource)
@@ -1220,6 +1254,27 @@ void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from,
 
 template <class SilKitConnectionT>
 void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from,
+                                             const Services::I2c::WireI2cFrameEvent& msg)
+{
+    SendMsgImpl(from, msg);
+}
+
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from,
+                                             const Services::I2c::I2cAcknowledge& msg)
+{
+    SendMsgImpl(from, msg);
+}
+
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from,
+                                             const Services::I2c::WireI2cControllerConfig& msg)
+{
+    SendMsgImpl(from, msg);
+}
+
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from,
                                              const Services::PubSub::WireDataMessageEvent& msg)
 {
     SendMsgImpl(from, msg);
@@ -1510,6 +1565,27 @@ void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const
 template <class SilKitConnectionT>
 void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName,
                                              const Services::Lin::LinFrameResponseUpdate& msg)
+{
+    SendMsgImpl(from, targetParticipantName, msg);
+}
+
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName,
+                                             const Services::I2c::WireI2cFrameEvent& msg)
+{
+    SendMsgImpl(from, targetParticipantName, msg);
+}
+
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName,
+                                             const Services::I2c::I2cAcknowledge& msg)
+{
+    SendMsgImpl(from, targetParticipantName, msg);
+}
+
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName,
+                                             const Services::I2c::WireI2cControllerConfig& msg)
 {
     SendMsgImpl(from, targetParticipantName, msg);
 }

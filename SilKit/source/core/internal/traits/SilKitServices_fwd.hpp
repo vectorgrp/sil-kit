@@ -10,6 +10,7 @@ namespace Config {
 inline namespace V1 {
 struct CanController;
 struct EthernetController;
+struct I2cController;
 struct LinController;
 struct FlexrayController;
 struct RpcClient;
@@ -45,6 +46,9 @@ class EthController;
 namespace Can {
 class CanController;
 } // namespace Can
+namespace I2c {
+class I2cController;
+} // namespace I2c
 namespace Lin {
 class LinController;
 } // namespace Lin

@@ -5,6 +5,7 @@
 #include "datatypes.hpp"
 
 #include "can/all.hpp"
+#include "i2c/all.hpp"
 #include "ethernet/all.hpp"
 #include "flexray/all.hpp"
 #include "lin/all.hpp"

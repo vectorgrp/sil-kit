@@ -23,6 +23,7 @@
 #include "WireDataMessages.hpp"
 #include "WireEthernetMessages.hpp"
 #include "WireFlexrayMessages.hpp"
+#include "WireI2cMessages.hpp"
 #include "WireLinMessages.hpp"
 #include "WireRpcMessages.hpp"
 #include "Metrics.hpp"
@@ -131,6 +132,13 @@ public:
                          const Services::Lin::LinFrameResponseUpdate& msg) = 0;
 
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from,
+                         const Services::I2c::WireI2cFrameEvent& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from,
+                         const Services::I2c::I2cAcknowledge& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from,
+                         const Services::I2c::WireI2cControllerConfig& msg) = 0;
+
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from,
                          const Services::PubSub::WireDataMessageEvent& msg) = 0;
 
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Rpc::FunctionCall& msg) = 0;
@@ -217,6 +225,13 @@ public:
                          const Services::Lin::LinControllerStatusUpdate& msg) = 0;
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName,
                          const Services::Lin::LinFrameResponseUpdate& msg) = 0;
+
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName,
+                         const Services::I2c::WireI2cFrameEvent& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName,
+                         const Services::I2c::I2cAcknowledge& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName,
+                         const Services::I2c::WireI2cControllerConfig& msg) = 0;
 
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName,
                          const Services::PubSub::WireDataMessageEvent& msg) = 0;

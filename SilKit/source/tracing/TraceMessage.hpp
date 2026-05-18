@@ -7,6 +7,7 @@
 // NB: type erasing in TraceMessage requires us to use concrete types
 #include "silkit/services/ethernet/EthernetDatatypes.hpp"
 #include "silkit/services/can/CanDatatypes.hpp"
+#include "silkit/services/i2c/I2cDatatypes.hpp"
 #include "silkit/services/pubsub/PubSubDatatypes.hpp"
 #include "silkit/services/lin/LinDatatypes.hpp"
 #include "silkit/services/flexray/FlexrayDatatypes.hpp"
@@ -20,6 +21,7 @@ enum class TraceMessageType
 {
     EthernetFrame,
     CanFrameEvent,
+    I2cFrameEvent,
     LinFrame,
     FlexrayFrameEvent,
     InvalidReplayData,
@@ -44,6 +46,7 @@ struct MessageTrait;
 // specializations for supported (C++) Types
 SILKIT_TRACING_MESSAGE(Services::Ethernet::EthernetFrame, EthernetFrame)
 SILKIT_TRACING_MESSAGE(Services::Can::CanFrameEvent, CanFrameEvent)
+SILKIT_TRACING_MESSAGE(Services::I2c::I2cFrameEvent, I2cFrameEvent)
 SILKIT_TRACING_MESSAGE(Services::Lin::LinFrame, LinFrame)
 SILKIT_TRACING_MESSAGE(Services::Flexray::FlexrayFrameEvent, FlexrayFrameEvent)
 SILKIT_TRACING_MESSAGE(Services::PubSub::DataMessageEvent, DataMessageEvent)

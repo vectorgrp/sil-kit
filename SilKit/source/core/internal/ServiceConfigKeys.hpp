@@ -21,6 +21,7 @@ const std::string simulatedControllerOriginalParticipantName = "controller.netsi
 // controllerType-specific values
 // Bus types
 const std::string controllerTypeCan = "CAN";
+const std::string controllerTypeI2c = "I2C";
 const std::string controllerTypeEthernet = "Ethernet";
 const std::string controllerTypeFlexray = "FlexRay";
 const std::string controllerTypeLin = "LIN";

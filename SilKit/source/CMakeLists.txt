@@ -135,6 +135,7 @@ list(APPEND SilKitImplObjectLibraries
     O_SilKit_Extensions
     O_SilKit_Experimental_NetworkSimulatorInternals
     O_SilKit_Services_Can
+    O_SilKit_Services_I2c
     O_SilKit_Services_Ethernet
     O_SilKit_Services_Flexray
     O_SilKit_Services_Lin
