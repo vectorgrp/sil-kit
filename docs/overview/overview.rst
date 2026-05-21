@@ -115,7 +115,7 @@ The |ProductName| ecosystem comprises the following turn-key solutions:
 * The `SIL Kit FMU Importer <https://github.com/vectorgrp/sil-kit-fmu-importer>`_
   can import Functional Mockup Units (FMUs) as SIL Kit participants.
 
-* The 'SIL Kit Adapter for Byte Stream Socket <https://github.com/vectorgrp/sil-kit-adapters-byte-stream-socket>'_
+* The `SIL Kit Adapter for Byte Stream Socket <https://github.com/vectorgrp/sil-kit-adapters-byte-stream-socket>`_
   can be used to bridge any socket and transmit the content between it using SIL Kit Topics.
 
 * The 'SIL Kit Adapter veIPC <https://github.com/vectorgrp/sil-kit-adapters-veipc>'_
