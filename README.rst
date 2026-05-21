@@ -64,6 +64,12 @@ The SIL Kit ecosystem comprises the following turn-key solutions:
 * The `SIL Kit FMU Importer <https://github.com/vectorgrp/sil-kit-fmu-importer>`_
   allows to import Functional Mockup Units (FMUs) as SIL Kit participants.
 
+* The `SIL Kit Adapter for Byte Stream Socket <https://github.com/vectorgrp/sil-kit-adapters-byte-stream-socket>`_
+  can be used to bridge any socket and transmit the content between it using SIL Kit Topics.
+
+* The `SIL Kit Adapter veIPC <https://github.com/vectorgrp/sil-kit-adapters-veipc>`_
+  allows attaching SIL Kit to a socket provided by the Vector MICROSAR Adaptive veIPC (Vector Module for Interprocessor Communication) component.
+
 Related Applications
 --------------------
 
