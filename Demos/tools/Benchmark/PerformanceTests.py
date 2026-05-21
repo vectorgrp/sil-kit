@@ -223,10 +223,12 @@ def run_test(test: Test, repository: ConfigRepository, config: Config):
     test_run = TestRun.new(test, repository)
 
     for demo in test.demos:
+        print(f"running test {test.name!r} with demo {demo.executable!r} from {repository.source_dir!r} ({repository.bin_dir!r})")
         popen = run_process(demo, config, repository.bin_dir, test=test, run=test_run)
         demo_processes.append(popen)
 
     for process in demo_processes:
+        print(f"waiting for process {process.pid} to complete")
         process.communicate()
 
 
