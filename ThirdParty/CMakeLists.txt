@@ -182,7 +182,7 @@ function(include_oatpp)
     endif ()
 
     if (CMAKE_CXX_COMPILER_ID MATCHES GNU)
-        target_compile_options(oatpp PRIVATE "-Wno-useless-cast")
+        target_compile_options(oatpp PRIVATE "-Wno-useless-cast" "-Wno-conversion")
     endif ()
 
     set_property(TARGET oatpp PROPERTY CXX_VISIBILITY_PRESET hidden)
@@ -211,5 +211,3 @@ function(silkit_add_third_party_packages)
         include_oatpp()
     endif ()
 endfunction()
-
-
