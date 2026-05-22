@@ -184,6 +184,35 @@ public:
     MOCK_METHOD(SilKit_ReturnCode, SilKit_FlexrayController_RemoveCycleStartHandler,
                 (SilKit_FlexrayController * controller, SilKit_HandlerId handlerId));
 
+    // I2cController
+
+    MOCK_METHOD(SilKit_ReturnCode, SilKit_I2cController_Create,
+                (SilKit_I2cController * *outI2cController, SilKit_Participant* participant, const char* name,
+                 const char* network));
+
+    MOCK_METHOD(SilKit_ReturnCode, SilKit_I2cController_Init,
+                (SilKit_I2cController * controller, SilKit_I2cControllerConfig* config));
+
+    MOCK_METHOD(SilKit_ReturnCode, SilKit_I2cController_SendFrame,
+                (SilKit_I2cController * controller, SilKit_I2cFrame* frame, void* userContext));
+
+    MOCK_METHOD(SilKit_ReturnCode, SilKit_I2cController_SetReadResponse,
+                (SilKit_I2cController * controller, SilKit_ByteVector* data));
+
+    MOCK_METHOD(SilKit_ReturnCode, SilKit_I2cController_AddFrameHandler,
+                (SilKit_I2cController * controller, void* context, SilKit_I2cFrameHandler_t handler,
+                 SilKit_Direction directionMask, SilKit_HandlerId* outHandlerId));
+
+    MOCK_METHOD(SilKit_ReturnCode, SilKit_I2cController_RemoveFrameHandler,
+                (SilKit_I2cController * controller, SilKit_HandlerId handlerId));
+
+    MOCK_METHOD(SilKit_ReturnCode, SilKit_I2cController_AddFrameTransmitHandler,
+                (SilKit_I2cController * controller, void* context, SilKit_I2cFrameTransmitHandler_t handler,
+                 SilKit_HandlerId* outHandlerId));
+
+    MOCK_METHOD(SilKit_ReturnCode, SilKit_I2cController_RemoveFrameTransmitHandler,
+                (SilKit_I2cController * controller, SilKit_HandlerId handlerId));
+
     // LinController
 
     MOCK_METHOD(SilKit_ReturnCode, SilKit_LinController_Create,

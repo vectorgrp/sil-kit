@@ -13,6 +13,7 @@
 #include "silkit/services/can/string_utils.hpp"
 #include "silkit/services/ethernet/string_utils.hpp"
 #include "silkit/services/flexray/string_utils.hpp"
+#include "silkit/services/i2c/string_utils.hpp"
 #include "silkit/services/lin/string_utils.hpp"
 #include "silkit/services/pubsub/string_utils.hpp"
 #include "silkit/services/rpc/string_utils.hpp"
@@ -28,6 +29,7 @@
 #include "WireCanMessages.hpp"
 #include "WireEthernetMessages.hpp"
 #include "WireFlexrayMessages.hpp"
+#include "WireI2cMessages.hpp"
 #include "WireLinMessages.hpp"
 #include "WireRpcMessages.hpp"
 #include "WireDataMessages.hpp"
@@ -65,6 +67,10 @@ MAKE_FORMATTER(SilKit::Services::Flexray::FlexrayTxBufferConfigUpdate);
 MAKE_FORMATTER(SilKit::Services::Flexray::WireFlexrayFrameEvent);
 MAKE_FORMATTER(SilKit::Services::Flexray::WireFlexrayFrameTransmitEvent);
 MAKE_FORMATTER(SilKit::Services::Flexray::WireFlexrayTxBufferUpdate);
+
+MAKE_FORMATTER(SilKit::Services::I2c::I2cAcknowledge);
+MAKE_FORMATTER(SilKit::Services::I2c::WireI2cControllerConfig);
+MAKE_FORMATTER(SilKit::Services::I2c::WireI2cFrameEvent);
 
 MAKE_FORMATTER(SilKit::Services::Lin::LinChecksumModel);
 MAKE_FORMATTER(SilKit::Services::Lin::LinControllerConfig);

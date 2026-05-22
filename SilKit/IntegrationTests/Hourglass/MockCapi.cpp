@@ -350,6 +350,61 @@ extern "C"
         return globalCapi->SilKit_FlexrayController_RemoveCycleStartHandler(controller, handlerId);
     }
 
+    // I2c
+
+    SilKit_ReturnCode SilKitCALL SilKit_I2cController_Create(SilKit_I2cController** outI2cController,
+                                                              SilKit_Participant* participant, const char* name,
+                                                              const char* network)
+    {
+        return globalCapi->SilKit_I2cController_Create(outI2cController, participant, name, network);
+    }
+
+    SilKit_ReturnCode SilKitCALL SilKit_I2cController_Init(SilKit_I2cController* controller,
+                                                            SilKit_I2cControllerConfig* config)
+    {
+        return globalCapi->SilKit_I2cController_Init(controller, config);
+    }
+
+    SilKit_ReturnCode SilKitCALL SilKit_I2cController_SendFrame(SilKit_I2cController* controller,
+                                                                 SilKit_I2cFrame* frame, void* userContext)
+    {
+        return globalCapi->SilKit_I2cController_SendFrame(controller, frame, userContext);
+    }
+
+    SilKit_ReturnCode SilKitCALL SilKit_I2cController_SetReadResponse(SilKit_I2cController* controller,
+                                                                       SilKit_ByteVector* data)
+    {
+        return globalCapi->SilKit_I2cController_SetReadResponse(controller, data);
+    }
+
+    SilKit_ReturnCode SilKitCALL SilKit_I2cController_AddFrameHandler(SilKit_I2cController* controller, void* context,
+                                                                       SilKit_I2cFrameHandler_t handler,
+                                                                       SilKit_Direction directionMask,
+                                                                       SilKit_HandlerId* outHandlerId)
+    {
+        return globalCapi->SilKit_I2cController_AddFrameHandler(controller, context, handler, directionMask,
+                                                                 outHandlerId);
+    }
+
+    SilKit_ReturnCode SilKitCALL SilKit_I2cController_RemoveFrameHandler(SilKit_I2cController* controller,
+                                                                          SilKit_HandlerId handlerId)
+    {
+        return globalCapi->SilKit_I2cController_RemoveFrameHandler(controller, handlerId);
+    }
+
+    SilKit_ReturnCode SilKitCALL SilKit_I2cController_AddFrameTransmitHandler(
+        SilKit_I2cController* controller, void* context, SilKit_I2cFrameTransmitHandler_t handler,
+        SilKit_HandlerId* outHandlerId)
+    {
+        return globalCapi->SilKit_I2cController_AddFrameTransmitHandler(controller, context, handler, outHandlerId);
+    }
+
+    SilKit_ReturnCode SilKitCALL SilKit_I2cController_RemoveFrameTransmitHandler(SilKit_I2cController* controller,
+                                                                                  SilKit_HandlerId handlerId)
+    {
+        return globalCapi->SilKit_I2cController_RemoveFrameTransmitHandler(controller, handlerId);
+    }
+
     // Lin
 
     SilKit_ReturnCode SilKitCALL SilKit_LinController_Create(SilKit_LinController** outLinController,

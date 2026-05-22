@@ -37,3 +37,12 @@ add_library(O_SilKit_Services_I2c OBJECT
 target_link_libraries(O_SilKit_Services_I2c
     PUBLIC I_SilKit_Services_I2c
 )
+
+add_silkit_test_to_executable(SilKitUnitTests
+    SOURCES
+        Test_I2cControllerTrivialSim.cpp
+    LIBS
+        S_SilKitImpl
+        I_SilKit_Core_Mock_Participant
+        O_SilKit_Core_Mock_NullConnection
+)

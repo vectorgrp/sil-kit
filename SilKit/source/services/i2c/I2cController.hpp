@@ -130,22 +130,22 @@ private:
 //  Inline Implementations
 // ================================================================================
 
-void I2cController::AddSink(ITraceMessageSink* sink, SilKit::Config::NetworkType /*networkType*/)
+inline void I2cController::AddSink(ITraceMessageSink* sink, SilKit::Config::NetworkType /*networkType*/)
 {
     _tracer.AddSink(GetServiceDescriptor(), *sink);
 }
 
-void I2cController::SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor)
+inline void I2cController::SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor)
 {
     _serviceDescriptor = serviceDescriptor;
 }
 
-auto I2cController::GetServiceDescriptor() const -> const Core::ServiceDescriptor&
+inline auto I2cController::GetServiceDescriptor() const -> const Core::ServiceDescriptor&
 {
     return _serviceDescriptor;
 }
 
-auto I2cController::GetTracer() -> Tracer*
+inline auto I2cController::GetTracer() -> Tracer*
 {
     return &_tracer;
 }
