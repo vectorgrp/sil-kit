@@ -1,0 +1,53 @@
+{
+    // VS Code task definitions for configuring/building with the debug CMake preset.
+    // Both tasks call .vscode/cmake-vs.cmd so they always run inside a VS toolchain env.
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "CMake Configure (debug preset, VS env)",
+            "type": "shell",
+            "command": "${workspaceFolder}\\.vscode\\cmake-vs.cmd",
+            "options": {
+                "shell": {
+                    "executable": "C:\\Windows\\System32\\cmd.exe",
+                    "args": [
+                        "/d",
+                        "/c"
+                    ]
+                }
+            },
+            "args": [
+                "--preset",
+                "debug"
+            ],
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "CMake Build (debug preset, VS env)",
+            // Default build task; runs configure first via dependsOn.
+            "type": "shell",
+            "command": "${workspaceFolder}\\.vscode\\cmake-vs.cmd",
+            "options": {
+                "shell": {
+                    "executable": "C:\\Windows\\System32\\cmd.exe",
+                    "args": [
+                        "/d",
+                        "/c"
+                    ]
+                }
+            },
+            "args": [
+                "--build",
+                "--preset",
+                "debug"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "dependsOn": "CMake Configure (debug preset, VS env)",
+            "problemMatcher": []
+        }
+    ]
+}

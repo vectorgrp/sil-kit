@@ -1,0 +1,22 @@
+{
+    // Workspace-local tooling settings for Windows/MSVC development.
+    // CMake calls are routed through .vscode/cmake-vs.cmd and terminals default
+    // to a profile that preloads the Visual Studio developer environment.
+    "cmake.useCMakePresets": "always",
+    "cmake.cmakePath": "${workspaceFolder}\\.vscode\\cmake-vs.cmd",
+    "terminal.integrated.profiles.windows": {
+        "VS Dev PowerShell (x64)": {
+            "source": "PowerShell",
+            "args": [
+                "-NoExit",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                "${workspaceFolder}\\.vscode\\vs-dev-shell.ps1",
+                "-Arch",
+                "x64"
+            ]
+        }
+    },
+    "terminal.integrated.defaultProfile.windows": "VS Dev PowerShell (x64)"
+}
