@@ -22,7 +22,7 @@ assemble_file_string()
 # Yes this is weird that we single out some directories and the include "."
 # But the regex filters only work if more than one path is provided
 result="$(licensecheck --check='\.c.*$|\.h.*$|\.py|CMakeLists.txt|\.sh' \
-    --ignore='ThirdParty|.git|.clang-format' \
+    --ignore='ThirdParty|.git|.clang-format|\.vscode/cmake-vs\.cmd' \
     --recursive -- ./SilKit/* ./Demos/* ./Utilities/* .)"
 
 numfiles=$(echo "$result" | wc -l)
