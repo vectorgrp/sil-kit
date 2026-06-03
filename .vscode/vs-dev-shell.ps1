@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 Vector Informatik GmbH
+#
+# SPDX-License-Identifier: MIT
+
 # Loads a Visual Studio developer shell into the current PowerShell session.
 # Usage examples:
 #   .\.vscode\vs-dev-shell.ps1

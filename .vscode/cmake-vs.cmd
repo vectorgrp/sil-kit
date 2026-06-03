@@ -1,3 +1,4 @@
+@REM SPDX-FileCopyrightText: 2025 Vector Informatik GmbH
 @REM Wrapper used by VS Code tasks and CMake Tools.
 @REM It discovers a Visual Studio installation, initializes the MSVC dev environment,
 @REM then forwards all arguments to cmake so configure/build use consistent toolchains.

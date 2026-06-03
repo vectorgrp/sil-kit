@@ -1,3 +1,4 @@
+// SPDX-FileCopyrightText: 2025 Vector Informatik GmbH
 {
     // Workspace-local tooling settings for Windows/MSVC development.
     // CMake calls are routed through .vscode/cmake-vs.cmd and terminals default
