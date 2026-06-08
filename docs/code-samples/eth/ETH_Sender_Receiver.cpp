@@ -50,8 +50,6 @@ const std::string message{"Ensure that the payload is at least 46 bytes to const
                     "a valid Ethernet frame ------------------------------"};
 const std::vector<uint8_t> payload{message.begin(), message.end()};
 
-const std::array<uint8_t, 2> frameCheckSequence{0x00, 0x00};  // optional for 
-
 EthernetFrame frame{};
 std::copy(destinationAddress.begin(), destinationAddress.end(), std::back_inserter(frame));
 std::copy(sourceAddress.begin(), sourceAddress.end(), std::back_inserter(frame));

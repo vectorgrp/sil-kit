@@ -121,8 +121,11 @@ An optional second parameter of |AddFrameTransmitHandler| allows to specify the 
 Receiving Ethernet Frame Events
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-An |EthernetFrame| is received as an |EthernetFrameEvent| consisting of a ``transmitId`` used to identify
-the acknowledgment of the frame, a timestamp and the actual |EthernetFrame|.
+An |EthernetFrame| is received as an |EthernetFrameEvent| consisting of a timestamp, direction,
+an optional ``userContext`` pointer, and the actual |EthernetFrame|.
+
+To correlate a transmission acknowledgment with a sent frame, pass a ``userContext`` value to
+|SendFrame| and read it back from the corresponding |EthernetFrameTransmitEvent|.
 
 To receive Ethernet frames, a frame handler must be registered using |AddFrameHandler|. The handler is called whenever 
 an Ethernet frame is received::

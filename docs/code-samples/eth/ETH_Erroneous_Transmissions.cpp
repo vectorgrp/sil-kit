@@ -54,10 +54,10 @@ sender_FrameTransmitHandler(ethernetSender, frameTransmitEvent);
 // ------------------------------------------------------------
 // Erroneous Transmission: EthernetTransmitStatus::LinkDown
 ethernetSender->Activate();
-ethernetSender->SendFrame(ethernetFrame);
+ethernetSender->SendFrame(frame);
 
 // As long as the Ethernet link is not successfully established,
-// the MessageAckHandler callback will be triggered and call the registered handler:
+// the FrameTransmitHandler callback will be triggered and call the registered handler:
 sender_FrameTransmitHandler(ethernetSender, frameTransmitEvent);
 // with frameTransmitEvent.status == EthernetTransmitStatus::LinkDown
 
@@ -66,10 +66,10 @@ sender_FrameTransmitHandler(ethernetSender, frameTransmitEvent);
 // Assumption: Ethernet link is already successfully established.
 for (auto i = 0; i < 50; i++)
 {
-    ethernetSender->SendFrame(ethernetFrame);
+    ethernetSender->SendFrame(frame);
 }
 
-// Sending 50 messages directly one after the other will call the registered sender_MessageAckHandler
+// Sending 50 messages directly one after the other will call the registered FrameTransmitHandler
 // positively with some EthernetTransmitStatus::Transmitted until the transmit queue overflows
 // and the Ethernet messages are acknowledged with status EthernetTransmitStatus::Dropped.
 
@@ -84,7 +84,7 @@ std::copy(sourceAddress.begin(), sourceAddress.end(), std::back_inserter(invalid
 std::copy(etherType.begin(), etherType.end(), std::back_inserter(invalidFrame));
 std::copy(longPayload.begin(), longPayload.end(), std::back_inserter(invalidFrame));
 
-ethernetSender->SendFrame(invalidEthernetFrame);
+ethernetSender->SendFrame(invalidFrame);
 
 // The MessageAckHandler callback will be triggered and call the registered handler:
 sender_FrameTransmitHandler(ethernetSender, frameTransmitEvent);
