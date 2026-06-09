@@ -1,5 +1,13 @@
 ---
 Description: Example include configuration for CAN Controllers
+Logging:
+  Sinks:
+    - Type: Stdout
+      Level: Info
+      Experimental:
+        DisabledTopics: TraceMessage
+        EnabledTopics: Can
+
 CanControllers:
 - Name: CAN1
   Replay:
@@ -27,3 +35,4 @@ Tracing:
   - Name: sink1
     Type: Mdf4File
     OutputPath: someFile.mf4
+    EnabledTopics: Can

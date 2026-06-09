@@ -216,8 +216,13 @@ void YamlReader::Read(SilKit::Config::Sink& obj)
     OptionalRead(obj.type, "Type");
     OptionalRead(obj.level, "Level");
     OptionalRead(obj.format, "Format");
-    OptionalRead(obj.disabledTopics, "DisabledTopics");
-    OptionalRead(obj.enabledTopics, "EnabledTopics");
+
+    auto&& child = GetChildSafe("Experimental");
+    if(child.IsValid())
+    {
+        child.OptionalRead(obj.disabledTopics, "DisabledTopics");
+        child.OptionalRead(obj.enabledTopics, "EnabledTopics");
+    }
 
     if (obj.type == SilKit::Config::Sink::Type::File)
     {

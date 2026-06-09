@@ -83,6 +83,7 @@ struct Sink
     Type type{Type::Remote};
     Services::Logging::Level level{Services::Logging::Level::Info};
     std::string logName;
+    // currenlty lives in Sink >> Experimental >>
     std::vector<Services::Logging::Topic> disabledTopics{};
     std::vector<Services::Logging::Topic> enabledTopics{};
 };

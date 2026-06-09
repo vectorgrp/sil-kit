@@ -120,7 +120,13 @@ Tracing:
   - Name: sink1
     Type: Mdf4File
     OutputPath: someFile.mf4
- 
+Logging:
+  Sinks:
+    - Type: Stdout
+      Level: Info
+      Experimental:
+        DisabledTopics: TraceMessage
+        EnabledTopics: Can
     )raw";
 
     auto cfg = SilKit::Config::ParticipantConfigurationFromStringImpl(configString);
