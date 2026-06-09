@@ -41,13 +41,6 @@ public:
     MockLogger()
     {
         ON_CALL(*this, GetLogLevel).WillByDefault(testing::Return(Level::Trace));
-        // Topic filtering for Log methods
-        /* ON_CALL(*this, Log(testing::_, testing::_, testing::_))
-            .WillByDefault(
-            [this](Level level, Topic topic, const std::string& msg) {
-                if (!IsTopicEnabled(topic)) return;
-                LogImpl(level, topic, msg);
-            });*/
     }
 
     std::vector<Topic> disabledTopics;
