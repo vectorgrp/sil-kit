@@ -40,7 +40,8 @@ const std::string message{"Ensure that the payload is at least 46 bytes to const
 const std::vector<uint8_t> payload{ message.begin(), message.end() };
 
 EthernetFrame frame;
-std::copy(destinationAddress.begin(), destinationAddress.end(), std::back_inserter(frame));
+std::vector<uint8_t> data;
+std::copy(destinationAddress.begin(), destinationAddress.end(), std::back_inserter(data));
 std::copy(sourceAddress.begin(), sourceAddress.end(), std::back_inserter(frame));
 std::copy(etherType.begin(), etherType.end(), std::back_inserter(frame));
 std::copy(payload.begin(), payload.end(), std::back_inserter(frame));
