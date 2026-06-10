@@ -52,16 +52,16 @@ const std::vector<uint8_t> payload{message.begin(), message.end()};
 
 
 std::vector<uint8_t> data;
-std::copy(destinationAddress.begin(), destinationAddress.end(), std::back_inserter(frame));
-std::copy(sourceAddress.begin(), sourceAddress.end(), std::back_inserter(frame));
-std::copy(vlanTag.begin(), vlanTag.end(), std::back_inserter(frame));
-std::copy(etherType.begin(), etherType.end(), std::back_inserter(frame));
-std::copy(payload.begin(), payload.end(), std::back_inserter(frame));
-std::copy(frameCheckSequence.begin(), frameCheckSequence.end(), std::back_inserter(frame));
+std::copy(destinationAddress.begin(), destinationAddress.end(), std::back_inserter(data));
+std::copy(sourceAddress.begin(), sourceAddress.end(), std::back_inserter(data));
+std::copy(vlanTag.begin(), vlanTag.end(), std::back_inserter(data));
+std::copy(etherType.begin(), etherType.end(), std::back_inserter(data));
+std::copy(payload.begin(), payload.end(), std::back_inserter(data));
+std::copy(frameCheckSequence.begin(), frameCheckSequence.end(), std::back_inserter(data));
 
 // The returned transmitId can be used to check if the ethernetFrameTransmitEvent
 // that should be triggered after a successful reception has the same transmitId.
-auto transmitId = ethernetSender->SendFrame(frame);
+auto transmitId = ethernetSender->SendFrame(EthernetFrame{data});
 
 
 // ------------------------------------------------------------
