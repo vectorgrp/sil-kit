@@ -14,7 +14,7 @@ jobs:
     name: License checks for SIL Kit sources
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           submodules: false
       - name: Install Dependencies
@@ -33,7 +33,7 @@ jobs:
     outputs:
       run_builds: ${{ steps.build_check.outputs.run_builds }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           submodules: false
 
@@ -50,7 +50,7 @@ jobs:
     name: 🦙 DCO Signing Check
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           submodules: false
 
@@ -62,7 +62,7 @@ jobs:
     name: Format checks for SIL Kit sources
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           submodules: false
       - name: Check Formatting
@@ -76,7 +76,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [check-run-builds, check-dco-signed]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           submodules: true
       - name: Run clang-tidy
@@ -90,7 +90,7 @@ jobs:
 
       - name: Artifact
         id: artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: clang_tidy_reports
           path: |
