@@ -125,8 +125,8 @@ Logging:
     - Type: Stdout
       Level: Info
       Experimental:
-        DisabledTopics: TraceMessage
-        EnabledTopics: Can
+        DisabledTopics: [MessageTracing, Flexray]
+        EnabledTopics: [Can]
     )raw";
 
     auto cfg = SilKit::Config::ParticipantConfigurationFromStringImpl(configString);
@@ -138,6 +138,7 @@ Logging:
     auto participantConfigRef = *std::dynamic_pointer_cast<ParticipantConfiguration>(ref_cfg);
 
     ASSERT_EQ(participantConfig, participantConfigRef);
+    ASSERT_TRUE(participantConfig.logging.sinks.at(0).enabledTopics.at(0) == SilKit::Services::Logging::Topic::Can);
 }
 TEST_F(Test_ParticipantConfiguration, participant_config_from_string_includes)
 {

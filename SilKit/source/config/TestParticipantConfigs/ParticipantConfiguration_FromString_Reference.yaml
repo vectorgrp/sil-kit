@@ -5,8 +5,8 @@ Logging:
     - Type: Stdout
       Level: Info
       Experimental:
-        DisabledTopics: TraceMessage
-        EnabledTopics: Can
+        DisabledTopics: [MessageTracing, Flexray]
+        EnabledTopics: [Can]
 
 CanControllers:
 - Name: CAN1

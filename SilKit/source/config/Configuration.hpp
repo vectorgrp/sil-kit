@@ -230,7 +230,8 @@ auto to_string(NetworkType networkType) -> std::string
 
 bool operator==(const Sink& lhs, const Sink& rhs)
 {
-    return lhs.type == rhs.type && lhs.level == rhs.level && lhs.format == rhs.format && lhs.logName == rhs.logName;
+    return lhs.type == rhs.type && lhs.level == rhs.level && lhs.format == rhs.format && lhs.logName == rhs.logName
+           && lhs.disabledTopics == rhs.disabledTopics && lhs.enabledTopics == rhs.enabledTopics;
 }
 
 bool operator<(const Sink& lhs, const Sink& rhs)

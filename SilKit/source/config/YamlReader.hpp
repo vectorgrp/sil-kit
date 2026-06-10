@@ -156,6 +156,11 @@ public:
     template <typename T>
     void Read(std::vector<T>& val)
     {
+        if (!IsSequence())
+        {
+            throw MakeConfigurationError("Expected a sequence.");
+        }
+
         for (auto&& i : _node.cchildren())
         {
             T element{};
