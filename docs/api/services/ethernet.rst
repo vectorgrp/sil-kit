@@ -88,15 +88,17 @@ A valid frame can be setup and sent as follows::
                       " a valid Ethernet frame ----------------------------");
   const std::vector<uint8_t> payload{ message.begin(), message.end() };
 
-  EthernetFrame frame{};
-  std::copy(destinationAddress.begin(), destinationAddress.end(), std::back_inserter(frame.raw));
-  std::copy(sourceAddress.begin(), sourceAddress.end(), std::back_inserter(frame.raw));
+  std::vector<uint8_t> raw;
+  std::copy(destinationAddress.begin(), destinationAddress.end(), std::back_inserter(raw));
+  std::copy(sourceAddress.begin(), sourceAddress.end(), std::back_inserter(raw));
   auto etherTypeBytes = reinterpret_cast<const uint8_t*>(&etherType);
-  frame.raw.push_back(etherTypeBytes[1]);  // We assume our platform to be little-endian
-  frame.raw.push_back(etherTypeBytes[0]);
-  std::copy(payload.begin(), payload.end(), std::back_inserter(frame.raw));
+  raw.push_back(etherTypeBytes[1]);  // We assume our platform to be little-endian
+  raw.push_back(etherTypeBytes[0]);
+  std::copy(payload.begin(), payload.end(), std::back_inserter(raw));
 
-  ethernetController->SendFrame(frame);
+  static int msgId = 0;
+  void* const userContext = reinterpret_cast<void*>(static_cast<intptr_t>(msgId++));
+  ethernetController->SendFrame(EthernetFrame{raw}, userContext);
 
 Transmission Acknowledgement
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -50,18 +50,20 @@ const std::string message{"Ensure that the payload is at least 46 bytes to const
                     "a valid Ethernet frame ------------------------------"};
 const std::vector<uint8_t> payload{message.begin(), message.end()};
 
+std::vector<uint8_t> raw;
+std::copy(destinationAddress.begin(), destinationAddress.end(), std::back_inserter(raw));
+std::copy(sourceAddress.begin(), sourceAddress.end(), std::back_inserter(raw));
+std::copy(vlanTag.begin(), vlanTag.end(), std::back_inserter(raw));
+std::copy(etherType.begin(), etherType.end(), std::back_inserter(raw));
+std::copy(payload.begin(), payload.end(), std::back_inserter(raw));
+std::copy(frameCheckSequence.begin(), frameCheckSequence.end(), std::back_inserter(raw));
 
-std::vector<uint8_t> data;
-std::copy(destinationAddress.begin(), destinationAddress.end(), std::back_inserter(data));
-std::copy(sourceAddress.begin(), sourceAddress.end(), std::back_inserter(data));
-std::copy(vlanTag.begin(), vlanTag.end(), std::back_inserter(data));
-std::copy(etherType.begin(), etherType.end(), std::back_inserter(data));
-std::copy(payload.begin(), payload.end(), std::back_inserter(data));
-std::copy(frameCheckSequence.begin(), frameCheckSequence.end(), std::back_inserter(data));
+static int msgId = 0;
+void* const userContext = reinterpret_cast<void*>(static_cast<intptr_t>(msgId++));
 
 // The returned transmitId can be used to check if the ethernetFrameTransmitEvent
 // that should be triggered after a successful reception has the same transmitId.
-auto transmitId = ethernetSender->SendFrame(EthernetFrame{data});
+auto transmitId = ethernetSender->SendFrame(EthernetFrame{raw}, userContext);
 
 
 // ------------------------------------------------------------
