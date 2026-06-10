@@ -35,4 +35,3 @@ Tracing:
   - Name: sink1
     Type: Mdf4File
     OutputPath: someFile.mf4
-    EnabledTopics: Can
