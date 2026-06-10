@@ -8,6 +8,7 @@
 #include "IServiceEndpoint.hpp"
 #include "ServiceDescriptor.hpp"
 #include "traits/SilKitMsgTraits.hpp"
+#include "traits/SilKitLoggingTraits.hpp"
 
 #include "YamlParser.hpp"
 
@@ -35,7 +36,9 @@ void TraceMessageCommon(Logging::ILoggerInternal* logger, const char* messageStr
     {
         if (logger->GetLogLevel() == Logging::Level::Trace)
         {
-            auto lm = logger->MakeMessage(Logging::Level::Trace, Logging::Topic::MessageTracing)
+            constexpr auto msgTopic = Core::SilKitTopicTrait<SilKitMessageT>::Topic();
+            auto lm = logger->MakeMessage(Logging::Level::Trace,
+                                          msgTopic != Logging::Topic::None ? msgTopic : Logging::Topic::MessageTracing)
                           .SetMessage(messageString)
                           .AddKeyValue(addr->GetServiceDescriptor())
                           .AddKeyValue(Logging::Keys::msg, msg);

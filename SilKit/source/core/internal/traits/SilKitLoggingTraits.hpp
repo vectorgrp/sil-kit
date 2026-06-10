@@ -107,6 +107,55 @@ DefineSilKitLoggingTrait_Topic(SilKit::Services::Rpc::RpcDiscoverer, SilKit::Ser
 DefineSilKitLoggingTrait_Topic(SilKit::Tracing::ReplayScheduler, SilKit::Services::Logging::Topic::Tracing);
 DefineSilKitLoggingTrait_Topic(SilKit::Tracing::PcapSink, SilKit::Services::Logging::Topic::Tracing);
 
+// Message type to topic mappings (used by TraceMessageCommon)
+DefineSilKitLoggingTrait_Topic(SilKit::Services::Can::WireCanFrameEvent, SilKit::Services::Logging::Topic::Can);
+DefineSilKitLoggingTrait_Topic(SilKit::Services::Can::CanFrameTransmitEvent, SilKit::Services::Logging::Topic::Can);
+DefineSilKitLoggingTrait_Topic(SilKit::Services::Can::CanControllerStatus, SilKit::Services::Logging::Topic::Can);
+DefineSilKitLoggingTrait_Topic(SilKit::Services::Can::CanConfigureBaudrate, SilKit::Services::Logging::Topic::Can);
+DefineSilKitLoggingTrait_Topic(SilKit::Services::Can::CanSetControllerMode, SilKit::Services::Logging::Topic::Can);
+
+DefineSilKitLoggingTrait_Topic(SilKit::Services::Ethernet::WireEthernetFrameEvent, SilKit::Services::Logging::Topic::Ethernet);
+DefineSilKitLoggingTrait_Topic(SilKit::Services::Ethernet::EthernetFrameTransmitEvent, SilKit::Services::Logging::Topic::Ethernet);
+DefineSilKitLoggingTrait_Topic(SilKit::Services::Ethernet::EthernetStatus, SilKit::Services::Logging::Topic::Ethernet);
+DefineSilKitLoggingTrait_Topic(SilKit::Services::Ethernet::EthernetSetMode, SilKit::Services::Logging::Topic::Ethernet);
+
+DefineSilKitLoggingTrait_Topic(SilKit::Services::Flexray::WireFlexrayFrameEvent, SilKit::Services::Logging::Topic::Flexray);
+DefineSilKitLoggingTrait_Topic(SilKit::Services::Flexray::WireFlexrayFrameTransmitEvent, SilKit::Services::Logging::Topic::Flexray);
+DefineSilKitLoggingTrait_Topic(SilKit::Services::Flexray::FlexraySymbolEvent, SilKit::Services::Logging::Topic::Flexray);
+DefineSilKitLoggingTrait_Topic(SilKit::Services::Flexray::FlexraySymbolTransmitEvent, SilKit::Services::Logging::Topic::Flexray);
+DefineSilKitLoggingTrait_Topic(SilKit::Services::Flexray::FlexrayCycleStartEvent, SilKit::Services::Logging::Topic::Flexray);
+DefineSilKitLoggingTrait_Topic(SilKit::Services::Flexray::FlexrayHostCommand, SilKit::Services::Logging::Topic::Flexray);
+DefineSilKitLoggingTrait_Topic(SilKit::Services::Flexray::FlexrayControllerConfig, SilKit::Services::Logging::Topic::Flexray);
+DefineSilKitLoggingTrait_Topic(SilKit::Services::Flexray::FlexrayTxBufferConfigUpdate, SilKit::Services::Logging::Topic::Flexray);
+DefineSilKitLoggingTrait_Topic(SilKit::Services::Flexray::WireFlexrayTxBufferUpdate, SilKit::Services::Logging::Topic::Flexray);
+DefineSilKitLoggingTrait_Topic(SilKit::Services::Flexray::FlexrayPocStatusEvent, SilKit::Services::Logging::Topic::Flexray);
+
+DefineSilKitLoggingTrait_Topic(SilKit::Services::Lin::LinSendFrameRequest, SilKit::Services::Logging::Topic::Lin);
+DefineSilKitLoggingTrait_Topic(SilKit::Services::Lin::LinSendFrameHeaderRequest, SilKit::Services::Logging::Topic::Lin);
+DefineSilKitLoggingTrait_Topic(SilKit::Services::Lin::LinTransmission, SilKit::Services::Logging::Topic::Lin);
+DefineSilKitLoggingTrait_Topic(SilKit::Services::Lin::LinWakeupPulse, SilKit::Services::Logging::Topic::Lin);
+DefineSilKitLoggingTrait_Topic(SilKit::Services::Lin::WireLinControllerConfig, SilKit::Services::Logging::Topic::Lin);
+DefineSilKitLoggingTrait_Topic(SilKit::Services::Lin::LinControllerStatusUpdate, SilKit::Services::Logging::Topic::Lin);
+DefineSilKitLoggingTrait_Topic(SilKit::Services::Lin::LinFrameResponseUpdate, SilKit::Services::Logging::Topic::Lin);
+
+DefineSilKitLoggingTrait_Topic(SilKit::Services::PubSub::WireDataMessageEvent, SilKit::Services::Logging::Topic::Pubsub);
+
+DefineSilKitLoggingTrait_Topic(SilKit::Services::Rpc::FunctionCall, SilKit::Services::Logging::Topic::Rpc);
+DefineSilKitLoggingTrait_Topic(SilKit::Services::Rpc::FunctionCallResponse, SilKit::Services::Logging::Topic::Rpc);
+
+DefineSilKitLoggingTrait_Topic(SilKit::Core::Discovery::ParticipantDiscoveryEvent, SilKit::Services::Logging::Topic::ServiceDiscovery);
+DefineSilKitLoggingTrait_Topic(SilKit::Core::Discovery::ServiceDiscoveryEvent, SilKit::Services::Logging::Topic::ServiceDiscovery);
+
+DefineSilKitLoggingTrait_Topic(SilKit::Core::RequestReply::RequestReplyCall, SilKit::Services::Logging::Topic::RequestReply);
+DefineSilKitLoggingTrait_Topic(SilKit::Core::RequestReply::RequestReplyCallReturn, SilKit::Services::Logging::Topic::RequestReply);
+
+DefineSilKitLoggingTrait_Topic(SilKit::Services::Orchestration::SystemCommand, SilKit::Services::Logging::Topic::LifeCycle);
+DefineSilKitLoggingTrait_Topic(SilKit::Services::Orchestration::ParticipantStatus, SilKit::Services::Logging::Topic::LifeCycle);
+DefineSilKitLoggingTrait_Topic(SilKit::Services::Orchestration::WorkflowConfiguration, SilKit::Services::Logging::Topic::LifeCycle);
+DefineSilKitLoggingTrait_Topic(SilKit::Services::Orchestration::NextSimTask, SilKit::Services::Logging::Topic::TimeSync);
+
+DefineSilKitLoggingTrait_Topic(VSilKit::MetricsUpdate, SilKit::Services::Logging::Topic::Metrics);
+
 } // namespace Core
 
 template <class ServiceT>
