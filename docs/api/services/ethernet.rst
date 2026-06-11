@@ -88,15 +88,17 @@ A valid frame can be setup and sent as follows::
                       " a valid Ethernet frame ----------------------------");
   const std::vector<uint8_t> payload{ message.begin(), message.end() };
 
-  EthernetFrame frame{};
-  std::copy(destinationAddress.begin(), destinationAddress.end(), std::back_inserter(frame.raw));
-  std::copy(sourceAddress.begin(), sourceAddress.end(), std::back_inserter(frame.raw));
+  std::vector<uint8_t> raw;
+  std::copy(destinationAddress.begin(), destinationAddress.end(), std::back_inserter(raw));
+  std::copy(sourceAddress.begin(), sourceAddress.end(), std::back_inserter(raw));
   auto etherTypeBytes = reinterpret_cast<const uint8_t*>(&etherType);
-  frame.raw.push_back(etherTypeBytes[1]);  // We assume our platform to be little-endian
-  frame.raw.push_back(etherTypeBytes[0]);
-  std::copy(payload.begin(), payload.end(), std::back_inserter(frame.raw));
+  raw.push_back(etherTypeBytes[1]);  // We assume our platform to be little-endian
+  raw.push_back(etherTypeBytes[0]);
+  std::copy(payload.begin(), payload.end(), std::back_inserter(raw));
 
-  ethernetController->SendFrame(frame);
+  static int msgId = 0;
+  void* const userContext = reinterpret_cast<void*>(static_cast<intptr_t>(msgId++));
+  ethernetController->SendFrame(EthernetFrame{raw}, userContext);
 
 Transmission Acknowledgement
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -121,8 +123,11 @@ An optional second parameter of |AddFrameTransmitHandler| allows to specify the 
 Receiving Ethernet Frame Events
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-An |EthernetFrame| is received as an |EthernetFrameEvent| consisting of a ``transmitId`` used to identify
-the acknowledgment of the frame, a timestamp and the actual |EthernetFrame|.
+An |EthernetFrame| is received as an |EthernetFrameEvent| consisting of a timestamp, direction,
+an optional ``userContext`` pointer, and the actual |EthernetFrame|.
+
+To correlate a transmission acknowledgment with a sent frame, pass a ``userContext`` value to
+|SendFrame| and read it back from the corresponding |EthernetFrameTransmitEvent|.
 
 To receive Ethernet frames, a frame handler must be registered using |AddFrameHandler|. The handler is called whenever 
 an Ethernet frame is received::
