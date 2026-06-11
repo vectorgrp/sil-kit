@@ -85,4 +85,12 @@ add_silkit_test_to_executable(SilKitUnitTests
 )
 
 
+add_executable(SilKit_version_gen sil-kit-version-gen.cpp)
+set_target_properties(SilKit_version_gen PROPERTIES
+    CXX_STANDARD 17
+    OUTPUT_NAME "sil-kit-version-gen"
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"
+)
+
+
 add_subdirectory(tests)
