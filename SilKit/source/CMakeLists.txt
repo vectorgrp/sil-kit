@@ -14,44 +14,20 @@ add_subdirectory(dashboard)
 
 find_package(Threads REQUIRED)
 
-# Encode the current GIT and version infos into version_macros.hpp
-# If this file is present in the current source directory we assume
-# that this source-tree is a non-git/packaged source tree and re-use
-# the file unmodified.
-set(GIT_DIR "${PROJECT_SOURCE_DIR}/../.git")
-set(GIT_HEAD_FILE "${GIT_DIR}/HEAD")
-set(VERSION_MACROS_HPP ${CMAKE_CURRENT_BINARY_DIR}/version_macros.hpp)
-if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/version_macros.hpp)
-    message(STATUS "SIL Kit: using deployed version_macros.hpp")
-    set(VERSION_MACROS_HPP ${CMAKE_CURRENT_LIST_DIR}/version_macros.hpp)
-elseif(EXISTS "${GIT_HEAD_FILE}")
-    configure_file(
-        "MakeVersionMacros.cmake.in"
-        ${CMAKE_CURRENT_BINARY_DIR}/MakeVersionMacros.cmake
-        @ONLY)
-    include(${CMAKE_CURRENT_BINARY_DIR}/MakeVersionMacros.cmake)
-    if(SILKIT_INSTALL_SOURCE)
-        install(FILES
-            ${CMAKE_CURRENT_BINARY_DIR}/version_macros.hpp
-            DESTINATION
-            ${INSTALL_SOURCE_DIR}/SilKit/source
-            COMPONENT source
-        )
-    endif()
-else()
-    message(STATUS "SIL Kit: Cannot determine hash of current git head! GIT_HEAD_HASH will be set to UNKNOWN")
-    set(GIT_HEAD_HASH "UNKNOWN")
-    configure_file(
-        version_macros.hpp.in
-        ${CMAKE_CURRENT_BINARY_DIR}/version_macros.hpp
-        @ONLY)
+# SilKitVersionMacros.h is committed to source and updated by running sil-kit-version-gen.
+# No generation at configure time — any build tool can use the file as a regular source file.
+# To update: sil-kit-version-gen --major X --minor Y --patch Z [--source-dir .] <path-to-header>
+set(VERSION_MACROS_HPP "${CMAKE_CURRENT_LIST_DIR}/../include/silkit/capi/SilKitVersionMacros.h")
+if(NOT EXISTS "${VERSION_MACROS_HPP}")
+    message(FATAL_ERROR
+        "SilKitVersionMacros.h not found. Run sil-kit-version-gen to create it:\n"
+        "  sil-kit-version-gen --major ${SILKIT_VERSION_MAJOR} --minor ${SILKIT_VERSION_MINOR}"
+        " --patch ${SILKIT_VERSION_PATCH} ${VERSION_MACROS_HPP}")
 endif()
-# now install the configured version_macros.hpp as a header into the `include/silkit/capi` directory.
-# NB please keep the version_macros.hpp C11 compatible!
+
 install(FILES
     ${VERSION_MACROS_HPP}
     DESTINATION ${INSTALL_INCLUDE_DIR}/silkit/capi
-    RENAME SilKitVersionMacros.h
     COMPONENT dev
 )
 
@@ -183,7 +159,6 @@ target_link_libraries(O_SilKit_CreateSilKitRegistryImpl
 add_library(O_SilKit_VersionImpl OBJECT
     SilKitVersionImpl.cpp
     SilKitVersionImpl.hpp
-    ${VERSION_MACROS_HPP}
 )
 
 target_link_libraries(O_SilKit_VersionImpl

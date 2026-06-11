@@ -4,7 +4,7 @@
 
 #include "SilKitVersionImpl.hpp"
 
-#include "version_macros.hpp"
+#include "silkit/capi/SilKitVersionMacros.h"
 
 namespace SilKit {
 namespace Version {
