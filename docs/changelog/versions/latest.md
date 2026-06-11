@@ -1,5 +1,3 @@
-# [5.0.6] - UNRELEASED
+# [5.0.7] - UNRELEASED
 
-## Fixed
 
-- `demo`: removed third-party dependency from the performance test script
