@@ -1,3 +1,5 @@
 # [5.0.6] - UNRELEASED
 
-> This changelog entry is still empty.
+## Fixed
+
+- `demo`: removed third-party dependency from the performance test script
