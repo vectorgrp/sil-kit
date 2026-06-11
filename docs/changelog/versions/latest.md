@@ -1,9 +1,6 @@
-# [5.0.6] - UNRELEASED
+# [5.0.6] - 2026-06-11
 
-## Fixed
-
-- `demo`: removed third-party dependency from the performance test script
+- `demo`: removed third-party dependency from performance test script
 - `docs`: Fixed ethernet docs and samples
 - `build`: Silence warning emitted from oatpp
-- `demo`: Remove third-party dependencies from performance test script 
 

@@ -1,13 +1,13 @@
 # compile commands for clangd  support
 compile_commands.json
 # ignore cmake-generated path directories
-build*/
-_build*/
-install*/
-_install*/
+/build*/
+/_build*/
+/install*/
+/_install*/
 .vscode
 .vs
-out
+/out
 
 # ignore CLion files
 .idea/
@@ -24,7 +24,7 @@ Products/*
 *__pycache__*
 
 # ci/build_all generates a lot of build directories
-_build_*/
+/_build_*/
 
 # ignore cmake CMakeUserPresets
 CMakeUserPresets.json

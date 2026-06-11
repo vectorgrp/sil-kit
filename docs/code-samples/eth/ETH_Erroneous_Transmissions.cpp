@@ -39,13 +39,16 @@ const std::string message{"Ensure that the payload is at least 46 bytes to const
                     "a valid Ethernet frame ------------------------------"};
 const std::vector<uint8_t> payload{ message.begin(), message.end() };
 
-EthernetFrame frame;
-std::copy(destinationAddress.begin(), destinationAddress.end(), std::back_inserter(frame));
-std::copy(sourceAddress.begin(), sourceAddress.end(), std::back_inserter(frame));
-std::copy(etherType.begin(), etherType.end(), std::back_inserter(frame));
-std::copy(payload.begin(), payload.end(), std::back_inserter(frame));
+std::vector<uint8_t> raw;
+std::copy(destinationAddress.begin(), destinationAddress.end(), std::back_inserter(raw));
+std::copy(sourceAddress.begin(), sourceAddress.end(), std::back_inserter(raw));
+std::copy(etherType.begin(), etherType.end(), std::back_inserter(raw));
+std::copy(payload.begin(), payload.end(), std::back_inserter(raw));
 
-ethernetSender->SendFrame(frame);
+static int msgId = 0;
+void* const userContext = reinterpret_cast<void*>(static_cast<intptr_t>(msgId++));
+
+ethernetSender->SendFrame(EthernetFrame{raw}, userContext);
 
 // The FrameTransmitHandler callback will be triggered and call the registered handler:
 sender_FrameTransmitHandler(ethernetSender, frameTransmitEvent);
@@ -54,10 +57,13 @@ sender_FrameTransmitHandler(ethernetSender, frameTransmitEvent);
 // ------------------------------------------------------------
 // Erroneous Transmission: EthernetTransmitStatus::LinkDown
 ethernetSender->Activate();
-ethernetSender->SendFrame(ethernetFrame);
+{
+    void* const userContext = reinterpret_cast<void*>(static_cast<intptr_t>(msgId++));
+    ethernetSender->SendFrame(EthernetFrame{raw}, userContext);
+}
 
 // As long as the Ethernet link is not successfully established,
-// the MessageAckHandler callback will be triggered and call the registered handler:
+// the FrameTransmitHandler callback will be triggered and call the registered handler:
 sender_FrameTransmitHandler(ethernetSender, frameTransmitEvent);
 // with frameTransmitEvent.status == EthernetTransmitStatus::LinkDown
 
@@ -66,10 +72,11 @@ sender_FrameTransmitHandler(ethernetSender, frameTransmitEvent);
 // Assumption: Ethernet link is already successfully established.
 for (auto i = 0; i < 50; i++)
 {
-    ethernetSender->SendFrame(ethernetFrame);
+    void* const userContext = reinterpret_cast<void*>(static_cast<intptr_t>(msgId++));
+    ethernetSender->SendFrame(EthernetFrame{raw}, userContext);
 }
 
-// Sending 50 messages directly one after the other will call the registered sender_MessageAckHandler
+// Sending 50 messages directly one after the other will call the registered FrameTransmitHandler
 // positively with some EthernetTransmitStatus::Transmitted until the transmit queue overflows
 // and the Ethernet messages are acknowledged with status EthernetTransmitStatus::Dropped.
 
@@ -78,13 +85,16 @@ for (auto i = 0; i < 50; i++)
 const std::string longMessage(4000, 'a'); // much longer than the maximum allowed Ethernet frame size of 1534 bytes
 const std::vector<uint8_t> longPayload{longMessage.begin(), longMessage.end()};
 
-EthernetFrame invalidFrame;
-std::copy(destinationAddress.begin(), destinationAddress.end(), std::back_inserter(invalidFrame));
-std::copy(sourceAddress.begin(), sourceAddress.end(), std::back_inserter(invalidFrame));
-std::copy(etherType.begin(), etherType.end(), std::back_inserter(invalidFrame));
-std::copy(longPayload.begin(), longPayload.end(), std::back_inserter(invalidFrame));
+raw.clear();
+std::copy(destinationAddress.begin(), destinationAddress.end(), std::back_inserter(raw));
+std::copy(sourceAddress.begin(), sourceAddress.end(), std::back_inserter(raw));
+std::copy(etherType.begin(), etherType.end(), std::back_inserter(raw));
+std::copy(longPayload.begin(), longPayload.end(), std::back_inserter(raw));
 
-ethernetSender->SendFrame(invalidEthernetFrame);
+{
+    void* const userContext = reinterpret_cast<void*>(static_cast<intptr_t>(msgId++));
+    ethernetSender->SendFrame(EthernetFrame{raw}, userContext);
+}
 
 // The MessageAckHandler callback will be triggered and call the registered handler:
 sender_FrameTransmitHandler(ethernetSender, frameTransmitEvent);
