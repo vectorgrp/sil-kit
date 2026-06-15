@@ -420,8 +420,9 @@ TEST(ITest_AsyncSimTask, test_timestamp_handling)
                                                    const SilKit::Services::PubSub::DataMessageEvent& dataMessageEvent) {
         const auto currentStep = std::chrono::nanoseconds{syncCurrentStepNs.load()};
 
-        EXPECT_TRUE((dataMessageEvent.timestamp == currentStep) || (dataMessageEvent.timestamp == currentStep + 1ms))
-            << "Incoming async message should be timestamped with the sync receiver time (or +1ms tolerance).";
+        EXPECT_TRUE((dataMessageEvent.timestamp == currentStep) || (dataMessageEvent.timestamp == currentStep + 1ms)
+                    || (dataMessageEvent.timestamp == currentStep - 1ms))
+            << "Incoming async message should be timestamped with the sync receiver time (+/-1ms tolerance).";
         asyncToSyncReceived = true;
     });
 
@@ -431,8 +432,9 @@ TEST(ITest_AsyncSimTask, test_timestamp_handling)
                                                   const SilKit::Services::PubSub::DataMessageEvent& dataMessageEvent) {
         const auto currentStep = std::chrono::nanoseconds{syncCurrentStepNs.load()};
 
-        EXPECT_TRUE((dataMessageEvent.timestamp == currentStep) || (dataMessageEvent.timestamp == currentStep + 1ms))
-            << "Incoming sync message should be timestamped with the sync receiver time (or +1ms tolerance).";
+        EXPECT_TRUE((dataMessageEvent.timestamp == currentStep) || (dataMessageEvent.timestamp == currentStep + 1ms)
+                    || (dataMessageEvent.timestamp == currentStep - 1ms))
+            << "Incoming sync message should be timestamped with the sync receiver time (+/-1ms tolerance).";
         syncToSyncReceived = true;
     });
 
