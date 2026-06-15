@@ -125,13 +125,14 @@ def check_clang_format_version():
     # Check for supported clang - format version
     format_version = subprocess.run([CLANG_FORMAT, '--version'], capture_output=True, encoding='utf-8')
 
-    version_reg = re.compile('^.* clang-format version (\d+)\.(\d+)\.(\d+).*')
-    version = re.match(version_reg, format_version.stdout)
+    version_reg = re.compile(r'clang-format version (\d+)\.(\d+)\.(\d+)')
+    version = version_reg.search(format_version.stdout)
 
     if version is None or len(version.groups()) != 3:
         die(2, "ERROR: Could not get the clang-format version!")
 
-    major, minor, patch = version.group(1,2,3)
+    major, minor, patch = version.group(1, 2, 3)
+
     if int(major) < 13:
         die(3, "clang{} not supported!\r\n       Minimum supported version is clang-{}!", major, CLANG_VERSION)
 
