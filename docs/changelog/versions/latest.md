@@ -3,4 +3,5 @@
 - `demo`: removed third-party dependency from performance test script
 - `docs`: Fixed ethernet docs and samples
 - `build`: Silence warning emitted from oatpp
-
+- `ci`: Fix version check and tooling in ci formatting check
+- `build`: Update deprecated syntax in devcontainter
