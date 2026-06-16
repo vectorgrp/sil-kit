@@ -33,8 +33,9 @@ def die(status, fmt, *args):
     sys.exit(status)
 
 ## Check if clang-format is installed
-CLANG_VERSION = "18"
-CLANG_FORMAT = "clang-format-" + CLANG_VERSION
+CLANG_MINIMUM_VERSION = 14
+CLANG_FORMAT = "clang-format"
+
 fileExtensions = [".cpp", ".ipp", ".c", ".hpp", ".h"]
 dirs = ["SilKit", "Demos", "Utilities"]
 
@@ -133,9 +134,9 @@ def check_clang_format_version():
 
     major, minor, patch = version.group(1, 2, 3)
 
-    if int(major) < 13:
-        die(3, "clang{} not supported!\r\n       Minimum supported version is clang-{}!", major, CLANG_VERSION)
-
+    if int(major) < CLANG_MINIMUM_VERSION:
+        die(3, "clang{} not supported!\r\n       Minimum supported version is clang-{}!", major, CLANG_MINIMUM_VERSION)    
+    
     info("clang-format-{}.{}.{} found!", major, minor, patch)
 
 
