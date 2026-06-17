@@ -31,3 +31,7 @@ CMakeUserPresets.json
 
 #ignore vim swap files
 *.swp
+
+#ignore temporary merge conflict backup files
+*.orig
+
