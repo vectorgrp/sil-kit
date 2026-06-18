@@ -1,7 +1,3 @@
-# [5.0.6] - 2026-06-11
+# [5.0.7] - UNRELEASED
 
-- `demo`: removed third-party dependency from performance test script
-- `docs`: Fixed ethernet docs and samples
-- `build`: Silence warning emitted from oatpp
-- `ci`: Fix version check and tooling in ci formatting check
-- `build`: Update deprecated syntax in devcontainter
+> This changelog entry is still empty.
