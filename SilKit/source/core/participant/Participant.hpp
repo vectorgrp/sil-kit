@@ -15,7 +15,6 @@
 
 #include "silkit/services/all.hpp"
 #include "silkit/services/logging/ILogger.hpp"
-#include "silkit/participant/parameters.hpp"
 
 #include "ParticipantConfiguration.hpp"
 #include "ReplayScheduler.hpp"

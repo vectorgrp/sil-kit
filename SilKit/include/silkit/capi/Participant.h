@@ -8,7 +8,6 @@
 #include "silkit/capi/SilKitMacros.h"
 #include "silkit/capi/Types.h"
 #include "silkit/capi/Logger.h"
-#include "silkit/capi/Parameters.h"
 
 #pragma pack(push)
 #pragma pack(8)

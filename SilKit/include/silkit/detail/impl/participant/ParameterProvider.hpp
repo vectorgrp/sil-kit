@@ -6,7 +6,6 @@
 
 #include <string>
 #include <vector>
-#include "silkit/capi/Parameters.h"
 #include "silkit/participant/exception.hpp"
 
 namespace SilKit {
@@ -20,9 +19,10 @@ public:
 
     inline ~ParameterProvider() = default;
 
-    inline auto GetStringParameter(SilKit_Participant* participant, Parameter parameter) -> std::string;
+    inline auto GetParticipantName(SilKit_Participant* participant) -> std::string;
+    inline auto GetRegistryUri(SilKit_Participant* participant) -> std::string;
 
-private:
+    private:
     using StringQueryFunction = SilKit_ReturnCode(SilKitCALL*)(void*, size_t*, SilKit_Participant*);
     inline auto QueryString(SilKit_Participant* participant, StringQueryFunction stringQueryFunction) -> std::string;
 
@@ -68,17 +68,14 @@ auto ParameterProvider::QueryString(SilKit_Participant* participant,
     return std::string{buffer.data()};
 }
 
-auto ParameterProvider::GetStringParameter(SilKit_Participant* participant, Parameter parameter) -> std::string
+auto ParameterProvider::GetParticipantName(SilKit_Participant* participant) -> std::string
 {
-    switch (parameter)
-    {
-    case Parameter::ParticipantName:
-        return QueryString(participant, &SilKit_Participant_GetParticipantName);
-    case Parameter::RegistryUri:
-        return QueryString(participant, &SilKit_Participant_GetGetRegistryUri);
-    default:
-        throw SilKit::SilKitError("Unknown parameter.");
-    }
+    return QueryString(participant, &SilKit_Participant_GetParticipantName);
+}
+
+auto ParameterProvider::GetRegistryUri(SilKit_Participant* participant) -> std::string
+{
+    return QueryString(participant, &SilKit_Participant_GetGetRegistryUri);
 }
 
 } // namespace Impl

@@ -11,7 +11,6 @@
 #include "silkit/SilKit.hpp"
 #include "silkit/services/logging/ILogger.hpp"
 #include "silkit/services/orchestration/all.hpp"
-#include "silkit/participant/parameters.hpp"
 
 #include "CapiImpl.hpp"
 #include "TypeConversion.hpp"

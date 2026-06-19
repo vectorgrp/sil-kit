@@ -236,12 +236,12 @@ auto Participant::GetLogger() -> SilKit::Services::Logging::ILogger*
 
 auto Participant::GetParticipantName() const -> std::string
 {
-    return _parameterProvider->GetStringParameter(_participant, SilKit::Parameter::ParticipantName);
+    return _parameterProvider->GetParticipantName(_participant);
 }
 
 auto Participant::GetRegistryUri() const -> std::string
 {
-    return _parameterProvider->GetStringParameter(_participant, SilKit::Parameter::RegistryUri);
+    return _parameterProvider->GetRegistryUri(_participant);
 }
 
 auto Participant::ExperimentalCreateSystemController()
