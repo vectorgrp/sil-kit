@@ -86,11 +86,11 @@ typedef SilKit_ReturnCode(SilKitFPTR* SilKit_Participant_GetParticipantName_t)(v
  * \param inOutParameterValueSize The required/provided size of the value including null-termination.
  * \param participant The participant to query.
  */
-SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Participant_GetGetRegistryUri(void* outParameterValue,
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Participant_GetRegistryUri(void* outParameterValue,
                                                                              size_t* inOutParameterValueSize,
                                                                              SilKit_Participant* participant);
 
-typedef SilKit_ReturnCode(SilKitFPTR* SilKit_Participant_GetGetRegistryUri_t)(void* outParameterValue,
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_Participant_GetRegistryUri_t)(void* outParameterValue,
                                                                                size_t* inOutParameterValueSize,
                                                                                SilKit_Participant* participant);
 

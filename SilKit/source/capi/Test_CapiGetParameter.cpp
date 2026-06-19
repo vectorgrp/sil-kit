@@ -45,13 +45,13 @@ TEST_F(Test_CapiGetParameter, getregistryuri_bad_params)
     char* parameterValue{nullptr};
     size_t parameterSize;
 
-    returnCode = SilKit_Participant_GetGetRegistryUri(nullptr, &parameterSize, cMockParticipant);
+    returnCode = SilKit_Participant_GetRegistryUri(nullptr, &parameterSize, cMockParticipant);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 
-    returnCode = SilKit_Participant_GetGetRegistryUri(parameterValue, nullptr, cMockParticipant);
+    returnCode = SilKit_Participant_GetRegistryUri(parameterValue, nullptr, cMockParticipant);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
-    returnCode = SilKit_Participant_GetGetRegistryUri(parameterValue, &parameterSize, nullptr);
+    returnCode = SilKit_Participant_GetRegistryUri(parameterValue, &parameterSize, nullptr);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 }
 
@@ -79,13 +79,13 @@ TEST_F(Test_CapiGetParameter, getregistryuri_returns_required_size_and_null_term
     const std::string value{"silkit://mock.participant.silkit:0"};
 
     size_t parameterSize{0};
-    auto returnCode = SilKit_Participant_GetGetRegistryUri(nullptr, &parameterSize, cMockParticipant);
+    auto returnCode = SilKit_Participant_GetRegistryUri(nullptr, &parameterSize, cMockParticipant);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
     EXPECT_EQ(parameterSize, value.size() + 1);
 
     char buffer[64]{};
     auto bufferSize = sizeof(buffer);
-    returnCode = SilKit_Participant_GetGetRegistryUri(buffer, &bufferSize, cMockParticipant);
+    returnCode = SilKit_Participant_GetRegistryUri(buffer, &bufferSize, cMockParticipant);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
     EXPECT_EQ(bufferSize, value.size() + 1);
     EXPECT_STREQ(buffer, value.c_str());

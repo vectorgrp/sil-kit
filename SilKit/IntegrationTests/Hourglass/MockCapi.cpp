@@ -777,11 +777,11 @@ extern "C"
                                                                   participant);
     }
 
-    SilKit_ReturnCode SilKitCALL SilKit_Participant_GetGetRegistryUri(void* outParameterValue,
+    SilKit_ReturnCode SilKitCALL SilKit_Participant_GetRegistryUri(void* outParameterValue,
                                                                       size_t* inOutParameterValueSize,
                                                                       SilKit_Participant* participant)
     {
-        return globalCapi->SilKit_Participant_GetGetRegistryUri(outParameterValue, inOutParameterValueSize,
+        return globalCapi->SilKit_Participant_GetRegistryUri(outParameterValue, inOutParameterValueSize,
                                                                  participant);
     }
 

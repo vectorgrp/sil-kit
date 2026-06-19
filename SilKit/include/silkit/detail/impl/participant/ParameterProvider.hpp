@@ -78,7 +78,7 @@ auto ParameterProvider::GetParticipantName(SilKit_Participant* participant) -> s
 
 auto ParameterProvider::GetRegistryUri(SilKit_Participant* participant) -> std::string
 {
-    return QueryString(participant, &SilKit_Participant_GetGetRegistryUri);
+    return QueryString(participant, &SilKit_Participant_GetRegistryUri);
 }
 
 } // namespace Impl

@@ -123,7 +123,7 @@ try
 }
 CAPI_CATCH_EXCEPTIONS
 
-SilKit_ReturnCode SilKitCALL SilKit_Participant_GetGetRegistryUri(void* outParameterValue,
+SilKit_ReturnCode SilKitCALL SilKit_Participant_GetRegistryUri(void* outParameterValue,
                                                                   size_t* inOutParameterValueSize,
                                                                   SilKit_Participant* participant)
 try
