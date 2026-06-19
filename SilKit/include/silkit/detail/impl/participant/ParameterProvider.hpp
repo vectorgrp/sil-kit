@@ -54,6 +54,7 @@ auto ParameterProvider::QueryString(SilKit_Participant* participant,
     size_t size = 0;
 
     {
+        //Initially only get the size of the string to be queried
         const auto returnCode = stringQueryFunction(nullptr, &size, participant);
         ThrowOnError(returnCode);
     }
