@@ -60,6 +60,8 @@ auto ParameterProvider::QueryString(SilKit_Participant* participant,
 
     while (size > buffer.size())
     {
+        // Retry until the returned required size fits our buffer:
+        // the value may change between the initial size query and the copy call.
         buffer.resize(size);
         const auto returnCode = stringQueryFunction(buffer.data(), &size, participant);
         ThrowOnError(returnCode);

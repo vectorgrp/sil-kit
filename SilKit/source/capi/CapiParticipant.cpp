@@ -26,6 +26,7 @@ namespace
 auto CopyStringToOutBuffer(const std::string& value, void* outParameterValue, size_t* inOutParameterValueSize)
     -> SilKit_ReturnCode
 {
+    // Passing outParameterValue == nullptr performs a size-check only.
     const auto requiredSize = value.size() + 1; // include '\0'
 
     if (outParameterValue != nullptr)
