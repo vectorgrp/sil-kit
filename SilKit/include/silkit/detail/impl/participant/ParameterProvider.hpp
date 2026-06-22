@@ -6,27 +6,18 @@
 
 #include <string>
 #include <vector>
+
 #include "silkit/participant/exception.hpp"
 
 namespace SilKit {
 DETAIL_SILKIT_DETAIL_VN_NAMESPACE_BEGIN
 namespace Impl {
 
-class ParameterProvider
-{
-public:
-    inline ParameterProvider();
+using StringQueryFunction = SilKit_ReturnCode(SilKitCALL*)(void*, size_t*, SilKit_Participant*);
+inline auto QueryString(SilKit_Participant* participant, StringQueryFunction stringQueryFunction) -> std::string;
 
-    inline ~ParameterProvider() = default;
-
-    inline auto GetParticipantName(SilKit_Participant* participant) -> std::string;
-    inline auto GetRegistryUri(SilKit_Participant* participant) -> std::string;
-
-    private:
-    using StringQueryFunction = SilKit_ReturnCode(SilKitCALL*)(void*, size_t*, SilKit_Participant*);
-    inline auto QueryString(SilKit_Participant* participant, StringQueryFunction stringQueryFunction) -> std::string;
-
-};
+inline auto GetParticipantName(SilKit_Participant* participant) -> std::string;
+inline auto GetRegistryUri(SilKit_Participant* participant) -> std::string;
 
 } // namespace Impl
 DETAIL_SILKIT_DETAIL_VN_NAMESPACE_CLOSE
@@ -43,18 +34,13 @@ namespace SilKit {
 DETAIL_SILKIT_DETAIL_VN_NAMESPACE_BEGIN
 namespace Impl {
 
-ParameterProvider::ParameterProvider()
-{
-}
-
-auto ParameterProvider::QueryString(SilKit_Participant* participant,
-                                    StringQueryFunction stringQueryFunction) -> std::string
+auto QueryString(SilKit_Participant* participant, StringQueryFunction stringQueryFunction) -> std::string
 {
     std::vector<char> buffer;
     size_t size = 0;
 
     {
-        //Initially only get the size of the string to be queried
+        // Initially only get the size of the string to be queried
         const auto returnCode = stringQueryFunction(nullptr, &size, participant);
         ThrowOnError(returnCode);
     }
@@ -71,12 +57,12 @@ auto ParameterProvider::QueryString(SilKit_Participant* participant,
     return std::string{buffer.data()};
 }
 
-auto ParameterProvider::GetParticipantName(SilKit_Participant* participant) -> std::string
+auto GetParticipantName(SilKit_Participant* participant) -> std::string
 {
     return QueryString(participant, &SilKit_Participant_GetParticipantName);
 }
 
-auto ParameterProvider::GetRegistryUri(SilKit_Participant* participant) -> std::string
+auto GetRegistryUri(SilKit_Participant* participant) -> std::string
 {
     return QueryString(participant, &SilKit_Participant_GetRegistryUri);
 }

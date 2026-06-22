@@ -130,8 +130,6 @@ private:
     std::unique_ptr<Impl::Services::Logging::Logger> _logger;
 
     std::unique_ptr<Impl::Experimental::NetworkSimulation::NetworkSimulator> _networkSimulator;
-
-    std::unique_ptr<Impl::ParameterProvider> _parameterProvider;
 };
 
 } // namespace Impl
@@ -151,7 +149,6 @@ Participant::Participant(SilKit_Participant* participant)
     : _participant{participant}
 {
     _logger = std::make_unique<Services::Logging::Logger>(_participant);
-    _parameterProvider = std::make_unique<ParameterProvider>();
 }
 
 Participant::~Participant()
@@ -236,12 +233,12 @@ auto Participant::GetLogger() -> SilKit::Services::Logging::ILogger*
 
 auto Participant::GetParticipantName() const -> std::string
 {
-    return _parameterProvider->GetParticipantName(_participant);
+    return Impl::GetParticipantName(_participant);
 }
 
 auto Participant::GetRegistryUri() const -> std::string
 {
-    return _parameterProvider->GetRegistryUri(_participant);
+    return Impl::GetRegistryUri(_participant);
 }
 
 auto Participant::ExperimentalCreateSystemController()
