@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "silkit/participant/exception.hpp"
+#include "silkit/detail/impl/ThrowOnError.hpp"
 
 namespace SilKit {
 DETAIL_SILKIT_DETAIL_VN_NAMESPACE_BEGIN
@@ -19,20 +20,9 @@ inline auto QueryString(SilKit_Participant* participant, StringQueryFunction str
 inline auto GetParticipantName(SilKit_Participant* participant) -> std::string;
 inline auto GetRegistryUri(SilKit_Participant* participant) -> std::string;
 
-} // namespace Impl
-DETAIL_SILKIT_DETAIL_VN_NAMESPACE_CLOSE
-} // namespace SilKit
-
-
 // ================================================================================
 //  Inline Implementations
 // ================================================================================
-
-#include "silkit/detail/impl/ThrowOnError.hpp"
-
-namespace SilKit {
-DETAIL_SILKIT_DETAIL_VN_NAMESPACE_BEGIN
-namespace Impl {
 
 auto QueryString(SilKit_Participant* participant, StringQueryFunction stringQueryFunction) -> std::string
 {

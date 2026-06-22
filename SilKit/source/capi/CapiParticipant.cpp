@@ -20,10 +20,11 @@
 #include <map>
 #include <mutex>
 #include <fstream>
+#include <string_view>
 
 namespace
 {
-auto CopyStringToOutBuffer(const std::string& value, char* outStringBuffer, size_t* inOutStringBufferSize)
+auto CopyStringToOutBuffer(std::string_view value, char* outStringBuffer, size_t* inOutStringBufferSize)
     -> SilKit_ReturnCode
 {
     // Passing outStringBuffer == nullptr performs a size-check only.
