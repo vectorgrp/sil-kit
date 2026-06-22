@@ -13,7 +13,7 @@ namespace SilKit {
 DETAIL_SILKIT_DETAIL_VN_NAMESPACE_BEGIN
 namespace Impl {
 
-using StringQueryFunction = SilKit_ReturnCode(SilKitCALL*)(void*, size_t*, SilKit_Participant*);
+using StringQueryFunction = SilKit_ReturnCode(SilKitCALL*)(char*, size_t*, SilKit_Participant*);
 inline auto QueryString(SilKit_Participant* participant, StringQueryFunction stringQueryFunction) -> std::string;
 
 inline auto GetParticipantName(SilKit_Participant* participant) -> std::string;

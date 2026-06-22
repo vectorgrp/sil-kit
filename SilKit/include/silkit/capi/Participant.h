@@ -66,33 +66,33 @@ typedef SilKit_ReturnCode(SilKitFPTR* SilKit_Participant_GetLogger_t)(SilKit_Log
 
 /*! \brief Retrieve the participant name from a participant.
  *
- * \param outParameterValue A buffer to copy the null-terminated participant name to.
- *                          Passing a nullptr is valid and indicates a size-check via inOutParameterValueSize.
- * \param inOutParameterValueSize The required/provided size of the value including null-termination.
+ * \param outParticipantName A buffer to copy the null-terminated participant name to.
+ *                           Passing a nullptr is valid and indicates a size-check via inOutParticipantNameSize.
+ * \param inOutParticipantNameSize The required/provided size of the value including null-termination.
  * \param participant The participant to query.
  */
-SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Participant_GetParticipantName(void* outParameterValue,
-                                                                              size_t* inOutParameterValueSize,
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Participant_GetParticipantName(char* outParticipantName,
+                                                                              size_t* inOutParticipantNameSize,
                                                                               SilKit_Participant* participant);
 
-typedef SilKit_ReturnCode(SilKitFPTR* SilKit_Participant_GetParticipantName_t)(void* outParameterValue,
-                                                                                size_t* inOutParameterValueSize,
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_Participant_GetParticipantName_t)(char* outParticipantName,
+                                                                                size_t* inOutParticipantNameSize,
                                                                                 SilKit_Participant* participant);
 
 /*! \brief Retrieve the registry URI from a participant.
  *
- * \param outParameterValue A buffer to copy the null-terminated registry URI to.
- *                          Passing a nullptr is valid and indicates a size-check via inOutParameterValueSize.
- * \param inOutParameterValueSize The required/provided size of the value including null-termination.
+ * \param outRegistryUri A buffer to copy the null-terminated registry URI to.
+ *                       Passing a nullptr is valid and indicates a size-check via inOutRegistryUriSize.
+ * \param inOutRegistryUriSize The required/provided size of the value including null-termination.
  * \param participant The participant to query.
  */
-SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Participant_GetRegistryUri(void* outParameterValue,
-                                                                             size_t* inOutParameterValueSize,
-                                                                             SilKit_Participant* participant);
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Participant_GetRegistryUri(char* outRegistryUri,
+                                                                          size_t* inOutRegistryUriSize,
+                                                                          SilKit_Participant* participant);
 
-typedef SilKit_ReturnCode(SilKitFPTR* SilKit_Participant_GetRegistryUri_t)(void* outParameterValue,
-                                                                               size_t* inOutParameterValueSize,
-                                                                               SilKit_Participant* participant);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_Participant_GetRegistryUri_t)(char* outRegistryUri,
+                                                                            size_t* inOutRegistryUriSize,
+                                                                            SilKit_Participant* participant);
 
 SILKIT_END_DECLS
 

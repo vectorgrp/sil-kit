@@ -408,10 +408,10 @@ public:
                 (SilKit_Logger * *outLogger, SilKit_Participant* participant));
 
     MOCK_METHOD(SilKit_ReturnCode, SilKit_Participant_GetParticipantName,
-                (void* outParameterValue, size_t* outParameterValueSize, SilKit_Participant* participant));
+                (char* outParticipantName, size_t* inOutParticipantNameSize, SilKit_Participant* participant));
 
     MOCK_METHOD(SilKit_ReturnCode, SilKit_Participant_GetRegistryUri,
-                (void* outParameterValue, size_t* outParameterValueSize, SilKit_Participant* participant));
+                (char* outRegistryUri, size_t* inOutRegistryUriSize, SilKit_Participant* participant));
 
     // ParticipantConfiguration
 

@@ -23,24 +23,24 @@
 
 namespace
 {
-auto CopyStringToOutBuffer(const std::string& value, void* outParameterValue, size_t* inOutParameterValueSize)
+auto CopyStringToOutBuffer(const std::string& value, char* outStringBuffer, size_t* inOutStringBufferSize)
     -> SilKit_ReturnCode
 {
-    // Passing outParameterValue == nullptr performs a size-check only.
+    // Passing outStringBuffer == nullptr performs a size-check only.
     const auto requiredSize = value.size() + 1; // include '\0'
 
-    if (outParameterValue != nullptr)
+    if (outStringBuffer != nullptr)
     {
-        const auto bufferSize = *inOutParameterValueSize;
+        const auto bufferSize = *inOutStringBufferSize;
         if (bufferSize > 0)
         {
             const auto sizeToCopy = std::min(value.size(), bufferSize - 1);
-            value.copy(static_cast<char*>(outParameterValue), sizeToCopy);
-            static_cast<char*>(outParameterValue)[sizeToCopy] = '\0';
+            value.copy(outStringBuffer, sizeToCopy);
+            outStringBuffer[sizeToCopy] = '\0';
         }
     }
 
-    *inOutParameterValueSize = requiredSize;
+    *inOutStringBufferSize = requiredSize;
     return SilKit_ReturnCode_SUCCESS;
 }
 } // namespace
@@ -110,29 +110,29 @@ try
 }
 CAPI_CATCH_EXCEPTIONS
 
-SilKit_ReturnCode SilKitCALL SilKit_Participant_GetParticipantName(void* outParameterValue,
-                                                                   size_t* inOutParameterValueSize,
+SilKit_ReturnCode SilKitCALL SilKit_Participant_GetParticipantName(char* outParticipantName,
+                                                                   size_t* inOutParticipantNameSize,
                                                                    SilKit_Participant* participant)
 try
 {
-    ASSERT_VALID_OUT_PARAMETER(inOutParameterValueSize);
+    ASSERT_VALID_OUT_PARAMETER(inOutParticipantNameSize);
     ASSERT_VALID_POINTER_PARAMETER(participant);
 
     auto cppParticipant = reinterpret_cast<SilKit::IParticipant*>(participant);
-    return CopyStringToOutBuffer(cppParticipant->GetParticipantName(), outParameterValue, inOutParameterValueSize);
+    return CopyStringToOutBuffer(cppParticipant->GetParticipantName(), outParticipantName, inOutParticipantNameSize);
 }
 CAPI_CATCH_EXCEPTIONS
 
-SilKit_ReturnCode SilKitCALL SilKit_Participant_GetRegistryUri(void* outParameterValue,
-                                                                  size_t* inOutParameterValueSize,
-                                                                  SilKit_Participant* participant)
+SilKit_ReturnCode SilKitCALL SilKit_Participant_GetRegistryUri(char* outRegistryUri,
+                                                               size_t* inOutRegistryUriSize,
+                                                               SilKit_Participant* participant)
 try
 {
-    ASSERT_VALID_OUT_PARAMETER(inOutParameterValueSize);
+    ASSERT_VALID_OUT_PARAMETER(inOutRegistryUriSize);
     ASSERT_VALID_POINTER_PARAMETER(participant);
 
     auto cppParticipant = reinterpret_cast<SilKit::IParticipant*>(participant);
-    return CopyStringToOutBuffer(cppParticipant->GetRegistryUri(), outParameterValue, inOutParameterValueSize);
+    return CopyStringToOutBuffer(cppParticipant->GetRegistryUri(), outRegistryUri, inOutRegistryUriSize);
 }
 CAPI_CATCH_EXCEPTIONS
 
