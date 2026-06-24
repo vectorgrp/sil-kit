@@ -2,8 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "silkit/services/logging/ILogger.hpp"
-
+#include "LoggerMessage.hpp"
 #include "RpcClient.hpp"
 #include "IServiceDiscovery.hpp"
 #include "IParticipantInternal.hpp"
@@ -37,7 +36,7 @@ RpcClient::RpcClient(Core::IParticipantInternal* participant, Services::Orchestr
     : _dataSpec{dataSpec}
     , _clientUUID{clientUUID}
     , _handler{std::move(handler)}
-    , _logger{participant->GetLogger()}
+    , _logger{participant->GetLoggerInternal()}
     , _timeProvider{timeProvider}
     , _participant{participant}
 {
@@ -195,9 +194,10 @@ void RpcClient::ReceiveMessage(const FunctionCallResponse& msg)
 
         if (it == _activeCalls.end())
         {
-            std::string warningMsg{"RpcClient: Received function call response with an unknown/deleted uuid. Might be "
-                                   "a call reply that ran into a timeout."};
-            _logger->Warn(warningMsg);
+            _logger->MakeMessage(Services::Logging::Level::Warn, TopicOf(*this))
+                .SetMessage("RpcClient: Received function call response with an unknown/deleted uuid. Might be "
+                            "a call reply that ran into a timeout.")
+                .Dispatch();
             return;
         }
     };

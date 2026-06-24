@@ -6,7 +6,7 @@
 
 #include <unordered_map>
 
-#include "silkit/services/logging/ILogger.hpp"
+#include "ILoggerInternal.hpp"
 #include "silkit/vendor/ISilKitRegistry.hpp"
 #include "silkit/services/orchestration/OrchestrationDatatypes.hpp"
 
@@ -32,7 +32,7 @@ struct IRegistryEventListener
 {
     virtual ~IRegistryEventListener() = default;
 
-    virtual void OnLoggerCreated(SilKit::Services::Logging::ILogger* logger) = 0;
+    virtual void OnLoggerCreated(SilKit::Services::Logging::ILoggerInternal* logger) = 0;
     virtual void OnRegistryUri(const std::string& registryUri) = 0;
     virtual void OnParticipantConnected(const std::string& simulationName, const std::string& participantName) = 0;
     virtual void OnParticipantDisconnected(const std::string& simulationName, const std::string& participantName) = 0;
@@ -68,6 +68,10 @@ public: // methods
 
     void SetAllConnectedHandler(std::function<void()> handler) override;
     void SetAllDisconnectedHandler(std::function<void()> handler) override;
+
+    auto GetLoggerInternal() -> Services::Logging::ILoggerInternal* ;
+
+private:
     auto GetLogger() -> Services::Logging::ILogger* override;
 
 private:

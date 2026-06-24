@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 #include "ParticipantConfiguration.hpp"
+#include "LoggerMessage.hpp"
 
 #include <string>
 #include <type_traits>

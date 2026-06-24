@@ -12,6 +12,7 @@
 
 #include "EndpointAddress.hpp"
 #include "detail/NamedPipe.hpp"
+#include "ILoggerInternal.hpp"
 
 namespace SilKit {
 namespace Tracing {
@@ -23,7 +24,7 @@ public:
     // Constructors and Destructor
     PcapSink() = delete;
     PcapSink(const PcapSink&) = delete;
-    PcapSink(Services::Logging::ILogger* logger, std::string name);
+    PcapSink(Services::Logging::ILoggerInternal* logger, std::string name);
     ~PcapSink() = default;
 
     // ----------------------------------------
@@ -35,7 +36,7 @@ public:
     void Trace(SilKit::Services::TransmitDirection txRx, const Core::ServiceDescriptor& id,
                std::chrono::nanoseconds timestamp, const TraceMessage& msg) override;
 
-    auto GetLogger() const -> Services::Logging::ILogger* override;
+    auto GetLogger() const -> Services::Logging::ILoggerInternal* override;
 
     auto Name() const -> const std::string& override;
 
@@ -49,7 +50,7 @@ private:
     std::string _name;
     std::string _busName;
     std::string _outputPath;
-    Services::Logging::ILogger* _logger{nullptr};
+    Services::Logging::ILoggerInternal* _logger{nullptr};
 };
 
 } // namespace Tracing

@@ -6,7 +6,7 @@
 #include "SimBehaviorTrivial.hpp"
 #include "Assert.hpp"
 
-#include "silkit/services/logging/ILogger.hpp"
+#include "ILoggerInternal.hpp"
 
 
 namespace SilKit {
@@ -74,8 +74,9 @@ void SimBehaviorTrivial::SendMsg(WireCanFrameEvent&& canFrameEvent)
     }
     else
     {
-        _participant->GetLogger()->Warn(
-            "ICanController::SendFrame is called although can controller is not in state CanController::Started.");
+        _participant->GetLoggerInternal()->MakeMessage(SilKit::Services::Logging::Level::Warn, TopicOf(*this))
+            .SetMessage("ICanController::SendFrame is called although can controller is not in state CanController::Started.")
+            .Dispatch();
     }
 }
 

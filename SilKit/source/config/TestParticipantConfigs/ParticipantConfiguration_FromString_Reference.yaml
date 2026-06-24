@@ -1,5 +1,13 @@
 ---
 Description: Example include configuration for CAN Controllers
+Logging:
+  Sinks:
+    - Type: Stdout
+      Level: Info
+      Experimental:
+        DisabledTopics: [MessageTracing, Flexray]
+        EnabledTopics: [Can]
+
 CanControllers:
 - Name: CAN1
   Replay:

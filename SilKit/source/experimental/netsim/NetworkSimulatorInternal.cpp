@@ -17,7 +17,7 @@ namespace NetworkSimulation {
 
 NetworkSimulatorInternal::NetworkSimulatorInternal(Core::IParticipantInternal* participant)
     : _participant{participant}
-    , _logger{participant->GetLogger()}
+    , _logger{participant->GetLoggerInternal()}
 {
     _nextControllerDescriptor = 0;
     _networkSimulatorStarted = false;
@@ -30,11 +30,16 @@ void NetworkSimulatorInternal::SimulateNetwork(const std::string& networkName, S
 {
     if (_networkSimulatorStarted)
     {
-        SilKit::Services::Logging::Warn(_logger, "SimulateNetwork() must not be used after Start().");
+        _logger->MakeMessage(SilKit::Services::Logging::Level::Warn, TopicOf(*this))
+            .SetMessage("SimulateNetwork() must not be used after Start().")
+            .Dispatch();
         return;
     }
 
-    _logger->Debug("SimulateNetwork '" + networkName + "' of type " + to_string(networkType));
+    _logger->MakeMessage(SilKit::Services::Logging::Level::Debug, TopicOf(*this))
+        .SetMessage("SimulateNetwork '{}' of type {}", networkName, to_string(networkType))
+        .Dispatch();
+
     CreateSimulatedNetwork(networkName, networkType, std::move(simulatedNetwork));
 }
 
@@ -42,7 +47,9 @@ void NetworkSimulatorInternal::Start()
 {
     if (_networkSimulatorStarted)
     {
-        SilKit::Services::Logging::Warn(_logger, "Start() has already been called.");
+        _logger->MakeMessage(SilKit::Services::Logging::Level::Warn, TopicOf(*this))
+            .SetMessage("Start() has already been called.")
+            .Dispatch();
         return;
     }
 
@@ -50,7 +57,9 @@ void NetworkSimulatorInternal::Start()
 
     if (_simulatedNetworks.empty())
     {
-        SilKit::Services::Logging::Warn(_logger, "NetworkSimulator was started without any simulated networks.");
+        _logger->MakeMessage(SilKit::Services::Logging::Level::Warn, TopicOf(*this))
+            .SetMessage("NetworkSimulator was started without any simulated networks.")
+            .Dispatch();
     }
 
     // Register the service discovery AFTER the network simulator has been registered.
@@ -76,8 +85,9 @@ auto NetworkSimulatorInternal::GetServiceDescriptorString(ControllerDescriptor c
     auto serviceDescriptor_it = _serviceDescriptorByControllerDescriptor.find(controllerDescriptor);
     if (serviceDescriptor_it == _serviceDescriptorByControllerDescriptor.end())
     {
-        SilKit::Services::Logging::Warn(_logger,
-                                        "GetServiceDescriptorString queried with an unknown controllerDescriptor.");
+        _logger->MakeMessage(SilKit::Services::Logging::Level::Warn, TopicOf(*this))
+            .SetMessage("GetServiceDescriptorString queried with an unknown controllerDescriptor.")
+            .Dispatch();
         return "";
     }
     return serviceDescriptor_it->second.to_string();
@@ -146,8 +156,10 @@ void NetworkSimulatorInternal::DiscoveryHandler(SilKit::Core::Discovery::Service
         if (simulatedNetwork)
         {
             auto errorMsg = "NetworkSimulation: Network '" + networkName + "' is already simulated by '"
-                            + fromParticipantName + "'.";
-            _logger->Error(errorMsg);
+                            + fromParticipantName + "'. ";
+            _logger->MakeMessage(SilKit::Services::Logging::Level::Error, TopicOf(*this))
+                .SetMessage(errorMsg)
+                .Dispatch();
             throw SilKitError{errorMsg};
         }
     }

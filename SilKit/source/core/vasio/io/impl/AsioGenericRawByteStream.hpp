@@ -50,12 +50,12 @@ class AsioGenericRawByteStream final : public IRawByteStream
     std::shared_ptr<asio::io_context> _asioIoContext;
     AsioSocket _socket;
 
-    SilKit::Services::Logging::ILogger* _logger{nullptr};
+    SilKit::Services::Logging::ILoggerInternal* _logger{nullptr};
 
 public:
     AsioGenericRawByteStream(const AsioGenericRawByteStreamOptions& options,
                              std::shared_ptr<asio::io_context> asioIoContext, AsioSocket socket,
-                             SilKit::Services::Logging::ILogger& logger);
+                             SilKit::Services::Logging::ILoggerInternal& logger);
     ~AsioGenericRawByteStream() override;
 
 public: // IRawByteStream

@@ -29,21 +29,27 @@ void ParticipantReplies::CallAfterAllParticipantsReplied(std::function<void()> c
     _participant->ExecuteDeferred([this, completionFunction = std::move(completionFunction)]() mutable {
         if (_barrierActive)
         {
-            Services::Logging::Debug(_participant->GetLogger(),
-                                     "Still waiting for replies from participants on a previous call, action when new "
-                                     "call is replied will not be executed. This might lead to unexpected behavior.");
+            _participant->GetLoggerInternal()->MakeMessage(Services::Logging::Level::Debug, TopicOf(*this))
+                .SetMessage("Still waiting for replies from participants on a previous call, action when new "
+                                     "call is replied will not be executed. This might lead to unexpected behavior.")
+                .Dispatch();
             return;
         }
 
         auto remoteReceivers =
             _participant->GetParticipantNamesOfRemoteReceivers(_requestReplyServiceEndpoint, "REQUESTREPLYCALL");
         _expectedParticipantsToSendCallReturns = std::set<std::string>(remoteReceivers.begin(), remoteReceivers.end());
-        Services::Logging::Debug(_participant->GetLogger(), "Request replies of {} participant(s).",
-                                 _expectedParticipantsToSendCallReturns.size());
+        
+        _participant->GetLoggerInternal()->MakeMessage(Services::Logging::Level::Debug, TopicOf(*this))
+            .SetMessage("Request replies of {} participant(s).",
+                                 _expectedParticipantsToSendCallReturns.size())
+            .Dispatch();
+            
         if (_expectedParticipantsToSendCallReturns.empty())
         {
-            Services::Logging::Debug(_participant->GetLogger(),
-                                     "Called CallAfterAllParticipantsReplied() with no other known participants.");
+            _participant->GetLoggerInternal()->MakeMessage(Services::Logging::Level::Debug, TopicOf(*this))
+                .SetMessage("Called CallAfterAllParticipantsReplied() with no other known participants.")
+                .Dispatch();
             completionFunction();
             return;
         }
@@ -81,7 +87,9 @@ void ParticipantReplies::ReceiveCallReturn(std::string fromParticipant, Util::Uu
         {
             if (_completionFunction)
             {
-                Services::Logging::Debug(_participant->GetLogger(), "Request participant replies completed.");
+                _participant->GetLoggerInternal()->MakeMessage(Services::Logging::Level::Debug, TopicOf(*this))
+                    .SetMessage("Request participant replies completed.")
+                    .Dispatch();
                 _completionFunction();
             }
             _barrierActive = false;

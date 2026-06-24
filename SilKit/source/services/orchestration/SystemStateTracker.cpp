@@ -142,12 +142,12 @@ auto SystemStateTracker::UpdateParticipantStatus(const ParticipantStatus& newPar
 
     if (_logger != nullptr)
     {
-        Log::LoggerMessage lm{_logger, Log::Level::Debug};
-        lm.SetMessage("Updating participant status");
-        lm.SetKeyValue(Log::Keys::participantName, participantName);
-        lm.FormatKeyValue(Log::Keys::oldParticipantState, "{}", oldParticipantState);
-        lm.FormatKeyValue(Log::Keys::newParticipantState, "{}", newParticipantState);
-        lm.Dispatch();
+          _logger->MakeMessage(Log::Level::Debug, TopicOf(*this))
+            .SetMessage("Updating participant status")
+            .AddKeyValue(Log::Keys::participantName, participantName)
+            .AddKeyValue(Log::Keys::oldParticipantState, oldParticipantState)
+            .AddKeyValue(Log::Keys::newParticipantState, newParticipantState)
+            .Dispatch();
     }
 
     // Check if transition from the old to the new participant state is valid
@@ -157,14 +157,14 @@ auto SystemStateTracker::UpdateParticipantStatus(const ParticipantStatus& newPar
         {
             const auto logLevel = IsRequiredParticipant(participantName) ? Log::Level::Warn : Log::Level::Debug;
 
-            Log::LoggerMessage lm{_logger, logLevel};
-            lm.SetMessage("SystemMonitor detected invalid ParticipantState transition!");
-            lm.SetKeyValue(Log::Keys::participantName, participantName);
-            lm.FormatKeyValue(Log::Keys::oldParticipantState, "{}", oldParticipantState);
-            lm.FormatKeyValue(Log::Keys::newParticipantState, "{}", newParticipantState);
-            lm.SetKeyValue(Log::Keys::enterTime, FormatTimePoint(newParticipantStatus.enterTime));
-            lm.SetKeyValue(Log::Keys::enterReason, newParticipantStatus.enterReason);
-            lm.Dispatch();
+           _logger->MakeMessage(logLevel, TopicOf(*this))
+                .SetMessage("SystemMonitor detected invalid ParticipantState transition!")
+                .AddKeyValue(Log::Keys::participantName, participantName)
+                .AddKeyValue(Log::Keys::oldParticipantState, oldParticipantState)
+                .AddKeyValue(Log::Keys::newParticipantState, newParticipantState)
+                .AddKeyValue(Log::Keys::enterTime, FormatTimePoint(newParticipantStatus.enterTime))
+                .AddKeyValue(Log::Keys::enterReason, newParticipantStatus.enterReason)
+                .Dispatch();
         }
         // NB: Failing validation doesn't actually stop the participants state from being changed, it just logs the
         //     invalid transition
@@ -186,10 +186,10 @@ auto SystemStateTracker::UpdateParticipantStatus(const ParticipantStatus& newPar
         result.participantStateChanged = true;
         if (_logger != nullptr)
         {
-            Log::LoggerMessage lm{_logger, Log::Level::Debug};
-            lm.SetMessage("The participant state has changed!");
-            lm.SetKeyValue(Log::Keys::participantName, participantName);
-            lm.Dispatch();
+            _logger->MakeMessage(Log::Level::Debug, TopicOf(*this))
+                .SetMessage("The participant state has changed!")
+                .AddKeyValue(Log::Keys::participantName, participantName)
+                .Dispatch();
         }
 
         if (IsRequiredParticipant(participantName))
@@ -199,24 +199,24 @@ auto SystemStateTracker::UpdateParticipantStatus(const ParticipantStatus& newPar
 
             if (_logger != nullptr)
             {
-                Log::LoggerMessage lm{_logger, Log::Level::Debug};
-                lm.SetMessage("Computed new system state update!");
-                lm.SetKeyValue(Log::Keys::participantName, participantName);
-                lm.FormatKeyValue(Log::Keys::oldParticipantState, "{}", oldSystemState);
-                lm.FormatKeyValue(Log::Keys::newParticipantState, "{}", newSystemState);
-                lm.Dispatch();
+                _logger->MakeMessage(Log::Level::Debug, TopicOf(*this))
+                    .SetMessage("Computed new system state update!")
+                    .AddKeyValue(Log::Keys::participantName, participantName)
+                    .AddKeyValue(Log::Keys::oldParticipantState, oldSystemState)
+                    .AddKeyValue(Log::Keys::newParticipantState, newSystemState)
+                    .Dispatch();
             }
 
             if (oldSystemState != newSystemState)
             {
                 if (_logger != nullptr)
                 {
-                    Log::LoggerMessage lm{_logger, Log::Level::Debug};
-                    lm.SetMessage("The system state has changed!");
-                    lm.SetKeyValue(Log::Keys::participantName, participantName);
-                    lm.FormatKeyValue(Log::Keys::oldParticipantState, "{}", oldSystemState);
-                    lm.FormatKeyValue(Log::Keys::newParticipantState, "{}", newSystemState);
-                    lm.Dispatch();
+                    _logger->MakeMessage(Log::Level::Debug, TopicOf(*this))
+                        .SetMessage("The system state has changed!")
+                        .AddKeyValue(Log::Keys::participantName, participantName)
+                        .AddKeyValue(Log::Keys::oldParticipantState, oldSystemState)
+                        .AddKeyValue(Log::Keys::newParticipantState, newSystemState)
+                        .Dispatch();
                 }
 
                 _systemState = newSystemState;
@@ -458,7 +458,10 @@ auto SystemStateTracker::ComputeSystemState(ParticipantState newParticipantState
         newSystemState = SS::Error;
         break;
     default:
-        Log::Debug(_logger, "Unhandled participant state {}", newParticipantState);
+        _logger->MakeMessage(Log::Level::Debug, TopicOf(*this))
+            .SetMessage("Unhandled participant state")
+            .AddKeyValue(Log::Keys::newParticipantState, newParticipantState)
+            .Dispatch();
         break;
     }
 

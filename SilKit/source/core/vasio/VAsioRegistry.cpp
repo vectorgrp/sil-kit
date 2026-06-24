@@ -48,7 +48,7 @@ VAsioRegistry::VAsioRegistry(std::shared_ptr<SilKit::Config::IParticipantConfigu
 
     if (_registryEventListener != nullptr)
     {
-        _registryEventListener->OnLoggerCreated(dynamic_cast<SilKit::Services::Logging::ILogger*>(_logger.get()));
+        _registryEventListener->OnLoggerCreated(_logger.get());
     }
 
     dynamic_cast<VSilKit::MetricsProcessor&>(*_metricsProcessor).SetLogger(*_logger);
@@ -88,9 +88,10 @@ auto VAsioRegistry::StartListening(const std::string& listenUri) -> std::string
     }
     catch (const std::exception& e)
     {
-        Services::Logging::Error(GetLogger(),
-                                 "SIL Kit Registry failed to create listening socket {}:{} (uri: {}). Reason: {}",
-                                 uri.Host(), uri.Port(), uri.EncodedString(), e.what());
+        GetLoggerInternal()->MakeMessage(Log::Level::Error, TopicOf(*this))
+            .SetMessage("SIL Kit Registry failed to create listening socket {}:{} (uri: {}). Reason: {}",
+                                 uri.Host(), uri.Port(), uri.EncodedString(), e.what())
+            .Dispatch();
     }
 
     if (enableDomainSockets)
@@ -111,41 +112,48 @@ auto VAsioRegistry::StartListening(const std::string& listenUri) -> std::string
         }
         catch (const std::exception& e)
         {
-            Services::Logging::Warn(GetLogger(), "SIL Kit Registry failed to create local listening socket: {}",
-                                    e.what());
+            GetLoggerInternal()->MakeMessage(Log::Level::Warn, TopicOf(*this))
+                .SetMessage("SIL Kit Registry failed to create local listening socket: {}", e.what())
+                .Dispatch();
         }
     }
 
     if (hasTcpSocket && hasDomainSocket)
     {
-        Services::Logging::Debug(GetLogger(), "SIL Kit Registry: Listening on both, TCP and Domain sockets");
+        GetLoggerInternal()->MakeMessage(Log::Level::Debug, TopicOf(*this))
+            .SetMessage("SIL Kit Registry: Listening on both, TCP and Domain sockets")
+            .Dispatch();
     }
     else if (hasTcpSocket && !hasDomainSocket)
     {
         if (enableDomainSockets)
         {
-            // There exist old versions of Windows that do not support domain sockets. Here only TCP/IP will be available.
-            _logger->Warn(
-                "This registry instance will only accept connections on TCP sockets. This might be caused by a second "
-                "registry running on this host, or using an operating system that does not support Domain sockets.");
+            GetLoggerInternal()->MakeMessage(Log::Level::Warn, TopicOf(*this))
+                .SetMessage("This registry instance will only accept connections on TCP sockets. This might be caused by a second "
+                "registry running on this host, or using an operating system that does not support Domain sockets.")
+                .Dispatch();
         }
         else
         {
-            _logger->Warn("This registry instance will only accept connections on TCP sockets. Domain sockets were "
-                          "explicitly disabled through the participant configuration.");
+            GetLoggerInternal()->MakeMessage(Log::Level::Warn, TopicOf(*this))
+                .SetMessage("This registry instance will only accept connections on TCP sockets. Domain sockets were "
+                          "explicitly disabled through the participant configuration.")
+                .Dispatch();
         }
     }
     else if (!hasTcpSocket && hasDomainSocket)
     {
-        // For scenarios where multiple instances run on the same host, binding on TCP/IP will result in an error.
-        // However, if we can accept local ipc connections we warn and continue.
-        _logger->Warn("This registry instance will only accept connections on local domain sockets. This might be "
+        GetLoggerInternal()->MakeMessage(Log::Level::Warn, TopicOf(*this))
+            .SetMessage("This registry instance will only accept connections on local domain sockets. This might be "
                       "caused by a second registry running on this host, or another process was already bound to the "
-                      "same port as this registry was attempting to use.");
+                      "same port as this registry was attempting to use.")
+            .Dispatch();
     }
     else
     {
-        Services::Logging::Error(GetLogger(), "SIL Kit Registry: Unable to listen on neither TCP, nor Domain sockets");
+        GetLoggerInternal()->MakeMessage(Log::Level::Error, TopicOf(*this))
+            .SetMessage("SIL Kit Registry: Unable to listen on neither TCP, nor Domain sockets")
+            .Dispatch();
         throw SilKit::StateError{"SIL Kit Registry: Unable to listen on neither TCP, nor Domain sockets"};
     }
 
@@ -173,7 +181,13 @@ void VAsioRegistry::SetAllDisconnectedHandler(std::function<void()> handler)
 {
     _onAllParticipantsDisconnected = std::move(handler);
 }
+
 auto VAsioRegistry::GetLogger() -> Services::Logging::ILogger*
+{
+    return nullptr;
+}
+
+auto VAsioRegistry::GetLoggerInternal() -> Services::Logging::ILoggerInternal*
 {
     return _logger.get();
 }
@@ -213,7 +227,9 @@ void VAsioRegistry::OnParticipantAnnouncement(IVAsioPeer* peer, const Participan
     {
         const auto message = fmt::format("A participant with the same name '{}' already exists in the simulation {}",
                                          peerInfo.participantName, announcement.simulationName);
-        GetLogger()->Warn(message);
+        GetLoggerInternal()->MakeMessage(Log::Level::Warn, TopicOf(*this))
+            .SetMessage(message)
+            .Dispatch();
         throw SilKitError{message};
     }
 
@@ -231,7 +247,9 @@ void VAsioRegistry::OnParticipantAnnouncement(IVAsioPeer* peer, const Participan
 
     if (AllParticipantsAreConnected())
     {
-        _logger->Info("All participants are online");
+        GetLoggerInternal()->MakeMessage(Log::Level::Info, TopicOf(*this))
+            .SetMessage("All participants are online")
+            .Dispatch();
         if (_onAllParticipantsConnected)
             _onAllParticipantsConnected();
     }
@@ -239,9 +257,11 @@ void VAsioRegistry::OnParticipantAnnouncement(IVAsioPeer* peer, const Participan
 
 void VAsioRegistry::SendKnownParticipants(IVAsioPeer* peer, const std::string& simulationName)
 {
-    Services::Logging::Info(GetLogger(), "Sending known participant message to {}, protocol version {}.{}",
+    GetLoggerInternal()->MakeMessage(Log::Level::Info, TopicOf(*this))
+        .SetMessage("Sending known participant message to {}, protocol version {}.{}",
                             peer->GetInfo().participantName, peer->GetProtocolVersion().major,
-                            peer->GetProtocolVersion().minor);
+                            peer->GetProtocolVersion().minor)
+        .Dispatch();
 
     KnownParticipants knownParticipantsMsg;
     knownParticipantsMsg.messageHeader = MakeRegistryMsgHeader(peer->GetProtocolVersion());
@@ -257,7 +277,7 @@ void VAsioRegistry::SendKnownParticipants(IVAsioPeer* peer, const std::string& s
             continue;
 
         auto peerInfo = connectedParticipant.peerInfo;
-        peerInfo.acceptorUris = TransformAcceptorUris(GetLogger(), connectedParticipant.peer, peer);
+        peerInfo.acceptorUris = TransformAcceptorUris(GetLoggerInternal(), connectedParticipant.peer, peer);
 
         knownParticipantsMsg.peerInfos.push_back(peerInfo);
     }
@@ -267,8 +287,6 @@ void VAsioRegistry::SendKnownParticipants(IVAsioPeer* peer, const std::string& s
 
 void VAsioRegistry::OnPeerShutdown(IVAsioPeer* peer)
 {
-    namespace Log = SilKit::Services::Logging;
-
     const auto& simulationName{peer->GetSimulationName()};
     const auto& participantName{peer->GetInfo().participantName};
 
@@ -276,18 +294,24 @@ void VAsioRegistry::OnPeerShutdown(IVAsioPeer* peer)
 
     if (connectedParticipant == nullptr)
     {
-        Log::Debug(_logger.get(), "Peer '{}' has shut down, which had no participant information", participantName);
+        GetLoggerInternal()->MakeMessage(Log::Level::Debug, TopicOf(*this))
+            .SetMessage("Peer '{}' has shut down, which had no participant information", participantName)
+            .Dispatch();
         return;
     }
 
     if (connectedParticipant->peer != peer)
     {
-        Log::Debug(_logger.get(), "Duplicate peer '{}' has shut down, which had no participant information",
-                   participantName);
+        GetLoggerInternal()->MakeMessage(Log::Level::Debug, TopicOf(*this))
+            .SetMessage("Duplicate peer '{}' has shut down, which had no participant information",
+                   participantName)
+            .Dispatch();
         return;
     }
 
-    Log::Debug(_logger.get(), "Peer '{}' has shut down", participantName);
+    GetLoggerInternal()->MakeMessage(Log::Level::Debug, TopicOf(*this))
+        .SetMessage("Peer '{}' has shut down", participantName)
+        .Dispatch();
 
     if (_registryEventListener != nullptr)
     {
@@ -303,7 +327,9 @@ void VAsioRegistry::OnPeerShutdown(IVAsioPeer* peer)
 
     if (_connectedParticipants.empty())
     {
-        _logger->Info("All participants are shut down");
+        GetLoggerInternal()->MakeMessage(Log::Level::Info, TopicOf(*this))
+            .SetMessage("All participants are shut down")
+            .Dispatch();
         if (_onAllParticipantsDisconnected)
             _onAllParticipantsDisconnected();
     }
@@ -404,11 +430,16 @@ auto VAsioRegistry::GetServiceDescriptor() const -> const ServiceDescriptor&
 void VAsioRegistry::OnMetricsUpdate(const std::string& simulationName, const std::string& participantName,
                                     const VSilKit::MetricsUpdate& metricsUpdate)
 {
-    Log::Info(GetLogger(), "Participant {} updates {} metrics", participantName, metricsUpdate.metrics.size());
+    GetLoggerInternal()->MakeMessage(Log::Level::Info, TopicOf(*this))
+        .SetMessage("Participant {} updates {} metrics", participantName, metricsUpdate.metrics.size())
+        .Dispatch();
+        
     for (const auto& data : metricsUpdate.metrics)
     {
-        Log::Info(GetLogger(), "Metric Update: {} {} {} {} ({})", data.name, data.kind, data.value, data.timestamp,
-                  participantName);
+        GetLoggerInternal()->MakeMessage(Log::Level::Info, TopicOf(*this))
+            .SetMessage("Metric Update: {} {} {} {} ({})", data.name, data.kind, data.value, data.timestamp,
+                  participantName)
+            .Dispatch();
     }
 
     dynamic_cast<VSilKit::MetricsProcessor&>(*_metricsProcessor)

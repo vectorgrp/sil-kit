@@ -16,7 +16,9 @@
 
 #include "silkit/participant/exception.hpp"
 #include "silkit/SilKitMacros.hpp"
+
 #include "silkit/services/logging/LoggingDatatypes.hpp"
+#include "LoggingTopics.hpp"
 
 #include "StringHelpers.hpp"
 
@@ -81,6 +83,9 @@ struct Sink
     Type type{Type::Remote};
     Services::Logging::Level level{Services::Logging::Level::Info};
     std::string logName;
+    // currenlty lives in Sink >> Experimental >>
+    std::vector<Services::Logging::Topic> disabledTopics{};
+    std::vector<Services::Logging::Topic> enabledTopics{};
 };
 
 //! \brief Logger service
@@ -225,7 +230,8 @@ auto to_string(NetworkType networkType) -> std::string
 
 bool operator==(const Sink& lhs, const Sink& rhs)
 {
-    return lhs.type == rhs.type && lhs.level == rhs.level && lhs.format == rhs.format && lhs.logName == rhs.logName;
+    return lhs.type == rhs.type && lhs.level == rhs.level && lhs.format == rhs.format && lhs.logName == rhs.logName
+           && lhs.disabledTopics == rhs.disabledTopics && lhs.enabledTopics == rhs.enabledTopics;
 }
 
 bool operator<(const Sink& lhs, const Sink& rhs)

@@ -25,4 +25,14 @@ auto CreateParticipantImpl(std::shared_ptr<SilKit::Config::IParticipantConfigura
     return CreateParticipantImpl(participantConfig, participantName, uri);
 }
 
+auto GetLoggerInternal(SilKit::IParticipant* participant) -> SilKit::Services::Logging::ILoggerInternal*
+{
+    auto participantImpl = dynamic_cast<Core::IParticipantInternal*>(participant);
+    if (participantImpl == nullptr)
+    {
+        throw SilKit::ConfigurationError("The provided participant is not a valid SilKit::Core::IParticipantInternal");
+    }
+    return participantImpl->GetLoggerInternal();
+}
+
 } //namespace SilKit

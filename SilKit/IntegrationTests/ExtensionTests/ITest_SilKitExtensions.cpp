@@ -39,23 +39,7 @@ void SetCurrentWorkingDir(const std::string& cwd)
 
 class StdoutLogger : public SilKit::Core::Tests::MockLogger
 {
-public:
-    void Info(const std::string& msg) override
-    {
-        std::cout << "SilKitExtensionTest: Info: " << msg << std::endl;
-    }
-    void Debug(const std::string& msg) override
-    {
-        std::cout << "SilKitExtensionTest: Debug: " << msg << std::endl;
-    }
-    void Warn(const std::string& msg) override
-    {
-        std::cout << "SilKitExtensionTest: Warn: " << msg << std::endl;
-    }
-    void Error(const std::string& msg) override
-    {
-        std::cout << "SilKitExtensionTest: Error: " << msg << std::endl;
-    }
+
 };
 } // namespace
 

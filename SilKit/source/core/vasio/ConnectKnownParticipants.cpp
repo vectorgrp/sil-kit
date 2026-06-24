@@ -44,7 +44,7 @@ ConnectKnownParticipants::ConnectKnownParticipants(IIoContext& ioContext, IConne
 }
 
 
-void ConnectKnownParticipants::SetLogger(SilKit::Services::Logging::ILogger& logger)
+void ConnectKnownParticipants::SetLogger(SilKit::Services::Logging::ILoggerInternal& logger)
 {
     SILKIT_ASSERT(_logger == nullptr);
     _logger = &logger;
@@ -96,7 +96,9 @@ void ConnectKnownParticipants::HandlePeerEvent(const std::string& participantNam
     auto peer{FindPeerByName(participantName)};
     if (peer == nullptr)
     {
-        Log::Warn(_logger, "Ignoring event '{}' for peer '{}'", event, participantName);
+        _logger->MakeMessage(Log::Level::Warn, TopicOf(*this))
+            .SetMessage("Ignoring event '{}' for peer '{}'", event, participantName)
+            .Dispatch();
         return;
     }
 
@@ -267,9 +269,10 @@ void ConnectKnownParticipants::Peer::HandleEvent(PeerEvent event)
     {
         if (_peerStage != PeerStage::REMOTE_CONNECT_REQUESTED)
         {
-            Log::Warn(_manager->_logger,
-                      "Ignoring unexpected remote participant connecting notification from peer '{}' in stage {}",
-                      _info.participantName, _peerStage.load());
+            _manager->_logger->MakeMessage(Log::Level::Warn, TopicOf(*_manager))
+                .SetMessage("Ignoring unexpected remote participant connecting notification from peer '{}' in stage {}",
+                  _info.participantName, _peerStage.load())
+                .Dispatch();
             return;
         }
 
@@ -282,10 +285,10 @@ void ConnectKnownParticipants::Peer::HandleEvent(PeerEvent event)
     {
         if (_peerStage != PeerStage::REMOTE_CONNECT_REQUESTED && _peerStage != PeerStage::REMOTE_IS_CONNECTING)
         {
-            Log::Warn(
-                _manager->_logger,
-                "Ignoring unexpected remote participant connection failure notification from peer '{}' in stage {}",
-                _info.participantName, _peerStage.load());
+            _manager->_logger->MakeMessage(Log::Level::Warn, TopicOf(*_manager))
+                .SetMessage("Ignoring unexpected remote participant connection failure notification from peer '{}' in stage {}",
+            _info.participantName, _peerStage.load())
+                .Dispatch();
             return;
         }
 
@@ -305,9 +308,10 @@ void ConnectKnownParticipants::Peer::HandleEvent(PeerEvent event)
     {
         if (_peerStage != PeerStage::REMOTE_CONNECT_REQUESTED && _peerStage != PeerStage::REMOTE_IS_CONNECTING)
         {
-            Log::Warn(_manager->_logger,
-                      "Ignoring unexpected remote participant announcement from peer '{}' in stage {}",
-                      _info.participantName, _peerStage.load());
+            _manager->_logger->MakeMessage(Log::Level::Warn, TopicOf(*_manager))
+                .SetMessage("Ignoring unexpected remote participant announcement from peer '{}' in stage {}",
+                  _info.participantName, _peerStage.load())
+                .Dispatch();
             return;
         }
 
@@ -320,8 +324,10 @@ void ConnectKnownParticipants::Peer::HandleEvent(PeerEvent event)
     {
         if (_peerStage != PeerStage::WAITING_FOR_REPLY)
         {
-            Log::Warn(_manager->_logger, "Ignoring unexpected reply from peer '{}' in stage {}", _info.participantName,
-                      _peerStage.load());
+            _manager->_logger->MakeMessage(Log::Level::Warn, TopicOf(*_manager))
+                .SetMessage("Ignoring unexpected reply from peer '{}' in stage {}", _info.participantName,
+                  _peerStage.load())
+                .Dispatch();
             return;
         }
 
@@ -438,8 +444,10 @@ void ConnectKnownParticipants::Peer::OnTimerExpired(VSilKit::ITimer&)
 
     if (_peerStage != PeerStage::REMOTE_CONNECT_REQUESTED)
     {
-        Log::Debug(_manager->_logger, "Ignoring expired remote connection request timer for {} in stage {}",
-                   _info.participantName, _peerStage.load());
+        _manager->_logger->MakeMessage(Log::Level::Debug, TopicOf(*_manager))
+            .SetMessage("Ignoring expired remote connection request timer for {} in stage {}",
+               _info.participantName, _peerStage.load())
+            .Dispatch();
         return;
     }
 
@@ -458,7 +466,9 @@ void ConnectKnownParticipants::Peer::HasFailed(const std::string& reason)
 {
     SILKIT_TRACE_METHOD_(_logger, "({})", reason);
 
-    Log::Error(_manager->_logger, "Failed to connect to '{}' {}", _info.participantName, reason);
+    _manager->_logger->MakeMessage(Log::Level::Error, TopicOf(*_manager))
+        .SetMessage("Failed to connect to '{}' {}", _info.participantName, reason)
+        .Dispatch();
 
     _failureReason = " ";
     _failureReason.append(reason);

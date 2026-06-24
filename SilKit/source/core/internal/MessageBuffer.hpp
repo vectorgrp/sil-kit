@@ -298,7 +298,7 @@ MessageBuffer& MessageBuffer::operator<<(const std::string& str)
         _storage.resize(_wPos + str.size());
     }
 
-    std::copy(str.begin(), str.end(), _storage.begin() + _wPos);
+    std::copy(str.begin(), str.end(), _storage.begin() + static_cast<decltype(_storage)::difference_type>(_wPos));
     _wPos += str.size();
 
     return *this;
@@ -311,7 +311,7 @@ MessageBuffer& MessageBuffer::operator>>(std::string& str)
     if (_rPos + strLength > _storage.size())
         throw end_of_buffer{};
 
-    str = std::string(_storage.begin() + _rPos, _storage.begin() + _rPos + strLength);
+    str = std::string(_storage.begin() + static_cast<decltype(_storage)::difference_type>(_rPos), _storage.begin() + static_cast<decltype(_storage)::difference_type>(_rPos + strLength));
     _rPos += strLength;
 
     return *this;
@@ -332,7 +332,9 @@ MessageBuffer& MessageBuffer::operator>>(std::vector<uint8_t>& vector)
     if (_rPos + vectorSize > _storage.size())
         throw end_of_buffer{};
 
-    vector = std::vector<uint8_t>(_storage.begin() + _rPos, _storage.begin() + _rPos + vectorSize);
+    vector =
+        std::vector<uint8_t>(_storage.begin() + static_cast<decltype(_storage)::difference_type>(_rPos),
+                             _storage.begin() + static_cast<decltype(_storage)::difference_type>(_rPos + vectorSize));
     _rPos += vectorSize;
 
     return *this;
@@ -399,7 +401,7 @@ inline MessageBuffer& MessageBuffer::operator<<(const Util::Span<const uint8_t>&
         _storage.resize(_wPos + span.size());
     }
 
-    std::copy(span.begin(), span.end(), _storage.begin() + _wPos);
+    std::copy(span.begin(), span.end(), _storage.begin() + static_cast<decltype(_storage)::difference_type>(_wPos));
     _wPos += span.size();
     return *this;
 }

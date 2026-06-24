@@ -18,6 +18,7 @@
 #include "util/TracingMacros.hpp"
 
 #include "LoggerMessage.hpp"
+#include "ILoggerInternal.hpp"
 
 #include <memory>
 
@@ -63,11 +64,11 @@ class AsioAcceptor final : public IAcceptor
 
     AsioEndpointType _localEndpoint;
 
-    SilKit::Services::Logging::ILogger* _logger{nullptr};
+    SilKit::Services::Logging::ILoggerInternal* _logger{nullptr};
 
 public:
     AsioAcceptor(const AsioSocketOptions& socketOptions, std::shared_ptr<asio::io_context> asioIoContext,
-                 AsioAcceptorType acceptor, SilKit::Services::Logging::ILogger& logger);
+                 AsioAcceptorType acceptor, SilKit::Services::Logging::ILoggerInternal& logger);
     ~AsioAcceptor() override;
 
 public: // IAcceptor
@@ -84,7 +85,7 @@ private:
 
 template <typename T>
 AsioAcceptor<T>::AsioAcceptor(const AsioSocketOptions& socketOptions, std::shared_ptr<asio::io_context> asioIoContext,
-                              AsioAcceptorType acceptor, SilKit::Services::Logging::ILogger& logger)
+                              AsioAcceptorType acceptor, SilKit::Services::Logging::ILoggerInternal& logger)
     : _socketOptions{socketOptions}
     , _asioIoContext{std::move(asioIoContext)}
     , _acceptor{std::move(acceptor)}

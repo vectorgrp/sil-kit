@@ -4,8 +4,8 @@
 
 #include "silkit/capi/SilKit.h"
 #include "silkit/SilKit.hpp"
-#include "silkit/services/logging/ILogger.hpp"
-
+#include "ILoggerInternal.hpp"
+#include "LoggerMessage.hpp"
 #include "CapiImpl.hpp"
 
 #include <string>
@@ -17,10 +17,15 @@ try
     ASSERT_VALID_POINTER_PARAMETER(self);
     ASSERT_VALID_POINTER_PARAMETER(message);
 
-    auto logger = reinterpret_cast<SilKit::Services::Logging::ILogger*>(self);
+    auto logger = reinterpret_cast<SilKit::Services::Logging::ILoggerInternal*>(self);
     auto enumLevel = static_cast<SilKit::Services::Logging::Level>(level);
+    
     std::string useString{message}; //ensure we do not trigger the FMT template overload for const char*
-    logger->Log(enumLevel, useString);
+
+    logger->MakeMessage(enumLevel, SilKit::Services::Logging::Topic::User)
+        .SetMessage(useString)
+        .Dispatch();
+
     return SilKit_ReturnCode_SUCCESS;
 }
 CAPI_CATCH_EXCEPTIONS
@@ -32,7 +37,7 @@ try
     ASSERT_VALID_POINTER_PARAMETER(self);
     ASSERT_VALID_POINTER_PARAMETER(outLevel);
 
-    auto logger = reinterpret_cast<SilKit::Services::Logging::ILogger*>(self);
+    auto logger = reinterpret_cast<SilKit::Services::Logging::ILoggerInternal*>(self);
     auto enumLevel = static_cast<SilKit_LoggingLevel>(logger->GetLogLevel());
     *outLevel = enumLevel;
     return SilKit_ReturnCode_SUCCESS;

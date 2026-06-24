@@ -20,20 +20,20 @@ ERROR_PREFIX = "::error ::" if isCI is not None else "ERROR: "
 
 
 # Convenience
-def log(fmt, *args):
-    print(fmt.format(*args))
+def log(fmt, *args, **kwargs):
+    print(fmt.format(*args), **kwargs)
 
 
-def info(fmt, *args):
-    log(INFO_PREFIX + fmt, *args)
+def info(fmt, *args, **kwargs):
+    log(INFO_PREFIX + fmt, *args, **kwargs)
 
 
-def warn(fmt, *args):
-    log(WARN_PREFIX + fmt, *args)
+def warn(fmt, *args, **kwargs):
+    log(WARN_PREFIX + fmt, *args, **kwargs)
 
 
-def die(status, fmt, *args):
-    log(ERROR_PREFIX + fmt, *args)
+def die(status, fmt, *args, **kwargs):
+    log(ERROR_PREFIX + fmt, *args, **kwargs)
     sys.exit(status)
 
 

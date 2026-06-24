@@ -69,22 +69,27 @@ void TimeConfiguration::OnReceiveNextSimStep(const std::string& participantName,
     auto&& itOtherNextTask = _otherNextTasks.find(participantName);
     if (itOtherNextTask == _otherNextTasks.end())
     {
-        Logging::Error(_logger, "Received NextSimTask from unknown participant {}", participantName);
+        _logger->MakeMessage(Logging::Level::Error, TopicOf(*this))
+            .SetMessage("Received NextSimTask from unknown participant {}", participantName)
+            .Dispatch();
         return;
     }
 
     if (nextStep.timePoint < itOtherNextTask->second.timePoint)
     {
-        Logging::Error(
-            _logger,
-            "Chonology error: Received NextSimTask from participant \'{}\' with lower timePoint {} than last "
-            "known timePoint {}",
-            participantName, nextStep.timePoint.count(), itOtherNextTask->second.timePoint.count());
+        _logger->MakeMessage(Logging::Level::Error, TopicOf(*this))
+            .SetMessage("Chonology error: Received NextSimTask from participant \'{}\' with lower timePoint {} than last "
+                "known timePoint {}",
+                participantName, nextStep.timePoint.count(), itOtherNextTask->second.timePoint.count())
+            .Dispatch();
     }
 
     _otherNextTasks.at(participantName) = std::move(nextStep);
-    Logging::Debug(_logger, "Updated _otherNextTasks for participant {} with time {}", participantName,
-                   nextStep.timePoint.count());
+
+    _logger->MakeMessage(Logging::Level::Debug, TopicOf(*this))
+        .SetMessage("Updated _otherNextTasks for participant {} with time {}", participantName,
+                    nextStep.timePoint.count())
+        .Dispatch();
 }
 
 void TimeConfiguration::SynchronizedParticipantRemoved(const std::string& otherParticipantName)
@@ -134,8 +139,10 @@ bool TimeConfiguration::OtherParticipantHasLowerTimepoint() const
     {
         if (_myNextTask.timePoint > otherTask.second.timePoint)
         {
-            Debug(_logger, "Not advancing because participant \'{}\' has lower timepoint {}", otherTask.first,
-                  otherTask.second.timePoint.count());
+            _logger->MakeMessage(Logging::Level::Debug, TopicOf(*this))
+                .SetMessage("Not advancing because participant \'{}\' has lower timepoint {}", otherTask.first,
+                            otherTask.second.timePoint.count())
+                .Dispatch();
             return true;
         }
     }
@@ -183,8 +190,9 @@ bool TimeConfiguration::IsHopOn()
         if (_hoppedOn)
         {
             _myNextTask.timePoint = minimalOtherTime;
-            Logging::Debug(_logger, "Simulation time already advanced. Starting at {}ns",
-                           _myNextTask.timePoint.count());
+            _logger->MakeMessage(Logging::Level::Debug, TopicOf(*this))
+                .SetMessage("Simulation time already advanced. Starting at {}ns", _myNextTask.timePoint.count())
+                .Dispatch();
             return true;
         }
     }
