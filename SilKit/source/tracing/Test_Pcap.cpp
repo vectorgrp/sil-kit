@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "PcapReader.hpp"
+#include "tracing/PcapReader.hpp"
 
 #include <cstring>
 
@@ -11,9 +11,9 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "Pcap.hpp"
-#include "MockParticipant.hpp"
-#include "EthDatatypeUtils.hpp"
+#include "tracing/Pcap.hpp"
+#include "core/mock/participant/MockParticipant.hpp"
+#include "services/ethernet/EthDatatypeUtils.hpp"
 
 namespace {
 

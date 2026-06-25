@@ -8,11 +8,11 @@
 #include <vector>
 #include <functional>
 
-#include "ITraceMessageSink.hpp"
+#include "tracing/ITraceMessageSink.hpp"
 
-#include "EndpointAddress.hpp"
-#include "TraceMessage.hpp"
-#include "Configuration.hpp"
+#include "core/internal/EndpointAddress.hpp"
+#include "tracing/TraceMessage.hpp"
+#include "config/Configuration.hpp"
 
 namespace SilKit {
 

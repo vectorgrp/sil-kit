@@ -2,14 +2,14 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "PcapReplay.hpp"
+#include "tracing/PcapReplay.hpp"
 
 #include <memory>
 
 #include "silkit/services/ethernet/EthernetDatatypes.hpp"
 
-#include "IReplay.hpp"
-#include "PcapReader.hpp"
+#include "tracing/IReplay.hpp"
+#include "tracing/PcapReader.hpp"
 
 namespace {
 
