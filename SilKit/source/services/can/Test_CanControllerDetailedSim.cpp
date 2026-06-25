@@ -9,10 +9,10 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "MockParticipant.hpp"
+#include "core/mock/participant/MockParticipant.hpp"
 
-#include "CanController.hpp"
-#include "CanDatatypesUtils.hpp"
+#include "services/can/CanController.hpp"
+#include "services/can/CanDatatypesUtils.hpp"
 
 namespace {
 

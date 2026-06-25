@@ -4,11 +4,11 @@
 
 #pragma once
 
-#include "IMsgForCanController.hpp"
-#include "IParticipantInternal.hpp"
-#include "ITraceMessageSource.hpp"
+#include "services/can/IMsgForCanController.hpp"
+#include "core/internal/IParticipantInternal.hpp"
+#include "tracing/ITraceMessageSource.hpp"
 
-#include "ISimBehavior.hpp"
+#include "services/can/ISimBehavior.hpp"
 
 namespace SilKit {
 namespace Services {

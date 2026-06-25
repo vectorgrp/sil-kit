@@ -2,9 +2,9 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "CanController.hpp"
-#include "SimBehaviorTrivial.hpp"
-#include "Assert.hpp"
+#include "services/can/CanController.hpp"
+#include "services/can/SimBehaviorTrivial.hpp"
+#include "util/Assert.hpp"
 
 #include "ILoggerInternal.hpp"
 

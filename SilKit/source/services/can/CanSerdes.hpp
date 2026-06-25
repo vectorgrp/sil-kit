@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include "MessageBuffer.hpp"
-#include "WireCanMessages.hpp"
+#include "core/internal/MessageBuffer.hpp"
+#include "wire/can/WireCanMessages.hpp"
 
 #include "silkit/services/can/CanDatatypes.hpp"
 

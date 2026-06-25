@@ -4,11 +4,11 @@
 
 #include "silkit/services/logging/ILogger.hpp"
 
-#include "IServiceDiscovery.hpp"
-#include "ServiceDatatypes.hpp"
-#include "CanController.hpp"
-#include "Tracing.hpp"
-#include "LoggerMessage.hpp"
+#include "core/service/IServiceDiscovery.hpp"
+#include "core/service/ServiceDatatypes.hpp"
+#include "services/can/CanController.hpp"
+#include "tracing/Tracing.hpp"
+#include "services/logging/LoggerMessage.hpp"
 
 namespace SilKit {
 namespace Services {
