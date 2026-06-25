@@ -4,10 +4,10 @@
 
 #pragma once
 
-#include "IReceiver.hpp"
-#include "ISender.hpp"
-#include "IServiceEndpoint.hpp"
-#include "WireFlexrayMessages.hpp"
+#include "core/internal/IReceiver.hpp"
+#include "core/internal/ISender.hpp"
+#include "core/internal/IServiceEndpoint.hpp"
+#include "wire/flexray/WireFlexrayMessages.hpp"
 
 #include "silkit/services/flexray/FlexrayDatatypes.hpp"
 

@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include "MessageBuffer.hpp"
-#include "WireFlexrayMessages.hpp"
+#include "core/internal/MessageBuffer.hpp"
+#include "wire/flexray/WireFlexrayMessages.hpp"
 
 #include "silkit/services/flexray/FlexrayDatatypes.hpp"
 

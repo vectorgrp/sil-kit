@@ -9,9 +9,9 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "NullConnectionParticipant.hpp"
+#include "core/mock/nullconnection/NullConnectionParticipant.hpp"
 
-#include "FlexrayController.hpp"
+#include "services/flexray/FlexrayController.hpp"
 
 namespace {
 using namespace SilKit::Core;

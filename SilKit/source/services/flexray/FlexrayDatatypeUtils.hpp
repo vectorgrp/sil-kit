@@ -6,7 +6,7 @@
 
 #include "silkit/services/flexray/FlexrayDatatypes.hpp"
 
-#include "WireFlexrayMessages.hpp"
+#include "wire/flexray/WireFlexrayMessages.hpp"
 
 namespace SilKit {
 namespace Services {

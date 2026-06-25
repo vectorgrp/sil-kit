@@ -2,9 +2,9 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "Validation.hpp"
+#include "services/flexray/Validation.hpp"
 
-#include "ParticipantConfiguration.hpp"
+#include "config/ParticipantConfiguration.hpp"
 
 namespace SilKit {
 namespace Services {
