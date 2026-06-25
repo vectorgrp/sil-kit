@@ -4,11 +4,11 @@
 
 #include "silkit/services/orchestration/string_utils.hpp"
 #include "silkit/SilKit.hpp"
-#include "DashboardRestClient.hpp"
-#include "DashboardComponents.hpp"
-#include "LoggerMessage.hpp"
-#include "Uri.hpp"
-#include "SilKitToOatppMapper.hpp"
+#include "dashboard/service/DashboardRestClient.hpp"
+#include "dashboard/client/DashboardComponents.hpp"
+#include "services/logging/LoggerMessage.hpp"
+#include "util/Uri.hpp"
+#include "dashboard/service/SilKitToOatppMapper.hpp"
 #include "client/DashboardSystemServiceClient.hpp"
 
 namespace SilKit {

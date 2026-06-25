@@ -4,18 +4,18 @@
 
 #pragma once
 
-#include "IDashboardInstance.hpp"
-#include "VAsioRegistry.hpp"
+#include "dashboard/IDashboardInstance.hpp"
+#include "core/vasio/VAsioRegistry.hpp"
 
-#include "LoggerMessage.hpp"
+#include "services/logging/LoggerMessage.hpp"
 
 #include "client/DashboardSystemApiClient.hpp"
 #include "service/ISilKitToOatppMapper.hpp"
-#include "SystemStateTracker.hpp"
-#include "IRestClient.hpp"
+#include "services/orchestration/SystemStateTracker.hpp"
+#include "dashboard/IRestClient.hpp"
 
-#include "LockedQueue.hpp"
-#include "SilKitEvent.hpp"
+#include "dashboard/LockedQueue.hpp"
+#include "dashboard/SilKitEvent.hpp"
 
 #include <chrono>
 #include <string>

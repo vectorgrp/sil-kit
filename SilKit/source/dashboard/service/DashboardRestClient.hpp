@@ -10,13 +10,13 @@
 
 #include "silkit/services/logging/ILogger.hpp"
 
-#include "ISilKitToOatppMapper.hpp"
-#include "IDashboardSystemServiceClient.hpp"
-#include "DashboardSystemApiClient.hpp"
-#include "DashboardRetryPolicy.hpp"
-#include "IRestClient.hpp"
-#include "DashboardBulkUpdate.hpp"
-#include "MetricsDatatypes.hpp"
+#include "dashboard/service/ISilKitToOatppMapper.hpp"
+#include "dashboard/client/IDashboardSystemServiceClient.hpp"
+#include "dashboard/client/DashboardSystemApiClient.hpp"
+#include "dashboard/client/DashboardRetryPolicy.hpp"
+#include "dashboard/IRestClient.hpp"
+#include "dashboard/DashboardBulkUpdate.hpp"
+#include "services/metrics/MetricsDatatypes.hpp"
 
 namespace SilKit {
 namespace Dashboard {
