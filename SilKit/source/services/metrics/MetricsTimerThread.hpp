@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "IMetricsTimerThread.hpp"
+#include "services/metrics/IMetricsTimerThread.hpp"
 
 #include <atomic>
 #include <functional>

@@ -4,11 +4,11 @@
 
 #pragma once
 
-#include "IMsgForMetricsSender.hpp"
+#include "services/metrics/IMsgForMetricsSender.hpp"
 
-#include "LoggerMessage.hpp"
-#include "IServiceEndpoint.hpp"
-#include "IParticipantInternal.hpp"
+#include "services/logging/LoggerMessage.hpp"
+#include "core/internal/IServiceEndpoint.hpp"
+#include "core/internal/IParticipantInternal.hpp"
 
 
 namespace VSilKit {

@@ -4,14 +4,14 @@
 
 #pragma once
 
-#include "IMsgForMetricsSender.hpp"
-#include "IMetricsManager.hpp"
-#include "Metrics.hpp"
+#include "services/metrics/IMsgForMetricsSender.hpp"
+#include "services/metrics/IMetricsManager.hpp"
+#include "services/metrics/Metrics.hpp"
 
-#include "LoggerMessage.hpp"
-#include "IServiceEndpoint.hpp"
-#include "IParticipantInternal.hpp"
-#include "IAttributeMetric.hpp"
+#include "services/logging/LoggerMessage.hpp"
+#include "core/internal/IServiceEndpoint.hpp"
+#include "core/internal/IParticipantInternal.hpp"
+#include "services/metrics/IAttributeMetric.hpp"
 
 #include <atomic>
 #include <chrono>

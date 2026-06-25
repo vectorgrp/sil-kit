@@ -4,10 +4,10 @@
 
 #pragma once
 
-#include "IMetricsSink.hpp"
-#include "IMetricsSender.hpp"
-#include "ILoggerInternal.hpp"
-#include "ParticipantConfiguration.hpp"
+#include "services/metrics/IMetricsSink.hpp"
+#include "services/metrics/IMetricsSender.hpp"
+#include "services/logging/ILoggerInternal.hpp"
+#include "config/ParticipantConfiguration.hpp"
 
 #include <memory>
 #include <string>

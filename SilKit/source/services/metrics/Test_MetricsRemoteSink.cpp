@@ -5,9 +5,9 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "IMetricsSender.hpp"
-#include "MetricsDatatypes.hpp"
-#include "MetricsRemoteSink.hpp"
+#include "services/metrics/IMetricsSender.hpp"
+#include "services/metrics/MetricsDatatypes.hpp"
+#include "services/metrics/MetricsRemoteSink.hpp"
 
 namespace {
 

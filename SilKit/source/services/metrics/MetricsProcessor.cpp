@@ -2,10 +2,10 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "MetricsProcessor.hpp"
+#include "services/metrics/MetricsProcessor.hpp"
 
-#include "IParticipantInternal.hpp"
-#include "LoggerMessage.hpp"
+#include "core/internal/IParticipantInternal.hpp"
+#include "services/logging/LoggerMessage.hpp"
 
 using SilKit::Services::Logging::Level;
 using SilKit::Services::Logging::Topic;

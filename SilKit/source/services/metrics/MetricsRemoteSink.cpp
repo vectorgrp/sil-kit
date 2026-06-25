@@ -2,10 +2,10 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "MetricsRemoteSink.hpp"
+#include "services/metrics/MetricsRemoteSink.hpp"
 
-#include "IParticipantInternal.hpp"
-#include "MetricsSender.hpp"
+#include "core/internal/IParticipantInternal.hpp"
+#include "services/metrics/MetricsSender.hpp"
 
 namespace VSilKit {
 

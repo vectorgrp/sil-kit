@@ -4,9 +4,9 @@
 
 #pragma once
 
-#include "MetricsDatatypes.hpp"
+#include "services/metrics/MetricsDatatypes.hpp"
 
-#include "MessageBuffer.hpp"
+#include "core/internal/MessageBuffer.hpp"
 
 
 namespace VSilKit {
