@@ -7,9 +7,9 @@
 #include <sstream>
 #include <string>
 
-#include "Logger.hpp"
+#include "services/logging/Logger.hpp"
 
-#include "StringHelpers.hpp"
+#include "util/StringHelpers.hpp"
 
 #include "fmt/chrono.h"
 #include "fmt/format.h"
@@ -22,7 +22,7 @@
 #include "spdlog/sinks/stdout_sinks.h"
 #include "spdlog/sinks/basic_file_sink.h"
 
-#include "SpdlogTypeConversion.hpp"
+#include "services/logging/SpdlogTypeConversion.hpp"
 #include "spdlog/pattern_formatter.h"
 
 

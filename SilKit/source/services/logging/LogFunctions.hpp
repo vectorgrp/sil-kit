@@ -7,8 +7,8 @@
 #include <atomic>
 
 
-#include "StructuredLoggingKeys.hpp"
-#include "SilKitFmtFormatters.hpp"
+#include "services/logging/StructuredLoggingKeys.hpp"
+#include "services/logging/SilKitFmtFormatters.hpp"
 
 #include <string>
 

@@ -17,25 +17,25 @@
 #include "silkit/services/pubsub/string_utils.hpp"
 #include "silkit/services/rpc/string_utils.hpp"
 
-#include "string_utils_sync.hpp"
-#include "string_utils_internal.hpp"
-#include "ServiceDatatypes.hpp"
-#include "LoggingDatatypesInternal.hpp"
-#include "MetricsDatatypes.hpp"
+#include "core/internal/string_utils_sync.hpp"
+#include "core/internal/string_utils_internal.hpp"
+#include "core/service/ServiceDatatypes.hpp"
+#include "core/internal/LoggingDatatypesInternal.hpp"
+#include "services/metrics/MetricsDatatypes.hpp"
 
-#include "RequestReplyDatatypes.hpp"
+#include "core/requests/RequestReplyDatatypes.hpp"
 
-#include "WireCanMessages.hpp"
-#include "WireEthernetMessages.hpp"
-#include "WireFlexrayMessages.hpp"
-#include "WireLinMessages.hpp"
-#include "WireRpcMessages.hpp"
-#include "WireDataMessages.hpp"
+#include "wire/can/WireCanMessages.hpp"
+#include "wire/ethernet/WireEthernetMessages.hpp"
+#include "wire/flexray/WireFlexrayMessages.hpp"
+#include "wire/lin/WireLinMessages.hpp"
+#include "wire/rpc/WireRpcMessages.hpp"
+#include "wire/pubsub/WireDataMessages.hpp"
 
-#include "ParticipantConfiguration.hpp"
+#include "config/ParticipantConfiguration.hpp"
 
-#include "TestDataTypes.hpp"    // for operator<<
-#include "IServiceEndpoint.hpp" // for operator<<(... ServiceDescriptor)
+#include "core/internal/TestDataTypes.hpp"    // for operator<<
+#include "core/internal/IServiceEndpoint.hpp" // for operator<<(... ServiceDescriptor)
 
 #define MAKE_FORMATTER(TYPE) \
     template <> \

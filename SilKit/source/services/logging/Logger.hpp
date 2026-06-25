@@ -9,9 +9,9 @@
 
 #include "silkit/services/logging/LoggingDatatypes.hpp"
 
-#include "ILoggerInternal.hpp"
-#include "LoggerMessage.hpp"
-#include "Configuration.hpp"
+#include "services/logging/ILoggerInternal.hpp"
+#include "services/logging/LoggerMessage.hpp"
+#include "config/Configuration.hpp"
 
 namespace spdlog {
 class logger;

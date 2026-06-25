@@ -9,10 +9,10 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "ParticipantConfiguration.hpp"
-#include "MockParticipant.hpp"
-#include "Logger.hpp"
-#include "LogMsgSender.hpp"
+#include "config/ParticipantConfiguration.hpp"
+#include "core/mock/participant/MockParticipant.hpp"
+#include "services/logging/Logger.hpp"
+#include "services/logging/LogMsgSender.hpp"
 
 namespace {
 

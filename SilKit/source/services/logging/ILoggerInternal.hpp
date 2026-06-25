@@ -8,8 +8,8 @@
 
 #include "silkit/services/logging/ILogger.hpp"
 
-#include "StructuredLoggingKeys.hpp"
-#include "SilKitFmtFormatters.hpp"
+#include "services/logging/StructuredLoggingKeys.hpp"
+#include "services/logging/SilKitFmtFormatters.hpp"
 #include "fmt/format.h"
 
 namespace SilKit {

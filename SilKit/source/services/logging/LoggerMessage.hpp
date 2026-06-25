@@ -6,8 +6,8 @@
 
 #include <atomic>
 
-#include "ILoggerInternal.hpp"
-#include "LogFunctions.hpp"
+#include "services/logging/ILoggerInternal.hpp"
+#include "services/logging/LogFunctions.hpp"
 
 #include <string>
 
