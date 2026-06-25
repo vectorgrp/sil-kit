@@ -6,7 +6,7 @@
 
 #include "silkit/services/orchestration/OrchestrationDatatypes.hpp"
 
-#include "SilKitEvent.hpp"
+#include "dashboard/SilKitEvent.hpp"
 
 #include <cstdint>
 #include <memory>

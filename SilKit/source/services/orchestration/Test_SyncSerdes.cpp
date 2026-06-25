@@ -6,7 +6,7 @@
 
 #include "gtest/gtest.h"
 
-#include "SyncSerdes.hpp"
+#include "services/orchestration/SyncSerdes.hpp"
 
 using namespace std::chrono_literals;
 

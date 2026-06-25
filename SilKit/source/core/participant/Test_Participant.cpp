@@ -8,10 +8,10 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-#include "NullConnectionParticipant.hpp"
-#include "CanController.hpp"
-#include "ConfigurationTestUtils.hpp"
-#include "ParticipantConfiguration.hpp"
+#include "core/mock/nullconnection/NullConnectionParticipant.hpp"
+#include "services/can/CanController.hpp"
+#include "config/ConfigurationTestUtils.hpp"
+#include "config/ParticipantConfiguration.hpp"
 
 namespace {
 

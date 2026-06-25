@@ -6,16 +6,16 @@
 
 #include <unordered_map>
 
-#include "ILoggerInternal.hpp"
+#include "services/logging/ILoggerInternal.hpp"
 #include "silkit/vendor/ISilKitRegistry.hpp"
 #include "silkit/services/orchestration/OrchestrationDatatypes.hpp"
 
-#include "VAsioConnection.hpp"
-#include "ParticipantConfiguration.hpp"
-#include "ProtocolVersion.hpp"
-#include "TimeProvider.hpp"
+#include "core/vasio/VAsioConnection.hpp"
+#include "config/ParticipantConfiguration.hpp"
+#include "core/internal/ProtocolVersion.hpp"
+#include "services/orchestration/TimeProvider.hpp"
 
-#include "MetricsReceiver.hpp"
+#include "services/metrics/MetricsReceiver.hpp"
 
 namespace SilKit {
 namespace Core {

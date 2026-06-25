@@ -9,11 +9,11 @@
 #include <chrono>
 #include <tuple>
 
-#include "ILoggerInternal.hpp"
+#include "services/logging/ILoggerInternal.hpp"
 
-#include "ServiceDescriptor.hpp"
-#include "TraceMessage.hpp"
-#include "ParticipantConfiguration.hpp"
+#include "core/internal/ServiceDescriptor.hpp"
+#include "tracing/TraceMessage.hpp"
+#include "config/ParticipantConfiguration.hpp"
 
 namespace SilKit {
 

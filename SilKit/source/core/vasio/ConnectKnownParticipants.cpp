@@ -2,11 +2,11 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "ConnectKnownParticipants.hpp"
+#include "core/vasio/ConnectKnownParticipants.hpp"
 
-#include "LoggerMessage.hpp"
-#include "VAsioConnection.hpp"
-#include "VAsioPeer.hpp"
+#include "services/logging/LoggerMessage.hpp"
+#include "core/vasio/VAsioConnection.hpp"
+#include "core/vasio/VAsioPeer.hpp"
 #include "util/TracingMacros.hpp"
 
 #include <chrono>

@@ -2,12 +2,12 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "SystemStateTracker.hpp"
+#include "services/orchestration/SystemStateTracker.hpp"
 
 #include "silkit/participant/exception.hpp"
 #include "silkit/services/orchestration/string_utils.hpp"
 
-#include "LoggerMessage.hpp"
+#include "services/logging/LoggerMessage.hpp"
 
 #include <fmt/format.h>
 

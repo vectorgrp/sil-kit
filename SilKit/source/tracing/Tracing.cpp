@@ -4,14 +4,14 @@
 
 #include <sstream>
 
-#include "CreateMdf4Tracing.hpp"
-#include "PcapSink.hpp"
-#include "Tracing.hpp"
-#include "PcapReplay.hpp"
+#include "extensions/SilKitExtensionImpl/CreateMdf4Tracing.hpp"
+#include "tracing/PcapSink.hpp"
+#include "tracing/Tracing.hpp"
+#include "tracing/PcapReplay.hpp"
 
-#include "LoggerMessage.hpp"
+#include "services/logging/LoggerMessage.hpp"
 
-#include "string_utils.hpp"
+#include "tracing/string_utils.hpp"
 
 namespace SilKit {
 namespace Tracing {

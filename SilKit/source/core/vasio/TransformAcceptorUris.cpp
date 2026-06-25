@@ -2,9 +2,9 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "TransformAcceptorUris.hpp"
+#include "core/vasio/TransformAcceptorUris.hpp"
 
-#include "LoggerMessage.hpp"
+#include "services/logging/LoggerMessage.hpp"
 
 #include <asio/ip/address.hpp>
 

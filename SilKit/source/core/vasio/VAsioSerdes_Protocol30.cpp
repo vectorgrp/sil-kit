@@ -7,7 +7,7 @@
 #include <vector>
 #include <array>
 
-#include "VAsioSerdes_Protocol30.hpp"
+#include "core/vasio/VAsioSerdes_Protocol30.hpp"
 
 namespace protocol_3_0 {
 

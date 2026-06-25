@@ -6,8 +6,8 @@
 #include "gmock/gmock.h"
 #include "silkit/capi/SilKit.h"
 #include "silkit/services/ethernet/all.hpp"
-#include "EthDatatypeUtils.hpp"
-#include "MockParticipant.hpp"
+#include "services/ethernet/EthDatatypeUtils.hpp"
+#include "core/mock/participant/MockParticipant.hpp"
 
 #include "fmt/format.h"
 

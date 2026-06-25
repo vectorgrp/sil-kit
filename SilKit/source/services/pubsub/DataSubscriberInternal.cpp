@@ -2,8 +2,8 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "DataSubscriberInternal.hpp"
-#include "DataSubscriber.hpp"
+#include "services/pubsub/DataSubscriberInternal.hpp"
+#include "services/pubsub/DataSubscriber.hpp"
 
 #include "silkit/services/logging/ILogger.hpp"
 

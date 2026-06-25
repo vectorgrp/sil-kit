@@ -9,7 +9,7 @@
 
 #include "silkit/capi/SilKit.h"
 #include "silkit/SilKit.hpp"
-#include "CapiImpl.hpp"
+#include "capi/CapiImpl.hpp"
 #include "silkit/services/can/all.hpp"
 
 

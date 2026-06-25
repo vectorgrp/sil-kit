@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "IParticipantInternal.hpp"
+#include "core/internal/IParticipantInternal.hpp"
 
 #include <map>
 #include <memory>
@@ -16,64 +16,64 @@
 #include "silkit/services/all.hpp"
 #include "silkit/services/logging/ILogger.hpp"
 
-#include "ParticipantConfiguration.hpp"
-#include "ReplayScheduler.hpp"
-#include "Metrics.hpp"
-#include "MetricsProcessor.hpp"
-#include "IMetricsTimerThread.hpp"
+#include "config/ParticipantConfiguration.hpp"
+#include "tracing/ReplayScheduler.hpp"
+#include "services/metrics/Metrics.hpp"
+#include "services/metrics/MetricsProcessor.hpp"
+#include "services/metrics/IMetricsTimerThread.hpp"
 
 // Interfaces relying on I_SilKit_Core_Internal
-#include "IMsgForLogMsgSender.hpp"
-#include "IMsgForLogMsgReceiver.hpp"
+#include "services/logging/IMsgForLogMsgSender.hpp"
+#include "services/logging/IMsgForLogMsgReceiver.hpp"
 
-#include "IMsgForCanSimulator.hpp"
-#include "IMsgForCanController.hpp"
+#include "services/can/IMsgForCanSimulator.hpp"
+#include "services/can/IMsgForCanController.hpp"
 
-#include "IMsgForEthSimulator.hpp"
-#include "IMsgForEthController.hpp"
+#include "services/ethernet/IMsgForEthSimulator.hpp"
+#include "services/ethernet/IMsgForEthController.hpp"
 
-#include "IMsgForLinSimulator.hpp"
-#include "IMsgForLinController.hpp"
+#include "services/lin/IMsgForLinSimulator.hpp"
+#include "services/lin/IMsgForLinController.hpp"
 
-#include "IMsgForFlexrayBusSimulator.hpp"
-#include "IMsgForFlexrayController.hpp"
+#include "services/flexray/IMsgForFlexrayBusSimulator.hpp"
+#include "services/flexray/IMsgForFlexrayController.hpp"
 
-#include "IMsgForDataPublisher.hpp"
-#include "IMsgForDataSubscriber.hpp"
-#include "IMsgForDataSubscriberInternal.hpp"
+#include "services/pubsub/IMsgForDataPublisher.hpp"
+#include "services/pubsub/IMsgForDataSubscriber.hpp"
+#include "services/pubsub/IMsgForDataSubscriberInternal.hpp"
 
-#include "IMsgForRpcServer.hpp"
-#include "IMsgForRpcServerInternal.hpp"
-#include "IMsgForRpcClient.hpp"
+#include "services/rpc/IMsgForRpcServer.hpp"
+#include "services/rpc/IMsgForRpcServerInternal.hpp"
+#include "services/rpc/IMsgForRpcClient.hpp"
 
-#include "IMsgForSystemMonitor.hpp"
-#include "IMsgForSystemController.hpp"
-#include "IMsgForLifecycleService.hpp"
-#include "IMsgForTimeSyncService.hpp"
+#include "services/orchestration/IMsgForSystemMonitor.hpp"
+#include "services/orchestration/IMsgForSystemController.hpp"
+#include "services/orchestration/IMsgForLifecycleService.hpp"
+#include "services/orchestration/IMsgForTimeSyncService.hpp"
 
-#include "IMsgForMetricsReceiver.hpp"
-#include "IMsgForMetricsSender.hpp"
+#include "services/metrics/IMsgForMetricsReceiver.hpp"
+#include "services/metrics/IMsgForMetricsSender.hpp"
 
-#include "ITraceMessageSink.hpp"
-#include "ITraceMessageSource.hpp"
+#include "tracing/ITraceMessageSink.hpp"
+#include "tracing/ITraceMessageSource.hpp"
 
 // core/service
-#include "ServiceDiscovery.hpp"
+#include "core/service/ServiceDiscovery.hpp"
 
 // core/requests
-#include "RequestReplyService.hpp"
+#include "core/requests/RequestReplyService.hpp"
 #include "procs/ParticipantReplies.hpp"
 
-#include "ProtocolVersion.hpp"
-#include "TimeProvider.hpp"
+#include "core/internal/ProtocolVersion.hpp"
+#include "services/orchestration/TimeProvider.hpp"
 
 // Add connection types here and make sure they are instantiated in Participant.cpp
-#include "VAsioConnection.hpp"
+#include "core/vasio/VAsioConnection.hpp"
 
 // utilities for CreateController
 #include "traits/SilKitServiceConfigTraits.hpp"
 
-#include "NetworkSimulatorInternal.hpp"
+#include "experimental/netsim/NetworkSimulatorInternal.hpp"
 
 using namespace std::chrono_literals;
 

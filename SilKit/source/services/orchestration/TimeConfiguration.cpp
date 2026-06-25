@@ -2,8 +2,8 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "TimeConfiguration.hpp"
-#include "LoggerMessage.hpp"
+#include "services/orchestration/TimeConfiguration.hpp"
+#include "services/logging/LoggerMessage.hpp"
 
 namespace SilKit {
 namespace Services {

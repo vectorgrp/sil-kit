@@ -4,10 +4,10 @@
 
 #pragma once
 
-#include "RpcSpecDto.hpp"
-#include "DataSpecDto.hpp"
-#include "ParticipantStatusDto.hpp"
-#include "SystemStatusDto.hpp"
+#include "dashboard/dto/RpcSpecDto.hpp"
+#include "dashboard/dto/DataSpecDto.hpp"
+#include "dashboard/dto/ParticipantStatusDto.hpp"
+#include "dashboard/dto/SystemStatusDto.hpp"
 
 #include OATPP_CODEGEN_BEGIN(DTO)
 

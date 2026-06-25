@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 #pragma once
-#include "NamedPipe.hpp"
+#include "tracing/detail/NamedPipe.hpp"
 
 #include <string>
 

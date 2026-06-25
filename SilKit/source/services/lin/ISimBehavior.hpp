@@ -5,9 +5,9 @@
 #pragma once
 
 #include "silkit/services/lin/LinDatatypes.hpp"
-#include "WireLinMessages.hpp"
+#include "wire/lin/WireLinMessages.hpp"
 
-#include "IServiceEndpoint.hpp"
+#include "core/internal/IServiceEndpoint.hpp"
 
 namespace SilKit {
 namespace Services {

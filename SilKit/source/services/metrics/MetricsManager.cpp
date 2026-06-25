@@ -2,10 +2,10 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "MetricsManager.hpp"
+#include "services/metrics/MetricsManager.hpp"
 
-#include "Assert.hpp"
-#include "MetricsProcessor.hpp"
+#include "util/Assert.hpp"
+#include "services/metrics/MetricsProcessor.hpp"
 
 #include <string>
 #include <sstream>

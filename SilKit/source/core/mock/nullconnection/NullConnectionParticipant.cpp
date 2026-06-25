@@ -4,10 +4,10 @@
 
 #include "silkit/services/logging/ILogger.hpp"
 
-#include "NullConnectionParticipant.hpp"
-#include "Participant.hpp"
-#include "Participant_impl.hpp"
-#include "CreateParticipantT.hpp"
+#include "core/mock/nullconnection/NullConnectionParticipant.hpp"
+#include "core/participant/Participant.hpp"
+#include "core/participant/Participant_impl.hpp"
+#include "core/participant/CreateParticipantT.hpp"
 
 namespace SilKit {
 namespace Core {

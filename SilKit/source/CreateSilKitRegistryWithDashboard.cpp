@@ -4,7 +4,7 @@
 
 #include "CreateSilKitRegistryWithDashboard.hpp"
 
-#include "VAsioRegistry.hpp"
+#include "core/vasio/VAsioRegistry.hpp"
 
 
 namespace VSilKit {

@@ -2,17 +2,17 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "VAsioPeer.hpp"
+#include "core/vasio/VAsioPeer.hpp"
 
 #include <iomanip>
 #include <sstream>
 #include <thread>
 
-#include "LoggerMessage.hpp"
-#include "VAsioMsgKind.hpp"
-#include "VAsioConnection.hpp"
-#include "Uri.hpp"
-#include "Assert.hpp"
+#include "services/logging/LoggerMessage.hpp"
+#include "core/vasio/VAsioMsgKind.hpp"
+#include "core/vasio/VAsioConnection.hpp"
+#include "util/Uri.hpp"
+#include "util/Assert.hpp"
 
 #include "util/TracingMacros.hpp"
 

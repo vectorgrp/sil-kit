@@ -9,15 +9,15 @@
 #include <tuple>
 #include <vector>
 
-#include "IMsgForFlexrayController.hpp"
-#include "IParticipantInternal.hpp"
-#include "IServiceEndpoint.hpp"
-#include "ITraceMessageSource.hpp"
-#include "ITimeProvider.hpp"
+#include "services/flexray/IMsgForFlexrayController.hpp"
+#include "core/internal/IParticipantInternal.hpp"
+#include "core/internal/IServiceEndpoint.hpp"
+#include "tracing/ITraceMessageSource.hpp"
+#include "core/internal/ITimeProvider.hpp"
 
-#include "ParticipantConfiguration.hpp"
+#include "config/ParticipantConfiguration.hpp"
 
-#include "SynchronizedHandlers.hpp"
+#include "util/SynchronizedHandlers.hpp"
 
 namespace SilKit {
 namespace Services {

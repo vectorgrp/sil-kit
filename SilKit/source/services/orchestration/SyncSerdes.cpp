@@ -2,8 +2,8 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "InternalSerdes.hpp"
-#include "SyncSerdes.hpp"
+#include "core/internal/InternalSerdes.hpp"
+#include "services/orchestration/SyncSerdes.hpp"
 
 namespace SilKit {
 namespace Services {

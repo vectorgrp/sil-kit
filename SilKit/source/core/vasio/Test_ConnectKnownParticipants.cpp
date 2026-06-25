@@ -2,19 +2,19 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "ConnectKnownParticipants.hpp"
+#include "core/vasio/ConnectKnownParticipants.hpp"
 
-#include "MockLogger.hpp"
+#include "services/logging/MockLogger.hpp"
 
-#include "MockConnectKnownParticipantsListener.hpp"
-#include "MockConnectionMethods.hpp"
-#include "MockConnectPeer.hpp"
-#include "MockIoContext.hpp"
-#include "MockRawByteStream.hpp"
-#include "MockTimer.hpp"
-#include "MockVAsioPeer.hpp"
+#include "core/vasio/mock/MockConnectKnownParticipantsListener.hpp"
+#include "core/vasio/mock/MockConnectionMethods.hpp"
+#include "core/vasio/mock/MockConnectPeer.hpp"
+#include "core/vasio/io/mock/MockIoContext.hpp"
+#include "core/vasio/io/mock/MockRawByteStream.hpp"
+#include "core/vasio/io/mock/MockTimer.hpp"
+#include "core/vasio/mock/MockVAsioPeer.hpp"
 
-#include "Hash.hpp"
+#include "util/Hash.hpp"
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"

@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "TransformAcceptorUris.hpp"
+#include "core/vasio/TransformAcceptorUris.hpp"
 
 #include "silkit/participant/exception.hpp"
 

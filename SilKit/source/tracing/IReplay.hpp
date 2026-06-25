@@ -15,9 +15,9 @@
 #include "silkit/services/logging/ILogger.hpp"
 #include "silkit/services/datatypes.hpp"
 
-#include "TraceMessage.hpp"
-#include "EndpointAddress.hpp"
-#include "ParticipantConfiguration.hpp"
+#include "tracing/TraceMessage.hpp"
+#include "core/internal/EndpointAddress.hpp"
+#include "config/ParticipantConfiguration.hpp"
 
 namespace SilKit {
 

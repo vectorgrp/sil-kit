@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "FlexRayEventProducer.hpp"
+#include "experimental/netsim/eventproducers/FlexRayEventProducer.hpp"
 
 namespace SilKit {
 namespace Experimental {

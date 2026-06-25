@@ -8,11 +8,11 @@
 #include <fstream>
 #include <memory>
 
-#include "ITraceMessageSink.hpp"
+#include "tracing/ITraceMessageSink.hpp"
 
-#include "EndpointAddress.hpp"
+#include "core/internal/EndpointAddress.hpp"
 #include "detail/NamedPipe.hpp"
-#include "ILoggerInternal.hpp"
+#include "services/logging/ILoggerInternal.hpp"
 
 namespace SilKit {
 namespace Tracing {

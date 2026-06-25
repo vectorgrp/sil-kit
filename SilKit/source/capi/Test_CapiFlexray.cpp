@@ -7,7 +7,7 @@
 #include "silkit/services/flexray/all.hpp"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
-#include "MockParticipant.hpp"
+#include "core/mock/participant/MockParticipant.hpp"
 
 namespace {
 using namespace SilKit::Core;

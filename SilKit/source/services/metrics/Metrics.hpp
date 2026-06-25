@@ -7,13 +7,13 @@
 #include <cstdint>
 #include <chrono>
 
-#include "ICounterMetric.hpp"
-#include "IStatisticMetric.hpp"
-#include "IStringListMetric.hpp"
-#include "IAttributeMetric.hpp"
-#include "IMetricsManager.hpp"
-#include "IMetricsSender.hpp"
-#include "IMetricsProcessor.hpp"
+#include "services/metrics/ICounterMetric.hpp"
+#include "services/metrics/IStatisticMetric.hpp"
+#include "services/metrics/IStringListMetric.hpp"
+#include "services/metrics/IAttributeMetric.hpp"
+#include "services/metrics/IMetricsManager.hpp"
+#include "services/metrics/IMetricsSender.hpp"
+#include "services/metrics/IMetricsProcessor.hpp"
 
 
 namespace SilKit {

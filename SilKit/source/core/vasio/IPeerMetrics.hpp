@@ -5,9 +5,9 @@
 
 #include <string>
 
-#include "IMetricsManager.hpp"
-#include "IVAsioPeer.hpp"
-#include "SerializedMessage.hpp"
+#include "services/metrics/IMetricsManager.hpp"
+#include "core/vasio/IVAsioPeer.hpp"
+#include "core/vasio/SerializedMessage.hpp"
 
 namespace VSilKit {
 

@@ -5,7 +5,7 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-#include "RpcDatatypeUtils.hpp"
+#include "services/rpc/RpcDatatypeUtils.hpp"
 
 namespace {
 

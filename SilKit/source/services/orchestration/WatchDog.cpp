@@ -4,8 +4,8 @@
 
 #include <iostream>
 
-#include "WatchDog.hpp"
-#include "SetThreadName.hpp"
+#include "services/orchestration/WatchDog.hpp"
+#include "util/SetThreadName.hpp"
 
 using namespace std::chrono_literals;
 

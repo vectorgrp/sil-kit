@@ -6,9 +6,9 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-#include "YamlParser.hpp"
+#include "config/YamlParser.hpp"
 
-#include "SilKitToOatppMapper.hpp"
+#include "dashboard/service/SilKitToOatppMapper.hpp"
 #include "fmt/core.h"
 
 #include <algorithm>

@@ -2,10 +2,10 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "ParticipantReplies.hpp"
+#include "core/requests/procs/ParticipantReplies.hpp"
 
 #include "silkit/participant/exception.hpp"
-#include "LoggerMessage.hpp"
+#include "services/logging/LoggerMessage.hpp"
 
 namespace SilKit {
 namespace Core {

@@ -2,13 +2,13 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "EthController.hpp"
+#include "services/ethernet/EthController.hpp"
 #include "silkit/services/logging/ILogger.hpp"
 
-#include "IServiceDiscovery.hpp"
-#include "ServiceDatatypes.hpp"
-#include "Tracing.hpp"
-#include "LoggerMessage.hpp"
+#include "core/service/IServiceDiscovery.hpp"
+#include "core/service/ServiceDatatypes.hpp"
+#include "tracing/Tracing.hpp"
+#include "services/logging/LoggerMessage.hpp"
 
 namespace SilKit {
 namespace Services {

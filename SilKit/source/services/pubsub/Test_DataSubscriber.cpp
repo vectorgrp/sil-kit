@@ -2,19 +2,19 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "DataSubscriber.hpp"
+#include "services/pubsub/DataSubscriber.hpp"
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-#include "functional.hpp"
+#include "util/functional.hpp"
 
-#include "MockParticipant.hpp"
+#include "core/mock/participant/MockParticipant.hpp"
 
-#include "DataPublisher.hpp"
-#include "DataMessageDatatypeUtils.hpp"
+#include "services/pubsub/DataPublisher.hpp"
+#include "services/pubsub/DataMessageDatatypeUtils.hpp"
 
-#include "YamlParser.hpp"
+#include "config/YamlParser.hpp"
 
 namespace {
 

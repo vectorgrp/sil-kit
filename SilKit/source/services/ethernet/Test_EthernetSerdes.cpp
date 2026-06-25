@@ -2,13 +2,13 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "EthernetSerdes.hpp"
+#include "services/ethernet/EthernetSerdes.hpp"
 
 #include <chrono>
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "EthDatatypeUtils.hpp"
+#include "services/ethernet/EthDatatypeUtils.hpp"
 
 using namespace std::chrono_literals;
 

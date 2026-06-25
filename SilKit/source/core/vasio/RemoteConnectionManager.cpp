@@ -2,11 +2,11 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "RemoteConnectionManager.hpp"
+#include "core/vasio/RemoteConnectionManager.hpp"
 
-#include "VAsioConnection.hpp"
-#include "VAsioPeer.hpp"
-#include "ConnectPeer.hpp"
+#include "core/vasio/VAsioConnection.hpp"
+#include "core/vasio/VAsioPeer.hpp"
+#include "core/vasio/ConnectPeer.hpp"
 #include "util/TracingMacros.hpp"
 
 

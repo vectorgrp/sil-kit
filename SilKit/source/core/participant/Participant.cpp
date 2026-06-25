@@ -2,8 +2,8 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "Participant.hpp"
-#include "Participant_impl.hpp"
+#include "core/participant/Participant.hpp"
+#include "core/participant/Participant_impl.hpp"
 
 namespace SilKit {
 namespace Core {

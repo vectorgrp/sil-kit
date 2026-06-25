@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "LoggingSerdes.hpp"
+#include "services/logging/LoggingSerdes.hpp"
 
 
 namespace SilKit {

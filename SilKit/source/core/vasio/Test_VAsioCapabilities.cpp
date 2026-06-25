@@ -6,7 +6,7 @@
 
 #include "silkit/participant/exception.hpp"
 
-#include "VAsioCapabilities.hpp"
+#include "core/vasio/VAsioCapabilities.hpp"
 
 
 namespace {

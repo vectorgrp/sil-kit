@@ -11,15 +11,15 @@
 
 #include "silkit/services/orchestration/ITimeSyncService.hpp"
 
-#include "IMsgForTimeSyncService.hpp"
-#include "IParticipantInternal.hpp"
-#include "LifecycleService.hpp"
-#include "ParticipantConfiguration.hpp"
-#include "PerformanceMonitor.hpp"
-#include "TimeProvider.hpp"
-#include "TimeConfiguration.hpp"
-#include "WatchDog.hpp"
-#include "Metrics.hpp"
+#include "services/orchestration/IMsgForTimeSyncService.hpp"
+#include "core/internal/IParticipantInternal.hpp"
+#include "services/orchestration/LifecycleService.hpp"
+#include "config/ParticipantConfiguration.hpp"
+#include "util/PerformanceMonitor.hpp"
+#include "services/orchestration/TimeProvider.hpp"
+#include "services/orchestration/TimeConfiguration.hpp"
+#include "services/orchestration/WatchDog.hpp"
+#include "services/metrics/Metrics.hpp"
 
 namespace SilKit {
 namespace Services {

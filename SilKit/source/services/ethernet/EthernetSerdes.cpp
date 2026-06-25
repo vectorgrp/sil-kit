@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "EthernetSerdes.hpp"
+#include "services/ethernet/EthernetSerdes.hpp"
 
 namespace SilKit {
 namespace Services {

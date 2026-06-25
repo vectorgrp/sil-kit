@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "IMetricsSink.hpp"
+#include "services/metrics/IMetricsSink.hpp"
 
 namespace VSilKit {
 struct IMetricsSender;

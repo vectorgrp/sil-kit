@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include "MessageBuffer.hpp"
-#include "RequestReplyDatatypes.hpp"
+#include "core/internal/MessageBuffer.hpp"
+#include "core/requests/RequestReplyDatatypes.hpp"
 
 namespace SilKit {
 namespace Core {

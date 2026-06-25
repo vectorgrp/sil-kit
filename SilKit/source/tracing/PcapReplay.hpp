@@ -6,8 +6,8 @@
 
 #include <string>
 
-#include "ILoggerInternal.hpp"
-#include "IReplay.hpp"
+#include "services/logging/ILoggerInternal.hpp"
+#include "tracing/IReplay.hpp"
 
 namespace SilKit {
 namespace Tracing {

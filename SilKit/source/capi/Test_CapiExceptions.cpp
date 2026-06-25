@@ -5,7 +5,7 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "CapiImpl.hpp"
+#include "capi/CapiImpl.hpp"
 #include "silkit/detail/impl/ThrowOnError.hpp"
 
 namespace {

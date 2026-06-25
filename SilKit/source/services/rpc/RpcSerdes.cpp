@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "RpcSerdes.hpp"
+#include "services/rpc/RpcSerdes.hpp"
 
 namespace SilKit {
 namespace Services {

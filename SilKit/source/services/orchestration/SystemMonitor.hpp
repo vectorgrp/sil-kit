@@ -11,11 +11,11 @@
 
 #include "silkit/services/orchestration/ISystemMonitor.hpp"
 
-#include "IMsgForSystemMonitor.hpp"
-#include "IParticipantInternal.hpp"
-#include "IServiceEndpoint.hpp"
-#include "SynchronizedHandlers.hpp"
-#include "SystemStateTracker.hpp"
+#include "services/orchestration/IMsgForSystemMonitor.hpp"
+#include "core/internal/IParticipantInternal.hpp"
+#include "core/internal/IServiceEndpoint.hpp"
+#include "util/SynchronizedHandlers.hpp"
+#include "services/orchestration/SystemStateTracker.hpp"
 
 namespace SilKit {
 namespace Services {

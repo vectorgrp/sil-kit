@@ -4,7 +4,7 @@
 
 #include "silkit/capi/SilKit.h"
 #include "SilKitVersionImpl.hpp"
-#include "CapiImpl.hpp"
+#include "capi/CapiImpl.hpp"
 
 
 SilKit_ReturnCode SilKitCALL SilKit_Version_Major(uint32_t* outVersionMajor)

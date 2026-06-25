@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "YamlParserUtils.hpp"
+#include "config/YamlParserUtils.hpp"
 
 #include "silkit/participant/exception.hpp"
 

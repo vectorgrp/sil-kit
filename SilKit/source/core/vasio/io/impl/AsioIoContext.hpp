@@ -5,11 +5,11 @@
 #pragma once
 
 
-#include "IIoContext.hpp"
+#include "core/vasio/io/IIoContext.hpp"
 
-#include "MakeAsioIoContext.hpp"
+#include "core/vasio/io/MakeAsioIoContext.hpp"
 
-#include "LoggerMessage.hpp"
+#include "services/logging/LoggerMessage.hpp"
 
 #include "asio.hpp"
 

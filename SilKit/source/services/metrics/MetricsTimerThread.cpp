@@ -2,9 +2,9 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "MetricsTimerThread.hpp"
+#include "services/metrics/MetricsTimerThread.hpp"
 
-#include "SetThreadName.hpp"
+#include "util/SetThreadName.hpp"
 
 namespace VSilKit {
 

@@ -3,8 +3,8 @@
 // SPDX-License-Identifier: MIT
 
 #include "silkit/experimental/netsim/INetworkSimulator.hpp"
-#include "ISimulator.hpp"
-#include "SimulatedNetworkRouter.hpp"
+#include "core/internal/ISimulator.hpp"
+#include "experimental/netsim/SimulatedNetworkRouter.hpp"
 
 namespace SilKit {
 namespace Experimental {

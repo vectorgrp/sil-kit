@@ -4,13 +4,13 @@
 
 #pragma once
 
-#include "ITimeConsumer.hpp"
+#include "core/internal/ITimeConsumer.hpp"
 
-#include "IMsgForDataSubscriberInternal.hpp"
-#include "IParticipantInternal.hpp"
-#include "DataMessageDatatypeUtils.hpp"
-#include "SynchronizedHandlers.hpp"
-#include "IReplayDataController.hpp"
+#include "services/pubsub/IMsgForDataSubscriberInternal.hpp"
+#include "core/internal/IParticipantInternal.hpp"
+#include "services/pubsub/DataMessageDatatypeUtils.hpp"
+#include "util/SynchronizedHandlers.hpp"
+#include "tracing/IReplayDataController.hpp"
 
 namespace SilKit {
 namespace Services {

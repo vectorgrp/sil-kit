@@ -5,9 +5,9 @@
 #pragma once
 
 
-#include "LoggerMessage.hpp"
-#include "IVAsioPeer.hpp"
-#include "Uri.hpp"
+#include "services/logging/LoggerMessage.hpp"
+#include "core/vasio/IVAsioPeer.hpp"
+#include "util/Uri.hpp"
 
 #include <string>
 #include <vector>

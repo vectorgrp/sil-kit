@@ -10,8 +10,8 @@
  */
 
 #include <cstdint>
-#include "SilKitExtensionABI.h"
-#include "ISilKitExtension.hpp"
+#include "extensions/SilKitExtensionApi/SilKitExtensionABI.h"
+#include "extensions/SilKitExtensionApi/ISilKitExtension.hpp"
 
 namespace SilKit {
 

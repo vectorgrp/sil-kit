@@ -13,12 +13,12 @@
 #include "silkit/services/rpc/IRpcCallHandle.hpp"
 #include "silkit/services/rpc/string_utils.hpp"
 
-#include "ITimeConsumer.hpp"
-#include "ITimeProvider.hpp"
-#include "IMsgForRpcClient.hpp"
-#include "IParticipantInternal.hpp"
-#include "RpcCallHandle.hpp"
-#include "Uuid.hpp"
+#include "core/internal/ITimeConsumer.hpp"
+#include "core/internal/ITimeProvider.hpp"
+#include "services/rpc/IMsgForRpcClient.hpp"
+#include "core/internal/IParticipantInternal.hpp"
+#include "services/rpc/RpcCallHandle.hpp"
+#include "util/Uuid.hpp"
 
 namespace SilKit {
 namespace Services {

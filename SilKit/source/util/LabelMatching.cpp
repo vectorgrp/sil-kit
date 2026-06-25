@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "LabelMatching.hpp"
+#include "util/LabelMatching.hpp"
 #include <optional>
 
 namespace SilKit {

@@ -5,11 +5,11 @@
 #pragma once
 
 
-#include "IConnectPeer.hpp"
+#include "core/vasio/IConnectPeer.hpp"
 
-#include "IIoContext.hpp"
+#include "core/vasio/io/IIoContext.hpp"
 
-#include "LoggerMessage.hpp"
+#include "services/logging/LoggerMessage.hpp"
 
 #include <chrono>
 #include <functional>

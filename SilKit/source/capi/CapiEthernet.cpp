@@ -9,7 +9,7 @@
 #include "silkit/services/ethernet/all.hpp"
 
 #include <cstring>
-#include "CapiImpl.hpp"
+#include "capi/CapiImpl.hpp"
 
 
 SilKit_ReturnCode SilKitCALL SilKit_EthernetController_Create(SilKit_EthernetController** outController,

@@ -10,7 +10,7 @@
 #include <algorithm>
 #include <memory>
 
-#include "Assert.hpp"
+#include "util/Assert.hpp"
 
 namespace SilKit {
 namespace Util {

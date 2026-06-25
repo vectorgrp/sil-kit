@@ -4,10 +4,10 @@
 
 #pragma once
 
-#include "SimulationCreationRequestDto.hpp"
-#include "SimulationCreationResponseDto.hpp"
-#include "BulkUpdateDto.hpp"
-#include "MetricsDto.hpp"
+#include "dashboard/dto/SimulationCreationRequestDto.hpp"
+#include "dashboard/dto/SimulationCreationResponseDto.hpp"
+#include "dashboard/dto/BulkUpdateDto.hpp"
+#include "dashboard/dto/MetricsDto.hpp"
 
 namespace SilKit {
 namespace Dashboard {

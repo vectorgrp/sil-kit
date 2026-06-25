@@ -10,11 +10,11 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "RequestReplyService.hpp"
-#include "string_utils_internal.hpp"
-#include "Uuid.hpp"
-#include "MockParticipant.hpp"
-#include "MockServiceEndpoint.hpp"
+#include "core/requests/RequestReplyService.hpp"
+#include "core/internal/string_utils_internal.hpp"
+#include "util/Uuid.hpp"
+#include "core/mock/participant/MockParticipant.hpp"
+#include "core/service/MockServiceEndpoint.hpp"
 
 namespace {
 

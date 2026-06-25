@@ -4,11 +4,11 @@
 
 #pragma once
 
-#include "Logger.hpp"
+#include "services/logging/Logger.hpp"
 
-#include "IParticipantInternal.hpp"
-#include "IMsgForLogMsgReceiver.hpp"
-#include "IServiceEndpoint.hpp"
+#include "core/internal/IParticipantInternal.hpp"
+#include "services/logging/IMsgForLogMsgReceiver.hpp"
+#include "core/internal/IServiceEndpoint.hpp"
 
 namespace SilKit {
 namespace Services {

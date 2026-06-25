@@ -4,7 +4,7 @@
 
 #include "silkit/participant/exception.hpp"
 
-#include "NamedPipeLinux.hpp"
+#include "tracing/detail/NamedPipeLinux.hpp"
 
 #include <sys/types.h>
 #include <sys/stat.h>

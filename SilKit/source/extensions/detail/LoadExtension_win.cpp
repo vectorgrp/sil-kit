@@ -8,8 +8,8 @@
 #include <cstdlib> //getenv
 #include <io.h>    //access
 
-#include "SilKitExtensions.hpp"
-#include "LoadExtension.hpp"
+#include "extensions/SilKitExtensions.hpp"
+#include "extensions/detail/LoadExtension.hpp"
 
 
 namespace SilKit {

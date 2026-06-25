@@ -12,7 +12,7 @@
 
 #include "silkit/services/logging/LoggingDatatypes.hpp"
 #include "silkit/services/logging/string_utils.hpp"
-#include "string_utils_internal.hpp"
+#include "core/internal/string_utils_internal.hpp"
 
 namespace SilKit {
 namespace Services {

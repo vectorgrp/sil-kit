@@ -4,7 +4,7 @@
 
 #include "gtest/gtest.h"
 
-#include "LoggingSerdes.hpp"
+#include "services/logging/LoggingSerdes.hpp"
 
 TEST(Test_LoggingSerdes, LoggingSerdes)
 {

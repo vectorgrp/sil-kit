@@ -6,7 +6,7 @@
 
 #include "gmock/gmock-function-mocker.h"
 
-#include "DashboardSystemApiClient.hpp"
+#include "dashboard/client/DashboardSystemApiClient.hpp"
 
 namespace SilKit {
 namespace Dashboard {

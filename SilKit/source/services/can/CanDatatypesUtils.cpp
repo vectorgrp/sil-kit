@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "CanDatatypesUtils.hpp"
+#include "services/can/CanDatatypesUtils.hpp"
 
 namespace SilKit {
 namespace Services {

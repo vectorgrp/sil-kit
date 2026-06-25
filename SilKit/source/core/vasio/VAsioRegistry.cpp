@@ -2,18 +2,18 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "VAsioRegistry.hpp"
+#include "core/vasio/VAsioRegistry.hpp"
 
-#include "Logger.hpp"
-#include "Uri.hpp"
-#include "LoggerMessage.hpp"
-#include "TransformAcceptorUris.hpp"
-#include "VAsioConstants.hpp"
+#include "services/logging/Logger.hpp"
+#include "util/Uri.hpp"
+#include "services/logging/LoggerMessage.hpp"
+#include "core/vasio/TransformAcceptorUris.hpp"
+#include "core/vasio/VAsioConstants.hpp"
 
-#include "MetricsReceiver.hpp"
-#include "MetricsProcessor.hpp"
-#include "MetricsManager.hpp"
-#include "CreateMetricsSinksFromParticipantConfiguration.hpp"
+#include "services/metrics/MetricsReceiver.hpp"
+#include "services/metrics/MetricsProcessor.hpp"
+#include "services/metrics/MetricsManager.hpp"
+#include "services/metrics/CreateMetricsSinksFromParticipantConfiguration.hpp"
 
 #include "traits/SilKitServiceConfigTraits.hpp"
 

@@ -5,9 +5,9 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "IMetricsSink.hpp"
-#include "MetricsDatatypes.hpp"
-#include "MetricsProcessor.hpp"
+#include "services/metrics/IMetricsSink.hpp"
+#include "services/metrics/MetricsDatatypes.hpp"
+#include "services/metrics/MetricsProcessor.hpp"
 
 #include <algorithm>
 #include <memory>

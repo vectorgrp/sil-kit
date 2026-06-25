@@ -10,17 +10,17 @@
 #include "silkit/services/lin/ILinController.hpp"
 #include "silkit/experimental/services/lin/LinDatatypesExtensions.hpp"
 
-#include "ILinControllerExtensions.hpp"
-#include "ITimeConsumer.hpp"
-#include "IParticipantInternal.hpp"
-#include "ITraceMessageSource.hpp"
-#include "IReplayDataController.hpp"
-#include "ParticipantConfiguration.hpp"
-#include "IMsgForLinController.hpp"
-#include "SimBehavior.hpp"
-#include "SynchronizedHandlers.hpp"
-#include "WireLinMessages.hpp"
-#include "LoggerMessage.hpp"
+#include "services/lin/ILinControllerExtensions.hpp"
+#include "core/internal/ITimeConsumer.hpp"
+#include "core/internal/IParticipantInternal.hpp"
+#include "tracing/ITraceMessageSource.hpp"
+#include "tracing/IReplayDataController.hpp"
+#include "config/ParticipantConfiguration.hpp"
+#include "services/lin/IMsgForLinController.hpp"
+#include "services/lin/SimBehavior.hpp"
+#include "util/SynchronizedHandlers.hpp"
+#include "wire/lin/WireLinMessages.hpp"
+#include "services/logging/LoggerMessage.hpp"
 
 namespace SilKit {
 namespace Services {

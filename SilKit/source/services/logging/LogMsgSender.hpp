@@ -4,9 +4,9 @@
 
 #pragma once
 
-#include "IMsgForLogMsgSender.hpp"
-#include "IParticipantInternal.hpp"
-#include "IServiceEndpoint.hpp"
+#include "services/logging/IMsgForLogMsgSender.hpp"
+#include "core/internal/IParticipantInternal.hpp"
+#include "core/internal/IServiceEndpoint.hpp"
 
 namespace SilKit {
 namespace Services {

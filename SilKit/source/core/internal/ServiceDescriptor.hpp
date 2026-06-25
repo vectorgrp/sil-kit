@@ -7,11 +7,11 @@
 #include <sstream>
 #include <map>
 
-#include "StructuredLoggingKeys.hpp"
-#include "ServiceConfigKeys.hpp"
-#include "Configuration.hpp"
-#include "EndpointAddress.hpp"
-#include "Hash.hpp"
+#include "services/logging/StructuredLoggingKeys.hpp"
+#include "core/internal/ServiceConfigKeys.hpp"
+#include "config/Configuration.hpp"
+#include "core/internal/EndpointAddress.hpp"
+#include "util/Hash.hpp"
 
 namespace SilKit {
 namespace Core {

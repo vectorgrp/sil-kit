@@ -5,9 +5,9 @@
 #pragma once
 
 
-#include "IConnectPeer.hpp"
+#include "core/vasio/IConnectPeer.hpp"
 
-#include "Uri.hpp"
+#include "util/Uri.hpp"
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"

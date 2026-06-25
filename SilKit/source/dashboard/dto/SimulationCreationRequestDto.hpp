@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "SimulationConfigurationDto.hpp"
+#include "dashboard/dto/SimulationConfigurationDto.hpp"
 
 #include OATPP_CODEGEN_BEGIN(DTO)
 

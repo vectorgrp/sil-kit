@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "MetricsDatatypes.hpp"
+#include "services/metrics/MetricsDatatypes.hpp"
 
 #include <ostream>
 #include <type_traits>

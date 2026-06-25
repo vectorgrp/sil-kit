@@ -8,12 +8,12 @@
 #include <vector>
 #include <map>
 
-#include "SimBehaviorDetailed.hpp"
-#include "SimBehaviorTrivial.hpp"
+#include "services/lin/SimBehaviorDetailed.hpp"
+#include "services/lin/SimBehaviorTrivial.hpp"
 
 #include "silkit/services/lin/LinDatatypes.hpp"
-#include "IServiceEndpoint.hpp"
-#include "WireLinMessages.hpp"
+#include "core/internal/IServiceEndpoint.hpp"
+#include "wire/lin/WireLinMessages.hpp"
 
 namespace SilKit {
 namespace Services {

@@ -5,10 +5,10 @@
 // SPDX-License-Identifier: MIT
 
 // internal connection endpoint types:
-#include "IMsgForCanSimulator.hpp"
-#include "IMsgForEthSimulator.hpp"
-#include "IMsgForFlexrayBusSimulator.hpp"
-#include "IMsgForLinSimulator.hpp"
+#include "services/can/IMsgForCanSimulator.hpp"
+#include "services/ethernet/IMsgForEthSimulator.hpp"
+#include "services/flexray/IMsgForFlexrayBusSimulator.hpp"
+#include "services/lin/IMsgForLinSimulator.hpp"
 
 namespace SilKit {
 namespace Core {

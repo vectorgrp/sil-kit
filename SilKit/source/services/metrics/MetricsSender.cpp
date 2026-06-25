@@ -2,9 +2,9 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "MetricsSender.hpp"
+#include "services/metrics/MetricsSender.hpp"
 
-#include "LoggerMessage.hpp"
+#include "services/logging/LoggerMessage.hpp"
 
 
 namespace VSilKit {

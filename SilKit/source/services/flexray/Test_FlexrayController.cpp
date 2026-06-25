@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "FlexrayController.hpp"
+#include "services/flexray/FlexrayController.hpp"
 
 #include <chrono>
 #include <functional>
@@ -12,11 +12,11 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-#include "FlexrayDatatypeUtils.hpp"
-#include "MockParticipant.hpp"
-#include "ParticipantConfiguration.hpp"
+#include "services/flexray/FlexrayDatatypeUtils.hpp"
+#include "core/mock/participant/MockParticipant.hpp"
+#include "config/ParticipantConfiguration.hpp"
 
-#include "functional.hpp"
+#include "util/functional.hpp"
 
 namespace {
 

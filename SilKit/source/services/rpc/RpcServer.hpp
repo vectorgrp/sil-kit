@@ -11,11 +11,11 @@
 #include "silkit/services/rpc/IRpcServer.hpp"
 #include "silkit/services/rpc/IRpcCallHandle.hpp"
 
-#include "ITimeConsumer.hpp"
-#include "IMsgForRpcServer.hpp"
-#include "IParticipantInternal.hpp"
-#include "RpcServerInternal.hpp"
-#include "RpcCallHandle.hpp"
+#include "core/internal/ITimeConsumer.hpp"
+#include "services/rpc/IMsgForRpcServer.hpp"
+#include "core/internal/IParticipantInternal.hpp"
+#include "services/rpc/RpcServerInternal.hpp"
+#include "services/rpc/RpcCallHandle.hpp"
 
 namespace SilKit {
 namespace Services {

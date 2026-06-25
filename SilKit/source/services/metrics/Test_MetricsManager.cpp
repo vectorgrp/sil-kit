@@ -7,9 +7,9 @@
 
 #include <string>
 
-#include "IMetricsProcessor.hpp"
-#include "MetricsDatatypes.hpp"
-#include "MetricsManager.hpp"
+#include "services/metrics/IMetricsProcessor.hpp"
+#include "services/metrics/MetricsDatatypes.hpp"
+#include "services/metrics/MetricsManager.hpp"
 
 namespace {
 

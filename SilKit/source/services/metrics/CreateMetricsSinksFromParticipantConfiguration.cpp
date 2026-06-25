@@ -2,14 +2,14 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "CreateMetricsSinksFromParticipantConfiguration.hpp"
+#include "services/metrics/CreateMetricsSinksFromParticipantConfiguration.hpp"
 
-#include "MetricsJsonSink.hpp"
-#include "MetricsRemoteSink.hpp"
+#include "services/metrics/MetricsJsonSink.hpp"
+#include "services/metrics/MetricsRemoteSink.hpp"
 
-#include "Assert.hpp"
-#include "StringHelpers.hpp"
-#include "LoggerMessage.hpp"
+#include "util/Assert.hpp"
+#include "util/StringHelpers.hpp"
+#include "services/logging/LoggerMessage.hpp"
 
 #include <fstream>
 

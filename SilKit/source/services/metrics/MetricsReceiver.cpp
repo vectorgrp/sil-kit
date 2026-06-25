@@ -2,9 +2,9 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "MetricsReceiver.hpp"
+#include "services/metrics/MetricsReceiver.hpp"
 
-#include "LoggerMessage.hpp"
+#include "services/logging/LoggerMessage.hpp"
 
 
 namespace Log = SilKit::Services::Logging;

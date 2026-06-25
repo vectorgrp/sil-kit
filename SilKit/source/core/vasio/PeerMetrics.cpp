@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2025 Vector Informatik GmbH
 // SPDX-License-Identifier: MIT
 
-#include "PeerMetrics.hpp"
+#include "core/vasio/PeerMetrics.hpp"
 
 
 namespace VSilKit {

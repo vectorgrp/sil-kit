@@ -10,9 +10,9 @@
 
 #include "silkit/participant/exception.hpp"
 
-#include "NullConnectionParticipant.hpp"
-#include "ConfigurationTestUtils.hpp"
-#include "ParticipantExtensionsImpl.hpp"
+#include "core/mock/nullconnection/NullConnectionParticipant.hpp"
+#include "config/ConfigurationTestUtils.hpp"
+#include "experimental/participant/ParticipantExtensionsImpl.hpp"
 
 namespace {
 

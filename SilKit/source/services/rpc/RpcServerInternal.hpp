@@ -7,13 +7,13 @@
 #include <vector>
 #include <map>
 
-#include "ITimeConsumer.hpp"
+#include "core/internal/ITimeConsumer.hpp"
 #include "silkit/services/rpc/IRpcServer.hpp"
 #include "silkit/services/rpc/IRpcCallHandle.hpp"
 
-#include "IParticipantInternal.hpp"
-#include "IMsgForRpcServerInternal.hpp"
-#include "RpcCallHandle.hpp"
+#include "core/internal/IParticipantInternal.hpp"
+#include "services/rpc/IMsgForRpcServerInternal.hpp"
+#include "services/rpc/RpcCallHandle.hpp"
 
 namespace SilKit {
 namespace Services {

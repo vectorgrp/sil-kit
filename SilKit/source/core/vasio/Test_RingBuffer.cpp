@@ -5,7 +5,7 @@
 #include <random>
 #include <cstring>
 
-#include "RingBuffer.hpp"
+#include "core/vasio/RingBuffer.hpp"
 
 #include "gtest/gtest.h"
 

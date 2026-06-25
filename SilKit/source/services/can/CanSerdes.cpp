@@ -4,8 +4,8 @@
 
 #include "silkit/services/can/CanDatatypes.hpp"
 
-#include "MessageBuffer.hpp"
-#include "CanSerdes.hpp"
+#include "core/internal/MessageBuffer.hpp"
+#include "services/can/CanSerdes.hpp"
 
 namespace SilKit {
 namespace Services {

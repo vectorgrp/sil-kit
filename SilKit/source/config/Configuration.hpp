@@ -18,9 +18,9 @@
 #include "silkit/SilKitMacros.hpp"
 
 #include "silkit/services/logging/LoggingDatatypes.hpp"
-#include "LoggingTopics.hpp"
+#include "core/internal/LoggingTopics.hpp"
 
-#include "StringHelpers.hpp"
+#include "util/StringHelpers.hpp"
 
 namespace SilKit {
 namespace Config {

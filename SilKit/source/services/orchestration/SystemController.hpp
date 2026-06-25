@@ -7,9 +7,9 @@
 
 #include "silkit/experimental/services/orchestration/ISystemController.hpp"
 
-#include "IMsgForSystemController.hpp"
-#include "IParticipantInternal.hpp"
-#include "Assert.hpp"
+#include "services/orchestration/IMsgForSystemController.hpp"
+#include "core/internal/IParticipantInternal.hpp"
+#include "util/Assert.hpp"
 
 namespace SilKit {
 namespace Services {

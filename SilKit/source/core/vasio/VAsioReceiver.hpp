@@ -4,14 +4,14 @@
 
 #pragma once
 
-#include "SilKitLink.hpp"
+#include "core/vasio/SilKitLink.hpp"
 
-#include "VAsioDatatypes.hpp"
+#include "core/vasio/VAsioDatatypes.hpp"
 
-#include "MessageTracing.hpp"
-#include "IServiceEndpoint.hpp"
-#include "SerializedMessage.hpp"
-#include "LoggerMessage.hpp"
+#include "services/logging/MessageTracing.hpp"
+#include "core/internal/IServiceEndpoint.hpp"
+#include "core/vasio/SerializedMessage.hpp"
+#include "services/logging/LoggerMessage.hpp"
 
 namespace SilKit {
 namespace Core {

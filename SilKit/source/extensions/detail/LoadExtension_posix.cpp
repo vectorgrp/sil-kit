@@ -13,8 +13,8 @@
 #include <limits.h>
 #include <libgen.h>
 
-#include "SilKitExtensions.hpp"
-#include "LoadExtension.hpp"
+#include "extensions/SilKitExtensions.hpp"
+#include "extensions/detail/LoadExtension.hpp"
 
 
 namespace SilKit {

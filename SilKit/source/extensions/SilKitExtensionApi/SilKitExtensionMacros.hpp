@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include "SilKitExtensionABI.h"
-#include "SilKitExtensionUtils.hpp"
+#include "extensions/SilKitExtensionApi/SilKitExtensionABI.h"
+#include "extensions/SilKitExtensionApi/SilKitExtensionUtils.hpp"
 
 #define STRFY(x) #x
 

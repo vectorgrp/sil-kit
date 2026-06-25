@@ -5,7 +5,7 @@
 #pragma once
 
 
-#include "IDashboardInstance.hpp"
+#include "dashboard/IDashboardInstance.hpp"
 
 #include <memory>
 

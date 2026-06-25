@@ -6,8 +6,8 @@
 #include <string>
 #include <ostream>
 
-#include "MessageBuffer.hpp"
-#include "InternalSerdes.hpp"
+#include "core/internal/MessageBuffer.hpp"
+#include "core/internal/InternalSerdes.hpp"
 
 
 // Datatypes for testing versioning and renaming of SIL Kit messages.

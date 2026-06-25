@@ -6,8 +6,8 @@
 
 #include <type_traits>
 
-#include "SilKitMsgVersion.hpp"
-#include "SilKitMsgSerdesName.hpp"
+#include "core/internal/traits/SilKitMsgVersion.hpp"
+#include "core/internal/traits/SilKitMsgSerdesName.hpp"
 
 namespace SilKit {
 namespace Core {

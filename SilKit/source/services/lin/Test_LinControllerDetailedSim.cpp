@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "LinController.hpp"
+#include "services/lin/LinController.hpp"
 
 #include <chrono>
 #include <functional>
@@ -12,9 +12,9 @@
 #include "gtest/gtest.h"
 
 #include "silkit/services/lin/string_utils.hpp"
-#include "functional.hpp"
+#include "util/functional.hpp"
 
-#include "LinTestUtils.hpp"
+#include "services/lin/LinTestUtils.hpp"
 
 namespace {
 

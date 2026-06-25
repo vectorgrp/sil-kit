@@ -6,7 +6,7 @@
 
 #include "gmock/gmock-function-mocker.h"
 
-#include "OatppHeaders.hpp"
+#include "dashboard/OatppHeaders.hpp"
 
 namespace SilKit {
 namespace Dashboard {

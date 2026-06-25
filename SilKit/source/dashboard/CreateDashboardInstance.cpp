@@ -2,8 +2,8 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "CreateDashboardInstance.hpp"
-#include "DashboardInstance.hpp"
+#include "dashboard/CreateDashboardInstance.hpp"
+#include "dashboard/DashboardInstance.hpp"
 
 namespace VSilKit {
 

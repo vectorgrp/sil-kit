@@ -12,14 +12,14 @@
 #include <unordered_set>
 #include <future>
 
-#include "IParticipantInternal.hpp"
-#include "IServiceEndpoint.hpp"
-#include "IReceiver.hpp"
-#include "ISender.hpp"
-#include "IRequestReplyService.hpp"
-#include "IRequestReplyProcedure.hpp"
+#include "core/internal/IParticipantInternal.hpp"
+#include "core/internal/IServiceEndpoint.hpp"
+#include "core/internal/IReceiver.hpp"
+#include "core/internal/ISender.hpp"
+#include "core/requests/IRequestReplyService.hpp"
+#include "core/requests/IRequestReplyProcedure.hpp"
 
-#include "Uuid.hpp"
+#include "util/Uuid.hpp"
 #include "procs/ParticipantReplies.hpp"
 
 namespace SilKit {

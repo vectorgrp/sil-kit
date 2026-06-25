@@ -2,9 +2,9 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "SystemController.hpp"
-#include "LifecycleService.hpp"
-#include "Hash.hpp"
+#include "services/orchestration/SystemController.hpp"
+#include "services/orchestration/LifecycleService.hpp"
+#include "util/Hash.hpp"
 
 namespace SilKit {
 namespace Services {

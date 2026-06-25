@@ -4,10 +4,10 @@
 
 #pragma once
 
-#include "MetricsDatatypes.hpp"
+#include "services/metrics/MetricsDatatypes.hpp"
 
-#include "IReceiver.hpp"
-#include "ISender.hpp"
+#include "core/internal/IReceiver.hpp"
+#include "core/internal/ISender.hpp"
 
 
 namespace VSilKit {
