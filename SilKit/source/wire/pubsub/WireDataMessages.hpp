@@ -7,7 +7,7 @@
 #include "silkit/services/pubsub/PubSubDatatypes.hpp"
 #include "silkit/services/pubsub/string_utils.hpp"
 
-#include "SharedVector.hpp"
+#include "wire/util/SharedVector.hpp"
 
 #include <chrono>
 #include <vector>
