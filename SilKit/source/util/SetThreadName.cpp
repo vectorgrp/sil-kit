@@ -2,8 +2,8 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "SetThreadName.hpp"
-#include "Assert.hpp"
+#include "util/SetThreadName.hpp"
+#include "util/Assert.hpp"
 
 #include "silkit/capi/SilKitMacros.h"
 

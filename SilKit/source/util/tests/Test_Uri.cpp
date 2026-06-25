@@ -12,7 +12,7 @@
 
 #include "silkit/participant/exception.hpp"
 
-#include "Uri.hpp"
+#include "util/Uri.hpp"
 
 
 namespace {

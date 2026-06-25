@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "SynchronizedHandlers.hpp"
+#include "util/SynchronizedHandlers.hpp"
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"

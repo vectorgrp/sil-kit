@@ -8,7 +8,7 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "CommandlineParser.hpp"
+#include "util/CommandlineParser.hpp"
 
 namespace SilKit {
 namespace Util {

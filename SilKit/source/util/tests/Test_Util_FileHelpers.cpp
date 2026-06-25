@@ -4,7 +4,7 @@
 
 #include "gtest/gtest.h"
 
-#include "FileHelpers.hpp"
+#include "util/FileHelpers.hpp"
 
 #include <fstream>
 #include <random>
