@@ -76,20 +76,25 @@ Vendored dependencies. Avoid editing vendored code; prefer changes in SIL Kit in
 
 ## Coding conventions
 
-- current legacy code: currently the network-simulator relies on a source build from sil-kit. in the future we want to only use public APIs. that means config parsing and some of the internal interfaces should be part of the SilKit public API or copied to the network-simulator repo.
 - do test driven development. always write tests that capture the new architecture/behavior first, then add the implementation and use tests as guard rails.
 - Unit tests go in files `Test_*` and have no dependency on public APIs.
 - Integration Tests go in files `ITest_*`, they should only depend on the network simulator and public SilKit.{so,dll} APIs
+- use ctest or run the gtest executable directly to verify
 - SPDX license header on every new file: `// SPDX-FileCopyrightText: 2026 Vector Informatik GmbH` + `// SPDX-License-Identifier: MIT`, update for current year
 - Namespace: `SilKit::Services::<BusName>` for service code
-- New bus types follow the CAN/LIN pattern: public datatypes -> C-API -> wire messages → IMsgFor* interfaces → SimBehavior (trivial + detailed) → controller implementation → serdes
+- New bus types follow the CAN/LIN pattern: public datatypes -> C-API -> wire messages -> IMsgFor* interfaces -> SimBehavior (trivial + detailed) -> controller implementation -> serdes
 - Wire message types must be registered in `SilKit/source/core/internal/traits/SilKitMsgTraits.hpp` and related type traits. Wire message types are not always necessary, sometimes we can transfer the api messages themselves.
 - Controller type keys go in `SilKit/source/core/internal/ServiceConfigKeys.hpp`
 - for platform support we are limited to C++17, but want to upgrade to C++20 or later in the future
-- prefer C++ composition over inheritance. templates and static dispatch are to be preferred
+- prefer C++ composition over inheritance. templates and static dispatch are to be preferred.
+- use smart pointers when possible
 - always use clang-format to format c++, aim for compile-time safety.
 - header only declarations should first have the declarations, and then the implementations after the declaration ina block (this is currently not done everywhere)
 - do not add gratuitous interfaces, however allow for testing and dependency injection.
+- allow for static dispatch, when writing performance critical code
 
 ## Best C/C++ practices
-
+- use auto functions with trailing return type
+- use PascalCase for Methods and Classes
+- no prefixes for globals and constants
+- internally, we want to simplify the namespaces to a single VSilKit namespace in the future. the public Namespaces remain as they are
