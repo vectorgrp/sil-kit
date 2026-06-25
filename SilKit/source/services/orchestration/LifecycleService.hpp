@@ -12,12 +12,12 @@
 
 #include "silkit/services/orchestration/ILifecycleService.hpp"
 
-#include "PerformanceMonitor.hpp"
-#include "WatchDog.hpp"
+#include "util/PerformanceMonitor.hpp"
+#include "services/orchestration/WatchDog.hpp"
 
-#include "IMsgForLifecycleService.hpp"
-#include "IParticipantInternal.hpp"
-#include "LifecycleManagement.hpp"
+#include "services/orchestration/IMsgForLifecycleService.hpp"
+#include "core/internal/IParticipantInternal.hpp"
+#include "services/orchestration/LifecycleManagement.hpp"
 
 namespace SilKit {
 namespace Services {

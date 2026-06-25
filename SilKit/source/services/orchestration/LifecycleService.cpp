@@ -8,11 +8,11 @@
 #include "silkit/services/orchestration/string_utils.hpp"
 #include "silkit/participant/exception.hpp"
 
-#include "LifecycleService.hpp"
-#include "TimeSyncService.hpp"
-#include "IServiceDiscovery.hpp"
-#include "LoggerMessage.hpp"
-#include "LifecycleManagement.hpp"
+#include "services/orchestration/LifecycleService.hpp"
+#include "services/orchestration/TimeSyncService.hpp"
+#include "core/service/IServiceDiscovery.hpp"
+#include "services/logging/LoggerMessage.hpp"
+#include "services/orchestration/LifecycleManagement.hpp"
 
 using namespace std::chrono_literals;
 

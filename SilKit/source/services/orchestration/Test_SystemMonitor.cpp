@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "SystemMonitor.hpp"
+#include "services/orchestration/SystemMonitor.hpp"
 
 #include <chrono>
 #include <functional>
@@ -11,11 +11,11 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "functional.hpp"
+#include "util/functional.hpp"
 #include "silkit/services/orchestration/string_utils.hpp"
 
-#include "MockParticipant.hpp"
-#include "SyncDatatypeUtils.hpp"
+#include "core/mock/participant/MockParticipant.hpp"
+#include "services/orchestration/SyncDatatypeUtils.hpp"
 
 namespace {
 

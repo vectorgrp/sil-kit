@@ -8,12 +8,12 @@
 
 #include "silkit/services/orchestration/string_utils.hpp"
 
-#include "SystemMonitor.hpp"
-#include "IServiceDiscovery.hpp"
-#include "LoggerMessage.hpp"
-#include "LifecycleService.hpp"
-#include "OrchestrationDatatypes.hpp"
-#include "VAsioConstants.hpp"
+#include "services/orchestration/SystemMonitor.hpp"
+#include "core/service/IServiceDiscovery.hpp"
+#include "services/logging/LoggerMessage.hpp"
+#include "services/orchestration/LifecycleService.hpp"
+#include "core/internal/OrchestrationDatatypes.hpp"
+#include "core/vasio/VAsioConstants.hpp"
 
 namespace SilKit {
 namespace Services {

@@ -4,10 +4,10 @@
 
 #include <string>
 
-#include "LifecycleManagement.hpp"
-#include "LifecycleService.hpp"
-#include "LifecycleStates.hpp"
-#include "TimeSyncService.hpp"
+#include "services/orchestration/LifecycleManagement.hpp"
+#include "services/orchestration/LifecycleService.hpp"
+#include "services/orchestration/LifecycleStates.hpp"
+#include "services/orchestration/TimeSyncService.hpp"
 
 namespace SilKit {
 namespace Services {

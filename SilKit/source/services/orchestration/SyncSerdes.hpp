@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include "OrchestrationDatatypes.hpp"
-#include "MessageBuffer.hpp"
+#include "core/internal/OrchestrationDatatypes.hpp"
+#include "core/internal/MessageBuffer.hpp"
 
 namespace SilKit {
 namespace Services {

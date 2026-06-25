@@ -4,11 +4,11 @@
 
 #include <fmt/format.h>
 
-#include "LoggerMessage.hpp"
-#include "LifecycleStates.hpp"
-#include "LifecycleService.hpp"
-#include "LifecycleManagement.hpp"
-#include "IRequestReplyService.hpp"
+#include "services/logging/LoggerMessage.hpp"
+#include "services/orchestration/LifecycleStates.hpp"
+#include "services/orchestration/LifecycleService.hpp"
+#include "services/orchestration/LifecycleManagement.hpp"
+#include "core/requests/IRequestReplyService.hpp"
 #include "procs/IParticipantReplies.hpp"
 
 namespace SilKit {

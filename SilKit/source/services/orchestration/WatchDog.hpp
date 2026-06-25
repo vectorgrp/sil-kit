@@ -9,7 +9,7 @@
 #include <chrono>
 #include <memory>
 
-#include "ParticipantConfiguration.hpp"
+#include "config/ParticipantConfiguration.hpp"
 
 namespace SilKit {
 namespace Services {
