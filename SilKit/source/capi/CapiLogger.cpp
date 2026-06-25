@@ -4,9 +4,9 @@
 
 #include "silkit/capi/SilKit.h"
 #include "silkit/SilKit.hpp"
-#include "ILoggerInternal.hpp"
-#include "LoggerMessage.hpp"
-#include "CapiImpl.hpp"
+#include "silkit/services/logging/ILoggerInternal.hpp"
+#include "silkit/services/logging/LoggerMessage.hpp"
+#include "capi/CapiImpl.hpp"
 
 #include <string>
 

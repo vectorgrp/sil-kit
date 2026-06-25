@@ -6,7 +6,7 @@
 #include "gmock/gmock.h"
 #include "silkit/capi/SilKit.h"
 
-#include "MockParticipant.hpp"
+#include "core/mock/participant/MockParticipant.hpp"
 
 namespace {
 

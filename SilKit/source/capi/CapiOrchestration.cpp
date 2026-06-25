@@ -9,8 +9,8 @@
 
 #include "participant/ParticipantExtensionsImpl.hpp"
 
-#include "CapiImpl.hpp"
-#include "TypeConversion.hpp"
+#include "capi/CapiImpl.hpp"
+#include "capi/TypeConversion.hpp"
 
 #include "services/orchestration/TimeSyncServiceExtensionsImpl.hpp"
 

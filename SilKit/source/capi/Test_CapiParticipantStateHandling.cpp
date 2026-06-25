@@ -11,7 +11,7 @@
 #include "silkit/capi/SilKit.h"
 #include "silkit/services/orchestration/all.hpp"
 
-#include "MockParticipant.hpp"
+#include "core/mock/participant/MockParticipant.hpp"
 
 namespace {
 using testing::Return;

@@ -10,8 +10,8 @@
 #include "gmock/gmock.h"
 #include "silkit/capi/SilKit.h"
 #include "silkit/services/rpc/all.hpp"
-#include "MockParticipant.hpp"
-#include "RpcCallHandle.hpp"
+#include "core/mock/participant/MockParticipant.hpp"
+#include "services/rpc/RpcCallHandle.hpp"
 
 namespace {
 using namespace SilKit::Services::Rpc;

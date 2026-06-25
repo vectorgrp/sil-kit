@@ -9,7 +9,7 @@
 #include "silkit/services/lin/all.hpp"
 #include "silkit/experimental/services/lin/LinControllerExtensions.hpp"
 
-#include "CapiImpl.hpp"
+#include "capi/CapiImpl.hpp"
 
 #include <cstring>
 
