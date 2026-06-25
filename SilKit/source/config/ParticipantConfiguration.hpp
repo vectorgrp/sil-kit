@@ -19,7 +19,7 @@
 #include "silkit/services/rpc/RpcDatatypes.hpp"
 #include "silkit/services/datatypes.hpp"
 
-#include "Configuration.hpp"
+#include "config/Configuration.hpp"
 
 namespace SilKit {
 namespace Config {

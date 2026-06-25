@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "Validation.hpp"
+#include "config/Validation.hpp"
 
 #include <chrono>
 #include <functional>
@@ -11,9 +11,9 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-#include "functional.hpp"
+#include "util/functional.hpp"
 
-#include "Validation.hpp"
+#include "config/Validation.hpp"
 
 namespace {
 

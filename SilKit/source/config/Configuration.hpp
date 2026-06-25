@@ -20,7 +20,7 @@
 #include "silkit/services/logging/LoggingDatatypes.hpp"
 #include "LoggingTopics.hpp"
 
-#include "StringHelpers.hpp"
+#include "util/StringHelpers.hpp"
 
 namespace SilKit {
 namespace Config {

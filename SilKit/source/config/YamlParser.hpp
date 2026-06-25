@@ -5,9 +5,9 @@
 
 #include <string>
 
-#include "YamlReader.hpp"
-#include "YamlWriter.hpp"
-#include "YamlParserUtils.hpp"
+#include "config/YamlReader.hpp"
+#include "config/YamlWriter.hpp"
+#include "config/YamlParserUtils.hpp"
 
 #include "rapidyaml.hpp"
 
