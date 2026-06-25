@@ -2,8 +2,8 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "EthController.hpp"
-#include "SimBehaviorTrivial.hpp"
+#include "services/ethernet/EthController.hpp"
+#include "services/ethernet/SimBehaviorTrivial.hpp"
 
 namespace {
 

@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "EthController.hpp"
+#include "services/ethernet/EthController.hpp"
 
 #include <chrono>
 #include <functional>
@@ -11,12 +11,12 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "functional.hpp"
+#include "util/functional.hpp"
 
-#include "MockParticipant.hpp"
+#include "core/mock/participant/MockParticipant.hpp"
 
-#include "EthDatatypeUtils.hpp"
-#include "ParticipantConfiguration.hpp"
+#include "services/ethernet/EthDatatypeUtils.hpp"
+#include "config/ParticipantConfiguration.hpp"
 
 namespace {
 

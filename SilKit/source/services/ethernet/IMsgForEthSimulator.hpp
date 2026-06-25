@@ -4,10 +4,10 @@
 
 #pragma once
 
-#include "IReceiver.hpp"
-#include "ISender.hpp"
-#include "IServiceEndpoint.hpp"
-#include "WireEthernetMessages.hpp"
+#include "core/internal/IReceiver.hpp"
+#include "core/internal/ISender.hpp"
+#include "core/internal/IServiceEndpoint.hpp"
+#include "wire/ethernet/WireEthernetMessages.hpp"
 
 #include "silkit/services/ethernet/fwd_decl.hpp"
 
