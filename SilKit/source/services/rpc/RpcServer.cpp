@@ -4,13 +4,13 @@
 
 #include "silkit/services/logging/ILogger.hpp"
 
-#include "IServiceDiscovery.hpp"
-#include "RpcServer.hpp"
-#include "RpcDatatypeUtils.hpp"
-#include "Uuid.hpp"
-#include "YamlParser.hpp"
-#include "Assert.hpp"
-#include "LabelMatching.hpp"
+#include "core/service/IServiceDiscovery.hpp"
+#include "services/rpc/RpcServer.hpp"
+#include "services/rpc/RpcDatatypeUtils.hpp"
+#include "util/Uuid.hpp"
+#include "config/YamlParser.hpp"
+#include "util/Assert.hpp"
+#include "util/LabelMatching.hpp"
 
 namespace SilKit {
 namespace Services {

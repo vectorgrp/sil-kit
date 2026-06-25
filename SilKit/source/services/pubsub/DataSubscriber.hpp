@@ -9,13 +9,13 @@
 #include <unordered_set>
 
 #include "silkit/services/pubsub/IDataSubscriber.hpp"
-#include "ITimeConsumer.hpp"
+#include "core/internal/ITimeConsumer.hpp"
 
-#include "IMsgForDataSubscriber.hpp"
-#include "IParticipantInternal.hpp"
-#include "DataSubscriberInternal.hpp"
-#include "DataMessageDatatypeUtils.hpp"
-#include "ITraceMessageSource.hpp"
+#include "services/pubsub/IMsgForDataSubscriber.hpp"
+#include "core/internal/IParticipantInternal.hpp"
+#include "services/pubsub/DataSubscriberInternal.hpp"
+#include "services/pubsub/DataMessageDatatypeUtils.hpp"
+#include "tracing/ITraceMessageSource.hpp"
 
 namespace SilKit {
 namespace Services {

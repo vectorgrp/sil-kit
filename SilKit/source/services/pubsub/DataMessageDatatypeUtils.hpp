@@ -10,7 +10,7 @@
 #include "silkit/services/pubsub/PubSubDatatypes.hpp"
 #include "silkit/util/HandlerId.hpp"
 
-#include "WireDataMessages.hpp"
+#include "wire/pubsub/WireDataMessages.hpp"
 
 namespace SilKit {
 namespace Services {

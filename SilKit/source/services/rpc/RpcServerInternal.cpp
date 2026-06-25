@@ -2,12 +2,12 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "RpcServerInternal.hpp"
+#include "services/rpc/RpcServerInternal.hpp"
 
 #include "silkit/services/rpc/string_utils.hpp"
 #include "silkit/services/logging/ILogger.hpp"
 
-#include "RpcDatatypeUtils.hpp"
+#include "services/rpc/RpcDatatypeUtils.hpp"
 
 namespace SilKit {
 namespace Services {

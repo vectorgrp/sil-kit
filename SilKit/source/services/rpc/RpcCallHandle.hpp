@@ -7,8 +7,8 @@
 #include "silkit/services/rpc/IRpcCallHandle.hpp"
 #include "silkit/services/rpc/RpcDatatypes.hpp"
 
-#include "WireRpcMessages.hpp"
-#include "Uuid.hpp"
+#include "wire/rpc/WireRpcMessages.hpp"
+#include "util/Uuid.hpp"
 
 namespace SilKit {
 namespace Services {

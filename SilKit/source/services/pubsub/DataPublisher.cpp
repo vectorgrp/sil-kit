@@ -2,10 +2,10 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "DataPublisher.hpp"
-#include "IParticipantInternal.hpp"
-#include "DataMessageDatatypeUtils.hpp"
-#include "WireDataMessages.hpp"
+#include "services/pubsub/DataPublisher.hpp"
+#include "core/internal/IParticipantInternal.hpp"
+#include "services/pubsub/DataMessageDatatypeUtils.hpp"
+#include "wire/pubsub/WireDataMessages.hpp"
 #include "silkit/util/Span.hpp"
 
 namespace SilKit {

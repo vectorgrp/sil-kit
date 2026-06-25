@@ -7,12 +7,12 @@
 #include <vector>
 
 #include "silkit/services/pubsub/IDataPublisher.hpp"
-#include "ITimeConsumer.hpp"
+#include "core/internal/ITimeConsumer.hpp"
 
-#include "IMsgForDataPublisher.hpp"
-#include "IParticipantInternal.hpp"
-#include "ITraceMessageSource.hpp"
-#include "IReplayDataController.hpp"
+#include "services/pubsub/IMsgForDataPublisher.hpp"
+#include "core/internal/IParticipantInternal.hpp"
+#include "tracing/ITraceMessageSource.hpp"
+#include "tracing/IReplayDataController.hpp"
 
 namespace SilKit {
 namespace Services {

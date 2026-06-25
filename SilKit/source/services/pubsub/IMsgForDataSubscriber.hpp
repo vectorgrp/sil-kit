@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include "IReceiver.hpp"
-#include "ISender.hpp"
+#include "core/internal/IReceiver.hpp"
+#include "core/internal/ISender.hpp"
 
 #include "silkit/services/pubsub/fwd_decl.hpp"
 
