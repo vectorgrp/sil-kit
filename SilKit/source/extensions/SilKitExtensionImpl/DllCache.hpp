@@ -7,9 +7,9 @@
 #include <string>
 #include <memory>
 
-#include "ParticipantConfiguration.hpp"
-#include "LoggerMessage.hpp"
-#include "SilKitExtensions.hpp"
+#include "config/ParticipantConfiguration.hpp"
+#include "services/logging/LoggerMessage.hpp"
+#include "extensions/SilKitExtensions.hpp"
 
 namespace SilKit {
 

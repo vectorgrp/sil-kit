@@ -6,7 +6,7 @@
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 
-#include "SilKitExtensions.hpp"
+#include "extensions/SilKitExtensions.hpp"
 
 #include <sstream>
 #include <cstdlib> //getenv
@@ -17,9 +17,9 @@
 #include "SilKitVersionImpl.hpp"
 #include "LoggerMessage.hpp"
 #include "detail/LoadExtension.hpp"
-#include "SilKitExtensionBase.hpp"
-#include "SilKitExtensionMacros.hpp"
-#include "SilKitExtensionUtils.hpp"
+#include "extensions/SilKitExtensionApi/SilKitExtensionBase.hpp"
+#include "extensions/SilKitExtensionApi/SilKitExtensionMacros.hpp"
+#include "extensions/SilKitExtensionApi/SilKitExtensionUtils.hpp"
 
 namespace SilKit {
 
