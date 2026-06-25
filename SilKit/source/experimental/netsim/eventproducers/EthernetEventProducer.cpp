@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "EthernetEventProducer.hpp"
+#include "experimental/netsim/eventproducers/EthernetEventProducer.hpp"
 
 namespace SilKit {
 namespace Experimental {

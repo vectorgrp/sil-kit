@@ -4,9 +4,9 @@
 
 #include "silkit/services/lin/ILinController.hpp"
 
-#include "LinControllerExtensionsImpl.hpp"
-#include "ILinControllerExtensions.hpp"
-#include "LinController.hpp"
+#include "experimental/services/lin/LinControllerExtensionsImpl.hpp"
+#include "services/lin/ILinControllerExtensions.hpp"
+#include "services/lin/LinController.hpp"
 
 namespace {
 

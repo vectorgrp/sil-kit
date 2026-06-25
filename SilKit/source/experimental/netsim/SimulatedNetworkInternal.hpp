@@ -6,8 +6,8 @@
 
 #include <unordered_map>
 
-#include "LoggerMessage.hpp"
-#include "SimulatedNetworkRouter.hpp"
+#include "services/logging/LoggerMessage.hpp"
+#include "experimental/netsim/SimulatedNetworkRouter.hpp"
 #include "silkit/experimental/netsim/all.hpp"
 
 namespace SilKit {

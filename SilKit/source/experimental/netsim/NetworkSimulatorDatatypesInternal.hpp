@@ -5,7 +5,7 @@
 #pragma once
 
 #include "silkit/experimental/netsim/NetworkSimulatorDatatypes.hpp"
-#include "Configuration.hpp"
+#include "config/Configuration.hpp"
 
 namespace SilKit {
 namespace Experimental {

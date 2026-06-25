@@ -7,18 +7,18 @@
 #include <unordered_map>
 #include <set>
 
-#include "IParticipantInternal.hpp"
-#include "ISimulator.hpp"
-#include "IServiceEndpoint.hpp"
+#include "core/internal/IParticipantInternal.hpp"
+#include "core/internal/ISimulator.hpp"
+#include "core/internal/IServiceEndpoint.hpp"
 
 #include "silkit/experimental/netsim/all.hpp"
 
-#include "WireCanMessages.hpp"
-#include "WireEthernetMessages.hpp"
-#include "WireFlexrayMessages.hpp"
-#include "WireLinMessages.hpp"
+#include "wire/can/WireCanMessages.hpp"
+#include "wire/ethernet/WireEthernetMessages.hpp"
+#include "wire/flexray/WireFlexrayMessages.hpp"
+#include "wire/lin/WireLinMessages.hpp"
 
-#include "LoggerMessage.hpp"
+#include "services/logging/LoggerMessage.hpp"
 
 namespace SilKit {
 namespace Experimental {

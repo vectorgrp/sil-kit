@@ -2,12 +2,12 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "SimulatedNetworkRouter.hpp"
-#include "IServiceDiscovery.hpp"
-#include "NetworkSimulatorDatatypesInternal.hpp"
-#include "Configuration.hpp"
+#include "experimental/netsim/SimulatedNetworkRouter.hpp"
+#include "core/service/IServiceDiscovery.hpp"
+#include "experimental/netsim/NetworkSimulatorDatatypesInternal.hpp"
+#include "config/Configuration.hpp"
 #include "silkit/experimental/netsim/string_utils.hpp"
-#include "ServiceConfigKeys.hpp"
+#include "core/internal/ServiceConfigKeys.hpp"
 
 namespace SilKit {
 namespace Experimental {

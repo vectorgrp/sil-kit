@@ -4,11 +4,11 @@
 
 #include <future>
 
-#include "NetworkSimulatorInternal.hpp"
-#include "NetworkSimulatorDatatypesInternal.hpp"
+#include "experimental/netsim/NetworkSimulatorInternal.hpp"
+#include "experimental/netsim/NetworkSimulatorDatatypesInternal.hpp"
 #include "silkit/experimental/netsim/string_utils.hpp"
 
-#include "LoggerMessage.hpp"
+#include "services/logging/LoggerMessage.hpp"
 #include "procs/IParticipantReplies.hpp"
 
 namespace SilKit {

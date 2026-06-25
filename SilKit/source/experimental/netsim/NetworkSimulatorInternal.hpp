@@ -10,14 +10,14 @@
 #include <deque>
 
 #include "silkit/experimental/netsim/INetworkSimulator.hpp"
-#include "INetworkSimulatorInternal.hpp"
+#include "experimental/netsim/INetworkSimulatorInternal.hpp"
 
-#include "IParticipantInternal.hpp"
-#include "IServiceDiscovery.hpp"
-#include "LoggerMessage.hpp"
+#include "core/internal/IParticipantInternal.hpp"
+#include "core/service/IServiceDiscovery.hpp"
+#include "services/logging/LoggerMessage.hpp"
 
-#include "SimulatedNetworkRouter.hpp"
-#include "SimulatedNetworkInternal.hpp"
+#include "experimental/netsim/SimulatedNetworkRouter.hpp"
+#include "experimental/netsim/SimulatedNetworkInternal.hpp"
 
 namespace SilKit {
 namespace Experimental {

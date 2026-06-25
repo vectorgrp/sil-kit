@@ -2,8 +2,8 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "ParticipantExtensionsImpl.hpp"
-#include "IParticipantInternal.hpp"
+#include "experimental/participant/ParticipantExtensionsImpl.hpp"
+#include "core/internal/IParticipantInternal.hpp"
 
 namespace SilKit {
 namespace Experimental {

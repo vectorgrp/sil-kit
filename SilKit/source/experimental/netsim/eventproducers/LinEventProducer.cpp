@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "LinEventProducer.hpp"
+#include "experimental/netsim/eventproducers/LinEventProducer.hpp"
 
 namespace SilKit {
 namespace Experimental {
