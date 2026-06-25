@@ -15,6 +15,7 @@ LIN Service API
 .. |InitDynamic| replace:: :cpp:func:`InitDynamic()<SilKit::Experimental::Services::Lin::InitDynamic>`
 .. |SendFrame| replace:: :cpp:func:`SendFrame()<SilKit::Services::Lin::ILinController::SendFrame>`
 .. |SendFrameHeader| replace:: :cpp:func:`SendFrameHeader()<SilKit::Services::Lin::ILinController::SendFrameHeader>`
+.. |SendDynamicResponse| replace:: :cpp:func:`SendDynamicResponse()<SilKit::Experimental::Services::Lin::SendDynamicResponse>`
 .. |UpdateTxBuffer| replace:: :cpp:func:`UpdateTxBuffer()<SilKit::Services::Lin::ILinController::UpdateTxBuffer>`
 .. |SetFrameResponse| replace:: :cpp:func:`SetFrameResponse()<SilKit::Services::Lin::ILinController::SetFrameResponse>`
 
@@ -433,3 +434,10 @@ The experimental API is defined as follows:
 .. doxygenfunction:: SilKit::Experimental::Services::Lin::AddFrameHeaderHandler(SilKit::Services::Lin::ILinController* linController, SilKit::Experimental::Services::Lin::LinFrameHeaderHandler handler)
 .. doxygenfunction:: SilKit::Experimental::Services::Lin::RemoveFrameHeaderHandler
 .. doxygenfunction:: SilKit::Experimental::Services::Lin::SendDynamicResponse
+
+.. note::
+  An dynamic response to a LIN header can only be delivered with certain timing restrictions:
+  When a LIN master initiates a frame transmission with |SendFrameHeader| at time T.
+  The LIN Slave that wants to send the response receives the LIN Header at T+dt and calls |SendDynamicResponse|.
+  The LIN Master will receive the response at T+2dt, which may be out of the timing window for the LIN frame.
+  
