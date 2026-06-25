@@ -2,8 +2,8 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "LinController.hpp"
-#include "SimBehavior.hpp"
+#include "services/lin/LinController.hpp"
+#include "services/lin/SimBehavior.hpp"
 
 namespace SilKit {
 namespace Services {

@@ -4,10 +4,10 @@
 
 #pragma once
 
-#include "IReceiver.hpp"
-#include "ISender.hpp"
-#include "IServiceEndpoint.hpp"
-#include "WireLinMessages.hpp"
+#include "core/internal/IReceiver.hpp"
+#include "core/internal/ISender.hpp"
+#include "core/internal/IServiceEndpoint.hpp"
+#include "wire/lin/WireLinMessages.hpp"
 
 #include "silkit/services/lin/LinDatatypes.hpp"
 

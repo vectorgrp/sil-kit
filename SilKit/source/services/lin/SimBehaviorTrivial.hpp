@@ -4,11 +4,11 @@
 
 #pragma once
 
-#include "IMsgForLinController.hpp"
-#include "IParticipantInternal.hpp"
-#include "ITraceMessageSource.hpp"
+#include "services/lin/IMsgForLinController.hpp"
+#include "core/internal/IParticipantInternal.hpp"
+#include "tracing/ITraceMessageSource.hpp"
 
-#include "ISimBehavior.hpp"
+#include "services/lin/ISimBehavior.hpp"
 
 namespace SilKit {
 namespace Services {

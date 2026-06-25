@@ -2,18 +2,18 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "LinController.hpp"
+#include "services/lin/LinController.hpp"
 
 #include <iostream>
 #include <chrono>
 
 #include "silkit/services/lin/string_utils.hpp"
-#include "IServiceDiscovery.hpp"
-#include "ServiceDatatypes.hpp"
-#include "Tracing.hpp"
+#include "core/service/IServiceDiscovery.hpp"
+#include "core/service/ServiceDatatypes.hpp"
+#include "tracing/Tracing.hpp"
 
-#include "LoggerMessage.hpp"
-#include "WireLinMessages.hpp"
+#include "services/logging/LoggerMessage.hpp"
+#include "wire/lin/WireLinMessages.hpp"
 
 namespace {
 using namespace SilKit::Services::Lin;

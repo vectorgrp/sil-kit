@@ -7,8 +7,8 @@
 
 #include "silkit/services/lin/LinDatatypes.hpp"
 
-#include "EndpointAddress.hpp"
-#include "MockParticipant.hpp"
+#include "core/internal/EndpointAddress.hpp"
+#include "core/mock/participant/MockParticipant.hpp"
 
 namespace SilKit {
 namespace Services {

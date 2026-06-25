@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "LinSerdes.hpp"
+#include "services/lin/LinSerdes.hpp"
 
 
 namespace SilKit {
