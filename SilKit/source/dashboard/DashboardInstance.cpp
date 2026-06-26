@@ -2,11 +2,11 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "DashboardInstance.hpp"
-#include "SilKitEvent.hpp"
-#include "LockedQueue.hpp"
-#include "SilKitToOatppMapper.hpp"
-#include "DashboardRestClient.hpp"
+#include "dashboard/DashboardInstance.hpp"
+#include "dashboard/SilKitEvent.hpp"
+#include "dashboard/LockedQueue.hpp"
+#include "dashboard/service/SilKitToOatppMapper.hpp"
+#include "dashboard/service/DashboardRestClient.hpp"
 
 
 namespace {

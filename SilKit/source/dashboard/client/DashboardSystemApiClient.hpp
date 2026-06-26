@@ -4,11 +4,11 @@
 
 #pragma once
 
-#include "OatppHeaders.hpp"
+#include "dashboard/OatppHeaders.hpp"
 
-#include "SimulationCreationRequestDto.hpp"
-#include "BulkUpdateDto.hpp"
-#include "MetricsDto.hpp"
+#include "dashboard/dto/SimulationCreationRequestDto.hpp"
+#include "dashboard/dto/BulkUpdateDto.hpp"
+#include "dashboard/dto/MetricsDto.hpp"
 
 #include OATPP_CODEGEN_BEGIN(ApiClient)
 

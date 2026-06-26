@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "MatchingLabelDto.hpp"
+#include "dashboard/dto/MatchingLabelDto.hpp"
 
 #include OATPP_CODEGEN_BEGIN(DTO)
 

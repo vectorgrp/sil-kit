@@ -6,20 +6,20 @@
 
 #include <cstdint>
 
-#include "OatppHeaders.hpp"
+#include "dashboard/OatppHeaders.hpp"
 
 #include "silkit/services/orchestration/OrchestrationDatatypes.hpp"
 
-#include "ParticipantStatusDto.hpp"
-#include "ServiceDescriptor.hpp"
-#include "ServiceDto.hpp"
-#include "SimulationCreationRequestDto.hpp"
-#include "SystemStatusDto.hpp"
-#include "BulkUpdateDto.hpp"
-#include "MetricsDto.hpp"
+#include "dashboard/dto/ParticipantStatusDto.hpp"
+#include "core/internal/ServiceDescriptor.hpp"
+#include "dashboard/dto/ServiceDto.hpp"
+#include "dashboard/dto/SimulationCreationRequestDto.hpp"
+#include "dashboard/dto/SystemStatusDto.hpp"
+#include "dashboard/dto/BulkUpdateDto.hpp"
+#include "dashboard/dto/MetricsDto.hpp"
 
-#include "DashboardBulkUpdate.hpp"
-#include "MetricsDatatypes.hpp"
+#include "dashboard/DashboardBulkUpdate.hpp"
+#include "services/metrics/MetricsDatatypes.hpp"
 
 
 namespace SilKit {

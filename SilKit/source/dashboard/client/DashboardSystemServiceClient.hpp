@@ -4,13 +4,13 @@
 
 #pragma once
 
-#include "IDashboardSystemServiceClient.hpp"
+#include "dashboard/client/IDashboardSystemServiceClient.hpp"
 
 #include <memory>
 
-#include "ILoggerInternal.hpp"
+#include "services/logging/ILoggerInternal.hpp"
 
-#include "DashboardSystemApiClient.hpp"
+#include "dashboard/client/DashboardSystemApiClient.hpp"
 
 namespace SilKit {
 namespace Dashboard {

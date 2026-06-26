@@ -5,8 +5,8 @@
 #pragma once
 
 #include "silkit/services/orchestration/OrchestrationDatatypes.hpp"
-#include "ServiceDatatypes.hpp"
-#include "MetricsDatatypes.hpp"
+#include "core/service/ServiceDatatypes.hpp"
+#include "services/metrics/MetricsDatatypes.hpp"
 
 namespace VSilKit {
 

@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "CreateDashboardInstance.hpp"
+#include "dashboard/CreateDashboardInstance.hpp"
 #include "silkit/participant/exception.hpp"
 
 namespace VSilKit {
