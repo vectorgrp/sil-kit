@@ -9,12 +9,12 @@
 #include "silkit/services/orchestration/string_utils.hpp"
 #include "silkit/services/orchestration/ISystemMonitor.hpp"
 
-#include "TimeSyncService.hpp"
-#include "IServiceDiscovery.hpp"
-#include "LoggerMessage.hpp"
-#include "SynchronizedHandlers.hpp"
-#include "Assert.hpp"
-#include "VAsioCapabilities.hpp"
+#include "services/orchestration/TimeSyncService.hpp"
+#include "core/service/IServiceDiscovery.hpp"
+#include "services/logging/LoggerMessage.hpp"
+#include "util/SynchronizedHandlers.hpp"
+#include "util/Assert.hpp"
+#include "core/vasio/VAsioCapabilities.hpp"
 
 using namespace std::chrono_literals;
 

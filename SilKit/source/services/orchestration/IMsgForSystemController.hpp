@@ -6,9 +6,9 @@
 
 #include "silkit/services/orchestration/OrchestrationDatatypes.hpp"
 
-#include "IReceiver.hpp"
-#include "ISender.hpp"
-#include "string_utils_sync.hpp"
+#include "core/internal/IReceiver.hpp"
+#include "core/internal/ISender.hpp"
+#include "core/internal/string_utils_sync.hpp"
 
 namespace SilKit {
 namespace Services {

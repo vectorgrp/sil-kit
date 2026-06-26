@@ -4,9 +4,9 @@
 
 #pragma once
 
-#include "OrchestrationDatatypes.hpp"
-#include "IReceiver.hpp"
-#include "ISender.hpp"
+#include "core/internal/OrchestrationDatatypes.hpp"
+#include "core/internal/IReceiver.hpp"
+#include "core/internal/ISender.hpp"
 
 namespace SilKit {
 namespace Services {

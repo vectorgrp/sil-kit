@@ -7,8 +7,8 @@
 #include <map>
 #include <mutex>
 
-#include "OrchestrationDatatypes.hpp"
-#include "LoggerMessage.hpp"
+#include "core/internal/OrchestrationDatatypes.hpp"
+#include "services/logging/LoggerMessage.hpp"
 
 namespace SilKit {
 namespace Services {

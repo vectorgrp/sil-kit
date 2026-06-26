@@ -9,9 +9,9 @@
 #include <memory>
 #include <mutex>
 
-#include "ITimeProvider.hpp"
-#include "Timer.hpp"
-#include "SynchronizedHandlers.hpp"
+#include "core/internal/ITimeProvider.hpp"
+#include "util/Timer.hpp"
+#include "util/SynchronizedHandlers.hpp"
 
 namespace SilKit {
 namespace Services {

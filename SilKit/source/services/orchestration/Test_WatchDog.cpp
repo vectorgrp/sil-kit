@@ -10,9 +10,9 @@
 
 #include "silkit/services/orchestration/string_utils.hpp"
 
-#include "ParticipantConfiguration.hpp"
-#include "WatchDog.hpp"
-#include "functional.hpp"
+#include "config/ParticipantConfiguration.hpp"
+#include "services/orchestration/WatchDog.hpp"
+#include "util/functional.hpp"
 
 namespace {
 

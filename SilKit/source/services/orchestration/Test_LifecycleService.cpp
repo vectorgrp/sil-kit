@@ -10,14 +10,14 @@
 #include "gtest/gtest.h"
 
 #include "silkit/services/orchestration/string_utils.hpp"
-#include "functional.hpp"
+#include "util/functional.hpp"
 
-#include "LifecycleService.hpp"
-#include "MockParticipant.hpp"
-#include "MockServiceEndpoint.hpp"
-#include "ParticipantConfiguration.hpp"
-#include "SyncDatatypeUtils.hpp"
-#include "TimeSyncService.hpp"
+#include "services/orchestration/LifecycleService.hpp"
+#include "core/mock/participant/MockParticipant.hpp"
+#include "core/service/MockServiceEndpoint.hpp"
+#include "config/ParticipantConfiguration.hpp"
+#include "services/orchestration/SyncDatatypeUtils.hpp"
+#include "services/orchestration/TimeSyncService.hpp"
 
 namespace {
 

@@ -8,8 +8,8 @@
 
 #include "silkit/services/orchestration/OrchestrationDatatypes.hpp"
 
-#include "ILifecycleStates.hpp"
-#include "LifecycleManagement.hpp"
+#include "services/orchestration/ILifecycleStates.hpp"
+#include "services/orchestration/LifecycleManagement.hpp"
 
 namespace SilKit {
 namespace Services {

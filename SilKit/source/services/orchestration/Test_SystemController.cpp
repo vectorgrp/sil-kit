@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "SystemController.hpp"
+#include "services/orchestration/SystemController.hpp"
 
 #include <chrono>
 #include <functional>
@@ -13,8 +13,8 @@
 
 #include "silkit/services/orchestration/string_utils.hpp"
 
-#include "MockParticipant.hpp"
-#include "SyncDatatypeUtils.hpp"
+#include "core/mock/participant/MockParticipant.hpp"
+#include "services/orchestration/SyncDatatypeUtils.hpp"
 
 namespace {
 

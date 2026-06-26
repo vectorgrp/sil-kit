@@ -10,9 +10,9 @@
 
 #include "silkit/services/logging/ILogger.hpp"
 
-#include "OrchestrationDatatypes.hpp"
-#include "ILifecycleStates.hpp"
-#include "IParticipantInternal.hpp"
+#include "core/internal/OrchestrationDatatypes.hpp"
+#include "services/orchestration/ILifecycleStates.hpp"
+#include "core/internal/IParticipantInternal.hpp"
 
 namespace SilKit {
 namespace Services {

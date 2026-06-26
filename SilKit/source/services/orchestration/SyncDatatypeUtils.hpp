@@ -4,7 +4,7 @@
 
 #include <ostream>
 
-#include "OrchestrationDatatypes.hpp"
+#include "core/internal/OrchestrationDatatypes.hpp"
 
 namespace SilKit {
 namespace Services {
