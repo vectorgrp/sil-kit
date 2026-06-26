@@ -6,8 +6,8 @@
 
 #include "silkit/services/ethernet/EthernetDatatypes.hpp"
 
-#include "IServiceEndpoint.hpp"
-#include "WireEthernetMessages.hpp"
+#include "core/internal/IServiceEndpoint.hpp"
+#include "wire/ethernet/WireEthernetMessages.hpp"
 
 namespace SilKit {
 namespace Services {

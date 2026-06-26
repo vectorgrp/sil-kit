@@ -4,11 +4,11 @@
 
 #pragma once
 
-#include "IMsgForEthController.hpp"
-#include "IParticipantInternal.hpp"
-#include "ITraceMessageSource.hpp"
+#include "services/ethernet/IMsgForEthController.hpp"
+#include "core/internal/IParticipantInternal.hpp"
+#include "tracing/ITraceMessageSource.hpp"
 
-#include "ISimBehavior.hpp"
+#include "services/ethernet/ISimBehavior.hpp"
 
 namespace SilKit {
 namespace Services {

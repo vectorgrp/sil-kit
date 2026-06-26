@@ -2,8 +2,8 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "EthController.hpp"
-#include "SimBehavior.hpp"
+#include "services/ethernet/EthController.hpp"
+#include "services/ethernet/SimBehavior.hpp"
 
 namespace SilKit {
 namespace Services {

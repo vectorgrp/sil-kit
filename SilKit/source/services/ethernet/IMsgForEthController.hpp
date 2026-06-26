@@ -4,9 +4,9 @@
 
 #pragma once
 
-#include "IReceiver.hpp"
-#include "ISender.hpp"
-#include "WireEthernetMessages.hpp"
+#include "core/internal/IReceiver.hpp"
+#include "core/internal/ISender.hpp"
+#include "wire/ethernet/WireEthernetMessages.hpp"
 
 #include "silkit/services/ethernet/fwd_decl.hpp"
 

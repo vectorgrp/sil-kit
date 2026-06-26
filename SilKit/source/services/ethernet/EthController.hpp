@@ -8,16 +8,16 @@
 
 #include "silkit/services/ethernet/IEthernetController.hpp"
 
-#include "ITimeConsumer.hpp"
-#include "IParticipantInternal.hpp"
-#include "ITraceMessageSource.hpp"
-#include "IReplayDataController.hpp"
-#include "ParticipantConfiguration.hpp"
-#include "IMsgForEthController.hpp"
-#include "SimBehavior.hpp"
+#include "core/internal/ITimeConsumer.hpp"
+#include "core/internal/IParticipantInternal.hpp"
+#include "tracing/ITraceMessageSource.hpp"
+#include "tracing/IReplayDataController.hpp"
+#include "config/ParticipantConfiguration.hpp"
+#include "services/ethernet/IMsgForEthController.hpp"
+#include "services/ethernet/SimBehavior.hpp"
 
-#include "SynchronizedHandlers.hpp"
-#include "LoggerMessage.hpp"
+#include "util/SynchronizedHandlers.hpp"
+#include "services/logging/LoggerMessage.hpp"
 
 namespace SilKit {
 namespace Services {

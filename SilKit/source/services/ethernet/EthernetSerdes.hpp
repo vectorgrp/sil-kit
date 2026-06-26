@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include "MessageBuffer.hpp"
-#include "WireEthernetMessages.hpp"
+#include "core/internal/MessageBuffer.hpp"
+#include "wire/ethernet/WireEthernetMessages.hpp"
 
 #include "silkit/services/ethernet/EthernetDatatypes.hpp"
 
