@@ -69,12 +69,12 @@ add_silkit_test_to_executable(SilKitUnitTests
 
 add_silkit_test_to_executable(SilKitUnitTests
     SOURCES Test_YamlParser.cpp
-    LIBS O_SilKit_Config rapidyaml
+    LIBS O_SilKit_Config
 )
 
 add_silkit_test_to_executable(SilKitUnitTests
     SOURCES Test_YamlValidator.cpp
-    LIBS O_SilKit_Config rapidyaml
+    LIBS O_SilKit_Config
 )
 
 set(ParticipantTestCanConfigs

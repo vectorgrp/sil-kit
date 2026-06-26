@@ -12,8 +12,6 @@ target_include_directories(O_SilKitRegistry_Config
 
 target_link_libraries(O_SilKitRegistry_Config
     PRIVATE I_SilKit
-    PRIVATE fmt::fmt
-    PRIVATE rapidyaml
 )
 
 
