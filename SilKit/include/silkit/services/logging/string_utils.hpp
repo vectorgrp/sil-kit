@@ -9,7 +9,6 @@
 #include <string>
 #include <algorithm>
 #include <cctype>
-#include <cstdint>
 
 #include "silkit/services/logging/LoggingDatatypes.hpp"
 
@@ -66,8 +65,9 @@ std::ostream& operator<<(std::ostream& outStream, const Level& level)
 inline Level from_string(const std::string& levelStr)
 {
     std::string logLevel = levelStr;
+    // Note: std::tolower has undefined behavior if the argument is not representable as unsigned char.
     std::transform(logLevel.begin(), logLevel.end(), logLevel.begin(),
-                   [](std::uint8_t c) { return static_cast<char>(std::tolower(c)); });
+                   [](unsigned char c) { return static_cast<std::string::value_type>(std::tolower(c)); });
     if (logLevel == "trace")
         return Level::Trace;
     if (logLevel == "debug")
