@@ -15,8 +15,8 @@
 #include <type_traits>
 
 #include "SilKitVersionImpl.hpp"
-#include "LoggerMessage.hpp"
-#include "detail/LoadExtension.hpp"
+#include "services/logging/LoggerMessage.hpp"
+#include "extensions/detail/LoadExtension.hpp"
 #include "extensions/SilKitExtensionApi/SilKitExtensionBase.hpp"
 #include "extensions/SilKitExtensionApi/SilKitExtensionMacros.hpp"
 #include "extensions/SilKitExtensionApi/SilKitExtensionUtils.hpp"
