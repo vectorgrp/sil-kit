@@ -9,8 +9,8 @@
 #include "silkit/services/orchestration/string_utils.hpp"
 #include "silkit/services/rpc/all.hpp"
 
-#include "CapiImpl.hpp"
-#include "TypeConversion.hpp"
+#include "capi/CapiImpl.hpp"
+#include "capi/TypeConversion.hpp"
 
 #include <string>
 #include <algorithm>

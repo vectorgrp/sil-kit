@@ -8,8 +8,8 @@
 #include "silkit/services/orchestration/all.hpp"
 #include "silkit/services/pubsub/all.hpp"
 
-#include "CapiImpl.hpp"
-#include "TypeConversion.hpp"
+#include "capi/CapiImpl.hpp"
+#include "capi/TypeConversion.hpp"
 
 #include <map>
 #include <mutex>

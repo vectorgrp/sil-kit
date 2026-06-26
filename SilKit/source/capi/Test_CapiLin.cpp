@@ -8,8 +8,8 @@
 #include "silkit/capi/SilKit.h"
 #include "silkit/services/lin/all.hpp"
 
-#include "MockParticipant.hpp"
-#include "ILinControllerExtensions.hpp"
+#include "core/mock/participant/MockParticipant.hpp"
+#include "services/lin/ILinControllerExtensions.hpp"
 
 namespace {
 using namespace SilKit::Services::Lin;

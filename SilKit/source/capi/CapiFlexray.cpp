@@ -9,8 +9,8 @@
 #include "silkit/SilKit.hpp"
 #include "silkit/services/flexray/all.hpp"
 
-#include "IParticipantInternal.hpp"
-#include "CapiImpl.hpp"
+#include "core/internal/IParticipantInternal.hpp"
+#include "capi/CapiImpl.hpp"
 
 
 namespace {

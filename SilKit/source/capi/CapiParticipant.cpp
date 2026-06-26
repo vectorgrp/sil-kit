@@ -2,18 +2,18 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "ParticipantConfiguration.hpp"
-#include "ParticipantConfigurationFromXImpl.hpp"
+#include "config/ParticipantConfiguration.hpp"
+#include "config/ParticipantConfigurationFromXImpl.hpp"
 #include "CreateParticipantImpl.hpp"
-#include "YamlParser.hpp"
+#include "config/YamlParser.hpp"
 
 #include "silkit/capi/SilKit.h"
 #include "silkit/SilKit.hpp"
 #include "silkit/services/logging/ILogger.hpp"
 #include "silkit/services/orchestration/all.hpp"
 
-#include "CapiImpl.hpp"
-#include "TypeConversion.hpp"
+#include "capi/CapiImpl.hpp"
+#include "capi/TypeConversion.hpp"
 
 #include <memory>
 #include <map>
