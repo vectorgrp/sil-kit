@@ -15,8 +15,6 @@
 #include "config/Configuration.hpp"
 #include "rapidyaml.hpp"
 
-//#include "YamlConversion.hpp"
-//#include "SilKitYamlHelper.hpp" // ParserContext
 #include "config/YamlParser.hpp" // ParserContext
 
 namespace {
