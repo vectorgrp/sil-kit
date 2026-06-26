@@ -114,7 +114,8 @@ public:
     //! \brief Get the SimParticipant by name
     SimParticipant* GetParticipant(const std::string& participantName);
     //! \brief Get the SimParticipant by name. If it does not exist yet, create a SimParticipant with the specified name and provide its ParticipantConfiguration as a string.
-    SimParticipant* GetParticipant(const std::string& participantName, const std::string& participantConfiguration);
+    SimParticipant* GetParticipant(const std::string& participantName, const std::string& participantConfiguration,
+                                   bool createDefaultTimeSyncService = true);
 
     auto GetRegistryUri() const -> std::string;
     auto GetRegistry() const -> SilKit::Vendor::Vector::ISilKitRegistry*
@@ -130,7 +131,8 @@ public:
 private:
     void AddParticipant(const std::string& participantName, const std::string& participantConfiguration,
                         SilKit::Services::Orchestration::LifecycleConfiguration startConfiguration = {
-                            SilKit::Services::Orchestration::OperationMode::Coordinated});
+                            SilKit::Services::Orchestration::OperationMode::Coordinated},
+                        bool createDefaultTimeSyncService = true);
     bool IsSync(const std::string& participantName);
     bool IsAsync(const std::string& participantName);
 

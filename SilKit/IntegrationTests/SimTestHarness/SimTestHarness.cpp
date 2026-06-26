@@ -256,7 +256,8 @@ bool SimTestHarness::Run(std::chrono::nanoseconds testRunTimeout, const std::vec
 }
 
 SimParticipant* SimTestHarness::GetParticipant(const std::string& participantName,
-                                               const std::string& participantConfiguration)
+                                               const std::string& participantConfiguration,
+                                               bool createDefaultTimeSyncService)
 {
     auto lock = Lock();
     if (_simParticipants.count(participantName) == 0)
@@ -271,12 +272,15 @@ SimParticipant* SimTestHarness::GetParticipant(const std::string& participantNam
             else
             {
                 AddParticipant(participantName, participantConfiguration,
-                               {SilKit::Services::Orchestration::OperationMode::Autonomous});
+                               {SilKit::Services::Orchestration::OperationMode::Autonomous},
+                               createDefaultTimeSyncService);
             }
         }
         else
         {
-            AddParticipant(participantName, participantConfiguration);
+            AddParticipant(participantName, participantConfiguration,
+                           {SilKit::Services::Orchestration::OperationMode::Coordinated},
+                           createDefaultTimeSyncService);
         }
     }
     return _simParticipants[participantName].get();
@@ -289,11 +293,12 @@ auto SimTestHarness::GetRegistryUri() const -> std::string
 
 SimParticipant* SimTestHarness::GetParticipant(const std::string& participantName)
 {
-    return GetParticipant(participantName, "");
+    return GetParticipant(participantName, "", true);
 }
 
 void SimTestHarness::AddParticipant(const std::string& participantName, const std::string& participantConfiguration,
-                                    SilKit::Services::Orchestration::LifecycleConfiguration startConfiguration)
+                                    SilKit::Services::Orchestration::LifecycleConfiguration startConfiguration,
+                                    bool createDefaultTimeSyncService)
 {
     auto participant = std::make_unique<SimParticipant>();
     participant->_name = participantName;
@@ -304,7 +309,8 @@ void SimTestHarness::AddParticipant(const std::string& participantName, const st
     // mandatory sim task for time synced simulation
     // by default, we do no operation during simulation task, the user should override this
     auto* lifecycleService = participant->GetOrCreateLifecycleService(startConfiguration);
-    if (startConfiguration.operationMode == SilKit::Services::Orchestration::OperationMode::Coordinated)
+    if (createDefaultTimeSyncService
+        && startConfiguration.operationMode == SilKit::Services::Orchestration::OperationMode::Coordinated)
     {
         auto* timeSyncService = participant->GetOrCreateTimeSyncService();
         timeSyncService->SetSimulationStepHandler([](auto, auto) {}, 1ms);
