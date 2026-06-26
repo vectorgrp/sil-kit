@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "FlexraySerdes.hpp"
+#include "services/flexray/FlexraySerdes.hpp"
 
 namespace SilKit {
 namespace Services {

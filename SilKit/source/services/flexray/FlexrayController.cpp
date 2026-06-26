@@ -2,12 +2,12 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "FlexrayController.hpp"
-#include "Validation.hpp"
-#include "IServiceDiscovery.hpp"
-#include "ServiceDatatypes.hpp"
+#include "services/flexray/FlexrayController.hpp"
+#include "services/flexray/Validation.hpp"
+#include "core/service/IServiceDiscovery.hpp"
+#include "core/service/ServiceDatatypes.hpp"
 
-#include "LoggerMessage.hpp"
+#include "services/logging/LoggerMessage.hpp"
 
 namespace SilKit {
 namespace Services {

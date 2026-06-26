@@ -4,9 +4,9 @@
 
 #pragma once
 
-#include "IReceiver.hpp"
-#include "ISender.hpp"
-#include "WireFlexrayMessages.hpp"
+#include "core/internal/IReceiver.hpp"
+#include "core/internal/ISender.hpp"
+#include "wire/flexray/WireFlexrayMessages.hpp"
 
 #include "silkit/services/flexray/fwd_decl.hpp"
 
