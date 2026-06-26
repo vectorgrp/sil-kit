@@ -13,10 +13,10 @@
 #include "silkit/services/fwd_decl.hpp"
 #include "silkit/services/logging/fwd_decl.hpp"
 
-#include "ITraceMessageSink.hpp"
-#include "IReplay.hpp"
-#include "ParticipantConfiguration.hpp"
-#include "ILoggerInternal.hpp"
+#include "tracing/ITraceMessageSink.hpp"
+#include "tracing/IReplay.hpp"
+#include "config/ParticipantConfiguration.hpp"
+#include "services/logging/ILoggerInternal.hpp"
 
 namespace SilKit {
 namespace Tracing {

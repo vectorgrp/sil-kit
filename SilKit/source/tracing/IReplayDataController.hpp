@@ -4,11 +4,11 @@
 
 #pragma once
 
-#include "IServiceEndpoint.hpp"
+#include "core/internal/IServiceEndpoint.hpp"
 
-#include "Configuration.hpp"
-#include "IReplay.hpp"
-#include "EndpointAddress.hpp"
+#include "config/Configuration.hpp"
+#include "tracing/IReplay.hpp"
+#include "core/internal/EndpointAddress.hpp"
 
 #include <limits>
 

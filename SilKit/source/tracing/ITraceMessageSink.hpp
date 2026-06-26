@@ -11,9 +11,9 @@
 
 #include "ILoggerInternal.hpp"
 
-#include "ServiceDescriptor.hpp"
-#include "TraceMessage.hpp"
-#include "ParticipantConfiguration.hpp"
+#include "core/internal/ServiceDescriptor.hpp"
+#include "tracing/TraceMessage.hpp"
+#include "config/ParticipantConfiguration.hpp"
 
 namespace SilKit {
 

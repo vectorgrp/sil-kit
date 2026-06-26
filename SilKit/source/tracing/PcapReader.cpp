@@ -2,14 +2,14 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "PcapReader.hpp"
+#include "tracing/PcapReader.hpp"
 
 #include "silkit/services/ethernet/EthernetDatatypes.hpp"
 
-#include "WireEthernetMessages.hpp"
-#include "Pcap.hpp"
-#include "Assert.hpp"
-#include "LoggerMessage.hpp"
+#include "wire/ethernet/WireEthernetMessages.hpp"
+#include "tracing/Pcap.hpp"
+#include "util/Assert.hpp"
+#include "services/logging/LoggerMessage.hpp"
 
 namespace SilKit {
 namespace Tracing {

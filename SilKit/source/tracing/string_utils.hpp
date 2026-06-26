@@ -6,7 +6,7 @@
 
 #include <sstream>
 
-#include "TraceMessage.hpp"
+#include "tracing/TraceMessage.hpp"
 
 namespace SilKit {
 

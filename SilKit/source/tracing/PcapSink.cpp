@@ -2,19 +2,19 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "PcapSink.hpp"
+#include "tracing/PcapSink.hpp"
 
 #include <string>
 #include <ctime>
 #include <sstream>
 
-#include "TraceMessage.hpp"
-#include "string_utils.hpp"
+#include "tracing/TraceMessage.hpp"
+#include "tracing/string_utils.hpp"
 
-#include "Pcap.hpp"
+#include "tracing/Pcap.hpp"
 #include "detail/NamedPipe.hpp"
 
-#include "LoggerMessage.hpp"
+#include "services/logging/LoggerMessage.hpp"
 
 using SilKit::Services::Logging::Level;
 using SilKit::Services::Logging::Topic;

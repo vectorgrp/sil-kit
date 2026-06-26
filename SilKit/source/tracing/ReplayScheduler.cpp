@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "ReplayScheduler.hpp"
+#include "tracing/ReplayScheduler.hpp"
 
 #include <string>
 #include <chrono>
@@ -12,12 +12,12 @@
 #include "silkit/services/orchestration/ISystemMonitor.hpp"
 #include "silkit/services/all.hpp"
 
-#include "IParticipantInternal.hpp"
-#include "IReplayDataController.hpp"
-#include "Tracing.hpp"
-#include "Assert.hpp"
-#include "LoggerMessage.hpp"
-#include "string_utils.hpp"
+#include "core/internal/IParticipantInternal.hpp"
+#include "tracing/IReplayDataController.hpp"
+#include "tracing/Tracing.hpp"
+#include "util/Assert.hpp"
+#include "services/logging/LoggerMessage.hpp"
+#include "tracing/string_utils.hpp"
 
 using namespace std::literals::chrono_literals;
 

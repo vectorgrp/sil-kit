@@ -4,7 +4,7 @@
 
 #include "silkit/participant/exception.hpp"
 
-#include "NamedPipeWin.hpp"
+#include "tracing/detail/NamedPipeWin.hpp"
 
 #include <iostream>
 #include <sstream>

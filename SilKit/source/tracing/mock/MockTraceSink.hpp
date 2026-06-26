@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "ITraceMessageSink.hpp"
+#include "tracing/ITraceMessageSink.hpp"
 
 namespace SilKit {
 namespace Tests {

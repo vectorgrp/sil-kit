@@ -4,20 +4,20 @@
 
 #include <memory>
 
-#include "functional.hpp"
+#include "util/functional.hpp"
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
 #include <fmt/format.h>
 
-#include "MockParticipant.hpp"
+#include "core/mock/participant/MockParticipant.hpp"
 
-#include "Configuration.hpp"
-#include "EndpointAddress.hpp"
+#include "config/Configuration.hpp"
+#include "core/internal/EndpointAddress.hpp"
 
-#include "EthController.hpp"
-#include "EthDatatypeUtils.hpp"
+#include "services/ethernet/EthController.hpp"
+#include "services/ethernet/EthDatatypeUtils.hpp"
 
 namespace {
 

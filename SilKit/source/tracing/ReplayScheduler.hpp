@@ -8,12 +8,12 @@
 #include <vector>
 #include <memory>
 
-#include "IParticipantInternal.hpp"
-#include "ParticipantConfiguration.hpp"
-#include "ITimeProvider.hpp"
-#include "IReplayDataController.hpp"
-#include "ISimulator.hpp"
-#include "ILoggerInternal.hpp"
+#include "core/internal/IParticipantInternal.hpp"
+#include "config/ParticipantConfiguration.hpp"
+#include "core/internal/ITimeProvider.hpp"
+#include "tracing/IReplayDataController.hpp"
+#include "core/internal/ISimulator.hpp"
+#include "services/logging/ILoggerInternal.hpp"
 
 namespace SilKit {
 namespace Tracing {
