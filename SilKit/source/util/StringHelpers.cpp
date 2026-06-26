@@ -98,8 +98,9 @@ auto CurrentTimestampString() -> std::string
 
 auto LowerCase(std::string input) -> std::string
 {
+    // Note: std::tolower has undefined behavior if the argument is not representable as unsigned char.
     std::transform(input.begin(), input.end(), input.begin(),
-                   [](unsigned char c) { return (unsigned char)std::tolower(c); });
+                   [](unsigned char c) { return static_cast<char>(std::tolower(static_cast<int>(static_cast<unsigned char>(c)))); });
     return input;
 }
 
