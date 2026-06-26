@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include "MessageBuffer.hpp"
-#include "LoggingDatatypesInternal.hpp"
+#include "core/internal/MessageBuffer.hpp"
+#include "core/internal/LoggingDatatypesInternal.hpp"
 
 namespace SilKit {
 namespace Services {

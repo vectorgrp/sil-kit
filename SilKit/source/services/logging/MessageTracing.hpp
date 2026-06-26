@@ -4,13 +4,13 @@
 
 #pragma once
 
-#include "LoggerMessage.hpp"
-#include "IServiceEndpoint.hpp"
-#include "ServiceDescriptor.hpp"
+#include "services/logging/LoggerMessage.hpp"
+#include "core/internal/IServiceEndpoint.hpp"
+#include "core/internal/ServiceDescriptor.hpp"
 #include "traits/SilKitMsgTraits.hpp"
 #include "traits/SilKitLoggingTraits.hpp"
 
-#include "YamlParser.hpp"
+#include "config/YamlParser.hpp"
 
 
 namespace SilKit {

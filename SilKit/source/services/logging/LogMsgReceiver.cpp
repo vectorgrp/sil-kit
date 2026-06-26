@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "LogMsgReceiver.hpp"
+#include "services/logging/LogMsgReceiver.hpp"
 
 namespace SilKit {
 namespace Services {

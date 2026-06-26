@@ -4,9 +4,9 @@
 
 #pragma once
 
-#include "LoggingDatatypesInternal.hpp"
-#include "IReceiver.hpp"
-#include "ISender.hpp"
+#include "core/internal/LoggingDatatypesInternal.hpp"
+#include "core/internal/IReceiver.hpp"
+#include "core/internal/ISender.hpp"
 
 namespace SilKit {
 namespace Services {
