@@ -2,8 +2,8 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "CanController.hpp"
-#include "SimBehavior.hpp"
+#include "services/can/CanController.hpp"
+#include "services/can/SimBehavior.hpp"
 
 namespace SilKit {
 namespace Services {

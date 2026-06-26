@@ -6,9 +6,9 @@
 
 #include "silkit/services/can/CanDatatypes.hpp"
 
-#include "IReceiver.hpp"
-#include "ISender.hpp"
-#include "WireCanMessages.hpp"
+#include "core/internal/IReceiver.hpp"
+#include "core/internal/ISender.hpp"
+#include "wire/can/WireCanMessages.hpp"
 
 namespace SilKit {
 namespace Services {

@@ -12,11 +12,11 @@
 #include "silkit/services/can/string_utils.hpp"
 #include "silkit/util/HandlerId.hpp"
 
-#include "MockParticipant.hpp"
-#include "MockTraceSink.hpp"
+#include "core/mock/participant/MockParticipant.hpp"
+#include "tracing/mock/MockTraceSink.hpp"
 
-#include "CanController.hpp"
-#include "CanDatatypesUtils.hpp"
+#include "services/can/CanController.hpp"
+#include "services/can/CanDatatypesUtils.hpp"
 
 namespace {
 

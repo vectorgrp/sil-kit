@@ -11,18 +11,18 @@
 
 #include "silkit/services/can/ICanController.hpp"
 
-#include "ITimeConsumer.hpp"
-#include "IMsgForCanController.hpp"
-#include "IParticipantInternal.hpp"
-#include "ITraceMessageSource.hpp"
-#include "IReplayDataController.hpp"
-#include "ParticipantConfiguration.hpp"
+#include "core/internal/ITimeConsumer.hpp"
+#include "services/can/IMsgForCanController.hpp"
+#include "core/internal/IParticipantInternal.hpp"
+#include "tracing/ITraceMessageSource.hpp"
+#include "tracing/IReplayDataController.hpp"
+#include "config/ParticipantConfiguration.hpp"
 
-#include "SimBehavior.hpp"
+#include "services/can/SimBehavior.hpp"
 
-#include "SynchronizedHandlers.hpp"
+#include "util/SynchronizedHandlers.hpp"
 
-#include "LoggerMessage.hpp"
+#include "services/logging/LoggerMessage.hpp"
 
 namespace SilKit {
 namespace Services {

@@ -6,7 +6,7 @@
 
 #include "silkit/services/can/CanDatatypes.hpp"
 
-#include "WireCanMessages.hpp"
+#include "wire/can/WireCanMessages.hpp"
 
 namespace SilKit {
 namespace Services {

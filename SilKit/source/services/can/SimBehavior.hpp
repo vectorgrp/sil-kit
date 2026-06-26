@@ -9,11 +9,11 @@
 #include <map>
 #include <mutex>
 
-#include "SimBehaviorDetailed.hpp"
-#include "SimBehaviorTrivial.hpp"
+#include "services/can/SimBehaviorDetailed.hpp"
+#include "services/can/SimBehaviorTrivial.hpp"
 
 #include "silkit/services/can/CanDatatypes.hpp"
-#include "IServiceEndpoint.hpp"
+#include "core/internal/IServiceEndpoint.hpp"
 
 namespace SilKit {
 namespace Services {
