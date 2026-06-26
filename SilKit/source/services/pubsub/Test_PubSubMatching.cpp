@@ -7,7 +7,7 @@
 
 #include <unordered_set>
 
-#include "DataMessageDatatypeUtils.hpp"
+#include "services/pubsub/DataMessageDatatypeUtils.hpp"
 #include "silkit/services/pubsub/PubSubSpec.hpp"
 #include "silkit/participant/exception.hpp"
 

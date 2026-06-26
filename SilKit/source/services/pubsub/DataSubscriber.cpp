@@ -2,10 +2,10 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "DataSubscriber.hpp"
-#include "IServiceDiscovery.hpp"
-#include "YamlParser.hpp"
-#include "LabelMatching.hpp"
+#include "services/pubsub/DataSubscriber.hpp"
+#include "core/service/IServiceDiscovery.hpp"
+#include "config/YamlParser.hpp"
+#include "util/LabelMatching.hpp"
 
 #include "silkit/services/logging/ILogger.hpp"
 

@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "RpcDatatypeUtils.hpp"
+#include "services/rpc/RpcDatatypeUtils.hpp"
 #include "silkit/services/datatypes.hpp"
 
 namespace SilKit {

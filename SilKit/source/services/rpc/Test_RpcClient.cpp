@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "RpcClient.hpp"
+#include "services/rpc/RpcClient.hpp"
 
 
 #include <chrono>
@@ -12,10 +12,10 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "RpcTestUtilities.hpp"
-#include "MockTimeProvider.hpp"
+#include "services/rpc/RpcTestUtilities.hpp"
+#include "core/mock/participant/MockTimeProvider.hpp"
 
-#include "functional.hpp"
+#include "util/functional.hpp"
 
 namespace {
 

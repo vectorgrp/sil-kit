@@ -8,16 +8,16 @@
 #include <typeinfo>
 
 
-#include "ITimeProvider.hpp"
-#include "CreateParticipantT.hpp"
-#include "Participant.hpp"
-#include "Participant_impl.hpp"
-#include "ProtocolVersion.hpp"
+#include "core/internal/ITimeProvider.hpp"
+#include "core/participant/CreateParticipantT.hpp"
+#include "core/participant/Participant.hpp"
+#include "core/participant/Participant_impl.hpp"
+#include "core/internal/ProtocolVersion.hpp"
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-#include "LoggerMessage.hpp"
+#include "services/logging/LoggerMessage.hpp"
 
 namespace SilKit {
 namespace Services {

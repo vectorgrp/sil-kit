@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include "MessageBuffer.hpp"
-#include "WireDataMessages.hpp"
+#include "core/internal/MessageBuffer.hpp"
+#include "wire/pubsub/WireDataMessages.hpp"
 
 #include "silkit/services/pubsub/PubSubDatatypes.hpp"
 

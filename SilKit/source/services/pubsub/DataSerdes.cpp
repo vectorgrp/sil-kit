@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "DataSerdes.hpp"
+#include "services/pubsub/DataSerdes.hpp"
 
 namespace SilKit {
 namespace Services {

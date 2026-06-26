@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "DataMessageDatatypeUtils.hpp"
+#include "services/pubsub/DataMessageDatatypeUtils.hpp"
 #include "silkit/services/datatypes.hpp"
 
 namespace SilKit {
