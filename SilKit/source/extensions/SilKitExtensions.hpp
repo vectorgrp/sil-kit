@@ -10,11 +10,11 @@
 #include <string>
 #include <functional>
 
-#include "ParticipantConfiguration.hpp"
+#include "config/ParticipantConfiguration.hpp"
 #include "silkit/participant/exception.hpp"
 #include "silkit/services/logging/ILogger.hpp"
-#include "ILoggerInternal.hpp"
-#include "ISilKitExtension.hpp"
+#include "services/logging/ILoggerInternal.hpp"
+#include "extensions/SilKitExtensionApi/ISilKitExtension.hpp"
 
 
 /*! SIL Kit Extensions

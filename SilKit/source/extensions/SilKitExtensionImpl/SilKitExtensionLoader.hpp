@@ -8,9 +8,9 @@
 #include <sstream>
 
 
-#include "ILoggerInternal.hpp"
-#include "SilKitExtensions.hpp"
-#include "DllCache.hpp"
+#include "services/logging/ILoggerInternal.hpp"
+#include "extensions/SilKitExtensions.hpp"
+#include "extensions/SilKitExtensionImpl/DllCache.hpp"
 
 namespace SilKit {
 

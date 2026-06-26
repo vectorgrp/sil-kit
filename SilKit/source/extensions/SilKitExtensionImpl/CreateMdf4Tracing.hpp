@@ -8,10 +8,10 @@
 
 #include "ILoggerInternal.hpp"
 
-#include "ITraceMessageSink.hpp"
-#include "IReplay.hpp"
+#include "tracing/ITraceMessageSink.hpp"
+#include "tracing/IReplay.hpp"
 
-#include "ParticipantConfiguration.hpp"
+#include "config/ParticipantConfiguration.hpp"
 
 namespace SilKit {
 

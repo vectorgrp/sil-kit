@@ -9,13 +9,13 @@
 #include "silkit/services/can/CanDatatypes.hpp"
 #include "silkit/services/lin/LinDatatypes.hpp"
 
-#include "ITraceMessageSink.hpp"
-#include "IReplay.hpp"
+#include "tracing/ITraceMessageSink.hpp"
+#include "tracing/IReplay.hpp"
 
-#include "SilKitExtensions.hpp"
-#include "CreateMdf4Tracing.hpp"
-#include "SilKitExtensionLoader.hpp"
-#include "ParticipantConfiguration.hpp"
+#include "extensions/SilKitExtensions.hpp"
+#include "extensions/SilKitExtensionImpl/CreateMdf4Tracing.hpp"
+#include "extensions/SilKitExtensionImpl/SilKitExtensionLoader.hpp"
+#include "config/ParticipantConfiguration.hpp"
 
 namespace SilKit {
 
