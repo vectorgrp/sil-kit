@@ -67,7 +67,7 @@ inline Level from_string(const std::string& levelStr)
     std::string logLevel = levelStr;
     // Note: std::tolower has undefined behavior if the argument is not representable as unsigned char.
     std::transform(logLevel.begin(), logLevel.end(), logLevel.begin(),
-                   [](unsigned char c) { return static_cast<std::string::value_type>(std::tolower(c)); });
+                   [](char c) { return static_cast<char>(std::tolower(static_cast<int>(static_cast<unsigned char>(c)))); });
     if (logLevel == "trace")
         return Level::Trace;
     if (logLevel == "debug")
