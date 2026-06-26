@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "SilKitExtensionBase.hpp"
+#include "extensions/SilKitExtensionApi/SilKitExtensionBase.hpp"
 
 struct DummyExtension : public SilKit::SilKitExtensionBase
 {

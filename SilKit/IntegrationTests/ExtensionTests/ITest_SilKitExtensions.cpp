@@ -11,10 +11,10 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "ParticipantConfiguration.hpp"
+#include "config/ParticipantConfiguration.hpp"
 
-#include "MockParticipant.hpp" //for DummyLogger
-#include "SilKitExtensions.hpp"
+#include "core/mock/participant/MockParticipant.hpp" //for DummyLogger
+#include "extensions/SilKitExtensions.hpp"
 #include "DummyExtension.hpp"
 
 

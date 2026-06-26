@@ -8,11 +8,11 @@
 #include "silkit/services/all.hpp"
 #include "silkit/vendor/CreateSilKitRegistry.hpp"
 
-#include "functional.hpp"
+#include "util/functional.hpp"
 
 #include "SimTestHarness.hpp"
-#include "ConfigurationTestUtils.hpp"
-#include "SyncDatatypeUtils.hpp"
+#include "config/ConfigurationTestUtils.hpp"
+#include "services/orchestration/SyncDatatypeUtils.hpp"
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"

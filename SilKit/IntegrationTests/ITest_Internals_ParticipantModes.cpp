@@ -20,8 +20,8 @@
 #include "silkit/services/orchestration/string_utils.hpp"
 #include "silkit/experimental/participant/ParticipantExtensions.hpp"
 
-#include "ConfigurationTestUtils.hpp"
-#include "IParticipantInternal.hpp"
+#include "config/ConfigurationTestUtils.hpp"
+#include "core/internal/IParticipantInternal.hpp"
 #include "CreateParticipantImpl.hpp"
 
 namespace {

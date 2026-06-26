@@ -8,13 +8,13 @@
 #include <future>
 
 #include "SimTestHarness.hpp"
-#include "IParticipantInternal.hpp"
+#include "core/internal/IParticipantInternal.hpp"
 #include "silkit/services/can/all.hpp"
 #include "silkit/services/can/CanDatatypes.hpp"
-#include "CanController.hpp"
+#include "services/can/CanController.hpp"
 
 #include "silkit/services/orchestration/all.hpp"
-#include "functional.hpp"
+#include "util/functional.hpp"
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"

@@ -4,8 +4,8 @@
 
 #include "silkit/SilKitVersion.hpp"
 
-#include "SilKitExtensionBase.hpp"
-#include "SilKitExtensionMacros.hpp"
+#include "extensions/SilKitExtensionApi/SilKitExtensionBase.hpp"
+#include "extensions/SilKitExtensionApi/SilKitExtensionMacros.hpp"
 
 // definitions for linking
 struct WrongBuildSystem : public SilKit::SilKitExtensionBase

@@ -7,7 +7,7 @@
 
 #include "ITest_Internals_DataPubSub.hpp"
 
-#include "ParticipantConfigurationFromXImpl.hpp"
+#include "config/ParticipantConfigurationFromXImpl.hpp"
 
 namespace {
 

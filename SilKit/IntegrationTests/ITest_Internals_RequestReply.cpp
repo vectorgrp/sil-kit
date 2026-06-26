@@ -11,11 +11,11 @@
 #include "silkit/vendor/CreateSilKitRegistry.hpp"
 #include "silkit/experimental/services/orchestration/ISystemController.hpp"
 
-#include "IRequestReplyService.hpp"
-#include "procs/IParticipantReplies.hpp"
+#include "core/requests/IRequestReplyService.hpp"
+#include "core/requests/procs/IParticipantReplies.hpp"
 
-#include "ConfigurationTestUtils.hpp"
-#include "VAsioRegistry.hpp"
+#include "config/ConfigurationTestUtils.hpp"
+#include "core/vasio/VAsioRegistry.hpp"
 #include "CreateParticipantImpl.hpp"
 
 #include "gmock/gmock.h"
