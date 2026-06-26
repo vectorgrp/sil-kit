@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "Uri.hpp"
+#include "util/Uri.hpp"
 
 #include <cctype>
 #include <filesystem>

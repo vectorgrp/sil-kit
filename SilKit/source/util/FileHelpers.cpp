@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "FileHelpers.hpp"
+#include "util/FileHelpers.hpp"
 
 #include "silkit/participant/exception.hpp"
 

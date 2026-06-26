@@ -5,7 +5,7 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-#include "LabelMatching.hpp"
+#include "util/LabelMatching.hpp"
 
 namespace {
 

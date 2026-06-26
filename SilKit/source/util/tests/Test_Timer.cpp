@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "Timer.hpp"
+#include "util/Timer.hpp"
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"

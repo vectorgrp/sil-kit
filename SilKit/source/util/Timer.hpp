@@ -9,7 +9,7 @@
 #include <functional>
 #include <chrono>
 
-#include "SetThreadName.hpp"
+#include "util/SetThreadName.hpp"
 
 namespace SilKit {
 namespace Util {
