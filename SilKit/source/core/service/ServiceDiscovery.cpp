@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "ServiceDiscovery.hpp"
+#include "core/service/ServiceDiscovery.hpp"
 #include "silkit/services/logging/ILogger.hpp"
 
 namespace SilKit {

@@ -12,7 +12,7 @@
 #include "silkit/config/IParticipantConfiguration.hpp"
 #include "silkit/services/logging/LoggingDatatypes.hpp"
 
-#include "ParticipantConfiguration.hpp"
+#include "config/ParticipantConfiguration.hpp"
 
 namespace SilKit {
 namespace Core {

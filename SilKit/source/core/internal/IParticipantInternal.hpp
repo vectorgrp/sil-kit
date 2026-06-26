@@ -11,25 +11,25 @@
 #include "silkit/experimental/netsim/NetworkSimulatorDatatypes.hpp"
 
 
-#include "internal_fwd.hpp"
-#include "IServiceEndpoint.hpp"
-#include "ServiceDatatypes.hpp"
-#include "RequestReplyDatatypes.hpp"
-#include "OrchestrationDatatypes.hpp"
-#include "LoggingDatatypesInternal.hpp"
-#include "MetricsDatatypes.hpp"
+#include "core/internal/internal_fwd.hpp"
+#include "core/internal/IServiceEndpoint.hpp"
+#include "core/service/ServiceDatatypes.hpp"
+#include "core/requests/RequestReplyDatatypes.hpp"
+#include "core/internal/OrchestrationDatatypes.hpp"
+#include "core/internal/LoggingDatatypesInternal.hpp"
+#include "services/metrics/MetricsDatatypes.hpp"
 
-#include "WireCanMessages.hpp"
-#include "WireDataMessages.hpp"
-#include "WireEthernetMessages.hpp"
-#include "WireFlexrayMessages.hpp"
-#include "WireLinMessages.hpp"
-#include "WireRpcMessages.hpp"
-#include "Metrics.hpp"
+#include "wire/can/WireCanMessages.hpp"
+#include "wire/pubsub/WireDataMessages.hpp"
+#include "wire/ethernet/WireEthernetMessages.hpp"
+#include "wire/flexray/WireFlexrayMessages.hpp"
+#include "wire/lin/WireLinMessages.hpp"
+#include "wire/rpc/WireRpcMessages.hpp"
+#include "services/metrics/Metrics.hpp"
 
-#include "ISimulator.hpp"
-#include "IReplayDataController.hpp"
-#include "ITraceMessageSource.hpp"
+#include "core/internal/ISimulator.hpp"
+#include "tracing/IReplayDataController.hpp"
+#include "tracing/ITraceMessageSource.hpp"
 
 // forwards
 namespace SilKit {

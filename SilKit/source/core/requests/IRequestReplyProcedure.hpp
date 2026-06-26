@@ -7,7 +7,7 @@
 #include <functional>
 #include <vector>
 
-#include "RequestReplyDatatypes.hpp"
+#include "core/requests/RequestReplyDatatypes.hpp"
 
 namespace SilKit {
 namespace Core {

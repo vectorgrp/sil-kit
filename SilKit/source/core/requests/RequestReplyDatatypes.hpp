@@ -8,8 +8,8 @@
 #include <map>
 #include <sstream>
 
-#include "Uuid.hpp"
-#include "IServiceEndpoint.hpp"
+#include "util/Uuid.hpp"
+#include "core/internal/IServiceEndpoint.hpp"
 #include "silkit/util/PrintableHexString.hpp"
 
 namespace SilKit {

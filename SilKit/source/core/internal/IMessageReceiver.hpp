@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "IServiceEndpoint.hpp"
+#include "core/internal/IServiceEndpoint.hpp"
 
 namespace SilKit {
 namespace Core {

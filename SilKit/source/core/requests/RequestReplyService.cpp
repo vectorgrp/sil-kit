@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "RequestReplyService.hpp"
+#include "core/requests/RequestReplyService.hpp"
 
 #include "silkit/participant/exception.hpp"
 

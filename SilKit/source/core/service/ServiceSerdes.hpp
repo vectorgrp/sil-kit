@@ -4,9 +4,9 @@
 
 #pragma once
 
-#include "MessageBuffer.hpp"
-#include "ServiceDescriptor.hpp"
-#include "ServiceDatatypes.hpp"
+#include "core/internal/MessageBuffer.hpp"
+#include "core/internal/ServiceDescriptor.hpp"
+#include "core/service/ServiceDatatypes.hpp"
 
 namespace SilKit {
 namespace Core {

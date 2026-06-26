@@ -28,16 +28,16 @@
 
 #include "silkit/experimental/netsim/INetworkSimulator.hpp"
 
-#include "IParticipantInternal.hpp"
-#include "IServiceDiscovery.hpp"
-#include "IRequestReplyService.hpp"
-#include "IRequestReplyProcedure.hpp"
-#include "procs/IParticipantReplies.hpp"
-#include "LifecycleService.hpp"
-#include "SynchronizedHandlers.hpp"
-#include "MockTimeProvider.hpp"
+#include "core/internal/IParticipantInternal.hpp"
+#include "core/service/IServiceDiscovery.hpp"
+#include "core/requests/IRequestReplyService.hpp"
+#include "core/requests/IRequestReplyProcedure.hpp"
+#include "core/requests/procs/IParticipantReplies.hpp"
+#include "services/orchestration/LifecycleService.hpp"
+#include "util/SynchronizedHandlers.hpp"
+#include "core/mock/participant/MockTimeProvider.hpp"
 
-#include "MockLogger.hpp"
+#include "services/logging/MockLogger.hpp"
 
 namespace SilKit {
 namespace Core {

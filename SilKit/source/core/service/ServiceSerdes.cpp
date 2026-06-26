@@ -2,9 +2,9 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "ServiceSerdes.hpp"
-#include "InternalSerdes.hpp"
-#include "ServiceDescriptor.hpp"
+#include "core/service/ServiceSerdes.hpp"
+#include "core/internal/InternalSerdes.hpp"
+#include "core/internal/ServiceDescriptor.hpp"
 
 namespace SilKit {
 namespace Core {

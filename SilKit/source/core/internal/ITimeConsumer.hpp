@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 #pragma once
-#include "ITimeProvider.hpp"
+#include "core/internal/ITimeProvider.hpp"
 
 namespace SilKit {
 namespace Services {

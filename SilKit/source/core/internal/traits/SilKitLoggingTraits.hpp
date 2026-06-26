@@ -7,7 +7,7 @@
 #include "core/internal/internal_fwd.hpp"
 
 #include "silkit/services/logging/LoggingDatatypes.hpp"
-#include "LoggingTopics.hpp"
+#include "core/internal/LoggingTopics.hpp"
 
 namespace SilKit {
 namespace Core {

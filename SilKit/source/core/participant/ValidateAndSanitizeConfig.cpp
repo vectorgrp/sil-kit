@@ -2,8 +2,8 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "ValidateAndSanitizeConfig.hpp"
-#include "Assert.hpp"
+#include "core/participant/ValidateAndSanitizeConfig.hpp"
+#include "util/Assert.hpp"
 
 #include <fmt/format.h>
 
