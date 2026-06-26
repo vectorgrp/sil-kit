@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "CanEventProducer.hpp"
+#include "experimental/netsim/eventproducers/CanEventProducer.hpp"
 
 namespace SilKit {
 namespace Experimental {

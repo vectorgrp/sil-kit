@@ -2,13 +2,13 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "SimulatedNetworkInternal.hpp"
+#include "experimental/netsim/SimulatedNetworkInternal.hpp"
 
-#include "eventproducers/CanEventProducer.hpp"
-#include "eventproducers/FlexRayEventProducer.hpp"
-#include "eventproducers/EthernetEventProducer.hpp"
-#include "eventproducers/LinEventProducer.hpp"
-#include "ServiceConfigKeys.hpp"
+#include "experimental/netsim/eventproducers/CanEventProducer.hpp"
+#include "experimental/netsim/eventproducers/FlexRayEventProducer.hpp"
+#include "experimental/netsim/eventproducers/EthernetEventProducer.hpp"
+#include "experimental/netsim/eventproducers/LinEventProducer.hpp"
+#include "core/internal/ServiceConfigKeys.hpp"
 
 namespace SilKit {
 namespace Experimental {

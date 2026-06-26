@@ -2,9 +2,9 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "TimeSyncServiceExtensionsImpl.hpp"
+#include "experimental/services/orchestration/TimeSyncServiceExtensionsImpl.hpp"
 
-#include "TimeSyncService.hpp"
+#include "services/orchestration/TimeSyncService.hpp"
 
 namespace SilKit {
 namespace Experimental {
