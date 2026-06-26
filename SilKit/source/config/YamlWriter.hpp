@@ -12,7 +12,7 @@
 
 #include "rapidyaml.hpp"
 
-#include "ParticipantConfiguration.hpp"
+#include "config/ParticipantConfiguration.hpp"
 
 namespace VSilKit {
 

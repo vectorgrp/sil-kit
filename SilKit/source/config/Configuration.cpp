@@ -2,4 +2,4 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "Configuration.hpp"
+#include "config/Configuration.hpp"

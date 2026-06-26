@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "YamlWriter.hpp"
+#include "config/YamlWriter.hpp"
 
 namespace VSilKit {
 

@@ -13,8 +13,8 @@
 
 #include "rapidyaml.hpp"
 
-#include "ParticipantConfiguration.hpp"
-#include "YamlParserUtils.hpp"
+#include "config/ParticipantConfiguration.hpp"
+#include "config/YamlParserUtils.hpp"
 
 namespace VSilKit {
 

@@ -10,7 +10,7 @@
 #include "silkit/services/logging/LoggingDatatypes.hpp"
 #include "silkit/services/logging/string_utils.hpp"
 
-#include "ParticipantConfiguration.hpp"
+#include "config/ParticipantConfiguration.hpp"
 
 namespace SilKit {
 namespace Config {

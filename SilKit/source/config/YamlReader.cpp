@@ -1,9 +1,9 @@
 // SPDX-FileCopyrightText: 2025 Vector Informatik GmbH
 //
 // SPDX-License-Identifier: MIT
-#include "YamlReader.hpp"
+#include "config/YamlReader.hpp"
 #include "silkit/services/logging/string_utils.hpp"
-#include "string_utils_internal.hpp"
+#include "core/internal/string_utils_internal.hpp"
 
 namespace VSilKit {
 
