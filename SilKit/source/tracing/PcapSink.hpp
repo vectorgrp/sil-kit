@@ -36,7 +36,7 @@ public:
     void Trace(SilKit::Services::TransmitDirection txRx, const Core::ServiceDescriptor& id,
                std::chrono::nanoseconds timestamp, const TraceMessage& msg) override;
 
-    auto GetLogger() const -> Services::Logging::ILoggerInternal* override;
+    auto GetLogger() const -> Services::Logging::ILogger* override;
 
     auto Name() const -> const std::string& override;
 

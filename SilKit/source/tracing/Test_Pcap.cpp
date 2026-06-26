@@ -66,7 +66,7 @@ TEST(Test_Pcap, read_from_pcap)
     auto raw = MakePcapTestData(testInput, 10);
     ss.write(reinterpret_cast<char*>(raw.data()), raw.size());
 
-    PcapReader reader{&ss, &log};
+    PcapReader reader{&ss, log.AsILogger()};
 
     auto numMessages = 0u;
     while (true)

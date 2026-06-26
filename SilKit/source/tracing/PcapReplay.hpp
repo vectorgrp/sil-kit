@@ -16,7 +16,7 @@ class PcapReplay : public IReplayDataProvider
 {
 public:
     auto OpenFile(const SilKit::Config::ParticipantConfiguration&, const std::string& filePath,
-                  SilKit::Services::Logging::ILoggerInternal* logger) -> std::shared_ptr<IReplayFile> override;
+                  SilKit::Services::Logging::ILogger* logger) -> std::shared_ptr<IReplayFile> override;
 };
 
 } // namespace Tracing

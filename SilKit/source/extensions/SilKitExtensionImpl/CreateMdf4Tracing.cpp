@@ -24,14 +24,14 @@ auto CreateMdf4Tracing(Config::ParticipantConfiguration config, SilKit::Services
                        const std::string& sinkName) -> std::unique_ptr<ITraceMessageSink>
 {
     auto& factory = SilKitExtensionLoader<ITraceMessageSinkFactory>(logger, "SilKitExtension_Mdf", config.extensions);
-    return factory.Create(std::move(config), logger, participantName, sinkName);
+    return factory.Create(std::move(config), logger->AsILogger(), participantName, sinkName);
 }
 
 auto CreateMdf4Replay(Config::ParticipantConfiguration config, SilKit::Services::Logging::ILoggerInternal* logger,
                       const std::string& fileName) -> std::shared_ptr<IReplayFile>
 {
     auto& factory = SilKitExtensionLoader<IReplayDataProvider>(logger, "SilKitExtension_Mdf", config.extensions);
-    return factory.OpenFile(config, fileName, logger);
+    return factory.OpenFile(config, fileName, logger->AsILogger());
 }
 
 

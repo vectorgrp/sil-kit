@@ -30,7 +30,7 @@ inline auto ALoggerMessageWith(SilKit::Services::Logging::Level level)
 }
 
 
-class MockLogger : public ::SilKit::Services::Logging::ILoggerInternal
+class MockLogger : public ::SilKit::Services::Logging::ILoggerInternal, SilKit::Services::Logging::ILogger
 {
     using Level = ::SilKit::Services::Logging::Level;
     using LoggerMessage = ::SilKit::Services::Logging::LoggerMessage;
@@ -48,7 +48,7 @@ public:
 
     SilKit::Services::Logging::ILogger* AsILogger() override
     {
-        throw SilKit::SilKitError("Not implemented!");
+        return this;
     }
 
     bool IsTopicEnabled(Topic topic) const
@@ -80,6 +80,42 @@ public:
         return LoggerMessage(this, level, topic);
     }
     MOCK_METHOD(SilKit::Services::Logging::Level, GetLogLevel, (), (const, override));
+
+public:
+    void Log(Level level, const std::string& msg) override
+    {
+        Log(level, Topic::None, msg);
+    }
+
+    void Trace(const std::string& msg) override
+    {
+        Log(Level::Trace, msg);
+    }
+
+    void Debug(const std::string& msg) override
+    {
+        Log(Level::Debug, msg);
+    }
+
+    void Info(const std::string& msg) override
+    {
+        Log(Level::Info, msg);
+    }
+
+    void Warn(const std::string& msg) override
+    {
+        Log(Level::Warn, msg);
+    }
+
+    void Error(const std::string& msg) override
+    {
+        Log(Level::Error, msg);
+    }
+
+    void Critical(const std::string& msg) override
+    {
+        Log(Level::Critical, msg);
+    }
 };
 
 
