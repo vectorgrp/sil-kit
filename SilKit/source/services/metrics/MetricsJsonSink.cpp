@@ -2,9 +2,9 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "MetricsJsonSink.hpp"
+#include "services/metrics/MetricsJsonSink.hpp"
 
-#include "StringHelpers.hpp"
+#include "util/StringHelpers.hpp"
 
 #include <ostream>
 

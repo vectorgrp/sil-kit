@@ -5,16 +5,16 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "MetricsDatatypes.hpp"
-#include "MetricsJsonSink.hpp"
-#include "StringHelpers.hpp"
+#include "services/metrics/MetricsDatatypes.hpp"
+#include "services/metrics/MetricsJsonSink.hpp"
+#include "util/StringHelpers.hpp"
 
 #include <algorithm>
 #include <sstream>
 
 #include "fmt/format.h"
 
-#include "YamlParser.hpp"
+#include "config/YamlParser.hpp"
 
 namespace VSilKit {
 

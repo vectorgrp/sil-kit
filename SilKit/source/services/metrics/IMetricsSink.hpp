@@ -6,7 +6,7 @@
 
 #include "silkit/util/Span.hpp"
 
-#include "MetricsDatatypes.hpp"
+#include "services/metrics/MetricsDatatypes.hpp"
 
 #include <string>
 

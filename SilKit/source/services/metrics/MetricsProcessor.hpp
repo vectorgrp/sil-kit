@@ -4,9 +4,9 @@
 
 #pragma once
 
-#include "IMetricsSink.hpp"
-#include "MetricsDatatypes.hpp"
-#include "MetricsReceiver.hpp"
+#include "services/metrics/IMetricsSink.hpp"
+#include "services/metrics/MetricsDatatypes.hpp"
+#include "services/metrics/MetricsReceiver.hpp"
 
 #include "ILoggerInternal.hpp"
 

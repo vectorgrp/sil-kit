@@ -5,9 +5,9 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "MetricsDatatypes.hpp"
-#include "MetricsSerdes.hpp"
-#include "MessageBuffer.hpp"
+#include "services/metrics/MetricsDatatypes.hpp"
+#include "services/metrics/MetricsSerdes.hpp"
+#include "core/internal/MessageBuffer.hpp"
 
 namespace {
 
