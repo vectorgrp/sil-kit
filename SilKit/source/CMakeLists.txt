@@ -63,49 +63,10 @@ endif()
 
 add_library(I_SilKit INTERFACE)
 
+# Internal includes are root-relative from SilKit/source (e.g. "services/can/CanController.hpp"),
+# so a single include root suffices for the whole internal build.
 target_include_directories(I_SilKit
     INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}"
-    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/capi"
-    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/config"
-    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/config/mock"
-    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/core/internal"
-    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/core/mock/nullconnection"
-    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/core/mock/participant"
-    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/core/participant"
-    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/core/requests"
-    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/core/requests/procs"
-    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/core/service"
-    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/core/vasio"
-    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/core/vasio/io"
-    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/core/vasio/io/mock"
-    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/core/vasio/mock"
-    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/dashboard"
-    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/dashboard/client"
-    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dto"
-    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/dashboard/service"
-    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/experimental"
-    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/experimental/netsim"
-    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/extensions"
-    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/extensions/SilKitExtensionsImpl"
-    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/services/can"
-    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/services/ethernet"
-    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/services/flexray"
-    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/services/lin"
-    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/services/logging"
-    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/services/metrics"
-    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/services/orchestration"
-    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/services/pubsub"
-    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/services/rpc"
-    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/tracing"
-    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/tracing/mock"
-    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/util"
-    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/wire/can"
-    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/wire/ethernet"
-    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/wire/flexray"
-    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/wire/lin"
-    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/wire/pubsub"
-    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/wire/rpc"
-    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/wire/util"
 )
 
 if (MSVC)
