@@ -8,7 +8,7 @@
 #include <vector>
 #include <map>
 
-#include "EndpointAddress.hpp"
+#include "core/internal/EndpointAddress.hpp"
 
 namespace SilKit {
 namespace Core {

@@ -5,7 +5,7 @@
 #pragma once
 
 
-#include "LoggerMessage.hpp"
+#include "services/logging/LoggerMessage.hpp"
 
 #include <algorithm>
 #include <string>

@@ -10,10 +10,10 @@
 
 #include "gtest/gtest.h"
 
-#include "ProtocolVersion.hpp"
-#include "VAsioConnection.hpp"
-#include "VAsioRegistry.hpp"
-#include "Participant.hpp"
+#include "core/internal/ProtocolVersion.hpp"
+#include "core/vasio/VAsioConnection.hpp"
+#include "core/vasio/VAsioRegistry.hpp"
+#include "core/participant/Participant.hpp"
 
 #include "SimSystemController.hpp"
 

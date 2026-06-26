@@ -3,26 +3,26 @@
 // SPDX-License-Identifier: MIT
 
 #pragma once
-#include "VAsioMsgKind.hpp"
-#include "VAsioDatatypes.hpp"
-#include "SerializedMessageTraits.hpp"
-#include "AggregationMessageTraits.hpp"
-#include "MessageBuffer.hpp"
+#include "core/vasio/VAsioMsgKind.hpp"
+#include "core/vasio/VAsioDatatypes.hpp"
+#include "core/vasio/SerializedMessageTraits.hpp"
+#include "core/vasio/AggregationMessageTraits.hpp"
+#include "core/internal/MessageBuffer.hpp"
 
 // Component specific Serialize/Deserialize functions
-#include "VAsioSerdes.hpp"
-#include "CanSerdes.hpp"
-#include "LinSerdes.hpp"
-#include "EthernetSerdes.hpp"
-#include "FlexraySerdes.hpp"
-#include "RpcSerdes.hpp"
-#include "InternalSerdes.hpp"
-#include "SyncSerdes.hpp"
-#include "ServiceSerdes.hpp"
-#include "RequestReplySerdes.hpp"
-#include "LoggingSerdes.hpp"
-#include "DataSerdes.hpp"
-#include "MetricsSerdes.hpp"
+#include "core/vasio/VAsioSerdes.hpp"
+#include "services/can/CanSerdes.hpp"
+#include "services/lin/LinSerdes.hpp"
+#include "services/ethernet/EthernetSerdes.hpp"
+#include "services/flexray/FlexraySerdes.hpp"
+#include "services/rpc/RpcSerdes.hpp"
+#include "core/internal/InternalSerdes.hpp"
+#include "services/orchestration/SyncSerdes.hpp"
+#include "core/service/ServiceSerdes.hpp"
+#include "core/requests/RequestReplySerdes.hpp"
+#include "services/logging/LoggingSerdes.hpp"
+#include "services/pubsub/DataSerdes.hpp"
+#include "services/metrics/MetricsSerdes.hpp"
 
 namespace SilKit {
 namespace Core {

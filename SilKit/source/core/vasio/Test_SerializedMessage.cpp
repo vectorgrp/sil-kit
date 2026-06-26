@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "SerializedMessage.hpp"
+#include "core/vasio/SerializedMessage.hpp"
 
 #include <cstdint>
 #include <array>

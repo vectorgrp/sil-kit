@@ -13,36 +13,36 @@
 #include "silkit/services/logging/fwd_decl.hpp"
 
 // internal types required for TestDataTypes because of SilKitMsgTraits
-#include "WireCanMessages.hpp"
-#include "WireDataMessages.hpp"
-#include "WireEthernetMessages.hpp"
-#include "WireFlexrayMessages.hpp"
-#include "WireLinMessages.hpp"
-#include "WireRpcMessages.hpp"
+#include "wire/can/WireCanMessages.hpp"
+#include "wire/pubsub/WireDataMessages.hpp"
+#include "wire/ethernet/WireEthernetMessages.hpp"
+#include "wire/flexray/WireFlexrayMessages.hpp"
+#include "wire/lin/WireLinMessages.hpp"
+#include "wire/rpc/WireRpcMessages.hpp"
 
-#include "ServiceDatatypes.hpp"         //concrete, no forwards
-#include "RequestReplyDatatypes.hpp"    //concrete, no forwards
-#include "LoggingDatatypesInternal.hpp" //concrete, no forwards
-#include "OrchestrationDatatypes.hpp"   //concrete, no forwards
+#include "core/service/ServiceDatatypes.hpp"         //concrete, no forwards
+#include "core/requests/RequestReplyDatatypes.hpp"    //concrete, no forwards
+#include "core/internal/LoggingDatatypesInternal.hpp" //concrete, no forwards
+#include "core/internal/OrchestrationDatatypes.hpp"   //concrete, no forwards
 
-#include "ProtocolVersion.hpp"
-#include "TestDataTypes.hpp" // must be included before VAsioConnection
+#include "core/internal/ProtocolVersion.hpp"
+#include "core/internal/TestDataTypes.hpp" // must be included before VAsioConnection
 
-#include "IVAsioPeer.hpp"
-#include "IMessageReceiver.hpp"
+#include "core/vasio/IVAsioPeer.hpp"
+#include "core/internal/IMessageReceiver.hpp"
 
-#include "VAsioConnection.hpp"
-#include "VAsioConstants.hpp"
-#include "MockParticipant.hpp" // for DummyLogger
-#include "VAsioSerdes.hpp"
-#include "SerializedMessage.hpp"
-#include "TimeProvider.hpp"
+#include "core/vasio/VAsioConnection.hpp"
+#include "core/vasio/VAsioConstants.hpp"
+#include "core/mock/participant/MockParticipant.hpp" // for DummyLogger
+#include "core/vasio/VAsioSerdes.hpp"
+#include "core/vasio/SerializedMessage.hpp"
+#include "services/orchestration/TimeProvider.hpp"
 
-#include "LoggerMessage.hpp"
+#include "services/logging/LoggerMessage.hpp"
 
 #include <chrono>
 
-#include "MockVAsioPeer.hpp"
+#include "core/vasio/mock/MockVAsioPeer.hpp"
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"

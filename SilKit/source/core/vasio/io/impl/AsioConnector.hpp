@@ -4,20 +4,20 @@
 
 #pragma once
 
-#include "IConnector.hpp"
-#include "IIoContext.hpp"
+#include "core/vasio/io/IConnector.hpp"
+#include "core/vasio/io/IIoContext.hpp"
 
-#include "AsioCleanupEndpoint.hpp"
-#include "AsioGenericRawByteStream.hpp"
-#include "AsioFormatEndpoint.hpp"
-#include "SetAsioSocketOptions.hpp"
+#include "core/vasio/io/impl/AsioCleanupEndpoint.hpp"
+#include "core/vasio/io/impl/AsioGenericRawByteStream.hpp"
+#include "core/vasio/io/impl/AsioFormatEndpoint.hpp"
+#include "core/vasio/io/impl/SetAsioSocketOptions.hpp"
 
-#include "AsioSocketOptions.hpp"
-#include "util/Atomic.hpp"
-#include "util/Exceptions.hpp"
-#include "util/TracingMacros.hpp"
+#include "core/vasio/io/AsioSocketOptions.hpp"
+#include "core/vasio/io/util/Atomic.hpp"
+#include "core/vasio/io/util/Exceptions.hpp"
+#include "core/vasio/io/util/TracingMacros.hpp"
 
-#include "LoggerMessage.hpp"
+#include "services/logging/LoggerMessage.hpp"
 
 #include <memory>
 #include <mutex>

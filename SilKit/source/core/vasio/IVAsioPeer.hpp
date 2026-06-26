@@ -6,14 +6,14 @@
 
 #include <tuple>
 
-#include "IServiceEndpoint.hpp"
+#include "core/internal/IServiceEndpoint.hpp"
 
-#include "VAsioPeerInfo.hpp"
-#include "VAsioDatatypes.hpp"
-#include "VAsioProtocolVersion.hpp"
+#include "core/vasio/VAsioPeerInfo.hpp"
+#include "core/vasio/VAsioDatatypes.hpp"
+#include "core/vasio/VAsioProtocolVersion.hpp"
 
-#include "SerializedMessage.hpp"
-#include "IMetricsManager.hpp"
+#include "core/vasio/SerializedMessage.hpp"
+#include "services/metrics/IMetricsManager.hpp"
 
 namespace SilKit {
 namespace Core {

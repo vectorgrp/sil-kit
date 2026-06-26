@@ -4,14 +4,14 @@
 
 #pragma once
 
-#include "VAsioDatatypes.hpp"
+#include "core/vasio/VAsioDatatypes.hpp"
 
-#include "OrchestrationDatatypes.hpp"
+#include "core/internal/OrchestrationDatatypes.hpp"
 
-#include "WireCanMessages.hpp"
-#include "WireDataMessages.hpp"
-#include "WireEthernetMessages.hpp"
-#include "WireRpcMessages.hpp"
+#include "wire/can/WireCanMessages.hpp"
+#include "wire/pubsub/WireDataMessages.hpp"
+#include "wire/ethernet/WireEthernetMessages.hpp"
+#include "wire/rpc/WireRpcMessages.hpp"
 
 namespace SilKit {
 namespace Core {

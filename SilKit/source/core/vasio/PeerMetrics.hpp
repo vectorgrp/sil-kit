@@ -3,11 +3,11 @@
 
 #pragma once
 
-#include "IPeerMetrics.hpp"
-#include "ICounterMetric.hpp"
-#include "IStatisticMetric.hpp"
-#include "IVAsioPeer.hpp"
-#include "SerializedMessage.hpp"
+#include "core/vasio/IPeerMetrics.hpp"
+#include "services/metrics/ICounterMetric.hpp"
+#include "services/metrics/IStatisticMetric.hpp"
+#include "core/vasio/IVAsioPeer.hpp"
+#include "core/vasio/SerializedMessage.hpp"
 
 namespace VSilKit {
 

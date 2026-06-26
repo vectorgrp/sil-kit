@@ -2,14 +2,14 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "AsioGenericRawByteStream.hpp"
+#include "core/vasio/io/impl/AsioGenericRawByteStream.hpp"
 
-#include "AsioFormatEndpoint.hpp"
-#include "IIoContext.hpp"
+#include "core/vasio/io/impl/AsioFormatEndpoint.hpp"
+#include "core/vasio/io/IIoContext.hpp"
 
-#include "util/Atomic.hpp"
-#include "util/Exceptions.hpp"
-#include "util/TracingMacros.hpp"
+#include "core/vasio/io/util/Atomic.hpp"
+#include "core/vasio/io/util/Exceptions.hpp"
+#include "core/vasio/io/util/TracingMacros.hpp"
 
 #include <algorithm>
 #include <vector>

@@ -5,11 +5,11 @@
 #pragma once
 
 
-#include "IAcceptor.hpp"
-#include "IConnector.hpp"
-#include "ITimer.hpp"
+#include "core/vasio/io/IAcceptor.hpp"
+#include "core/vasio/io/IConnector.hpp"
+#include "core/vasio/io/ITimer.hpp"
 
-#include "LoggerMessage.hpp"
+#include "services/logging/LoggerMessage.hpp"
 
 #include <functional>
 #include <memory>

@@ -5,8 +5,8 @@
 #pragma once
 
 
-#include "ConnectPeer.hpp"
-#include "ITimer.hpp"
+#include "core/vasio/ConnectPeer.hpp"
+#include "core/vasio/io/ITimer.hpp"
 
 #include <mutex>
 #include <vector>

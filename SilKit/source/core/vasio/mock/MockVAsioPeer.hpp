@@ -12,7 +12,7 @@
 #pragma once
 
 
-#include "IVAsioPeer.hpp"
+#include "core/vasio/IVAsioPeer.hpp"
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"

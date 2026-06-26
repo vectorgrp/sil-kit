@@ -2,9 +2,9 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "VAsioProxyPeer.hpp"
+#include "core/vasio/VAsioProxyPeer.hpp"
 
-#include "Logger.hpp"
+#include "services/logging/Logger.hpp"
 
 
 namespace {

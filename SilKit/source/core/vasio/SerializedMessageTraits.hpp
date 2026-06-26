@@ -3,8 +3,8 @@
 // SPDX-License-Identifier: MIT
 
 #pragma once
-#include "VAsioMsgKind.hpp"
-#include "VAsioDatatypes.hpp"
+#include "core/vasio/VAsioMsgKind.hpp"
+#include "core/vasio/VAsioDatatypes.hpp"
 
 namespace SilKit {
 namespace Core {

@@ -12,18 +12,18 @@
 
 #include "silkit/services/logging/ILogger.hpp"
 
-#include "IVAsioPeer.hpp"
-#include "EndpointAddress.hpp"
-#include "MessageBuffer.hpp"
-#include "RingBuffer.hpp"
-#include "VAsioPeerInfo.hpp"
-#include "ProtocolVersion.hpp"
+#include "core/vasio/IVAsioPeer.hpp"
+#include "core/internal/EndpointAddress.hpp"
+#include "core/internal/MessageBuffer.hpp"
+#include "core/vasio/RingBuffer.hpp"
+#include "core/vasio/VAsioPeerInfo.hpp"
+#include "core/internal/ProtocolVersion.hpp"
 
-#include "IIoContext.hpp"
-#include "IRawByteStream.hpp"
-#include "ITimer.hpp"
+#include "core/vasio/io/IIoContext.hpp"
+#include "core/vasio/io/IRawByteStream.hpp"
+#include "core/vasio/io/ITimer.hpp"
 
-#include "PeerMetrics.hpp"
+#include "core/vasio/PeerMetrics.hpp"
 
 namespace SilKit {
 namespace Core {

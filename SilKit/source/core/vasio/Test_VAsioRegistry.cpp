@@ -2,11 +2,11 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "ConfigurationTestUtils.hpp"
+#include "config/ConfigurationTestUtils.hpp"
 
-#include "Uri.hpp"
+#include "util/Uri.hpp"
 
-#include "VAsioRegistry.hpp"
+#include "core/vasio/VAsioRegistry.hpp"
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"

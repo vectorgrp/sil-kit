@@ -5,12 +5,12 @@
 #pragma once
 
 
-#include "IRawByteStream.hpp"
+#include "core/vasio/io/IRawByteStream.hpp"
 
-#include "AsioSocketOptions.hpp"
-#include "util/Atomic.hpp"
+#include "core/vasio/io/AsioSocketOptions.hpp"
+#include "core/vasio/io/util/Atomic.hpp"
 
-#include "LoggerMessage.hpp"
+#include "services/logging/LoggerMessage.hpp"
 
 #include <memory>
 #include <mutex>
