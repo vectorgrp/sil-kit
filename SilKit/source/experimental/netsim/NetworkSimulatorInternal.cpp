@@ -9,7 +9,7 @@
 #include "silkit/experimental/netsim/string_utils.hpp"
 
 #include "services/logging/LoggerMessage.hpp"
-#include "procs/IParticipantReplies.hpp"
+#include "core/requests/procs/IParticipantReplies.hpp"
 
 namespace SilKit {
 namespace Experimental {
