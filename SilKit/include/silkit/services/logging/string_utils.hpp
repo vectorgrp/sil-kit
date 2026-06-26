@@ -9,6 +9,7 @@
 #include <string>
 #include <algorithm>
 #include <cctype>
+#include <cstdint>
 
 #include "silkit/services/logging/LoggingDatatypes.hpp"
 
@@ -66,7 +67,7 @@ inline Level from_string(const std::string& levelStr)
 {
     std::string logLevel = levelStr;
     std::transform(logLevel.begin(), logLevel.end(), logLevel.begin(),
-                   [](unsigned char c) { return (unsigned char)std::tolower(c); });
+                   [](std::uint8_t c) { return static_cast<char>(std::tolower(c)); });
     if (logLevel == "trace")
         return Level::Trace;
     if (logLevel == "debug")

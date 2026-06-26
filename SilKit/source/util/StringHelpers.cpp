@@ -7,6 +7,7 @@
 #include <chrono>
 #include <sstream>
 #include <cctype>
+#include <cstdint>
 
 #include "fmt/chrono.h"
 
@@ -99,7 +100,7 @@ auto CurrentTimestampString() -> std::string
 auto LowerCase(std::string input) -> std::string
 {
     std::transform(input.begin(), input.end(), input.begin(),
-                   [](unsigned char c) { return (unsigned char)std::tolower(c); });
+                   [](std::uint8_t c) { return static_cast<char>(std::tolower(c)); });
     return input;
 }
 
