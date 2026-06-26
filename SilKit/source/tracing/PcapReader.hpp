@@ -17,9 +17,9 @@ class PcapReader final : public SilKit::IReplayChannelReader
 {
 public:
     // Constructors
-    PcapReader(const std::string& filePath, SilKit::Services::Logging::ILoggerInternal* logger);
+    PcapReader(const std::string& filePath, SilKit::Services::Logging::ILogger* logger);
     //This CTor is for testing purposes only:
-    PcapReader(std::istream* stream, SilKit::Services::Logging::ILoggerInternal* logger);
+    PcapReader(std::istream* stream, SilKit::Services::Logging::ILogger* logger);
     PcapReader(PcapReader& other);
 
 public:
@@ -46,7 +46,7 @@ private:
     std::map<std::string, std::string> _metaInfos;
     std::shared_ptr<IReplayMessage> _currentMessage;
     uint64_t _numMessages{0};
-    SilKit::Services::Logging::ILoggerInternal* _log{nullptr};
+    SilKit::Services::Logging::ILogger* _log{nullptr};
     std::chrono::nanoseconds _startTime{0};
     std::chrono::nanoseconds _endTime{0};
 };

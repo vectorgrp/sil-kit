@@ -61,9 +61,9 @@ void PcapSink::Open(SinkType outputType, const std::string& outputPath)
     }
 }
 
-auto PcapSink::GetLogger() const -> Services::Logging::ILoggerInternal*
+auto PcapSink::GetLogger() const -> Services::Logging::ILogger*
 {
-    return _logger;
+    return _logger->AsILogger();
 }
 
 auto PcapSink::Name() const -> const std::string&

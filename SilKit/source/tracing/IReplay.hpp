@@ -21,12 +21,6 @@
 
 namespace SilKit {
 
-namespace Services {
-namespace Logging {
-struct ILoggerInternal;
-} // namespace Logging
-} // namespace Services
-
 //forwards
 class IReplayMessage;
 class IReplayChannel;
@@ -40,7 +34,7 @@ public:
     //!< Pass the config (containing search path hints), the actual file to open
     //   and a logger to the extension.
     virtual auto OpenFile(const SilKit::Config::ParticipantConfiguration& config, const std::string& filePath,
-                          SilKit::Services::Logging::ILoggerInternal* logger) -> std::shared_ptr<IReplayFile> = 0;
+                          SilKit::Services::Logging::ILogger* logger) -> std::shared_ptr<IReplayFile> = 0;
 };
 
 class IReplayFile
