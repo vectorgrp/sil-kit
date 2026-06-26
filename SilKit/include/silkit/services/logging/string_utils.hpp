@@ -10,8 +10,7 @@
 #include <algorithm>
 #include <cctype>
 
-#include "LoggingDatatypes.hpp"
-#include "StringHelpers.hpp"
+#include "silkit/services/logging/LoggingDatatypes.hpp"
 
 namespace SilKit {
 namespace Services {
@@ -65,7 +64,9 @@ std::ostream& operator<<(std::ostream& outStream, const Level& level)
 
 inline Level from_string(const std::string& levelStr)
 {
-    auto logLevel = SilKit::Util::LowerCase(levelStr);
+    std::string logLevel = levelStr;
+    std::transform(logLevel.begin(), logLevel.end(), logLevel.begin(),
+                   [](unsigned char c) { return (unsigned char)std::tolower(c); });
     if (logLevel == "trace")
         return Level::Trace;
     if (logLevel == "debug")
