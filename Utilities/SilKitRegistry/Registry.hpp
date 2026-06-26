@@ -5,7 +5,7 @@
 #pragma once
 
 #include "silkit/vendor/ISilKitRegistry.hpp"
-#include "IDashboardInstance.hpp"
+#include "dashboard/IDashboardInstance.hpp"
 
 #include <memory>
 

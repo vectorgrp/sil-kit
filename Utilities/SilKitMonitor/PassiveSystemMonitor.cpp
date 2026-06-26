@@ -19,8 +19,8 @@
 #include "silkit/services/orchestration/string_utils.hpp"
 #include "silkit/services/logging/ILogger.hpp"
 
-#include "CommandlineParser.hpp"
-#include "SignalHandler.hpp"
+#include "util/CommandlineParser.hpp"
+#include "util/SignalHandler.hpp"
 
 using namespace SilKit;
 using namespace SilKit::Util;
