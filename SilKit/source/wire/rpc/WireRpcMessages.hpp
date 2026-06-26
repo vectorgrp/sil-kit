@@ -8,8 +8,8 @@
 #include "silkit/services/rpc/string_utils.hpp"
 #include "silkit/util/PrintableHexString.hpp"
 
-#include "SharedVector.hpp"
-#include "Uuid.hpp"
+#include "wire/util/SharedVector.hpp"
+#include "util/Uuid.hpp"
 
 #include <chrono>
 #include <vector>

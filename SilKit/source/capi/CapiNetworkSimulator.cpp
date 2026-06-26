@@ -16,7 +16,7 @@
 #include "silkit/experimental/netsim/all.hpp"
 
 #include "silkit/detail/impl/HourglassConversions.hpp"
-#include "participant/ParticipantExtensionsImpl.hpp"
+#include "experimental/participant/ParticipantExtensionsImpl.hpp"
 
 namespace SilKit {
 namespace Experimental {

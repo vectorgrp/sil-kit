@@ -7,7 +7,7 @@
 #include "silkit/services/ethernet/EthernetDatatypes.hpp"
 #include "silkit/services/ethernet/string_utils.hpp"
 
-#include "SharedVector.hpp"
+#include "wire/util/SharedVector.hpp"
 
 #include <chrono>
 #include <vector>

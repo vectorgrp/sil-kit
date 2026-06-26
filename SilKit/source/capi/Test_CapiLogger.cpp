@@ -6,8 +6,8 @@
 #include "gmock/gmock.h"
 #include "silkit/capi/SilKit.h"
 #include "silkit/services/logging/all.hpp"
-#include "LoggingTopics.hpp"
-#include "MockLogger.hpp"
+#include "core/internal/LoggingTopics.hpp"
+#include "services/logging/MockLogger.hpp"
 
 namespace {
 using namespace SilKit::Services::Logging;

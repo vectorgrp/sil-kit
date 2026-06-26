@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "services/lin/LinControllerExtensionsImpl.hpp"
+#include "experimental/services/lin/LinControllerExtensionsImpl.hpp"
 
 #include "silkit/capi/SilKit.h"
 #include "silkit/SilKit.hpp"
