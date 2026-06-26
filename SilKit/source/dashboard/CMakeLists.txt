@@ -111,10 +111,6 @@ else()
         DashboardUnavailable.cpp
     )
 
-    target_include_directories(O_SilKit_Dashboard
-        PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
-    )
-
     target_link_libraries(O_SilKit_Dashboard
         PRIVATE I_SilKit
     )

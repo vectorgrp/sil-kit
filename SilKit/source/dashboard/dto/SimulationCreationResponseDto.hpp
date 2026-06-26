@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "OatppHeaders.hpp"
+#include "dashboard/OatppHeaders.hpp"
 
 #include OATPP_CODEGEN_BEGIN(DTO)
 

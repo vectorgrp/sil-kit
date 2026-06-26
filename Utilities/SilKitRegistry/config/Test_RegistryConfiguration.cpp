@@ -7,7 +7,7 @@
 
 #include "RegistryConfiguration.hpp"
 
-#include "FileHelpers.hpp"
+#include "util/FileHelpers.hpp"
 
 namespace {
 

@@ -7,12 +7,12 @@
 #include "silkit/services/orchestration/all.hpp"
 #include "silkit/participant/exception.hpp"
 
-#include "participant/ParticipantExtensionsImpl.hpp"
+#include "experimental/participant/ParticipantExtensionsImpl.hpp"
 
 #include "capi/CapiImpl.hpp"
 #include "capi/TypeConversion.hpp"
 
-#include "services/orchestration/TimeSyncServiceExtensionsImpl.hpp"
+#include "experimental/services/orchestration/TimeSyncServiceExtensionsImpl.hpp"
 
 #include <memory>
 #include <map>

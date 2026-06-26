@@ -9,14 +9,14 @@
 #include "silkit/services/pubsub/PubSubSpec.hpp"
 #include "silkit/vendor/CreateSilKitRegistry.hpp"
 
-#include "functional.hpp"
+#include "util/functional.hpp"
 
 #include "SimTestHarness.hpp"
-#include "ServiceDiscovery.hpp"
-#include "ConfigurationTestUtils.hpp"
-#include "VAsioRegistry.hpp"
+#include "core/service/ServiceDiscovery.hpp"
+#include "config/ConfigurationTestUtils.hpp"
+#include "core/vasio/VAsioRegistry.hpp"
 #include "CreateParticipantImpl.hpp"
-#include "ParticipantConfigurationFromXImpl.hpp"
+#include "config/ParticipantConfigurationFromXImpl.hpp"
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"

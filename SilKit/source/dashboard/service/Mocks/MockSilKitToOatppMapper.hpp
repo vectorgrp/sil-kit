@@ -5,7 +5,7 @@
 #pragma once
 
 #include "gmock/gmock-function-mocker.h"
-#include "ISilKitToOatppMapper.hpp"
+#include "dashboard/service/ISilKitToOatppMapper.hpp"
 
 namespace SilKit {
 namespace Dashboard {

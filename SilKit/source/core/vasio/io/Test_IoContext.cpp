@@ -2,17 +2,17 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "Uri.hpp"
+#include "util/Uri.hpp"
 #include "core/vasio/io/MakeAsioIoContext.hpp"
 #include <filesystem>
-#include "Uuid.hpp"
+#include "util/Uuid.hpp"
 
-#include "MockLogger.hpp"
+#include "services/logging/MockLogger.hpp"
 
-#include "MockAcceptor.hpp"
-#include "MockConnector.hpp"
-#include "MockRawByteStream.hpp"
-#include "MockTimer.hpp"
+#include "core/vasio/io/mock/MockAcceptor.hpp"
+#include "core/vasio/io/mock/MockConnector.hpp"
+#include "core/vasio/io/mock/MockRawByteStream.hpp"
+#include "core/vasio/io/mock/MockTimer.hpp"
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"

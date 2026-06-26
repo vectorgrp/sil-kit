@@ -14,9 +14,9 @@
 #pragma warning(pop)
 #endif
 
-#include "MockParticipant.hpp"
+#include "core/mock/participant/MockParticipant.hpp"
 
-#include "DashboardSystemServiceClient.hpp"
+#include "dashboard/client/DashboardSystemServiceClient.hpp"
 #include "Mocks/MockBodyDecoder.hpp"
 #include "Mocks/MockDashboardSystemApiClient.hpp"
 #include "Mocks/MockInputStream.hpp"

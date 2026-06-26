@@ -5,7 +5,7 @@
 #pragma once
 
 
-#include "IConnectKnownParticipantsListener.hpp"
+#include "core/vasio/IConnectKnownParticipantsListener.hpp"
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"

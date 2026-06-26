@@ -5,7 +5,7 @@
 #pragma once
 
 
-#include "IRawByteStream.hpp"
+#include "core/vasio/io/IRawByteStream.hpp"
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"

@@ -7,7 +7,7 @@
 #include <functional>
 #include <vector>
 
-#include "ServiceDatatypes.hpp"
+#include "core/service/ServiceDatatypes.hpp"
 
 namespace SilKit {
 namespace Core {

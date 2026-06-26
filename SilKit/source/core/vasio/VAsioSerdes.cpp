@@ -2,16 +2,16 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "VAsioSerdes.hpp"
-#include "VAsioPeerInfo.hpp"
+#include "core/vasio/VAsioSerdes.hpp"
+#include "core/vasio/VAsioPeerInfo.hpp"
 
-#include "Uri.hpp"
-#include "InternalSerdes.hpp"
-#include "ProtocolVersion.hpp"
-#include "VAsioProtocolVersion.hpp" // from_header(ProtcolVersion)
+#include "util/Uri.hpp"
+#include "core/internal/InternalSerdes.hpp"
+#include "core/internal/ProtocolVersion.hpp"
+#include "core/vasio/VAsioProtocolVersion.hpp" // from_header(ProtcolVersion)
 
 // Backward compatibility:
-#include "VAsioSerdes_Protocol30.hpp"
+#include "core/vasio/VAsioSerdes_Protocol30.hpp"
 
 namespace SilKit {
 namespace Core {

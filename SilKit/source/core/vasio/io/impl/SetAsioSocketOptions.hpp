@@ -5,9 +5,9 @@
 #pragma once
 
 
-#include "AsioSocketOptions.hpp"
+#include "core/vasio/io/AsioSocketOptions.hpp"
 
-#include "ILoggerInternal.hpp"
+#include "services/logging/ILoggerInternal.hpp"
 
 #include "asio.hpp"
 

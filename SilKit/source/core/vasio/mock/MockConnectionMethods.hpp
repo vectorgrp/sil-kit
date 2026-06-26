@@ -5,7 +5,7 @@
 #pragma once
 
 
-#include "IConnectionMethods.hpp"
+#include "core/vasio/IConnectionMethods.hpp"
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"

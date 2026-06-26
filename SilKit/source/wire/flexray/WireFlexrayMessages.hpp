@@ -7,7 +7,7 @@
 #include "silkit/services/flexray/FlexrayDatatypes.hpp"
 #include "silkit/services/flexray/string_utils.hpp"
 
-#include "SharedVector.hpp"
+#include "wire/util/SharedVector.hpp"
 
 #include <chrono>
 #include <vector>

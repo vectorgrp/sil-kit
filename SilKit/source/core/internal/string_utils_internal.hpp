@@ -7,7 +7,7 @@
 #include <iostream>
 #include <sstream>
 
-#include "EndpointAddress.hpp"
+#include "core/internal/EndpointAddress.hpp"
 
 
 #include <ostream>
@@ -15,8 +15,8 @@
 #include <algorithm>
 #include <cctype>
 
-#include "LoggingTopics.hpp"
-#include "StringHelpers.hpp"
+#include "core/internal/LoggingTopics.hpp"
+#include "util/StringHelpers.hpp"
 
 namespace SilKit {
 namespace Core {

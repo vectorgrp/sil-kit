@@ -9,12 +9,12 @@
 #include <functional>
 #include <set>
 
-#include "IParticipantReplies.hpp"
-#include "IParticipantInternal.hpp"
-#include "IRequestReplyService.hpp"
-#include "IRequestReplyProcedure.hpp"
+#include "core/requests/procs/IParticipantReplies.hpp"
+#include "core/internal/IParticipantInternal.hpp"
+#include "core/requests/IRequestReplyService.hpp"
+#include "core/requests/IRequestReplyProcedure.hpp"
 
-#include "Uuid.hpp"
+#include "util/Uuid.hpp"
 
 namespace SilKit {
 namespace Core {

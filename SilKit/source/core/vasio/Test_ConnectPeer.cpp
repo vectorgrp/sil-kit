@@ -2,16 +2,16 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "ConnectPeer.hpp"
+#include "core/vasio/ConnectPeer.hpp"
 
-#include "MockLogger.hpp"
+#include "services/logging/MockLogger.hpp"
 
-#include "MockConnector.hpp"
-#include "MockConnectPeer.hpp"
-#include "MockIoContext.hpp"
-#include "MockRawByteStream.hpp"
+#include "core/vasio/io/mock/MockConnector.hpp"
+#include "core/vasio/mock/MockConnectPeer.hpp"
+#include "core/vasio/io/mock/MockIoContext.hpp"
+#include "core/vasio/io/mock/MockRawByteStream.hpp"
 
-#include "Hash.hpp"
+#include "util/Hash.hpp"
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"

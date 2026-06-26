@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "VAsioSerdes.hpp"
+#include "core/vasio/VAsioSerdes.hpp"
 
 namespace SilKit {
 namespace Core {

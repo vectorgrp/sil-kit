@@ -9,7 +9,7 @@
 #include "services/orchestration/LifecycleService.hpp"
 #include "services/orchestration/LifecycleManagement.hpp"
 #include "core/requests/IRequestReplyService.hpp"
-#include "procs/IParticipantReplies.hpp"
+#include "core/requests/procs/IParticipantReplies.hpp"
 
 namespace SilKit {
 namespace Services {

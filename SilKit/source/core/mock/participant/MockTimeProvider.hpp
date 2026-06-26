@@ -9,8 +9,8 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "ITimeProvider.hpp"
-#include "SynchronizedHandlers.hpp"
+#include "core/internal/ITimeProvider.hpp"
+#include "util/SynchronizedHandlers.hpp"
 
 namespace SilKit {
 namespace Core {

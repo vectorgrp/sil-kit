@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "traits/SilKitServices_fwd.hpp"
+#include "core/internal/traits/SilKitServices_fwd.hpp"
 
 namespace SilKit {
 

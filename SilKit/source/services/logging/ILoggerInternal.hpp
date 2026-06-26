@@ -11,7 +11,7 @@
 #include "services/logging/StructuredLoggingKeys.hpp"
 #include "services/logging/SilKitFmtFormatters.hpp"
 #include "fmt/format.h"
-#include "traits/SilKitLoggingTraits.hpp"
+#include "core/internal/traits/SilKitLoggingTraits.hpp"
 
 namespace SilKit {
 namespace Services {

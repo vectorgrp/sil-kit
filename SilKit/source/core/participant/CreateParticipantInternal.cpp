@@ -2,9 +2,9 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "CreateParticipantInternal.hpp"
+#include "core/participant/CreateParticipantInternal.hpp"
 
-#include "CreateParticipantT.hpp"
+#include "core/participant/CreateParticipantT.hpp"
 
 namespace SilKit {
 namespace Core {

@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "RequestReplySerdes.hpp"
+#include "core/requests/RequestReplySerdes.hpp"
 
 namespace SilKit {
 namespace Core {

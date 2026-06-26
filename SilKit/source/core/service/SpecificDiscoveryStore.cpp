@@ -2,9 +2,9 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "SpecificDiscoveryStore.hpp"
-#include "LabelMatching.hpp"
-#include "YamlParser.hpp"
+#include "core/service/SpecificDiscoveryStore.hpp"
+#include "util/LabelMatching.hpp"
+#include "config/YamlParser.hpp"
 
 namespace {
 inline auto MakeFilter(const std::string& type,

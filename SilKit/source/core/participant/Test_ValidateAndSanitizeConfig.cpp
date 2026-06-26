@@ -5,8 +5,8 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-#include "ValidateAndSanitizeConfig.hpp"
-#include "ParticipantConfiguration.hpp"
+#include "core/participant/ValidateAndSanitizeConfig.hpp"
+#include "config/ParticipantConfiguration.hpp"
 
 namespace {
 

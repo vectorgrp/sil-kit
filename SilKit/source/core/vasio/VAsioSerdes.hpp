@@ -4,9 +4,9 @@
 
 #pragma once
 
-#include "MessageBuffer.hpp"
-#include "VAsioMsgKind.hpp"
-#include "VAsioDatatypes.hpp"
+#include "core/internal/MessageBuffer.hpp"
+#include "core/vasio/VAsioMsgKind.hpp"
+#include "core/vasio/VAsioDatatypes.hpp"
 
 namespace SilKit {
 namespace Core {

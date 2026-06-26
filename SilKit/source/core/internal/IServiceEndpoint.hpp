@@ -10,9 +10,9 @@
 #include <vector>
 #include <functional>
 
-#include "EndpointAddress.hpp"
-#include "ServiceDescriptor.hpp"
-#include "ServiceConfigKeys.hpp"
+#include "core/internal/EndpointAddress.hpp"
+#include "core/internal/ServiceDescriptor.hpp"
+#include "core/internal/ServiceConfigKeys.hpp"
 
 namespace SilKit {
 namespace Core {

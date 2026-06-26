@@ -7,7 +7,7 @@
 #include <vector>
 #include <stdint.h>
 
-#include "util/Buffer.hpp"
+#include "core/vasio/io/util/Buffer.hpp"
 
 namespace SilKit {
 namespace Core {

@@ -2,10 +2,10 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "SilKitToOatppMapper.hpp"
+#include "dashboard/service/SilKitToOatppMapper.hpp"
 
-#include "YamlParser.hpp"
-#include "StringHelpers.hpp"
+#include "config/YamlParser.hpp"
+#include "util/StringHelpers.hpp"
 
 #include <string>
 #include <type_traits>

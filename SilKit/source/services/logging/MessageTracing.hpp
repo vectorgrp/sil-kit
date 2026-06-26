@@ -7,8 +7,8 @@
 #include "services/logging/LoggerMessage.hpp"
 #include "core/internal/IServiceEndpoint.hpp"
 #include "core/internal/ServiceDescriptor.hpp"
-#include "traits/SilKitMsgTraits.hpp"
-#include "traits/SilKitLoggingTraits.hpp"
+#include "core/internal/traits/SilKitMsgTraits.hpp"
+#include "core/internal/traits/SilKitLoggingTraits.hpp"
 
 #include "config/YamlParser.hpp"
 

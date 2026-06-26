@@ -8,10 +8,10 @@
 #include "silkit/services/orchestration/all.hpp"
 #include "silkit/services/all.hpp"
 
-#include "ConfigurationTestUtils.hpp"
-#include "IParticipantInternal.hpp"
-#include "IServiceDiscovery.hpp"
-#include "ServiceDatatypes.hpp"
+#include "config/ConfigurationTestUtils.hpp"
+#include "core/internal/IParticipantInternal.hpp"
+#include "core/service/IServiceDiscovery.hpp"
+#include "core/service/ServiceDatatypes.hpp"
 
 #include "IntegrationTestInfrastructure.hpp"
 

@@ -71,11 +71,6 @@ target_compile_definitions(O_SilKit_Core_VAsio
     PRIVATE ASIO_STANDALONE
 )
 
-target_include_directories(O_SilKit_Core_VAsio
-    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
-    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/io
-)
-
 if (MSVC)
     target_compile_options(O_SilKit_Core_VAsio PRIVATE "/bigobj")
 endif()

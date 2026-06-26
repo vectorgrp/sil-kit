@@ -4,7 +4,7 @@
 
 #include "gtest/gtest.h"
 
-#include "InternalSerdes.hpp"
+#include "core/internal/InternalSerdes.hpp"
 
 TEST(Test_InternalSerdes, Mw_EndpointAddress)
 {

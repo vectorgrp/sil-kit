@@ -2,9 +2,9 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "SetAsioSocketOptions.hpp"
+#include "core/vasio/io/impl/SetAsioSocketOptions.hpp"
 
-#include "LoggerMessage.hpp"
+#include "services/logging/LoggerMessage.hpp"
 
 
 namespace {

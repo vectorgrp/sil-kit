@@ -2,11 +2,11 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "VAsioCapabilities.hpp"
+#include "core/vasio/VAsioCapabilities.hpp"
 
 #include "silkit/participant/exception.hpp"
 
-#include "YamlParser.hpp"
+#include "config/YamlParser.hpp"
 
 #include <algorithm>
 #include <exception>

@@ -18,7 +18,7 @@
 #include "silkit/SilKitMacros.hpp"
 
 #include "silkit/services/logging/LoggingDatatypes.hpp"
-#include "LoggingTopics.hpp"
+#include "core/internal/LoggingTopics.hpp"
 
 #include "util/StringHelpers.hpp"
 

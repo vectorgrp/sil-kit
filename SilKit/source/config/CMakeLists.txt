@@ -31,10 +31,6 @@ target_link_libraries(O_SilKit_Config
 )
 
 
-target_include_directories(O_SilKit_Config
-    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
-)
-
 add_silkit_test_to_executable(SilKitUnitTests
     SOURCES Test_Validation.cpp
     LIBS O_SilKit_Config S_SilKitImpl

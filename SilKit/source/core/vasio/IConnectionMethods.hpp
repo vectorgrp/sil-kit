@@ -5,10 +5,10 @@
 #pragma once
 
 
-#include "VAsioPeerInfo.hpp"
+#include "core/vasio/VAsioPeerInfo.hpp"
 
-#include "IConnectPeer.hpp"
-#include "IVAsioPeer.hpp"
+#include "core/vasio/IConnectPeer.hpp"
+#include "core/vasio/IVAsioPeer.hpp"
 
 #include <cstddef>
 #include <chrono>

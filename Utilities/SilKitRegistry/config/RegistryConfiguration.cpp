@@ -2,11 +2,11 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "ParticipantConfiguration.hpp"
+#include "config/ParticipantConfiguration.hpp"
 #include "RegistryConfiguration.hpp"
 
 // Internal SIL Kit Headers
-#include "YamlParser.hpp"
+#include "config/YamlParser.hpp"
 #include "fmt/format.h"
 
 namespace SilKitRegistry {

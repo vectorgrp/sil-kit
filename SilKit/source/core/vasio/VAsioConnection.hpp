@@ -17,41 +17,41 @@
 #include <set>
 #include <condition_variable>
 
-#include "ParticipantConfiguration.hpp"
+#include "config/ParticipantConfiguration.hpp"
 
-#include "tuple_tools/for_each.hpp"
-#include "tuple_tools/wrapped_tuple.hpp"
+#include "util/tuple_tools/for_each.hpp"
+#include "util/tuple_tools/wrapped_tuple.hpp"
 
-#include "SilKitLink.hpp"
-#include "IVAsioPeer.hpp"
-#include "VAsioReceiver.hpp"
-#include "VAsioTransmitter.hpp"
-#include "VAsioMsgKind.hpp"
-#include "IServiceEndpoint.hpp"
-#include "traits/SilKitMsgTraits.hpp"
-#include "traits/SilKitServiceTraits.hpp"
+#include "core/vasio/SilKitLink.hpp"
+#include "core/vasio/IVAsioPeer.hpp"
+#include "core/vasio/VAsioReceiver.hpp"
+#include "core/vasio/VAsioTransmitter.hpp"
+#include "core/vasio/VAsioMsgKind.hpp"
+#include "core/internal/IServiceEndpoint.hpp"
+#include "core/internal/traits/SilKitMsgTraits.hpp"
+#include "core/internal/traits/SilKitServiceTraits.hpp"
 
 // private data types for unit testing support:
-#include "TestDataTraits.hpp"
+#include "core/internal/TestDataTraits.hpp"
 
 #include "silkit/services/orchestration/string_utils.hpp"
 #include "silkit/services/can/string_utils.hpp"
 
-#include "ProtocolVersion.hpp"
-#include "SerializedMessage.hpp"
-#include "Assert.hpp"
-#include "LoggerMessage.hpp"
-#include "VAsioCapabilities.hpp"
-#include "WireLinMessages.hpp"
-#include "Uri.hpp"
-#include "Metrics.hpp"
+#include "core/internal/ProtocolVersion.hpp"
+#include "core/vasio/SerializedMessage.hpp"
+#include "util/Assert.hpp"
+#include "services/logging/LoggerMessage.hpp"
+#include "core/vasio/VAsioCapabilities.hpp"
+#include "wire/lin/WireLinMessages.hpp"
+#include "util/Uri.hpp"
+#include "services/metrics/Metrics.hpp"
 
-#include "IIoContext.hpp"
-#include "IConnectionMethods.hpp"
-#include "IConnectPeer.hpp"
-#include "MakeAsioIoContext.hpp"
-#include "ConnectKnownParticipants.hpp"
-#include "RemoteConnectionManager.hpp"
+#include "core/vasio/io/IIoContext.hpp"
+#include "core/vasio/IConnectionMethods.hpp"
+#include "core/vasio/IConnectPeer.hpp"
+#include "core/vasio/io/MakeAsioIoContext.hpp"
+#include "core/vasio/ConnectKnownParticipants.hpp"
+#include "core/vasio/RemoteConnectionManager.hpp"
 
 
 namespace SilKit {

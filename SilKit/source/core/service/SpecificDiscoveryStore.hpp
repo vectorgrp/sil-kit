@@ -12,8 +12,8 @@
 #include <map>
 #include <unordered_set>
 
-#include "IServiceDiscovery.hpp"
-#include "Hash.hpp"
+#include "core/service/IServiceDiscovery.hpp"
+#include "util/Hash.hpp"
 
 namespace SilKit {
 namespace Core {

@@ -2,10 +2,10 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "VAsioConnection.hpp"
-#include "VAsioProtocolVersion.hpp"
+#include "core/vasio/VAsioConnection.hpp"
+#include "core/vasio/VAsioProtocolVersion.hpp"
 
-#include "SerializedMessage.hpp"
+#include "core/vasio/SerializedMessage.hpp"
 
 #include <algorithm>
 #include <chrono>
@@ -16,19 +16,19 @@
 #include <cctype>
 #include <map>
 
-#include "LoggerMessage.hpp"
+#include "services/logging/LoggerMessage.hpp"
 
-#include "VAsioConstants.hpp"
-#include "VAsioPeer.hpp"
-#include "VAsioProxyPeer.hpp"
-#include "SetThreadName.hpp"
-#include "Uri.hpp"
-#include "Assert.hpp"
-#include "TransformAcceptorUris.hpp"
-#include "StringHelpers.hpp"
+#include "core/vasio/VAsioConstants.hpp"
+#include "core/vasio/VAsioPeer.hpp"
+#include "core/vasio/VAsioProxyPeer.hpp"
+#include "util/SetThreadName.hpp"
+#include "util/Uri.hpp"
+#include "util/Assert.hpp"
+#include "core/vasio/TransformAcceptorUris.hpp"
+#include "util/StringHelpers.hpp"
 
-#include "ConnectPeer.hpp"
-#include "util/TracingMacros.hpp"
+#include "core/vasio/ConnectPeer.hpp"
+#include "core/vasio/io/util/TracingMacros.hpp"
 
 #include "asio.hpp"
 

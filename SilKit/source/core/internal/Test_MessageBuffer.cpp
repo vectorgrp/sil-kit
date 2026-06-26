@@ -6,7 +6,7 @@
 
 #include "gtest/gtest.h"
 
-#include "MessageBuffer.hpp"
+#include "core/internal/MessageBuffer.hpp"
 
 using namespace std::chrono_literals;
 
