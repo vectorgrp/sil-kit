@@ -4,8 +4,8 @@
 
 #include "CreateParticipantImpl.hpp"
 
-#include "CreateParticipantInternal.hpp"
-#include "ParticipantConfiguration.hpp"
+#include "core/participant/CreateParticipantInternal.hpp"
+#include "config/ParticipantConfiguration.hpp"
 
 namespace SilKit {
 

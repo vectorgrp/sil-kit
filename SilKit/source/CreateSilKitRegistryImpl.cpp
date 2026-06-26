@@ -6,7 +6,7 @@
 
 #include <memory>
 
-#include "VAsioRegistry.hpp"
+#include "core/vasio/VAsioRegistry.hpp"
 
 
 namespace SilKit {
