@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include "MessageBuffer.hpp"
-#include "WireLinMessages.hpp"
+#include "core/internal/MessageBuffer.hpp"
+#include "wire/lin/WireLinMessages.hpp"
 
 #include "silkit/services/lin/LinDatatypes.hpp"
 

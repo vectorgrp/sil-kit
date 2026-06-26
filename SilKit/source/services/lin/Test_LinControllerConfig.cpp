@@ -9,9 +9,9 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "NullConnectionParticipant.hpp"
+#include "core/mock/nullconnection/NullConnectionParticipant.hpp"
 
-#include "LinController.hpp"
+#include "services/lin/LinController.hpp"
 
 namespace {
 using namespace SilKit::Core;
