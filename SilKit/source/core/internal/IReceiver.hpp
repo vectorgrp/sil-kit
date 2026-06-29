@@ -5,7 +5,7 @@
 #pragma once
 #include <tuple>
 
-#include "IMessageReceiver.hpp"
+#include "core/internal/IMessageReceiver.hpp"
 
 namespace SilKit {
 namespace Core {

@@ -8,7 +8,7 @@
 #include <map>
 #include <sstream>
 
-#include "IServiceEndpoint.hpp"
+#include "core/internal/IServiceEndpoint.hpp"
 
 namespace SilKit {
 namespace Core {

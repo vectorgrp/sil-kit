@@ -5,7 +5,7 @@
 #pragma once
 
 #include "traits/SilKitMsgTraits.hpp"
-#include "TestDataTypes.hpp"
+#include "core/internal/TestDataTypes.hpp"
 
 // Datatypes for testing versioning and renaming of SIL Kit messages.
 namespace SilKit {

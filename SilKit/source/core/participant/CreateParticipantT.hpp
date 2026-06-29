@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include "ValidateAndSanitizeConfig.hpp"
-#include "Participant.hpp"
+#include "core/participant/ValidateAndSanitizeConfig.hpp"
+#include "core/participant/Participant.hpp"
 
 namespace SilKit {
 namespace Core {

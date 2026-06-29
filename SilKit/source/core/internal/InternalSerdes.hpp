@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include "MessageBuffer.hpp"
-#include "EndpointAddress.hpp"
+#include "core/internal/MessageBuffer.hpp"
+#include "core/internal/EndpointAddress.hpp"
 
 namespace SilKit {
 namespace Core {

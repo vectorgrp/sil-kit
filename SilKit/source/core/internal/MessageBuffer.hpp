@@ -17,9 +17,9 @@
 
 #include "silkit/util/Span.hpp"
 
-#include "Uuid.hpp"
-#include "ProtocolVersion.hpp"
-#include "SharedVector.hpp"
+#include "util/Uuid.hpp"
+#include "core/internal/ProtocolVersion.hpp"
+#include "wire/util/SharedVector.hpp"
 
 namespace SilKit {
 namespace Core {

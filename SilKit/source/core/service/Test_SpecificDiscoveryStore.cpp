@@ -9,13 +9,13 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "ServiceDiscovery.hpp"
-#include "string_utils_internal.hpp"
-#include "Uuid.hpp"
-#include "LabelMatching.hpp"
-#include "MockParticipant.hpp"
-#include "MockServiceEndpoint.hpp"
-#include "YamlParser.hpp"
+#include "core/service/ServiceDiscovery.hpp"
+#include "core/internal/string_utils_internal.hpp"
+#include "util/Uuid.hpp"
+#include "util/LabelMatching.hpp"
+#include "core/mock/participant/MockParticipant.hpp"
+#include "core/service/MockServiceEndpoint.hpp"
+#include "config/YamlParser.hpp"
 
 namespace {
 

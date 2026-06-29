@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 #pragma once
-#include "internal_fwd.hpp"
+#include "core/internal/internal_fwd.hpp"
 
 namespace SilKit {
 namespace Core {

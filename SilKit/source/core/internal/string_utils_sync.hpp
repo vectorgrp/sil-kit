@@ -6,7 +6,7 @@
 
 #include "silkit/services/orchestration/string_utils.hpp"
 
-#include "OrchestrationDatatypes.hpp"
+#include "core/internal/OrchestrationDatatypes.hpp"
 
 namespace SilKit {
 namespace Services {

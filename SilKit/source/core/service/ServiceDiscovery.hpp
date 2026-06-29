@@ -11,13 +11,13 @@
 #include <atomic>
 #include <unordered_set>
 
-#include "SpecificDiscoveryStore.hpp"
+#include "core/service/SpecificDiscoveryStore.hpp"
 
-#include "IParticipantInternal.hpp"
-#include "IServiceEndpoint.hpp"
-#include "IReceiver.hpp"
-#include "ISender.hpp"
-#include "IServiceDiscovery.hpp"
+#include "core/internal/IParticipantInternal.hpp"
+#include "core/internal/IServiceEndpoint.hpp"
+#include "core/internal/IReceiver.hpp"
+#include "core/internal/ISender.hpp"
+#include "core/service/IServiceDiscovery.hpp"
 
 namespace SilKit {
 namespace Core {

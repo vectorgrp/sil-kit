@@ -4,7 +4,7 @@
 
 #include "gtest/gtest.h"
 
-#include "ServiceSerdes.hpp"
+#include "core/service/ServiceSerdes.hpp"
 
 TEST(Test_ServiceSerdes, Mw_Service)
 {

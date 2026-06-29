@@ -9,8 +9,8 @@
 
 #include "gmock/gmock.h"
 
-#include "IServiceEndpoint.hpp"
-#include "ServiceDiscovery.hpp"
+#include "core/internal/IServiceEndpoint.hpp"
+#include "core/service/ServiceDiscovery.hpp"
 
 namespace SilKit {
 namespace Core {

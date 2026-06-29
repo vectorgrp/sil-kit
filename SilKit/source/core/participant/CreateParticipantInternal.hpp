@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include "IParticipantInternal.hpp"
-#include "ParticipantConfiguration.hpp"
+#include "core/internal/IParticipantInternal.hpp"
+#include "config/ParticipantConfiguration.hpp"
 
 namespace SilKit {
 namespace Core {
