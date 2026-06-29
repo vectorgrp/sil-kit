@@ -2,8 +2,8 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "SilKitExtensionBase.hpp"
-#include "SilKitExtensionMacros.hpp"
+#include "extensions/SilKitExtensionApi/SilKitExtensionBase.hpp"
+#include "extensions/SilKitExtensionApi/SilKitExtensionMacros.hpp"
 
 // definitions for linking
 struct WrongVersionExtension : public SilKit::SilKitExtensionBase

@@ -10,11 +10,11 @@
 #include "silkit/services/orchestration/all.hpp"
 #include "silkit/services/all.hpp"
 
-#include "ConfigurationTestUtils.hpp"
+#include "config/ConfigurationTestUtils.hpp"
 
 #include "IntegrationTestInfrastructure.hpp"
-#include "IParticipantInternal.hpp"
-#include "IServiceDiscovery.hpp"
+#include "core/internal/IParticipantInternal.hpp"
+#include "core/service/IServiceDiscovery.hpp"
 
 using namespace std::chrono_literals;
 using namespace SilKit;

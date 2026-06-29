@@ -4,7 +4,7 @@
 
 #include "silkit/SilKitVersion.hpp"
 
-#include "SilKitExtensionMacros.hpp"
+#include "extensions/SilKitExtensionApi/SilKitExtensionMacros.hpp"
 #include "DummyExtension.hpp"
 
 // Define shared library extension for linking

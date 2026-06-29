@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "IParticipantInternal.hpp"
+#include "core/internal/IParticipantInternal.hpp"
 
 
 namespace SilKit {

@@ -24,8 +24,8 @@
 #include "silkit/services/all.hpp"
 #include "silkit/services/pubsub/PubSubSpec.hpp"
 
-#include "ConfigurationTestUtils.hpp"
-#include "functional.hpp"
+#include "config/ConfigurationTestUtils.hpp"
+#include "util/functional.hpp"
 #include "silkit/experimental/participant/ParticipantExtensions.hpp"
 
 using namespace std::chrono_literals;

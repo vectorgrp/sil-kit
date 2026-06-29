@@ -8,8 +8,8 @@
 #include "silkit/SilKit.hpp"
 #include "silkit/services/all.hpp"
 
-#include "ConfigurationTestUtils.hpp"
-#include "IParticipantInternal.hpp"
+#include "config/ConfigurationTestUtils.hpp"
+#include "core/internal/IParticipantInternal.hpp"
 #include "CreateParticipantImpl.hpp"
 
 using namespace SilKit;

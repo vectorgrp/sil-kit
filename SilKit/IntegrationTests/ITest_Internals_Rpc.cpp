@@ -7,7 +7,7 @@
 
 #include "ITest_Internals_Rpc.hpp"
 
-#include "ParticipantConfigurationFromXImpl.hpp"
+#include "config/ParticipantConfigurationFromXImpl.hpp"
 
 namespace {
 
