@@ -7,8 +7,8 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-#include "SilKitEvent.hpp"
-#include "LockedQueue.hpp"
+#include "dashboard/SilKitEvent.hpp"
+#include "dashboard/LockedQueue.hpp"
 
 using namespace testing;
 using namespace VSilKit;

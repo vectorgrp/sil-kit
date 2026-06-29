@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "DashboardRetryPolicy.hpp"
+#include "dashboard/client/DashboardRetryPolicy.hpp"
 
 #include "silkit/SilKitMacros.hpp"
 

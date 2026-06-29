@@ -2,9 +2,9 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "DashboardSystemServiceClient.hpp"
+#include "dashboard/client/DashboardSystemServiceClient.hpp"
 
-#include "LoggerMessage.hpp"
+#include "services/logging/LoggerMessage.hpp"
 
 #include OATPP_CODEGEN_BEGIN(ApiClient)
 

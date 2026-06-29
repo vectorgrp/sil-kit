@@ -6,7 +6,7 @@
 
 #include <atomic>
 
-#include "OatppHeaders.hpp"
+#include "dashboard/OatppHeaders.hpp"
 
 namespace SilKit {
 namespace Dashboard {

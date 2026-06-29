@@ -14,13 +14,16 @@
 #pragma warning(pop)
 #endif
 
-#include "MockParticipant.hpp"
+#include "core/mock/participant/MockParticipant.hpp"
 
-#include "DashboardSystemServiceClient.hpp"
+#include "dashboard/client/DashboardSystemServiceClient.hpp"
 #include "Mocks/MockBodyDecoder.hpp"
 #include "Mocks/MockDashboardSystemApiClient.hpp"
 #include "Mocks/MockInputStream.hpp"
-#include "Mocks/MockObjectMapper.hpp"
+#include "dashboard/client/Mocks/MockBodyDecoder.hpp"
+#include "dashboard/client/Mocks/MockDashboardSystemApiClient.hpp"
+#include "dashboard/client/Mocks/MockInputStream.hpp"
+#include "dashboard/client/Mocks/MockObjectMapper.hpp"
 
 using namespace oatpp::web;
 using namespace oatpp::data::mapping;

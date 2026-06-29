@@ -5,13 +5,13 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-#include "MockParticipant.hpp"
+#include "core/mock/participant/MockParticipant.hpp"
 
-#include "DashboardRestClient.hpp"
+#include "dashboard/service/DashboardRestClient.hpp"
 
 #include "Mocks/MockSilKitToOatppMapper.hpp"
-#include "Mocks/MockDashboardSystemServiceClient.hpp"
-#include "Mocks/MockDashboardSystemApiClient.hpp"
+#include "dashboard/client/Mocks/MockDashboardSystemServiceClient.hpp"
+#include "dashboard/client/Mocks/MockDashboardSystemApiClient.hpp"
 
 using namespace testing;
 namespace SilKit {
