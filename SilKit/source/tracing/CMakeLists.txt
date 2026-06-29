@@ -34,12 +34,6 @@ add_library(O_SilKit_Tracing OBJECT
     ReplayScheduler.cpp
 )
 
-target_include_directories(O_SilKit_Tracing
-    PRIVATE
-        ${CMAKE_CURRENT_LIST_DIR}
-        detail
-)
-
 target_link_libraries(O_SilKit_Tracing
     PRIVATE I_SilKit
     PRIVATE I_SilKit_Extensions
