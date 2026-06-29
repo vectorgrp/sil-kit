@@ -2,15 +2,15 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "ConnectPeer.hpp"
+#include "core/vasio/ConnectPeer.hpp"
 
-#include "util/TracingMacros.hpp"
+#include "core/vasio/io/util/TracingMacros.hpp"
 
-#include "VAsioConnection.hpp"
-#include "VAsioPeerInfo.hpp"
-#include "VAsioPeer.hpp"
+#include "core/vasio/VAsioConnection.hpp"
+#include "core/vasio/VAsioPeerInfo.hpp"
+#include "core/vasio/VAsioPeer.hpp"
 
-#include "Uri.hpp"
+#include "util/Uri.hpp"
 
 #include <algorithm>
 #include <memory>

@@ -5,12 +5,12 @@
 #pragma once
 
 
-#include "IIoContext.hpp"
-#include "IConnectPeer.hpp"
-#include "IConnectionMethods.hpp"
-#include "IConnectKnownParticipantsListener.hpp"
-#include "ITimer.hpp"
-#include "VAsioPeerInfo.hpp"
+#include "core/vasio/io/IIoContext.hpp"
+#include "core/vasio/IConnectPeer.hpp"
+#include "core/vasio/IConnectionMethods.hpp"
+#include "core/vasio/IConnectKnownParticipantsListener.hpp"
+#include "core/vasio/io/ITimer.hpp"
+#include "core/vasio/VAsioPeerInfo.hpp"
 
 #include "silkit/services/logging/ILogger.hpp"
 

@@ -5,10 +5,10 @@
 #pragma once
 
 
-#include "IIoContext.hpp"
-#include "AsioSocketOptions.hpp"
+#include "core/vasio/io/IIoContext.hpp"
+#include "core/vasio/io/AsioSocketOptions.hpp"
 
-#include "LoggerMessage.hpp"
+#include "services/logging/LoggerMessage.hpp"
 
 #include <memory>
 

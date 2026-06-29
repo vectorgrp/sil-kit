@@ -5,7 +5,7 @@
 #pragma once
 
 
-#include "IVAsioPeer.hpp"
+#include "core/vasio/IVAsioPeer.hpp"
 
 
 namespace SilKit {

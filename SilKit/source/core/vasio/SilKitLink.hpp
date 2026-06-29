@@ -4,14 +4,14 @@
 
 #pragma once
 
-#include "LoggerMessage.hpp"
+#include "services/logging/LoggerMessage.hpp"
 
-#include "VAsioTransmitter.hpp"
-#include "traits/SilKitMsgTraits.hpp"
-#include "MessageTracing.hpp"
+#include "core/vasio/VAsioTransmitter.hpp"
+#include "core/internal/traits/SilKitMsgTraits.hpp"
+#include "services/logging/MessageTracing.hpp"
 
-#include "IMessageReceiver.hpp"
-#include "TimeSyncService.hpp"
+#include "core/internal/IMessageReceiver.hpp"
+#include "services/orchestration/TimeSyncService.hpp"
 
 namespace SilKit {
 namespace Core {

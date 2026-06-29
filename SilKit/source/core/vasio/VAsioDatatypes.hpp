@@ -9,8 +9,8 @@
 #include <cstdint>
 #include <string>
 
-#include "VAsioPeerInfo.hpp"
-#include "ProtocolVersion.hpp" // for current ProtocolVersion in RegistryMsgHeader
+#include "core/vasio/VAsioPeerInfo.hpp"
+#include "core/internal/ProtocolVersion.hpp" // for current ProtocolVersion in RegistryMsgHeader
 
 namespace SilKit {
 namespace Core {

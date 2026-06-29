@@ -6,16 +6,16 @@
 
 #include <sstream>
 
-#include "IVAsioPeer.hpp"
+#include "core/vasio/IVAsioPeer.hpp"
 #include <type_traits>
 
-#include "IMessageReceiver.hpp"
-#include "IServiceEndpoint.hpp"
-#include "traits/SilKitMsgTraits.hpp"
-#include "ILoggerInternal.hpp"
-#include "MessageTracing.hpp"
+#include "core/internal/IMessageReceiver.hpp"
+#include "core/internal/IServiceEndpoint.hpp"
+#include "core/internal/traits/SilKitMsgTraits.hpp"
+#include "services/logging/ILoggerInternal.hpp"
+#include "services/logging/MessageTracing.hpp"
 
-#include "SerializedMessage.hpp"
+#include "core/vasio/SerializedMessage.hpp"
 
 namespace SilKit {
 namespace Core {

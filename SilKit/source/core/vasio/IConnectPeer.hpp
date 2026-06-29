@@ -5,9 +5,9 @@
 #pragma once
 
 
-#include "VAsioPeerInfo.hpp"
+#include "core/vasio/VAsioPeerInfo.hpp"
 
-#include "IRawByteStream.hpp"
+#include "core/vasio/io/IRawByteStream.hpp"
 
 #include <cstddef>
 #include <chrono>

@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 
-#include "EndpointAddress.hpp"
+#include "core/internal/EndpointAddress.hpp"
 
 
 namespace VSilKit {
