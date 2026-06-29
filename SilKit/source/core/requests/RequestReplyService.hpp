@@ -20,7 +20,7 @@
 #include "core/requests/IRequestReplyProcedure.hpp"
 
 #include "util/Uuid.hpp"
-#include "procs/ParticipantReplies.hpp"
+#include "core/requests/procs/ParticipantReplies.hpp"
 
 namespace SilKit {
 namespace Core {
