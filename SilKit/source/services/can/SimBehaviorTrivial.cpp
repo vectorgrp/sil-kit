@@ -6,7 +6,7 @@
 #include "services/can/SimBehaviorTrivial.hpp"
 #include "util/Assert.hpp"
 
-#include "ILoggerInternal.hpp"
+#include "services/logging/ILoggerInternal.hpp"
 
 
 namespace SilKit {

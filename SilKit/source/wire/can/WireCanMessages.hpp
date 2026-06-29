@@ -7,7 +7,7 @@
 #include "silkit/services/can/CanDatatypes.hpp"
 #include "silkit/services/can/string_utils.hpp"
 
-#include "SharedVector.hpp"
+#include "wire/util/SharedVector.hpp"
 
 #include <chrono>
 #include <vector>

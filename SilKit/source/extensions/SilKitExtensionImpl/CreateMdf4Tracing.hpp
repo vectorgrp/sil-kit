@@ -6,7 +6,7 @@
 
 #include <string>
 
-#include "ILoggerInternal.hpp"
+#include "services/logging/ILoggerInternal.hpp"
 
 #include "tracing/ITraceMessageSink.hpp"
 #include "tracing/IReplay.hpp"

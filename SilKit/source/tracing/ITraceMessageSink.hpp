@@ -9,7 +9,7 @@
 #include <chrono>
 #include <tuple>
 
-#include "ILoggerInternal.hpp"
+#include "services/logging/ILoggerInternal.hpp"
 
 #include "core/internal/ServiceDescriptor.hpp"
 #include "tracing/TraceMessage.hpp"

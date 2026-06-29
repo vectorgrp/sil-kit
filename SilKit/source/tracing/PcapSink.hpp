@@ -11,8 +11,8 @@
 #include "tracing/ITraceMessageSink.hpp"
 
 #include "core/internal/EndpointAddress.hpp"
-#include "detail/NamedPipe.hpp"
-#include "ILoggerInternal.hpp"
+#include "tracing/detail/NamedPipe.hpp"
+#include "services/logging/ILoggerInternal.hpp"
 
 namespace SilKit {
 namespace Tracing {
