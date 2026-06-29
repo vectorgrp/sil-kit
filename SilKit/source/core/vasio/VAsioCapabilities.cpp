@@ -6,7 +6,7 @@
 
 #include "silkit/participant/exception.hpp"
 
-#include "config/YamlParser.hpp"
+#include "config/CapabilitiesParser.hpp"
 
 #include <algorithm>
 #include <exception>

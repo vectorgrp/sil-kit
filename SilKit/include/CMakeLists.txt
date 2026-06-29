@@ -30,7 +30,9 @@ install(
     COMPONENT dev
     INCLUDES DESTINATION ${INSTALL_INCLUDE_DIR} # Destination for header files
 )
-# Copy all headers from the source directory to the proper destination
+# Copy all headers from the source directory to the proper destination.
+# The silkit_yaml/ folder is the unstable auxiliary YAML library; it is installed
+# separately and only when -DSILKIT_INSTALL_YAML=ON (see source/config/CMakeLists.txt).
 install(
     DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/
     DESTINATION ${INSTALL_INCLUDE_DIR}
@@ -38,11 +40,14 @@ install(
     FILES_MATCHING
         PATTERN *.hpp
         PATTERN *.ipp
+        PATTERN "silkit_yaml" EXCLUDE
 )
 # for C API
 install(
     DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/
     DESTINATION ${INSTALL_INCLUDE_DIR}
     COMPONENT dev
-    FILES_MATCHING PATTERN *.h
+    FILES_MATCHING
+        PATTERN *.h
+        PATTERN "silkit_yaml" EXCLUDE
 )

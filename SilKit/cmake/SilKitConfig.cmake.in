@@ -11,3 +11,9 @@ find_dependency(Threads)
 
 get_filename_component(SILKIT_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
 include("${SILKIT_CMAKE_DIR}/SilKitTargets.cmake")
+
+# Optional unstable auxiliary YAML library (present only if the package was built
+# with -DSILKIT_INSTALL_YAML=ON). Exposes the SilKit::Yaml target.
+if(EXISTS "${SILKIT_CMAKE_DIR}/SilKitYamlTargets.cmake")
+    include("${SILKIT_CMAKE_DIR}/SilKitYamlTargets.cmake")
+endif()
