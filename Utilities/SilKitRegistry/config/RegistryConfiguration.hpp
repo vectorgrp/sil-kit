@@ -7,8 +7,8 @@
 #include <string>
 
 // Internal SIL Kit Headers
-#include "Configuration.hpp"
-#include "ParticipantConfiguration.hpp"
+#include "config/Configuration.hpp"
+#include "config/ParticipantConfiguration.hpp"
 
 
 namespace SilKitRegistry {

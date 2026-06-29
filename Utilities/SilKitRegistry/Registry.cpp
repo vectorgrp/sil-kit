@@ -17,22 +17,22 @@
 #include "silkit/SilKitVersion.hpp"
 #include "silkit/SilKit.hpp"
 
-#include "SignalHandler.hpp"
+#include "util/SignalHandler.hpp"
 #include "WindowsServiceMain.hpp"
 #include "RegistryConfiguration.hpp"
-#include "StringHelpers.hpp"
+#include "util/StringHelpers.hpp"
 
-#include "CommandlineParser.hpp"
-#include "ParticipantConfiguration.hpp"
-#include "FileHelpers.hpp"
-#include "YamlParser.hpp"
-#include "ParticipantConfigurationFromXImpl.hpp"
+#include "util/CommandlineParser.hpp"
+#include "config/ParticipantConfiguration.hpp"
+#include "util/FileHelpers.hpp"
+#include "config/YamlParser.hpp"
+#include "config/ParticipantConfigurationFromXImpl.hpp"
 #include "CreateSilKitRegistryImpl.hpp"
 #include "CreateSilKitRegistryWithDashboard.hpp"
 
 // Dashboard
-#include "ValidateAndSanitizeConfig.hpp"
-#include "CreateDashboardInstance.hpp"
+#include "core/participant/ValidateAndSanitizeConfig.hpp"
+#include "dashboard/CreateDashboardInstance.hpp"
 
 using namespace SilKit::Core;
 using namespace SilKit::Util;
