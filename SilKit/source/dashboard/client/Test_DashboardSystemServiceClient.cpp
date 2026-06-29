@@ -20,7 +20,10 @@
 #include "Mocks/MockBodyDecoder.hpp"
 #include "Mocks/MockDashboardSystemApiClient.hpp"
 #include "Mocks/MockInputStream.hpp"
-#include "Mocks/MockObjectMapper.hpp"
+#include "dashboard/client/Mocks/MockBodyDecoder.hpp"
+#include "dashboard/client/Mocks/MockDashboardSystemApiClient.hpp"
+#include "dashboard/client/Mocks/MockInputStream.hpp"
+#include "dashboard/client/Mocks/MockObjectMapper.hpp"
 
 using namespace oatpp::web;
 using namespace oatpp::data::mapping;
