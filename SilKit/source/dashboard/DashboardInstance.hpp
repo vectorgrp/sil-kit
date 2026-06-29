@@ -9,8 +9,8 @@
 
 #include "services/logging/LoggerMessage.hpp"
 
-#include "client/DashboardSystemApiClient.hpp"
-#include "service/ISilKitToOatppMapper.hpp"
+#include "dashboard/client/DashboardSystemApiClient.hpp"
+#include "dashboard/service/ISilKitToOatppMapper.hpp"
 #include "services/orchestration/SystemStateTracker.hpp"
 #include "dashboard/IRestClient.hpp"
 
