@@ -129,6 +129,13 @@ TEST(Test_CapiSymbols, DISABLED_link_all_public_symbols)
     (void)SilKit_Experimental_NetworkSimulator_Start(nullptr);
     (void)SilKit_Experimental_NetworkSimulator_SimulateNetwork(nullptr, "", SilKit_NetworkType_Undefined, nullptr,
                                                                nullptr);
+    (void)SilKit_Experimental_ServiceDiscovery_Create(nullptr, nullptr);
+    (void)SilKit_Experimental_ServiceDiscovery_SetServiceDiscoveryHandler(nullptr, nullptr, nullptr);
+    (void)SilKit_Experimental_ServiceDescriptor_GetParticipantName(nullptr, nullptr);
+    (void)SilKit_Experimental_ServiceDescriptor_GetServiceName(nullptr, nullptr);
+    (void)SilKit_Experimental_ServiceDescriptor_GetNetworkName(nullptr, nullptr);
+    (void)SilKit_Experimental_ServiceDescriptor_GetServiceType(nullptr, nullptr);
+    (void)SilKit_Experimental_ServiceDescriptor_GetSupplementalDataItem(nullptr, nullptr, nullptr, nullptr);
 }
 
 } // namespace
