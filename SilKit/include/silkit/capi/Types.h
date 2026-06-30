@@ -30,14 +30,6 @@ typedef struct SilKit_Experimental_SystemController SilKit_Experimental_SystemCo
  */
 typedef struct SilKit_Experimental_ServiceDiscovery SilKit_Experimental_ServiceDiscovery;
 
-/*! \brief Opaque type describing a single discovered service. Passed to a
- *         \ref SilKit_Experimental_ServiceDiscoveryHandler_t and queried with the
- *         SilKit_Experimental_ServiceDescriptor_... accessor functions.
- *
- * \warning This type is not part of the stable API of the SIL Kit. It may be removed at any time without prior notice.
- */
-typedef struct SilKit_Experimental_ServiceDescriptor SilKit_Experimental_ServiceDescriptor;
-
 typedef int32_t SilKit_ReturnCode;
 
 #define SilKit_ReturnCode_SUCCESS ((SilKit_ReturnCode)0)
