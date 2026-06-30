@@ -23,7 +23,7 @@ void YamlReader::Read(SilKit::Services::MatchingLabel::Kind& value)
     else if (numericValue == 1)
         value = SilKit::Services::MatchingLabel::Kind::Optional;
     else
-        throw MakeConfigurationError("MatchingLabel::Kind should be an integer of Mandatory(2)|Optional(1).");
+        throw MakeError("MatchingLabel::Kind should be an integer of Mandatory(2)|Optional(1).");
 }
 
 
@@ -45,7 +45,7 @@ void YamlReader::Read(SilKit::Services::Logging::Level& obj)
         obj = SilKit::Services::Logging::Level::Off;
     else
     {
-        throw MakeConfigurationError("Unknown SilKit::Services::Logging::Level.");
+        throw MakeError("Unknown SilKit::Services::Logging::Level.");
     }
 }
 
@@ -53,7 +53,7 @@ void YamlReader::Read(SilKit::Services::Logging::Topic& obj)
 {
     if (!IsScalar() )
     {
-        throw MakeConfigurationError("Topic should be a string.");
+        throw MakeError("Topic should be a string.");
     }
 
     std::string value;
@@ -63,7 +63,7 @@ void YamlReader::Read(SilKit::Services::Logging::Topic& obj)
 
     if (topic == SilKit::Services::Logging::Topic::Invalid)
     {
-        throw MakeConfigurationError("Unknown SilKit::Services::Logging::Topic");
+        throw MakeError("Unknown SilKit::Services::Logging::Topic");
     }
     obj = topic;
 }
@@ -145,7 +145,7 @@ void YamlReader::Read(SilKit::Services::Flexray::FlexrayChannel& obj)
         obj = SilKit::Services::Flexray::FlexrayChannel::None;
     else
     {
-        throw MakeConfigurationError("Unknown Services::Flexray::FlexrayChannel");
+        throw MakeError("Unknown Services::Flexray::FlexrayChannel");
     }
 }
 
@@ -159,7 +159,7 @@ void YamlReader::Read(SilKit::Services::Flexray::FlexrayClockPeriod& obj)
         obj = SilKit::Services::Flexray::FlexrayClockPeriod::T50NS;
     else
     {
-        throw MakeConfigurationError("Unknown Services::Flexray::FlexrayClockPeriod");
+        throw MakeError("Unknown Services::Flexray::FlexrayClockPeriod");
     }
 }
 
@@ -171,7 +171,7 @@ void YamlReader::Read(SilKit::Services::Flexray::FlexrayTransmissionMode& obj)
         obj = SilKit::Services::Flexray::FlexrayTransmissionMode::SingleShot;
     else
     {
-        throw MakeConfigurationError("Unknown Services::Flexray::FlexrayTransmissionMode.");
+        throw MakeError("Unknown Services::Flexray::FlexrayTransmissionMode.");
     }
 }
 
@@ -191,7 +191,7 @@ void YamlReader::Read(SilKit::Config::Sink::Type& obj)
     }
     else
     {
-        throw MakeConfigurationError("Unknown Sink::Type");
+        throw MakeError("Unknown Sink::Type");
     }
 }
 
@@ -207,7 +207,7 @@ void YamlReader::Read(SilKit::Config::Sink::Format& obj)
     }
     else
     {
-        throw MakeConfigurationError("Unknown Sink::Format:");
+        throw MakeError("Unknown Sink::Format:");
     }
 }
 
@@ -228,7 +228,7 @@ void YamlReader::Read(SilKit::Config::Sink& obj)
     {
         if (!HasKey("LogName"))
         {
-            throw MakeConfigurationError("Sink of type Sink::Type::File requires a LogName");
+            throw MakeError("Sink of type Sink::Type::File requires a LogName");
         }
 
         ReadKeyValue(obj.logName, "LogName");
@@ -258,7 +258,7 @@ void YamlReader::Read(SilKit::Config::MetricsSink::Type& obj)
     }
     else
     {
-        throw MakeConfigurationError("Unknown MetricsSink::Type");
+        throw MakeError("Unknown MetricsSink::Type");
     }
 }
 
@@ -278,7 +278,7 @@ void YamlReader::Read(SilKit::Config::MdfChannel& obj)
 {
     if (!IsMap())
     {
-        throw MakeConfigurationError("MdfChannel should be a Map");
+        throw MakeError("MdfChannel should be a Map");
     }
     OptionalRead(obj.channelName, "ChannelName");
     OptionalRead(obj.channelPath, "ChannelPath");
@@ -307,7 +307,7 @@ void YamlReader::Read(SilKit::Config::Replay::Direction& obj)
         obj = SilKit::Config::Replay::Direction::Both;
     else
     {
-        throw MakeConfigurationError("Unknown Replay::Direction");
+        throw MakeError("Unknown Replay::Direction");
     }
 }
 void YamlReader::Read(SilKit::Config::CanController& obj)
@@ -341,7 +341,7 @@ void YamlReader::Read(SilKit::Config::Label::Kind& obj)
         obj = SilKit::Config::Label::Kind::Optional;
     else
     {
-        throw MakeConfigurationError("Unknown Label::Kind");
+        throw MakeError("Unknown Label::Kind");
     }
 }
 
@@ -415,7 +415,7 @@ void YamlReader::Read(SilKit::Config::TraceSink::Type& obj)
         obj = SilKit::Config::TraceSink::Type::PcapPipe;
     else
     {
-        throw MakeConfigurationError("Unknown TraceSink::Type");
+        throw MakeError("Unknown TraceSink::Type");
     }
 }
 void YamlReader::Read(SilKit::Config::TraceSource& obj)
@@ -435,7 +435,7 @@ void YamlReader::Read(SilKit::Config::TraceSource::Type& obj)
         obj = SilKit::Config::TraceSource::Type::PcapFile;
     else
     {
-        throw MakeConfigurationError("Unknown TraceSource::Type:");
+        throw MakeError("Unknown TraceSource::Type:");
     }
 }
 
@@ -475,7 +475,7 @@ void YamlReader::Read(SilKit::Config::Aggregation& obj)
         obj = SilKit::Config::Aggregation::Auto;
     else
     {
-        throw MakeConfigurationError("Unknown Aggregation");
+        throw MakeError("Unknown Aggregation");
     }
 }
 

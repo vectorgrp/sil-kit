@@ -4,9 +4,7 @@
 
 #pragma once
 
-// UNSTABLE API: this auxiliary library does NOT carry the API/ABI stability
-// guarantees of the main SIL Kit API (the silkit/ headers). Pin your SIL Kit
-// version. See silkit_yaml/README for details.
+// SilKitYaml: self-contained, header-only YAML deserialization. See README.md.
 
 #include <algorithm>
 #include <chrono>
@@ -18,13 +16,12 @@
 #include <type_traits>
 #include <vector>
 
-#include "silkit/participant/exception.hpp"
-
 #include "rapidyaml.hpp"
 
-#include "silkit_yaml/YamlParserUtils.hpp"
+#include "SilKitYaml/YamlError.hpp"
+#include "SilKitYaml/YamlParserUtils.hpp"
 
-namespace VSilKit {
+namespace SilKitYaml {
 
 template <typename Impl>
 class BasicYamlReader
@@ -107,7 +104,7 @@ public:
                 ss << " \"" << deprecatedFieldName << "\"";
             }
             ss << " are present.";
-            throw SilKit::ConfigurationError{ss.str()};
+            throw YamlError{ss.str()};
         }
 
         if (presentDeprecatedFieldNames.size() >= 2)
@@ -119,7 +116,7 @@ public:
                 ss << " \"" << deprecatedFieldName << "\"";
             }
             ss << " are present.";
-            throw SilKit::ConfigurationError{ss.str()};
+            throw YamlError{ss.str()};
         }
 
         OptionalRead(value, fieldName);
@@ -139,7 +136,7 @@ public:
         {
             std::ostringstream s;
             s << "missing key: " << name;
-            throw MakeConfigurationError(s.str());
+            throw MakeError(s.str());
         }
 
         child.Read(value);
@@ -166,7 +163,7 @@ public:
     {
         if (!IsSequence())
         {
-            throw MakeConfigurationError("Expected a sequence.");
+            throw MakeError("Expected a sequence.");
         }
 
         for (auto&& i : _node.cchildren())
@@ -227,10 +224,10 @@ protected:
         return node.is_map() && !node.find_child(ryml::to_csubstr(name)).invalid();
     }
 
-    auto MakeConfigurationError(const std::string_view message) const -> SilKit::ConfigurationError
+    auto MakeError(const std::string_view message) const -> YamlError
     {
         const auto location = _parser.location(_node);
-        return VSilKit::MakeConfigurationError(location, message);
+        return SilKitYaml::MakeError(location, message);
     }
 
     auto GetChildSafe(const std::string& name) const -> Impl
@@ -271,4 +268,4 @@ private:
     }
 };
 
-} // namespace VSilKit
+} // namespace SilKitYaml

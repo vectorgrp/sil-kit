@@ -4,9 +4,7 @@
 
 #pragma once
 
-// UNSTABLE API: this auxiliary library does NOT carry the API/ABI stability
-// guarantees of the main SIL Kit API (the silkit/ headers). Pin your SIL Kit
-// version. See silkit_yaml/README for details.
+// SilKitYaml: self-contained, header-only YAML serialization. See README.md.
 
 #include <chrono>
 #include <optional>
@@ -14,11 +12,11 @@
 #include <string>
 #include <vector>
 
-#include "silkit/participant/exception.hpp"
-
 #include "rapidyaml.hpp"
 
-namespace VSilKit {
+#include "SilKitYaml/YamlError.hpp"
+
+namespace SilKitYaml {
 
 template <typename Impl>
 struct BasicYamlWriter
@@ -72,7 +70,7 @@ public:
     {
         if (!node.is_map())
         {
-            throw SilKit::ConfigurationError("Parse error: trying to access child of something not a map");
+            throw YamlError("Parse error: trying to access child of something not a map");
         }
 
         auto writer = MakeImpl(node.append_child() << ryml::key(name));
@@ -102,13 +100,13 @@ protected:
         node |= ryml::MAP;
     }
 
-    auto MakeConfigurationError(const char* message) const -> SilKit::ConfigurationError
+    auto MakeError(const char* message) const -> YamlError
     {
         std::ostringstream s;
 
-        s << "error writing configuration: " << message;
+        s << "error writing yaml: " << message;
 
-        return SilKit::ConfigurationError{s.str()};
+        return YamlError{s.str()};
     }
 
 protected:
@@ -129,4 +127,4 @@ private:
     }
 };
 
-} // namespace VSilKit
+} // namespace SilKitYaml

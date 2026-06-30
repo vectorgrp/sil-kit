@@ -4,30 +4,28 @@
 
 #pragma once
 
-// UNSTABLE API: this auxiliary library does NOT carry the API/ABI stability
-// guarantees of the main SIL Kit API (the silkit/ headers). It is provided to let
-// out-of-tree projects parse their own YAML formats on their own schemata by
-// reusing SIL Kit's thin rapidyaml wrapper. Pin your SIL Kit version.
-// See silkit_yaml/README for details.
+// SilKitYaml: a self-contained, header-only YAML (de)serialization layer built on
+// top of rapidyaml. It is consumed internally by SIL Kit and may be vendored into
+// other projects via subrepo/submodule (add_subdirectory). It depends only on a
+// `rapidyaml` target. See SilKitYaml/README.md.
 
 #include <cstdlib>
 #include <sstream>
 #include <string>
 #include <string_view>
 
-#include "silkit/participant/exception.hpp"
-
 #include "rapidyaml.hpp"
 
-namespace VSilKit {
+#include "SilKitYaml/YamlError.hpp"
 
-// Format a rapidyaml parse location and message into a SilKit::ConfigurationError.
-inline auto MakeConfigurationError(ryml::Location location,
-                                   const std::string_view message) -> SilKit::ConfigurationError
+namespace SilKitYaml {
+
+// Format a rapidyaml parse location and message into a SilKitYaml::YamlError.
+inline auto MakeError(ryml::Location location, const std::string_view message) -> YamlError
 {
     std::ostringstream s;
 
-    s << "error parsing configuration";
+    s << "error parsing yaml";
     if (location.name.empty())
     {
         s << " string: ";
@@ -39,7 +37,7 @@ inline auto MakeConfigurationError(ryml::Location location,
 
     s << "line " << (location.line + 1) << " column " << location.col << ": " << message;
 
-    return SilKit::ConfigurationError{s.str()};
+    return YamlError{s.str()};
 }
 
 namespace detail {
@@ -57,17 +55,17 @@ inline void RapidyamlFree(void* ptr, size_t /*length*/, void* /*userData*/)
 inline void RapidyamlError(const char* message, const size_t length, ryml::Location location, void* /*userData*/)
 {
     const std::string_view rapidyamlMessage{message, length};
-    throw VSilKit::MakeConfigurationError(location, rapidyamlMessage);
+    throw SilKitYaml::MakeError(location, rapidyamlMessage);
 }
 
 } // namespace detail
 
 // Error-handling callbacks for a ryml::Tree/Parser. The error callback nicely
-// formats the location and throws SilKit::ConfigurationError. Requires the
-// compile definition RYML_DEFAULT_CALLBACK_USES_EXCEPTIONS=1.
+// formats the location and throws SilKitYaml::YamlError. Requires the compile
+// definition RYML_DEFAULT_CALLBACK_USES_EXCEPTIONS=1 (provided by the rapidyaml target).
 inline auto GetRapidyamlCallbacks() -> ryml::Callbacks
 {
     return ryml::Callbacks{nullptr, detail::RapidyamlAllocate, detail::RapidyamlFree, detail::RapidyamlError};
 }
 
-} // namespace VSilKit
+} // namespace SilKitYaml

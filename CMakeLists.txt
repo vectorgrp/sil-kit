@@ -26,7 +26,6 @@ option(SILKIT_USE_SYSTEM_LIBRARIES "Use the libraries installed on the system fo
 option(SILKIT_BUILD_REPRODUCIBLE "Creates a reproducible build by ommiting timestamps/unique build ids" ON)
 option(SILKIT_BUILD_LINUX_PACKAGE "Creates SIL Kit builds suitable for package managers in Linux Distributions (.deb)" OFF)
 option(SILKIT_BUILD_LTO "Build with link time optimizations" OFF)
-option(SILKIT_INSTALL_YAML "Install the SilKit::Yaml header-only auxiliary YAML library (silkit_yaml; unstable API/ABI)" OFF)
 
 if(SILKIT_BUILD_LINUX_PACKAGE)
 
@@ -134,6 +133,10 @@ if(MINGW)
     endif()
 endif()
 
+# Internal, self-contained YAML helper library (header-only). Must come before
+# SilKit, which depends on it, and after ThirdParty, which provides rapidyaml.
+add_subdirectory(SilKitYaml)
+
 # Have both SIL Kit library and demo project in a single solution
 add_subdirectory(SilKit)
 if(SILKIT_BUILD_UTILITIES)
@@ -159,6 +162,7 @@ if(SILKIT_INSTALL_SOURCE)
             ${CMAKE_CURRENT_SOURCE_DIR}/cmake
             ${CMAKE_CURRENT_SOURCE_DIR}/Demos
             ${CMAKE_CURRENT_SOURCE_DIR}/SilKit
+            ${CMAKE_CURRENT_SOURCE_DIR}/SilKitYaml
             ${CMAKE_CURRENT_SOURCE_DIR}/Utilities
         DESTINATION ${INSTALL_SOURCE_DIR}
         COMPONENT source

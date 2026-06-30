@@ -4,27 +4,26 @@
 
 #pragma once
 
-// UNSTABLE API: this auxiliary library does NOT carry the API/ABI stability
-// guarantees of the main SIL Kit API (the silkit/ headers). Pin your SIL Kit
-// version. See silkit_yaml/README for details.
+// SilKitYaml: self-contained, header-only YAML/JSON (de)serialization. See README.md.
 
 #include <string>
 
-#include "silkit/participant/exception.hpp"
-
 #include "rapidyaml.hpp"
 
-#include "silkit_yaml/YamlParserUtils.hpp"
+#include "SilKitYaml/YamlError.hpp"
+#include "SilKitYaml/YamlParserUtils.hpp"
 
-namespace VSilKit {
+namespace SilKitYaml {
 
 //////////////////////////////////////////////////////////////////////
 // Generic YAML/JSON (de)serialization
 //
-// R must derive from VSilKit::BasicYamlReader<R> and provide a
+// R must derive from SilKitYaml::BasicYamlReader<R> and provide a
 //   void Read(T&) overload for the target type T.
-// W must derive from VSilKit::BasicYamlWriter<W> and provide a
+// W must derive from SilKitYaml::BasicYamlWriter<W> and provide a
 //   void Write(const T&) overload for the source type T.
+//
+// All errors are reported as SilKitYaml::YamlError.
 //////////////////////////////////////////////////////////////////////
 
 template <typename T, typename R>
@@ -35,7 +34,7 @@ auto Deserialize(const std::string& input) -> T
         return {};
     }
 
-    const auto rapidyamlCallbacks = VSilKit::GetRapidyamlCallbacks();
+    const auto rapidyamlCallbacks = SilKitYaml::GetRapidyamlCallbacks();
 
     ryml::ParserOptions options{};
     options.locations(true);
@@ -61,7 +60,7 @@ auto Deserialize(const std::string& input) -> T
     }
     catch (const std::exception& ex)
     {
-        throw SilKit::ConfigurationError{ex.what()};
+        throw YamlError{ex.what()};
     }
     catch (...)
     {
@@ -87,4 +86,4 @@ auto SerializeAsJson(const T& input) -> std::string
     return ryml::emitrs_json<std::string>(t);
 }
 
-} // namespace VSilKit
+} // namespace SilKitYaml

@@ -12,13 +12,13 @@
 
 #include "rapidyaml.hpp"
 
-#include "silkit_yaml/BasicYamlWriter.hpp"
+#include "SilKitYaml/BasicYamlWriter.hpp"
 
 #include "config/ParticipantConfiguration.hpp"
 
 namespace VSilKit {
 
-struct YamlWriter : BasicYamlWriter<YamlWriter>
+struct YamlWriter : SilKitYaml::BasicYamlWriter<YamlWriter>
 {
     using BasicYamlWriter::BasicYamlWriter;
     using BasicYamlWriter::OptionalWrite;

@@ -115,6 +115,14 @@ if (TARGET rapidyaml)
     )
 endif()
 
+if (TARGET SilKitYaml)
+    # Internal, header-only YAML helper. BUILD_INTERFACE only -- it is not
+    # installed and its symbols are not exported from the SIL Kit library.
+    target_link_libraries(I_SilKit
+        INTERFACE $<BUILD_INTERFACE:SilKitYaml>
+    )
+endif()
+
 
 add_library(O_SilKit_CreateParticipantImpl OBJECT
     CreateParticipantImpl.hpp

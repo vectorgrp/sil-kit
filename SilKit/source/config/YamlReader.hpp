@@ -13,13 +13,13 @@
 
 #include "rapidyaml.hpp"
 
-#include "silkit_yaml/BasicYamlReader.hpp"
+#include "SilKitYaml/BasicYamlReader.hpp"
 
 #include "config/ParticipantConfiguration.hpp"
 
 namespace VSilKit {
 
-struct YamlReader : BasicYamlReader<YamlReader>
+struct YamlReader : SilKitYaml::BasicYamlReader<YamlReader>
 {
     using BasicYamlReader::BasicYamlReader;
     using BasicYamlReader::Read;
