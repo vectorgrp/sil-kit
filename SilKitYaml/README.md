@@ -7,9 +7,9 @@ SPDX-License-Identifier: MIT
 # SilKitYaml — self-contained YAML (de)serialization
 
 `SilKitYaml` is a small, **header-only** C++17 library wrapping
-[rapidyaml](https://github.com/biojppm/rapidyaml) with ergonomic CRTP-based
-reader/writer bases and `Deserialize`/`Serialize` helpers. It lets you parse and
-emit your own YAML/JSON formats against your own schemata.
+[rapidyaml](https://github.com/biojppm/rapidyaml) with CRTP-based reader/writer
+base classes and `Deserialize`/`Serialize` helper functions. It lets you parse
+and emit your own YAML/JSON formats against your own schemata.
 
 It is used **internally by SIL Kit** and is intentionally **self-contained**.
 
