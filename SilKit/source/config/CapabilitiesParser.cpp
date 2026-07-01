@@ -6,33 +6,51 @@
 
 #include "silkit/participant/exception.hpp"
 
-#include "rapidyaml.hpp"
+#include "SilKitYaml/BasicYamlReader.hpp"
+#include "SilKitYaml/YamlSerdes.hpp"
 
 namespace VSilKit {
 
-auto ParseCapabilities(const std::string& input) -> std::vector<std::map<std::string, std::string>>
-{
-    std::vector<std::map<std::string, std::string>> result;
-    auto&& cinput = ryml::to_csubstr(input);
-    auto t = ryml::parse_in_arena(cinput);
+using ValueT = std::vector<std::map<std::string, std::string>>;
 
-    auto root = t.crootref();
-    if (!root.is_seq())
+namespace {
+struct CapabilityReader: SilKitYaml::BasicYamlReader<CapabilityReader>
+{
+    using BasicYamlReader::BasicYamlReader;
+    void Read(ValueT& value)
     {
-        throw SilKit::ConfigurationError{"First element in Capabilities string is not a sequence"};
-    }
-    if (root.has_children())
-    {
-        for (auto&& child : root.children())
+        if(!IsSequence())
         {
-            if (!child.is_map())
+            throw SilKitYaml::YamlError{"First element in Capabilities string is not a sequence"};
+        }
+
+        if(_node.has_children())
+        {
+            for(auto&& i: _node.cchildren())
             {
-                throw SilKit::ConfigurationError{"Capabilities should be a sequence of map objects."};
+                auto&& parser = MakeImpl(i);
+                if(!parser.IsMap())
+                {
+                    throw SilKitYaml::YamlError{"Capabilities should be a sequence of map objects."};
+                }
+                std::map<std::string, std::string> element;
+                static_cast<SilKitYaml::BasicYamlReader<CapabilityReader>&>(parser).Read(element);
+                value.emplace_back(std::move(element));
             }
         }
     }
-    root >> result;
-    return result;
+};
+
+} // end namespace
+auto ParseCapabilities(const std::string& input) -> std::vector<std::map<std::string, std::string>>
+{
+    try {
+        ValueT result;
+        return SilKitYaml::Deserialize<ValueT, CapabilityReader>(input);
+    } catch(const SilKitYaml::YamlError& ex)
+    {
+        throw SilKit::ConfigurationError{ex.what()};
+    }
 }
 
 } // namespace VSilKit
