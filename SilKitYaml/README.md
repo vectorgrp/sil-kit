@@ -16,8 +16,8 @@ It is used **internally by SIL Kit** and is intentionally **self-contained**.
 ## Properties
 
 - Namespace `SilKitYaml`. Errors are reported as `SilKitYaml::YamlError`.
-- Depends on **nothing** except a `rapidyaml` target (it does **not** depend on
-  SIL Kit). The host project must provide a `rapidyaml` target.
+- Depends only on `rapidyaml`. It does **not** depend on SIL Kit. The host
+  project must provide a `rapidyaml` target.
 - **Not installed and not exported** by SIL Kit; it is an internal interface
   library whose symbols do not leak into the SIL Kit shared library.
 
