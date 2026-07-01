@@ -45,7 +45,6 @@ struct CapabilityReader: SilKitYaml::BasicYamlReader<CapabilityReader>
 auto ParseCapabilities(const std::string& input) -> std::vector<std::map<std::string, std::string>>
 {
     try {
-        ValueT result;
         return SilKitYaml::Deserialize<ValueT, CapabilityReader>(input);
     } catch(const SilKitYaml::YamlError& ex)
     {
