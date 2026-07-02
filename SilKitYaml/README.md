@@ -16,19 +16,28 @@ It is used **internally by SIL Kit** and is intentionally **self-contained**.
 ## Properties
 
 - Namespace `SilKitYaml`. Errors are reported as `SilKitYaml::YamlError`.
-- Depends only on `rapidyaml`. It does **not** depend on SIL Kit. The host
-  project must provide a `rapidyaml` target.
+- Depends only on `rapidyaml`. It does **not** depend on SIL Kit.
 - **Not installed and not exported** by SIL Kit; it is an internal interface
   library whose symbols do not leak into the SIL Kit shared library.
 
 ## CMake usage
 
-The host project provides a `rapidyaml` target, then:
-
 ```cmake
 add_subdirectory(SilKitYaml)
 target_link_libraries(my_target PRIVATE SilKitYaml::SilKitYaml)
 ```
+
+The `rapidyaml` dependency is resolved as follows:
+
+- If the host already defines a `rapidyaml` target (as SIL Kit does in-tree), it
+  is used as-is.
+- Otherwise SilKitYaml provisions the vendored rapidyaml itself, locating it at
+  `${SILKIT_TOP_DIR}/ThirdParty/rapidyaml`. `SILKIT_TOP_DIR` defaults to the SIL
+  Kit tree root (self-located as the parent of this folder).
+
+To override for a different layout, set `SILKIT_TOP_DIR` or the more specific
+`SILKITYAML_RAPIDYAML_DIR`, or simply provide your own `rapidyaml` target before
+`add_subdirectory(SilKitYaml)`.
 
 ## Code
 

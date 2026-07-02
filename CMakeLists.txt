@@ -10,6 +10,10 @@ cmake_minimum_required(VERSION 3.13)
 
 project("SilKit")
 
+# Root of the SIL Kit tree; used by components (e.g. SilKitYaml) to locate
+# vendored sources independently of the current subdirectory.
+set(SILKIT_TOP_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
+
 option(SILKIT_BUILD_DEMOS "Build the SIL Kit Demos" ON)
 option(SILKIT_BUILD_STATIC "Compile the SIL Kit as a static library" OFF)
 option(SILKIT_BUILD_TESTS "Enable unit and integration tests for the SIL Kit" ON)

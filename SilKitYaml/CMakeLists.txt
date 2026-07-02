@@ -7,11 +7,35 @@
 # subrepo/submodule (add_subdirectory). It is NOT installed or exported, and its
 # symbols are not leaked into the SIL Kit shared library.
 #
-# Requirement: the host project must provide a `rapidyaml` target.
+# rapidyaml dependency: if the host project already provides a `rapidyaml` target
+# (as SIL Kit does in-tree), it is used as-is. Otherwise SilKitYaml provisions the
+# vendored rapidyaml itself, locating it via SILKIT_TOP_DIR (the root of the SIL
+# Kit tree). Both SILKIT_TOP_DIR and the concrete SILKITYAML_RAPIDYAML_DIR are
+# overridable so hosts with a different layout, or their own rapidyaml, still work.
+
+# Root of the SIL Kit tree. Honor an outer definition (set by the top-level
+# CMakeLists in-tree); otherwise self-locate: SilKitYaml lives at <root>/SilKitYaml.
+if(NOT DEFINED SILKIT_TOP_DIR)
+    get_filename_component(SILKIT_TOP_DIR "${CMAKE_CURRENT_LIST_DIR}/.." ABSOLUTE)
+endif()
+
+set(SILKITYAML_RAPIDYAML_DIR "${SILKIT_TOP_DIR}/ThirdParty/rapidyaml"
+    CACHE PATH "Location of the rapidyaml sources consumed by SilKitYaml")
 
 if(NOT TARGET rapidyaml)
-    message(FATAL_ERROR
-        "SilKitYaml requires a 'rapidyaml' target. Provide one before add_subdirectory(SilKitYaml).")
+    if(EXISTS "${SILKITYAML_RAPIDYAML_DIR}/CMakeLists.txt")
+        add_subdirectory("${SILKITYAML_RAPIDYAML_DIR}"
+                         "${CMAKE_CURRENT_BINARY_DIR}/_rapidyaml")
+        # The rapidyaml folder only defines `rapidyaml-static`; provide the alias.
+        if(NOT TARGET rapidyaml)
+            add_library(rapidyaml ALIAS rapidyaml-static)
+        endif()
+    else()
+        message(FATAL_ERROR
+            "SilKitYaml: no 'rapidyaml' target and none found at "
+            "'${SILKITYAML_RAPIDYAML_DIR}'. Provide a 'rapidyaml' target, or set "
+            "SILKIT_TOP_DIR / SILKITYAML_RAPIDYAML_DIR to the rapidyaml location.")
+    endif()
 endif()
 
 add_library(SilKitYaml INTERFACE)
