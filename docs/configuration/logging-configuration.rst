@@ -77,16 +77,17 @@ logs to a file, the following configuration could be used:
    * - LogName
      - The filename used by sinks of type *File*. The
        resulting filename is ``<LogName>_<Sanitized-Participant-Name>_<ISO-TimeStamp>.txt``.
-   * - EnabledTopics
+   * - Experimental: EnabledTopics
      - Optional allow-list of logging topics for this sink. If this list is non-empty,
        only messages with topics from this list are written to the sink.
-   * - DisabledTopics
+   * - Experimental: DisabledTopics
      - Optional block-list of logging topics for this sink. Disabled topics are always
        filtered out, even if they are also listed in *EnabledTopics*.
 
-Topic-based sink filtering
+Experimental: Topic-based sink filtering
 ========================================
 
+A topic classifies the origin of a log message (for example middleware internals, service controllers, or user-level logging).
 Topic filters can be configured per sink by using *EnabledTopics* and/or *DisabledTopics*.
 
 - If *EnabledTopics* is empty or not set, all topics are allowed.
@@ -97,22 +98,35 @@ Topic filters can be configured per sink by using *EnabledTopics* and/or *Disabl
 
 Example:
 
+In the following example, only the user-level and ``Ethernet`` log messages are enabled:
+
 .. code-block:: yaml
 
     Logging:
       Sinks:
       - Type: Stdout
         Level: Trace
-        EnabledTopics: [User, Ethernet]
+        Experimental:
+          EnabledTopics: 
+            - User
+            - Ethernet
 
-In this example, only the user-level and ``Ethernet`` log messages are enabled.
+With the next example, topics that produce verbose log messages at startup are disabled:
 
+.. code-block:: yaml
 
+    Logging:
+      Sinks:
+      - Type: Stdout
+        Level: Trace
+        Experimental:
+          DisabledTopics: 
+            - Participant
+            - Asio
+            - ServiceDiscovery
 
 
 The following topic names are currently assigned by SIL Kit components:
-
-A topic classifies the origin of a log message (for example middleware internals, service controllers, or user-level logging) and can be used by sink filters to include or exclude related messages.
 
 - ``Asio``: Logging from middleware communication and connection handling.
 - ``Can``: Logging related to CAN services and controllers.
