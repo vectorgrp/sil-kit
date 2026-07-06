@@ -143,6 +143,7 @@ const std::set<std::string> schemaPaths_v1 = {
     "/Experimental/Metrics/Sinks",
     "/Experimental/Metrics/Sinks/Name",
     "/Experimental/Metrics/Sinks/Type",
+    "/Experimental/Metrics/UpdateInterval",
     "/Experimental/TimeSynchronization",
     "/Experimental/TimeSynchronization/AnimationFactor",
     "/Experimental/TimeSynchronization/EnableMessageAggregation",
@@ -314,8 +315,9 @@ const std::set<std::string> schemaPaths_v1 = {
     "/Logging/Sinks/Level",
     "/Logging/Sinks/LogName",
     "/Logging/Sinks/Type",
-    "/Logging/Sinks/EnabledTopics",
-    "/Logging/Sinks/DisabledTopics",
+    "/Logging/Sinks/Experimental",
+    "/Logging/Sinks/Experimental/EnabledTopics",
+    "/Logging/Sinks/Experimental/DisabledTopics",
     "/Middleware",
     "/Middleware/AcceptorUris",
     "/Middleware/ConnectAttempts",
@@ -330,7 +332,9 @@ const std::set<std::string> schemaPaths_v1 = {
     "/Middleware/TcpSendBufferSize",
     "/ParticipantName",
     "/RpcClients",
+    "/RpcClients/Channel",
     "/RpcClients/FunctionName",
+    "/RpcClients/RpcChannel",
     "/RpcClients/Labels",
     "/RpcClients/Labels/Key",
     "/RpcClients/Labels/Kind",
@@ -348,7 +352,9 @@ const std::set<std::string> schemaPaths_v1 = {
     "/RpcClients/Replay/UseTraceSource",
     "/RpcClients/UseTraceSinks",
     "/RpcServers",
+    "/RpcServers/Channel",
     "/RpcServers/FunctionName",
+    "/RpcServers/RpcChannel",
     "/RpcServers/Labels",
     "/RpcServers/Labels/Key",
     "/RpcServers/Labels/Kind",
@@ -460,7 +466,6 @@ struct ValidatingVisitor
     std::ostream& warnings;
     std::string currentNodePath;
     std::deque<std::string> nodePaths;
-    std::set<std::string> userDefinedPaths;
     ryml::Parser& parser;
 
     bool ok{true};
@@ -476,12 +481,6 @@ struct ValidatingVisitor
     ValidatingVisitor() = delete;
     ValidatingVisitor(const ValidatingVisitor&) = delete;
     ValidatingVisitor& operator=(const ValidatingVisitor&) = delete;
-
-    bool PathIsAlreadyDefined(const std::string& path)
-    {
-        auto it = userDefinedPaths.insert(path);
-        return !std::get<1>(it);
-    }
 
     auto GetCurrentLocation(ryml::ConstNodeRef node) -> std::string
     {
@@ -503,6 +502,28 @@ struct ValidatingVisitor
 
     void push(ryml::ConstNodeRef node, ryml::id_type /* level */)
     {
+        // Detect keys defined more than once within the same map (real YAML duplicate keys).
+        // This is scoped to a single map's direct children; the same key appearing in
+        // different elements of a sequence is not a duplicate.
+        if (node.is_map())
+        {
+            std::set<std::string> seenKeys;
+            for (auto child : node.children())
+            {
+                if (!child.has_key())
+                {
+                    continue;
+                }
+                auto childKey = to_string(child.key());
+                if (!seenKeys.insert(childKey).second)
+                {
+                    warnings << "At " << GetCurrentLocation(child) << ": Element \"" << childKey << "\""
+                             << " is already defined in path \"" << currentNodePath << "\"\n";
+                    ok &= false;
+                }
+            }
+        }
+
         if (!node.has_key())
         {
             return;
@@ -510,13 +531,6 @@ struct ValidatingVisitor
 
         auto nodeKey = to_string(node.key());
         auto nodePath = MakePath(currentNodePath, nodeKey);
-        if (PathIsAlreadyDefined(nodePath))
-        {
-            warnings << "At " << GetCurrentLocation(node) << ": Element \"" << nodePath << "\""
-                     << " is already defined in path \"" << currentNodePath << "\"\n";
-            ok &= false;
-        }
-
         nodePaths.push_back(nodePath);
         currentNodePath = nodePaths.back();
         return;
@@ -546,9 +560,10 @@ struct ValidatingVisitor
             }
             else
             {
-                // We only report error if the element is a reserved keyword
+                // Unknown, non-reserved elements are only warned about, not treated as errors
                 warnings << "At " << GetCurrentLocation(node) << ": Element \"" << nodeName << "\""
-                         << " is being ignored. It is not a sub-element of schema path \"";
+                         << " is being ignored. It is not a sub-element of schema path \"" << currentNodePath
+                         << "\"\n";
             }
         }
     }
@@ -625,6 +640,12 @@ bool ValidateWithSchema(const std::string& yamlString, std::ostream& warnings)
                 warnings << "Cannot load schema with SchemaVersion='" << version << "'" << "\n";
                 return false;
             }
+        }
+
+        if (!root.is_map() && !root.is_seq())
+        {
+            // Empty or scalar documents have no fields to validate against the schema
+            return true;
         }
 
         ValidatingVisitor visitor{parser, warnings};

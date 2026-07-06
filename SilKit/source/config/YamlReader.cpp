@@ -272,6 +272,11 @@ void YamlReader::Read(SilKit::Config::Metrics& obj)
 {
     OptionalRead(obj.sinks, "Sinks");
     OptionalRead(obj.collectFromRemote, "CollectFromRemote");
+
+    // UpdateInterval is an integer count of seconds; keep the default if the key is absent
+    std::chrono::seconds::rep updateIntervalSeconds{obj.updateInterval.count()};
+    OptionalRead(updateIntervalSeconds, "UpdateInterval");
+    obj.updateInterval = std::chrono::seconds{updateIntervalSeconds};
 }
 
 void YamlReader::Read(SilKit::Config::MdfChannel& obj)

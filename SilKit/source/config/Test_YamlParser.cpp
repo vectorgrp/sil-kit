@@ -352,6 +352,31 @@ TEST_F(Test_YamlParser, yaml_native_type_conversions)
     }
 }
 
+TEST_F(Test_YamlParser, yaml_metrics_update_interval)
+{
+    // UpdateInterval is read from YAML as an integer count of seconds
+    auto config = Deserialize<ParticipantConfiguration>(R"(
+Experimental:
+  Metrics:
+    CollectFromRemote: true
+    UpdateInterval: 42
+)");
+    EXPECT_EQ(config.experimental.metrics.updateInterval, 42s);
+
+    // ... and round-trips through serialization
+    auto txt = Serialize(config);
+    auto config2 = Deserialize<ParticipantConfiguration>(txt);
+    EXPECT_EQ(config2.experimental.metrics.updateInterval, 42s);
+
+    // An absent UpdateInterval keeps the default
+    auto configDefault = Deserialize<ParticipantConfiguration>(R"(
+Experimental:
+  Metrics:
+    CollectFromRemote: true
+)");
+    EXPECT_EQ(configDefault.experimental.metrics.updateInterval, 1s);
+}
+
 TEST_F(Test_YamlParser, middleware_convert)
 {
     auto config = Deserialize<Middleware>(R"(

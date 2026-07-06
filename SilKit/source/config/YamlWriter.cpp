@@ -283,12 +283,15 @@ void YamlWriter::Write(const SilKit::Config::MetricsSink& obj)
 
 void YamlWriter::Write(const SilKit::Config::Metrics& obj)
 {
+    static const SilKit::Config::Metrics defaultObj{};
     MakeMap();
     OptionalWrite(obj.sinks, "Sinks");
     if (obj.collectFromRemote.has_value())
     {
         WriteKeyValue("CollectFromRemote", obj.collectFromRemote.value());
     }
+    // UpdateInterval is serialized as an integer count of seconds
+    NonDefaultWrite(obj.updateInterval.count(), "UpdateInterval", defaultObj.updateInterval.count());
 }
 
 

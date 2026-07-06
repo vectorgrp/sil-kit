@@ -55,7 +55,93 @@ CanControllerss:
     std::cout << "Yaml Validator warnings: " << warnings.str() << std::endl;
     EXPECT_TRUE(yamlValid) << "We ignore non-keyword errors and typos, but generate warnings!";
     EXPECT_GT(warnings.str().size(), 0u) << "Yaml Validator warnings: '" << warnings.str() << "'";
-    ;
+    // The warning must be complete: it names the field and the schema path it is ignored under
+    EXPECT_THAT(warnings.str(), testing::HasSubstr("CanControllerss"));
+    EXPECT_THAT(warnings.str(), testing::HasSubstr("is being ignored"));
+    EXPECT_THAT(warnings.str(), testing::HasSubstr("schema path \"/\""));
+}
+
+TEST_F(Test_YamlValidator, validate_unknown_toplevel_arbitrary)
+{
+    auto yamlString = R"yaml(
+schemaVersion: 1
+ParticipantName: P1
+# a completely unknown field, not a near-miss of any keyword
+Foobar: true
+)yaml";
+
+    std::stringstream warnings;
+    bool yamlValid = ValidateWithSchema(yamlString, warnings);
+    std::cout << "Yaml Validator warnings: " << warnings.str() << std::endl;
+    EXPECT_TRUE(yamlValid) << "Unknown fields are warned about, not rejected";
+    EXPECT_THAT(warnings.str(), testing::HasSubstr("Foobar"));
+    EXPECT_THAT(warnings.str(), testing::HasSubstr("is being ignored"));
+    EXPECT_THAT(warnings.str(), testing::HasSubstr("schema path \"/\""));
+}
+
+TEST_F(Test_YamlValidator, validate_unknown_nested)
+{
+    auto yamlString = R"yaml(
+schemaVersion: 1
+ParticipantName: P1
+Middleware:
+  Foobar: true
+CanControllers:
+  - Name: CAN1
+    Foobaz: 42
+)yaml";
+
+    std::stringstream warnings;
+    bool yamlValid = ValidateWithSchema(yamlString, warnings);
+    std::cout << "Yaml Validator warnings: " << warnings.str() << std::endl;
+    EXPECT_TRUE(yamlValid) << "Unknown nested fields are warned about, not rejected";
+    EXPECT_THAT(warnings.str(), testing::HasSubstr("Foobar"));
+    EXPECT_THAT(warnings.str(), testing::HasSubstr("schema path \"/Middleware\""));
+    EXPECT_THAT(warnings.str(), testing::HasSubstr("Foobaz"));
+    EXPECT_THAT(warnings.str(), testing::HasSubstr("schema path \"/CanControllers\""));
+}
+
+TEST_F(Test_YamlValidator, validate_logging_sink_experimental)
+{
+    // Regression: the reader reads EnabledTopics/DisabledTopics under a nested Experimental
+    // node, so the schema must accept that nesting without warnings.
+    auto yamlString = R"yaml(
+schemaVersion: 1
+ParticipantName: P1
+Logging:
+  Sinks:
+  - Type: Remote
+    Experimental:
+      EnabledTopics:
+      - TopicA
+      DisabledTopics:
+      - TopicB
+)yaml";
+
+    std::stringstream warnings;
+    bool yamlValid = ValidateWithSchema(yamlString, warnings);
+    EXPECT_TRUE(yamlValid) << "YamlValidator warnings: " << warnings.str();
+    EXPECT_EQ(warnings.str(), "") << "Nested Sink Experimental topics must validate cleanly";
+}
+
+TEST_F(Test_YamlValidator, validate_rpc_deprecated_channel_alias)
+{
+    // Regression: deprecated but still-supported RPC keys Channel/RpcChannel must not warn.
+    auto yamlString = R"yaml(
+schemaVersion: 1
+ParticipantName: P1
+RpcServers:
+  - Name: Server1
+    Channel: FuncA
+RpcClients:
+  - Name: Client1
+    RpcChannel: FuncA
+)yaml";
+
+    std::stringstream warnings;
+    bool yamlValid = ValidateWithSchema(yamlString, warnings);
+    EXPECT_TRUE(yamlValid) << "YamlValidator warnings: " << warnings.str();
+    EXPECT_EQ(warnings.str(), "") << "Deprecated RPC Channel aliases must validate cleanly";
 }
 
 TEST_F(Test_YamlValidator, validate_duplicate_element)
@@ -72,6 +158,32 @@ LinControllers:
     EXPECT_FALSE(yamlValid) << "YamlValidator warnings: " << warnings.str();
     std::cout << "YamlValidator warnings: " << warnings.str() << std::endl;
     EXPECT_GT(warnings.str().size(), 0u);
+}
+
+TEST_F(Test_YamlValidator, validate_repeated_container_keys_in_sequence)
+{
+    // Regression: the same container key (e.g. Replay) appearing in different elements of a
+    // sequence must NOT be reported as a duplicate. Duplicate detection is per-map only.
+    auto yamlString = R"yaml(
+schemaVersion: 1
+ParticipantName: P1
+CanControllers:
+  - Name: CAN1
+    Replay:
+      UseTraceSource: Source1
+      MdfChannel:
+        ChannelName: Ch1
+  - Name: CAN2
+    Replay:
+      UseTraceSource: Source2
+      MdfChannel:
+        ChannelName: Ch2
+)yaml";
+
+    std::stringstream warnings;
+    bool yamlValid = ValidateWithSchema(yamlString, warnings);
+    EXPECT_TRUE(yamlValid) << "YamlValidator warnings: " << warnings.str();
+    EXPECT_EQ(warnings.str(), "") << "Repeated keys across sequence elements are not duplicates";
 }
 
 TEST_F(Test_YamlValidator, validate_unnamed_children)

@@ -140,6 +140,33 @@ Logging:
     ASSERT_EQ(participantConfig, participantConfigRef);
     ASSERT_TRUE(participantConfig.logging.sinks.at(0).enabledTopics.at(0) == SilKit::Services::Logging::Topic::Can);
 }
+
+TEST_F(Test_ParticipantConfiguration, participant_config_from_string_root_schema_validated)
+{
+    // Regression: the root configuration (not just included files) must be schema-validated.
+    // A misplaced known keyword at the top level must be rejected.
+    const auto configString = R"raw(
+---
+ParticipantName: P1
+# FlushLevel is a Logging sub-element, not valid at the document root
+FlushLevel: Info
+)raw";
+
+    EXPECT_THROW(SilKit::Config::ParticipantConfigurationFromStringImpl(configString), SilKit::ConfigurationError);
+}
+
+TEST_F(Test_ParticipantConfiguration, participant_config_from_string_unknown_field_warns_but_loads)
+{
+    // Unknown, non-reserved fields are warned about but must not prevent loading the config.
+    const auto configString = R"raw(
+---
+ParticipantName: P1
+Foobar: true
+)raw";
+
+    EXPECT_NO_THROW(SilKit::Config::ParticipantConfigurationFromStringImpl(configString));
+}
+
 TEST_F(Test_ParticipantConfiguration, participant_config_from_string_includes)
 {
     const auto configString = R"raw(
