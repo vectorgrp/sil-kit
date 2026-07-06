@@ -1126,8 +1126,7 @@
             },
             "DynamicSimulationStep": {
               "type": "boolean",
-              "description": "Disabled by default. When set to true, a participant aligns its simulation step duration to the minimal step among all synchronized participants, allowing dynamic step sizes.",
-              "default": false
+              "description": "Controls dynamic simulation step sizes (aligning each simulation step to the minimal step among all synchronized participants). When true, the participant enables it locally and advertises to all peers that it should be used. When absent (the default), the participant follows the network and enables it if any peer requests it. When false, it is a hard opt-out that never enables it regardless of peers."
             }
           },
           "additionalProperties": false

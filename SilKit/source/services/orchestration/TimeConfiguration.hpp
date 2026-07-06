@@ -43,6 +43,7 @@ public: //Methods
     auto GetMinimalAlignedDuration() const -> std::chrono::nanoseconds;
 
     void SetDynamicStepSizeEnabled(bool enabled);
+    bool IsDynamicStepSizeEnabled() const;
 
 private: //Members
     mutable std::mutex _mx;

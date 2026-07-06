@@ -10,6 +10,7 @@
 #include <sstream>
 #include <functional>
 #include <vector>
+#include <optional>
 #include "ITestFixture.hpp"
 
 using namespace std::chrono_literals;
@@ -93,10 +94,11 @@ struct ParticipantParams
 {
     std::string name{};
     std::chrono::nanoseconds initialStepSize{1ms};
-    // Enables/disables the dynamic simulation step behavior via participant configuration
-    // (Experimental.TimeSynchronization.DynamicSimulationStep). true == align to the minimal step
-    // among all participants, false == always advance by the participant's own step size.
-    bool dynamicSimulationStep{true};
+    // Tri-state dynamic simulation step behavior via participant configuration
+    // (Experimental.TimeSynchronization.DynamicSimulationStep). true == request it for all + align to
+    // the minimal step; false == hard opt-out, always advance by the participant's own step size;
+    // std::nullopt == omit the config key entirely (follow the network / enable if a peer requests it).
+    std::optional<bool> dynamicSimulationStep{true};
 
     // Change step size at these time points
     std::map<std::chrono::nanoseconds /*changeTimePoint*/, std::chrono::nanoseconds /*newStepSize*/>
@@ -137,8 +139,12 @@ void ITest_DynStepSizes::RunTestSetup(std::vector<ParticipantParams>& participan
         std::string participantConfiguration;
         participantConfiguration += R"({"Logging":{"Sinks":[{"Type":"File","Level":"Trace","LogName":")";
         participantConfiguration += "DynStepSizes_" + participantParams.name;
-        participantConfiguration += R"("}]},"Experimental":{"TimeSynchronization":{"DynamicSimulationStep":)";
-        participantConfiguration += participantParams.dynamicSimulationStep ? "true" : "false";
+        participantConfiguration += R"("}]},"Experimental":{"TimeSynchronization":{)";
+        if (participantParams.dynamicSimulationStep.has_value())
+        {
+            participantConfiguration += R"("DynamicSimulationStep":)";
+            participantConfiguration += participantParams.dynamicSimulationStep.value() ? "true" : "false";
+        }
         participantConfiguration += R"(}}})";
 
         auto&& simParticipant = _simTestHarness->GetParticipant(participantParams.name, participantConfiguration);
@@ -334,6 +340,26 @@ TEST_F(ITest_DynStepSizes, three_participants_MixedTimeAdvanceModes)
     }
     // Compare P3 nows with union of P1 and P2 nows
     AssertStepsEqual(p3Nows, unionNowsVec);
+}
+
+// Remote enabling: a participant that requests dynamic step sizes (true) makes a participant with no
+// DynamicSimulationStep config (nullopt -> follow) use dynamic stepping too, while a hard opt-out
+// participant (false) keeps advancing at its own duration.
+TEST_F(ITest_DynStepSizes, follower_enabled_remotely_optout_unaffected)
+{
+    std::vector<ParticipantParams> participantsParams = {
+        {"Driver", 1ms, true},          // requests dynamic step sizes for all
+        {"Follower", 5ms, std::nullopt}, // no config -> follows the network
+        {"OptOut", 5ms, false}};         // hard opt-out
+    RunTestSetup(participantsParams);
+
+    // Driver aligns to the minimal step (1ms).
+    AssertAscendingStepsWithReferenceDuration({participantsParams[0]}, 1ms);
+    // Follower was remotely enabled by the Driver's advertisement -> also steps at the minimal 1ms,
+    // NOT at its own 5ms.
+    AssertAscendingStepsWithReferenceDuration({participantsParams[1]}, 1ms);
+    // Opt-out ignored the advertisement and keeps its own 5ms step.
+    AssertAscendingStepsWithReferenceDuration({participantsParams[2]}, 5ms);
 }
 
 // Change to a different step size during simulation

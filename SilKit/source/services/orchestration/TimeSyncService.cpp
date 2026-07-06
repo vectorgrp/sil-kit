@@ -346,6 +346,25 @@ TimeSyncService::TimeSyncService(Core::IParticipantInternal* participant, ITimeP
 
                 std::string timeSyncActive;
                 descriptor.GetSupplementalDataItem(Core::Discovery::timeSyncActive, timeSyncActive);
+
+                // Track whether this peer requests dynamic simulation step sizes. Unless this
+                // participant is a hard opt-out, its dynamic stepping follows any advertising peer.
+                std::string peerDynamicStep;
+                descriptor.GetSupplementalDataItem(Core::Discovery::timeSyncDynamicStepSize, peerDynamicStep);
+                {
+                    std::lock_guard<std::mutex> lock{_dynamicStepMx};
+                    if (discoveryEventType == Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated
+                        && peerDynamicStep == "1")
+                    {
+                        _dynamicStepPeers.insert(descriptorParticipantName);
+                    }
+                    else if (discoveryEventType == Core::Discovery::ServiceDiscoveryEvent::Type::ServiceRemoved)
+                    {
+                        _dynamicStepPeers.erase(descriptorParticipantName);
+                    }
+                }
+                RecomputeDynamicStepEnabled();
+
                 if (timeSyncActive == "1")
                 {
                     if (discoveryEventType == Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated)
@@ -624,6 +643,16 @@ void TimeSyncService::InitializeTimeSyncPolicy(bool isSynchronizingVirtualTime)
 
         _serviceDescriptor.SetSupplementalDataItem(SilKit::Core::Discovery::timeSyncActive,
                                                    (isSynchronizingVirtualTime) ? "1" : "0");
+
+        // Advertise to peers whether this participant requests dynamic simulation step sizes for the
+        // whole simulation (config == true). Peers that are not a hard opt-out enable it when they see this.
+        bool advertiseDynamicStep;
+        {
+            std::lock_guard<std::mutex> lock{_dynamicStepMx};
+            advertiseDynamicStep = (_dynamicStepConfig == std::optional<bool>{true});
+        }
+        _serviceDescriptor.SetSupplementalDataItem(SilKit::Core::Discovery::timeSyncDynamicStepSize,
+                                                   advertiseDynamicStep ? "1" : "0");
         ResetTime();
     }
     catch (const std::exception& e)
@@ -840,9 +869,40 @@ bool TimeSyncService::IsBlocking() const
     return _timeConfiguration.IsBlocking();
 }
 
-void TimeSyncService::SetDynamicStepSizeEnabled(bool enabled)
+void TimeSyncService::ConfigureDynamicStepSize(std::optional<bool> configured)
 {
+    {
+        std::lock_guard<std::mutex> lock{_dynamicStepMx};
+        _dynamicStepConfig = configured;
+    }
+    RecomputeDynamicStepEnabled();
+}
+
+void TimeSyncService::RecomputeDynamicStepEnabled()
+{
+    bool enabled;
+    bool enabledByRemote;
+    {
+        std::lock_guard<std::mutex> lock{_dynamicStepMx};
+        // true  -> always on (this participant drives dynamic stepping)
+        // false -> hard opt-out, never on
+        // absent-> follow the network: on iff at least one peer advertises the request
+        const bool isDriver = (_dynamicStepConfig == std::optional<bool>{true});
+        const bool isOptOut = (_dynamicStepConfig == std::optional<bool>{false});
+        enabledByRemote = (!isDriver && !isOptOut && !_dynamicStepPeers.empty());
+        enabled = isDriver || enabledByRemote;
+    }
     _timeConfiguration.SetDynamicStepSizeEnabled(enabled);
+
+    // Notify (once) that dynamic stepping was turned on because a remote participant requested it,
+    // rather than by this participant's own configuration.
+    if (enabledByRemote && !_dynamicStepRemoteLogOnce.WasCalled())
+    {
+        _logger->MakeMessage(Logging::Level::Info, TopicOf(*this))
+            .SetMessage("Dynamic simulation step sizes were enabled because a remote participant requested them. "
+                        "Set Experimental.TimeSynchronization.DynamicSimulationStep to false to opt out.")
+            .Dispatch();
+    }
 }
 
 
