@@ -654,6 +654,9 @@ void ProcessIncludes(const ParticipantConfiguration& config, ConfigIncludeData& 
 auto PaticipantConfigurationWithIncludes(const std::string& text, struct ConfigIncludeData& configData)
     -> SilKit::Config::ParticipantConfiguration
 {
+    // Validate the root configuration against the schema (included files are validated in ProcessIncludes)
+    SilKit::Config::Validate(text);
+
     auto configuration = SilKit::Config::Deserialize<ParticipantConfiguration>(text);
     if (configuration.schemaVersion.empty())
     {
