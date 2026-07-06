@@ -10,7 +10,7 @@
 #include "silkit/experimental/services/orchestration/ISystemController.hpp"
 #include "silkit/experimental/netsim/NetworkSimulatorDatatypes.hpp"
 
-#include "ParticipantConfiguration.hpp"
+#include "config/ParticipantConfiguration.hpp"
 
 #include "core/internal/internal_fwd.hpp"
 #include "core/internal/IServiceEndpoint.hpp"
