@@ -2,12 +2,10 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include <memory>
 #include <thread>
 #include <string>
 #include <chrono>
 #include <iostream>
-#include <sstream>
 #include <functional>
 #include <vector>
 #include <optional>
@@ -15,48 +13,16 @@
 
 using namespace std::chrono_literals;
 
-namespace testing {
-namespace internal {
-template <typename Rep, typename Period>
-class UniversalPrinter<std::chrono::duration<Rep, Period>>
+// Defined in std::chrono so both googletest's value printer (used for EXPECT_EQ operands, including
+// std::pair<nanoseconds, nanoseconds>) and its message stream can find it via ADL.
+namespace std {
+namespace chrono {
+inline std::ostream& operator<<(std::ostream& out, const nanoseconds& timestamp)
 {
-public:
-    static void Print(const std::chrono::duration<Rep, Period>& value, ::std::ostream* os)
-    {
-        *os << std::chrono::duration_cast<std::chrono::nanoseconds>(value).count() << "ns";
-    }
-};
-
-template <typename R1, typename P1, typename R2, typename P2>
-class UniversalPrinter<std::pair<std::chrono::duration<R1, P1>, std::chrono::duration<R2, P2>>>
-{
-public:
-    static void Print(const std::pair<std::chrono::duration<R1, P1>, std::chrono::duration<R2, P2>>& p,
-                      ::std::ostream* os)
-    {
-        *os << "(";
-        UniversalPrinter<std::chrono::nanoseconds>::Print(p.first, os);
-        *os << ", ";
-        UniversalPrinter<std::chrono::nanoseconds>::Print(p.second, os);
-        *os << ")";
-    }
-};
-
-} // namespace internal
-} // namespace testing
-
-inline std::string ToString(const std::chrono::nanoseconds& ns)
-{
-    std::ostringstream os;
-    testing::internal::UniversalPrinter<std::chrono::nanoseconds>::Print(ns, &os);
-    return os.str();
+    return out << timestamp.count() << "ns";
 }
-inline std::string ToString(const std::pair<std::chrono::nanoseconds, std::chrono::nanoseconds>& p)
-{
-    std::ostringstream os;
-    testing::internal::UniversalPrinter<std::pair<std::chrono::nanoseconds, std::chrono::nanoseconds>>::Print(p, &os);
-    return os.str();
-}
+} // namespace chrono
+} // namespace std
 
 namespace {
 
@@ -64,31 +30,6 @@ using namespace SilKit::Tests;
 using namespace SilKit::Config;
 using namespace SilKit::Services;
 using namespace SilKit::Services::Orchestration;
-
-template <typename Rep, typename Period>
-struct Dummy
-{
-    std::chrono::duration<Rep, Period> value;
-
-    explicit Dummy(const std::chrono::duration<Rep, Period>& v)
-        : value{v}
-    {
-    }
-
-    bool operator==(const Dummy<Rep, Period>& other) const
-    {
-        return value == other.value;
-    }
-
-    friend void PrintTo(const Dummy<Rep, Period>& d, std::ostream* os)
-    {
-        *os << std::chrono::duration_cast<std::chrono::nanoseconds>(d.value).count() << "ns";
-    }
-};
-
-#define SILKIT_ASSERT_CHRONO_EQ(expected, actual) ASSERT_EQ(Dummy{(expected)}, Dummy{(actual)})
-#define SILKIT_EXPECT_CHRONO_EQ(expected, actual) EXPECT_EQ(Dummy{(expected)}, Dummy{(actual)})
-
 
 struct ParticipantParams
 {
@@ -131,8 +72,10 @@ void ITest_DynStepSizes::RunTestSetup(std::vector<ParticipantParams>& participan
     std::mutex mx;
 
     using StepHandler = std::function<void(std::chrono::nanoseconds, std::chrono::nanoseconds)>;
-    // Keep the self-referential handlers alive for the whole run.
-    std::vector<std::shared_ptr<StepHandler>> stepHandlers;
+    // A handler re-registers itself (see below) to change its step size, so each handler captures a
+    // reference to its own slot in this vector. Reserve up front so the slots never move.
+    std::vector<StepHandler> stepHandlers;
+    stepHandlers.reserve(participantsParams.size());
 
     for (auto& participantParams : participantsParams)
     {
@@ -154,8 +97,8 @@ void ITest_DynStepSizes::RunTestSetup(std::vector<ParticipantParams>& participan
         // default no-op step handler below.
         auto* timeSyncService = simParticipant->GetOrCreateTimeSyncService();
 
-        auto handler = std::make_shared<StepHandler>();
-        *handler = [timeSyncService, &participantParams, &mx, lifecycleService, handler](auto now, auto duration) {
+        auto& handler = stepHandlers.emplace_back();
+        handler = [timeSyncService, &participantParams, &mx, lifecycleService, &handler](auto now, auto duration) {
             if (now >= 100ms)
             {
                 lifecycleService->Stop("stopping the test at 100ms");
@@ -182,21 +125,14 @@ void ITest_DynStepSizes::RunTestSetup(std::vector<ParticipantParams>& participan
             // Must be the last statement: it replaces the currently executing handler.
             if (changeStepSize)
             {
-                timeSyncService->SetSimulationStepHandler(*handler, newStepSize);
+                timeSyncService->SetSimulationStepHandler(handler, newStepSize);
             }
         };
-        stepHandlers.push_back(handler);
-        timeSyncService->SetSimulationStepHandler(*handler, participantParams.initialStepSize);
+        timeSyncService->SetSimulationStepHandler(handler, participantParams.initialStepSize);
     }
 
     auto ok = _simTestHarness->Run(5s);
     ASSERT_TRUE(ok) << "SimTestHarness should terminate without timeout";
-
-    // Break the shared_ptr<->std::function self-reference cycles so the handlers are not leaked.
-    for (auto& handler : stepHandlers)
-    {
-        *handler = nullptr;
-    }
 }
 
 void ITest_DynStepSizes::AssertAllStepsEqual(const std::vector<ParticipantParams>& participantsParams)
@@ -212,10 +148,9 @@ void ITest_DynStepSizes::AssertAllStepsEqual(const std::vector<ParticipantParams
         for (size_t j = 0; j < ref.size(); ++j)
         {
             EXPECT_EQ(ref[j], cmp[j]) << "Differenz at index " << j << ": " << participantsParams[0].name
-                                      << "(now=" << ToString(ref[j].first) << ", duration=" << ToString(ref[j].second)
-                                      << ")"
-                                      << " vs " << participantsParams[i].name << "(now=" << ToString(cmp[j].first)
-                                      << ", duration=" << ToString(cmp[j].second) << ")";
+                                      << "(now=" << ref[j].first << ", duration=" << ref[j].second << ")"
+                                      << " vs " << participantsParams[i].name << "(now=" << cmp[j].first
+                                      << ", duration=" << cmp[j].second << ")";
         }
     }
 }
@@ -233,16 +168,15 @@ void ITest_DynStepSizes::AssertAscendingStepsWithReferenceDuration(
             // Check if duration matches the reference duration
             EXPECT_EQ(steps[i].second, refDuration)
                 << "Duration mismatch for " << participant.name << " at index " << i << ": expected "
-                << ToString(refDuration) << ", got " << ToString(steps[i].second);
+                << refDuration << ", got " << steps[i].second;
 
             // Check if time points are strictly increasing by refDuration
             if (i > 0)
             {
                 auto diff = steps[i].first - steps[i - 1].first;
                 EXPECT_EQ(diff, refDuration)
-                    << "Timestep difference for " << participant.name << " at index " << i << " is " << ToString(diff)
-                    << ", expected " << ToString(refDuration) << " (" << ToString(steps[i - 1].first) << " -> "
-                    << ToString(steps[i].first) << ")";
+                    << "Timestep difference for " << participant.name << " at index " << i << " is " << diff
+                    << ", expected " << refDuration << " (" << steps[i - 1].first << " -> " << steps[i].first << ")";
             }
         }
     }
@@ -255,8 +189,8 @@ void ITest_DynStepSizes::AssertStepsEqual(const std::vector<std::chrono::nanosec
 
     for (size_t j = 0; j < s1.size(); ++j)
     {
-        SILKIT_EXPECT_CHRONO_EQ(s1[j], s2[j]) << "Differenz at index " << j << ": "
-                                              << "s1 now=" << ToString(s1[j]) << " vs s2 now=" << ToString(s2[j]);
+        EXPECT_EQ(s1[j], s2[j]) << "Differenz at index " << j << ": "
+                                << "s1 now=" << s1[j] << " vs s2 now=" << s2[j];
     }
 }
 
