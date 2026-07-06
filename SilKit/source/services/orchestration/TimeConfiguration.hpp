@@ -56,8 +56,8 @@ private: //Members
     Logging::ILoggerInternal* _logger;
 
     // When enabled, each simulation step is shortened ("aligned") to the minimal duration among all
-    // synchronized participants (see GetMinimalAlignedDuration / AdvanceTimeStep). Enabled by default
-    // via participant configuration; can be turned off with Experimental.TimeSynchronization.DynamicSimulationStep.
+    // synchronized participants (see GetMinimalAlignedDuration / AdvanceTimeStep). Disabled by default;
+    // can be turned on via Experimental.TimeSynchronization.DynamicSimulationStep.
     bool _dynamicStepSizeEnabled{false};
 };
 

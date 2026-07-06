@@ -31,6 +31,12 @@ const std::string testMessage{"TestMessage"};
 const std::chrono::nanoseconds subscriberPeriod = 7ns;
 const std::vector<std::chrono::nanoseconds> publisherPeriods = {3ns, 7ns, 17ns};
 
+// Upper bound for how long we wait on any lifecycle future. The simulation itself finishes in well
+// under a second; this only guards against a deadlock (e.g. a failed assertion in a step/receive
+// handler that prevents the stop condition from ever being reached) so the test fails as a gtest
+// failure instead of hanging until the outer CTest timeout kills it. Generous for slow sanitizer CI.
+const std::chrono::seconds testTimeout{60};
+
 std::ostream& operator<<(std::ostream& out, const nanoseconds& timestamp)
 {
     out << timestamp.count();
@@ -78,9 +84,16 @@ public:
         _simulationFuture = _lifecycleService->StartLifecycle();
     }
 
-    auto WaitForShutdown() -> ParticipantState
+    // Waits up to `timeout` for the lifecycle to finish. Returns false on timeout (leaving the
+    // future untouched so we never block on .get()); on success stores the final state.
+    auto TryWaitForShutdown(std::chrono::nanoseconds timeout, ParticipantState& finalState) -> bool
     {
-        return _simulationFuture.get();
+        if (_simulationFuture.wait_for(timeout) != std::future_status::ready)
+        {
+            return false;
+        }
+        finalState = _simulationFuture.get();
+        return true;
     }
 
     uint32_t NumMessagesSent() const
@@ -152,6 +165,13 @@ public:
     std::future<ParticipantState> RunAsync() const
     {
         return _lifecycleService->StartLifecycle();
+    }
+
+    // Force the whole coordinated simulation to unwind. Used to break a deadlock so all participant
+    // futures become ready instead of the test hanging forever.
+    void AbortSimulation()
+    {
+        _systemController->AbortSimulation();
     }
 
     uint32_t NumMessagesReceived(const uint32_t publisherIndex)
@@ -257,16 +277,42 @@ TEST_F(ITest_DifferentPeriods, different_simtask_periods)
     }
 
 
-    auto finalState = subscriberFuture.get();
-    EXPECT_EQ(ParticipantState::Shutdown, finalState);
+    // The subscriber calls Stop() once every message has been received; wait for its lifecycle to
+    // finish, but never block indefinitely. If it does not complete in time (e.g. a handler
+    // assertion prevented the stop condition), abort the simulation so all participant threads
+    // unwind, then fail the test.
+    const bool subscriberFinished = subscriberFuture.wait_for(testTimeout) == std::future_status::ready;
+    if (!subscriberFinished)
+    {
+        subscriber.AbortSimulation();
+        ADD_FAILURE() << "Timed out after " << testTimeout.count()
+                      << "s waiting for the subscriber to shut down; simulation aborted";
+    }
+
+    // Ready now either from a normal shutdown or from the abort above.
+    ASSERT_EQ(std::future_status::ready, subscriberFuture.wait_for(testTimeout))
+        << "Subscriber lifecycle future did not become ready even after abort";
+    const auto finalState = subscriberFuture.get();
+    if (subscriberFinished)
+    {
+        EXPECT_EQ(ParticipantState::Shutdown, finalState);
+    }
 
     for (auto publisherIndex = 0u; publisherIndex < publisherCount; publisherIndex++)
     {
         auto& publisher = publishers[publisherIndex];
 
-        EXPECT_EQ(ParticipantState::Shutdown, publisher.WaitForShutdown());
-        EXPECT_EQ(numMessages, publisher.NumMessagesSent());
-        EXPECT_EQ(numMessages, subscriber.NumMessagesReceived(publisherIndex));
+        ParticipantState publisherState{};
+        ASSERT_TRUE(publisher.TryWaitForShutdown(testTimeout, publisherState))
+            << "Timed out waiting for Publisher" << publisherIndex << " to shut down";
+
+        // Message-count expectations only hold on the happy path; after an abort they are meaningless.
+        if (subscriberFinished)
+        {
+            EXPECT_EQ(ParticipantState::Shutdown, publisherState);
+            EXPECT_EQ(numMessages, publisher.NumMessagesSent());
+            EXPECT_EQ(numMessages, subscriber.NumMessagesReceived(publisherIndex));
+        }
     }
 }
 

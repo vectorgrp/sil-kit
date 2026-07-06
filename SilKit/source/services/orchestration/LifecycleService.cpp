@@ -432,7 +432,7 @@ auto LifecycleService::CreateTimeSyncService() -> ITimeSyncService*
     _participant->RegisterTimeSyncService(_timeSyncService);
     _timeSyncActive = true;
 
-    // Dynamic simulation step sizes are enabled by default and can be disabled per participant via
+    // Dynamic simulation step sizes are disabled by default and can be enabled per participant via
     // Experimental.TimeSynchronization.DynamicSimulationStep.
     const auto& participantConfiguration = _participant->GetParticipantConfiguration();
     _timeSyncService->SetDynamicStepSizeEnabled(

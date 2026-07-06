@@ -309,9 +309,9 @@ struct TimeSynchronization
 {
     double animationFactor{0.0};
     Aggregation enableMessageAggregation{Aggregation::Off};
-    //! When enabled (the default), a participant aligns its simulation step duration to the minimal
-    //! step among all synchronized participants. Set to false to opt out.
-    bool dynamicSimulationStep{true};
+    //! Disabled by default. When set to true, a participant aligns its simulation step duration to
+    //! the minimal step among all synchronized participants.
+    bool dynamicSimulationStep{false};
 };
 
 // ================================================================================

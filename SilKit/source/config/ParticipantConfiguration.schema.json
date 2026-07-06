@@ -1126,8 +1126,8 @@
             },
             "DynamicSimulationStep": {
               "type": "boolean",
-              "description": "When enabled (the default), a participant aligns its simulation step duration to the minimal step among all synchronized participants, allowing dynamic step sizes. Set to false to opt out.",
-              "default": true
+              "description": "Disabled by default. When set to true, a participant aligns its simulation step duration to the minimal step among all synchronized participants, allowing dynamic step sizes.",
+              "default": false
             }
           },
           "additionalProperties": false
