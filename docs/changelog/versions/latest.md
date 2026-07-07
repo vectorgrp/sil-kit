@@ -1,3 +1,5 @@
 # [5.0.7] - UNRELEASED
 
-> This changelog entry is still empty.
+## Changed
+
+- `docs`:  Default format of file logging is set to JSON
