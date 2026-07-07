@@ -237,6 +237,8 @@ TEST_F(Test_YamlParser, yaml_complete_configuration)
     EXPECT_EQ(config.logging.sinks.at(0).level, SilKit::Services::Logging::Level::Critical);
     EXPECT_EQ(config.logging.sinks.at(0).logName, "MyLog1");
 
+    EXPECT_EQ(config.logging.sinks.at(0).format, Sink::Format::Json);
+
     EXPECT_EQ(config.healthCheck.softResponseTimeout.value(), 500ms);
     EXPECT_EQ(config.healthCheck.hardResponseTimeout.value(), 5000ms);
 
@@ -261,6 +263,39 @@ TEST_F(Test_YamlParser, yaml_complete_configuration)
     EXPECT_EQ(config.middleware.tcpReceiveBufferSize, 3456);
     EXPECT_EQ(config.middleware.tcpSendBufferSize, 3456);
     ASSERT_FALSE(config.middleware.registryAsFallbackProxy);
+}
+
+TEST_F(Test_YamlParser, yaml_file_sink_defaults_to_json_format)
+{
+    auto config = Deserialize<ParticipantConfiguration>(R"(
+Logging:
+  Sinks:
+  - Type: File
+    LogName: MyLog1
+)");
+    ASSERT_EQ(config.logging.sinks.size(), 1u);
+    EXPECT_EQ(config.logging.sinks.at(0).type, Sink::Type::File);
+    EXPECT_EQ(config.logging.sinks.at(0).format, Sink::Format::Json);
+
+    auto configExplicit = Deserialize<ParticipantConfiguration>(R"(
+Logging:
+  Sinks:
+  - Type: File
+    Format: Simple
+    LogName: MyLog1
+)");
+    ASSERT_EQ(configExplicit.logging.sinks.size(), 1u);
+    EXPECT_EQ(configExplicit.logging.sinks.at(0).type, Sink::Type::File);
+    EXPECT_EQ(configExplicit.logging.sinks.at(0).format, Sink::Format::Simple);
+
+    auto configStdout = Deserialize<ParticipantConfiguration>(R"(
+Logging:
+  Sinks:
+  - Type: Stdout
+)");
+    ASSERT_EQ(configStdout.logging.sinks.size(), 1u);
+    EXPECT_EQ(configStdout.logging.sinks.at(0).type, Sink::Type::Stdout);
+    EXPECT_EQ(configStdout.logging.sinks.at(0).format, Sink::Format::Simple);
 }
 
 TEST_F(Test_YamlParser, yaml_elements_in_random_order)
@@ -334,10 +369,12 @@ TEST_F(Test_YamlParser, yaml_native_type_conversions)
         Sink sink;
         logger.logFromRemotes = true;
         sink.type = Sink::Type::File;
+        sink.format = Sink::Format::Json;
         sink.level = SilKit::Services::Logging::Level::Trace;
         sink.logName = "filename";
         logger.sinks.push_back(sink);
         sink.type = Sink::Type::Stdout;
+        sink.format = Sink::Format::Simple;
         sink.logName = "";
         logger.sinks.push_back(sink);
         auto txt = Serialize(logger);
