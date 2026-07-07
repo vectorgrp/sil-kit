@@ -625,7 +625,7 @@ void ProcessIncludes(const ParticipantConfiguration& config, ConfigIncludeData& 
 
             // Get the next Include to be processed within this tree level
             auto nextConfigText = SilKit::Config::OpenFileWithSearchHints(include, configData.searchPaths);
-            SilKit::Config::Validate(nextConfigText);
+            SilKit::Config::Validate(nextConfigText); 
 
             // Load and Parse the file as Yaml
             auto nextConfig = SilKit::Config::Deserialize<ParticipantConfiguration>(nextConfigText);

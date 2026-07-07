@@ -77,3 +77,76 @@ logs to a file, the following configuration could be used:
    * - LogName
      - The filename used by sinks of type *File*. The
        resulting filename is ``<LogName>_<Sanitized-Participant-Name>_<ISO-TimeStamp>.txt``.
+   * - Experimental: EnabledTopics
+     - Optional allow-list of logging topics for this sink. If this list is non-empty,
+       only messages with topics from this list are written to the sink.
+   * - Experimental: DisabledTopics
+     - Optional block-list of logging topics for this sink. Disabled topics are always
+       filtered out, even if they are also listed in *EnabledTopics*.
+
+Experimental: Topic-based sink filtering
+========================================
+
+A topic classifies the origin of a log message (for example middleware internals, service controllers, or user-level logging).
+Topic filters can be configured per sink by using *EnabledTopics* and/or *DisabledTopics*.
+
+- If *EnabledTopics* is empty or not set, all topics are allowed.
+- If *EnabledTopics* is set, only listed topics are allowed.
+- *DisabledTopics* always has precedence and filters matching topics out.
+- Topic names are parsed case-insensitively.
+- User-level logging uses the ``User`` topic.
+
+Example:
+
+In the following example, only the user-level and ``Ethernet`` log messages are enabled:
+
+.. code-block:: yaml
+
+    Logging:
+      Sinks:
+      - Type: Stdout
+        Level: Trace
+        Experimental:
+          EnabledTopics: 
+            - User
+            - Ethernet
+
+With the next example, topics that produce verbose log messages at startup are disabled:
+
+.. code-block:: yaml
+
+    Logging:
+      Sinks:
+      - Type: Stdout
+        Level: Trace
+        Experimental:
+          DisabledTopics: 
+            - Participant
+            - Asio
+            - ServiceDiscovery
+
+
+The following topic names are currently assigned by SIL Kit components:
+
+- ``Asio``: Logging from middleware communication and connection handling.
+- ``Can``: Logging related to CAN services and controllers.
+- ``Dashboard``: Logging from dashboard integration and dashboard clients.
+- ``Ethernet``: Logging related to Ethernet services and controllers.
+- ``Extension``: Logging from SIL Kit extension components.
+- ``Flexray``: Logging related to FlexRay services and controllers.
+- ``LifeCycle``: Logging from lifecycle state transitions and lifecycle management.
+- ``Lin``: Logging related to LIN services and controllers.
+- ``MessageTracing``: Logging from message tracing internals.
+- ``Metrics``: Logging from metrics collection and processing.
+- ``NetSim``: Logging from experimental network simulation components.
+- ``Participant``: Logging from participant-level internal functionality.
+- ``Pubsub``: Logging related to publish/subscribe data services.
+- ``RequestReply``: Logging related to internal request/reply coordination.
+- ``Rpc``: Logging related to RPC clients, servers, and discovery.
+- ``ServiceDiscovery``: Logging related to service discovery.
+- ``SystemMonitor``: Logging related to system monitor internals.
+- ``SystemState``: Logging related to system state tracking and monitoring.
+- ``TimeConfig``: Logging related to time synchronization configuration.
+- ``TimeSync``: Logging from runtime time synchronization.
+- ``Tracing``: Logging related to tracing, replay, and trace sinks.
+- ``User``: Logging emitted by user application code.
