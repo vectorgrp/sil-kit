@@ -190,11 +190,12 @@ function(include_oatpp)
 endfunction()
 
 function(include_rapidyaml)
-		add_subdirectory(
-            "${SILKIT_THIRD_PARTY_SOURCE_DIR}/rapidyaml"
-            "${SILKIT_THIRD_PARTY_BINARY_DIR}/_tp_rapidyaml"
+    add_subdirectory(
+        "${SILKIT_THIRD_PARTY_SOURCE_DIR}/rapidyaml"
+        "${SILKIT_THIRD_PARTY_BINARY_DIR}/_tp_rapidyaml"
     )
-    add_library(rapidyaml ALIAS rapidyaml-static)
+
+    set(SILKIT_THIRD_PARTY_RAPIDYAML_TARGET rapidyaml CACHE STRING "SIL Kit: Vendored rapidyaml target")
 endfunction()
 
 function(silkit_add_third_party_packages)
