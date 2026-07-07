@@ -215,6 +215,12 @@ void YamlReader::Read(SilKit::Config::Sink& obj)
 {
     OptionalRead(obj.type, "Type");
     OptionalRead(obj.level, "Level");
+
+    // A File sink defaults to the Json format. An explicitly configured Format takes precedence.
+    if (obj.type == SilKit::Config::Sink::Type::File)
+    {
+        obj.format = SilKit::Config::Sink::Format::Json;
+    }
     OptionalRead(obj.format, "Format");
 
     auto&& child = GetChildSafe("Experimental");
