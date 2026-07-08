@@ -1,7 +1,7 @@
 add_library(rapidyaml STATIC
     src/rapidyaml.cpp
     include/rapidyaml.hpp
-    include/rapidyaml-0.15.2.hpp
+    include/rapidyaml-0.9.0.hpp
 )
 
 target_include_directories(rapidyaml

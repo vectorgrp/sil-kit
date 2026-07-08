@@ -107,21 +107,11 @@ if (TARGET ${SILKIT_THIRD_PARTY_ASIO})
     )
 endif()
 
-if (TARGET rapidyaml)
-    message(STATUS "SIL Kit: Third-Party Library: rapidyaml")
-
-    target_link_libraries(I_SilKit
-        INTERFACE $<BUILD_INTERFACE:rapidyaml>
-    )
-endif()
-
-if (TARGET SilKitYaml)
-    # Internal, header-only YAML helper. BUILD_INTERFACE only -- it is not
-    # installed and its symbols are not exported from the SIL Kit library.
-    target_link_libraries(I_SilKit
-        INTERFACE $<BUILD_INTERFACE:SilKitYaml>
-    )
-endif()
+# Internal, header-only YAML helper. BUILD_INTERFACE only -- it is not
+# installed and its symbols are not exported from the SIL Kit library.
+target_link_libraries(I_SilKit
+    INTERFACE $<BUILD_INTERFACE:SilKitYaml>
+)
 
 
 add_library(O_SilKit_CreateParticipantImpl OBJECT
