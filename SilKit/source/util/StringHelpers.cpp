@@ -7,6 +7,7 @@
 #include <chrono>
 #include <sstream>
 #include <cctype>
+#include <string_view>
 
 #include "fmt/chrono.h"
 
@@ -18,7 +19,7 @@ namespace Util {
 namespace {
 
 template <typename F>
-void DoEscape(const std::string& string, F f)
+void DoEscape(const std::string_view string, F f)
 {
     for (const char ch : string)
     {
@@ -60,6 +61,12 @@ void DoEscape(const std::string& string, F f)
 }
 
 } // namespace
+
+
+void AppendEscapedJsonStringTo(const std::string_view input, std::string& output)
+{
+    DoEscape(input, [&output](const auto ch) { output.push_back(ch); });
+}
 
 
 auto EscapeString(const std::string& input) -> std::string
