@@ -15,6 +15,8 @@
 #include "fmt/format.h"
 
 
+#ifdef SILKIT_ENABLE_API_TRACING_INSTRUMENTATION
+
 namespace VSilKit {
 
 void ApiTraceEventImpl(std::string_view func, std::string_view data);
@@ -31,8 +33,6 @@ void ApiTraceEvent(const std::string_view func, Args&&... args)
 }
 
 } // namespace VSilKit
-
-#ifdef SILKIT_ENABLE_API_TRACING_INSTRUMENTATION
 
 #define VSILKIT_API_TRACE(...) ::VSilKit::ApiTraceEvent((__func__), __VA_ARGS__)
 

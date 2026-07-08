@@ -2,6 +2,10 @@
 //
 // SPDX-License-Identifier: MIT
 
+#include "capi/CapiImpl.hpp"
+
+#ifdef SILKIT_ENABLE_API_TRACING_INSTRUMENTATION
+
 #include "util/StringHelpers.hpp"
 
 #include <iostream>
@@ -31,3 +35,5 @@ void ApiTraceEventImpl(const std::string_view func, const std::string_view data)
 }
 
 } // namespace VSilKit
+
+#endif
