@@ -2,4 +2,5 @@
 
 ## Changed
 
-- `docs`:  Default format of file logging is set to JSON
+- `config`:  Default format of file logging is set to JSON. Set "Format: Simple" in the sink to get previous behaviour.
+- `docs`:  Added description of the logging "Format".

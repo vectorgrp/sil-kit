@@ -70,19 +70,68 @@ logs to a file, the following configuration could be used:
        *Remote* send the log messages over the underlying middleware. Note that
        this can result in a significant amount of traffic, which can impact the
        simulation performance, in particular when using a low log level.
+   * - Format
+     - The output format used for log messages written by the sink. Valid
+       options are *Simple* and *Json* (see
+       :ref:`Log message format<sec:cfg-participant-logformat>`). Applies to
+       sinks of type *Stdout* and *File*. If not set, sinks of type *File*
+       default to *Json*, while all other sinks default to *Simple*.
    * - Level
      - The minimum log level of a message to be logged by the sink. All messages
        with a lower log level are ignored. Valid options are *Critical*,
        *Error*, *Warn*, *Info*, *Debug*, *Trace*, and *Off*.
    * - LogName
-     - The filename used by sinks of type *File*. The
-       resulting filename is ``<LogName>_<Sanitized-Participant-Name>_<ISO-TimeStamp>.txt``.
+     - The filename used by sinks of type *File*. The resulting filename is
+       ``<LogName>_<Sanitized-Participant-Name>_<ISO-TimeStamp>.txt`` for the
+       *Simple* format and
+       ``<LogName>_<Sanitized-Participant-Name>_<ISO-TimeStamp>.jsonl`` for the
+       *Json* format.
    * - Experimental: EnabledTopics
      - Optional allow-list of logging topics for this sink. If this list is non-empty,
        only messages with topics from this list are written to the sink.
    * - Experimental: DisabledTopics
      - Optional block-list of logging topics for this sink. Disabled topics are always
        filtered out, even if they are also listed in *EnabledTopics*.
+
+.. _sec:cfg-participant-logformat:
+
+Log message format
+========================================
+
+The *Format* property of a sink controls how log messages are
+rendered. It applies to sinks of type *Stdout* and *File*. Sinks of type
+*Remote* always transmit the messages in the *Simple* format.
+
+If the *Format* property is not set explicitly, sinks of type *File* default to
+*Json*, while sinks of type *Stdout* default to *Simple*.
+
+Simple
+   Human-readable, single-line text output. This is the default for *Stdout*
+   sinks. For *File* sinks, the messages are written to a ``.txt`` file.
+
+Json
+   One JSON object per line, which is
+   convenient for automated processing of the log. Each entry contains the UNIX
+   epoch timestamp in microseconds (``ts``), the participant name (``log``), the
+   log level (``lvl``), and the message (``msg``). Depending on the message, the
+    ``topic`` (the :ref:`logging topic<sec:cfg-participant-logtopics>`)
+   and the optional field ``kv`` (structured key-value data) are added. For *File* sinks, the
+   messages are written to a ``.jsonl`` file.
+
+The following example configures a *File* sink using the *Simple* format and a
+*Stdout* sink using the *Json* format:
+
+.. code-block:: yaml
+
+    Logging:
+      Sinks:
+      - Type: File
+        Format: Simple
+        Level: Trace
+        LogName: ParticipantLog
+      - Type: Stdout
+        Format: Json
+        Level: Info
 
 Experimental: Topic-based sink filtering
 ========================================
