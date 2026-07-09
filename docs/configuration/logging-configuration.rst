@@ -12,16 +12,20 @@ Logging Configuration
 Overview
 ========================================
 
-Within the SIL Kit, the Logger provides features for local and distributed logging on different log 
-levels.
+Within the SIL Kit, the Logger provides features for local and distributed logging on different log levels.
+
+- Logging output is configured through **sinks**, where each sink defines where messages are written (for example *Stdout*, *File*, or *Remote*) and which minimum log level is emitted.
+
+- Log messages can be classified by **topics** (for example middleware internals, service controllers, or user-level logging). Topic-based filtering can be configured per sink to include or exclude specific topics.
+
+- For sinks of type *Stdout* and *File*, the output **format** can be selected as *Simple* (human-readable text) or *Json* (structured one-object-per-line output).
 
 Configuration
 ========================================
 The Logging configuration allows to configure the logging behavior of the simulation participant.
 Within the SIL Kit, the Logger uses so-called sinks to store log messages.
-Multiple sinks can be configured at the same time. For example, to send log
-messages with log level ``Debug`` or higher to a remote logger and write ``Trace`` level
-logs to a file, the following configuration could be used:
+Multiple sinks can be configured at the same time. 
+For example, to send log messages with log level ``Debug`` or higher to a remote logger and write ``Trace`` level logs to a file, the following configuration could be used:
 
 .. code-block:: yaml
 
@@ -98,28 +102,36 @@ logs to a file, the following configuration could be used:
 Log message format
 ========================================
 
-The *Format* property of a sink controls how log messages are
-rendered. It applies to sinks of type *Stdout* and *File*. Sinks of type
-*Remote* always transmit the messages in the *Simple* format.
+The *Format* property of a sink controls how log messages are rendered. 
+It applies to sinks of type *Stdout* and *File*. 
+Sinks of type *Remote* always transmit the messages in the *Simple* format.
 
-If the *Format* property is not set explicitly, sinks of type *File* default to
-*Json*, while sinks of type *Stdout* default to *Simple*.
+.. note::
+
+  If the *Format* property is not set explicitly, sinks of type *File* default to *Json*, while sinks of type *Stdout* default to *Simple*.
 
 Simple
-   Human-readable, single-line text output. This is the default for *Stdout*
-   sinks. For *File* sinks, the messages are written to a ``.txt`` file.
+   Human-readable, single-line text output. 
+   This is the default for *Stdout* sinks.
+   For *File* sinks, the messages are written to a ``.txt`` file.
+
+   .. code-block:: text
+
+      [2026-07-09 11:59:50.287] [CanWriter] [trace] [TimeSync] Finished Simulation Step., ExecutionTime: 0.4058, VirtualTimeNS: 60000000
+
 
 Json
-   One JSON object per line, which is
-   convenient for automated processing of the log. Each entry contains the UNIX
-   epoch timestamp in microseconds (``ts``), the participant name (``log``), the
-   log level (``lvl``), and the message (``msg``). Depending on the message, the
-    ``topic`` (the :ref:`logging topic<sec:cfg-participant-logtopics>`)
-   and the optional field ``kv`` (structured key-value data) are added. For *File* sinks, the
-   messages are written to a ``.jsonl`` file.
+   One JSON object per line, which is convenient for automated processing of the log. 
 
-The following example configures a *File* sink using the *Simple* format and a
-*Stdout* sink using the *Json* format:
+   .. code-block:: text
+
+      {"ts":"1783591190287458","log":"CanWriter","lvl":"trace", "topic": "TimeSync", "msg": "Finished Simulation Step.", "kv": {"ExecutionTime":"0.4058","VirtualTimeNS":"60000000"} }
+   
+   Each entry contains the UNIX epoch timestamp in microseconds (``ts``), the participant name (``log``), the log level (``lvl``), and the message (``msg``). 
+   Depending on the message, the ``topic`` (see :ref:`logging topics<sec:cfg-participant-logtopics>`) and the optional field ``kv`` (structured key-value data) are added. 
+   For *File* sinks, the messages are written to a ``.jsonl`` file.
+
+The following example configures a *File* sink using the *Simple* format and a *Stdout* sink using the *Json* format:
 
 .. code-block:: yaml
 
@@ -132,6 +144,7 @@ The following example configures a *File* sink using the *Simple* format and a
       - Type: Stdout
         Format: Json
         Level: Info
+
 
 Experimental: Topic-based sink filtering
 ========================================
@@ -174,6 +187,7 @@ With the next example, topics that produce verbose log messages at startup are d
             - Asio
             - ServiceDiscovery
 
+.. _sec:cfg-participant-logtopics:
 
 The following topic names are currently assigned by SIL Kit components:
 
