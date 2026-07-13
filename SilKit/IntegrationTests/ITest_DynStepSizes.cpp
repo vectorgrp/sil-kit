@@ -92,9 +92,6 @@ void ITest_DynStepSizes::RunTestSetup(std::vector<ParticipantParams>& participan
 
         auto&& simParticipant = _simTestHarness->GetParticipant(participantParams.name, participantConfiguration);
         auto&& lifecycleService = simParticipant->GetOrCreateLifecycleService();
-        // The harness already created the time sync service for coordinated participants (reading the
-        // DynamicSimulationStep flag from the participant configuration above); reuse it and override the
-        // default no-op step handler below.
         auto* timeSyncService = simParticipant->GetOrCreateTimeSyncService();
 
         auto& handler = stepHandlers.emplace_back();
