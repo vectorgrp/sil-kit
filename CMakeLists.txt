@@ -10,6 +10,10 @@ cmake_minimum_required(VERSION 3.13)
 
 project("SilKit")
 
+# Root of the SIL Kit tree; used by components (e.g. SilKitYaml) to locate
+# vendored sources independently of the current subdirectory.
+set(SILKIT_TOP_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
+
 option(SILKIT_BUILD_DEMOS "Build the SIL Kit Demos" ON)
 option(SILKIT_BUILD_STATIC "Compile the SIL Kit as a static library" OFF)
 option(SILKIT_BUILD_TESTS "Enable unit and integration tests for the SIL Kit" ON)
@@ -133,6 +137,10 @@ if(MINGW)
     endif()
 endif()
 
+# Internal, self-contained YAML helper library (header-only). Must come before
+# SilKit, which depends on it, and after ThirdParty, which provides rapidyaml.
+add_subdirectory(SilKitYaml)
+
 # Have both SIL Kit library and demo project in a single solution
 add_subdirectory(SilKit)
 if(SILKIT_BUILD_UTILITIES)
@@ -158,6 +166,7 @@ if(SILKIT_INSTALL_SOURCE)
             ${CMAKE_CURRENT_SOURCE_DIR}/cmake
             ${CMAKE_CURRENT_SOURCE_DIR}/Demos
             ${CMAKE_CURRENT_SOURCE_DIR}/SilKit
+            ${CMAKE_CURRENT_SOURCE_DIR}/SilKitYaml
             ${CMAKE_CURRENT_SOURCE_DIR}/Utilities
         DESTINATION ${INSTALL_SOURCE_DIR}
         COMPONENT source

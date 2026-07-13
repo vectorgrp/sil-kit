@@ -5,9 +5,12 @@
 
 #include <string>
 
+#include "silkit/participant/exception.hpp"
+
 #include "config/YamlReader.hpp"
 #include "config/YamlWriter.hpp"
-#include "config/YamlParserUtils.hpp"
+
+#include "SilKitYaml/YamlSerdes.hpp"
 
 #include "rapidyaml.hpp"
 
@@ -17,67 +20,50 @@ namespace Config {
 
 //////////////////////////////////////////////////////////////////////
 // Configuration Parsing
+//
+// Thin wrappers around the generic SilKitYaml serdes templates, defaulting to the
+// SilKit concrete reader/writer for the in-tree configuration types. They form
+// the boundary that translates SilKitYaml::YamlError into the public
+// SilKit::ConfigurationError, preserving SIL Kit's exception contract.
 //////////////////////////////////////////////////////////////////////
 
 template <typename T, typename R = VSilKit::YamlReader>
 auto Deserialize(const std::string& input) -> T
 {
-    if (input.empty())
-    {
-        return {};
-    }
-
-    const auto rapidyamlCallbacks = VSilKit::GetRapidyamlCallbacks();
-
-    ryml::ParserOptions options{};
-    options.locations(true);
-
-    ryml::EventHandlerTree eventHandler{};
-    auto parser = ryml::Parser(&eventHandler, options);
-    parser.reserve_locations(100u);
-    auto&& cinput = ryml::to_csubstr(input);
     try
     {
-        auto tree = ryml::parse_in_arena(&parser, cinput);
-
-        // Install the error-handling callbacks. This will nicely format errors and throw an exception.
-        tree.callbacks(rapidyamlCallbacks);
-
-        // Extract a reference to the root node of the document tree.
-        auto root = tree.crootref();
-
-        R reader{parser, root};
-        T result{};
-        reader.Read(result);
-        return result;
+        return SilKitYaml::Deserialize<T, R>(input);
     }
     catch (const std::exception& ex)
     {
         throw SilKit::ConfigurationError{ex.what()};
     }
-    catch (...)
-    {
-        throw;
-    }
 }
-
 
 template <typename T, typename W = VSilKit::YamlWriter>
 auto Serialize(const T& input) -> std::string
 {
-    ryml::Tree t;
-    W writer{t.rootref()};
-    writer.Write(input);
-    return ryml::emitrs_yaml<std::string>(t);
+    try
+    {
+        return SilKitYaml::Serialize<T, W>(input);
+    }
+    catch (const std::exception& ex)
+    {
+        throw SilKit::ConfigurationError{ex.what()};
+    }
 }
 
 template <typename T, typename W = VSilKit::YamlWriter>
 auto SerializeAsJson(const T& input) -> std::string
 {
-    ryml::Tree t;
-    W writer{t.rootref()};
-    writer.Write(input);
-    return ryml::emitrs_json<std::string>(t);
+    try
+    {
+        return SilKitYaml::SerializeAsJson<T, W>(input);
+    }
+    catch (const std::exception& ex)
+    {
+        throw SilKit::ConfigurationError{ex.what()};
+    }
 }
 
 } // namespace Config

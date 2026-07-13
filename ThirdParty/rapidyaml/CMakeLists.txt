@@ -1,18 +1,19 @@
-add_library(rapidyaml-static STATIC
-    rapidyaml.hpp
-    rapidyaml-0.9.0.cpp
+add_library(rapidyaml STATIC
+    src/rapidyaml.cpp
+    include/rapidyaml.hpp
+    include/rapidyaml-0.9.0.hpp
 )
 
-target_include_directories(rapidyaml-static 
-	INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
+target_include_directories(rapidyaml
+	PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
-target_compile_definitions(rapidyaml-static
-	PUBLIC
-	RYML_DEFAULT_CALLBACK_USES_EXCEPTIONS=1
+target_compile_definitions(rapidyaml
+	PUBLIC RYML_DEFAULT_CALLBACK_USES_EXCEPTIONS=1
 )
+
 if(UNIX)
-    set_target_properties(rapidyaml-static
+    set_target_properties(rapidyaml
         PROPERTIES
         VISIBILITY_INLINES_HIDDEN 1
         CXX_VISIBILITY_PRESET hidden
