@@ -144,7 +144,7 @@ void ITest_DynStepSizes::AssertAllStepsEqual(const std::vector<ParticipantParams
 
         for (size_t j = 0; j < ref.size(); ++j)
         {
-            EXPECT_EQ(ref[j], cmp[j]) << "Differenz at index " << j << ": " << participantsParams[0].name
+            EXPECT_EQ(ref[j], cmp[j]) << "Difference at index " << j << ": " << participantsParams[0].name
                                       << "(now=" << ref[j].first << ", duration=" << ref[j].second << ")"
                                       << " vs " << participantsParams[i].name << "(now=" << cmp[j].first
                                       << ", duration=" << cmp[j].second << ")";
@@ -186,7 +186,7 @@ void ITest_DynStepSizes::AssertStepsEqual(const std::vector<std::chrono::nanosec
 
     for (size_t j = 0; j < s1.size(); ++j)
     {
-        EXPECT_EQ(s1[j], s2[j]) << "Differenz at index " << j << ": "
+        EXPECT_EQ(s1[j], s2[j]) << "Difference at index " << j << ": "
                                 << "s1 now=" << s1[j] << " vs s2 now=" << s2[j];
     }
 }
