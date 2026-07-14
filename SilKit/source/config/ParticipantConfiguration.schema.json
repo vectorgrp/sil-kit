@@ -471,18 +471,6 @@
                 "type": "string",
                 "enum": [ "Simple", "Json" ]
               },
-              "DisabledTopics": {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              },
-              "EnabledTopics": {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              },
               "Level": {
                 "type": "string",
                 "enum": [
@@ -622,6 +610,12 @@
           },
           "History": {
             "$ref": "#/definitions/History"
+          },
+          "UseTraceSinks": {
+            "$ref": "#/definitions/UseTraceSinks"
+          },
+          "Replay": {
+            "$ref": "#/definitions/Replay"
           }
         },
         "additionalProperties": false,
@@ -642,6 +636,12 @@
           },
           "Labels": {
             "$ref": "#/definitions/Labels"
+          },
+          "UseTraceSinks": {
+            "$ref": "#/definitions/UseTraceSinks"
+          },
+          "Replay": {
+            "$ref": "#/definitions/Replay"
           }
         },
         "additionalProperties": false,
@@ -662,6 +662,12 @@
           },
           "Labels": {
             "$ref": "#/definitions/Labels"
+          },
+          "UseTraceSinks": {
+            "$ref": "#/definitions/UseTraceSinks"
+          },
+          "Replay": {
+            "$ref": "#/definitions/Replay"
           }
         },
         "additionalProperties": false,
@@ -682,6 +688,12 @@
           },
           "Labels": {
             "$ref": "#/definitions/Labels"
+          },
+          "UseTraceSinks": {
+            "$ref": "#/definitions/UseTraceSinks"
+          },
+          "Replay": {
+            "$ref": "#/definitions/Replay"
           }
         },
         "additionalProperties": false,
@@ -821,6 +833,18 @@
         },
         "EnableDomainSockets": {
           "type": "boolean",
+          "default": true
+        },
+        "AcceptorUris": {
+          "type": "array",
+          "description": "Explicit list of endpoints this participant will accept connections on",
+          "items": {
+            "type": "string"
+          }
+        },
+        "RegistryAsFallbackProxy": {
+          "type": "boolean",
+          "description": "Enables communication with other participants using the registry as a proxy",
           "default": true
         },
         "ConnectTimeoutSeconds": {
