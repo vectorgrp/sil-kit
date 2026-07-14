@@ -351,7 +351,7 @@ int main(int argc, char** argv)
         return -1;
     }
 
-    const auto participantName{commandlineParser.Get<CliParser::Option>("name").Value()};
+    const auto participantNameFromCli{commandlineParser.Get<CliParser::Option>("name").Value()};
     const auto nonInteractiveMode = (commandlineParser.Get<CliParser::Flag>("non-interactive").Value());
 
     const bool hasLogOption{commandlineParser.Get<CliParser::Option>("log").HasValue()};
@@ -365,7 +365,7 @@ int main(int argc, char** argv)
 
     const auto configurationFilename{commandlineParser.Get<CliParser::Option>("configuration").Value()};
     const auto requiredParticipantNames{commandlineParser.Get<CliParser::PositionalList>("participantNames").Values()};
-    const auto connectUri{commandlineParser.Get<CliParser::Option>("connect-uri").Value()};
+    const auto connectUriFromCli{commandlineParser.Get<CliParser::Option>("connect-uri").Value()};
 
     const auto logLevel{commandlineParser.Get<CliParser::Option>("log").Value()};
     if (!IsValidLogLevel(logLevel))
@@ -413,9 +413,11 @@ int main(int argc, char** argv)
 
     try
     {
-        std::cout << "Creating participant '" << participantName << "' with registry " << connectUri << std::endl;
+        auto participant = SilKit::CreateParticipant(configuration, participantNameFromCli, connectUriFromCli);
 
-        auto participant = SilKit::CreateParticipant(configuration, participantName, connectUri);
+        // The name and URI might have changed due to the configuration, so we retrieve them from the participant after creation
+        const auto participantName{participant->GetParticipantName()};
+        const auto connectUri{participant->GetRegistryUri()};
 
         auto* logger{participant->GetLogger()};
         {

@@ -36,6 +36,8 @@
 
 #include "silkit/detail/impl/netsim/NetworkSimulator.hpp"
 
+#include "silkit/detail/impl/participant/ParameterProvider.hpp"
+
 namespace SilKit {
 DETAIL_SILKIT_DETAIL_VN_NAMESPACE_BEGIN
 namespace Impl {
@@ -82,6 +84,10 @@ public:
     inline auto CreateSystemMonitor() -> SilKit::Services::Orchestration::ISystemMonitor* override;
 
     inline auto GetLogger() -> SilKit::Services::Logging::ILogger* override;
+
+    inline auto GetParticipantName() const -> std::string override;
+
+    inline auto GetRegistryUri() const -> std::string override;
 
     inline auto ExperimentalCreateNetworkSimulator() -> SilKit::Experimental::NetworkSimulation::INetworkSimulator*;
 
@@ -222,6 +228,17 @@ auto Participant::CreateSystemMonitor() -> SilKit::Services::Orchestration::ISys
 auto Participant::GetLogger() -> SilKit::Services::Logging::ILogger*
 {
     return _logger.get();
+}
+
+
+auto Participant::GetParticipantName() const -> std::string
+{
+    return Impl::GetParticipantName(_participant);
+}
+
+auto Participant::GetRegistryUri() const -> std::string
+{
+    return Impl::GetRegistryUri(_participant);
 }
 
 auto Participant::ExperimentalCreateSystemController()

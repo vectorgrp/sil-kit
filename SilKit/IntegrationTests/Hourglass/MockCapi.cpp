@@ -769,6 +769,21 @@ extern "C"
         return globalCapi->SilKit_Participant_GetLogger(outLogger, participant);
     }
 
+    SilKit_ReturnCode SilKitCALL SilKit_Participant_GetParticipantName(char* outParticipantName,
+                                                                       size_t* inOutParticipantNameSize,
+                                                                       SilKit_Participant* participant)
+    {
+        return globalCapi->SilKit_Participant_GetParticipantName(outParticipantName, inOutParticipantNameSize,
+                                                                  participant);
+    }
+
+    SilKit_ReturnCode SilKitCALL SilKit_Participant_GetRegistryUri(char* outRegistryUri,
+                                                                    size_t* inOutRegistryUriSize,
+                                                                    SilKit_Participant* participant)
+    {
+        return globalCapi->SilKit_Participant_GetRegistryUri(outRegistryUri, inOutRegistryUriSize, participant);
+    }
+
     // ParticipantConfiguration
 
     SilKit_ReturnCode SilKitCALL SilKit_ParticipantConfiguration_FromString(

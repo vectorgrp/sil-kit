@@ -51,15 +51,15 @@ class IParticipantInternal : public IParticipant
 public:
     // ----------------------------------------
     // Public methods
-    virtual auto GetParticipantName() const -> const std::string& = 0;
+    virtual auto GetParticipantName() const -> std::string = 0;
 
     /*! \brief Returns the URI of the registry this participant is connecting to.
      *
-     * The URI must be specified in the configuration (which has priority) or the CreateParticipant call.
      *
      * @return the URI of the registry
+     * The URI must be specified in the configuration (which has priority) or the CreateParticipant call.
      */
-    virtual auto GetRegistryUri() const -> const std::string& = 0;
+    virtual auto GetRegistryUri() const -> std::string = 0;
 
     /*! \brief Connect to the registry and join the simulation.
     *

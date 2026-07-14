@@ -41,3 +41,5 @@ add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_CapiLin.cpp LIBS S_Si
 add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_CapiSymbols.cpp LIBS S_SilKitImpl)
 add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_CapiNetSim.cpp LIBS S_SilKitImpl I_SilKit)
 add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_CapiExceptions.cpp LIBS S_SilKitImpl)
+add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_CapiGetParameter.cpp LIBS S_SilKitImpl)
+

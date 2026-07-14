@@ -1052,6 +1052,7 @@ auto Participant<SilKitConnectionT>::GetLoggerInternal() -> Services::Logging::I
     return _logger.get();
 }
 
+
 template <class SilKitConnectionT>
 void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const Can::WireCanFrameEvent& msg)
 {

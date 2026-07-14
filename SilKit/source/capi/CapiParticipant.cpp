@@ -15,11 +15,36 @@
 #include "capi/CapiImpl.hpp"
 #include "capi/TypeConversion.hpp"
 
+#include <algorithm>
 #include <memory>
 #include <map>
 #include <mutex>
 #include <fstream>
+#include <string_view>
 
+namespace
+{
+auto CopyStringToOutBuffer(std::string_view value, char* outStringBuffer, size_t* inOutStringBufferSize)
+    -> SilKit_ReturnCode
+{
+    // Passing outStringBuffer == nullptr performs a size-check only.
+    const auto requiredSize = value.size() + 1; // include '\0'
+
+    if (outStringBuffer != nullptr)
+    {
+        const auto bufferSize = *inOutStringBufferSize;
+        if (bufferSize > 0)
+        {
+            const auto sizeToCopy = std::min(value.size(), bufferSize - 1);
+            value.copy(outStringBuffer, sizeToCopy);
+            outStringBuffer[sizeToCopy] = '\0';
+        }
+    }
+
+    *inOutStringBufferSize = requiredSize;
+    return SilKit_ReturnCode_SUCCESS;
+}
+} // namespace
 
 SilKit_ReturnCode SilKitCALL SilKit_Participant_Create(SilKit_Participant** outParticipant,
                                                        SilKit_ParticipantConfiguration* participantConfiguration,
@@ -83,6 +108,32 @@ try
     auto logger = GetLoggerInternal(cppParticipant);
     *outLogger = reinterpret_cast<SilKit_Logger*>(logger);
     return SilKit_ReturnCode_SUCCESS;
+}
+CAPI_CATCH_EXCEPTIONS
+
+SilKit_ReturnCode SilKitCALL SilKit_Participant_GetParticipantName(char* outParticipantName,
+                                                                   size_t* inOutParticipantNameSize,
+                                                                   SilKit_Participant* participant)
+try
+{
+    ASSERT_VALID_OUT_PARAMETER(inOutParticipantNameSize);
+    ASSERT_VALID_POINTER_PARAMETER(participant);
+
+    auto cppParticipant = reinterpret_cast<SilKit::IParticipant*>(participant);
+    return CopyStringToOutBuffer(cppParticipant->GetParticipantName(), outParticipantName, inOutParticipantNameSize);
+}
+CAPI_CATCH_EXCEPTIONS
+
+SilKit_ReturnCode SilKitCALL SilKit_Participant_GetRegistryUri(char* outRegistryUri,
+                                                               size_t* inOutRegistryUriSize,
+                                                               SilKit_Participant* participant)
+try
+{
+    ASSERT_VALID_OUT_PARAMETER(inOutRegistryUriSize);
+    ASSERT_VALID_POINTER_PARAMETER(participant);
+
+    auto cppParticipant = reinterpret_cast<SilKit::IParticipant*>(participant);
+    return CopyStringToOutBuffer(cppParticipant->GetRegistryUri(), outRegistryUri, inOutRegistryUriSize);
 }
 CAPI_CATCH_EXCEPTIONS
 
