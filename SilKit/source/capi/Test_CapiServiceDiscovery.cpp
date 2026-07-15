@@ -266,4 +266,119 @@ TEST_F(Test_CapiServiceDiscovery, malformed_labels_are_swallowed)
     EXPECT_EQ(data.primaryIdentifier, "TopicA");
 }
 
+// --------------------------------------------------------------------------------------------------
+// Connection-gated DataSubscriber synthesis: a user-facing DataSubscriber is reported only while it
+// has at least one confirmed connection (a DataSubscriberInternal announcement whose parent-service
+// id points back at it). Internal services and the transport UUID are never exposed.
+// --------------------------------------------------------------------------------------------------
+
+namespace {
+// User-facing DataSubscriber with an explicit service id and topic (topic drives primaryIdentifier).
+auto MakeUserSubscriber(SilKit::Core::EndpointId serviceId, const std::string& topic) -> ServiceDescriptor
+{
+    ServiceDescriptor descriptor;
+    descriptor.SetParticipantNameAndComputeId("SubParticipant");
+    descriptor.SetServiceName("Sub");
+    descriptor.SetNetworkName("default");
+    descriptor.SetServiceType(ServiceType::Controller);
+    descriptor.SetServiceId(serviceId);
+    descriptor.SetSupplementalDataItem(Discovery::controllerType, Discovery::controllerTypeDataSubscriber);
+    descriptor.SetSupplementalDataItem(Discovery::supplKeyDataSubscriberTopic, topic);
+    return descriptor;
+}
+
+// DataSubscriberInternal (a confirmed connection) whose parent is the user-facing subscriber above.
+auto MakeInternalConnection(SilKit::Core::EndpointId serviceId, SilKit::Core::EndpointId parentServiceId)
+    -> ServiceDescriptor
+{
+    ServiceDescriptor descriptor;
+    descriptor.SetParticipantNameAndComputeId("SubParticipant");
+    descriptor.SetServiceName("SubInternal");
+    descriptor.SetNetworkName("pub-uuid");
+    descriptor.SetServiceType(ServiceType::Controller);
+    descriptor.SetServiceId(serviceId);
+    descriptor.SetSupplementalDataItem(Discovery::controllerType, Discovery::controllerTypeDataSubscriberInternal);
+    descriptor.SetSupplementalDataItem(Discovery::supplKeyDataSubscriberInternalParentServiceID,
+                                       std::to_string(parentServiceId));
+    return descriptor;
+}
+} // namespace
+
+TEST_F(Test_CapiServiceDiscovery, subscriber_without_connection_is_not_reported)
+{
+    CallbackData data;
+    auto handler = InstallHandler(data);
+
+    handler(ServiceDiscoveryEvent::Type::ServiceCreated, MakeUserSubscriber(100, "T"));
+
+    EXPECT_EQ(data.callCount, 0);
+}
+
+TEST_F(Test_CapiServiceDiscovery, subscriber_reported_when_connection_appears)
+{
+    CallbackData data;
+    auto handler = InstallHandler(data);
+
+    handler(ServiceDiscoveryEvent::Type::ServiceCreated, MakeUserSubscriber(100, "T"));
+    handler(ServiceDiscoveryEvent::Type::ServiceCreated, MakeInternalConnection(200, 100));
+
+    EXPECT_EQ(data.callCount, 1);
+    EXPECT_EQ(data.lastType, SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceCreated);
+    EXPECT_EQ(data.serviceKind, SilKit_Experimental_ServiceKind_DataSubscriber);
+    EXPECT_EQ(data.primaryIdentifier, "T");
+}
+
+TEST_F(Test_CapiServiceDiscovery, subscriber_reported_when_connection_arrives_before_subscriber)
+{
+    CallbackData data;
+    auto handler = InstallHandler(data);
+
+    // Reversed order: the connection is discovered before the user-facing subscriber.
+    handler(ServiceDiscoveryEvent::Type::ServiceCreated, MakeInternalConnection(200, 100));
+    EXPECT_EQ(data.callCount, 0);
+
+    handler(ServiceDiscoveryEvent::Type::ServiceCreated, MakeUserSubscriber(100, "T"));
+    EXPECT_EQ(data.callCount, 1);
+    EXPECT_EQ(data.lastType, SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceCreated);
+    EXPECT_EQ(data.serviceKind, SilKit_Experimental_ServiceKind_DataSubscriber);
+}
+
+TEST_F(Test_CapiServiceDiscovery, subscriber_removed_when_connection_removed)
+{
+    CallbackData data;
+    auto handler = InstallHandler(data);
+
+    handler(ServiceDiscoveryEvent::Type::ServiceCreated, MakeUserSubscriber(100, "T"));
+    handler(ServiceDiscoveryEvent::Type::ServiceCreated, MakeInternalConnection(200, 100));
+    ASSERT_EQ(data.callCount, 1);
+
+    handler(ServiceDiscoveryEvent::Type::ServiceRemoved, MakeInternalConnection(200, 100));
+
+    EXPECT_EQ(data.callCount, 2);
+    EXPECT_EQ(data.lastType, SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceRemoved);
+    EXPECT_EQ(data.serviceKind, SilKit_Experimental_ServiceKind_DataSubscriber);
+}
+
+TEST_F(Test_CapiServiceDiscovery, subscriber_reported_once_for_multiple_connections)
+{
+    CallbackData data;
+    auto handler = InstallHandler(data);
+
+    handler(ServiceDiscoveryEvent::Type::ServiceCreated, MakeUserSubscriber(100, "T"));
+
+    // Two publishers => two internal connections for the same subscriber: only one ServiceCreated.
+    handler(ServiceDiscoveryEvent::Type::ServiceCreated, MakeInternalConnection(200, 100));
+    handler(ServiceDiscoveryEvent::Type::ServiceCreated, MakeInternalConnection(201, 100));
+    EXPECT_EQ(data.callCount, 1);
+
+    // Removing one connection keeps the subscriber connected (no event).
+    handler(ServiceDiscoveryEvent::Type::ServiceRemoved, MakeInternalConnection(200, 100));
+    EXPECT_EQ(data.callCount, 1);
+
+    // Removing the last connection reports the subscriber removed.
+    handler(ServiceDiscoveryEvent::Type::ServiceRemoved, MakeInternalConnection(201, 100));
+    EXPECT_EQ(data.callCount, 2);
+    EXPECT_EQ(data.lastType, SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceRemoved);
+}
+
 } // namespace

@@ -31,7 +31,6 @@
 #include <memory>
 #include <mutex>
 #include <string>
-#include <thread>
 #include <vector>
 
 #include "silkit/SilKit.hpp"
@@ -246,7 +245,7 @@ TEST_F(ITest_CapiServiceDiscovery, both_subscribers_receive_published_data)
     const std::string mediaType{"M"};
     PubSubSpec spec{topic, mediaType};
 
-    struct RecvLatch
+    struct ReceiveLatch
     {
         std::mutex mutex;
         std::condition_variable cv;
@@ -278,34 +277,35 @@ TEST_F(ITest_CapiServiceDiscovery, both_subscribers_receive_published_data)
     EXPECT_TRUE(latch.Wait(2, kWaitTimeout)) << "both subscribers should receive the published sample";
 }
 
-// VALIDATOR (follow-up): the gating discriminator. A subscriber whose topic has no publisher must
-// NOT produce a DataSubscriber ServiceCreated event at the observer. Today the user-facing
-// subscriber event fires on creation regardless, so this FAILS. It PASSES once the C API gates
-// the event on a confirmed internal match.
-TEST_F(ITest_CapiServiceDiscovery, DISABLED_no_subscriber_event_without_matching_publisher)
+// The gating discriminator. A subscriber whose topic has no publisher must NOT produce a
+// DataSubscriber ServiceCreated event at the observer: the C API only reports a subscriber once it
+// is connected to a publisher (a confirmed internal match).
+//
+// The barrier is deterministic (no wall-clock wait): the unmatched subscriber and a sentinel
+// publisher are created, in that order, on the SAME participant. All of a participant's service
+// announcements reach the observer over a single in-order connection, so the subscriber's
+// announcement is delivered no later than the sentinel's. Once the observer has seen the sentinel
+// publisher, it has necessarily already processed the subscriber's announcement -- so if the
+// (removed) premature-report behavior were present, the event would already be recorded.
+TEST_F(ITest_CapiServiceDiscovery, no_subscriber_event_without_matching_publisher)
 {
     const std::string lonelyTopic{"LonelyTopic"};
-    const std::string otherTopic{"OtherTopic"};
+    const std::string sentinelTopic{"SentinelTopic"};
     const std::string mediaType{"M"};
 
-    // A publisher on an unrelated topic gives us a deterministic "discovery has propagated" signal
-    // without ever matching the lonely subscriber.
-    auto publisher = CreateParticipant("Pub");
-    publisher->CreateDataPublisher("PubCtrl", PubSubSpec{otherTopic, mediaType}, 0);
+    auto participant = CreateParticipant("LonelyParticipant");
 
-    auto subscriber = CreateParticipant("LonelySub");
-    subscriber->CreateDataSubscriber("SubCtrl", PubSubSpec{lonelyTopic, mediaType},
-                                     [](IDataSubscriber*, const DataMessageEvent&) {});
+    // Unmatched subscriber first, then the sentinel publisher (unrelated topic, so it never matches
+    // the subscriber) -- both on the same participant to get in-order delivery to the observer.
+    participant->CreateDataSubscriber("SubCtrl", PubSubSpec{lonelyTopic, mediaType},
+                                      [](IDataSubscriber*, const DataMessageEvent&) {});
+    participant->CreateDataPublisher("SentinelPub", PubSubSpec{sentinelTopic, mediaType}, 0);
 
-    // Wait until discovery has demonstrably reached the observer (it sees the unrelated publisher).
     ASSERT_TRUE(WaitFor([&] {
         return CountUnlocked(SilKit_Experimental_ServiceKind_DataPublisher,
-                             SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceCreated, otherTopic)
+                             SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceCreated, sentinelTopic)
                >= 1;
-    })) << "observer never saw the unrelated publisher";
-
-    // Grace period for any (erroneously emitted) subscriber event to arrive as well.
-    std::this_thread::sleep_for(500ms);
+    })) << "observer never saw the sentinel publisher";
 
     EXPECT_EQ(Count(SilKit_Experimental_ServiceKind_DataSubscriber,
                     SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceCreated, lonelyTopic),
@@ -313,11 +313,10 @@ TEST_F(ITest_CapiServiceDiscovery, DISABLED_no_subscriber_event_without_matching
         << "an unmatched subscriber must not be reported as connected";
 }
 
-// VALIDATOR (follow-up): the removal-synthesis half. Start matched (observer sees the subscriber
-// connected), then destroy the publisher; the observer must receive a synthesized DataSubscriber
-// ServiceRemoved (disconnected) event. Today destroying the publisher does not remove the
-// user-facing subscriber, so no such event is emitted and this FAILS.
-TEST_F(ITest_CapiServiceDiscovery, DISABLED_subscriber_event_removed_when_publisher_leaves)
+// The removal-synthesis half. Start matched (observer sees the subscriber connected), then destroy
+// the publisher; the observer must receive a synthesized DataSubscriber ServiceRemoved
+// (disconnected) event once the subscriber's last connection drops.
+TEST_F(ITest_CapiServiceDiscovery, subscriber_event_removed_when_publisher_leaves)
 {
     const std::string topic{"T"};
     const std::string mediaType{"M"};
