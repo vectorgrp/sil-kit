@@ -42,8 +42,7 @@ struct CallbackData
     SilKit_Experimental_ServiceKind serviceKind{SilKit_Experimental_ServiceKind_Undefined};
     std::string participantName;
     std::string serviceName;
-    std::string networkName;
-    std::string networkOrTopic;
+    std::string primaryIdentifier;
     std::string mediaType;
     std::vector<CapturedLabel> labels;
 };
@@ -57,8 +56,7 @@ void SilKitCALL CapturingHandler(void* context, SilKit_Experimental_ServiceDisco
     data->serviceKind = serviceDescriptor->serviceKind;
     data->participantName = serviceDescriptor->participantName;
     data->serviceName = serviceDescriptor->serviceName;
-    data->networkName = serviceDescriptor->networkName;
-    data->networkOrTopic = serviceDescriptor->networkOrTopic;
+    data->primaryIdentifier = serviceDescriptor->primaryIdentifier;
     data->mediaType = serviceDescriptor->mediaType;
     data->labels.clear();
     for (size_t i = 0; i < serviceDescriptor->labelList.numLabels; ++i)
@@ -152,8 +150,7 @@ TEST_F(Test_CapiServiceDiscovery, reports_can_controller)
     EXPECT_EQ(data.serviceKind, SilKit_Experimental_ServiceKind_CanController);
     EXPECT_EQ(data.participantName, "ParticipantA");
     EXPECT_EQ(data.serviceName, "Can1");
-    EXPECT_EQ(data.networkName, "CAN1");
-    EXPECT_EQ(data.networkOrTopic, "CAN1"); // bus controller: join key is the network name
+    EXPECT_EQ(data.primaryIdentifier, "CAN1"); // bus controller: identifier is the network name
     EXPECT_EQ(data.mediaType, "");
     EXPECT_TRUE(data.labels.empty());
 }
@@ -175,8 +172,7 @@ TEST_F(Test_CapiServiceDiscovery, reports_data_publisher_with_decoded_metadata)
 
     EXPECT_EQ(data.callCount, 1);
     EXPECT_EQ(data.serviceKind, SilKit_Experimental_ServiceKind_DataPublisher);
-    EXPECT_EQ(data.networkName, "pub-uuid-1234");
-    EXPECT_EQ(data.networkOrTopic, "TopicA"); // pub/sub: join key is the topic
+    EXPECT_EQ(data.primaryIdentifier, "TopicA"); // pub/sub: identifier is the topic
     EXPECT_EQ(data.mediaType, "application/json");
     ASSERT_EQ(data.labels.size(), 2u);
     EXPECT_EQ(data.labels[0].key, "kA");
@@ -198,7 +194,7 @@ TEST_F(Test_CapiServiceDiscovery, reports_rpc_client_with_function_name)
     handler(ServiceDiscoveryEvent::Type::ServiceCreated, descriptor);
 
     EXPECT_EQ(data.serviceKind, SilKit_Experimental_ServiceKind_RpcClient);
-    EXPECT_EQ(data.networkOrTopic, "Add"); // rpc: join key is the function name
+    EXPECT_EQ(data.primaryIdentifier, "Add"); // rpc: identifier is the function name
     EXPECT_EQ(data.mediaType, "application/octet-stream");
 }
 
@@ -217,8 +213,7 @@ TEST_F(Test_CapiServiceDiscovery, reports_network_link)
 
     EXPECT_EQ(data.callCount, 1);
     EXPECT_EQ(data.serviceKind, SilKit_Experimental_ServiceKind_NetworkLink);
-    EXPECT_EQ(data.networkName, "CAN1");
-    EXPECT_EQ(data.networkOrTopic, "CAN1");
+    EXPECT_EQ(data.primaryIdentifier, "CAN1");
 }
 
 TEST_F(Test_CapiServiceDiscovery, reports_removal)
@@ -268,7 +263,7 @@ TEST_F(Test_CapiServiceDiscovery, malformed_labels_are_swallowed)
     EXPECT_NO_THROW(handler(ServiceDiscoveryEvent::Type::ServiceCreated, descriptor));
     EXPECT_EQ(data.callCount, 1);
     EXPECT_EQ(data.serviceKind, SilKit_Experimental_ServiceKind_DataPublisher);
-    EXPECT_EQ(data.networkOrTopic, "TopicA");
+    EXPECT_EQ(data.primaryIdentifier, "TopicA");
 }
 
 } // namespace

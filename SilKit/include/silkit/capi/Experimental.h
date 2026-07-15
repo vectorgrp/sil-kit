@@ -65,12 +65,10 @@ typedef struct
     const char* serviceName;
     //! The kind of service.
     SilKit_Experimental_ServiceKind serviceKind;
-    //! Raw network/link identifier. The user-facing network name for bus controllers (e.g. "CAN1"); a generated id or
-    //! "default" for pub/sub and RPC.
-    const char* networkName;
-    //! Convenience join key for visualization: the network name for bus controllers and links, the topic for
-    //! pub/sub, and the function name for RPC.
-    const char* networkOrTopic;
+    //! The primary, user-facing identifier of the service: the network name for bus controllers (e.g. "CAN1") and
+    //! network links, the topic for pub/sub, and the function name for RPC. Suitable as a display / join key for
+    //! visualization and tooling.
+    const char* primaryIdentifier;
     //! Media type for pub/sub and RPC services; empty string when not applicable.
     const char* mediaType;
     //! Decoded matching labels for pub/sub and RPC services; empty for bus controllers and links.
