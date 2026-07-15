@@ -117,7 +117,7 @@
         "pdAcceptedStartupRange": 212,
         "pdListenTimeout": 400162,
         "pdMicrotick": "25ns",
-        "pSecondKeySlotId": 1337,
+        "pSecondKeySlotId": 11,
         "pTwoKeySlotMode": 1
       },
       "TxBufferConfigurations": [
@@ -217,8 +217,13 @@
     "Sinks": [
       {
         "Type": "File",
+        "Format": "Simple",
         "Level": "Critical",
-        "LogName": "MyLog1"
+        "LogName": "MyLog1",
+        "Experimental": {
+          "EnabledTopics": ["Can"],
+          "DisabledTopics": ["MessageTracing", "Flexray"]
+        }
       }
     ],
     "FlushLevel": "Critical",
@@ -258,8 +263,12 @@
     "EnableDomainSockets": false,
     "TcpSendBufferSize": 3456,
     "TcpReceiveBufferSize": 3456,
+    "AcceptorUris": [
+      "silkit://localhost:0"
+    ],
     "RegistryAsFallbackProxy": false,
-    "ConnectTimeoutSeconds": 1.234
+    "ConnectTimeoutSeconds": 1.234,
+    "ExperimentalRemoteParticipantConnection": false
   },
   "Experimental": {
     "TimeSynchronization": {
