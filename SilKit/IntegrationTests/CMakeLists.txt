@@ -177,6 +177,10 @@ add_silkit_test_to_executable(SilKitIntegrationTests
     SOURCES ITest_PubHistory.cpp
 )
 
+add_silkit_test_to_executable(SilKitIntegrationTests
+    SOURCES ITest_CapiServiceDiscovery.cpp
+)
+
 # RPC
 
 add_silkit_test_to_executable(SilKitInternalIntegrationTests
