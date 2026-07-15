@@ -71,8 +71,7 @@ auto ClassifyAndFill(const SilKit::Core::ServiceDescriptor& serviceDescriptor,
     SilKit_Struct_Init(SilKit_Experimental_ServiceDescriptor, out);
     out.participantName = serviceDescriptor.GetParticipantName().c_str();
     out.serviceName = serviceDescriptor.GetServiceName().c_str();
-    out.networkName = serviceDescriptor.GetNetworkName().c_str();
-    out.networkOrTopic = serviceDescriptor.GetNetworkName().c_str();
+    out.primaryIdentifier = serviceDescriptor.GetNetworkName().c_str();
     out.mediaType = "";
 
     // Network links carry no controller type and are reported as-is.
@@ -138,7 +137,7 @@ auto ClassifyAndFill(const SilKit::Core::ServiceDescriptor& serviceDescriptor,
         out.serviceKind = SilKit_Experimental_ServiceKind_DataPublisher;
         if (const char* topic = findValue(Discovery::supplKeyDataPublisherTopic))
         {
-            out.networkOrTopic = topic;
+            out.primaryIdentifier = topic;
         }
         if (const char* mediaType = findValue(Discovery::supplKeyDataPublisherMediaType))
         {
@@ -151,7 +150,7 @@ auto ClassifyAndFill(const SilKit::Core::ServiceDescriptor& serviceDescriptor,
         out.serviceKind = SilKit_Experimental_ServiceKind_DataSubscriber;
         if (const char* topic = findValue(Discovery::supplKeyDataSubscriberTopic))
         {
-            out.networkOrTopic = topic;
+            out.primaryIdentifier = topic;
         }
         if (const char* mediaType = findValue(Discovery::supplKeyDataSubscriberMediaType))
         {
@@ -164,7 +163,7 @@ auto ClassifyAndFill(const SilKit::Core::ServiceDescriptor& serviceDescriptor,
         out.serviceKind = SilKit_Experimental_ServiceKind_RpcClient;
         if (const char* functionName = findValue(Discovery::supplKeyRpcClientFunctionName))
         {
-            out.networkOrTopic = functionName;
+            out.primaryIdentifier = functionName;
         }
         if (const char* mediaType = findValue(Discovery::supplKeyRpcClientMediaType))
         {
@@ -177,7 +176,7 @@ auto ClassifyAndFill(const SilKit::Core::ServiceDescriptor& serviceDescriptor,
         out.serviceKind = SilKit_Experimental_ServiceKind_RpcServer;
         if (const char* functionName = findValue(Discovery::supplKeyRpcServerFunctionName))
         {
-            out.networkOrTopic = functionName;
+            out.primaryIdentifier = functionName;
         }
         if (const char* mediaType = findValue(Discovery::supplKeyRpcServerMediaType))
         {
