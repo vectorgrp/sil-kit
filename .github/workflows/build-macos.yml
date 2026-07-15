@@ -1,22 +1,30 @@
-name: 'Validate Participant Configuration Examples'
+name: macOS build
+
 on:
+  workflow_call:
+    inputs:
+      run_build:
+        required: true
+        type: boolean
+
   workflow_dispatch:
 
-  push:
-    branches: [ 'main' ]
-
 jobs:
-  validate-participant-configs:
-    name: Validate participant configuration examples against JSON schema
-    runs-on: ubuntu-24.04
+  build-macos:
+    runs-on: macos-latest
+    continue-on-error: true
+    if: (inputs.run_build == true) || (github.event_name == 'push') || (github.event_name == 'workflow_dispatch')
+
     steps:
-      - uses: actions/checkout@v6
-        with:
-          submodules: false
-      - name: Install Dependencies
-        run: |
-          python3 -m pip install --quiet jsonschema pyyaml
-      - name: Validate participant configuration examples
-        run: |
-          python3 ./SilKit/ci/validate_participant_configs.py
-        shell: bash
+    - uses: actions/checkout@v6
+      with:
+        submodules: true
+
+    - name: Setup host
+      run: brew install ninja doxygen
+
+    - uses: ./.github/actions/build-cmake-preset
+      with:
+        preset-name: release
+        cmake-args: "-DCMAKE_POLICY_VERSION_MINIMUM=3.5"
+        artifact-label: ${{ github.job }}
