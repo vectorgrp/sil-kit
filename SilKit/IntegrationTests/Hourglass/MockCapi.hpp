@@ -396,6 +396,15 @@ public:
                 (SilKit_Experimental_SystemController * systemController,
                  const SilKit_WorkflowConfiguration* workflowConfiguration));
 
+    // ServiceDiscovery
+
+    MOCK_METHOD(SilKit_ReturnCode, SilKit_Experimental_ServiceDiscovery_Create,
+                (SilKit_Experimental_ServiceDiscovery * *outServiceDiscovery, SilKit_Participant* participant));
+
+    MOCK_METHOD(SilKit_ReturnCode, SilKit_Experimental_ServiceDiscovery_SetServiceDiscoveryHandler,
+                (SilKit_Experimental_ServiceDiscovery * serviceDiscovery, void* context,
+                 SilKit_Experimental_ServiceDiscoveryHandler_t handler));
+
     // Participant
 
     MOCK_METHOD(SilKit_ReturnCode, SilKit_Participant_Create,
