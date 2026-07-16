@@ -1,6 +1,6 @@
 ---
 Description: Example configuration to test a broken configuration with multiple AcceptorURIs
-schemaVersion: 1
+SchemaVersion: 1
 Includes:
   Files:
     - MultipleAcceptorUrisInclude.yaml

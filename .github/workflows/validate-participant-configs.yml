@@ -1,0 +1,24 @@
+name: 'Validate Participant Configuration Examples'
+on:
+  workflow_call:
+
+  workflow_dispatch:
+
+  push:
+    branches: [ 'main' ]
+
+jobs:
+  validate-participant-configs:
+    name: Validate participant configuration examples against JSON schema
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: false
+      - name: Install Dependencies
+        run: |
+          python3 -m pip install --quiet jsonschema pyyaml
+      - name: Validate participant configuration examples
+        run: |
+          python3 ./SilKit/ci/validate_participant_configs.py
+        shell: bash

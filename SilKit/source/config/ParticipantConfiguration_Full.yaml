@@ -89,7 +89,7 @@ FlexrayControllers:
     pOffsetCorrectionStart: 3632
     pRateCorrectionOut: 81
     pSamplesPerMicrotick: 2
-    pSecondKeySlotId: 1337
+    pSecondKeySlotId: 11
     pTwoKeySlotMode: 1
     pWakeupChannel: A
     pWakeupPattern: 33
@@ -157,8 +157,12 @@ RpcClients:
 Logging:
   Sinks:
   - Type: File
+    Format: Simple
     Level: Critical
     LogName: MyLog1
+    Experimental:
+      EnabledTopics: [Can]
+      DisabledTopics: [MessageTracing, Flexray]
   FlushLevel: Critical
   LogFromRemotes: false
 HealthCheck:
@@ -185,12 +189,15 @@ Middleware:
   EnableDomainSockets: false
   TcpSendBufferSize: 3456
   TcpReceiveBufferSize: 3456
+  AcceptorUris:
+  - silkit://localhost:0
   RegistryAsFallbackProxy: false
   ConnectTimeoutSeconds: 1.234
+  ExperimentalRemoteParticipantConnection: false
 Experimental:
   TimeSynchronization:
     AnimationFactor: 1.5
-    EnableMessageAggregation: Off
+    EnableMessageAggregation: 'Off'
   Metrics:
     CollectFromRemote: false
     Sinks:
