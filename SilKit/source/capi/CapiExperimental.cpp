@@ -231,8 +231,8 @@ struct PendingEmission
 // client/server are still reported on creation.)
 struct ObserverState
 {
-    SilKit_Experimental_ServiceDiscoveryHandler_t handler;
-    void* context;
+    SilKit_Experimental_ServiceDiscoveryHandler_t handler{};
+    void* context{nullptr};
 
     std::mutex mutex;
     std::map<ServiceKey, SubscriberEntry> subscribers;
@@ -242,11 +242,11 @@ struct ObserverState
 void Emit(ObserverState& state, SilKit_Experimental_ServiceDiscoveryEvent_Type type,
           const SilKit::Core::ServiceDescriptor& descriptor)
 {
-    SilKit_Experimental_ServiceDescriptor descriptor;
+    SilKit_Experimental_ServiceDescriptor reportedDescriptor{};
     LabelStorage storage;
-    if (ClassifyAndFill(descriptor, descriptor, storage))
+    if (ClassifyAndFill(descriptor, reportedDescriptor, storage))
     {
-        state.handler(state.context, type, &descriptor);
+        state.handler(state.context, type, &reportedDescriptor);
     }
 }
 
@@ -372,11 +372,11 @@ void HandleDiscoveryEvent(ObserverState& state, Discovery::ServiceDiscoveryEvent
 
     // Publishers, RPC clients/servers, bus controllers, network links, and anything else: reported on
     // creation/removal exactly as before.
-    SilKit_Experimental_ServiceDescriptor descriptor;
+    SilKit_Experimental_ServiceDescriptor reportedDescriptor{};
     LabelStorage storage;
-    if (ClassifyAndFill(descriptor, descriptor, storage))
+    if (ClassifyAndFill(descriptor, reportedDescriptor, storage))
     {
-        state.handler(state.context, ToC(type), &descriptor);
+        state.handler(state.context, ToC(type), &reportedDescriptor);
     }
 }
 
