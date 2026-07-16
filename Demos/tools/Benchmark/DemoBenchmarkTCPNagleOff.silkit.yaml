@@ -4,5 +4,5 @@ Logging:
     - Level: Error
       Type: Stdout
 Middleware:
-  EnableDomainSockets: false
-  TcpNoDelay: true
+  EnableDomainSockets: 'False'
+  TcpNoDelay: 'True'

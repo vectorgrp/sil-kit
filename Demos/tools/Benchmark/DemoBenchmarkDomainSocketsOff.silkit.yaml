@@ -4,4 +4,4 @@ Logging:
     - Level: Error
       Type: Stdout
 Middleware:
-  EnableDomainSockets: false
+  EnableDomainSockets: 'False'
