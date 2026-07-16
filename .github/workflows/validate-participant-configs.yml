@@ -2,6 +2,8 @@ name: 'Validate Participant Configuration Examples'
 on:
   workflow_call:
 
+  workflow_dispatch:
+
   push:
     branches: [ 'main' ]
 
