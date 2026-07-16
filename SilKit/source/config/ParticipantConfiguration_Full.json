@@ -221,8 +221,8 @@
         "Level": "Critical",
         "LogName": "MyLog1",
         "Experimental": {
-          "EnabledTopics": ["Can"],
-          "DisabledTopics": ["MessageTracing", "Flexray"]
+          "EnabledTopics": [ "Can" ],
+          "DisabledTopics": [ "MessageTracing", "Flexray" ]
         }
       }
     ],

@@ -1,6 +1,6 @@
 ---
 Description: Example configuration to test YAML Parser
-schemaVersion: 1
+SchemaVersion: 1
 Includes:
   SearchPathHints:
     - ConfigSnippets/CAN
