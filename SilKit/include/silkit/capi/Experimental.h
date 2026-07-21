@@ -17,10 +17,10 @@ SILKIT_BEGIN_DECLS
 //  Experimental service discovery
 //
 //  Allows a participant to passively observe the user-facing services (bus
-//  controllers, publishers/subscribers, RPC clients/servers, network links)
-//  created by all other participants in the simulation. This builds on the
-//  internal service discovery used throughout the SIL Kit and requires no
-//  configuration of the observed participants.
+//  controllers, publishers/subscribers, RPC clients/servers) created by all
+//  other participants in the simulation. This builds on the internal service
+//  discovery used throughout the SIL Kit and requires no configuration of the
+//  observed participants.
 //
 //  \warning The functions and types declared in this header are not part of the
 //           stable API and ABI of the SIL Kit. They may be removed or changed at
@@ -37,6 +37,9 @@ typedef uint32_t SilKit_Experimental_ServiceDiscoveryEvent_Type;
 /*! \brief A service has been removed. */
 #define SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceRemoved \
     ((SilKit_Experimental_ServiceDiscoveryEvent_Type)2)
+/*! \brief A property of an existing service has changed (e.g. connection count, simulation status). */
+#define SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceUpdated \
+    ((SilKit_Experimental_ServiceDiscoveryEvent_Type)3)
 
 /*! \brief The kind of a discovered service. Only user-facing services are reported. */
 typedef uint32_t SilKit_Experimental_ServiceKind;
@@ -49,12 +52,23 @@ typedef uint32_t SilKit_Experimental_ServiceKind;
 #define SilKit_Experimental_ServiceKind_DataSubscriber ((SilKit_Experimental_ServiceKind)6)
 #define SilKit_Experimental_ServiceKind_RpcClient ((SilKit_Experimental_ServiceKind)7)
 #define SilKit_Experimental_ServiceKind_RpcServer ((SilKit_Experimental_ServiceKind)8)
-#define SilKit_Experimental_ServiceKind_NetworkLink ((SilKit_Experimental_ServiceKind)9)
 
 /*! \brief Describes a single discovered service, passed by value to a service discovery handler.
  *
- * \warning All pointer members (the strings and the label list) are borrowed and only valid for the duration of the
- *          handler invocation. Copy any data that must outlive the call.
+ * All pointer members are borrowed and only valid for the duration of the handler invocation. Copy
+ * any data that must outlive the call.
+ *
+ * Fields \p connectedParticipantName and \p connectedServiceName are populated only in
+ * \ref SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceUpdated events that represent a
+ * connection change (pub/sub match or RPC call). They identify the single peer whose connection
+ * was added or removed, while \p numberOfConnections gives the new running total. For all other
+ * event types and all other service kinds these fields are empty strings.
+ *
+ * Fields \p isSimulated and \p simulatingParticipantName are set on bus controllers (CAN, Ethernet,
+ * FlexRay, LIN) when a network simulator claims ownership of the controller's network. Both a
+ * \ref SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceCreated with \p isSimulated = true
+ * (simulator already active) and a subsequent
+ * \ref SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceUpdated are possible.
  */
 typedef struct
 {
@@ -65,23 +79,35 @@ typedef struct
     const char* serviceName;
     //! The kind of service.
     SilKit_Experimental_ServiceKind serviceKind;
-    //! The primary, user-facing identifier of the service: the network name for bus controllers (e.g. "CAN1") and
-    //! network links, the topic for pub/sub, and the function name for RPC. Suitable as a display / join key for
+    //! The primary, user-facing identifier of the service: the network name for bus controllers,
+    //! the topic for pub/sub, and the function name for RPC. Suitable as a display / join key for
     //! visualization and tooling.
     const char* primaryIdentifier;
     //! Media type for pub/sub and RPC services; empty string when not applicable.
     const char* mediaType;
-    //! Decoded matching labels for pub/sub and RPC services; empty for bus controllers and links.
+    //! Decoded matching labels for pub/sub and RPC services; empty for bus controllers.
     SilKit_LabelList labelList;
+    //! The simulation name this service belongs to. Empty string when not available.
+    const char* simulationName;
+    //! Name of the peer participant; populated only in ServiceUpdated connection events.
+    const char* connectedParticipantName;
+    //! Name of the peer service; populated only in ServiceUpdated connection events.
+    const char* connectedServiceName;
+    //! Name of the participant simulating this controller's network; empty when not simulated.
+    const char* simulatingParticipantName;
+    //! Number of active matched connections (pub/sub matches or RPC call pairs); 0 for bus controllers.
+    uint32_t numberOfConnections;
+    //! True when a network simulator owns this bus controller's network.
+    SilKit_Bool isSimulated;
 } SilKit_Experimental_ServiceDescriptor;
 
-/*! \brief Handler invoked when a user-facing service is created or removed in the simulation.
+/*! \brief Handler invoked when a user-facing service is created, updated, or removed in the simulation.
  *
- * The \p serviceDescriptor and all of its pointer members are only valid for the duration of the handler invocation.
- * Copy the data if it must outlive the call.
+ * The \p serviceDescriptor and all of its pointer members are only valid for the duration of the
+ * handler invocation. Copy the data if it must outlive the call.
  *
  * \param context The user context pointer passed to \ref SilKit_Experimental_ServiceDiscovery_SetServiceDiscoveryHandler.
- * \param eventType Whether the service was created or removed.
+ * \param eventType Whether the service was created, updated, or removed.
  * \param serviceDescriptor The affected service.
  */
 typedef void(SilKitFPTR* SilKit_Experimental_ServiceDiscoveryHandler_t)(
@@ -106,16 +132,19 @@ typedef SilKit_ReturnCode(SilKitFPTR* SilKit_Experimental_ServiceDiscovery_Creat
 
 /*! \brief Register a handler that is called for every user-facing service in the simulation.
  *
- * Upon registration the handler is immediately invoked once for every service that is already known, each reported as
- * \ref SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceCreated. It is subsequently invoked for every user-facing
- * service created or removed. Internal/infrastructure services are not reported.
+ * Upon registration the handler is immediately invoked once for every service that is already known,
+ * each reported as \ref SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceCreated. It is
+ * subsequently invoked for every user-facing service created, updated, or removed.
+ * Infrastructure/internal services are not reported. Network link events are not reported directly;
+ * instead, affected bus controllers receive a
+ * \ref SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceUpdated with \p isSimulated set.
  *
  * \warning This function is not part of the stable API and ABI of the SIL Kit. It may be removed at any time without
  *          prior notice.
  *
  * \param serviceDiscovery The observer obtained via \ref SilKit_Experimental_ServiceDiscovery_Create.
  * \param context The user context pointer made available to the handler.
- * \param handler The handler to be called on service creation and removal.
+ * \param handler The handler to be called on service creation, update, and removal.
  */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Experimental_ServiceDiscovery_SetServiceDiscoveryHandler(
     SilKit_Experimental_ServiceDiscovery* serviceDiscovery, void* context,
