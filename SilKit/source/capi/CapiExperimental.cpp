@@ -19,6 +19,7 @@
 #include <map>
 #include <memory>
 #include <mutex>
+#include <set>
 #include <string>
 #include <utility>
 #include <vector>
@@ -61,7 +62,10 @@ struct LabelStorage
 };
 
 // Maps the internal ServiceDescriptor to the public struct. Returns false if the service is not user-facing
-// (infrastructure / internal services), in which case the handler must not be invoked.
+// (infrastructure / internal services / network links), in which case the handler must not be invoked.
+// Connection-specific and simulation-specific fields (numberOfConnections, connectedParticipantName,
+// connectedServiceName, isSimulated, simulatingParticipantName) are initialised to safe empty values
+// here; callers set them from PendingEmission after this function returns.
 auto ClassifyAndFill(const SilKit::Core::ServiceDescriptor& serviceDescriptor,
                      SilKit_Experimental_ServiceDescriptor& out, LabelStorage& storage) -> bool
 {
@@ -77,12 +81,16 @@ auto ClassifyAndFill(const SilKit::Core::ServiceDescriptor& serviceDescriptor,
     out.serviceName = serviceDescriptor.GetServiceName().c_str();
     out.primaryIdentifier = serviceDescriptor.GetNetworkName().c_str();
     out.mediaType = "";
+    out.simulationName = serviceDescriptor.GetSimulationName().c_str();
+    out.connectedParticipantName = "";
+    out.connectedServiceName = "";
+    out.simulatingParticipantName = "";
+    // numberOfConnections = 0, isSimulated = SilKit_False (from memset above)
 
-    // Network links carry no controller type and are reported as-is.
+    // Network links are handled internally (fan-out to bus controllers) and are not exposed directly.
     if (serviceDescriptor.GetServiceType() == SilKit::Core::ServiceType::Link)
     {
-        out.serviceKind = SilKit_Experimental_ServiceKind_NetworkLink;
-        return true;
+        return false;
     }
 
     std::string controllerType;
@@ -200,111 +208,230 @@ auto ClassifyAndFill(const SilKit::Core::ServiceDescriptor& serviceDescriptor,
 
 // Identifies a service across the simulation: (participant name, service id).
 using ServiceKey = std::pair<std::string, SilKit::Core::EndpointId>;
+// Identifies a network: (network name, network type). Used to correlate bus controllers with links.
+using NetworkKey = std::pair<std::string, SilKit::Config::NetworkType>;
 
-struct SubscriberEntry
+// Peer identity for pub/sub and RPC connection resolution.
+struct PeerInfo
+{
+    std::string participantName;
+    std::string serviceName;
+};
+
+// Tracks a user-facing service (DataSubscriber or RpcServer) for connection counting.
+struct TrackedEntry
 {
     SilKit::Core::ServiceDescriptor descriptor;
     bool haveDescriptor{false};
     std::size_t connections{0};
-    bool announced{false};
 };
 
 // A synthesized event, queued while the state lock is held and dispatched after it is released.
+// All std::string members hold backing storage for the pointer fields set in the emitted struct.
 struct PendingEmission
 {
-    SilKit_Experimental_ServiceDiscoveryEvent_Type type;
+    SilKit_Experimental_ServiceDiscoveryEvent_Type type{SilKit_Experimental_ServiceDiscoveryEvent_Type_Invalid};
     SilKit::Core::ServiceDescriptor descriptor;
+    uint32_t numberOfConnections{0};
+    std::string connectedParticipantName;
+    std::string connectedServiceName;
+    bool isSimulated{false};
+    std::string simulatingParticipantName;
 };
 
 // Per-observer bookkeeping. Lives as long as the participant's service discovery, because it is
 // captured by the registered handler (which is never unregistered).
-//
-// Semantics: a user-facing DataSubscriber is reported to the observer only while it has at least one
-// confirmed connection to a publisher. SIL Kit creates exactly one internal DataSubscriberInternal
-// service per matched publisher - its existence IS the confirmed match - carrying the parent
-// DataSubscriber's service id. We ref-count these connections and synthesize a ServiceCreated when
-// the first connection appears and a ServiceRemoved when the last one disappears. Internal services
-// and the transport UUID are never exposed. All other kinds (publishers, RPC, bus, links) are
-// reported on creation, unchanged.
-//
-// (RPC has an analogous RpcServerInternal edge but is intentionally out of scope here: RPC
-// client/server are still reported on creation.)
 struct ObserverState
 {
     SilKit_Experimental_ServiceDiscoveryHandler_t handler{};
     void* context{nullptr};
 
     std::mutex mutex;
-    std::map<ServiceKey, SubscriberEntry> subscribers;
-    std::map<ServiceKey, ServiceKey> connectionParent; // internal-subscriber id -> parent subscriber id
+
+    // DataSubscribers and RpcServers tracked for connection counting and peer resolution.
+    std::map<ServiceKey, TrackedEntry> tracked;
+    // internal-connection key -> parent (subscriber/server) key
+    std::map<ServiceKey, ServiceKey> connectionParent;
+
+    // DataPublisher UUID (= networkName of DataPublisher) -> peer info, for resolving pub/sub connections.
+    std::map<std::string, PeerInfo> publishersByUuid;
+    // RpcClient UUID (= networkName of RpcClient) -> peer info, for resolving RPC connections.
+    std::map<std::string, PeerInfo> rpcClientsByUuid;
+
+    // Bus controllers by ServiceKey -> stored descriptor, for link-event fan-out.
+    std::map<ServiceKey, SilKit::Core::ServiceDescriptor> busControllers;
+    // NetworkKey -> set of bus controller ServiceKeys (reverse lookup for link events).
+    std::map<NetworkKey, std::set<ServiceKey>> controllersByNetwork;
+
+    // Active network simulators: NetworkKey -> simulator's participant name.
+    std::map<NetworkKey, std::string> activeLinks;
 };
 
-void Emit(ObserverState& state, SilKit_Experimental_ServiceDiscoveryEvent_Type type,
-          const SilKit::Core::ServiceDescriptor& descriptor)
+void EmitPending(ObserverState& state, const PendingEmission& e)
 {
-    SilKit_Experimental_ServiceDescriptor reportedDescriptor{};
+    SilKit_Experimental_ServiceDescriptor out{};
     LabelStorage storage;
-    if (ClassifyAndFill(descriptor, reportedDescriptor, storage))
+    if (!ClassifyAndFill(e.descriptor, out, storage))
     {
-        state.handler(state.context, type, &reportedDescriptor);
+        return;
     }
+    out.numberOfConnections = e.numberOfConnections;
+    out.connectedParticipantName = e.connectedParticipantName.c_str();
+    out.connectedServiceName = e.connectedServiceName.c_str();
+    out.isSimulated = e.isSimulated ? SilKit_True : SilKit_False;
+    out.simulatingParticipantName = e.simulatingParticipantName.c_str();
+    state.handler(state.context, e.type, &out);
 }
 
-// Handles a single internal discovery event. Subscriber-related events drive the connection
-// bookkeeping and may synthesize user-facing DataSubscriber events; every other kind is forwarded
-// as-is. Emissions are dispatched outside the lock so user code never runs while we hold it.
+// Handles a single internal discovery event, translating it into zero or more public emissions.
+// Emissions are always dispatched outside the state lock so user code never runs while we hold it.
 void HandleDiscoveryEvent(ObserverState& state, Discovery::ServiceDiscoveryEvent::Type type,
                           const SilKit::Core::ServiceDescriptor& descriptor)
 {
     using EventType = Discovery::ServiceDiscoveryEvent::Type;
 
-    std::string controllerType;
-    descriptor.GetSupplementalDataItem(Discovery::controllerType, controllerType);
-
-    if (controllerType == Discovery::controllerTypeDataSubscriber)
+    // ---- Network links: track and fan-out isSimulated updates to affected bus controllers ----
+    if (descriptor.GetServiceType() == SilKit::Core::ServiceType::Link)
     {
-        const ServiceKey key{descriptor.GetParticipantName(), descriptor.GetServiceId()};
+        const NetworkKey networkKey{descriptor.GetNetworkName(), descriptor.GetNetworkType()};
         std::vector<PendingEmission> emissions;
         {
             std::lock_guard<std::mutex> lock{state.mutex};
             if (type == EventType::ServiceCreated)
             {
-                auto& entry = state.subscribers[key];
-                entry.descriptor = descriptor;
-                entry.haveDescriptor = true;
-                if (entry.connections > 0 && !entry.announced)
+                state.activeLinks[networkKey] = descriptor.GetParticipantName();
+                const auto cit = state.controllersByNetwork.find(networkKey);
+                if (cit != state.controllersByNetwork.end())
                 {
-                    entry.announced = true;
-                    emissions.push_back(
-                        {SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceCreated, entry.descriptor});
+                    for (const auto& controllerKey : cit->second)
+                    {
+                        PendingEmission e;
+                        e.type = SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceUpdated;
+                        e.descriptor = state.busControllers.at(controllerKey);
+                        e.isSimulated = true;
+                        e.simulatingParticipantName = descriptor.GetParticipantName();
+                        emissions.push_back(std::move(e));
+                    }
                 }
             }
             else if (type == EventType::ServiceRemoved)
             {
-                const auto it = state.subscribers.find(key);
-                if (it != state.subscribers.end())
+                state.activeLinks.erase(networkKey);
+                const auto cit = state.controllersByNetwork.find(networkKey);
+                if (cit != state.controllersByNetwork.end())
                 {
-                    if (it->second.announced)
+                    for (const auto& controllerKey : cit->second)
                     {
-                        emissions.push_back(
-                            {SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceRemoved, it->second.descriptor});
-                    }
-                    state.subscribers.erase(it);
-                    // Drop any still-open connections that referenced this subscriber.
-                    for (auto cit = state.connectionParent.begin(); cit != state.connectionParent.end();)
-                    {
-                        cit = (cit->second == key) ? state.connectionParent.erase(cit) : std::next(cit);
+                        PendingEmission e;
+                        e.type = SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceUpdated;
+                        e.descriptor = state.busControllers.at(controllerKey);
+                        e.isSimulated = false;
+                        emissions.push_back(std::move(e));
                     }
                 }
             }
         }
-        for (const auto& emission : emissions)
+        for (const auto& e : emissions)
         {
-            Emit(state, emission.type, emission.descriptor);
+            EmitPending(state, e);
         }
         return;
     }
 
+    std::string controllerType;
+    descriptor.GetSupplementalDataItem(Discovery::controllerType, controllerType);
+
+    // ---- Bus controllers: track for link fan-out; emit immediately with current isSimulated state ----
+    if (controllerType == Discovery::controllerTypeCan || controllerType == Discovery::controllerTypeEthernet
+        || controllerType == Discovery::controllerTypeFlexray || controllerType == Discovery::controllerTypeLin)
+    {
+        const ServiceKey key{descriptor.GetParticipantName(), descriptor.GetServiceId()};
+        const NetworkKey networkKey{descriptor.GetNetworkName(), descriptor.GetNetworkType()};
+        PendingEmission emission;
+        emission.descriptor = descriptor;
+        {
+            std::lock_guard<std::mutex> lock{state.mutex};
+            if (type == EventType::ServiceCreated)
+            {
+                state.busControllers[key] = descriptor;
+                state.controllersByNetwork[networkKey].insert(key);
+                emission.type = SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceCreated;
+                const auto linkIt = state.activeLinks.find(networkKey);
+                if (linkIt != state.activeLinks.end())
+                {
+                    emission.isSimulated = true;
+                    emission.simulatingParticipantName = linkIt->second;
+                }
+            }
+            else if (type == EventType::ServiceRemoved)
+            {
+                state.busControllers.erase(key);
+                auto& ctrlSet = state.controllersByNetwork[networkKey];
+                ctrlSet.erase(key);
+                if (ctrlSet.empty())
+                {
+                    state.controllersByNetwork.erase(networkKey);
+                }
+                emission.type = SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceRemoved;
+            }
+        }
+        EmitPending(state, emission);
+        return;
+    }
+
+    // ---- DataPublisher: track UUID for connection peer resolution; emit immediately ----
+    if (controllerType == Discovery::controllerTypeDataPublisher)
+    {
+        {
+            std::lock_guard<std::mutex> lock{state.mutex};
+            if (type == EventType::ServiceCreated)
+            {
+                state.publishersByUuid[descriptor.GetNetworkName()] = {descriptor.GetParticipantName(),
+                                                                       descriptor.GetServiceName()};
+            }
+            else if (type == EventType::ServiceRemoved)
+            {
+                state.publishersByUuid.erase(descriptor.GetNetworkName());
+            }
+        }
+        PendingEmission e;
+        e.type = ToC(type);
+        e.descriptor = descriptor;
+        EmitPending(state, e);
+        return;
+    }
+
+    // ---- DataSubscriber: emit immediately; tracked for connection counting via DataSubscriberInternal ----
+    if (controllerType == Discovery::controllerTypeDataSubscriber)
+    {
+        const ServiceKey key{descriptor.GetParticipantName(), descriptor.GetServiceId()};
+        PendingEmission emission;
+        emission.descriptor = descriptor;
+        {
+            std::lock_guard<std::mutex> lock{state.mutex};
+            if (type == EventType::ServiceCreated)
+            {
+                auto& entry = state.tracked[key];
+                entry.descriptor = descriptor;
+                entry.haveDescriptor = true;
+                emission.type = SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceCreated;
+                emission.numberOfConnections = static_cast<uint32_t>(entry.connections);
+            }
+            else if (type == EventType::ServiceRemoved)
+            {
+                state.tracked.erase(key);
+                for (auto cit = state.connectionParent.begin(); cit != state.connectionParent.end();)
+                {
+                    cit = (cit->second == key) ? state.connectionParent.erase(cit) : std::next(cit);
+                }
+                emission.type = SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceRemoved;
+            }
+        }
+        EmitPending(state, emission);
+        return;
+    }
+
+    // ---- DataSubscriberInternal: a confirmed pub/sub match; emit Service_Updated on the parent subscriber ----
     if (controllerType == Discovery::controllerTypeDataSubscriberInternal)
     {
         const ServiceKey internalKey{descriptor.GetParticipantName(), descriptor.GetServiceId()};
@@ -323,6 +450,7 @@ void HandleDiscoveryEvent(ObserverState& state, Discovery::ServiceDiscoveryEvent
             return;
         }
         const ServiceKey parentKey{descriptor.GetParticipantName(), parentServiceId};
+        const std::string publisherUuid = descriptor.GetNetworkName();
 
         std::vector<PendingEmission> emissions;
         {
@@ -332,13 +460,21 @@ void HandleDiscoveryEvent(ObserverState& state, Discovery::ServiceDiscoveryEvent
                 if (state.connectionParent.count(internalKey) == 0)
                 {
                     state.connectionParent[internalKey] = parentKey;
-                    auto& entry = state.subscribers[parentKey];
+                    auto& entry = state.tracked[parentKey];
                     ++entry.connections;
-                    if (entry.haveDescriptor && !entry.announced)
+                    if (entry.haveDescriptor)
                     {
-                        entry.announced = true;
-                        emissions.push_back(
-                            {SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceCreated, entry.descriptor});
+                        PendingEmission e;
+                        e.type = SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceUpdated;
+                        e.descriptor = entry.descriptor;
+                        e.numberOfConnections = static_cast<uint32_t>(entry.connections);
+                        const auto pubIt = state.publishersByUuid.find(publisherUuid);
+                        if (pubIt != state.publishersByUuid.end())
+                        {
+                            e.connectedParticipantName = pubIt->second.participantName;
+                            e.connectedServiceName = pubIt->second.serviceName;
+                        }
+                        emissions.push_back(std::move(e));
                     }
                 }
             }
@@ -349,35 +485,176 @@ void HandleDiscoveryEvent(ObserverState& state, Discovery::ServiceDiscoveryEvent
                 {
                     const auto storedParentKey = cit->second;
                     state.connectionParent.erase(cit);
-                    const auto sit = state.subscribers.find(storedParentKey);
-                    if (sit != state.subscribers.end() && sit->second.connections > 0)
+                    const auto sit = state.tracked.find(storedParentKey);
+                    if (sit != state.tracked.end() && sit->second.connections > 0)
                     {
                         --sit->second.connections;
-                        if (sit->second.connections == 0 && sit->second.announced)
+                        if (sit->second.haveDescriptor)
                         {
-                            sit->second.announced = false;
-                            emissions.push_back(
-                                {SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceRemoved, sit->second.descriptor});
+                            PendingEmission e;
+                            e.type = SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceUpdated;
+                            e.descriptor = sit->second.descriptor;
+                            e.numberOfConnections = static_cast<uint32_t>(sit->second.connections);
+                            const auto pubIt = state.publishersByUuid.find(publisherUuid);
+                            if (pubIt != state.publishersByUuid.end())
+                            {
+                                e.connectedParticipantName = pubIt->second.participantName;
+                                e.connectedServiceName = pubIt->second.serviceName;
+                            }
+                            emissions.push_back(std::move(e));
                         }
                     }
                 }
             }
         }
-        for (const auto& emission : emissions)
+        for (const auto& e : emissions)
         {
-            Emit(state, emission.type, emission.descriptor);
+            EmitPending(state, e);
         }
         return;
     }
 
-    // Publishers, RPC clients/servers, bus controllers, network links, and anything else: reported on
-    // creation/removal exactly as before.
-    SilKit_Experimental_ServiceDescriptor reportedDescriptor{};
-    LabelStorage storage;
-    if (ClassifyAndFill(descriptor, reportedDescriptor, storage))
+    // ---- RpcClient: track UUID for RPC connection peer resolution; emit immediately ----
+    if (controllerType == Discovery::controllerTypeRpcClient)
     {
-        state.handler(state.context, ToC(type), &reportedDescriptor);
+        {
+            std::lock_guard<std::mutex> lock{state.mutex};
+            if (type == EventType::ServiceCreated)
+            {
+                state.rpcClientsByUuid[descriptor.GetNetworkName()] = {descriptor.GetParticipantName(),
+                                                                       descriptor.GetServiceName()};
+            }
+            else if (type == EventType::ServiceRemoved)
+            {
+                state.rpcClientsByUuid.erase(descriptor.GetNetworkName());
+            }
+        }
+        PendingEmission e;
+        e.type = ToC(type);
+        e.descriptor = descriptor;
+        EmitPending(state, e);
+        return;
     }
+
+    // ---- RpcServer: emit immediately; tracked for connection counting via RpcServerInternal ----
+    if (controllerType == Discovery::controllerTypeRpcServer)
+    {
+        const ServiceKey key{descriptor.GetParticipantName(), descriptor.GetServiceId()};
+        PendingEmission emission;
+        emission.descriptor = descriptor;
+        {
+            std::lock_guard<std::mutex> lock{state.mutex};
+            if (type == EventType::ServiceCreated)
+            {
+                auto& entry = state.tracked[key];
+                entry.descriptor = descriptor;
+                entry.haveDescriptor = true;
+                emission.type = SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceCreated;
+                emission.numberOfConnections = static_cast<uint32_t>(entry.connections);
+            }
+            else if (type == EventType::ServiceRemoved)
+            {
+                state.tracked.erase(key);
+                for (auto cit = state.connectionParent.begin(); cit != state.connectionParent.end();)
+                {
+                    cit = (cit->second == key) ? state.connectionParent.erase(cit) : std::next(cit);
+                }
+                emission.type = SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceRemoved;
+            }
+        }
+        EmitPending(state, emission);
+        return;
+    }
+
+    // ---- RpcServerInternal: a confirmed RPC match; emit Service_Updated on the parent server ----
+    if (controllerType == Discovery::controllerTypeRpcServerInternal)
+    {
+        const ServiceKey internalKey{descriptor.GetParticipantName(), descriptor.GetServiceId()};
+        std::string parentIdStr;
+        if (!descriptor.GetSupplementalDataItem(Discovery::supplKeyRpcServerInternalParentServiceID, parentIdStr))
+        {
+            return;
+        }
+        SilKit::Core::EndpointId parentServiceId{0};
+        try
+        {
+            parentServiceId = static_cast<SilKit::Core::EndpointId>(std::stoull(parentIdStr));
+        }
+        catch (...)
+        {
+            return;
+        }
+        const ServiceKey parentKey{descriptor.GetParticipantName(), parentServiceId};
+        std::string clientUuid;
+        descriptor.GetSupplementalDataItem(Discovery::supplKeyRpcServerInternalClientUUID, clientUuid);
+
+        std::vector<PendingEmission> emissions;
+        {
+            std::lock_guard<std::mutex> lock{state.mutex};
+            if (type == EventType::ServiceCreated)
+            {
+                if (state.connectionParent.count(internalKey) == 0)
+                {
+                    state.connectionParent[internalKey] = parentKey;
+                    auto& entry = state.tracked[parentKey];
+                    ++entry.connections;
+                    if (entry.haveDescriptor)
+                    {
+                        PendingEmission e;
+                        e.type = SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceUpdated;
+                        e.descriptor = entry.descriptor;
+                        e.numberOfConnections = static_cast<uint32_t>(entry.connections);
+                        const auto clientIt = state.rpcClientsByUuid.find(clientUuid);
+                        if (clientIt != state.rpcClientsByUuid.end())
+                        {
+                            e.connectedParticipantName = clientIt->second.participantName;
+                            e.connectedServiceName = clientIt->second.serviceName;
+                        }
+                        emissions.push_back(std::move(e));
+                    }
+                }
+            }
+            else if (type == EventType::ServiceRemoved)
+            {
+                const auto cit = state.connectionParent.find(internalKey);
+                if (cit != state.connectionParent.end())
+                {
+                    const auto storedParentKey = cit->second;
+                    state.connectionParent.erase(cit);
+                    const auto sit = state.tracked.find(storedParentKey);
+                    if (sit != state.tracked.end() && sit->second.connections > 0)
+                    {
+                        --sit->second.connections;
+                        if (sit->second.haveDescriptor)
+                        {
+                            PendingEmission e;
+                            e.type = SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceUpdated;
+                            e.descriptor = sit->second.descriptor;
+                            e.numberOfConnections = static_cast<uint32_t>(sit->second.connections);
+                            const auto clientIt = state.rpcClientsByUuid.find(clientUuid);
+                            if (clientIt != state.rpcClientsByUuid.end())
+                            {
+                                e.connectedParticipantName = clientIt->second.participantName;
+                                e.connectedServiceName = clientIt->second.serviceName;
+                            }
+                            emissions.push_back(std::move(e));
+                        }
+                    }
+                }
+            }
+        }
+        for (const auto& e : emissions)
+        {
+            EmitPending(state, e);
+        }
+        return;
+    }
+
+    // Everything else (infrastructure, system services): forwarded as-is; ClassifyAndFill suppresses them.
+    PendingEmission e;
+    e.type = ToC(type);
+    e.descriptor = descriptor;
+    EmitPending(state, e);
 }
 
 } // namespace
@@ -408,9 +685,6 @@ try
 
     auto* cppServiceDiscovery = reinterpret_cast<Discovery::IServiceDiscovery*>(serviceDiscovery);
 
-    // The observer state is captured by (and thus owned by) the registered handler, which lives as
-    // long as the participant's service discovery. It buffers pub/sub matches and synthesizes
-    // connection-gated DataSubscriber events (see ObserverState / HandleDiscoveryEvent).
     auto state = std::make_shared<ObserverState>();
     state->handler = handler;
     state->context = context;
