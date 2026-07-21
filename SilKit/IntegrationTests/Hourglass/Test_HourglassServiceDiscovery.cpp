@@ -150,6 +150,45 @@ TEST_F(Test_HourglassServiceDiscovery, service_discovery_handler_round_trip)
     EXPECT_TRUE(received.labels.empty());
 }
 
+// Setting the handler twice must register the C trampoline exactly once (no duplicate delivery) and
+// replace the user handler in place without dangling the previously stored std::function.
+TEST_F(Test_HourglassServiceDiscovery, set_handler_twice_replaces_and_registers_once)
+{
+    ServiceDiscoveryWrapper serviceDiscovery{mockParticipant};
+
+    void* capturedContext{nullptr};
+    SilKit_Experimental_ServiceDiscoveryHandler_t capturedHandler{nullptr};
+    EXPECT_CALL(capi, SilKit_Experimental_ServiceDiscovery_SetServiceDiscoveryHandler(mockServiceDiscovery, _, _))
+        .Times(1)
+        .WillOnce(DoAll(SaveArg<1>(&capturedContext), SaveArg<2>(&capturedHandler),
+                        Return(SilKit_ReturnCode_SUCCESS)));
+
+    int firstCalls{0};
+    int secondCalls{0};
+    serviceDiscovery.SetServiceDiscoveryHandler(
+        [&](SD::ServiceDiscoveryEventType, const SD::ServiceDescriptor&) { ++firstCalls; });
+    serviceDiscovery.SetServiceDiscoveryHandler(
+        [&](SD::ServiceDiscoveryEventType, const SD::ServiceDescriptor&) { ++secondCalls; });
+
+    ASSERT_NE(capturedHandler, nullptr);
+
+    SilKit_Experimental_ServiceDescriptor cDescriptor;
+    SilKit_Struct_Init(SilKit_Experimental_ServiceDescriptor, cDescriptor);
+    cDescriptor.participantName = "P";
+    cDescriptor.serviceName = "S";
+    cDescriptor.serviceKind = SilKit_Experimental_ServiceKind_CanController;
+    cDescriptor.primaryIdentifier = "CAN1";
+    cDescriptor.mediaType = "";
+    cDescriptor.labelList.numLabels = 0;
+    cDescriptor.labelList.labels = nullptr;
+
+    capturedHandler(capturedContext, SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceCreated, &cDescriptor);
+
+    // Only the second (current) handler is invoked; the first was replaced, not left dangling.
+    EXPECT_EQ(firstCalls, 0);
+    EXPECT_EQ(secondCalls, 1);
+}
+
 TEST_F(Test_HourglassServiceDiscovery, to_string_maps_enums)
 {
     EXPECT_EQ(SD::to_string(SD::ServiceKind::DataSubscriber), "DataSubscriber");

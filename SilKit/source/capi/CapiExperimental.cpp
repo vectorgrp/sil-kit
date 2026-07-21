@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2022 Vector Informatik GmbH
+// SPDX-FileCopyrightText: 2026 Vector Informatik GmbH
 //
 // SPDX-License-Identifier: MIT
 
@@ -218,12 +218,24 @@ struct PeerInfo
     std::string serviceName;
 };
 
-// Tracks a user-facing service (DataSubscriber or RpcServer) for connection counting.
+// Tracks a user-facing service (DataSubscriber or RpcServer) for connection counting and peer reveal.
+// connKeys holds the internal-connection endpoints attached to this parent; its size is the connection
+// count. Endpoints may be recorded before the parent's own descriptor is known (out-of-order replay),
+// in which case haveDescriptor is false until the parent is discovered.
 struct TrackedEntry
 {
     SilKit::Core::ServiceDescriptor descriptor;
     bool haveDescriptor{false};
-    std::size_t connections{0};
+    std::set<ServiceKey> connKeys;
+};
+
+// A confirmed connection endpoint (DataSubscriberInternal / RpcServerInternal): links the internal
+// endpoint to its parent (user-facing subscriber/server) and remembers the peer's UUID (the
+// DataPublisher / RpcClient networkName) so the peer identity can be resolved, possibly later.
+struct ConnInfo
+{
+    ServiceKey parentKey;
+    std::string peerUuid;
 };
 
 // A synthesized event, queued while the state lock is held and dispatched after it is released.
@@ -250,13 +262,14 @@ struct ObserverState
 
     // DataSubscribers and RpcServers tracked for connection counting and peer resolution.
     std::map<ServiceKey, TrackedEntry> tracked;
-    // internal-connection key -> parent (subscriber/server) key
-    std::map<ServiceKey, ServiceKey> connectionParent;
-
-    // DataPublisher UUID (= networkName of DataPublisher) -> peer info, for resolving pub/sub connections.
-    std::map<std::string, PeerInfo> publishersByUuid;
-    // RpcClient UUID (= networkName of RpcClient) -> peer info, for resolving RPC connections.
-    std::map<std::string, PeerInfo> rpcClientsByUuid;
+    // Internal-connection endpoint key -> connection info (parent key + peer UUID).
+    std::map<ServiceKey, ConnInfo> connections;
+    // Peer UUID -> connection endpoints whose peer identity is not yet known, awaiting the peer's own
+    // discovery. Enables revealing the peer of a connection seen before its DataPublisher / RpcClient.
+    std::map<std::string, std::set<ServiceKey>> pendingByPeerUuid;
+    // DataPublisher / RpcClient UUID (= their networkName) -> peer identity. Keyed by globally unique
+    // UUID, so publishers and clients share this map without collision.
+    std::map<std::string, PeerInfo> peersByUuid;
 
     // Bus controllers by ServiceKey -> stored descriptor, for link-event fan-out.
     std::map<ServiceKey, SilKit::Core::ServiceDescriptor> busControllers;
@@ -281,6 +294,189 @@ void EmitPending(ObserverState& state, const PendingEmission& e)
     out.isSimulated = e.isSimulated ? SilKit_True : SilKit_False;
     out.simulatingParticipantName = e.simulatingParticipantName.c_str();
     state.handler(state.context, e.type, &out);
+}
+
+// ---- Connection bookkeeping helpers. All are called with state.mutex held and append synthesized
+//      ServiceUpdated emissions for the *parent* service (subscriber/server); the emissions are always
+//      dispatched by the caller after the lock is released. Peer identity is filled in when known, and
+//      revealed via a later ServiceUpdated once the peer (publisher/client) is discovered. This keeps
+//      the connection graph reconstructable regardless of discovery/replay ordering. ----
+
+auto MakeParentUpdate(const TrackedEntry& entry, const PeerInfo* peer) -> PendingEmission
+{
+    PendingEmission e;
+    e.type = SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceUpdated;
+    e.descriptor = entry.descriptor;
+    e.numberOfConnections = static_cast<uint32_t>(entry.connKeys.size());
+    if (peer != nullptr)
+    {
+        e.connectedParticipantName = peer->participantName;
+        e.connectedServiceName = peer->serviceName;
+    }
+    return e;
+}
+
+// A parent (DataSubscriber / RpcServer) was created: emit its ServiceCreated and reveal the peers of
+// any connections already recorded against it (possible when discovery replays out of order).
+void OnParentCreated(ObserverState& state, const ServiceKey& parentKey,
+                     const SilKit::Core::ServiceDescriptor& descriptor, std::vector<PendingEmission>& emissions)
+{
+    auto& entry = state.tracked[parentKey];
+    entry.descriptor = descriptor;
+    entry.haveDescriptor = true;
+
+    PendingEmission created;
+    created.type = SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceCreated;
+    created.descriptor = descriptor;
+    created.numberOfConnections = static_cast<uint32_t>(entry.connKeys.size());
+    emissions.push_back(std::move(created));
+
+    for (const auto& connKey : entry.connKeys)
+    {
+        const auto cit = state.connections.find(connKey);
+        if (cit == state.connections.end())
+        {
+            continue;
+        }
+        const auto pit = state.peersByUuid.find(cit->second.peerUuid);
+        if (pit != state.peersByUuid.end())
+        {
+            emissions.push_back(MakeParentUpdate(entry, &pit->second));
+        }
+        else
+        {
+            state.pendingByPeerUuid[cit->second.peerUuid].insert(connKey);
+        }
+    }
+}
+
+// A parent (DataSubscriber / RpcServer) was removed: drop it and all of its connection bookkeeping.
+void OnParentRemoved(ObserverState& state, const ServiceKey& parentKey)
+{
+    const auto tit = state.tracked.find(parentKey);
+    if (tit == state.tracked.end())
+    {
+        return;
+    }
+    for (const auto& connKey : tit->second.connKeys)
+    {
+        const auto cit = state.connections.find(connKey);
+        if (cit == state.connections.end())
+        {
+            continue;
+        }
+        const auto pit = state.pendingByPeerUuid.find(cit->second.peerUuid);
+        if (pit != state.pendingByPeerUuid.end())
+        {
+            pit->second.erase(connKey);
+            if (pit->second.empty())
+            {
+                state.pendingByPeerUuid.erase(pit);
+            }
+        }
+        state.connections.erase(cit);
+    }
+    state.tracked.erase(tit);
+}
+
+// A confirmed connection endpoint (DataSubscriberInternal / RpcServerInternal) appeared.
+void OnConnectionCreated(ObserverState& state, const ServiceKey& connKey, const ServiceKey& parentKey,
+                         const std::string& peerUuid, std::vector<PendingEmission>& emissions)
+{
+    if (state.connections.count(connKey) != 0)
+    {
+        return; // already counted
+    }
+    state.connections[connKey] = ConnInfo{parentKey, peerUuid};
+    auto& entry = state.tracked[parentKey];
+    entry.connKeys.insert(connKey);
+
+    if (!entry.haveDescriptor)
+    {
+        return; // revealed when the parent itself is discovered
+    }
+    const auto pit = state.peersByUuid.find(peerUuid);
+    if (pit != state.peersByUuid.end())
+    {
+        emissions.push_back(MakeParentUpdate(entry, &pit->second));
+    }
+    else
+    {
+        // Surface the new connection count now; reveal the peer once its publisher/client is known.
+        emissions.push_back(MakeParentUpdate(entry, nullptr));
+        state.pendingByPeerUuid[peerUuid].insert(connKey);
+    }
+}
+
+// A confirmed connection endpoint was removed (a match dissolved).
+void OnConnectionRemoved(ObserverState& state, const ServiceKey& connKey, std::vector<PendingEmission>& emissions)
+{
+    const auto cit = state.connections.find(connKey);
+    if (cit == state.connections.end())
+    {
+        return;
+    }
+    const auto parentKey = cit->second.parentKey;
+    const auto peerUuid = cit->second.peerUuid;
+    state.connections.erase(cit);
+
+    const auto pit = state.pendingByPeerUuid.find(peerUuid);
+    if (pit != state.pendingByPeerUuid.end())
+    {
+        pit->second.erase(connKey);
+        if (pit->second.empty())
+        {
+            state.pendingByPeerUuid.erase(pit);
+        }
+    }
+
+    const auto tit = state.tracked.find(parentKey);
+    if (tit == state.tracked.end())
+    {
+        return;
+    }
+    tit->second.connKeys.erase(connKey);
+    if (tit->second.haveDescriptor)
+    {
+        const auto peerIt = state.peersByUuid.find(peerUuid);
+        const PeerInfo* peer = peerIt != state.peersByUuid.end() ? &peerIt->second : nullptr;
+        emissions.push_back(MakeParentUpdate(tit->second, peer));
+    }
+}
+
+// A peer (DataPublisher / RpcClient) appeared: remember its identity and reveal it to any connection
+// that was recorded before the peer was known.
+void OnPeerCreated(ObserverState& state, const std::string& peerUuid, PeerInfo peerInfo,
+                   std::vector<PendingEmission>& emissions)
+{
+    state.peersByUuid[peerUuid] = std::move(peerInfo);
+    const auto pit = state.pendingByPeerUuid.find(peerUuid);
+    if (pit == state.pendingByPeerUuid.end())
+    {
+        return;
+    }
+    const auto& peer = state.peersByUuid[peerUuid];
+    for (const auto& connKey : pit->second)
+    {
+        const auto cit = state.connections.find(connKey);
+        if (cit == state.connections.end())
+        {
+            continue;
+        }
+        const auto tit = state.tracked.find(cit->second.parentKey);
+        if (tit != state.tracked.end() && tit->second.haveDescriptor)
+        {
+            emissions.push_back(MakeParentUpdate(tit->second, &peer));
+        }
+    }
+    state.pendingByPeerUuid.erase(pit);
+}
+
+// A peer (DataPublisher / RpcClient) was removed: forget its identity. Existing connection edges have
+// already been reported; the connection's own removal (if any) reports the decremented count.
+void OnPeerRemoved(ObserverState& state, const std::string& peerUuid)
+{
+    state.peersByUuid.erase(peerUuid);
 }
 
 // Handles a single internal discovery event, translating it into zero or more public emissions.
@@ -379,59 +575,64 @@ void HandleDiscoveryEvent(ObserverState& state, Discovery::ServiceDiscoveryEvent
         return;
     }
 
-    // ---- DataPublisher: track UUID for connection peer resolution; emit immediately ----
+    // ---- DataPublisher: a user-facing service AND a connection peer. Emit its own event first, then
+    //      reveal it on any subscriber connection recorded before this publisher was known. ----
     if (controllerType == Discovery::controllerTypeDataPublisher)
     {
+        std::vector<PendingEmission> reveals;
         {
             std::lock_guard<std::mutex> lock{state.mutex};
             if (type == EventType::ServiceCreated)
             {
-                state.publishersByUuid[descriptor.GetNetworkName()] = {descriptor.GetParticipantName(),
-                                                                       descriptor.GetServiceName()};
+                OnPeerCreated(state, descriptor.GetNetworkName(),
+                              PeerInfo{descriptor.GetParticipantName(), descriptor.GetServiceName()}, reveals);
             }
             else if (type == EventType::ServiceRemoved)
             {
-                state.publishersByUuid.erase(descriptor.GetNetworkName());
+                OnPeerRemoved(state, descriptor.GetNetworkName());
             }
         }
-        PendingEmission e;
-        e.type = ToC(type);
-        e.descriptor = descriptor;
-        EmitPending(state, e);
+        PendingEmission own;
+        own.type = ToC(type);
+        own.descriptor = descriptor;
+        EmitPending(state, own);
+        for (const auto& e : reveals)
+        {
+            EmitPending(state, e);
+        }
         return;
     }
 
-    // ---- DataSubscriber: emit immediately; tracked for connection counting via DataSubscriberInternal ----
+    // ---- DataSubscriber: a tracked parent. OnParentCreated emits ServiceCreated and reveals any
+    //      already-recorded connections; removal drops all of its bookkeeping. ----
     if (controllerType == Discovery::controllerTypeDataSubscriber)
     {
         const ServiceKey key{descriptor.GetParticipantName(), descriptor.GetServiceId()};
-        PendingEmission emission;
-        emission.descriptor = descriptor;
+        std::vector<PendingEmission> emissions;
         {
             std::lock_guard<std::mutex> lock{state.mutex};
             if (type == EventType::ServiceCreated)
             {
-                auto& entry = state.tracked[key];
-                entry.descriptor = descriptor;
-                entry.haveDescriptor = true;
-                emission.type = SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceCreated;
-                emission.numberOfConnections = static_cast<uint32_t>(entry.connections);
+                OnParentCreated(state, key, descriptor, emissions);
             }
             else if (type == EventType::ServiceRemoved)
             {
-                state.tracked.erase(key);
-                for (auto cit = state.connectionParent.begin(); cit != state.connectionParent.end();)
-                {
-                    cit = (cit->second == key) ? state.connectionParent.erase(cit) : std::next(cit);
-                }
-                emission.type = SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceRemoved;
+                OnParentRemoved(state, key);
+                PendingEmission removed;
+                removed.type = SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceRemoved;
+                removed.descriptor = descriptor;
+                emissions.push_back(std::move(removed));
             }
         }
-        EmitPending(state, emission);
+        for (const auto& e : emissions)
+        {
+            EmitPending(state, e);
+        }
         return;
     }
 
-    // ---- DataSubscriberInternal: a confirmed pub/sub match; emit Service_Updated on the parent subscriber ----
+    // ---- DataSubscriberInternal: a confirmed pub/sub match; drives Service_Updated on the parent
+    //      subscriber, with the publisher (peerUuid = networkName) as the peer. ----
     if (controllerType == Discovery::controllerTypeDataSubscriberInternal)
     {
         const ServiceKey internalKey{descriptor.GetParticipantName(), descriptor.GetServiceId()};
@@ -457,54 +658,11 @@ void HandleDiscoveryEvent(ObserverState& state, Discovery::ServiceDiscoveryEvent
             std::lock_guard<std::mutex> lock{state.mutex};
             if (type == EventType::ServiceCreated)
             {
-                if (state.connectionParent.count(internalKey) == 0)
-                {
-                    state.connectionParent[internalKey] = parentKey;
-                    auto& entry = state.tracked[parentKey];
-                    ++entry.connections;
-                    if (entry.haveDescriptor)
-                    {
-                        PendingEmission e;
-                        e.type = SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceUpdated;
-                        e.descriptor = entry.descriptor;
-                        e.numberOfConnections = static_cast<uint32_t>(entry.connections);
-                        const auto pubIt = state.publishersByUuid.find(publisherUuid);
-                        if (pubIt != state.publishersByUuid.end())
-                        {
-                            e.connectedParticipantName = pubIt->second.participantName;
-                            e.connectedServiceName = pubIt->second.serviceName;
-                        }
-                        emissions.push_back(std::move(e));
-                    }
-                }
+                OnConnectionCreated(state, internalKey, parentKey, publisherUuid, emissions);
             }
             else if (type == EventType::ServiceRemoved)
             {
-                const auto cit = state.connectionParent.find(internalKey);
-                if (cit != state.connectionParent.end())
-                {
-                    const auto storedParentKey = cit->second;
-                    state.connectionParent.erase(cit);
-                    const auto sit = state.tracked.find(storedParentKey);
-                    if (sit != state.tracked.end() && sit->second.connections > 0)
-                    {
-                        --sit->second.connections;
-                        if (sit->second.haveDescriptor)
-                        {
-                            PendingEmission e;
-                            e.type = SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceUpdated;
-                            e.descriptor = sit->second.descriptor;
-                            e.numberOfConnections = static_cast<uint32_t>(sit->second.connections);
-                            const auto pubIt = state.publishersByUuid.find(publisherUuid);
-                            if (pubIt != state.publishersByUuid.end())
-                            {
-                                e.connectedParticipantName = pubIt->second.participantName;
-                                e.connectedServiceName = pubIt->second.serviceName;
-                            }
-                            emissions.push_back(std::move(e));
-                        }
-                    }
-                }
+                OnConnectionRemoved(state, internalKey, emissions);
             }
         }
         for (const auto& e : emissions)
@@ -514,55 +672,59 @@ void HandleDiscoveryEvent(ObserverState& state, Discovery::ServiceDiscoveryEvent
         return;
     }
 
-    // ---- RpcClient: track UUID for RPC connection peer resolution; emit immediately ----
+    // ---- RpcClient: a user-facing service AND a connection peer. Emit its own event first, then
+    //      reveal it on any server connection recorded before this client was known. ----
     if (controllerType == Discovery::controllerTypeRpcClient)
     {
+        std::vector<PendingEmission> reveals;
         {
             std::lock_guard<std::mutex> lock{state.mutex};
             if (type == EventType::ServiceCreated)
             {
-                state.rpcClientsByUuid[descriptor.GetNetworkName()] = {descriptor.GetParticipantName(),
-                                                                       descriptor.GetServiceName()};
+                OnPeerCreated(state, descriptor.GetNetworkName(),
+                              PeerInfo{descriptor.GetParticipantName(), descriptor.GetServiceName()}, reveals);
             }
             else if (type == EventType::ServiceRemoved)
             {
-                state.rpcClientsByUuid.erase(descriptor.GetNetworkName());
+                OnPeerRemoved(state, descriptor.GetNetworkName());
             }
         }
-        PendingEmission e;
-        e.type = ToC(type);
-        e.descriptor = descriptor;
-        EmitPending(state, e);
+        PendingEmission own;
+        own.type = ToC(type);
+        own.descriptor = descriptor;
+        EmitPending(state, own);
+        for (const auto& e : reveals)
+        {
+            EmitPending(state, e);
+        }
         return;
     }
 
-    // ---- RpcServer: emit immediately; tracked for connection counting via RpcServerInternal ----
+    // ---- RpcServer: a tracked parent. OnParentCreated emits ServiceCreated and reveals any
+    //      already-recorded connections; removal drops all of its bookkeeping. ----
     if (controllerType == Discovery::controllerTypeRpcServer)
     {
         const ServiceKey key{descriptor.GetParticipantName(), descriptor.GetServiceId()};
-        PendingEmission emission;
-        emission.descriptor = descriptor;
+        std::vector<PendingEmission> emissions;
         {
             std::lock_guard<std::mutex> lock{state.mutex};
             if (type == EventType::ServiceCreated)
             {
-                auto& entry = state.tracked[key];
-                entry.descriptor = descriptor;
-                entry.haveDescriptor = true;
-                emission.type = SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceCreated;
-                emission.numberOfConnections = static_cast<uint32_t>(entry.connections);
+                OnParentCreated(state, key, descriptor, emissions);
             }
             else if (type == EventType::ServiceRemoved)
             {
-                state.tracked.erase(key);
-                for (auto cit = state.connectionParent.begin(); cit != state.connectionParent.end();)
-                {
-                    cit = (cit->second == key) ? state.connectionParent.erase(cit) : std::next(cit);
-                }
-                emission.type = SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceRemoved;
+                OnParentRemoved(state, key);
+                PendingEmission removed;
+                removed.type = SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceRemoved;
+                removed.descriptor = descriptor;
+                emissions.push_back(std::move(removed));
             }
         }
-        EmitPending(state, emission);
+        for (const auto& e : emissions)
+        {
+            EmitPending(state, e);
+        }
         return;
     }
 
@@ -593,54 +755,11 @@ void HandleDiscoveryEvent(ObserverState& state, Discovery::ServiceDiscoveryEvent
             std::lock_guard<std::mutex> lock{state.mutex};
             if (type == EventType::ServiceCreated)
             {
-                if (state.connectionParent.count(internalKey) == 0)
-                {
-                    state.connectionParent[internalKey] = parentKey;
-                    auto& entry = state.tracked[parentKey];
-                    ++entry.connections;
-                    if (entry.haveDescriptor)
-                    {
-                        PendingEmission e;
-                        e.type = SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceUpdated;
-                        e.descriptor = entry.descriptor;
-                        e.numberOfConnections = static_cast<uint32_t>(entry.connections);
-                        const auto clientIt = state.rpcClientsByUuid.find(clientUuid);
-                        if (clientIt != state.rpcClientsByUuid.end())
-                        {
-                            e.connectedParticipantName = clientIt->second.participantName;
-                            e.connectedServiceName = clientIt->second.serviceName;
-                        }
-                        emissions.push_back(std::move(e));
-                    }
-                }
+                OnConnectionCreated(state, internalKey, parentKey, clientUuid, emissions);
             }
             else if (type == EventType::ServiceRemoved)
             {
-                const auto cit = state.connectionParent.find(internalKey);
-                if (cit != state.connectionParent.end())
-                {
-                    const auto storedParentKey = cit->second;
-                    state.connectionParent.erase(cit);
-                    const auto sit = state.tracked.find(storedParentKey);
-                    if (sit != state.tracked.end() && sit->second.connections > 0)
-                    {
-                        --sit->second.connections;
-                        if (sit->second.haveDescriptor)
-                        {
-                            PendingEmission e;
-                            e.type = SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceUpdated;
-                            e.descriptor = sit->second.descriptor;
-                            e.numberOfConnections = static_cast<uint32_t>(sit->second.connections);
-                            const auto clientIt = state.rpcClientsByUuid.find(clientUuid);
-                            if (clientIt != state.rpcClientsByUuid.end())
-                            {
-                                e.connectedParticipantName = clientIt->second.participantName;
-                                e.connectedServiceName = clientIt->second.serviceName;
-                            }
-                            emissions.push_back(std::move(e));
-                        }
-                    }
-                }
+                OnConnectionRemoved(state, internalKey, emissions);
             }
         }
         for (const auto& e : emissions)
@@ -692,7 +811,9 @@ try
     cppServiceDiscovery->RegisterServiceDiscoveryHandler(
         [state](Discovery::ServiceDiscoveryEvent::Type type,
                 const SilKit::Core::ServiceDescriptor& serviceDescriptor) {
-        // This runs on the SIL Kit IO worker thread. Exceptions must never propagate into SIL Kit internals.
+        // Invoked by the internal service discovery with its lock held, serialized, on an unspecified
+        // thread (an IO worker for remote events, or the caller's thread for locally created/removed
+        // services). Exceptions must never propagate into SIL Kit internals.
         try
         {
             HandleDiscoveryEvent(*state, type, serviceDescriptor);

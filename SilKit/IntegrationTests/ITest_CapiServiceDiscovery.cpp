@@ -424,4 +424,57 @@ TEST_F(ITest_CapiServiceDiscovery, rpc_service_updated_carries_client_peer_ident
         << "server's Service_Updated must identify the RPC client's controller name";
 }
 
+// Attaching an observer to an already-running simulation must recover not only the connection count
+// but also the peer identity of connections that existed before the observer registered. This is the
+// replay-ordering case: the DataSubscriberInternal may be replayed before its parent/publisher.
+TEST_F(ITest_CapiServiceDiscovery, late_observer_recovers_peer_of_preexisting_connection)
+{
+    const std::string topic{"LateTopic"};
+    const std::string mediaType{"M"};
+    PubSubSpec spec{topic, mediaType};
+
+    auto publisher = CreateParticipant("LatePub");
+    auto subscriber = CreateParticipant("LateSub");
+    publisher->CreateDataPublisher("LatePubCtrl", spec, 0);
+    subscriber->CreateDataSubscriber("LateSubCtrl", spec, [](IDataSubscriber*, const DataMessageEvent&) {});
+
+    // Ensure the match is established (observed via the SetUp observer) before attaching a new one.
+    ASSERT_TRUE(WaitFor([&] {
+        return std::any_of(_ctx.events.begin(), _ctx.events.end(), [&](const auto& e) {
+            return e.serviceKind == SilKit_Experimental_ServiceKind_DataSubscriber
+                   && e.eventType == SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceUpdated
+                   && e.primaryIdentifier == topic && e.numberOfConnections >= 1;
+        });
+    })) << "the pub/sub connection was never established";
+
+    // Attach a brand-new observer that must replay the already-running simulation.
+    SilKit_ParticipantConfiguration* config{nullptr};
+    ASSERT_EQ(SilKit_ParticipantConfiguration_FromString(&config, ""), SilKit_ReturnCode_SUCCESS);
+    SilKit_Participant* lateObserver{nullptr};
+    ASSERT_EQ(SilKit_Participant_Create(&lateObserver, config, "LateObserver", _registryUri.c_str()),
+              SilKit_ReturnCode_SUCCESS);
+    SilKit_ParticipantConfiguration_Destroy(config);
+
+    ObserverContext lateCtx;
+    SilKit_Experimental_ServiceDiscovery* lateSd{nullptr};
+    ASSERT_EQ(SilKit_Experimental_ServiceDiscovery_Create(&lateSd, lateObserver), SilKit_ReturnCode_SUCCESS);
+    ASSERT_EQ(
+        SilKit_Experimental_ServiceDiscovery_SetServiceDiscoveryHandler(lateSd, &lateCtx, &OnServiceDiscovery),
+        SilKit_ReturnCode_SUCCESS);
+
+    std::unique_lock<std::mutex> lock{lateCtx.mutex};
+    const bool recovered = lateCtx.cv.wait_for(lock, kWaitTimeout, [&] {
+        return std::any_of(lateCtx.events.begin(), lateCtx.events.end(), [&](const auto& e) {
+            return e.serviceKind == SilKit_Experimental_ServiceKind_DataSubscriber
+                   && e.eventType == SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceUpdated
+                   && e.primaryIdentifier == topic && e.numberOfConnections >= 1
+                   && e.connectedParticipantName == "LatePub" && e.connectedServiceName == "LatePubCtrl";
+        });
+    });
+    lock.unlock();
+    EXPECT_TRUE(recovered) << "late observer must recover the peer identity of the pre-existing connection";
+
+    SilKit_Participant_Destroy(lateObserver);
+}
+
 } // namespace
