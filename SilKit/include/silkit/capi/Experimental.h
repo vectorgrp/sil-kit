@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2022 Vector Informatik GmbH
+// SPDX-FileCopyrightText: 2026 Vector Informatik GmbH
 //
 // SPDX-License-Identifier: MIT
 
@@ -87,7 +87,7 @@ typedef struct
     const char* mediaType;
     //! Decoded matching labels for pub/sub and RPC services; empty for bus controllers.
     SilKit_LabelList labelList;
-    //! The simulation name this service belongs to. Empty string when not available.
+    //! Reserved for future system-level simulation detection. Currently always an empty string.
     const char* simulationName;
     //! Name of the peer participant; populated only in ServiceUpdated connection events.
     const char* connectedParticipantName;
@@ -95,7 +95,9 @@ typedef struct
     const char* connectedServiceName;
     //! Name of the participant simulating this controller's network; empty when not simulated.
     const char* simulatingParticipantName;
-    //! Number of active matched connections (pub/sub matches or RPC call pairs); 0 for bus controllers.
+    //! Number of active matched connections. Reported on the receiving side only: DataSubscribers count
+    //! matched publishers and RpcServers count matched clients. Always 0 for DataPublishers, RpcClients
+    //! and bus controllers.
     uint32_t numberOfConnections;
     //! True when a network simulator owns this bus controller's network.
     SilKit_Bool isSimulated;
@@ -105,6 +107,12 @@ typedef struct
  *
  * The \p serviceDescriptor and all of its pointer members are only valid for the duration of the
  * handler invocation. Copy the data if it must outlive the call.
+ *
+ * \note Threading: this handler may be invoked on an internal SIL Kit worker thread or on an
+ *       application thread that creates or destroys a service; the invoking thread is unspecified.
+ *       Invocations are serialized (the handler is never called concurrently with itself). The
+ *       handler must not block and must not call back into the participant that owns the observer,
+ *       as doing so may deadlock.
  *
  * \param context The user context pointer passed to \ref SilKit_Experimental_ServiceDiscovery_SetServiceDiscoveryHandler.
  * \param eventType Whether the service was created, updated, or removed.
@@ -116,7 +124,9 @@ typedef void(SilKitFPTR* SilKit_Experimental_ServiceDiscoveryHandler_t)(
 
 /*! \brief Obtain the experimental service discovery observer of a participant.
  *
- * The returned object is owned by the participant and must not be destroyed by the caller.
+ * The returned object is owned by the participant and must not be destroyed by the caller; there is
+ * no corresponding destroy function. It refers to the participant's single service discovery, so
+ * repeated calls for the same participant yield the same observer handle.
  *
  * \warning This function is not part of the stable API and ABI of the SIL Kit. It may be removed at any time without
  *          prior notice.
@@ -138,6 +148,10 @@ typedef SilKit_ReturnCode(SilKitFPTR* SilKit_Experimental_ServiceDiscovery_Creat
  * Infrastructure/internal services are not reported. Network link events are not reported directly;
  * instead, affected bus controllers receive a
  * \ref SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceUpdated with \p isSimulated set.
+ *
+ * \note Each call registers an additional, independent handler; handlers cannot be removed and remain
+ *       registered for the lifetime of the participant. To observe with a single handler, call this
+ *       function once. See the handler typedef for the threading contract.
  *
  * \warning This function is not part of the stable API and ABI of the SIL Kit. It may be removed at any time without
  *          prior notice.

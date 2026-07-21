@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2022 Vector Informatik GmbH
+// SPDX-FileCopyrightText: 2026 Vector Informatik GmbH
 //
 // SPDX-License-Identifier: MIT
 
@@ -526,6 +526,90 @@ TEST_F(Test_CapiServiceDiscovery, subscriber_multiple_connections_counted)
     EXPECT_EQ(data.callCount, 5);
 }
 
+TEST_F(Test_CapiServiceDiscovery, subscriber_peer_revealed_when_publisher_arrives_late)
+{
+    // A connection observed before its publisher: the count is reported immediately without a peer,
+    // and the peer identity is revealed by a later Service_Updated once the publisher is discovered.
+    // This is what lets an observer that attaches to a running simulation reconstruct the graph.
+    CallbackData data;
+    auto handler = InstallHandler(data);
+
+    const std::string uuid = "pub-uuid-late";
+    handler(ServiceDiscoveryEvent::Type::ServiceCreated, MakeUserSubscriber(100, "T"));
+    handler(ServiceDiscoveryEvent::Type::ServiceCreated, MakeInternalConnection(200, 100, uuid));
+
+    // Count is known, peer is not yet.
+    EXPECT_EQ(data.numberOfConnections, 1u);
+    EXPECT_EQ(data.connectedParticipantName, "");
+
+    handler(ServiceDiscoveryEvent::Type::ServiceCreated, MakeDataPublisher(uuid, "PubParticipant", "MyPub"));
+
+    // The last event is the reveal: a Service_Updated on the subscriber naming the publisher.
+    EXPECT_EQ(data.lastType, SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceUpdated);
+    EXPECT_EQ(data.serviceKind, SilKit_Experimental_ServiceKind_DataSubscriber);
+    EXPECT_EQ(data.numberOfConnections, 1u);
+    EXPECT_EQ(data.connectedParticipantName, "PubParticipant");
+    EXPECT_EQ(data.connectedServiceName, "MyPub");
+}
+
+TEST_F(Test_CapiServiceDiscovery, subscriber_created_reveals_peer_for_preexisting_connection)
+{
+    // Adverse replay order (attach-to-running): the internal connection and the publisher are both
+    // seen before the subscriber. When the subscriber finally arrives, it is reported created and the
+    // pre-existing connection's peer is revealed on a following Service_Updated.
+    CallbackData data;
+    auto handler = InstallHandler(data);
+
+    const std::string uuid = "pub-uuid-replay";
+    handler(ServiceDiscoveryEvent::Type::ServiceCreated, MakeInternalConnection(200, 100, uuid));
+    handler(ServiceDiscoveryEvent::Type::ServiceCreated, MakeDataPublisher(uuid, "PubParticipant", "MyPub"));
+    handler(ServiceDiscoveryEvent::Type::ServiceCreated, MakeUserSubscriber(100, "T"));
+
+    EXPECT_EQ(data.lastType, SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceUpdated);
+    EXPECT_EQ(data.serviceKind, SilKit_Experimental_ServiceKind_DataSubscriber);
+    EXPECT_EQ(data.numberOfConnections, 1u);
+    EXPECT_EQ(data.connectedParticipantName, "PubParticipant");
+    EXPECT_EQ(data.connectedServiceName, "MyPub");
+}
+
+TEST_F(Test_CapiServiceDiscovery, reports_data_subscriber_with_decoded_labels)
+{
+    // The subscriber-side label key must be decoded too (not just the publisher's).
+    CallbackData data;
+    auto handler = InstallHandler(data);
+
+    auto descriptor = MakeController(Discovery::controllerTypeDataSubscriber, "default", "MySubscriber");
+    descriptor.SetSupplementalDataItem(Discovery::supplKeyDataSubscriberTopic, "TopicS");
+    descriptor.SetSupplementalDataItem(
+        Discovery::supplKeyDataSubscriberSubLabels,
+        SerializeLabels({{"sk", "sv", SilKit::Services::MatchingLabel::Kind::Mandatory}}));
+
+    handler(ServiceDiscoveryEvent::Type::ServiceCreated, descriptor);
+
+    EXPECT_EQ(data.serviceKind, SilKit_Experimental_ServiceKind_DataSubscriber);
+    EXPECT_EQ(data.primaryIdentifier, "TopicS");
+    ASSERT_EQ(data.labels.size(), 1u);
+    EXPECT_EQ(data.labels[0].key, "sk");
+    EXPECT_EQ(data.labels[0].value, "sv");
+    EXPECT_EQ(data.labels[0].kind, SilKit_LabelKind_Mandatory);
+}
+
+TEST_F(Test_CapiServiceDiscovery, reports_ethernet_and_flexray_controllers)
+{
+    CallbackData data;
+    auto handler = InstallHandler(data);
+
+    handler(ServiceDiscoveryEvent::Type::ServiceCreated,
+            MakeController(Discovery::controllerTypeEthernet, "ETH1", "Eth1"));
+    EXPECT_EQ(data.serviceKind, SilKit_Experimental_ServiceKind_EthernetController);
+    EXPECT_EQ(data.primaryIdentifier, "ETH1");
+
+    handler(ServiceDiscoveryEvent::Type::ServiceCreated,
+            MakeController(Discovery::controllerTypeFlexray, "FR1", "Fr1"));
+    EXPECT_EQ(data.serviceKind, SilKit_Experimental_ServiceKind_FlexrayController);
+    EXPECT_EQ(data.primaryIdentifier, "FR1");
+}
+
 // --------------------------------------------------------------------------------------------------
 // RpcServer: reported immediately on creation; Service_Updated fires on each RpcServerInternal event.
 // --------------------------------------------------------------------------------------------------
@@ -577,6 +661,29 @@ TEST_F(Test_CapiServiceDiscovery, rpc_server_service_updated_shows_peer_info)
     EXPECT_EQ(data.connectedParticipantName, "ClientParticipant");
     EXPECT_EQ(data.connectedServiceName, "MyClient");
     EXPECT_EQ(data.numberOfConnections, 1u);
+}
+
+TEST_F(Test_CapiServiceDiscovery, rpc_server_peer_revealed_when_client_arrives_late)
+{
+    // RPC analogue of the pub/sub late-peer reveal: the server connection is seen before the client;
+    // the client's identity is revealed by a later Service_Updated once the client is discovered.
+    CallbackData data;
+    auto handler = InstallHandler(data);
+
+    const std::string clientUuid = "client-uuid-late";
+    handler(ServiceDiscoveryEvent::Type::ServiceCreated, MakeRpcServer(50, "Add"));
+    handler(ServiceDiscoveryEvent::Type::ServiceCreated, MakeRpcServerInternal(60, 50, clientUuid));
+
+    EXPECT_EQ(data.numberOfConnections, 1u);
+    EXPECT_EQ(data.connectedParticipantName, "");
+
+    handler(ServiceDiscoveryEvent::Type::ServiceCreated, MakeRpcClient(clientUuid, "ClientParticipant", "MyClient"));
+
+    EXPECT_EQ(data.lastType, SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceUpdated);
+    EXPECT_EQ(data.serviceKind, SilKit_Experimental_ServiceKind_RpcServer);
+    EXPECT_EQ(data.numberOfConnections, 1u);
+    EXPECT_EQ(data.connectedParticipantName, "ClientParticipant");
+    EXPECT_EQ(data.connectedServiceName, "MyClient");
 }
 
 TEST_F(Test_CapiServiceDiscovery, rpc_server_service_updated_on_disconnection)
