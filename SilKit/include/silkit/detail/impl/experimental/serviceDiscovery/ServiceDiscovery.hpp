@@ -87,6 +87,12 @@ void ServiceDiscovery::SetServiceDiscoveryHandler(
             label.kind = static_cast<SilKit::Services::MatchingLabel::Kind>(cLabel.kind);
             serviceDescriptor.labels.emplace_back(std::move(label));
         }
+        serviceDescriptor.simulationName = cServiceDescriptor->simulationName ? cServiceDescriptor->simulationName : "";
+        serviceDescriptor.connectedParticipantName = cServiceDescriptor->connectedParticipantName ? cServiceDescriptor->connectedParticipantName : "";
+        serviceDescriptor.connectedServiceName = cServiceDescriptor->connectedServiceName ? cServiceDescriptor->connectedServiceName : "";
+        serviceDescriptor.simulatingParticipantName = cServiceDescriptor->simulatingParticipantName ? cServiceDescriptor->simulatingParticipantName : "";
+        serviceDescriptor.numberOfConnections = cServiceDescriptor->numberOfConnections;
+        serviceDescriptor.isSimulated = cServiceDescriptor->isSimulated != SilKit_False;
 
         (*static_cast<SD::ServiceDiscoveryHandler*>(context))(
             static_cast<SD::ServiceDiscoveryEventType>(eventType), serviceDescriptor);
