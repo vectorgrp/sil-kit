@@ -127,6 +127,10 @@ private:
 
     std::atomic<ConnectStage> _connectStage{ConnectStage::INVALID};
 
+    // Serializes the check-then-set stage transitions in UpdateStage(), which can be called
+    // concurrently from the caller thread (StartConnecting) and the IO worker thread (connect callbacks).
+    std::mutex _stageMutex{};
+
     mutable std::mutex _mutex{};
     std::unordered_map<std::string, std::unique_ptr<Peer>> _peers;
 

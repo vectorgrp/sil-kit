@@ -161,6 +161,10 @@ void ConnectKnownParticipants::UpdateStage()
 {
     SILKIT_TRACE_METHOD_(_logger, "()");
 
+    // Serialize the whole transition: _connectStage is atomic, but the check-then-set below is not,
+    // so concurrent callers would otherwise fire the same stage callback (e.g. set_value()) twice.
+    std::lock_guard<decltype(_stageMutex)> stageLock{_stageMutex};
+
     if (_connectStage == ConnectStage::INVALID)
     {
         return;
