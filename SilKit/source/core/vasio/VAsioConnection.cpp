@@ -1386,6 +1386,7 @@ void VAsioConnection::OnPeerShutdown(IVAsioPeer* peer)
 
             RemovePeerFromLinks(peer);
             RemovePeerFromConnection(peer);
+            RemovePeerFromPendingAcknowledges(peer);
         }
     }
 }
@@ -1690,6 +1691,33 @@ void VAsioConnection::RemovePendingSubscription(const PendingAcksIdentifier& ack
     if (iterPendingASync != _pendingAsyncSubscriptionAcknowledges.end())
     {
         _pendingAsyncSubscriptionAcknowledges.erase(iterPendingASync);
+        if (_pendingAsyncSubscriptionAcknowledges.empty())
+        {
+            AsyncSubscriptionsCompleted();
+        }
+    }
+}
+
+void VAsioConnection::RemovePeerFromPendingAcknowledges(IVAsioPeer* peer)
+{
+    const auto belongsToPeer = [peer](const PendingAcksIdentifier& ackId) { return ackId.first == peer; };
+
+    auto iterPendingSync = std::remove_if(_pendingSubscriptionAcknowledges.begin(),
+                                          _pendingSubscriptionAcknowledges.end(), belongsToPeer);
+    if (iterPendingSync != _pendingSubscriptionAcknowledges.end())
+    {
+        _pendingSubscriptionAcknowledges.erase(iterPendingSync, _pendingSubscriptionAcknowledges.end());
+        if (_pendingSubscriptionAcknowledges.empty())
+        {
+            SyncSubscriptionsCompleted();
+        }
+    }
+
+    auto iterPendingASync = std::remove_if(_pendingAsyncSubscriptionAcknowledges.begin(),
+                                           _pendingAsyncSubscriptionAcknowledges.end(), belongsToPeer);
+    if (iterPendingASync != _pendingAsyncSubscriptionAcknowledges.end())
+    {
+        _pendingAsyncSubscriptionAcknowledges.erase(iterPendingASync, _pendingAsyncSubscriptionAcknowledges.end());
         if (_pendingAsyncSubscriptionAcknowledges.empty())
         {
             AsyncSubscriptionsCompleted();

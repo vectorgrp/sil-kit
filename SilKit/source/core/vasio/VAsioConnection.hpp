@@ -286,6 +286,9 @@ private:
     // Unique identifier of SubscriptionAcknowledges on the subscriber
     using PendingAcksIdentifier = std::pair<IVAsioPeer*, VAsioMsgSubscriber>;
     void RemovePendingSubscription(const PendingAcksIdentifier& ackId);
+    // Drop all pending acknowledges belonging to a peer that is going away, so the
+    // pending lists can complete even though the peer will never acknowledge them.
+    void RemovePeerFromPendingAcknowledges(IVAsioPeer* peer);
 
     void SendProxyPeerShutdownNotification(IVAsioPeer* peer);
     void RemovePeerFromLinks(IVAsioPeer* peer);
