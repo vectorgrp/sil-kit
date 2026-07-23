@@ -24,8 +24,6 @@ enum class ServiceDiscoveryEventType : SilKit_Experimental_ServiceDiscoveryEvent
     ServiceCreated = SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceCreated,
     //! A service has been removed.
     ServiceRemoved = SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceRemoved,
-    //! A property of an existing service has changed (e.g. connection count, simulation status).
-    ServiceUpdated = SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceUpdated,
 };
 
 //! \brief The kind of a discovered service. Only user-facing services are reported.
@@ -40,9 +38,19 @@ enum class ServiceKind : SilKit_Experimental_ServiceKind
     DataSubscriber = SilKit_Experimental_ServiceKind_DataSubscriber,
     RpcClient = SilKit_Experimental_ServiceKind_RpcClient,
     RpcServer = SilKit_Experimental_ServiceKind_RpcServer,
+    //! A link between two services: a pub/sub or RPC match, or a network-simulator link.
+    Link = SilKit_Experimental_ServiceKind_Link,
 };
 
 //! \brief Describes a single discovered service, passed to a \ref ServiceDiscoveryHandler.
+//!
+//! A \ref ServiceKind::Link describes a link between two services: a pub/sub or RPC match, or a
+//! network-simulator link. For a pub/sub or RPC match \p participantName / \p serviceName name the
+//! receiving side (the DataSubscriber or RpcServer) and \p connectedParticipantName /
+//! \p connectedServiceName name the peer (the DataPublisher or RpcClient). For a network-simulator
+//! link \p participantName is the simulating participant, \p primaryIdentifier is the simulated
+//! network name (matching the affected bus controllers' \p primaryIdentifier), and the
+//! \p connected... fields are empty.
 struct ServiceDescriptor
 {
     //! Name of the participant providing the service.
@@ -51,8 +59,8 @@ struct ServiceDescriptor
     std::string serviceName;
     //! The kind of service.
     ServiceKind serviceKind{ServiceKind::Undefined};
-    //! The primary, user-facing identifier of the service: the network name for bus controllers,
-    //! the topic for pub/sub, and the function name for RPC.
+    //! The primary, user-facing identifier of the service: the network name for bus controllers and
+    //! network-simulator links, the topic for pub/sub, and the function name for RPC.
     std::string primaryIdentifier;
     //! Media type for pub/sub and RPC services; empty string when not applicable.
     std::string mediaType;
@@ -60,21 +68,15 @@ struct ServiceDescriptor
     std::vector<SilKit::Services::MatchingLabel> labels;
     //! The simulation name this service belongs to. Empty string when not available.
     std::string simulationName;
-    //! Name of the peer participant; populated only in ServiceUpdated connection events.
+    //! Name of the peer participant; populated only in pub/sub and RPC Link events.
     std::string connectedParticipantName;
-    //! Name of the peer service; populated only in ServiceUpdated connection events.
+    //! Name of the peer service; populated only in pub/sub and RPC Link events.
     std::string connectedServiceName;
-    //! Name of the participant simulating this controller's network; empty when not simulated.
-    std::string simulatingParticipantName;
-    //! Number of active matched connections (pub/sub or RPC); 0 for bus controllers.
-    uint32_t numberOfConnections{0};
-    //! True when a network simulator owns this bus controller's network.
-    bool isSimulated{false};
 };
 
-/*! \brief Handler invoked when a user-facing service is created, updated, or removed in the simulation.
+/*! \brief Handler invoked when a user-facing service is created or removed in the simulation.
  *
- * \param eventType Whether the service was created, updated, or removed.
+ * \param eventType Whether the service was created or removed.
  * \param serviceDescriptor The affected service.
  */
 using ServiceDiscoveryHandler =

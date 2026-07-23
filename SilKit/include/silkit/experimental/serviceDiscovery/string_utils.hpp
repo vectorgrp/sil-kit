@@ -46,6 +46,8 @@ std::string to_string(ServiceKind serviceKind)
         return "RpcClient";
     case ServiceKind::RpcServer:
         return "RpcServer";
+    case ServiceKind::Link:
+        return "Link";
     }
 
     std::stringstream out;
@@ -63,8 +65,6 @@ std::string to_string(ServiceDiscoveryEventType eventType)
         return "ServiceCreated";
     case ServiceDiscoveryEventType::ServiceRemoved:
         return "ServiceRemoved";
-    case ServiceDiscoveryEventType::ServiceUpdated:
-        return "ServiceUpdated";
     }
 
     std::stringstream out;

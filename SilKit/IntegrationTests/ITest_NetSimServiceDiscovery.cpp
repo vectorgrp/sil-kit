@@ -2,15 +2,15 @@
 //
 // SPDX-License-Identifier: MIT
 
-// Integration test: verify that the service-discovery C API correctly reports bus controllers as
-// simulated (isSimulated=true) when a network simulator is present, without embedding this
-// plumbing into the CAN/Ethernet/LIN/FlexRay routing tests.
+// Integration test: verify that the service-discovery C API reports a network simulator as a Link
+// service (SilKit_Experimental_ServiceKind_Link) whose primaryIdentifier is the simulated network
+// name and whose participantName is the simulating participant. A consumer joins that network name
+// against a bus controller's primaryIdentifier to learn the controller is simulated -- without any
+// dedicated cross-referencing being done inside the API.
 //
 // The test sets up the minimal scenario: one network simulator participant that takes over one CAN
 // network ("CAN1"), one regular participant with a CAN controller on that network, and one
-// autonomous service-discovery observer. After the simulation, the observer must have received at
-// least one event for a CAN controller with isSimulated=true and the correct
-// simulatingParticipantName.
+// autonomous service-discovery observer.
 
 #include <algorithm>
 #include <chrono>
@@ -76,9 +76,8 @@ struct DiscoveryEvent
 {
     SilKit_Experimental_ServiceKind serviceKind{};
     SilKit_Experimental_ServiceDiscoveryEvent_Type eventType{};
-    std::string primaryIdentifier; // networkName for bus controllers
-    bool isSimulated{false};
-    std::string simulatingParticipantName;
+    std::string participantName;
+    std::string primaryIdentifier; // networkName for bus controllers and network-simulator links
 };
 
 struct DiscoveryCtx
@@ -96,9 +95,8 @@ void SilKitCALL OnNetSimDiscovery(void* context, SilKit_Experimental_ServiceDisc
     DiscoveryEvent ev{};
     ev.serviceKind = d->serviceKind;
     ev.eventType = eventType;
+    ev.participantName = d->participantName ? d->participantName : "";
     ev.primaryIdentifier = d->primaryIdentifier ? d->primaryIdentifier : "";
-    ev.isSimulated = d->isSimulated != SilKit_False;
-    ev.simulatingParticipantName = d->simulatingParticipantName ? d->simulatingParticipantName : "";
 
     {
         std::lock_guard<std::mutex> lk{ctx->mutex};
@@ -115,12 +113,11 @@ class ITest_NetSimServiceDiscovery : public ITest_SimTestHarness
 {
 };
 
-// A network simulator takes over the "CAN1" network. A regular participant creates a CAN
-// controller on that network. The service-discovery observer must see the CAN controller event
-// with isSimulated=true and simulatingParticipantName equal to the network simulator's
-// participant name — demonstrating that the new API can identify a network simulator without
-// any dedicated "NetworkLink" kind or separate cross-referencing by the caller.
-TEST_F(ITest_NetSimServiceDiscovery, can_controller_reported_as_simulated_when_netsim_present)
+// A network simulator takes over the "CAN1" network. A regular participant creates a CAN controller
+// on that network. The service-discovery observer must see a Link service whose primaryIdentifier is
+// "CAN1" and whose participantName is the network simulator's participant name — demonstrating that
+// the API surfaces a network simulator as a Link, joinable to bus controllers by network name.
+TEST_F(ITest_NetSimServiceDiscovery, netsim_reported_as_link_service)
 {
     const std::string netSimName = "NetworkSimulator";
     const std::string canPartName = "CanParticipant";
@@ -173,24 +170,28 @@ TEST_F(ITest_NetSimServiceDiscovery, can_controller_reported_as_simulated_when_n
     auto ok = _simTestHarness->Run(10s);
     ASSERT_TRUE(ok) << "simulation should complete without timeout";
 
-    // The isSimulated=true events for the CAN controller fire during the simulation (when the
-    // Link service from the network simulator arrives). They are accumulated in ctx.events by
-    // the observer's IO thread. Allow a brief settle window after Run() returns for any
-    // in-flight IO delivery.
+    // The Link service for the network simulator fires during the simulation. It is accumulated in
+    // ctx.events by the observer's IO thread. Allow a brief settle window after Run() returns for
+    // any in-flight IO delivery.
     {
         std::unique_lock<std::mutex> lk{ctx.mutex};
         const bool found = ctx.cv.wait_for(lk, 5s, [&] {
-            return std::any_of(ctx.events.begin(), ctx.events.end(), [](const DiscoveryEvent& e) {
-                return e.serviceKind == SilKit_Experimental_ServiceKind_CanController && e.isSimulated;
+            return std::any_of(ctx.events.begin(), ctx.events.end(), [&](const DiscoveryEvent& e) {
+                return e.serviceKind == SilKit_Experimental_ServiceKind_Link
+                       && e.eventType == SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceCreated
+                       && e.primaryIdentifier == networkName && e.participantName == netSimName;
             });
         });
-        ASSERT_TRUE(found) << "no CAN controller event with isSimulated=true was observed";
+        ASSERT_TRUE(found)
+            << "no Link service with the network name and the network simulator participant was observed";
 
-        const auto it = std::find_if(ctx.events.begin(), ctx.events.end(), [](const DiscoveryEvent& e) {
-            return e.serviceKind == SilKit_Experimental_ServiceKind_CanController && e.isSimulated;
+        // The CAN controller is reported as its own kind on the same network; joining on
+        // primaryIdentifier lets a consumer conclude the controller is simulated.
+        const bool sawController = std::any_of(ctx.events.begin(), ctx.events.end(), [&](const DiscoveryEvent& e) {
+            return e.serviceKind == SilKit_Experimental_ServiceKind_CanController
+                   && e.primaryIdentifier == networkName;
         });
-        EXPECT_EQ(it->simulatingParticipantName, netSimName)
-            << "simulatingParticipantName must be the network simulator's participant name";
+        EXPECT_TRUE(sawController) << "the CAN controller on the simulated network was not observed";
     }
 
     SilKit_Participant_Destroy(observer);

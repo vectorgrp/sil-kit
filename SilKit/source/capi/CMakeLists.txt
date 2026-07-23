@@ -19,6 +19,8 @@ add_library(O_SilKit_Capi OBJECT
     CapiVendor.cpp
     CapiVersion.cpp
     CapiNetworkSimulator.cpp
+    ServiceObserver.cpp
+    ServiceObserver.hpp
     TypeConversion.hpp
 )
 
@@ -32,6 +34,7 @@ add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_CapiEthernet.cpp LIBS
 add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_CapiFlexray.cpp LIBS S_SilKitImpl I_SilKit)
 add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_CapiData.cpp LIBS S_SilKitImpl I_SilKit)
 add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_CapiServiceDiscovery.cpp LIBS S_SilKitImpl I_SilKit)
+add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_ServiceObserver.cpp LIBS S_SilKitImpl I_SilKit)
 add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_CapiRpc.cpp LIBS S_SilKitImpl I_SilKit)
 add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_CapiLogger.cpp LIBS S_SilKitImpl)
 add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_CapiVersion.cpp LIBS S_SilKitImpl)
