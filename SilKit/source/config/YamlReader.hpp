@@ -236,11 +236,21 @@ protected:
         {
             // A leading "---" makes the document root a stream (a sequence of
             // documents). Transparently descend into the document(s) to find the key.
-            for (const auto& child : _node.cchildren())
+            // A document must itself be a mapping; a document that is a bare sequence
+            // is the same object-vs-list mistype we reject below.
+            for (const auto& doc : _node.cchildren())
             {
-                if (child.is_container() && HasKey(child, name))
+                if (doc.is_seq())
                 {
-                    return MakeImpl(child.find_child(ryml::to_csubstr(name)));
+                    ThrowExpectedMapping(name);
+                }
+                if (doc.is_map())
+                {
+                    auto&& found = doc.find_child(ryml::to_csubstr(name));
+                    if (!found.invalid())
+                    {
+                        return MakeImpl(found);
+                    }
                 }
             }
             return MakeImpl({});
@@ -253,14 +263,19 @@ protected:
             // list's elements for the key. This catches mistyped configuration such as
             // "HealthCheck:\n  - SoftResponseTimeout: 1", where the leading "- " turns
             // an object into a single-element list.
-            std::ostringstream s;
-            s << "expected a mapping with key \"" << name << "\", but got a sequence";
-            throw MakeConfigurationError(s.str());
+            ThrowExpectedMapping(name);
         }
 
         // Not a container (absent, null or empty node): treat the key as not present so
         // that objects left empty keep their default values.
         return MakeImpl({});
+    }
+
+    [[noreturn]] void ThrowExpectedMapping(const std::string& name) const
+    {
+        std::ostringstream s;
+        s << "expected a mapping with key \"" << name << "\", but got a sequence";
+        throw MakeConfigurationError(s.str());
     }
 
     auto MakeImpl(ryml::ConstNodeRef node_) const -> Impl

@@ -713,6 +713,23 @@ Experimental:
     }
 }
 
+TEST_F(Test_YamlParser, yaml_throw_on_stream_document_as_sequence)
+{
+    // A leading "---" wraps the document in a stream node. The document itself must be
+    // a mapping; here the whole document is a bare sequence, which is the same
+    // object-vs-list mistype and must be rejected.
+    auto streamDocAsSequence = R"(---
+- SoftResponseTimeout: 1
+)";
+
+    EXPECT_THROW(
+        {
+            auto&& cfg = Deserialize<ParticipantConfiguration>(streamDocAsSequence);
+            (void)cfg;
+        },
+        SilKit::ConfigurationError);
+}
+
 TEST_F(Test_YamlParser, yaml_healthcheck_as_map_is_accepted)
 {
     // Regression guard: the correctly-typed object must still parse.
