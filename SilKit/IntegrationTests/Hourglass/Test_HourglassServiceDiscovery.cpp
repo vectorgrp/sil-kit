@@ -193,9 +193,9 @@ TEST_F(Test_HourglassServiceDiscovery, to_string_maps_enums)
 {
     EXPECT_EQ(SD::to_string(SD::ServiceKind::DataSubscriber), "DataSubscriber");
     EXPECT_EQ(SD::to_string(SD::ServiceKind::RpcServer), "RpcServer");
+    EXPECT_EQ(SD::to_string(SD::ServiceKind::Link), "Link");
     EXPECT_EQ(SD::to_string(SD::ServiceDiscoveryEventType::ServiceCreated), "ServiceCreated");
     EXPECT_EQ(SD::to_string(SD::ServiceDiscoveryEventType::ServiceRemoved), "ServiceRemoved");
-    EXPECT_EQ(SD::to_string(SD::ServiceDiscoveryEventType::ServiceUpdated), "ServiceUpdated");
 }
 
 } // namespace

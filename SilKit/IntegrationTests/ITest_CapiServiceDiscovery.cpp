@@ -6,11 +6,12 @@
 // (SilKit_Experimental_ServiceDiscovery_*), driven against real participants over an
 // in-process registry.
 //
-// Design: subscribers and RPC servers are reported immediately on ServiceCreated (no connection
-// gating). When a DataSubscriberInternal confirms a pub/sub match, the parent DataSubscriber
-// receives a Service_Updated event carrying the updated numberOfConnections and the peer's
-// identity. ServiceRemoved fires only when the service itself is destroyed, not when a connection
-// drops.
+// Design: bus controllers, publishers/subscribers and RPC clients/servers are reported as their own
+// service kinds on ServiceCreated/ServiceRemoved. A confirmed pub/sub or RPC match is reported as a
+// SilKit_Experimental_ServiceKind_Link ServiceCreated event whose participantName/serviceName name
+// the receiving side (subscriber/server) and whose connectedParticipantName/connectedServiceName
+// name the peer (publisher/client). A match teardown emits no Link removal: it is inferred from the
+// ServiceRemoved of one of the endpoints.
 
 #include <algorithm>
 #include <atomic>
@@ -60,7 +61,6 @@ struct ObservedEvent
     std::string primaryIdentifier;
     std::string mediaType;
     std::vector<ObservedLabel> labels;
-    uint32_t numberOfConnections{0};
     std::string connectedParticipantName;
     std::string connectedServiceName;
 };
@@ -92,7 +92,6 @@ void SilKitCALL OnServiceDiscovery(void* context, SilKit_Experimental_ServiceDis
         const auto& label = descriptor->labelList.labels[i];
         event.labels.push_back({label.key, label.value, label.kind});
     }
-    event.numberOfConnections = descriptor->numberOfConnections;
     event.connectedParticipantName =
         descriptor->connectedParticipantName ? descriptor->connectedParticipantName : "";
     event.connectedServiceName = descriptor->connectedServiceName ? descriptor->connectedServiceName : "";
@@ -199,8 +198,6 @@ protected:
 
 // 1 publisher + 2 subscribers on the same topic. The observer must see the publisher and both
 // subscribers with the right kind, primaryIdentifier (== topic), mediaType and labels.
-// (In this matched scenario the events fire whether or not they are gated on a connection, so
-// this stays green across the follow-up; the semantic then shifts from "created" to "connected".)
 TEST_F(ITest_CapiServiceDiscovery, observer_sees_publisher_and_both_subscribers)
 {
     const std::string topic{"T"};
@@ -285,8 +282,8 @@ TEST_F(ITest_CapiServiceDiscovery, both_subscribers_receive_published_data)
     EXPECT_TRUE(latch.Wait(2, kWaitTimeout)) << "both subscribers should receive the published sample";
 }
 
-// A subscriber with no matching publisher is reported immediately on creation with
-// numberOfConnections == 0. The sentinel ensures in-order delivery (see below).
+// A subscriber with no matching publisher is reported immediately on creation (as its own kind, with
+// no link). The sentinel ensures in-order delivery (see below).
 //
 // The barrier is deterministic: the unmatched subscriber and a sentinel publisher are created, in
 // that order, on the SAME participant. All announcements from one participant reach the observer
@@ -319,15 +316,16 @@ TEST_F(ITest_CapiServiceDiscovery, subscriber_visible_immediately_without_matchi
               1u)
         << "a subscriber must be reported immediately on creation, even without a matching publisher";
 
-    // And the connection count must be zero (no publisher matched).
-    const auto ev = FindEvent(SilKit_Experimental_ServiceKind_DataSubscriber,
-                              SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceCreated, lonelyTopic);
-    EXPECT_EQ(ev.numberOfConnections, 0u);
+    // And no link exists for that topic (no publisher matched).
+    EXPECT_EQ(Count(SilKit_Experimental_ServiceKind_Link,
+                    SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceCreated, lonelyTopic),
+              0u);
 }
 
-// When the publisher leaves, the observer must receive a Service_Updated event on the subscriber
-// with numberOfConnections == 0. ServiceRemoved does NOT fire (the subscriber is still alive).
-TEST_F(ITest_CapiServiceDiscovery, subscriber_updated_when_publisher_leaves)
+// When a publisher matches a subscriber, a Link ServiceCreated event fires. When the publisher then
+// leaves, no Link removal is emitted; instead the publisher's own ServiceRemoved is observed, from
+// which the teardown of the link is inferred.
+TEST_F(ITest_CapiServiceDiscovery, link_created_and_publisher_removal_observed)
 {
     const std::string topic{"T"};
     const std::string mediaType{"M"};
@@ -338,31 +336,26 @@ TEST_F(ITest_CapiServiceDiscovery, subscriber_updated_when_publisher_leaves)
     publisher->CreateDataPublisher("PubCtrl", spec, 1);
     subscriber->CreateDataSubscriber("SubCtrl", spec, [](IDataSubscriber*, const DataMessageEvent&) {});
 
-    // Wait for the connection to be established before destroying the publisher.
+    // Wait for the match to be reported as a Link before destroying the publisher.
     ASSERT_TRUE(WaitFor([&] {
-        return std::any_of(_ctx.events.begin(), _ctx.events.end(), [&](const auto& e) {
-            return e.serviceKind == SilKit_Experimental_ServiceKind_DataSubscriber
-                   && e.eventType == SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceUpdated
-                   && e.primaryIdentifier == topic && e.numberOfConnections >= 1;
-        });
-    })) << "observer never saw the subscriber connected to the publisher (Service_Updated, connections>=1)";
+        return CountUnlocked(SilKit_Experimental_ServiceKind_Link,
+                             SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceCreated, topic)
+               >= 1;
+    })) << "observer never saw the pub/sub match reported as a Link";
 
     publisher.reset();
 
     ASSERT_TRUE(WaitFor([&] {
-        return std::any_of(_ctx.events.begin(), _ctx.events.end(), [&](const auto& e) {
-            return e.serviceKind == SilKit_Experimental_ServiceKind_DataSubscriber
-                   && e.eventType == SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceUpdated
-                   && e.primaryIdentifier == topic && e.numberOfConnections == 0;
-        });
-    })) << "observer should see Service_Updated(connections=0) when the publisher leaves";
+        return CountUnlocked(SilKit_Experimental_ServiceKind_DataPublisher,
+                             SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceRemoved, topic)
+               >= 1;
+    })) << "observer should see the publisher's ServiceRemoved when it leaves";
 }
 
-// When a publisher matches a subscriber, the Service_Updated event carried on the subscriber must
-// name the publisher: connectedParticipantName == publisher's participant name and
-// connectedServiceName == publisher's controller name. This lets the observer build a confirmed
-// connection graph from service discovery data alone.
-TEST_F(ITest_CapiServiceDiscovery, pubsub_service_updated_carries_publisher_peer_identity)
+// A pub/sub match Link must name both endpoints: participantName/serviceName the subscriber, and
+// connectedParticipantName/connectedServiceName the publisher. This lets the observer build a
+// confirmed connection graph from service discovery data alone.
+TEST_F(ITest_CapiServiceDiscovery, pubsub_match_link_carries_peer_identity)
 {
     const std::string topic{"Sensor"};
     const std::string mediaType{"application/octet-stream"};
@@ -375,26 +368,26 @@ TEST_F(ITest_CapiServiceDiscovery, pubsub_service_updated_carries_publisher_peer
 
     ASSERT_TRUE(WaitFor([&] {
         return std::any_of(_ctx.events.begin(), _ctx.events.end(), [&](const auto& e) {
-            return e.serviceKind == SilKit_Experimental_ServiceKind_DataSubscriber
-                   && e.eventType == SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceUpdated
-                   && e.primaryIdentifier == topic && e.numberOfConnections >= 1;
+            return e.serviceKind == SilKit_Experimental_ServiceKind_Link
+                   && e.eventType == SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceCreated
+                   && e.primaryIdentifier == topic;
         });
-    })) << "Service_Updated for matched subscriber never arrived";
+    })) << "the pub/sub match Link never arrived";
 
     const auto ev = FindEventWhere([&](const ObservedEvent& e) {
-        return e.serviceKind == SilKit_Experimental_ServiceKind_DataSubscriber
-               && e.eventType == SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceUpdated
-               && e.primaryIdentifier == topic && e.numberOfConnections >= 1;
+        return e.serviceKind == SilKit_Experimental_ServiceKind_Link
+               && e.eventType == SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceCreated
+               && e.primaryIdentifier == topic;
     });
-    EXPECT_EQ(ev.connectedParticipantName, "PublisherParticipant")
-        << "subscriber's Service_Updated must identify the publisher's participant";
-    EXPECT_EQ(ev.connectedServiceName, "PublisherController")
-        << "subscriber's Service_Updated must identify the publisher's controller name";
+    EXPECT_EQ(ev.participantName, "SubscriberParticipant") << "Link must name the subscriber as the receiving side";
+    EXPECT_EQ(ev.serviceName, "SubscriberController");
+    EXPECT_EQ(ev.connectedParticipantName, "PublisherParticipant") << "Link must identify the publisher's participant";
+    EXPECT_EQ(ev.connectedServiceName, "PublisherController") << "Link must identify the publisher's controller name";
 }
 
-// The RPC server's Service_Updated must carry the matching client's participant name and
-// controller name, letting the observer resolve concrete RPC call edges.
-TEST_F(ITest_CapiServiceDiscovery, rpc_service_updated_carries_client_peer_identity)
+// An RPC match Link must carry the matching client's participant name and controller name, letting
+// the observer resolve concrete RPC call edges.
+TEST_F(ITest_CapiServiceDiscovery, rpc_match_link_carries_peer_identity)
 {
     const std::string functionName{"RemoteProc"};
     const std::string mediaType{"application/octet-stream"};
@@ -407,27 +400,27 @@ TEST_F(ITest_CapiServiceDiscovery, rpc_service_updated_carries_client_peer_ident
 
     ASSERT_TRUE(WaitFor([&] {
         return std::any_of(_ctx.events.begin(), _ctx.events.end(), [&](const auto& e) {
-            return e.serviceKind == SilKit_Experimental_ServiceKind_RpcServer
-                   && e.eventType == SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceUpdated
-                   && e.primaryIdentifier == functionName && e.numberOfConnections >= 1;
+            return e.serviceKind == SilKit_Experimental_ServiceKind_Link
+                   && e.eventType == SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceCreated
+                   && e.primaryIdentifier == functionName;
         });
-    })) << "Service_Updated for matched RPC server never arrived";
+    })) << "the RPC match Link never arrived";
 
     const auto ev = FindEventWhere([&](const ObservedEvent& e) {
-        return e.serviceKind == SilKit_Experimental_ServiceKind_RpcServer
-               && e.eventType == SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceUpdated
-               && e.primaryIdentifier == functionName && e.numberOfConnections >= 1;
+        return e.serviceKind == SilKit_Experimental_ServiceKind_Link
+               && e.eventType == SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceCreated
+               && e.primaryIdentifier == functionName;
     });
-    EXPECT_EQ(ev.connectedParticipantName, "ClientParticipant")
-        << "server's Service_Updated must identify the RPC client's participant";
-    EXPECT_EQ(ev.connectedServiceName, "ClientController")
-        << "server's Service_Updated must identify the RPC client's controller name";
+    EXPECT_EQ(ev.participantName, "ServerParticipant") << "Link must name the server as the receiving side";
+    EXPECT_EQ(ev.serviceName, "ServerController");
+    EXPECT_EQ(ev.connectedParticipantName, "ClientParticipant") << "Link must identify the RPC client's participant";
+    EXPECT_EQ(ev.connectedServiceName, "ClientController") << "Link must identify the RPC client's controller name";
 }
 
-// Attaching an observer to an already-running simulation must recover not only the connection count
-// but also the peer identity of connections that existed before the observer registered. This is the
-// replay-ordering case: the DataSubscriberInternal may be replayed before its parent/publisher.
-TEST_F(ITest_CapiServiceDiscovery, late_observer_recovers_peer_of_preexisting_connection)
+// Attaching an observer to an already-running simulation must recover the match, including the peer
+// identity, of connections that existed before the observer registered. This is the replay-ordering
+// case: the DataSubscriberInternal may be replayed before its parent/publisher.
+TEST_F(ITest_CapiServiceDiscovery, late_observer_recovers_preexisting_link)
 {
     const std::string topic{"LateTopic"};
     const std::string mediaType{"M"};
@@ -440,12 +433,10 @@ TEST_F(ITest_CapiServiceDiscovery, late_observer_recovers_peer_of_preexisting_co
 
     // Ensure the match is established (observed via the SetUp observer) before attaching a new one.
     ASSERT_TRUE(WaitFor([&] {
-        return std::any_of(_ctx.events.begin(), _ctx.events.end(), [&](const auto& e) {
-            return e.serviceKind == SilKit_Experimental_ServiceKind_DataSubscriber
-                   && e.eventType == SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceUpdated
-                   && e.primaryIdentifier == topic && e.numberOfConnections >= 1;
-        });
-    })) << "the pub/sub connection was never established";
+        return CountUnlocked(SilKit_Experimental_ServiceKind_Link,
+                             SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceCreated, topic)
+               >= 1;
+    })) << "the pub/sub link was never established";
 
     // Attach a brand-new observer that must replay the already-running simulation.
     SilKit_ParticipantConfiguration* config{nullptr};
@@ -465,14 +456,14 @@ TEST_F(ITest_CapiServiceDiscovery, late_observer_recovers_peer_of_preexisting_co
     std::unique_lock<std::mutex> lock{lateCtx.mutex};
     const bool recovered = lateCtx.cv.wait_for(lock, kWaitTimeout, [&] {
         return std::any_of(lateCtx.events.begin(), lateCtx.events.end(), [&](const auto& e) {
-            return e.serviceKind == SilKit_Experimental_ServiceKind_DataSubscriber
-                   && e.eventType == SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceUpdated
-                   && e.primaryIdentifier == topic && e.numberOfConnections >= 1
-                   && e.connectedParticipantName == "LatePub" && e.connectedServiceName == "LatePubCtrl";
+            return e.serviceKind == SilKit_Experimental_ServiceKind_Link
+                   && e.eventType == SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceCreated
+                   && e.primaryIdentifier == topic && e.connectedParticipantName == "LatePub"
+                   && e.connectedServiceName == "LatePubCtrl";
         });
     });
     lock.unlock();
-    EXPECT_TRUE(recovered) << "late observer must recover the peer identity of the pre-existing connection";
+    EXPECT_TRUE(recovered) << "late observer must recover the pre-existing link and its peer identity";
 
     SilKit_Participant_Destroy(lateObserver);
 }
