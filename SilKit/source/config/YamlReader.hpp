@@ -227,13 +227,15 @@ protected:
 
     auto GetChildSafe(const std::string& name) const -> Impl
     {
-        if (HasKey(name))
+        if (IsMap())
         {
             return MakeImpl(_node.find_child(ryml::to_csubstr(name)));
         }
 
-        if (IsSequence())
+        if (_node.is_stream())
         {
+            // A leading "---" makes the document root a stream (a sequence of
+            // documents). Transparently descend into the document(s) to find the key.
             for (const auto& child : _node.cchildren())
             {
                 if (child.is_container() && HasKey(child, name))
@@ -241,8 +243,23 @@ protected:
                     return MakeImpl(child.find_child(ryml::to_csubstr(name)));
                 }
             }
+            return MakeImpl({});
         }
 
+        if (IsSequence())
+        {
+            // A YAML sequence (list) was provided where an object with named keys is
+            // expected. Reject the type mismatch instead of silently searching the
+            // list's elements for the key. This catches mistyped configuration such as
+            // "HealthCheck:\n  - SoftResponseTimeout: 1", where the leading "- " turns
+            // an object into a single-element list.
+            std::ostringstream s;
+            s << "expected a mapping with key \"" << name << "\", but got a sequence";
+            throw MakeConfigurationError(s.str());
+        }
+
+        // Not a container (absent, null or empty node): treat the key as not present so
+        // that objects left empty keep their default values.
         return MakeImpl({});
     }
 

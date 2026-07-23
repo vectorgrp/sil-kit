@@ -641,4 +641,127 @@ FlexrayControllers:
         SilKit::ConfigurationError);
 }
 
+TEST_F(Test_YamlParser, yaml_throw_on_healthcheck_as_sequence)
+{
+    // HealthCheck is an object with SoftResponseTimeout/HardResponseTimeout members.
+    // Here it is mistyped as a sequence (a list with a single element). The parser
+    // must reject the type mismatch instead of silently descending into the list and
+    // picking up the value from the contained map.
+    auto healthCheckAsSequence = R"(
+HealthCheck:
+  - SoftResponseTimeout: 1
+)";
+
+    EXPECT_THROW(
+        {
+            auto cfg = Deserialize<ParticipantConfiguration>(healthCheckAsSequence);
+        },
+        SilKit::ConfigurationError);
+}
+
+// A YAML sequence where a map/object is expected is a type mismatch. The generalized
+// check lives in the parser (GetChildSafe), so it applies to every object, not just
+// HealthCheck. The following cases exercise the edges of that generalization.
+
+TEST_F(Test_YamlParser, yaml_throw_on_object_as_sequence)
+{
+    // Each of these mistypes a mapping as a single-element sequence at a different
+    // nesting level (top-level object, deeply nested object, object inside a list
+    // element). All must be rejected.
+    const std::initializer_list<const char*> mistypedConfigurations = {
+        // top-level object as sequence
+        R"(
+HealthCheck:
+  - SoftResponseTimeout: 1
+)",
+        R"(
+Logging:
+  - FlushLevel: Critical
+)",
+        R"(
+Middleware:
+  - RegistryUri: silkit://localhost:8500
+)",
+        R"(
+Experimental:
+  - Metrics:
+      CollectFromRemote: true
+)",
+        // nested object (a controller's Replay) as sequence
+        R"(
+CanControllers:
+- Name: CAN1
+  Replay:
+    - UseTraceSource: Source1
+)",
+        // object nested inside Experimental as sequence
+        R"(
+Experimental:
+  Metrics:
+    - CollectFromRemote: true
+)",
+    };
+
+    for (const auto configuration : mistypedConfigurations)
+    {
+        EXPECT_THROW(
+            {
+                auto&& cfg = Deserialize<ParticipantConfiguration>(configuration);
+                (void)cfg;
+            },
+            SilKit::ConfigurationError);
+    }
+}
+
+TEST_F(Test_YamlParser, yaml_healthcheck_as_map_is_accepted)
+{
+    // Regression guard: the correctly-typed object must still parse.
+    auto config = Deserialize<ParticipantConfiguration>(R"(
+HealthCheck:
+  SoftResponseTimeout: 1
+  HardResponseTimeout: 2
+)");
+
+    ASSERT_TRUE(config.healthCheck.softResponseTimeout.has_value());
+    ASSERT_TRUE(config.healthCheck.hardResponseTimeout.has_value());
+    EXPECT_EQ(config.healthCheck.softResponseTimeout.value(), 1ms);
+    EXPECT_EQ(config.healthCheck.hardResponseTimeout.value(), 2ms);
+}
+
+TEST_F(Test_YamlParser, yaml_empty_object_keeps_defaults)
+{
+    // An object left empty (null node) is not a type mismatch: it keeps its defaults
+    // and must not throw. This guards the generalized check against over-rejecting.
+    ParticipantConfiguration defaults{};
+
+    auto config = Deserialize<ParticipantConfiguration>(R"(
+HealthCheck:
+)");
+
+    EXPECT_EQ(config.healthCheck.softResponseTimeout, defaults.healthCheck.softResponseTimeout);
+    EXPECT_EQ(config.healthCheck.hardResponseTimeout, defaults.healthCheck.hardResponseTimeout);
+}
+
+TEST_F(Test_YamlParser, yaml_sequence_typed_fields_still_parse)
+{
+    // Fields that are genuinely sequences (lists of objects) must keep working after
+    // the object-vs-sequence check was tightened.
+    auto config = Deserialize<ParticipantConfiguration>(R"(
+CanControllers:
+- Name: CAN1
+  Network: CAN2
+- Name: CAN2
+LinControllers:
+- Name: LIN1
+)");
+
+    ASSERT_EQ(config.canControllers.size(), 2u);
+    EXPECT_EQ(config.canControllers.at(0).name, "CAN1");
+    ASSERT_TRUE(config.canControllers.at(0).network.has_value());
+    EXPECT_EQ(config.canControllers.at(0).network.value(), "CAN2");
+    EXPECT_EQ(config.canControllers.at(1).name, "CAN2");
+    ASSERT_EQ(config.linControllers.size(), 1u);
+    EXPECT_EQ(config.linControllers.at(0).name, "LIN1");
+}
+
 } // anonymous namespace
