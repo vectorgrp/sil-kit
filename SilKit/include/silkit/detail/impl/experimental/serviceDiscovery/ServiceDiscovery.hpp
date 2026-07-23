@@ -111,9 +111,6 @@ void ServiceDiscovery::SetServiceDiscoveryHandler(
         serviceDescriptor.simulationName = orEmpty(cServiceDescriptor->simulationName);
         serviceDescriptor.connectedParticipantName = orEmpty(cServiceDescriptor->connectedParticipantName);
         serviceDescriptor.connectedServiceName = orEmpty(cServiceDescriptor->connectedServiceName);
-        serviceDescriptor.simulatingParticipantName = orEmpty(cServiceDescriptor->simulatingParticipantName);
-        serviceDescriptor.numberOfConnections = cServiceDescriptor->numberOfConnections;
-        serviceDescriptor.isSimulated = cServiceDescriptor->isSimulated != SilKit_False;
 
         auto& userHandler = *static_cast<SD::ServiceDiscoveryHandler*>(context);
         if (userHandler)
