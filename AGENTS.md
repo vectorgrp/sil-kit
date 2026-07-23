@@ -1,5 +1,11 @@
 # SIL Kit (FOSS) — Reference Context
 
+## Git and pull requests
+
+- Do not open pull requests without permission.
+- Do not commit in git without permission.
+- Do not create new branches in git without permission.
+
 ## Repository layout
 
 Top-level directories:
