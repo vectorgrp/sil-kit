@@ -730,6 +730,25 @@ TEST_F(Test_YamlParser, yaml_throw_on_stream_document_as_sequence)
         SilKit::ConfigurationError);
 }
 
+TEST_F(Test_YamlParser, yaml_throw_on_multi_document_stream)
+{
+    // A configuration must be a single YAML document. Two "---"-separated documents
+    // form a multi-document stream and must be rejected rather than silently reading
+    // keys from whichever document happens to contain them.
+    auto multiDocument = R"(---
+ParticipantName: Node0
+---
+ParticipantName: Node1
+)";
+
+    EXPECT_THROW(
+        {
+            auto&& cfg = Deserialize<ParticipantConfiguration>(multiDocument);
+            (void)cfg;
+        },
+        SilKit::ConfigurationError);
+}
+
 TEST_F(Test_YamlParser, yaml_healthcheck_as_map_is_accepted)
 {
     // Regression guard: the correctly-typed object must still parse.
