@@ -67,9 +67,17 @@ This gives users the ability to run a simulation with multiple instances of a pa
 
     Many IDEs automatically support participant configuration schema support when the participant configuration file ends with the suffix ``.silkit.json/yaml``.
 
-A participant configuration file is written in YAML syntax according to a specified schema. 
-It starts with the ``SchemaVersion``, the ``Description`` for the configuration and the ``ParticipantName``. 
+A participant configuration file is written in YAML syntax according to a specified schema.
+It starts with the ``SchemaVersion``, the ``Description`` for the configuration and the ``ParticipantName``.
 This is followed by further sections for ``Includes``, ``Middleware``, ``Logging``, ``HealthCheck``, ``Tracing``, ``Extentions`` and sections for the different services of the |ProductName|.
+
+.. admonition:: Note
+
+    A configuration must be a single YAML document.
+    A single leading document marker (``---``) is allowed, but a configuration that
+    contains multiple ``---``-separated documents is rejected with an error.
+    This most commonly happens when a stray ``---`` is placed in the middle of a file.
+
 The outline of a participant configuration file is as follows:
 
 .. code-block:: yaml

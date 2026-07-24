@@ -234,19 +234,8 @@ protected:
 
         if (_node.is_stream())
         {
-            // A leading "---" makes the document root a stream (a sequence of
-            // documents). Only a single document is a valid configuration; reject a
-            // multi-document stream ("---"-separated documents) outright.
-            if (_node.num_children() > 1)
-            {
-                throw MakeConfigurationError(
-                    "expected a single YAML document, but the configuration contains multiple "
-                    "\"---\"-separated documents");
-            }
-
-            // Transparently descend into the document to find the key. The document
-            // must itself be a mapping; a document that is a bare sequence is the same
-            // object-vs-list mistype we reject below.
+            // Single-document stream (leading "---"): descend into the document. A
+            // document that is a bare sequence is the same mistype rejected below.
             for (const auto& doc : _node.cchildren())
             {
                 if (doc.is_seq())
@@ -267,16 +256,10 @@ protected:
 
         if (IsSequence())
         {
-            // A YAML sequence (list) was provided where an object with named keys is
-            // expected. Reject the type mismatch instead of silently searching the
-            // list's elements for the key. This catches mistyped configuration such as
-            // "HealthCheck:\n  - SoftResponseTimeout: 1", where the leading "- " turns
-            // an object into a single-element list.
             ThrowExpectedMapping(name);
         }
 
-        // Not a container (absent, null or empty node): treat the key as not present so
-        // that objects left empty keep their default values.
+        // Absent, null or empty node: treat the key as not present.
         return MakeImpl({});
     }
 

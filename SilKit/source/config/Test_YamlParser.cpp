@@ -643,10 +643,7 @@ FlexrayControllers:
 
 TEST_F(Test_YamlParser, yaml_throw_on_healthcheck_as_sequence)
 {
-    // HealthCheck is an object with SoftResponseTimeout/HardResponseTimeout members.
-    // Here it is mistyped as a sequence (a list with a single element). The parser
-    // must reject the type mismatch instead of silently descending into the list and
-    // picking up the value from the contained map.
+    // HealthCheck is a mapping; the leading "- " mistypes it as a single-element list.
     auto healthCheckAsSequence = R"(
 HealthCheck:
   - SoftResponseTimeout: 1
@@ -659,17 +656,10 @@ HealthCheck:
         SilKit::ConfigurationError);
 }
 
-// A YAML sequence where a map/object is expected is a type mismatch. The generalized
-// check lives in the parser (GetChildSafe), so it applies to every object, not just
-// HealthCheck. The following cases exercise the edges of that generalization.
-
 TEST_F(Test_YamlParser, yaml_throw_on_object_as_sequence)
 {
-    // Each of these mistypes a mapping as a single-element sequence at a different
-    // nesting level (top-level object, deeply nested object, object inside a list
-    // element). All must be rejected.
+    // A mapping mistyped as a sequence must be rejected at every nesting level.
     const std::initializer_list<const char*> mistypedConfigurations = {
-        // top-level object as sequence
         R"(
 HealthCheck:
   - SoftResponseTimeout: 1
@@ -687,14 +677,12 @@ Experimental:
   - Metrics:
       CollectFromRemote: true
 )",
-        // nested object (a controller's Replay) as sequence
         R"(
 CanControllers:
 - Name: CAN1
   Replay:
     - UseTraceSource: Source1
 )",
-        // object nested inside Experimental as sequence
         R"(
 Experimental:
   Metrics:
@@ -715,9 +703,7 @@ Experimental:
 
 TEST_F(Test_YamlParser, yaml_throw_on_stream_document_as_sequence)
 {
-    // A leading "---" wraps the document in a stream node. The document itself must be
-    // a mapping; here the whole document is a bare sequence, which is the same
-    // object-vs-list mistype and must be rejected.
+    // A single "---" document that is itself a bare sequence is the same mistype.
     auto streamDocAsSequence = R"(---
 - SoftResponseTimeout: 1
 )";
@@ -732,9 +718,7 @@ TEST_F(Test_YamlParser, yaml_throw_on_stream_document_as_sequence)
 
 TEST_F(Test_YamlParser, yaml_throw_on_multi_document_stream)
 {
-    // A configuration must be a single YAML document. Two "---"-separated documents
-    // form a multi-document stream and must be rejected rather than silently reading
-    // keys from whichever document happens to contain them.
+    // A configuration must be a single YAML document; two "---" documents are rejected.
     auto multiDocument = R"(---
 ParticipantName: Node0
 ---
@@ -766,8 +750,7 @@ HealthCheck:
 
 TEST_F(Test_YamlParser, yaml_empty_object_keeps_defaults)
 {
-    // An object left empty (null node) is not a type mismatch: it keeps its defaults
-    // and must not throw. This guards the generalized check against over-rejecting.
+    // An empty object (null node) keeps its defaults and must not throw.
     ParticipantConfiguration defaults{};
 
     auto config = Deserialize<ParticipantConfiguration>(R"(
@@ -780,8 +763,7 @@ HealthCheck:
 
 TEST_F(Test_YamlParser, yaml_sequence_typed_fields_still_parse)
 {
-    // Fields that are genuinely sequences (lists of objects) must keep working after
-    // the object-vs-sequence check was tightened.
+    // Genuinely sequence-typed fields (lists of objects) must keep working.
     auto config = Deserialize<ParticipantConfiguration>(R"(
 CanControllers:
 - Name: CAN1

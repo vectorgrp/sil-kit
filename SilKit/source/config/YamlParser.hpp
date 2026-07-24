@@ -46,6 +46,8 @@ auto Deserialize(const std::string& input) -> T
         // Extract a reference to the root node of the document tree.
         auto root = tree.crootref();
 
+        VSilKit::EnsureSingleDocument(root);
+
         R reader{parser, root};
         T result{};
         reader.Read(result);
