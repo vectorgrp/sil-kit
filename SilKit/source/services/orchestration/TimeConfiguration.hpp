@@ -40,10 +40,15 @@ public: //Methods
     bool HoppedOn();
 
     void SetStepDuration(std::chrono::nanoseconds duration);
-    auto GetMinimalAlignedDuration() const -> std::chrono::nanoseconds;
 
     void SetDynamicStepSizeEnabled(bool enabled);
     bool IsDynamicStepSizeEnabled() const;
+
+private: //Methods
+    // Computes the minimal step duration that keeps this participant aligned with the earliest next
+    // timepoint among all other synchronized participants. The caller must already hold _mx (this is
+    // only invoked from AdvanceTimeStep); it deliberately does not lock so it stays reentrant there.
+    auto GetMinimalAlignedDuration() const -> std::chrono::nanoseconds;
 
 private: //Members
     mutable std::mutex _mx;
