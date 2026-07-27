@@ -8,6 +8,8 @@
 #include <tuple>
 #include <map>
 #include <atomic>
+#include <optional>
+#include <set>
 
 #include "silkit/services/orchestration/ITimeSyncService.hpp"
 
@@ -20,6 +22,7 @@
 #include "services/orchestration/TimeConfiguration.hpp"
 #include "services/orchestration/WatchDog.hpp"
 #include "services/metrics/Metrics.hpp"
+#include "services/logging/LogFunctions.hpp"
 
 namespace SilKit {
 namespace Services {
@@ -56,7 +59,7 @@ public:
     void SetSimulationStepHandler(SimulationStepHandler task, std::chrono::nanoseconds initialStepSize) override;
     void SetSimulationStepHandlerAsync(SimulationStepHandler task, std::chrono::nanoseconds initialStepSize) override;
     void CompleteSimulationStep() override;
-    void SetPeriod(std::chrono::nanoseconds period);
+
     void ReceiveMsg(const IServiceEndpoint* from, const NextSimTask& task) override;
     auto Now() const -> std::chrono::nanoseconds override;
 
@@ -99,9 +102,18 @@ public:
     void RemoveOtherSimulationStepsCompletedHandler(HandlerId handlerId);
     void InvokeOtherSimulationStepsCompletedHandlers();
 
+    //! Configure the tri-state dynamic-step-size preference from participant configuration:
+    //! true = enable locally and advertise the request to peers; false = hard opt-out;
+    //! std::nullopt (default) = follow the network (enable if any peer advertises the request).
+    void ConfigureDynamicStepSize(std::optional<bool> configured);
+
 private:
     // ----------------------------------------
     // private methods
+
+    //! Recomputes whether dynamic step sizes are active from the local preference and the set of
+    //! peers currently advertising the request, and pushes the result into the TimeConfiguration.
+    void RecomputeDynamicStepEnabled();
 
     //! Creates the _timeSyncPolicy. Returns true if the call assigned the _timeSyncPolicy, and false if it was already
     //! assigned before.
@@ -154,6 +166,16 @@ private:
     std::atomic<bool> _wallClockReachedBeforeCompletion{false};
 
     Util::SynchronizedHandlers<std::function<void()>> _otherSimulationStepsCompletedHandlers;
+
+    // Dynamic simulation step sizes: local tri-state preference from config and the set of peers
+    // currently advertising the request. Guarded by _dynamicStepMx because the service-discovery
+    // handler (network thread) and ConfigureDynamicStepSize (setup thread) both touch them.
+    mutable std::mutex _dynamicStepMx;
+    std::optional<bool> _dynamicStepConfig;
+    std::set<std::string> _dynamicStepPeers;
+    // Ensures the "enabled by a remote participant" notice is logged only once.
+    Services::Logging::LogOnceFlag _dynamicStepRemoteLogOnce;
+
 };
 
 // ================================================================================

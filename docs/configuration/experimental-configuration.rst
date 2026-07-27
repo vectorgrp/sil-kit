@@ -26,6 +26,7 @@ TimeSynchronization
         TimeSynchronization:
             AnimationFactor: 1.0
             EnableMessageAggregation: Off
+            DynamicSimulationStep: true
 
 .. list-table:: TimeSynchronization Configuration
    :widths: 15 85
@@ -33,6 +34,38 @@ TimeSynchronization
 
    * - Property Name
      - Description
+
+   * - DynamicSimulationStep
+     - Controls *dynamic simulation step sizes*. When enabled, each simulation step of this participant
+       is shortened ("aligned") to the minimal step duration among all synchronized participants,
+       instead of always advancing by this participant's own configured step size.
+       The virtual time therefore stops at the earliest next time point of any participant, which lets
+       participants with coarse step sizes still observe events produced by participants with finer steps.
+
+       This is a tri-state option. Its three states have distinct meanings:
+
+       .. list-table::
+          :widths: 20 80
+          :header-rows: 1
+
+          * - Value
+            - Behavior
+          * - ``true``
+            - Request dynamic stepping for the whole simulation: enable it locally **and** advertise the
+              request to all peers, so participants that do not opt out follow. This is the typical
+              setting for a driving participant such as a network simulator.
+          * - ``false``
+            - Hard opt-out: never enable dynamic stepping, even if a peer requests it. This participant
+              always advances by its own configured step size.
+          * - *(absent, the default)*
+            - Follow the network: enable dynamic stepping if and only if at least one peer advertises the
+              request; otherwise behave as before and advance by the participant's own step size.
+
+       .. note::
+         A typical setup uses ``true`` on a single driving participant (e.g. a network simulator) and
+         leaves the key unset on all others, so they follow automatically. When a participant is enabled
+         this way by a remote request, it emits an ``Info`` log message stating that dynamic stepping was
+         enabled remotely and how to opt out (set ``DynamicSimulationStep`` to ``false``).
 
    * - AnimationFactor
      - This value affects |ProductName| simulations where a time synchronization service is used. 

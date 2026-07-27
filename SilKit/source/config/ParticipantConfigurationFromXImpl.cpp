@@ -62,6 +62,7 @@ struct TimeSynchronizationCache
 {
     std::optional<double> animationFactor;
     std::optional<Aggregation> enableMessageAggregation;
+    std::optional<bool> dynamicSimulationStep;
 };
 
 struct MetricsCache
@@ -346,6 +347,14 @@ void Cache(const TimeSynchronization& root, TimeSynchronizationCache& cache)
                     cache.animationFactor);
     CacheNonDefault(defaultObject.enableMessageAggregation, root.enableMessageAggregation,
                     "TimeSynchronization.EnableMessageAggregation", cache.enableMessageAggregation);
+    if (root.dynamicSimulationStep.has_value())
+    {
+        // Tri-state: cache both explicit true and explicit false (passing the negation as the
+        // "default" so CacheNonDefault always stores the value while still detecting conflicting
+        // includes). Absent stays uncached so it can distinguish "follow network" from explicit false.
+        CacheNonDefault(!root.dynamicSimulationStep.value(), root.dynamicSimulationStep.value(),
+                        "TimeSynchronization.DynamicSimulationStep", cache.dynamicSimulationStep);
+    }
 }
 
 void Cache(const Metrics& root, MetricsCache& cache)
@@ -518,6 +527,10 @@ void MergeTimeSynchronizationCache(const TimeSynchronizationCache& cache, TimeSy
 {
     MergeCacheField(cache.animationFactor, timeSynchronization.animationFactor);
     MergeCacheField(cache.enableMessageAggregation, timeSynchronization.enableMessageAggregation);
+    if (cache.dynamicSimulationStep.has_value())
+    {
+        timeSynchronization.dynamicSimulationStep = cache.dynamicSimulationStep.value();
+    }
 }
 
 void MergeMetricsCache(const MetricsCache& cache, Metrics& metrics)

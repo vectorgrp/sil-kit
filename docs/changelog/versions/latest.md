@@ -11,9 +11,14 @@
 - `config`: the participant configuration is now validated against the schema. Previously, only included configuration files were validated, the root configuration was not.
 - `config`: added missing entries to the participant configuration JSON schema and the schema validation (e.g., `Experimental/Metrics/UpdateInterval`, `RpcClients/RpcChannel`, `RpcServers/RpcChannel`).
 - `api`: the public header `silkit/services/logging/string_utils.hpp` no longer includes internal headers.
+- `config`: experimental `Experimental.TimeSynchronization.DynamicSimulationStep` to enable dynamic
+  simulation step sizes, aligning each simulation step to the minimal step among all synchronized
+  participants. Tri-state: `true` requests it for the whole simulation, `false` opts out, and leaving
+  it unset follows the network. Off by default.
 
 ## Changed
 
 - `config`: default format of file logging is set to JSON. Set "Format: Simple" in the sink to get previous behaviour.
 - `docs`: added description of the logging "Format".
 - `build`: the CMake targets only expose the top-level include directory instead of internal include directories.
+- `orchestration`: setting a simulation step duration of zero now raises a `SilKitError` instead of being silently accepted.

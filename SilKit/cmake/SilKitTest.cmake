@@ -63,14 +63,23 @@ function(add_silkit_test_to_executable SILKIT_TEST_EXECUTABLE_NAME)
         return()
     endif()
 
+    set(sva TIMEOUT)
     set(mva SOURCES LIBS CONFIGS TESTSUITE_NAME)
 
     cmake_parse_arguments(arg
         ""
-        ""
+        "${sva}"
         "${mva}"
         ${ARGN}
     )
+
+    # Bound every CTest entry so a hung test (e.g. a time-sync regression that never reaches its
+    # shutdown condition) fails fast instead of waiting for CTest's implicit 1500s default. Each
+    # entry runs a whole gtest suite and sanitizer builds are much slower, hence the generous
+    # default. Callers may override per suite with TIMEOUT.
+    if(NOT DEFINED arg_TIMEOUT)
+        set(arg_TIMEOUT 600)
+    endif()
 
     target_sources("${SILKIT_TEST_EXECUTABLE_NAME}" PRIVATE ${arg_SOURCES})
 
@@ -116,5 +125,7 @@ function(add_silkit_test_to_executable SILKIT_TEST_EXECUTABLE_NAME)
                 "--gtest_filter=${testSuite}.*"
             WORKING_DIRECTORY $<TARGET_FILE_DIR:${SILKIT_TEST_EXECUTABLE_NAME}>
         )
+
+        set_tests_properties("${testSuite}" PROPERTIES TIMEOUT ${arg_TIMEOUT})
     endforeach ()
 endfunction()
