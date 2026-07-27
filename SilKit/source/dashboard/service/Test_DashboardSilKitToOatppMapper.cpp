@@ -162,7 +162,7 @@ TEST_F(Test_DashboardSilKitToOatppMapper, CreateBulkDataServiceDto_MapNetworkNam
     expectedLabel.value = "myValue";
     expectedLabel.kind = Services::MatchingLabel::Kind::Mandatory;
     auto labels = std::vector<Services::MatchingLabel>{expectedLabel};
-    descriptor.SetSupplementalDataItem(Core::Discovery::supplKeyDataSubscriberSubLabels, Config::Serialize(labels));
+    descriptor.SetSupplementalDataItem(Core::Discovery::supplKeyDataSubscriberSubLabels, Config::SerializeAsJson(labels));
 
     // Act
     const auto dataMapper = CreateService();
@@ -204,7 +204,7 @@ TEST_F(Test_DashboardSilKitToOatppMapper, CreateBulkRpcServiceDto_MapNetworkName
     expectedLabel.value = "myValue";
     expectedLabel.kind = Services::MatchingLabel::Kind::Mandatory;
     auto labels = std::vector<Services::MatchingLabel>{expectedLabel};
-    descriptor.SetSupplementalDataItem(Core::Discovery::supplKeyRpcClientLabels, Config::Serialize(labels));
+    descriptor.SetSupplementalDataItem(Core::Discovery::supplKeyRpcClientLabels, Config::SerializeAsJson(labels));
 
     // Act
     const auto dataMapper = CreateService();
