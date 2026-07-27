@@ -26,8 +26,6 @@ public: //Methods
     bool RemoveSynchronizedParticipant(const std::string& otherParticipantName);
     auto GetSynchronizedParticipantNames() -> std::vector<std::string>;
     void OnReceiveNextSimStep(const std::string& participantName, NextSimTask nextStep);
-    void SynchronizedParticipantRemoved(const std::string& otherParticipantName);
-    void SetStepDuration(std::chrono::nanoseconds duration);
     void AdvanceTimeStep();
     auto CurrentSimStep() const -> NextSimTask;
     auto NextSimStep() const -> NextSimTask;
@@ -41,6 +39,17 @@ public: //Methods
     bool IsHopOn();
     bool HoppedOn();
 
+    void SetStepDuration(std::chrono::nanoseconds duration);
+
+    void SetDynamicStepSizeEnabled(bool enabled);
+    bool IsDynamicStepSizeEnabled() const;
+
+private: //Methods
+    // Computes the minimal step duration that keeps this participant aligned with the earliest next
+    // timepoint among all other synchronized participants. The caller must already hold _mx (this is
+    // only invoked from AdvanceTimeStep); it deliberately does not lock so it stays reentrant there.
+    auto GetMinimalAlignedDuration() const -> std::chrono::nanoseconds;
+
 private: //Members
     mutable std::mutex _mx;
     using Lock = std::unique_lock<decltype(_mx)>;
@@ -51,6 +60,11 @@ private: //Members
 
     bool _hoppedOn = false;
     Logging::ILoggerInternal* _logger;
+
+    // When enabled, each simulation step is shortened ("aligned") to the minimal duration among all
+    // synchronized participants (see GetMinimalAlignedDuration / AdvanceTimeStep). Disabled by default;
+    // can be turned on via Experimental.TimeSynchronization.DynamicSimulationStep.
+    bool _dynamicStepSizeEnabled{false};
 };
 
 } // namespace Orchestration

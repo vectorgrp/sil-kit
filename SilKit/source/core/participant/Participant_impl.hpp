@@ -522,7 +522,7 @@ auto Participant<SilKitConnectionT>::CreateDataPublisher(const std::string& cano
     supplementalData[SilKit::Core::Discovery::supplKeyDataPublisherPubUUID] = network;
     supplementalData[SilKit::Core::Discovery::supplKeyDataPublisherMediaType] = configuredDataNodeSpec.MediaType();
     supplementalData[SilKit::Core::Discovery::supplKeyDataPublisherPubLabels] =
-        SilKit::Config::Serialize(configuredDataNodeSpec.Labels());
+        SilKit::Config::SerializeAsJson(configuredDataNodeSpec.Labels());
 
     auto controller = CreateController<Services::PubSub::DataPublisher>(
         controllerConfig, network, std::move(supplementalData), true, true, &_timeProvider, configuredDataNodeSpec,
@@ -590,7 +590,7 @@ auto Participant<SilKitConnectionT>::CreateDataSubscriber(
     supplementalData[SilKit::Core::Discovery::supplKeyDataSubscriberTopic] = configuredDataNodeSpec.Topic();
     supplementalData[SilKit::Core::Discovery::supplKeyDataSubscriberMediaType] = configuredDataNodeSpec.MediaType();
     supplementalData[SilKit::Core::Discovery::supplKeyDataSubscriberSubLabels] =
-        SilKit::Config::Serialize(configuredDataNodeSpec.Labels());
+        SilKit::Config::SerializeAsJson(configuredDataNodeSpec.Labels());
 
     auto controller = CreateController<Services::PubSub::DataSubscriber>(
         controllerConfig, network, std::move(supplementalData), true, true, controllerConfig, &_timeProvider,
@@ -683,7 +683,7 @@ auto Participant<SilKitConnectionT>::CreateRpcClient(
     supplementalData[SilKit::Core::Discovery::supplKeyRpcClientFunctionName] = configuredRpcSpec.FunctionName();
     supplementalData[SilKit::Core::Discovery::supplKeyRpcClientMediaType] = configuredRpcSpec.MediaType();
     supplementalData[SilKit::Core::Discovery::supplKeyRpcClientLabels] =
-        SilKit::Config::Serialize(configuredRpcSpec.Labels());
+        SilKit::Config::SerializeAsJson(configuredRpcSpec.Labels());
     supplementalData[SilKit::Core::Discovery::supplKeyRpcClientUUID] = network;
 
     auto controller =
@@ -741,7 +741,7 @@ auto Participant<SilKitConnectionT>::CreateRpcServer(
     supplementalData[SilKit::Core::Discovery::supplKeyRpcServerFunctionName] = configuredRpcSpec.FunctionName();
     supplementalData[SilKit::Core::Discovery::supplKeyRpcServerMediaType] = configuredRpcSpec.MediaType();
     supplementalData[SilKit::Core::Discovery::supplKeyRpcServerLabels] =
-        SilKit::Config::Serialize(configuredRpcSpec.Labels());
+        SilKit::Config::SerializeAsJson(configuredRpcSpec.Labels());
 
     auto controller = CreateController<Services::Rpc::RpcServer>(controllerConfig, network, supplementalData, true,
                                                                  true, &_timeProvider, configuredRpcSpec, handler);

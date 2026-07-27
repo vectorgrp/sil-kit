@@ -129,8 +129,9 @@ public:
 
 private:
     void AddParticipant(const std::string& participantName, const std::string& participantConfiguration,
-                        SilKit::Services::Orchestration::LifecycleConfiguration startConfiguration = {
-                            SilKit::Services::Orchestration::OperationMode::Coordinated});
+                        SilKit::Services::Orchestration::LifecycleConfiguration startConfiguration =
+                            {SilKit::Services::Orchestration::OperationMode::Coordinated},
+                        bool createTimeSyncService = true);
     bool IsSync(const std::string& participantName);
     bool IsAsync(const std::string& participantName);
 

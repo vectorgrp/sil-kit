@@ -184,8 +184,13 @@ bool SimTestHarness::Run(std::chrono::nanoseconds testRunTimeout, const std::vec
     auto simulationFinishedFuture = simulationFinishedPromise.get_future();
     if (!_syncParticipantNames.empty())
     {
-        // Create a monitor, add it to the list of simParticipants, then start all participants
-        AddParticipant(internalSystemMonitorName, "");
+        // Create a monitor, add it to the list of simParticipants, then start all participants.
+        // The monitor only observes SystemState; it must not create a time sync service, otherwise it
+        // would advertise an active 1ms simulation step and pollute the ByMinimalDuration negotiation
+        // of the actual sync participants (dragging their aligned step size down to 1ms).
+        AddParticipant(internalSystemMonitorName, "",
+                       {SilKit::Services::Orchestration::OperationMode::Coordinated},
+                       /*createTimeSyncService=*/false);
         auto monitor = _simParticipants[internalSystemMonitorName]->GetOrCreateSystemMonitor();
         monitor->AddSystemStateHandler([&](auto systemState) {
             if (systemState == SilKit::Services::Orchestration::SystemState::Shutdown)
@@ -293,7 +298,8 @@ SimParticipant* SimTestHarness::GetParticipant(const std::string& participantNam
 }
 
 void SimTestHarness::AddParticipant(const std::string& participantName, const std::string& participantConfiguration,
-                                    SilKit::Services::Orchestration::LifecycleConfiguration startConfiguration)
+                                    SilKit::Services::Orchestration::LifecycleConfiguration startConfiguration,
+                                    bool createTimeSyncService)
 {
     auto participant = std::make_unique<SimParticipant>();
     participant->_name = participantName;
@@ -304,7 +310,8 @@ void SimTestHarness::AddParticipant(const std::string& participantName, const st
     // mandatory sim task for time synced simulation
     // by default, we do no operation during simulation task, the user should override this
     auto* lifecycleService = participant->GetOrCreateLifecycleService(startConfiguration);
-    if (startConfiguration.operationMode == SilKit::Services::Orchestration::OperationMode::Coordinated)
+    if (createTimeSyncService
+        && startConfiguration.operationMode == SilKit::Services::Orchestration::OperationMode::Coordinated)
     {
         auto* timeSyncService = participant->GetOrCreateTimeSyncService();
         timeSyncService->SetSimulationStepHandler([](auto, auto) {}, 1ms);

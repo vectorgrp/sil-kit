@@ -265,4 +265,70 @@ TEST_F(Test_TimeSyncService, hop_on_outside_simulation_step)
     ASSERT_EQ(sentNextSimTasks[3].timePoint, 2ms);
 }
 
+// A remote TimeSyncService descriptor advertising (or not) that it requests dynamic simulation step
+// sizes. timeSyncActive is intentionally left unset because the dynamic-step reaction is independent
+// of the time-sync membership handling.
+auto MakeDynamicStepDescriptor(const std::string& participantName, bool requestsDynamicStep)
+    -> SilKit::Core::ServiceDescriptor
+{
+    SilKit::Core::ServiceDescriptor sd;
+    sd.SetServiceType(Core::ServiceType::InternalController);
+    sd.SetParticipantNameAndComputeId(participantName);
+    sd.SetNetworkName("default");
+    sd.SetNetworkType(Config::NetworkType::Undefined);
+    sd.SetServiceName("TimeSyncService");
+    sd.SetServiceId(1234);
+    sd.SetSupplementalDataItem(SilKit::Core::Discovery::controllerType, "TimeSyncService");
+    sd.SetSupplementalDataItem(SilKit::Core::Discovery::timeSyncDynamicStepSize, requestsDynamicStep ? "1" : "0");
+    return sd;
+}
+
+TEST_F(Test_TimeSyncService, dynamic_step_follower_enables_when_peer_requests)
+{
+    using SilKit::Core::Discovery::ServiceDiscoveryEvent;
+    ASSERT_EQ(serviceDiscoveryHandlers.size(), 1u);
+
+    // Absent config == follow the network: off until a peer requests it.
+    timeSyncService->ConfigureDynamicStepSize(std::nullopt);
+    EXPECT_FALSE(timeSyncService->GetTimeConfiguration()->IsDynamicStepSizeEnabled());
+
+    // A peer (e.g. a network simulator) advertises the request -> we enable dynamic stepping.
+    serviceDiscoveryHandlers[0](ServiceDiscoveryEvent::Type::ServiceCreated,
+                                MakeDynamicStepDescriptor("Netsim", true));
+    EXPECT_TRUE(timeSyncService->GetTimeConfiguration()->IsDynamicStepSizeEnabled());
+
+    // The requesting peer leaves -> revert to disabled.
+    serviceDiscoveryHandlers[0](ServiceDiscoveryEvent::Type::ServiceRemoved,
+                                MakeDynamicStepDescriptor("Netsim", true));
+    EXPECT_FALSE(timeSyncService->GetTimeConfiguration()->IsDynamicStepSizeEnabled());
+}
+
+TEST_F(Test_TimeSyncService, dynamic_step_peer_without_request_does_not_enable)
+{
+    using SilKit::Core::Discovery::ServiceDiscoveryEvent;
+
+    timeSyncService->ConfigureDynamicStepSize(std::nullopt);
+    serviceDiscoveryHandlers[0](ServiceDiscoveryEvent::Type::ServiceCreated,
+                                MakeDynamicStepDescriptor("Peer", false));
+    EXPECT_FALSE(timeSyncService->GetTimeConfiguration()->IsDynamicStepSizeEnabled());
+}
+
+TEST_F(Test_TimeSyncService, dynamic_step_hard_opt_out_ignores_peer_request)
+{
+    using SilKit::Core::Discovery::ServiceDiscoveryEvent;
+
+    // Explicit false is a hard opt-out: a peer's request must not enable it.
+    timeSyncService->ConfigureDynamicStepSize(false);
+    serviceDiscoveryHandlers[0](ServiceDiscoveryEvent::Type::ServiceCreated,
+                                MakeDynamicStepDescriptor("Netsim", true));
+    EXPECT_FALSE(timeSyncService->GetTimeConfiguration()->IsDynamicStepSizeEnabled());
+}
+
+TEST_F(Test_TimeSyncService, dynamic_step_driver_enables_without_peers)
+{
+    // Explicit true enables locally regardless of peers (and also advertises to them).
+    timeSyncService->ConfigureDynamicStepSize(true);
+    EXPECT_TRUE(timeSyncService->GetTimeConfiguration()->IsDynamicStepSizeEnabled());
+}
+
 } // namespace

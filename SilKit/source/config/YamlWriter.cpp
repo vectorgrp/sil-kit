@@ -570,6 +570,10 @@ void YamlWriter::Write(const SilKit::Config::TimeSynchronization& obj)
     MakeMap();
     NonDefaultWrite(obj.animationFactor, "AnimationFactor", defaultObj.animationFactor);
     NonDefaultWrite(obj.enableMessageAggregation, "EnableMessageAggregation", defaultObj.enableMessageAggregation);
+    if (obj.dynamicSimulationStep.has_value())
+    {
+        WriteKeyValue("DynamicSimulationStep", obj.dynamicSimulationStep.value());
+    }
 }
 
 
