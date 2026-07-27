@@ -73,6 +73,9 @@ const std::string controllerTypeOther = "Other";
 // Lifecycle & TimeSync
 const std::string lifecycleIsCoordinated = "LifecycleIsCoordinated";
 const std::string timeSyncActive = "TimeSyncActive";
+// Set to "1" by a participant that requests dynamic simulation step sizes for the whole simulation
+// (e.g. a network simulator). Peers that are not a hard opt-out enable dynamic stepping when they see it.
+const std::string timeSyncDynamicStepSize = "TimeSyncDynamicStepSize";
 
 } // namespace Discovery
 } // namespace Core

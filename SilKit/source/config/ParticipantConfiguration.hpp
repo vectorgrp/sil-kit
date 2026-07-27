@@ -309,6 +309,12 @@ struct TimeSynchronization
 {
     double animationFactor{0.0};
     Aggregation enableMessageAggregation{Aggregation::Off};
+    //! Tri-state, absent by default. When true, this participant advertises to all peers that
+    //! dynamic simulation step sizes should be used (aligning each step to the minimal step among
+    //! all synchronized participants) and enables it locally. When absent, the participant follows
+    //! the network: it enables dynamic stepping if any peer advertises it. When false, it is a hard
+    //! opt-out that never enables dynamic stepping regardless of peers.
+    std::optional<bool> dynamicSimulationStep;
 };
 
 // ================================================================================
