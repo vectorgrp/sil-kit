@@ -227,23 +227,47 @@ protected:
 
     auto GetChildSafe(const std::string& name) const -> Impl
     {
-        if (HasKey(name))
+        if (IsMap())
         {
             return MakeImpl(_node.find_child(ryml::to_csubstr(name)));
         }
 
-        if (IsSequence())
+        if (_node.is_stream())
         {
-            for (const auto& child : _node.cchildren())
+            // Single-document stream (leading "---"): descend into the document. A
+            // document that is a bare sequence is the same mistype rejected below.
+            for (const auto& doc : _node.cchildren())
             {
-                if (child.is_container() && HasKey(child, name))
+                if (doc.is_seq())
                 {
-                    return MakeImpl(child.find_child(ryml::to_csubstr(name)));
+                    ThrowExpectedMapping(name);
+                }
+                if (doc.is_map())
+                {
+                    auto&& found = doc.find_child(ryml::to_csubstr(name));
+                    if (!found.invalid())
+                    {
+                        return MakeImpl(found);
+                    }
                 }
             }
+            return MakeImpl({});
         }
 
+        if (IsSequence())
+        {
+            ThrowExpectedMapping(name);
+        }
+
+        // Absent, null or empty node: treat the key as not present.
         return MakeImpl({});
+    }
+
+    [[noreturn]] void ThrowExpectedMapping(const std::string& name) const
+    {
+        std::ostringstream s;
+        s << "expected a mapping with key \"" << name << "\", but got a sequence";
+        throw MakeConfigurationError(s.str());
     }
 
     auto MakeImpl(ryml::ConstNodeRef node_) const -> Impl

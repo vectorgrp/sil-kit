@@ -21,4 +21,7 @@ auto MakeConfigurationError(ryml::Location location, const std::string_view mess
 
 auto GetRapidyamlCallbacks() -> ryml::Callbacks;
 
+// Throws unless the configuration is a single YAML document.
+void EnsureSingleDocument(ryml::ConstNodeRef root);
+
 } // namespace VSilKit

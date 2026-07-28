@@ -631,6 +631,9 @@ bool ValidateWithSchema(const std::string& yamlString, std::ostream& warnings)
         auto tree = ryml::parse_in_arena(&parser, cinput);
 
         auto root = tree.crootref();
+
+        VSilKit::EnsureSingleDocument(root);
+
         if (root.is_doc() && (root.is_map() || root.is_seq()))
         {
             std::string version;

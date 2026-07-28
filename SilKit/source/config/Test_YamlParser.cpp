@@ -641,4 +641,145 @@ FlexrayControllers:
         SilKit::ConfigurationError);
 }
 
+TEST_F(Test_YamlParser, yaml_throw_on_healthcheck_as_sequence)
+{
+    // HealthCheck is a mapping; the leading "- " mistypes it as a single-element list.
+    auto healthCheckAsSequence = R"(
+HealthCheck:
+  - SoftResponseTimeout: 1
+)";
+
+    EXPECT_THROW(
+        {
+            auto cfg = Deserialize<ParticipantConfiguration>(healthCheckAsSequence);
+        },
+        SilKit::ConfigurationError);
+}
+
+TEST_F(Test_YamlParser, yaml_throw_on_object_as_sequence)
+{
+    // A mapping mistyped as a sequence must be rejected at every nesting level.
+    const std::initializer_list<const char*> mistypedConfigurations = {
+        R"(
+HealthCheck:
+  - SoftResponseTimeout: 1
+)",
+        R"(
+Logging:
+  - FlushLevel: Critical
+)",
+        R"(
+Middleware:
+  - RegistryUri: silkit://localhost:8500
+)",
+        R"(
+Experimental:
+  - Metrics:
+      CollectFromRemote: true
+)",
+        R"(
+CanControllers:
+- Name: CAN1
+  Replay:
+    - UseTraceSource: Source1
+)",
+        R"(
+Experimental:
+  Metrics:
+    - CollectFromRemote: true
+)",
+    };
+
+    for (const auto configuration : mistypedConfigurations)
+    {
+        EXPECT_THROW(
+            {
+                auto&& cfg = Deserialize<ParticipantConfiguration>(configuration);
+                (void)cfg;
+            },
+            SilKit::ConfigurationError);
+    }
+}
+
+TEST_F(Test_YamlParser, yaml_throw_on_stream_document_as_sequence)
+{
+    // A single "---" document that is itself a bare sequence is the same mistype.
+    auto streamDocAsSequence = R"(---
+- SoftResponseTimeout: 1
+)";
+
+    EXPECT_THROW(
+        {
+            auto&& cfg = Deserialize<ParticipantConfiguration>(streamDocAsSequence);
+            (void)cfg;
+        },
+        SilKit::ConfigurationError);
+}
+
+TEST_F(Test_YamlParser, yaml_throw_on_multi_document_stream)
+{
+    // A configuration must be a single YAML document; two "---" documents are rejected.
+    auto multiDocument = R"(---
+ParticipantName: Node0
+---
+ParticipantName: Node1
+)";
+
+    EXPECT_THROW(
+        {
+            auto&& cfg = Deserialize<ParticipantConfiguration>(multiDocument);
+            (void)cfg;
+        },
+        SilKit::ConfigurationError);
+}
+
+TEST_F(Test_YamlParser, yaml_healthcheck_as_map_is_accepted)
+{
+    // Regression guard: the correctly-typed object must still parse.
+    auto config = Deserialize<ParticipantConfiguration>(R"(
+HealthCheck:
+  SoftResponseTimeout: 1
+  HardResponseTimeout: 2
+)");
+
+    ASSERT_TRUE(config.healthCheck.softResponseTimeout.has_value());
+    ASSERT_TRUE(config.healthCheck.hardResponseTimeout.has_value());
+    EXPECT_EQ(config.healthCheck.softResponseTimeout.value(), 1ms);
+    EXPECT_EQ(config.healthCheck.hardResponseTimeout.value(), 2ms);
+}
+
+TEST_F(Test_YamlParser, yaml_empty_object_keeps_defaults)
+{
+    // An empty object (null node) keeps its defaults and must not throw.
+    ParticipantConfiguration defaults{};
+
+    auto config = Deserialize<ParticipantConfiguration>(R"(
+HealthCheck:
+)");
+
+    EXPECT_EQ(config.healthCheck.softResponseTimeout, defaults.healthCheck.softResponseTimeout);
+    EXPECT_EQ(config.healthCheck.hardResponseTimeout, defaults.healthCheck.hardResponseTimeout);
+}
+
+TEST_F(Test_YamlParser, yaml_sequence_typed_fields_still_parse)
+{
+    // Genuinely sequence-typed fields (lists of objects) must keep working.
+    auto config = Deserialize<ParticipantConfiguration>(R"(
+CanControllers:
+- Name: CAN1
+  Network: CAN2
+- Name: CAN2
+LinControllers:
+- Name: LIN1
+)");
+
+    ASSERT_EQ(config.canControllers.size(), 2u);
+    EXPECT_EQ(config.canControllers.at(0).name, "CAN1");
+    ASSERT_TRUE(config.canControllers.at(0).network.has_value());
+    EXPECT_EQ(config.canControllers.at(0).network.value(), "CAN2");
+    EXPECT_EQ(config.canControllers.at(1).name, "CAN2");
+    ASSERT_EQ(config.linControllers.size(), 1u);
+    EXPECT_EQ(config.linControllers.at(0).name, "LIN1");
+}
+
 } // anonymous namespace
