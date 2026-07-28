@@ -40,6 +40,38 @@ TEST_F(Test_YamlValidator, validate_without_warnings)
     EXPECT_TRUE(warnings.empty()) << "Warnings: " << warnings;
 }
 
+TEST_F(Test_YamlValidator, validate_rejects_multi_document_stream)
+{
+    // A stray "---" mid-config splits it into two documents; the validator must reject it.
+    auto yamlString = R"yaml(Description: Log to Stdout with Level Info
+Logging:
+---
+  Sinks:
+    - Level: Info
+      Type: Stdout
+)yaml";
+
+    std::stringstream warnings;
+    bool yamlValid = ValidateWithSchema(yamlString, warnings);
+    EXPECT_FALSE(yamlValid) << "A multi-document stream must not validate";
+    EXPECT_THAT(warnings.str(), testing::HasSubstr("one YAML document"));
+}
+
+TEST_F(Test_YamlValidator, validate_accepts_single_leading_document_marker)
+{
+    // A single leading "---" is one document and stays valid.
+    auto yamlString = R"yaml(---
+schemaVersion: 1
+ParticipantName: CanDemoParticipant
+)yaml";
+
+    std::stringstream warnings;
+    bool yamlValid = ValidateWithSchema(yamlString, warnings);
+    EXPECT_TRUE(yamlValid) << "A single leading '---' document must validate. Warnings: "
+                           << warnings.str();
+    EXPECT_TRUE(warnings.str().empty()) << "Warnings: " << warnings.str();
+}
+
 TEST_F(Test_YamlValidator, validate_unknown_toplevel)
 {
     auto yamlString = R"yaml(

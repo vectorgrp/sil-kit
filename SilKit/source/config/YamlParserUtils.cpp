@@ -69,6 +69,16 @@ auto GetRapidyamlCallbacks() -> ryml::Callbacks
     return ryml::Callbacks{nullptr, RapidyamlAllocate, RapidyamlFree, RapidyamlError};
 }
 
+void EnsureSingleDocument(ryml::ConstNodeRef root)
+{
+    if (root.is_stream() && root.num_children() > 1)
+    {
+        throw SilKit::ConfigurationError{
+            "configuration must contain exactly one YAML document, but multiple "
+            "\"---\"-separated documents were found"};
+    }
+}
+
 } // namespace VSilKit
 
 
