@@ -140,6 +140,7 @@ SimTestHarness::SimTestHarness(const std::vector<std::string>& syncParticipantNa
 SimTestHarness::SimTestHarness(const SilKit::Tests::SimTestHarnessArgs& args)
     : _syncParticipantNames{args.syncParticipantNames}
     , _asyncParticipantNames{args.asyncParticipantNames}
+    , _enableInternalSystemMonitorTimeSync{args.enableInternalSystemMonitorTimeSync}
 {
     // start registry
     _registry = SilKit::Vendor::Vector::CreateSilKitRegistry(
@@ -184,13 +185,10 @@ bool SimTestHarness::Run(std::chrono::nanoseconds testRunTimeout, const std::vec
     auto simulationFinishedFuture = simulationFinishedPromise.get_future();
     if (!_syncParticipantNames.empty())
     {
-        // Create a monitor, add it to the list of simParticipants, then start all participants.
-        // The monitor only observes SystemState; it must not create a time sync service, otherwise it
-        // would advertise an active 1ms simulation step and pollute the ByMinimalDuration negotiation
-        // of the actual sync participants (dragging their aligned step size down to 1ms).
+        // Create a monitor, add it to the list of simParticipants, then start all participants
         AddParticipant(internalSystemMonitorName, "",
                        {SilKit::Services::Orchestration::OperationMode::Coordinated},
-                       /*createTimeSyncService=*/false);
+                       _enableInternalSystemMonitorTimeSync);
         auto monitor = _simParticipants[internalSystemMonitorName]->GetOrCreateSystemMonitor();
         monitor->AddSystemStateHandler([&](auto systemState) {
             if (systemState == SilKit::Services::Orchestration::SystemState::Shutdown)

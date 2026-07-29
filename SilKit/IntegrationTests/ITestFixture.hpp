@@ -27,11 +27,18 @@ protected: //CTor and operators
         return *_simTestHarness;
     }
 
-    void SetupFromParticipantList(std::vector<std::string> participantNames)
+    void SetupFromParticipantList(std::vector<std::string> participantNames,
+                                  bool enableInternalSystemMonitorTimeSync = true)
     {
         // create test harness with deferred participant creation.
         // Will only create the SIL Kit Registry and tell the SystemController the participantNames
-        _simTestHarness = std::make_unique<SimTestHarness>(participantNames, "silkit://localhost:0", true);
+        SimTestHarnessArgs args{};
+        args.syncParticipantNames = std::move(participantNames);
+        args.registry.listenUri = "silkit://localhost:0";
+        args.deferParticipantCreation = true;
+        args.enableInternalSystemMonitorTimeSync = enableInternalSystemMonitorTimeSync;
+
+        _simTestHarness = std::make_unique<SimTestHarness>(args);
         _registryUri = _simTestHarness->GetRegistryUri();
     }
 
