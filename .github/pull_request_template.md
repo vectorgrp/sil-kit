@@ -20,7 +20,7 @@ SPDX-License-Identifier: MIT
 
 ## Instructions for review / testing
 <!--
-    - Hilight some of the important changes, which reviewers should focus on
+    - Highlight some of the important changes, which reviewers should focus on
     - Which parts should be reviewed in detail? For example: content of console output, correct semantics of changes
     - Test steps and test setup description. For example: which programs or configs to use
 -->

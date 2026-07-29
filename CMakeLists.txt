@@ -23,7 +23,7 @@ option(SILKIT_BUILD_DASHBOARD "Build the SIL Kit Dashboard client." ON)
 option(SILKIT_ENABLE_TRACING_INSTRUMENTATION "Enable tracing instrumentation (_SILKIT_TRACE_CLASS_NAMES)." OFF)
 option(SILKIT_LINK_LLD "Use the lld linker for SIL KIT" OFF)
 option(SILKIT_USE_SYSTEM_LIBRARIES "Use the libraries installed on the system for third party dependencies" OFF)
-option(SILKIT_BUILD_REPRODUCIBLE "Creates a reproducible build by ommiting timestamps/unique build ids" ON)
+option(SILKIT_BUILD_REPRODUCIBLE "Creates a reproducible build by omitting timestamps/unique build ids" ON)
 option(SILKIT_BUILD_LINUX_PACKAGE "Creates SIL Kit builds suitable for package managers in Linux Distributions (.deb)" OFF)
 option(SILKIT_BUILD_LTO "Build with link time optimizations" OFF)
 
