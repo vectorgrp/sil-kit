@@ -225,70 +225,71 @@ void VAsioPeer::ReadSomeAsync()
 
 void VAsioPeer::DispatchBuffer()
 {
-    if (_currentMsgSize == 0)
+    while(true) 
     {
-        if (_isShuttingDown)
+        if (_currentMsgSize == 0)
         {
-            return;
-        }
-        if (_msgBuffer.Size() >= sizeof(uint32_t))
-        {
-            std::vector<uint8_t> msgSizeInBytes(sizeof(uint32_t));
-            if (!_msgBuffer.Peek(msgSizeInBytes))
+            if (_isShuttingDown)
             {
-                throw SilKitError("Reading message size from ring buffer failed.");
+                break;
             }
-            _currentMsgSize = *reinterpret_cast<uint32_t*>(msgSizeInBytes.data());
+            if (_msgBuffer.Size() >= sizeof(uint32_t))
+            {
+                std::vector<uint8_t> msgSizeInBytes(sizeof(uint32_t));
+                if (!_msgBuffer.Peek(msgSizeInBytes))
+                {
+                    throw SilKitError("Reading message size from ring buffer failed.");
+                }
+                _currentMsgSize = *reinterpret_cast<uint32_t*>(msgSizeInBytes.data());
+            }
+            else
+            {
+                // not enough data to even determine the message size...
+                // restart the async read operation
+                ReadSomeAsync();
+                break;
+            }
+        }
+
+        // validate the received size
+        if (_currentMsgSize == 0 || _currentMsgSize > 1024 * 1024 * 1024)
+        {
+            _logger->MakeMessage(Services::Logging::Level::Error, TopicOf(*this))
+                .SetMessage("Received invalid Message Size: {}", _currentMsgSize.load())
+                .Dispatch();
+            Shutdown();
+        }
+
+
+        if (_msgBuffer.Size() < _currentMsgSize)
+        {
+            // Make the buffer large enough and wait until we have more data.
+            if (_msgBuffer.Capacity() < _currentMsgSize)
+            {
+                _msgBuffer.Reserve(_currentMsgSize);
+            }
+
+            ReadSomeAsync();
+            break;
         }
         else
         {
-            // not enough data to even determine the message size...
-            // restart the async read operation
-            ReadSomeAsync();
-            return;
+            std::vector<uint8_t> currentMsg(_currentMsgSize);
+            if (!_msgBuffer.Read(currentMsg))
+            {
+                throw SilKitError("Reading data from ring buffer failed.");
+            }
+
+            SerializedMessage message{std::move(currentMsg)};
+            message.SetProtocolVersion(GetProtocolVersion());
+
+            _peerMetrics->RxBytes(message);
+            _peerMetrics->RxPacket();
+
+            _listener->OnSocketData(this, std::move(message));
+
+            _currentMsgSize = 0u;
         }
-    }
-
-    // validate the received size
-    if (_currentMsgSize == 0 || _currentMsgSize > 1024 * 1024 * 1024)
-    {
-        _logger->MakeMessage(Services::Logging::Level::Error, TopicOf(*this))
-            .SetMessage("Received invalid Message Size: {}", _currentMsgSize.load())
-            .Dispatch();
-        Shutdown();
-    }
-
-
-    if (_msgBuffer.Size() < _currentMsgSize)
-    {
-        // Make the buffer large enough and wait until we have more data.
-        if (_msgBuffer.Capacity() < _currentMsgSize)
-        {
-            _msgBuffer.Reserve(_currentMsgSize);
-        }
-
-        ReadSomeAsync();
-        return;
-    }
-    else
-    {
-        std::vector<uint8_t> currentMsg(_currentMsgSize);
-        if (!_msgBuffer.Read(currentMsg))
-        {
-            throw SilKitError("Reading data from ring buffer failed.");
-        }
-
-        SerializedMessage message{std::move(currentMsg)};
-        message.SetProtocolVersion(GetProtocolVersion());
-
-        _peerMetrics->RxBytes(message);
-        _peerMetrics->RxPacket();
-
-        _listener->OnSocketData(this, std::move(message));
-
-        _currentMsgSize = 0u;
-
-        DispatchBuffer();
     }
 }
 
