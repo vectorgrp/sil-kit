@@ -211,7 +211,7 @@ Essential targets. Automatically tested and provided as official binary packages
      - GCC 13
    * - Ubuntu 20.04
      - amd64
-     - Clang 10, `.deb`
+     - Clang 10, `.deb`, will be deprecated in a future release
    * - Ubuntu 22.04
      - ARM64
      - Clang 14, `.deb`
