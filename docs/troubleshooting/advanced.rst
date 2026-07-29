@@ -1,7 +1,7 @@
 Advanced 
 ========
 
-This section shows how to use advanced tools like the `SIL Kit Dashboard <https://vector.com/sil-kit-dashboard>`_ to visualize simulations, in order to identitfy participant misconfigurations, detect system misbehavior or analyze participant performance.
+This section shows how to use advanced tools like the `SIL Kit Dashboard <https://vector.com/sil-kit-dashboard>`_ to visualize simulations, in order to identify participant misconfigurations, detect system misbehavior or analyze participant performance.
 
 Getting Started with the dashboard
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -16,7 +16,7 @@ Please refer to the SIL Kit Dashboard documentation for updated instructions.
    The ``sil-kit-registry`` executable supports the ``--dashboard-uri https://1.2.3.4`` command line flag and the registry's configuration supports the ``DashboardUri: https://1.2.3.4`` declaration.
    Ensure that the registry is able to connect to the Dashboard when started, e.g. by verifying the log output.
    The registry's configuration of ``CollectFromRemotes: true`` defaults to true -- it can be disabled explicitly.
-#. Each participant that should be included in the dashboard visualization, must add a remot metric sink to its conifugration file:
+#. Each participant that should be included in the dashboard visualization, must add a remote metric sink to its configuration file:
 
    .. code-block:: yaml
 
