@@ -668,7 +668,7 @@ TEST_F(ITest_CommunicationGuarantees, test_receive_in_comm_ready_handler_autonom
         // We can guarantee communication in the CommReadyHandler between PubSub/RPC controllers
         // that have been created by the time the participant calls StartLifecycle.
         // E.g. Subscribers that are created on Participant1 after Participant2 called StartLifecycle may
-        // not see a publication stemming from the CommReadyHandler of participant2
+        // not see a publication stemming from the CommReadyHandler of participant2 
 
         // In this test, we wait until the subscriber participant has called StartLifecycle. Then, all of
         // his controllers have been created.
