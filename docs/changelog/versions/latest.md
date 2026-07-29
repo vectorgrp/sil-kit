@@ -20,6 +20,7 @@
 
 - `config`: default format of file logging is set to JSON. Set "Format: Simple" in the sink to get previous behaviour.
 - `docs`: added description of the logging "Format".
+- `docs`: added deprecation warning for Ubuntu 20.04
 - `build`: the CMake targets only expose the top-level include directory instead of internal include directories.
 
 ## Fixed
