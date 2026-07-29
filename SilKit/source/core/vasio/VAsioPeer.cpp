@@ -258,6 +258,7 @@ void VAsioPeer::DispatchBuffer()
                 .SetMessage("Received invalid Message Size: {}", _currentMsgSize.load())
                 .Dispatch();
             Shutdown();
+            break;
         }
 
 
