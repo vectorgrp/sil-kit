@@ -26,7 +26,7 @@ It provides:
 
 * Implemented in C++ w/o platform dependencies
 
-* Interoperability between Windows, Linux, and other UNIX derivatives​
+* Interoperability between Windows, Linux, and other UNIX derivatives
 
 * Stable API and ABI as well as long-term network layer compatibility
 
