@@ -67,7 +67,9 @@ void ITest_DynStepSizes::RunTestSetup(std::vector<ParticipantParams>& participan
     {
         participantNames.push_back(participantParams.name);
     }
-    SetupFromParticipantList(participantNames);
+    // The internal system monitor must stay out of the step size negotiation, otherwise its own 1ms
+    // step would drag every ByMinimalDuration participant down to 1ms.
+    SetupFromParticipantList(participantNames, /*enableInternalSystemMonitorTimeSync=*/false);
 
     std::mutex mx;
 

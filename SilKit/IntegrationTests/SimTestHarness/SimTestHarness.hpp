@@ -81,6 +81,10 @@ struct SimTestHarnessArgs
     /// If true, the system controller is only created if CreateSystemController is called. If false, it will be created
     /// in the SimTestHarness constructor.
     bool deferSystemControllerCreation{false};
+    /// If false, the internal system monitor participant is created without a time sync service, i.e. it does not
+    /// take part in the ByMinimalDuration negotiation with its own 1ms step. Only ITest_DynStepSizes needs this;
+    /// such a monitor is not throttled by the virtual time barrier and can starve under load.
+    bool enableInternalSystemMonitorTimeSync{true};
 
     struct
     {
@@ -148,6 +152,7 @@ private:
     std::map<std::string, std::unique_ptr<SimParticipant>> _simParticipants;
     std::unique_ptr<SilKit::Vendor::Vector::ISilKitRegistry> _registry;
     const std::string internalSystemMonitorName = "InternalSystemMonitor";
+    bool _enableInternalSystemMonitorTimeSync{true};
 };
 
 
