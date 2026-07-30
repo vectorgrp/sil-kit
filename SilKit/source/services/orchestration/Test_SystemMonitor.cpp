@@ -7,6 +7,7 @@
 #include <chrono>
 #include <functional>
 #include <string>
+#include <vector>
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
@@ -765,6 +766,153 @@ TEST_F(Test_SystemMonitor, add_and_remove_system_state_and_participant_status_ha
     SetAllParticipantStates(ParticipantState::CommunicationInitializing);
 
     EXPECT_EQ(monitor.InvalidTransitionCount(), 0u);
+}
+
+// ================================================================================================
+//  Participants running at different speeds
+//
+//  The tests above always advance P1, P2 and P3 by one state at a time, in ascending order. Without
+//  virtual time synchronization there is no back pressure between participants, so under load one
+//  participant can run several states ahead of another. The tests below cover that regime.
+//
+//  All of them are single-threaded and deterministic - no threads, no sleeps, no timeouts and no
+//  wall-clock reads - so they behave identically on a heavily loaded CI machine.
+// ================================================================================================
+
+/*! Intermediate system states must not be skipped.
+ *
+ *  The SystemState handler is fed from an aggregate that is only sampled when a ParticipantStatus
+ *  message arrives, but it is consumed as a sequence of transitions. If P1 races ahead to Stopping
+ *  before P2 reports Running at all, the aggregate jumps straight from ReadyToRun to Stopping and
+ *  SystemState::Running is never emitted.
+ *
+ *  This is not only an observability problem: LifecycleService::NewSystemState uses
+ *  SystemState::Stopping as the trigger that makes a coordinated participant stop. Unlike the
+ *  startup transitions - which are backed by the participant-replies and pending-subscription
+ *  barriers - the stop path has no barrier behind it, so a skipped state is a missed trigger.
+ */
+TEST_F(Test_SystemMonitor, intermediate_system_states_are_not_skipped)
+{
+    monitor.UpdateRequiredParticipantNames({"P1", "P2"});
+
+    std::vector<SystemState> observedStates;
+    monitor.AddSystemStateHandler([&observedStates](SystemState systemState) {
+        observedStates.push_back(systemState);
+    });
+
+    // Both participants reach ReadyToRun in lock-step.
+    for (const auto state : {ParticipantState::ServicesCreated, ParticipantState::CommunicationInitializing,
+                             ParticipantState::CommunicationInitialized, ParticipantState::ReadyToRun})
+    {
+        SetParticipantStatus(1, state);
+        SetParticipantStatus(2, state);
+    }
+    ASSERT_EQ(monitor.SystemState(), SystemState::ReadyToRun);
+
+    // P1 runs ahead: it starts, finishes its work and stops before P2 reports Running.
+    SetParticipantStatus(1, ParticipantState::Running);
+    SetParticipantStatus(1, ParticipantState::Stopping);
+    SetParticipantStatus(2, ParticipantState::Running);
+
+    EXPECT_THAT(observedStates, Contains(SystemState::Running))
+        << "both participants were running, but SystemState::Running was never reported";
+}
+
+/*! A system state change that happens while a handler is being registered must not be lost.
+ *
+ *  SystemMonitor::AddSystemStateHandler first invokes the handler with the current system state and
+ *  only then adds it to the handler list. A change delivered in between is dispatched to a list that
+ *  does not yet contain the new handler, and is lost for good: the aggregate only changes when a
+ *  participant status changes, so nothing will re-deliver it.
+ *
+ *  In production the two statements are separated by the IO worker thread; here the change is
+ *  injected from inside the initial invocation, which exercises the very same code path and the very
+ *  same lost notification without depending on thread timing. There is no deadlock risk:
+ *  AddSystemStateHandler invokes the handler outside the SynchronizedHandlers lock, and the
+ *  reentrant InvokeAll takes a recursive_mutex over an empty handler list.
+ *
+ *  LifecycleService::StartLifecycle registers its handlers from the user thread, so the lost
+ *  notification can be a coordinated participant's own startup or stop trigger.
+ */
+TEST_F(Test_SystemMonitor, system_state_change_during_handler_registration_is_not_lost)
+{
+    monitor.UpdateRequiredParticipantNames({"P1", "P2"});
+
+    for (const auto state : {ParticipantState::ServicesCreated, ParticipantState::CommunicationInitializing,
+                             ParticipantState::CommunicationInitialized, ParticipantState::ReadyToRun})
+    {
+        SetParticipantStatus(1, state);
+        SetParticipantStatus(2, state);
+    }
+    SetParticipantStatus(1, ParticipantState::Running);
+    ASSERT_EQ(monitor.SystemState(), SystemState::ReadyToRun);
+
+    std::vector<SystemState> observedStates;
+    bool isFirstInvocation{true};
+
+    monitor.AddSystemStateHandler([this, &observedStates, &isFirstInvocation](SystemState systemState) {
+        observedStates.push_back(systemState);
+
+        if (isFirstInvocation)
+        {
+            isFirstInvocation = false;
+            // The system state changes to Running while AddSystemStateHandler sits between invoking
+            // this handler and registering it.
+            SetParticipantStatus(2, ParticipantState::Running);
+        }
+    });
+
+    ASSERT_EQ(monitor.SystemState(), SystemState::Running);
+    EXPECT_THAT(observedStates, Contains(SystemState::Running));
+    ASSERT_FALSE(observedStates.empty());
+    EXPECT_EQ(observedStates.back(), monitor.SystemState())
+        << "the handler's last observed system state must not lag behind the monitor";
+}
+
+/*! ParticipantStatus() must not hand out a reference to storage that keeps changing.
+ *
+ *  SystemMonitor::ParticipantStatus returns the pointer produced by
+ *  SystemStateTracker::GetParticipantStatus, which is taken after the tracker's mutex has already
+ *  been released. The returned reference therefore aliases the live map value.
+ *
+ *  This test only observes the benign half of the problem - the value changes underneath the caller
+ *  while the map node is still alive. The real hazard is worse: SetParticipantStatus assigns the
+ *  std::string members while a caller may be reading them, and RemoveParticipant erases the node
+ *  outright when a participant disconnects, leaving a dangling reference.
+ *
+ *  The fix pattern already exists in this directory: LifecycleService::Status() copies under lock
+ *  into a 'mutable ParticipantStatus _returnValueForStatus', and SystemStateTracker already offers
+ *  the copying overload GetParticipantStatus(name, ParticipantStatus&).
+ */
+TEST_F(Test_SystemMonitor, participant_status_must_not_alias_mutable_storage)
+{
+    SetParticipantStatus(1, ParticipantState::ServicesCreated);
+
+    const auto& participantStatus = monitor.ParticipantStatus("P1");
+    ASSERT_EQ(participantStatus.state, ParticipantState::ServicesCreated);
+
+    SetParticipantStatus(1, ParticipantState::CommunicationInitializing);
+
+    EXPECT_EQ(participantStatus.state, ParticipantState::ServicesCreated)
+        << "the previously returned ParticipantStatus changed when an unrelated update arrived";
+}
+
+/*! Invalid participant state transitions must be counted.
+ *
+ *  SystemMonitor::InvalidTransitionCount() reads _invalidTransitionCount, which is never written
+ *  anywhere. The detection moved into SystemStateTracker::ValidateParticipantStateUpdate, which only
+ *  logs and deliberately lets the transition through, and the count was never wired back up.
+ *
+ *  As a result every 'EXPECT_EQ(monitor.InvalidTransitionCount(), 0u)' in this file - there are 27 -
+ *  cannot fail. Do not read them as evidence that no invalid transition was detected.
+ */
+TEST_F(Test_SystemMonitor, invalid_participant_transition_is_counted)
+{
+    // Invalid -> Running: only ServicesCreated is a valid successor of Invalid.
+    SetParticipantStatus(1, ParticipantState::Running);
+    ASSERT_EQ(monitor.ParticipantStatus("P1").state, ParticipantState::Running);
+
+    EXPECT_EQ(monitor.InvalidTransitionCount(), 1u);
 }
 
 } // anonymous namespace
