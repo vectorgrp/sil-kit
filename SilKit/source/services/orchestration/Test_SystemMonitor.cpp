@@ -297,24 +297,6 @@ TEST_F(Test_SystemMonitor, detect_multiple_paused_clients)
     EXPECT_EQ(monitor.InvalidTransitionCount(), 0u);
 }
 
-TEST_F(Test_SystemMonitor, DISABLED_detect_system_stopping)
-{
-    SetAllParticipantStates(ParticipantState::ServicesCreated);
-    SetAllParticipantStates(ParticipantState::CommunicationInitializing);
-    SetAllParticipantStates(ParticipantState::CommunicationInitialized);
-    SetAllParticipantStates(ParticipantState::ReadyToRun);
-    SetAllParticipantStates(ParticipantState::Running);
-    EXPECT_EQ(monitor.SystemState(), SystemState::Running);
-
-    AddSystemStateHandler();
-    EXPECT_CALL(callbacks, SystemStateHandler(SystemState::Stopping)).Times(1);
-
-    SetParticipantStatus(1, ParticipantState::Stopping);
-    EXPECT_EQ(monitor.ParticipantStatus("P1").state, ParticipantState::Stopping);
-    EXPECT_EQ(monitor.SystemState(), SystemState::Stopping);
-    EXPECT_EQ(monitor.InvalidTransitionCount(), 0u);
-}
-
 TEST_F(Test_SystemMonitor, detect_system_stopped)
 {
     SetAllParticipantStates(ParticipantState::ServicesCreated);
@@ -351,20 +333,6 @@ TEST_F(Test_SystemMonitor, detect_system_stopped)
     SetParticipantStatus(3, ParticipantState::Stopped);
     EXPECT_EQ(monitor.ParticipantStatus("P3").state, ParticipantState::Stopped);
     EXPECT_EQ(monitor.SystemState(), SystemState::Stopped);
-    EXPECT_EQ(monitor.InvalidTransitionCount(), 0u);
-}
-
-TEST_F(Test_SystemMonitor, DISABLED_detect_reinitializing_after_stopped)
-{
-    SetAllParticipantStates(ParticipantState::ServicesCreated);
-    SetAllParticipantStates(ParticipantState::CommunicationInitializing);
-    SetAllParticipantStates(ParticipantState::CommunicationInitialized);
-    SetAllParticipantStates(ParticipantState::ReadyToRun);
-    SetAllParticipantStates(ParticipantState::Running);
-    SetAllParticipantStates(ParticipantState::Stopped);
-    EXPECT_EQ(monitor.SystemState(), SystemState::Stopped);
-
-    AddSystemStateHandler();
     EXPECT_EQ(monitor.InvalidTransitionCount(), 0u);
 }
 
@@ -620,24 +588,6 @@ TEST_F(Test_SystemMonitor, detect_error_from_shuttingdown)
     EXPECT_EQ(monitor.InvalidTransitionCount(), 0u);
 }
 
-TEST_F(Test_SystemMonitor, DISABLED_detect_initializing_after_error)
-{
-    SetAllParticipantStates(ParticipantState::ServicesCreated);
-    EXPECT_EQ(monitor.SystemState(), SystemState::ServicesCreated);
-
-    SetParticipantStatus(1, ParticipantState::Error);
-    EXPECT_EQ(monitor.ParticipantStatus("P1").state, ParticipantState::Error);
-    EXPECT_EQ(monitor.SystemState(), SystemState::Error);
-
-    AddSystemStateHandler();
-
-    SetParticipantStatus(1, ParticipantState::ServicesCreated);
-    EXPECT_EQ(monitor.ParticipantStatus("P1").state, ParticipantState::ServicesCreated);
-    EXPECT_EQ(monitor.SystemState(), SystemState::ServicesCreated);
-
-    EXPECT_EQ(monitor.InvalidTransitionCount(), 0u);
-}
-
 TEST_F(Test_SystemMonitor, detect_shuttingdown_after_error)
 {
     SetAllParticipantStates(ParticipantState::ServicesCreated);
@@ -657,34 +607,69 @@ TEST_F(Test_SystemMonitor, detect_shuttingdown_after_error)
     EXPECT_EQ(monitor.InvalidTransitionCount(), 0u);
 }
 
-TEST_F(Test_SystemMonitor, DISABLED_detect_initializing_after_invalid)
+/*! The system state must stay Invalid until every required participant has reported, and must then
+ *  follow the least advanced one.
+ *
+ *  Test that the monitor recovers from seemingly erroneous state transitions.
+ *
+ *  Due to the distributed nature, it can occur that some participants
+ *  have not matched yet, while others are already fully connected. This can lead
+ *  to one participant already starting initalization while the other not having yet
+ *  connected to the (local) participant, which is seemingly a wrong state transition
+ *  as the whole system is not idle yet. The SystemMonitor must be able to recover
+ *  from such erroneous state transitions.
+ *
+ *  Was DISABLED_detect_initializing_after_invalid: the VIB-807 state machine rework (2022) disabled
+ *  it with 'TODO why would this be an error? (CommunicationReady used to be initializing)', and that
+ *  TODO was later dropped by "fix remove todos (#382)". The TODO was right - the old
+ *  CommunicationReady had been mapped onto CommunicationInitializing here but onto
+ *  CommunicationInitialized everywhere else, which left the test expecting the system state to jump
+ *  to the *most advanced* participant. The scenario is worth covering; only the expectations were
+ *  wrong, and they have been corrected below.
+ */
+TEST_F(Test_SystemMonitor, detect_system_state_once_all_participants_reported)
 {
-    // Test that the monitor recovers from seemingly erroneous state transitions.
-    //
-    // Due to the distributed nature, it can occur that some participants
-    // have not matched yet, while others are already fully connected. This can lead
-    // to one participant already starting initalization while the other not having yet
-    // connected to the (local) participant, which is seemingly a wrong state transition
-    // as the whole system is not idle yet. The SystemMonitor must be able to recover
-    // from such erroneous state transitions.
-
+    // P1 is already initializing while P2 and P3 have not reported at all yet.
     SetParticipantStatus(1, ParticipantState::ServicesCreated);
     SetParticipantStatus(1, ParticipantState::CommunicationInitializing);
 
+    // As long as a required participant is unaccounted for, there is no system state.
     EXPECT_EQ(monitor.SystemState(), SystemState::Invalid);
 
     AddSystemStateHandler();
+    EXPECT_CALL(callbacks, SystemStateHandler(SystemState::ServicesCreated)).Times(1);
     EXPECT_CALL(callbacks, SystemStateHandler(SystemState::CommunicationInitializing)).Times(1);
 
     SetParticipantStatus(2, ParticipantState::ServicesCreated);
+    EXPECT_EQ(monitor.SystemState(), SystemState::Invalid);
+
+    // With P3 the picture is complete. P2 and P3 are the laggards, so the system is ServicesCreated -
+    // it does not jump ahead to where P1 already is.
     SetParticipantStatus(3, ParticipantState::ServicesCreated);
+    EXPECT_EQ(monitor.SystemState(), SystemState::ServicesCreated);
+
+    // Once the laggards catch up, the system state follows.
+    SetParticipantStatus(2, ParticipantState::CommunicationInitializing);
+    EXPECT_EQ(monitor.SystemState(), SystemState::ServicesCreated);
+
+    SetParticipantStatus(3, ParticipantState::CommunicationInitializing);
     EXPECT_EQ(monitor.SystemState(), SystemState::CommunicationInitializing);
 }
 
-TEST_F(Test_SystemMonitor, DISABLED_detect_initialized_after_invalid)
+/*! The system state must track the single lagging participant all the way up the startup ladder.
+ *
+ *  Same distributed-startup situation as above, but taken to the extreme: two participants run all
+ *  the way to ReadyToRun while the third has not reported at all. Every step the laggard takes must
+ *  move the system state with it, and the system state must never run ahead of it.
+ *
+ *  Was DISABLED_detect_initialized_after_invalid, disabled by the VIB-807 state machine rework (2022)
+ *  with 'TODO clarify the purpose of this test' (later dropped by "fix remove todos (#382)"). Its
+ *  EXPECT_EQ assertions were in fact correct; what made it fail was a missing expectation for the
+ *  ServicesCreated notification, which gmock reported as an unexpected call. The walk is now carried
+ *  through to ReadyToRun so that the whole ladder is covered.
+ */
+TEST_F(Test_SystemMonitor, detect_system_state_follows_lagging_participant)
 {
-    // Test that the monitor recovers from seemingly erroneous state transitions.
-
     SetParticipantStatus(1, ParticipantState::ServicesCreated);
     SetParticipantStatus(1, ParticipantState::CommunicationInitializing);
     SetParticipantStatus(1, ParticipantState::CommunicationInitialized);
@@ -698,8 +683,10 @@ TEST_F(Test_SystemMonitor, DISABLED_detect_initialized_after_invalid)
     EXPECT_EQ(monitor.SystemState(), SystemState::Invalid);
 
     AddSystemStateHandler();
+    EXPECT_CALL(callbacks, SystemStateHandler(SystemState::ServicesCreated)).Times(1);
     EXPECT_CALL(callbacks, SystemStateHandler(SystemState::CommunicationInitializing)).Times(1);
     EXPECT_CALL(callbacks, SystemStateHandler(SystemState::CommunicationInitialized)).Times(1);
+    EXPECT_CALL(callbacks, SystemStateHandler(SystemState::ReadyToRun)).Times(1);
 
     SetParticipantStatus(3, ParticipantState::ServicesCreated);
     EXPECT_EQ(monitor.SystemState(), SystemState::ServicesCreated);
@@ -709,6 +696,9 @@ TEST_F(Test_SystemMonitor, DISABLED_detect_initialized_after_invalid)
 
     SetParticipantStatus(3, ParticipantState::CommunicationInitialized);
     EXPECT_EQ(monitor.SystemState(), SystemState::CommunicationInitialized);
+
+    SetParticipantStatus(3, ParticipantState::ReadyToRun);
+    EXPECT_EQ(monitor.SystemState(), SystemState::ReadyToRun);
 }
 
 TEST_F(Test_SystemMonitor, check_on_partitipant_connected_triggers_callback)
