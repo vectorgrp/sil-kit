@@ -73,6 +73,16 @@ public:
         return *this;
     }
 
+    LoggerMessage& SetMessage(std::string msg)
+    {
+        if (_logger->GetLogLevel() <= _level)
+        {
+            _msg = std::move(msg);
+        }
+            
+        return *this;
+    }
+
     auto SetTopic(Topic topic) -> LoggerMessage&
     {
         _topic = topic;
