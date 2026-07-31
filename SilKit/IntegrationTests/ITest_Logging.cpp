@@ -46,13 +46,22 @@ auto MakeBracedMessage() -> std::string
     return ss.str();
 }
 
-auto MakeParticipantConfiguration() -> std::string
+auto MakeParticipantConfiguration() -> const std::string
 {
-    std::stringstream config;
-    config << R"({"Logging":{"FlushLevel":"Trace","Sinks":[)"
-           << R"({"Type":"File","Format":"Simple","Level":"Trace","LogName":")" << simpleLogName << R"("},)"
-           << R"({"Type":"File","Format":"Json","Level":"Trace","LogName":")" << jsonLogName << R"("}]}})";
-    return config.str();
+    std::string config = R"(
+Logging:
+    FlushLevel: Trace
+    Sinks:
+    - Type: File
+      Level: Trace
+      Format: Simple
+      LogName: ITest_Logging_Simple
+    - Type: File
+      Level: Trace
+      Format: Json
+      LogName: ITest_Logging_Json
+    )";
+    return config;
 }
 
 class ITest_Logging : public testing::Test
