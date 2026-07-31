@@ -79,7 +79,6 @@ public:
         {
             _msg = std::move(msg);
         }
-            
         return *this;
     }
 
