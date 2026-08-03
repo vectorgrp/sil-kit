@@ -1,4 +1,4 @@
-# [5.0.7] - 2026-07-29
+# [5.0.7] - 2026-07-31
 
 ## Added
 
@@ -15,6 +15,7 @@
   simulation step sizes, aligning each simulation step to the minimal step among all synchronized
   participants. Tri-state: `true` requests it for the whole simulation, `false` opts out, and leaving
   it unset follows the network. Off by default.
+- `logging`: Fixes a bug where some log messages (e.g., user-level log messages) were passed to fmt and caused exceptions when placeholder characters were present. These log messages are no longer passed to fmt.
 
 ## Changed
 
