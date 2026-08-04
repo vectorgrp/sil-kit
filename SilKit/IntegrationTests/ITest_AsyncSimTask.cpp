@@ -365,11 +365,17 @@ TEST(ITest_AsyncSimTask, test_async_simtask_other_simulation_steps_completed_han
 // Verify timestamp behavior from the synchronized participant perspective:
 // - Sync sender: outgoing event carries virtual send time.
 // - Async sender: outgoing events will have an invalid timestamp
-// - Sync receiver: incoming event from async or sync sender is timestamped with sync receive time.
-// - Async receiver: incoming event from async or sync sender keeps the timestamp (async sender: invalid timestamp, sync sender: send time)
+// - Sync receiver: incoming event with an invalid timestamp (=from async) is timestamped with sync receive time.
+// - Sync receiver: incoming event with a valid timestamp (=from sync) keeps the sender's send time.
+// - Async receiver: incoming event from async or sync are untouched (async sender: invalid timestamp, sync sender: send time)
 TEST(ITest_AsyncSimTask, test_timestamp_handling)
 {
-    SimTestHarness testHarness({"Sync"}, "silkit://localhost:0", false, false, {"Async", "Async2"});
+    SimTestHarnessArgs testHarnessArgs;
+    testHarnessArgs.syncParticipantNames = {"Sync", "Sync2"};
+    testHarnessArgs.asyncParticipantNames = {"Async", "Async2"};
+    testHarnessArgs.registry.listenUri = "silkit://localhost:0";
+
+    SimTestHarness testHarness{testHarnessArgs};
 
     const auto dataSpecSyncToAsync = SilKit::Services::PubSub::PubSubSpec{"TopicSyncToAsync", "A"};
     const auto dataSpecAsyncToSync = SilKit::Services::PubSub::PubSubSpec{"TopicAsyncToSync", "A"};
@@ -377,13 +383,16 @@ TEST(ITest_AsyncSimTask, test_timestamp_handling)
     const auto dataSpecSyncToSync = SilKit::Services::PubSub::PubSubSpec{"TopicSyncToSync", "A"};
 
     auto* syncParticipant = testHarness.GetParticipant("Sync");
+    auto* sync2Participant = testHarness.GetParticipant("Sync2");
     auto* asyncParticipant = testHarness.GetParticipant("Async");
     auto* async2Participant = testHarness.GetParticipant("Async2");
 
     auto* syncLifecycleService = syncParticipant->GetOrCreateLifecycleService();
+    auto* sync2LifecycleService = sync2Participant->GetOrCreateLifecycleService();
     auto* asyncLifecycleService = asyncParticipant->GetOrCreateLifecycleService();
     auto* async2LifecycleService = async2Participant->GetOrCreateLifecycleService();
     auto* syncTimeSyncService = syncParticipant->GetOrCreateTimeSyncService();
+    auto* sync2TimeSyncService = sync2Participant->GetOrCreateTimeSyncService();
 
     auto* syncPublisher = syncParticipant->Participant()->CreateDataPublisher("SyncPub", dataSpecSyncToAsync);
     auto* asyncPublisher = asyncParticipant->Participant()->CreateDataPublisher("AsyncPub", dataSpecAsyncToSync);
@@ -426,15 +435,14 @@ TEST(ITest_AsyncSimTask, test_timestamp_handling)
         asyncToSyncReceived = true;
     });
 
-    syncParticipant->Participant()->CreateDataSubscriber(
-        "SyncSubFromSync", dataSpecSyncToSync,
-        [&syncCurrentStepNs, &syncToSyncReceived](SilKit::Services::PubSub::IDataSubscriber* /*subscriber*/,
-                                                  const SilKit::Services::PubSub::DataMessageEvent& dataMessageEvent) {
-        const auto currentStep = std::chrono::nanoseconds{syncCurrentStepNs.load()};
-
-        EXPECT_TRUE((dataMessageEvent.timestamp == currentStep) || (dataMessageEvent.timestamp == currentStep + 1ms)
-                    || (dataMessageEvent.timestamp == currentStep - 1ms))
-            << "Incoming sync message should be timestamped with the sync receiver time (+/-1ms tolerance).";
+    sync2Participant->Participant()->CreateDataSubscriber(
+        "Sync2SubFromSync", dataSpecSyncToSync,
+        [&syncSendTimeNs, &syncToSyncReceived](SilKit::Services::PubSub::IDataSubscriber* /*subscriber*/,
+                                               const SilKit::Services::PubSub::DataMessageEvent& dataMessageEvent) {
+        const auto expectedTimestamp = std::chrono::nanoseconds{syncSendTimeNs.load()};
+        EXPECT_NE(expectedTimestamp, std::chrono::nanoseconds::min());
+        EXPECT_EQ(dataMessageEvent.timestamp, expectedTimestamp)
+            << "Incoming sync message must keep the sync sender's send time.";
         syncToSyncReceived = true;
     });
 
@@ -447,11 +455,15 @@ TEST(ITest_AsyncSimTask, test_timestamp_handling)
         asyncToAsyncReceived = true;
     });
 
+    // Sync2 only receives; it needs a simulation step handler to take part in virtual time synchronization.
+    sync2TimeSyncService->SetSimulationStepHandler(
+        [](std::chrono::nanoseconds /*now*/, std::chrono::nanoseconds /*duration*/) {}, 1ms);
+
     syncTimeSyncService->SetSimulationStepHandler(
-        [syncLifecycleService, asyncLifecycleService, async2LifecycleService, syncPublisher, syncPublisherToSync,
-         &syncSendTimeNs, &syncCurrentStepNs, &syncSent, &syncToAsyncReceived, &asyncToSyncReceived,
-         &asyncToAsyncReceived, &syncToSyncReceived](std::chrono::nanoseconds now,
-                                                     std::chrono::nanoseconds /*duration*/) {
+        [syncLifecycleService, sync2LifecycleService, asyncLifecycleService, async2LifecycleService, syncPublisher,
+         syncPublisherToSync, &syncSendTimeNs, &syncCurrentStepNs, &syncSent, &syncToAsyncReceived,
+         &asyncToSyncReceived, &asyncToAsyncReceived, &syncToSyncReceived](std::chrono::nanoseconds now,
+                                                                          std::chrono::nanoseconds /*duration*/) {
         syncCurrentStepNs = now.count();
 
         if (!syncSent && now >= 1ms)
@@ -466,12 +478,14 @@ TEST(ITest_AsyncSimTask, test_timestamp_handling)
         {
             asyncLifecycleService->Stop("Timestamp handling verified");
             async2LifecycleService->Stop("Timestamp handling verified");
+            sync2LifecycleService->Stop("Timestamp handling verified");
             syncLifecycleService->Stop("Timestamp handling verified");
         }
         else if (now >= 20ms)
         {
             asyncLifecycleService->Stop("Timestamp handling timed out");
             async2LifecycleService->Stop("Timestamp handling timed out");
+            sync2LifecycleService->Stop("Timestamp handling timed out");
             syncLifecycleService->Stop("Timestamp handling timed out");
         }
     },
