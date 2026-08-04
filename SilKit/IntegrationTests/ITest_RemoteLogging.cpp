@@ -1,9 +1,8 @@
-// SPDX-FileCopyrightText: 2022 Vector Informatik GmbH
+// SPDX-FileCopyrightText: 2026 Vector Informatik GmbH
 //
 // SPDX-License-Identifier: MIT
 
-#include <algorithm>
-#include <atomic>
+#include <system_error>
 #include <chrono>
 #include <filesystem>
 #include <fstream>
@@ -96,16 +95,21 @@ Logging:
       Level: Trace
 )";
 
-    const auto receiverConfig = "Logging:\n"
-                                "  LogFromRemotes: true\n"
-                                "  FlushLevel: Trace\n"
-                                "  Sinks:\n"
-                                "    - Type: File\n"
-                                "      Level: Trace\n"
-                                "      LogName: "
-        + receiverLogName + "\n";
+    const auto receiverConfig = R"(
+Logging:
+  LogFromRemotes: true
+  FlushLevel: Trace
+  Sinks:
+    - Type: File
+      Level: Trace
+      LogName: )" + receiverLogName + "\n";
 
-    SimTestHarness testHarness{{"Sender1", "Sender2", "Receiver"}, "silkit://localhost:0", true};
+    SimTestHarnessArgs testHarnessArgs;
+    testHarnessArgs.syncParticipantNames = {"Sender1", "Sender2", "Receiver"};
+    testHarnessArgs.deferParticipantCreation = true;
+    testHarnessArgs.registry.listenUri = "silkit://localhost:0";
+
+    SimTestHarness testHarness{testHarnessArgs};
 
     auto* sender1 = testHarness.GetParticipant("Sender1", senderConfig);
     auto* sender2 = testHarness.GetParticipant("Sender2", senderConfig);
@@ -116,18 +120,19 @@ Logging:
     auto* sender2TimeSync = sender2->GetOrCreateTimeSyncService();
     auto* receiverTimeSync = receiver->GetOrCreateTimeSyncService();
 
-    auto* sender1Logger = sender1->Participant()->GetLogger();
-    auto* sender2Logger = sender2->Participant()->GetLogger();
+    auto* sender1Logger = sender1->GetLogger();
+    auto* sender2Logger = sender2->GetLogger();
 
     const std::string sender1Message = "remote-log-from-sender-1";
     const std::string sender2Message = "remote-log-from-sender-2";
 
-    std::atomic<bool> sender1Logged{false};
-    std::atomic<bool> sender2Logged{false};
+    bool sender1Logged{false};
+    bool sender2Logged{false};
 
     sender1TimeSync->SetSimulationStepHandler([&](std::chrono::nanoseconds now, std::chrono::nanoseconds) {
-        if (!sender1Logged.exchange(true))
+        if (!sender1Logged)
         {
+            sender1Logged = true;
             sender1Logger->Info(sender1Message);
         }
 
@@ -139,8 +144,9 @@ Logging:
         1ms);
 
     sender2TimeSync->SetSimulationStepHandler([&](std::chrono::nanoseconds /*now*/, std::chrono::nanoseconds) {
-        if (!sender2Logged.exchange(true))
+        if (!sender2Logged)
         {
+            sender2Logged = true;
             sender2Logger->Info(sender2Message);
         }
     },
