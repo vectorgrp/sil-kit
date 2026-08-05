@@ -15,6 +15,13 @@ SIL Kit Overview
 .. |Timesync-API| replace:: :ref:`time synchronization<chap:timesync-service-api>`
 .. |Logging-API| replace:: :ref:`logging<chap:logging-service-api>`
 
+.. |fastBus| replace:: fast bus
+.. |FastBus| replace:: Fast bus
+.. |BoldFastBus| replace:: **Fast bus**
+.. |accurateBus| replace:: accurate bus
+.. |AccurateBus| replace:: Accurate bus
+.. |BoldAccurateBus| replace:: **Accurate bus**
+
 The |ProductName| is an open source library for connecting Software-in-the-Loop Environments.
 It provides:
 
@@ -48,22 +55,65 @@ Vehicle Networks
 ----------------
 
 The |ProductName| provides means to simulate |CANBuses|, Ethernet, FlexRay, and LIN networks.
-All networks except for FlexRay can be simulated with two different levels of detail: a simple, functional simulation or a detailed simulation.
-The simple simulation assumes no delay and unlimited bandwidth.
+Vehicle networks are accessed through their corresponding services (for example, a CAN controller).
 
-The detailed simulation is enabled by using an additional |ProductName| |NetSim|, which considers these aspects as well.
-The |NetSim| is not part of |ProductName| itself.
-Because of its sensitivity regarding time, FlexRay is only supported in a detailed simulation.
+Fast vs. Accurate Bus Simulation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Vehicle networks are accessed through their corresponding services (e.g., a CAN controller).
-The service interfaces are the same for simple and detailed simulation.
-As a result, an application that works in the simple use case also works when switching to a detailed simulation using the |NetSim|.
+For all supported bus systems, |ProductName| distinguishes between two simulation styles:
 
-In general, |ProductName| deliberately avoids imposing restrictions on bus protocols.
+* |BoldFastBus| - Lightweight communication with idealized behavior.
+  Communication is functional and timing effects are simplified (e.g., no modeled delay or bandwidth limits).
+  This is the default simulation style.
+* |BoldAccurateBus| - A more detailed bus behavior is modeled by integrating a Network Simulator.
+  A Network Simulator can apply realistic timing and protocol effects, e.g. sending delays, bandwidth limits and frame validation.
+  The |NetSim| is not part of |ProductName| itself.
+  The chapter :ref:`chap:custom-netsim` describes how to implement a custom Network Simulator and integrate it with |ProductName|.
+
+.. important::
+  Because of its sensitivity regarding time, **FlexRay** is only available with the |BoldAccurateBus| and thus requires a Network Simulator.
+
+The service interfaces are the same for |fastBus| and |accurateBus| simulation.
+As a result, an application that works in the |fastBus| use case also works when switching to |accurateBus| simulation.
+The section :ref:`sec:api-services` describes how to configure and use the vehicle network services (valid for both modes).
+
+Choosing the Right Mode
+~~~~~~~~~~~~~~~~~~~~~~~
+
+As a practical default, start with |fastBus| unless the need for detailed network simulation is clear.
+Switch to |accurateBus| when timing fidelity or protocol-level effects are required.
+
+..
+    vECU level guidance (rule of thumb):
+    
+    * **vECU levels 1-2:** prefer |fastBus| for early functional development and rapid iteration.
+    * **vECU level 3:** start with |fastBus|; use |AccurateBus| selectively for timing-critical paths.
+    * **vECU levels 4-5:** prefer |accurateBus| when network timing, delays, bandwidth, timestamps, or payload validation influence behavior.
+
+.. list-table:: Vehicle network overview
+   :header-rows: 1
+   :widths: 20 40 40
+
+   * - Bus system
+     - |FastBus|
+     - |AccurateBus|
+   * - CAN
+     - High execution speed and functional tests.
+     - Required for arbitration effects, delay behavior and payload validation.
+   * - Ethernet
+     - Service-oriented and high-throughput functional traffic patterns.
+     - Required for switching behavior, buffering effects, and bandwidth contention.
+   * - FlexRay
+     - Not available. FlexRay requires |accurateBus| simulation.
+     - Strict requirement.
+   * - LIN
+     - Simple and fast functional integration for body/control style scenarios.
+     - Better for schedule timing, bus delay modeling, and payload constraints.
+
+In general, |ProductName| deliberately avoids imposing restrictions on bus protocols with the |fastBus|.
 This enables user applications to freely determine the desired level of detail for vehicle network simulations.
 For example, a test participant can inject faulty frames without being blocked by |ProductName|.
 
-The section :ref:`sec:api-services` describes how to configure and use the vehicle network services in detail.
 
 Simulation Basics
 -----------------
