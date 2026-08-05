@@ -33,6 +33,7 @@
 #include "silkit/detail/impl/services/rpc/RpcServer.hpp"
 
 #include "silkit/detail/impl/experimental/services/orchestration/SystemController.hpp"
+#include "silkit/detail/impl/experimental/serviceDiscovery/ServiceDiscovery.hpp"
 
 #include "silkit/detail/impl/netsim/NetworkSimulator.hpp"
 
@@ -88,6 +89,9 @@ public:
     inline auto ExperimentalCreateSystemController()
         -> SilKit::Experimental::Services::Orchestration::ISystemController*;
 
+    inline auto ExperimentalCreateServiceDiscovery()
+        -> SilKit::Experimental::ServiceDiscovery::IServiceDiscovery*;
+
 public:
     inline auto Get() const -> SilKit_Participant*;
 
@@ -115,6 +119,8 @@ private:
     ControllerStorage<Services::PubSub::DataSubscriber> _dataSubscribers;
     ControllerStorage<Services::Rpc::RpcClient> _rpcClients;
     ControllerStorage<Services::Rpc::RpcServer> _rpcServers;
+
+    ControllerStorage<Impl::Experimental::ServiceDiscovery::ServiceDiscovery> _serviceDiscoveries;
 
     std::unique_ptr<Impl::Services::Orchestration::LifecycleService> _lifecycleService;
     std::unique_ptr<Services::Orchestration::SystemMonitor> _systemMonitor;
@@ -237,6 +243,11 @@ auto Participant::ExperimentalCreateNetworkSimulator() -> SilKit::Experimental::
     _networkSimulator = std::make_unique<Impl::Experimental::NetworkSimulation::NetworkSimulator>(_participant);
 
     return _networkSimulator.get();
+}
+
+auto Participant::ExperimentalCreateServiceDiscovery() -> SilKit::Experimental::ServiceDiscovery::IServiceDiscovery*
+{
+    return _serviceDiscoveries.Create(_participant);
 }
 
 auto Participant::Get() const -> SilKit_Participant*
