@@ -10,74 +10,68 @@
 
 #include "capi/CapiExceptions.hpp"
 
+#include <string_view>
+
+#include "fmt/format.h"
+
+
+#ifdef SILKIT_ENABLE_API_TRACING_INSTRUMENTATION
+
+namespace VSilKit {
+
+void ApiTraceEventImpl(std::string_view func, std::string_view data);
+
+template <typename... Args>
+void ApiTraceEvent(const std::string_view func, Args&&... args)
+{
+    thread_local std::string data;
+
+    data.clear();
+    fmt::format_to(std::back_inserter(data), std::forward<Args>(args)...);
+
+    ApiTraceEventImpl(func, data);
+}
+
+} // namespace VSilKit
+
+#define VSILKIT_API_TRACE(...) ::VSilKit::ApiTraceEvent((__func__), __VA_ARGS__)
+
+#else
+
+#define VSILKIT_API_TRACE(...) \
+do \
+{ \
+} while (false)
+
+#endif
+
+
+#define CAPI_CATCH_EXCEPTIONS_CATCH_BLOCK(ErrorType, ReturnCode) \
+    catch (const ErrorType& e) \
+    { \
+        SilKit_error_string = e.what(); \
+        VSILKIT_API_TRACE("ERROR {}", #ReturnCode); \
+        return ReturnCode; \
+    }
+
+
 #define CAPI_CATCH_EXCEPTIONS \
-    catch (const SilKit::CapiBadParameterError& e) \
-    { \
-        SilKit_error_string = e.what(); \
-        return SilKit_ReturnCode_BADPARAMETER; \
-    } \
-    catch (const SilKit::StateError& e) \
-    { \
-        SilKit_error_string = e.what(); \
-        return SilKit_ReturnCode_WRONGSTATE; \
-    } \
-    catch (const SilKit::TypeConversionError& e) \
-    { \
-        SilKit_error_string = e.what(); \
-        return SilKit_ReturnCode_TYPECONVERSIONERROR; \
-    } \
-    catch (const SilKit::ConfigurationError& e) \
-    { \
-        SilKit_error_string = e.what(); \
-        return SilKit_ReturnCode_CONFIGURATIONERROR; \
-    } \
-    catch (const SilKit::ProtocolError& e) \
-    { \
-        SilKit_error_string = e.what(); \
-        return SilKit_ReturnCode_PROTOCOLERROR; \
-    } \
-    catch (const SilKit::AssertionError& e) \
-    { \
-        SilKit_error_string = e.what(); \
-        return SilKit_ReturnCode_ASSERTIONERROR; \
-    } \
-    catch (const SilKit::ExtensionError& e) \
-    { \
-        SilKit_error_string = e.what(); \
-        return SilKit_ReturnCode_EXTENSIONERROR; \
-    } \
-    catch (const SilKit::LengthError& e) \
-    { \
-        SilKit_error_string = e.what(); \
-        return SilKit_ReturnCode_LENGTHERROR; \
-    } \
-    catch (const SilKit::OutOfRangeError& e) \
-    { \
-        SilKit_error_string = e.what(); \
-        return SilKit_ReturnCode_OUTOFRANGEERROR; \
-    } \
-    catch (const SilKit::LogicError& e) \
-    { \
-        SilKit_error_string = e.what(); \
-        return SilKit_ReturnCode_LOGICERROR; \
-    } \
-    catch (const SilKit::SilKitError& e) \
-    { \
-        SilKit_error_string = e.what(); \
-        return SilKit_ReturnCode_UNSPECIFIEDERROR; \
-    } \
-    catch (const std::runtime_error& e) \
-    { \
-        SilKit_error_string = e.what(); \
-        return SilKit_ReturnCode_UNSPECIFIEDERROR; \
-    } \
-    catch (const std::exception& e) \
-    { \
-        SilKit_error_string = e.what(); \
-        return SilKit_ReturnCode_UNSPECIFIEDERROR; \
-    } \
+    CAPI_CATCH_EXCEPTIONS_CATCH_BLOCK(SilKit::CapiBadParameterError, SilKit_ReturnCode_BADPARAMETER) \
+    CAPI_CATCH_EXCEPTIONS_CATCH_BLOCK(SilKit::StateError, SilKit_ReturnCode_WRONGSTATE) \
+    CAPI_CATCH_EXCEPTIONS_CATCH_BLOCK(SilKit::TypeConversionError, SilKit_ReturnCode_TYPECONVERSIONERROR) \
+    CAPI_CATCH_EXCEPTIONS_CATCH_BLOCK(SilKit::ConfigurationError, SilKit_ReturnCode_CONFIGURATIONERROR) \
+    CAPI_CATCH_EXCEPTIONS_CATCH_BLOCK(SilKit::ProtocolError, SilKit_ReturnCode_PROTOCOLERROR) \
+    CAPI_CATCH_EXCEPTIONS_CATCH_BLOCK(SilKit::AssertionError, SilKit_ReturnCode_ASSERTIONERROR) \
+    CAPI_CATCH_EXCEPTIONS_CATCH_BLOCK(SilKit::ExtensionError, SilKit_ReturnCode_EXTENSIONERROR) \
+    CAPI_CATCH_EXCEPTIONS_CATCH_BLOCK(SilKit::LengthError, SilKit_ReturnCode_LENGTHERROR) \
+    CAPI_CATCH_EXCEPTIONS_CATCH_BLOCK(SilKit::OutOfRangeError, SilKit_ReturnCode_OUTOFRANGEERROR) \
+    CAPI_CATCH_EXCEPTIONS_CATCH_BLOCK(SilKit::LogicError, SilKit_ReturnCode_LOGICERROR) \
+    CAPI_CATCH_EXCEPTIONS_CATCH_BLOCK(SilKit::SilKitError, SilKit_ReturnCode_UNSPECIFIEDERROR) \
+    CAPI_CATCH_EXCEPTIONS_CATCH_BLOCK(std::runtime_error, SilKit_ReturnCode_UNSPECIFIEDERROR) \
+    CAPI_CATCH_EXCEPTIONS_CATCH_BLOCK(std::exception, SilKit_ReturnCode_UNSPECIFIEDERROR) \
     catch (...) \
     { \
+        VSILKIT_API_TRACE("ERROR SilKit_ReturnCode_UNSPECIFIEDERROR"); \
         return SilKit_ReturnCode_UNSPECIFIEDERROR; \
     }
 
