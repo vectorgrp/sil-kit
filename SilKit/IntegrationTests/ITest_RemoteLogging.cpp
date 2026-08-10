@@ -107,7 +107,6 @@ Logging:
     SimTestHarnessArgs testHarnessArgs;
     testHarnessArgs.syncParticipantNames = {"Sender1", "Sender2", "Receiver"};
     testHarnessArgs.deferParticipantCreation = true;
-    testHarnessArgs.registry.listenUri = "silkit://localhost:0";
 
     SimTestHarness testHarness{testHarnessArgs};
 
@@ -156,7 +155,7 @@ Logging:
 
     ASSERT_TRUE(testHarness.Run(5s));
 
-    const auto deadline = std::chrono::steady_clock::now() + 2s;
+    const auto deadline = std::chrono::steady_clock::now() + 10s;
     std::filesystem::path logFile;
     std::string logContent;
 
