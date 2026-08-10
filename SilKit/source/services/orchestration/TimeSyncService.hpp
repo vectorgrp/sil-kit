@@ -200,6 +200,10 @@ auto TimeSyncService::GetServiceDescriptor() const -> const Core::ServiceDescrip
 auto TimeSyncService::GetTimeSyncPolicy() const -> ITimeSyncPolicy*
 {
     std::unique_lock<decltype(_timeSyncPolicyMx)> lock{_timeSyncPolicyMx};
+    if (_timeSyncPolicy == nullptr)
+    {
+        throw LogicError{"TimeSyncPolicy is not set"};
+    }
     return _timeSyncPolicy.get();
 }
 
