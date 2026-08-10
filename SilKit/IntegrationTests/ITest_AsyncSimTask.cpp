@@ -24,10 +24,6 @@ using namespace SilKit::Tests;
 
 const std::chrono::nanoseconds expectedTime{10ms};
 
-std::mutex mx;
-int cvCounter{};
-std::condition_variable cv;
-
 TEST(ITest_AsyncSimTask, test_async_simtask_lockstep)
 {
     // Goal: have a foreign/user thread run in lockstep with the SimulationStepHandler.
@@ -35,6 +31,11 @@ TEST(ITest_AsyncSimTask, test_async_simtask_lockstep)
     // The sync participant's SimulationStepHandler will run as often as possible.
     // Async may not start a new SimTask before calling CompleteSimulationtask to complete the current one.
 
+    using MutexType = std::mutex;
+
+    MutexType mx;
+    int cvCounter{};
+    std::condition_variable cv;
 
     SimTestHarness testHarness({"Sync", "Async"}, "silkit://localhost:0");
 
@@ -66,8 +67,8 @@ TEST(ITest_AsyncSimTask, test_async_simtask_lockstep)
         }
 
         //wait until counter is even
-        std::unique_lock<decltype(mx)> lock(mx);
-        cv.wait(lock, [] { return cvCounter % 2 == 0; });
+        std::unique_lock<MutexType> lock(mx);
+        cv.wait(lock, [&] { return cvCounter % 2 == 0; });
 
         // increment so that completer thread will be notified
         cvCounter++;
@@ -86,9 +87,9 @@ TEST(ITest_AsyncSimTask, test_async_simtask_lockstep)
     auto completer = std::thread{[&]() {
         while (!done && (syncTimeNs.load() < expectedTime))
         {
-            std::unique_lock<decltype(mx)> lock(mx);
+            std::unique_lock<MutexType> lock(mx);
             //wait for odd counter
-            cv.wait(lock, [] { return cvCounter % 2 == 1; });
+            cv.wait(lock, [&] { return cvCounter % 2 == 1; });
             if (done)
             {
                 return;
