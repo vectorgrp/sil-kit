@@ -394,8 +394,8 @@ TEST(ITest_AsyncSimTask, test_timestamp_handling)
     auto* syncTimeSyncService = syncParticipant->GetOrCreateTimeSyncService();
     auto* sync2TimeSyncService = sync2Participant->GetOrCreateTimeSyncService();
 
-    auto* syncPublisher = syncParticipant->Participant()->CreateDataPublisher("SyncPub", dataSpecSyncToAsync);
-    auto* asyncPublisher = asyncParticipant->Participant()->CreateDataPublisher("AsyncPub", dataSpecAsyncToSync);
+    auto* syncPublisherToAsync = syncParticipant->Participant()->CreateDataPublisher("SyncPub", dataSpecSyncToAsync);
+    auto* asyncPublisherToSync = asyncParticipant->Participant()->CreateDataPublisher("AsyncPub", dataSpecAsyncToSync);
     auto* asyncPublisherToAsync2 = asyncParticipant->Participant()->CreateDataPublisher("AsyncPubToAsync2", dataSpecAsyncToAsync);
     auto* syncPublisherToSync = syncParticipant->Participant()->CreateDataPublisher("SyncPubToSync", dataSpecSyncToSync);
 
@@ -409,7 +409,7 @@ TEST(ITest_AsyncSimTask, test_timestamp_handling)
 
     asyncParticipant->Participant()->CreateDataSubscriber(
         "AsyncSub", dataSpecSyncToAsync,
-        [asyncPublisher, asyncPublisherToAsync2, &syncSendTimeNs,
+        [asyncPublisherToSync, asyncPublisherToAsync2, &syncSendTimeNs,
          &syncToAsyncReceived](SilKit::Services::PubSub::IDataSubscriber* /*subscriber*/,
                                const SilKit::Services::PubSub::DataMessageEvent& dataMessageEvent) {
         const auto expectedTimestamp = std::chrono::nanoseconds{syncSendTimeNs.load()};
@@ -418,7 +418,7 @@ TEST(ITest_AsyncSimTask, test_timestamp_handling)
 
         if (!syncToAsyncReceived.exchange(true))
         {
-            asyncPublisher->Publish(std::vector<uint8_t>{0xA5});
+            asyncPublisherToSync->Publish(std::vector<uint8_t>{0xA5});
             asyncPublisherToAsync2->Publish(std::vector<uint8_t>{0x3C});
         }
     });
@@ -429,9 +429,8 @@ TEST(ITest_AsyncSimTask, test_timestamp_handling)
                                                    const SilKit::Services::PubSub::DataMessageEvent& dataMessageEvent) {
         const auto currentStep = std::chrono::nanoseconds{syncCurrentStepNs.load()};
 
-        EXPECT_TRUE((dataMessageEvent.timestamp == currentStep) || (dataMessageEvent.timestamp == currentStep + 1ms)
-                    || (dataMessageEvent.timestamp == currentStep - 1ms))
-            << "Incoming async message should be timestamped with the sync receiver time (+/-1ms tolerance).";
+        EXPECT_TRUE(dataMessageEvent.timestamp == currentStep)
+            << "Incoming async message should be timestamped with the sync receiver time.";
         asyncToSyncReceived = true;
     });
 
@@ -460,7 +459,8 @@ TEST(ITest_AsyncSimTask, test_timestamp_handling)
         [](std::chrono::nanoseconds /*now*/, std::chrono::nanoseconds /*duration*/) {}, 1ms);
 
     syncTimeSyncService->SetSimulationStepHandler(
-        [syncLifecycleService, sync2LifecycleService, asyncLifecycleService, async2LifecycleService, syncPublisher,
+        [syncLifecycleService, sync2LifecycleService, asyncLifecycleService, async2LifecycleService,
+         syncPublisherToAsync,
          syncPublisherToSync, &syncSendTimeNs, &syncCurrentStepNs, &syncSent, &syncToAsyncReceived,
          &asyncToSyncReceived, &asyncToAsyncReceived, &syncToSyncReceived](std::chrono::nanoseconds now,
                                                                           std::chrono::nanoseconds /*duration*/) {
@@ -469,7 +469,7 @@ TEST(ITest_AsyncSimTask, test_timestamp_handling)
         if (!syncSent && now >= 1ms)
         {
             syncSendTimeNs = now.count();
-            syncPublisher->Publish(std::vector<uint8_t>{0x5A});
+            syncPublisherToAsync->Publish(std::vector<uint8_t>{0x5A});
             syncPublisherToSync->Publish(std::vector<uint8_t>{0xC3});
             syncSent = true;
         }
