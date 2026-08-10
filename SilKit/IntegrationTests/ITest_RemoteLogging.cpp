@@ -6,6 +6,7 @@
 #include <chrono>
 #include <filesystem>
 #include <fstream>
+#include <sstream>
 #include <string>
 #include <thread>
 #include <vector>
@@ -27,7 +28,7 @@ auto ReadTextFile(const std::filesystem::path& filePath) -> std::string
     return std::string{std::istreambuf_iterator<char>{in}, std::istreambuf_iterator<char>{}};
 }
 
-auto FindLogFile(const std::string& logNamePrefix) -> std::filesystem::path
+auto FindLogFiles(const std::string& logNamePrefix) -> std::vector<std::filesystem::path>
 {
     std::vector<std::filesystem::path> candidates;
 
@@ -45,12 +46,66 @@ auto FindLogFile(const std::string& logNamePrefix) -> std::filesystem::path
         }
     }
 
+    return candidates;
+}
+
+auto FindLogFile(const std::string& logNamePrefix) -> std::filesystem::path
+{
+    const auto candidates = FindLogFiles(logNamePrefix);
+
     if (candidates.size() != 1u)
     {
         return {};
     }
 
     return candidates.front();
+}
+
+// Diagnostics for CI failures: dump the directory FindLogFile searches in.
+auto DescribeSearchDir(const std::string& logNamePrefix) -> std::string
+{
+    std::error_code ec;
+    const auto searchDir = std::filesystem::current_path(ec);
+
+    std::ostringstream out;
+    out << "search dir (current_path): " << searchDir.string();
+    if (ec)
+    {
+        out << " [error: " << ec.message() << "]";
+    }
+    out << "\n";
+
+    std::size_t entryCount{0};
+    for (const auto& entry : std::filesystem::directory_iterator{searchDir, ec})
+    {
+        ++entryCount;
+
+        std::error_code entryEc;
+        const auto isFile = entry.is_regular_file(entryEc);
+        const auto size = isFile ? entry.file_size(entryEc) : 0u;
+
+        out << "  " << entry.path().filename().string() << (isFile ? "" : " [not a regular file]");
+        if (isFile)
+        {
+            out << " (" << size << " bytes)";
+        }
+        out << "\n";
+    }
+    if (ec)
+    {
+        out << "  [directory_iterator error: " << ec.message() << "]\n";
+    }
+    out << "  --> " << entryCount << " entries total\n";
+
+    const auto candidates = FindLogFiles(logNamePrefix);
+    out << "matching candidates for prefix '" << logNamePrefix << "' (expected exactly 1): " << candidates.size()
+        << "\n";
+    for (const auto& candidate : candidates)
+    {
+        out << "  " << candidate.string() << "\n";
+    }
+
+    return out.str();
 }
 
 struct ScopedLogFileCleanup
@@ -175,7 +230,8 @@ Logging:
         std::this_thread::sleep_for(10ms);
     }
 
-    ASSERT_FALSE(logFile.empty()) << "Could not find exactly one receiver log file with prefix " << filePrefix;
+    ASSERT_FALSE(logFile.empty()) << "Could not find exactly one receiver log file with prefix " << filePrefix << "\n"
+                                  << DescribeSearchDir(filePrefix);
     EXPECT_NE(logContent.find(sender1Message), std::string::npos);
     EXPECT_NE(logContent.find(sender2Message), std::string::npos);
 }
