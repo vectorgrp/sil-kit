@@ -554,10 +554,20 @@ void LifecycleService::NewSystemState(SystemState systemState)
         if (_lifecycleManager.GetCurrentState() == _lifecycleManager.GetRunningState()
             || _lifecycleManager.GetCurrentState() == _lifecycleManager.GetPausedState())
         {
+            _stopRequestedDueToSystemStateChange = true;
             _lifecycleManager.Stop(ss.str());
         }
         break;
     case SystemState::Stopped:
+        // Due to the local calculation of SystemStates, SystemState::Stopping might have been skipped. Try to trigger a stop again in that case.
+        if (!_stopRequestedDueToSystemStateChange && 
+            (_lifecycleManager.GetCurrentState()
+                == _lifecycleManager.GetRunningState()
+            || _lifecycleManager.GetCurrentState() == _lifecycleManager.GetPausedState()))
+        {
+            _stopRequestedDueToSystemStateChange = true;
+            _lifecycleManager.Stop(ss.str());
+        }
         break;
     case SystemState::ShuttingDown:
         break;

@@ -178,6 +178,9 @@ private:
     // for immediate checks (e.g., not to send out the NextSimTask after a stopping in the SimTaskHandler).
     std::atomic<bool> _stopRequested{false};
     std::atomic<bool> _pauseRequested{false};
+
+    bool _stopRequestedDueToSystemStateChange{false};
+
 };
 
 // ================================================================================
