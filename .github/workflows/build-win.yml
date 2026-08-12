@@ -43,10 +43,8 @@ jobs:
       shell: powershell
 
     - name: Prepare build env on Windows
-      uses: ilammy/msvc-dev-cmd@v1.12.0
-      with:
-        arch: x64
-        toolset: 14.20
+      run: |
+        python3 -u ./SilKit/ci/setup_msvc_env.py --arch x64 --hostarch x64 --vcvars_ver 14.2
 
     - uses: ./.github/actions/build-cmake-preset
       with:
@@ -78,10 +76,9 @@ jobs:
       shell: powershell
 
     - name: Prepare build env on Windows
-      uses: ilammy/msvc-dev-cmd@v1.12.0
-      with:
-        arch: x86
-        toolset: 14.20
+      run: |
+        python3 -u ./SilKit/ci/setup_msvc_env.py --arch x86 --hostarch x64 --vcvars_ver 14.2
+
 
     - uses: ./.github/actions/build-cmake-preset
       with:
