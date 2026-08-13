@@ -40,7 +40,7 @@ auto FindLogFiles(const std::string& logNamePrefix) -> std::vector<std::filesyst
         }
 
         const auto filename = entry.path().filename().string();
-        if (filename.rfind(logNamePrefix, 0) == 0 && entry.path().extension() == ".txt")
+        if (filename.rfind(logNamePrefix, 0) == 0 && entry.path().extension() == ".jsonl")
         {
             candidates.emplace_back(entry.path());
         }
@@ -61,53 +61,6 @@ auto FindLogFile(const std::string& logNamePrefix) -> std::filesystem::path
     return candidates.front();
 }
 
-// Diagnostics for CI failures: dump the directory FindLogFile searches in.
-auto DescribeSearchDir(const std::string& logNamePrefix) -> std::string
-{
-    std::error_code ec;
-    const auto searchDir = std::filesystem::current_path(ec);
-
-    std::ostringstream out;
-    out << "search dir (current_path): " << searchDir.string();
-    if (ec)
-    {
-        out << " [error: " << ec.message() << "]";
-    }
-    out << "\n";
-
-    std::size_t entryCount{0};
-    for (const auto& entry : std::filesystem::directory_iterator{searchDir, ec})
-    {
-        ++entryCount;
-
-        std::error_code entryEc;
-        const auto isFile = entry.is_regular_file(entryEc);
-        const auto size = isFile ? entry.file_size(entryEc) : 0u;
-
-        out << "  " << entry.path().filename().string() << (isFile ? "" : " [not a regular file]");
-        if (isFile)
-        {
-            out << " (" << size << " bytes)";
-        }
-        out << "\n";
-    }
-    if (ec)
-    {
-        out << "  [directory_iterator error: " << ec.message() << "]\n";
-    }
-    out << "  --> " << entryCount << " entries total\n";
-
-    const auto candidates = FindLogFiles(logNamePrefix);
-    out << "matching candidates for prefix '" << logNamePrefix << "' (expected exactly 1): " << candidates.size()
-        << "\n";
-    for (const auto& candidate : candidates)
-    {
-        out << "  " << candidate.string() << "\n";
-    }
-
-    return out.str();
-}
-
 struct ScopedLogFileCleanup
 {
     explicit ScopedLogFileCleanup(std::string prefix)
@@ -125,10 +78,10 @@ struct ScopedLogFileCleanup
             }
 
             const auto filename = entry.path().filename().string();
-            if (filename.rfind(_prefix, 0) == 0 && entry.path().extension() == ".txt")
+            if (filename.rfind(_prefix, 0) == 0 && entry.path().extension() == ".jsonl")
             {
                 std::error_code ec;
-                //std::filesystem::remove(entry.path(), ec);
+                std::filesystem::remove(entry.path(), ec);
             }
         }
     }
@@ -230,8 +183,7 @@ Logging:
         std::this_thread::sleep_for(10ms);
     }
 
-    ASSERT_FALSE(logFile.empty()) << "Could not find exactly one receiver log file with prefix " << filePrefix << "\n"
-                                  << DescribeSearchDir(filePrefix);
+    ASSERT_FALSE(logFile.empty()) << "Could not find exactly one receiver log file with prefix " << filePrefix << "\n";
     EXPECT_NE(logContent.find(sender1Message), std::string::npos);
     EXPECT_NE(logContent.find(sender2Message), std::string::npos);
 }
