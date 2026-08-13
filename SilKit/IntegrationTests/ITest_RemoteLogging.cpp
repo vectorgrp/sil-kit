@@ -128,7 +128,7 @@ struct ScopedLogFileCleanup
             if (filename.rfind(_prefix, 0) == 0 && entry.path().extension() == ".txt")
             {
                 std::error_code ec;
-                std::filesystem::remove(entry.path(), ec);
+                //std::filesystem::remove(entry.path(), ec);
             }
         }
     }
