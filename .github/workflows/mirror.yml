@@ -26,6 +26,6 @@ jobs:
         with:
           app-key:          ${{ secrets.VECTOR_APP_KEY }}
           app-id:           ${{ secrets.VECTOR_APP_ID }}
-          remote-repo-url:  https://github.com/vectorgrp/sil-kit-private
-          remote-branch:    main
+          remote-repo-url:  ${{ secrets.SIL_KIT_PRIVATE_REPO_URL }}
+          remote-branch:    ${{ secrets.SIL_KIT_PRIVATE_MIRROR_TO_BRANCH }}
           local-branch:     origin/main
