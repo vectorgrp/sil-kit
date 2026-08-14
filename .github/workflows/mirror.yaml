@@ -1,0 +1,25 @@
+name: Mirror Main to Private Repo
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - closed
+  workflow_dispatch: # Aktiviert den Button für den manuellen Start auf GitHub
+
+jobs:
+  mirror:
+    if: github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Push to Private Mirror Repository
+        run: |
+          git remote add target https://x-access-token:${{ secrets.TARGET_REPO_TOKEN }}@://github.com/vectorgrp/sil-kit-private
+          git push target main:main --force
