@@ -13,7 +13,7 @@ on:
 jobs:
   mirror:
     name: Mirror main branch to the private GitHub.com repo
-    runs-on: Linux
+    runs-on: [Linux, small]
     environment: SyncRemoteRepoEnv
 
     steps:
