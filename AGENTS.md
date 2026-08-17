@@ -95,6 +95,8 @@ globbed, so new ones need a re-configure.
 
 ## Definition of done
 
+Applies to work intended to merge. For a PoC, reproducer or quick hack, see experiment mode below.
+
 - **Unit tests** (`Test_*`) and, for features, **integration tests** (`ITest_*`) — written first, then the
   implementation, then used as guard rails. Add backward-compatibility coverage when the change touches the
   wire protocol or configuration.
@@ -128,6 +130,23 @@ runs it on push to `main` but *not* on pull requests, so breakage surfaces only 
 
 CI never builds the docs, and only `docs/code-samples/simple/simple.cpp` has a build target — an API rename
 silently rots every other sample. Check with `-DSILKIT_BUILD_DOCS=ON`.
+
+## Experiment mode — PoC, reproducer, quick hack
+
+When the user says they want a PoC, an experiment, a reproducer or a quick hack, work that way until they
+say otherwise. Do not infer this mode — unless they have said so, the definition of done applies.
+
+In this mode, do not overthink or over-engineer. No tests, documentation, changelog, doxygen or persona
+review. Hardcoding, copy-paste and rough formatting are fine. Do not add abstractions, interfaces,
+configuration options or error handling a throwaway does not need.
+
+Basic C/C++ hygiene still applies — C++17, no undefined behaviour, no leaks that matter — and so does not
+breaking things for others: leave existing tests, CI gates and the public API alone, and do not merge an
+experiment into `main`.
+
+A reproducer does not have to be a failing test. Reproducing bad performance, a race, an unexpected log
+line or a wrong value is just as valid — the finding is the deliverable, not the code. If the experiment
+turns into real work, the definition of done applies to that work, not retroactively to the experiment.
 
 ## Reviewing changes
 
