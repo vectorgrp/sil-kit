@@ -3,7 +3,10 @@
 ## Git and pull requests
 
 - Do not open pull requests, commit, or create branches without permission.
-- Every commit needs `Signed-off-by:` matching the author — use `git commit -s`. DCO is a merge gate.
+- DCO applies to what lands on `main` via squash-merge. Do not enforce it on local or
+  feature-branch commits, and never rewrite history to add trailers — warn at most. The PR check
+  (`SilKit/ci/check_dco_signed.py`, `pull_request` to `main` only) does inspect every commit and wants
+  `Signed-off-by:` from the author, plus the committer when they differ; `fixup` messages are exempt.
 
 ## Build and test
 
@@ -103,9 +106,14 @@ globbed, so new ones need a re-configure.
     YAML outline, the Overview table, and the toctree in `docs/configuration/configuration.rst`.
   - Utility CLI — `docs/utilities/utilities.rst` and the man page in `docs/man/`.
   - New `.rst` must join a toctree or be marked `:orphan:`; Sphinx runs `-W --keep-going`.
-- **Changelog** entry in `docs/changelog/versions/latest.md`, written for a user. Format per
-  `template.md` (`## Added` / `## Fixed` / `## Changes`); match the neighbouring released file.
-- **Green gates** and a warnings-as-errors build.
+- **Changelog** — only when a user can observe the change: a new or changed feature, a bug fix, or an
+  improvement such as performance. Add it to `docs/changelog/versions/latest.md`, written for a user,
+  under `## Added` / `## Fixed` / `## Changed`, matching the neighbouring released file. Internal-only
+  work needs no entry — refactors, test-only changes, CI, tooling, agent instructions. Do not invent
+  entries for invisible changes; they are noise that makes the changelog worse for users.
+- **The gates that apply to the change**, plus a warnings-as-errors build. Not all gates apply to all
+  changes: clang-format and the license check only scan `.c* .h* .py CMakeLists.txt .sh`, so a
+  docs-only change is exempt from both.
 - **A reviewed feature branch** opened as a pull request — see below.
 
 A new participant-configuration option is the most error-prone user-visible change: struct field and
@@ -113,7 +121,10 @@ A new participant-configuration option is the most error-prone user-visible chan
 `ParticipantConfiguration.schema.json`, **and** a matching path in the separate hardcoded `schemaPaths_v1`
 set in `SilKit/source/config/YamlValidator.cpp` — omit that last one and a schema-valid config is rejected
 at load. Plus the round-trip fixtures `ParticipantConfiguration_Full.{json,yaml}` (keep in sync) and the
-`Test_ParticipantConfiguration` / `Test_YamlParser` / `Test_YamlValidator` suites.
+`Test_ParticipantConfiguration` / `Test_YamlParser` / `Test_YamlValidator` suites. Every example config
+must stay valid against the schema — `SilKit/source/config/*.{json,yaml}` and `Demos/**/*.silkit.yaml`.
+Check locally with `python3 SilKit/ci/validate_participant_configs.py` (needs `jsonschema pyyaml`); CI
+runs it on push to `main` but *not* on pull requests, so breakage surfaces only after merge.
 
 CI never builds the docs, and only `docs/code-samples/simple/simple.cpp` has a build target — an API rename
 silently rots every other sample. Check with `-DSILKIT_BUILD_DOCS=ON`.
@@ -121,7 +132,9 @@ silently rots every other sample. Check with `-DSILKIT_BUILD_DOCS=ON`.
 ## Reviewing changes
 
 Review a feature branch from each perspective in turn, not as one undifferentiated read. There is no
-CODEOWNERS file; see `.github/pull_request_template.md` for the process checklist.
+CODEOWNERS file; see `.github/pull_request_template.md` for the process checklist. For a docs-, CI- or
+tooling-only branch, only the user perspective and the applicable gates apply — skip the other two
+rather than manufacturing findings.
 
 **Security — distributed systems and deployment.** The threat model is a participant receiving
 attacker-controlled bytes, so the top surface is deserialization: every `serdes` reader must bounds-check
