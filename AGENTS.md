@@ -2,114 +2,214 @@
 
 ## Git and pull requests
 
-- Do not open pull requests without permission.
-- Do not commit in git without permission.
-- Do not create new branches in git without permission.
+- Do not open pull requests, commit, or create branches without permission.
+- Every commit needs `Signed-off-by:` matching the author — use `git commit -s`. DCO is a merge gate.
+
+## Build and test
+
+```sh
+git submodule update --init --recursive   # required: spdlog, asio, fmt, googletest, oatpp
+cmake --preset debug                      # -> _build/debug, installs to _install/debug
+cmake --build --preset debug
+ctest --preset debug --output-on-failure
+```
+
+- Presets: `debug`, `release`, `relwithdebinfo`, `distrib`, `x86-*`, `vs141-*`, plus QNX/ARM cross presets.
+- Single suite: `ctest --preset debug -R Test_CanSerdes --output-on-failure`, or run the binary in
+  `_build/debug/<CONFIG>/` with `--gtest_filter=`.
+- Format: `python3 SilKit/ci/check_formatting.py changes` (staged + modified). Needs clang-format >= 14.
+- Docs: `cmake -D SILKIT_BUILD_DOCS=ON -B _build/docs && cmake --build _build/docs --target Doxygen`.
+- `SILKIT_WARNINGS_AS_ERRORS` defaults OFF but every preset sets it ON — a bare `cmake ..` build is more
+  permissive than CI. Options defaulting ON: `SILKIT_BUILD_TESTS`, `_UTILITIES`, `_DEMOS`, `_DASHBOARD`.
+  OFF: `_DOCS`, `_STATIC`, `_INSTALL_SOURCE`. No sanitizer option — CI passes raw
+  `-DCMAKE_CXX_FLAGS='-fsanitize=address|undefined|thread'` on the `relwithdebinfo` preset.
+- With CMake 4.x add `-DCMAKE_POLICY_VERSION_MINIMUM=3.5` (vendored deps).
+
+Merge gates: DCO sign-off, clang-format, license headers (`SilKit/ci/check_licenses.sh`). clang-tidy runs
+advisory-only with default checks — there is no `.clang-tidy` in the repo.
 
 ## Repository layout
 
-Top-level directories:
-- `SilKit/` — the library itself: public headers, implementation, and tests
-- `Utilities/` — standalone tools: registry, monitor, system controller
-- `Demos/` — example applications and sample integrations
-- `docs/` — Sphinx and Doxygen documentation sources
-- `ThirdParty/` — vendored dependencies (avoid editing unless necessary)
-- `cmake/` — shared CMake helper modules and packaging files
+- `SilKit/` — the library: public headers, implementation, tests. CMake helper modules in `SilKit/cmake/`
+- `Utilities/` — `SilKitRegistry/`, `SilKitSystemController/`, `SilKitMonitor/` (needs `SILKIT_BUILD_UTILITIES=ON`)
+- `Demos/` — `communication/` (Can, Ethernet, Flexray, Lin, PubSub, Rpc), `api/`, `tools/Benchmark/`.
+  Some integration tests are built on the demos, so changes here can affect test behaviour
+- `docs/` — Sphinx sources and `Doxyfile.in`
+- `ThirdParty/` — vendored deps; avoid editing, prefer changes in integration code, document any exception
+- `cmake/` — packaging template only (`README.txt.in`)
 
 ### SilKit/ public surface
 
-- `SilKit/include/silkit/` — public C++ and C API headers; hourglass pattern that wraps the C-API to stay ABI- and API-compatible
-- `SilKit/source/capi/` — C API implementation layer (the actual ABI: C functions, datatypes, typedefs)
+- `SilKit/include/silkit/` — public header-only C++ API; hourglass over the C-API, ABI- and API-compatible
+- `SilKit/source/capi/` — C-API implementation (the actual ABI: C functions, datatypes, typedefs)
 
 ### SilKit/source/ internal areas
 
-- `util/` — shared helper code
-- `config/` — configuration loading and support
-- `tracing/` — tracing support
-- `core/` — core runtime: participant internals, VAsio transport, service discovery, orchestration
-- `services/` — per-bus implementations: CAN, Ethernet, LIN, FlexRay, PubSub, RPC, logging, metrics, orchestration
+- `util/` — shared helpers; `config/` — configuration loading; `tracing/` — tracing support
+- `core/` — participant internals, VAsio transport, service discovery, orchestration
+- `services/` — per-bus: can, ethernet, lin, flexray, pubsub, rpc, logging, metrics, orchestration
 - `wire/` — internal wire message types (serializable versions of public frame types)
-- `extensions/` — extension implementation
-- `experimental/` — experimental features, including network simulator internals
-- `dashboard/` — dashboard client and service code
+- `extensions/`, `experimental/` (incl. network simulator internals), `dashboard/`
 
-The source tree compiles into many object libraries that are linked into the final `SilKit` shared library — a change in a small submodule affects the shared library without introducing a new binary.
+The tree compiles into many object libraries linked into the single `SilKit` shared library — a change in a
+small submodule affects that library without introducing a new binary.
 
 ## Stability guarantees
 
-- Semver is used; see `SilKit/docs/for-developers/versioning.md`
-- The networking layer is never broken; it has its own protocol versioning and capability system for backward compatibility
-- The C-API is an ABI-stable boundary
-- `SilKit/include/` is a header-only C++ API on top of the C-API (the hourglass); its namespaces are public API and must not change
-- A thorough test suite ensures safety, stability and backward compatibility
-- Experimental namespaces/symbols are exempt from stability guarantees
+- Semver; see `docs/for-developers/versioning.md`
+- The networking layer is never broken; it has its own protocol versioning and capability system
+- The C-API is an ABI-stable boundary; nothing crossing it may change layout or signature
+- `SilKit/include/` namespaces are public API and must not change
+- Experimental namespaces/symbols are exempt
 
 ## Tests
 
-Tests are wired up through `SilKit/cmake/SilKitTest.cmake`. There are several aggregate executables:
+Wired through `SilKit/cmake/SilKitTest.cmake`. Executables: `SilKitUnitTests`, `SilKitIntegrationTests`,
+`SilKitInternalIntegrationTests`, `SilKitFunctionalTests`, `SilKitInternalFunctionalTests`,
+`SilKitHourglassTests`, `SilKitDashboardTests`, `SilKitRegistryTests`.
 
-- `SilKitUnitTests`
-- `SilKitIntegrationTests` / `SilKitInternalIntegrationTests`
-- `SilKitFunctionalTests` / `SilKitInternalFunctionalTests`
+```cmake
+add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_Foo.cpp LIBS S_SilKitImpl I_SilKit)
+```
 
-CTest registers one entry per test suite (not per binary) using `--gtest_filter=<suite>.*`, so `ctest` output is more granular than the binary count suggests. A new `*Test_*.cpp` added via the helper macro will appear as its own CTest suite.
+**CTest registers one entry per test suite, named after the source file basename, and runs
+`--gtest_filter=<basename>.*`. If the `TEST`/`TEST_F` suite name does not equal the filename stem, the test
+runs zero cases and CTest reports PASS.** Use the `TESTSUITE_NAME` argument when they must differ.
+
+- `Test_*.cpp` — unit tests beside the code in `SilKit/source/**`, no dependency on public APIs.
+- `ITest_*.cpp` — integration tests in `SilKit/IntegrationTests/`, depending only on the network simulator
+  and public `SilKit.{so,dll}`. The `ITest_Internals_*` family deliberately uses internals and builds into
+  `SilKitInternalIntegrationTests`.
+- `FTest_*.cpp` — functional/perf tests in `SilKit/IntegrationTests/`. GitHub CI runs `-R '^(I|T)'` and so
+  skips them; run them locally.
+- `SilKit/IntegrationTests/Hourglass/Test_Hourglass*.cpp` is the documented exception to the unit-test rule:
+  it tests the public hourglass against a mocked C-API.
+- No registry process needed — integration tests start one in-process on an ephemeral port.
+
+Sources are explicit lists in the nearest `add_library(O_... OBJECT ...)`; no globbing. Target prefixes:
+`O_*` object libs, `I_*` interface libs, `S_*` aggregates. Public headers under `SilKit/include/` *are*
+globbed, so new ones need a re-configure.
+
+## Definition of done
+
+- **Unit tests** (`Test_*`) and, for features, **integration tests** (`ITest_*`) — written first, then the
+  implementation, then used as guard rails. Add backward-compatibility coverage when the change touches the
+  wire protocol or configuration.
+- **Documentation for every user-visible surface:**
+  - Public API — doxygen comments in the header (Doxygen input is `SilKit/include/silkit` only, so comments
+    in `source/` never reach the docs) *and* the matching `docs/api/**` page, including the C-API mirror
+    under `docs/api/capi/`.
+  - Configuration — the owning `docs/configuration/*-configuration.rst`. A new *root* node also needs the
+    YAML outline, the Overview table, and the toctree in `docs/configuration/configuration.rst`.
+  - Utility CLI — `docs/utilities/utilities.rst` and the man page in `docs/man/`.
+  - New `.rst` must join a toctree or be marked `:orphan:`; Sphinx runs `-W --keep-going`.
+- **Changelog** entry in `docs/changelog/versions/latest.md`, written for a user. Format per
+  `template.md` (`## Added` / `## Fixed` / `## Changes`); match the neighbouring released file.
+- **Green gates** and a warnings-as-errors build.
+- **A reviewed feature branch** opened as a pull request — see below.
+
+A new participant-configuration option is the most error-prone user-visible change: struct field and
+`operator==` in `ParticipantConfiguration.{hpp,cpp}`, `YamlReader.cpp`, `YamlWriter.cpp`,
+`ParticipantConfiguration.schema.json`, **and** a matching path in the separate hardcoded `schemaPaths_v1`
+set in `SilKit/source/config/YamlValidator.cpp` — omit that last one and a schema-valid config is rejected
+at load. Plus the round-trip fixtures `ParticipantConfiguration_Full.{json,yaml}` (keep in sync) and the
+`Test_ParticipantConfiguration` / `Test_YamlParser` / `Test_YamlValidator` suites.
+
+CI never builds the docs, and only `docs/code-samples/simple/simple.cpp` has a build target — an API rename
+silently rots every other sample. Check with `-DSILKIT_BUILD_DOCS=ON`.
+
+## Reviewing changes
+
+Review a feature branch from each perspective in turn, not as one undifferentiated read. There is no
+CODEOWNERS file; see `.github/pull_request_template.md` for the process checklist.
+
+**Security — distributed systems and deployment.** The threat model is a participant receiving
+attacker-controlled bytes, so the top surface is deserialization: every `serdes` reader must bounds-check
+and must not over-read, over-allocate, or crash on a malformed or truncated frame. A network-supplied
+length or count must never drive an unbounded allocation; queue and history sizes stay bounded. Version and
+capability negotiation must degrade gracefully rather than break older peers. Check what a participant
+listens on by default and whether the change widens exposure beyond localhost. Check for secrets and
+filesystem paths reaching logs. Concurrency counts — ASAN, UBSAN and TSAN all run in CI.
+
+**C++ veteran with style.** Formatting is machine-checked, so review what clang-format cannot see:
+ownership and lifetime (smart pointers; lifetime of registered handlers relative to their controller),
+const-correctness, avoidable copies, and reaching for inheritance or a new interface where composition or
+static dispatch would do. C++17 only — and anything in a public header must still compile at **C++14**,
+since `Demos/`, `SilKitMonitor` and `SilKitSystemController` build at C++14 deliberately. Nothing crossing
+the C-API changes layout; the hourglass stays header-only. Clean under `-Wall -Wextra -pedantic` / `/W4`
+with warnings as errors.
+
+**User perspective and ease of use.** Read the public API as someone meeting it for the first time: is it
+discoverable from the existing headers, do the doxygen comments suffice without reading the implementation,
+and does a failure produce an error message that says what to change? Does the feature behave sensibly with
+no configuration? Do existing configs and older participants still work? Is the changelog entry written for
+a user rather than describing the patch? Are the docs where a user would look?
+
+## Naming and style
+
+- SPDX header on every new file, before `#pragma once`, with the bare `//` separator; year is the creation
+  year and is not bumped later (substantially reworked files use a range, `2022-2025`):
+  ```cpp
+  // SPDX-FileCopyrightText: 2026 Vector Informatik GmbH
+  //
+  // SPDX-License-Identifier: MIT
+  ```
+- `_member` leading underscore for member variables. Never `m_`.
+- camelCase for locals, parameters and public struct fields.
+- PascalCase for methods, classes, namespaces, enum types and enumerators.
+- No prefixes for globals and constants; both camelCase and PascalCase occur, so match the file.
+- Deliberate exceptions: free functions `to_string(...)` / `toString(...)`.
+- `#pragma once`, never include guards.
+- Quotes for project headers, angle brackets for stdlib; `"silkit/..."` for public API, bare filenames for
+  internal headers. Include ordering is deliberately unenforced (`SortIncludes: false`) — do not reorder.
+- Public API needs doxygen: `/*!` blocks with `\brief`, `\param`, `\ref`, and `//!<` for fields. Not `///`,
+  not `@brief`.
+- Always run clang-format. It enforces 120 columns, 4-space indent, Allman braces except after `namespace`,
+  and `PointerAlignment: Left`.
+- Namespace `SilKit::Services::<BusName>` for service code.
+
+## Rules for new code
+
+- Test-driven: tests capturing the new behaviour first, then the implementation.
+- Prefer composition over inheritance; templates and static dispatch over virtual dispatch.
+- Use smart pointers. Aim for compile-time safety.
+- Use `auto` functions with trailing return type.
+- No gratuitous interfaces — but allow for testing and dependency injection.
+- No gratuitous comments.
+- Allow static dispatch in performance-critical code.
+- Header-only code declares first, then defines in a block after the declarations.
+- C++17 is the limit for platform support; C++20 is a future goal.
+- New bus types follow the CAN/LIN pattern: public datatypes -> C-API -> wire messages -> `IMsgFor*`
+  interfaces -> SimBehavior (trivial + detailed) -> controller implementation -> serdes.
+- Wire message types are registered in `SilKit/source/core/internal/traits/SilKitMsgTraits.hpp` and related
+  traits. They are not always needed — sometimes the API messages can be transferred directly.
+- Controller type keys go in `SilKit/source/core/internal/ServiceConfigKeys.hpp`.
+
+## Migrations in progress
+
+Apply to new and touched code; do not mass-refactor. Mixed style in existing files is expected.
+
+- Trailing return types: ~25% of `SilKit/source`, ~35% of `SilKit/include` converted. Both forms coexist
+  within a single class.
+- `VSilKit` namespace: done in `services/metrics`, `core/vasio/io`, `config`, `dashboard` (~97 files); the
+  rest is still `SilKit::Core` / `SilKit::Services::*`, and `VSilKit` code freely references
+  `SilKit::Core::*`. Public namespaces in `SilKit/include` remain as they are.
+
+## Where to look
+
+| Path | Topic |
+|---|---|
+| `README.rst` | Quick start |
+| `docs/development/build.rst` | CMake options, docs build, packaging |
+| `docs/for-developers/developers.rst` | Architecture, platform support tiers, running a simulation |
+| `docs/for-developers/versioning.md` | Semver and API/ABI/protocol compatibility policy |
+| `docs/development/rst-help.rst` | Writing the reStructuredText docs |
+| `CONTRIBUTING.md` | External pull requests are not currently accepted |
+| `.github/pull_request_template.md` | The de-facto PR checklist |
 
 ## Navigating changes
-
-When working on a change:
 
 1. Find the public API or executable entry point involved.
 2. Trace from the relevant `CMakeLists.txt` into the concrete source directory.
 3. Identify the owning area under `SilKit/source/`, `Utilities/`, or `Demos/`.
 4. Check nearby tests and existing docs before editing.
-
-Quick orientation:
-- `SilKit/include/` — understand the public API shape
-- `SilKit/source/` — change behavior or internals
-- `SilKit/source/capi/` — preserve or extend C API behavior
-
-## Utilities/
-
-Standalone tools built on top of the library: `SilKitRegistry/`, `SilKitSystemController/`, `SilKitMonitor/`. Included only when `SILKIT_BUILD_UTILITIES=ON`. Relevant when touching startup flows, participant discovery, or orchestration.
-
-## Demos/
-
-Example applications under `Demos/communication/` (CAN, Ethernet, FlexRay, LIN, PubSub, RPC), `Demos/api/`, and `Demos/tools/Benchmark/`. Some integration tests in `SilKit/IntegrationTests/` are based on demo applications — changes here can affect test behavior.
-
-## ThirdParty/
-
-Vendored dependencies. Avoid editing vendored code; prefer changes in SIL Kit integration code. If a change must touch `ThirdParty/`, document the reason clearly.
-
-## Coding conventions
-
-- do test driven development. always write tests that capture the new architecture/behavior first, then add the implementation and use tests as guard rails.
-- Tests use gtest/gmock
-- Integration tests link against the public SilKit target
-- New code needs unit tests
-- New features need integration tests (with backward compatibility checks if necessary)
-- New features need documentation
-
-- Unit tests go in files `Test_*` and have no dependency on public APIs.
-- Integration Tests go in files `ITest_*`, they should only depend on the network simulator and public SilKit.{so,dll} APIs
-- use ctest or run the gtest executable directly to verify
-- SPDX license header on every new file: `// SPDX-FileCopyrightText: 2026 Vector Informatik GmbH` + `// SPDX-License-Identifier: MIT`, update for current year
-- Namespace: `SilKit::Services::<BusName>` for service code
-- New bus types follow the CAN/LIN pattern: public datatypes -> C-API -> wire messages -> IMsgFor* interfaces -> SimBehavior (trivial + detailed) -> controller implementation -> serdes
-- Wire message types must be registered in `SilKit/source/core/internal/traits/SilKitMsgTraits.hpp` and related type traits. Wire message types are not always necessary, sometimes we can transfer the api messages themselves.
-- Controller type keys go in `SilKit/source/core/internal/ServiceConfigKeys.hpp`
-- for platform support we are limited to C++17, but want to upgrade to C++20 or later in the future
-- prefer C++ composition over inheritance. templates and static dispatch are to be preferred.
-- use smart pointers when possible
-- always use clang-format to format c++ to our standard.
-- aim for compile-time safety.
-- header only declarations should first have the declarations, and then the implementations after the declaration ina block (this is currently not done everywhere)
-- do not add gratuitous interfaces, however allow for testing and dependency injection.
-- allow for static dispatch, when writing performance critical code
-
-## Best C/C++ practices
-- use auto functions with trailing return type.
-- do not add gratuitous comments to code.
-- public API needs doxygen comments.
-- use PascalCase for Methods and Classes
-- no prefixes for globals and constants
-- internally in `SilKit/source`, we want to simplify the namespaces to a single VSilKit namespace in the future. the public Namespaces in `SilKit/include` remain as they are.
