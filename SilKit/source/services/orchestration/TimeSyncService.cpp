@@ -308,16 +308,17 @@ TimeSyncService::TimeSyncService(Core::IParticipantInternal* participant, ITimeP
     if (_isCoupledToWallClock)
     {
         _logger->MakeMessage(Logging::Level::Debug, TopicOf(*this))
-        .SetMessage("Coupled to the local wall clock with animation factor")
-        .AddKeyValue(Logging::Keys::animationFactor, _animationFactor)
-        .Dispatch();
+            .SetMessage("Coupled to the local wall clock with animation factor")
+            .AddKeyValue(Logging::Keys::animationFactor, _animationFactor)
+            .Dispatch();
     }
 
     _watchDog.SetWarnHandler([logger = _logger, type = this](std::chrono::milliseconds timeout) {
+        const auto timeoutMs = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(timeout).count();
 
         logger->MakeMessage(Logging::Level::Warn, TopicOf(*type))
-            .SetMessage("SimStep did not finish within soft time limit. Timeout detected after {} ms")
-            .AddKeyValue(Logging::Keys::timeoutTime, std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(timeout).count())
+            .SetMessage("SimStep did not finish within soft time limit. Timeout detected after {} ms", timeoutMs)
+            .AddKeyValue(Logging::Keys::timeoutTime, timeoutMs)
             .Dispatch();
     });
     _watchDog.SetErrorHandler([this](std::chrono::milliseconds timeout) {
@@ -392,7 +393,8 @@ TimeSyncService::TimeSyncService(Core::IParticipantInternal* participant, ITimeP
                             // At this point, the late-joiner will receive it because its TimeSyncPolicy is configured when the
                             // discovery arrives that triggered this handler.
                             _logger->MakeMessage(Logging::Level::Debug, TopicOf(*this))
-                                .SetMessage("Participant is joining an already running simulation. Resending our NextSimTask.")
+                                .SetMessage(
+                                    "Participant is joining an already running simulation. Resending our NextSimTask.")
                                 .Dispatch();
 
                             if (GetTimeSyncPolicy()->IsExecutingSimStep())
@@ -416,8 +418,9 @@ TimeSyncService::TimeSyncService(Core::IParticipantInternal* participant, ITimeP
                         // Other participant hopped off
                         if (_timeConfiguration.RemoveSynchronizedParticipant(descriptorParticipantName))
                         {
-                             _logger->MakeMessage(Logging::Level::Debug, TopicOf(*this))
-                                .SetMessage("TimeSyncService: Participant is no longer part of the distributed time synchronization.")
+                            _logger->MakeMessage(Logging::Level::Debug, TopicOf(*this))
+                                .SetMessage("TimeSyncService: Participant is no longer part of the distributed time "
+                                            "synchronization.")
                                 .AddKeyValue(Logging::Keys::participantName, descriptorParticipantName)
                                 .Dispatch();
 
@@ -514,9 +517,12 @@ void TimeSyncService::ReceiveMsg(const IServiceEndpoint* from, const NextSimTask
     }
     else
     {
+        const auto& participantName = from->GetServiceDescriptor().GetParticipantName();
+
         _logger->MakeMessage(Logging::Level::Trace, TopicOf(*this))
-            .SetMessage("Received NextSimTask from participant \'{}\' but TimeSyncPolicy is not yet configured")
-            .AddKeyValue(Logging::Keys::participantName, from->GetServiceDescriptor().GetParticipantName())
+            .SetMessage("Received NextSimTask from participant \'{}\' but TimeSyncPolicy is not yet configured",
+                        participantName)
+            .AddKeyValue(Logging::Keys::participantName, participantName)
             .Dispatch();
     }
 }
@@ -533,7 +539,8 @@ void TimeSyncService::ExecuteSimStep(std::chrono::nanoseconds timePoint, std::ch
 
     _logger->MakeMessage(Logging::Level::Trace, TopicOf(*this))
         .SetMessage("Starting next Simulation Step.")
-        .AddKeyValue(Logging::Keys::waitingTime, std::chrono::duration_cast<DoubleMSecs>(_waitTimeMonitor.CurrentDuration()).count())
+        .AddKeyValue(Logging::Keys::waitingTime,
+                     std::chrono::duration_cast<DoubleMSecs>(_waitTimeMonitor.CurrentDuration()).count())
         .AddKeyValue(Logging::Keys::virtualTimeNS, timePoint.count())
         .Dispatch();
 
@@ -573,7 +580,7 @@ void TimeSyncService::ExecuteSimStep(std::chrono::nanoseconds timePoint, std::ch
 void TimeSyncService::LogicalSimStepCompleted(std::chrono::duration<double, std::milli> logicalSimStepTimeMs)
 {
     _simStepCounterMetric->Add(1);
- 
+
     _logger->MakeMessage(Logging::Level::Trace, TopicOf(*this))
         .SetMessage("Finished Simulation Step.")
         .AddKeyValue(Logging::Keys::executionTime, logicalSimStepTimeMs.count())
@@ -597,9 +604,7 @@ void TimeSyncService::CompleteSimulationStep()
     }
     else
     {
-        _logger->MakeMessage(Logging::Level::Debug, TopicOf(*this))
-            .SetMessage("CompleteSimulationStep()")
-            .Dispatch();
+        _logger->MakeMessage(Logging::Level::Debug, TopicOf(*this)).SetMessage("CompleteSimulationStep()").Dispatch();
     }
 
     _participant->ExecuteDeferred([this] {
@@ -657,9 +662,7 @@ void TimeSyncService::InitializeTimeSyncPolicy(bool isSynchronizingVirtualTime)
     }
     catch (const std::exception& e)
     {
-        _logger->MakeMessage(Logging::Level::Critical, TopicOf(*this))
-            .SetMessage(e.what())
-            .Dispatch();
+        _logger->MakeMessage(Logging::Level::Critical, TopicOf(*this)).SetMessage(e.what()).Dispatch();
         throw;
     }
 }
@@ -729,11 +732,12 @@ bool TimeSyncService::ParticipantHasAutonomousSynchronousCapability(const std::s
         // We are a participant with autonomous lifecycle and virtual time sync.
         // The remote participant must support this, otherwise Hop-On / Hop-Off will fail.
 
-            _logger->MakeMessage(Logging::Level::Error, TopicOf(*this))
-                .SetMessage( "This participant does not support simulations with participants that use an autonomous lifecycle "
+        _logger->MakeMessage(Logging::Level::Error, TopicOf(*this))
+            .SetMessage(
+                "This participant does not support simulations with participants that use an autonomous lifecycle "
                 "and virtual time synchronization. Please consider upgrading Participant. Aborting simulation...")
-                .AddKeyValue(Logging::Keys::participantName, participantName)
-                .Dispatch();
+            .AddKeyValue(Logging::Keys::participantName, participantName)
+            .Dispatch();
         return false;
     }
     return true;
@@ -746,8 +750,9 @@ bool TimeSyncService::AbortHopOnForCoordinatedParticipants() const
         if (_lifecycleService->GetOperationMode() == OperationMode::Coordinated)
         {
             _logger->MakeMessage(Logging::Level::Error, TopicOf(*this))
-                .SetMessage("This participant is running with a coordinated lifecycle and virtual time synchronization and wants "
-                "to join an already running simulation. This is not allowed, aborting simulation...")
+                .SetMessage("This participant is running with a coordinated lifecycle and virtual time synchronization "
+                            "and wants "
+                            "to join an already running simulation. This is not allowed, aborting simulation...")
                 .AddKeyValue(Logging::Keys::participantName, _participant->GetParticipantName())
                 .Dispatch();
             _participant->GetSystemController()->AbortSimulation();
