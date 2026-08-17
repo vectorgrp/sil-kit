@@ -41,7 +41,7 @@ The source tree compiles into many object libraries that are linked into the fin
 - The networking layer is never broken; it has its own protocol versioning and capability system for backward compatibility
 - The C-API is an ABI-stable boundary
 - `SilKit/include/` is a header-only C++ API on top of the C-API (the hourglass); its namespaces are public API and must not change
-- Unit tests use gtest/gmock; integration tests link against the public SilKit target
+- A thorough test suite ensures safety, stability and backward compatibility
 - Experimental namespaces/symbols are exempt from stability guarantees
 
 ## Tests
@@ -83,6 +83,12 @@ Vendored dependencies. Avoid editing vendored code; prefer changes in SIL Kit in
 ## Coding conventions
 
 - do test driven development. always write tests that capture the new architecture/behavior first, then add the implementation and use tests as guard rails.
+- Tests use gtest/gmock
+- Integration tests link against the public SilKit target
+- New code needs unit tests
+- New features need integration tests (with backward compatibility checks if necessary)
+- New features need documentation
+
 - Unit tests go in files `Test_*` and have no dependency on public APIs.
 - Integration Tests go in files `ITest_*`, they should only depend on the network simulator and public SilKit.{so,dll} APIs
 - use ctest or run the gtest executable directly to verify
@@ -94,13 +100,16 @@ Vendored dependencies. Avoid editing vendored code; prefer changes in SIL Kit in
 - for platform support we are limited to C++17, but want to upgrade to C++20 or later in the future
 - prefer C++ composition over inheritance. templates and static dispatch are to be preferred.
 - use smart pointers when possible
-- always use clang-format to format c++, aim for compile-time safety.
+- always use clang-format to format c++ to our standard.
+- aim for compile-time safety.
 - header only declarations should first have the declarations, and then the implementations after the declaration ina block (this is currently not done everywhere)
 - do not add gratuitous interfaces, however allow for testing and dependency injection.
 - allow for static dispatch, when writing performance critical code
 
 ## Best C/C++ practices
-- use auto functions with trailing return type
+- use auto functions with trailing return type.
+- do not add gratuitous comments to code.
+- public API needs doxygen comments.
 - use PascalCase for Methods and Classes
 - no prefixes for globals and constants
-- internally, we want to simplify the namespaces to a single VSilKit namespace in the future. the public Namespaces remain as they are
+- internally in `SilKit/source`, we want to simplify the namespaces to a single VSilKit namespace in the future. the public Namespaces in `SilKit/include` remain as they are.
