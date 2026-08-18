@@ -83,13 +83,6 @@ Choosing the Right Simulation Mode
 As a practical default, start with |fastBus| unless the need for detailed network simulation is clear.
 Switch to |accurateBus| when timing fidelity or protocol-level effects are required.
 
-..
-    vECU level guidance (rule of thumb):
-    
-    * **vECU levels 1-2:** prefer |fastBus| for early functional development and rapid iteration.
-    * **vECU level 3:** start with |fastBus|; use |AccurateBus| selectively for timing-critical paths.
-    * **vECU levels 4-5:** prefer |accurateBus| when network timing, delays, bandwidth, timestamps, or payload validation influence behavior.
-
 .. list-table:: Vehicle network overview
    :header-rows: 1
    :widths: 20 40 40
