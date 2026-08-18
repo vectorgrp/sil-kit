@@ -436,8 +436,9 @@ The experimental API is defined as follows:
 .. doxygenfunction:: SilKit::Experimental::Services::Lin::SendDynamicResponse
 
 .. note::
-  An dynamic response to a LIN header can only be delivered with certain timing restrictions:
-  When a LIN master initiates a frame transmission with |SendFrameHeader| at time T.
-  The LIN Slave that wants to send the response receives the LIN Header at T+dt and calls |SendDynamicResponse|.
-  The LIN Master will receive the response at T+2dt, which may be out of the timing window for the LIN frame.
+  A dynamic response to a LIN header can only be delivered with certain timing restrictions:
+
+  - At time **T**, the LIN coordinator initiates a frame transmission by calling |SendFrameHeader|.
+  - At time **T + dt**, the LIN responder receives the LIN Header and calls |SendDynamicResponse|.
+  - The LIN coordinator will receive the response at **T + 2dt**, which may exceed the allowed timing window for the LIN frame.
   

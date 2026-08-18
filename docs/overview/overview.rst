@@ -60,24 +60,24 @@ Vehicle networks are accessed through their corresponding services (for example,
 Fast vs. Accurate Bus Simulation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-For all supported bus systems, |ProductName| distinguishes between two simulation styles:
+For all supported bus systems, |ProductName| distinguishes between two simulation modes:
 
 * |BoldFastBus| - Lightweight communication with idealized behavior.
   Communication is functional and timing effects are simplified (e.g., no modeled delay or bandwidth limits).
-  This is the default simulation style.
-* |BoldAccurateBus| - A more detailed bus behavior is modeled by integrating a Network Simulator.
-  A Network Simulator can apply realistic timing and protocol effects, e.g. sending delays, bandwidth limits and frame validation.
+  This is the default simulation mode.
+* |BoldAccurateBus| - a more detailed bus behavior. It is modeled by integrating a Network Simulator, which
+  can apply realistic timing and protocol effects, e.g., sending delays, bandwidth limits, and frame validation.
   The |NetSim| is not part of |ProductName| itself.
-  The chapter :ref:`chap:custom-netsim` describes how to implement a custom Network Simulator and integrate it with |ProductName|.
+  The :ref:`chap:custom-netsim` chapter describes how to implement a custom Network Simulator and integrate it with |ProductName|.
 
 .. important::
   Because of its sensitivity regarding time, **FlexRay** is only available with the |BoldAccurateBus| and thus requires a Network Simulator.
 
 The service interfaces are the same for |fastBus| and |accurateBus| simulation.
 As a result, an application that works in the |fastBus| use case also works when switching to |accurateBus| simulation.
-The section :ref:`sec:api-services` describes how to configure and use the vehicle network services (valid for both modes).
+The :ref:`sec:api-services` section describes how to configure and use the vehicle network services (valid for both modes).
 
-Choosing the Right Mode
+Choosing the Right Simulation Mode
 ~~~~~~~~~~~~~~~~~~~~~~~
 
 As a practical default, start with |fastBus| unless the need for detailed network simulation is clear.
@@ -99,7 +99,7 @@ Switch to |accurateBus| when timing fidelity or protocol-level effects are requi
      - |AccurateBus|
    * - CAN
      - High execution speed and functional tests.
-     - Required for arbitration effects, delay behavior and payload validation.
+     - Required for arbitration effects, delay behavior, and payload validation.
    * - Ethernet
      - Service-oriented and high-throughput functional traffic patterns.
      - Required for switching behavior, buffering effects, and bandwidth contention.
@@ -108,7 +108,7 @@ Switch to |accurateBus| when timing fidelity or protocol-level effects are requi
      - Strict requirement.
    * - LIN
      - Simple and fast functional integration for body/control style scenarios.
-     - Better for schedule timing, bus delay modeling, and payload constraints.
+     - Required for schedule timing, bus delay modeling, and payload constraints.
 
 In general, |ProductName| deliberately avoids imposing restrictions on bus protocols with the |fastBus|.
 This enables user applications to freely determine the desired level of detail for vehicle network simulations.
