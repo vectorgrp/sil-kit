@@ -6,7 +6,6 @@
 #include <chrono>
 #include <filesystem>
 #include <fstream>
-#include <sstream>
 #include <string>
 #include <thread>
 #include <vector>
@@ -16,6 +15,7 @@
 #include "SimTestHarness.hpp"
 
 #include "gtest/gtest.h"
+#include "gmock/gmock.h"
 
 namespace {
 
@@ -47,18 +47,6 @@ auto FindLogFiles(const std::string& logNamePrefix) -> std::vector<std::filesyst
     }
 
     return candidates;
-}
-
-auto FindLogFile(const std::string& logNamePrefix) -> std::filesystem::path
-{
-    const auto candidates = FindLogFiles(logNamePrefix);
-
-    if (candidates.size() != 1u)
-    {
-        return {};
-    }
-
-    return candidates.front();
 }
 
 struct ScopedLogFileCleanup
@@ -163,29 +151,12 @@ Logging:
 
     ASSERT_TRUE(testHarness.Run(5s));
 
-    const auto deadline = std::chrono::steady_clock::now() + 10s;
-    std::filesystem::path logFile;
-    std::string logContent;
+    const auto logFiles = FindLogFiles(filePrefix);
+    ASSERT_EQ(logFiles.size(), 1u) << "Expected exactly one receiver log file with prefix " << filePrefix;
 
-    while (std::chrono::steady_clock::now() < deadline)
-    {
-        logFile = FindLogFile(filePrefix);
-        if (!logFile.empty())
-        {
-            logContent = ReadTextFile(logFile);
-            if (logContent.find(sender1Message) != std::string::npos
-                && logContent.find(sender2Message) != std::string::npos)
-            {
-                break;
-            }
-        }
-
-        std::this_thread::sleep_for(10ms);
-    }
-
-    ASSERT_FALSE(logFile.empty()) << "Could not find exactly one receiver log file with prefix " << filePrefix << "\n";
-    EXPECT_NE(logContent.find(sender1Message), std::string::npos);
-    EXPECT_NE(logContent.find(sender2Message), std::string::npos);
+    const auto logContent = ReadTextFile(logFiles.front());
+    EXPECT_THAT(logContent, testing::HasSubstr(sender1Message));
+    EXPECT_THAT(logContent, testing::HasSubstr(sender2Message));
 }
 
 } // namespace
