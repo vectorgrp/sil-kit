@@ -1,5 +1,33 @@
 # SIL Kit (FOSS) — Reference Context
 
+## Who this is for
+
+Two different jobs. Most of this file is about the first.
+
+- **Changing SIL Kit itself** — the library, utilities, demos or docs in this repo. Everything below applies.
+- **Writing your own program against SIL Kit** — read the next section and stop there. The repository
+  layout, definition of done, review section and naming rules below govern contributions to *this* repo;
+  they do not govern your application's code, which follows your own project's conventions.
+
+## Building an application against SIL Kit
+
+You need the public API and the user documentation, not this repo's internals.
+
+- Consume the installed package from CMake: `find_package(SilKit REQUIRED CONFIG)`, then link
+  `SilKit::SilKit` (plus `Threads::Threads`). The package config is exported to
+  `SilKit/{lib,lib64}/cmake/SilKit`.
+- The public API is header-only over the stable C-API and works at C++14 or later, so use whatever
+  standard your project already uses — you are not bound by this repo's C++17 limit.
+- Minimal working example: `docs/code-samples/simple/` (`simple.cpp`, `simple.yaml`, `CMakeLists.txt`),
+  walked through in `docs/for-developers/developers.rst`. Richer examples in `Demos/`.
+- Start from `silkit/SilKit.hpp` and `silkit/services/all.hpp`; create a participant with
+  `SilKit::CreateParticipant`. API reference: `docs/api/`.
+- Participant behaviour comes from a YAML or JSON participant configuration — see `docs/configuration/`.
+- Running a simulation needs `sil-kit-registry` for participant discovery, and usually
+  `sil-kit-system-controller` to name the participants and start the run — see `docs/utilities/utilities.rst`
+  and `docs/for-users/users.rst`.
+- When it misbehaves: `docs/troubleshooting/`, then `docs/faq/faq.rst`.
+
 ## Git and pull requests
 
 - Do not open pull requests, commit, or create branches without permission.
@@ -21,6 +49,7 @@ ctest --preset debug --output-on-failure
 - Single suite: `ctest --preset debug -R Test_CanSerdes --output-on-failure`, or run the binary in
   `_build/debug/<CONFIG>/` with `--gtest_filter=`.
 - Format: `python3 SilKit/ci/check_formatting.py changes` (staged + modified). Needs clang-format >= 14.
+  Output differs between clang-format major versions, so format only what you wrote — see below.
 - Docs: `cmake -D SILKIT_BUILD_DOCS=ON -B _build/docs && cmake --build _build/docs --target Doxygen`.
 - `SILKIT_WARNINGS_AS_ERRORS` defaults OFF but every preset sets it ON — a bare `cmake ..` build is more
   permissive than CI. Options defaulting ON: `SILKIT_BUILD_TESTS`, `_UTILITIES`, `_DEMOS`, `_DASHBOARD`.
@@ -28,8 +57,9 @@ ctest --preset debug --output-on-failure
   `-DCMAKE_CXX_FLAGS='-fsanitize=address|undefined|thread'` on the `relwithdebinfo` preset.
 - With CMake 4.x add `-DCMAKE_POLICY_VERSION_MINIMUM=3.5` (vendored deps).
 
-Merge gates: DCO sign-off, clang-format, license headers (`SilKit/ci/check_licenses.sh`). clang-tidy runs
-advisory-only with default checks — there is no `.clang-tidy` in the repo.
+Merge gates: DCO sign-off and license headers (`SilKit/ci/check_licenses.sh`). The clang-format and
+clang-tidy jobs report problems but always exit 0, so neither blocks a merge — `check_formatting.py`
+never sets its failure flag ("Only warn for now"), and there is no `.clang-tidy` in the repo.
 
 ## Repository layout
 
@@ -114,8 +144,8 @@ Applies to work intended to merge. For a PoC, reproducer or quick hack, see expe
   work needs no entry — refactors, test-only changes, CI, tooling, agent instructions. Do not invent
   entries for invisible changes; they are noise that makes the changelog worse for users.
 - **The gates that apply to the change**, plus a warnings-as-errors build. Not all gates apply to all
-  changes: clang-format and the license check only scan `.c* .h* .py CMakeLists.txt .sh`, so a
-  docs-only change is exempt from both.
+  changes: the license check scans only `.c* .h* .py CMakeLists.txt .sh`, so a docs-only change is exempt,
+  and clang-format warns rather than blocks.
 - **A reviewed feature branch** opened as a pull request — see below.
 
 A new participant-configuration option is the most error-prone user-visible change: struct field and
@@ -163,7 +193,8 @@ capability negotiation must degrade gracefully rather than break older peers. Ch
 listens on by default and whether the change widens exposure beyond localhost. Check for secrets and
 filesystem paths reaching logs. Concurrency counts — ASAN, UBSAN and TSAN all run in CI.
 
-**C++ veteran with style.** Formatting is machine-checked, so review what clang-format cannot see:
+**C++ veteran with style.** Do not spend review time on formatting — it is not a merge gate and versions
+disagree. Review what clang-format cannot see:
 ownership and lifetime (smart pointers; lifetime of registered handlers relative to their controller),
 const-correctness, avoidable copies, and reaching for inheritance or a new interface where composition or
 static dispatch would do. C++17 only — and anything in a public header must still compile at **C++14**,
@@ -196,8 +227,11 @@ a user rather than describing the patch? Are the docs where a user would look?
   internal headers. Include ordering is deliberately unenforced (`SortIncludes: false`) — do not reorder.
 - Public API needs doxygen: `/*!` blocks with `\brief`, `\param`, `\ref`, and `//!<` for fields. Not `///`,
   not `@brief`.
-- Always run clang-format. It enforces 120 columns, 4-space indent, Allman braces except after `namespace`,
-  and `PointerAlignment: Left`.
+- Format the code you write, not the files you touch. clang-format output varies between major versions
+  (the check only requires >= 14), so reformatting untouched code or whole files creates churn and merge
+  conflicts for no gain. If your clang-format disagrees with surrounding code, leave the surrounding code
+  alone. Match the house style by hand where that is easier: 120 columns, 4-space indent, Allman braces
+  except after `namespace`, `PointerAlignment: Left`.
 - Namespace `SilKit::Services::<BusName>` for service code.
 
 ## Rules for new code
