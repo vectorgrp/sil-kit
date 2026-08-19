@@ -4,6 +4,10 @@
 ## Added
 
 - Add Integration Test for Timestamp Behavior
+- SIL Kit now provides a Software Bill of Materials (SBOM) as an SPDX 2.3 document, `SilKit.spdx.json`.
+  It lists the version, license, supplier and package URL of every third party component, and records
+  whether a component is part of the SIL Kit library or of the `sil-kit-registry` utility. Builds also
+  write an SBOM matching their own configuration to `<build dir>/sbom/`.
 
 ## Fixed
 

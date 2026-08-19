@@ -28,6 +28,22 @@ jobs:
           sh ./SilKit/ci/check_licenses.sh
         shell: bash
 
+  check-sbom:
+    name: SBOM is up to date
+    runs-on: ubuntu-22.04
+    steps:
+      # The check reads the submodule commits from the tree via 'git ls-tree', so the submodules
+      # themselves are not needed.
+      - uses: actions/checkout@v6
+        with:
+          submodules: false
+
+      - name: Check SBOM
+        id: sbom-check
+        run: |
+          python3 ./SilKit/ci/generate_sbom.py --check
+        shell: bash
+
   check-run-builds:
     runs-on: ubuntu-22.04
     outputs:

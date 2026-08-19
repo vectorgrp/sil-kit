@@ -26,6 +26,7 @@ option(SILKIT_USE_SYSTEM_LIBRARIES "Use the libraries installed on the system fo
 option(SILKIT_BUILD_REPRODUCIBLE "Creates a reproducible build by omitting timestamps/unique build ids" ON)
 option(SILKIT_BUILD_LINUX_PACKAGE "Creates SIL Kit builds suitable for package managers in Linux Distributions (.deb)" OFF)
 option(SILKIT_BUILD_LTO "Build with link time optimizations" OFF)
+option(SILKIT_BUILD_SBOM "Generate an SPDX software bill of materials (requires Python 3)" ON)
 
 if(SILKIT_BUILD_LINUX_PACKAGE)
 
@@ -145,6 +146,10 @@ endif()
 if(SILKIT_BUILD_DOCS)
     add_subdirectory(docs)
 endif()
+
+# Must come after add_subdirectory(SilKit), which is where SILKIT_GIT_HASH is determined
+include(SilKitSbom)
+silkit_add_sbom()
 
 ################################################################################
 # Distribution of the source code

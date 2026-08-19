@@ -37,7 +37,8 @@ Build) and is provided in pre-built form with the SIL Kit packages.
 
 The SIL Kit source and documentation is licensed under a permissible open
 source license, see LICENSE file. For licenses of third party dependencies,
-see `ThirdParty/LICENSES.rst`.
+see `ThirdParty/LICENSES.rst`. A machine-readable inventory of all components
+is provided as an SPDX software bill of materials in `SilKit.spdx.json`.
 
 For supported platforms, see `Developer Guide <docs/for-developers/developers.rst>`_
 

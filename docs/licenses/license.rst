@@ -32,10 +32,18 @@ The |ProductName| itself is licensed with minimal restrictions (referred to as *
 	OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 	WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+Software Bill of Materials
+--------------------------
+
+A machine-readable inventory of the |ProductName| and its third party components is available as an
+SPDX 2.3 document at ``SilKit.spdx.json`` in the root of the source repository. It lists each
+component with its version, license, supplier and package URL, and records which artifact the
+component ends up in — the |ProductName| library or the ``sil-kit-registry`` utility.
+
 Third-Party Licenses
 --------------------
 
-The |ProductName| uses third party software components. 
+The |ProductName| uses third party software components.
 The full and unmodified license of each component is printed below.
 
 .. contents::
