@@ -76,6 +76,8 @@ exclude_patterns = [
     '_build', 'Thumbs.db', '.DS_Store',
     'overview/overview.rst',
     'changelog/versions/template.md',
+    # generated, and included by licenses/license.rst rather than being a page of its own
+    'licenses/thirdparty.rst',
 ]
 
 # The name of the Pygments (syntax highlighting) style to use.

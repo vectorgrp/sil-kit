@@ -1,16 +1,12 @@
-SIL Kit Third Party Libraries
-=============================
-
 .. NOTE: This file is generated from ThirdParty/third-party-components.json by SilKit/ci/generate_thirdparty.py.
    Do not edit it by hand; edit the metadata or the texts in ThirdParty/licenses/
    and run: python3 SilKit/ci/generate_thirdparty.py
 
-The SIL Kit uses the third party software components listed below, which are governed by
-their respective licenses. The full and unmodified license of each redistributed component
-is printed after the table.
+The |ProductName| uses the third party software components listed below. The full and
+unmodified license of each redistributed component is printed after the table.
 
-A machine-readable inventory of the same components is available as an SPDX 2.3 document
-in SilKit.spdx.json.
+Components marked as a build tool are needed to produce an artifact but do not ship any of
+their own code, so no license text is reproduced for them.
 
 .. list-table::
    :header-rows: 1
@@ -82,7 +78,7 @@ in SilKit.spdx.json.
      - Documentation (build tool)
 
 asio
-====
+~~~~
 
 ::
 
@@ -111,7 +107,7 @@ asio
    DEALINGS IN THE SOFTWARE.
 
 fmt
-===
+~~~
 
 ::
 
@@ -144,7 +140,7 @@ fmt
    without including the above copyright and permission notices.
 
 spdlog
-======
+~~~~~~
 
 ::
 
@@ -171,7 +167,7 @@ spdlog
    THE SOFTWARE.
 
 rapidyaml
-=========
+~~~~~~~~~
 
 ::
 
@@ -196,7 +192,7 @@ rapidyaml
    DEALINGS IN THE SOFTWARE.
 
 c4core
-======
+~~~~~~
 
 ::
 
@@ -223,7 +219,7 @@ c4core
    THE SOFTWARE.
 
 oatpp
-=====
+~~~~~
 
 ::
 
@@ -430,7 +426,7 @@ oatpp
    limitations under the License.
 
 googletest
-==========
+~~~~~~~~~~
 
 ::
 
@@ -464,7 +460,7 @@ googletest
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 Sphinx
-======
+~~~~~~
 
 ::
 
@@ -537,7 +533,7 @@ Sphinx
    -------------------------------------------------------------------------------
 
 sphinx-rtd-theme
-================
+~~~~~~~~~~~~~~~~
 
 ::
 
@@ -563,7 +559,7 @@ sphinx-rtd-theme
    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 Font Awesome
-============
+~~~~~~~~~~~~
 
 ::
 
@@ -685,7 +681,7 @@ Font Awesome
    THE SOFTWARE.
 
 Lato
-====
+~~~~
 
 ::
 
@@ -782,7 +778,7 @@ Lato
    OTHER DEALINGS IN THE FONT SOFTWARE.
 
 Roboto Slab
-===========
+~~~~~~~~~~~
 
 ::
 
@@ -993,7 +989,7 @@ Roboto Slab
    limitations under the License.
 
 jQuery
-======
+~~~~~~
 
 ::
 

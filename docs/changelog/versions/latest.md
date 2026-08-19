@@ -10,10 +10,17 @@
   part of the release it reaches: the SIL Kit library, the `sil-kit-registry` utility, the HTML
   documentation, or the source distribution. Builds also write an SBOM matching their own
   configuration to `<build dir>/sbom/`.
+- The documentation now contains a table of all third party dependencies with their versions,
+  licenses and the part of the release they belong to, on the Licenses page.
 
 ## Fixed
 
 - Fix ITest_AsyncSimTask (test failed when run repeatedly)
+- The third party license notices were incomplete. They now also cover c4core, which is bundled
+  inside the rapidyaml sources, and the components that ship inside the HTML documentation: Sphinx,
+  sphinx-rtd-theme, jQuery, Font Awesome, Lato and Roboto Slab. The notices in
+  `ThirdParty/LICENSES.rst` and in the documentation are generated from one source and can no longer
+  disagree.
 
 ## Changed
 

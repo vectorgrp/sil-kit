@@ -7,13 +7,15 @@
 ################################################################################
 # Software composition scanners cannot resolve this project's dependencies: they are git submodules
 # carrying nothing but a gitlink, plus one vendored source amalgamation. The inventory is therefore
-# declared in ThirdParty/third-party-components.json and rendered to SPDX 2.3 by
-# SilKit/ci/generate_sbom.py.
+# declared in ThirdParty/third-party-components.json, and the SBOM, the third party notice file and
+# the documentation table are all rendered from it by SilKit/ci/generate_thirdparty.py.
 #
 # Targets:
-#   silkit-sbom         (in ALL) writes ${CMAKE_BINARY_DIR}/sbom/ for the configuration being built
-#   silkit-sbom-update  refreshes the canonical SilKit.spdx.json committed to the repository
-#   silkit-sbom-check   verifies the committed SBOM and the metadata, as CI does
+#   silkit-sbom                (in ALL) writes ${CMAKE_BINARY_DIR}/sbom/ for the configuration
+#                              being built. It never writes into the source tree.
+#   silkit-thirdparty-update   refreshes SilKit.spdx.json, ThirdParty/LICENSES.rst and
+#                              docs/licenses/thirdparty.rst in the source tree
+#   silkit-thirdparty-check    verifies all three and the metadata, as CI does
 
 function(silkit_add_sbom)
     if(NOT SILKIT_BUILD_SBOM)
@@ -28,7 +30,7 @@ function(silkit_add_sbom)
         return()
     endif()
 
-    set(sbomScript "${PROJECT_SOURCE_DIR}/SilKit/ci/generate_sbom.py")
+    set(sbomScript "${PROJECT_SOURCE_DIR}/SilKit/ci/generate_thirdparty.py")
     set(sbomMetadata "${PROJECT_SOURCE_DIR}/ThirdParty/third-party-components.json")
     set(sbomOutput "${CMAKE_BINARY_DIR}/sbom/SilKit-${PROJECT_VERSION}.spdx.json")
 
@@ -37,7 +39,8 @@ function(silkit_add_sbom)
         return()
     endif()
 
-    set(sbomArgs --version "${PROJECT_VERSION}" --output "${sbomOutput}")
+    # --emit spdx only: a build must not write the notice file or the docs into the source tree.
+    set(sbomArgs --emit spdx --version "${PROJECT_VERSION}" --output "${sbomOutput}")
 
     # Record what was actually built, so the SBOM does not claim artifacts this configuration
     # never produced. The generator's defaults describe a full release.
@@ -74,22 +77,22 @@ function(silkit_add_sbom)
     add_custom_target(silkit-sbom ALL DEPENDS "${sbomOutput}")
     set_property(TARGET silkit-sbom PROPERTY FOLDER "Packaging")
 
-    # Both of the following deliberately use the generator's defaults, which are the canonical
-    # configuration of the SBOM committed to the repository. They must not inherit the flags of
-    # the current build.
-    add_custom_target(silkit-sbom-update
-        COMMAND "${Python3_EXECUTABLE}" "${sbomScript}"
-        COMMENT "Updating the canonical SilKit.spdx.json"
+    # Both of the following deliberately use the generator's defaults, which describe a full
+    # release. They must not inherit the flags of the current build: the notice file and the
+    # documentation have to list everything a release redistributes, not just what is built here.
+    add_custom_target(silkit-thirdparty-update
+        COMMAND "${Python3_EXECUTABLE}" "${sbomScript}" --emit all
+        COMMENT "Updating SilKit.spdx.json, ThirdParty/LICENSES.rst and docs/licenses/thirdparty.rst"
         VERBATIM
     )
-    set_property(TARGET silkit-sbom-update PROPERTY FOLDER "Packaging")
+    set_property(TARGET silkit-thirdparty-update PROPERTY FOLDER "Packaging")
 
-    add_custom_target(silkit-sbom-check
+    add_custom_target(silkit-thirdparty-check
         COMMAND "${Python3_EXECUTABLE}" "${sbomScript}" --check
-        COMMENT "Checking the canonical SilKit.spdx.json against the source tree"
+        COMMENT "Checking the generated third party files against the source tree"
         VERBATIM
     )
-    set_property(TARGET silkit-sbom-check PROPERTY FOLDER "Packaging")
+    set_property(TARGET silkit-thirdparty-check PROPERTY FOLDER "Packaging")
 
     message(STATUS "SIL Kit - SBOM: ${sbomOutput}")
 endfunction()
