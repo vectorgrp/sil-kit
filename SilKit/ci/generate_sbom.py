@@ -52,9 +52,23 @@ SILKIT_COPYRIGHT = "Copyright (c) Vector Informatik GmbH"
 # being a random UUID, and the timestamp falls back to SOURCE_DATE_EPOCH.
 NAMESPACE_SEED = "https://github.com/vectorgrp/sil-kit/spdx"
 
-# Artifacts a component can be part of. Keep in sync with 'shipsIn' in the metadata file.
-ARTIFACT_LIBRARY = "SilKit"
-ARTIFACT_REGISTRY = "sil-kit-registry"
+# The CMake options that decide which release artifacts exist. The canonical SBOM committed to the
+# repository describes a full release, so all of them default to on.
+BUILD_OPTIONS = (
+    "SILKIT_BUILD_UTILITIES",
+    "SILKIT_BUILD_DOCS",
+    "SILKIT_INSTALL_SOURCE",
+    "SILKIT_BUILD_DASHBOARD",
+    "SILKIT_USE_SYSTEM_LIBRARIES",
+)
+
+FULL_RELEASE = {
+    "SILKIT_BUILD_UTILITIES": True,
+    "SILKIT_BUILD_DOCS": True,
+    "SILKIT_INSTALL_SOURCE": True,
+    "SILKIT_BUILD_DASHBOARD": True,
+    "SILKIT_USE_SYSTEM_LIBRARIES": False,
+}
 
 
 # ---------------------------------------------------------------------------------------------
@@ -71,29 +85,59 @@ def load_metadata(path):
     except json.JSONDecodeError as e:
         die(1, "{} is not valid JSON: {}", path, e)
 
-    if metadata.get("schemaVersion") != 1:
+    if metadata.get("schemaVersion") != 2:
         die(1, "Unsupported schemaVersion {} in {}", metadata.get("schemaVersion"), path)
 
     components = metadata.get("components")
     if not components:
         die(1, "{} declares no components", path)
 
-    return components
+    artifacts = metadata.get("artifacts")
+    if not artifacts:
+        die(1, "{} declares no artifacts", path)
+
+    return artifacts, components
 
 
-def selected_components(components, withDashboard, withTests):
-    """The components that end up in a released artifact for this build configuration."""
-    enabled = {"SILKIT_BUILD_DASHBOARD": withDashboard, "SILKIT_BUILD_TESTS": withTests}
-    selected = []
+def enabled_artifacts(artifacts, options):
+    """The release artifacts this build configuration actually produces."""
+    return [a for a in artifacts if a["guard"] is None or options.get(a["guard"], False)]
+
+
+def resolve(artifacts, components, options):
+    """Work out which artifacts are built and which components reach them.
+
+    Returns the enabled artifacts, the components to describe, and the (component, artifact,
+    relationship) triples between them. A component is described when at least one of its 'partOf'
+    entries resolves to an enabled artifact, or when it is bundled inside a component that is.
+    """
+    enabled = enabled_artifacts(artifacts, options)
+    enabledIds = set(a["id"] for a in enabled)
+
+    edges = []
+    selectedIds = set()
     for component in components:
-        # Test-only dependencies never reach a released artifact.
-        if not component["shipsIn"]:
-            continue
-        guard = component.get("cmakeGuard")
-        if guard is not None and not enabled.get(guard, False):
-            continue
-        selected.append(component)
-    return selected
+        for entry in component.get("partOf", []):
+            if entry["artifact"] not in enabledIds:
+                continue
+            guard = entry.get("guard")
+            if guard is not None and not options.get(guard, False):
+                continue
+            edges.append((component, entry["artifact"], entry["relationship"]))
+            selectedIds.add(component["id"])
+
+    # Bundled components ride along with their container, however that container got in.
+    changed = True
+    while changed:
+        changed = False
+        for component in components:
+            container = component.get("containedBy")
+            if container in selectedIds and component["id"] not in selectedIds:
+                selectedIds.add(component["id"])
+                changed = True
+
+    selected = [c for c in components if c["id"] in selectedIds]
+    return enabled, selected, edges
 
 
 # ---------------------------------------------------------------------------------------------
@@ -217,12 +261,12 @@ def relationship(element, relationshipType, related):
     }
 
 
-def build_document(components, version, gitHash, withDashboard, withTests, useSystemLibraries,
-                   created):
-    shipped = selected_components(components, withDashboard, withTests)
+def build_document(artifacts, components, version, gitHash, options, created):
+    enabled, selected, edges = resolve(artifacts, components, options)
 
-    configKey = "dashboard={};systemLibs={}".format(int(bool(withDashboard)),
-                                                    int(bool(useSystemLibraries)))
+    configKey = ",".join(a["id"] for a in enabled)
+    if options.get("SILKIT_USE_SYSTEM_LIBRARIES"):
+        configKey += ";systemLibs"
 
     if gitHash and gitHash != "UNKNOWN":
         silkitDownload = "git+{}.git@{}".format(SILKIT_REPOSITORY, gitHash)
@@ -230,66 +274,55 @@ def build_document(components, version, gitHash, withDashboard, withTests, useSy
         silkitDownload = "git+{}.git@v{}".format(SILKIT_REPOSITORY, version)
 
     rootId = spdx_id("SilKit")
-    libraryId = spdx_id("Artifact", "SilKit-library")
-    registryId = spdx_id("Artifact", "sil-kit-registry")
 
     packages = [
         silkit_package(
             rootId,
             "SilKit",
             version,
-            "Vector SIL Kit distribution: the SIL Kit library and its utility tools.",
+            "Vector SIL Kit release: the SIL Kit library, its utility tools, the documentation "
+            "and the source distribution.",
             silkitDownload,
             "pkg:github/vectorgrp/sil-kit@v{}".format(version),
-        ),
-        silkit_package(
-            libraryId,
-            "SilKit-library",
-            version,
-            "The SIL Kit shared library (SilKit.dll / libSilKit.so).",
-            silkitDownload,
-            None,
-        ),
+        )
     ]
 
-    relationships = [
-        relationship("SPDXRef-DOCUMENT", "DESCRIBES", rootId),
-        relationship(rootId, "CONTAINS", libraryId),
-    ]
+    relationships = [relationship("SPDXRef-DOCUMENT", "DESCRIBES", rootId)]
 
-    if withDashboard:
+    for artifact in enabled:
+        artifactId = spdx_id("Artifact", artifact["id"])
         packages.append(
             silkit_package(
-                registryId,
-                "sil-kit-registry",
-                version,
-                "The SIL Kit registry utility, which carries the dashboard client.",
-                silkitDownload,
-                None,
+                artifactId, artifact["id"], version, artifact["description"], silkitDownload, None
             )
         )
-        relationships.append(relationship(rootId, "CONTAINS", registryId))
+        relationships.append(relationship(rootId, "CONTAINS", artifactId))
 
-    artifactIds = {ARTIFACT_LIBRARY: libraryId, ARTIFACT_REGISTRY: registryId}
-
-    for component in shipped:
+    for component in selected:
         packages.append(component_package(component))
+
+    for component, artifactName, relationshipType in edges:
+        artifactId = spdx_id("Artifact", artifactName)
         componentId = spdx_id("Package", component["id"])
+        # SPDX relationship types ending in _OF or _BY read "component is a X of artifact", so the
+        # component is the subject. CONTAINS and STATIC_LINK read the other way round.
+        if relationshipType.endswith("_OF") or relationshipType.endswith("_BY"):
+            relationships.append(relationship(componentId, relationshipType, artifactId))
+        else:
+            relationships.append(relationship(artifactId, relationshipType, componentId))
 
-        containedBy = component.get("containedBy")
-        if containedBy:
-            # A component bundled inside another one (c4core inside the rapidyaml amalgamation)
-            # hangs off its container, not off the artifact.
+    # A component bundled inside another one (c4core inside the rapidyaml amalgamation, the
+    # webfonts inside sphinx-rtd-theme) hangs off its container, not off the artifact.
+    for component in selected:
+        container = component.get("containedBy")
+        if container:
             relationships.append(
-                relationship(spdx_id("Package", containedBy), "CONTAINS", componentId)
+                relationship(
+                    spdx_id("Package", container),
+                    "CONTAINS",
+                    spdx_id("Package", component["id"]),
+                )
             )
-            continue
-
-        for artifact in component["shipsIn"]:
-            artifactId = artifactIds.get(artifact)
-            if artifactId is None:
-                die(1, "Component '{}' ships in unknown artifact '{}'", component["id"], artifact)
-            relationships.append(relationship(artifactId, "STATIC_LINK", componentId))
 
     document = {
         "spdxVersion": "SPDX-2.3",
@@ -309,7 +342,7 @@ def build_document(components, version, gitHash, withDashboard, withTests, useSy
             "Generated by SilKit/ci/generate_sbom.py from ThirdParty/third-party-components.json. "
             "Third party components are declared by hand because they are vendored as git "
             "submodules and as a source amalgamation, which no software composition scanner can "
-            "resolve. Build configuration: {}.".format(configKey)
+            "resolve. Artifacts covered: {}.".format(configKey)
         ),
         "packages": packages,
         "relationships": relationships,
@@ -348,9 +381,69 @@ def gitlink_sha(path):
     return entry[2]
 
 
-def check_metadata(components):
+def pinned_versions(requirementsPath):
+    """Map the distribution names pinned in a requirements file to their versions."""
+    pins = {}
+    try:
+        text = (REPO_ROOT / requirementsPath).read_text(encoding="utf-8")
+    except OSError:
+        return None
+
+    for line in text.splitlines():
+        line = line.split("#", 1)[0].strip()
+        match = re.match(r"^([A-Za-z0-9._-]+)\s*==\s*([^\s;]+)$", line)
+        if match:
+            pins[match.group(1).lower().replace("_", "-")] = match.group(2)
+    return pins
+
+
+def check_metadata(artifacts, components):
     """Verify the hand-maintained metadata against the tree. Returns a list of problems."""
     problems = []
+    artifactIds = set(a["id"] for a in artifacts)
+    componentIds = set(c["id"] for c in components)
+    requirementCache = {}
+
+    for component in components:
+        for entry in component.get("partOf", []):
+            if entry["artifact"] not in artifactIds:
+                problems.append(
+                    "{}: partOf references unknown artifact '{}'".format(
+                        component["id"], entry["artifact"]
+                    )
+                )
+        container = component.get("containedBy")
+        if container and container not in componentIds:
+            problems.append(
+                "{}: containedBy references unknown component '{}'".format(
+                    component["id"], container
+                )
+            )
+
+        # Keep the documentation toolchain in step with the requirements file the release build
+        # installs from, so bumping a pin there cannot silently invalidate the SBOM.
+        pinnedIn = component.get("pinnedIn")
+        if pinnedIn:
+            if pinnedIn not in requirementCache:
+                requirementCache[pinnedIn] = pinned_versions(pinnedIn)
+            pins = requirementCache[pinnedIn]
+            if pins is None:
+                problems.append("{}: cannot read {}".format(component["id"], pinnedIn))
+            else:
+                key = component["name"].lower().replace("_", "-")
+                if key not in pins:
+                    problems.append(
+                        "{}: '{}' is not pinned in {}".format(component["id"], component["name"],
+                                                              pinnedIn)
+                    )
+                elif pins[key] != component["version"]:
+                    problems.append(
+                        "{}: metadata says {} but {} pins {}. Update the version in "
+                        "ThirdParty/third-party-components.json.".format(
+                            component["id"], component["version"], pinnedIn, pins[key]
+                        )
+                    )
+
 
     try:
         notices = NOTICE_FILE.read_text(encoding="utf-8", errors="replace")
@@ -404,8 +497,8 @@ def check_metadata(components):
 # ---------------------------------------------------------------------------------------------
 
 
-def do_check(components, output, args):
-    problems = check_metadata(components)
+def do_check(artifacts, components, output, args):
+    problems = check_metadata(artifacts, components)
 
     if not output.exists():
         problems.append(
@@ -426,15 +519,7 @@ def do_check(components, output, args):
         problems.append("{} is not a readable SPDX document".format(output))
 
     expected = serialize(
-        build_document(
-            components,
-            args.version,
-            None,
-            withDashboard=True,
-            withTests=False,
-            useSystemLibraries=False,
-            created=created,
-        )
+        build_document(artifacts, components, args.version, None, FULL_RELEASE, created)
     )
 
     if expected != existing:
@@ -472,14 +557,18 @@ def main():
                         help="the commit the artifacts were built from. Omit for the canonical "
                              "SBOM committed to the repository, which must not change on every "
                              "commit")
-    # The canonical SBOM committed to the repository is the default configuration, so the
-    # dependency-affecting options default to their CMake defaults and are turned off explicitly.
-    parser.add_argument("--without-dashboard", dest="with_dashboard", action="store_false",
-                        help="the build has SILKIT_BUILD_DASHBOARD=OFF")
-    parser.add_argument("--with-tests", action="store_true",
-                        help="the build has SILKIT_BUILD_TESTS=ON")
-    parser.add_argument("--use-system-libraries", action="store_true",
-                        help="the build has SILKIT_USE_SYSTEM_LIBRARIES=ON")
+    # The canonical SBOM describes a full release, so every artifact-producing option defaults to
+    # on and is turned off explicitly for a narrower build.
+    parser.add_argument("--without-utilities", dest="SILKIT_BUILD_UTILITIES",
+                        action="store_false", help="the build has SILKIT_BUILD_UTILITIES=OFF")
+    parser.add_argument("--without-docs", dest="SILKIT_BUILD_DOCS",
+                        action="store_false", help="the build has SILKIT_BUILD_DOCS=OFF")
+    parser.add_argument("--without-source", dest="SILKIT_INSTALL_SOURCE",
+                        action="store_false", help="the build has SILKIT_INSTALL_SOURCE=OFF")
+    parser.add_argument("--without-dashboard", dest="SILKIT_BUILD_DASHBOARD",
+                        action="store_false", help="the build has SILKIT_BUILD_DASHBOARD=OFF")
+    parser.add_argument("--use-system-libraries", dest="SILKIT_USE_SYSTEM_LIBRARIES",
+                        action="store_true", help="the build has SILKIT_USE_SYSTEM_LIBRARIES=ON")
     parser.add_argument("--check", action="store_true",
                         help="verify the committed SBOM and the metadata instead of writing; "
                              "exits non-zero when either is stale")
@@ -488,27 +577,21 @@ def main():
     if args.version is None:
         args.version = read_version()
 
-    components = load_metadata(args.metadata)
+    artifacts, components = load_metadata(args.metadata)
     output = Path(args.output)
 
     if args.check:
-        return do_check(components, output, args)
+        return do_check(artifacts, components, output, args)
 
-    if args.use_system_libraries:
+    options = dict((name, getattr(args, name)) for name in BUILD_OPTIONS)
+
+    if options["SILKIT_USE_SYSTEM_LIBRARIES"]:
         warn(
             "SILKIT_USE_SYSTEM_LIBRARIES is ON: the versions in this SBOM are the ones vendored "
             "in ThirdParty/, not the system libraries actually linked."
         )
 
-    document = build_document(
-        components,
-        args.version,
-        args.git_hash,
-        withDashboard=args.with_dashboard,
-        withTests=args.with_tests,
-        useSystemLibraries=args.use_system_libraries,
-        created=None,
-    )
+    document = build_document(artifacts, components, args.version, args.git_hash, options, None)
 
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(serialize(document), encoding="utf-8")

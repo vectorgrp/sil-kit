@@ -20,8 +20,14 @@ record only a commit SHA, and rapidyaml is a vendored source amalgamation
 amalgamation additionally bundles a second upstream project, c4core, which no scanner will ever
 attribute.
 
+The documentation is no better served: the HTML that ships in a release embeds stylesheets, scripts
+and webfonts from the Sphinx toolchain, which is pinned in a requirements file rather than described
+by any package manifest inside the release.
+
 The inventory is therefore declared explicitly in ``ThirdParty/third-party-components.json`` and
-rendered into SPDX by ``SilKit/ci/generate_sbom.py``. A CI job keeps the declaration honest.
+rendered into SPDX by ``SilKit/ci/generate_sbom.py``. A CI job keeps the declaration honest: it
+verifies the submodule pins against the tree and the documentation pins against
+``SilKit/ci/docker/docs_requirements.txt``.
 
 .. admonition:: Do not derive versions from git
 
@@ -34,20 +40,43 @@ rendered into SPDX by ``SilKit/ci/generate_sbom.py``. A CI job keeps the declara
 What the SBOM covers
 ====================
 
-Only components that reach a released artifact. googletest is present in the metadata but excluded
-from the document, because it is linked into the test executables only.
+The canonical SBOM describes a **full release** — everything a user receives, not just the compiled
+binaries. It is organised around the four release artifacts, and the relationship to each records
+*how* the component gets there, which is the part a scanner could not reconstruct:
 
-The document distinguishes *which* artifact each component ends up in, which is the part a scanner
-could not reconstruct:
+``SilKit-library``
+    The shared library. asio and fmt are compiled in as header-only libraries, spdlog and rapidyaml
+    are linked in as static libraries. All four are ``STATIC_LINK``.
 
-* ``SilKit`` — the distribution, described by the document.
-* ``SilKit-library`` — the shared library. asio and fmt are compiled in as header-only libraries;
-  spdlog and rapidyaml are linked in as static libraries.
-* ``sil-kit-registry`` — the registry utility. It is the only artifact that carries oatpp, via the
-  dashboard client. oatpp is *not* part of the SIL Kit library.
+``sil-kit-registry``
+    The registry utility. It is the only binary that carries oatpp, via the dashboard client. oatpp
+    is *not* part of the SIL Kit library.
 
-c4core is recorded as ``CONTAINS``-ed by rapidyaml rather than linked directly, reflecting that it
-arrives inside the amalgamation.
+``SilKit-Documentation``
+    The generated HTML. Sphinx and sphinx-rtd-theme ``CONTAINS`` — they copy stylesheets, scripts
+    and webfonts into the output — as does jQuery, which ships verbatim as ``_static/jquery.js``.
+    breathe and myst-parser are ``BUILD_TOOL_OF``: they are needed to produce the documentation but
+    none of their own code ends up in it.
+
+``SilKit-Source``
+    The source distribution. ``install(DIRECTORY ThirdParty/ ...)`` copies the whole tree, so every
+    third-party component is redistributed as source here — **including googletest**, which is never
+    linked into any released binary. This is why googletest is in the SBOM at all; with
+    ``SILKIT_INSTALL_SOURCE=OFF`` it correctly disappears.
+
+Components bundled inside another component are recorded as ``CONTAINS``-ed by their container
+rather than attached to an artifact: c4core inside the rapidyaml amalgamation, and Font Awesome,
+Lato and Roboto Slab inside sphinx-rtd-theme.
+
+.. admonition:: What is not in the SBOM
+
+   GitHub Actions and other CI definitions. They are build infrastructure that produces nothing a
+   user receives, and the GitHub workflows do not build releases at all. Build *provenance* is a
+   separate concern from a bill of materials.
+
+   Doxygen, although it is required to build the documentation. Unlike the Python packages it is not
+   pinned by this repository, so any version recorded here would describe one machine rather than
+   the release.
 
 Regenerating
 ============
@@ -77,23 +106,46 @@ commits with ``git ls-tree``, so it does not require the submodules to be checke
 
 Every build also writes an SBOM for its own configuration to
 ``<build dir>/sbom/SilKit-<version>.spdx.json``, via the ``silkit-sbom`` target. Unlike the
-committed one, it records the build's git hash and reflects the options actually enabled — turning
-off ``SILKIT_BUILD_DASHBOARD`` removes oatpp and the registry from the document. Set
-``SILKIT_BUILD_SBOM=OFF`` to skip generation; it is also skipped automatically when no Python 3
+committed one, it records the build's git hash and reflects the options actually enabled:
+``SILKIT_BUILD_UTILITIES``, ``SILKIT_BUILD_DOCS``, ``SILKIT_INSTALL_SOURCE`` and
+``SILKIT_BUILD_DASHBOARD`` each add or remove an artifact and everything that reaches only that
+artifact. An ordinary ``debug`` build therefore describes two artifacts and six components, while
+the canonical release SBOM describes four and fifteen.
+
+Set ``SILKIT_BUILD_SBOM=OFF`` to skip generation; it is also skipped automatically when no Python 3
 interpreter is available.
 
 Adding or updating a dependency
 ===============================
 
-#. Update the submodule or the vendored copy as usual.
+#. Update the submodule, the vendored copy, or the pin in
+   ``SilKit/ci/docker/docs_requirements.txt`` as usual.
 #. In ``ThirdParty/third-party-components.json``, set ``version`` and ``commit``. For submodules,
    read the commit with ``git ls-tree HEAD ThirdParty/<name>`` — not from ``git describe``. Take the
-   version from the upstream tag or from the version macro in the sources.
+   version from the upstream tag or from the version macro in the sources. For a component with
+   ``pinnedIn``, the version must match the requirements file exactly; the check enforces this.
 #. Add the license text to ``ThirdParty/LICENSES.rst`` and ``docs/licenses/license.rst`` if the
-   component is new, and make ``noticeName`` match the heading used there.
-#. Set ``shipsIn`` to the artifacts that actually embed the component, and ``cmakeGuard`` to the
-   CMake option that enables it, if any. A component that never ships gets an empty ``shipsIn``.
+   component is new, and make ``noticeName`` match the heading used there. Components with
+   ``noticeName: null`` are exempt from that check.
+#. Fill in ``partOf``: one entry per release artifact the component reaches, with the relationship
+   to use — ``STATIC_LINK`` for code linked into a binary, ``CONTAINS`` for files shipped verbatim,
+   ``BUILD_TOOL_OF`` for a tool that produces an artifact without shipping its own code. Add a
+   per-entry ``guard`` when a CMake option decides whether the component reaches that artifact, as
+   oatpp does. A component bundled inside another one gets ``containedBy`` and an empty ``partOf``.
 #. Regenerate and check, as above.
+
+Anything vendored under ``ThirdParty/`` needs a ``SilKit-Source`` entry, because the source
+distribution ships the whole directory regardless of what the component is used for.
+
+Known gap
+=========
+
+``ThirdParty/LICENSES.rst`` and ``docs/licenses/license.rst`` cover only the C++ components. The
+assets that the documentation build ships — the Sphinx and sphinx-rtd-theme static files, jQuery,
+Font Awesome, Lato and Roboto Slab — are recorded in the SBOM but have no license text in either
+notice file. Those components therefore carry ``noticeName: null`` and are exempt from the notice
+check. Adding their texts, and generating both ``.rst`` files from the metadata so that the three
+lists cannot diverge, is outstanding work.
 
 Reproducibility
 ===============

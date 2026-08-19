@@ -39,13 +39,19 @@ function(silkit_add_sbom)
 
     set(sbomArgs --version "${PROJECT_VERSION}" --output "${sbomOutput}")
 
-    # Record what was actually built, so the SBOM does not claim components this configuration
-    # never produced.
+    # Record what was actually built, so the SBOM does not claim artifacts this configuration
+    # never produced. The generator's defaults describe a full release.
+    if(NOT SILKIT_BUILD_UTILITIES)
+        list(APPEND sbomArgs --without-utilities)
+    endif()
+    if(NOT SILKIT_BUILD_DOCS)
+        list(APPEND sbomArgs --without-docs)
+    endif()
+    if(NOT SILKIT_INSTALL_SOURCE)
+        list(APPEND sbomArgs --without-source)
+    endif()
     if(NOT SILKIT_BUILD_DASHBOARD)
         list(APPEND sbomArgs --without-dashboard)
-    endif()
-    if(SILKIT_BUILD_TESTS)
-        list(APPEND sbomArgs --with-tests)
     endif()
     if(SILKIT_USE_SYSTEM_LIBRARIES)
         list(APPEND sbomArgs --use-system-libraries)
