@@ -33,6 +33,7 @@ add_library(O_SilKit_Services_Orchestration OBJECT
     TimeConfiguration.hpp
     TimeConfiguration.cpp
 
+    SystemStateTracker.hpp
     SystemStateTracker.cpp
 )
 
@@ -50,6 +51,10 @@ add_silkit_test_to_executable(SilKitUnitTests
 )
 add_silkit_test_to_executable(SilKitUnitTests
     SOURCES Test_SystemMonitor.cpp 
+    LIBS S_SilKitImpl I_SilKit
+)
+add_silkit_test_to_executable(SilKitUnitTests
+    SOURCES Test_SystemStateTracker.cpp
     LIBS S_SilKitImpl I_SilKit
 )
 add_silkit_test_to_executable(SilKitUnitTests
