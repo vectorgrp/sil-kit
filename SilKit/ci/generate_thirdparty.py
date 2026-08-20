@@ -66,7 +66,7 @@ ARTIFACT_LABELS = {
 }
 
 SILKIT_REPOSITORY = "https://github.com/vectorgrp/sil-kit"
-SILKIT_SUPPLIER = "Organization: Vector Informatik GmbH"
+SILKIT_SUPPLIER = "Organization: The SIL Kit Developers"
 SILKIT_LICENSE = "MIT"
 SILKIT_COPYRIGHT = "Copyright (c) Vector Informatik GmbH"
 
