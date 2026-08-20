@@ -64,7 +64,10 @@ For all supported bus systems, |ProductName| distinguishes between two simulatio
 
 * |BoldFastBus| - Lightweight communication with idealized behavior.
   Communication is functional and timing effects are simplified (e.g., no modeled delay or bandwidth limits).
-  This is the default simulation mode.
+  This is the default simulation mode. 
+  Here, |ProductName| deliberately avoids imposing restrictions on bus protocols.
+  This enables user applications to freely determine the desired level of detail for vehicle network simulations. 
+  For example, |ProductName| will not prevent the injection of faulty frames.
 * |BoldAccurateBus| - a more detailed bus behavior. It is modeled by integrating a Network Simulator, which
   can apply realistic timing and protocol effects, e.g., sending delays, bandwidth limits, and frame validation.
   The |NetSim| is not part of |ProductName| itself.
@@ -102,11 +105,6 @@ Switch to |accurateBus| when timing fidelity or protocol-level effects are requi
    * - LIN
      - Simple and fast functional integration for body/control style scenarios.
      - Required for schedule timing, bus delay modeling, and payload constraints.
-
-In general, |ProductName| deliberately avoids imposing restrictions on bus protocols with the |fastBus|.
-This enables user applications to freely determine the desired level of detail for vehicle network simulations.
-For example, a test participant can inject faulty frames without being blocked by |ProductName|.
-
 
 Simulation Basics
 -----------------
