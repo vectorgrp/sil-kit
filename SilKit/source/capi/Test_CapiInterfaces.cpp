@@ -64,6 +64,7 @@ constexpr uint64_t allSilkidIds[] = {
     SilKit_LifecycleConfiguration_STRUCT_VERSION,
     SilKit_WorkflowConfiguration_STRUCT_VERSION,
     SilKit_ParticipantConnectionInformation_STRUCT_VERSION,
+    SilKit_Experimental_ServiceDescriptor_STRUCT_VERSION,
     SilKit_Experimental_EventReceivers_STRUCT_VERSION,
     SilKit_Experimental_SimulatedNetworkFunctions_STRUCT_VERSION,
     SilKit_Experimental_SimulatedCanControllerFunctions_STRUCT_VERSION,
