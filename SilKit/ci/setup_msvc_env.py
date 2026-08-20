@@ -40,7 +40,7 @@ def main():
                         help='The version of the toolset to be used')
     args = parser.parse_args()
 
-    vs_path = find_VsDevCmd()
+    vsdevcmd_path = find_VsDevCmd()
 
     vsdevcmd = f'"{vsdevcmd_path}" -arch={args.arch} -host_arch={args.hostarch} -vcvars_ver={args.vcvars_ver}'
 
