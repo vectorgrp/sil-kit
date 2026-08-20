@@ -3,7 +3,9 @@
 // SPDX-License-Identifier: MIT
 
 #include <chrono>
+#include <condition_variable>
 #include <functional>
+#include <mutex>
 #include <string>
 
 #include "gmock/gmock.h"
@@ -59,6 +61,16 @@ protected: // CTor
                 [this](const SilKit::Core::IServiceEndpoint* /* from */,
                        const Services::Orchestration::NextSimTask& msg) { sentNextSimTasks.emplace_back(msg); });
 
+        CreateServices();
+    }
+
+protected: // Methods
+    //! Recreate the services under test, e.g. after changing healthCheckConfig.
+    void CreateServices()
+    {
+        timeSyncService.reset(); // holds a raw pointer to the lifecycle service
+        lifecycleService.reset();
+
         // this CTor calls CreateTimeSyncService implicitly
         lifecycleService = std::make_unique<LifecycleService>(&participant);
         lifecycleService->SetLifecycleConfiguration(LifecycleConfiguration{OperationMode::Coordinated});
@@ -67,7 +79,6 @@ protected: // CTor
         lifecycleService->SetTimeSyncService(timeSyncService.get());
     }
 
-protected: // Methods
     void PrepareLifecycle()
     {
         lifecycleService->SetTimeSyncActive(true);
@@ -329,6 +340,51 @@ TEST_F(Test_TimeSyncService, dynamic_step_driver_enables_without_peers)
     // Explicit true enables locally regardless of peers (and also advertises to them).
     timeSyncService->ConfigureDynamicStepSize(true);
     EXPECT_TRUE(timeSyncService->GetTimeConfiguration()->IsDynamicStepSizeEnabled());
+}
+
+TEST_F(Test_TimeSyncService, soft_time_limit_warning_reports_the_measured_timeout)
+{
+    healthCheckConfig.softResponseTimeout = 10ms;
+    CreateServices();
+
+    std::mutex mutex;
+    std::condition_variable warningArrived;
+    std::string warning;
+
+    // The watchdog warns from its own thread while the simulation step handler below is still running.
+    auto captureWarning = [&](const Services::Logging::LoggerMessage& msg) {
+        if (msg.GetLevel() != Services::Logging::Level::Warn)
+        {
+            return;
+        }
+
+        std::unique_lock<std::mutex> lock{mutex};
+        warning = msg.GetMsgString();
+        warningArrived.notify_all();
+    };
+    ON_CALL(participant.logger, ProcessLoggerMessage(_)).WillByDefault(captureWarning);
+
+    auto simulationStep = [&](std::chrono::nanoseconds, std::chrono::nanoseconds) {
+        std::unique_lock<std::mutex> lock{mutex};
+        warningArrived.wait_for(lock, 30s, [&] { return !warning.empty(); });
+    };
+    timeSyncService->SetSimulationStepHandler(simulationStep, 1ms);
+
+    PrepareLifecycle();
+    timeSyncService->ReceiveMsg(&endpoint, {0ms});
+
+    std::unique_lock<std::mutex> lock{mutex};
+    ASSERT_FALSE(warning.empty()) << "the watchdog should have warned about the exceeded soft time limit";
+    EXPECT_THAT(warning, HasSubstr("soft time limit"));
+    EXPECT_THAT(warning, Not(HasSubstr("{}"))) << "the timeout must be formatted into the message";
+
+    const std::string prefix{"after "};
+    const auto timeoutPos = warning.find(prefix);
+    ASSERT_NE(timeoutPos, std::string::npos) << warning;
+
+    double timeoutMs{-1.0};
+    ASSERT_NO_THROW(timeoutMs = std::stod(warning.substr(timeoutPos + prefix.size()))) << warning;
+    EXPECT_GT(timeoutMs, 0.0);
 }
 
 } // namespace

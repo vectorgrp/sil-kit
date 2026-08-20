@@ -8,6 +8,8 @@
 ## Fixed
 
 - Fix ITest_AsyncSimTask (test failed when run repeatedly)
+- Fix the `TimeSyncService` warning about an exceeded soft time limit, which showed a literal `{}` instead of the
+  measured timeout in milliseconds
 
 ## Changed
 
