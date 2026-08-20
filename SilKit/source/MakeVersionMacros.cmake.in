@@ -41,6 +41,9 @@ endif()
 file(READ ${gitHashFile} GIT_HEAD_HASH LIMIT 512)
 string(STRIP "${GIT_HEAD_HASH}" GIT_HEAD_HASH)
 message(STATUS "SIL Kit GIT Version: ${GIT_HEAD_HASH}")
+# Publish the hash beyond this local scope, so that the SBOM generation can record which commit
+# the artifacts were built from.
+set(SILKIT_GIT_HASH "${GIT_HEAD_HASH}" CACHE INTERNAL "Hash of the git HEAD of the source tree")
 configure_file(
     version_macros.hpp.in
     ${CMAKE_CURRENT_BINARY_DIR}/version_macros.hpp

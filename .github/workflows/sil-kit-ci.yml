@@ -28,6 +28,22 @@ jobs:
           sh ./SilKit/ci/check_licenses.sh
         shell: bash
 
+  check-thirdparty:
+    name: SBOM and third party notices are up to date
+    runs-on: ubuntu-22.04
+    steps:
+      # The check reads the submodule commits from the tree via 'git ls-tree' and the license texts
+      # from ThirdParty/licenses/, so the submodules themselves are not needed.
+      - uses: actions/checkout@v6
+        with:
+          submodules: false
+
+      - name: Check third party files
+        id: thirdparty-check
+        run: |
+          python3 ./SilKit/ci/generate_thirdparty.py --check
+        shell: bash
+
   check-run-builds:
     runs-on: ubuntu-22.04
     outputs:

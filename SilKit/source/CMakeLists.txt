@@ -41,6 +41,7 @@ elseif(EXISTS "${GIT_HEAD_FILE}")
 else()
     message(STATUS "SIL Kit: Cannot determine hash of current git head! GIT_HEAD_HASH will be set to UNKNOWN")
     set(GIT_HEAD_HASH "UNKNOWN")
+    set(SILKIT_GIT_HASH "UNKNOWN" CACHE INTERNAL "Hash of the git HEAD of the source tree")
     configure_file(
         version_macros.hpp.in
         ${CMAKE_CURRENT_BINARY_DIR}/version_macros.hpp
