@@ -81,6 +81,9 @@ public:
     inline void SetServiceId(SilKit::Core::EndpointId val);
 
     inline auto GetSupplementalData() const -> SupplementalData;
+    //! \brief Direct access to the supplemental data without copying. The reference is valid for the lifetime of this
+    //!        ServiceDescriptor.
+    inline auto GetSupplementalDataRef() const -> const SupplementalData&;
     inline void SetSupplementalData(SupplementalData val);
 
     inline bool GetSupplementalDataItem(const std::string& key, std::string& value) const;
@@ -222,6 +225,11 @@ void ServiceDescriptor::SetServiceId(SilKit::Core::EndpointId val)
 }
 
 auto ServiceDescriptor::GetSupplementalData() const -> SupplementalData
+{
+    return _supplementalData;
+}
+
+auto ServiceDescriptor::GetSupplementalDataRef() const -> const SupplementalData&
 {
     return _supplementalData;
 }
