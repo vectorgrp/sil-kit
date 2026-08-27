@@ -4,10 +4,17 @@
 ## Added
 
 - Add Integration Test for Timestamp Behavior
+- The documentation now lists every third party dependency found in the source tree with its
+  version and license on the Licenses page, followed by the full license text of each component
+  that ships one.
 
 ## Fixed
 
 - Fix ITest_AsyncSimTask (test failed when run repeatedly)
+- The third party license notices were incomplete. They now also cover components that are vendored
+  inside another dependency, such as c4core inside the rapidyaml sources, and the components that
+  ship inside the HTML documentation. `ThirdParty/LICENSES.rst` is generated from a software bill of
+  materials and is the file the documentation shows, so the two can no longer disagree.
 
 ## Changed
 
