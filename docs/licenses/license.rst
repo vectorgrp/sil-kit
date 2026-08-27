@@ -32,19 +32,21 @@ The |ProductName| itself is licensed with minimal restrictions (referred to as *
 	OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 	WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Software Bill of Materials
---------------------------
-
-A machine-readable inventory of the |ProductName| and its third party components is available as an
-SPDX 2.3 document at ``SilKit.spdx.json`` in the root of the source repository. It lists each
-component with its version, license, supplier and package URL, and records which part of the release
-the component ends up in. The table below is generated from the same source.
-
 Third-Party Licenses
 --------------------
+
+The |ProductName| uses the third party software components listed below. For each component the
+table gives the version found in the source tree and its SPDX license identifier. Where a component
+ships a license file, its full and unmodified text is reproduced underneath the table. For the few
+components that do not, the license is named in the table and its text is available from the
+component's own project.
+
+.. The table and the license texts below are ThirdParty/LICENSES.rst, which is generated from a
+   software bill of materials produced by scanning the source tree. It is the same file that ships
+   with the source distribution. Edit it only by regenerating it.
 
 .. contents::
    :local:
    :depth: 1
 
-.. include:: thirdparty.rst
+.. include:: ../../ThirdParty/LICENSES.rst

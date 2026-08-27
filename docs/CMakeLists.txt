@@ -44,6 +44,8 @@ set(SPHINX_INDEX_FILE ${SPHINX_BUILD}/index.html)
 file(GLOB_RECURSE SPHINX_SOURCE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.rst)
 file(GLOB_RECURSE SVG_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.svg)
 list(APPEND SPHINX_SOURCE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/_static/custom.css)
+# included by licenses/license.rst, and outside the glob above
+list(APPEND SPHINX_SOURCE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty/LICENSES.rst)
 
 if (UNIX)
   if (${SILKIT_WARNINGS_AS_ERRORS})
