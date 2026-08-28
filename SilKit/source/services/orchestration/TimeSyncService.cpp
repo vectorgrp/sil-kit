@@ -314,10 +314,11 @@ TimeSyncService::TimeSyncService(Core::IParticipantInternal* participant, ITimeP
     }
 
     _watchDog.SetWarnHandler([logger = _logger, type = this](std::chrono::milliseconds timeout) {
+        const auto timeoutMs = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(timeout).count();
 
         logger->MakeMessage(Logging::Level::Warn, TopicOf(*type))
-            .SetMessage("SimStep did not finish within soft time limit. Timeout detected after {} ms")
-            .AddKeyValue(Logging::Keys::timeoutTime, std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(timeout).count())
+            .SetMessage("SimStep did not finish within soft time limit. Timeout detected after {} ms", timeoutMs)
+            .AddKeyValue(Logging::Keys::timeoutTime, timeoutMs)
             .Dispatch();
     });
     _watchDog.SetErrorHandler([this](std::chrono::milliseconds timeout) {
@@ -514,9 +515,12 @@ void TimeSyncService::ReceiveMsg(const IServiceEndpoint* from, const NextSimTask
     }
     else
     {
+        const auto& participantName = from->GetServiceDescriptor().GetParticipantName();
+
         _logger->MakeMessage(Logging::Level::Trace, TopicOf(*this))
-            .SetMessage("Received NextSimTask from participant \'{}\' but TimeSyncPolicy is not yet configured")
-            .AddKeyValue(Logging::Keys::participantName, from->GetServiceDescriptor().GetParticipantName())
+            .SetMessage("Received NextSimTask from participant \'{}\' but TimeSyncPolicy is not yet configured",
+                        participantName)
+            .AddKeyValue(Logging::Keys::participantName, participantName)
             .Dispatch();
     }
 }
