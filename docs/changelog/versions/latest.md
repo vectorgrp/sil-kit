@@ -7,6 +7,9 @@
 - The documentation now lists every third party dependency found in the source tree with its
   version and license on the Licenses page, followed by the full license text of each component
   that ships one.
+- New CMake option `SILKIT_BUILD_GENERATE_VERSION` (default `ON`) to build the `sil-kit-generate-version` maintainer
+  tool. Turn it off when cross-compiling: the tool runs on the maintainer's machine, so building it for the target
+  architecture produces an unrunnable binary.
 
 ## Fixed
 
