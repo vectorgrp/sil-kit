@@ -4,6 +4,9 @@
 ## Added
 
 - Add Integration Test for Timestamp Behavior
+- New CMake option `SILKIT_BUILD_GENERATE_VERSION` (default `ON`) to build the `sil-kit-generate-version` maintainer
+  tool. Turn it off when cross-compiling: the tool runs on the maintainer's machine, so building it for the target
+  architecture produces an unrunnable binary.
 
 ## Fixed
 

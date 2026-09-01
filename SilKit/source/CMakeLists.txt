@@ -21,8 +21,8 @@ find_package(Threads REQUIRED)
 set(VERSION_MACROS_HPP "${CMAKE_CURRENT_LIST_DIR}/../include/silkit/capi/SilKitVersionMacros.h")
 if(NOT EXISTS "${VERSION_MACROS_HPP}")
     message(FATAL_ERROR
-        "SilKitVersionMacros.h not found. Build the sil-kit-generate-version target and run it"
-        " from the source tree root to create it:\n"
+        "SilKitVersionMacros.h not found. Configure with -DSILKIT_BUILD_GENERATE_VERSION=ON,"
+        " build the sil-kit-generate-version target, and run it from the source tree root:\n"
         "  sil-kit-generate-version\n"
         "See docs/development/release.md.")
 endif()
