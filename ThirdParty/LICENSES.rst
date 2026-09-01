@@ -2,6 +2,10 @@
    Do not edit it by hand; regenerate it from the SPDX document it was
    rendered from.
 
+   No copyright statement was recorded for: inplace_function.
+   Nothing the scan read named a holder for them. Where a licence
+   obliges one, it has to come from the component's own sources.
+
 .. list-table::
    :header-rows: 1
    :widths: 30 12 28
@@ -16,7 +20,7 @@
      - 0.2.6
      - MIT
    * - debugbreak
-     -
+     - 2025-06-25T08:30:32Z
      - BSD-2-Clause
    * - fast_float
      - 8.0.0
@@ -31,7 +35,7 @@
      - release-1.12.1
      - BSD-3-Clause
    * - inplace_function
-     -
+     - 2025-06-25T08:30:32Z
      - BSL-1.0
    * - `jQuery <https://jquery.com>`__
      - 3.6.0
@@ -46,7 +50,7 @@
      - 0.9.0
      - MIT
    * - rng
-     -
+     - 2025-06-25T08:30:32Z
      - MIT
    * - `Roboto Slab <https://fonts.google.com/specimen/Roboto+Slab>`__
      - 1.100263
@@ -64,7 +68,7 @@
 asio
 ~~~~
 
-::
+.. code-block:: none
 
    Copyright (c) 2003-2024 Christopher M. Kohlhoff (chris at kohlhoff dot com)
 
@@ -75,7 +79,7 @@ asio
 c4core
 ~~~~~~
 
-::
+.. code-block:: none
 
    // Copyright (c) 2018, Joao Paulo Magalhaes <dev@jpmag.me>
    //
@@ -101,7 +105,7 @@ c4core
 debugbreak
 ~~~~~~~~~~
 
-::
+.. code-block:: none
 
    /* Copyright (c) 2011-2021, Scott Tsai
     *
@@ -132,7 +136,7 @@ debugbreak
 fast_float
 ~~~~~~~~~~
 
-::
+.. code-block:: none
 
    // fast_float by Daniel Lemire
    // fast_float by João Paulo Magalhaes
@@ -185,7 +189,7 @@ fast_float
 fmt
 ~~~
 
-::
+.. code-block:: none
 
    Copyright (c) 2012 - present, Victor Zverovich and {fmt} contributors
 
@@ -219,7 +223,11 @@ fmt
 Font Awesome
 ~~~~~~~~~~~~
 
-::
+.. code-block:: none
+
+   Copyright Dave Gandy 2016. All rights reserved.
+
+.. code-block:: none
 
    Font Awesome 4.7.0 by @davegandy - http://fontawesome.io - @fontawesome
    License - http://fontawesome.io/license
@@ -342,7 +350,7 @@ Font Awesome
 googletest
 ~~~~~~~~~~
 
-::
+.. code-block:: none
 
    Copyright 2008, Google Inc.
    All rights reserved.
@@ -377,7 +385,7 @@ googletest
 inplace_function
 ~~~~~~~~~~~~~~~~
 
-::
+.. code-block:: none
 
    /*
     * Boost Software License - Version 1.0 - August 17th, 2003
@@ -408,7 +416,7 @@ inplace_function
 jQuery
 ~~~~~~
 
-::
+.. code-block:: none
 
    The MIT License (MIT)
 
@@ -436,7 +444,11 @@ jQuery
 Lato
 ~~~~
 
-::
+.. code-block:: none
+
+   Copyright (c) 2011-2015 by tyPoland Lukasz Dziedzic (http://www.typoland.com/) with Reserved Font Name "Lato". Licensed under the SIL Open Font License, Version 1.1 (http://scripts.sil.org/OFL).
+
+.. code-block:: none
 
    Copyright (c) 2010-2015 by tyPoland Lukasz Dziedzic (team@latofonts.com) with
    Reserved Font Name "Lato".
@@ -534,7 +546,11 @@ Lato
 oatpp
 ~~~~~
 
-::
+.. code-block:: none
+
+   Copyright 2018-present, Leonid Stryzhevskyi <lganzzzo@gmail.com>
+
+.. code-block:: none
 
                                     Apache License
                               Version 2.0, January 2004
@@ -742,7 +758,7 @@ oatpp
 rapidyaml
 ~~~~~~~~~
 
-::
+.. code-block:: none
 
     Copyright (c) 2018, Joao Paulo Magalhaes <dev@jpmag.me>
 
@@ -767,7 +783,7 @@ rapidyaml
 rng
 ~~~
 
-::
+.. code-block:: none
 
    /* Copyright (c) 2018 Arvid Gerstmann.
     *
@@ -778,7 +794,11 @@ rng
 Roboto Slab
 ~~~~~~~~~~~
 
-::
+.. code-block:: none
+
+   Font data copyright Google 2013
+
+.. code-block:: none
 
    Copyright (c) Google Inc.
 
@@ -990,7 +1010,7 @@ Roboto Slab
 spdlog
 ~~~~~~
 
-::
+.. code-block:: none
 
    The MIT License (MIT)
 
@@ -1023,7 +1043,11 @@ spdlog
 sphinx
 ~~~~~~
 
-::
+.. code-block:: none
+
+   Copyright (c) 2007-2023 by the Sphinx team (see AUTHORS file) | Copyright (C) 2008 Stefan van der Walt <stefan@mentat.za.net>, Pauli Virtanen <pav@iki.fi>
+
+.. code-block:: none
 
    License for Sphinx
    ==================
@@ -1097,7 +1121,7 @@ sphinx
 sphinx-rtd-theme
 ~~~~~~~~~~~~~~~~
 
-::
+.. code-block:: none
 
    The MIT License (MIT)
 
