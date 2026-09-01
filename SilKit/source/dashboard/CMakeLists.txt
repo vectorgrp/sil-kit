@@ -23,6 +23,10 @@ if(SILKIT_BUILD_DASHBOARD)
     endif ()
 
     add_library(O_SilKit_Dashboard STATIC
+        IDashboardInstance.hpp
+        IRestClient.hpp
+        CreateDashboardInstance.hpp
+
         client/DashboardPaths.hpp
         client/DashboardSystemServiceClient.cpp
         client/DashboardSystemServiceClient.hpp
@@ -30,7 +34,6 @@ if(SILKIT_BUILD_DASHBOARD)
 
         http/AsioHttpClient.cpp
         http/AsioHttpClient.hpp
-        http/FakeHttpServer.hpp
         http/HttpResponseParser.cpp
         http/HttpResponseParser.hpp
         http/HttpRetryPolicy.hpp
@@ -63,6 +66,8 @@ if(SILKIT_BUILD_DASHBOARD)
         SilKitEvent.hpp
 
         DashboardBulkUpdate.hpp
+        EventQueueWorkerThread.cpp
+        EventQueueWorkerThread.hpp
 
         DashboardInstance.cpp
         CreateDashboardInstance.cpp
@@ -91,77 +96,31 @@ if(SILKIT_BUILD_DASHBOARD)
     set_property(TARGET O_SilKit_Dashboard PROPERTY FOLDER "Dashboard")
 
 
-    add_silkit_test_to_executable(SilKitDashboardTests
-        SOURCES Test_DashboardSilKitEventQueue.cpp 
-        LIBS
-        S_SilKitImpl
-        O_SilKit_Dashboard
-        I_SilKit
+    # Every dashboard test links the same set, so register them from one list.
+    set(SILKIT_DASHBOARD_TEST_SOURCES
+        Test_DashboardEventQueueWorker.cpp
+        Test_DashboardSilKitEventQueue.cpp
+        client/Test_DashboardSystemServiceClient.cpp
+        http/Test_AsioHttpClient.cpp
+        http/Test_HttpResponseParser.cpp
+        http/Test_RetryingHttpClient.cpp
+        json/Test_DashboardJsonWriter.cpp
+        service/Test_DashboardDtoMapper.cpp
+        service/Test_DashboardRestClient.cpp
+        service/Test_DashboardShutdown.cpp
     )
 
-    add_silkit_test_to_executable(SilKitDashboardTests
-        SOURCES service/Test_DashboardShutdown.cpp
-        LIBS
-        S_SilKitImpl
-        O_SilKit_Dashboard
-        I_SilKit
-    )
+    target_sources(SilKitDashboardTests PRIVATE http/FakeHttpServer.hpp Mocks/MockRestClient.hpp)
 
-    add_silkit_test_to_executable(SilKitDashboardTests
-        SOURCES service/Test_DashboardRestClient.cpp 
-        LIBS
-        S_SilKitImpl
-        O_SilKit_Dashboard
-        I_SilKit
-    )
-
-    add_silkit_test_to_executable(SilKitDashboardTests
-        SOURCES service/Test_DashboardDtoMapper.cpp 
-        LIBS
-        S_SilKitImpl
-        O_SilKit_Dashboard
-        I_SilKit
-    )
-
-    add_silkit_test_to_executable(SilKitDashboardTests
-        SOURCES json/Test_DashboardJsonWriter.cpp
-        LIBS
-        S_SilKitImpl
-        O_SilKit_Dashboard
-        I_SilKit
-    )
-
-    add_silkit_test_to_executable(SilKitDashboardTests
-        SOURCES http/Test_HttpResponseParser.cpp
-        LIBS
-        S_SilKitImpl
-        O_SilKit_Dashboard
-        I_SilKit
-    )
-
-    add_silkit_test_to_executable(SilKitDashboardTests
-        SOURCES http/Test_RetryingHttpClient.cpp
-        LIBS
-        S_SilKitImpl
-        O_SilKit_Dashboard
-        I_SilKit
-    )
-
-    add_silkit_test_to_executable(SilKitDashboardTests
-        SOURCES http/Test_AsioHttpClient.cpp
-        LIBS
-        S_SilKitImpl
-        O_SilKit_Dashboard
-        I_SilKit
-    )
-
-    add_silkit_test_to_executable(SilKitDashboardTests
-        SOURCES client/Test_DashboardSystemServiceClient.cpp 
-        LIBS
-        S_SilKitImpl
-        O_SilKit_Dashboard
-        I_SilKit
-    )
+    foreach(testSource IN LISTS SILKIT_DASHBOARD_TEST_SOURCES)
+        add_silkit_test_to_executable(SilKitDashboardTests
+            SOURCES ${testSource}
+            LIBS
+            S_SilKitImpl
+            O_SilKit_Dashboard
+            I_SilKit
+        )
+    endforeach()
 
 else()
 

@@ -28,9 +28,6 @@ public:
 
     virtual void UpdateSimulation(uint64_t simulationId, const BulkSimulationDto& bulkSimulation) = 0;
     virtual void UpdateSimulationMetrics(uint64_t simulationId, const MetricsUpdateDto& metrics) = 0;
-
-    //! Probe whether the dashboard service supports the bulk-update endpoint.
-    virtual auto CheckBulkUpdateSupported() -> bool = 0;
 };
 
 } // namespace Dashboard

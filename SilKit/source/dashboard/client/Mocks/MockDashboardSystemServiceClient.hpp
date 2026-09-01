@@ -18,7 +18,6 @@ public:
                 (override));
     MOCK_METHOD(void, UpdateSimulation, (uint64_t simulationId, const BulkSimulationDto& bulkSimulation), (override));
     MOCK_METHOD(void, UpdateSimulationMetrics, (uint64_t simulationId, const MetricsUpdateDto& metrics), (override));
-    MOCK_METHOD(bool, CheckBulkUpdateSupported, (), (override));
 };
 
 } // namespace Dashboard

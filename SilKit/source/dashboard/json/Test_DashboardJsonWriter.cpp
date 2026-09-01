@@ -53,9 +53,9 @@ auto MakeController(uint64_t id, std::string name, std::string networkName) -> B
     return controller;
 }
 
-// --- the payload IsBulkUpdateSupported() probes with ------------------------------------------
+// --- an empty bulk update ---------------------------------------------------------------------
 
-TEST(Test_DashboardJsonWriter, BulkSimulationDto_Default_MatchesTheBulkUpdateProbePayload)
+TEST(Test_DashboardJsonWriter, BulkSimulationDto_Default)
 {
     EXPECT_EQ(ToJson(BulkSimulationDto{}),
               "{\"stopped\": null,\"system\": {\"statuses\": []},\"participants\": []}");

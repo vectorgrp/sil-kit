@@ -24,7 +24,6 @@ public:
     auto CreateSimulation(const SimulationCreationRequestDto& simulation) -> std::optional<uint64_t> override;
     void UpdateSimulation(uint64_t simulationId, const BulkSimulationDto& bulkSimulation) override;
     void UpdateSimulationMetrics(uint64_t simulationId, const MetricsUpdateDto& metrics) override;
-    auto CheckBulkUpdateSupported() -> bool override;
 
 private:
     void Log(const VSilKit::HttpResult& result, const std::string& message);

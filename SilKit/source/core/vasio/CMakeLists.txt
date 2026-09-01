@@ -8,6 +8,7 @@ add_library(O_SilKit_Core_VAsio OBJECT
     VAsioConnection.hpp
     VAsioConnection.cpp
 
+    IRegistryEventListener.hpp
     VAsioRegistry.hpp
     VAsioRegistry.cpp
 

@@ -32,7 +32,6 @@ public: // For testing
                         std::shared_ptr<IDashboardDtoMapper> mapper);
 
 public: // IRestClient
-    bool IsBulkUpdateSupported() override;
     uint64_t OnSimulationStart(const std::string& connectUri, uint64_t time) override;
 
     void OnBulkUpdate(uint64_t simulationId, const DashboardBulkUpdate& bulkUpdate) override;

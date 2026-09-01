@@ -4,7 +4,14 @@
 
 #pragma once
 
+#include <cstdint>
+#include <string>
+#include <type_traits>
+#include <utility>
+#include <variant>
+
 #include "silkit/services/orchestration/OrchestrationDatatypes.hpp"
+
 #include "core/service/ServiceDatatypes.hpp"
 #include "services/metrics/MetricsDatatypes.hpp"
 
@@ -27,6 +34,20 @@ struct SimulationEnd
     uint64_t time;
 };
 
+using MetricsUpdatePair = std::pair<std::string, VSilKit::MetricsUpdate>;
+
+//! Payload of a SilKitEvent. The alternatives are in the same order as SilKitEventType.
+using SilKitEventData =
+    std::variant<SimulationStart,                                                    //
+                 SilKit::Services::Orchestration::ParticipantConnectionInformation,  //
+                 SilKit::Services::Orchestration::SystemState,                       //
+                 SilKit::Services::Orchestration::ParticipantStatus,                 //
+                 ServiceData,                                                        //
+                 SimulationEnd,                                                      //
+                 MetricsUpdatePair>;
+
+//! Discriminator for SilKitEventData. Enumerator values must match the variant alternative order;
+//! the static_asserts below enforce that.
 enum class SilKitEventType
 {
     OnSimulationStart,
@@ -38,101 +59,52 @@ enum class SilKitEventType
     OnMetricUpdate,
 };
 
-template <SilKitEventType id>
-struct TypeIdTrait
+namespace Detail {
+
+template <SilKitEventType kType, typename T>
+constexpr auto EventTypeMatchesAlternative() -> bool
 {
-    static const SilKitEventType typeId = id;
-};
+    return std::is_same<std::variant_alternative_t<static_cast<size_t>(kType), SilKitEventData>, T>::value;
+}
 
-template <class T>
-struct SilKitEventTrait;
+} // namespace Detail
 
-#define SILKIT_EVENT(TYPENAME, SILKIT_EVENT_TYPE_ENUMERATOR) \
-    template <> \
-    struct SilKitEventTrait<TYPENAME> : TypeIdTrait<SilKitEventType::SILKIT_EVENT_TYPE_ENUMERATOR> \
-    { \
-    };
+static_assert(std::variant_size<SilKitEventData>::value == 7, "SilKitEventType and SilKitEventData disagree");
+static_assert(Detail::EventTypeMatchesAlternative<SilKitEventType::OnSimulationStart, SimulationStart>(), "");
+static_assert(Detail::EventTypeMatchesAlternative<
+                  SilKitEventType::OnParticipantConnected,
+                  SilKit::Services::Orchestration::ParticipantConnectionInformation>(),
+              "");
+static_assert(Detail::EventTypeMatchesAlternative<SilKitEventType::OnSystemStateChanged,
+                                                 SilKit::Services::Orchestration::SystemState>(),
+              "");
+static_assert(Detail::EventTypeMatchesAlternative<SilKitEventType::OnParticipantStatusChanged,
+                                                 SilKit::Services::Orchestration::ParticipantStatus>(),
+              "");
+static_assert(Detail::EventTypeMatchesAlternative<SilKitEventType::OnServiceDiscoveryEvent, ServiceData>(), "");
+static_assert(Detail::EventTypeMatchesAlternative<SilKitEventType::OnSimulationEnd, SimulationEnd>(), "");
+static_assert(Detail::EventTypeMatchesAlternative<SilKitEventType::OnMetricUpdate, MetricsUpdatePair>(), "");
 
-using MetricsUpdatePair = std::pair<std::string, VSilKit::MetricsUpdate>;
-
-SILKIT_EVENT(SimulationStart, OnSimulationStart)
-SILKIT_EVENT(SilKit::Services::Orchestration::ParticipantConnectionInformation, OnParticipantConnected)
-SILKIT_EVENT(SilKit::Services::Orchestration::SystemState, OnSystemStateChanged)
-SILKIT_EVENT(SilKit::Services::Orchestration::ParticipantStatus, OnParticipantStatusChanged)
-SILKIT_EVENT(ServiceData, OnServiceDiscoveryEvent)
-SILKIT_EVENT(SimulationEnd, OnSimulationEnd)
-SILKIT_EVENT(MetricsUpdatePair, OnMetricUpdate)
-
-#undef SILKIT_EVENT
-
+/*! One thing that happened in one simulation, queued for the dashboard worker thread.
+ *
+ *  Copyable and movable with the compiler-generated operations; the payload lives inline in the
+ *  variant, so enqueueing an event costs no allocation beyond the payload's own.
+ */
 class SilKitEvent
 {
 public:
     SilKitEvent() = delete;
 
-    SilKitEvent(const SilKitEvent& other)
-        : _type(other._type)
-        , _simulationName{other._simulationName}
-        , _data(other._clone(other._data))
-        , _clone(other._clone)
-        , _destroy(other._destroy)
-    {
-    }
-
-    SilKitEvent(SilKitEvent&& other) noexcept
-    {
-        swap(other);
-    }
-
-    ~SilKitEvent()
-    {
-        if (_destroy != nullptr)
-        {
-            _destroy(_data);
-        }
-    };
-
     template <typename T>
-    explicit SilKitEvent(std::string simulationName, const T& value)
-        : _type{getTypeId<T>()}
-        , _simulationName{std::move(simulationName)}
-        , _data{new T{value}}
-        , _clone([](void* otherData) -> void* { return new T(*static_cast<T*>(otherData)); })
-        , _destroy([](void* data) { delete static_cast<T*>(data); })
+    explicit SilKitEvent(std::string simulationName, T&& value)
+        : _simulationName{std::move(simulationName)}
+        , _data{std::forward<T>(value)}
     {
-    }
-
-    SilKitEvent& operator=(const SilKitEvent& other)
-    {
-        if (this == &other)
-        {
-            return *this;
-        }
-        if (_destroy != nullptr)
-        {
-            _destroy(_data);
-        }
-        _type = other._type;
-        _simulationName = other._simulationName;
-        _data = other._clone(other._data);
-        _clone = other._clone;
-        _destroy = other._destroy;
-        return *this;
-    }
-
-    SilKitEvent& operator=(SilKitEvent&& other) noexcept
-    {
-        if (this == &other)
-        {
-            return *this;
-        }
-        swap(other);
-        return *this;
     }
 
     auto Type() const -> SilKitEventType
     {
-        return _type;
+        return static_cast<SilKitEventType>(_data.index());
     }
 
     auto GetSimulationName() const -> const std::string&
@@ -140,82 +112,52 @@ public:
         return _simulationName;
     }
 
+    auto Data() const -> const SilKitEventData&
+    {
+        return _data;
+    }
+
+    // Typed accessors. Each throws std::bad_variant_access if the event holds a different type.
+
     auto GetSimulationStart() const -> const SimulationStart&
     {
-        return Get<SimulationStart>();
+        return std::get<SimulationStart>(_data);
     }
 
     auto GetParticipantConnectionInformation() const
         -> const SilKit::Services::Orchestration::ParticipantConnectionInformation&
     {
-        return Get<SilKit::Services::Orchestration::ParticipantConnectionInformation>();
+        return std::get<SilKit::Services::Orchestration::ParticipantConnectionInformation>(_data);
     }
 
     auto GetParticipantStatus() const -> const SilKit::Services::Orchestration::ParticipantStatus&
     {
-        return Get<SilKit::Services::Orchestration::ParticipantStatus>();
+        return std::get<SilKit::Services::Orchestration::ParticipantStatus>(_data);
     }
 
     auto GetSystemState() const -> const SilKit::Services::Orchestration::SystemState&
     {
-        return Get<SilKit::Services::Orchestration::SystemState>();
+        return std::get<SilKit::Services::Orchestration::SystemState>(_data);
     }
 
     auto GetServiceData() const -> const ServiceData&
     {
-        return Get<ServiceData>();
+        return std::get<ServiceData>(_data);
     }
 
     auto GetSimulationEnd() const -> const SimulationEnd&
     {
-        return Get<SimulationEnd>();
+        return std::get<SimulationEnd>(_data);
     }
 
-    auto GetMetricsUpdate() const -> const std::pair<std::string, VSilKit::MetricsUpdate>&
+    auto GetMetricsUpdate() const -> const MetricsUpdatePair&
     {
-        return Get<std::pair<std::string, VSilKit::MetricsUpdate>>();
+        return std::get<MetricsUpdatePair>(_data);
     }
 
 private:
-    template <typename T>
-    constexpr SilKitEventType getTypeId() const
-    {
-        return SilKitEventTrait<T>::typeId;
-    }
-
-    template <typename T>
-    inline const T& Get() const;
-
-    inline void swap(SilKitEvent& other) noexcept;
-
-private:
-    SilKitEventType _type{};
     std::string _simulationName;
-    void* _data{nullptr};
-    void* (*_clone)(void* otherData){nullptr};
-    void (*_destroy)(void* data){nullptr};
+    SilKitEventData _data;
 };
-
-template <typename T>
-const T& SilKitEvent::Get() const
-{
-    const auto tag = getTypeId<T>();
-    if (tag != _type)
-    {
-        throw SilKit::SilKitError("SilKitEvent::Get() Requested type does not match stored type.");
-    }
-
-    return *(reinterpret_cast<const T*>(_data));
-}
-
-void SilKitEvent::swap(SilKitEvent& other) noexcept
-{
-    using std::swap;
-    swap(_type, other._type);
-    swap(_simulationName, other._simulationName);
-    swap(_data, other._data);
-    swap(_clone, other._clone);
-    swap(_destroy, other._destroy);
-}
 
 } // namespace VSilKit

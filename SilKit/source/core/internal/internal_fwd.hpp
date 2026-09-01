@@ -12,6 +12,8 @@ class MetricsProcessor;
 class AsioGenericRawByteStream;
 class AsioHttpClient;
 class RetryingHttpClient;
+class DashboardInstance;
+class EventQueueWorkerThread;
 } // namespace VSilKit
 namespace SilKit {
 namespace Tracing {
@@ -21,7 +23,6 @@ class ReplayScheduler;
  namespace Dashboard {
 class DashboardRestClient;
 class DashboardSystemServiceClient;
-class DashboardInstance;
 } // namespace Dashboard
 namespace Experimental {
 namespace NetworkSimulation {

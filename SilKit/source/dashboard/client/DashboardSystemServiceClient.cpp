@@ -50,14 +50,6 @@ void DashboardSystemServiceClient::UpdateSimulationMetrics(uint64_t simulationId
     Log(result, "updating simulation metrics");
 }
 
-auto DashboardSystemServiceClient::CheckBulkUpdateSupported() -> bool
-{
-    // Deliberately unlogged: the previous implementation probed through the raw api client, which
-    // did not log either, and a failure here is reported by the caller instead.
-    const auto result = _httpClient->Post(Paths::UpdateSimulation(0), ToJson(BulkSimulationDto{}));
-    return !result.transportError && 200 <= result.statusCode && result.statusCode < 300;
-}
-
 void DashboardSystemServiceClient::Log(const VSilKit::HttpResult& result, const std::string& message)
 {
     if (result.transportError)

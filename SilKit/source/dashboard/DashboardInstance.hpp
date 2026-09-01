@@ -4,38 +4,42 @@
 
 #pragma once
 
-#include "dashboard/IDashboardInstance.hpp"
-#include "core/vasio/VAsioRegistry.hpp"
-
-#include "services/logging/LoggerMessage.hpp"
-
-#include "services/orchestration/SystemStateTracker.hpp"
-#include "dashboard/IRestClient.hpp"
-
-#include "dashboard/LockedQueue.hpp"
-#include "dashboard/SilKitEvent.hpp"
-
-#include <chrono>
-#include <future>
-#include <string>
+#include <atomic>
 #include <memory>
+#include <optional>
+#include <string>
 #include <thread>
 #include <unordered_map>
 
+#include "core/vasio/IRegistryEventListener.hpp"
+#include "services/orchestration/SystemStateTracker.hpp"
+#include "util/Uri.hpp"
+
+#include "dashboard/IDashboardInstance.hpp"
+#include "dashboard/IRestClient.hpp"
+#include "dashboard/LockedQueue.hpp"
+#include "dashboard/SilKitEvent.hpp"
 
 namespace VSilKit {
 
+/*! Forwards what the registry reports to the SIL Kit Dashboard's REST service.
+ *
+ *  Two threads are involved. The registry calls the IRegistryEventListener methods below from its
+ *  I/O thread; those only track per-simulation state and push onto _silKitEventQueue. A dedicated
+ *  worker thread ("SK-Dash-Cons") drains that queue, batches the events per simulation and performs
+ *  every HTTP request. The queue is the only synchronisation between the two.
+ *
+ *  IRegistryEventListener is inherited privately on purpose: the registry receives a listener
+ *  pointer from GetRegistryEventListener(), but the On* methods are not part of the public
+ *  IDashboardInstance surface.
+ */
 class DashboardInstance final
     : public IDashboardInstance
     , private SilKit::Core::IRegistryEventListener
 {
-    struct SimulationData
-    {
-        SystemStateTracker systemStateTracker;
-    };
-
 public:
-    explicit DashboardInstance();
+    //! Throws if dashboardUri is not a usable http URI, so a bad --dashboard-uri fails at creation.
+    explicit DashboardInstance(const std::string& dashboardUri);
 
     DashboardInstance(const DashboardInstance&) = delete;
     DashboardInstance(DashboardInstance&&) = delete;
@@ -46,14 +50,14 @@ public:
     ~DashboardInstance() override;
 
     auto GetRegistryEventListener() -> SilKit::Core::IRegistryEventListener* override;
-    void SetupDashboardConnection(const std::string& dashboardUri) override;
 
 private:
-    auto GetOrCreateSimulationData(const std::string& simulationName) -> SimulationData&;
-    void RemoveSimulationData(const std::string& simulationName);
-
-private:
-    void RunEventQueueWorkerThread();
+    /*! Connects to the dashboard and starts the worker thread.
+     *
+     *  Deferred until OnRegistryUri because the REST client needs the logger from OnLoggerCreated
+     *  and the events need the registry URI. Called once.
+     */
+    void StartWorker();
 
 private: // SilKit::Core::IRegistryEventListener
     void OnLoggerCreated(SilKit::Services::Logging::ILoggerInternal* logger) override;
@@ -71,21 +75,22 @@ private: // SilKit::Core::IRegistryEventListener
                          const VSilKit::MetricsUpdate& metricsUpdate) override;
 
 private:
+    const std::string _dashboardUri;
+
     /// Assigned in OnLoggerCreated
     SilKit::Services::Logging::ILoggerInternal* _logger{nullptr};
     /// Assigned in OnRegistryUri
-    std::unique_ptr<SilKit::Core::Uri> _registryUri;
+    std::optional<SilKit::Core::Uri> _registryUri;
 
-    std::shared_ptr<IRestClient> _dashboardRestClient;
+    std::unique_ptr<IRestClient> _dashboardRestClient;
     LockedQueue<SilKitEvent> _silKitEventQueue;
 
-    /// How long the destructor lets an in-flight dashboard request finish before aborting it.
-    std::chrono::milliseconds _shutdownGracePeriod{5000};
-
     std::thread _eventQueueWorkerThread;
-    std::promise<void> _eventQueueWorkerThreadAbort;
+    /// Read by the worker thread, set by the destructor.
+    std::atomic<bool> _abortWorker{false};
 
-    std::unordered_map<std::string, SimulationData> _simulationEventHandlers;
+    /// One tracker per live simulation, touched only from the registry's thread.
+    std::unordered_map<std::string, SystemStateTracker> _systemStateTrackers;
 };
 
 } // namespace VSilKit

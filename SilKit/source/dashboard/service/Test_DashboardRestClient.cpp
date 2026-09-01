@@ -127,15 +127,6 @@ TEST_F(Test_DashboardRestClient, OnMetricsUpdate_ForwardsTheMappedDtoWithTheSimu
     EXPECT_EQ(actualDtoJson, ToJson(expectedDto));
 }
 
-TEST_F(Test_DashboardRestClient, IsBulkUpdateSupported_DelegatesToTheServiceClient)
-{
-    EXPECT_CALL(*_mockServiceClient, CheckBulkUpdateSupported()).WillOnce(Return(true));
-
-    const auto service = CreateService();
-
-    EXPECT_TRUE(service->IsBulkUpdateSupported());
-}
-
 // The test constructor has no transport, so Abort() must still be safe to call.
 TEST_F(Test_DashboardRestClient, Abort_WithoutATransport_IsANoOp)
 {

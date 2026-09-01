@@ -266,7 +266,7 @@ TEST_F(Test_DashboardDtoMapper, CreateBulkSimulationDto)
     // Arrange
     DashboardBulkUpdate expectedBulkUpdate;
 
-    expectedBulkUpdate.stopped = std::make_unique<std::uint64_t>(12345u);
+    expectedBulkUpdate.stopped = std::uint64_t{12345u};
 
     const auto expectedSystemState0 = SilKit::Dashboard::SystemState::Shutdown;
     expectedBulkUpdate.systemStates.emplace_back(SilKit::Services::Orchestration::SystemState::Shutdown);

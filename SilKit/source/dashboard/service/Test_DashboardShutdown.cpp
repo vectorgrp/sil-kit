@@ -8,11 +8,10 @@
  *  over RetryingHttpClient over AsioHttpClient - against a loopback server, rather than mocks.
  *
  *  The case that matters is a dashboard server that accepts the connection and then never answers.
- *  IsBulkUpdateSupported() is the very first thing the registry's dashboard worker thread does, so
- *  before this rework that request blocked forever: oatpp set no socket timeouts, and the abort hook
- *  the destructor called ran only after the worker thread had already been joined. The registry
- *  therefore hung on shutdown. Both halves of the fix are covered here: the request is now bounded
- *  by a read deadline, and Abort() can cut it short from another thread.
+ *  Before this rework such a request blocked forever: oatpp set no socket timeouts, and the abort
+ *  hook the destructor called ran only after the worker thread had already been joined, so the
+ *  registry hung on shutdown. Both halves of the fix are covered here: the request is bounded by a
+ *  read deadline, and Abort() can cut it short from another thread.
  */
 
 #include <chrono>
@@ -55,7 +54,7 @@ public:
     NiceMock<Core::Tests::MockLogger> _dummyLogger;
 };
 
-TEST_F(Test_DashboardShutdown, IsBulkUpdateSupported_AgainstASilentServer_CanBeAborted)
+TEST_F(Test_DashboardShutdown, OnSimulationStart_AgainstASilentServer_CanBeAborted)
 {
     FakeHttpServer server{FakeHttpServer::Always("")}; // accepts, never answers
 
@@ -67,39 +66,39 @@ TEST_F(Test_DashboardShutdown, IsBulkUpdateSupported_AgainstASilentServer_CanBeA
     }};
 
     const auto start = std::chrono::steady_clock::now();
-    const auto supported = client->IsBulkUpdateSupported();
+    const auto simulationId = client->OnSimulationStart("silkit://localhost:8500", 0);
     const auto elapsed = std::chrono::steady_clock::now() - start;
     aborter.join();
 
-    EXPECT_FALSE(supported);
-    EXPECT_LT(elapsed, kGenerousBound) << "Abort() must unblock the in-flight probe";
+    EXPECT_EQ(simulationId, 0u);
+    EXPECT_LT(elapsed, kGenerousBound) << "Abort() must unblock the in-flight request";
 }
 
-TEST_F(Test_DashboardShutdown, IsBulkUpdateSupported_WithNothingListening_FailsWithoutHanging)
+TEST_F(Test_DashboardShutdown, OnSimulationStart_WithNothingListening_FailsWithoutHanging)
 {
     // Port 1 is reserved and never has a listener.
     const auto client = CreateClient(1);
 
     const auto start = std::chrono::steady_clock::now();
-    const auto supported = client->IsBulkUpdateSupported();
+    const auto simulationId = client->OnSimulationStart("silkit://localhost:8500", 0);
     const auto elapsed = std::chrono::steady_clock::now() - start;
 
-    EXPECT_FALSE(supported);
+    EXPECT_EQ(simulationId, 0u);
     EXPECT_LT(elapsed, kGenerousBound);
 }
 
 TEST_F(Test_DashboardShutdown, Abort_IsIdempotentAndSafeBeforeAnyRequest)
 {
-    FakeHttpServer server{FakeHttpServer::Always(FakeHttpServer::MakeReply(200, "{}"))};
+    FakeHttpServer server{FakeHttpServer::Always(FakeHttpServer::MakeReply(201, R"({"id":1})"))};
 
     const auto client = CreateClient(server.Port());
 
     client->Abort();
     client->Abort();
 
-    // Once aborted the client stays aborted, so the probe fails fast instead of contacting a server
+    // Once aborted the client stays aborted, so the request fails fast instead of reaching a server
     // that would have answered.
-    EXPECT_FALSE(client->IsBulkUpdateSupported());
+    EXPECT_EQ(client->OnSimulationStart("silkit://localhost:8500", 0), 0u);
 }
 
 TEST_F(Test_DashboardShutdown, Destruction_AfterAnAbortedRequest_DoesNotBlock)
@@ -113,7 +112,7 @@ TEST_F(Test_DashboardShutdown, Destruction_AfterAnAbortedRequest_DoesNotBlock)
             std::this_thread::sleep_for(200ms);
             client->Abort();
         }};
-        client->IsBulkUpdateSupported();
+        client->OnSimulationStart("silkit://localhost:8500", 0);
         aborter.join();
     }
     const auto elapsed = std::chrono::steady_clock::now() - start;

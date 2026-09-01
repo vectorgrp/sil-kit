@@ -60,11 +60,6 @@ void DashboardRestClient::Abort()
     }
 }
 
-bool DashboardRestClient::IsBulkUpdateSupported()
-{
-    return _serviceClient->CheckBulkUpdateSupported();
-}
-
 uint64_t DashboardRestClient::OnSimulationStart(const std::string& connectUri, uint64_t time)
 {
     _logger->MakeMessage(Level::Info, TopicOf(*this))
