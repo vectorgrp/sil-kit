@@ -174,11 +174,23 @@ TEST(Test_Util_GenerateVersion, RenderedHeaderIsAsciiLfAndRoundTrips)
     EXPECT_EQ(ParseGitHashFromHeader(header), "deadbeef");
 }
 
-TEST(Test_Util_GenerateVersion, BuildNumberIsOnlyAFallbackInTheHeader)
+// The build number and git hash are properties of a build, supplied by CMake as
+// -DSILKIT_BUILD_NUMBER=N and -DSILKIT_GIT_HASH=<hash>. The header must guard
+// both, or the definitions could never take effect.
+void ExpectGuardedFallback(const std::string& header, const std::string& macroName)
 {
-    // The build number is a property of a build, supplied by CMake as
-    // -DSILKIT_BUILD_NUMBER=N. The header must not pin it, or the definition
-    // could never take effect.
+    const auto guard = header.find("#ifndef " + macroName);
+    const auto define = header.find("#define " + macroName);
+    EXPECT_NE(guard, std::string::npos) << macroName << " is not guarded by #ifndef";
+    EXPECT_LT(guard, define) << macroName << " is defined before its guard";
+
+    // Exactly one define, so nothing pins the value unconditionally.
+    EXPECT_EQ(header.find("#define " + macroName, define + 1), std::string::npos)
+        << macroName << " is defined more than once";
+}
+
+TEST(Test_Util_GenerateVersion, BuildInputsAreOnlyFallbacksInTheHeader)
+{
     Version version;
     version.major = 5;
     version.minor = 0;
@@ -186,14 +198,14 @@ TEST(Test_Util_GenerateVersion, BuildNumberIsOnlyAFallbackInTheHeader)
 
     const auto header = RenderHeader("abc", version);
 
-    EXPECT_NE(header.find("#ifndef SILKIT_BUILD_NUMBER"), std::string::npos);
-    EXPECT_NE(header.find("#define SILKIT_BUILD_NUMBER 0"), std::string::npos);
-    EXPECT_NE(header.find("#endif"), std::string::npos);
+    ExpectGuardedFallback(header, "SILKIT_BUILD_NUMBER");
+    ExpectGuardedFallback(header, "SILKIT_GIT_HASH");
 
-    // The guarded define is the only one, and it comes after the #ifndef.
-    EXPECT_LT(header.find("#ifndef SILKIT_BUILD_NUMBER"), header.find("#define SILKIT_BUILD_NUMBER"));
-    EXPECT_EQ(header.find("#define SILKIT_BUILD_NUMBER", header.find("#define SILKIT_BUILD_NUMBER") + 1),
-              std::string::npos);
+    EXPECT_NE(header.find("#define SILKIT_BUILD_NUMBER 0"), std::string::npos);
+    EXPECT_EQ(ParseGitHashFromHeader(header), "abc");
+
+    // The version itself is not guarded: it is source tree state.
+    EXPECT_EQ(header.find("#ifndef SILKIT_VERSION_MAJOR"), std::string::npos);
 }
 
 TEST(Test_Util_GenerateVersion, RenderedHeaderIsStable)
