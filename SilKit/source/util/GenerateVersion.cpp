@@ -28,19 +28,29 @@ constexpr auto kHeaderTemplate = R"(// SPDX-FileCopyrightText: 2022 Vector Infor
 #define SILKIT_VERSION_MAJOR @MAJOR@
 #define SILKIT_VERSION_MINOR @MINOR@
 #define SILKIT_VERSION_PATCH @PATCH@
-#define SILKIT_VERSION_STRING "@VERSION_STRING@"
-#define SILKIT_VERSION_SUFFIX "@SUFFIX@"
 
-// The build number and the git hash describe a build, not the source tree, so
-// CMake supplies them: -DSILKIT_BUILD_NUMBER=N and -DSILKIT_BUILD_GIT_HASH=<hash>.
-// The values below are the fallbacks. The hash is the commit that was HEAD when
-// this file was generated, i.e. the parent of the version bump.
+// Everything below describes a build rather than the source tree, so CMake
+// supplies it and the values here are only fallbacks:
+//   -DSILKIT_BUILD_NUMBER=N         stamps a build number
+//   -DSILKIT_BUILD_GIT_HASH=<hash>  the commit actually built; the fallback is
+//                                   the commit that was HEAD when this file was
+//                                   generated, i.e. the parent of the bump
+//   -DSILKIT_VERSION_SUFFIX=rc1     marks a pre-release, which also changes
+//                                   SILKIT_VERSION_STRING to "@VERSION_STRING@-rc1"
 #ifndef SILKIT_BUILD_NUMBER
 #define SILKIT_BUILD_NUMBER 0
 #endif
 
 #ifndef SILKIT_GIT_HASH
 #define SILKIT_GIT_HASH "@GIT_HASH@"
+#endif
+
+#ifndef SILKIT_VERSION_SUFFIX
+#define SILKIT_VERSION_SUFFIX ""
+#endif
+
+#ifndef SILKIT_VERSION_STRING
+#define SILKIT_VERSION_STRING "@VERSION_STRING@"
 #endif
 )";
 
@@ -61,12 +71,6 @@ void SubstituteVar(std::string& s, const std::string& name, const std::string& v
 std::regex CMakeIntSetter(const std::string& variable)
 {
     return std::regex{"(set[ \t]*\\([ \t]*" + variable + "[ \t]+)([0-9]+)"};
-}
-
-// set(SILKIT_VERSION_SUFFIX "rc1")
-std::regex CMakeStringSetter(const std::string& variable)
-{
-    return std::regex{"(set[ \t]*\\([ \t]*" + variable + "[ \t]+\")([^\"]*)(\")"};
 }
 
 int MatchCMakeInt(const std::string& content, const std::regex& re)
@@ -120,14 +124,9 @@ bool ReplaceCapture(std::string& content, const std::regex& re, int group, const
 
 } // namespace
 
-std::string Version::ToShortString() const
-{
-    return std::to_string(major) + "." + std::to_string(minor) + "." + std::to_string(patch);
-}
-
 std::string Version::ToString() const
 {
-    return ToShortString() + (suffix.empty() ? "" : "-" + suffix);
+    return std::to_string(major) + "." + std::to_string(minor) + "." + std::to_string(patch);
 }
 
 Version ParseVersionFromCMake(const std::string& content)
@@ -136,12 +135,6 @@ Version ParseVersionFromCMake(const std::string& content)
     version.major = MatchCMakeInt(content, CMakeIntSetter("SILKIT_VERSION_MAJOR"));
     version.minor = MatchCMakeInt(content, CMakeIntSetter("SILKIT_VERSION_MINOR"));
     version.patch = MatchCMakeInt(content, CMakeIntSetter("SILKIT_VERSION_PATCH"));
-
-    std::smatch match;
-    if (std::regex_search(content, match, CMakeStringSetter("SILKIT_VERSION_SUFFIX")))
-    {
-        version.suffix = match[2].str();
-    }
     return version;
 }
 
@@ -151,7 +144,6 @@ Version ParseVersionFromHeader(const std::string& content)
     version.major = DefineInt(content, "SILKIT_VERSION_MAJOR");
     version.minor = DefineInt(content, "SILKIT_VERSION_MINOR");
     version.patch = DefineInt(content, "SILKIT_VERSION_PATCH");
-    DefineString(content, "SILKIT_VERSION_SUFFIX", version.suffix);
     return version;
 }
 
@@ -191,12 +183,6 @@ bool PatchCMakeVersion(std::string& content, const Version& version, std::string
         }
     }
 
-    if (!ReplaceCapture(result, CMakeStringSetter("SILKIT_VERSION_SUFFIX"), 2, version.suffix))
-    {
-        error = "no 'set(SILKIT_VERSION_SUFFIX \"...\")' found";
-        return false;
-    }
-
     content = result;
     return true;
 }
@@ -209,7 +195,6 @@ std::string RenderHeader(const std::string& gitHash, const Version& version)
     SubstituteVar(result, "MINOR", std::to_string(version.minor));
     SubstituteVar(result, "PATCH", std::to_string(version.patch));
     SubstituteVar(result, "VERSION_STRING", version.ToString());
-    SubstituteVar(result, "SUFFIX", version.suffix);
     return result;
 }
 
@@ -237,7 +222,7 @@ std::string RenderChangelogStub(const Version& version)
 
 bool InsertChangelogToctreeEntry(std::string& content, const Version& version, std::string& error)
 {
-    const std::string entry = "versions/" + version.ToShortString() + ".md";
+    const std::string entry = "versions/" + version.ToString() + ".md";
     if (content.find(entry) != std::string::npos)
     {
         error = "'" + entry + "' is already listed";

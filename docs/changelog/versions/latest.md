@@ -19,10 +19,11 @@
 - `SilKitVersionMacros.h` is now committed to the source tree instead of being generated at CMake configure time.
   The new `sil-kit-generate-version` maintainer tool regenerates it and performs a complete version bump
   (`SilKitVersion.cmake`, the generated header and the changelog) in one step. See `docs/development/release.md`.
-- The build number and git hash are now build-time settings (`cmake -DSILKIT_BUILD_NUMBER=N`,
-  `-DSILKIT_BUILD_GIT_HASH=<hash>`) rather than values stored in the source tree. The generated header carries only
-  `#ifndef` fallbacks, so a build that passes its own hash makes `SilKit::Version::GitHash()` report the commit
-  actually built instead of the commit the header was generated at.
+- The build number, git hash and pre-release suffix are now build-time settings (`cmake -DSILKIT_BUILD_NUMBER=N`,
+  `-DSILKIT_BUILD_GIT_HASH=<hash>`, `-DSILKIT_VERSION_SUFFIX=rc1`) rather than values stored in the source tree.
+  The generated header carries only `#ifndef` fallbacks, so a build that passes its own hash makes
+  `SilKit::Version::GitHash()` report the commit actually built, and a build that sets a suffix reports
+  `5.0.8-rc1` from `SilKit::Version::String()` and in the CPack archive name.
 - Changes to the SIL KIT MSI installer: 
   - Default installation path changed from `<ProgramFilesFolder>\Vector SIL Kit <VERSION>` to `<ProgramFilesFolder>\SIL Kit <VERSION>`
   - Windows System Service Name changed from `VectorSilKitRegistry` to `SilKitRegistry`

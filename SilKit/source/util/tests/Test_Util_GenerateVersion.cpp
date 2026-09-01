@@ -68,7 +68,6 @@ TEST(Test_Util_GenerateVersion, ParseVersionFromCmake)
     EXPECT_EQ(version.major, 5);
     EXPECT_EQ(version.minor, 0);
     EXPECT_EQ(version.patch, 8);
-    EXPECT_EQ(version.suffix, "");
     EXPECT_EQ(version.ToString(), "5.0.8");
 }
 
@@ -77,7 +76,7 @@ TEST(Test_Util_GenerateVersion, ParseVersionFromCmakeIgnoresBuildNumber)
     // SILKIT_BUILD_NUMBER carries a CACHE clause and must not be mistaken for a
     // version component.
     const auto version = ParseVersionFromCMake(kCMakeVersion);
-    EXPECT_EQ(version.ToShortString(), "5.0.8");
+    EXPECT_EQ(version.ToString(), "5.0.8");
 }
 
 TEST(Test_Util_GenerateVersion, ParseVersionFromCmakeWithoutVersionIsInvalid)
@@ -118,7 +117,6 @@ TEST(Test_Util_GenerateVersion, PatchCmakeVersionOnlyTouchesTheVersionLines)
     version.major = 6;
     version.minor = 1;
     version.patch = 2;
-    version.suffix = "rc1";
 
     std::string content{kCMakeVersion};
     std::string error;
@@ -127,14 +125,15 @@ TEST(Test_Util_GenerateVersion, PatchCmakeVersionOnlyTouchesTheVersionLines)
     EXPECT_NE(content.find("set(SILKIT_VERSION_MAJOR 6)"), std::string::npos);
     EXPECT_NE(content.find("set(SILKIT_VERSION_MINOR 1)"), std::string::npos);
     EXPECT_NE(content.find("set(SILKIT_VERSION_PATCH 2)"), std::string::npos);
-    EXPECT_NE(content.find("set(SILKIT_VERSION_SUFFIX \"rc1\")"), std::string::npos);
 
-    // Everything else survives verbatim.
+    // Everything else survives verbatim, the suffix included: it is a build
+    // input now, not something a version bump rewrites.
+    EXPECT_NE(content.find("set(SILKIT_VERSION_SUFFIX \"\")"), std::string::npos);
     EXPECT_NE(content.find("set(SILKIT_BUILD_NUMBER 0 CACHE STRING \"The build number\")"), std::string::npos);
     EXPECT_NE(content.find("macro(configure_silkit_version project_name)"), std::string::npos);
     EXPECT_NE(content.find("${SILKIT_VERSION_MAJOR}.${SILKIT_VERSION_MINOR}"), std::string::npos);
 
-    EXPECT_EQ(ParseVersionFromCMake(content).ToString(), "6.1.2-rc1");
+    EXPECT_EQ(ParseVersionFromCMake(content).ToString(), "6.1.2");
 }
 
 TEST(Test_Util_GenerateVersion, PatchCmakeVersionReportsAMissingSetter)
@@ -156,7 +155,6 @@ TEST(Test_Util_GenerateVersion, RenderedHeaderIsAsciiLfAndRoundTrips)
     version.major = 5;
     version.minor = 0;
     version.patch = 9;
-    version.suffix = "rc2";
 
     const auto header = RenderHeader("deadbeef", version);
 
@@ -167,16 +165,16 @@ TEST(Test_Util_GenerateVersion, RenderedHeaderIsAsciiLfAndRoundTrips)
     }
     EXPECT_EQ(header.find('\r'), std::string::npos) << "the generated header must use LF line endings";
 
-    EXPECT_NE(header.find("#define SILKIT_VERSION_STRING \"5.0.9-rc2\""), std::string::npos);
+    EXPECT_NE(header.find("#define SILKIT_VERSION_STRING \"5.0.9\""), std::string::npos);
     EXPECT_NE(header.find("DO NOT EDIT"), std::string::npos);
 
-    EXPECT_EQ(ParseVersionFromHeader(header).ToString(), "5.0.9-rc2");
+    EXPECT_EQ(ParseVersionFromHeader(header).ToString(), "5.0.9");
     EXPECT_EQ(ParseGitHashFromHeader(header), "deadbeef");
 }
 
-// The build number and git hash are properties of a build, supplied by CMake as
-// -DSILKIT_BUILD_NUMBER=N and -DSILKIT_GIT_HASH=<hash>. The header must guard
-// both, or the definitions could never take effect.
+// The build number, git hash and pre-release suffix are properties of a build,
+// supplied by CMake. The header must guard each of them, or the definitions
+// could never take effect.
 void ExpectGuardedFallback(const std::string& header, const std::string& macroName)
 {
     const auto guard = header.find("#ifndef " + macroName);
@@ -200,12 +198,17 @@ TEST(Test_Util_GenerateVersion, BuildInputsAreOnlyFallbacksInTheHeader)
 
     ExpectGuardedFallback(header, "SILKIT_BUILD_NUMBER");
     ExpectGuardedFallback(header, "SILKIT_GIT_HASH");
+    ExpectGuardedFallback(header, "SILKIT_VERSION_SUFFIX");
+    // Guarded too, because a pre-release suffix changes it to "5.0.8-rc1".
+    ExpectGuardedFallback(header, "SILKIT_VERSION_STRING");
 
     EXPECT_NE(header.find("#define SILKIT_BUILD_NUMBER 0"), std::string::npos);
+    EXPECT_NE(header.find("#define SILKIT_VERSION_SUFFIX \"\""), std::string::npos);
     EXPECT_EQ(ParseGitHashFromHeader(header), "abc");
 
-    // The version itself is not guarded: it is source tree state.
+    // The version numbers are not guarded: they are source tree state.
     EXPECT_EQ(header.find("#ifndef SILKIT_VERSION_MAJOR"), std::string::npos);
+    EXPECT_EQ(header.find("#ifndef SILKIT_VERSION_PATCH"), std::string::npos);
 }
 
 TEST(Test_Util_GenerateVersion, RenderedHeaderIsStable)

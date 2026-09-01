@@ -251,7 +251,6 @@ void PrintUsage(const char* prog)
               << "  --major N          New version major (requires --minor and --patch)\n"
               << "  --minor N          New version minor\n"
               << "  --patch N          New version patch\n"
-              << "  --suffix S         Version suffix, e.g. rc1 (default: keep current)\n"
               << "  --date YYYY-MM-DD  Release date for the archived changelog entry\n"
               << "                     (default: today)\n"
               << "  --source-dir PATH  Source tree root (default: search upward from CWD)\n"
@@ -280,8 +279,6 @@ struct Options
     int major{-1};
     int minor{-1};
     int patch{-1};
-    bool haveSuffix{false};
-    std::string suffix;
     std::string date;
     fs::path sourceDir;
     fs::path gitDir;
@@ -326,11 +323,6 @@ bool ParseOptions(int argc, char* argv[], Options& options)
         else if (arg == "--patch")
         {
             options.patch = std::atoi(requireNext().c_str());
-        }
-        else if (arg == "--suffix")
-        {
-            options.suffix = requireNext();
-            options.haveSuffix = true;
         }
         else if (arg == "--date")
         {
@@ -430,7 +422,7 @@ int RunCheck(const Layout& layout, const fs::path& headerPath, const Version& cm
         std::cerr << "error: " << Show(headerPath) << " has no usable version macros\n";
         return 1;
     }
-    if (!headerVersion.SameNumbers(cmakeVersion) || headerVersion.suffix != cmakeVersion.suffix)
+    if (headerVersion != cmakeVersion)
     {
         std::cerr << "error: version drift\n"
                   << "  " << Show(layout.cmakeVersionFile) << ": " << cmakeVersion.ToString() << "\n"
@@ -509,13 +501,8 @@ int main(int argc, char* argv[])
         newVersion.minor = options.minor;
         newVersion.patch = options.patch;
     }
-    if (options.haveSuffix)
-    {
-        newVersion.suffix = options.suffix;
-    }
 
-    const bool bumping = !newVersion.SameNumbers(currentVersion);
-    const bool cmakeChanged = bumping || newVersion.suffix != currentVersion.suffix;
+    const bool bumping = newVersion != currentVersion;
 
     // --- guard the output header --------------------------------------------
 
@@ -532,7 +519,7 @@ int main(int argc, char* argv[])
 
         // Report drift instead of silently taking the header's word for it.
         const Version headerVersion = SilKit::VersionGen::ParseVersionFromHeader(existing);
-        if (headerVersion.IsValid() && !headerVersion.SameNumbers(currentVersion))
+        if (headerVersion.IsValid() && headerVersion != currentVersion)
         {
             std::cout << "note: header was at " << headerVersion.ToString() << ", " << Show(layout.cmakeVersionFile)
                       << " says " << currentVersion.ToString() << "; using the latter\n";
@@ -565,7 +552,7 @@ int main(int argc, char* argv[])
     std::vector<PlannedWrite> writes;
     const bool rotating = bumping && !options.noChangelog;
 
-    if (cmakeChanged)
+    if (bumping)
     {
         std::string error;
         if (!SilKit::VersionGen::PatchCMakeVersion(cmakeContent, newVersion, error))
@@ -579,7 +566,7 @@ int main(int argc, char* argv[])
 
     if (rotating)
     {
-        const fs::path archiveMd = layout.versionsDir / (currentVersion.ToShortString() + ".md");
+        const fs::path archiveMd = layout.versionsDir / (currentVersion.ToString() + ".md");
 
         if (!fs::exists(layout.latestMd))
         {
@@ -620,7 +607,7 @@ int main(int argc, char* argv[])
         if (SilKit::VersionGen::InsertChangelogToctreeEntry(overviewContent, currentVersion, error))
         {
             writes.push_back({layout.overviewRst, overviewContent,
-                              "changelog: list " + currentVersion.ToShortString() + ".md in the toctree"});
+                              "changelog: list " + currentVersion.ToString() + ".md in the toctree"});
         }
         else if (!options.force)
         {
