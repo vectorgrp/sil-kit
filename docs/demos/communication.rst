@@ -206,8 +206,8 @@ Executables
     * ``SilKitDemoLinMaster``
     * ``SilKitDemoLinSlave``
 Sources
-    * :repo-link:`LinMasterDemo.cpp <Demos/communication/Ethernet/LinMasterDemo.cpp>`
-    * :repo-link:`LinSlaveDemo.cpp <Demos/communication/Ethernet/LinSlaveDemo.cpp>`
+    * :repo-link:`LinMasterDemo.cpp <Demos/communication/Lin/LinMasterDemo.cpp>`
+    * :repo-link:`LinSlaveDemo.cpp <Demos/communication/Lin/LinSlaveDemo.cpp>`
 Requirements
     * :ref:`sil-kit-registry<sec:util-registry>`
     * :ref:`sil-kit-system-controller<sec:util-system-controller>` (not needed for unsynchronized execution)
