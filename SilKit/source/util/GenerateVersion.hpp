@@ -76,7 +76,8 @@ std::string RenderChangelogStub(const Version& version);
 // false and fills 'error' if the anchor is missing or the entry already exists.
 bool InsertChangelogToctreeEntry(std::string& content, const Version& version, std::string& error);
 
-// Today's date as YYYY-MM-DD in local time.
+// Today's date as YYYY-MM-DD in local time, or "" if the clock cannot be
+// formatted.
 std::string TodayIsoDate();
 
 // True if the content uses CRLF line endings. The working tree may be either,
