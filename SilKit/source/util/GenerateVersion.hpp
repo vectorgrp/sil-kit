@@ -20,26 +20,28 @@ struct Version
     int major{-1};
     int minor{-1};
     int patch{-1};
-    std::string suffix;
 
     bool IsValid() const
     {
         return major >= 0 && minor >= 0 && patch >= 0;
     }
 
-    // "5.0.8", without the suffix
-    std::string ToShortString() const;
-
-    // "5.0.8" or "5.0.8-rc1"
+    // "5.0.8". There is no suffix here: a pre-release suffix describes a build
+    // and is supplied by CMake, not stored in the source tree.
     std::string ToString() const;
 
-    bool SameNumbers(const Version& other) const
+    bool operator==(const Version& other) const
     {
         return major == other.major && minor == other.minor && patch == other.patch;
     }
+
+    bool operator!=(const Version& other) const
+    {
+        return !(*this == other);
+    }
 };
 
-// Parses SILKIT_VERSION_{MAJOR,MINOR,PATCH,SUFFIX} out of the contents of
+// Parses SILKIT_VERSION_{MAJOR,MINOR,PATCH} out of the contents of
 // SilKit/cmake/SilKitVersion.cmake. Returns an invalid Version if a number is
 // missing.
 Version ParseVersionFromCMake(const std::string& content);
@@ -59,8 +61,9 @@ bool LooksLikeGeneratedHeader(const std::string& content);
 // expected lines is missing.
 bool PatchCMakeVersion(std::string& content, const Version& version, std::string& error);
 
-// Renders the full SilKitVersionMacros.h. The build number is deliberately not
-// a parameter: it is a build-time CMake definition, not source tree state.
+// Renders the full SilKitVersionMacros.h. 'gitHash' is written as the fallback
+// value. The build number and pre-release suffix are not parameters at all:
+// CMake supplies those at build time.
 std::string RenderHeader(const std::string& gitHash, const Version& version);
 
 // Rewrites the leading '# [x.y.z] - UNRELEASED' heading of a changelog entry to
