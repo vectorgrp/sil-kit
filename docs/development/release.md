@@ -52,6 +52,12 @@ The tool is standalone: C++17 and the standard library only, no SIL Kit
 dependencies, and it reads the git hash out of `.git` without invoking `git`.
 It has to be, because it generates a header the library itself is built from.
 
+It is built by default and is never installed or packaged.
+`-DSILKIT_BUILD_GENERATE_VERSION=OFF` skips it, which is what a cross-compiled
+build wants: the tool runs on the maintainer's machine, so building it for the
+target architecture produces something unrunnable. The version logic keeps its
+unit test coverage either way.
+
 ## Bump the version
 
 Run it from anywhere inside the source tree; it locates the tree root by looking
