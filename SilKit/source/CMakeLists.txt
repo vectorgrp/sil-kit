@@ -36,11 +36,21 @@ target_compile_definitions(I_SilKit
     INTERFACE SILKIT_BUILD_NUMBER=${SILKIT_BUILD_NUMBER}
 )
 
-# Only the C++ sources read the hash, and a quoted string define is fragile in
-# the resource compiler, so keep this one away from the .rc files.
+# Only the C++ sources read these, and quoted string defines are fragile in the
+# resource compiler, so keep them away from the .rc files.
 if(SILKIT_BUILD_GIT_HASH)
     target_compile_definitions(I_SilKit
         INTERFACE $<$<COMPILE_LANGUAGE:CXX>:SILKIT_GIT_HASH="${SILKIT_BUILD_GIT_HASH}">
+    )
+endif()
+
+# A pre-release suffix changes the version string too, and CMake is the only
+# place that knows how to compose it (VERSION_STRING in SilKitVersion.cmake).
+if(SILKIT_VERSION_SUFFIX)
+    target_compile_definitions(I_SilKit
+        INTERFACE
+            $<$<COMPILE_LANGUAGE:CXX>:SILKIT_VERSION_SUFFIX="${SILKIT_VERSION_SUFFIX}">
+            $<$<COMPILE_LANGUAGE:CXX>:SILKIT_VERSION_STRING="${VERSION_STRING}">
     )
 endif()
 

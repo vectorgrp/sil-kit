@@ -8,10 +8,12 @@
 #   they are accessible from public headers at runtime.
 # * Do not edit the numbers below by hand. Run the sil-kit-generate-version tool, which keeps this file, the generated
 #   header and the changelog in sync. See docs/development/release.md.
-# * SILKIT_BUILD_NUMBER and SILKIT_BUILD_GIT_HASH describe a build, not the source tree. Both are build-time
-#   overrides (cmake -DSILKIT_BUILD_NUMBER=N -DSILKIT_BUILD_GIT_HASH=<hash>) passed to the sources as compile
-#   definitions; the generated header only carries the fallbacks. CI should pass the hash it actually built, so the
-#   library reports that commit rather than the parent of the version bump.
+# * SILKIT_BUILD_NUMBER, SILKIT_BUILD_GIT_HASH and SILKIT_VERSION_SUFFIX describe a build, not the source tree. All
+#   three are build-time overrides passed to the sources as compile definitions; the generated header only carries
+#   the fallbacks. CI should pass the hash it actually built, so the library reports that commit rather than the
+#   parent of the version bump, and may set a suffix to mark a pre-release:
+#     cmake -DSILKIT_BUILD_GIT_HASH=<hash> -DSILKIT_BUILD_NUMBER=N -DSILKIT_VERSION_SUFFIX=rc1
+#   The suffix also flows into VERSION_STRING below, so CPack package names carry it too.
 macro(configure_silkit_version project_name)
     set(SILKIT_VERSION_MAJOR 5)
     set(SILKIT_VERSION_MINOR 0)
@@ -21,7 +23,7 @@ macro(configure_silkit_version project_name)
     # entry under that name, and set(... CACHE ...) would not overwrite it.
     set(SILKIT_BUILD_GIT_HASH "" CACHE STRING
         "Git hash of the built sources; empty keeps the one in SilKitVersionMacros.h")
-    set(SILKIT_VERSION_SUFFIX "")
+    set(SILKIT_VERSION_SUFFIX "" CACHE STRING "Pre-release suffix, e.g. rc1; empty for a normal build")
 
     set(VERSION_STRING "${SILKIT_VERSION_MAJOR}.${SILKIT_VERSION_MINOR}.${SILKIT_VERSION_PATCH}")
     if (SILKIT_VERSION_SUFFIX)

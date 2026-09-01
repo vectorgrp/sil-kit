@@ -41,10 +41,11 @@
 - `SilKitVersionMacros.h` is now committed to the source tree instead of being generated at CMake configure time.
   The new `sil-kit-generate-version` maintainer tool regenerates it and performs a complete version bump
   (`SilKitVersion.cmake`, the generated header and the changelog) in one step. See `docs/development/release.md`.
-- The build number and git hash are now build-time settings (`cmake -DSILKIT_BUILD_NUMBER=N`,
-  `-DSILKIT_BUILD_GIT_HASH=<hash>`) rather than values stored in the source tree. The generated header carries only
-  `#ifndef` fallbacks, so a build that passes its own hash makes `SilKit::Version::GitHash()` report the commit
-  actually built instead of the commit the header was generated at.
+- The build number, git hash and pre-release suffix are now build-time settings (`cmake -DSILKIT_BUILD_NUMBER=N`,
+  `-DSILKIT_BUILD_GIT_HASH=<hash>`, `-DSILKIT_VERSION_SUFFIX=rc1`) rather than values stored in the source tree.
+  The generated header carries only `#ifndef` fallbacks, so a build that passes its own hash makes
+  `SilKit::Version::GitHash()` report the commit actually built, and a build that sets a suffix reports
+  `5.0.8-rc1` from `SilKit::Version::String()` and in the CPack archive name.
 - `third-party`: the dashboard client no longer depends on `oatpp`, and the `ThirdParty/oatpp`
   submodule has been removed. The dashboard payloads are now built with the already-bundled
   `rapidyaml`, and the REST requests are issued over the already-bundled standalone `asio`.
