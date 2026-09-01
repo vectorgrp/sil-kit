@@ -2,42 +2,27 @@
 orphan: true
 ---
 
-# !!! Releasing SIL Kit: Version Bumps and the Changelog
+# !!! Version Bumps and the Changelog
 
-This page is for SIL Kit maintainers. It describes how the version number is
-stored in the source tree and how to change it.
-
-**Everything on this page is done by one tool: `sil-kit-generate-version`.**
-Do not edit the version by hand: several files have to agree, and the tool is
-what keeps them in sync.
+For maintainers. One tool does all of it: `sil-kit-generate-version`. Do not edit
+the version by hand, several files have to agree.
 
 ## Where the version lives
 
 | File | Who writes it |
 | --- | --- |
-| `SilKit/cmake/SilKitVersion.cmake` | **Source of truth.** Patched by the tool. Everything in the build reads the version from here. |
-| `SilKit/include/silkit/capi/SilKitVersionMacros.h` | **Generated. Never edit by hand.** Committed to the repository, and compiled into the library and into the Windows resources of the utilities. |
-| `docs/changelog/versions/latest.md` | Hand-written during development, reset by the tool on a bump. |
-| `docs/changelog/versions/<version>.md` | Created by the tool when it archives `latest.md`. |
-| `docs/changelog/overview.rst` | The toctree line for the archived entry is added by the tool. |
-
-The build number is deliberately absent from that list: it is set at configure
-time, not stored in the source tree. See the "Build identity" section below.
+| `SilKit/cmake/SilKitVersion.cmake` | **Source of truth.** Patched by the tool. |
+| `SilKit/include/silkit/capi/SilKitVersionMacros.h` | **Generated. Never edit by hand.** Committed, and compiled into the library and the utilities' Windows resources. |
+| `docs/changelog/versions/latest.md` | Hand-written as changes land; reset by the tool on a bump. |
+| `docs/changelog/versions/<version>.md` | Written by the tool when it archives `latest.md`. |
+| `docs/changelog/overview.rst` | Toctree line for the archived entry, added by the tool. |
 
 ```{warning}
-`silkit/capi/Version.h` and `silkit/SilKitVersion.hpp` are **hand-written public
-API** headers that declare the version *query functions*. They contain no version
-numbers and are never touched by a version bump. Only
-`silkit/capi/SilKitVersionMacros.h` is generated.
-
-The tool refuses to overwrite any file that is not recognizably a generated
-version-macros header, so a mistyped output path fails instead of destroying an
-API header.
+`silkit/capi/Version.h` and `silkit/SilKitVersion.hpp` are hand-written public API
+declaring the version *query functions*. They hold no version numbers and a bump
+never touches them. Only `SilKitVersionMacros.h` is generated, and the tool
+refuses to write to anything that is not already a generated version header.
 ```
-
-`docs/changelog/versions/template.md` is authoring guidance for writing a
-changelog entry. It is excluded from the documentation build and is not copied
-anywhere by the tool.
 
 ## Build the tool
 
@@ -45,164 +30,80 @@ anywhere by the tool.
 cmake --build <build-dir> --target sil-kit-generate-version
 ```
 
-The executable lands in `<build-dir>/sil-kit-generate-version` (with
-multi-config generators such as Visual Studio: `<build-dir>/<CONFIG>/`).
+It lands in `<build-dir>/` (multi-config generators: `<build-dir>/<CONFIG>/`). It
+is standalone C++17 with no SIL Kit dependencies, because it generates a header
+the library is built from, and it reads `.git` directly rather than invoking
+`git`.
 
-The tool is standalone: C++17 and the standard library only, no SIL Kit
-dependencies, and it reads the git hash out of `.git` without invoking `git`.
-It has to be, because it generates a header the library itself is built from.
-
-It is built by default and is never installed or packaged.
-`-DSILKIT_BUILD_GENERATE_VERSION=OFF` skips it, which is what a cross-compiled
-build wants: the tool runs on the maintainer's machine, so building it for the
-target architecture produces something unrunnable. The version logic keeps its
-unit test coverage either way.
+Built by default, never installed. `-DSILKIT_BUILD_GENERATE_VERSION=OFF` skips it
+when cross-compiling, where a host tool built for the target is useless. The
+version logic keeps its unit tests either way.
 
 ## Bump the version
 
-Run it from anywhere inside the source tree; it locates the tree root by looking
-for `SilKit/cmake/SilKitVersion.cmake`.
-
-Look at the plan first:
+Run from anywhere in the source tree. Preview first:
 
 ```
 sil-kit-generate-version --dry-run --major 5 --minor 0 --patch 9
-```
-
-Then apply it:
-
-```
 sil-kit-generate-version --major 5 --minor 0 --patch 9
 ```
 
-That single command:
+That one command sets the version in `SilKitVersion.cmake`, archives
+`latest.md` as `5.0.8.md` with today's date, lists it in `overview.rst`, resets
+`latest.md` to an empty `# [5.0.9] - UNRELEASED` stub, and regenerates the
+header. Every precondition is checked before the first byte is written, so it
+either all happens or none of it does.
 
-1. sets the version in `SilKit/cmake/SilKitVersion.cmake` to `5.0.9`,
-2. renames the current in-progress changelog entry to its release version and
-   date, archiving `docs/changelog/versions/latest.md` as
-   `docs/changelog/versions/5.0.8.md`,
-3. adds `versions/5.0.8.md` to the toctree in `docs/changelog/overview.rst`,
-4. resets `latest.md` to an empty `# [5.0.9] - UNRELEASED` stub,
-5. regenerates `SilKit/include/silkit/capi/SilKitVersionMacros.h`.
+Review with `git diff`; exactly five files change and the `SilKitVersion.cmake`
+diff is at most three lines. Anything larger means something went wrong.
 
-Either all of it happens or none of it does: every precondition is checked before
-the first byte is written.
+`--date YYYY-MM-DD` overrides the release date, `--suffix rc1` makes it a
+pre-release. Commit as `version: bump to X.Y.Z (#PR)`.
 
-Review the result with `git diff`. Exactly these files should have changed:
+## Refresh the header without bumping
 
-```
-SilKit/cmake/SilKitVersion.cmake
-SilKit/include/silkit/capi/SilKitVersionMacros.h
-docs/changelog/overview.rst
-docs/changelog/versions/latest.md
-docs/changelog/versions/<old-version>.md   (new file)
-```
-
-The `SilKitVersion.cmake` diff must be three lines at most. If it is larger,
-something went wrong; do not commit it.
-
-The archived entry gets today's date. Pass `--date YYYY-MM-DD` to set a
-different release date, and `--suffix rc1` for a pre-release version (which
-turns the version string into `5.0.9-rc1`).
-
-The commit convention for a bump is `version: bump to X.Y.Z (#PR)`.
-
-## Refresh the generated header without bumping
-
-After a rebase or a merge, the git hash in the committed header is stale, and if
-the rebase pulled in someone else's bump the version numbers may disagree too.
-Run the tool with no version arguments:
+After a rebase or merge the committed hash is stale, and the version may have
+drifted from `SilKitVersion.cmake` too. With no version arguments the tool takes
+the version from `SilKitVersion.cmake`, refreshes the hash, and rotates nothing:
 
 ```
 sil-kit-generate-version
+sil-kit-generate-version --check   # non-zero on drift, writes nothing; for CI
 ```
-
-This takes the version from `SilKitVersion.cmake`, refreshes the git hash, and
-touches nothing else. No changelog rotation happens because the version did not
-change.
-
-## Verify
-
-```
-sil-kit-generate-version --check
-```
-
-Exits non-zero if the header disagrees with `SilKitVersion.cmake`, and writes
-nothing. Suitable for a CI guard. Reconfiguring the build is the other check:
-`SilKit/source/CMakeLists.txt` fails outright if the generated header is missing.
-
-## Finish the changelog before a release
-
-`latest.md` is the entry for the version currently under development. Fill it in
-as changes land, following `template.md`. It is what the packaging step ships as
-`CHANGELOG.md`, so it must be complete before packaging.
-
-The heading stays `# [<version>] - UNRELEASED` until the bump; the tool then
-substitutes the release date automatically when it archives the file. There is no
-need to edit the date by hand.
 
 ## Build identity
 
-Nothing on this page stamps a build. This repository does not produce releases;
-its GitHub workers run CI and component tests only.
-
-What identifies a build:
-
-- **Git hash.** `SILKIT_GIT_HASH` in the generated header, exposed at runtime as
-  `SilKit::Version::GitHash()`. Because the header is committed, the hash is
-  whatever HEAD was when the tool last ran, so for a bump commit it is that
-  commit's parent. It is no longer refreshed on every build, which is what makes
-  the build reproducible.
-- **Reproducible builds.** `SILKIT_BUILD_REPRODUCIBLE` is `ON` by default and
-  omits timestamps and unique build ids, so the same sources produce the same
-  binaries.
-
-**Build number.** `SILKIT_BUILD_NUMBER` exists only because
-`SilKit_Version_BuildNumber()` is part of the stable public C API. It is a
-property of a build, not of the source tree, so it is *not* stored in the
-generated header and `sil-kit-generate-version` cannot set it. To stamp one, pass
-it to CMake:
+The version is source tree state. The build number and git hash describe a
+*build*, so the header carries only `#ifndef` fallbacks and CMake supplies the
+real values:
 
 ```
-cmake -B <build-dir> -DSILKIT_BUILD_NUMBER=42
+cmake -B <build-dir> -DSILKIT_BUILD_GIT_HASH=$(git rev-parse HEAD) -DSILKIT_BUILD_NUMBER=42
 ```
 
-It reaches the library and the Windows `FILEVERSION` as a compile definition on
-`I_SilKit`; `SilKitVersionMacros.h` only carries the `#ifndef` fallback of `0` for
-consumers who compile against the installed header without CMake. Deliberately
-setting it defeats reproducibility, so leave it alone unless something downstream
-genuinely needs it.
+Pass `SILKIT_BUILD_GIT_HASH` and `SilKit::Version::GitHash()` reports the commit
+actually built. Left unset, it reports the header's fallback, which is the commit
+that was HEAD when the tool last ran, i.e. the parent of the bump commit.
+`SILKIT_BUILD_NUMBER` defaults to `0` and also feeds the Windows `FILEVERSION`.
+
+Neither is refreshed per build, which is what keeps `SILKIT_BUILD_REPRODUCIBLE`
+(`ON` by default) meaningful: the same sources and the same flags give the same
+binary.
 
 ## Troubleshooting
 
-### `error: refusing to overwrite <path>`
-
-The file is not a generated version-macros header. You most likely passed the
-wrong output path. Drop the path argument entirely; the default is correct.
-
-### `error: <version>.md already exists`
-
-`SilKitVersion.cmake` names a version whose changelog entry has already been
-archived, which usually means the tree is mid-rebase and the version numbers are
-not what you think. Check `SilKitVersion.cmake` and `docs/changelog/versions/`
-before doing anything else. `--force` overwrites the archived entry;
-`--no-changelog` bumps the version and leaves the changelog alone. Nothing has
-been written yet at this point.
-
-### `error: version drift` (from `--check`)
-
-The committed header and `SilKitVersion.cmake` disagree. Run
-`sil-kit-generate-version` with no version arguments to regenerate the header.
-
-### `error: no SIL Kit source tree found`
-
-The working directory is outside the source tree. `cd` into it or pass
-`--source-dir PATH`.
-
-### `warning: could not determine the git hash`
-
-`.git` was not found or could not be read; `SILKIT_GIT_HASH` is written as
-`UNKNOWN`. Pass `--git-dir PATH`, or `--git-hash HASH` to set it directly.
+- **`refusing to overwrite <path>`** - not a generated version header, so you
+  passed the wrong output path. Drop the path argument; the default is right.
+- **`<version>.md already exists`** - `SilKitVersion.cmake` names a version whose
+  entry is already archived, usually a mid-rebase tree. Check the version numbers
+  first. `--force` overwrites the archived entry, `--no-changelog` skips
+  rotation. Nothing has been written yet.
+- **`version drift`** (from `--check`) - header and `SilKitVersion.cmake`
+  disagree. Re-run with no version arguments.
+- **`no SIL Kit source tree found`** - run inside the tree or pass
+  `--source-dir PATH`.
+- **`could not determine the git hash`** - `.git` was unreadable, so the fallback
+  is written as `UNKNOWN`. Pass `--git-dir PATH` or `--git-hash HASH`.
 
 `sil-kit-generate-version --help` lists every option.
 
