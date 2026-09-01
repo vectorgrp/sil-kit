@@ -57,8 +57,9 @@ either all happens or none of it does.
 Review with `git diff`; exactly five files change and the `SilKitVersion.cmake`
 diff is at most three lines. Anything larger means something went wrong.
 
-`--date YYYY-MM-DD` overrides the release date, `--suffix rc1` makes it a
-pre-release. Commit as `version: bump to X.Y.Z (#PR)`.
+`--date YYYY-MM-DD` overrides the release date. Commit as
+`version: bump to X.Y.Z (#PR)`. A pre-release is not a bump; see
+"Build identity" below.
 
 ## Refresh the header without bumping
 
@@ -73,22 +74,25 @@ sil-kit-generate-version --check   # non-zero on drift, writes nothing; for CI
 
 ## Build identity
 
-The version is source tree state. The build number and git hash describe a
-*build*, so the header carries only `#ifndef` fallbacks and CMake supplies the
-real values:
+Only the version numbers are source tree state. The git hash, build number and
+pre-release suffix describe a *build*, so the header carries only `#ifndef`
+fallbacks and CMake supplies the real values:
 
 ```
-cmake -B <build-dir> -DSILKIT_BUILD_GIT_HASH=$(git rev-parse HEAD) -DSILKIT_BUILD_NUMBER=42
+cmake -B <build-dir> -DSILKIT_BUILD_GIT_HASH=$(git rev-parse HEAD) \
+                     -DSILKIT_BUILD_NUMBER=42 -DSILKIT_VERSION_SUFFIX=rc1
 ```
 
-Pass `SILKIT_BUILD_GIT_HASH` and `SilKit::Version::GitHash()` reports the commit
-actually built. Left unset, it reports the header's fallback, which is the commit
-that was HEAD when the tool last ran, i.e. the parent of the bump commit.
-`SILKIT_BUILD_NUMBER` defaults to `0` and also feeds the Windows `FILEVERSION`.
+- `SILKIT_BUILD_GIT_HASH` makes `SilKit::Version::GitHash()` report the commit
+  actually built. Unset, it reports the header's fallback: the commit that was
+  HEAD when the tool last ran, i.e. the parent of the bump.
+- `SILKIT_BUILD_NUMBER` defaults to `0` and also fills the Windows `FILEVERSION`.
+- `SILKIT_VERSION_SUFFIX` marks a pre-release. It changes
+  `SilKit::Version::String()` to `5.0.8-rc1` and flows into `PROJECT_VERSION`, so
+  CPack archive names carry it too.
 
-Neither is refreshed per build, which is what keeps `SILKIT_BUILD_REPRODUCIBLE`
-(`ON` by default) meaningful: the same sources and the same flags give the same
-binary.
+None of them is derived per build, which keeps `SILKIT_BUILD_REPRODUCIBLE` (`ON`
+by default) meaningful: the same sources and the same flags give the same binary.
 
 ## Troubleshooting
 
