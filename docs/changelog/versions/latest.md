@@ -13,6 +13,12 @@
 
 ## Changed
 
+- `SilKitVersionMacros.h` is now committed to the source tree instead of being generated at CMake configure time.
+  The new `sil-kit-generate-version` maintainer tool regenerates it and performs a complete version bump
+  (`SilKitVersion.cmake`, the generated header and the changelog) in one step. See `docs/development/release.md`.
+- `SILKIT_BUILD_NUMBER` is now purely a build-time setting (`cmake -DSILKIT_BUILD_NUMBER=N`) rather than a value
+  stored in the source tree. The generated header only carries an `#ifndef` fallback of `0`, so
+  `SilKit_Version_BuildNumber()` reports `0` unless a build sets it.
 - Changes to the SIL KIT MSI installer: 
   - Default installation path changed from `<ProgramFilesFolder>\Vector SIL Kit <VERSION>` to `<ProgramFilesFolder>\SIL Kit <VERSION>`
   - Windows System Service Name changed from `VectorSilKitRegistry` to `SilKitRegistry`
