@@ -10,6 +10,8 @@ class SystemStateTracker;
 class ConnectPeer;
 class MetricsProcessor;
 class AsioGenericRawByteStream;
+class AsioHttpClient;
+class RetryingHttpClient;
 } // namespace VSilKit
 namespace SilKit {
 namespace Tracing {

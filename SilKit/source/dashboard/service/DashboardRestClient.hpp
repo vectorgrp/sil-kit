@@ -10,23 +10,15 @@
 
 #include "services/logging/ILoggerInternal.hpp"
 
-#include "dashboard/service/ISilKitToOatppMapper.hpp"
-#include "dashboard/client/IDashboardSystemServiceClient.hpp"
-#include "dashboard/client/DashboardSystemApiClient.hpp"
-#include "dashboard/client/DashboardRetryPolicy.hpp"
-#include "dashboard/IRestClient.hpp"
 #include "dashboard/DashboardBulkUpdate.hpp"
+#include "dashboard/IRestClient.hpp"
+#include "dashboard/client/IDashboardSystemServiceClient.hpp"
+#include "dashboard/http/IHttpClient.hpp"
+#include "dashboard/service/IDashboardDtoMapper.hpp"
 #include "services/metrics/MetricsDatatypes.hpp"
 
 namespace SilKit {
 namespace Dashboard {
-
-// Utility to initialize the Oatpp library separately, e.g. in test cases
-struct LibraryInitializer
-{
-    LibraryInitializer();
-    ~LibraryInitializer();
-};
 
 class DashboardRestClient : public VSilKit::IRestClient
 {
@@ -35,9 +27,9 @@ public:
     ~DashboardRestClient() override;
 
 public: // For testing
-    DashboardRestClient(std::shared_ptr<LibraryInitializer> libraryInit, Services::Logging::ILoggerInternal* logger,
+    DashboardRestClient(Services::Logging::ILoggerInternal* logger,
                         std::shared_ptr<IDashboardSystemServiceClient> serviceClient,
-                        std::shared_ptr<ISilKitToOatppMapper> mapper);
+                        std::shared_ptr<IDashboardDtoMapper> mapper);
 
 public: // IRestClient
     bool IsBulkUpdateSupported() override;
@@ -48,12 +40,13 @@ public: // IRestClient
     void OnMetricsUpdate(uint64_t simulationId, const std::string& origin,
                          const VSilKit::MetricsUpdate& metricsUpdate) override;
 
+    void Abort() override;
+
 private: //member
-    std::shared_ptr<LibraryInitializer> _libraryInit;
-    Services::Logging::ILoggerInternal* _logger;
-    std::shared_ptr<SilKit::Dashboard::DashboardRetryPolicy> _retryPolicy;
-    std::shared_ptr<ISilKitToOatppMapper> _silKitToOatppMapper;
-    std::shared_ptr<DashboardSystemApiClient> _apiClient;
+    Services::Logging::ILoggerInternal* _logger{nullptr};
+    //! Null in tests; held only so that Abort() can reach the transport.
+    std::shared_ptr<VSilKit::IHttpClient> _httpClient;
+    std::shared_ptr<IDashboardDtoMapper> _dtoMapper;
     std::shared_ptr<IDashboardSystemServiceClient> _serviceClient;
 };
 

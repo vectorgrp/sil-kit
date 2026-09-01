@@ -9,8 +9,6 @@
 
 #include "services/logging/LoggerMessage.hpp"
 
-#include "dashboard/client/DashboardSystemApiClient.hpp"
-#include "dashboard/service/ISilKitToOatppMapper.hpp"
 #include "services/orchestration/SystemStateTracker.hpp"
 #include "dashboard/IRestClient.hpp"
 
@@ -18,6 +16,7 @@
 #include "dashboard/SilKitEvent.hpp"
 
 #include <chrono>
+#include <future>
 #include <string>
 #include <memory>
 #include <thread>
@@ -79,6 +78,9 @@ private:
 
     std::shared_ptr<IRestClient> _dashboardRestClient;
     LockedQueue<SilKitEvent> _silKitEventQueue;
+
+    /// How long the destructor lets an in-flight dashboard request finish before aborting it.
+    std::chrono::milliseconds _shutdownGracePeriod{5000};
 
     std::thread _eventQueueWorkerThread;
     std::promise<void> _eventQueueWorkerThreadAbort;

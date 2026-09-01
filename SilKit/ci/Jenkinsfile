@@ -102,7 +102,7 @@ def buildConfigs = [
         DockerImage: "silkit-ubuntu",
         DockerBuildArgs: "--build-arg UBUNTU_VERSION=22.04",
         PublishArtifacts: false,
-        CmakeArgs: "-D SILKIT_ENABLE_THREADSAN=ON -D SILKIT_BUILD_DASHBOARD=OFF",
+        CmakeArgs: "-D SILKIT_ENABLE_THREADSAN=ON",
         CmakePreset: "clang14-release",
         TestDebug: true,
     ]
@@ -112,7 +112,7 @@ def buildConfigs = [
         DockerImage: "silkit-ubuntu",
         DockerBuildArgs: "--build-arg UBUNTU_VERSION=22.04",
         PublishArtifacts: false,
-        CmakeArgs: "-D SILKIT_ENABLE_ASAN=ON -D SILKIT_BUILD_DASHBOARD=OFF",
+        CmakeArgs: "-D SILKIT_ENABLE_ASAN=ON",
         CmakePreset: "clang14-release",
         TestDebug: true,
     ]
@@ -122,7 +122,7 @@ def buildConfigs = [
         DockerImage: "silkit-ubuntu",
         DockerBuildArgs: "--build-arg UBUNTU_VERSION=22.04",
         PublishArtifacts: false,
-        CmakeArgs: "-D SILKIT_ENABLE_UBSAN=ON -D SILKIT_BUILD_DASHBOARD=OFF",
+        CmakeArgs: "-D SILKIT_ENABLE_UBSAN=ON",
         CmakePreset: "clang14-release",
         TestDebug: true,
     ]

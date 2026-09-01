@@ -5,7 +5,7 @@
 #include "dashboard/DashboardInstance.hpp"
 #include "dashboard/SilKitEvent.hpp"
 #include "dashboard/LockedQueue.hpp"
-#include "dashboard/service/SilKitToOatppMapper.hpp"
+#include "dashboard/service/DashboardDtoMapper.hpp"
 #include "dashboard/service/DashboardRestClient.hpp"
 
 
@@ -53,10 +53,26 @@ DashboardInstance::~DashboardInstance()
 
     _silKitEventQueue.Stop();
 
+    /* The worker may be blocked in an HTTP request. Give it a grace period to finish flushing, then
+     * abort the transport so shutdown stays bounded even when the dashboard server accepts
+     * connections but never answers. std::thread has no timed join, hence the watchdog. */
+    std::promise<void> workerFinished;
+    auto workerFinishedFuture = workerFinished.get_future();
+    auto watchdog = std::async(std::launch::async, [this, &workerFinishedFuture] {
+        if (workerFinishedFuture.wait_for(_shutdownGracePeriod) == std::future_status::timeout
+            && _dashboardRestClient != nullptr)
+        {
+            _dashboardRestClient->Abort();
+        }
+    });
+
     if (_eventQueueWorkerThread.joinable())
     {
         _eventQueueWorkerThread.join();
     }
+
+    workerFinished.set_value();
+    watchdog.wait();
 }
 
 auto DashboardInstance::GetRegistryEventListener() -> SilKit::Core::IRegistryEventListener*

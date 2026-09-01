@@ -8,7 +8,7 @@
 
 #include "config/YamlParser.hpp"
 
-#include "dashboard/service/SilKitToOatppMapper.hpp"
+#include "dashboard/service/DashboardDtoMapper.hpp"
 #include "fmt/core.h"
 
 #include <algorithm>
@@ -18,18 +18,18 @@ namespace SilKit {
 namespace Dashboard {
 using namespace VSilKit;
 
-class Test_DashboardSilKitToOatppMapper : public testing::Test
+class Test_DashboardDtoMapper : public testing::Test
 {
 public:
     void SetUp() override {}
 
-    static std::shared_ptr<ISilKitToOatppMapper> CreateService()
+    static std::shared_ptr<DashboardDtoMapper> CreateService()
     {
-        return std::make_shared<SilKitToOatppMapper>();
+        return std::make_shared<DashboardDtoMapper>();
     }
 };
 
-TEST_F(Test_DashboardSilKitToOatppMapper, CreateSimulationCreationRequestDto_MapEndpoint)
+TEST_F(Test_DashboardDtoMapper, CreateSimulationCreationRequestDto_MapEndpoint)
 {
     // Arrange
     const std::string endpoint("silkit://myhost:1234");
@@ -41,10 +41,10 @@ TEST_F(Test_DashboardSilKitToOatppMapper, CreateSimulationCreationRequestDto_Map
     const auto dto = dataMapper->CreateSimulationCreationRequestDto(endpoint, expectedStartTime);
 
     // Assert
-    ASSERT_STREQ(dto->configuration->connectUri->c_str(), endpoint.c_str());
+    ASSERT_STREQ(dto.configuration.connectUri.c_str(), endpoint.c_str());
 }
 
-TEST_F(Test_DashboardSilKitToOatppMapper, CreateSimulationCreationRequestDto_StartTimeEqualsCreationTime)
+TEST_F(Test_DashboardDtoMapper, CreateSimulationCreationRequestDto_StartTimeEqualsCreationTime)
 {
     // Arrange
     const auto now = std::chrono::system_clock::now().time_since_epoch();
@@ -55,20 +55,20 @@ TEST_F(Test_DashboardSilKitToOatppMapper, CreateSimulationCreationRequestDto_Sta
     const auto dto = dataMapper->CreateSimulationCreationRequestDto("", expectedStartTime);
 
     // Assert
-    ASSERT_EQ(dto->started, expectedStartTime);
+    ASSERT_EQ(dto.started, expectedStartTime);
 }
 
-TEST_F(Test_DashboardSilKitToOatppMapper, CreateSystemStatusDto_MapState)
+TEST_F(Test_DashboardDtoMapper, CreateSystemStatusDto_MapState)
 {
     // Act
     const auto dataMapper = CreateService();
     const auto dto = dataMapper->CreateSystemStatusDto(Services::Orchestration::SystemState::ReadyToRun);
 
     // Assert
-    ASSERT_EQ(dto->state, SystemState::ReadyToRun);
+    ASSERT_EQ(dto.state, SystemState::ReadyToRun);
 }
 
-TEST_F(Test_DashboardSilKitToOatppMapper, CreateParticipantStatusDto_MapReasonAndTimeAndState)
+TEST_F(Test_DashboardDtoMapper, CreateParticipantStatusDto_MapReasonAndTimeAndState)
 {
     namespace orchestration = Services::Orchestration;
 
@@ -90,30 +90,12 @@ TEST_F(Test_DashboardSilKitToOatppMapper, CreateParticipantStatusDto_MapReasonAn
     const auto dto = dataMapper->CreateParticipantStatusDto(participant_status);
 
     // Assert
-    ASSERT_STREQ(dto->enterReason->c_str(), expectedReason.c_str());
-    ASSERT_EQ(dto->enterTime, static_cast<uint64_t>(expectedEnterTime));
-    ASSERT_EQ(dto->state, ParticipantState::ReadyToRun);
+    ASSERT_STREQ(dto.enterReason.c_str(), expectedReason.c_str());
+    ASSERT_EQ(dto.enterTime, static_cast<uint64_t>(expectedEnterTime));
+    ASSERT_EQ(dto.state, ParticipantState::ReadyToRun);
 }
 
-TEST_F(Test_DashboardSilKitToOatppMapper, CreateServiceDto_MapNameAndNetworkName)
-{
-    // Arrange
-    const std::string expectedName("myService");
-    const std::string expectedNetwork("myNetwork");
-    Core::ServiceDescriptor descriptor;
-    descriptor.SetServiceName(expectedName);
-    descriptor.SetNetworkName(expectedNetwork);
-
-    // Act
-    const auto dataMapper = CreateService();
-    const auto dto = dataMapper->CreateServiceDto(descriptor);
-
-    // Assert
-    ASSERT_STREQ(dto->name->c_str(), expectedName.c_str());
-    ASSERT_STREQ(dto->networkName->c_str(), expectedNetwork.c_str());
-}
-
-TEST_F(Test_DashboardSilKitToOatppMapper, CreateBulkControllerDto)
+TEST_F(Test_DashboardDtoMapper, CreateBulkControllerDto)
 {
     // Arrange
     constexpr SilKit::Core::EndpointId expectedId{12345};
@@ -129,12 +111,12 @@ TEST_F(Test_DashboardSilKitToOatppMapper, CreateBulkControllerDto)
     const auto dto = dataMapper->CreateBulkControllerDto(descriptor);
 
     // Assert
-    ASSERT_EQ(dto->id.getValue(0), expectedId);
-    ASSERT_STREQ(dto->name->c_str(), expectedName.c_str());
-    ASSERT_STREQ(dto->networkName->c_str(), expectedNetwork.c_str());
+    ASSERT_EQ(dto.id, expectedId);
+    ASSERT_STREQ(dto.name.c_str(), expectedName.c_str());
+    ASSERT_STREQ(dto.networkName.c_str(), expectedNetwork.c_str());
 }
 
-TEST_F(Test_DashboardSilKitToOatppMapper, CreateBulkDataServiceDto_MapNetworkNameAndTopicAndMediaTypeAndLabel)
+TEST_F(Test_DashboardDtoMapper, CreateBulkDataServiceDto_MapNetworkNameAndTopicAndMediaTypeAndLabel)
 {
     // Arrange
     Core::ServiceDescriptor descriptor;
@@ -169,17 +151,17 @@ TEST_F(Test_DashboardSilKitToOatppMapper, CreateBulkDataServiceDto_MapNetworkNam
     const auto dto = dataMapper->CreateBulkDataServiceDto(descriptor);
 
     // Assert
-    ASSERT_EQ(dto->id.getValue(0), expectedId);
-    ASSERT_STREQ(dto->name->c_str(), expectedName.c_str());
-    ASSERT_STREQ(dto->networkName->c_str(), expectedNetwork.c_str());
-    ASSERT_STREQ(dto->spec->topic->c_str(), expectedTopic.c_str());
-    ASSERT_STREQ(dto->spec->mediaType->c_str(), expectedMediaType.c_str());
-    ASSERT_STREQ(dto->spec->labels->at(0)->key->c_str(), expectedLabel.key.c_str());
-    ASSERT_STREQ(dto->spec->labels->at(0)->value->c_str(), expectedLabel.value.c_str());
-    ASSERT_EQ(dto->spec->labels->at(0)->kind, LabelKind::Mandatory);
+    ASSERT_EQ(dto.id, expectedId);
+    ASSERT_STREQ(dto.name.c_str(), expectedName.c_str());
+    ASSERT_STREQ(dto.networkName.c_str(), expectedNetwork.c_str());
+    ASSERT_STREQ(dto.spec.topic.c_str(), expectedTopic.c_str());
+    ASSERT_STREQ(dto.spec.mediaType.c_str(), expectedMediaType.c_str());
+    ASSERT_STREQ(dto.spec.labels.at(0).key.c_str(), expectedLabel.key.c_str());
+    ASSERT_STREQ(dto.spec.labels.at(0).value.c_str(), expectedLabel.value.c_str());
+    ASSERT_EQ(dto.spec.labels.at(0).kind, LabelKind::Mandatory);
 }
 
-TEST_F(Test_DashboardSilKitToOatppMapper, CreateBulkRpcServiceDto_MapNetworkNameAndFunctionNameAndMediaTypeAndLabel)
+TEST_F(Test_DashboardDtoMapper, CreateBulkRpcServiceDto_MapNetworkNameAndFunctionNameAndMediaTypeAndLabel)
 {
     // Arrange
     Core::ServiceDescriptor descriptor;
@@ -211,17 +193,17 @@ TEST_F(Test_DashboardSilKitToOatppMapper, CreateBulkRpcServiceDto_MapNetworkName
     const auto dto = dataMapper->CreateBulkRpcServiceDto(descriptor);
 
     // Assert
-    ASSERT_EQ(dto->id.getValue(0), expectedId);
-    ASSERT_STREQ(dto->name->c_str(), expectedName.c_str());
-    ASSERT_STREQ(dto->networkName->c_str(), expectedNetwork.c_str());
-    ASSERT_STREQ(dto->spec->functionName->c_str(), expectedFunctionName.c_str());
-    ASSERT_STREQ(dto->spec->mediaType->c_str(), expectedMediaType.c_str());
-    ASSERT_STREQ(dto->spec->labels->at(0)->key->c_str(), expectedLabel.key.c_str());
-    ASSERT_STREQ(dto->spec->labels->at(0)->value->c_str(), expectedLabel.value.c_str());
-    ASSERT_EQ(dto->spec->labels->at(0)->kind, LabelKind::Mandatory);
+    ASSERT_EQ(dto.id, expectedId);
+    ASSERT_STREQ(dto.name.c_str(), expectedName.c_str());
+    ASSERT_STREQ(dto.networkName.c_str(), expectedNetwork.c_str());
+    ASSERT_STREQ(dto.spec.functionName.c_str(), expectedFunctionName.c_str());
+    ASSERT_STREQ(dto.spec.mediaType.c_str(), expectedMediaType.c_str());
+    ASSERT_STREQ(dto.spec.labels.at(0).key.c_str(), expectedLabel.key.c_str());
+    ASSERT_STREQ(dto.spec.labels.at(0).value.c_str(), expectedLabel.value.c_str());
+    ASSERT_EQ(dto.spec.labels.at(0).kind, LabelKind::Mandatory);
 }
 
-TEST_F(Test_DashboardSilKitToOatppMapper, CreateBulkServiceInternalDto_RpcServerInternal)
+TEST_F(Test_DashboardDtoMapper, CreateBulkServiceInternalDto_RpcServerInternal)
 {
     // Arrange
     Core::ServiceDescriptor descriptor;
@@ -244,13 +226,13 @@ TEST_F(Test_DashboardSilKitToOatppMapper, CreateBulkServiceInternalDto_RpcServer
     const auto dto = dataMapper->CreateBulkServiceInternalDto(descriptor);
 
     // Assert
-    ASSERT_EQ(dto->id.getValue(0), expectedId);
-    ASSERT_STREQ(dto->name->c_str(), expectedName.c_str());
-    ASSERT_STREQ(dto->networkName->c_str(), expectedNetwork.c_str());
-    ASSERT_EQ(dto->parentId.getValue(0), expectedParentId);
+    ASSERT_EQ(dto.id, expectedId);
+    ASSERT_STREQ(dto.name.c_str(), expectedName.c_str());
+    ASSERT_STREQ(dto.networkName.c_str(), expectedNetwork.c_str());
+    ASSERT_EQ(dto.parentId, expectedParentId);
 }
 
-TEST_F(Test_DashboardSilKitToOatppMapper, CreateBulkSimulationDto)
+TEST_F(Test_DashboardDtoMapper, CreateBulkSimulationDto)
 {
     const auto to_ms = [](const auto tp) -> std::uint64_t {
         return std::chrono::duration_cast<std::chrono::milliseconds>(tp.time_since_epoch()).count();
@@ -357,103 +339,71 @@ TEST_F(Test_DashboardSilKitToOatppMapper, CreateBulkSimulationDto)
     const auto dto = dataMapper->CreateBulkSimulationDto(expectedBulkUpdate);
 
     // Assert
-    ASSERT_NE(dto->stopped.getPtr(), nullptr);
-    ASSERT_EQ(dto->stopped.getValue(0), static_cast<std::int64_t>(*expectedBulkUpdate.stopped));
+    ASSERT_TRUE(dto.stopped.has_value());
+    ASSERT_EQ(*dto.stopped, static_cast<std::int64_t>(*expectedBulkUpdate.stopped));
 
-    ASSERT_NE(dto->system.getPtr(), nullptr);
-    ASSERT_NE(dto->system->statuses.getPtr(), nullptr);
-    ASSERT_EQ(dto->system->statuses->size(), expectedBulkUpdate.systemStates.size());
-    ASSERT_NE(dto->system->statuses[0].getPtr(), nullptr);
-    ASSERT_NE(dto->system->statuses[0]->state.getPtr(), nullptr);
-    ASSERT_EQ(dto->system->statuses[0]->state, expectedSystemState0);
-    ASSERT_NE(dto->system->statuses[1].getPtr(), nullptr);
-    ASSERT_NE(dto->system->statuses[1]->state.getPtr(), nullptr);
-    ASSERT_EQ(dto->system->statuses[1]->state, expectedSystemState1);
-    ASSERT_NE(dto->system->statuses[2].getPtr(), nullptr);
-    ASSERT_NE(dto->system->statuses[2]->state.getPtr(), nullptr);
-    ASSERT_EQ(dto->system->statuses[2]->state, expectedSystemState2);
+    ASSERT_EQ(dto.system.statuses.size(), expectedBulkUpdate.systemStates.size());
+    ASSERT_EQ(dto.system.statuses[0].state, expectedSystemState0);
+    ASSERT_EQ(dto.system.statuses[1].state, expectedSystemState1);
+    ASSERT_EQ(dto.system.statuses[2].state, expectedSystemState2);
 
-    ASSERT_NE(dto->participants.getPtr(), nullptr);
-    ASSERT_EQ(dto->participants->size(), 3u);
+    ASSERT_EQ(dto.participants.size(), 3u);
 
-    oatpp::Object<BulkParticipantDto> aParticipantDto;
-    oatpp::Object<BulkParticipantDto> bParticipantDto;
-    oatpp::Object<BulkParticipantDto> cParticipantDto;
+    const BulkParticipantDto* aParticipantDto{nullptr};
+    const BulkParticipantDto* bParticipantDto{nullptr};
+    const BulkParticipantDto* cParticipantDto{nullptr};
 
-    for (const auto& participantDto : *dto->participants.get())
+    for (const auto& participantDto : dto.participants)
     {
-        ASSERT_NE(participantDto.getPtr(), nullptr);
-        ASSERT_NE(participantDto->name.getPtr(), nullptr);
 
-        if (participantDto->name == "A")
+        if (participantDto.name == "A")
         {
-            aParticipantDto = participantDto;
+            aParticipantDto = &participantDto;
         }
 
-        if (participantDto->name == "B")
+        if (participantDto.name == "B")
         {
-            bParticipantDto = participantDto;
+            bParticipantDto = &participantDto;
         }
 
-        if (participantDto->name == "C")
+        if (participantDto.name == "C")
         {
-            cParticipantDto = participantDto;
+            cParticipantDto = &participantDto;
         }
     }
 
-    ASSERT_NE(aParticipantDto.getPtr(), nullptr);
-    ASSERT_NE(aParticipantDto->statuses.getPtr(), nullptr);
-    ASSERT_EQ(aParticipantDto->statuses->size(), 2u);
-    ASSERT_NE(aParticipantDto->statuses[0].getPtr(), nullptr);
-    ASSERT_EQ(aParticipantDto->statuses[0]->state, expectedAParticipantState0);
-    ASSERT_EQ(aParticipantDto->statuses[0]->enterReason, aParticipantStatus0.enterReason);
-    ASSERT_EQ(aParticipantDto->statuses[0]->enterTime, to_ms(aParticipantStatus0.enterTime));
-    ASSERT_NE(aParticipantDto->statuses[1].getPtr(), nullptr);
-    ASSERT_EQ(aParticipantDto->statuses[1]->state, expectedAParticipantState1);
-    ASSERT_EQ(aParticipantDto->statuses[1]->enterReason, aParticipantStatus1.enterReason);
-    ASSERT_EQ(aParticipantDto->statuses[1]->enterTime, to_ms(aParticipantStatus1.enterTime));
+    ASSERT_NE(aParticipantDto, nullptr);
+    ASSERT_EQ(aParticipantDto->statuses.size(), 2u);
+    ASSERT_EQ(aParticipantDto->statuses[0].state, expectedAParticipantState0);
+    ASSERT_EQ(aParticipantDto->statuses[0].enterReason, aParticipantStatus0.enterReason);
+    ASSERT_EQ(aParticipantDto->statuses[0].enterTime, to_ms(aParticipantStatus0.enterTime));
+    ASSERT_EQ(aParticipantDto->statuses[1].state, expectedAParticipantState1);
+    ASSERT_EQ(aParticipantDto->statuses[1].enterReason, aParticipantStatus1.enterReason);
+    ASSERT_EQ(aParticipantDto->statuses[1].enterTime, to_ms(aParticipantStatus1.enterTime));
 
-    ASSERT_NE(aParticipantDto->canControllers.getPtr(), nullptr);
-    ASSERT_EQ(aParticipantDto->canControllers->size(), 2u);
-    ASSERT_NE(aParticipantDto->canControllers[0].getPtr(), nullptr);
-    ASSERT_NE(aParticipantDto->canControllers[1].getPtr(), nullptr);
+    ASSERT_EQ(aParticipantDto->canControllers.size(), 2u);
 
-    ASSERT_NE(aParticipantDto->ethernetControllers.getPtr(), nullptr);
-    ASSERT_EQ(aParticipantDto->ethernetControllers->size(), 2u);
-    ASSERT_NE(aParticipantDto->ethernetControllers[0].getPtr(), nullptr);
-    ASSERT_NE(aParticipantDto->ethernetControllers[1].getPtr(), nullptr);
+    ASSERT_EQ(aParticipantDto->ethernetControllers.size(), 2u);
 
-    ASSERT_NE(aParticipantDto->flexrayControllers.getPtr(), nullptr);
-    ASSERT_EQ(aParticipantDto->flexrayControllers->size(), 2u);
-    ASSERT_NE(aParticipantDto->flexrayControllers[0].getPtr(), nullptr);
-    ASSERT_NE(aParticipantDto->flexrayControllers[1].getPtr(), nullptr);
+    ASSERT_EQ(aParticipantDto->flexrayControllers.size(), 2u);
 
-    ASSERT_NE(aParticipantDto->linControllers.getPtr(), nullptr);
-    ASSERT_EQ(aParticipantDto->linControllers->size(), 2u);
-    ASSERT_NE(aParticipantDto->linControllers[0].getPtr(), nullptr);
-    ASSERT_NE(aParticipantDto->linControllers[1].getPtr(), nullptr);
+    ASSERT_EQ(aParticipantDto->linControllers.size(), 2u);
 
-    ASSERT_NE(aParticipantDto->canNetworks.getPtr(), nullptr);
-    ASSERT_EQ(aParticipantDto->canNetworks->size(), 2u);
+    ASSERT_EQ(aParticipantDto->canNetworks.size(), 2u);
 
-    ASSERT_NE(aParticipantDto->ethernetNetworks.getPtr(), nullptr);
-    ASSERT_EQ(aParticipantDto->ethernetNetworks->size(), 2u);
+    ASSERT_EQ(aParticipantDto->ethernetNetworks.size(), 2u);
 
-    ASSERT_NE(aParticipantDto->flexrayNetworks.getPtr(), nullptr);
-    ASSERT_EQ(aParticipantDto->flexrayNetworks->size(), 2u);
+    ASSERT_EQ(aParticipantDto->flexrayNetworks.size(), 2u);
 
-    ASSERT_NE(aParticipantDto->linNetworks.getPtr(), nullptr);
-    ASSERT_EQ(aParticipantDto->linNetworks->size(), 2u);
+    ASSERT_EQ(aParticipantDto->linNetworks.size(), 2u);
 
-    ASSERT_NE(bParticipantDto.getPtr(), nullptr);
-    ASSERT_NE(bParticipantDto->statuses.getPtr(), nullptr);
-    ASSERT_EQ(bParticipantDto->statuses->size(), 1u);
-    ASSERT_NE(bParticipantDto->statuses[0].getPtr(), nullptr);
-    ASSERT_EQ(bParticipantDto->statuses[0]->state, expectedBParticipantState);
-    ASSERT_EQ(bParticipantDto->statuses[0]->enterReason, bParticipantStatus.enterReason);
-    ASSERT_EQ(bParticipantDto->statuses[0]->enterTime, to_ms(bParticipantStatus.enterTime));
+    ASSERT_NE(bParticipantDto, nullptr);
+    ASSERT_EQ(bParticipantDto->statuses.size(), 1u);
+    ASSERT_EQ(bParticipantDto->statuses[0].state, expectedBParticipantState);
+    ASSERT_EQ(bParticipantDto->statuses[0].enterReason, bParticipantStatus.enterReason);
+    ASSERT_EQ(bParticipantDto->statuses[0].enterTime, to_ms(bParticipantStatus.enterTime));
 
-    ASSERT_NE(cParticipantDto.getPtr(), nullptr);
+    ASSERT_NE(cParticipantDto, nullptr);
 }
 
 } // namespace Dashboard

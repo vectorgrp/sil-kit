@@ -2,140 +2,197 @@
 //
 // SPDX-License-Identifier: MIT
 
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4702)
-#endif
-
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
-
 #include "core/mock/participant/MockParticipant.hpp"
 
+#include "dashboard/client/DashboardPaths.hpp"
 #include "dashboard/client/DashboardSystemServiceClient.hpp"
-#include "Mocks/MockBodyDecoder.hpp"
-#include "Mocks/MockDashboardSystemApiClient.hpp"
-#include "Mocks/MockInputStream.hpp"
-#include "dashboard/client/Mocks/MockBodyDecoder.hpp"
-#include "dashboard/client/Mocks/MockDashboardSystemApiClient.hpp"
-#include "dashboard/client/Mocks/MockInputStream.hpp"
-#include "dashboard/client/Mocks/MockObjectMapper.hpp"
+#include "dashboard/http/Mocks/MockHttpClient.hpp"
+#include "dashboard/json/DashboardJson.hpp"
 
-using namespace oatpp::web;
-using namespace oatpp::data::mapping;
-using namespace protocol::http;
 using namespace testing;
+using VSilKit::HttpResult;
+using VSilKit::MockHttpClient;
 
 namespace SilKit {
 namespace Dashboard {
+namespace {
+
+auto Responded(int statusCode, std::string body = {}) -> HttpResult
+{
+    return HttpResult{false, statusCode, std::move(body)};
+}
+
+auto Unavailable() -> HttpResult
+{
+    return HttpResult{};
+}
 
 class Test_DashboardSystemServiceClient : public Test
 {
 public:
     void SetUp() override
     {
-        _mockObjectMapper = std::make_shared<MockObjectMapper>(_info);
-        _objectMapper = std::static_pointer_cast<ObjectMapper>(_mockObjectMapper);
-        _mockDashboardSystemApiClient = std::make_shared<StrictMock<MockDashboardSystemApiClient>>(_objectMapper);
-        _mockBodyDecoder = std::make_shared<StrictMock<MockBodyDecoder>>();
-        _nullInput = std::make_shared<MockInputStream>();
-
+        _mockHttpClient = std::make_shared<StrictMock<MockHttpClient>>();
         EXPECT_CALL(_dummyLogger, GetLogLevel).WillRepeatedly(Return(Services::Logging::Level::Debug));
     }
 
-    std::shared_ptr<IDashboardSystemServiceClient> CreateService()
+    auto CreateService() -> std::shared_ptr<IDashboardSystemServiceClient>
     {
-        return std::make_shared<DashboardSystemServiceClient>(&_dummyLogger, _mockDashboardSystemApiClient,
-                                                              _objectMapper);
+        return std::make_shared<DashboardSystemServiceClient>(&_dummyLogger, _mockHttpClient);
     }
 
-    void SetupExecuteRequest(
-        Status status,
-        const std::function<void(const oatpp::String&, const oatpp::data::share::StringTemplate&,
-                                 const std::unordered_map<oatpp::String, oatpp::String>& pathParams)>& OnRequest)
+    void ExpectLog(Services::Logging::Level level, const std::string& message)
     {
-        std::shared_ptr<oatpp::web::protocol::http::incoming::Response> response =
-            oatpp::web::protocol::http::incoming::Response::createShared(status.code, status.description, Headers(),
-                                                                         _nullInput, _mockBodyDecoder);
-        EXPECT_CALL(*_mockDashboardSystemApiClient, executeRequest)
-            .WillOnce(DoAll(WithArgs<0, 1, 3>([OnRequest](auto currentMethod, auto pathTemplate, auto map) {
-            OnRequest(currentMethod, pathTemplate, map);
-        }),
-                            Return(response)));
+        EXPECT_CALL(_dummyLogger, ProcessLoggerMessage(Services::Logging::ALoggerMessageWith(level, message)));
     }
 
     Core::Tests::MockLogger _dummyLogger;
-    std::shared_ptr<StrictMock<MockDashboardSystemApiClient>> _mockDashboardSystemApiClient;
-    std::shared_ptr<MockObjectMapper> _mockObjectMapper;
-    std::shared_ptr<ObjectMapper> _objectMapper;
-    std::shared_ptr<MockInputStream> _nullInput;
-    std::shared_ptr<StrictMock<MockBodyDecoder>> _mockBodyDecoder;
-    ObjectMapper::Info _info = "application/json";
+    std::shared_ptr<StrictMock<MockHttpClient>> _mockHttpClient;
 };
+
+// --- CreateSimulation -------------------------------------------------------------------------
 
 TEST_F(Test_DashboardSystemServiceClient, CreateSimulation_Success)
 {
-    // Arrange
-    EXPECT_CALL(*_mockObjectMapper, write);
-    oatpp::String actualPath;
-    oatpp::String actualMethod;
-    SetupExecuteRequest(Status::CODE_201,
-                        [&actualPath, &actualMethod](auto currentMethod, auto pathTemplate, auto map) {
-        actualMethod = currentMethod;
-        actualPath = pathTemplate.format(map);
-    });
-    EXPECT_CALL(*_mockBodyDecoder, decode);
-    auto expectedResponse = SimulationCreationResponseDto::createShared();
-    expectedResponse->id = 123;
-    EXPECT_CALL(*_mockObjectMapper, read).WillOnce(Return(expectedResponse));
-    EXPECT_CALL(_dummyLogger, ProcessLoggerMessage(Services::Logging::ALoggerMessageWith(
-                                  Services::Logging::Level::Debug, "Dashboard: creating simulation returned 201")));
+    EXPECT_CALL(*_mockHttpClient, Post("system-service/v1.0/simulations", _))
+        .WillOnce(Return(Responded(201, R"({"id":123})")));
+    ExpectLog(Services::Logging::Level::Debug, "Dashboard: creating simulation returned 201");
 
-    // Act
-    oatpp::Object<SimulationCreationResponseDto> response;
-    {
-        const auto service = CreateService();
-        auto request = SimulationCreationRequestDto::createShared();
-        response = service->CreateSimulation(request);
-    }
+    const auto service = CreateService();
+    const auto simulationId = service->CreateSimulation(SimulationCreationRequestDto{});
 
-    // Assert
-    ASSERT_EQ(response, expectedResponse);
-    ASSERT_STREQ(actualMethod->c_str(), "POST");
-    ASSERT_STREQ(actualPath->c_str(), "system-service/v1.0/simulations");
+    ASSERT_TRUE(simulationId.has_value());
+    EXPECT_EQ(*simulationId, 123u);
 }
 
-TEST_F(Test_DashboardSystemServiceClient, CreateSimulation_Failure)
+TEST_F(Test_DashboardSystemServiceClient, CreateSimulation_ServerError)
 {
-    // Arrange
-    EXPECT_CALL(*_mockObjectMapper, write);
-    oatpp::String actualPath;
-    oatpp::String actualMethod;
-    SetupExecuteRequest(Status::CODE_500,
-                        [&actualPath, &actualMethod](auto currentMethod, auto pathTemplate, auto map) {
-        actualMethod = currentMethod;
-        actualPath = pathTemplate.format(map);
-    });
-    EXPECT_CALL(_dummyLogger, ProcessLoggerMessage(Services::Logging::ALoggerMessageWith(
-                                  Services::Logging::Level::Error, "Dashboard: creating simulation returned 500")));
+    EXPECT_CALL(*_mockHttpClient, Post("system-service/v1.0/simulations", _)).WillOnce(Return(Responded(500)));
+    ExpectLog(Services::Logging::Level::Error, "Dashboard: creating simulation returned 500");
 
-    // Act
-    oatpp::Object<SimulationCreationResponseDto> response;
-    {
-        const auto service = CreateService();
-        auto request = SimulationCreationRequestDto::createShared();
-        service->CreateSimulation(request);
-    }
+    const auto service = CreateService();
 
-    // Assert
-    ASSERT_TRUE(response == nullptr);
-    ASSERT_STREQ(actualMethod->c_str(), "POST");
-    ASSERT_STREQ(actualPath->c_str(), "system-service/v1.0/simulations");
+    EXPECT_FALSE(service->CreateSimulation(SimulationCreationRequestDto{}).has_value());
 }
 
+TEST_F(Test_DashboardSystemServiceClient, CreateSimulation_TransportFailure_LogsServerUnavailable)
+{
+    EXPECT_CALL(*_mockHttpClient, Post(_, _)).WillOnce(Return(Unavailable()));
+    ExpectLog(Services::Logging::Level::Error, "Dashboard: creating simulation server unavailable");
+
+    const auto service = CreateService();
+
+    EXPECT_FALSE(service->CreateSimulation(SimulationCreationRequestDto{}).has_value());
+}
+
+// A 201 whose body we cannot read is treated as "no id", not as a hard failure.
+TEST_F(Test_DashboardSystemServiceClient, CreateSimulation_UnparsableBody)
+{
+    EXPECT_CALL(*_mockHttpClient, Post(_, _)).WillOnce(Return(Responded(201, "not json")));
+    ExpectLog(Services::Logging::Level::Debug, "Dashboard: creating simulation returned 201");
+
+    const auto service = CreateService();
+
+    EXPECT_FALSE(service->CreateSimulation(SimulationCreationRequestDto{}).has_value());
+}
+
+TEST_F(Test_DashboardSystemServiceClient, CreateSimulation_SendsTheSerializedRequest)
+{
+    SimulationCreationRequestDto request{};
+    request.started = 17;
+    request.configuration.connectUri = "silkit://localhost:8500";
+
+    std::string actualBody;
+    EXPECT_CALL(*_mockHttpClient, Post(Paths::CreateSimulation(), _))
+        .WillOnce(DoAll(SaveArg<1>(&actualBody), Return(Responded(201, R"({"id":1})"))));
+    ExpectLog(Services::Logging::Level::Debug, "Dashboard: creating simulation returned 201");
+
+    const auto service = CreateService();
+    service->CreateSimulation(request);
+
+    EXPECT_EQ(actualBody, ToJson(request));
+    EXPECT_EQ(actualBody,
+              "{\"started\": 17,\"configuration\": {\"connectUri\": \"silkit://localhost:8500\"}}");
+}
+
+// --- UpdateSimulation -------------------------------------------------------------------------
+
+TEST_F(Test_DashboardSystemServiceClient, UpdateSimulation_UsesTheSimulationIdInThePath)
+{
+    std::string actualBody;
+    EXPECT_CALL(*_mockHttpClient, Post("system-service/v1.1/simulations/456", _))
+        .WillOnce(DoAll(SaveArg<1>(&actualBody), Return(Responded(200))));
+    ExpectLog(Services::Logging::Level::Debug, "Dashboard: updating simulation returned 200");
+
+    const auto service = CreateService();
+    service->UpdateSimulation(456, BulkSimulationDto{});
+
+    EXPECT_EQ(actualBody, ToJson(BulkSimulationDto{}));
+}
+
+TEST_F(Test_DashboardSystemServiceClient, UpdateSimulation_TransportFailure)
+{
+    EXPECT_CALL(*_mockHttpClient, Post(_, _)).WillOnce(Return(Unavailable()));
+    ExpectLog(Services::Logging::Level::Error, "Dashboard: updating simulation server unavailable");
+
+    const auto service = CreateService();
+    service->UpdateSimulation(1, BulkSimulationDto{});
+}
+
+// --- UpdateSimulationMetrics ------------------------------------------------------------------
+
+TEST_F(Test_DashboardSystemServiceClient, UpdateSimulationMetrics_UsesTheMetricsPath)
+{
+    std::string actualBody;
+    EXPECT_CALL(*_mockHttpClient, Post("system-service/v1.1/simulations/789/metrics", _))
+        .WillOnce(DoAll(SaveArg<1>(&actualBody), Return(Responded(200))));
+    ExpectLog(Services::Logging::Level::Debug, "Dashboard: updating simulation metrics returned 200");
+
+    const auto service = CreateService();
+    service->UpdateSimulationMetrics(789, MetricsUpdateDto{});
+
+    EXPECT_EQ(actualBody, ToJson(MetricsUpdateDto{}));
+}
+
+// --- CheckBulkUpdateSupported -----------------------------------------------------------------
+
+/*! Probes the bulk endpoint with simulation id 0 and an empty payload, and deliberately does not
+ *  log: the previous implementation issued this request through the raw api client, bypassing the
+ *  logging wrapper, and the caller reports the outcome instead.
+ */
+TEST_F(Test_DashboardSystemServiceClient, CheckBulkUpdateSupported_SuccessStatusMeansSupported)
+{
+    std::string actualBody;
+    EXPECT_CALL(*_mockHttpClient, Post("system-service/v1.1/simulations/0", _))
+        .WillOnce(DoAll(SaveArg<1>(&actualBody), Return(Responded(200))));
+
+    const auto service = CreateService();
+
+    EXPECT_TRUE(service->CheckBulkUpdateSupported());
+    EXPECT_EQ(actualBody, "{\"stopped\": null,\"system\": {\"statuses\": []},\"participants\": []}");
+}
+
+TEST_F(Test_DashboardSystemServiceClient, CheckBulkUpdateSupported_NonSuccessStatusMeansUnsupported)
+{
+    EXPECT_CALL(*_mockHttpClient, Post(_, _)).WillOnce(Return(Responded(404)));
+
+    const auto service = CreateService();
+
+    EXPECT_FALSE(service->CheckBulkUpdateSupported());
+}
+
+TEST_F(Test_DashboardSystemServiceClient, CheckBulkUpdateSupported_TransportFailureMeansUnsupported)
+{
+    EXPECT_CALL(*_mockHttpClient, Post(_, _)).WillOnce(Return(Unavailable()));
+
+    const auto service = CreateService();
+
+    EXPECT_FALSE(service->CheckBulkUpdateSupported());
+}
+
+} // namespace
 } // namespace Dashboard
 } // namespace SilKit

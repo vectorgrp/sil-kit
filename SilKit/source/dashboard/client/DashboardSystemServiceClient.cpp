@@ -4,80 +4,81 @@
 
 #include "dashboard/client/DashboardSystemServiceClient.hpp"
 
+#include <utility>
+
+#include "dashboard/client/DashboardPaths.hpp"
+#include "dashboard/json/DashboardJson.hpp"
 #include "services/logging/LoggerMessage.hpp"
 
-#include OATPP_CODEGEN_BEGIN(ApiClient)
-
-using namespace std::chrono_literals;
 using SilKit::Services::Logging::Level;
-using SilKit::Services::Logging::Topic;
 using SilKit::Services::Logging::LoggerMessage;
+using SilKit::Services::Logging::Topic;
 
 namespace SilKit {
 namespace Dashboard {
 
-DashboardSystemServiceClient::DashboardSystemServiceClient(
-    Services::Logging::ILoggerInternal* logger, std::shared_ptr<DashboardSystemApiClient> dashboardSystemApiClient,
-    std::shared_ptr<oatpp::data::mapping::ObjectMapper> objectMapper)
+DashboardSystemServiceClient::DashboardSystemServiceClient(Services::Logging::ILoggerInternal* logger,
+                                                           std::shared_ptr<VSilKit::IHttpClient> httpClient)
     : _logger(logger)
-    , _dashboardSystemApiClient(dashboardSystemApiClient)
-    , _objectMapper(objectMapper)
+    , _httpClient(std::move(httpClient))
 {
 }
 
 DashboardSystemServiceClient::~DashboardSystemServiceClient() {}
 
-void DashboardSystemServiceClient::UpdateSimulation(oatpp::UInt64 simulationId,
-                                                    oatpp::Object<BulkSimulationDto> bulkSimulation)
+auto DashboardSystemServiceClient::CreateSimulation(const SimulationCreationRequestDto& simulation)
+    -> std::optional<uint64_t>
 {
-    auto response = _dashboardSystemApiClient->updateSimulation(simulationId, bulkSimulation);
-    Log(response, "updating simulation");
-}
-
-oatpp::Object<SimulationCreationResponseDto> DashboardSystemServiceClient::CreateSimulation(
-    oatpp::Object<SimulationCreationRequestDto> simulation)
-{
-    auto response = _dashboardSystemApiClient->createSimulation(simulation);
-    Log(response, "creating simulation");
-    if (response && response->getStatusCode() == 201)
+    const auto result = _httpClient->Post(Paths::CreateSimulation(), ToJson(simulation));
+    Log(result, "creating simulation");
+    if (!result.transportError && result.statusCode == 201)
     {
-        return response->readBodyToDto<oatpp::Object<SimulationCreationResponseDto>>(_objectMapper);
+        return ParseSimulationCreationResponse(result.body);
     }
-    return nullptr;
+    return std::nullopt;
 }
 
-void DashboardSystemServiceClient::UpdateSimulationMetrics(oatpp::UInt64 simulationId,
-                                                           oatpp::Object<MetricsUpdateDto> metrics)
+void DashboardSystemServiceClient::UpdateSimulation(uint64_t simulationId, const BulkSimulationDto& bulkSimulation)
 {
-    auto response = _dashboardSystemApiClient->updateSimulationMetrics(simulationId, metrics);
-    Log(response, "updating simulation metrics");
+    const auto result = _httpClient->Post(Paths::UpdateSimulation(simulationId), ToJson(bulkSimulation));
+    Log(result, "updating simulation");
 }
 
-
-void DashboardSystemServiceClient::Log(std::shared_ptr<oatpp::web::client::RequestExecutor::Response> response,
-                                       const std::string& message)
+void DashboardSystemServiceClient::UpdateSimulationMetrics(uint64_t simulationId, const MetricsUpdateDto& metrics)
 {
-    if (!response)
+    const auto result = _httpClient->Post(Paths::UpdateSimulationMetrics(simulationId), ToJson(metrics));
+    Log(result, "updating simulation metrics");
+}
+
+auto DashboardSystemServiceClient::CheckBulkUpdateSupported() -> bool
+{
+    // Deliberately unlogged: the previous implementation probed through the raw api client, which
+    // did not log either, and a failure here is reported by the caller instead.
+    const auto result = _httpClient->Post(Paths::UpdateSimulation(0), ToJson(BulkSimulationDto{}));
+    return !result.transportError && 200 <= result.statusCode && result.statusCode < 300;
+}
+
+void DashboardSystemServiceClient::Log(const VSilKit::HttpResult& result, const std::string& message)
+{
+    if (result.transportError)
     {
         _logger->MakeMessage(Level::Error, TopicOf(*this))
             .SetMessage("Dashboard: {} server unavailable", message)
             .Dispatch();
     }
-    else if (response->getStatusCode() >= 400)
+    else if (result.statusCode >= 400)
     {
         _logger->MakeMessage(Level::Error, TopicOf(*this))
-            .SetMessage("Dashboard: {} returned {}", message, response->getStatusCode())
+            .SetMessage("Dashboard: {} returned {}", message, result.statusCode)
             .Dispatch();
     }
     else
     {
         _logger->MakeMessage(Level::Debug, TopicOf(*this))
-            .SetMessage("Dashboard: {} returned {}", message, response->getStatusCode())
+            .SetMessage("Dashboard: {} returned {}", message, result.statusCode)
             .Dispatch();
     }
 }
 
 } // namespace Dashboard
 } // namespace SilKit
-
-#include OATPP_CODEGEN_END(ApiClient)

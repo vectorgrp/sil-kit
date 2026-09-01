@@ -156,39 +156,6 @@ function(include_spdlog)
 endfunction()
 
 
-function(include_oatpp)
-    silkit_clean_default_compileflags()
-
-    set(OATPP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-    set(OATPP_INSTALL OFF CACHE BOOL "" FORCE)
-    set(OATPP_ADD_LINK_LIBS OFF CACHE BOOL "" FORCE)
-    set(OATPP_LINK_ATOMIC OFF CACHE BOOL "" FORCE)
-
-    set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
-    set(CMAKE_CXX_VISIBILITY_PRESET hidden)
-    set(CMAKE_C_VISIBILITY_PRESET hidden)
-    # work around old cmake in oatpp:
-    set(CMAKE_POLICY_DEFAULT_CMP0063 NEW)
-
-    add_subdirectory(
-        "${SILKIT_THIRD_PARTY_SOURCE_DIR}/oatpp"
-        "${SILKIT_THIRD_PARTY_BINARY_DIR}/_tp_oatpp"
-        EXCLUDE_FROM_ALL
-    )
-    silkit_target_clean_compileflags(oatpp)
-
-    if (CMAKE_CXX_COMPILER_ID MATCHES MSVC)
-        target_compile_options(oatpp PRIVATE "/wd4244" "/wd4068")
-    endif ()
-
-    if (CMAKE_CXX_COMPILER_ID MATCHES GNU)
-        target_compile_options(oatpp PRIVATE "-Wno-useless-cast" "-Wno-conversion")
-    endif ()
-
-    set_property(TARGET oatpp PROPERTY CXX_VISIBILITY_PRESET hidden)
-    set_property(TARGET oatpp PROPERTY VISIBILITY_INLINES_HIDDEN ON)
-endfunction()
-
 function(include_rapidyaml)
 		add_subdirectory(
             "${SILKIT_THIRD_PARTY_SOURCE_DIR}/rapidyaml"
@@ -206,8 +173,4 @@ function(silkit_add_third_party_packages)
     include_fmt()
     include_spdlog()
     include_rapidyaml()
-
-    if (SILKIT_BUILD_DASHBOARD)
-        include_oatpp()
-    endif ()
 endfunction()
