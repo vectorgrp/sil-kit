@@ -25,18 +25,22 @@ constexpr auto kHeaderTemplate = R"(// SPDX-FileCopyrightText: 2022 Vector Infor
 
 #pragma once
 
-#define SILKIT_GIT_HASH "@GIT_HASH@"
 #define SILKIT_VERSION_MAJOR @MAJOR@
 #define SILKIT_VERSION_MINOR @MINOR@
 #define SILKIT_VERSION_PATCH @PATCH@
 #define SILKIT_VERSION_STRING "@VERSION_STRING@"
 #define SILKIT_VERSION_SUFFIX "@SUFFIX@"
 
-// The build number is a property of the build, not of the source tree: pass
-// -DSILKIT_BUILD_NUMBER=N to CMake to set it. This is the fallback for anyone
-// compiling against the installed header without it.
+// The build number and the git hash describe a build, not the source tree, so
+// CMake supplies them: -DSILKIT_BUILD_NUMBER=N and -DSILKIT_BUILD_GIT_HASH=<hash>.
+// The values below are the fallbacks. The hash is the commit that was HEAD when
+// this file was generated, i.e. the parent of the version bump.
 #ifndef SILKIT_BUILD_NUMBER
 #define SILKIT_BUILD_NUMBER 0
+#endif
+
+#ifndef SILKIT_GIT_HASH
+#define SILKIT_GIT_HASH "@GIT_HASH@"
 #endif
 )";
 
