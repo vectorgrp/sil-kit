@@ -69,8 +69,11 @@ Refer to :doc:`rst-help` for guidelines on formatting the documentation.
 ~~~~~~~~~~~~~
 SIL Kit uses CPack to generate the release distributions in ZIP form.
 It can be packaged using the *package* target::
-    
+
     cmake --build . --target package
+
+Refer to :doc:`release` for bumping the version number and rotating the
+changelog before a release.
 
 The generated package adheres to the following template 
 ``SilKit-<VERSION>-<compiler>-<OS>-<TYPE>.zip``.
