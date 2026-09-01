@@ -603,6 +603,11 @@ int main(int argc, char* argv[])
         }
 
         const std::string date = options.date.empty() ? SilKit::VersionGen::TodayIsoDate() : options.date;
+        if (date.empty())
+        {
+            std::cerr << "error: cannot determine today's date; pass --date YYYY-MM-DD\n";
+            return 1;
+        }
         const std::string latestContent = ReadFileFull(layout.latestMd);
 
         writes.push_back({archiveMd, SilKit::VersionGen::FinalizeChangelogHeading(latestContent, currentVersion, date),

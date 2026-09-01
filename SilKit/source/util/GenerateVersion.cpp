@@ -4,7 +4,6 @@
 
 #include "GenerateVersion.hpp"
 
-#include <cstdio>
 #include <cstdlib>
 #include <ctime>
 #include <regex>
@@ -275,8 +274,13 @@ std::string TodayIsoDate()
 #else
     localtime_r(&now, &local);
 #endif
+    // strftime rather than snprintf: GCC cannot prove that tm_mon and tm_mday
+    // are two digits wide and warns about a possibly truncated %02d.
     char buffer[16] = {};
-    std::snprintf(buffer, sizeof(buffer), "%04d-%02d-%02d", local.tm_year + 1900, local.tm_mon + 1, local.tm_mday);
+    if (std::strftime(buffer, sizeof(buffer), "%Y-%m-%d", &local) == 0)
+    {
+        return "";
+    }
     return buffer;
 }
 
