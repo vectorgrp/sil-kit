@@ -3,10 +3,13 @@
 # SPDX-License-Identifier: MIT
 
 # SIL Kit Versioning:
-# * Major and minor release number is configured here. The patch number should not be changed here; it will be set by 
-#   the Jenkins workflow to the master branch's build number for packaging (cmake -SILKIT_BUILD_NUMBER).
-# * Major and minor release number, as well as the sprint number are encoded into Version.hpp and compiled into the library,
-#   they will be accessible from public headers.
+# * Major, minor and patch release number are configured here. This is the source of truth: the generated public header
+#   SilKit/include/silkit/capi/SilKitVersionMacros.h is produced from these numbers and compiled into the library, so
+#   they are accessible from public headers at runtime.
+# * Do not edit the numbers below by hand. Run the sil-kit-generate-version tool, which keeps this file, the generated
+#   header and the changelog in sync. See docs/development/release.md.
+# * SILKIT_BUILD_NUMBER is a build-time override (cmake -DSILKIT_BUILD_NUMBER=N), not source tree state. It defaults to
+#   0 and is passed to the sources as a compile definition; the generated header only carries the fallback.
 macro(configure_silkit_version project_name)
     set(SILKIT_VERSION_MAJOR 5)
     set(SILKIT_VERSION_MINOR 0)
