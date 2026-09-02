@@ -38,6 +38,10 @@ The following options are available:
    - Build the demo applications
  * - SILKIT_BUILD_DOCS
    - Build the documentation using Doxygen and Sphinx
+ * - SILKIT_BUILD_GENERATE_VERSION
+   - Build the ``sil-kit-generate-version`` maintainer tool (see :doc:`release`).
+     It is not installed or packaged; turn it off when cross-compiling, since the
+     resulting binary would not run on the host.
  * - SILKIT_INSTALL_SOURCE
    - Installs the source-tree (used for packaging releases). Implies SILKIT_BUILD_DOCS.
 
@@ -69,8 +73,11 @@ Refer to :doc:`rst-help` for guidelines on formatting the documentation.
 ~~~~~~~~~~~~~
 SIL Kit uses CPack to generate the release distributions in ZIP form.
 It can be packaged using the *package* target::
-    
+
     cmake --build . --target package
+
+Refer to :doc:`release` for bumping the version number and rotating the
+changelog before a release.
 
 The generated package adheres to the following template 
 ``SilKit-<VERSION>-<compiler>-<OS>-<TYPE>.zip``.
