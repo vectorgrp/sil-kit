@@ -48,8 +48,7 @@ TEST_F(Test_DashboardRestClient, Create)
 TEST_F(Test_DashboardRestClient, OnSimulationStart_CreateSimulationSuccess)
 {
     constexpr uint64_t expectedSimulationId = 123;
-    EXPECT_CALL(*_mockDtoMapper, CreateSimulationCreationRequestDto)
-        .WillOnce(Return(SimulationCreationRequestDto{}));
+    EXPECT_CALL(*_mockDtoMapper, CreateSimulationCreationRequestDto).WillOnce(Return(SimulationCreationRequestDto{}));
     EXPECT_CALL(*_mockServiceClient, CreateSimulation).WillOnce(Return(expectedSimulationId));
 
     const auto service = CreateService();
@@ -60,8 +59,7 @@ TEST_F(Test_DashboardRestClient, OnSimulationStart_CreateSimulationSuccess)
 
 TEST_F(Test_DashboardRestClient, OnSimulationStart_CreateSimulationFailure)
 {
-    EXPECT_CALL(*_mockDtoMapper, CreateSimulationCreationRequestDto)
-        .WillOnce(Return(SimulationCreationRequestDto{}));
+    EXPECT_CALL(*_mockDtoMapper, CreateSimulationCreationRequestDto).WillOnce(Return(SimulationCreationRequestDto{}));
     EXPECT_CALL(*_mockServiceClient, CreateSimulation).WillOnce(Return(std::nullopt));
     EXPECT_CALL(_dummyLogger, ProcessLoggerMessage(Services::Logging::ALoggerMessageWith(
                                   Services::Logging::Level::Warn, "Dashboard: creating simulation failed")));

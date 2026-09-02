@@ -37,14 +37,13 @@ struct SimulationEnd
 using MetricsUpdatePair = std::pair<std::string, VSilKit::MetricsUpdate>;
 
 //! Payload of a SilKitEvent. The alternatives are in the same order as SilKitEventType.
-using SilKitEventData =
-    std::variant<SimulationStart,                                                    //
-                 SilKit::Services::Orchestration::ParticipantConnectionInformation,  //
-                 SilKit::Services::Orchestration::SystemState,                       //
-                 SilKit::Services::Orchestration::ParticipantStatus,                 //
-                 ServiceData,                                                        //
-                 SimulationEnd,                                                      //
-                 MetricsUpdatePair>;
+using SilKitEventData = std::variant<SimulationStart,                                                   //
+                                     SilKit::Services::Orchestration::ParticipantConnectionInformation, //
+                                     SilKit::Services::Orchestration::SystemState,                      //
+                                     SilKit::Services::Orchestration::ParticipantStatus,                //
+                                     ServiceData,                                                       //
+                                     SimulationEnd,                                                     //
+                                     MetricsUpdatePair>;
 
 //! Discriminator for SilKitEventData. Enumerator values must match the variant alternative order;
 //! the static_asserts below enforce that.
@@ -61,25 +60,24 @@ enum class SilKitEventType
 
 namespace Detail {
 
-template <SilKitEventType kType, typename T>
+template <SilKitEventType eventType, typename T>
 constexpr auto EventTypeMatchesAlternative() -> bool
 {
-    return std::is_same<std::variant_alternative_t<static_cast<size_t>(kType), SilKitEventData>, T>::value;
+    return std::is_same<std::variant_alternative_t<static_cast<size_t>(eventType), SilKitEventData>, T>::value;
 }
 
 } // namespace Detail
 
 static_assert(std::variant_size<SilKitEventData>::value == 7, "SilKitEventType and SilKitEventData disagree");
 static_assert(Detail::EventTypeMatchesAlternative<SilKitEventType::OnSimulationStart, SimulationStart>(), "");
-static_assert(Detail::EventTypeMatchesAlternative<
-                  SilKitEventType::OnParticipantConnected,
-                  SilKit::Services::Orchestration::ParticipantConnectionInformation>(),
+static_assert(Detail::EventTypeMatchesAlternative<SilKitEventType::OnParticipantConnected,
+                                                  SilKit::Services::Orchestration::ParticipantConnectionInformation>(),
               "");
 static_assert(Detail::EventTypeMatchesAlternative<SilKitEventType::OnSystemStateChanged,
-                                                 SilKit::Services::Orchestration::SystemState>(),
+                                                  SilKit::Services::Orchestration::SystemState>(),
               "");
 static_assert(Detail::EventTypeMatchesAlternative<SilKitEventType::OnParticipantStatusChanged,
-                                                 SilKit::Services::Orchestration::ParticipantStatus>(),
+                                                  SilKit::Services::Orchestration::ParticipantStatus>(),
               "");
 static_assert(Detail::EventTypeMatchesAlternative<SilKitEventType::OnServiceDiscoveryEvent, ServiceData>(), "");
 static_assert(Detail::EventTypeMatchesAlternative<SilKitEventType::OnSimulationEnd, SimulationEnd>(), "");

@@ -12,7 +12,7 @@ namespace Dashboard {
 namespace {
 
 //! U+FFFD REPLACEMENT CHARACTER, as UTF-8.
-constexpr std::string_view kReplacementCharacter = "\xEF\xBF\xBD";
+constexpr std::string_view replacementCharacter = "\xEF\xBF\xBD";
 
 /*! True for the control bytes ryml's JSON emitter would pass through unescaped.
  *
@@ -59,7 +59,7 @@ void DashboardJsonWriter::WriteQuoted(std::string_view value)
         {
             if (NeedsReplacement(static_cast<unsigned char>(c)))
             {
-                sanitized += kReplacementCharacter;
+                sanitized += replacementCharacter;
             }
             else
             {

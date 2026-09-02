@@ -28,11 +28,11 @@ class IDashboardDtoMapper
 public:
     virtual ~IDashboardDtoMapper() = default;
 
-    virtual auto CreateSimulationCreationRequestDto(const std::string& connectUri,
-                                                    uint64_t start) -> SimulationCreationRequestDto = 0;
+    virtual auto CreateSimulationCreationRequestDto(const std::string& connectUri, uint64_t start)
+        -> SimulationCreationRequestDto = 0;
     virtual auto CreateBulkSimulationDto(const DashboardBulkUpdate& bulkUpdate) -> BulkSimulationDto = 0;
-    virtual auto CreateMetricsUpdateDto(const std::string& participantName,
-                                        const VSilKit::MetricsUpdate& metricsUpdate) -> MetricsUpdateDto = 0;
+    virtual auto CreateMetricsUpdateDto(const std::string& participantName, const VSilKit::MetricsUpdate& metricsUpdate)
+        -> MetricsUpdateDto = 0;
 };
 
 } // namespace Dashboard

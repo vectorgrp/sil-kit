@@ -31,7 +31,10 @@ auto Unavailable() -> HttpResult
 class Test_RetryingHttpClient : public testing::Test
 {
 public:
-    void SetUp() override { _inner = std::make_shared<MockHttpClient>(); }
+    void SetUp() override
+    {
+        _inner = std::make_shared<MockHttpClient>();
+    }
 
     auto CreateClient(HttpRetryPolicy policy = {}) -> RetryingHttpClient
     {

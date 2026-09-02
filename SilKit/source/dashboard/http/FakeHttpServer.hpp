@@ -110,11 +110,10 @@ public:
     }
 
     //! Convenience: a well-formed response with a Content-Length body.
-    static auto MakeReply(int statusCode, const std::string& body,
-                          const std::string& extraHeaders = {}) -> std::string
+    static auto MakeReply(int statusCode, const std::string& body, const std::string& extraHeaders = {}) -> std::string
     {
-        return "HTTP/1.1 " + std::to_string(statusCode) + " Status\r\n" + extraHeaders + "Content-Length: "
-               + std::to_string(body.size()) + "\r\n\r\n" + body;
+        return "HTTP/1.1 " + std::to_string(statusCode) + " Status\r\n" + extraHeaders
+               + "Content-Length: " + std::to_string(body.size()) + "\r\n\r\n" + body;
     }
 
     //! Convenience: a handler that always answers with the same bytes.

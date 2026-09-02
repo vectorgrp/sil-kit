@@ -25,8 +25,7 @@ namespace Dashboard {
 
 DashboardRestClient::DashboardRestClient(Services::Logging::ILoggerInternal* logger,
                                          const std::string& dashboardServerUri,
-                                         VSilKit::AsioHttpClientTimeouts timeouts,
-                                         VSilKit::HttpRetryPolicy retryPolicy)
+                                         VSilKit::AsioHttpClientTimeouts timeouts, VSilKit::HttpRetryPolicy retryPolicy)
     : _logger(logger)
 {
     _dtoMapper = std::make_shared<DashboardDtoMapper>(logger);
@@ -76,9 +75,7 @@ uint64_t DashboardRestClient::OnSimulationStart(const std::string& connectUri, u
             .Dispatch();
         return *simulationId;
     }
-    _logger->MakeMessage(Level::Warn, TopicOf(*this))
-        .SetMessage("Dashboard: creating simulation failed")
-        .Dispatch();
+    _logger->MakeMessage(Level::Warn, TopicOf(*this)).SetMessage("Dashboard: creating simulation failed").Dispatch();
     return 0;
 }
 

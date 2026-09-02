@@ -122,8 +122,8 @@ TEST_F(Test_AsioHttpClient, Post_HandlesABodylessResponseAndKeepsTheConnection)
 
 TEST_F(Test_AsioHttpClient, Post_ReassemblesAChunkedResponseBody)
 {
-    const std::string chunked = std::string{"HTTP/1.1 201 Created\r\nTransfer-Encoding: chunked\r\n\r\n"}
-                                + "5\r\n" + R"({"id")" + "\r\n" + "4\r\n" + R"(:42})" + "\r\n" + "0\r\n\r\n";
+    const std::string chunked = std::string{"HTTP/1.1 201 Created\r\nTransfer-Encoding: chunked\r\n\r\n"} + "5\r\n"
+                                + R"({"id")" + "\r\n" + "4\r\n" + R"(:42})" + "\r\n" + "0\r\n\r\n";
     FakeHttpServer server{AlwaysReply(chunked)};
     AsioHttpClient client{nullptr, "127.0.0.1", server.Port()};
 
@@ -212,9 +212,8 @@ TEST_F(Test_AsioHttpClient, Abort_UnblocksAnInFlightRequest)
 TEST_F(Test_AsioHttpClient, RetryingHttpClient_OverTheRealTransport_RecoversFromServiceUnavailable)
 {
     std::atomic<int> attempts{0};
-    FakeHttpServer server{[&attempts](const std::string&) {
-        return ++attempts <= 2 ? Reply(503, "") : Reply(200, "{}");
-    }};
+    FakeHttpServer server{
+        [&attempts](const std::string&) { return ++attempts <= 2 ? Reply(503, "") : Reply(200, "{}"); }};
 
     auto transport = std::make_shared<AsioHttpClient>(nullptr, "127.0.0.1", server.Port());
     HttpRetryPolicy policy{};

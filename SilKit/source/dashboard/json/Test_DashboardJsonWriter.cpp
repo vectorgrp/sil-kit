@@ -57,8 +57,7 @@ auto MakeController(uint64_t id, std::string name, std::string networkName) -> B
 
 TEST(Test_DashboardJsonWriter, BulkSimulationDto_Default)
 {
-    EXPECT_EQ(ToJson(BulkSimulationDto{}),
-              "{\"stopped\": null,\"system\": {\"statuses\": []},\"participants\": []}");
+    EXPECT_EQ(ToJson(BulkSimulationDto{}), "{\"stopped\": null,\"system\": {\"statuses\": []},\"participants\": []}");
 }
 
 // --- simulation creation ----------------------------------------------------------------------
@@ -118,11 +117,12 @@ TEST(Test_DashboardJsonWriter, ParticipantStatusDto_NonAsciiIsEmittedAsRawUtf8)
 {
     ParticipantStatusDto status{};
     status.state = ParticipantState::Stopped;
-    status.enterReason = "Fahrzeug-S\xc3\xbc" "d \xe2\x82\xac"; // "Fahrzeug-Sued EUR" in UTF-8
+    status.enterReason = "Fahrzeug-S\xc3\xbc"
+                         "d \xe2\x82\xac"; // "Fahrzeug-Sued EUR" in UTF-8
     status.enterTime = 1;
 
-    EXPECT_EQ(ToJson(status),
-              "{\"state\": \"stopped\",\"enterReason\": \"Fahrzeug-S\xc3\xbc" "d \xe2\x82\xac\",\"enterTime\": 1}");
+    EXPECT_EQ(ToJson(status), "{\"state\": \"stopped\",\"enterReason\": \"Fahrzeug-S\xc3\xbc"
+                              "d \xe2\x82\xac\",\"enterTime\": 1}");
 }
 
 // rapidyaml escapes only \b \f \n \r \t, so any other C0 byte would be emitted raw and break the
@@ -156,8 +156,7 @@ TEST(Test_DashboardJsonWriter, MatchingLabelDto_KindIsEmittedAsItsName)
  */
 TEST(Test_DashboardJsonWriter, StringFields_ThatLookLikeNumbers_StayQuoted)
 {
-    EXPECT_EQ(ToJson(MakeController(0, "12345", "0")),
-              "{\"id\": 0,\"name\": \"12345\",\"networkName\": \"0\"}");
+    EXPECT_EQ(ToJson(MakeController(0, "12345", "0")), "{\"id\": 0,\"name\": \"12345\",\"networkName\": \"0\"}");
 }
 
 TEST(Test_DashboardJsonWriter, StringFields_ThatLookLikeOtherJsonLiterals_StayQuoted)
@@ -292,8 +291,7 @@ TEST(Test_DashboardJsonWriter, AttributeDataDto_AStringListValueStaysANestedStri
     attribute.mn = {"names"};
     attribute.mv = "[\"a\",\"b\"]";
 
-    EXPECT_EQ(ToJson(attribute),
-              "{\"ts\": 1,\"pn\": \"P1\",\"mn\": [\"names\"],\"mv\": \"[\\\"a\\\",\\\"b\\\"]\"}");
+    EXPECT_EQ(ToJson(attribute), "{\"ts\": 1,\"pn\": \"P1\",\"mn\": [\"names\"],\"mv\": \"[\\\"a\\\",\\\"b\\\"]\"}");
 }
 
 TEST(Test_DashboardJsonWriter, CounterDataDto_HandlesTheFullInt64Range)
@@ -379,8 +377,7 @@ TEST(Test_DashboardJsonWriter, ParseSimulationCreationResponse_ReadsTheId)
 
 TEST(Test_DashboardJsonWriter, ParseSimulationCreationResponse_HandlesTheFullUint64Range)
 {
-    EXPECT_EQ(ParseSimulationCreationResponse(R"({"id":18446744073709551615})"),
-              std::numeric_limits<uint64_t>::max());
+    EXPECT_EQ(ParseSimulationCreationResponse(R"({"id":18446744073709551615})"), std::numeric_limits<uint64_t>::max());
 }
 
 /*! oatpp rejected unknown fields, and the resulting exception propagated out of the dashboard's

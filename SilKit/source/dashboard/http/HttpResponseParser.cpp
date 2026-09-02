@@ -214,7 +214,7 @@ auto ParseResponseHead(std::string_view head, ResponseHead& out) -> bool
 
     if (haveContentLength)
     {
-        if (contentLength > kMaxHttpBodySize)
+        if (contentLength > maxHttpBodySize)
         {
             return false;
         }

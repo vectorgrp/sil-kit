@@ -31,11 +31,11 @@ namespace {
 
 namespace orchestration = SilKit::Services::Orchestration;
 
-constexpr uint64_t kSimulationId{42};
-constexpr uint64_t kOtherSimulationId{43};
+constexpr uint64_t simulationId{42};
+constexpr uint64_t otherSimulationId{43};
 
-auto MakeParticipantStatus(const std::string& participantName,
-                           orchestration::ParticipantState state) -> orchestration::ParticipantStatus
+auto MakeParticipantStatus(const std::string& participantName, orchestration::ParticipantState state)
+    -> orchestration::ParticipantStatus
 {
     orchestration::ParticipantStatus status{};
     status.participantName = participantName;
@@ -89,7 +89,7 @@ public:
 
 TEST_F(Test_DashboardEventQueueWorker, SimulationStart_CreatesTheSimulation)
 {
-    EXPECT_CALL(_restClient, OnSimulationStart("silkit://localhost:8500/sim", 1000)).WillOnce(Return(kSimulationId));
+    EXPECT_CALL(_restClient, OnSimulationStart("silkit://localhost:8500/sim", 1000)).WillOnce(Return(simulationId));
 
     EnqueueSimulationStart("sim");
     RunWorkerToCompletion();
@@ -100,7 +100,7 @@ TEST_F(Test_DashboardEventQueueWorker, SimulationStart_CreatesTheSimulation)
  */
 TEST_F(Test_DashboardEventQueueWorker, SimulationStart_Twice_CreatesTheSimulationOnce)
 {
-    EXPECT_CALL(_restClient, OnSimulationStart(_, _)).WillOnce(Return(kSimulationId));
+    EXPECT_CALL(_restClient, OnSimulationStart(_, _)).WillOnce(Return(simulationId));
 
     EnqueueSimulationStart("sim");
     EnqueueSimulationStart("sim");
@@ -109,8 +109,8 @@ TEST_F(Test_DashboardEventQueueWorker, SimulationStart_Twice_CreatesTheSimulatio
 
 TEST_F(Test_DashboardEventQueueWorker, SimulationStart_ForDistinctNames_CreatesEachSimulation)
 {
-    EXPECT_CALL(_restClient, OnSimulationStart("silkit://localhost:8500/a", _)).WillOnce(Return(kSimulationId));
-    EXPECT_CALL(_restClient, OnSimulationStart("silkit://localhost:8500/b", _)).WillOnce(Return(kOtherSimulationId));
+    EXPECT_CALL(_restClient, OnSimulationStart("silkit://localhost:8500/a", _)).WillOnce(Return(simulationId));
+    EXPECT_CALL(_restClient, OnSimulationStart("silkit://localhost:8500/b", _)).WillOnce(Return(otherSimulationId));
 
     EnqueueSimulationStart("a");
     EnqueueSimulationStart("b");
@@ -141,10 +141,10 @@ TEST_F(Test_DashboardEventQueueWorker, EventsForAnUnknownSimulation_AreDropped)
 
 TEST_F(Test_DashboardEventQueueWorker, Events_AreBatchedIntoASingleBulkUpdate)
 {
-    EXPECT_CALL(_restClient, OnSimulationStart(_, _)).WillOnce(Return(kSimulationId));
+    EXPECT_CALL(_restClient, OnSimulationStart(_, _)).WillOnce(Return(simulationId));
 
     DashboardBulkUpdate captured;
-    EXPECT_CALL(_restClient, OnBulkUpdate(kSimulationId, _))
+    EXPECT_CALL(_restClient, OnBulkUpdate(simulationId, _))
         .WillOnce(WithArg<1>([&captured](const DashboardBulkUpdate& update) {
         captured.participantConnectionInformations = update.participantConnectionInformations;
         captured.participantStatuses = update.participantStatuses;
@@ -170,17 +170,15 @@ TEST_F(Test_DashboardEventQueueWorker, Events_AreBatchedIntoASingleBulkUpdate)
 
 TEST_F(Test_DashboardEventQueueWorker, EachSimulation_GetsItsOwnBulkUpdate)
 {
-    EXPECT_CALL(_restClient, OnSimulationStart("silkit://localhost:8500/a", _)).WillOnce(Return(kSimulationId));
-    EXPECT_CALL(_restClient, OnSimulationStart("silkit://localhost:8500/b", _)).WillOnce(Return(kOtherSimulationId));
+    EXPECT_CALL(_restClient, OnSimulationStart("silkit://localhost:8500/a", _)).WillOnce(Return(simulationId));
+    EXPECT_CALL(_restClient, OnSimulationStart("silkit://localhost:8500/b", _)).WillOnce(Return(otherSimulationId));
 
     size_t participantsForA{0};
     size_t participantsForB{0};
-    EXPECT_CALL(_restClient, OnBulkUpdate(kSimulationId, _))
-        .WillOnce(WithArg<1>([&](const DashboardBulkUpdate& u) {
+    EXPECT_CALL(_restClient, OnBulkUpdate(simulationId, _)).WillOnce(WithArg<1>([&](const DashboardBulkUpdate& u) {
         participantsForA = u.participantConnectionInformations.size();
     }));
-    EXPECT_CALL(_restClient, OnBulkUpdate(kOtherSimulationId, _))
-        .WillOnce(WithArg<1>([&](const DashboardBulkUpdate& u) {
+    EXPECT_CALL(_restClient, OnBulkUpdate(otherSimulationId, _)).WillOnce(WithArg<1>([&](const DashboardBulkUpdate& u) {
         participantsForB = u.participantConnectionInformations.size();
     }));
 
@@ -198,7 +196,7 @@ TEST_F(Test_DashboardEventQueueWorker, EachSimulation_GetsItsOwnBulkUpdate)
 //! Nothing to report means no request at all, rather than an empty bulk update every batch.
 TEST_F(Test_DashboardEventQueueWorker, ASimulationWithNothingToReport_SendsNoBulkUpdate)
 {
-    EXPECT_CALL(_restClient, OnSimulationStart(_, _)).WillOnce(Return(kSimulationId));
+    EXPECT_CALL(_restClient, OnSimulationStart(_, _)).WillOnce(Return(simulationId));
     EXPECT_CALL(_restClient, OnBulkUpdate(_, _)).Times(0);
 
     EnqueueSimulationStart("sim");
@@ -212,9 +210,9 @@ TEST_F(Test_DashboardEventQueueWorker, ASimulationStart_FlushesWhatWasAlreadyAcc
 {
     InSequence sequence;
 
-    EXPECT_CALL(_restClient, OnSimulationStart("silkit://localhost:8500/a", _)).WillOnce(Return(kSimulationId));
-    EXPECT_CALL(_restClient, OnBulkUpdate(kSimulationId, _));
-    EXPECT_CALL(_restClient, OnSimulationStart("silkit://localhost:8500/b", _)).WillOnce(Return(kOtherSimulationId));
+    EXPECT_CALL(_restClient, OnSimulationStart("silkit://localhost:8500/a", _)).WillOnce(Return(simulationId));
+    EXPECT_CALL(_restClient, OnBulkUpdate(simulationId, _));
+    EXPECT_CALL(_restClient, OnSimulationStart("silkit://localhost:8500/b", _)).WillOnce(Return(otherSimulationId));
 
     EnqueueSimulationStart("a");
     Enqueue("a", orchestration::ParticipantConnectionInformation{"P1"});
@@ -226,10 +224,10 @@ TEST_F(Test_DashboardEventQueueWorker, ASimulationStart_FlushesWhatWasAlreadyAcc
 
 TEST_F(Test_DashboardEventQueueWorker, SimulationEnd_SetsStopped)
 {
-    EXPECT_CALL(_restClient, OnSimulationStart(_, _)).WillOnce(Return(kSimulationId));
+    EXPECT_CALL(_restClient, OnSimulationStart(_, _)).WillOnce(Return(simulationId));
 
     std::optional<uint64_t> stopped;
-    EXPECT_CALL(_restClient, OnBulkUpdate(kSimulationId, _))
+    EXPECT_CALL(_restClient, OnBulkUpdate(simulationId, _))
         .WillOnce(WithArg<1>([&stopped](const DashboardBulkUpdate& u) { stopped = u.stopped; }));
 
     EnqueueSimulationStart("sim");
@@ -243,8 +241,8 @@ TEST_F(Test_DashboardEventQueueWorker, SimulationEnd_SetsStopped)
 //! After the end the name is forgotten, so late events are dropped rather than reusing the id.
 TEST_F(Test_DashboardEventQueueWorker, EventsAfterSimulationEnd_AreDropped)
 {
-    EXPECT_CALL(_restClient, OnSimulationStart(_, _)).WillOnce(Return(kSimulationId));
-    EXPECT_CALL(_restClient, OnBulkUpdate(kSimulationId, _)).Times(1);
+    EXPECT_CALL(_restClient, OnSimulationStart(_, _)).WillOnce(Return(simulationId));
+    EXPECT_CALL(_restClient, OnBulkUpdate(simulationId, _)).Times(1);
 
     EnqueueSimulationStart("sim");
     Enqueue("sim", SimulationEnd{1});
@@ -256,10 +254,10 @@ TEST_F(Test_DashboardEventQueueWorker, EventsAfterSimulationEnd_AreDropped)
 TEST_F(Test_DashboardEventQueueWorker, ASimulationNameCanBeReusedAfterItEnded)
 {
     EXPECT_CALL(_restClient, OnSimulationStart(_, _))
-        .WillOnce(Return(kSimulationId))
-        .WillOnce(Return(kOtherSimulationId));
-    EXPECT_CALL(_restClient, OnBulkUpdate(kSimulationId, _));
-    EXPECT_CALL(_restClient, OnBulkUpdate(kOtherSimulationId, _));
+        .WillOnce(Return(simulationId))
+        .WillOnce(Return(otherSimulationId));
+    EXPECT_CALL(_restClient, OnBulkUpdate(simulationId, _));
+    EXPECT_CALL(_restClient, OnBulkUpdate(otherSimulationId, _));
 
     EnqueueSimulationStart("sim");
     Enqueue("sim", SimulationEnd{1});
@@ -273,8 +271,8 @@ TEST_F(Test_DashboardEventQueueWorker, ASimulationNameCanBeReusedAfterItEnded)
 //! Metrics have their own endpoint and are sent as they arrive rather than folded into the batch.
 TEST_F(Test_DashboardEventQueueWorker, MetricsUpdates_AreSentImmediatelyAndNotBatched)
 {
-    EXPECT_CALL(_restClient, OnSimulationStart(_, _)).WillOnce(Return(kSimulationId));
-    EXPECT_CALL(_restClient, OnMetricsUpdate(kSimulationId, "P1", _)).Times(1);
+    EXPECT_CALL(_restClient, OnSimulationStart(_, _)).WillOnce(Return(simulationId));
+    EXPECT_CALL(_restClient, OnMetricsUpdate(simulationId, "P1", _)).Times(1);
     EXPECT_CALL(_restClient, OnBulkUpdate(_, _)).Times(0);
 
     EnqueueSimulationStart("sim");
@@ -292,14 +290,13 @@ TEST_F(Test_DashboardEventQueueWorker, MetricsUpdates_AreSentImmediatelyAndNotBa
  */
 TEST_F(Test_DashboardEventQueueWorker, Abort_FlushesWhatWasAccumulated)
 {
-    EXPECT_CALL(_restClient, OnSimulationStart(_, _)).WillOnce(Return(kSimulationId));
-    EXPECT_CALL(_restClient, OnMetricsUpdate(kSimulationId, "P1", _)).WillOnce([this](auto&&...) {
+    EXPECT_CALL(_restClient, OnSimulationStart(_, _)).WillOnce(Return(simulationId));
+    EXPECT_CALL(_restClient, OnMetricsUpdate(simulationId, "P1", _)).WillOnce([this](auto&&...) {
         _abort.store(true);
     });
 
     size_t participants{0};
-    EXPECT_CALL(_restClient, OnBulkUpdate(kSimulationId, _))
-        .WillOnce(WithArg<1>([&](const DashboardBulkUpdate& update) {
+    EXPECT_CALL(_restClient, OnBulkUpdate(simulationId, _)).WillOnce(WithArg<1>([&](const DashboardBulkUpdate& update) {
         participants = update.participantConnectionInformations.size();
     }));
 
@@ -348,11 +345,11 @@ TEST_F(Test_DashboardEventQueueWorker, AThrowingRestClient_DoesNotEscapeTheWorke
 TEST_F(Test_DashboardEventQueueWorker, AFailedMetricsUpdate_DoesNotStopLaterEvents)
 {
     InSequence sequence;
-    EXPECT_CALL(_restClient, OnSimulationStart(_, _)).WillOnce(Return(kSimulationId));
-    EXPECT_CALL(_restClient, OnMetricsUpdate(kSimulationId, "P1", _))
+    EXPECT_CALL(_restClient, OnSimulationStart(_, _)).WillOnce(Return(simulationId));
+    EXPECT_CALL(_restClient, OnMetricsUpdate(simulationId, "P1", _))
         .WillOnce(Throw(SilKit::SilKitError{"Unexpected controller type Something"}));
-    EXPECT_CALL(_restClient, OnMetricsUpdate(kSimulationId, "P2", _)).Times(1);
-    EXPECT_CALL(_restClient, OnBulkUpdate(kSimulationId, _)).Times(1);
+    EXPECT_CALL(_restClient, OnMetricsUpdate(simulationId, "P2", _)).Times(1);
+    EXPECT_CALL(_restClient, OnBulkUpdate(simulationId, _)).Times(1);
 
     EnqueueSimulationStart("sim");
     Enqueue("sim", MetricsUpdatePair{"P1", MetricsUpdate{}});
@@ -365,18 +362,17 @@ TEST_F(Test_DashboardEventQueueWorker, AFailedMetricsUpdate_DoesNotStopLaterEven
 //! A bulk update that cannot be sent must not be retried forever, blocking everything behind it.
 TEST_F(Test_DashboardEventQueueWorker, AFailedBulkUpdate_IsDroppedRatherThanRetried)
 {
-    EXPECT_CALL(_restClient, OnSimulationStart(_, _)).WillOnce(Return(kSimulationId));
+    EXPECT_CALL(_restClient, OnSimulationStart(_, _)).WillOnce(Return(simulationId));
 
     std::vector<std::string> secondFlush;
-    EXPECT_CALL(_restClient, OnBulkUpdate(kSimulationId, _))
+    EXPECT_CALL(_restClient, OnBulkUpdate(simulationId, _))
         .Times(2)
         // The first flush queues the next batch, ends the queue and then fails.
         .WillOnce([&](uint64_t, const DashboardBulkUpdate&) {
         Enqueue("sim", orchestration::ParticipantConnectionInformation{"P2"});
         _queue.Stop();
         throw SilKit::SilKitError{"cannot map this"};
-    })
-        .WillOnce(WithArg<1>([&](const DashboardBulkUpdate& update) {
+    }).WillOnce(WithArg<1>([&](const DashboardBulkUpdate& update) {
         for (const auto& connection : update.participantConnectionInformations)
         {
             secondFlush.push_back(connection.participantName);
@@ -399,8 +395,8 @@ TEST_F(Test_DashboardEventQueueWorker, AFailedSimulationStart_DoesNotStopLaterSi
 {
     EXPECT_CALL(_restClient, OnSimulationStart("silkit://localhost:8500/bad", _))
         .WillOnce(Throw(std::runtime_error{"boom"}));
-    EXPECT_CALL(_restClient, OnSimulationStart("silkit://localhost:8500/good", _)).WillOnce(Return(kSimulationId));
-    EXPECT_CALL(_restClient, OnBulkUpdate(kSimulationId, _)).Times(1);
+    EXPECT_CALL(_restClient, OnSimulationStart("silkit://localhost:8500/good", _)).WillOnce(Return(simulationId));
+    EXPECT_CALL(_restClient, OnBulkUpdate(simulationId, _)).Times(1);
 
     EnqueueSimulationStart("bad");
     EnqueueSimulationStart("good");

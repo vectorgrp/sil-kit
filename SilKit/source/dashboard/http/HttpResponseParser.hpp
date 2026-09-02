@@ -11,7 +11,7 @@
 namespace VSilKit {
 
 //! Upper bound on a response body we are willing to buffer.
-constexpr uint64_t kMaxHttpBodySize = 1u << 20; // 1 MiB
+constexpr uint64_t maxHttpBodySize = 1u << 20; // 1 MiB
 
 //! How the body of a response is framed.
 enum class HttpBodyFraming

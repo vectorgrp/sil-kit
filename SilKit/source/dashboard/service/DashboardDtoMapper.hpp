@@ -23,11 +23,11 @@ public:
      */
     explicit DashboardDtoMapper(Services::Logging::ILoggerInternal* logger = nullptr);
 
-    auto CreateSimulationCreationRequestDto(const std::string& connectUri,
-                                            uint64_t start) -> SimulationCreationRequestDto override;
+    auto CreateSimulationCreationRequestDto(const std::string& connectUri, uint64_t start)
+        -> SimulationCreationRequestDto override;
     auto CreateBulkSimulationDto(const DashboardBulkUpdate& bulkUpdate) -> BulkSimulationDto override;
-    auto CreateMetricsUpdateDto(const std::string& participantName,
-                                const VSilKit::MetricsUpdate& metricsUpdate) -> MetricsUpdateDto override;
+    auto CreateMetricsUpdateDto(const std::string& participantName, const VSilKit::MetricsUpdate& metricsUpdate)
+        -> MetricsUpdateDto override;
 
 public: // exercised directly by the tests
     auto CreateSystemStatusDto(Services::Orchestration::SystemState systemState) -> SystemStatusDto;

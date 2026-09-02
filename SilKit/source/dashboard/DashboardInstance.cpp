@@ -20,7 +20,7 @@ namespace {
 
 
 /// How long the destructor lets an in-flight dashboard request finish before aborting it.
-constexpr auto kShutdownGracePeriod = std::chrono::seconds{5};
+constexpr auto shutdownGracePeriod = std::chrono::seconds{5};
 
 
 uint64_t GetCurrentSystemTime()
@@ -77,7 +77,7 @@ DashboardInstance::~DashboardInstance()
     std::promise<void> workerFinished;
     auto workerFinishedFuture = workerFinished.get_future();
     auto watchdog = std::async(std::launch::async, [this, &workerFinishedFuture] {
-        if (workerFinishedFuture.wait_for(kShutdownGracePeriod) == std::future_status::timeout
+        if (workerFinishedFuture.wait_for(shutdownGracePeriod) == std::future_status::timeout
             && _dashboardRestClient != nullptr)
         {
             _dashboardRestClient->Abort();
@@ -129,8 +129,8 @@ void DashboardInstance::OnRegistryUri(const std::string& registryUri)
 void DashboardInstance::OnParticipantConnected(const std::string& simulationName, const std::string& participantName)
 {
     _logger->MakeMessage(Level::Trace, TopicOf(*this))
-        .SetMessage("DashboardInstance::OnParticipantConnected: simulationName={} participantName={}",
-                    simulationName, participantName)
+        .SetMessage("DashboardInstance::OnParticipantConnected: simulationName={} participantName={}", simulationName,
+                    participantName)
         .Dispatch();
 
     auto& systemStateTracker{_systemStateTrackers[simulationName]};
@@ -240,8 +240,8 @@ void DashboardInstance::OnMetricsUpdate(const std::string& simulationName, const
                                         const VSilKit::MetricsUpdate& metricsUpdate)
 {
     _logger->MakeMessage(Level::Trace, TopicOf(*this))
-        .SetMessage("DashboardInstance::OnMetricsUpdate: simulationName={} origin={} metricsUpdate={}",
-                    simulationName, origin, metricsUpdate)
+        .SetMessage("DashboardInstance::OnMetricsUpdate: simulationName={} origin={} metricsUpdate={}", simulationName,
+                    origin, metricsUpdate)
         .Dispatch();
 
     _silKitEventQueue.Enqueue(SilKitEvent{simulationName, MetricsUpdatePair{origin, metricsUpdate}});

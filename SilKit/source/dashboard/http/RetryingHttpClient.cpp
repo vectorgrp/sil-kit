@@ -66,8 +66,7 @@ void RetryingHttpClient::Abort()
 auto RetryingHttpClient::SleepInterruptible(std::chrono::milliseconds duration) -> bool
 {
     std::unique_lock<std::mutex> lock{_mutex};
-    const bool aborted =
-        _abortCv.wait_for(lock, duration, [this] { return _aborted.load(std::memory_order_acquire); });
+    const bool aborted = _abortCv.wait_for(lock, duration, [this] { return _aborted.load(std::memory_order_acquire); });
     return !aborted;
 }
 

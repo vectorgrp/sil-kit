@@ -114,8 +114,7 @@ TEST_F(Test_DashboardSystemServiceClient, CreateSimulation_SendsTheSerializedReq
     service->CreateSimulation(request);
 
     EXPECT_EQ(actualBody, ToJson(request));
-    EXPECT_EQ(actualBody,
-              "{\"started\": 17,\"configuration\": {\"connectUri\": \"silkit://localhost:8500\"}}");
+    EXPECT_EQ(actualBody, "{\"started\": 17,\"configuration\": {\"connectUri\": \"silkit://localhost:8500\"}}");
 }
 
 // --- UpdateSimulation -------------------------------------------------------------------------

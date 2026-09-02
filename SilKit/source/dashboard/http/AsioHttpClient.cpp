@@ -28,12 +28,12 @@ namespace VSilKit {
 namespace {
 
 //! Sentinel no asio operation ever completes with, so it doubles as "still pending".
-const std::error_code kPending = asio::error::would_block;
+const std::error_code pending = asio::error::would_block;
 
 //! How often the deadline loop wakes to notice an Abort(); also bounds abort latency.
-constexpr auto kPollInterval = std::chrono::milliseconds{50};
+constexpr auto pollInterval = std::chrono::milliseconds{50};
 
-constexpr size_t kMaxHeadSize = 64 * 1024;
+constexpr size_t maxHeadSize = 64 * 1024;
 
 } // namespace
 
@@ -93,13 +93,13 @@ struct AsioHttpClient::Impl
     template <typename Initiate>
     auto RunWithDeadline(Initiate&& initiate, std::chrono::milliseconds timeout) -> std::error_code
     {
-        auto opError = kPending;
+        auto opError = pending;
         initiate([&opError](const std::error_code& ec) { opError = ec; });
 
         ioContext.restart();
         const auto deadline = std::chrono::steady_clock::now() + timeout;
 
-        while (opError == kPending)
+        while (opError == pending)
         {
             if (aborted.load(std::memory_order_acquire))
             {
@@ -110,7 +110,7 @@ struct AsioHttpClient::Impl
             {
                 return DrainAndFail(asio::error::timed_out);
             }
-            ioContext.run_one_for(std::min<std::chrono::steady_clock::duration>(remaining, kPollInterval));
+            ioContext.run_one_for(std::min<std::chrono::steady_clock::duration>(remaining, pollInterval));
         }
         return opError;
     }
@@ -138,19 +138,17 @@ struct AsioHttpClient::Impl
         // be reliably cancelled, so we want to be exposed to it at most once.
         asio::ip::tcp::resolver resolver{ioContext};
         asio::ip::tcp::resolver::results_type results;
-        const auto ec = RunWithDeadline(
-            [&](auto handler) {
-                resolver.async_resolve(host, std::to_string(port),
-                                       [handler, &results](const std::error_code& e,
-                                                           asio::ip::tcp::resolver::results_type r) {
-            if (!e)
-            {
-                results = std::move(r);
-            }
-            handler(e);
-                                       });
-            },
-            timeouts.connect);
+        const auto ec = RunWithDeadline([&](auto handler) {
+            resolver.async_resolve(
+                host, std::to_string(port),
+                [handler, &results](const std::error_code& e, asio::ip::tcp::resolver::results_type r) {
+                if (!e)
+                {
+                    results = std::move(r);
+                }
+                handler(e);
+            });
+        }, timeouts.connect);
         if (ec)
         {
             return ec;
@@ -191,14 +189,10 @@ struct AsioHttpClient::Impl
         }
 
         socket.emplace(ioContext);
-        const auto ec = RunWithDeadline(
-            [&](auto handler) {
-                asio::async_connect(*socket, endpoints,
-                                    [handler](const std::error_code& e, const asio::ip::tcp::endpoint&) {
-            handler(e);
-                                    });
-            },
-            timeouts.connect);
+        const auto ec = RunWithDeadline([&](auto handler) {
+            asio::async_connect(*socket, endpoints,
+                                [handler](const std::error_code& e, const asio::ip::tcp::endpoint&) { handler(e); });
+        }, timeouts.connect);
         if (ec)
         {
             DropSocket();
@@ -229,32 +223,28 @@ struct AsioHttpClient::Impl
 
     auto WriteAll(const std::string& request) -> std::error_code
     {
-        return RunWithDeadline(
-            [&](auto handler) {
-                asio::async_write(*socket, asio::buffer(request),
-                                  [handler](const std::error_code& e, size_t) { handler(e); });
-            },
-            timeouts.write);
+        return RunWithDeadline([&](auto handler) {
+            asio::async_write(*socket, asio::buffer(request),
+                              [handler](const std::error_code& e, size_t) { handler(e); });
+        }, timeouts.write);
     }
 
     //! Reads up to and including the blank line terminating the response head.
     auto ReadHead(std::string& head) -> std::error_code
     {
         size_t headSize = 0;
-        const auto ec = RunWithDeadline(
-            [&](auto handler) {
-                asio::async_read_until(*socket, readBuffer, "\r\n\r\n",
-                                       [handler, &headSize](const std::error_code& e, size_t n) {
-            headSize = n;
-            handler(e);
-                                       });
-            },
-            timeouts.read);
+        const auto ec = RunWithDeadline([&](auto handler) {
+            asio::async_read_until(*socket, readBuffer, "\r\n\r\n",
+                                   [handler, &headSize](const std::error_code& e, size_t n) {
+                headSize = n;
+                handler(e);
+            });
+        }, timeouts.read);
         if (ec)
         {
             return ec;
         }
-        if (headSize > kMaxHeadSize)
+        if (headSize > maxHeadSize)
         {
             return asio::error::message_size;
         }
@@ -267,7 +257,7 @@ struct AsioHttpClient::Impl
     //! Reads exactly `count` bytes of body, serving from the buffer first.
     auto ReadExactly(uint64_t count, std::string& out) -> std::error_code
     {
-        if (count > kMaxHttpBodySize)
+        if (count > maxHttpBodySize)
         {
             return asio::error::message_size;
         }
@@ -275,12 +265,10 @@ struct AsioHttpClient::Impl
         if (readBuffer.size() < wanted)
         {
             const auto missing = wanted - readBuffer.size();
-            const auto ec = RunWithDeadline(
-                [&](auto handler) {
-                    asio::async_read(*socket, readBuffer, asio::transfer_exactly(missing),
-                                     [handler](const std::error_code& e, size_t) { handler(e); });
-                },
-                timeouts.read);
+            const auto ec = RunWithDeadline([&](auto handler) {
+                asio::async_read(*socket, readBuffer, asio::transfer_exactly(missing),
+                                 [handler](const std::error_code& e, size_t) { handler(e); });
+            }, timeouts.read);
             if (ec)
             {
                 return ec;
@@ -296,15 +284,13 @@ struct AsioHttpClient::Impl
     auto ReadLine(std::string& line) -> std::error_code
     {
         size_t lineSize = 0;
-        const auto ec = RunWithDeadline(
-            [&](auto handler) {
-                asio::async_read_until(*socket, readBuffer, "\r\n",
-                                       [handler, &lineSize](const std::error_code& e, size_t n) {
-            lineSize = n;
-            handler(e);
-                                       });
-            },
-            timeouts.read);
+        const auto ec = RunWithDeadline([&](auto handler) {
+            asio::async_read_until(*socket, readBuffer, "\r\n",
+                                   [handler, &lineSize](const std::error_code& e, size_t n) {
+                lineSize = n;
+                handler(e);
+            });
+        }, timeouts.read);
         if (ec)
         {
             return ec;
@@ -333,7 +319,7 @@ struct AsioHttpClient::Impl
             {
                 break;
             }
-            if (out.size() + chunkSize > kMaxHttpBodySize)
+            if (out.size() + chunkSize > maxHttpBodySize)
             {
                 return asio::error::message_size;
             }
@@ -368,17 +354,14 @@ struct AsioHttpClient::Impl
 
     auto ReadUntilClose(std::string& out) -> std::error_code
     {
-        const auto ec = RunWithDeadline(
-            [&](auto handler) {
-                asio::async_read(*socket, readBuffer,
-                                 [handler](const std::error_code& e, size_t) { handler(e); });
-            },
-            timeouts.read);
+        const auto ec = RunWithDeadline([&](auto handler) {
+            asio::async_read(*socket, readBuffer, [handler](const std::error_code& e, size_t) { handler(e); });
+        }, timeouts.read);
         if (ec && ec != asio::error::eof)
         {
             return ec;
         }
-        if (readBuffer.size() > kMaxHttpBodySize)
+        if (readBuffer.size() > maxHttpBodySize)
         {
             return asio::error::message_size;
         }

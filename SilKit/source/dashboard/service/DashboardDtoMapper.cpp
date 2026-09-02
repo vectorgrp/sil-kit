@@ -38,8 +38,7 @@ auto ToUInt64(const std::string& value) -> std::uint64_t
     }
 }
 
-auto GetSupplementalDataValue(const Core::ServiceDescriptor& serviceDescriptor,
-                              const std::string& key) -> std::string
+auto GetSupplementalDataValue(const Core::ServiceDescriptor& serviceDescriptor, const std::string& key) -> std::string
 {
     std::string str;
     if (!serviceDescriptor.GetSupplementalDataItem(key, str))
@@ -152,8 +151,8 @@ auto CreateMatchingLabelDto(const Services::MatchingLabel& matchingLabel) -> Mat
     return label;
 }
 
-auto CreateMatchingLabels(const Core::ServiceDescriptor& serviceDescriptor,
-                          const std::string& labelsKey) -> std::vector<MatchingLabelDto>
+auto CreateMatchingLabels(const Core::ServiceDescriptor& serviceDescriptor, const std::string& labelsKey)
+    -> std::vector<MatchingLabelDto>
 {
     std::string labelsStr;
     if (!serviceDescriptor.GetSupplementalDataItem(labelsKey, labelsStr))
@@ -196,8 +195,8 @@ DashboardDtoMapper::DashboardDtoMapper(Services::Logging::ILoggerInternal* logge
 {
 }
 
-auto DashboardDtoMapper::CreateSimulationCreationRequestDto(const std::string& connectUri,
-                                                            uint64_t start) -> SimulationCreationRequestDto
+auto DashboardDtoMapper::CreateSimulationCreationRequestDto(const std::string& connectUri, uint64_t start)
+    -> SimulationCreationRequestDto
 {
     SimulationCreationRequestDto simulation{};
     simulation.started = start;
@@ -212,15 +211,14 @@ auto DashboardDtoMapper::CreateSystemStatusDto(Services::Orchestration::SystemSt
     return status;
 }
 
-auto DashboardDtoMapper::CreateParticipantStatusDto(
-    const Services::Orchestration::ParticipantStatus& participantStatus) -> ParticipantStatusDto
+auto DashboardDtoMapper::CreateParticipantStatusDto(const Services::Orchestration::ParticipantStatus& participantStatus)
+    -> ParticipantStatusDto
 {
     ParticipantStatusDto status{};
     status.state = MapParticipantState(participantStatus.state);
     status.enterReason = participantStatus.enterReason;
     status.enterTime = static_cast<uint64_t>(
-        std::chrono::duration_cast<std::chrono::milliseconds>(participantStatus.enterTime.time_since_epoch())
-            .count());
+        std::chrono::duration_cast<std::chrono::milliseconds>(participantStatus.enterTime.time_since_epoch()).count());
     return status;
 }
 
@@ -337,8 +335,7 @@ auto DashboardDtoMapper::CreateBulkSimulationDto(const DashboardBulkUpdate& bulk
 
     std::unordered_map<std::string, BulkParticipantDto> nameToBulkParticipantDto;
 
-    const auto getOrCreateParticipantDto = [&nameToBulkParticipantDto](const std::string& name)
-        -> BulkParticipantDto& {
+    const auto getOrCreateParticipantDto = [&nameToBulkParticipantDto](const std::string& name) -> BulkParticipantDto& {
         auto it = nameToBulkParticipantDto.find(name);
         if (it == nameToBulkParticipantDto.end())
         {
@@ -451,8 +448,7 @@ void DashboardDtoMapper::ProcessServiceDiscovery(BulkParticipantDto& dto, const 
     }
 }
 
-void DashboardDtoMapper::ProcessControllerDiscovery(BulkParticipantDto& dto,
-                                                    const ServiceDescriptor& serviceDescriptor)
+void DashboardDtoMapper::ProcessControllerDiscovery(BulkParticipantDto& dto, const ServiceDescriptor& serviceDescriptor)
 {
     const auto controllerType = GetControllerType(serviceDescriptor);
 

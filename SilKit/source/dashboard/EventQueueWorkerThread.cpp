@@ -15,8 +15,7 @@ using SilKit::Services::Logging::ILoggerInternal;
 using SilKit::Services::Logging::Level;
 
 EventQueueWorkerThread::EventQueueWorkerThread(ILoggerInternal* logger, IRestClient* dashboardRestClient,
-                                               LockedQueue<SilKitEvent>* eventQueue,
-                                               const std::atomic<bool>* abort)
+                                               LockedQueue<SilKitEvent>* eventQueue, const std::atomic<bool>* abort)
     : _logger{logger}
     , _dashboardRestClient{dashboardRestClient}
     , _eventQueue{eventQueue}
@@ -200,9 +199,8 @@ void EventQueueWorkerThread::ProcessEvents() const
                 return;
             }
 
-            WithoutPropagating("processing an event", [&] {
-                ProcessEvent(event, simulationIds, simulationBulkUpdates);
-            });
+            WithoutPropagating("processing an event",
+                               [&] { ProcessEvent(event, simulationIds, simulationBulkUpdates); });
         }
 
         events.clear();
