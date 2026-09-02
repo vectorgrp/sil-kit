@@ -80,7 +80,11 @@ DefineSilKitLoggingTrait_Topic(VSilKit::AsioGenericRawByteStream, SilKit::Servic
 
 DefineSilKitLoggingTrait_Topic(SilKit::Dashboard::DashboardRestClient, SilKit::Services::Logging::Topic::Dashboard);
 DefineSilKitLoggingTrait_Topic(SilKit::Dashboard::DashboardSystemServiceClient, SilKit::Services::Logging::Topic::Dashboard);
-DefineSilKitLoggingTrait_Topic(SilKit::Dashboard::DashboardInstance, SilKit::Services::Logging::Topic::Dashboard);
+DefineSilKitLoggingTrait_Topic(SilKit::Dashboard::DashboardDtoMapper, SilKit::Services::Logging::Topic::Dashboard);
+DefineSilKitLoggingTrait_Topic(VSilKit::DashboardInstance, SilKit::Services::Logging::Topic::Dashboard);
+DefineSilKitLoggingTrait_Topic(VSilKit::EventQueueWorkerThread, SilKit::Services::Logging::Topic::Dashboard);
+DefineSilKitLoggingTrait_Topic(VSilKit::AsioHttpClient, SilKit::Services::Logging::Topic::Dashboard);
+DefineSilKitLoggingTrait_Topic(VSilKit::RetryingHttpClient, SilKit::Services::Logging::Topic::Dashboard);
 
 DefineSilKitLoggingTrait_Topic(VSilKit::MetricsProcessor, SilKit::Services::Logging::Topic::Metrics);
 

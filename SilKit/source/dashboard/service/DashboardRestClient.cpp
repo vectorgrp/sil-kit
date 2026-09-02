@@ -1,93 +1,64 @@
-// SPDX-FileCopyrightText: 2022-2025 Vector Informatik GmbH
+// SPDX-FileCopyrightText: 2022-2026 Vector Informatik GmbH
 //
 // SPDX-License-Identifier: MIT
 
-#include "silkit/services/orchestration/string_utils.hpp"
-#include "silkit/SilKit.hpp"
 #include "dashboard/service/DashboardRestClient.hpp"
-#include "dashboard/client/DashboardComponents.hpp"
+
+#include <utility>
+
+#include "silkit/SilKit.hpp"
+#include "silkit/services/orchestration/string_utils.hpp"
+
+#include "dashboard/client/DashboardSystemServiceClient.hpp"
+#include "dashboard/http/AsioHttpClient.hpp"
+#include "dashboard/http/RetryingHttpClient.hpp"
+#include "dashboard/service/DashboardDtoMapper.hpp"
 #include "services/logging/LoggerMessage.hpp"
 #include "util/Uri.hpp"
-#include "dashboard/service/SilKitToOatppMapper.hpp"
-#include "dashboard/client/DashboardSystemServiceClient.hpp"
 
 using SilKit::Services::Logging::Level;
-using SilKit::Services::Logging::Topic;
 using SilKit::Services::Logging::LoggerMessage;
+using SilKit::Services::Logging::Topic;
 
 namespace SilKit {
 namespace Dashboard {
 
-LibraryInitializer::LibraryInitializer()
-{
-    oatpp::base::Environment::init();
-}
-LibraryInitializer::~LibraryInitializer()
-{
-    oatpp::base::Environment::destroy();
-}
-
-DashboardRestClient::DashboardRestClient(Services::Logging::ILoggerInternal* logger, const std::string& dashboardServerUri)
+DashboardRestClient::DashboardRestClient(Services::Logging::ILoggerInternal* logger,
+                                         const std::string& dashboardServerUri,
+                                         VSilKit::AsioHttpClientTimeouts timeouts, VSilKit::HttpRetryPolicy retryPolicy)
     : _logger(logger)
 {
-    _libraryInit = std::make_shared<LibraryInitializer>();
+    _dtoMapper = std::make_shared<DashboardDtoMapper>(logger);
 
-    _silKitToOatppMapper = std::make_shared<SilKit::Dashboard::SilKitToOatppMapper>();
-
-    auto uri = SilKit::Core::Uri::Parse(dashboardServerUri);
-    SilKit::Dashboard::DashboardComponents dashboardComponents{uri.Host(), uri.Port()};
-    auto objectMapper = OATPP_GET_COMPONENT(std::shared_ptr<oatpp::data::mapping::ObjectMapper>);
-    _retryPolicy = std::make_shared<SilKit::Dashboard::DashboardRetryPolicy>(3);
-    OATPP_COMPONENT(std::shared_ptr<oatpp::network::ClientConnectionProvider>, connectionProvider);
-    auto requestExecutor = oatpp::web::client::HttpRequestExecutor::createShared(connectionProvider, _retryPolicy);
-    _apiClient = SilKit::Dashboard::DashboardSystemApiClient::createShared(requestExecutor, objectMapper);
-    _serviceClient =
-        std::make_shared<SilKit::Dashboard::DashboardSystemServiceClient>(_logger, _apiClient, objectMapper);
+    const auto uri = SilKit::Core::Uri::Parse(dashboardServerUri);
+    auto transport = std::make_shared<VSilKit::AsioHttpClient>(logger, uri.Host(), uri.Port(), timeouts);
+    _httpClient = std::make_shared<VSilKit::RetryingHttpClient>(std::move(transport), retryPolicy);
+    _serviceClient = std::make_shared<DashboardSystemServiceClient>(_logger, _httpClient);
 }
 
-DashboardRestClient::DashboardRestClient(std::shared_ptr<LibraryInitializer> libraryInit,
-                                         Services::Logging::ILoggerInternal* logger,
+DashboardRestClient::DashboardRestClient(Services::Logging::ILoggerInternal* logger,
                                          std::shared_ptr<IDashboardSystemServiceClient> serviceClient,
-                                         std::shared_ptr<ISilKitToOatppMapper> mapper)
-
+                                         std::shared_ptr<IDashboardDtoMapper> mapper)
+    : _logger(logger)
+    , _dtoMapper(std::move(mapper))
+    , _serviceClient(std::move(serviceClient))
 {
-    _logger = logger;
-    _libraryInit = libraryInit;
-    _serviceClient = serviceClient;
-    _silKitToOatppMapper = mapper;
-
-    auto uri = SilKit::Core::Uri::Parse("http://localhost:1234");
-    SilKit::Dashboard::DashboardComponents dashboardComponents{uri.Host(), uri.Port()};
-    auto objectMapper = OATPP_GET_COMPONENT(std::shared_ptr<oatpp::data::mapping::ObjectMapper>);
-    _retryPolicy = std::make_shared<SilKit::Dashboard::DashboardRetryPolicy>(3);
-    OATPP_COMPONENT(std::shared_ptr<oatpp::network::ClientConnectionProvider>, connectionProvider);
-    auto requestExecutor = oatpp::web::client::HttpRequestExecutor::createShared(connectionProvider, _retryPolicy);
-    _apiClient = SilKit::Dashboard::DashboardSystemApiClient::createShared(requestExecutor, objectMapper);
 }
 
 DashboardRestClient::~DashboardRestClient()
 {
-    if (_retryPolicy != nullptr)
-    {
-        _retryPolicy->AbortAllRetries();
-        _retryPolicy.reset();
-    }
-    _silKitToOatppMapper.reset();
-    _apiClient.reset();
+    Abort();
+    _dtoMapper.reset();
     _serviceClient.reset();
-    _libraryInit.reset();
+    _httpClient.reset();
 }
 
-bool DashboardRestClient::IsBulkUpdateSupported()
+void DashboardRestClient::Abort()
 {
-    auto bulkSimulationDto = SilKit::Dashboard::BulkSimulationDto::createShared();
-    const auto response = _apiClient->updateSimulation(oatpp::UInt64{std::uint64_t{0}}, bulkSimulationDto);
-    if (response)
+    if (_httpClient != nullptr)
     {
-        const auto statusCode = response->getStatusCode();
-        return 200 <= statusCode && statusCode < 300;
+        _httpClient->Abort();
     }
-    return false;
 }
 
 uint64_t DashboardRestClient::OnSimulationStart(const std::string& connectUri, uint64_t time)
@@ -95,31 +66,28 @@ uint64_t DashboardRestClient::OnSimulationStart(const std::string& connectUri, u
     _logger->MakeMessage(Level::Info, TopicOf(*this))
         .SetMessage("Dashboard: creating simulation {} {}", connectUri, time)
         .Dispatch();
-    auto simulation =
-        _serviceClient->CreateSimulation(_silKitToOatppMapper->CreateSimulationCreationRequestDto(connectUri, time));
-    if (simulation)
+    const auto simulationId =
+        _serviceClient->CreateSimulation(_dtoMapper->CreateSimulationCreationRequestDto(connectUri, time));
+    if (simulationId.has_value())
     {
         _logger->MakeMessage(Level::Info, TopicOf(*this))
-            .SetMessage("Dashboard: created simulation with id {}", *simulation->id.get())
+            .SetMessage("Dashboard: created simulation with id {}", *simulationId)
             .Dispatch();
-        return simulation->id;
+        return *simulationId;
     }
-    _logger->MakeMessage(Level::Warn, TopicOf(*this))
-        .SetMessage("Dashboard: creating simulation failed")
-        .Dispatch();
+    _logger->MakeMessage(Level::Warn, TopicOf(*this)).SetMessage("Dashboard: creating simulation failed").Dispatch();
     return 0;
 }
 
 void DashboardRestClient::OnBulkUpdate(uint64_t simulationId, const DashboardBulkUpdate& bulkUpdate)
 {
-    _serviceClient->UpdateSimulation(simulationId, _silKitToOatppMapper->CreateBulkSimulationDto(bulkUpdate));
+    _serviceClient->UpdateSimulation(simulationId, _dtoMapper->CreateBulkSimulationDto(bulkUpdate));
 }
 
 void DashboardRestClient::OnMetricsUpdate(uint64_t simulationId, const std::string& origin,
                                           const VSilKit::MetricsUpdate& metricsUpdate)
 {
-    _serviceClient->UpdateSimulationMetrics(simulationId,
-                                            _silKitToOatppMapper->CreateMetricsUpdateDto(origin, metricsUpdate));
+    _serviceClient->UpdateSimulationMetrics(simulationId, _dtoMapper->CreateMetricsUpdateDto(origin, metricsUpdate));
 }
 
 } // namespace Dashboard

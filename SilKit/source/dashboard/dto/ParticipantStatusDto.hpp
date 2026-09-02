@@ -4,53 +4,78 @@
 
 #pragma once
 
-#include "dashboard/OatppHeaders.hpp"
+#include <cstdint>
+#include <string>
+#include <string_view>
 
-#include OATPP_CODEGEN_BEGIN(DTO)
+#include "silkit/participant/exception.hpp"
 
 namespace SilKit {
 namespace Dashboard {
 
-ENUM(ParticipantState, v_int32,                                         //
-     VALUE(Unknown, -1, "unknown"),                                     //
-     VALUE(Invalid, 0, "invalid"),                                      //
-     VALUE(ServicesCreated, 10, "servicescreated"),                     //
-     VALUE(CommunicationInitializing, 20, "communicationinitializing"), //
-     VALUE(CommunicationInitialized, 30, "communicationinitialized"),   //
-     VALUE(ReadyToRun, 40, "readytorun"),                               //
-     VALUE(Running, 50, "running"),                                     //
-     VALUE(Paused, 60, "paused"),                                       //
-     VALUE(Stopping, 70, "stopping"),                                   //
-     VALUE(Stopped, 80, "stopped"),                                     //
-     VALUE(Error, 90, "error"),                                         //
-     VALUE(ShuttingDown, 100, "shuttingdown"),                          //
-     VALUE(Shutdown, 110, "shutdown"),                                  //
-     VALUE(Aborting, 120, "aborting"))
-
-class ParticipantStatusDto : public oatpp::DTO
+//! Wire representation of SilKit::Services::Orchestration::ParticipantState. Serialized as its name.
+enum class ParticipantState : int32_t
 {
-    DTO_INIT(ParticipantStatusDto, DTO)
+    Unknown = -1,
+    Invalid = 0,
+    ServicesCreated = 10,
+    CommunicationInitializing = 20,
+    CommunicationInitialized = 30,
+    ReadyToRun = 40,
+    Running = 50,
+    Paused = 60,
+    Stopping = 70,
+    Stopped = 80,
+    Error = 90,
+    ShuttingDown = 100,
+    Shutdown = 110,
+    Aborting = 120,
+};
 
-    DTO_FIELD_INFO(state)
+inline auto ToStringView(ParticipantState state) -> std::string_view
+{
+    switch (state)
     {
-        info->description = "Name of the state";
+    case ParticipantState::Unknown:
+        return "unknown";
+    case ParticipantState::Invalid:
+        return "invalid";
+    case ParticipantState::ServicesCreated:
+        return "servicescreated";
+    case ParticipantState::CommunicationInitializing:
+        return "communicationinitializing";
+    case ParticipantState::CommunicationInitialized:
+        return "communicationinitialized";
+    case ParticipantState::ReadyToRun:
+        return "readytorun";
+    case ParticipantState::Running:
+        return "running";
+    case ParticipantState::Paused:
+        return "paused";
+    case ParticipantState::Stopping:
+        return "stopping";
+    case ParticipantState::Stopped:
+        return "stopped";
+    case ParticipantState::Error:
+        return "error";
+    case ParticipantState::ShuttingDown:
+        return "shuttingdown";
+    case ParticipantState::Shutdown:
+        return "shutdown";
+    case ParticipantState::Aborting:
+        return "aborting";
     }
-    DTO_FIELD(Enum<ParticipantState>::AsString, state);
+    throw SilKitError{"Dashboard: invalid ParticipantState"};
+}
 
-    DTO_FIELD_INFO(enterReason)
-    {
-        info->description = "Reason for entering the state";
-    }
-    DTO_FIELD(String, enterReason);
-
-    DTO_FIELD_INFO(enterTime)
-    {
-        info->description = "Time when state got entered";
-    }
-    DTO_FIELD(UInt64, enterTime);
+struct ParticipantStatusDto
+{
+    ParticipantState state{ParticipantState::Invalid};
+    //! Reason for entering the state.
+    std::string enterReason;
+    //! Time when the state was entered.
+    uint64_t enterTime{};
 };
 
 } // namespace Dashboard
 } // namespace SilKit
-
-#include OATPP_CODEGEN_END(DTO)

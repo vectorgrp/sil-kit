@@ -8,9 +8,14 @@
 namespace VSilKit {
 
 
-auto CreateDashboardInstance() -> std::unique_ptr<IDashboardInstance>
+auto IsDashboardAvailable() -> bool
 {
-    return std::make_unique<DashboardInstance>();
+    return true;
+}
+
+auto CreateDashboardInstance(const std::string& dashboardUri) -> std::unique_ptr<IDashboardInstance>
+{
+    return std::make_unique<DashboardInstance>(dashboardUri);
 }
 
 

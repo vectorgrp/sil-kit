@@ -3,13 +3,24 @@
 // SPDX-License-Identifier: MIT
 
 #include "dashboard/DashboardInstance.hpp"
-#include "dashboard/SilKitEvent.hpp"
-#include "dashboard/LockedQueue.hpp"
-#include "dashboard/service/SilKitToOatppMapper.hpp"
+
+#include <chrono>
+#include <future>
+#include <utility>
+
+#include "dashboard/EventQueueWorkerThread.hpp"
 #include "dashboard/service/DashboardRestClient.hpp"
+#include "services/logging/LoggerMessage.hpp"
+#include "util/Assert.hpp"
+#include "util/SetThreadName.hpp"
+#include "util/Uri.hpp"
 
 
 namespace {
+
+
+/// How long the destructor lets an in-flight dashboard request finish before aborting it.
+constexpr auto shutdownGracePeriod = std::chrono::seconds{5};
 
 
 uint64_t GetCurrentSystemTime()
@@ -37,26 +48,46 @@ using VSilKit::ServiceData;
 
 namespace VSilKit {
 
+using namespace SilKit::Services;
+using namespace SilKit::Services::Logging;
+using SilKit::Dashboard::DashboardBulkUpdate;
 
-DashboardInstance::DashboardInstance() {}
+DashboardInstance::DashboardInstance(const std::string& dashboardUri)
+    : _dashboardUri{dashboardUri}
+{
+    // Parse eagerly so that a malformed --dashboard-uri is reported when the instance is created,
+    // rather than later on the registry's thread. The result is discarded; DashboardRestClient
+    // parses it again once it is built.
+    (void)SilKit::Core::Uri::Parse(dashboardUri);
+}
 
 DashboardInstance::~DashboardInstance()
 {
-    try
-    {
-        _eventQueueWorkerThreadAbort.set_value();
-    }
-    catch (...)
-    {
-        // ignored
-    }
-
+    _abortWorker.store(true, std::memory_order_release);
     _silKitEventQueue.Stop();
 
-    if (_eventQueueWorkerThread.joinable())
+    if (!_eventQueueWorkerThread.joinable())
     {
-        _eventQueueWorkerThread.join();
+        return;
     }
+
+    /* The worker may be blocked in an HTTP request. Give it a grace period to finish flushing, then
+     * abort the transport so shutdown stays bounded even when the dashboard server accepts
+     * connections but never answers. std::thread has no timed join, hence the watchdog. */
+    std::promise<void> workerFinished;
+    auto workerFinishedFuture = workerFinished.get_future();
+    auto watchdog = std::async(std::launch::async, [this, &workerFinishedFuture] {
+        if (workerFinishedFuture.wait_for(shutdownGracePeriod) == std::future_status::timeout
+            && _dashboardRestClient != nullptr)
+        {
+            _dashboardRestClient->Abort();
+        }
+    });
+
+    _eventQueueWorkerThread.join();
+
+    workerFinished.set_value();
+    watchdog.wait();
 }
 
 auto DashboardInstance::GetRegistryEventListener() -> SilKit::Core::IRegistryEventListener*
@@ -64,244 +95,17 @@ auto DashboardInstance::GetRegistryEventListener() -> SilKit::Core::IRegistryEve
     return this;
 }
 
-void DashboardInstance::SetupDashboardConnection(const std::string& dashboardUri)
-{
-    _dashboardRestClient = std::make_shared<SilKit::Dashboard::DashboardRestClient>(_logger, dashboardUri);
-    RunEventQueueWorkerThread();
-}
-
-using namespace SilKit::Services;
-using namespace SilKit::Services::Logging;
-using namespace SilKit::Dashboard;
-
-class EventQueueWorkerThread
-{
-    ILoggerInternal* _logger{nullptr};
-    IRestClient* _dashboardRestClient{nullptr};
-    LockedQueue<SilKitEvent>* _eventQueue{nullptr};
-    std::future<void> _abort;
-
-public: //CTor
-    EventQueueWorkerThread(ILoggerInternal* logger, IRestClient* dashboardRestClient, LockedQueue<SilKitEvent>* eventQueue,
-                           std::future<void> abort)
-        : _logger{logger}
-        , _dashboardRestClient{dashboardRestClient}
-        , _eventQueue{eventQueue}
-        , _abort{std::move(abort)}
-    {
-    }
-
-    auto DetectBulkUpdate() const -> bool
-    {
-        auto bulkUpdateAvailable = _dashboardRestClient->IsBulkUpdateSupported();
-        if (bulkUpdateAvailable)
-        {
-            _logger->MakeMessage(Level::Debug, TopicOf(*this))
-                .SetMessage("Dashboard bulk-updates are available")
-                .Dispatch();
-        }
-        else
-        {
-            _logger->MakeMessage(Level::Debug, TopicOf(*this))
-                .SetMessage("Dashboard bulk-updates are not available, falling back to individual requests")
-                .Dispatch();
-        }
-
-        return bulkUpdateAvailable;
-    }
-
-    void ProcessEventsWithBulkUpdates() const
-    {
-        std::unordered_map<std::string, uint64_t> simulationNameToId;
-        std::unordered_map<uint64_t, SilKit::Dashboard::DashboardBulkUpdate> simulationBulkUpdates;
-
-        std::vector<SilKitEvent> events;
-        while (_eventQueue->DequeueAllInto(events))
-        {
-            const auto ProcessAllAccumulatedBulkUpdates = [this, &simulationBulkUpdates] {
-                for (auto& pair : simulationBulkUpdates)
-                {
-                    const auto simulationId = pair.first;
-                    auto& bulkUpdate = pair.second;
-
-                    if (bulkUpdate.Empty())
-                    {
-                        continue;
-                    }
-
-                    _dashboardRestClient->OnBulkUpdate(simulationId, bulkUpdate);
-                    bulkUpdate.Clear();
-                }
-            };
-
-            for (const auto& event : events)
-            {
-                if (!_abort.valid() || _abort.wait_for(std::chrono::seconds{}) != std::future_status::timeout)
-                {
-                    return;
-                }
-
-                // process OnSimulationStart separately, which creates the simulation-id for a simulation name
-
-                if (event.Type() == SilKitEventType::OnSimulationStart)
-                {
-                    ProcessAllAccumulatedBulkUpdates();
-
-                    const auto it{simulationNameToId.find(event.GetSimulationName())};
-                    if (it != simulationNameToId.end())
-                    {
-                        // it is possible that multiple SimulationStart events are created (due to the queuing)
-                        _logger->MakeMessage(Level::Debug, TopicOf(*this))
-                            .SetMessage("Dashboard: Simulation {} already has id {}", event.GetSimulationName(), it->second)
-                            .Dispatch();
-                        continue;
-                    }
-
-                    const auto& simulationStart = event.GetSimulationStart();
-                    const auto simulationId =
-                        _dashboardRestClient->OnSimulationStart(simulationStart.connectUri, simulationStart.time);
-
-                    if (simulationId == 0)
-                    {
-                        _logger->MakeMessage(Level::Warn, TopicOf(*this))
-                            .SetMessage("Dashboard: Simulation {} could not be created", event.GetSimulationName())
-                            .Dispatch();
-                        continue;
-                    }
-
-                    simulationNameToId.emplace(event.GetSimulationName(), simulationId);
-
-                    continue;
-                }
-
-                // fetch the simulation id for the given name
-
-                const auto it{simulationNameToId.find(event.GetSimulationName())};
-                if (it == simulationNameToId.end())
-                {
-                    _logger->MakeMessage(Level::Warn, TopicOf(*this))
-                        .SetMessage("Dashboard: Simulation {} is unknown", event.GetSimulationName())
-                        .Dispatch();
-                    continue;
-                }
-
-                const auto simulationId{it->second};
-                auto& bulkUpdate{simulationBulkUpdates[simulationId]};
-
-                // process all event types, except OnSimulationStart
-
-                switch (event.Type())
-                {
-                case SilKitEventType::OnParticipantConnected:
-                {
-                    const auto& participantConnectionInformation = event.GetParticipantConnectionInformation();
-                    bulkUpdate.participantConnectionInformations.emplace_back(participantConnectionInformation);
-                }
-                break;
-
-                case SilKitEventType::OnSystemStateChanged:
-                {
-                    const auto& systemState = event.GetSystemState();
-                    bulkUpdate.systemStates.emplace_back(systemState);
-                }
-                break;
-
-                case SilKitEventType::OnParticipantStatusChanged:
-                {
-                    const auto& participantStatus = event.GetParticipantStatus();
-                    bulkUpdate.participantStatuses.emplace_back(participantStatus);
-                }
-                break;
-
-                case SilKitEventType::OnServiceDiscoveryEvent:
-                {
-                    const auto& serviceData = event.GetServiceData();
-                    bulkUpdate.serviceDatas.emplace_back(serviceData);
-                }
-                break;
-
-                case SilKitEventType::OnSimulationEnd:
-                {
-                    const auto& simulationEnd = event.GetSimulationEnd();
-                    bulkUpdate.stopped = std::make_unique<uint64_t>(simulationEnd.time);
-
-                    simulationNameToId.erase(it);
-                }
-                break;
-
-                case SilKitEventType::OnMetricUpdate:
-                {
-                    const auto& data = event.GetMetricsUpdate();
-                    _dashboardRestClient->OnMetricsUpdate(simulationId, data.first, data.second);
-                }
-                break;
-
-                default:
-                {
-                    _logger->MakeMessage(Level::Error, TopicOf(*this))
-                        .SetMessage("Dashboard: unexpected SilKitEventType")
-                        .Dispatch();
-                }
-                break;
-                }
-            }
-
-            events.clear();
-            ProcessAllAccumulatedBulkUpdates();
-        }
-    }
-
-    void operator()() const
-    try
-    {
-        SilKit::Util::SetThreadName("SK-Dash-Cons");
-
-        const bool bulkUpdateAvailable = DetectBulkUpdate();
-
-        if (bulkUpdateAvailable)
-        {
-            ProcessEventsWithBulkUpdates();
-        }
-        else
-        {
-            throw SilKit::SilKitError{"Bulk update for REST API is required!"};
-        }
-    }
-    catch (const std::exception& exception)
-    {
-        _logger->MakeMessage(Level::Error, TopicOf(*this))
-            .SetMessage("Dashboard: event queue worker failed: {}", exception.what())
-            .Dispatch();
-    }
-    catch (...)
-    {
-        _logger->MakeMessage(Level::Error, TopicOf(*this))
-            .SetMessage("Dashboard: event queue worker failed with unknown exception")
-            .Dispatch();
-    }
-};
-
-void DashboardInstance::RunEventQueueWorkerThread()
+void DashboardInstance::StartWorker()
 {
     SILKIT_ASSERT(_eventQueueWorkerThread.get_id() == std::thread::id{});
 
-    _eventQueueWorkerThreadAbort = std::promise<void>{};
+    _dashboardRestClient = std::make_unique<SilKit::Dashboard::DashboardRestClient>(_logger, _dashboardUri);
 
-    EventQueueWorkerThread workerThread{_logger, _dashboardRestClient.get(), &_silKitEventQueue,
-                                        _eventQueueWorkerThreadAbort.get_future()};
-
-    _eventQueueWorkerThread = std::thread{std::move(workerThread)};
-}
-
-auto DashboardInstance::GetOrCreateSimulationData(const std::string& simulationName) -> SimulationData&
-{
-    auto& simulationDataRef{_simulationEventHandlers[simulationName]};
-    return simulationDataRef;
-}
-
-void DashboardInstance::RemoveSimulationData(const std::string& simulationName)
-{
-    _simulationEventHandlers.erase(simulationName);
+    EventQueueWorkerThread worker{_logger, _dashboardRestClient.get(), &_silKitEventQueue, &_abortWorker};
+    _eventQueueWorkerThread = std::thread{[worker] {
+        SilKit::Util::SetThreadName("SK-Dash-Cons");
+        worker();
+    }};
 }
 
 void DashboardInstance::OnLoggerCreated(SilKit::Services::Logging::ILoggerInternal* logger)
@@ -315,26 +119,28 @@ void DashboardInstance::OnRegistryUri(const std::string& registryUri)
     _logger->MakeMessage(Level::Debug, TopicOf(*this))
         .SetMessage("DashboardInstance::OnRegistryUri: registryUri={}", registryUri)
         .Dispatch();
-    SILKIT_ASSERT(_registryUri == nullptr);
-    _registryUri = std::make_unique<SilKit::Core::Uri>(registryUri);
+    SILKIT_ASSERT(!_registryUri.has_value());
+    _registryUri = SilKit::Core::Uri{registryUri};
+
+    // Both prerequisites are now in place: the logger and the registry URI.
+    StartWorker();
 }
 
 void DashboardInstance::OnParticipantConnected(const std::string& simulationName, const std::string& participantName)
 {
     _logger->MakeMessage(Level::Trace, TopicOf(*this))
-        .SetMessage("DashboardInstance::OnParticipantConnected: simulationName={} participantName={}",
-                    simulationName, participantName)
+        .SetMessage("DashboardInstance::OnParticipantConnected: simulationName={} participantName={}", simulationName,
+                    participantName)
         .Dispatch();
 
-    auto& simulationData{GetOrCreateSimulationData(simulationName)};
+    auto& systemStateTracker{_systemStateTrackers[simulationName]};
 
-    if (simulationData.systemStateTracker.IsEmpty())
+    if (systemStateTracker.IsEmpty())
     {
         const auto connectUri{
             SilKit::Core::Uri::MakeSilKit(_registryUri->Host(), _registryUri->Port(), simulationName)};
         _silKitEventQueue.Enqueue(
-            SilKitEvent{simulationName, SimulationStart{connectUri.EncodedString(), GetCurrentSystemTime()}}
-        );
+            SilKitEvent{simulationName, SimulationStart{connectUri.EncodedString(), GetCurrentSystemTime()}});
     }
 
     _silKitEventQueue.Enqueue(SilKitEvent{
@@ -351,21 +157,21 @@ void DashboardInstance::OnParticipantDisconnected(const std::string& simulationN
     bool isEmpty{false};
 
     {
-        auto& simulationData{GetOrCreateSimulationData(simulationName)};
+        auto& systemStateTracker{_systemStateTrackers[simulationName]};
 
-        const auto result{simulationData.systemStateTracker.RemoveParticipant(participantName)};
-        isEmpty = simulationData.systemStateTracker.IsEmpty();
+        const auto result{systemStateTracker.RemoveParticipant(participantName)};
+        isEmpty = systemStateTracker.IsEmpty();
 
         if (result.systemStateChanged)
         {
-            _silKitEventQueue.Enqueue(SilKitEvent{simulationName, simulationData.systemStateTracker.GetSystemState()});
+            _silKitEventQueue.Enqueue(SilKitEvent{simulationName, systemStateTracker.GetSystemState()});
         }
     }
 
     if (isEmpty)
     {
         _silKitEventQueue.Enqueue(SilKitEvent{simulationName, SimulationEnd{GetCurrentSystemTime()}});
-        RemoveSimulationData(simulationName);
+        _systemStateTrackers.erase(simulationName);
     }
 }
 
@@ -379,12 +185,12 @@ void DashboardInstance::OnRequiredParticipantsUpdate(const std::string& simulati
                     simulationName, participantName, requiredParticipantNames.size())
         .Dispatch();
 
-    auto& simulationData{GetOrCreateSimulationData(simulationName)};
-    const auto result{simulationData.systemStateTracker.UpdateRequiredParticipants(requiredParticipantNames)};
+    auto& systemStateTracker{_systemStateTrackers[simulationName]};
+    const auto result{systemStateTracker.UpdateRequiredParticipants(requiredParticipantNames)};
 
     if (result.systemStateChanged)
     {
-        _silKitEventQueue.Enqueue(SilKitEvent{simulationName, simulationData.systemStateTracker.GetSystemState()});
+        _silKitEventQueue.Enqueue(SilKitEvent{simulationName, systemStateTracker.GetSystemState()});
     }
 }
 
@@ -395,12 +201,11 @@ void DashboardInstance::OnParticipantStatusUpdate(
     _logger->MakeMessage(Level::Trace, TopicOf(*this))
         .SetMessage("DashboardInstance::OnParticipantStatusUpdate: simulationName={} participantName={} "
                     "participantState={}",
-
-                   simulationName, participantName, participantStatus.state)
+                    simulationName, participantName, participantStatus.state)
         .Dispatch();
 
-    auto& simulationData{GetOrCreateSimulationData(simulationName)};
-    const auto result{simulationData.systemStateTracker.UpdateParticipantStatus(participantStatus)};
+    auto& systemStateTracker{_systemStateTrackers[simulationName]};
+    const auto result{systemStateTracker.UpdateParticipantStatus(participantStatus)};
 
     if (result.participantStateChanged)
     {
@@ -409,7 +214,7 @@ void DashboardInstance::OnParticipantStatusUpdate(
 
     if (result.systemStateChanged)
     {
-        _silKitEventQueue.Enqueue(SilKitEvent{simulationName, simulationData.systemStateTracker.GetSystemState()});
+        _silKitEventQueue.Enqueue(SilKitEvent{simulationName, systemStateTracker.GetSystemState()});
     }
 }
 
@@ -417,15 +222,15 @@ void DashboardInstance::OnServiceDiscoveryEvent(
     const std::string& simulationName, const std::string& participantName,
     const SilKit::Core::Discovery::ServiceDiscoveryEvent& serviceDiscoveryEvent)
 {
-    _logger->MakeMessage(Level::Trace, TopicOf(*this))
-        .SetMessage("DashboardInstance::OnServiceDiscoveryEvent: simulationName={} participantName={} serviceName={}",
-                    simulationName, participantName, serviceDiscoveryEvent.serviceDescriptor.GetServiceName())
-        .Dispatch();
-
     if (ShouldSkipServiceDiscoveryEvent(serviceDiscoveryEvent))
     {
         return;
     }
+
+    _logger->MakeMessage(Level::Trace, TopicOf(*this))
+        .SetMessage("DashboardInstance::OnServiceDiscoveryEvent: simulationName={} participantName={} serviceName={}",
+                    simulationName, participantName, serviceDiscoveryEvent.serviceDescriptor.GetServiceName())
+        .Dispatch();
 
     _silKitEventQueue.Enqueue(
         SilKitEvent{simulationName, ServiceData{serviceDiscoveryEvent.type, serviceDiscoveryEvent.serviceDescriptor}});
@@ -435,13 +240,11 @@ void DashboardInstance::OnMetricsUpdate(const std::string& simulationName, const
                                         const VSilKit::MetricsUpdate& metricsUpdate)
 {
     _logger->MakeMessage(Level::Trace, TopicOf(*this))
-        .SetMessage("DashboardInstance::OnMetricsUpdate: simulationName={} origin={} metricsUpdate={}",
-                    simulationName, origin, metricsUpdate)
+        .SetMessage("DashboardInstance::OnMetricsUpdate: simulationName={} origin={} metricsUpdate={}", simulationName,
+                    origin, metricsUpdate)
         .Dispatch();
 
-    std::pair<std::string, VSilKit::MetricsUpdate> data{origin, metricsUpdate};
-
-    _silKitEventQueue.Enqueue(SilKitEvent{simulationName, std::move(data)});
+    _silKitEventQueue.Enqueue(SilKitEvent{simulationName, MetricsUpdatePair{origin, metricsUpdate}});
 }
 
 
