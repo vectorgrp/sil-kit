@@ -406,5 +406,59 @@ TEST_F(Test_DashboardDtoMapper, CreateBulkSimulationDto)
     ASSERT_NE(cParticipantDto, nullptr);
 }
 
+/*! A controller type the dashboard has no view for is skipped, not treated as fatal.
+ *
+ *  Throwing here used to end the dashboard's worker thread, which silently stopped all further
+ *  reporting for the life of the process. Every controller type added to SIL Kit that nobody
+ *  remembers to list in ProcessControllerDiscovery would have that effect, so an unhandled type has
+ *  to cost only the service it describes.
+ */
+TEST_F(Test_DashboardDtoMapper, CreateBulkSimulationDto_SkipsUnhandledControllerTypes)
+{
+    ServiceData serviceData;
+    serviceData.discoveryType = Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated;
+    serviceData.serviceDescriptor.SetParticipantNameAndComputeId("A");
+    serviceData.serviceDescriptor.SetServiceType(Core::ServiceType::Controller);
+    serviceData.serviceDescriptor.SetServiceName("SomethingNew");
+    serviceData.serviceDescriptor.SetSupplementalDataItem(SilKit::Core::Discovery::controllerType,
+                                                          "SomeTypeAddedLater");
+
+    DashboardBulkUpdate bulkUpdate;
+    bulkUpdate.serviceDatas.emplace_back(serviceData);
+
+    const auto dataMapper = CreateService();
+
+    BulkSimulationDto dto;
+    ASSERT_NO_THROW(dto = dataMapper->CreateBulkSimulationDto(bulkUpdate));
+
+    // The participant is still reported; only the unknown service is left out.
+    ASSERT_EQ(dto.participants.size(), 1u);
+    EXPECT_EQ(dto.participants[0].name, "A");
+    EXPECT_TRUE(dto.participants[0].canControllers.empty());
+    EXPECT_TRUE(dto.participants[0].dataPublishers.empty());
+    EXPECT_TRUE(dto.participants[0].rpcClients.empty());
+}
+
+//! A descriptor missing the supplemental data the dashboard needs must not be silently accepted.
+TEST_F(Test_DashboardDtoMapper, CreateBulkSimulationDto_ThrowsOnAMalformedDescriptor)
+{
+    ServiceData serviceData;
+    serviceData.discoveryType = Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated;
+    serviceData.serviceDescriptor.SetParticipantNameAndComputeId("A");
+    serviceData.serviceDescriptor.SetServiceType(Core::ServiceType::Controller);
+    serviceData.serviceDescriptor.SetServiceName("aPublisher");
+    serviceData.serviceDescriptor.SetSupplementalDataItem(SilKit::Core::Discovery::controllerType,
+                                                          SilKit::Core::Discovery::controllerTypeDataPublisher);
+    // no supplKeyDataPublisherTopic
+
+    DashboardBulkUpdate bulkUpdate;
+    bulkUpdate.serviceDatas.emplace_back(serviceData);
+
+    const auto dataMapper = CreateService();
+
+    // The worker contains this; see Test_DashboardEventQueueWorker.
+    ASSERT_THROW(dataMapper->CreateBulkSimulationDto(bulkUpdate), SilKitError);
+}
+
 } // namespace Dashboard
 } // namespace SilKit

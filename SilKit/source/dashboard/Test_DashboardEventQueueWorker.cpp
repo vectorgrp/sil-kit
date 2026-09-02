@@ -338,5 +338,76 @@ TEST_F(Test_DashboardEventQueueWorker, AThrowingRestClient_DoesNotEscapeTheWorke
     EXPECT_NO_THROW(RunWorkerToCompletion());
 }
 
+/*! One unmappable event must not end all reporting.
+ *
+ *  This is the regression that made the dashboard look frozen: the mapper throws on data it has no
+ *  representation for, that escaped ProcessEvents(), and the worker thread ended. Nothing restarts
+ *  it, so every later event was queued to a consumer that no longer existed and the dashboard kept
+ *  showing whatever had arrived before - no metrics, no attributes, no status changes.
+ */
+TEST_F(Test_DashboardEventQueueWorker, AFailedMetricsUpdate_DoesNotStopLaterEvents)
+{
+    InSequence sequence;
+    EXPECT_CALL(_restClient, OnSimulationStart(_, _)).WillOnce(Return(kSimulationId));
+    EXPECT_CALL(_restClient, OnMetricsUpdate(kSimulationId, "P1", _))
+        .WillOnce(Throw(SilKit::SilKitError{"Unexpected controller type Something"}));
+    EXPECT_CALL(_restClient, OnMetricsUpdate(kSimulationId, "P2", _)).Times(1);
+    EXPECT_CALL(_restClient, OnBulkUpdate(kSimulationId, _)).Times(1);
+
+    EnqueueSimulationStart("sim");
+    Enqueue("sim", MetricsUpdatePair{"P1", MetricsUpdate{}});
+    Enqueue("sim", MetricsUpdatePair{"P2", MetricsUpdate{}});
+    Enqueue("sim", orchestration::ParticipantConnectionInformation{"P1"});
+
+    RunWorkerToCompletion();
+}
+
+//! A bulk update that cannot be sent must not be retried forever, blocking everything behind it.
+TEST_F(Test_DashboardEventQueueWorker, AFailedBulkUpdate_IsDroppedRatherThanRetried)
+{
+    EXPECT_CALL(_restClient, OnSimulationStart(_, _)).WillOnce(Return(kSimulationId));
+
+    std::vector<std::string> secondFlush;
+    EXPECT_CALL(_restClient, OnBulkUpdate(kSimulationId, _))
+        .Times(2)
+        // The first flush queues the next batch, ends the queue and then fails.
+        .WillOnce([&](uint64_t, const DashboardBulkUpdate&) {
+        Enqueue("sim", orchestration::ParticipantConnectionInformation{"P2"});
+        _queue.Stop();
+        throw SilKit::SilKitError{"cannot map this"};
+    })
+        .WillOnce(WithArg<1>([&](const DashboardBulkUpdate& update) {
+        for (const auto& connection : update.participantConnectionInformations)
+        {
+            secondFlush.push_back(connection.participantName);
+        }
+    }));
+
+    EnqueueSimulationStart("sim");
+    Enqueue("sim", orchestration::ParticipantConnectionInformation{"P1"});
+
+    EventQueueWorkerThread worker{&_dummyLogger, &_restClient, &_queue, &_abort};
+    worker();
+
+    // P1 is gone with the update that could not be sent, rather than being retried on every
+    // following flush - which would have stalled everything queued behind it.
+    EXPECT_THAT(secondFlush, ElementsAre("P2"));
+}
+
+//! Every event after a failure is still processed, so the queue cannot grow without a consumer.
+TEST_F(Test_DashboardEventQueueWorker, AFailedSimulationStart_DoesNotStopLaterSimulations)
+{
+    EXPECT_CALL(_restClient, OnSimulationStart("silkit://localhost:8500/bad", _))
+        .WillOnce(Throw(std::runtime_error{"boom"}));
+    EXPECT_CALL(_restClient, OnSimulationStart("silkit://localhost:8500/good", _)).WillOnce(Return(kSimulationId));
+    EXPECT_CALL(_restClient, OnBulkUpdate(kSimulationId, _)).Times(1);
+
+    EnqueueSimulationStart("bad");
+    EnqueueSimulationStart("good");
+    Enqueue("good", orchestration::ParticipantConnectionInformation{"P1"});
+
+    RunWorkerToCompletion();
+}
+
 } // namespace
 } // namespace VSilKit

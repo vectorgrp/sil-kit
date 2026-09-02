@@ -9,6 +9,8 @@
 #include <unordered_map>
 
 #include "config/YamlParser.hpp"
+#include "core/internal/traits/SilKitLoggingTraits.hpp"
+#include "services/logging/LoggerMessage.hpp"
 #include "util/StringHelpers.hpp"
 
 namespace SilKit {
@@ -188,6 +190,11 @@ auto CreateRpcSpecDto(const Core::ServiceDescriptor& serviceDescriptor, const st
 }
 
 } // namespace
+
+DashboardDtoMapper::DashboardDtoMapper(Services::Logging::ILoggerInternal* logger)
+    : _logger{logger}
+{
+}
 
 auto DashboardDtoMapper::CreateSimulationCreationRequestDto(const std::string& connectUri,
                                                             uint64_t start) -> SimulationCreationRequestDto
@@ -495,7 +502,17 @@ void DashboardDtoMapper::ProcessControllerDiscovery(BulkParticipantDto& dto,
     // Everything Else
     else
     {
-        throw SilKitError{"Unexpected controller type " + controllerType};
+        /* Not a bus or pub/sub service, so there is nothing to show for it. This must not throw:
+         * every controller type SIL Kit ever adds would otherwise take down all dashboard
+         * reporting for the rest of the process, since the worker cannot resume a batch it failed
+         * to map. Report it and move on. */
+        if (_logger != nullptr)
+        {
+            _logger->MakeMessage(Services::Logging::Level::Debug, TopicOf(*this))
+                .SetMessage("Dashboard: ignoring service {} of unhandled controller type {}",
+                            serviceDescriptor.GetServiceName(), controllerType)
+                .Dispatch();
+        }
     }
 }
 

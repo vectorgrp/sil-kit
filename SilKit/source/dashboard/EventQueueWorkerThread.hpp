@@ -42,6 +42,9 @@ public:
     void operator()() const;
 
 private:
+    using SimulationIds = std::unordered_map<std::string, uint64_t>;
+    using BulkUpdates = std::unordered_map<uint64_t, SilKit::Dashboard::DashboardBulkUpdate>;
+
     auto IsAborted() const -> bool;
 
     /*! Sends every non-empty accumulated update.
@@ -49,9 +52,23 @@ private:
      *  An update carrying `stopped` is the last one for that simulation, so its entry is dropped
      *  afterwards instead of being kept around empty for the rest of the process's life.
      */
-    void FlushAccumulated(std::unordered_map<uint64_t, SilKit::Dashboard::DashboardBulkUpdate>& bulkUpdates) const;
+    void FlushAccumulated(BulkUpdates& bulkUpdates) const;
+
+    //! Folds one event into the accumulated state, sending immediately where the event needs it.
+    void ProcessEvent(const SilKitEvent& event, SimulationIds& simulationIds, BulkUpdates& bulkUpdates) const;
 
     void ProcessEvents() const;
+
+    /*! Runs one step, turning a failure into a log line rather than the end of all reporting.
+     *
+     *  Mapping an event or sending an update can throw on data the dashboard has no representation
+     *  for. Letting that escape would end the worker: the queue would then grow without a consumer
+     *  and the dashboard would silently freeze at whatever it had received - which is exactly what
+     *  the symptom looks like from the outside. A single unusable event is not worth that, so it is
+     *  reported and skipped. Returns true when the step completed.
+     */
+    template <typename Action>
+    auto WithoutPropagating(const char* what, Action&& action) const -> bool;
 
     SilKit::Services::Logging::ILoggerInternal* _logger{nullptr};
     IRestClient* _dashboardRestClient{nullptr};

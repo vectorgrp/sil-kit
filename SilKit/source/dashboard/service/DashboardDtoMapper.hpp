@@ -5,6 +5,7 @@
 #pragma once
 
 #include "core/internal/ServiceDescriptor.hpp"
+#include "services/logging/ILoggerInternal.hpp"
 
 #include "dashboard/service/IDashboardDtoMapper.hpp"
 
@@ -16,6 +17,12 @@ class DashboardDtoMapper : public IDashboardDtoMapper
     using ServiceDescriptor = SilKit::Core::ServiceDescriptor;
 
 public:
+    /*! \param logger used to report services that carry nothing for the dashboard; may be null.
+     *
+     *  The tests construct the mapper without one.
+     */
+    explicit DashboardDtoMapper(Services::Logging::ILoggerInternal* logger = nullptr);
+
     auto CreateSimulationCreationRequestDto(const std::string& connectUri,
                                             uint64_t start) -> SimulationCreationRequestDto override;
     auto CreateBulkSimulationDto(const DashboardBulkUpdate& bulkUpdate) -> BulkSimulationDto override;
@@ -35,6 +42,8 @@ private:
     void ProcessServiceDiscovery(BulkParticipantDto& dto, const ServiceDescriptor& serviceDescriptor);
     void ProcessControllerDiscovery(BulkParticipantDto& dto, const ServiceDescriptor& serviceDescriptor);
     void ProcessLinkDiscovery(BulkParticipantDto& dto, const ServiceDescriptor& serviceDescriptor);
+
+    Services::Logging::ILoggerInternal* _logger{nullptr};
 };
 
 } // namespace Dashboard

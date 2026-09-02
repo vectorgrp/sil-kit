@@ -159,6 +159,19 @@ auto VAsioRegistry::StartListening(const std::string& listenUri) -> std::string
 
     if (_registryEventListener != nullptr)
     {
+        if (!_vasioConfig->experimental.metrics.collectFromRemote.value_or(false))
+        {
+            /* Without this the registry never receives a MetricsUpdate, so the dashboard shows no
+             * metrics and - because attributes travel as metrics - no participant attributes
+             * either. Nothing else reports the combination, and the result is indistinguishable
+             * from a broken dashboard connection. */
+            GetLoggerInternal()
+                ->MakeMessage(Log::Level::Warn, Log::Topic::Dashboard)
+                .SetMessage("SIL Kit Registry: the dashboard is enabled but Experimental.Metrics.CollectFromRemote "
+                            "is disabled, so no metrics and no participant attributes will reach the dashboard")
+                .Dispatch();
+        }
+
         _registryEventListener->OnRegistryUri(uri.EncodedString());
     }
 

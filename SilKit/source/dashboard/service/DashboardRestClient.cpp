@@ -29,7 +29,7 @@ DashboardRestClient::DashboardRestClient(Services::Logging::ILoggerInternal* log
                                          VSilKit::HttpRetryPolicy retryPolicy)
     : _logger(logger)
 {
-    _dtoMapper = std::make_shared<DashboardDtoMapper>();
+    _dtoMapper = std::make_shared<DashboardDtoMapper>(logger);
 
     const auto uri = SilKit::Core::Uri::Parse(dashboardServerUri);
     auto transport = std::make_shared<VSilKit::AsioHttpClient>(logger, uri.Host(), uri.Port(), timeouts);

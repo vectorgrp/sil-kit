@@ -23,6 +23,7 @@ class ReplayScheduler;
  namespace Dashboard {
 class DashboardRestClient;
 class DashboardSystemServiceClient;
+class DashboardDtoMapper;
 } // namespace Dashboard
 namespace Experimental {
 namespace NetworkSimulation {
