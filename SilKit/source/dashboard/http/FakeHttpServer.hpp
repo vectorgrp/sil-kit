@@ -9,6 +9,7 @@
 #include <atomic>
 #include <chrono>
 #include <functional>
+#include <future>
 #include <mutex>
 #include <string>
 #include <thread>
@@ -23,6 +24,32 @@
 
 namespace VSilKit {
 namespace Tests {
+
+/*! A one-shot signal for coordinating test threads without sleeping.
+ *
+ *  Sleeping to "let the other thread get there" is a race that a loaded CI worker loses: the test
+ *  still passes, but it exercises a different path than intended. Waiting on an actual event does
+ *  not care how slow the machine is.
+ */
+class Latch
+{
+public:
+    void Signal()
+    {
+        std::call_once(_once, [this] { _promise.set_value(); });
+    }
+
+    void Wait() const
+    {
+        _future.wait();
+    }
+
+private:
+    std::promise<void> _promise;
+    std::shared_future<void> _future{_promise.get_future()};
+    std::once_flag _once;
+};
+
 
 /*! A minimal scripted HTTP server for driving the dashboard's HTTP client.
  *
@@ -47,12 +74,20 @@ public:
     ~FakeHttpServer()
     {
         _stop = true;
-        std::error_code ignored;
-        _acceptor.close(ignored);
+
+        /* Closing the acceptor here would be wrong twice over: only Winsock wakes a thread that is
+         * blocked in accept(), POSIX close() leaves it parked forever, and touching the acceptor
+         * from this thread while the server thread is inside accept() is a data race on it. Nudge
+         * the acceptor with a throwaway connection instead, and close it once the thread is gone. */
+        WakeAcceptor();
+
         if (_thread.joinable())
         {
             _thread.join();
         }
+
+        std::error_code ignored;
+        _acceptor.close(ignored);
     }
 
     FakeHttpServer(const FakeHttpServer&) = delete;
@@ -89,6 +124,22 @@ public:
     }
 
 private:
+    //! Unblocks a server thread sitting in accept() by connecting once and hanging up.
+    void WakeAcceptor()
+    {
+        try
+        {
+            asio::io_context ioContext;
+            asio::ip::tcp::socket socket{ioContext};
+            std::error_code ignored;
+            socket.connect(asio::ip::tcp::endpoint{asio::ip::make_address("127.0.0.1"), _port}, ignored);
+        }
+        catch (...)
+        {
+            // Best effort: if the connection fails the thread was not in accept() anyway.
+        }
+    }
+
     void Serve()
     {
         while (!_stop)
@@ -96,9 +147,11 @@ private:
             asio::ip::tcp::socket socket{_ioContext};
             std::error_code ec;
             _acceptor.accept(socket, ec);
-            if (ec)
+            if (ec || _stop)
             {
-                return; // the destructor closed the acceptor
+                // Either shutting down, or this is the destructor's wake-up connection, which must
+                // not be counted as a real accept.
+                return;
             }
             ++_acceptCount;
             ServeConnection(socket);

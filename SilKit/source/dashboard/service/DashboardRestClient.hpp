@@ -13,6 +13,8 @@
 #include "dashboard/DashboardBulkUpdate.hpp"
 #include "dashboard/IRestClient.hpp"
 #include "dashboard/client/IDashboardSystemServiceClient.hpp"
+#include "dashboard/http/AsioHttpClient.hpp"
+#include "dashboard/http/HttpRetryPolicy.hpp"
 #include "dashboard/http/IHttpClient.hpp"
 #include "dashboard/service/IDashboardDtoMapper.hpp"
 #include "services/metrics/MetricsDatatypes.hpp"
@@ -23,7 +25,13 @@ namespace Dashboard {
 class DashboardRestClient : public VSilKit::IRestClient
 {
 public:
-    DashboardRestClient(Services::Logging::ILoggerInternal* logger, const std::string& dashboardServerUri);
+    /*! Connect to the dashboard at dashboardServerUri.
+     *
+     *  The timeouts and retry policy are parameters so that tests can drive the assembled stack
+     *  without waiting out real deadlines; production uses the defaults.
+     */
+    DashboardRestClient(Services::Logging::ILoggerInternal* logger, const std::string& dashboardServerUri,
+                        VSilKit::AsioHttpClientTimeouts timeouts = {}, VSilKit::HttpRetryPolicy retryPolicy = {});
     ~DashboardRestClient() override;
 
 public: // For testing

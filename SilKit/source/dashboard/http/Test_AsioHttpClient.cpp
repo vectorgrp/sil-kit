@@ -24,11 +24,13 @@ namespace {
 
 using namespace std::chrono_literals;
 
-// Timing assertions are deliberately loose: CI machines are slow and oversubscribed. Each one only
-// has to distinguish "bounded" from "hung", not measure latency.
-constexpr auto kGenerousBound = 5s;
+/* No test here measures wall-clock time. Where a deadline is the feature under test the deadline is
+ * set short and only its effect is asserted; where a deadline must NOT be what ends the request it
+ * is set out of reach, so a request that returns can only have been aborted. Threads hand over
+ * through a Latch, never a sleep. */
 
 using VSilKit::Tests::FakeHttpServer;
+using VSilKit::Tests::Latch;
 
 auto Reply(int statusCode, const std::string& body, const std::string& extraHeaders = {}) -> std::string
 {
@@ -48,7 +50,7 @@ public:
         AsioHttpClientTimeouts timeouts{};
         timeouts.connect = 1s;
         timeouts.write = 1s;
-        timeouts.read = 500ms;
+        timeouts.read = 150ms;
         return timeouts;
     }
 };
@@ -154,51 +156,56 @@ TEST_F(Test_AsioHttpClient, Post_ReportsATransportErrorForAMalformedResponse)
 
 TEST_F(Test_AsioHttpClient, Post_ReportsATransportErrorWhenNothingIsListening)
 {
-    // Port 1 is reserved and never has a listener; the point is that we fail rather than hang.
-    AsioHttpClient client{nullptr, "127.0.0.1", 1, FastTimeouts()};
+    // Port 1 is reserved and never has a listener. The connect deadline is out of reach, so a
+    // refused connection is the only thing that can end this call.
+    AsioHttpClientTimeouts unreachableDeadlines{};
+    unreachableDeadlines.connect = 1h;
+    AsioHttpClient client{nullptr, "127.0.0.1", 1, unreachableDeadlines};
 
-    const auto start = std::chrono::steady_clock::now();
-    const auto result = client.Post("a", "{}");
-    const auto elapsed = std::chrono::steady_clock::now() - start;
-
-    EXPECT_TRUE(result.transportError);
-    EXPECT_LT(elapsed, kGenerousBound);
+    EXPECT_TRUE(client.Post("a", "{}").transportError);
 }
 
-// oatpp set no socket timeouts at all, so this case used to hang forever.
+/*! oatpp set no socket timeouts at all, so this case used to hang forever.
+ *
+ *  Here the read deadline is the feature under test, so it is deliberately short. The assertion is
+ *  on its effect - the request came back and reported failure - not on how long it took.
+ */
 TEST_F(Test_AsioHttpClient, Post_TimesOutWhenTheServerNeverAnswers)
 {
     FakeHttpServer server{AlwaysReply("")};
     AsioHttpClient client{nullptr, "127.0.0.1", server.Port(), FastTimeouts()};
 
-    const auto start = std::chrono::steady_clock::now();
-    const auto result = client.Post("a", "{}");
-    const auto elapsed = std::chrono::steady_clock::now() - start;
-
-    EXPECT_TRUE(result.transportError);
-    EXPECT_LT(elapsed, kGenerousBound) << "the read deadline should have fired";
+    EXPECT_TRUE(client.Post("a", "{}").transportError) << "the read deadline should have fired";
 }
 
+/*! Abort() cancels a read that nothing else could end.
+ *
+ *  The deadline is out of reach and the server never answers, so if Abort() fails to cancel the
+ *  pending read this blocks and the harness timeout reports it - a verdict that does not depend on
+ *  how fast the machine is. The handler signals once the request has arrived, which is the moment
+ *  the client is committed to the read.
+ */
 TEST_F(Test_AsioHttpClient, Abort_UnblocksAnInFlightRequest)
 {
-    FakeHttpServer server{AlwaysReply("")};
+    Latch requestReceived;
+    FakeHttpServer server{[&requestReceived](const std::string&) {
+        requestReceived.Signal();
+        return std::string{};
+    }};
 
-    AsioHttpClientTimeouts patient{};
-    patient.read = 60s; // long enough that only Abort() can end the wait in time
-    AsioHttpClient client{nullptr, "127.0.0.1", server.Port(), patient};
+    AsioHttpClientTimeouts unreachableDeadlines{};
+    unreachableDeadlines.read = 1h;
+    AsioHttpClient client{nullptr, "127.0.0.1", server.Port(), unreachableDeadlines};
 
-    std::thread aborter{[&client] {
-        std::this_thread::sleep_for(100ms);
+    std::thread aborter{[&] {
+        requestReceived.Wait();
         client.Abort();
     }};
 
-    const auto start = std::chrono::steady_clock::now();
     const auto result = client.Post("a", "{}");
-    const auto elapsed = std::chrono::steady_clock::now() - start;
     aborter.join();
 
     EXPECT_TRUE(result.transportError);
-    EXPECT_LT(elapsed, kGenerousBound) << "Abort() must cancel the pending read";
     EXPECT_TRUE(client.Post("a", "{}").transportError) << "an aborted client stays aborted";
 }
 

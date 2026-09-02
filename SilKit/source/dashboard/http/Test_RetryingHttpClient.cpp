@@ -6,7 +6,6 @@
 
 #include <chrono>
 #include <memory>
-#include <thread>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -39,7 +38,7 @@ public:
         return RetryingHttpClient{_inner, policy};
     }
 
-    //! A policy with a negligible backoff, so timing does not dominate the test run.
+    //! A negligible backoff, so the retry paths do not spend real time.
     static auto FastPolicy() -> HttpRetryPolicy
     {
         HttpRetryPolicy policy{};
@@ -135,30 +134,25 @@ TEST_F(Test_RetryingHttpClient, Post_AfterAbort_DoesNotCallInner)
     EXPECT_TRUE(result.transportError);
 }
 
+/*! Abort() cuts the retry backoff short.
+ *
+ *  Reset() is called immediately before the client enters its backoff, so aborting from there is a
+ *  precise handover with no sleeping: the abort lands exactly when the wait begins. The verdict is
+ *  the inner call count, not the clock - if the backoff were not interruptible the client would wake
+ *  after an hour and Post() a second time, which this StrictMock rejects.
+ */
 TEST_F(Test_RetryingHttpClient, Abort_DuringBackoff_ReturnsWithoutWaitingOutTheBackoff)
 {
-    // A long backoff: if it were not interruptible, this test would take 30 s.
     HttpRetryPolicy policy{};
-    policy.backoff = 30s;
-
-    EXPECT_CALL(*_inner, Post("path", "{}")).WillOnce(Return(Ok(503)));
-    EXPECT_CALL(*_inner, Reset()).Times(1);
-    EXPECT_CALL(*_inner, Abort()).Times(1);
+    policy.backoff = 1h;
 
     auto client = CreateClient(policy);
 
-    std::thread aborter{[&client] {
-        std::this_thread::sleep_for(50ms);
-        client.Abort();
-    }};
+    EXPECT_CALL(*_inner, Post("path", "{}")).Times(1).WillOnce(Return(Ok(503)));
+    EXPECT_CALL(*_inner, Reset()).Times(1).WillOnce([&client] { client.Abort(); });
+    EXPECT_CALL(*_inner, Abort()).Times(1);
 
-    const auto start = std::chrono::steady_clock::now();
-    const auto result = client.Post("path", "{}");
-    const auto elapsed = std::chrono::steady_clock::now() - start;
-    aborter.join();
-
-    EXPECT_TRUE(result.transportError);
-    EXPECT_LT(elapsed, 5s) << "Abort() must cut the backoff short";
+    EXPECT_TRUE(client.Post("path", "{}").transportError);
 }
 
 TEST_F(Test_RetryingHttpClient, Post_RespectsAConfiguredAttemptLimit)

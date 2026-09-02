@@ -24,14 +24,16 @@ namespace SilKit {
 namespace Dashboard {
 
 DashboardRestClient::DashboardRestClient(Services::Logging::ILoggerInternal* logger,
-                                         const std::string& dashboardServerUri)
+                                         const std::string& dashboardServerUri,
+                                         VSilKit::AsioHttpClientTimeouts timeouts,
+                                         VSilKit::HttpRetryPolicy retryPolicy)
     : _logger(logger)
 {
     _dtoMapper = std::make_shared<DashboardDtoMapper>();
 
     const auto uri = SilKit::Core::Uri::Parse(dashboardServerUri);
-    auto transport = std::make_shared<VSilKit::AsioHttpClient>(logger, uri.Host(), uri.Port());
-    _httpClient = std::make_shared<VSilKit::RetryingHttpClient>(std::move(transport));
+    auto transport = std::make_shared<VSilKit::AsioHttpClient>(logger, uri.Host(), uri.Port(), timeouts);
+    _httpClient = std::make_shared<VSilKit::RetryingHttpClient>(std::move(transport), retryPolicy);
     _serviceClient = std::make_shared<DashboardSystemServiceClient>(_logger, _httpClient);
 }
 

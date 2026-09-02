@@ -10,8 +10,14 @@
  *  The case that matters is a dashboard server that accepts the connection and then never answers.
  *  Before this rework such a request blocked forever: oatpp set no socket timeouts, and the abort
  *  hook the destructor called ran only after the worker thread had already been joined, so the
- *  registry hung on shutdown. Both halves of the fix are covered here: the request is bounded by a
- *  read deadline, and Abort() can cut it short from another thread.
+ *  registry hung on shutdown.
+ *
+ *  Nothing here measures wall-clock time or sleeps to synchronise. The read deadline is set far
+ *  higher than these tests could ever legitimately take, so a request that returns at all can only
+ *  have been ended by Abort(); if Abort() stops working the test blocks and the harness timeout
+ *  reports it, which is a verdict that does not change with how loaded the machine is. Threads hand
+ *  over through a Latch tied to the server actually receiving the request, so the client is
+ *  guaranteed to be blocked in the read before the abort fires.
  */
 
 #include <chrono>
@@ -27,15 +33,12 @@
 #include "dashboard/service/DashboardRestClient.hpp"
 
 using namespace testing;
-using namespace std::chrono_literals;
 using VSilKit::Tests::FakeHttpServer;
+using VSilKit::Tests::Latch;
 
 namespace SilKit {
 namespace Dashboard {
 namespace {
-
-// Loose on purpose: these only need to separate "bounded" from "hung".
-constexpr auto kGenerousBound = 60s;
 
 class Test_DashboardShutdown : public Test
 {
@@ -45,46 +48,73 @@ public:
         EXPECT_CALL(_dummyLogger, GetLogLevel).WillRepeatedly(Return(Services::Logging::Level::Off));
     }
 
-    auto CreateClient(uint16_t port) -> std::shared_ptr<DashboardRestClient>
+    /*! A client whose deadlines cannot plausibly fire during a test.
+     *
+     *  An hour-long read deadline means "the request came back" is only ever attributable to
+     *  Abort(), never to a timeout that happened to elapse on a slow worker. The zero backoff keeps
+     *  the retry path from spending real time.
+     */
+    auto CreateClient(uint16_t port, std::size_t maxAttempts = 3) -> std::shared_ptr<DashboardRestClient>
     {
-        return std::make_shared<DashboardRestClient>(&_dummyLogger,
-                                                     "http://127.0.0.1:" + std::to_string(port));
+        VSilKit::AsioHttpClientTimeouts timeouts{};
+        timeouts.connect = std::chrono::hours{1};
+        timeouts.write = std::chrono::hours{1};
+        timeouts.read = std::chrono::hours{1};
+
+        VSilKit::HttpRetryPolicy retryPolicy{};
+        retryPolicy.maxAttempts = maxAttempts;
+        retryPolicy.backoff = std::chrono::milliseconds{0};
+
+        return std::make_shared<DashboardRestClient>(&_dummyLogger, "http://127.0.0.1:" + std::to_string(port),
+                                                     timeouts, retryPolicy);
+    }
+
+    /*! A client pointed at a port nothing listens on, with a connect deadline that will not fire.
+     *
+     *  One attempt only: this is about a refused connection being reported, not about retrying, and
+     *  some platforms take seconds to refuse a loopback connection.
+     */
+    auto CreateClientWithNoServer() -> std::shared_ptr<DashboardRestClient>
+    {
+        return CreateClient(1, 1); // port 1 is reserved and never has a listener
     }
 
     NiceMock<Core::Tests::MockLogger> _dummyLogger;
 };
 
-TEST_F(Test_DashboardShutdown, OnSimulationStart_AgainstASilentServer_CanBeAborted)
+/*! A silent server plus an abort is the shutdown hang, reproduced.
+ *
+ *  The handler signals once the request has arrived, which is the moment the client is committed to
+ *  reading a response that will never come. Only Abort() can end that read.
+ */
+TEST_F(Test_DashboardShutdown, OnSimulationStart_AgainstASilentServer_IsEndedByAbort)
 {
-    FakeHttpServer server{FakeHttpServer::Always("")}; // accepts, never answers
+    Latch requestReceived;
+    FakeHttpServer server{[&requestReceived](const std::string&) {
+        requestReceived.Signal();
+        return std::string{}; // go silent
+    }};
 
     const auto client = CreateClient(server.Port());
 
-    std::thread aborter{[&client] {
-        std::this_thread::sleep_for(200ms);
+    std::thread aborter{[&] {
+        requestReceived.Wait();
         client->Abort();
     }};
 
-    const auto start = std::chrono::steady_clock::now();
     const auto simulationId = client->OnSimulationStart("silkit://localhost:8500", 0);
-    const auto elapsed = std::chrono::steady_clock::now() - start;
     aborter.join();
 
     EXPECT_EQ(simulationId, 0u);
-    EXPECT_LT(elapsed, kGenerousBound) << "Abort() must unblock the in-flight request";
+    EXPECT_EQ(server.Requests().size(), 1u) << "the abort must not have triggered a retry";
 }
 
-TEST_F(Test_DashboardShutdown, OnSimulationStart_WithNothingListening_FailsWithoutHanging)
+//! A refused connection is reported, rather than retried until the connect deadline expires.
+TEST_F(Test_DashboardShutdown, OnSimulationStart_WithNothingListening_ReportsFailure)
 {
-    // Port 1 is reserved and never has a listener.
-    const auto client = CreateClient(1);
+    const auto client = CreateClientWithNoServer();
 
-    const auto start = std::chrono::steady_clock::now();
-    const auto simulationId = client->OnSimulationStart("silkit://localhost:8500", 0);
-    const auto elapsed = std::chrono::steady_clock::now() - start;
-
-    EXPECT_EQ(simulationId, 0u);
-    EXPECT_LT(elapsed, kGenerousBound);
+    EXPECT_EQ(client->OnSimulationStart("silkit://localhost:8500", 0), 0u);
 }
 
 TEST_F(Test_DashboardShutdown, Abort_IsIdempotentAndSafeBeforeAnyRequest)
@@ -96,28 +126,34 @@ TEST_F(Test_DashboardShutdown, Abort_IsIdempotentAndSafeBeforeAnyRequest)
     client->Abort();
     client->Abort();
 
-    // Once aborted the client stays aborted, so the request fails fast instead of reaching a server
-    // that would have answered.
+    // An aborted client stays aborted, so this fails fast instead of reaching a server that would
+    // have answered - which is what makes the assertion on AcceptCount meaningful.
     EXPECT_EQ(client->OnSimulationStart("silkit://localhost:8500", 0), 0u);
+    EXPECT_EQ(server.AcceptCount(), 0);
 }
 
-TEST_F(Test_DashboardShutdown, Destruction_AfterAnAbortedRequest_DoesNotBlock)
+//! Destroying a client whose request was aborted must not block on the dead request.
+TEST_F(Test_DashboardShutdown, Destruction_AfterAnAbortedRequest_Completes)
 {
-    FakeHttpServer server{FakeHttpServer::Always("")};
+    Latch requestReceived;
+    FakeHttpServer server{[&requestReceived](const std::string&) {
+        requestReceived.Signal();
+        return std::string{};
+    }};
 
-    const auto start = std::chrono::steady_clock::now();
     {
         const auto client = CreateClient(server.Port());
-        std::thread aborter{[&client] {
-            std::this_thread::sleep_for(200ms);
+
+        std::thread aborter{[&] {
+            requestReceived.Wait();
             client->Abort();
         }};
+
         client->OnSimulationStart("silkit://localhost:8500", 0);
         aborter.join();
     }
-    const auto elapsed = std::chrono::steady_clock::now() - start;
 
-    EXPECT_LT(elapsed, kGenerousBound);
+    SUCCEED() << "the client was destroyed without blocking";
 }
 
 // The happy path over the real stack, so the shutdown cases above are not the only coverage of the
