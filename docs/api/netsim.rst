@@ -1,5 +1,7 @@
 .. include:: /substitutions.rst
 
+.. _chap:custom-netsim:
+
 ========================================
 Custom Network Simulator
 ========================================
