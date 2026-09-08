@@ -17,12 +17,6 @@
 
 #include "services/logging/ILoggerInternal.hpp"
 
-// asio types are kept out of this header so that the 22k-line asio headers are confined to the
-// single translation unit that implements the client.
-namespace asio {
-class io_context;
-}
-
 namespace VSilKit {
 
 struct AsioHttpClientTimeouts
@@ -55,6 +49,8 @@ public:
     void Abort() override;
 
 private:
+    // Every asio type lives in Impl so that the 22k-line asio headers stay confined to the single
+    // translation unit that implements the client.
     struct Impl;
     std::unique_ptr<Impl> _impl;
 };

@@ -35,6 +35,11 @@ constexpr auto pollInterval = std::chrono::milliseconds{50};
 
 constexpr size_t maxHeadSize = 64 * 1024;
 
+//! Bounds the read buffer itself: async_read_until then completes with error::not_found, and
+//! async_read stops, instead of buffering without limit for the whole read deadline. The size
+//! checks below still reject anything that reaches the limit.
+constexpr size_t maxReadBufferSize = maxHeadSize + static_cast<size_t>(maxHttpBodySize);
+
 } // namespace
 
 struct AsioHttpClient::Impl
@@ -47,7 +52,7 @@ struct AsioHttpClient::Impl
 
     asio::io_context ioContext{1};
     std::optional<asio::ip::tcp::socket> socket;
-    asio::streambuf readBuffer;
+    asio::streambuf readBuffer{maxReadBufferSize};
     std::vector<asio::ip::tcp::endpoint> endpoints;
     std::chrono::steady_clock::time_point lastUse{};
     std::atomic<bool> aborted{false};
@@ -248,7 +253,7 @@ struct AsioHttpClient::Impl
         {
             return asio::error::message_size;
         }
-        const auto* data = asio::buffer_cast<const char*>(readBuffer.data());
+        const auto* data = static_cast<const char*>(readBuffer.data().data());
         head.assign(data, headSize);
         readBuffer.consume(headSize);
         return {};
@@ -274,7 +279,15 @@ struct AsioHttpClient::Impl
                 return ec;
             }
         }
-        const auto* data = asio::buffer_cast<const char*>(readBuffer.data());
+        /* A full read buffer makes async_read complete successfully with a short read, so this
+         * must be checked before trusting `wanted` bytes to be there. maxReadBufferSize is the
+         * sum of both limits and `count` is capped at maxHttpBodySize, so it cannot fire today -
+         * but appending past the buffer would be an over-read, not merely a wrong result. */
+        if (readBuffer.size() < wanted)
+        {
+            return asio::error::message_size;
+        }
+        const auto* data = static_cast<const char*>(readBuffer.data().data());
         out.append(data, wanted);
         readBuffer.consume(wanted);
         return {};
@@ -295,7 +308,7 @@ struct AsioHttpClient::Impl
         {
             return ec;
         }
-        const auto* data = asio::buffer_cast<const char*>(readBuffer.data());
+        const auto* data = static_cast<const char*>(readBuffer.data().data());
         line.assign(data, lineSize >= 2 ? lineSize - 2 : 0); // strip CRLF
         readBuffer.consume(lineSize);
         return {};
@@ -365,7 +378,7 @@ struct AsioHttpClient::Impl
         {
             return asio::error::message_size;
         }
-        const auto* data = asio::buffer_cast<const char*>(readBuffer.data());
+        const auto* data = static_cast<const char*>(readBuffer.data().data());
         out.append(data, readBuffer.size());
         readBuffer.consume(readBuffer.size());
         return {};

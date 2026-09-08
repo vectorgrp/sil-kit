@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <cmath>
 #include <cstdio>
 #include <optional>
 #include <string>
@@ -49,9 +50,19 @@ struct DashboardJsonWriter : VSilKit::BasicYamlWriter<DashboardJsonWriter>
     void Write(const char*) = delete;
     void Write(bool) = delete;
 
-    //! Matches oatpp's OATPP_FLOAT_STRING_FORMAT, so statistic values keep their previous digits.
+    /*! Matches oatpp's OATPP_FLOAT_STRING_FORMAT, so statistic values keep their previous digits.
+     *
+     *  JSON has no representation for NaN or the infinities, and "%.16g" would emit them as the
+     *  bare tokens `nan`/`inf`, which makes the whole payload unparseable for the server rather
+     *  than just that one field. Substitute 0 instead.
+     */
     void Write(double value)
     {
+        if (!std::isfinite(value))
+        {
+            node << 0;
+            return;
+        }
         char buffer[64];
         const int length = std::snprintf(buffer, sizeof buffer, "%.16g", value);
         node << ryml::csubstr{buffer, static_cast<size_t>(length < 0 ? 0 : length)};

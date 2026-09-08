@@ -331,6 +331,24 @@ TEST(Test_DashboardJsonWriter, StatisticDataDto_KeepsOatppsSixteenSignificantDig
                                  "[0.1234567890123457,1e-300,1.797693134862316e+308]}");
 }
 
+/*! A deliberate divergence from oatpp, which is why it is not derived from its output.
+ *
+ *  JSON has no representation for NaN or the infinities, and oatpp's "%.16g" emitted them as the
+ *  bare tokens `nan`/`inf`. No JSON parser accepts those, so the dashboard lost the whole payload
+ *  rather than the one field. Substituting 0 keeps the rest of the update intact.
+ */
+TEST(Test_DashboardJsonWriter, StatisticDataDto_NonFiniteDoublesAreEmittedAsZero)
+{
+    StatisticDataDto statistic{};
+    statistic.ts = 5;
+    statistic.pn = "P1";
+    statistic.mn = {"s"};
+    statistic.mv = {std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::infinity(),
+                    -std::numeric_limits<double>::infinity(), 1.5};
+
+    EXPECT_EQ(ToJson(statistic), "{\"ts\": 5,\"pn\": \"P1\",\"mn\": [\"s\"],\"mv\": [0,0,0,1.5]}");
+}
+
 TEST(Test_DashboardJsonWriter, MetricsUpdateDto_Empty)
 {
     EXPECT_EQ(ToJson(MetricsUpdateDto{}), "{\"attributes\": [],\"counters\": [],\"statistics\": []}");

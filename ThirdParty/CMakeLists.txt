@@ -87,6 +87,10 @@ function(include_asio)
     add_library(asio INTERFACE)
     # mark asio headers as system headers, which avoids warnings from asio to break our build
     target_include_directories(asio SYSTEM INTERFACE "${ASIO_INCLUDE_DIR}")
+    # Compile out asio's deprecated interfaces, so that using one is a build error rather than
+    # something that only breaks when upstream finally removes it. Set on the interface target so
+    # it reaches every translation unit that can see the asio headers.
+    target_compile_definitions(asio INTERFACE ASIO_NO_DEPRECATED)
     set(SILKIT_THIRD_PARTY_ASIO "asio" CACHE STRING "Name of the third party asio target")
 endfunction()
 

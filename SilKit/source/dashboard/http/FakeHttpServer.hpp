@@ -169,7 +169,7 @@ private:
                 return;
             }
 
-            std::string request{asio::buffer_cast<const char*>(buffer.data()), headSize};
+            std::string request{static_cast<const char*>(buffer.data().data()), headSize};
             buffer.consume(headSize);
 
             size_t contentLength = 0;
@@ -188,7 +188,7 @@ private:
                         return;
                     }
                 }
-                request.append(asio::buffer_cast<const char*>(buffer.data()), contentLength);
+                request.append(static_cast<const char*>(buffer.data().data()), contentLength);
             }
 
             {

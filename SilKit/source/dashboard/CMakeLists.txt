@@ -96,8 +96,13 @@ if(SILKIT_BUILD_DASHBOARD)
     set_property(TARGET O_SilKit_Dashboard PROPERTY FOLDER "Dashboard")
 
 
-    # Every dashboard test links the same set, so register them from one list.
-    set(SILKIT_DASHBOARD_TEST_SOURCES
+    # Every dashboard test links the same set, so register them in one call. It also keeps the
+    # SILKIT_BUILD_TESTS check inside add_silkit_test_to_executable, which a bare target_sources on
+    # SilKitDashboardTests would bypass - that target does not exist when tests are off.
+    add_silkit_test_to_executable(SilKitDashboardTests
+        SOURCES
+        http/FakeHttpServer.hpp
+        Mocks/MockRestClient.hpp
         Test_DashboardEventQueueWorker.cpp
         Test_DashboardSilKitEventQueue.cpp
         client/Test_DashboardSystemServiceClient.cpp
@@ -108,19 +113,11 @@ if(SILKIT_BUILD_DASHBOARD)
         service/Test_DashboardDtoMapper.cpp
         service/Test_DashboardRestClient.cpp
         service/Test_DashboardShutdown.cpp
+        LIBS
+        S_SilKitImpl
+        O_SilKit_Dashboard
+        I_SilKit
     )
-
-    target_sources(SilKitDashboardTests PRIVATE http/FakeHttpServer.hpp Mocks/MockRestClient.hpp)
-
-    foreach(testSource IN LISTS SILKIT_DASHBOARD_TEST_SOURCES)
-        add_silkit_test_to_executable(SilKitDashboardTests
-            SOURCES ${testSource}
-            LIBS
-            S_SilKitImpl
-            O_SilKit_Dashboard
-            I_SilKit
-        )
-    endforeach()
 
 else()
 

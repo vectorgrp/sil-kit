@@ -35,9 +35,15 @@
   the JSON encoding: a space follows each `:` separator, forward slashes are no longer escaped as
   `\/`, and non-ASCII characters are sent as UTF-8 rather than `\uXXXX` escapes. Control characters
   that cannot be escaped are replaced with U+FFFD.
+- `third-party`: the SIL Kit build now defines `ASIO_NO_DEPRECATED`, so that using an asio interface
+  that upstream has deprecated is a build error rather than something that only surfaces when asio
+  removes it. No SIL Kit source used one.
 - Running a build without dashboard support (`SILKIT_BUILD_DASHBOARD=OFF`) and passing
   `--dashboard-uri` now reports plainly that this build has no dashboard support, instead of printing
   an error about a failed dashboard instance creation.
+- A `--dashboard-uri` whose scheme is not `http` is now rejected when the dashboard instance is
+  created. The dashboard client only ever spoke plaintext HTTP, so an `https://` URI was previously
+  accepted and silently downgraded.
 - Changes to the SIL KIT MSI installer: 
   - Default installation path changed from `<ProgramFilesFolder>\Vector SIL Kit <VERSION>` to `<ProgramFilesFolder>\SIL Kit <VERSION>`
   - Windows System Service Name changed from `VectorSilKitRegistry` to `SilKitRegistry`

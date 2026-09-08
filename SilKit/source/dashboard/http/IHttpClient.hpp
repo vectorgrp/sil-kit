@@ -27,8 +27,11 @@ struct HttpResult
 /*! A minimal blocking HTTP client, sufficient for the dashboard's three POST endpoints.
  *
  *  Implementations must never throw out of Post(): every failure is reported as
- *  HttpResult::transportError. Post() is expected to be called from a single thread; Abort() may be
- *  called concurrently from another.
+ *  HttpResult::transportError.
+ *
+ *  Threading: Post() and Reset() belong to one and the same thread - the dashboard's event-queue
+ *  worker - and are never called concurrently with each other. Abort() is the only member that may
+ *  be called from a different thread.
  */
 struct IHttpClient
 {
@@ -37,7 +40,8 @@ struct IHttpClient
     //! POST a JSON body. `path` must not have a leading '/'.
     virtual auto Post(const std::string& path, const std::string& jsonBody) -> HttpResult = 0;
 
-    //! Drop any cached connection. Equivalent to oatpp's invalidateConnection.
+    //! Drop any cached connection. Equivalent to oatpp's invalidateConnection. Called on Post()'s
+    //! thread, including from within Post() itself when it retries.
     virtual void Reset() = 0;
 
     /*! Unblock any in-flight Post() and make all subsequent calls fail fast.

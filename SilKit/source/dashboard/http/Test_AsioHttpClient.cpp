@@ -156,11 +156,51 @@ TEST_F(Test_AsioHttpClient, Post_ReportsATransportErrorForAMalformedResponse)
 
 TEST_F(Test_AsioHttpClient, Post_ReportsATransportErrorWhenNothingIsListening)
 {
-    // Port 1 is reserved and never has a listener. The connect deadline is out of reach, so a
-    // refused connection is the only thing that can end this call.
-    AsioHttpClientTimeouts unreachableDeadlines{};
-    unreachableDeadlines.connect = 1h;
-    AsioHttpClient client{nullptr, "127.0.0.1", 1, unreachableDeadlines};
+    /* Port 1 is reserved and never has a listener, so on any host that refuses a connection to an
+     * unbound loopback port the refusal is what ends this call. The connect deadline is only a
+     * backstop for hosts that silently drop such packets instead of refusing them: there the
+     * request must still come back and report failure rather than hang to the harness timeout. */
+    AsioHttpClientTimeouts timeouts{};
+    timeouts.connect = 30s;
+    AsioHttpClient client{nullptr, "127.0.0.1", 1, timeouts};
+
+    EXPECT_TRUE(client.Post("a", "{}").transportError);
+}
+
+/*! The read buffer is bounded, so a response that never terminates cannot grow it without limit.
+ *
+ *  The read deadline is deliberately out of reach in both cases below, which is what makes them
+ *  sharp: a request that returns at all can only have been ended by the buffer bound. Without the
+ *  bound asio would keep buffering and these would block until the harness timeout.
+ *
+ *  Each reply is just over maxHeadSize + maxHttpBodySize, the point at which the buffer is full.
+ */
+TEST_F(Test_AsioHttpClient, Post_ReportsATransportErrorForAResponseHeadThatNeverEnds)
+{
+    std::string endlessHead;
+    while (endlessHead.size() < 1200000)
+    {
+        endlessHead += "X-Pad: " + std::string(500, 'a') + "\r\n"; // plenty of CRLFs, never the blank line
+    }
+
+    FakeHttpServer server{AlwaysReply(endlessHead)};
+    AsioHttpClientTimeouts outOfReach{};
+    outOfReach.read = 1h;
+    AsioHttpClient client{nullptr, "127.0.0.1", server.Port(), outOfReach};
+
+    EXPECT_TRUE(client.Post("a", "{}").transportError);
+}
+
+TEST_F(Test_AsioHttpClient, Post_ReportsATransportErrorForACloseFramedBodyThatNeverEnds)
+{
+    // Neither Content-Length nor Transfer-Encoding, so the body is framed by the close that the
+    // server never performs.
+    const std::string endlessBody = "HTTP/1.1 200 OK\r\n\r\n" + std::string(1200000, 'x');
+
+    FakeHttpServer server{AlwaysReply(endlessBody)};
+    AsioHttpClientTimeouts outOfReach{};
+    outOfReach.read = 1h;
+    AsioHttpClient client{nullptr, "127.0.0.1", server.Port(), outOfReach};
 
     EXPECT_TRUE(client.Post("a", "{}").transportError);
 }

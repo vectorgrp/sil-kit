@@ -4,9 +4,13 @@
 
 #include "dashboard/DashboardInstance.hpp"
 
+#include <algorithm>
+#include <cctype>
 #include <chrono>
 #include <future>
 #include <utility>
+
+#include "silkit/participant/exception.hpp"
 
 #include "dashboard/EventQueueWorkerThread.hpp"
 #include "dashboard/service/DashboardRestClient.hpp"
@@ -56,9 +60,20 @@ DashboardInstance::DashboardInstance(const std::string& dashboardUri)
     : _dashboardUri{dashboardUri}
 {
     // Parse eagerly so that a malformed --dashboard-uri is reported when the instance is created,
-    // rather than later on the registry's thread. The result is discarded; DashboardRestClient
-    // parses it again once it is built.
-    (void)SilKit::Core::Uri::Parse(dashboardUri);
+    // rather than later on the registry's thread. The result is only inspected here;
+    // DashboardRestClient parses it again once it is built.
+    const auto uri = SilKit::Core::Uri::Parse(dashboardUri);
+
+    /* Uri::Parse accepts any scheme, but the transport only ever speaks plaintext HTTP. Without
+     * this an "https://" URI would be silently downgraded rather than rejected. Schemes are
+     * case-insensitive per RFC 3986, so "HTTP://" must keep working. */
+    auto scheme = uri.Scheme();
+    std::transform(scheme.begin(), scheme.end(), scheme.begin(),
+                   [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+    if (scheme != "http")
+    {
+        throw SilKit::ConfigurationError{"dashboard URI must use the 'http' scheme, got '" + uri.Scheme() + "'"};
+    }
 }
 
 DashboardInstance::~DashboardInstance()

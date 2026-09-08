@@ -54,10 +54,12 @@ public:
      *  Abort(), never to a timeout that happened to elapse on a slow worker. The zero backoff keeps
      *  the retry path from spending real time.
      */
-    auto CreateClient(uint16_t port, std::size_t maxAttempts = 3) -> std::shared_ptr<DashboardRestClient>
+    auto CreateClient(uint16_t port, std::size_t maxAttempts = 3,
+                      std::chrono::milliseconds connectDeadline = std::chrono::hours{1})
+        -> std::shared_ptr<DashboardRestClient>
     {
         VSilKit::AsioHttpClientTimeouts timeouts{};
-        timeouts.connect = std::chrono::hours{1};
+        timeouts.connect = connectDeadline;
         timeouts.write = std::chrono::hours{1};
         timeouts.read = std::chrono::hours{1};
 
@@ -69,14 +71,16 @@ public:
                                                      timeouts, retryPolicy);
     }
 
-    /*! A client pointed at a port nothing listens on, with a connect deadline that will not fire.
+    /*! A client pointed at a port nothing listens on.
      *
      *  One attempt only: this is about a refused connection being reported, not about retrying, and
-     *  some platforms take seconds to refuse a loopback connection.
+     *  some platforms take seconds to refuse a loopback connection. The connect deadline is a
+     *  backstop for hosts that drop rather than refuse - there the call must still return and
+     *  report failure instead of hanging to the harness timeout.
      */
     auto CreateClientWithNoServer() -> std::shared_ptr<DashboardRestClient>
     {
-        return CreateClient(1, 1); // port 1 is reserved and never has a listener
+        return CreateClient(1, 1, std::chrono::seconds{30}); // port 1 is reserved, never listened on
     }
 
     NiceMock<Core::Tests::MockLogger> _dummyLogger;
