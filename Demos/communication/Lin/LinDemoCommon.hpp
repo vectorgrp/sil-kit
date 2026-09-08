@@ -85,6 +85,19 @@ public:
         Reset();
     }
 
+    //! Same, for a schedule assembled at runtime rather than written out as a literal list.
+    Schedule(const std::vector<std::pair<std::chrono::nanoseconds, std::function<void(std::chrono::nanoseconds)>>>&
+                 tasks,
+             bool autoScheduleNext = true)
+        : _autoScheduleNext{autoScheduleNext}
+    {
+        for (auto&& task : tasks)
+        {
+            _schedule.emplace_back(task.first, task.second);
+        }
+        Reset();
+    }
+
     void Reset()
     {
         _nextTask = _schedule.begin();

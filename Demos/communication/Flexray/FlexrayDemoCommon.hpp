@@ -4,6 +4,10 @@
 
 #pragma once
 
+#include <functional>
+#include <string>
+#include <vector>
+
 #include "silkit/services/flexray/all.hpp"
 #include "silkit/services/flexray/string_utils.hpp"
 #include "silkit/services/logging/ILogger.hpp"
@@ -14,13 +18,85 @@ using namespace std::chrono_literals;
 // This is the common behavior used in FlexrayNode0 and FlexrayNode1
 namespace FlexrayDemoCommon {
 
+// Deliberately malformed FlexRay frames, used by FlexrayNode0Demo --invalid to exercise a receiver's frame
+// validation. Each case violates exactly one check of CANoe's GetFlexRayFrameInvalidReason /
+// GetFlexRayMessageInvalidReason (projects_source/CANoe/Source/RTEVENT/SilKit/SilKitFr.cpp) and makes it report write
+// message 83-0505 with the quoted reason in its Details, on both the frame and the frame transmit route.
+//
+// A FlexRay frame is not handed over field by field like a CAN frame: the header a receiver sees is derived by SIL Kit
+// from the TX buffer configuration and the running cycle. So a case either changes the buffer config
+// (ApplyToBufferConfig) or the payload of the buffer update (BuildPayload), and SIL Kit may well reject or normalise
+// the value before it reaches the receiver - whether a case arrives at all is part of what it tests.
+//
+// Not reachable from a sender, and needing a receiver-side unit test instead: the four null-pointer reasons, plus
+// "payloadlength exceeds the maximum of 127 words" (UpdateTxBuffer accepts at most 254 payload bytes, which is
+// exactly 127 words) and "cyclecount exceeds the maximum of 63" (the cycle counter comes from SIL Kit).
+namespace InvalidFrames {
+
+struct Case
+{
+    const char* name;
+    const char* expectedReason;
+    //! Applied to the last TX buffer config - never the key slot buffer, which FlexRay startup depends on.
+    std::function<void(FlexrayTxBufferConfig&)> ApplyToBufferConfig;
+    //! Replaces the payload of every buffer update. Empty means "leave the normal payload alone".
+    std::function<void(std::vector<uint8_t>&)> BuildPayload;
+};
+
+inline auto All() -> const std::vector<Case>&
+{
+    static const std::vector<Case> cases{
+        {"slotid-zero", "frameid is outside the valid slot id range of 1...2047",
+         [](FlexrayTxBufferConfig& cfg) { cfg.slotId = 0; }, {}},
+        {"slotid-max", "frameid is outside the valid slot id range of 1...2047",
+         [](FlexrayTxBufferConfig& cfg) { cfg.slotId = 2048; }, {}},
+        {"headercrc", "headercrc exceeds the 11 bit maximum of 2047",
+         [](FlexrayTxBufferConfig& cfg) { cfg.headerCrc = 2048; }, {}},
+        // Transmitting on both channels at once. SIL Kit may resolve this into one event per channel, in which case
+        // the receiver never sees channel == AB and this case does not fire.
+        {"channel", "channel is neither FlexRay channel A nor B",
+         [](FlexrayTxBufferConfig& cfg) { cfg.channels = FlexrayChannel::AB; }, {}},
+        // An odd payload size cannot be expressed as whole 2 byte words, so payloadLength * 2 never matches it.
+        {"payload-size", "payloadsize does not match the two bytes per word derived from payloadlength", {},
+         [](std::vector<uint8_t>& payload) { payload.assign(3, 0xAB); }},
+    };
+    return cases;
+}
+
+inline auto Find(const std::string& name) -> const Case*
+{
+    for (const auto& c : All())
+    {
+        if (c.name == name)
+        {
+            return &c;
+        }
+    }
+    return nullptr;
+}
+
+inline auto NameList() -> std::string
+{
+    std::string list;
+    for (const auto& c : All())
+    {
+        list += (list.empty() ? "" : ", ");
+        list += c.name;
+    }
+    return list;
+}
+
+} // namespace InvalidFrames
+
 class FlexrayNode
 {
 public:
-    FlexrayNode(IFlexrayController* controller, FlexrayControllerConfig config, ILogger* logger)
+    FlexrayNode(IFlexrayController* controller, FlexrayControllerConfig config, ILogger* logger,
+                const InvalidFrames::Case* invalidCase = nullptr)
         : _flexrayController{controller}
         , _controllerConfig{std::move(config)}
         , _logger{logger}
+        , _invalidCase{invalidCase}
     {
         _lastPocStatus.state = FlexrayPocState::DefaultConfig;
         _busState = FlexrayNode::MasterState::PerformWakeup;
@@ -97,6 +173,7 @@ private:
     int _msgId = 0;
     bool _configured{false};
     ILogger* _logger;
+    const InvalidFrames::Case* _invalidCase{nullptr};
 
     enum class MasterState
     {
@@ -144,6 +221,17 @@ private:
         payloadBytes.resize(payloadString.size());
 
         std::copy(payloadString.begin(), payloadString.end(), payloadBytes.begin());
+
+        if (_invalidCase != nullptr && _invalidCase->BuildPayload)
+        {
+            _invalidCase->BuildPayload(payloadBytes);
+
+            std::stringstream ss;
+            ss << "Sending malformed FlexRay payload '" << _invalidCase->name
+               << "': payloadsize=" << payloadBytes.size() << " - expecting reason '" << _invalidCase->expectedReason
+               << "'";
+            _logger->Info(ss.str());
+        }
 
         FlexrayTxBufferUpdate update;
         update.payload = payloadBytes;

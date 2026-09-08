@@ -16,6 +16,8 @@ private:
     std::string _networkName = "Eth1";
     bool _printHex{false};
     int _frameId = 0;
+    std::string _invalidCase{};
+    size_t _invalidIndex{0};
 
     void AddCommandLineArgs() override
     {
@@ -27,12 +29,39 @@ private:
             "hex", "H", "-H, --hex",
             std::vector<std::string>{"Print the CAN payloads in hexadecimal format.",
                                      "Otherwise, the payloads are interpreted as strings."});
+
+        GetCommandLineParser()->Add<CommandlineParser::Option>(
+            "invalid", "I", _invalidCase, "-I, --invalid <case>",
+            std::vector<std::string>{"Send deliberately malformed Ethernet frames instead of valid ones,",
+                                     "to exercise a receiver's frame validation.",
+                                     "'all' cycles through every case, one per tick.",
+                                     "'list' prints the cases with their expected reason and exits.",
+                                     "Cases: " + EthernetDemoCommon::InvalidFrames::NameList() + "."});
     }
 
     void EvaluateCommandLineArgs() override
     {
         _networkName = GetCommandLineParser()->Get<CommandlineParser::Option>("network").Value();
         _printHex = GetCommandLineParser()->Get<CommandlineParser::Flag>("hex").Value();
+        _invalidCase = GetCommandLineParser()->Get<CommandlineParser::Option>("invalid").Value();
+
+        if (_invalidCase == "list")
+        {
+            std::cout << std::endl << "Malformed Ethernet frame cases:" << std::endl << std::endl;
+            for (const auto& c : EthernetDemoCommon::InvalidFrames::All())
+            {
+                std::cout << "  " << std::setw(12) << std::left << c.name << "  " << c.expectedReason << std::endl;
+            }
+            std::cout << std::endl;
+            std::exit(0);
+        }
+
+        if (!_invalidCase.empty() && _invalidCase != "all"
+            && EthernetDemoCommon::InvalidFrames::Find(_invalidCase) == nullptr)
+        {
+            throw std::runtime_error("Unknown --invalid case '" + _invalidCase + "'. Known cases: "
+                                     + EthernetDemoCommon::InvalidFrames::NameList() + ", all, list.");
+        }
     }
 
     void CreateControllers() override
@@ -69,12 +98,43 @@ private:
         return raw;
     }
 
+    //! Send one deliberately malformed frame, see EthernetDemoCommon::InvalidFrames.
+    void SendInvalidFrame()
+    {
+        const auto& cases = EthernetDemoCommon::InvalidFrames::All();
+        const EthernetDemoCommon::InvalidFrames::Case* invalidCase = nullptr;
+        if (_invalidCase == "all")
+        {
+            invalidCase = &cases[_invalidIndex++ % cases.size()];
+        }
+        else
+        {
+            invalidCase = EthernetDemoCommon::InvalidFrames::Find(_invalidCase);
+        }
+
+        const auto raw = invalidCase->Build();
+        const auto userContext = reinterpret_cast<void*>(static_cast<intptr_t>(_frameId));
+
+        std::stringstream ss;
+        ss << "Sending malformed Ethernet frame '" << invalidCase->name << "': size=" << raw.size()
+           << " - expecting reason '" << invalidCase->expectedReason << "'";
+        GetLogger()->Info(ss.str());
+
+        _ethernetController->SendFrame(EthernetFrame{raw}, userContext);
+    }
+
     void SendFrame()
     {
         EthernetDemoCommon::EthernetMac WriterMacAddr = {0xF6, 0x04, 0x68, 0x71, 0xAA, 0xC1};
         EthernetDemoCommon::EthernetMac BroadcastMacAddr = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 
         _frameId++;
+
+        if (!_invalidCase.empty())
+        {
+            SendInvalidFrame();
+            return;
+        }
 
         std::stringstream stream;
         // Ensure that the payload is long enough to constitute a valid Ethernet frame

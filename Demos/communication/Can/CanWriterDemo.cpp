@@ -16,6 +16,8 @@ private:
     std::string _networkName = "CAN1";
     bool _printHex{false};
     int _frameId = 0;
+    std::string _invalidCase{};
+    size_t _invalidIndex{0};
 
     void AddCommandLineArgs() override
     {
@@ -25,12 +27,39 @@ private:
 
         GetCommandLineParser()->Add<CommandlineParser::Flag>("hex", "H", "-H, --hex",
                                                              std::vector<std::string>{"Print the CAN payload as hex."});
+
+        GetCommandLineParser()->Add<CommandlineParser::Option>(
+            "invalid", "I", _invalidCase, "-I, --invalid <case>",
+            std::vector<std::string>{"Send deliberately malformed CAN frames instead of valid ones,",
+                                     "to exercise a receiver's frame validation.",
+                                     "'all' cycles through every case, one per tick.",
+                                     "'list' prints the cases with their expected reason and exits.",
+                                     "Cases: " + CanDemoCommon::InvalidFrames::NameList() + "."});
     }
 
     void EvaluateCommandLineArgs() override
     {
         _networkName = GetCommandLineParser()->Get<CommandlineParser::Option>("network").Value();
         _printHex = GetCommandLineParser()->Get<CommandlineParser::Flag>("hex").Value();
+        _invalidCase = GetCommandLineParser()->Get<CommandlineParser::Option>("invalid").Value();
+
+        if (_invalidCase == "list")
+        {
+            std::cout << std::endl << "Malformed CAN frame cases:" << std::endl << std::endl;
+            for (const auto& c : CanDemoCommon::InvalidFrames::All())
+            {
+                std::cout << "  " << std::setw(10) << std::left << c.name << "  " << c.expectedReason << std::endl;
+            }
+            std::cout << std::endl;
+            std::exit(0);
+        }
+
+        if (!_invalidCase.empty() && _invalidCase != "all"
+            && CanDemoCommon::InvalidFrames::Find(_invalidCase) == nullptr)
+        {
+            throw std::runtime_error("Unknown --invalid case '" + _invalidCase + "'. Known cases: "
+                                     + CanDemoCommon::InvalidFrames::NameList() + ", all, list.");
+        }
     }
 
     void CreateControllers() override
@@ -51,9 +80,49 @@ private:
         _canController->Start();
     }
 
+    //! Send one deliberately malformed frame, see CanDemoCommon::InvalidFrames.
+    void SendInvalidFrame()
+    {
+        const auto& cases = CanDemoCommon::InvalidFrames::All();
+        const CanDemoCommon::InvalidFrames::Case* invalidCase = nullptr;
+        if (_invalidCase == "all")
+        {
+            invalidCase = &cases[_invalidIndex++ % cases.size()];
+        }
+        else
+        {
+            invalidCase = CanDemoCommon::InvalidFrames::Find(_invalidCase);
+        }
+
+        // Start from a frame that passes every check, then let the case violate exactly one of them.
+        CanFrame canFrame{};
+        canFrame.canId = 3;
+        canFrame.flags = 0;
+        canFrame.dlc = 0;
+        std::vector<uint8_t> payloadBytes;
+
+        invalidCase->Build(canFrame, payloadBytes);
+        canFrame.dataField = payloadBytes;
+
+        std::stringstream ss;
+        ss << "Sending malformed CAN frame '" << invalidCase->name << "': canId=" << canFrame.canId << ", flags=0x"
+           << std::hex << canFrame.flags << std::dec << ", dlc=" << canFrame.dlc
+           << ", datasize=" << canFrame.dataField.size() << " - expecting reason '" << invalidCase->expectedReason
+           << "'";
+        GetLogger()->Info(ss.str());
+
+        _canController->SendFrame(canFrame);
+    }
+
     void SendFrame()
     {
         _frameId++;
+
+        if (!_invalidCase.empty())
+        {
+            SendInvalidFrame();
+            return;
+        }
 
         // Build a CAN FD frame
         CanFrame canFrame{};
