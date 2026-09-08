@@ -81,7 +81,7 @@ As a result, an application that works in the |fastBus| use case also works when
 The :ref:`sec:api-services` section describes how to configure and use the vehicle network services (valid for both modes).
 
 Choosing the Right Simulation Mode
-~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 As a practical default, start with |fastBus| unless the need for detailed network simulation is clear.
 Switch to |accurateBus| when timing fidelity or protocol-level effects are required.
