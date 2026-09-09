@@ -85,4 +85,34 @@ add_silkit_test_to_executable(SilKitUnitTests
 )
 
 
+# Maintainer tool for version bumps. Standalone on purpose: it must not depend
+# on I_SilKit, since it generates a header the library itself is built from.
+#
+# The version logic is still built (and tested) when the tool itself is disabled,
+# so a cross-compiled build keeps the test coverage without producing a
+# maintainer binary that cannot run on the host.
+if(SILKIT_BUILD_GENERATE_VERSION OR SILKIT_BUILD_TESTS)
+    add_library(O_SilKit_Util_GenerateVersion OBJECT
+        GenerateVersion.hpp
+        GenerateVersion.cpp
+    )
+
+    # Root-relative includes as everywhere else in SilKit/source, so consumers
+    # write #include "util/GenerateVersion.hpp".
+    target_include_directories(O_SilKit_Util_GenerateVersion
+        PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/.."
+    )
+endif()
+
+if(SILKIT_BUILD_GENERATE_VERSION)
+    add_executable(sil-kit-generate-version sil-kit-generate-version.cpp)
+    target_link_libraries(sil-kit-generate-version
+        PRIVATE O_SilKit_Util_GenerateVersion
+    )
+    set_target_properties(sil-kit-generate-version PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"
+    )
+endif()
+
+
 add_subdirectory(tests)

@@ -42,6 +42,10 @@ set(SPHINX_INDEX_FILE ${SPHINX_BUILD}/index.html)
 # - Our doc files have been updated
 # - The Sphinx config has been updated
 file(GLOB_RECURSE SPHINX_SOURCE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.rst)
+# Markdown pages (the changelog entries, development/release.md) are part of the
+# Sphinx sources too and must retrigger the build when edited.
+file(GLOB_RECURSE SPHINX_MD_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.md)
+list(APPEND SPHINX_SOURCE_FILES ${SPHINX_MD_FILES})
 file(GLOB_RECURSE SVG_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.svg)
 list(APPEND SPHINX_SOURCE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/_static/custom.css)
 

@@ -14,47 +14,6 @@ add_subdirectory(dashboard)
 
 find_package(Threads REQUIRED)
 
-# Encode the current GIT and version infos into version_macros.hpp
-# If this file is present in the current source directory we assume
-# that this source-tree is a non-git/packaged source tree and re-use
-# the file unmodified.
-set(GIT_DIR "${PROJECT_SOURCE_DIR}/../.git")
-set(GIT_HEAD_FILE "${GIT_DIR}/HEAD")
-set(VERSION_MACROS_HPP ${CMAKE_CURRENT_BINARY_DIR}/version_macros.hpp)
-if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/version_macros.hpp)
-    message(STATUS "SIL Kit: using deployed version_macros.hpp")
-    set(VERSION_MACROS_HPP ${CMAKE_CURRENT_LIST_DIR}/version_macros.hpp)
-elseif(EXISTS "${GIT_HEAD_FILE}")
-    configure_file(
-        "MakeVersionMacros.cmake.in"
-        ${CMAKE_CURRENT_BINARY_DIR}/MakeVersionMacros.cmake
-        @ONLY)
-    include(${CMAKE_CURRENT_BINARY_DIR}/MakeVersionMacros.cmake)
-    if(SILKIT_INSTALL_SOURCE)
-        install(FILES
-            ${CMAKE_CURRENT_BINARY_DIR}/version_macros.hpp
-            DESTINATION
-            ${INSTALL_SOURCE_DIR}/SilKit/source
-            COMPONENT source
-        )
-    endif()
-else()
-    message(STATUS "SIL Kit: Cannot determine hash of current git head! GIT_HEAD_HASH will be set to UNKNOWN")
-    set(GIT_HEAD_HASH "UNKNOWN")
-    configure_file(
-        version_macros.hpp.in
-        ${CMAKE_CURRENT_BINARY_DIR}/version_macros.hpp
-        @ONLY)
-endif()
-# now install the configured version_macros.hpp as a header into the `include/silkit/capi` directory.
-# NB please keep the version_macros.hpp C11 compatible!
-install(FILES
-    ${VERSION_MACROS_HPP}
-    DESTINATION ${INSTALL_INCLUDE_DIR}/silkit/capi
-    RENAME SilKitVersionMacros.h
-    COMPONENT dev
-)
-
 set(silkitLibType SHARED)
 if(SILKIT_BUILD_STATIC)
     set(silkitLibType STATIC)
@@ -68,6 +27,32 @@ add_library(I_SilKit INTERFACE)
 target_include_directories(I_SilKit
     INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}"
 )
+
+# The build number and git hash describe a build, not the source tree, so they
+# override the fallbacks in the generated SilKitVersionMacros.h. The build number
+# also reaches the .rc resource scripts, which put it in FILEVERSION; CMake passes
+# a target's compile definitions to the resource compiler.
+target_compile_definitions(I_SilKit
+    INTERFACE SILKIT_BUILD_NUMBER=${SILKIT_BUILD_NUMBER}
+)
+
+# Only the C++ sources read these, and quoted string defines are fragile in the
+# resource compiler, so keep them away from the .rc files.
+if(SILKIT_BUILD_GIT_HASH)
+    target_compile_definitions(I_SilKit
+        INTERFACE $<$<COMPILE_LANGUAGE:CXX>:SILKIT_GIT_HASH="${SILKIT_BUILD_GIT_HASH}">
+    )
+endif()
+
+# A pre-release suffix changes the version string too, and CMake is the only
+# place that knows how to compose it (VERSION_STRING in SilKitVersion.cmake).
+if(SILKIT_VERSION_SUFFIX)
+    target_compile_definitions(I_SilKit
+        INTERFACE
+            $<$<COMPILE_LANGUAGE:CXX>:SILKIT_VERSION_SUFFIX="${SILKIT_VERSION_SUFFIX}">
+            $<$<COMPILE_LANGUAGE:CXX>:SILKIT_VERSION_STRING="${VERSION_STRING}">
+    )
+endif()
 
 if (MSVC)
     target_compile_definitions(I_SilKit
@@ -144,7 +129,6 @@ target_link_libraries(O_SilKit_CreateSilKitRegistryImpl
 add_library(O_SilKit_VersionImpl OBJECT
     SilKitVersionImpl.cpp
     SilKitVersionImpl.hpp
-    ${VERSION_MACROS_HPP}
 )
 
 target_link_libraries(O_SilKit_VersionImpl
