@@ -4,31 +4,19 @@
 
 #pragma once
 
-#include "dashboard/dto/SimulationConfigurationDto.hpp"
+#include <cstdint>
 
-#include OATPP_CODEGEN_BEGIN(DTO)
+#include "dashboard/dto/SimulationConfigurationDto.hpp"
 
 namespace SilKit {
 namespace Dashboard {
 
-class SimulationCreationRequestDto : public oatpp::DTO
+struct SimulationCreationRequestDto
 {
-    DTO_INIT(SimulationCreationRequestDto, DTO)
-
-    DTO_FIELD_INFO(started)
-    {
-        info->description = "Time when simulation started";
-    }
-    DTO_FIELD(UInt64, started);
-
-    DTO_FIELD_INFO(configuration)
-    {
-        info->description = "Configuration of the simulation";
-    }
-    DTO_FIELD(Object<SimulationConfigurationDto>, configuration);
+    //! Time when the simulation started.
+    uint64_t started{};
+    SimulationConfigurationDto configuration;
 };
 
 } // namespace Dashboard
 } // namespace SilKit
-
-#include OATPP_CODEGEN_END(DTO)

@@ -4,25 +4,16 @@
 
 #pragma once
 
-#include "dashboard/OatppHeaders.hpp"
-
-#include OATPP_CODEGEN_BEGIN(DTO)
+#include <string>
 
 namespace SilKit {
 namespace Dashboard {
 
-class SimulationConfigurationDto : public oatpp::DTO
+struct SimulationConfigurationDto
 {
-    DTO_INIT(SimulationConfigurationDto, DTO)
-
-    DTO_FIELD_INFO(connectUri)
-    {
-        info->description = "Connect URI";
-    }
-    DTO_FIELD(String, connectUri);
+    //! Connect URI of the simulation.
+    std::string connectUri;
 };
 
 } // namespace Dashboard
 } // namespace SilKit
-
-#include OATPP_CODEGEN_END(DTO)

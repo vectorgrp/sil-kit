@@ -4,53 +4,41 @@
 
 #pragma once
 
-
-#include OATPP_CODEGEN_BEGIN(DTO)
+#include <cstdint>
+#include <string>
+#include <vector>
 
 namespace SilKit {
 namespace Dashboard {
 
-class MetricDataDto : public oatpp::DTO
+/*! One metric sample: timestamp, participant name, split metric name, and the value.
+ *
+ *  The three concrete metric kinds differ only in the type of `mv`, so they share this template.
+ *  Field order matches what the previous oatpp DTOs emitted (base fields first, then `mv`).
+ */
+template <typename MetricValueT>
+struct MetricDataDto
 {
-    DTO_INIT(MetricDataDto, DTO)
-
-    DTO_FIELD(Int64, ts);
-    DTO_FIELD(String, pn);
-    DTO_FIELD(Vector<String>, mn) = Vector<String>::createShared();
+    //! Timestamp.
+    int64_t ts{};
+    //! Participant name.
+    std::string pn;
+    //! Metric name, split on '/'.
+    std::vector<std::string> mn;
+    //! Metric value.
+    MetricValueT mv{};
 };
 
-class AttributeDataDto : public MetricDataDto
+using AttributeDataDto = MetricDataDto<std::string>;
+using CounterDataDto = MetricDataDto<int64_t>;
+using StatisticDataDto = MetricDataDto<std::vector<double>>;
+
+struct MetricsUpdateDto
 {
-    DTO_INIT(AttributeDataDto, MetricDataDto)
-
-    DTO_FIELD(String, mv);
-};
-
-class CounterDataDto : public MetricDataDto
-{
-    DTO_INIT(CounterDataDto, MetricDataDto)
-
-    DTO_FIELD(Int64, mv);
-};
-
-class StatisticDataDto : public MetricDataDto
-{
-    DTO_INIT(StatisticDataDto, MetricDataDto)
-
-    DTO_FIELD(Vector<Float64>, mv) = Vector<Float64>::createShared();
-};
-
-
-class MetricsUpdateDto : public oatpp::DTO
-{
-    DTO_INIT(MetricsUpdateDto, oatpp::DTO)
-
-    DTO_FIELD(Vector<Object<AttributeDataDto>>, attributes) = Vector<Object<AttributeDataDto>>::createShared();
-    DTO_FIELD(Vector<Object<CounterDataDto>>, counters) = Vector<Object<CounterDataDto>>::createShared();
-    DTO_FIELD(Vector<Object<StatisticDataDto>>, statistics) = Vector<Object<StatisticDataDto>>::createShared();
+    std::vector<AttributeDataDto> attributes;
+    std::vector<CounterDataDto> counters;
+    std::vector<StatisticDataDto> statistics;
 };
 
 } // namespace Dashboard
 } // namespace SilKit
-
-#include OATPP_CODEGEN_END(DTO)

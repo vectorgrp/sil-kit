@@ -23,36 +23,51 @@ if(SILKIT_BUILD_DASHBOARD)
     endif ()
 
     add_library(O_SilKit_Dashboard STATIC
-        client/DashboardComponents.hpp
-        client/DashboardSystemApiClient.hpp
+        IDashboardInstance.hpp
+        IRestClient.hpp
+        CreateDashboardInstance.hpp
+
+        client/DashboardPaths.hpp
         client/DashboardSystemServiceClient.cpp
         client/DashboardSystemServiceClient.hpp
-        client/DashboardRetryPolicy.cpp
-        client/DashboardRetryPolicy.hpp
         client/IDashboardSystemServiceClient.hpp
 
+        http/AsioHttpClient.cpp
+        http/AsioHttpClient.hpp
+        http/HttpResponseParser.cpp
+        http/HttpResponseParser.hpp
+        http/HttpRetryPolicy.hpp
+        http/IHttpClient.hpp
+        http/RetryingHttpClient.cpp
+        http/RetryingHttpClient.hpp
+
+        dto/BulkUpdateDto.hpp
         dto/DataSpecDto.hpp
         dto/MatchingLabelDto.hpp
+        dto/MetricsDto.hpp
         dto/ParticipantStatusDto.hpp
         dto/RpcSpecDto.hpp
-        dto/ServiceDto.hpp
         dto/SimulationConfigurationDto.hpp
         dto/SimulationCreationRequestDto.hpp
-        dto/SimulationCreationResponseDto.hpp
         dto/SystemStatusDto.hpp
 
-        service/ISilKitToOatppMapper.hpp
+        json/DashboardJson.cpp
+        json/DashboardJson.hpp
+        json/DashboardJsonWriter.cpp
+        json/DashboardJsonWriter.hpp
+
+        service/IDashboardDtoMapper.hpp
         service/DashboardRestClient.cpp
         service/DashboardRestClient.hpp
-        service/SilKitToOatppMapper.cpp
-        service/SilKitToOatppMapper.hpp
+        service/DashboardDtoMapper.cpp
+        service/DashboardDtoMapper.hpp
 
         LockedQueue.hpp
         SilKitEvent.hpp
 
         DashboardBulkUpdate.hpp
-        OatppHeaders.cpp
-        OatppHeaders.hpp
+        EventQueueWorkerThread.cpp
+        EventQueueWorkerThread.hpp
 
         DashboardInstance.cpp
         CreateDashboardInstance.cpp
@@ -61,8 +76,19 @@ if(SILKIT_BUILD_DASHBOARD)
         PRIVATE I_SilKit
         PRIVATE S_SilKitImpl
         PRIVATE Threads::Threads
-        PRIVATE oatpp
     )
+
+    target_compile_definitions(O_SilKit_Dashboard
+        PRIVATE ASIO_STANDALONE
+    )
+
+    if (MSVC)
+        target_compile_options(O_SilKit_Dashboard PRIVATE "/bigobj")
+    endif()
+
+    if(MINGW)
+        target_link_libraries(O_SilKit_Dashboard PUBLIC -lwsock32 -lws2_32) #windows socket/ wsa
+    endif()
 
     silkit_target_clean_compileflags(O_SilKit_Dashboard)
     silkit_dashboard_target_compile_flags(O_SilKit_Dashboard)
@@ -70,39 +96,27 @@ if(SILKIT_BUILD_DASHBOARD)
     set_property(TARGET O_SilKit_Dashboard PROPERTY FOLDER "Dashboard")
 
 
+    # Every dashboard test links the same set, so register them in one call. It also keeps the
+    # SILKIT_BUILD_TESTS check inside add_silkit_test_to_executable, which a bare target_sources on
+    # SilKitDashboardTests would bypass - that target does not exist when tests are off.
     add_silkit_test_to_executable(SilKitDashboardTests
-        SOURCES Test_DashboardSilKitEventQueue.cpp 
+        SOURCES
+        http/FakeHttpServer.hpp
+        Mocks/MockRestClient.hpp
+        Test_DashboardEventQueueWorker.cpp
+        Test_DashboardSilKitEventQueue.cpp
+        client/Test_DashboardSystemServiceClient.cpp
+        http/Test_AsioHttpClient.cpp
+        http/Test_HttpResponseParser.cpp
+        http/Test_RetryingHttpClient.cpp
+        json/Test_DashboardJsonWriter.cpp
+        service/Test_DashboardDtoMapper.cpp
+        service/Test_DashboardRestClient.cpp
+        service/Test_DashboardShutdown.cpp
         LIBS
         S_SilKitImpl
         O_SilKit_Dashboard
         I_SilKit
-    )
-
-    add_silkit_test_to_executable(SilKitDashboardTests
-        SOURCES service/Test_DashboardRestClient.cpp 
-        LIBS
-        S_SilKitImpl
-        O_SilKit_Dashboard
-        I_SilKit
-        oatpp
-    )
-
-    add_silkit_test_to_executable(SilKitDashboardTests
-        SOURCES service/Test_DashboardSilKitToOatppMapper.cpp 
-        LIBS
-        S_SilKitImpl
-        O_SilKit_Dashboard
-        I_SilKit
-        oatpp
-    )
-
-    add_silkit_test_to_executable(SilKitDashboardTests
-        SOURCES client/Test_DashboardSystemServiceClient.cpp 
-        LIBS
-        S_SilKitImpl
-        O_SilKit_Dashboard
-        I_SilKit
-        oatpp
     )
 
 else()

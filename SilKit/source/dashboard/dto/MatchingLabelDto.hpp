@@ -4,41 +4,40 @@
 
 #pragma once
 
-#include "dashboard/OatppHeaders.hpp"
+#include <cstdint>
+#include <string>
+#include <string_view>
 
-#include OATPP_CODEGEN_BEGIN(DTO)
+#include "silkit/participant/exception.hpp"
 
 namespace SilKit {
 namespace Dashboard {
 
-ENUM(LabelKind, v_int32,             //
-     VALUE(Optional, 1, "optional"), //
-     VALUE(Mandatory, 2, "mandatory"))
-
-class MatchingLabelDto : public oatpp::DTO
+//! Wire representation of SilKit::Services::MatchingLabel::Kind. Serialized as its name.
+enum class LabelKind : int32_t
 {
-    DTO_INIT(MatchingLabelDto, DTO)
+    Optional = 1,
+    Mandatory = 2,
+};
 
-    DTO_FIELD_INFO(key)
+inline auto ToStringView(LabelKind kind) -> std::string_view
+{
+    switch (kind)
     {
-        info->description = "Key of the label";
+    case LabelKind::Optional:
+        return "optional";
+    case LabelKind::Mandatory:
+        return "mandatory";
     }
-    DTO_FIELD(String, key);
+    throw SilKitError{"Dashboard: invalid LabelKind"};
+}
 
-    DTO_FIELD_INFO(value)
-    {
-        info->description = "Value of the label";
-    }
-    DTO_FIELD(String, value);
-
-    DTO_FIELD_INFO(kind)
-    {
-        info->description = "Kind of the label";
-    }
-    DTO_FIELD(Enum<LabelKind>::AsString, kind);
+struct MatchingLabelDto
+{
+    std::string key;
+    std::string value;
+    LabelKind kind{LabelKind::Optional};
 };
 
 } // namespace Dashboard
 } // namespace SilKit
-
-#include OATPP_CODEGEN_END(DTO)

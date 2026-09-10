@@ -4,41 +4,73 @@
 
 #pragma once
 
-#include "dashboard/OatppHeaders.hpp"
+#include <cstdint>
+#include <string_view>
 
-#include OATPP_CODEGEN_BEGIN(DTO)
+#include "silkit/participant/exception.hpp"
 
 namespace SilKit {
 namespace Dashboard {
 
-ENUM(SystemState, v_int32,                                              //
-     VALUE(Unknown, -1, "unknown"),                                     //
-     VALUE(Invalid, 0, "invalid"),                                      //
-     VALUE(ServicesCreated, 10, "servicescreated"),                     //
-     VALUE(CommunicationInitializing, 20, "communicationinitializing"), //
-     VALUE(CommunicationInitialized, 30, "communicationinitialized"),   //
-     VALUE(ReadyToRun, 40, "readytorun"),                               //
-     VALUE(Running, 50, "running"),                                     //
-     VALUE(Paused, 60, "paused"),                                       //
-     VALUE(Stopping, 70, "stopping"),                                   //
-     VALUE(Stopped, 80, "stopped"),                                     //
-     VALUE(Error, 90, "error"),                                         //
-     VALUE(ShuttingDown, 100, "shuttingdown"),                          //
-     VALUE(Shutdown, 110, "shutdown"),                                  //
-     VALUE(Aborting, 120, "aborting"))
-
-class SystemStatusDto : public oatpp::DTO
+//! Wire representation of SilKit::Services::Orchestration::SystemState. Serialized as its name.
+enum class SystemState : int32_t
 {
-    DTO_INIT(SystemStatusDto, DTO)
+    Unknown = -1,
+    Invalid = 0,
+    ServicesCreated = 10,
+    CommunicationInitializing = 20,
+    CommunicationInitialized = 30,
+    ReadyToRun = 40,
+    Running = 50,
+    Paused = 60,
+    Stopping = 70,
+    Stopped = 80,
+    Error = 90,
+    ShuttingDown = 100,
+    Shutdown = 110,
+    Aborting = 120,
+};
 
-    DTO_FIELD_INFO(state)
+inline auto ToStringView(SystemState state) -> std::string_view
+{
+    switch (state)
     {
-        info->description = "Name of the state";
+    case SystemState::Unknown:
+        return "unknown";
+    case SystemState::Invalid:
+        return "invalid";
+    case SystemState::ServicesCreated:
+        return "servicescreated";
+    case SystemState::CommunicationInitializing:
+        return "communicationinitializing";
+    case SystemState::CommunicationInitialized:
+        return "communicationinitialized";
+    case SystemState::ReadyToRun:
+        return "readytorun";
+    case SystemState::Running:
+        return "running";
+    case SystemState::Paused:
+        return "paused";
+    case SystemState::Stopping:
+        return "stopping";
+    case SystemState::Stopped:
+        return "stopped";
+    case SystemState::Error:
+        return "error";
+    case SystemState::ShuttingDown:
+        return "shuttingdown";
+    case SystemState::Shutdown:
+        return "shutdown";
+    case SystemState::Aborting:
+        return "aborting";
     }
-    DTO_FIELD(Enum<SystemState>::AsString, state);
+    throw SilKitError{"Dashboard: invalid SystemState"};
+}
+
+struct SystemStatusDto
+{
+    SystemState state{SystemState::Invalid};
 };
 
 } // namespace Dashboard
 } // namespace SilKit
-
-#include OATPP_CODEGEN_END(DTO)

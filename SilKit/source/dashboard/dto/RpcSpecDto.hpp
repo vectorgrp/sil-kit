@@ -4,37 +4,20 @@
 
 #pragma once
 
-#include "dashboard/dto/MatchingLabelDto.hpp"
+#include <string>
+#include <vector>
 
-#include OATPP_CODEGEN_BEGIN(DTO)
+#include "dashboard/dto/MatchingLabelDto.hpp"
 
 namespace SilKit {
 namespace Dashboard {
 
-class RpcSpecDto : public oatpp::DTO
+struct RpcSpecDto
 {
-    DTO_INIT(RpcSpecDto, DTO)
-
-    DTO_FIELD_INFO(functionName)
-    {
-        info->description = "Function name";
-    }
-    DTO_FIELD(String, functionName);
-
-    DTO_FIELD_INFO(mediaType)
-    {
-        info->description = "Media type";
-    }
-    DTO_FIELD(String, mediaType);
-
-    DTO_FIELD_INFO(labels)
-    {
-        info->description = "Labels";
-    }
-    DTO_FIELD(Vector<Object<MatchingLabelDto>>, labels);
+    std::string functionName;
+    std::string mediaType;
+    std::vector<MatchingLabelDto> labels;
 };
 
 } // namespace Dashboard
 } // namespace SilKit
-
-#include OATPP_CODEGEN_END(DTO)

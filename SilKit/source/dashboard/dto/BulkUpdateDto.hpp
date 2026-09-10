@@ -4,98 +4,85 @@
 
 #pragma once
 
-#include "dashboard/dto/RpcSpecDto.hpp"
+#include <cstdint>
+#include <optional>
+#include <string>
+#include <vector>
+
 #include "dashboard/dto/DataSpecDto.hpp"
 #include "dashboard/dto/ParticipantStatusDto.hpp"
+#include "dashboard/dto/RpcSpecDto.hpp"
 #include "dashboard/dto/SystemStatusDto.hpp"
 
-#include OATPP_CODEGEN_BEGIN(DTO)
+// NB: field declaration order below fixes the order of the emitted JSON keys, so do not reorder
+// members without checking Test_DashboardJsonWriter.
 
 namespace SilKit {
 namespace Dashboard {
 
-class BulkSystemDto : public oatpp::DTO
+struct BulkSystemDto
 {
-    DTO_INIT(BulkSystemDto, DTO)
-
-    DTO_FIELD(Vector<Object<SystemStatusDto>>, statuses) = Vector<Object<SystemStatusDto>>::createShared();
+    std::vector<SystemStatusDto> statuses;
 };
 
-class BulkControllerDto : public oatpp::DTO
+struct BulkControllerDto
 {
-    DTO_INIT(BulkControllerDto, DTO)
-
-    DTO_FIELD(UInt64, id);
-    DTO_FIELD(String, name);
-    DTO_FIELD(String, networkName);
+    uint64_t id{};
+    std::string name;
+    std::string networkName;
 };
 
-class BulkDataServiceDto : public oatpp::DTO
+struct BulkDataServiceDto
 {
-    DTO_INIT(BulkDataServiceDto, DTO)
-
-    DTO_FIELD(UInt64, id);
-    DTO_FIELD(String, name);
-    DTO_FIELD(String, networkName);
-    DTO_FIELD(Object<DataSpecDto>, spec) = Object<DataSpecDto>::createShared();
+    uint64_t id{};
+    std::string name;
+    std::string networkName;
+    DataSpecDto spec;
 };
 
-class BulkRpcServiceDto : public oatpp::DTO
+struct BulkRpcServiceDto
 {
-    DTO_INIT(BulkRpcServiceDto, DTO)
-
-    DTO_FIELD(UInt64, id);
-    DTO_FIELD(String, name);
-    DTO_FIELD(String, networkName);
-    DTO_FIELD(Object<RpcSpecDto>, spec) = Object<RpcSpecDto>::createShared();
+    uint64_t id{};
+    std::string name;
+    std::string networkName;
+    RpcSpecDto spec;
 };
 
-class BulkServiceInternalDto : public oatpp::DTO
+struct BulkServiceInternalDto
 {
-    DTO_INIT(BulkServiceInternalDto, DTO)
-
-    DTO_FIELD(UInt64, id);
-    DTO_FIELD(String, name);
-    DTO_FIELD(String, networkName);
-    DTO_FIELD(UInt64, parentId);
+    uint64_t id{};
+    std::string name;
+    std::string networkName;
+    uint64_t parentId{};
 };
 
-class BulkParticipantDto : public oatpp::DTO
+struct BulkParticipantDto
 {
-    DTO_INIT(BulkParticipantDto, DTO)
-
-    DTO_FIELD(String, name);
-    DTO_FIELD(Vector<Object<ParticipantStatusDto>>, statuses) = Vector<Object<ParticipantStatusDto>>::createShared();
-    DTO_FIELD(Vector<Object<BulkControllerDto>>, canControllers) = Vector<Object<BulkControllerDto>>::createShared();
-    DTO_FIELD(Vector<Object<BulkControllerDto>>,
-              ethernetControllers) = Vector<Object<BulkControllerDto>>::createShared();
-    DTO_FIELD(Vector<Object<BulkControllerDto>>,
-              flexrayControllers) = Vector<Object<BulkControllerDto>>::createShared();
-    DTO_FIELD(Vector<Object<BulkControllerDto>>, linControllers) = Vector<Object<BulkControllerDto>>::createShared();
-    DTO_FIELD(Vector<Object<BulkDataServiceDto>>, dataPublishers) = Vector<Object<BulkDataServiceDto>>::createShared();
-    DTO_FIELD(Vector<Object<BulkDataServiceDto>>, dataSubscribers) = Vector<Object<BulkDataServiceDto>>::createShared();
-    DTO_FIELD(Vector<Object<BulkServiceInternalDto>>,
-              dataSubscriberInternals) = Vector<Object<BulkServiceInternalDto>>::createShared();
-    DTO_FIELD(Vector<Object<BulkRpcServiceDto>>, rpcClients) = Vector<Object<BulkRpcServiceDto>>::createShared();
-    DTO_FIELD(Vector<Object<BulkRpcServiceDto>>, rpcServers) = Vector<Object<BulkRpcServiceDto>>::createShared();
-    DTO_FIELD(Vector<Object<BulkServiceInternalDto>>,
-              rpcServerInternals) = Vector<Object<BulkServiceInternalDto>>::createShared();
-    DTO_FIELD(Vector<String>, canNetworks) = Vector<String>::createShared();
-    DTO_FIELD(Vector<String>, ethernetNetworks) = Vector<String>::createShared();
-    DTO_FIELD(Vector<String>, flexrayNetworks) = Vector<String>::createShared();
-    DTO_FIELD(Vector<String>, linNetworks) = Vector<String>::createShared();
+    std::string name;
+    std::vector<ParticipantStatusDto> statuses;
+    std::vector<BulkControllerDto> canControllers;
+    std::vector<BulkControllerDto> ethernetControllers;
+    std::vector<BulkControllerDto> flexrayControllers;
+    std::vector<BulkControllerDto> linControllers;
+    std::vector<BulkDataServiceDto> dataPublishers;
+    std::vector<BulkDataServiceDto> dataSubscribers;
+    std::vector<BulkServiceInternalDto> dataSubscriberInternals;
+    std::vector<BulkRpcServiceDto> rpcClients;
+    std::vector<BulkRpcServiceDto> rpcServers;
+    std::vector<BulkServiceInternalDto> rpcServerInternals;
+    std::vector<std::string> canNetworks;
+    std::vector<std::string> ethernetNetworks;
+    std::vector<std::string> flexrayNetworks;
+    std::vector<std::string> linNetworks;
 };
 
-class BulkSimulationDto : public oatpp::DTO
+struct BulkSimulationDto
 {
-    DTO_INIT(BulkSimulationDto, DTO)
-
-    DTO_FIELD(Int64, stopped);
-    DTO_FIELD(Object<BulkSystemDto>, system) = Object<BulkSystemDto>::createShared();
-    DTO_FIELD(Vector<Object<BulkParticipantDto>>, participants) = Vector<Object<BulkParticipantDto>>::createShared();
+    //! Absent until the simulation stops; emitted as JSON null while unset.
+    std::optional<int64_t> stopped;
+    BulkSystemDto system;
+    std::vector<BulkParticipantDto> participants;
 };
 
 } // namespace Dashboard
 } // namespace SilKit
-
-#include OATPP_CODEGEN_END(DTO)

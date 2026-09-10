@@ -7,112 +7,133 @@
 
 #include "core/mock/participant/MockParticipant.hpp"
 
+#include "dashboard/json/DashboardJson.hpp"
 #include "dashboard/service/DashboardRestClient.hpp"
 
-#include "Mocks/MockSilKitToOatppMapper.hpp"
 #include "dashboard/client/Mocks/MockDashboardSystemServiceClient.hpp"
-#include "dashboard/client/Mocks/MockDashboardSystemApiClient.hpp"
+#include "dashboard/service/Mocks/MockDashboardDtoMapper.hpp"
 
 using namespace testing;
+
 namespace SilKit {
 namespace Dashboard {
+namespace {
+
 class Test_DashboardRestClient : public Test
 {
 public:
     void SetUp() override
     {
         _mockServiceClient = std::make_shared<StrictMock<MockDashboardSystemServiceClient>>();
-        _mockSilKitToOatppMapper = std::make_shared<StrictMock<MockSilKitToOatppMapper>>();
-        _libraryInit = std::make_shared<LibraryInitializer>();
+        _mockDtoMapper = std::make_shared<StrictMock<MockDashboardDtoMapper>>();
 
         EXPECT_CALL(_dummyLogger, GetLogLevel).WillRepeatedly(Return(Services::Logging::Level::Warn));
     }
 
-    std::shared_ptr<DashboardRestClient> CreateService()
+    auto CreateService() -> std::shared_ptr<DashboardRestClient>
     {
-        return std::make_shared<DashboardRestClient>(_libraryInit, &_dummyLogger, _mockServiceClient,
-                                                     _mockSilKitToOatppMapper);
+        return std::make_shared<DashboardRestClient>(&_dummyLogger, _mockServiceClient, _mockDtoMapper);
     }
 
     Core::Tests::MockLogger _dummyLogger;
-    std::shared_ptr<LibraryInitializer> _libraryInit;
     std::shared_ptr<StrictMock<MockDashboardSystemServiceClient>> _mockServiceClient;
-    std::shared_ptr<StrictMock<MockSilKitToOatppMapper>> _mockSilKitToOatppMapper;
+    std::shared_ptr<StrictMock<MockDashboardDtoMapper>> _mockDtoMapper;
 };
 
 TEST_F(Test_DashboardRestClient, Create)
 {
-    // Arrange
-
-    // Act
     const auto service = CreateService();
-
-    // Assert
 }
 
 TEST_F(Test_DashboardRestClient, OnSimulationStart_CreateSimulationSuccess)
 {
-    // Arrange
-    const uint64_t expectedSimulationId = 123;
-    auto request = SimulationCreationRequestDto::createShared();
-    EXPECT_CALL(*_mockSilKitToOatppMapper, CreateSimulationCreationRequestDto).WillOnce(Return(request));
-    auto response = SimulationCreationResponseDto::createShared();
-    response->id = expectedSimulationId;
-    EXPECT_CALL(*_mockServiceClient, CreateSimulation).WillOnce(Return(response));
+    constexpr uint64_t expectedSimulationId = 123;
+    EXPECT_CALL(*_mockDtoMapper, CreateSimulationCreationRequestDto).WillOnce(Return(SimulationCreationRequestDto{}));
+    EXPECT_CALL(*_mockServiceClient, CreateSimulation).WillOnce(Return(expectedSimulationId));
+
     const auto service = CreateService();
+    const auto simulationId = service->OnSimulationStart("silkit://localhost:8500", 0);
 
-    // Act
-    auto res = service->OnSimulationStart("silkit://localhost:8500", 0);
-
-    // Assert
-    ASSERT_EQ(res, expectedSimulationId) << "Wrong simulationId!";
+    ASSERT_EQ(simulationId, expectedSimulationId) << "Wrong simulationId!";
 }
 
 TEST_F(Test_DashboardRestClient, OnSimulationStart_CreateSimulationFailure)
 {
-    // Arrange
-    auto request = SimulationCreationRequestDto::createShared();
-    EXPECT_CALL(*_mockSilKitToOatppMapper, CreateSimulationCreationRequestDto).WillOnce(Return(request));
-    EXPECT_CALL(*_mockServiceClient, CreateSimulation).WillOnce(Return(nullptr));
+    EXPECT_CALL(*_mockDtoMapper, CreateSimulationCreationRequestDto).WillOnce(Return(SimulationCreationRequestDto{}));
+    EXPECT_CALL(*_mockServiceClient, CreateSimulation).WillOnce(Return(std::nullopt));
     EXPECT_CALL(_dummyLogger, ProcessLoggerMessage(Services::Logging::ALoggerMessageWith(
                                   Services::Logging::Level::Warn, "Dashboard: creating simulation failed")));
 
     const auto service = CreateService();
+    const auto simulationId = service->OnSimulationStart("silkit://localhost:8500", 0);
 
-    // Act
-    auto res = service->OnSimulationStart("silkit://localhost:8500", 0);
-
-    // Assert
-    ASSERT_EQ(res, 0) << "Wrong simulationId!";
+    ASSERT_EQ(simulationId, 0u) << "Wrong simulationId!";
 }
 
-TEST_F(Test_DashboardRestClient, OnBulkUpdate)
+TEST_F(Test_DashboardRestClient, OnBulkUpdate_ForwardsTheMappedDtoWithTheSimulationId)
 {
     constexpr uint64_t expectedSimulationId{123};
-    const auto expectedBulkSimulationDto = SilKit::Dashboard::BulkSimulationDto::createShared();
 
-    // Arrange
-    const auto service = CreateService();
+    // The DTOs are plain aggregates without operator==, so compare their serialized form; that also
+    // covers the writer for this payload.
+    BulkSimulationDto expectedDto{};
+    expectedDto.stopped = 42;
 
-    using testing::_;
-    EXPECT_CALL(*_mockSilKitToOatppMapper, CreateBulkSimulationDto(_)).WillOnce(Return(expectedBulkSimulationDto));
+    EXPECT_CALL(*_mockDtoMapper, CreateBulkSimulationDto(_)).WillOnce(Return(expectedDto));
 
-    oatpp::UInt64 simulationId;
-    oatpp::Object<BulkSimulationDto> bulkSimulationDto;
+    uint64_t actualSimulationId{0};
+    std::string actualDtoJson;
     EXPECT_CALL(*_mockServiceClient, UpdateSimulation)
-        .WillOnce(WithArgs<0, 1>([&](oatpp::UInt64 simulationId_, oatpp::Object<BulkSimulationDto> bulkSimulation_) {
-        simulationId = std::move(simulationId_);
-        bulkSimulationDto = std::move(bulkSimulation_);
+        .WillOnce(WithArgs<0, 1>([&](uint64_t simulationId, const BulkSimulationDto& bulkSimulation) {
+        actualSimulationId = simulationId;
+        actualDtoJson = ToJson(bulkSimulation);
     }));
 
-    // Act
-    service->OnBulkUpdate(expectedSimulationId, SilKit::Dashboard::DashboardBulkUpdate{});
+    const auto service = CreateService();
+    service->OnBulkUpdate(expectedSimulationId, DashboardBulkUpdate{});
 
-    // Assert
-    ASSERT_EQ(simulationId.getValue(0), expectedSimulationId);
-    ASSERT_NE(bulkSimulationDto.getPtr(), nullptr);
-    ASSERT_EQ(bulkSimulationDto, expectedBulkSimulationDto);
+    EXPECT_EQ(actualSimulationId, expectedSimulationId);
+    EXPECT_EQ(actualDtoJson, ToJson(expectedDto));
 }
 
+TEST_F(Test_DashboardRestClient, OnMetricsUpdate_ForwardsTheMappedDtoWithTheSimulationId)
+{
+    constexpr uint64_t expectedSimulationId{7};
+
+    MetricsUpdateDto expectedDto{};
+    CounterDataDto counter{};
+    counter.ts = 1;
+    counter.pn = "P1";
+    counter.mn = {"c"};
+    counter.mv = 5;
+    expectedDto.counters.push_back(counter);
+
+    EXPECT_CALL(*_mockDtoMapper, CreateMetricsUpdateDto("P1", _)).WillOnce(Return(expectedDto));
+
+    uint64_t actualSimulationId{0};
+    std::string actualDtoJson;
+    EXPECT_CALL(*_mockServiceClient, UpdateSimulationMetrics)
+        .WillOnce(WithArgs<0, 1>([&](uint64_t simulationId, const MetricsUpdateDto& metrics) {
+        actualSimulationId = simulationId;
+        actualDtoJson = ToJson(metrics);
+    }));
+
+    const auto service = CreateService();
+    service->OnMetricsUpdate(expectedSimulationId, "P1", VSilKit::MetricsUpdate{});
+
+    EXPECT_EQ(actualSimulationId, expectedSimulationId);
+    EXPECT_EQ(actualDtoJson, ToJson(expectedDto));
+}
+
+// The test constructor has no transport, so Abort() must still be safe to call.
+TEST_F(Test_DashboardRestClient, Abort_WithoutATransport_IsANoOp)
+{
+    const auto service = CreateService();
+
+    service->Abort();
+    service->Abort();
+}
+
+} // namespace
 } // namespace Dashboard
 } // namespace SilKit

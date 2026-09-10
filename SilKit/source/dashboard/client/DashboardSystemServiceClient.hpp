@@ -4,13 +4,12 @@
 
 #pragma once
 
-#include "dashboard/client/IDashboardSystemServiceClient.hpp"
-
 #include <memory>
+#include <string>
 
+#include "dashboard/client/IDashboardSystemServiceClient.hpp"
+#include "dashboard/http/IHttpClient.hpp"
 #include "services/logging/ILoggerInternal.hpp"
-
-#include "dashboard/client/DashboardSystemApiClient.hpp"
 
 namespace SilKit {
 namespace Dashboard {
@@ -19,23 +18,18 @@ class DashboardSystemServiceClient : public IDashboardSystemServiceClient
 {
 public:
     DashboardSystemServiceClient(Services::Logging::ILoggerInternal* logger,
-                                 std::shared_ptr<DashboardSystemApiClient> dashboardSystemApiClient,
-                                 std::shared_ptr<oatpp::data::mapping::ObjectMapper> objectMapper);
-    ~DashboardSystemServiceClient();
+                                 std::shared_ptr<VSilKit::IHttpClient> httpClient);
+    ~DashboardSystemServiceClient() override;
 
-public:
-    oatpp::Object<SimulationCreationResponseDto> CreateSimulation(
-        oatpp::Object<SimulationCreationRequestDto> simulation) override;
-    void UpdateSimulation(oatpp::UInt64 simulationId, oatpp::Object<BulkSimulationDto> bulkSimulation) override;
-    void UpdateSimulationMetrics(oatpp::UInt64 simulationId, oatpp::Object<MetricsUpdateDto> metrics) override;
+    auto CreateSimulation(const SimulationCreationRequestDto& simulation) -> std::optional<uint64_t> override;
+    void UpdateSimulation(uint64_t simulationId, const BulkSimulationDto& bulkSimulation) override;
+    void UpdateSimulationMetrics(uint64_t simulationId, const MetricsUpdateDto& metrics) override;
 
 private:
-    void Log(std::shared_ptr<oatpp::web::client::RequestExecutor::Response> response, const std::string& message);
+    void Log(const VSilKit::HttpResult& result, const std::string& message);
 
-private:
     Services::Logging::ILoggerInternal* _logger;
-    std::shared_ptr<DashboardSystemApiClient> _dashboardSystemApiClient;
-    std::shared_ptr<oatpp::data::mapping::ObjectMapper> _objectMapper;
+    std::shared_ptr<VSilKit::IHttpClient> _httpClient;
 };
 
 } // namespace Dashboard

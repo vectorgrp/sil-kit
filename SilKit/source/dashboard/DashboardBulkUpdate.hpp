@@ -9,7 +9,7 @@
 #include "dashboard/SilKitEvent.hpp"
 
 #include <cstdint>
-#include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -23,7 +23,8 @@ public:
     using SystemState = SilKit::Services::Orchestration::SystemState;
     using ParticipantStatus = SilKit::Services::Orchestration::ParticipantStatus;
 
-    std::unique_ptr<uint64_t> stopped;
+    //! Set once the simulation has stopped; the value is the stop timestamp.
+    std::optional<uint64_t> stopped;
     std::vector<SystemState> systemStates;
     std::vector<ParticipantConnectionInformation> participantConnectionInformations;
     std::vector<ParticipantStatus> participantStatuses;
