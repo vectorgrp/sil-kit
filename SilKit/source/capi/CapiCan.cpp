@@ -18,6 +18,8 @@ SilKit_ReturnCode SilKitCALL SilKit_CanController_Create(SilKit_CanController** 
                                                          const char* cNetwork)
 try
 {
+    VSILKIT_API_TRACE("{:p} {:?} {:?}", fmt::ptr(participant), cName, cNetwork);
+
     ASSERT_VALID_OUT_PARAMETER(outController);
     ASSERT_VALID_POINTER_PARAMETER(participant);
     ASSERT_VALID_POINTER_PARAMETER(cName);
@@ -26,6 +28,9 @@ try
     auto cppParticipant = reinterpret_cast<SilKit::IParticipant*>(participant);
     auto canController = cppParticipant->CreateCanController(cName, cNetwork);
     *outController = reinterpret_cast<SilKit_CanController*>(canController);
+
+    VSILKIT_API_TRACE("{:p}", fmt::ptr(*outController));
+
     return SilKit_ReturnCode_SUCCESS;
 }
 CAPI_CATCH_EXCEPTIONS
@@ -37,6 +42,8 @@ SilKit_ReturnCode SilKitCALL SilKit_CanController_AddFrameHandler(SilKit_CanCont
                                                                   SilKit_HandlerId* outHandlerId)
 try
 {
+    VSILKIT_API_TRACE("{:p} {:p} {:p} {} {:p}", fmt::ptr(controller), fmt::ptr(context), fmt::ptr(callback), directionMask, fmt::ptr(outHandlerId));
+
     ASSERT_VALID_POINTER_PARAMETER(controller);
     ASSERT_VALID_HANDLER_PARAMETER(callback);
     ASSERT_VALID_OUT_PARAMETER(outHandlerId);
@@ -65,6 +72,9 @@ try
         callback(context, controller, &frameEvent);
     },
         directionMask);
+
+    VSILKIT_API_TRACE("{}", *outHandlerId);
+
     return SilKit_ReturnCode_SUCCESS;
 }
 CAPI_CATCH_EXCEPTIONS
@@ -74,6 +84,8 @@ SilKit_ReturnCode SilKitCALL SilKit_CanController_RemoveFrameHandler(SilKit_CanC
                                                                      SilKit_HandlerId handlerId)
 try
 {
+    VSILKIT_API_TRACE("{:p} {}", fmt::ptr(controller), handlerId);
+
     ASSERT_VALID_POINTER_PARAMETER(controller);
 
     auto canController = reinterpret_cast<SilKit::Services::Can::ICanController*>(controller);
@@ -205,6 +217,8 @@ SilKit_ReturnCode SilKitCALL SilKit_CanController_SetBaudRate(SilKit_CanControll
                                                               uint32_t fdRate, uint32_t xlRate)
 try
 {
+    VSILKIT_API_TRACE("{:p} {} {} {}", fmt::ptr(controller), rate, fdRate, xlRate);
+
     ASSERT_VALID_POINTER_PARAMETER(controller);
 
     auto canController = reinterpret_cast<SilKit::Services::Can::ICanController*>(controller);
@@ -218,6 +232,8 @@ SilKit_ReturnCode SilKitCALL SilKit_CanController_SendFrame(SilKit_CanController
                                                             void* transmitContext)
 try
 {
+    VSILKIT_API_TRACE("{:p} {:p} {:p}", fmt::ptr(controller), fmt::ptr(message), fmt::ptr(transmitContext));
+
     ASSERT_VALID_POINTER_PARAMETER(controller);
     ASSERT_VALID_POINTER_PARAMETER(message);
     ASSERT_VALID_STRUCT_HEADER(message);
@@ -243,6 +259,8 @@ CAPI_CATCH_EXCEPTIONS
 SilKit_ReturnCode SilKitCALL SilKit_CanController_Start(SilKit_CanController* controller)
 try
 {
+    VSILKIT_API_TRACE("{:p}", fmt::ptr(controller));
+
     ASSERT_VALID_POINTER_PARAMETER(controller);
 
     auto canController = reinterpret_cast<SilKit::Services::Can::ICanController*>(controller);
@@ -255,6 +273,8 @@ CAPI_CATCH_EXCEPTIONS
 SilKit_ReturnCode SilKitCALL SilKit_CanController_Stop(SilKit_CanController* controller)
 try
 {
+    VSILKIT_API_TRACE("{:p}", fmt::ptr(controller));
+
     ASSERT_VALID_POINTER_PARAMETER(controller);
 
     auto canController = reinterpret_cast<SilKit::Services::Can::ICanController*>(controller);
@@ -267,6 +287,8 @@ CAPI_CATCH_EXCEPTIONS
 SilKit_ReturnCode SilKitCALL SilKit_CanController_Reset(SilKit_CanController* controller)
 try
 {
+    VSILKIT_API_TRACE("{:p}", fmt::ptr(controller));
+
     ASSERT_VALID_POINTER_PARAMETER(controller);
 
     auto canController = reinterpret_cast<SilKit::Services::Can::ICanController*>(controller);
@@ -279,6 +301,8 @@ CAPI_CATCH_EXCEPTIONS
 SilKit_ReturnCode SilKitCALL SilKit_CanController_Sleep(SilKit_CanController* controller)
 try
 {
+    VSILKIT_API_TRACE("{:p}", fmt::ptr(controller));
+
     ASSERT_VALID_POINTER_PARAMETER(controller);
 
     auto canController = reinterpret_cast<SilKit::Services::Can::ICanController*>(controller);
