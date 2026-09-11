@@ -18,9 +18,33 @@ import signal
 import csv
 import argparse
 import typing
+import shutil
 
 SCRIPT_PATH = os.path.abspath(__file__)
 WINDOWS = platform.system() == "Windows"
+
+# Prefer Ninja when it is available. The platform default is Visual Studio on Windows and
+# Makefiles elsewhere, both of which build far slower than Ninja for a from-scratch build, and this
+# script does two of those per run.
+USE_NINJA = shutil.which("ninja") is not None
+
+# NB: binaries live in a per-configuration subdirectory regardless of the generator, because the
+#     project pins RUNTIME_OUTPUT_DIRECTORY to ${CMAKE_BINARY_DIR}/$<CONFIG>. Do not "fix" bin_dir
+#     to drop the Release component when building with a single-config generator such as Ninja.
+
+# Configure arguments applied to every build.
+#
+# The dashboard is not exercised by any benchmark, so building it only costs time. Disabling it
+# also keeps oatpp out of the build entirely, which matters for revisions before 5.0.8 where oatpp
+# was still vendored: its CMakeLists declares a minimum below 3.5, which CMake 4 refuses outright.
+#
+# CMAKE_POLICY_VERSION_MINIMUM is a belt-and-braces fallback for any other old vendored dependency.
+# SIL Kit itself has required at least 3.12 across all versions this script compares, so this can
+# never mask a policy problem in SIL Kit's own CMake files.
+DEFAULT_CMAKE_CONFIGURE_ARGS = [
+    "-DSILKIT_BUILD_DASHBOARD=OFF",
+    "-DCMAKE_POLICY_VERSION_MINIMUM=3.5",
+]
 
 
 # data structures
@@ -51,6 +75,9 @@ class ConfigRepositories:
 @dataclasses.dataclass
 class ConfigRepository:
     version: str
+    # Extra configure arguments for this repository only, e.g. to accommodate an old reference
+    # revision. Applied after the defaults, so they win.
+    cmake_configure_arg: list[str] | None = None
     skip_clone: bool = False
     skip_configure: bool = False
     skip_build: bool = False
@@ -170,8 +197,13 @@ def configure(config: Config, repository: 'ConfigRepository'):
         print(f"Skipping configure because the directory {build_dir!r} already exists")
         return
 
-    cmd = ["cmake", f"-S{source_dir}", f"-B{build_dir}", "-DCMAKE_BUILD_TYPE=Release", "-DSILKIT_BUILD_TESTS=OFF"]
+    cmd = ["cmake", f"-S{source_dir}", f"-B{build_dir}"]
+    if USE_NINJA:
+        cmd += ["-GNinja"]
+    cmd += ["-DCMAKE_BUILD_TYPE=Release", "-DSILKIT_BUILD_TESTS=OFF"]
+    cmd += DEFAULT_CMAKE_CONFIGURE_ARGS
     cmd += config.cmake_configure_arg
+    cmd += repository.cmake_configure_arg or []
     run(cmd)
 
 

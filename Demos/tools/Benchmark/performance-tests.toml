@@ -1,6 +1,4 @@
 [repositories.reference]
-# NB: compare against the immediately preceding release. A far older reference folds years of
-#     unrelated change into the interval and makes it useless as a per-change gate.
 version = "v5.0.7"
 
 [repositories.under_test]
