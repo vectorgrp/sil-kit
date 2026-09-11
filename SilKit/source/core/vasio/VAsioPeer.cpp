@@ -118,7 +118,7 @@ void VAsioPeer::SendSilKitMsg(const SharedSerializedMessage& msg, EndpointId rem
     _peerMetrics->TxBytes(msg.TotalSize());
     _peerMetrics->TxPacket();
 
-    SILKIT_ASSERT(msg.HeaderSize() <= SendItem::kMaxHeaderSize);
+    SILKIT_ASSERT(msg.HeaderSize() <= SendItem::MaxHeaderSize);
     SILKIT_ASSERT(msg.RemoteIndexOffset() + sizeof(EndpointId) <= msg.HeaderSize());
 
     SendItem item;

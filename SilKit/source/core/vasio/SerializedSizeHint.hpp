@@ -28,11 +28,11 @@ template <typename MessageT>
 struct SerializedSizeHint
 {
     //! Network headers plus room for the fixed size fields of small messages.
-    static constexpr size_t kFixedOverhead = 128;
+    static constexpr size_t FixedOverhead{128};
 
     static auto Of(const MessageT& /*message*/) -> size_t
     {
-        return kFixedOverhead;
+        return FixedOverhead;
     }
 };
 
@@ -40,10 +40,10 @@ struct SerializedSizeHint
     template <> \
     struct SerializedSizeHint<MessageType> \
     { \
-        static constexpr size_t kFixedOverhead = 128; \
+        static constexpr size_t FixedOverhead{128}; \
         static auto Of(const MessageType& message) -> size_t \
         { \
-            return kFixedOverhead + (PayloadExpression).size(); \
+            return FixedOverhead + (PayloadExpression).size(); \
         } \
     }
 

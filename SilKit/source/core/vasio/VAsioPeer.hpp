@@ -96,9 +96,9 @@ private:
      */
     struct SendItem
     {
-        static constexpr size_t kMaxHeaderSize = 32;
+        static constexpr size_t MaxHeaderSize{32};
 
-        std::array<uint8_t, kMaxHeaderSize> header{};
+        std::array<uint8_t, MaxHeaderSize> header{};
         size_t headerSize{0};
         SilKit::Util::SharedSpan<uint8_t> body;
     };
