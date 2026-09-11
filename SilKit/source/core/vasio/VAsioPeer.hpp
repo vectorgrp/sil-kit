@@ -5,6 +5,8 @@
 #pragma once
 
 
+#include <array>
+#include <deque>
 #include <vector>
 #include <queue>
 #include <mutex>
@@ -56,6 +58,7 @@ public:
     // ----------------------------------------
     // Public Methods
     void SendSilKitMsg(SerializedMessage buffer) override;
+    void SendSilKitMsg(const SharedSerializedMessage& msg, EndpointId remoteIdx) override;
     void Subscribe(VAsioMsgSubscriber subscriber) override;
 
     auto GetInfo() const -> const VAsioPeerInfo& override;
@@ -85,12 +88,30 @@ public:
 private:
     // ----------------------------------------
     // Private Methods
+    /*! \brief One queued write: an optional per-peer header followed by a shared body.
+     *
+     * A message that is sent to several peers differs only in the remote index inside its network
+     * header, so the body can be shared between peers and only the small header is per-peer. The
+     * header is stored inline; headerSize == 0 marks an item that consists of the body alone.
+     */
+    struct SendItem
+    {
+        static constexpr size_t kMaxHeaderSize = 32;
+
+        std::array<uint8_t, kMaxHeaderSize> header{};
+        size_t headerSize{0};
+        SilKit::Util::SharedSpan<uint8_t> body;
+    };
+
     void StartAsyncWrite();
     void WriteSomeAsync();
     void ReadSomeAsync();
     void DispatchBuffer();
     void SendSilKitMsgInternal(std::vector<uint8_t> blob);
-    void Aggregate(const std::vector<uint8_t>& blob);
+    void EnqueueSendItem(SendItem item);
+    void DispatchSendItem(SendItem item, MessageAggregationKind aggregationKind);
+    void BuildCurrentSendingBuffers();
+    void Aggregate(const SendItem& item);
     void Flush();
 
 private: // IRawByteStreamListener
@@ -122,9 +143,11 @@ private:
 
     // sending
     mutable std::mutex _sendingQueueMutex;
-    std::deque<std::vector<uint8_t>> _sendingQueue;
-    ConstBuffer _currentSendingBuffer;
-    std::vector<uint8_t> _currentSendingBufferData;
+    std::deque<SendItem> _sendingQueue;
+    // NB: _currentSendingBuffers points into _currentSendItem, including into its inline header
+    //     array, so the item must be moved into place before the buffers are built.
+    SendItem _currentSendItem;
+    std::vector<ConstBuffer> _currentSendingBuffers;
     std::vector<uint8_t> _aggregatedMessages;
 
     std::atomic_bool _sending{false};

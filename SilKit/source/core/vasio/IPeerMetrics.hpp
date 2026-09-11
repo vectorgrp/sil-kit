@@ -3,11 +3,11 @@
 
 #pragma once
 
+#include <cstddef>
 #include <string>
 
 #include "services/metrics/IMetricsManager.hpp"
 #include "core/vasio/IVAsioPeer.hpp"
-#include "core/vasio/SerializedMessage.hpp"
 
 namespace VSilKit {
 
@@ -17,8 +17,8 @@ struct IPeerMetrics
     virtual void InitializeMetrics(VSilKit::IMetricsManager* manager, SilKit::Core::IVAsioPeer* peer) = 0;
     virtual void RxPacket() = 0;
     virtual void TxPacket() = 0;
-    virtual void RxBytes(const SilKit::Core::SerializedMessage&) = 0;
-    virtual void TxBytes(const SilKit::Core::SerializedMessage&) = 0;
+    virtual void RxBytes(size_t) = 0;
+    virtual void TxBytes(size_t) = 0;
     virtual void TxQueueSize(size_t) = 0;
 };
 

@@ -14,6 +14,12 @@ SerializedMessage::SerializedMessage(std::vector<uint8_t>&& blob)
     ReadNetworkHeaders();
 }
 
+SerializedMessage::SerializedMessage(Util::SharedSpan<uint8_t> blob)
+    : _buffer{std::move(blob)}
+{
+    ReadNetworkHeaders();
+}
+
 auto SerializedMessage::ReleaseStorage() -> std::vector<uint8_t>
 {
     auto buffer = _buffer.ReleaseStorage();
@@ -86,8 +92,13 @@ void SerializedMessage::WriteNetworkHeaders()
     }
     if (IsMwOrSim(_messageKind))
     {
+        // NB: record the offsets from the actual write positions rather than hard-coding them, so
+        //     that they cannot drift if the header layout changes. Sharing one serialized body
+        //     between peers relies on _remoteIndex being the only field that differs per peer.
+        _remoteIndexOffset = _buffer.WritePos();
         _buffer << _remoteIndex << _endpointAddress;
     }
+    _headerSize = _buffer.WritePos();
 }
 
 void SerializedMessage::ReadNetworkHeaders()
