@@ -368,11 +368,32 @@ WORKLOAD_COLUMNS = [
 ]
 
 
-def assess_test(test: Test, reference: ConfigRepository, under_test: ConfigRepository) -> bool:
-    """Assess one test. Returns True if it did not regress."""
+@dataclasses.dataclass
+class Assessment:
+    name: str
+    topic: str
+    unit: str
+    verdict: str
+    reference_mean: float | None = None
+    under_test_mean: float | None = None
+    noisy: bool = False
+
+    @property
+    def regressed(self) -> bool:
+        return self.verdict not in ("PASSED", "IMPROVED", "SKIPPED")
+
+    @property
+    def change(self) -> str:
+        if not self.reference_mean or self.under_test_mean is None:
+            return "-"
+        return f"{(self.under_test_mean - self.reference_mean) / self.reference_mean * 100:+.1f}%"
+
+
+def assess_test(test: Test, reference: ConfigRepository, under_test: ConfigRepository) -> Assessment:
+    """Assess one test."""
     if not test.enabled:
         print(f"Skipping assessment of test {test.name!r} as configured")
-        return True
+        return Assessment(test.name, test.topic, test.unit, "SKIPPED")
 
     reference_path = latest_result(reference, test)
     under_test_path = latest_result(under_test, test)
@@ -384,7 +405,7 @@ def assess_test(test: Test, reference: ConfigRepository, under_test: ConfigRepos
         if path is None:
             print(f"{test.topic + ': ':<30}NO RESULT, no {role} results for {test.name!r} in "
                   f"{repository.results_dir}. Re-run to generate them.")
-            return False
+            return Assessment(test.name, test.topic, test.unit, "NO RESULT")
 
     reference_row = read_last_row(reference_path)
     under_test_row = read_last_row(under_test_path)
@@ -400,7 +421,7 @@ def assess_test(test: Test, reference: ConfigRepository, under_test: ConfigRepos
         print(f"{test.topic + ': ':<30}NOT COMPARABLE, the two runs used different parameters "
               f"({differences}). The stale results are in {os.path.basename(reference_path)} and "
               f"{os.path.basename(under_test_path)}; re-run both sides.")
-        return False
+        return Assessment(test.name, test.topic, test.unit, "NOT COMPARABLE")
 
     reference_mean = float(reference_row[test.kpis.mean.label])
     reference_err = float(reference_row[test.kpis.err.label])
@@ -440,17 +461,51 @@ def assess_test(test: Test, reference: ConfigRepository, under_test: ConfigRepos
     print(f"{test.topic + ': ':<30}{verdict} with {under_test_mean} {test.unit} "
           f"(reference: {reference_mean} +/- {reference_err}, {bound}){warn}")
 
-    return not regressed
+    return Assessment(test.name, test.topic, test.unit, verdict,
+                      reference_mean, under_test_mean, noisy=bool(warn))
+
+def print_summary_table(assessments: list[Assessment]):
+    """A compact overview of every test, so the outcome is readable at a glance."""
+    rows = [("Test", "Unit", "Reference", "Under test", "Change", "Verdict")]
+    for a in assessments:
+        rows.append((
+            a.topic,
+            a.unit,
+            "-" if a.reference_mean is None else f"{a.reference_mean:.6g}",
+            "-" if a.under_test_mean is None else f"{a.under_test_mean:.6g}",
+            a.change,
+            a.verdict + (" (noisy)" if a.noisy else ""),
+        ))
+
+    widths = [max(len(row[i]) for row in rows) for i in range(len(rows[0]))]
+    separator = "  ".join("-" * w for w in widths)
+
+    def emit(row):
+        # right align the numeric columns, left align the rest
+        print("  ".join(cell.rjust(widths[i]) if i in (2, 3, 4) else cell.ljust(widths[i])
+                        for i, cell in enumerate(row)).rstrip())
+
+    print()
+    emit(rows[0])
+    print(separator)
+    for row in rows[1:]:
+        emit(row)
+    print()
+    print("Change is the raw difference from the reference. Whether that is good or bad depends "
+          "on the test, so read it together with the verdict.")
+
 
 def assess_kpis(reference: ConfigRepository, under_test: ConfigRepository, config: Config) -> bool:
     """Assess every test. Returns True if none of them regressed."""
     print("\n" + "----- Test Report (start) -----" + "\n")
 
-    regressions = [test.name for test in config.tests
-                   if not assess_test(test, reference, under_test)]
+    assessments = [assess_test(test, reference, under_test) for test in config.tests]
+
+    print_summary_table(assessments)
 
     print("\n" + "----- Test Report (end) -------")
 
+    regressions = [a.name for a in assessments if a.regressed]
     if regressions:
         print(f"Regressions detected in: {', '.join(regressions)}")
 
