@@ -19,6 +19,8 @@ import csv
 import argparse
 import typing
 import shutil
+import time
+import glob
 
 SCRIPT_PATH = os.path.abspath(__file__)
 WINDOWS = platform.system() == "Windows"
@@ -45,6 +47,18 @@ DEFAULT_CMAKE_CONFIGURE_ARGS = [
     "-DSILKIT_BUILD_DASHBOARD=OFF",
     "-DCMAKE_POLICY_VERSION_MINIMUM=3.5",
 ]
+
+REPOSITORY_URL = "https://github.com/vectorgrp/sil-kit.git"
+
+BUILD_TARGETS = ["sil-kit-registry", "SilKitDemoBenchmark", "SilKitDemoLatency"]
+
+# Identifies this invocation. Result files are prefixed with it so that successive runs
+# accumulate in the results directory instead of overwriting each other.
+RUN_ID = time.strftime("%Y%m%d-%H%M%S")
+
+# How often to report that a demo is still running. The demos can run for many minutes without
+# producing output, so without this there is no way to tell a slow run from a hung one.
+PROGRESS_INTERVAL_SECONDS = 30
 
 
 # data structures
@@ -132,7 +146,9 @@ class TestRun:
 
     @staticmethod
     def new(test: Test, repository: ConfigRepository) -> 'TestRun':
-        return TestRun(csv_output=os.path.join(repository.results_dir, test.csv_output))
+        """Where this invocation writes the results of a test."""
+        return TestRun(csv_output=os.path.join(repository.results_dir,
+                                               f"{RUN_ID}_{test.csv_output}"))
 
 
 ##### function definitions #####
@@ -145,13 +161,15 @@ def get_command(command, bin_dir):
 
 def spawn(args: list[str], bin_dir: str, verbose: bool) -> subprocess.Popen:
     args = [get_command(args[0], bin_dir)] + args[1:]
-    output = subprocess.DEVNULL
 
     if verbose:
-        output = None
         print(f"spawning: {args!r}")
 
-    popen = subprocess.Popen(args, stdout=output, stderr=output)
+    # NB: the child inherits stdout/stderr rather than having it sent to DEVNULL, so that demo
+    #     progress is visible while the run is in flight. Inheriting rather than piping matters:
+    #     a pipe would hold the output until the child exits, which is exactly when it stops being
+    #     useful.
+    popen = subprocess.Popen(args)
     return popen
 
 
@@ -172,8 +190,7 @@ def clone(repository: 'ConfigRepository'):
         print(f"Skipping cloning because the directory {source_dir!r} already exists")
         return
 
-    # clone from GitHub
-    url = "https://github.com/vectorgrp/sil-kit.git"
+    url = REPOSITORY_URL
 
     print(f"Cloning {url!r} into {source_dir!r}")
     subprocess.run(["git", "clone", str(url), str(source_dir)])
@@ -214,9 +231,8 @@ def build(repository: 'ConfigRepository'):
         print("Skipping build as requested")
         return
 
-    run(['cmake', "--build", build_dir, "--config", "Release", "--parallel", "--target", "sil-kit-registry"])
-    run(['cmake', "--build", build_dir, "--config", "Release", "--parallel", "--target", "SilKitDemoBenchmark"])
-    run(['cmake', "--build", build_dir, "--config", "Release", "--parallel", "--target", "SilKitDemoLatency"])
+    for target in BUILD_TARGETS:
+        run(['cmake', "--build", build_dir, "--config", "Release", "--parallel", "--target", target])
 
 
 def start_registry(repository: 'ConfigRepository', config: 'Config'):
@@ -246,13 +262,34 @@ def run_process(process: Process, config: Config, bin_dir: str, **kwargs) -> sub
     return spawn(args, bin_dir, config.verbose)
 
 
+def wait_for_process(process: subprocess.Popen, label: str) -> int:
+    """Wait for a demo, reporting periodically so a hung run is distinguishable from a slow one."""
+    started = time.monotonic()
+
+    while True:
+        try:
+            process.wait(timeout=PROGRESS_INTERVAL_SECONDS)
+            break
+        except subprocess.TimeoutExpired:
+            print(f"  [{label}] still running after {int(time.monotonic() - started)}s "
+                  f"(pid {process.pid})", flush=True)
+
+    elapsed = time.monotonic() - started
+
+    if process.returncode != 0:
+        # NB: report this here rather than letting it surface later as a missing CSV file.
+        print(f"  [{label}] WARNING: exited with code {process.returncode} after {elapsed:.1f}s; "
+              f"its results will be missing", flush=True)
+    else:
+        print(f"  [{label}] done after {elapsed:.1f}s", flush=True)
+
+    return process.returncode
+
+
 def run_test(test: Test, repository: ConfigRepository, config: Config):
     if not test.enabled:
         print(f"Skipping test {test.name!r} as configured")
         return
-
-    if os.path.isfile(test.csv_output):
-        os.remove(test.csv_output)
 
     demo_processes = []
 
@@ -263,18 +300,32 @@ def run_test(test: Test, repository: ConfigRepository, config: Config):
         popen = run_process(demo, config, repository.bin_dir, test=test, run=test_run)
         demo_processes.append(popen)
 
-    for process in demo_processes:
-        print(f"waiting for process {process.pid} to complete")
-        process.communicate()
+    for demo, process in zip(test.demos, demo_processes):
+        wait_for_process(process, f"{test.name}/{demo.executable}")
+
+
+def missing_results(repository: ConfigRepository, config: Config) -> list[str]:
+    """Names of enabled tests that have no result file for this repository."""
+    return [test.name for test in config.tests if test.enabled
+            and latest_result(repository, test) is None]
 
 
 def run_tests(repository: ConfigRepository, config: Config, force: bool):
     results_dir = repository.results_dir
 
     if not force and os.path.exists(results_dir):
-        # TODO If something went wrong in creating the ref. KPIs (e.g. registry collision, build failure,...), the folder exists but the result files not
-        print(f"Skipping test execution because directory {results_dir!r} already exists")
-        return
+        # NB: the directory existing is not enough. An aborted earlier run leaves partial results
+        #     behind, and reusing them silently compares against whatever configuration produced
+        #     them. Only skip when every enabled test actually has a result.
+        missing = missing_results(repository, config)
+        if not missing:
+            print(f"Skipping test execution because {results_dir!r} already has results for "
+                  f"every enabled test")
+            return
+
+        print(f"WARNING: {results_dir!r} exists but has no results for {', '.join(missing)}. "
+              f"Re-running all tests for this repository, because partial results from an earlier "
+              f"run may have used a different configuration.", flush=True)
 
     os.makedirs(results_dir, exist_ok=True)
 
@@ -286,14 +337,35 @@ def run_tests(repository: ConfigRepository, config: Config, force: bool):
     kill_process(sil_kit_registry_pid)
 
 
-def read_kpi(path: str, kpi_label: str):
+def latest_result(repository: ConfigRepository, test: Test) -> str | None:
+    """The most recent result file for a test, across all runs, or None if there is none.
+
+    Result files are prefixed with a sortable run id, so the lexicographically last match is the
+    newest. The reference results are often produced by an earlier invocation than the version
+    under test, so assessment has to look these up rather than assume the current run id.
+    """
+    matches = glob.glob(os.path.join(repository.results_dir, f"*_{test.csv_output}"))
+    return sorted(matches)[-1] if matches else None
+
+
+def read_last_row(path: str) -> dict:
+    """Return the last data row of a result CSV."""
     with open(path) as csv_file:
         lines = csv_file.readlines()[1:]  # skip comment
-        data = csv.DictReader(lines, delimiter=';', skipinitialspace=True)
-        vals = [float(row[kpi_label]) for row in data]
-        kpi_value = vals[-1]
+        rows = list(csv.DictReader(lines, delimiter=';', skipinitialspace=True))
 
-    return kpi_value
+    return rows[-1]
+
+
+# Columns that describe the workload rather than its result. Both sides of a comparison have to
+# agree on these, otherwise the two runs did not measure the same thing.
+WORKLOAD_COLUMNS = [
+    "participants",
+    "messageSize",
+    "messageCount",
+    "duration(virtual time, s)",
+    "stepSize(virtual time, ms)",
+]
 
 
 def assess_test(test: Test, reference: ConfigRepository, under_test: ConfigRepository) -> bool:
@@ -302,20 +374,44 @@ def assess_test(test: Test, reference: ConfigRepository, under_test: ConfigRepos
         print(f"Skipping assessment of test {test.name!r} as configured")
         return True
 
-    # get reference kpi values
-    reference_test_run = TestRun.new(test, reference)
-    reference_mean = read_kpi(reference_test_run.csv_output, test.kpis.mean.label)
-    reference_err = read_kpi(reference_test_run.csv_output, test.kpis.err.label)
+    reference_path = latest_result(reference, test)
+    under_test_path = latest_result(under_test, test)
+
+    # NB: a missing result file used to raise straight out of the report. Report it as a failure of
+    #     this test instead, so the remaining tests are still assessed.
+    for role, path, repository in (("reference", reference_path, reference),
+                                   ("under test", under_test_path, under_test)):
+        if path is None:
+            print(f"{test.topic + ': ':<30}NO RESULT, no {role} results for {test.name!r} in "
+                  f"{repository.results_dir}. Re-run to generate them.")
+            return False
+
+    reference_row = read_last_row(reference_path)
+    under_test_row = read_last_row(under_test_path)
+
+    # NB: results left over from an earlier run can silently be compared against a different
+    #     configuration, which shows up as a large but entirely fictitious improvement. Catch it.
+    mismatched = [column for column in WORKLOAD_COLUMNS
+                  if column in reference_row and column in under_test_row
+                  and reference_row[column] != under_test_row[column]]
+    if mismatched:
+        differences = ", ".join(f"{column}: reference {reference_row[column]} vs under test "
+                                f"{under_test_row[column]}" for column in mismatched)
+        print(f"{test.topic + ': ':<30}NOT COMPARABLE, the two runs used different parameters "
+              f"({differences}). The stale results are in {os.path.basename(reference_path)} and "
+              f"{os.path.basename(under_test_path)}; re-run both sides.")
+        return False
+
+    reference_mean = float(reference_row[test.kpis.mean.label])
+    reference_err = float(reference_row[test.kpis.err.label])
 
     # compute thresholds (2 sigma rule)
     sigma = 2.0
     reference_upper_threshold = reference_mean + sigma * reference_err
     reference_lower_threshold = reference_mean - sigma * reference_err
 
-    # get under-test kpi values
-    under_test_test_run = TestRun.new(test, under_test)
-    under_test_mean = read_kpi(under_test_test_run.csv_output, test.kpis.mean.label)
-    under_test_err = read_kpi(under_test_test_run.csv_output, test.kpis.err.label)
+    under_test_mean = float(under_test_row[test.kpis.mean.label])
+    under_test_err = float(under_test_row[test.kpis.err.label])
 
     # check if standard deviation is larger than 10% of the mean (NB: 10% is heuristically chosen and may be adapted in the future)
     err_coeff = 0.1
@@ -383,16 +479,117 @@ def override_with_or(obj: T, key: str, value: U | None, default=U | None):
         setattr(obj, key, default)
 
 
+def use_prebuilt_binaries(repository: ConfigRepository, bin_dir: str | None, role: str):
+    """Point a repository at already built binaries, skipping clone, configure and build."""
+    if bin_dir is None:
+        return
+
+    repository.bin_dir = os.path.abspath(bin_dir)
+    repository.skip_clone = True
+    repository.skip_configure = True
+    repository.skip_build = True
+    repository.version = f"prebuilt binaries in {repository.bin_dir}"
+
+    if not os.path.isdir(repository.bin_dir):
+        raise SystemExit(f"--{role}-bin-dir: {repository.bin_dir!r} is not a directory")
+
+    missing = [target for target in BUILD_TARGETS
+               if not os.path.isfile(get_command(target, repository.bin_dir))]
+    if missing:
+        raise SystemExit(f"--{role}-bin-dir: {repository.bin_dir!r} does not contain "
+                         f"{', '.join(missing)}")
+
+
 def update_config(config: Config, args: object):
     override_or(config, args, "work_dir", os.path.abspath("_work"))
     override_or(config, args, "verbose", False)
     override_or(config, args, "cmake_configure_arg", [])
 
+    # NB: these two were previously declared as command line options but never applied, so
+    #     passing them silently did nothing and the configured versions were used regardless.
+    if args.reference_version is not None:
+        config.repositories.reference.version = args.reference_version
+    if args.version_under_test is not None:
+        config.repositories.under_test.version = args.version_under_test
+
     for name, repository in vars(config.repositories).items():
-        override_with_or(repository, "source_dir", None, os.path.join(config.work_dir, "s", name))
-        override_with_or(repository, "build_dir", None, os.path.join(config.work_dir, "b", name))
+        override_with_or(repository, "source_dir", None, os.path.join(config.work_dir, "source", name))
+        override_with_or(repository, "build_dir", None, os.path.join(config.work_dir, "build", name))
         override_with_or(repository, "bin_dir", None, os.path.join(repository.build_dir, "Release"))
-        override_with_or(repository, "results_dir", None, os.path.join(config.work_dir, "r", name))
+        override_with_or(repository, "results_dir", None, os.path.join(config.work_dir, "results", name))
+
+    use_prebuilt_binaries(config.repositories.reference, args.reference_bin_dir, "reference")
+    use_prebuilt_binaries(config.repositories.under_test, args.under_test_bin_dir, "under-test")
+
+
+def format_demo_args(demo: Process, test: Test, config: Config, repository: ConfigRepository) -> list[str]:
+    """Resolve a demo command line the same way run_process does, for reporting."""
+    test_run = TestRun.new(test, repository)
+    format_arg = lambda f: f.format(process=demo, config=config, test=test, run=test_run)
+    return [format_arg(arg) for arg in [demo.executable] + demo.args]
+
+
+def print_plan(config: Config):
+    """Summarize what will be fetched, built and run before any of it happens."""
+    repositories = list(vars(config.repositories).items())
+
+    print("=" * 78)
+    print("Performance test plan")
+    print("=" * 78)
+    print(f"work directory   : {config.work_dir}")
+    print(f"cmake generator  : {'Ninja' if USE_NINJA else 'platform default'}")
+    print(f"configure args   : {' '.join(DEFAULT_CMAKE_CONFIGURE_ARGS + config.cmake_configure_arg)}")
+    print(f"build targets    : {', '.join(BUILD_TARGETS)}")
+    print(f"progress         : a heartbeat is printed every {PROGRESS_INTERVAL_SECONDS}s while a demo runs")
+
+    print()
+    print("Fetch and build")
+    print("-" * 78)
+    for name, repository in repositories:
+        print(f"  {name} @ {repository.version}")
+
+        if repository.skip_clone:
+            fetch = "skipped, disabled in configuration"
+        elif os.path.isdir(repository.source_dir):
+            fetch = f"skipped, {repository.source_dir} already exists"
+        else:
+            fetch = f"clone {REPOSITORY_URL}, checkout {repository.version}, init submodules"
+        print(f"    fetch     : {fetch}")
+
+        if repository.skip_configure:
+            cfg = "skipped, disabled in configuration"
+        elif os.path.isdir(repository.build_dir):
+            cfg = f"skipped, {repository.build_dir} already exists"
+        else:
+            cfg = "configure"
+        print(f"    configure : {cfg}")
+        print(f"    build     : {'skipped, disabled in configuration' if repository.skip_build else 'build'}")
+        print(f"    source    : {repository.source_dir}")
+        print(f"    binaries  : {repository.bin_dir}")
+        print(f"    results   : {repository.results_dir}")
+
+    enabled = [test for test in config.tests if test.enabled]
+    skipped = [test.name for test in config.tests if not test.enabled]
+
+    print()
+    print(f"Run ({len(enabled)} tests x {len(repositories)} repositories)")
+    print("-" * 78)
+
+    # NB: the command lines are resolved against the first repository. Only the CSV output path
+    #     differs between repositories.
+    reporting_repository = repositories[0][1]
+
+    for test in enabled:
+        print(f"  {test.name}  ({test.topic}, {test.unit}, "
+              f"{'higher' if test.higher_is_better else 'lower'} is better)")
+        for demo in test.demos:
+            print(f"    {' '.join(format_demo_args(demo, test, config, reporting_repository))}")
+
+    if skipped:
+        print(f"  skipped (disabled in configuration): {', '.join(skipped)}")
+
+    print("=" * 78)
+    print(flush=True)
 
 
 def main():
@@ -401,6 +598,13 @@ def main():
                         help='Reference tag or commit id of the reference version')
     parser.add_argument('--version-under-test', type=str, default=None,
                         help='Reference tag or commit id for the version under test')
+    parser.add_argument('--reference-bin-dir', type=str, default=None,
+                        help='Use prebuilt binaries from this directory as the reference, '
+                             'skipping clone, configure and build')
+    parser.add_argument('--under-test-bin-dir', type=str, default=None,
+                        help='Use prebuilt binaries from this directory as the version under '
+                             'test, skipping clone, configure and build. For example the Release '
+                             'directory of a local build')
     parser.add_argument('--work-dir', type=str, default=None)
     parser.add_argument('--cmake-configure-arg', action='append',
                         help='Additional CMake configure argument')
@@ -412,6 +616,8 @@ def main():
         config = Config(**tomllib.load(f))
 
     update_config(config, args)
+
+    print_plan(config)
 
     prepare_repository(config, config.repositories.reference, force=False)
     prepare_repository(config, config.repositories.under_test, force=True)

@@ -82,6 +82,22 @@ args = [
 
 # NB: the tests above all run with the default of two participants, i.e. a fan-out of one, so they
 #     cannot observe the cost of sending a single message to many peers. The following two do.
+#
+#     Deliveries scale with participants*(participants-1), so moving from 2 to 8 participants
+#     multiplies them by 28 and the wall clock with them. Shorten the simulation duration to pay
+#     for that, and do NOT lower the message count: the message count sets the load per simulation
+#     step, and the run has to stay saturated (reported speedup below 1) for the KPI to measure
+#     capacity rather than the virtual time step pacing. An unsaturated run is insensitive to the
+#     very costs these tests exist to detect.
+#
+#     Measured on one machine, one run, 8 participants, 16 byte messages:
+#       message-count 200, duration 10 -> 120s, speedup 0.084, 936k msg/s
+#       message-count  50, duration  2 ->   6s, speedup 0.333, 933k msg/s   (kept)
+#       message-count  10, duration 10 ->   8s, speedup 1.26,  704k msg/s   (unsaturated, rejected)
+#     and with 65536 byte messages:
+#       message-count   4, duration 10 ->  19s, speedup 0.516, 7.22e3 MiB/s
+#       message-count   4, duration  2 ->   3s, speedup 0.664, 9.29e3 MiB/s (kept)
+#       message-count   2, duration  5 ->   5s, speedup 1.14,  7.99e3 MiB/s (unsaturated, rejected)
 [[tests]]
 name = "throughput-fanout-large-msg"
 unit = "MiB/s"
@@ -98,7 +114,7 @@ args = [
     "--write-csv", "{run.csv_output}",
     "--message-size", "65536",
     "--message-count", "4",
-    "--simulation-duration", "10",
+    "--simulation-duration", "2",
     "--number-participants", "8",
     "--number-simulation-runs", "20",
 ]
@@ -119,8 +135,8 @@ executable = "SilKitDemoBenchmark"
 args = [
     "--write-csv", "{run.csv_output}",
     "--message-size", "16",
-    "--message-count", "200",
-    "--simulation-duration", "10",
+    "--message-count", "50",
+    "--simulation-duration", "2",
     "--number-participants", "8",
     "--number-simulation-runs", "20",
 ]
