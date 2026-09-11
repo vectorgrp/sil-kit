@@ -62,3 +62,19 @@ Compatiblity Use Cases:
   If the data type is used during 2. Service Subscriptions, its data types version should be increased
   and compat code added to its Ser/Des routines. (see internal/traits/SilKitMsgVersion.hpp)
 
+
+Simulation Message Serialization Invariant
+==========================================
+
+A simulation message that is sent to several peers is serialized only once. The serialized form
+differs per receiver solely in the `remoteIndex` field of the implicit network header, which each
+peer patches into its own copy of that header before writing it (see `SharedSerializedMessage` and
+`VAsioTransmitter`).
+
+This relies on the serialized body being independent of the peer, which holds because simulation
+message serialization does not consult `MessageBuffer::GetProtocolVersion()`. Only the handshake
+and registry messages are protocol version dependent.
+
+Consequently: **do not make the ser/des of a simulation message depend on the protocol version.**
+If that ever becomes necessary, the remote receivers have to be grouped by their peer protocol
+version and the message serialized once per distinct version.

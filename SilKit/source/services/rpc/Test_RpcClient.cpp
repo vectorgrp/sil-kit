@@ -70,7 +70,7 @@ TEST_F(Test_RpcClient, rpc_client_call_sends_message_with_current_timestamp_and_
     EXPECT_CALL(participant->GetSilKitConnection(), Mock_SendMsg(testing::_, testing::A<FunctionCall>()))
         .WillOnce([this, &fixedTimeProvider](const SilKit::Core::IServiceEndpoint* /*from*/, const FunctionCall& msg) {
         ASSERT_EQ(msg.timestamp, fixedTimeProvider.now);
-        ASSERT_EQ(msg.data, sampleData);
+        ASSERT_TRUE(SilKit::Util::ItemsAreEqual(msg.data.AsSpan(), SilKit::Util::ToSpan(sampleData)));
     });
 
     // HACK: Change the time provider for the captured services. Must happen _after_ the RpcServer and RpcClient (and

@@ -1,5 +1,7 @@
 [repositories.reference]
-version = "v4.0.52"
+# NB: compare against the immediately preceding release. A far older reference folds years of
+#     unrelated change into the interval and makes it useless as a per-change gate.
+version = "v5.0.7"
 
 [repositories.under_test]
 version = "main"
@@ -10,6 +12,8 @@ name = "latency"
 unit = "us"
 topic = "Latency"
 csv_output = "latency.csv"
+# lower latency is the improvement, so the regression threshold is the upper one
+higher_is_better = false
 
 [tests.kpis]
 mean = { label = "latency(us)" }
@@ -75,4 +79,50 @@ args = [
     "--message-count", "100",
     "--simulation-duration", "10",
     "--number-simulation-runs", "50",
+]
+
+
+# NB: the tests above all run with the default of two participants, i.e. a fan-out of one, so they
+#     cannot observe the cost of sending a single message to many peers. The following two do.
+[[tests]]
+name = "throughput-fanout-large-msg"
+unit = "MiB/s"
+topic = "Throughput (large messages, fan-out of 8)"
+csv_output = "throughput-fanout-large-msg.csv"
+
+[tests.kpis]
+mean = { label = "throughput(MiB/s)" }
+err = { label = "throughput_err" }
+
+[[tests.demos]]
+executable = "SilKitDemoBenchmark"
+args = [
+    "--write-csv", "{run.csv_output}",
+    "--message-size", "65536",
+    "--message-count", "4",
+    "--simulation-duration", "10",
+    "--number-participants", "8",
+    "--number-simulation-runs", "20",
+]
+
+
+[[tests]]
+name = "throughput-fanout-small-msg"
+unit = "1/s"
+topic = "Message rate (small messages, fan-out of 8)"
+csv_output = "throughput-fanout-small-msg.csv"
+
+[tests.kpis]
+mean = { label = "messageRate(1/s)" }
+err = { label = "messageRate_err" }
+
+[[tests.demos]]
+executable = "SilKitDemoBenchmark"
+args = [
+    "--write-csv", "{run.csv_output}",
+    "--message-size", "16",
+    "--message-count", "200",
+    "--simulation-duration", "10",
+    "--number-participants", "8",
+    "--number-simulation-runs", "20",
 ]

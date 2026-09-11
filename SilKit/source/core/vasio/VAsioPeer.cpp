@@ -4,6 +4,8 @@
 
 #include "core/vasio/VAsioPeer.hpp"
 
+#include <array>
+#include <cstring>
 #include <iomanip>
 #include <sstream>
 #include <thread>
@@ -100,34 +102,69 @@ auto VAsioPeer::GetSimulationName() const -> const std::string&
 
 void VAsioPeer::SendSilKitMsg(SerializedMessage buffer)
 {
-    _peerMetrics->TxBytes(buffer);
+    const auto aggregationKind = buffer.GetAggregationKind();
+
+    _peerMetrics->TxBytes(buffer.GetStorageSize());
     _peerMetrics->TxPacket();
 
-    auto blob = buffer.ReleaseStorage();
+    SendItem item;
+    item.body = SilKit::Util::SharedSpan<uint8_t>{buffer.ReleaseStorage()};
 
-    if (_useAggregation && buffer.GetAggregationKind() == MessageAggregationKind::UserDataMessage)
+    DispatchSendItem(std::move(item), aggregationKind);
+}
+
+void VAsioPeer::SendSilKitMsg(const SharedSerializedMessage& msg, EndpointId remoteIdx)
+{
+    _peerMetrics->TxBytes(msg.TotalSize());
+    _peerMetrics->TxPacket();
+
+    SILKIT_ASSERT(msg.HeaderSize() <= SendItem::kMaxHeaderSize);
+    SILKIT_ASSERT(msg.RemoteIndexOffset() + sizeof(EndpointId) <= msg.HeaderSize());
+
+    SendItem item;
+    item.headerSize = msg.HeaderSize();
+    std::memcpy(item.header.data(), msg.Header().data(), item.headerSize);
+    // Patch this peer's remote index into the private copy of the header. The encoding matches
+    // what MessageBuffer would have written for an EndpointId.
+    std::memcpy(item.header.data() + msg.RemoteIndexOffset(), &remoteIdx, sizeof(remoteIdx));
+    // sharing the body only bumps a reference count
+    item.body = msg.Body();
+
+    DispatchSendItem(std::move(item), msg.GetAggregationKind());
+}
+
+void VAsioPeer::DispatchSendItem(SendItem item, MessageAggregationKind aggregationKind)
+{
+    if (_useAggregation && aggregationKind == MessageAggregationKind::UserDataMessage)
     {
-        Aggregate(blob);
+        Aggregate(item);
     }
-    else if (_useAggregation && buffer.GetAggregationKind() == MessageAggregationKind::FlushAggregationMessage)
+    else if (_useAggregation && aggregationKind == MessageAggregationKind::FlushAggregationMessage)
     {
-        Aggregate(blob); // don't forget to send (current) time sync message
+        Aggregate(item); // don't forget to send (current) time sync message
         Flush();
     }
     else
     {
-        SendSilKitMsgInternal(std::move(blob));
+        EnqueueSendItem(std::move(item));
     }
 }
 
 void VAsioPeer::SendSilKitMsgInternal(std::vector<uint8_t> blob)
+{
+    SendItem item;
+    item.body = SilKit::Util::SharedSpan<uint8_t>{std::move(blob)};
+    EnqueueSendItem(std::move(item));
+}
+
+void VAsioPeer::EnqueueSendItem(SendItem item)
 {
     // Prevent sending when shutting down
     if (!_isShuttingDown && _socket != nullptr)
     {
         std::unique_lock<std::mutex> lock{_sendingQueueMutex};
 
-        _sendingQueue.emplace_back(std::move(blob));
+        _sendingQueue.emplace_back(std::move(item));
 
         _peerMetrics->TxQueueSize(_sendingQueue.size());
 
@@ -137,7 +174,23 @@ void VAsioPeer::SendSilKitMsgInternal(std::vector<uint8_t> blob)
     }
 }
 
-void VAsioPeer::Aggregate(const std::vector<uint8_t>& blob)
+void VAsioPeer::BuildCurrentSendingBuffers()
+{
+    _currentSendingBuffers.clear();
+
+    if (_currentSendItem.headerSize > 0)
+    {
+        _currentSendingBuffers.emplace_back(_currentSendItem.header.data(), _currentSendItem.headerSize);
+    }
+
+    const auto body = _currentSendItem.body.AsSpan();
+    if (!body.empty())
+    {
+        _currentSendingBuffers.emplace_back(body.data(), body.size());
+    }
+}
+
+void VAsioPeer::Aggregate(const SendItem& item)
 {
     // start initial timer
     // NB: resetting timer in every Aggregate() is costly
@@ -147,7 +200,14 @@ void VAsioPeer::Aggregate(const std::vector<uint8_t>& blob)
         _initialTimerStarted = true;
     }
 
-    _aggregatedMessages.insert(_aggregatedMessages.end(), blob.begin(), blob.end());
+    if (item.headerSize > 0)
+    {
+        _aggregatedMessages.insert(_aggregatedMessages.end(), item.header.begin(),
+                                   item.header.begin() + static_cast<std::ptrdiff_t>(item.headerSize));
+    }
+
+    const auto body = item.body.AsSpan();
+    _aggregatedMessages.insert(_aggregatedMessages.end(), body.begin(), body.end());
 
     // ensure that the aggregation buffer does not exceed a certain size
     if (_aggregatedMessages.size() > _aggregationBufferThreshold)
@@ -184,17 +244,19 @@ void VAsioPeer::StartAsyncWrite()
 
     _sending = true;
 
-    _currentSendingBufferData = std::move(_sendingQueue.front());
+    // NB: the item must be moved into place before the buffers are built. Moving a SendItem
+    //     relocates its inline header array, so buffers built beforehand would dangle.
+    _currentSendItem = std::move(_sendingQueue.front());
     _sendingQueue.pop_front();
     lock.unlock();
 
-    _currentSendingBuffer = ConstBuffer(_currentSendingBufferData.data(), _currentSendingBufferData.size());
+    BuildCurrentSendingBuffers();
     WriteSomeAsync();
 }
 
 void VAsioPeer::WriteSomeAsync()
 {
-    _socket->AsyncWriteSome(ConstBufferSequence{&_currentSendingBuffer, 1});
+    _socket->AsyncWriteSome(ConstBufferSequence{_currentSendingBuffers.data(), _currentSendingBuffers.size()});
 }
 
 void VAsioPeer::Subscribe(VAsioMsgSubscriber subscriber)
@@ -235,12 +297,17 @@ void VAsioPeer::DispatchBuffer()
             }
             if (_msgBuffer.Size() >= sizeof(uint32_t))
             {
-                std::vector<uint8_t> msgSizeInBytes(sizeof(uint32_t));
-                if (!_msgBuffer.Peek(msgSizeInBytes))
+                // NB: peek into a stack buffer and decode via memcpy. Reading the size through a
+                //     reinterpret_cast of the byte buffer would be misaligned and violate strict
+                //     aliasing, and a heap vector per message is needless here.
+                std::array<uint8_t, sizeof(uint32_t)> msgSizeInBytes{};
+                if (!_msgBuffer.Peek(SilKit::Util::MakeSpan(msgSizeInBytes)))
                 {
                     throw SilKitError("Reading message size from ring buffer failed.");
                 }
-                _currentMsgSize = *reinterpret_cast<uint32_t*>(msgSizeInBytes.data());
+                uint32_t msgSize{0};
+                std::memcpy(&msgSize, msgSizeInBytes.data(), sizeof(msgSize));
+                _currentMsgSize = msgSize;
             }
             else
             {
@@ -275,16 +342,24 @@ void VAsioPeer::DispatchBuffer()
         }
         else
         {
-            std::vector<uint8_t> currentMsg(_currentMsgSize);
-            if (!_msgBuffer.Read(currentMsg))
+            // NB: the message must be linearised out of the ring buffer because it may wrap, but
+            //     it is allocated as a shared blob so that deserialized payloads can alias it
+            //     instead of being copied out again. The blob is filled before being wrapped,
+            //     which establishes the immutability the SharedSpan invariant requires. One blob
+            //     per message keeps the retained memory bounded by the message's own size.
+            auto currentMsg = std::make_shared<std::vector<uint8_t>>(_currentMsgSize);
+            if (!_msgBuffer.Read(SilKit::Util::ToSpan(*currentMsg)))
             {
                 throw SilKitError("Reading data from ring buffer failed.");
             }
 
-            SerializedMessage message{std::move(currentMsg)};
+            const auto blobSize = currentMsg->size();
+            SerializedMessage message{
+                SilKit::Util::MakeSharedSpan(std::shared_ptr<const std::vector<uint8_t>>{std::move(currentMsg)}, 0,
+                                             blobSize)};
             message.SetProtocolVersion(GetProtocolVersion());
 
-            _peerMetrics->RxBytes(message);
+            _peerMetrics->RxBytes(message.GetStorageSize());
             _peerMetrics->RxPacket();
 
             _listener->OnSocketData(this, std::move(message));
@@ -313,13 +388,33 @@ void VAsioPeer::OnAsyncWriteSomeDone(IRawByteStream& stream, size_t bytesTransfe
     SILKIT_UNUSED_ARG(stream);
     SILKIT_TRACE_METHOD_(_logger, "({}, {})", static_cast<const void*>(&stream), bytesTransferred);
 
-    if (bytesTransferred < _currentSendingBuffer.GetSize())
+    // Consume the transferred bytes across the buffer sequence: drop the buffers that were
+    // written in full and slice the prefix off a partially written one.
+    size_t remaining = bytesTransferred;
+    auto it = _currentSendingBuffers.begin();
+    while (it != _currentSendingBuffers.end() && remaining > 0)
     {
-        _currentSendingBuffer.SliceOff(bytesTransferred);
+        if (remaining >= it->GetSize())
+        {
+            remaining -= it->GetSize();
+            ++it;
+        }
+        else
+        {
+            it->SliceOff(remaining);
+            remaining = 0;
+        }
+    }
+    _currentSendingBuffers.erase(_currentSendingBuffers.begin(), it);
+
+    if (!_currentSendingBuffers.empty())
+    {
         WriteSomeAsync();
         return;
     }
 
+    // release the shared body as soon as it has been written
+    _currentSendItem = SendItem{};
     _sending = false;
     StartAsyncWrite();
 }

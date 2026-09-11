@@ -7,7 +7,7 @@
 #include "silkit/services/flexray/FlexrayDatatypes.hpp"
 #include "silkit/services/flexray/string_utils.hpp"
 
-#include "wire/util/SharedVector.hpp"
+#include "util/SharedSpan.hpp"
 
 #include <chrono>
 #include <vector>
@@ -19,7 +19,7 @@ namespace Flexray {
 struct WireFlexrayFrame
 {
     FlexrayHeader header;                //!< Header flags, slot, crc, and cycle indidcators
-    Util::SharedVector<uint8_t> payload; //!< Raw payload containing 0 to 254 bytes
+    Util::SharedSpan<uint8_t> payload; //!< Raw payload containing 0 to 254 bytes
 };
 
 inline auto ToFlexrayFrame(const WireFlexrayFrame& wireFlexrayFramea) -> FlexrayFrame;
@@ -59,7 +59,7 @@ struct WireFlexrayTxBufferUpdate
     bool payloadDataValid;
 
     //! Raw payload containing 0 to 254 bytes.
-    Util::SharedVector<uint8_t> payload;
+    Util::SharedSpan<uint8_t> payload;
 };
 
 inline auto ToFlexrayTxBufferUpdate(const WireFlexrayTxBufferUpdate& wireFlexrayTxBufferUpdate)

@@ -2,6 +2,7 @@
 #
 # SPDX-License-Identifier: MIT
 import platform
+import sys
 
 min_python_version = (3, 11, 0)
 current_python_version = tuple(map(int, platform.python_version_tuple()))
@@ -68,6 +69,9 @@ class Test:
     demos: ['Process']
     csv_output: str
     enabled: bool = True
+    # Which direction counts as an improvement. Throughput and message rates improve upwards,
+    # latencies improve downwards. Used to make the acceptance threshold one-sided.
+    higher_is_better: bool = True
 
     def __post_init__(self):
         self.kpis = TestKpis(**typing.cast(dict, self.kpis))
@@ -260,10 +264,11 @@ def read_kpi(path: str, kpi_label: str):
     return kpi_value
 
 
-def assess_test(test: Test, reference: ConfigRepository, under_test: ConfigRepository):
+def assess_test(test: Test, reference: ConfigRepository, under_test: ConfigRepository) -> bool:
+    """Assess one test. Returns True if it did not regress."""
     if not test.enabled:
         print(f"Skipping assessment of test {test.name!r} as configured")
-        return
+        return True
 
     # get reference kpi values
     reference_test_run = TestRun.new(test, reference)
@@ -286,28 +291,47 @@ def assess_test(test: Test, reference: ConfigRepository, under_test: ConfigRepos
     if (under_test_mean * err_coeff) < under_test_err:
         warn = f" [WARNING: Standard deviation is larger than {err_coeff:.0%} of the mean.]"
 
-    def report(topic: str, passed: bool, extra: str, optionalWarning: str):
-        print(f"{topic + ': ':<30}{'PASSED' if passed else 'FAILED'}{extra}{optionalWarning}")
+    # NB: the threshold is one-sided, in the direction that counts as a regression. A two-sided
+    #     interval reports a genuine improvement as a failure, which makes the gate unusable.
+    if test.higher_is_better:
+        regressed = under_test_mean < reference_lower_threshold
+        improved = under_test_mean > reference_upper_threshold
+        bound = f"acceptance threshold: >= {reference_lower_threshold} {test.unit}"
+    else:
+        regressed = under_test_mean > reference_upper_threshold
+        improved = under_test_mean < reference_lower_threshold
+        bound = f"acceptance threshold: <= {reference_upper_threshold} {test.unit}"
 
-    report(
-        test.topic,
-        reference_lower_threshold < under_test_mean < reference_upper_threshold,
-        f" with {under_test_mean} {test.unit} (acceptance interval: {reference_lower_threshold} - {reference_upper_threshold} {test.unit})",
-        warn
-    )
+    if regressed:
+        verdict = "FAILED"
+    elif improved:
+        verdict = "IMPROVED"
+    else:
+        verdict = "PASSED"
 
-def assess_kpis(reference: ConfigRepository, under_test: ConfigRepository, config: Config):
+    print(f"{test.topic + ': ':<30}{verdict} with {under_test_mean} {test.unit} "
+          f"(reference: {reference_mean} +/- {reference_err}, {bound}){warn}")
+
+    return not regressed
+
+def assess_kpis(reference: ConfigRepository, under_test: ConfigRepository, config: Config) -> bool:
+    """Assess every test. Returns True if none of them regressed."""
     print("\n" + "----- Test Report (start) -----" + "\n")
 
-    for test in config.tests:
-        assess_test(test, reference, under_test)
+    regressions = [test.name for test in config.tests
+                   if not assess_test(test, reference, under_test)]
 
     print("\n" + "----- Test Report (end) -------")
+
+    if regressions:
+        print(f"Regressions detected in: {', '.join(regressions)}")
+
+    return not regressions
 
 
 ##### start script #####
 
-DEFAULT_REFERENCE_VERSION = "v4.0.52"
+DEFAULT_REFERENCE_VERSION = "v5.0.7"
 
 T = typing.TypeVar("T")
 U = typing.TypeVar("U")
@@ -363,8 +387,9 @@ def main():
     run_tests(config.repositories.reference, config, force=False)
     run_tests(config.repositories.under_test, config, force=True)
 
-    assess_kpis(config.repositories.reference, config.repositories.under_test, config)
+    return assess_kpis(config.repositories.reference, config.repositories.under_test, config)
 
 
 if __name__ == "__main__":
-    main()
+    # NB: exit non-zero on a regression so that this can actually gate.
+    sys.exit(0 if main() else 1)
