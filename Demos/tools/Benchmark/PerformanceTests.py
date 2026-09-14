@@ -337,6 +337,11 @@ def run_tests(repository: ConfigRepository, config: Config, force: bool):
     kill_process(sil_kit_registry_pid)
 
 
+def run_id_of(path: str) -> str:
+    """The run identifier a result file was written under."""
+    return os.path.basename(path).split("_", 1)[0]
+
+
 def latest_result(repository: ConfigRepository, test: Test) -> str | None:
     """The most recent result file for a test, across all runs, or None if there is none.
 
@@ -375,8 +380,11 @@ class Assessment:
     unit: str
     verdict: str
     reference_mean: float | None = None
+    reference_err: float | None = None
     under_test_mean: float | None = None
-    noisy: bool = False
+    under_test_err: float | None = None
+    reference_run: str | None = None
+    under_test_run: str | None = None
 
     @property
     def regressed(self) -> bool:
@@ -387,6 +395,15 @@ class Assessment:
         if not self.reference_mean or self.under_test_mean is None:
             return "-"
         return f"{(self.under_test_mean - self.reference_mean) / self.reference_mean * 100:+.1f}%"
+
+    @staticmethod
+    def format_value(mean: float | None, err: float | None) -> str:
+        """A measurement with its spread as a percentage, so noise is visible at a glance."""
+        if mean is None:
+            return "-"
+        if not err or not mean:
+            return f"{mean:.6g}"
+        return f"{mean:.6g} +/-{abs(err / mean) * 100:.1f}%"
 
 
 def assess_test(test: Test, reference: ConfigRepository, under_test: ConfigRepository) -> Assessment:
@@ -462,7 +479,8 @@ def assess_test(test: Test, reference: ConfigRepository, under_test: ConfigRepos
           f"(reference: {reference_mean} +/- {reference_err}, {bound}){warn}")
 
     return Assessment(test.name, test.topic, test.unit, verdict,
-                      reference_mean, under_test_mean, noisy=bool(warn))
+                      reference_mean, reference_err, under_test_mean, under_test_err,
+                      run_id_of(reference_path), run_id_of(under_test_path))
 
 def print_summary_table(assessments: list[Assessment]):
     """A compact overview of every test, so the outcome is readable at a glance."""
@@ -471,10 +489,10 @@ def print_summary_table(assessments: list[Assessment]):
         rows.append((
             a.topic,
             a.unit,
-            "-" if a.reference_mean is None else f"{a.reference_mean:.6g}",
-            "-" if a.under_test_mean is None else f"{a.under_test_mean:.6g}",
+            Assessment.format_value(a.reference_mean, a.reference_err),
+            Assessment.format_value(a.under_test_mean, a.under_test_err),
             a.change,
-            a.verdict + (" (noisy)" if a.noisy else ""),
+            a.verdict,
         ))
 
     widths = [max(len(row[i]) for row in rows) for i in range(len(rows[0]))]
@@ -492,7 +510,24 @@ def print_summary_table(assessments: list[Assessment]):
         emit(row)
     print()
     print("Change is the raw difference from the reference. Whether that is good or bad depends "
-          "on the test, so read it together with the verdict.")
+          "on the test, so read it together with the verdict. The +/- figures are the spread of "
+          "each measurement relative to its own mean: a change smaller than those is not a result.")
+
+    # NB: the reference is reused across invocations, so the two sides can have been measured days
+    #     apart under completely different machine load. That drift can easily exceed the effect
+    #     being measured, so make it visible rather than leaving it implicit.
+    runs = {(a.reference_run, a.under_test_run) for a in assessments
+            if a.reference_run and a.under_test_run}
+    for reference_run, under_test_run in sorted(runs):
+        if reference_run == under_test_run:
+            continue
+        same_day = reference_run[:8] == under_test_run[:8]
+        print(f"{'NOTE' if same_day else 'WARNING'}: reference measured in run {reference_run}, "
+              f"version under test in run {under_test_run}"
+              + ("." if same_day else
+                 ", on a different day. Machine conditions drift, so small differences above may "
+                 "say more about the machine than about the code. Delete the reference results "
+                 "directory and re-run to measure both sides back to back."))
 
 
 def assess_kpis(reference: ConfigRepository, under_test: ConfigRepository, config: Config) -> bool:
