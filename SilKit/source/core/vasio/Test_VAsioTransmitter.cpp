@@ -149,6 +149,49 @@ TEST(Test_VAsioTransmitter, serializes_once_and_shares_the_body_across_peers)
     }
 }
 
+TEST(Test_VAsioTransmitter, a_single_receiver_is_sent_one_contiguous_message)
+{
+    // With nothing to share, the shared form would only cost an allocation and split the write,
+    // so the transmitter must fall back to serializing directly for that one peer.
+    NiceMock<SilKit::Services::Logging::MockLogger> logger;
+    VAsioTransmitter<WireDataMessageEvent> transmitter{&logger};
+
+    VAsioPeerInfo peerInfo;
+    peerInfo.participantName = "TheOnlyPeer";
+    peerInfo.participantId = 1;
+
+    auto peer = std::make_unique<NiceMock<MockVAsioPeer>>();
+    ON_CALL(*peer, GetInfo()).WillByDefault(testing::ReturnRef(peerInfo));
+
+    EndpointId observedRemoteIndex{0};
+    size_t contiguousCalls{0};
+
+    EXPECT_CALL(*peer, SendSilKitMsg(testing::Matcher<SerializedMessage>(testing::_)))
+        .Times(1)
+        .WillOnce([&observedRemoteIndex, &contiguousCalls](SerializedMessage msg) {
+        ++contiguousCalls;
+        observedRemoteIndex = msg.GetRemoteIndex();
+    });
+
+    // the shared overload must not be used at all for a single receiver
+    EXPECT_CALL(*peer, SendSilKitMsg(testing::Matcher<const SharedSerializedMessage&>(testing::_),
+                                     testing::_))
+        .Times(0);
+
+    transmitter.AddRemoteReceiver(peer.get(), EndpointId{42});
+    ASSERT_EQ(transmitter.GetNumberOfRemoteReceivers(), 1u);
+
+    MockServiceEndpoint from;
+    const std::vector<uint8_t> payload(16, 0x7E);
+    WireDataMessageEvent event{std::chrono::nanoseconds{99}, payload};
+
+    transmitter.ReceiveMsg(&from, event);
+
+    EXPECT_EQ(contiguousCalls, 1u);
+    // the peer's remote index is serialized directly, not patched afterwards
+    EXPECT_EQ(observedRemoteIndex, EndpointId{42});
+}
+
 TEST(Test_VAsioTransmitter, header_and_body_partition_the_message)
 {
     const std::vector<uint8_t> payload(256, 0x33);

@@ -96,11 +96,25 @@ private:
      */
     struct SendItem
     {
+        //! Upper bound on the network header, which is all that is inlined when a body is shared.
         static constexpr size_t MaxHeaderSize{32};
 
-        std::array<uint8_t, MaxHeaderSize> header{};
-        size_t headerSize{0};
-        SilKit::Util::SharedSpan<uint8_t> body;
+        //! A serialized message up to this size is copied into the item whole, so that it needs no
+        //! allocation and can be written as a single contiguous buffer. Sized to cover the bus
+        //! sized messages that dominate real simulations, a CAN FD frame included, while keeping
+        //! the item small enough that moving it through the queue stays cheap.
+        static constexpr size_t MaxInlineSize{128};
+
+        //! Either the whole message, or just the network header when a body follows.
+        std::array<uint8_t, MaxInlineSize> inlineData{};
+        size_t inlineSize{0};
+
+        //! Bytes owned by this item alone. Used when the message is too large to inline and is not
+        //! shared with other peers, so that no reference counted wrapper is needed.
+        std::vector<uint8_t> ownedBody;
+
+        //! Bytes shared with the other peers this message was sent to.
+        SilKit::Util::SharedSpan<uint8_t> sharedBody;
     };
 
     void StartAsyncWrite();
@@ -109,6 +123,7 @@ private:
     void DispatchBuffer();
     void SendSilKitMsgInternal(std::vector<uint8_t> blob);
     void EnqueueSendItem(SendItem item);
+    static auto MakeSendItem(std::vector<uint8_t> blob) -> SendItem;
     void DispatchSendItem(SendItem item, MessageAggregationKind aggregationKind);
     void BuildCurrentSendingBuffers();
     void Aggregate(const SendItem& item);

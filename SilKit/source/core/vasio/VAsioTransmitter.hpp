@@ -177,10 +177,22 @@ public:
             return;
         }
 
+        const auto endpointAddress = to_endpointAddress(from->GetServiceDescriptor());
+
+        // NB: with a single receiver there is nothing to share, so serialize straight into one
+        //     contiguous buffer carrying that peer's remote index. Going through the shared form
+        //     would only add a reference counted allocation and split the write in two, for no
+        //     benefit. This is the common case for a two participant simulation.
+        if (_remoteReceivers.size() == 1)
+        {
+            auto& receiver = _remoteReceivers.front();
+            receiver.peer->SendSilKitMsg(SerializedMessage{msg, endpointAddress, receiver.remoteIdx});
+            return;
+        }
+
         // NB: serialize once and share the body between all peers. The serialized form differs
         //     per receiver only in the remote index, which each peer patches into its own copy of
         //     the small network header.
-        const auto endpointAddress = to_endpointAddress(from->GetServiceDescriptor());
         const SharedSerializedMessage shared{msg, endpointAddress};
 
         for (auto& receiver : _remoteReceivers)

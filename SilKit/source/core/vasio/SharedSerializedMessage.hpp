@@ -41,6 +41,9 @@ public:
     //! \brief Everything after the network header, shared between all peers.
     auto Body() const -> const Util::SharedSpan<uint8_t>&;
 
+    //! The whole serialized message, network header included.
+    auto Blob() const -> Util::Span<const uint8_t>;
+
     auto HeaderSize() const -> size_t;
     auto RemoteIndexOffset() const -> size_t;
     auto TotalSize() const -> size_t;
@@ -83,6 +86,11 @@ inline auto SharedSerializedMessage::Header() const -> Util::Span<const uint8_t>
 inline auto SharedSerializedMessage::Body() const -> const Util::SharedSpan<uint8_t>&
 {
     return _body;
+}
+
+inline auto SharedSerializedMessage::Blob() const -> Util::Span<const uint8_t>
+{
+    return _blob.AsSpan();
 }
 
 inline auto SharedSerializedMessage::HeaderSize() const -> size_t

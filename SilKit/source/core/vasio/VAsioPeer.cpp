@@ -107,10 +107,7 @@ void VAsioPeer::SendSilKitMsg(SerializedMessage buffer)
     _peerMetrics->TxBytes(buffer.GetStorageSize());
     _peerMetrics->TxPacket();
 
-    SendItem item;
-    item.body = SilKit::Util::SharedSpan<uint8_t>{buffer.ReleaseStorage()};
-
-    DispatchSendItem(std::move(item), aggregationKind);
+    DispatchSendItem(MakeSendItem(buffer.ReleaseStorage()), aggregationKind);
 }
 
 void VAsioPeer::SendSilKitMsg(const SharedSerializedMessage& msg, EndpointId remoteIdx)
@@ -122,13 +119,25 @@ void VAsioPeer::SendSilKitMsg(const SharedSerializedMessage& msg, EndpointId rem
     SILKIT_ASSERT(msg.RemoteIndexOffset() + sizeof(EndpointId) <= msg.HeaderSize());
 
     SendItem item;
-    item.headerSize = msg.HeaderSize();
-    std::memcpy(item.header.data(), msg.Header().data(), item.headerSize);
+
+    if (msg.TotalSize() <= SendItem::MaxInlineSize)
+    {
+        // Small enough to carry whole. This costs one memcpy but avoids both the reference count
+        // traffic and the split write, which dominate for bus sized messages.
+        item.inlineSize = msg.TotalSize();
+        std::memcpy(item.inlineData.data(), msg.Blob().data(), item.inlineSize);
+    }
+    else
+    {
+        item.inlineSize = msg.HeaderSize();
+        std::memcpy(item.inlineData.data(), msg.Header().data(), item.inlineSize);
+        // sharing the body only bumps a reference count
+        item.sharedBody = msg.Body();
+    }
+
     // Patch this peer's remote index into the private copy of the header. The encoding matches
     // what MessageBuffer would have written for an EndpointId.
-    std::memcpy(item.header.data() + msg.RemoteIndexOffset(), &remoteIdx, sizeof(remoteIdx));
-    // sharing the body only bumps a reference count
-    item.body = msg.Body();
+    std::memcpy(item.inlineData.data() + msg.RemoteIndexOffset(), &remoteIdx, sizeof(remoteIdx));
 
     DispatchSendItem(std::move(item), msg.GetAggregationKind());
 }
@@ -152,9 +161,26 @@ void VAsioPeer::DispatchSendItem(SendItem item, MessageAggregationKind aggregati
 
 void VAsioPeer::SendSilKitMsgInternal(std::vector<uint8_t> blob)
 {
+    EnqueueSendItem(MakeSendItem(std::move(blob)));
+}
+
+auto VAsioPeer::MakeSendItem(std::vector<uint8_t> blob) -> SendItem
+{
     SendItem item;
-    item.body = SilKit::Util::SharedSpan<uint8_t>{std::move(blob)};
-    EnqueueSendItem(std::move(item));
+
+    if (blob.size() <= SendItem::MaxInlineSize)
+    {
+        item.inlineSize = blob.size();
+        std::memcpy(item.inlineData.data(), blob.data(), item.inlineSize);
+    }
+    else
+    {
+        // NB: move the vector in rather than wrapping it in a SharedSpan. Nothing shares these
+        //     bytes, so a reference counted wrapper would only add an allocation.
+        item.ownedBody = std::move(blob);
+    }
+
+    return item;
 }
 
 void VAsioPeer::EnqueueSendItem(SendItem item)
@@ -178,15 +204,23 @@ void VAsioPeer::BuildCurrentSendingBuffers()
 {
     _currentSendingBuffers.clear();
 
-    if (_currentSendItem.headerSize > 0)
+    if (_currentSendItem.inlineSize > 0)
     {
-        _currentSendingBuffers.emplace_back(_currentSendItem.header.data(), _currentSendItem.headerSize);
+        _currentSendingBuffers.emplace_back(_currentSendItem.inlineData.data(), _currentSendItem.inlineSize);
     }
 
-    const auto body = _currentSendItem.body.AsSpan();
-    if (!body.empty())
+    if (!_currentSendItem.ownedBody.empty())
     {
-        _currentSendingBuffers.emplace_back(body.data(), body.size());
+        _currentSendingBuffers.emplace_back(_currentSendItem.ownedBody.data(),
+                                            _currentSendItem.ownedBody.size());
+    }
+    else
+    {
+        const auto body = _currentSendItem.sharedBody.AsSpan();
+        if (!body.empty())
+        {
+            _currentSendingBuffers.emplace_back(body.data(), body.size());
+        }
     }
 }
 
@@ -200,14 +234,21 @@ void VAsioPeer::Aggregate(const SendItem& item)
         _initialTimerStarted = true;
     }
 
-    if (item.headerSize > 0)
+    if (item.inlineSize > 0)
     {
-        _aggregatedMessages.insert(_aggregatedMessages.end(), item.header.begin(),
-                                   item.header.begin() + static_cast<std::ptrdiff_t>(item.headerSize));
+        _aggregatedMessages.insert(_aggregatedMessages.end(), item.inlineData.begin(),
+                                   item.inlineData.begin() + static_cast<std::ptrdiff_t>(item.inlineSize));
     }
 
-    const auto body = item.body.AsSpan();
-    _aggregatedMessages.insert(_aggregatedMessages.end(), body.begin(), body.end());
+    if (!item.ownedBody.empty())
+    {
+        _aggregatedMessages.insert(_aggregatedMessages.end(), item.ownedBody.begin(), item.ownedBody.end());
+    }
+    else
+    {
+        const auto body = item.sharedBody.AsSpan();
+        _aggregatedMessages.insert(_aggregatedMessages.end(), body.begin(), body.end());
+    }
 
     // ensure that the aggregation buffer does not exceed a certain size
     if (_aggregatedMessages.size() > _aggregationBufferThreshold)
@@ -413,7 +454,7 @@ void VAsioPeer::OnAsyncWriteSomeDone(IRawByteStream& stream, size_t bytesTransfe
         return;
     }
 
-    // release the shared body as soon as it has been written
+    // release the body as soon as it has been written
     _currentSendItem = SendItem{};
     _sending = false;
     StartAsyncWrite();
