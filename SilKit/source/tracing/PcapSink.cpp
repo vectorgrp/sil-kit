@@ -40,6 +40,8 @@ void PcapSink::Open(SinkType outputType, const std::string& outputPath)
         throw SilKitError("PcapSink::Open: outputPath must not be empty!");
     }
 
+    std::unique_lock<decltype(_lock)> lock{_lock};
+
     switch (outputType)
     {
     case SilKit::SinkType::PcapFile:
@@ -73,6 +75,8 @@ auto PcapSink::Name() const -> const std::string&
 
 void PcapSink::Close()
 {
+    std::unique_lock<decltype(_lock)> lock{_lock};
+
     if (_file)
     {
         _file.flush();
@@ -107,7 +111,7 @@ void PcapSink::Trace(SilKit::Services::TransmitDirection /*unused*/,
     }
     const auto& message = traceMessage.Get<Services::Ethernet::EthernetFrame>();
 
-    std::unique_lock<decltype(_lock)> lock;
+    std::unique_lock<decltype(_lock)> lock{_lock};
 
     const auto tosec = 1000'000ull;
     const auto usec = std::chrono::duration_cast<std::chrono::microseconds>(timestamp);
