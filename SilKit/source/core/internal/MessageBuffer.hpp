@@ -47,6 +47,55 @@ private:
 };
 
 
+//! Maximum number of serialization buffers held per thread, and the largest one worth keeping.
+constexpr size_t SerializationBufferPoolSize{32};
+constexpr size_t SerializationBufferPoolMaxCapacity{64 * 1024};
+
+namespace Detail {
+//! Thread local free list of serialization buffers. See AcquireSerializationBuffer.
+inline auto SerializationBufferPool() -> std::vector<std::vector<uint8_t>>&
+{
+    thread_local std::vector<std::vector<uint8_t>> pool;
+    return pool;
+}
+} // namespace Detail
+
+/*! \brief Take a serialization buffer from the thread local free list, or a fresh one.
+ *
+ * Serializing a message otherwise allocates a buffer every time and retires it again almost
+ * immediately, which heap profiling showed as one allocation per sent message. The list is thread
+ * local so it needs no synchronization; a buffer acquired on one thread and recycled on another
+ * simply migrates between lists, which is harmless.
+ */
+inline auto AcquireSerializationBuffer() -> std::vector<uint8_t>
+{
+    auto& pool = Detail::SerializationBufferPool();
+    if (pool.empty())
+    {
+        return {};
+    }
+
+    auto buffer = std::move(pool.back());
+    pool.pop_back();
+    buffer.clear(); // keeps the capacity, which is the point of pooling it
+    return buffer;
+}
+
+//! Hand a serialization buffer back once its contents are no longer needed.
+inline void RecycleSerializationBuffer(std::vector<uint8_t>&& buffer)
+{
+    auto& pool = Detail::SerializationBufferPool();
+    if (buffer.capacity() == 0 || buffer.capacity() > SerializationBufferPoolMaxCapacity
+        || pool.size() >= SerializationBufferPoolSize)
+    {
+        return;
+    }
+
+    buffer.clear();
+    pool.push_back(std::move(buffer));
+}
+
+
 class MessageBuffer
 {
 public:
@@ -56,7 +105,13 @@ public:
 public:
     // ----------------------------------------
     // Constructors and Destructor
-    inline MessageBuffer() = default;
+    //! NB: takes its storage from the thread local pool, so serializing a message need not
+    //!     allocate one. Only this writing constructor does so; the reading constructors below
+    //!     bring their own storage.
+    inline MessageBuffer()
+        : _storage{AcquireSerializationBuffer()}
+    {
+    }
     inline MessageBuffer(std::vector<uint8_t> data);
     //! \brief Read from a shared blob without copying it. The buffer is read-only in this state.
     inline explicit MessageBuffer(Util::SharedSpan<uint8_t> blob);
