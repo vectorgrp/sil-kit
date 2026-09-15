@@ -29,6 +29,50 @@
 using namespace std::chrono_literals;
 
 
+namespace {
+
+//! Maximum number of receive blobs held per thread, and the largest one worth keeping.
+constexpr size_t ReceiveBlobPoolSize{8};
+constexpr size_t ReceiveBlobPoolMaxCapacity{64 * 1024};
+
+/*! \brief Take a receive blob from the thread local pool, or allocate one.
+ *
+ * Every received message is linearised into a blob that deserialized payloads then alias, so the
+ * blob has to outlive the dispatch. Reusing one is therefore only safe once nothing references it
+ * any more, which is exactly what a use count of one means: only the pool still holds it. Blobs
+ * that no payload kept alive are reused without allocating, which is the common case because
+ * dispatch is synchronous.
+ */
+auto AcquireReceiveBlob(size_t size) -> std::shared_ptr<std::vector<uint8_t>>
+{
+    thread_local std::vector<std::shared_ptr<std::vector<uint8_t>>> pool;
+
+    // Large messages are rare; do not hoard a buffer for them.
+    if (size > ReceiveBlobPoolMaxCapacity)
+    {
+        return std::make_shared<std::vector<uint8_t>>(size);
+    }
+
+    for (auto& entry : pool)
+    {
+        if (entry.use_count() == 1)
+        {
+            entry->resize(size);
+            return entry;
+        }
+    }
+
+    auto blob = std::make_shared<std::vector<uint8_t>>(size);
+    if (pool.size() < ReceiveBlobPoolSize)
+    {
+        pool.push_back(blob);
+    }
+
+    return blob;
+}
+
+} // namespace
+
 namespace SilKit {
 namespace Core {
 
@@ -164,6 +208,9 @@ auto VAsioPeer::MakeSendItem(std::vector<uint8_t> blob) -> SendItem
     {
         item.inlineSize = blob.size();
         std::memcpy(item.inlineData.data(), blob.data(), item.inlineSize);
+        // NB: the bytes live in the item now, so hand the buffer back for the next serialization
+        //     instead of letting it be freed.
+        RecycleSerializationBuffer(std::move(blob));
     }
     else
     {
@@ -369,8 +416,12 @@ void VAsioPeer::DispatchBuffer()
         }
         else
         {
-            // NB: linearised into a shared blob, so that deserialized payloads can alias it.
-            auto currentMsg = std::make_shared<std::vector<uint8_t>>(_currentMsgSize);
+            // NB: the message must be linearised out of the ring buffer because it may wrap, but
+            //     it is allocated as a shared blob so that deserialized payloads can alias it
+            //     instead of being copied out again. The blob is filled before being wrapped,
+            //     which establishes the immutability the SharedSpan invariant requires. One blob
+            //     per message keeps the retained memory bounded by the message's own size.
+            auto currentMsg = AcquireReceiveBlob(_currentMsgSize);
             if (!_msgBuffer.Read(SilKit::Util::ToSpan(*currentMsg)))
             {
                 throw SilKitError("Reading data from ring buffer failed.");
