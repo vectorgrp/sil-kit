@@ -1783,7 +1783,10 @@ void VAsioConnection::ReceiveRawSilKitMessage(IVAsioPeer* from, SerializedMessag
 
     auto endpoint = buffer.GetEndpointAddress(); //ExtractEndpointAddress(buffer);
 
-    auto* fromService = dynamic_cast<IServiceEndpoint*>(from);
+    // NB: IVAsioPeer derives publicly from IServiceEndpoint, so this is a plain upcast. It used
+    //     to be a dynamic_cast, which profiling showed to be a measurable share of the work done
+    //     for every received message.
+    const IServiceEndpoint* fromService = from;
     ServiceDescriptor tmpService(fromService->GetServiceDescriptor());
     tmpService.SetServiceId(endpoint.endpoint);
 
