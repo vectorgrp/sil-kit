@@ -1787,10 +1787,16 @@ void VAsioConnection::ReceiveRawSilKitMessage(IVAsioPeer* from, SerializedMessag
     //     to be a dynamic_cast, which profiling showed to be a measurable share of the work done
     //     for every received message.
     const IServiceEndpoint* fromService = from;
-    ServiceDescriptor tmpService(fromService->GetServiceDescriptor());
-    tmpService.SetServiceId(endpoint.endpoint);
 
-    _vasioReceivers[receiverIdx]->ReceiveRawMsg(from, tmpService, std::move(buffer));
+    // NB: assign into a reusable descriptor rather than constructing a fresh one. The copy exists
+    //     only to override the service id, and constructing it allocated the nodes of the
+    //     supplemental data map for every received message. Assignment reuses the existing nodes
+    //     and string buffers. Only the io thread reaches this and the dispatch below is
+    //     synchronous, so one scratch instance suffices.
+    _receiveServiceDescriptor = fromService->GetServiceDescriptor();
+    _receiveServiceDescriptor.SetServiceId(endpoint.endpoint);
+
+    _vasioReceivers[receiverIdx]->ReceiveRawMsg(from, _receiveServiceDescriptor, std::move(buffer));
 }
 
 void VAsioConnection::RegisterMessageReceiver(std::function<void(IVAsioPeer* peer, ParticipantAnnouncement)> callback)
