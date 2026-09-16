@@ -57,7 +57,13 @@ auto AcquireReceiveBlob(size_t size) -> std::shared_ptr<std::vector<uint8_t>>
     {
         if (entry.use_count() == 1)
         {
-            entry->resize(size);
+            // NB: only grow. Shrinking to the exact size would value initialize bytes that the
+            //     caller overwrites immediately anyway, so keep the blob at its high water size
+            //     and let the caller view only the part it filled.
+            if (entry->size() < size)
+            {
+                entry->resize(size);
+            }
             return entry;
         }
     }
@@ -421,13 +427,15 @@ void VAsioPeer::DispatchBuffer()
             //     instead of being copied out again. The blob is filled before being wrapped,
             //     which establishes the immutability the SharedSpan invariant requires. One blob
             //     per message keeps the retained memory bounded by the message's own size.
-            auto currentMsg = AcquireReceiveBlob(_currentMsgSize);
-            if (!_msgBuffer.Read(SilKit::Util::ToSpan(*currentMsg)))
+            const size_t blobSize = _currentMsgSize;
+            auto currentMsg = AcquireReceiveBlob(blobSize);
+
+            // NB: a pooled blob may be larger than this message, so read and view exactly the
+            //     message's bytes rather than the whole buffer.
+            if (!_msgBuffer.Read(SilKit::Util::Span<uint8_t>{currentMsg->data(), blobSize}))
             {
                 throw SilKitError("Reading data from ring buffer failed.");
             }
-
-            const auto blobSize = currentMsg->size();
             SerializedMessage message{
                 SilKit::Util::MakeSharedSpan(std::shared_ptr<const std::vector<uint8_t>>{std::move(currentMsg)}, 0,
                                              blobSize)};
