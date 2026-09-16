@@ -140,6 +140,10 @@ void SetTimestamp(MsgT& /*msg*/, std::chrono::nanoseconds /*value*/,
 }
 
 // Distribute incoming (= from remote) SilKitMessages to local receivers
+// NB: a byte payload in msg aliases the received message blob and stays valid only as long as some
+//     SharedSpan references it. Receivers must not retain it beyond the synchronous dispatch below
+//     without taking an owning copy (SharedSpan::Cloned()). This is also why the public API
+//     contract states that payloads are valid only for the duration of a handler.
 template <class MsgT>
 void SilKitLink<MsgT>::DistributeRemoteSilKitMessage(const IServiceEndpoint* from, MsgT&& msg)
 {

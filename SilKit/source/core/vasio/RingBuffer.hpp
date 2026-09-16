@@ -23,6 +23,10 @@ public:
     std::size_t Capacity() const;
     std::size_t Size() const;
 
+    // Copy Size() bytes into the caller's memory. The span overloads are the primitives; the
+    // vector overloads are thin wrappers kept for convenience.
+    bool Peek(SilKit::Util::Span<uint8_t> elem) const;
+    bool Read(SilKit::Util::Span<uint8_t> elem);
     bool Peek(std::vector<uint8_t>& elem) const;
     bool Read(std::vector<uint8_t>& elem);
 

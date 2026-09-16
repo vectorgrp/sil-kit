@@ -7,7 +7,7 @@
 #include "silkit/services/can/CanDatatypes.hpp"
 #include "silkit/services/can/string_utils.hpp"
 
-#include "wire/util/SharedVector.hpp"
+#include "util/SharedSpan.hpp"
 
 #include <chrono>
 #include <vector>
@@ -28,7 +28,7 @@ struct WireCanFrame
     uint8_t sdt;  //!< SDU type - describes the structure of the frames Data Field content (for XL Format only)
     uint8_t vcid; //!< Virtual CAN network ID (for XL Format only)
     uint32_t af;  //!< Acceptance field (for XL Format only)
-    Util::SharedVector<uint8_t> dataField; //!< The raw CAN data field
+    Util::SharedSpan<uint8_t> dataField; //!< The raw CAN data field
 };
 
 inline auto ToCanFrame(const WireCanFrame& wireCanFrame) -> CanFrame;

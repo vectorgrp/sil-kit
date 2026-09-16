@@ -5,6 +5,8 @@
 #pragma once
 
 
+#include <array>
+#include <deque>
 #include <vector>
 #include <queue>
 #include <mutex>
@@ -56,6 +58,7 @@ public:
     // ----------------------------------------
     // Public Methods
     void SendSilKitMsg(SerializedMessage buffer) override;
+    void SendSilKitMsg(const SharedSerializedMessage& msg, EndpointId remoteIdx) override;
     void Subscribe(VAsioMsgSubscriber subscriber) override;
 
     auto GetInfo() const -> const VAsioPeerInfo& override;
@@ -85,12 +88,45 @@ public:
 private:
     // ----------------------------------------
     // Private Methods
+    /*! \brief One queued write: an optional per-peer header followed by a shared body.
+     *
+     * A message that is sent to several peers differs only in the remote index inside its network
+     * header, so the body can be shared between peers and only the small header is per-peer. The
+     * header is stored inline; headerSize == 0 marks an item that consists of the body alone.
+     */
+    struct SendItem
+    {
+        //! Upper bound on the network header, which is all that is inlined when a body is shared.
+        static constexpr size_t MaxHeaderSize{32};
+
+        //! A serialized message up to this size is copied into the item whole, so that it needs no
+        //! allocation and can be written as a single contiguous buffer. Sized to cover the bus
+        //! sized messages that dominate real simulations, a CAN FD frame included, while keeping
+        //! the item small enough that moving it through the queue stays cheap.
+        static constexpr size_t MaxInlineSize{128};
+
+        //! Either the whole message, or just the network header when a body follows.
+        std::array<uint8_t, MaxInlineSize> inlineData{};
+        size_t inlineSize{0};
+
+        //! Bytes owned by this item alone. Used when the message is too large to inline and is not
+        //! shared with other peers, so that no reference counted wrapper is needed.
+        std::vector<uint8_t> ownedBody;
+
+        //! Bytes shared with the other peers this message was sent to.
+        SilKit::Util::SharedSpan<uint8_t> sharedBody;
+    };
+
     void StartAsyncWrite();
     void WriteSomeAsync();
     void ReadSomeAsync();
     void DispatchBuffer();
     void SendSilKitMsgInternal(std::vector<uint8_t> blob);
-    void Aggregate(const std::vector<uint8_t>& blob);
+    void EnqueueSendItem(SendItem item);
+    static auto MakeSendItem(std::vector<uint8_t> blob) -> SendItem;
+    void DispatchSendItem(SendItem item, MessageAggregationKind aggregationKind);
+    void BuildCurrentSendingBuffers();
+    void Aggregate(const SendItem& item);
     void Flush();
 
 private: // IRawByteStreamListener
@@ -122,9 +158,11 @@ private:
 
     // sending
     mutable std::mutex _sendingQueueMutex;
-    std::deque<std::vector<uint8_t>> _sendingQueue;
-    ConstBuffer _currentSendingBuffer;
-    std::vector<uint8_t> _currentSendingBufferData;
+    std::deque<SendItem> _sendingQueue;
+    // NB: _currentSendingBuffers points into _currentSendItem, including into its inline header
+    //     array, so the item must be moved into place before the buffers are built.
+    SendItem _currentSendItem;
+    std::vector<ConstBuffer> _currentSendingBuffers;
     std::vector<uint8_t> _aggregatedMessages;
 
     std::atomic_bool _sending{false};

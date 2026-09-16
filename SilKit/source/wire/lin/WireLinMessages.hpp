@@ -8,7 +8,6 @@
 #include "silkit/services/lin/string_utils.hpp"
 #include "silkit/experimental/services/lin/LinDatatypesExtensions.hpp"
 
-#include "wire/util/SharedVector.hpp"
 
 #include <chrono>
 #include <vector>

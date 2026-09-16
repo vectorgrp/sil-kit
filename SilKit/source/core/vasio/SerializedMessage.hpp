@@ -7,6 +7,7 @@
 #include "core/vasio/VAsioDatatypes.hpp"
 #include "core/vasio/SerializedMessageTraits.hpp"
 #include "core/vasio/AggregationMessageTraits.hpp"
+#include "core/vasio/SerializedSizeHint.hpp"
 #include "core/internal/MessageBuffer.hpp"
 
 // Component specific Serialize/Deserialize functions
@@ -34,22 +35,6 @@ auto AdlDeserialize(Args&&... args) -> decltype(auto)
     return Deserialize(std::forward<Args>(args)...);
 }
 
-template <typename T>
-struct SerializedSize
-{
-    size_t _size{};
-    SerializedSize(const T& message)
-    {
-        MessageBuffer buffer;
-        Serialize(buffer, message);
-        _size = buffer.ReleaseStorage().size();
-    }
-    size_t Size() const
-    {
-        return _size;
-    }
-};
-
 // A serialized message used as binary wire format for the VAsio transport.
 class SerializedMessage
 {
@@ -72,6 +57,9 @@ public: // Sending a SerializedMessage: from T to binary blob
 
 public: // Receiving a SerializedMessage: from binary blob to SilKitMessage<T>
     explicit SerializedMessage(std::vector<uint8_t>&& blob);
+    //! \brief Read from a shared blob. Deserialized byte payloads then alias it rather than
+    //!        being copied out of it, and keep it alive for as long as they are referenced.
+    explicit SerializedMessage(Util::SharedSpan<uint8_t> blob);
 
     template <typename ApiMessageT>
     auto Deserialize() -> ApiMessageT;
@@ -94,9 +82,24 @@ public: // Receiving a SerializedMessage: from binary blob to SilKitMessage<T>
         return _buffer.PeekData().size();
     }
 
+    auto GetHeaderSize() const -> size_t
+    {
+        return _headerSize;
+    }
+
+    auto GetRemoteIndexOffset() const -> size_t
+    {
+        return _remoteIndexOffset;
+    }
+
 private:
     void WriteNetworkHeaders();
     void ReadNetworkHeaders();
+    // Size of the network headers and the offset of _remoteIndex within them, both recorded by
+    // WriteNetworkHeaders(). Derived from the actual write positions so they cannot drift from the
+    // layout. Only meaningful for messages that carry a remote index (see IsMwOrSim).
+    size_t _headerSize{0};
+    size_t _remoteIndexOffset{0};
     // network headers, some members are optional depending on messageKind
     uint32_t _messageSize{0};
     VAsioMsgKind _messageKind{VAsioMsgKind::Invalid};
@@ -119,8 +122,7 @@ private:
 template <typename MessageT>
 SerializedMessage::SerializedMessage(const MessageT& message)
 {
-    static SerializedSize<MessageT> messageSize{message};
-    _buffer.IncreaseCapacity(messageSize.Size());
+    _buffer.IncreaseCapacity(SerializedSizeHint<MessageT>::Of(message));
 
     _messageKind = messageKind<MessageT>();
     _registryKind = registryMessageKind<MessageT>();
@@ -134,8 +136,7 @@ SerializedMessage::SerializedMessage(const MessageT& message)
 template <typename MessageT>
 SerializedMessage::SerializedMessage(ProtocolVersion version, const MessageT& message)
 {
-    static SerializedSize<MessageT> messageSize{message};
-    _buffer.IncreaseCapacity(messageSize.Size());
+    _buffer.IncreaseCapacity(SerializedSizeHint<MessageT>::Of(message));
 
     _messageKind = messageKind<MessageT>();
     _registryKind = registryMessageKind<MessageT>();
@@ -150,8 +151,7 @@ SerializedMessage::SerializedMessage(ProtocolVersion version, const MessageT& me
 template <typename MessageT>
 SerializedMessage::SerializedMessage(const MessageT& message, EndpointAddress endpointAddress, EndpointId remoteIndex)
 {
-    static SerializedSize<MessageT> messageSize{message};
-    _buffer.IncreaseCapacity(messageSize.Size());
+    _buffer.IncreaseCapacity(SerializedSizeHint<MessageT>::Of(message));
 
     _remoteIndex = remoteIndex;
     _endpointAddress = endpointAddress;

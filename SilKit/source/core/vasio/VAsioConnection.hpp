@@ -444,7 +444,13 @@ private:
     template <typename... MethodArgs, typename... Args>
     inline void ExecuteOnIoThread(void (VAsioConnection::*method)(MethodArgs...), Args&&... args)
     {
-        _ioContext->Post([=]() mutable { (this->*method)(std::move(args)...); });
+        // NB: the arguments are stored in a tuple by-value so that rvalue arguments are moved rather
+        //     than copied. A plain [=] capture would copy them, discarding the move that the rvalue
+        //     SendMsg overloads deliberately perform. The closure must stay copy-constructible
+        //     because IIoContext::Post takes a std::function.
+        _ioContext->Post([this, method, args = std::make_tuple(std::forward<Args>(args)...)]() mutable {
+            std::apply([this, method](auto&&... a) { (this->*method)(std::move(a)...); }, std::move(args));
+        });
     }
     inline void ExecuteOnIoThread(std::function<void()> function)
     {

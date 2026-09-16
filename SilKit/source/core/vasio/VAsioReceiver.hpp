@@ -28,13 +28,17 @@ struct RemoteServiceEndpoint : IServiceEndpoint
         return _serviceDescriptor;
     }
 
+    // NB: the descriptor is referenced, not copied. Instances are short lived stand-ins used for
+    //     the synchronous dispatch of a single received message, and the referenced descriptor is
+    //     owned by the caller for at least that long. Copying it would deep-copy several strings
+    //     and a map for every received message.
     RemoteServiceEndpoint(const ServiceDescriptor& descriptor)
+        : _serviceDescriptor{descriptor}
     {
-        _serviceDescriptor = descriptor;
     }
 
 private:
-    ServiceDescriptor _serviceDescriptor;
+    const ServiceDescriptor& _serviceDescriptor;
 };
 
 class MessageBuffer;
