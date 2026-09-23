@@ -1271,21 +1271,27 @@ auto VAsioConnection::AcceptTcpConnectionsOn(const std::string& hostName,
 
     if (!hostName.empty())
     {
-        auto resolverResults{_ioContext->Resolve(hostName)};
+        std::vector<asio::ip::tcp::endpoint> endpoints;
+        try
+        {
+            for (const auto& address : _ioContext->Resolve(hostName))
+            {
+                endpoints.emplace_back(asio::ip::make_address(address), port);
+            }
+        }
+        catch (const std::exception& exception)
+        {
+            throw SilKit::ConfigurationError{
+                fmt::format("Invalid listen address \"{}\": {}", hostName, exception.what())};
+        }
 
-        if (resolverResults.empty())
+        if (endpoints.empty())
         {
             _logger->MakeMessage(Log::Level::Error, TopicOf(*this))
                 .SetMessage("AcceptTcpConnectionsOn: Unable to resolve hostname\"{}:{}\"", hostName,
                                      port)
                 .Dispatch();
-            throw SilKit::StateError{"Unable to resolve hostname and service."};
-        }
-
-        std::vector<asio::ip::tcp::endpoint> endpoints;
-        for (const auto& address : resolverResults)
-        {
-            endpoints.emplace_back(asio::ip::make_address(address), port);
+            throw SilKit::ConfigurationError{"Unable to resolve hostname and service."};
         }
 
         endpoint = selectBestEndpointFromResolverResults(endpoints);

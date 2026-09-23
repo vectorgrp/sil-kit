@@ -46,5 +46,13 @@ TEST(Test_VAsioRegistry, check_start_listening)
     }
 }
 
+TEST(Test_VAsioRegistry, start_listening_on_invalid_address_throws)
+{
+    auto configuration{SilKit::Config::MakeEmptyParticipantConfigurationImpl()};
+
+    SilKit::Core::VAsioRegistry vAsioRegistry{configuration};
+    EXPECT_THROW(vAsioRegistry.StartListening("silkit://333.0.0.0:8501"), SilKit::ConfigurationError);
+}
+
 
 } // namespace
