@@ -148,7 +148,6 @@ private:
     std::atomic<bool> _timeSyncActive{false};
 
     // Final State Handling
-    std::mutex _finalStatePromiseMutex;
     std::unique_ptr<std::promise<ParticipantState>> _finalStatePromise;
 
     std::future<ParticipantState> _finalStateFuture;

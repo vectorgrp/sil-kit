@@ -159,7 +159,6 @@ private:
     WatchDog _watchDog;
     bool _isCoupledToWallClock{false};
     std::thread _wallClockCouplingThread;
-    mutable std::mutex _mx;
     std::atomic<std::chrono::nanoseconds::rep> _currentWallClockSyncPointNs{0};
     double _animationFactor{0};
     std::atomic<bool> _wallClockCouplingThreadRunning{false};
