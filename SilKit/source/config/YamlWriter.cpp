@@ -584,6 +584,7 @@ void YamlWriter::Write(const SilKit::Config::Experimental& obj)
     MakeMap();
     NonDefaultWrite(obj.timeSynchronization, "TimeSynchronization", defaultObj.timeSynchronization);
     NonDefaultWrite(obj.metrics, "Metrics", defaultObj.metrics);
+    NonDefaultWrite(obj.useReceiveBufferPool, "UseReceiveBufferPool", defaultObj.useReceiveBufferPool);
 }
 
 

@@ -1133,6 +1133,12 @@
         },
         "Metrics": {
           "$ref": "#/definitions/Metrics"
+        },
+        "UseReceiveBufferPool": {
+          "type": "boolean",
+          "description": "Reuse the buffers that received messages are read into. Set to false to allocate a fresh buffer per received message, which turns a payload used after its handler returned into a detectable use-after-free. Intended for diagnosing such bugs.",
+          "default": true,
+          "examples": [false]
         }
       },
       "additionalProperties": false

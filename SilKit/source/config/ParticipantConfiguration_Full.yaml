@@ -206,3 +206,4 @@ Experimental:
         Name: MyJsonMetrics
       - Type: Remote
         Name: MyRemoteMetricsSink
+  UseReceiveBufferPool: false

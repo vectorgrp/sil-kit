@@ -29,66 +29,18 @@
 using namespace std::chrono_literals;
 
 
-namespace {
-
-//! Maximum number of receive blobs held per thread, and the largest one worth keeping.
-constexpr size_t ReceiveBlobPoolSize{8};
-constexpr size_t ReceiveBlobPoolMaxCapacity{64 * 1024};
-
-/*! \brief Take a receive blob from the thread local pool, or allocate one.
- *
- * Every received message is linearised into a blob that deserialized payloads then alias, so the
- * blob has to outlive the dispatch. Reusing one is therefore only safe once nothing references it
- * any more, which is exactly what a use count of one means: only the pool still holds it. Blobs
- * that no payload kept alive are reused without allocating, which is the common case because
- * dispatch is synchronous.
- */
-auto AcquireReceiveBlob(size_t size) -> std::shared_ptr<std::vector<uint8_t>>
-{
-    thread_local std::vector<std::shared_ptr<std::vector<uint8_t>>> pool;
-
-    // Large messages are rare; do not hoard a buffer for them.
-    if (size > ReceiveBlobPoolMaxCapacity)
-    {
-        return std::make_shared<std::vector<uint8_t>>(size);
-    }
-
-    for (auto& entry : pool)
-    {
-        if (entry.use_count() == 1)
-        {
-            // NB: only grow. Shrinking to the exact size would value initialize bytes that the
-            //     caller overwrites immediately anyway, so keep the blob at its high water size
-            //     and let the caller view only the part it filled.
-            if (entry->size() < size)
-            {
-                entry->resize(size);
-            }
-            return entry;
-        }
-    }
-
-    auto blob = std::make_shared<std::vector<uint8_t>>(size);
-    if (pool.size() < ReceiveBlobPoolSize)
-    {
-        pool.push_back(blob);
-    }
-
-    return blob;
-}
-
-} // namespace
-
 namespace SilKit {
 namespace Core {
 
 VAsioPeer::VAsioPeer(IVAsioPeerListener* listener, IIoContext* ioContext, std::unique_ptr<IRawByteStream> stream,
-                     Services::Logging::ILoggerInternal* logger, std::unique_ptr<VSilKit::IPeerMetrics> peerMetrics)
+                     Services::Logging::ILoggerInternal* logger, std::unique_ptr<VSilKit::IPeerMetrics> peerMetrics,
+                     ReceiveBlobPool* receiveBlobPool)
     : _listener{listener}
     , _ioContext{ioContext}
     , _socket{std::move(stream)}
     , _logger{logger}
     , _msgBuffer{4096}
+    , _receiveBlobPool{receiveBlobPool}
     , _peerMetrics{std::move(peerMetrics)}
 {
     _socket->SetListener(*this);
@@ -428,7 +380,7 @@ void VAsioPeer::DispatchBuffer()
             //     which establishes the immutability the SharedSpan invariant requires. One blob
             //     per message keeps the retained memory bounded by the message's own size.
             const size_t blobSize = _currentMsgSize;
-            auto currentMsg = AcquireReceiveBlob(blobSize);
+            auto currentMsg = _receiveBlobPool->Acquire(blobSize);
 
             // NB: a pooled blob may be larger than this message, so read and view exactly the
             //     message's bytes rather than the whole buffer.

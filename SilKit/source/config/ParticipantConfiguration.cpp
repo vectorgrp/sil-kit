@@ -176,7 +176,8 @@ bool operator==(const TimeSynchronization& lhs, const TimeSynchronization& rhs)
 
 bool operator==(const Experimental& lhs, const Experimental& rhs)
 {
-    return lhs.timeSynchronization == rhs.timeSynchronization && lhs.metrics == rhs.metrics;
+    return lhs.timeSynchronization == rhs.timeSynchronization && lhs.metrics == rhs.metrics
+           && lhs.useReceiveBufferPool == rhs.useReceiveBufferPool;
 }
 
 bool operator==(const Label& lhs, const Label& rhs)
