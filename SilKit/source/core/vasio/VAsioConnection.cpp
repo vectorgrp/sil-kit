@@ -233,6 +233,7 @@ VAsioConnection::VAsioConnection(IParticipantInternal* participant, IMetricsMana
                                  ParticipantId participantId, Services::Orchestration::ITimeProvider* timeProvider,
                                  ProtocolVersion version)
     : _config{std::move(config)}
+    , _receiveBlobPool{_config.experimental.useReceiveBufferPool}
     , _participantName{std::move(participantName)}
     , _participantId{participantId}
     , _timeProvider{timeProvider}
@@ -557,6 +558,13 @@ void VAsioConnection::ConnectParticipantToRegistryAndStartIoWorker(const std::st
 
     _registry = MakeVAsioPeer(std::move(registryStream));
     _registry->SetInfo(registryPeerInfo);
+
+    if (!_receiveBlobPool.IsEnabled())
+    {
+        _logger->MakeMessage(Log::Level::Info, TopicOf(*this))
+            .SetMessage("Receive buffer pool is disabled (Experimental.UseReceiveBufferPool)")
+            .Dispatch();
+    }
 
     _logger->MakeMessage(Log::Level::Info, TopicOf(*this))
         .SetMessage("Connected to registry at '{}' via '{}' ({})",
@@ -2035,12 +2043,12 @@ auto VAsioConnection::MakeVAsioPeer(std::unique_ptr<IRawByteStream> stream) -> s
     if (_config.experimental.metrics.sinks.empty())
     {
         return std::make_unique<VAsioPeer>(this, _ioContext.get(), std::move(stream), _logger,
-                                           std::make_unique<VSilKit::NoMetrics>());
+                                           std::make_unique<VSilKit::NoMetrics>(), &_receiveBlobPool);
     }
     else
     {
         return std::make_unique<VAsioPeer>(this, _ioContext.get(), std::move(stream), _logger,
-                                           std::make_unique<VSilKit::PeerMetrics>());
+                                           std::make_unique<VSilKit::PeerMetrics>(), &_receiveBlobPool);
     }
 }
 

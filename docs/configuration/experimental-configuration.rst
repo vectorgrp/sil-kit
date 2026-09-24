@@ -89,6 +89,34 @@ TimeSynchronization
          In the case of option *On*, however, it is necessary to verify that the transmission of messages within a time step does not depend on incoming messages from other participants.
          In this case, the time step will not be terminated and the communication will block.
 
+UseReceiveBufferPool
+--------------------
+
+.. code-block:: yaml
+
+    Experimental:
+        UseReceiveBufferPool: false
+
+.. list-table:: Receive Buffer Pool Configuration
+   :widths: 15 85
+   :header-rows: 1
+
+   * - Property Name
+     - Description
+
+   * - UseReceiveBufferPool
+     - Reuse the buffers that received messages are read into. Defaults to ``true``.
+
+       Payloads passed to message handlers, for example ``DataMessageEvent::data``, are only valid until
+       the handler returns. With the pool enabled, a payload that is used after its handler returned
+       silently reads the bytes of a later message. Setting this option to ``false`` allocates a fresh
+       buffer per received message instead, so such a use becomes a use-after-free, which crashes more
+       reliably and is reported by memory checkers such as AddressSanitizer.
+
+       .. note::
+         This option is intended for diagnosing payload lifetime issues and costs one allocation per
+         received message. When it is disabled, the participant logs this at ``Info`` level.
+
 Metrics for participants
 ------------------------
 Each participant supports collecting static attributes of a simulation and

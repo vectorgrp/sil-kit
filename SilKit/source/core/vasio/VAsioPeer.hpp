@@ -18,6 +18,7 @@
 #include "core/internal/EndpointAddress.hpp"
 #include "core/internal/MessageBuffer.hpp"
 #include "core/vasio/RingBuffer.hpp"
+#include "core/vasio/ReceiveBlobPool.hpp"
 #include "core/vasio/VAsioPeerInfo.hpp"
 #include "core/internal/ProtocolVersion.hpp"
 
@@ -49,8 +50,10 @@ public:
     VAsioPeer& operator=(const VAsioPeer& other) = delete;
     VAsioPeer& operator=(VAsioPeer&& other) = delete; //implicitly deleted because of mutex
 
+    //! receiveBlobPool must outlive the peer and is only used on the io thread.
     VAsioPeer(IVAsioPeerListener* listener, IIoContext* ioContext, std::unique_ptr<IRawByteStream> stream,
-              Services::Logging::ILoggerInternal* logger, std::unique_ptr<VSilKit::IPeerMetrics> metrics);
+              Services::Logging::ILoggerInternal* logger, std::unique_ptr<VSilKit::IPeerMetrics> metrics,
+              ReceiveBlobPool* receiveBlobPool);
 
     ~VAsioPeer() override;
 
@@ -142,6 +145,7 @@ private:
     std::atomic<uint32_t> _currentMsgSize{0u};
     RingBuffer _msgBuffer;
     std::vector<MutableBuffer> _currentReceivingBuffers;
+    ReceiveBlobPool* _receiveBlobPool{nullptr};
 
     // sending
     mutable std::mutex _sendingQueueMutex;

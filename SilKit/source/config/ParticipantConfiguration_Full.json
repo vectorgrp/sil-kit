@@ -288,6 +288,7 @@
           "Name": "MyRemoteMetricsSink"
         }
       ]
-    }
+    },
+    "UseReceiveBufferPool": false
   }
 }
