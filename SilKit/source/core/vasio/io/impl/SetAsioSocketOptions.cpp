@@ -56,6 +56,22 @@ void SetAsioSocketOptions(Log::ILoggerInternal* logger, asio::ip::tcp::socket& s
             return;
         }
     }
+
+#if defined(TCP_NOTSENT_LOWAT)
+    if (socketOptions.tcp.notSentLowWatermark > 0)
+    {
+        using NotSentLowWatermark = asio::detail::socket_option::integer<IPPROTO_TCP, TCP_NOTSENT_LOWAT>;
+        socket.set_option(NotSentLowWatermark{socketOptions.tcp.notSentLowWatermark}, errorCode);
+        if (errorCode)
+        {
+            logger->MakeMessage(SilKit::Services::Logging::Level::Warn, SilKit::Services::Logging::Topic::Asio)
+                .SetMessage("SetAsioSocketOptions: failed to set not sent low watermark to {}: {}",
+                            socketOptions.tcp.notSentLowWatermark, errorCode.message())
+                .Dispatch();
+            return;
+        }
+    }
+#endif
 }
 
 

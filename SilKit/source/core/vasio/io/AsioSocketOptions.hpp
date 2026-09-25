@@ -16,6 +16,7 @@ struct AsioSocketOptions
         bool noDelay{false};
         int receiveBufferSize{-1};
         int sendBufferSize{-1};
+        int notSentLowWatermark{-1};
     } tcp;
 };
 

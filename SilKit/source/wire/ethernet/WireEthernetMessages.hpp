@@ -10,6 +10,7 @@
 #include "wire/util/SharedVector.hpp"
 
 #include <chrono>
+#include <memory>
 #include <vector>
 
 namespace SilKit {
@@ -30,6 +31,8 @@ struct WireEthernetFrameEvent
     WireEthernetFrame frame;            //!< The Ethernet frame
     TransmitDirection direction;        //!< Receive/Transmit direction
     void* userContext;                  //!< Optional pointer provided by user when sending the frame
+    //! Not serialized. Held by the transport until the frame has been written.
+    std::shared_ptr<const void> transmitReservation{};
 };
 
 inline auto ToEthernetFrameEvent(const WireEthernetFrameEvent& wireEthernetFrameEvent) -> EthernetFrameEvent;
@@ -91,7 +94,7 @@ auto ToEthernetFrameEvent(const WireEthernetFrameEvent& wireEthernetFrameEvent) 
 auto MakeWireEthernetFrameEvent(const EthernetFrameEvent& ethernetFrameEvent) -> WireEthernetFrameEvent
 {
     return {ethernetFrameEvent.timestamp, MakeWireEthernetFrame(ethernetFrameEvent.frame), ethernetFrameEvent.direction,
-            ethernetFrameEvent.userContext};
+            ethernetFrameEvent.userContext, {}};
 }
 
 std::string to_string(const WireEthernetFrame& msg)

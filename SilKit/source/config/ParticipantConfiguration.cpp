@@ -146,7 +146,8 @@ bool operator==(const Middleware& lhs, const Middleware& rhs)
     return lhs.registryUri == rhs.registryUri && lhs.connectAttempts == rhs.connectAttempts
            && lhs.enableDomainSockets == rhs.enableDomainSockets && lhs.tcpNoDelay == rhs.tcpNoDelay
            && lhs.tcpQuickAck == rhs.tcpQuickAck && lhs.tcpReceiveBufferSize == rhs.tcpReceiveBufferSize
-           && lhs.tcpSendBufferSize == rhs.tcpSendBufferSize && lhs.acceptorUris == rhs.acceptorUris
+           && lhs.tcpSendBufferSize == rhs.tcpSendBufferSize
+           && lhs.tcpNotSentLowWatermark == rhs.tcpNotSentLowWatermark && lhs.acceptorUris == rhs.acceptorUris
            && lhs.registryAsFallbackProxy == rhs.registryAsFallbackProxy
            && lhs.connectTimeoutSeconds == rhs.connectTimeoutSeconds
            && lhs.experimentalRemoteParticipantConnection == rhs.experimentalRemoteParticipantConnection;
@@ -176,7 +177,8 @@ bool operator==(const TimeSynchronization& lhs, const TimeSynchronization& rhs)
 
 bool operator==(const Experimental& lhs, const Experimental& rhs)
 {
-    return lhs.timeSynchronization == rhs.timeSynchronization && lhs.metrics == rhs.metrics;
+    return lhs.timeSynchronization == rhs.timeSynchronization && lhs.metrics == rhs.metrics
+           && lhs.transmitQueueSize == rhs.transmitQueueSize;
 }
 
 bool operator==(const Label& lhs, const Label& rhs)

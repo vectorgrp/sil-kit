@@ -1064,6 +1064,11 @@
           "type": "integer",
           "examples": [3456]
         },
+        "TcpNotSentLowWatermark": {
+          "type": "integer",
+          "description": "Sets TCP_NOTSENT_LOWAT on TCP sockets (Linux and macOS only).",
+          "examples": [16384]
+        },
         "TcpReceiveBufferSize": {
           "type": "integer",
           "examples": [3456]
@@ -1133,6 +1138,13 @@
         },
         "Metrics": {
           "$ref": "#/definitions/Metrics"
+        },
+        "TransmitQueueSize": {
+          "type": "integer",
+          "description": "Bytes per Ethernet controller that may wait for transmission. Frames that do not fit are dropped. 0 is unbounded.",
+          "minimum": 0,
+          "default": 0,
+          "examples": [65536]
         }
       },
       "additionalProperties": false

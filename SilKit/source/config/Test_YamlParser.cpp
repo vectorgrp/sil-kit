@@ -414,6 +414,22 @@ Experimental:
     EXPECT_EQ(configDefault.experimental.metrics.updateInterval, 1s);
 }
 
+TEST_F(Test_YamlParser, yaml_transmit_queue_size_and_not_sent_low_watermark)
+{
+    auto config = Deserialize<ParticipantConfiguration>(R"(
+Middleware:
+  TcpNotSentLowWatermark: 16384
+Experimental:
+  TransmitQueueSize: 65536
+)");
+    EXPECT_EQ(config.middleware.tcpNotSentLowWatermark, 16384);
+    EXPECT_EQ(config.experimental.transmitQueueSize, 65536u);
+
+    auto config2 = Deserialize<ParticipantConfiguration>(Serialize(config));
+    EXPECT_EQ(config2.middleware.tcpNotSentLowWatermark, 16384);
+    EXPECT_EQ(config2.experimental.transmitQueueSize, 65536u);
+}
+
 TEST_F(Test_YamlParser, middleware_convert)
 {
     auto config = Deserialize<Middleware>(R"(

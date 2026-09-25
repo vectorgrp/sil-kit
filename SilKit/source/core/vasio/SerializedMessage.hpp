@@ -3,6 +3,9 @@
 // SPDX-License-Identifier: MIT
 
 #pragma once
+#include <memory>
+#include <type_traits>
+
 #include "core/vasio/VAsioMsgKind.hpp"
 #include "core/vasio/VAsioDatatypes.hpp"
 #include "core/vasio/SerializedMessageTraits.hpp"
@@ -33,6 +36,17 @@ auto AdlDeserialize(Args&&... args) -> decltype(auto)
 {
     return Deserialize(std::forward<Args>(args)...);
 }
+
+template <typename T, typename = void>
+struct HasTransmitReservation : std::false_type
+{
+};
+
+template <typename T>
+struct HasTransmitReservation<T, std::void_t<decltype(std::declval<const T&>().transmitReservation)>>
+    : std::true_type
+{
+};
 
 template <typename T>
 struct SerializedSize
@@ -89,6 +103,10 @@ public: // Receiving a SerializedMessage: from binary blob to SilKitMessage<T>
 
     void SetAggregationKind(MessageAggregationKind msgAggregationKind);
 
+    //! Not serialized. The transport holds it until the message has been written.
+    auto ReleaseTransmitReservation() -> std::shared_ptr<const void>;
+    void SetTransmitReservation(std::shared_ptr<const void> reservation);
+
     auto GetStorageSize() const -> size_t
     {
         return _buffer.PeekData().size();
@@ -111,6 +129,7 @@ private:
     ProxyMessageHeader _proxyMessageHeader;
 
     MessageBuffer _buffer;
+    std::shared_ptr<const void> _transmitReservation;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -158,6 +177,10 @@ SerializedMessage::SerializedMessage(const MessageT& message, EndpointAddress en
     _messageKind = messageKind<MessageT>();
     _registryKind = registryMessageKind<MessageT>();
     _aggregationKind = aggregationKind<MessageT>();
+    if constexpr (HasTransmitReservation<MessageT>::value)
+    {
+        _transmitReservation = message.transmitReservation;
+    }
     WriteNetworkHeaders();
     Serialize(_buffer, message);
     //Ensure we can directly Deserialize in unit tests by reading the header in again

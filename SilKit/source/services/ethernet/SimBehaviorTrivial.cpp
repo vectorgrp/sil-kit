@@ -38,7 +38,11 @@ SimBehaviorTrivial::SimBehaviorTrivial(Core::IParticipantInternal* participant, 
     , _parentServiceEndpoint{dynamic_cast<Core::IServiceEndpoint*>(ethController)}
     , _timeProvider{timeProvider}
 {
-    (void)_parentController;
+    const auto transmitQueueSize = participant->GetParticipantConfiguration().experimental.transmitQueueSize;
+    if (transmitQueueSize > 0)
+    {
+        _transmitQueue.emplace(transmitQueueSize);
+    }
 }
 
 template <typename MsgT>
@@ -56,11 +60,21 @@ auto SimBehaviorTrivial::AllowReception(const Core::IServiceEndpoint* /*from*/) 
 void SimBehaviorTrivial::SendMsg(WireEthernetFrameEvent&& ethFrameEvent)
 {
     EthernetState controllerState = _parentController->GetState();
+    auto status = ControllerStateToTransmitStatus(controllerState);
 
     // Trivial Sim: Set the timestamp, trace, send out the event and directly generate the ack
     ethFrameEvent.timestamp = _timeProvider->Now();
 
-    if (controllerState == EthernetState::LinkUp)
+    if (status == EthernetTransmitStatus::Transmitted && _transmitQueue)
+    {
+        ethFrameEvent.transmitReservation = _transmitQueue->TryReserve(ethFrameEvent.frame.raw.AsSpan().size());
+        if (!ethFrameEvent.transmitReservation)
+        {
+            status = EthernetTransmitStatus::Dropped;
+        }
+    }
+
+    if (status == EthernetTransmitStatus::Transmitted)
     {
         // Send to others as RX
         ethFrameEvent.direction = TransmitDirection::RX;
@@ -73,7 +87,7 @@ void SimBehaviorTrivial::SendMsg(WireEthernetFrameEvent&& ethFrameEvent)
 
     EthernetFrameTransmitEvent ack;
     ack.timestamp = ethFrameEvent.timestamp;
-    ack.status = ControllerStateToTransmitStatus(controllerState);
+    ack.status = status;
     ack.userContext = ethFrameEvent.userContext;
     ReceiveMsg(ack);
 }

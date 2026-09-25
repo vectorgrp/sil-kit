@@ -463,6 +463,7 @@ void YamlReader::Read(SilKit::Config::Middleware& obj)
     OptionalRead(obj.tcpQuickAck, "TcpQuickAck");
     OptionalRead(obj.tcpReceiveBufferSize, "TcpReceiveBufferSize");
     OptionalRead(obj.tcpSendBufferSize, "TcpSendBufferSize");
+    OptionalRead(obj.tcpNotSentLowWatermark, "TcpNotSentLowWatermark");
     OptionalRead(obj.enableDomainSockets, "EnableDomainSockets");
     OptionalRead(obj.acceptorUris, "AcceptorUris");
     OptionalRead(obj.registryAsFallbackProxy, "RegistryAsFallbackProxy");
@@ -501,6 +502,7 @@ void YamlReader::Read(SilKit::Config::Experimental& obj)
 {
     OptionalRead(obj.timeSynchronization, "TimeSynchronization");
     OptionalRead(obj.metrics, "Metrics");
+    OptionalRead(obj.transmitQueueSize, "TransmitQueueSize");
 }
 
 void YamlReader::Read(SilKit::Config::ParticipantConfiguration& obj)

@@ -89,6 +89,20 @@ TimeSynchronization
          In the case of option *On*, however, it is necessary to verify that the transmission of messages within a time step does not depend on incoming messages from other participants.
          In this case, the time step will not be terminated and the communication will block.
 
+TransmitQueueSize
+--------------------
+
+.. code-block:: yaml
+
+    Experimental:
+        TransmitQueueSize: 65536
+
+Limits the bytes of Ethernet frames per controller that have been sent but not yet written to the network.
+A frame that does not fit is dropped and acknowledged with ``EthernetTransmitStatus::Dropped``.
+The default ``0`` disables the limit.
+Only applies without a network simulator.
+Combine it with ``Middleware.TcpNotSentLowWatermark``, otherwise the backlog builds up in the operating system's socket buffers instead.
+
 Metrics for participants
 ------------------------
 Each participant supports collecting static attributes of a simulation and

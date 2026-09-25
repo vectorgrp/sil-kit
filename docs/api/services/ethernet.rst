@@ -117,8 +117,8 @@ An optional second parameter of |AddFrameTransmitHandler| allows to specify the 
 
 .. admonition:: Note
 
-  In a simple simulation, the |EthernetTransmitStatus| of the 
-  |EthernetFrameTransmitEvent| will always be |Transmitted|.
+  In a simple simulation, the |EthernetTransmitStatus| of the
+  |EthernetFrameTransmitEvent| will always be |Transmitted|, unless ``Experimental.TransmitQueueSize`` is set.
 
 Receiving Ethernet Frame Events
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -177,7 +177,7 @@ When sending frames, the |EthernetTransmitStatus| of the |EthernetFrameTransmitE
 - |Transmitted|: Transmission was successful.
 - |ControllerInactive|: The sending Ethernet controller tried to send a frame before |Activate| was called.
 - |LinkDown|: |Activate| has been called but the link to another Ethernet Controller has not yet been established.
-- |Dropped|: Indicates a transmit queue overflow.
+- |Dropped|: Indicates a transmit queue overflow, see ``Experimental.TransmitQueueSize``.
 - |InvalidFrameFormat|: The Ethernet frame is invalid, e.g., too small or too large.
 
 API and Data Type Reference

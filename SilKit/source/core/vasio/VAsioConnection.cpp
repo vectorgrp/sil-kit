@@ -174,6 +174,7 @@ auto MakeAsioSocketOptionsFromConfiguration(const SilKit::Config::ParticipantCon
     socketOptions.tcp.noDelay = participantConfiguration.middleware.tcpNoDelay;
     socketOptions.tcp.sendBufferSize = participantConfiguration.middleware.tcpSendBufferSize;
     socketOptions.tcp.receiveBufferSize = participantConfiguration.middleware.tcpReceiveBufferSize;
+    socketOptions.tcp.notSentLowWatermark = participantConfiguration.middleware.tcpNotSentLowWatermark;
 
     return socketOptions;
 }

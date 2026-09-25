@@ -41,6 +41,7 @@ struct MiddlewareCache
     std::optional<int> connectAttempts;
     std::optional<int> tcpReceiveBufferSize;
     std::optional<int> tcpSendBufferSize;
+    std::optional<int> tcpNotSentLowWatermark;
     std::optional<bool> tcpNoDelay;
     std::optional<bool> tcpQuickAck;
     std::optional<bool> enableDomainSockets;
@@ -77,6 +78,7 @@ struct ExperimentalCache
 {
     TimeSynchronizationCache timeSynchronizationCache;
     MetricsCache metricsCache;
+    std::optional<size_t> transmitQueueSize;
 };
 
 struct ConfigIncludeData
@@ -274,6 +276,8 @@ void Cache(const Middleware& root, MiddlewareCache& cache)
                     cache.tcpReceiveBufferSize);
     CacheNonDefault(defaultObject.tcpSendBufferSize, root.tcpSendBufferSize, "Middleware.TcpSendBufferSize",
                     cache.tcpSendBufferSize);
+    CacheNonDefault(defaultObject.tcpNotSentLowWatermark, root.tcpNotSentLowWatermark,
+                    "Middleware.TcpNotSentLowWatermark", cache.tcpNotSentLowWatermark);
     CacheNonDefault(defaultObject.enableDomainSockets, root.enableDomainSockets, "Middleware.EnableDomainSockets",
                     cache.enableDomainSockets);
     CacheNonDefault(defaultObject.registryAsFallbackProxy, root.registryAsFallbackProxy,
@@ -408,8 +412,11 @@ void Cache(const Metrics& root, MetricsCache& cache)
 
 void Cache(const Experimental& root, ExperimentalCache& cache)
 {
+    static const Experimental defaultObject;
     Cache(root.timeSynchronization, cache.timeSynchronizationCache);
     Cache(root.metrics, cache.metricsCache);
+    CacheNonDefault(defaultObject.transmitQueueSize, root.transmitQueueSize, "Experimental.TransmitQueueSize",
+                    cache.transmitQueueSize);
 }
 
 
@@ -496,6 +503,7 @@ void MergeMiddleware(const MiddlewareCache& cache, Middleware& middleware)
     MergeCacheField(cache.tcpNoDelay, middleware.tcpNoDelay);
     MergeCacheField(cache.tcpQuickAck, middleware.tcpQuickAck);
     MergeCacheField(cache.tcpSendBufferSize, middleware.tcpSendBufferSize);
+    MergeCacheField(cache.tcpNotSentLowWatermark, middleware.tcpNotSentLowWatermark);
     MergeCacheField(cache.tcpReceiveBufferSize, middleware.tcpReceiveBufferSize);
     MergeCacheField(cache.enableDomainSockets, middleware.enableDomainSockets);
     MergeCacheField(cache.registryUri, middleware.registryUri);
@@ -557,6 +565,7 @@ void MergeExperimentalCache(const ExperimentalCache& cache, Experimental& experi
 {
     MergeTimeSynchronizationCache(cache.timeSynchronizationCache, experimental.timeSynchronization);
     MergeMetricsCache(cache.metricsCache, experimental.metrics);
+    MergeCacheField(cache.transmitQueueSize, experimental.transmitQueueSize);
 }
 
 

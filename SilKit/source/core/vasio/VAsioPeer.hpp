@@ -85,12 +85,18 @@ public:
 private:
     // ----------------------------------------
     // Private Methods
+    struct SendItem
+    {
+        std::vector<uint8_t> data;
+        std::shared_ptr<const void> transmitReservation;
+    };
+
     void StartAsyncWrite();
     void WriteSomeAsync();
     void ReadSomeAsync();
     void DispatchBuffer();
-    void SendSilKitMsgInternal(std::vector<uint8_t> blob);
-    void Aggregate(const std::vector<uint8_t>& blob);
+    void SendSilKitMsgInternal(SendItem item);
+    void Aggregate(const std::vector<uint8_t>& blob, std::shared_ptr<const void> transmitReservation);
     void Flush();
 
 private: // IRawByteStreamListener
@@ -122,10 +128,11 @@ private:
 
     // sending
     mutable std::mutex _sendingQueueMutex;
-    std::deque<std::vector<uint8_t>> _sendingQueue;
+    std::deque<SendItem> _sendingQueue;
     ConstBuffer _currentSendingBuffer;
-    std::vector<uint8_t> _currentSendingBufferData;
+    SendItem _currentSendItem;
     std::vector<uint8_t> _aggregatedMessages;
+    std::vector<std::shared_ptr<const void>> _aggregatedTransmitReservations;
 
     std::atomic_bool _sending{false};
     Core::ServiceDescriptor _serviceDescriptor;

@@ -74,6 +74,10 @@ running on 'localhost' listening on port 8500. These values can be changed via t
    * - TcpReceiveBufferSize
      - Sets the TCP receive buffer size. Be careful when changing the OS defaults!
 
+   * - TcpNotSentLowWatermark
+     - Sets the TCP_NOTSENT_LOWAT option on TCP sockets (Linux and macOS only), which limits the unsent bytes
+       buffered by the operating system. See ``Experimental.TransmitQueueSize``.
+
    * - RegistryAsFallbackProxy
      - Disable using the registry as a proxy for participant-to-participant
        communication as a fallback, if the direct connection attempts fail.
