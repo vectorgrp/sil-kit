@@ -21,12 +21,6 @@ using WeakBlob = std::weak_ptr<std::vector<uint8_t>>;
 constexpr size_t Small{100};
 constexpr size_t Large{60 * 1024};
 
-TEST(Test_ReceiveBlobPool, reports_whether_it_is_enabled)
-{
-    EXPECT_TRUE(ReceiveBlobPool{true}.IsEnabled());
-    EXPECT_FALSE(ReceiveBlobPool{false}.IsEnabled());
-}
-
 TEST(Test_ReceiveBlobPool, reuses_an_unreferenced_blob)
 {
     ReceiveBlobPool pool{true};

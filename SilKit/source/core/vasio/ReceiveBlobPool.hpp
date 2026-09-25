@@ -14,14 +14,9 @@ namespace Core {
 
 /*! \brief The blobs that received messages are linearised into.
  *
- * Deserialized payloads alias the blob of their message, so a blob can only be reused once nothing
- * references it any more, which is what a use count of one means: only the pool still holds it.
- * Blobs that no payload kept alive are reused without allocating, which is the common case because
- * dispatch is synchronous.
- *
- * A disabled pool allocates a fresh blob per message. A payload used after its handler returned
- * then reads freed memory, which sanitizers and debug heaps detect, instead of silently reading the
- * bytes of a later message. See Config::Experimental::useReceiveBufferPool.
+ * Deserialized payloads alias their blob, so a blob is only reused once the pool holds the last
+ * reference. A disabled pool allocates a fresh blob per message, see
+ * Config::Experimental::useReceiveBufferPool.
  *
  * Not thread safe. The owning connection only uses it from its io thread.
  */

@@ -119,8 +119,7 @@ void AsioGenericRawByteStream::AsyncReadSome(MutableBufferSequence bufferSequenc
             _reading = true;
         }
 
-        // NB: same as in AsyncWriteSome. The ring buffer only needs two buffers when the free
-        //     region wraps, so a single buffer is the common case here too.
+        // NB: see AsyncWriteSome. Two buffers are only needed when the ring buffer wraps.
         if (bufferSequence.size() == 1)
         {
             _socket.async_read_some(asio::mutable_buffer{bufferSequence[0].GetData(), bufferSequence[0].GetSize()},
@@ -163,10 +162,8 @@ void AsioGenericRawByteStream::AsyncWriteSome(ConstBufferSequence bufferSequence
             _writing = true;
         }
 
-        // NB: asio copies a buffer sequence into the async operation, which costs an allocation
-        //     per write. A single buffer is stored in the operation by value instead, so take that
-        //     path when there is only one. That is the common case, because a small message is
-        //     written as one contiguous buffer.
+        // NB: asio allocates to copy a buffer sequence into the operation, but stores a single
+        //     buffer by value. A single buffer is the common case.
         if (bufferSequence.size() == 1)
         {
             _socket.async_write_some(asio::const_buffer{bufferSequence[0].GetData(), bufferSequence[0].GetSize()},
