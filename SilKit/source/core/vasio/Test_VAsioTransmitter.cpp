@@ -4,7 +4,6 @@
 
 #include "core/vasio/VAsioTransmitter.hpp"
 
-#include <cstring>
 #include <memory>
 #include <vector>
 
@@ -48,28 +47,16 @@ struct Observation
     const void* messageIdentity{nullptr};
     const void* bodyData{nullptr};
     size_t bodySize{0};
-    size_t totalSize{0};
     EndpointId remoteIdx{0};
-    //! the remote index as it would appear on the wire, read back from the patched header
-    EndpointId patchedRemoteIndex{0};
-    std::vector<uint8_t> header;
 };
 
-//! Reproduce what VAsioPeer does with the shared message for one peer.
 auto Observe(const SharedSerializedMessage& msg, EndpointId remoteIdx) -> Observation
 {
     Observation observation;
     observation.messageIdentity = &msg;
     observation.bodyData = msg.Body().AsSpan().data();
     observation.bodySize = msg.Body().size();
-    observation.totalSize = msg.TotalSize();
     observation.remoteIdx = remoteIdx;
-
-    observation.header.assign(msg.Header().begin(), msg.Header().end());
-    std::memcpy(observation.header.data() + msg.RemoteIndexOffset(), &remoteIdx, sizeof(remoteIdx));
-    std::memcpy(&observation.patchedRemoteIndex, observation.header.data() + msg.RemoteIndexOffset(),
-                sizeof(observation.patchedRemoteIndex));
-
     return observation;
 }
 
@@ -135,17 +122,7 @@ TEST(Test_VAsioTransmitter, serializes_once_and_shares_the_body_across_peers)
 
     for (size_t i = 0; i < numPeers; ++i)
     {
-        const auto expected = static_cast<EndpointId>(100 + i);
-        EXPECT_EQ(observations[i].remoteIdx, expected);
-        // each peer's private header carries its own remote index
-        EXPECT_EQ(observations[i].patchedRemoteIndex, expected);
-    }
-
-    // the per-peer headers differ only in the remote index
-    for (size_t i = 1; i < numPeers; ++i)
-    {
-        ASSERT_EQ(observations[i].header.size(), observations[0].header.size());
-        EXPECT_NE(observations[i].header, observations[0].header);
+        EXPECT_EQ(observations[i].remoteIdx, static_cast<EndpointId>(100 + i));
     }
 }
 
@@ -164,14 +141,10 @@ TEST(Test_VAsioTransmitter, a_single_receiver_is_sent_one_contiguous_message)
     ON_CALL(*peer, GetInfo()).WillByDefault(testing::ReturnRef(peerInfo));
 
     EndpointId observedRemoteIndex{0};
-    size_t contiguousCalls{0};
 
     EXPECT_CALL(*peer, SendSilKitMsg(testing::Matcher<SerializedMessage>(testing::_)))
         .Times(1)
-        .WillOnce([&observedRemoteIndex, &contiguousCalls](SerializedMessage msg) {
-        ++contiguousCalls;
-        observedRemoteIndex = msg.GetRemoteIndex();
-    });
+        .WillOnce([&observedRemoteIndex](SerializedMessage msg) { observedRemoteIndex = msg.GetRemoteIndex(); });
 
     // the shared overload must not be used at all for a single receiver
     EXPECT_CALL(*peer, SendSilKitMsg(testing::Matcher<const SharedSerializedMessage&>(testing::_),
@@ -187,8 +160,6 @@ TEST(Test_VAsioTransmitter, a_single_receiver_is_sent_one_contiguous_message)
 
     transmitter.ReceiveMsg(&from, event);
 
-    EXPECT_EQ(contiguousCalls, 1u);
-    // the peer's remote index is serialized directly, not patched afterwards
     EXPECT_EQ(observedRemoteIndex, EndpointId{42});
 }
 

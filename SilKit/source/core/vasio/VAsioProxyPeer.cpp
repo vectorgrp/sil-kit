@@ -58,10 +58,7 @@ void VAsioProxyPeer::SendSilKitMsg(SerializedMessage buffer)
 
 void VAsioProxyPeer::SendSilKitMsg(const SharedSerializedMessage& msg, EndpointId remoteIdx)
 {
-    // NB: a proxied message is re-serialized into a ProxyMessage anyway, so the shared body
-    //     cannot be forwarded as a separate buffer. Materialize the header and the body into one
-    //     contiguous payload and patch the remote index, which matches the cost of the plain
-    //     SendSilKitMsg path. The proxy is a connectivity fallback, not a throughput path.
+    // NB: the ProxyMessage payload must be contiguous, so the shared body is copied.
     std::vector<uint8_t> payload;
     payload.reserve(msg.TotalSize());
 

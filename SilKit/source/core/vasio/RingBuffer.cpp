@@ -67,16 +67,6 @@ bool RingBuffer::Read(SilKit::Util::Span<uint8_t> elem)
     return true;
 }
 
-bool RingBuffer::Peek(std::vector<uint8_t>& elem) const
-{
-    return Peek(SilKit::Util::ToSpan(elem));
-}
-
-bool RingBuffer::Read(std::vector<uint8_t>& elem)
-{
-    return Read(SilKit::Util::ToSpan(elem));
-}
-
 void RingBuffer::GetWritingBuffers(std::vector<MutableBuffer>& buffers)
 {
     auto arrayOne = GetFreeMemoryArrayOne();

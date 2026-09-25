@@ -57,8 +57,7 @@ public: // Sending a SerializedMessage: from T to binary blob
 
 public: // Receiving a SerializedMessage: from binary blob to SilKitMessage<T>
     explicit SerializedMessage(std::vector<uint8_t>&& blob);
-    //! \brief Read from a shared blob. Deserialized byte payloads then alias it rather than
-    //!        being copied out of it, and keep it alive for as long as they are referenced.
+    //! \brief Read from a shared blob. Deserialized byte payloads alias it instead of copying.
     explicit SerializedMessage(Util::SharedSpan<uint8_t> blob);
 
     template <typename ApiMessageT>
@@ -95,8 +94,7 @@ public: // Receiving a SerializedMessage: from binary blob to SilKitMessage<T>
 private:
     void WriteNetworkHeaders();
     void ReadNetworkHeaders();
-    // Size of the network headers and the offset of _remoteIndex within them, both recorded by
-    // WriteNetworkHeaders(). Derived from the actual write positions so they cannot drift from the
+    // Recorded from the write positions in WriteNetworkHeaders(), so they cannot drift from the
     // layout. Only meaningful for messages that carry a remote index (see IsMwOrSim).
     size_t _headerSize{0};
     size_t _remoteIndexOffset{0};

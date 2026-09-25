@@ -15,24 +15,20 @@
 namespace SilKit {
 namespace Core {
 
+//! Network headers plus room for the fixed size fields of small messages.
+constexpr size_t SerializedSizeHintFixedOverhead{128};
+
 /*! \brief Capacity hint for the serialization buffer of a message.
  *
- * Reserving the full serialized size up front keeps the whole serialization free of
- * reallocations. That matters most for the payload carrying messages: without an accurate hint,
- * a field written after a large payload can trigger a reallocation that copies the payload.
- *
- * The hint may over- but must never systematically under-estimate for payload carrying types.
- * It is only a capacity hint, so an inaccurate value costs performance, never correctness.
+ * For payload carrying messages the hint must cover the payload, otherwise a field written after
+ * it can trigger a reallocation that copies the payload.
  */
 template <typename MessageT>
 struct SerializedSizeHint
 {
-    //! Network headers plus room for the fixed size fields of small messages.
-    static constexpr size_t FixedOverhead{128};
-
     static auto Of(const MessageT& /*message*/) -> size_t
     {
-        return FixedOverhead;
+        return SerializedSizeHintFixedOverhead;
     }
 };
 
@@ -40,10 +36,9 @@ struct SerializedSizeHint
     template <> \
     struct SerializedSizeHint<MessageType> \
     { \
-        static constexpr size_t FixedOverhead{128}; \
         static auto Of(const MessageType& message) -> size_t \
         { \
-            return FixedOverhead + (PayloadExpression).size(); \
+            return SerializedSizeHintFixedOverhead + (PayloadExpression).size(); \
         } \
     }
 

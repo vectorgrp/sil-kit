@@ -15,20 +15,9 @@ namespace Core {
 
 /*! \brief A simulation message serialized once for delivery to any number of peers.
  *
- * The serialized form of a simulation message differs between its receivers only in the remote
- * index inside the network header. This type therefore serializes the message a single time and
- * exposes the header and the body separately, so that each peer can send its own small header
- * followed by the shared body instead of re-serializing the whole message per peer.
- *
- * The body is shared through a reference count, so it stays alive until the slowest peer has
- * finished writing it.
- *
- * NB: this relies on the serialized body being independent of the peer. That holds because
- *     simulation message serialization does not consult MessageBuffer::GetProtocolVersion();
- *     only the handshake and registry messages are protocol version dependent. If a simulation
- *     serdes ever becomes version dependent, the remote receivers have to be grouped by peer
- *     protocol version and serialized once per distinct version. See also
- *     README-network-compatibility.md.
+ * Receivers differ only in the remote index of the network header, so each peer sends its own
+ * patched copy of the header followed by the shared body. Relies on simulation message serdes
+ * being independent of the protocol version, see README-network-compatibility.md.
  */
 class SharedSerializedMessage
 {

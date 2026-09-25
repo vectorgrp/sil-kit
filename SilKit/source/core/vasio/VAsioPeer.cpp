@@ -122,8 +122,7 @@ void VAsioPeer::SendSilKitMsg(const SharedSerializedMessage& msg, EndpointId rem
 
     if (msg.TotalSize() <= SendItem::MaxInlineSize)
     {
-        // Small enough to carry whole. This costs one memcpy but avoids both the reference count
-        // traffic and the split write, which dominate for bus sized messages.
+        // NB: one memcpy is cheaper than the reference count traffic and the split write.
         item.inlineSize = msg.TotalSize();
         std::memcpy(item.inlineData.data(), msg.Blob().data(), item.inlineSize);
     }
@@ -131,12 +130,10 @@ void VAsioPeer::SendSilKitMsg(const SharedSerializedMessage& msg, EndpointId rem
     {
         item.inlineSize = msg.HeaderSize();
         std::memcpy(item.inlineData.data(), msg.Header().data(), item.inlineSize);
-        // sharing the body only bumps a reference count
         item.sharedBody = msg.Body();
     }
 
-    // Patch this peer's remote index into the private copy of the header. The encoding matches
-    // what MessageBuffer would have written for an EndpointId.
+    // NB: same encoding as MessageBuffer uses for an EndpointId.
     std::memcpy(item.inlineData.data() + msg.RemoteIndexOffset(), &remoteIdx, sizeof(remoteIdx));
 
     DispatchSendItem(std::move(item), msg.GetAggregationKind());
@@ -159,11 +156,6 @@ void VAsioPeer::DispatchSendItem(SendItem item, MessageAggregationKind aggregati
     }
 }
 
-void VAsioPeer::SendSilKitMsgInternal(std::vector<uint8_t> blob)
-{
-    EnqueueSendItem(MakeSendItem(std::move(blob)));
-}
-
 auto VAsioPeer::MakeSendItem(std::vector<uint8_t> blob) -> SendItem
 {
     SendItem item;
@@ -175,8 +167,7 @@ auto VAsioPeer::MakeSendItem(std::vector<uint8_t> blob) -> SendItem
     }
     else
     {
-        // NB: move the vector in rather than wrapping it in a SharedSpan. Nothing shares these
-        //     bytes, so a reference counted wrapper would only add an allocation.
+        // NB: nothing shares these bytes, so a SharedSpan would only add an allocation.
         item.ownedBody = std::move(blob);
     }
 
@@ -266,7 +257,7 @@ void VAsioPeer::Flush()
 {
     decltype(_aggregatedMessages) blob;
     blob.swap(_aggregatedMessages);
-    SendSilKitMsgInternal(std::move(blob));
+    EnqueueSendItem(MakeSendItem(std::move(blob)));
 
     // reset timer when flush is triggered
     _flushTimer->AsyncWaitFor(_flushTimeout);
@@ -285,8 +276,6 @@ void VAsioPeer::StartAsyncWrite()
 
     _sending = true;
 
-    // NB: the item must be moved into place before the buffers are built. Moving a SendItem
-    //     relocates its inline header array, so buffers built beforehand would dangle.
     _currentSendItem = std::move(_sendingQueue.front());
     _sendingQueue.pop_front();
     lock.unlock();
@@ -338,9 +327,6 @@ void VAsioPeer::DispatchBuffer()
             }
             if (_msgBuffer.Size() >= sizeof(uint32_t))
             {
-                // NB: peek into a stack buffer and decode via memcpy. Reading the size through a
-                //     reinterpret_cast of the byte buffer would be misaligned and violate strict
-                //     aliasing, and a heap vector per message is needless here.
                 std::array<uint8_t, sizeof(uint32_t)> msgSizeInBytes{};
                 if (!_msgBuffer.Peek(SilKit::Util::MakeSpan(msgSizeInBytes)))
                 {
@@ -383,11 +369,7 @@ void VAsioPeer::DispatchBuffer()
         }
         else
         {
-            // NB: the message must be linearised out of the ring buffer because it may wrap, but
-            //     it is allocated as a shared blob so that deserialized payloads can alias it
-            //     instead of being copied out again. The blob is filled before being wrapped,
-            //     which establishes the immutability the SharedSpan invariant requires. One blob
-            //     per message keeps the retained memory bounded by the message's own size.
+            // NB: linearised into a shared blob, so that deserialized payloads can alias it.
             auto currentMsg = std::make_shared<std::vector<uint8_t>>(_currentMsgSize);
             if (!_msgBuffer.Read(SilKit::Util::ToSpan(*currentMsg)))
             {

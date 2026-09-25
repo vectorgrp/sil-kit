@@ -92,9 +92,6 @@ void SerializedMessage::WriteNetworkHeaders()
     }
     if (IsMwOrSim(_messageKind))
     {
-        // NB: record the offsets from the actual write positions rather than hard-coding them, so
-        //     that they cannot drift if the header layout changes. Sharing one serialized body
-        //     between peers relies on _remoteIndex being the only field that differs per peer.
         _remoteIndexOffset = _buffer.WritePos();
         _buffer << _remoteIndex << _endpointAddress;
     }

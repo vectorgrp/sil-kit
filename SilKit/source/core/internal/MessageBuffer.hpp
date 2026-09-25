@@ -192,14 +192,8 @@ public:
     template <typename ValueT>
     inline MessageBuffer& operator>>(std::vector<ValueT>& vector);
     // --------------------------------------------------------------------------------
-    // Util::SharedSpan<T>
-    template <typename ValueT>
-    inline MessageBuffer& operator<<(const Util::SharedSpan<ValueT>& sharedData);
-    template <typename ValueT>
-    inline MessageBuffer& operator>>(Util::SharedSpan<ValueT>& sharedData);
-    // NB: only for uint8_t. A byte payload is serialized as a length prefix plus the bytes
-    //     verbatim, so it can be aliased. Other element types are serialized element-wise and
-    //     have alignment requirements, so they must be copied out.
+    // Util::SharedSpan<uint8_t>
+    inline MessageBuffer& operator<<(const Util::SharedSpan<uint8_t>& sharedData);
     inline MessageBuffer& operator>>(Util::SharedSpan<uint8_t>& sharedData);
     // --------------------------------------------------------------------------------
     // Util::Span<T>
@@ -261,19 +255,16 @@ public:
     }
 
 private:
-    //! \brief Start of the readable bytes, whether owned locally or shared.
     inline auto Data() const -> const uint8_t*
     {
         return _readsFromSharedStorage ? _sharedStorage.AsSpan().data() : _storage.data();
     }
 
-    //! \brief Number of readable bytes, whether owned locally or shared.
     inline auto Size() const -> size_t
     {
         return _readsFromSharedStorage ? _sharedStorage.size() : _storage.size();
     }
 
-    //! \brief A buffer constructed from a shared blob is read-only.
     inline void AssertWritable() const
     {
         if (_readsFromSharedStorage)
@@ -282,10 +273,7 @@ private:
         }
     }
 
-    //! \brief Append count raw bytes at the current write position.
-    //
-    // Uses a single insert for the common append case, which avoids the zero-fill that resize()
-    // performs on bytes that are immediately overwritten anyway.
+    // NB: insert() when appending, which avoids the zero-fill of resize().
     inline void AppendBytes(const uint8_t* first, size_t count)
     {
         AssertWritable();
@@ -315,8 +303,7 @@ private:
     // private members
     ProtocolVersion _protocolVersion{CurrentProtocolVersion()};
     std::vector<uint8_t> _storage;
-    // Set instead of _storage when the buffer reads from a blob owned elsewhere. Deserialized
-    // byte payloads then alias this blob rather than being copied out of it.
+    // Used instead of _storage when reading a shared blob, so that byte payloads can alias it.
     Util::SharedSpan<uint8_t> _sharedStorage;
     bool _readsFromSharedStorage{false};
     std::size_t _wPos{0u};
@@ -477,23 +464,11 @@ inline MessageBuffer& MessageBuffer::operator<<(const Util::Span<ValueT>& span)
     return *this;
 }
 // --------------------------------------------------------------------------------
-// Util::SharedSpan<T>
-template <typename ValueT>
-inline MessageBuffer& MessageBuffer::operator<<(const Util::SharedSpan<ValueT>& sharedData)
+// Util::SharedSpan<uint8_t>
+inline MessageBuffer& MessageBuffer::operator<<(const Util::SharedSpan<uint8_t>& sharedData)
 {
     const auto span = sharedData.AsSpan();
     return *this << span;
-}
-
-template <typename ValueT>
-inline MessageBuffer& MessageBuffer::operator>>(Util::SharedSpan<ValueT>& sharedData)
-{
-    std::vector<ValueT> vector;
-    *this >> vector;
-
-    sharedData = Util::SharedSpan<ValueT>{std::move(vector)};
-
-    return *this;
 }
 
 inline MessageBuffer& MessageBuffer::operator>>(Util::SharedSpan<uint8_t>& sharedData)
@@ -506,8 +481,6 @@ inline MessageBuffer& MessageBuffer::operator>>(Util::SharedSpan<uint8_t>& share
 
     if (_readsFromSharedStorage)
     {
-        // Alias the shared blob instead of copying the payload out of it. Subspan is range
-        // checked and keeps the blob alive for as long as the payload is referenced.
         sharedData = _sharedStorage.Subspan(_rPos, payloadSize);
     }
     else

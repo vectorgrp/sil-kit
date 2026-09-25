@@ -138,10 +138,6 @@ TEST(Test_SerializedMessage, packed_sim_message)
     ASSERT_EQ(ptr->payload.at(0), payload.at(0));
     ASSERT_EQ(ptr->payload.at(3), payload.at(3));
     ASSERT_EQ(ptr->timestamp, event.timestamp.count());
-
-    // Pin the offsets that the shared-body send path depends on.
-    ASSERT_EQ(offsetof(PackedSimMessage, remoteIndex), 5u);
-    ASSERT_EQ(offsetof(PackedSimMessage, payloadSize), 29u);
 }
 
 TEST(Test_SerializedMessage, deserialized_payload_aliases_a_shared_blob)

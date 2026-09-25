@@ -27,7 +27,7 @@ public:
 
 public:
     virtual void SendSilKitMsg(SerializedMessage buffer) = 0;
-    //! brief Send a message that was serialized once for several peers, patching remoteIdx.
+    //! \brief Send a message that was serialized once for several peers, patching remoteIdx.
     virtual void SendSilKitMsg(const SharedSerializedMessage& msg, EndpointId remoteIdx) = 0;
     virtual void Subscribe(VAsioMsgSubscriber subscriber) = 0;
 

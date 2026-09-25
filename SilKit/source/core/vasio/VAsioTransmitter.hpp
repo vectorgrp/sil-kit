@@ -43,11 +43,8 @@ struct MessageHistory<MsgT, 1>
         _hasHistory = historyLength != 0;
     }
 
-    // NB: the saved message is retained for the lifetime of the participant, so its payload must
-    //     be owning. That holds today: this transmitter is only reached from
-    //     SilKitLink::DistributeLocalSilKitMessage, and locally published payloads always own a
-    //     copy of the user's bytes. A received payload aliases the socket blob and must not end up
-    //     here; if that ever becomes possible, call SharedSpan::Cloned() on the payload first.
+    // NB: the saved payload is retained, so it must not alias a received blob. This holds because
+    //     only locally published messages, which own a copy of the user's bytes, reach this.
     void Save(const IServiceEndpoint* from, const MsgT& msg)
     {
         if (!_hasHistory)
@@ -179,10 +176,7 @@ public:
 
         const auto endpointAddress = to_endpointAddress(from->GetServiceDescriptor());
 
-        // NB: with a single receiver there is nothing to share, so serialize straight into one
-        //     contiguous buffer carrying that peer's remote index. Going through the shared form
-        //     would only add a reference counted allocation and split the write in two, for no
-        //     benefit. This is the common case for a two participant simulation.
+        // NB: nothing to share with a single receiver, so avoid the extra allocation and split write.
         if (_remoteReceivers.size() == 1)
         {
             auto& receiver = _remoteReceivers.front();
@@ -190,9 +184,6 @@ public:
             return;
         }
 
-        // NB: serialize once and share the body between all peers. The serialized form differs
-        //     per receiver only in the remote index, which each peer patches into its own copy of
-        //     the small network header.
         const SharedSerializedMessage shared{msg, endpointAddress};
 
         for (auto& receiver : _remoteReceivers)
