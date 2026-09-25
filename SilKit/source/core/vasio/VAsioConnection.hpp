@@ -513,7 +513,7 @@ private:
     Util::tuple_tools::wrapped_tuple<SilKitServiceToLinkMap, SilKitMessageTypes> _serviceToLinkMap;
 
     //! Reused for every received message, to avoid reallocating the descriptor's strings and
-    //! supplemental data map each time. Only touched on the io thread.
+    //! supplemental data map each time. Only touched on the io thread, and dispatch is synchronous.
     ServiceDescriptor _receiveServiceDescriptor;
 
     std::vector<std::unique_ptr<IVAsioReceiver>> _vasioReceivers;

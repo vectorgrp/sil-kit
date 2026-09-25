@@ -62,10 +62,7 @@ inline auto SerializationBufferPool() -> std::vector<std::vector<uint8_t>>&
 
 /*! \brief Take a serialization buffer from the thread local free list, or a fresh one.
  *
- * Serializing a message otherwise allocates a buffer every time and retires it again almost
- * immediately, which heap profiling showed as one allocation per sent message. The list is thread
- * local so it needs no synchronization; a buffer acquired on one thread and recycled on another
- * simply migrates between lists, which is harmless.
+ * A buffer acquired on one thread and recycled on another migrates between lists, which is harmless.
  */
 inline auto AcquireSerializationBuffer() -> std::vector<uint8_t>
 {
@@ -77,7 +74,6 @@ inline auto AcquireSerializationBuffer() -> std::vector<uint8_t>
 
     auto buffer = std::move(pool.back());
     pool.pop_back();
-    buffer.clear(); // keeps the capacity, which is the point of pooling it
     return buffer;
 }
 
@@ -105,9 +101,7 @@ public:
 public:
     // ----------------------------------------
     // Constructors and Destructor
-    //! NB: takes its storage from the thread local pool, so serializing a message need not
-    //!     allocate one. Only this writing constructor does so; the reading constructors below
-    //!     bring their own storage.
+    // NB: the writing constructor takes its storage from the thread local serialization pool.
     inline MessageBuffer()
         : _storage{AcquireSerializationBuffer()}
     {

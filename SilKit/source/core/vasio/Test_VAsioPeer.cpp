@@ -28,6 +28,7 @@ namespace {
 
 using namespace SilKit::Core;
 using SilKit::Services::PubSub::WireDataMessageEvent;
+using SilKit::Util::ToStdVector;
 using testing::_;
 using testing::NiceMock;
 
@@ -63,11 +64,6 @@ auto Concat(std::initializer_list<std::vector<uint8_t>> parts) -> std::vector<ui
         result.insert(result.end(), part.begin(), part.end());
     }
     return result;
-}
-
-auto ToVector(SilKit::Util::Span<const uint8_t> span) -> std::vector<uint8_t>
-{
-    return {span.begin(), span.end()};
 }
 
 struct TestPeerListener : IVAsioPeerListener
@@ -418,7 +414,7 @@ protected:
         p.Listener().onData = [this](SerializedMessage& message) {
             storageSizes.push_back(message.GetStorageSize());
             auto event = message.Deserialize<WireDataMessageEvent>();
-            payloads.push_back(ToVector(event.data.AsSpan()));
+            payloads.push_back(ToStdVector(event.data.AsSpan()));
             if (retain)
             {
                 retained.push_back(std::move(event));
@@ -441,7 +437,7 @@ TEST_P(Test_VAsioPeerReceive, payload_is_delivered_intact)
     p.Feed(Reference(event, 3));
 
     ASSERT_EQ(payloads.size(), 1u);
-    EXPECT_EQ(payloads[0], ToVector(event.data.AsSpan()));
+    EXPECT_EQ(payloads[0], ToStdVector(event.data.AsSpan()));
 }
 
 TEST_P(Test_VAsioPeerReceive, message_wrapping_the_ring_buffer_is_reassembled)
@@ -457,8 +453,8 @@ TEST_P(Test_VAsioPeerReceive, message_wrapping_the_ring_buffer_is_reassembled)
     p.Feed(Concat({firstBytes, Reference(second, 3)}), {4010});
 
     ASSERT_EQ(payloads.size(), 2u);
-    EXPECT_EQ(payloads[0], ToVector(first.data.AsSpan()));
-    EXPECT_EQ(payloads[1], ToVector(second.data.AsSpan()));
+    EXPECT_EQ(payloads[0], ToStdVector(first.data.AsSpan()));
+    EXPECT_EQ(payloads[1], ToStdVector(second.data.AsSpan()));
 }
 
 TEST_P(Test_VAsioPeerReceive, retained_payload_is_not_overwritten)
@@ -476,7 +472,7 @@ TEST_P(Test_VAsioPeerReceive, retained_payload_is_not_overwritten)
     }
 
     ASSERT_EQ(retained.size(), 1u);
-    EXPECT_EQ(ToVector(retained[0].data.AsSpan()), ToVector(kept.data.AsSpan()));
+    EXPECT_EQ(ToStdVector(retained[0].data.AsSpan()), ToStdVector(kept.data.AsSpan()));
 }
 
 TEST_P(Test_VAsioPeerReceive, message_after_a_larger_one_is_viewed_exactly)
@@ -491,7 +487,7 @@ TEST_P(Test_VAsioPeerReceive, message_after_a_larger_one_is_viewed_exactly)
 
     ASSERT_EQ(payloads.size(), 2u);
     EXPECT_EQ(storageSizes[1], smallBytes.size());
-    EXPECT_EQ(payloads[1], ToVector(small.data.AsSpan()));
+    EXPECT_EQ(payloads[1], ToStdVector(small.data.AsSpan()));
 }
 
 TEST_P(Test_VAsioPeerReceive, message_above_the_pool_limit)
@@ -503,8 +499,8 @@ TEST_P(Test_VAsioPeerReceive, message_above_the_pool_limit)
     p.Feed(Reference(small, 3));
 
     ASSERT_EQ(payloads.size(), 2u);
-    EXPECT_EQ(payloads[0], ToVector(large.data.AsSpan()));
-    EXPECT_EQ(payloads[1], ToVector(small.data.AsSpan()));
+    EXPECT_EQ(payloads[0], ToStdVector(large.data.AsSpan()));
+    EXPECT_EQ(payloads[1], ToStdVector(small.data.AsSpan()));
 }
 
 TEST_P(Test_VAsioPeerReceive, byte_by_byte_delivery)
@@ -515,7 +511,7 @@ TEST_P(Test_VAsioPeerReceive, byte_by_byte_delivery)
     p.Feed(bytes, std::deque<size_t>(bytes.size(), 1));
 
     ASSERT_EQ(payloads.size(), 1u);
-    EXPECT_EQ(payloads[0], ToVector(event.data.AsSpan()));
+    EXPECT_EQ(payloads[0], ToStdVector(event.data.AsSpan()));
 }
 
 INSTANTIATE_TEST_SUITE_P(ReceiveBlobPool, Test_VAsioPeerReceive, testing::Values(true, false),

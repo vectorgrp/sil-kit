@@ -166,8 +166,6 @@ auto VAsioPeer::MakeSendItem(std::vector<uint8_t> blob) -> SendItem
     {
         item.inlineSize = blob.size();
         std::memcpy(item.inlineData.data(), blob.data(), item.inlineSize);
-        // NB: the bytes live in the item now, so hand the buffer back for the next serialization
-        //     instead of letting it be freed.
         RecycleSerializationBuffer(std::move(blob));
     }
     else
@@ -374,11 +372,7 @@ void VAsioPeer::DispatchBuffer()
         }
         else
         {
-            // NB: the message must be linearised out of the ring buffer because it may wrap, but
-            //     it is allocated as a shared blob so that deserialized payloads can alias it
-            //     instead of being copied out again. The blob is filled before being wrapped,
-            //     which establishes the immutability the SharedSpan invariant requires. One blob
-            //     per message keeps the retained memory bounded by the message's own size.
+            // NB: linearised into a shared blob, so that deserialized payloads can alias it.
             const size_t blobSize = _currentMsgSize;
             auto currentMsg = _receiveBlobPool->Acquire(blobSize);
 

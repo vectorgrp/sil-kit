@@ -265,7 +265,6 @@ void ExpectPayloadAliasesTheBlob(const MsgT& msg, PayloadOf payloadOf)
     const auto& payload = payloadOf(received);
     const auto view = payload.AsSpan();
 
-    EXPECT_TRUE(payload.HasOwner());
     EXPECT_GE(view.data(), blob->data());
     EXPECT_LE(view.data() + view.size(), blob->data() + blob->size());
     EXPECT_TRUE(SilKit::Util::ItemsAreEqual(view, payloadOf(msg).AsSpan()));

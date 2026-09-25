@@ -72,9 +72,7 @@ private:
     Services::Logging::ILoggerInternal* _logger;
     Services::Orchestration::ITimeProvider* _timeProvider;
 
-    //! A local receiver together with its service endpoint. The endpoint is resolved once when the
-    //! receiver is registered, because resolving it per message required a dynamic_cast, and these
-    //! receivers use multiple inheritance so that cast has to walk the inheritance graph.
+    //! The service endpoint is resolved on registration, to avoid a dynamic_cast per message.
     struct LocalReceiver
     {
         ReceiverT* receiver;
