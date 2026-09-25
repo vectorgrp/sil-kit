@@ -4,6 +4,10 @@
 
 #include "core/vasio/VAsioProxyPeer.hpp"
 
+#include <cstring>
+
+#include "util/Assert.hpp"
+
 #include "services/logging/Logger.hpp"
 
 
@@ -48,6 +52,36 @@ void VAsioProxyPeer::SendSilKitMsg(SerializedMessage buffer)
     // keep track of aggregation kind
     auto bufferProxy = SerializedMessage{msg};
     bufferProxy.SetAggregationKind(buffer.GetAggregationKind());
+
+    _peer->SendSilKitMsg(std::move(bufferProxy));
+}
+
+void VAsioProxyPeer::SendSilKitMsg(const SharedSerializedMessage& msg, EndpointId remoteIdx)
+{
+    // NB: the ProxyMessage payload must be contiguous, so the shared body is copied.
+    std::vector<uint8_t> payload;
+    payload.reserve(msg.TotalSize());
+
+    const auto header = msg.Header();
+    payload.insert(payload.end(), header.begin(), header.end());
+    SILKIT_ASSERT(msg.RemoteIndexOffset() + sizeof(EndpointId) <= payload.size());
+    std::memcpy(payload.data() + msg.RemoteIndexOffset(), &remoteIdx, sizeof(remoteIdx));
+
+    const auto body = msg.Body().AsSpan();
+    payload.insert(payload.end(), body.begin(), body.end());
+
+    ProxyMessage proxyMessage{};
+    proxyMessage.source = _participantName;
+    proxyMessage.destination = GetInfo().participantName;
+    proxyMessage.payload = std::move(payload);
+
+    _logger->MakeMessage(Services::Logging::Level::Trace, TopicOf(*this))
+        .SetMessage("VAsioProxyPeer ({}): SendSilKitMsg({})", _peerInfo.participantName,
+                    proxyMessage.payload.size())
+        .Dispatch();
+
+    auto bufferProxy = SerializedMessage{proxyMessage};
+    bufferProxy.SetAggregationKind(msg.GetAggregationKind());
 
     _peer->SendSilKitMsg(std::move(bufferProxy));
 }

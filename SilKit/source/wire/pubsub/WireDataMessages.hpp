@@ -7,7 +7,7 @@
 #include "silkit/services/pubsub/PubSubDatatypes.hpp"
 #include "silkit/services/pubsub/string_utils.hpp"
 
-#include "wire/util/SharedVector.hpp"
+#include "util/SharedSpan.hpp"
 
 #include <chrono>
 #include <vector>
@@ -19,7 +19,7 @@ namespace PubSub {
 struct WireDataMessageEvent
 {
     std::chrono::nanoseconds timestamp;
-    Util::SharedVector<uint8_t> data;
+    Util::SharedSpan<uint8_t> data;
 };
 
 inline auto ToDataMessageEvent(const WireDataMessageEvent& wireDataMessageEvent) -> DataMessageEvent;
