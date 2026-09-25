@@ -154,6 +154,11 @@ void VAsioPeer::DispatchSendItem(SendItem item, MessageAggregationKind aggregati
     }
     else
     {
+        // NB: must not overtake the aggregated messages sent before it
+        if (_useAggregation && !_aggregatedMessages.empty())
+        {
+            Flush();
+        }
         EnqueueSendItem(std::move(item));
     }
 }
@@ -194,26 +199,33 @@ void VAsioPeer::EnqueueSendItem(SendItem item)
     }
 }
 
+auto VAsioPeer::SendItem::Size() const -> size_t
+{
+    return inlineSize + ownedBody.size() + sharedBody.size();
+}
+
 void VAsioPeer::BuildCurrentSendingBuffers()
 {
     _currentSendingBuffers.clear();
 
-    if (_currentSendItem.inlineSize > 0)
+    for (const auto& item : _currentSendItems)
     {
-        _currentSendingBuffers.emplace_back(_currentSendItem.inlineData.data(), _currentSendItem.inlineSize);
-    }
-
-    if (!_currentSendItem.ownedBody.empty())
-    {
-        _currentSendingBuffers.emplace_back(_currentSendItem.ownedBody.data(),
-                                            _currentSendItem.ownedBody.size());
-    }
-    else
-    {
-        const auto body = _currentSendItem.sharedBody.AsSpan();
-        if (!body.empty())
+        if (item.inlineSize > 0)
         {
-            _currentSendingBuffers.emplace_back(body.data(), body.size());
+            _currentSendingBuffers.emplace_back(item.inlineData.data(), item.inlineSize);
+        }
+
+        if (!item.ownedBody.empty())
+        {
+            _currentSendingBuffers.emplace_back(item.ownedBody.data(), item.ownedBody.size());
+        }
+        else
+        {
+            const auto body = item.sharedBody.AsSpan();
+            if (!body.empty())
+            {
+                _currentSendingBuffers.emplace_back(body.data(), body.size());
+            }
         }
     }
 }
@@ -279,8 +291,14 @@ void VAsioPeer::StartAsyncWrite()
 
     _sending = true;
 
-    _currentSendItem = std::move(_sendingQueue.front());
-    _sendingQueue.pop_front();
+    size_t size{0};
+    do
+    {
+        size += _sendingQueue.front().Size();
+        _currentSendItems.push_back(std::move(_sendingQueue.front()));
+        _sendingQueue.pop_front();
+    } while (!_sendingQueue.empty() && _currentSendItems.size() < MaxItemsPerWrite
+             && size + _sendingQueue.front().Size() <= MaxBytesPerWrite);
     lock.unlock();
 
     BuildCurrentSendingBuffers();
@@ -441,8 +459,8 @@ void VAsioPeer::OnAsyncWriteSomeDone(IRawByteStream& stream, size_t bytesTransfe
         return;
     }
 
-    // release the body as soon as it has been written
-    _currentSendItem = SendItem{};
+    // release the bodies as soon as they have been written
+    _currentSendItems.clear();
     _sending = false;
     StartAsyncWrite();
 }
