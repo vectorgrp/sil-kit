@@ -40,6 +40,10 @@ public:
     // ----------------------------------------
     // Public Data Types
 
+    //! Limits for gathering queued messages into one write. A single larger message is written alone.
+    static constexpr size_t MaxItemsPerWrite{16};
+    static constexpr size_t MaxBytesPerWrite{64 * 1024};
+
 public:
     // ----------------------------------------
     // Constructors and Destructor
@@ -106,6 +110,8 @@ private:
         std::vector<uint8_t> ownedBody;
         //! Shared with the other peers this message was sent to.
         SilKit::Util::SharedSpan<uint8_t> sharedBody;
+
+        auto Size() const -> size_t;
     };
 
     void StartAsyncWrite();
@@ -150,9 +156,9 @@ private:
     // sending
     mutable std::mutex _sendingQueueMutex;
     std::deque<SendItem> _sendingQueue;
-    // NB: _currentSendingBuffers points into _currentSendItem, including its inline array, so move
-    //     the item into place before building the buffers.
-    SendItem _currentSendItem;
+    // NB: _currentSendingBuffers points into _currentSendItems, including their inline arrays, so
+    //     move all items into place before building the buffers.
+    std::vector<SendItem> _currentSendItems;
     std::vector<ConstBuffer> _currentSendingBuffers;
     std::vector<uint8_t> _aggregatedMessages;
 

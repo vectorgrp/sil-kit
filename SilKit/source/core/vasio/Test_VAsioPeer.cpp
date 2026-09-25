@@ -347,6 +347,99 @@ TEST(Test_VAsioPeer, queued_items_keep_valid_headers)
     EXPECT_EQ(p.DrainWrites({10}), Concat({Reference(first, 1), Reference(second, 2), Reference(third, 3)}));
 }
 
+TEST(Test_VAsioPeer, queued_items_are_gathered_into_one_write)
+{
+    PeerUnderTest p;
+    const auto inFlight = MakeEvent(3, 16);
+    const auto small = MakeEvent(3, 17);
+    const auto owned = MakeEvent(1024, 18);
+    const auto sharedEvent = MakeEvent(1024, 19);
+    const SharedSerializedMessage shared{sharedEvent, From};
+
+    p.Peer().SendSilKitMsg(SerializedMessage{inFlight, From, EndpointId{1}});
+    p.Peer().SendSilKitMsg(SerializedMessage{small, From, EndpointId{2}});
+    p.Peer().SendSilKitMsg(SerializedMessage{owned, From, EndpointId{3}});
+    p.Peer().SendSilKitMsg(shared, EndpointId{4});
+
+    EXPECT_EQ(p.DrainWrites(), Concat({Reference(inFlight, 1), Reference(small, 2), Reference(owned, 3),
+                                       Reference(sharedEvent, 4)}));
+    EXPECT_EQ(p.WriteCount(), 2u);
+    EXPECT_EQ(p.LastWrite().size(), 4u);
+}
+
+TEST(Test_VAsioPeer, partial_writes_of_gathered_items_resume_where_they_stopped)
+{
+    const auto inFlight = MakeEvent(3, 20);
+    const auto small = MakeEvent(3, 21);
+    const auto owned = MakeEvent(1024, 22);
+    const auto sharedEvent = MakeEvent(1024, 23);
+    const SharedSerializedMessage shared{sharedEvent, From};
+    const auto expected = Concat(
+        {Reference(inFlight, 1), Reference(small, 2), Reference(owned, 3), Reference(sharedEvent, 4)});
+    const auto inFlightSize = Reference(inFlight, 1).size();
+    const auto smallSize = Reference(small, 2).size();
+    const auto ownedSize = Reference(owned, 3).size();
+
+    const std::vector<std::deque<size_t>> splits{
+        {smallSize - 1},
+        {smallSize},
+        {smallSize + 1},
+        {smallSize + ownedSize},
+        {smallSize + ownedSize + shared.HeaderSize() + 1},
+        {1, 1, smallSize, 0, ownedSize},
+    };
+
+    for (const auto& split : splits)
+    {
+        PeerUnderTest p;
+        p.Peer().SendSilKitMsg(SerializedMessage{inFlight, From, EndpointId{1}});
+        p.Peer().SendSilKitMsg(SerializedMessage{small, From, EndpointId{2}});
+        p.Peer().SendSilKitMsg(SerializedMessage{owned, From, EndpointId{3}});
+        p.Peer().SendSilKitMsg(shared, EndpointId{4});
+
+        auto transferred = split;
+        transferred.push_front(inFlightSize);
+        EXPECT_EQ(p.DrainWrites(transferred), expected) << "first transfer: " << split.front();
+    }
+}
+
+TEST(Test_VAsioPeer, gathering_is_limited_by_the_number_of_items)
+{
+    PeerUnderTest p;
+    std::vector<uint8_t> expected;
+
+    for (size_t i = 0; i < 1 + 2 * VAsioPeer::MaxItemsPerWrite; ++i)
+    {
+        const auto event = MakeEvent(3, static_cast<uint8_t>(i));
+        p.Peer().SendSilKitMsg(SerializedMessage{event, From, EndpointId{i}});
+        const auto reference = Reference(event, EndpointId{i});
+        expected.insert(expected.end(), reference.begin(), reference.end());
+    }
+
+    EXPECT_EQ(p.DrainWrites(), expected);
+    // the first item alone, then two full batches
+    EXPECT_EQ(p.WriteCount(), 3u);
+}
+
+TEST(Test_VAsioPeer, gathering_stops_before_the_byte_limit_is_exceeded)
+{
+    PeerUnderTest p;
+    const auto inFlight = MakeEvent(3, 24);
+    const auto small = MakeEvent(3, 25);
+    const auto large = MakeEvent(VAsioPeer::MaxBytesPerWrite, 26);
+    const auto last = MakeEvent(3, 27);
+
+    p.Peer().SendSilKitMsg(SerializedMessage{inFlight, From, EndpointId{1}});
+    p.Peer().SendSilKitMsg(SerializedMessage{small, From, EndpointId{2}});
+    p.Peer().SendSilKitMsg(SerializedMessage{large, From, EndpointId{3}});
+    p.Peer().SendSilKitMsg(SerializedMessage{last, From, EndpointId{4}});
+
+    EXPECT_EQ(p.DrainWrites(),
+              Concat({Reference(inFlight, 1), Reference(small, 2), Reference(large, 3), Reference(last, 4)}));
+    // the large item exceeds the limit on its own, so it is neither joined nor followed by another
+    EXPECT_EQ(p.WriteCount(), 4u);
+}
+
 TEST(Test_VAsioPeer, body_outlives_the_shared_message)
 {
     PeerUnderTest p;
@@ -382,6 +475,23 @@ TEST(Test_VAsioPeer, aggregation_concatenates_inline_owned_and_shared_items)
     ASSERT_EQ(p.WriteCount(), 1u);
     EXPECT_EQ(p.DrainWrites(), Concat({Reference(small, 1), Reference(owned, 2), Reference(sharedEvent, 3),
                                        Reference(nextSimTask, 4)}));
+}
+
+TEST(Test_VAsioPeer, aggregated_messages_are_written_before_a_later_unaggregated_one)
+{
+    PeerUnderTest p;
+    p.Peer().EnableAggregation();
+
+    const auto small = MakeEvent(3, 28);
+    const auto owned = MakeEvent(1024, 29);
+    const SilKit::Services::Orchestration::SystemCommand command{
+        SilKit::Services::Orchestration::SystemCommand::Kind::AbortSimulation};
+
+    p.Peer().SendSilKitMsg(SerializedMessage{small, From, EndpointId{1}});
+    p.Peer().SendSilKitMsg(SerializedMessage{owned, From, EndpointId{2}});
+    p.Peer().SendSilKitMsg(SerializedMessage{command, From, EndpointId{3}});
+
+    EXPECT_EQ(p.DrainWrites(), Concat({Reference(small, 1), Reference(owned, 2), Reference(command, 3)}));
 }
 
 TEST(Test_VAsioPeer, shutdown_with_a_write_in_flight)
