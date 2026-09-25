@@ -196,6 +196,46 @@ TEST_F(ITest_Internals_DataPubSub, test_1pub_2sub_sync)
     RunSyncTest(pubsubs);
 }
 
+// One publisher participant, three subscriber participants. With more than one remote receiver the
+// publisher serializes each message once and shares the body between the peers.
+const std::string messageAggregationOn{R"({"Experimental": {"TimeSynchronization": {"EnableMessageAggregation": "On"}}})"};
+const std::string receiveBufferPoolOff{R"({"Experimental": {"UseReceiveBufferPool": false}})"};
+
+TEST_F(ITest_Internals_DataPubSub, test_1pub_3sub_sync_100B)
+{
+    RunFanOutSyncTest(3, 100, "");
+}
+
+TEST_F(ITest_Internals_DataPubSub, test_1pub_3sub_sync_4KiB)
+{
+    RunFanOutSyncTest(3, 4096, "");
+}
+
+TEST_F(ITest_Internals_DataPubSub, test_1pub_3sub_sync_largemsg)
+{
+    RunFanOutSyncTest(3, 250000, "");
+}
+
+TEST_F(ITest_Internals_DataPubSub, test_1pub_3sub_sync_100B_aggregation)
+{
+    RunFanOutSyncTest(3, 100, messageAggregationOn);
+}
+
+TEST_F(ITest_Internals_DataPubSub, test_1pub_3sub_sync_4KiB_aggregation)
+{
+    RunFanOutSyncTest(3, 4096, messageAggregationOn);
+}
+
+TEST_F(ITest_Internals_DataPubSub, test_1pub_3sub_sync_largemsg_aggregation)
+{
+    RunFanOutSyncTest(3, 250000, messageAggregationOn);
+}
+
+TEST_F(ITest_Internals_DataPubSub, test_1pub_3sub_sync_4KiB_receive_buffer_pool_off)
+{
+    RunFanOutSyncTest(3, 4096, receiveBufferPoolOff);
+}
+
 // Two publisher participants, one subscriber participant on same topic: Expect all to arrive but arbitrary reception order
 TEST_F(ITest_Internals_DataPubSub, test_2pub_1sub_sync)
 {
@@ -211,8 +251,8 @@ TEST_F(ITest_Internals_DataPubSub, test_2pub_1sub_sync)
     std::vector<std::vector<uint8_t>> expectedDataUnordered;
     for (uint8_t d = 0; d < numMsgToPublish; d++)
     {
-        expectedDataUnordered.emplace_back(std::vector<uint8_t>(defaultMsgSize, d));
-        expectedDataUnordered.emplace_back(std::vector<uint8_t>(defaultMsgSize, d));
+        expectedDataUnordered.emplace_back(MakeTestData(defaultMsgSize, static_cast<uint8_t>(d)));
+        expectedDataUnordered.emplace_back(MakeTestData(defaultMsgSize, static_cast<uint8_t>(d)));
     }
     pubsubs.push_back({"Sub1",
                        {},
@@ -246,8 +286,8 @@ TEST_F(ITest_Internals_DataPubSub, test_2pub_2sub_sync_sametopic)
     std::vector<std::vector<uint8_t>> expectedDataUnordered;
     for (uint8_t d = 0; d < numMsgToPublish; d++)
     {
-        expectedDataUnordered.emplace_back(std::vector<uint8_t>(defaultMsgSize, d));
-        expectedDataUnordered.emplace_back(std::vector<uint8_t>(defaultMsgSize, d));
+        expectedDataUnordered.emplace_back(MakeTestData(defaultMsgSize, static_cast<uint8_t>(d)));
+        expectedDataUnordered.emplace_back(MakeTestData(defaultMsgSize, static_cast<uint8_t>(d)));
     }
 
     pubsubs.push_back({"Sub1",
@@ -299,9 +339,9 @@ TEST_F(ITest_Internals_DataPubSub, test_3pub_4sub_sync_4topics)
     std::vector<std::vector<uint8_t>> expectedDataUnordered;
     for (uint8_t d = 0; d < numMsgToPublish; d++)
     {
-        expectedDataUnordered.emplace_back(std::vector<uint8_t>(defaultMsgSize, d));
-        expectedDataUnordered.emplace_back(std::vector<uint8_t>(defaultMsgSize, d));
-        expectedDataUnordered.emplace_back(std::vector<uint8_t>(defaultMsgSize, d));
+        expectedDataUnordered.emplace_back(MakeTestData(defaultMsgSize, static_cast<uint8_t>(d)));
+        expectedDataUnordered.emplace_back(MakeTestData(defaultMsgSize, static_cast<uint8_t>(d)));
+        expectedDataUnordered.emplace_back(MakeTestData(defaultMsgSize, static_cast<uint8_t>(d)));
     }
     pubsubs.push_back({"Sub1",
                        {},
@@ -698,8 +738,8 @@ TEST_F(ITest_Internals_DataPubSub, test_1_participant_selfdelivery_same_topic)
     std::vector<std::vector<uint8_t>> expectedDataUnordered;
     for (uint8_t d = 0; d < numMsgToPublish; d++)
     {
-        expectedDataUnordered.emplace_back(std::vector<uint8_t>(defaultMsgSize, d));
-        expectedDataUnordered.emplace_back(std::vector<uint8_t>(defaultMsgSize, d));
+        expectedDataUnordered.emplace_back(MakeTestData(defaultMsgSize, static_cast<uint8_t>(d)));
+        expectedDataUnordered.emplace_back(MakeTestData(defaultMsgSize, static_cast<uint8_t>(d)));
     }
     pubsubs.push_back({"PubSub1",
                        {{"PubCtrl1", "TopicA", {"A"}, {}, 0, defaultMsgSize, numMsgToPublish},
@@ -759,7 +799,7 @@ TEST_F(ITest_Internals_DataPubSub, test_1pub_1sub_async_rejoin)
     for (uint32_t d = 0; d < numMsgToReceive; d++)
     {
         // Receive the same blob several times (once from every publisher)
-        expectedDataUnordered.emplace_back(std::vector<uint8_t>(defaultMsgSize, 0));
+        expectedDataUnordered.emplace_back(MakeTestData(defaultMsgSize, 0));
     }
     subscribers.push_back({"Sub1",
                            {},
@@ -838,7 +878,7 @@ TEST_F(ITest_Internals_DataPubSub, test_2pub_1sub_async_starting_order)
     for (uint32_t d = 0; d < numMsgToReceive; d++)
     {
         // Receive the same blob several times (once from every publisher)
-        expectedDataUnordered.emplace_back(std::vector<uint8_t>(defaultMsgSize, 0));
+        expectedDataUnordered.emplace_back(MakeTestData(defaultMsgSize, 0));
     }
     subscribers.push_back(
         {"Sub1",

@@ -53,21 +53,31 @@ protected:
 protected:
     ITest_ThreeEthController()
     {
+        // pad the message such that the actual frame has exactly the minimum frame length
+        constexpr size_t PAYLOAD_LENGTH = MINIMUM_ETHERNET_FRAME_LENGTH - 2 * sizeof(EthernetMac)
+                                          - sizeof(EthernetEtherType) - sizeof(EthernetVlanTagControlIdentifier)
+                                          - sizeof(EthernetEtherType);
+        MakeTestMessages(PAYLOAD_LENGTH);
+
+        syncParticipantNames = {"EthWriter", "EthReader1", "EthReader2"};
+    }
+
+    void MakeTestMessages(size_t payloadLength)
+    {
+        testMessages.clear();
         testMessages.resize(5);
         for (auto index = 0u; index < testMessages.size(); index++)
         {
             std::stringstream messageBuilder;
             messageBuilder << "Test Message " << index;
             std::string messageString = messageBuilder.str();
-            // pad the message such that the actual frame has exactly the minimum frame length
-            constexpr size_t PAYLOAD_LENGTH = MINIMUM_ETHERNET_FRAME_LENGTH - 2 * sizeof(EthernetMac)
-                                              - sizeof(EthernetEtherType) - sizeof(EthernetVlanTagControlIdentifier)
-                                              - sizeof(EthernetEtherType);
-            messageString.resize(std::max<size_t>(messageString.size(), PAYLOAD_LENGTH), ' ');
+            // NB: pad with a varying pattern, so that shifted or truncated frames are detected
+            for (size_t i = messageString.size(); i < payloadLength; ++i)
+            {
+                messageString.push_back(static_cast<char>('a' + (i + index) % 26));
+            }
             testMessages[index].expectedData = std::move(messageString);
         }
-
-        syncParticipantNames = {"EthWriter", "EthReader1", "EthReader2"};
     }
 
     void SetupSender(SilKit::Tests::SimParticipant* participant)
@@ -191,6 +201,13 @@ protected:
 
 TEST_F(ITest_ThreeEthController, test_eth_ack_callbacks)
 {
+    ExecuteTest();
+}
+
+// Frames large enough that the sender serializes each once and shares the body between both readers
+TEST_F(ITest_ThreeEthController, test_eth_ack_callbacks_large_frames)
+{
+    MakeTestMessages(1400);
     ExecuteTest();
 }
 

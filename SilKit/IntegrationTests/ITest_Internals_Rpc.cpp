@@ -179,6 +179,39 @@ TEST_F(ITest_Internals_Rpc, test_1client_2server_sync)
     RunSyncTest(rpcs);
 }
 
+// One client participant, two server participants, with calls large enough that the client serializes
+// each call once and shares the body between both servers
+TEST_F(ITest_Internals_Rpc, test_1client_2server_sync_4KiB)
+{
+    const size_t messageSize = 4096;
+    const uint32_t numCallsToReceive = defaultNumCalls;
+    const uint32_t numCallsToReturn = defaultNumCalls * 2;
+
+    std::vector<std::vector<uint8_t>> expectedReturnDataUnordered;
+    for (uint8_t d = 0; d < defaultNumCalls; d++)
+    {
+        expectedReturnDataUnordered.emplace_back(std::vector<uint8_t>(messageSize, d + rpcFuncIncrement));
+        expectedReturnDataUnordered.emplace_back(std::vector<uint8_t>(messageSize, d + rpcFuncIncrement));
+    }
+
+    std::vector<RpcParticipant> rpcs;
+    rpcs.push_back({"Client1",
+                    {},
+                    {{"ClientCtrl1",
+                      "TestFuncA",
+                      "A",
+                      {},
+                      messageSize,
+                      defaultNumCalls,
+                      numCallsToReturn,
+                      expectedReturnDataUnordered}},
+                    {"TestFuncA"}});
+    rpcs.push_back({"Server1", {{"ServerCtrl1", "TestFuncA", "A", {}, messageSize, numCallsToReceive}}, {}, {}});
+    rpcs.push_back({"Server2", {{"ServerCtrl1", "TestFuncA", "A", {}, messageSize, numCallsToReceive}}, {}, {}});
+
+    RunSyncTest(rpcs);
+}
+
 // Two client participants, one server participant
 TEST_F(ITest_Internals_Rpc, test_Nclient_1server_sync)
 {

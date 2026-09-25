@@ -161,6 +161,11 @@ protected:
     {
         _connection.RegisterSilKitMsgReceiver<MessageT, ServiceT>(receiver);
     }
+
+    static auto ReceiveBlobPoolOf(const VAsioConnection& connection) -> const ReceiveBlobPool&
+    {
+        return connection._receiveBlobPool;
+    }
 };
 
 } // namespace Core
@@ -261,4 +266,23 @@ TEST_F(Test_VAsioConnection, DISABLED_versioned_send_testmessage)
     auto buffer = SerializedMessage(message, _from.GetServiceDescriptor().to_endpointAddress(), subscriber.receiverIdx);
 
     _connection.OnSocketData(&_from, std::move(buffer));
+}
+
+//////////////////////////////////////////////////////////////////////
+// Receive buffer pool configuration
+//////////////////////////////////////////////////////////////////////
+
+TEST_F(Test_VAsioConnection, receive_buffer_pool_is_enabled_by_default)
+{
+    EXPECT_TRUE(ReceiveBlobPoolOf(_connection).IsEnabled());
+}
+
+TEST_F(Test_VAsioConnection, receive_buffer_pool_follows_the_configuration)
+{
+    SilKit::Config::ParticipantConfiguration config;
+    config.experimental.useReceiveBufferPool = false;
+
+    VAsioConnection connection{nullptr, &_dummyMetricsManager, config, "Test_VAsioConnection", 1, &_timeProvider};
+
+    EXPECT_FALSE(ReceiveBlobPoolOf(connection).IsEnabled());
 }

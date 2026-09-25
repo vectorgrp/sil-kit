@@ -72,7 +72,14 @@ private:
     Services::Logging::ILoggerInternal* _logger;
     Services::Orchestration::ITimeProvider* _timeProvider;
 
-    std::vector<ReceiverT*> _localReceivers;
+    //! The service endpoint is resolved on registration, to avoid a dynamic_cast per message.
+    struct LocalReceiver
+    {
+        ReceiverT* receiver;
+        const IServiceEndpoint* serviceEndpoint;
+    };
+
+    std::vector<LocalReceiver> _localReceivers;
     VAsioTransmitter<MsgT> _vasioTransmitter;
 };
 
@@ -93,9 +100,13 @@ SilKitLink<MsgT>::SilKitLink(std::string name, Services::Logging::ILoggerInterna
 template <class MsgT>
 void SilKitLink<MsgT>::AddLocalReceiver(ReceiverT* receiver)
 {
-    if (std::find(_localReceivers.begin(), _localReceivers.end(), receiver) != _localReceivers.end())
+    const auto alreadyRegistered =
+        std::find_if(_localReceivers.begin(), _localReceivers.end(),
+                     [receiver](const LocalReceiver& entry) { return entry.receiver == receiver; });
+    if (alreadyRegistered != _localReceivers.end())
         return;
-    _localReceivers.push_back(receiver);
+
+    _localReceivers.push_back(LocalReceiver{receiver, dynamic_cast<const IServiceEndpoint*>(receiver)});
 }
 
 template <class MsgT>
@@ -152,7 +163,7 @@ void SilKitLink<MsgT>::DistributeRemoteSilKitMessage(const IServiceEndpoint* fro
 
     for (auto&& receiver : _localReceivers)
     {
-        DispatchSilKitMessage(receiver, from, msg);
+        DispatchSilKitMessage(receiver.receiver, from, msg);
     }
 }
 
@@ -178,7 +189,7 @@ void SilKitLink<MsgT>::DistributeToSelf(const IServiceEndpoint* from, const MsgT
     {
         for (auto&& receiver : _localReceivers)
         {
-            auto* receiverId = dynamic_cast<const IServiceEndpoint*>(receiver);
+            const auto* receiverId = receiver.serviceEndpoint;
             if constexpr (!SilKitMsgTraits<MsgT>::IsSelfDeliveryEnforced())
             {
                 if (receiverId->GetServiceDescriptor() == from->GetServiceDescriptor())
@@ -187,7 +198,7 @@ void SilKitLink<MsgT>::DistributeToSelf(const IServiceEndpoint* from, const MsgT
             // Trace reception of self delivery
             Services::TraceRx(_logger, receiverId, msg, from->GetServiceDescriptor());
 
-            DispatchSilKitMessage(receiver, from, msg);
+            DispatchSilKitMessage(receiver.receiver, from, msg);
         }
     }
 }

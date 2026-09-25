@@ -47,6 +47,51 @@ private:
 };
 
 
+//! Maximum number of serialization buffers held per thread, and the largest one worth keeping.
+constexpr size_t SerializationBufferPoolSize{32};
+constexpr size_t SerializationBufferPoolMaxCapacity{64 * 1024};
+
+namespace Detail {
+//! Thread local free list of serialization buffers. See AcquireSerializationBuffer.
+inline auto SerializationBufferPool() -> std::vector<std::vector<uint8_t>>&
+{
+    thread_local std::vector<std::vector<uint8_t>> pool;
+    return pool;
+}
+} // namespace Detail
+
+/*! \brief Take a serialization buffer from the thread local free list, or a fresh one.
+ *
+ * A buffer acquired on one thread and recycled on another migrates between lists, which is harmless.
+ */
+inline auto AcquireSerializationBuffer() -> std::vector<uint8_t>
+{
+    auto& pool = Detail::SerializationBufferPool();
+    if (pool.empty())
+    {
+        return {};
+    }
+
+    auto buffer = std::move(pool.back());
+    pool.pop_back();
+    return buffer;
+}
+
+//! Hand a serialization buffer back once its contents are no longer needed.
+inline void RecycleSerializationBuffer(std::vector<uint8_t>&& buffer)
+{
+    auto& pool = Detail::SerializationBufferPool();
+    if (buffer.capacity() == 0 || buffer.capacity() > SerializationBufferPoolMaxCapacity
+        || pool.size() >= SerializationBufferPoolSize)
+    {
+        return;
+    }
+
+    buffer.clear();
+    pool.push_back(std::move(buffer));
+}
+
+
 class MessageBuffer
 {
 public:
@@ -56,7 +101,11 @@ public:
 public:
     // ----------------------------------------
     // Constructors and Destructor
-    inline MessageBuffer() = default;
+    // NB: the writing constructor takes its storage from the thread local serialization pool.
+    inline MessageBuffer()
+        : _storage{AcquireSerializationBuffer()}
+    {
+    }
     inline MessageBuffer(std::vector<uint8_t> data);
     //! \brief Read from a shared blob without copying it. The buffer is read-only in this state.
     inline explicit MessageBuffer(Util::SharedSpan<uint8_t> blob);

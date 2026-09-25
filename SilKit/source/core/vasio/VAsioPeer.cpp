@@ -33,12 +33,14 @@ namespace SilKit {
 namespace Core {
 
 VAsioPeer::VAsioPeer(IVAsioPeerListener* listener, IIoContext* ioContext, std::unique_ptr<IRawByteStream> stream,
-                     Services::Logging::ILoggerInternal* logger, std::unique_ptr<VSilKit::IPeerMetrics> peerMetrics)
+                     Services::Logging::ILoggerInternal* logger, std::unique_ptr<VSilKit::IPeerMetrics> peerMetrics,
+                     ReceiveBlobPool* receiveBlobPool)
     : _listener{listener}
     , _ioContext{ioContext}
     , _socket{std::move(stream)}
     , _logger{logger}
     , _msgBuffer{4096}
+    , _receiveBlobPool{receiveBlobPool}
     , _peerMetrics{std::move(peerMetrics)}
 {
     _socket->SetListener(*this);
@@ -164,6 +166,7 @@ auto VAsioPeer::MakeSendItem(std::vector<uint8_t> blob) -> SendItem
     {
         item.inlineSize = blob.size();
         std::memcpy(item.inlineData.data(), blob.data(), item.inlineSize);
+        RecycleSerializationBuffer(std::move(blob));
     }
     else
     {
@@ -370,13 +373,15 @@ void VAsioPeer::DispatchBuffer()
         else
         {
             // NB: linearised into a shared blob, so that deserialized payloads can alias it.
-            auto currentMsg = std::make_shared<std::vector<uint8_t>>(_currentMsgSize);
-            if (!_msgBuffer.Read(SilKit::Util::ToSpan(*currentMsg)))
+            const size_t blobSize = _currentMsgSize;
+            auto currentMsg = _receiveBlobPool->Acquire(blobSize);
+
+            // NB: a pooled blob may be larger than this message, so read and view exactly the
+            //     message's bytes rather than the whole buffer.
+            if (!_msgBuffer.Read(SilKit::Util::Span<uint8_t>{currentMsg->data(), blobSize}))
             {
                 throw SilKitError("Reading data from ring buffer failed.");
             }
-
-            const auto blobSize = currentMsg->size();
             SerializedMessage message{
                 SilKit::Util::MakeSharedSpan(std::shared_ptr<const std::vector<uint8_t>>{std::move(currentMsg)}, 0,
                                              blobSize)};
