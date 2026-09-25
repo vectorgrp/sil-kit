@@ -7,6 +7,9 @@
 - The documentation now lists every third party dependency found in the source tree with its
   version and license on the Licenses page, followed by the full license text of each component
   that ships one.
+- New CMake option `SILKIT_BUILD_GENERATE_VERSION` (default `ON`) to build the `sil-kit-generate-version` maintainer
+  tool. Turn it off when cross-compiling: the tool runs on the maintainer's machine, so building it for the target
+  architecture produces an unrunnable binary.
 
 ## Fixed
 
@@ -35,6 +38,14 @@
 
 ## Changed
 
+- `SilKitVersionMacros.h` is now committed to the source tree instead of being generated at CMake configure time.
+  The new `sil-kit-generate-version` maintainer tool regenerates it and performs a complete version bump
+  (`SilKitVersion.cmake`, the generated header and the changelog) in one step. See `docs/development/release.md`.
+- The build number, git hash and pre-release suffix are now build-time settings (`cmake -DSILKIT_BUILD_NUMBER=N`,
+  `-DSILKIT_BUILD_GIT_HASH=<hash>`, `-DSILKIT_VERSION_SUFFIX=rc1`) rather than values stored in the source tree.
+  The generated header carries only `#ifndef` fallbacks, so a build that passes its own hash makes
+  `SilKit::Version::GitHash()` report the commit actually built, and a build that sets a suffix reports
+  `5.0.8-rc1` from `SilKit::Version::String()` and in the CPack archive name.
 - `third-party`: the dashboard client no longer depends on `oatpp`, and the `ThirdParty/oatpp`
   submodule has been removed. The dashboard payloads are now built with the already-bundled
   `rapidyaml`, and the REST requests are issued over the already-bundled standalone `asio`.
