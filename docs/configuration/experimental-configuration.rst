@@ -90,7 +90,7 @@ TimeSynchronization
          In this case, the time step will not be terminated and the communication will block.
 
 TransmitQueueSize
---------------------
+-----------------
 
 .. code-block:: yaml
 
@@ -102,6 +102,12 @@ A frame that does not fit is dropped and acknowledged with ``EthernetTransmitSta
 The default ``0`` disables the limit.
 Only applies without a network simulator.
 Combine it with ``Middleware.TcpNotSentLowWatermark``, otherwise the backlog builds up in the operating system's socket buffers instead.
+``TcpNotSentLowWatermark`` does not apply to local domain sockets, set ``Middleware.EnableDomainSockets: false`` for participants on the same host.
+
+.. note::
+  The bytes of a frame are freed once it has been written to all receiving participants, so a single slow receiver causes drops for all.
+  Frames sent from a handler, including the simulation step handler, are not written before the handler returns, and with message aggregation not before the aggregation buffer is flushed.
+  In synchronized simulations, the limit therefore also caps the bytes a controller can send within one simulation step.
 
 Metrics for participants
 ------------------------

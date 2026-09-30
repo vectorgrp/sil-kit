@@ -4,7 +4,6 @@
 
 #pragma once
 #include <memory>
-#include <type_traits>
 
 #include "core/vasio/VAsioMsgKind.hpp"
 #include "core/vasio/VAsioDatatypes.hpp"
@@ -37,16 +36,17 @@ auto AdlDeserialize(Args&&... args) -> decltype(auto)
     return Deserialize(std::forward<Args>(args)...);
 }
 
-template <typename T, typename = void>
-struct HasTransmitReservation : std::false_type
+template <typename MessageT>
+inline auto transmitReservation(const MessageT&) -> std::shared_ptr<const void>
 {
-};
-
-template <typename T>
-struct HasTransmitReservation<T, std::void_t<decltype(std::declval<const T&>().transmitReservation)>>
-    : std::true_type
+    return nullptr;
+}
+template <>
+inline auto transmitReservation<Services::Ethernet::WireEthernetFrameEvent>(
+    const Services::Ethernet::WireEthernetFrameEvent& message) -> std::shared_ptr<const void>
 {
-};
+    return message.transmitReservation;
+}
 
 template <typename T>
 struct SerializedSize
@@ -144,6 +144,7 @@ SerializedMessage::SerializedMessage(const MessageT& message)
     _messageKind = messageKind<MessageT>();
     _registryKind = registryMessageKind<MessageT>();
     _aggregationKind = aggregationKind<MessageT>();
+    _transmitReservation = transmitReservation(message);
     WriteNetworkHeaders();
     Serialize(_buffer, message);
     //Ensure we can directly Deserialize in unit tests by reading the header in again
@@ -159,6 +160,7 @@ SerializedMessage::SerializedMessage(ProtocolVersion version, const MessageT& me
     _messageKind = messageKind<MessageT>();
     _registryKind = registryMessageKind<MessageT>();
     _aggregationKind = aggregationKind<MessageT>();
+    _transmitReservation = transmitReservation(message);
     _buffer.SetProtocolVersion(version);
     WriteNetworkHeaders();
     Serialize(_buffer, message);
@@ -177,10 +179,7 @@ SerializedMessage::SerializedMessage(const MessageT& message, EndpointAddress en
     _messageKind = messageKind<MessageT>();
     _registryKind = registryMessageKind<MessageT>();
     _aggregationKind = aggregationKind<MessageT>();
-    if constexpr (HasTransmitReservation<MessageT>::value)
-    {
-        _transmitReservation = message.transmitReservation;
-    }
+    _transmitReservation = transmitReservation(message);
     WriteNetworkHeaders();
     Serialize(_buffer, message);
     //Ensure we can directly Deserialize in unit tests by reading the header in again

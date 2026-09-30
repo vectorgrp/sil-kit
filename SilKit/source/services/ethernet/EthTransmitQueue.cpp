@@ -28,7 +28,7 @@ struct EthTransmitQueue::Reservation
 
     ~Reservation()
     {
-        _state->used.fetch_sub(_size, std::memory_order_acq_rel);
+        _state->used.fetch_sub(_size, std::memory_order_relaxed);
     }
 
 private:
@@ -44,7 +44,7 @@ EthTransmitQueue::EthTransmitQueue(size_t capacity)
 
 auto EthTransmitQueue::TryReserve(size_t size) -> std::shared_ptr<const void>
 {
-    auto used = _state->used.load(std::memory_order_acquire);
+    auto used = _state->used.load(std::memory_order_relaxed);
     do
     {
         // NB: an empty queue always accepts, so frames larger than the capacity still pass
@@ -52,9 +52,17 @@ auto EthTransmitQueue::TryReserve(size_t size) -> std::shared_ptr<const void>
         {
             return nullptr;
         }
-    } while (!_state->used.compare_exchange_weak(used, used + size, std::memory_order_acq_rel));
+    } while (!_state->used.compare_exchange_weak(used, used + size, std::memory_order_relaxed));
 
-    return std::make_shared<Reservation>(_state, size);
+    try
+    {
+        return std::make_shared<Reservation>(_state, size);
+    }
+    catch (...)
+    {
+        _state->used.fetch_sub(size, std::memory_order_relaxed);
+        throw;
+    }
 }
 
 } // namespace Ethernet

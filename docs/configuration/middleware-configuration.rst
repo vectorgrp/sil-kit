@@ -76,7 +76,8 @@ running on 'localhost' listening on port 8500. These values can be changed via t
 
    * - TcpNotSentLowWatermark
      - Sets the TCP_NOTSENT_LOWAT option on TCP sockets (Linux and macOS only), which limits the unsent bytes
-       buffered by the operating system. See ``Experimental.TransmitQueueSize``.
+       buffered by the operating system. On other platforms, a warning is logged and the option is ignored.
+       Has no effect on local domain sockets. See ``Experimental.TransmitQueueSize``.
 
    * - RegistryAsFallbackProxy
      - Disable using the registry as a proxy for participant-to-participant
