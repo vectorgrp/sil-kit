@@ -258,6 +258,30 @@ add_silkit_test_to_executable(SilKitIntegrationTests
 )
 
 # ============================================================
+#  Integration Tests replacing manual QA release tests
+# ============================================================
+
+add_silkit_test_to_executable(SilKitIntegrationTests
+    SOURCES ITest_HealthCheck.cpp
+)
+
+add_silkit_test_to_executable(SilKitIntegrationTests
+    SOURCES ITest_PcapTracing.cpp
+)
+
+add_silkit_test_to_executable(SilKitIntegrationTests
+    SOURCES ITest_DomainSockets.cpp
+)
+
+add_silkit_test_to_executable(SilKitIntegrationTests
+    SOURCES ITest_ConfigPrecedence.cpp
+)
+
+add_silkit_test_to_executable(SilKitIntegrationTests
+    SOURCES ITest_LinSleepWakeup.cpp
+)
+
+# ============================================================
 #  Integration Tests using SIL Kit internals (in-tree builds only)
 # ============================================================
 
