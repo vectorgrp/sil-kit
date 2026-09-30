@@ -174,6 +174,7 @@ auto MakeAsioSocketOptionsFromConfiguration(const SilKit::Config::ParticipantCon
     socketOptions.tcp.noDelay = participantConfiguration.middleware.tcpNoDelay;
     socketOptions.tcp.sendBufferSize = participantConfiguration.middleware.tcpSendBufferSize;
     socketOptions.tcp.receiveBufferSize = participantConfiguration.middleware.tcpReceiveBufferSize;
+    socketOptions.tcp.notSentLowWatermark = participantConfiguration.middleware.tcpNotSentLowWatermark;
 
     return socketOptions;
 }
@@ -441,6 +442,15 @@ void VAsioConnection::OpenLocalAcceptors(const std::vector<std::string>& accepto
 void VAsioConnection::JoinSimulation(std::string connectUri)
 {
     SILKIT_ASSERT(_logger);
+
+#if !defined(TCP_NOTSENT_LOWAT)
+    if (_config.middleware.tcpNotSentLowWatermark > 0)
+    {
+        _logger->MakeMessage(Log::Level::Warn, TopicOf(*this))
+            .SetMessage("Middleware.TcpNotSentLowWatermark is not supported on this platform and has no effect")
+            .Dispatch();
+    }
+#endif
 
     _simulationName = Uri{connectUri}.Path();
     _allowAnySimulationName = false;

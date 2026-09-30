@@ -263,6 +263,7 @@
     "EnableDomainSockets": false,
     "TcpSendBufferSize": 3456,
     "TcpReceiveBufferSize": 3456,
+    "TcpNotSentLowWatermark": 16384,
     "AcceptorUris": [
       "tcp://0.0.0.0:0"
     ],
@@ -271,6 +272,7 @@
     "ExperimentalRemoteParticipantConnection": false
   },
   "Experimental": {
+    "TransmitQueueSize": 65536,
     "TimeSynchronization": {
       "AnimationFactor": 1.5,
       "EnableMessageAggregation": "Off",

@@ -530,6 +530,7 @@ void YamlWriter::Write(const SilKit::Config::Middleware& obj)
     NonDefaultWrite(obj.tcpQuickAck, "TcpQuickAck", defaultObj.tcpQuickAck);
     NonDefaultWrite(obj.tcpReceiveBufferSize, "TcpReceiveBufferSize", defaultObj.tcpReceiveBufferSize);
     NonDefaultWrite(obj.tcpSendBufferSize, "TcpSendBufferSize", defaultObj.tcpSendBufferSize);
+    NonDefaultWrite(obj.tcpNotSentLowWatermark, "TcpNotSentLowWatermark", defaultObj.tcpNotSentLowWatermark);
     NonDefaultWrite(obj.enableDomainSockets, "EnableDomainSockets", defaultObj.enableDomainSockets);
     NonDefaultWrite(obj.acceptorUris, "AcceptorUris", defaultObj.acceptorUris);
     NonDefaultWrite(obj.registryAsFallbackProxy, "RegistryAsFallbackProxy", defaultObj.registryAsFallbackProxy);
@@ -584,6 +585,7 @@ void YamlWriter::Write(const SilKit::Config::Experimental& obj)
     MakeMap();
     NonDefaultWrite(obj.timeSynchronization, "TimeSynchronization", defaultObj.timeSynchronization);
     NonDefaultWrite(obj.metrics, "Metrics", defaultObj.metrics);
+    NonDefaultWrite(obj.transmitQueueSize, "TransmitQueueSize", defaultObj.transmitQueueSize);
 }
 
 

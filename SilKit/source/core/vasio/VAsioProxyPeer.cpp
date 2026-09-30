@@ -48,6 +48,7 @@ void VAsioProxyPeer::SendSilKitMsg(SerializedMessage buffer)
     // keep track of aggregation kind
     auto bufferProxy = SerializedMessage{msg};
     bufferProxy.SetAggregationKind(buffer.GetAggregationKind());
+    bufferProxy.SetTransmitReservation(buffer.ReleaseTransmitReservation());
 
     _peer->SendSilKitMsg(std::move(bufferProxy));
 }

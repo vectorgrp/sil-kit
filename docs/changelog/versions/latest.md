@@ -4,6 +4,9 @@
 ## Added
 
 - Add Integration Test for Timestamp Behavior
+- `ethernet`: experimental `Experimental.TransmitQueueSize` bounds the bytes of unsent frames per
+  Ethernet controller. Frames that do not fit are dropped and acknowledged with `Dropped`.
+- `config`: `Middleware.TcpNotSentLowWatermark` sets `TCP_NOTSENT_LOWAT` on TCP sockets (Linux and macOS).
 - The documentation now lists every third party dependency found in the source tree with its
   version and license on the Licenses page, followed by the full license text of each component
   that ships one.

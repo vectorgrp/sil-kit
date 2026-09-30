@@ -406,4 +406,42 @@ TEST_F(Test_EthControllerTrivialSim, sendmsg_distributes_before_txreceive)
     controller.SendFrame(frame);
 }
 
+TEST_F(Test_EthControllerTrivialSim, drop_frames_if_transmit_queue_is_full)
+{
+    participant._participantConfiguration.experimental.transmitQueueSize = 100;
+    EthController boundedController{&participant, cfg, participant.GetTimeProvider()};
+    boundedController.AddFrameHandler(SilKit::Util::bind_method(&callbacks, &Callbacks::ReceiveMessage));
+    boundedController.AddFrameTransmitHandler(SilKit::Util::bind_method(&callbacks, &Callbacks::MessageAck));
+    boundedController.Activate();
+
+    std::vector<WireEthernetFrameEvent> inTransport;
+    EXPECT_CALL(participant, SendMsg(&boundedController, A<const WireEthernetFrameEvent&>()))
+        .Times(3)
+        .WillRepeatedly([&inTransport](auto, const WireEthernetFrameEvent& msg) { inTransport.push_back(msg); });
+    EXPECT_CALL(callbacks, ReceiveMessage(&boundedController, AnEthernetFrameEventWith(TransmitDirection::TX)))
+        .Times(3);
+
+    const auto transmitted = testing::Field(&EthernetFrameTransmitEvent::status, EthernetTransmitStatus::Transmitted);
+    const auto dropped = testing::Field(&EthernetFrameTransmitEvent::status, EthernetTransmitStatus::Dropped);
+    {
+        InSequence seq;
+        EXPECT_CALL(callbacks, MessageAck(&boundedController, transmitted));
+        EXPECT_CALL(callbacks, MessageAck(&boundedController, dropped));
+        EXPECT_CALL(callbacks, MessageAck(&boundedController, transmitted));
+        EXPECT_CALL(callbacks, MessageAck(&boundedController, transmitted));
+    }
+
+    std::vector<uint8_t> rawFrame(60);
+    boundedController.SendFrame(EthernetFrame{rawFrame});
+    boundedController.SendFrame(EthernetFrame{rawFrame});
+
+    inTransport.clear();
+    boundedController.SendFrame(EthernetFrame{rawFrame});
+
+    // an empty queue accepts frames larger than its capacity
+    inTransport.clear();
+    std::vector<uint8_t> largeRawFrame(200);
+    boundedController.SendFrame(EthernetFrame{largeRawFrame});
+}
+
 } // anonymous namespace

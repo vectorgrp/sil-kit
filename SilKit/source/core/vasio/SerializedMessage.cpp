@@ -41,6 +41,16 @@ auto SerializedMessage::GetAggregationKind() const -> MessageAggregationKind
     return _aggregationKind;
 }
 
+auto SerializedMessage::ReleaseTransmitReservation() -> std::shared_ptr<const void>
+{
+    return std::move(_transmitReservation);
+}
+
+void SerializedMessage::SetTransmitReservation(std::shared_ptr<const void> reservation)
+{
+    _transmitReservation = std::move(reservation);
+}
+
 auto SerializedMessage::GetRemoteIndex() const -> EndpointId
 {
     if (!IsMwOrSim(_messageKind))

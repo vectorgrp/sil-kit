@@ -4,6 +4,9 @@
 
 #pragma once
 
+#include <optional>
+
+#include "services/ethernet/EthTransmitQueue.hpp"
 #include "services/ethernet/IMsgForEthController.hpp"
 #include "core/internal/IParticipantInternal.hpp"
 #include "tracing/ITraceMessageSource.hpp"
@@ -36,6 +39,7 @@ private:
     EthController* _parentController{nullptr};
     const Core::IServiceEndpoint* _parentServiceEndpoint{nullptr};
     Services::Orchestration::ITimeProvider* _timeProvider{nullptr};
+    std::optional<EthTransmitQueue> _transmitQueue;
 };
 
 } // namespace Ethernet

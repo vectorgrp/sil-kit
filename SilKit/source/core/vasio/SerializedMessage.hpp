@@ -3,6 +3,8 @@
 // SPDX-License-Identifier: MIT
 
 #pragma once
+#include <memory>
+
 #include "core/vasio/VAsioMsgKind.hpp"
 #include "core/vasio/VAsioDatatypes.hpp"
 #include "core/vasio/SerializedMessageTraits.hpp"
@@ -32,6 +34,18 @@ template <typename... Args>
 auto AdlDeserialize(Args&&... args) -> decltype(auto)
 {
     return Deserialize(std::forward<Args>(args)...);
+}
+
+template <typename MessageT>
+inline auto transmitReservation(const MessageT&) -> std::shared_ptr<const void>
+{
+    return nullptr;
+}
+template <>
+inline auto transmitReservation<Services::Ethernet::WireEthernetFrameEvent>(
+    const Services::Ethernet::WireEthernetFrameEvent& message) -> std::shared_ptr<const void>
+{
+    return message.transmitReservation;
 }
 
 template <typename T>
@@ -89,6 +103,10 @@ public: // Receiving a SerializedMessage: from binary blob to SilKitMessage<T>
 
     void SetAggregationKind(MessageAggregationKind msgAggregationKind);
 
+    //! Not serialized. The transport holds it until the message has been written.
+    auto ReleaseTransmitReservation() -> std::shared_ptr<const void>;
+    void SetTransmitReservation(std::shared_ptr<const void> reservation);
+
     auto GetStorageSize() const -> size_t
     {
         return _buffer.PeekData().size();
@@ -111,6 +129,7 @@ private:
     ProxyMessageHeader _proxyMessageHeader;
 
     MessageBuffer _buffer;
+    std::shared_ptr<const void> _transmitReservation;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -125,6 +144,7 @@ SerializedMessage::SerializedMessage(const MessageT& message)
     _messageKind = messageKind<MessageT>();
     _registryKind = registryMessageKind<MessageT>();
     _aggregationKind = aggregationKind<MessageT>();
+    _transmitReservation = transmitReservation(message);
     WriteNetworkHeaders();
     Serialize(_buffer, message);
     //Ensure we can directly Deserialize in unit tests by reading the header in again
@@ -140,6 +160,7 @@ SerializedMessage::SerializedMessage(ProtocolVersion version, const MessageT& me
     _messageKind = messageKind<MessageT>();
     _registryKind = registryMessageKind<MessageT>();
     _aggregationKind = aggregationKind<MessageT>();
+    _transmitReservation = transmitReservation(message);
     _buffer.SetProtocolVersion(version);
     WriteNetworkHeaders();
     Serialize(_buffer, message);
@@ -158,6 +179,7 @@ SerializedMessage::SerializedMessage(const MessageT& message, EndpointAddress en
     _messageKind = messageKind<MessageT>();
     _registryKind = registryMessageKind<MessageT>();
     _aggregationKind = aggregationKind<MessageT>();
+    _transmitReservation = transmitReservation(message);
     WriteNetworkHeaders();
     Serialize(_buffer, message);
     //Ensure we can directly Deserialize in unit tests by reading the header in again

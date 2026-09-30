@@ -5,6 +5,8 @@
 add_library(O_SilKit_Services_Ethernet OBJECT
     EthController.cpp
     EthController.hpp
+    EthTransmitQueue.cpp
+    EthTransmitQueue.hpp
 
     ISimBehavior.hpp
     SimBehavior.cpp
