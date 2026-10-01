@@ -2,9 +2,8 @@
 //
 // SPDX-License-Identifier: MIT
 
-// Automates the QA test cases 2.23.1 "PCAP Tracing" and 2.23.2 "PCAP Pipe Tracing": Ethernet frames of a controller
-// with a PCAP trace sink end up in a valid PCAP stream. The stream is parsed here without SIL Kit internals, the same
-// way an external tool like Wireshark reads it.
+// PCAP tracing to a file and to a pipe: Ethernet frames of a controller with a PCAP trace sink end up in a valid PCAP
+// stream. The stream is parsed here without SIL Kit internals, the same way an external tool like Wireshark reads it.
 
 #include <atomic>
 #include <chrono>

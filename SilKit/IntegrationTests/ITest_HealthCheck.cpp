@@ -2,9 +2,9 @@
 //
 // SPDX-License-Identifier: MIT
 
-// Automates the QA test cases 2.11 - 2.13 "Health Monitoring": a participant whose simulation step exceeds the
-// configured SoftResponseTimeout logs a warning, one that exceeds the HardResponseTimeout goes to the Error state,
-// and the disconnect of a participant is observed by the others.
+// Health monitoring: a participant whose simulation step exceeds the configured SoftResponseTimeout logs a warning,
+// one that exceeds the HardResponseTimeout goes to the Error state, and the disconnect of a participant is observed
+// by the others.
 
 #include <atomic>
 #include <chrono>

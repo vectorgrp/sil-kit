@@ -125,8 +125,7 @@ TEST(ITest_RemoteLogging, test_remote_logging_two_senders_one_receiver)
     EXPECT_THAT(logContent, testing::HasSubstr(receiverOwnMessage));
 }
 
-// QA test case 2.8 "Logger Configuration - Remote Logging", second part (see SILKIT-1338): a participant that does not
-// set LogFromRemotes must not receive the log messages of other participants.
+// A participant that does not set LogFromRemotes must not receive the log messages of other participants.
 TEST(ITest_RemoteLogging, test_log_from_remotes_false_ignores_remote_messages)
 {
     const auto logContent = RunRemoteLoggingSimulation(remoteTraceSenderConfig, "  LogFromRemotes: false");

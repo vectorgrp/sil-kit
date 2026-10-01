@@ -169,7 +169,7 @@ void LogOneMessagePerLevel(const std::string& config, const std::string& name)
     logger->Critical("message-at-level-critical");
 }
 
-// QA test case 2.6 "Logger Configuration - Log Level": each sink only receives messages at or above its level.
+// Each sink only receives messages at or above its level.
 TEST_F(ITest_Logging, sink_level_filters_messages_below_the_configured_level)
 {
     SilKit::IntegrationTests::ScopedLogFiles warnLog{SilKit::IntegrationTests::MakeUniqueLogName("ITest_LogLevel_Warn")};
@@ -219,7 +219,7 @@ Logging:
     EXPECT_THAT(offLog.ReadAll(), testing::Not(testing::HasSubstr("message-at-level-")));
 }
 
-// QA test case 2.7 "Logger Configuration - Additional File Sink": the file is named
+// Additional file sink: the file is named
 // "<LogName>_<ParticipantName>_<Timestamp>.jsonl" (File sinks default to the Json format) and each participant writes
 // its own file.
 TEST_F(ITest_Logging, file_sink_writes_one_file_per_participant_named_after_log_name_and_participant)

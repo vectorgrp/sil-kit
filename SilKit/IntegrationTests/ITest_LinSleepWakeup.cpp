@@ -2,9 +2,8 @@
 //
 // SPDX-License-Identifier: MIT
 
-// Complements the QA test case 2.3 "LIN Simulation" (see SILKIT-1504, LIN slave did not return from sleep): master and
-// slave go through several go-to-sleep / wakeup cycles and exchange frames after every wakeup. ITest_Lin only covers a
-// single cycle.
+// LIN master and slave go through several go-to-sleep / wakeup cycles and exchange frames after every wakeup, so a
+// slave that does not return from sleep is detected. ITest_Lin only covers a single cycle.
 
 #include <chrono>
 #include <string>

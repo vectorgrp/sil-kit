@@ -2,8 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-// Automates the QA test case 2.19 "Override-Semantics for Participant Configuration": values in the participant
-// configuration take precedence over the values passed to the API.
+// Values in the participant configuration take precedence over the values passed to the API.
 
 #include <chrono>
 #include <future>

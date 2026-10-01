@@ -260,7 +260,7 @@ add_silkit_test_to_executable(SilKitIntegrationTests
 )
 
 # ============================================================
-#  Integration Tests replacing manual QA release tests
+#  End-to-end integration tests
 # ============================================================
 
 add_silkit_test_to_executable(SilKitIntegrationTests
