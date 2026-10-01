@@ -197,7 +197,7 @@ void VAsioRegistry::SetAllDisconnectedHandler(std::function<void()> handler)
 
 auto VAsioRegistry::GetLogger() -> Services::Logging::ILogger*
 {
-    return nullptr;
+    return _logger ? _logger->AsILogger() : nullptr;
 }
 
 auto VAsioRegistry::GetLoggerInternal() -> Services::Logging::ILoggerInternal*

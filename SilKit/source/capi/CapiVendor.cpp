@@ -88,7 +88,8 @@ try
 
     auto* silKitRegistry = reinterpret_cast<SilKit::Vendor::Vector::ISilKitRegistry*>(cSilKitRegistry);
 
-    *outLogger = reinterpret_cast<SilKit_Logger*>(silKitRegistry->GetLogger());
+    // The SilKit_Logger functions expect the internal logger, like SilKit_Participant_GetLogger provides it.
+    *outLogger = reinterpret_cast<SilKit_Logger*>(SilKit::Vendor::Vector::GetLoggerInternal(silKitRegistry));
 
     return SilKit_ReturnCode_SUCCESS;
 }
