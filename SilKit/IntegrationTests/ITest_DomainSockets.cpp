@@ -2,8 +2,8 @@
 //
 // SPDX-License-Identifier: MIT
 
-// Automates the QA test case 2.18 "Local Domain Sockets" (regression test for SILKIT-1435): participants on the same
-// host connect via local domain sockets by default, and via TCP if domain sockets are disabled.
+// Participants on the same host connect via local domain sockets by default, and via TCP if domain sockets are
+// disabled.
 
 #include <string>
 
