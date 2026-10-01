@@ -16,7 +16,7 @@
 #include "silkit/services/orchestration/all.hpp"
 #include "silkit/vendor/CreateSilKitRegistry.hpp"
 
-#include "ITestLogFiles.hpp"
+#include "IntegrationTestUtils.hpp"
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -25,8 +25,8 @@ namespace {
 
 using namespace std::chrono_literals;
 using namespace SilKit::Services::Orchestration;
-using SilKit::IntegrationTests::MakeUniqueLogName;
-using SilKit::IntegrationTests::ScopedLogFiles;
+using IntegrationTestUtils::MakeUniqueLogName;
+using IntegrationTestUtils::ScopedLogFiles;
 
 class ITest_HealthCheck : public testing::Test
 {
