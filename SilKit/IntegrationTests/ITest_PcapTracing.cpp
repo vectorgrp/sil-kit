@@ -25,12 +25,16 @@
 #include "gtest/gtest.h"
 
 #if defined(_WIN32)
-#    define WIN32_LEAN_AND_MEAN
-#    define NOMINMAX
-#    include <windows.h>
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#ifndef NOMINMAX
+#define NOMINMAX // MinGW's libstdc++ already defines it
+#endif
+#include <windows.h>
 #else
-#    include <fcntl.h>
-#    include <unistd.h>
+#include <fcntl.h>
+#include <unistd.h>
 #endif
 
 namespace {
