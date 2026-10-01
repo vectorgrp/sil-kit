@@ -10,15 +10,15 @@
 #include "silkit/SilKit.hpp"
 #include "silkit/vendor/CreateSilKitRegistry.hpp"
 
-#include "ITestLogFiles.hpp"
+#include "IntegrationTestUtils.hpp"
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
 namespace {
 
-using SilKit::IntegrationTests::MakeUniqueLogName;
-using SilKit::IntegrationTests::ScopedLogFiles;
+using IntegrationTestUtils::MakeUniqueLogName;
+using IntegrationTestUtils::ScopedLogFiles;
 
 auto MakeConfig(const std::string& logName, const std::string& middleware) -> std::string
 {

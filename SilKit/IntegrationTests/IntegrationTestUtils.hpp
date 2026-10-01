@@ -13,14 +13,21 @@
 #include <fstream>
 #include <random>
 #include <algorithm>
+#include <filesystem>
+#include <sstream>
+#include <system_error>
+#include <vector>
 
-#if __unix__
+#if defined(__unix__)
 #include <errno.h>
 #include <string.h>
 #include <stdio.h>
 #endif //__unix__
 
-#if _WIN32
+#if defined(_WIN32)
+#ifndef NOMINMAX
+#define NOMINMAX // keep std::min/std::max and std::numeric_limits<>::min/max usable
+#endif
 #include <Windows.h> //for 'HANDLE'
 #endif               //__WIN32
 
@@ -84,7 +91,7 @@ struct Pipe
 {
     using buffer_t = std::vector<char>;
     Pipe() = delete;
-#ifdef WIN32
+#ifdef _WIN32
     HANDLE handle = INVALID_HANDLE_VALUE;
 
     Pipe(const std::string& pipeName)
@@ -178,21 +185,21 @@ struct Pipe
 #endif
 };
 
-size_t getFileSize(const std::string& name)
+inline size_t getFileSize(const std::string& name)
 {
     auto ifs = std::ifstream{name, std::ios::binary | std::ios::ate};
     return ifs.tellg();
 }
 
-bool fileExists(const std::string& name)
+inline bool fileExists(const std::string& name)
 {
     auto ifs = std::ifstream{name, std::ios::in};
     return ifs.good();
 }
 
-void removeTempFile(const std::string& fileName)
+inline void removeTempFile(const std::string& fileName)
 {
-#if WIN32
+#if defined(_WIN32)
     auto ok = DeleteFileA(fileName.c_str());
     if (!ok)
     {
@@ -207,7 +214,7 @@ void removeTempFile(const std::string& fileName)
 #endif
 }
 
-std::string randomString(size_t len)
+inline std::string randomString(size_t len)
 {
     static const std::string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
                                      "abcdefghijklmnopqrstuvwxyz"
@@ -221,6 +228,81 @@ std::string randomString(size_t len)
     std::generate_n(rv.begin(), len, [&]() { return chars.at(randPick(re)); });
     return rv;
 }
+
+
+// File sinks write "<LogName>_<ParticipantName>_<Timestamp>.txt" (or ".jsonl") into the working directory, so a log
+// file can only be found by its prefix. The unique suffix keeps concurrent or leftover test runs apart.
+inline auto MakeUniqueLogName(const std::string& base) -> std::string
+{
+    return base + "_" + std::to_string(std::chrono::steady_clock::now().time_since_epoch().count());
+}
+
+// Tests run in parallel processes that share the working directory, so files may vanish while it is scanned. Only the
+// non-throwing overloads are used: a throwing directory_iterator in a destructor would terminate the test process.
+inline auto FindLogFiles(const std::string& prefix) -> std::vector<std::filesystem::path>
+{
+    std::vector<std::filesystem::path> logFiles;
+    std::error_code ec;
+    for (std::filesystem::directory_iterator it{std::filesystem::current_path(), ec}, end; !ec && it != end;
+         it.increment(ec))
+    {
+        std::error_code statusEc;
+        if (it->is_regular_file(statusEc) && it->path().filename().string().rfind(prefix, 0) == 0)
+        {
+            logFiles.push_back(it->path());
+        }
+    }
+    return logFiles;
+}
+
+inline auto ReadTextFile(const std::filesystem::path& path) -> std::string
+{
+    std::ifstream stream{path};
+    std::stringstream contents;
+    contents << stream.rdbuf();
+    return contents.str();
+}
+
+// Removes all log files starting with the given prefix when going out of scope.
+class ScopedLogFiles
+{
+public:
+    explicit ScopedLogFiles(std::string prefix)
+        : _prefix{std::move(prefix)}
+    {
+    }
+
+    ~ScopedLogFiles()
+    {
+        for (const auto& logFile : FindLogFiles(_prefix))
+        {
+            std::error_code ec;
+            std::filesystem::remove(logFile, ec);
+        }
+    }
+
+    ScopedLogFiles(const ScopedLogFiles&) = delete;
+    ScopedLogFiles& operator=(const ScopedLogFiles&) = delete;
+
+    auto Prefix() const -> const std::string&
+    {
+        return _prefix;
+    }
+
+    // Concatenated contents of all matching files. Empty if no file exists.
+    auto ReadAll() const -> std::string
+    {
+        std::string contents;
+        for (const auto& logFile : FindLogFiles(_prefix))
+        {
+            contents += ReadTextFile(logFile);
+        }
+        return contents;
+    }
+
+private:
+    std::string _prefix;
+};
 
 
 } // end namespace IntegrationTestUtils
