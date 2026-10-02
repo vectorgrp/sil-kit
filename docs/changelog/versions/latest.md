@@ -1,5 +1,8 @@
 # [5.0.8] - UNRELEASED
 
+## Special Note (remider, delete before release)
+
+The MSI installer installed *per user*. inform the user about this here and also that it changed to *per machine* in  5.0.8. Also add a note in the Release.
 
 ## Added
 
