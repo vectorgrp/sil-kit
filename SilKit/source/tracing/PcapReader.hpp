@@ -49,6 +49,7 @@ private:
     SilKit::Services::Logging::ILogger* _log{nullptr};
     std::chrono::nanoseconds _startTime{0};
     std::chrono::nanoseconds _endTime{0};
+    uint64_t _nsPerTimestampFraction{1}; //!< 1 for nanosecond files, 1000 for microsecond files
 };
 
 } // namespace Tracing
