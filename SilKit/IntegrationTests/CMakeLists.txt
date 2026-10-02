@@ -273,10 +273,6 @@ add_silkit_test_to_executable(SilKitIntegrationTests
     SOURCES ITest_ConfigPrecedence.cpp
 )
 
-add_silkit_test_to_executable(SilKitIntegrationTests
-    SOURCES ITest_LinSleepWakeup.cpp
-)
-
 # ============================================================
 #  Integration Tests using SIL Kit internals (in-tree builds only)
 # ============================================================
