@@ -127,4 +127,9 @@ TEST(Test_Pcap, read_microsecond_timestamps)
     EXPECT_THAT(ReadTimestamps(Pcap::MicrosecondMagic), testing::ElementsAre(0ns, 1s + 1us, 2s + 2us));
 }
 
+TEST(Test_Pcap, invalid_magic_number_throws)
+{
+    EXPECT_THROW(ReadTimestamps(0x12345678), SilKit::SilKitError);
+}
+
 } // namespace

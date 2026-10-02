@@ -5,6 +5,8 @@
 #pragma once
 #include <cstdint>
 
+#include "silkit/participant/exception.hpp"
+
 namespace SilKit {
 namespace Tracing {
 namespace Pcap {
@@ -17,6 +19,13 @@ const size_t PacketHeaderSize = 16;
 const uint16_t MajorVersion = 2;
 const uint16_t MinorVersion = 4;
 
+// The unit of PacketHeader::ts_fraction
+enum class TimestampMode
+{
+    Nanoseconds,
+    Microseconds,
+};
+
 struct GlobalHeader
 {
     uint32_t magic_number = NativeMagic;   /* magic number */
@@ -26,6 +35,19 @@ struct GlobalHeader
     uint32_t sigfigs = 0;                  /* accuracy of timestamps */
     uint32_t snaplen = 65535;              /* max length of captured packets, in octets */
     uint32_t network = 1;                  /* data link type */
+
+    auto GetTimestampMode() const -> TimestampMode
+    {
+        switch (magic_number)
+        {
+        case NativeMagic:
+            return TimestampMode::Nanoseconds;
+        case MicrosecondMagic:
+            return TimestampMode::Microseconds;
+        default:
+            throw SilKitError("PCAP global header: invalid magic number");
+        }
+    }
 };
 static_assert(sizeof(GlobalHeader) == GlobalHeaderSize, "GlobalHeader size must be equal to 24 bytes");
 

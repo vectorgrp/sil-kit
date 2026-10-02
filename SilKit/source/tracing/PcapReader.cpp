@@ -137,17 +137,14 @@ void PcapReader::ReadGlobalHeader()
         throw SilKitError("PCAP file cannot be opened: global header short read");
     }
     auto* hdr = reinterpret_cast<Pcap::GlobalHeader*>(buf.data());
-    if (hdr->magic_number == Pcap::NativeMagic)
+    switch (hdr->GetTimestampMode())
     {
+    case Pcap::TimestampMode::Nanoseconds:
         _nsPerTimestampFraction = 1;
-    }
-    else if (hdr->magic_number == Pcap::MicrosecondMagic)
-    {
+        break;
+    case Pcap::TimestampMode::Microseconds:
         _nsPerTimestampFraction = 1000;
-    }
-    else
-    {
-        throw SilKitError("PCAP file cannot be opened: invalid PCAP valid magic number");
+        break;
     }
     if ((hdr->version_major != Pcap::MajorVersion) && (hdr->version_minor != Pcap::MinorVersion))
     {
