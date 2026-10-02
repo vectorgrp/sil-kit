@@ -13,31 +13,18 @@ from ci_utils import log, isCI
 
 def check_run_build(url: str):
     run_builds = "false"
-    files_url = url + '/files'
+    files_url = url + '/files' + 'testinvalidurl'
     r = requests.get(files_url, verify=False)
+    r.raise_for_status()
     
-    try:
-        files_data = r.json()
-        # Ensure we have a list/array
-        if not isinstance(files_data, list):
-            log(f"Unexpected response format: {type(files_data)}")
-            log(f"Response content: {files_data}")
-            return
-        
-        for fileObject in files_data:
-            # Ensure fileObject is a dict
-            if not isinstance(fileObject, dict):
-                continue
-                
-            file_path = fileObject.get("filename", "")
-            file = file_path.split(sep="/")[-1]
+    for fileObject in r.json():
 
-            if file not in exceptional_files:
-                run_builds = "true"
-                break
-    except (ValueError, KeyError) as e:
-        log(f"Error processing files response: {e}")
-        return
+        file_path = fileObject["filename"]
+        file = file_path.split(sep="/")[-1]
+
+        if file not in exceptional_files:
+            run_builds = "true"
+            break
 
     log("Builds should run: {}".format(run_builds))
 
