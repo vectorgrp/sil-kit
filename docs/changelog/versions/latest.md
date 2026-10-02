@@ -1,5 +1,11 @@
 # [5.0.8] - UNRELEASED
 
+## Special Note (reminder, delete before release)
+
+The SIL Kit MSI installer will now be installed **per-machine** by default.
+In versions up to (and including) 5.0.7 the installer performed a per-user installation if the property `ALLUSERS=1` was not set explicitly.
+This change unfortunately **requires** manual deinstallation of the previous SIL Kit installation.
+Add this note to the Release description.
 
 ## Added
 
