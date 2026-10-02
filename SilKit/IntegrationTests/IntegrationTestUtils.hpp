@@ -189,7 +189,7 @@ struct Pipe
 inline size_t getFileSize(const std::string& name)
 {
     auto ifs = std::ifstream{name, std::ios::binary | std::ios::ate};
-    return ifs.tellg();
+    return static_cast<size_t>(ifs.tellg());
 }
 
 inline bool fileExists(const std::string& name)
