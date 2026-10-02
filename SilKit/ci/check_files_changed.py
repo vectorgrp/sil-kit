@@ -15,7 +15,8 @@ def check_run_build(url: str):
     run_builds = "false"
     files_url = url + '/files'
     r = requests.get(files_url, verify=False)
-
+    r.raise_for_status()
+    
     for fileObject in r.json():
 
         file_path = fileObject["filename"]
@@ -32,7 +33,6 @@ def check_run_build(url: str):
         with open(os.environ["GITHUB_OUTPUT"], 'a') as f:
             print("run_builds={}".format(run_builds), file=f)
 
-
 # File Set
 exceptional_files = {'README.rst', 'latest.md', 'LICENSE', 'CONTRIBUTING.md',
                      'SilKitVersion.cmake'}
@@ -48,3 +48,4 @@ url = 'https://api.github.com/repos/' + args.repo + '/pulls/' + args.PR
 log("Checking at {}".format(url))
 
 check_run_build(url)
+
