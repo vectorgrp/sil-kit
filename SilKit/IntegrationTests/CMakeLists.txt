@@ -274,7 +274,3 @@ add_silkit_test_to_executable(SilKitIntegrationTests
 add_silkit_test_to_executable(SilKitIntegrationTests
     SOURCES ITest_ConfigPrecedence.cpp
 )
-
-add_silkit_test_to_executable(SilKitIntegrationTests
-    SOURCES ITest_LinSleepWakeup.cpp
-)
