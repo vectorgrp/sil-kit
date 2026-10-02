@@ -13,7 +13,7 @@ from ci_utils import log, isCI
 
 def check_run_build(url: str):
     run_builds = "false"
-    files_url = url + '/files' + 'testinvalidurl'
+    files_url = url + '/files'
     r = requests.get(files_url, verify=False)
     r.raise_for_status()
     
