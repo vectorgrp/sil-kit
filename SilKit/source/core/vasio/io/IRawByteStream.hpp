@@ -29,6 +29,10 @@ struct IRawByteStream
 
     virtual void AsyncWriteSome(ConstBufferSequence bufferSequence) = 0;
 
+    //! Writes as much as possible without blocking, from any thread, if no asynchronous write is in
+    //! progress. Returns the number of bytes written; 0 means the caller must use AsyncWriteSome.
+    virtual auto TryWriteSome(ConstBufferSequence bufferSequence) -> size_t = 0;
+
     virtual void Shutdown() = 0;
 };
 

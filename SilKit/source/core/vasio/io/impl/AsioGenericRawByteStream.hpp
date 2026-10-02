@@ -64,6 +64,7 @@ public: // IRawByteStream
     auto GetRemoteEndpoint() const -> std::string override;
     void AsyncReadSome(MutableBufferSequence bufferSequence) override;
     void AsyncWriteSome(ConstBufferSequence bufferSequence) override;
+    auto TryWriteSome(ConstBufferSequence bufferSequence) -> size_t override;
     void Shutdown() override;
 
 private:

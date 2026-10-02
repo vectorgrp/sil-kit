@@ -165,6 +165,34 @@ void AsioGenericRawByteStream::AsyncWriteSome(ConstBufferSequence bufferSequence
 }
 
 
+auto AsioGenericRawByteStream::TryWriteSome(ConstBufferSequence bufferSequence) -> size_t
+{
+#if defined(__linux__)
+    std::unique_lock<decltype(_mutex)> lock{_mutex};
+
+    if (_shutdownPending || _writing || bufferSequence.size() != 1)
+    {
+        return 0;
+    }
+
+    // Bypasses asio's socket object on purpose: a plain non-blocking send() on the descriptor does not
+    // touch asio's per-socket state, so it cannot race with the asynchronous read pending on the IO
+    // thread, and it completes without posting a completion handler (i.e. without waking the IO thread).
+    const auto& buffer = bufferSequence.data()[0];
+    const auto result = ::send(_socket.native_handle(), buffer.GetData(), buffer.GetSize(), MSG_DONTWAIT | MSG_NOSIGNAL);
+    if (result < 0)
+    {
+        // EAGAIN as well as real errors: let the asynchronous path wait for writability or report the error.
+        return 0;
+    }
+    return static_cast<size_t>(result);
+#else
+    SILKIT_UNUSED_ARG(bufferSequence);
+    return 0;
+#endif
+}
+
+
 void AsioGenericRawByteStream::Shutdown()
 {
     SILKIT_TRACE_METHOD_(_logger, "()");
