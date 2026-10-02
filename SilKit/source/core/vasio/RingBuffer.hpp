@@ -23,8 +23,8 @@ public:
     std::size_t Capacity() const;
     std::size_t Size() const;
 
-    bool Peek(std::vector<uint8_t>& elem) const;
-    bool Read(std::vector<uint8_t>& elem);
+    bool Peek(SilKit::Util::Span<uint8_t> elem) const;
+    bool Read(SilKit::Util::Span<uint8_t> elem);
 
     void GetWritingBuffers(std::vector<MutableBuffer>& buffers);
 

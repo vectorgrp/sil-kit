@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: MIT
 
 add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_Span.cpp)
+add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_SharedSpan.cpp)
 add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_SilSerializer.cpp Test_SilSerDes.cpp)
 add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_CommandlineParser.cpp LIBS I_SilKit)
 add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_SynchronizedHandlers.cpp LIBS I_SilKit)

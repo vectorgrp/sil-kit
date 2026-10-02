@@ -76,7 +76,7 @@ TEST(Test_RingBuffer, writeSingle)
         Write(ringBuffer, elem);
 
         std::vector<uint8_t> readData(ringBuffer.Size());
-        ringBuffer.Read(readData);
+        ringBuffer.Read(SilKit::Util::ToSpan(readData));
 
         ASSERT_EQ(elem, readData);
     }
@@ -105,7 +105,7 @@ TEST(Test_RingBuffer, resizeRingBuffer)
             Write(ringBuffer, elem);
 
             std::vector<uint8_t> readData(ringBuffer.Size());
-            ringBuffer.Read(readData);
+            ringBuffer.Read(SilKit::Util::ToSpan(readData));
 
             ASSERT_EQ(elem, readData);
         }
@@ -144,7 +144,7 @@ TEST(Test_RingBuffer, writeMultiple_resizeAllowed)
 
         // read all data available
         std::vector<uint8_t> readData(ringBuffer.Size());
-        ringBuffer.Read(readData);
+        ringBuffer.Read(SilKit::Util::ToSpan(readData));
 
         ASSERT_EQ(currentDataBlock, readData);
 
@@ -197,7 +197,7 @@ TEST(Test_RingBuffer, writeMultiple_fixedCapacity)
 
             // read all data
             std::vector<uint8_t> readData(ringBuffer.Size());
-            ringBuffer.Read(readData);
+            ringBuffer.Read(SilKit::Util::ToSpan(readData));
 
             ASSERT_EQ(currentDataBlock, readData);
 

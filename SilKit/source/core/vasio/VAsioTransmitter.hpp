@@ -16,6 +16,7 @@
 #include "services/logging/MessageTracing.hpp"
 
 #include "core/vasio/SerializedMessage.hpp"
+#include "core/vasio/SharedSerializedMessage.hpp"
 
 namespace SilKit {
 namespace Core {
@@ -42,6 +43,8 @@ struct MessageHistory<MsgT, 1>
         _hasHistory = historyLength != 0;
     }
 
+    // NB: the saved payload is retained, so it must not alias a received blob. This holds because
+    //     only locally published messages, which own a copy of the user's bytes, reach this.
     void Save(const IServiceEndpoint* from, const MsgT& msg)
     {
         if (!_hasHistory)
@@ -165,10 +168,27 @@ public:
     void ReceiveMsg(const IServiceEndpoint* from, const MsgT& msg) override
     {
         _hist.Save(from, msg);
+
+        if (_remoteReceivers.empty())
+        {
+            return;
+        }
+
+        const auto endpointAddress = to_endpointAddress(from->GetServiceDescriptor());
+
+        // NB: nothing to share with a single receiver, so avoid the extra allocation and split write.
+        if (_remoteReceivers.size() == 1)
+        {
+            auto& receiver = _remoteReceivers.front();
+            receiver.peer->SendSilKitMsg(SerializedMessage{msg, endpointAddress, receiver.remoteIdx});
+            return;
+        }
+
+        const SharedSerializedMessage shared{msg, endpointAddress};
+
         for (auto& receiver : _remoteReceivers)
         {
-            auto buffer = SerializedMessage(msg, to_endpointAddress(from->GetServiceDescriptor()), receiver.remoteIdx);
-            receiver.peer->SendSilKitMsg(std::move(buffer));
+            receiver.peer->SendSilKitMsg(shared, receiver.remoteIdx);
         }
     }
 
