@@ -18,11 +18,12 @@
 #include <system_error>
 #include <vector>
 
-#if defined(__unix__)
+#if !defined(_WIN32)
 #include <errno.h>
 #include <string.h>
 #include <stdio.h>
-#endif //__unix__
+#include <unistd.h> // unlink
+#endif
 
 #if defined(_WIN32)
 #ifndef NOMINMAX
