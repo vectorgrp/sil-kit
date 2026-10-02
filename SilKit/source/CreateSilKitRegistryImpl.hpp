@@ -18,7 +18,7 @@
 namespace SilKit {
 namespace Services {
 namespace Logging {
-struct ILoggerInternal; // todo check or remove, move to own file
+struct ILoggerInternal;
 } // namespace Logging
 } // namespace Services
 } // namespace SilKit
@@ -48,7 +48,7 @@ auto CreateSilKitRegistryImpl(std::shared_ptr<SilKit::Config::IParticipantConfig
     -> std::unique_ptr<ISilKitRegistry>;
 
 auto GetLoggerInternal(ISilKitRegistry* participant)
-    -> SilKit::Services::Logging::ILoggerInternal*; // todo check or remove, move to own file
+    -> SilKit::Services::Logging::ILoggerInternal*; 
 } // namespace Vector
 } // namespace Vendor
 } // namespace SilKit
