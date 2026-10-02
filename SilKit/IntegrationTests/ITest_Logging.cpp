@@ -30,6 +30,9 @@ namespace fs = std::filesystem;
 using namespace std::chrono_literals;
 using namespace SilKit::Services::Logging;
 
+using IntegrationTestUtils::FindLogFiles;
+using IntegrationTestUtils::LogFilePrefix;
+
 const std::string participantName{"LoggingParticipant"};
 const std::string simpleLogName{"ITest_Logging_Simple"};
 const std::string jsonLogName{"ITest_Logging_Json"};
@@ -82,18 +85,11 @@ protected:
         RemoveLogFiles();
     }
 
-    // The sinks append a participant name and a timestamp to the configured log name, so the files can only
-    // be identified by their prefix.
-    static auto FindLogFiles(const std::string& logName) -> std::vector<fs::path>
-    {
-        return IntegrationTestUtils::FindLogFiles(logName + "_");
-    }
-
     static void RemoveLogFiles()
     {
         for (const auto& logName : {simpleLogName, jsonLogName})
         {
-            for (const auto& logFile : FindLogFiles(logName))
+            for (const auto& logFile : FindLogFiles(LogFilePrefix(logName)))
             {
                 std::error_code ec;
                 fs::remove(logFile, ec);
@@ -103,7 +99,7 @@ protected:
 
     static auto ReadLogFile(const std::string& logName) -> std::string
     {
-        const auto logFiles = FindLogFiles(logName);
+        const auto logFiles = FindLogFiles(LogFilePrefix(logName));
         EXPECT_EQ(logFiles.size(), 1u) << "Expected exactly one log file for '" << logName << "'";
         if (logFiles.size() != 1u)
         {
@@ -119,7 +115,7 @@ protected:
     }
 };
 
-TEST_F(ITest_Logging, log_message_with_braces_is_not_parsed_as_format_string)
+TEST_F(ITest_Logging, log_message_with_braces_is_not_parsed_as_format_striLogFilePrefixng)
 {
     const auto bracedMessage = MakeBracedMessage();
     ASSERT_THAT(bracedMessage, testing::HasSubstr("{pattern=Wus, channel=A @ 12.796ms}"));
@@ -269,7 +265,7 @@ auto RunRemoteLoggingSimulation(const std::string& senderConfig, const std::stri
     -> std::string
 {
     const auto receiverLogName = IntegrationTestUtils::MakeUniqueLogName("itest_remote_logging");
-    const auto filePrefix = receiverLogName + "_Receiver_";
+    const auto filePrefix = LogFilePrefix(receiverLogName, "Receiver");
     IntegrationTestUtils::ScopedLogFiles cleanup{filePrefix};
 
     const auto receiverConfig = R"(

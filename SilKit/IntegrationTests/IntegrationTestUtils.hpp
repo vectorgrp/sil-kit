@@ -238,6 +238,17 @@ inline auto MakeUniqueLogName(const std::string& base) -> std::string
     return base + "_" + std::to_string(std::chrono::steady_clock::now().time_since_epoch().count());
 }
 
+// The prefix of the files a File sink with the given LogName writes, for all participants or for one participant.
+inline auto LogFilePrefix(const std::string& logName) -> std::string
+{
+    return logName + "_";
+}
+
+inline auto LogFilePrefix(const std::string& logName, const std::string& participantName) -> std::string
+{
+    return LogFilePrefix(logName) + participantName + "_";
+}
+
 // Tests run in parallel processes that share the working directory, so files may vanish while it is scanned. Only the
 // non-throwing overloads are used: a throwing directory_iterator in a destructor would terminate the test process.
 inline auto FindLogFiles(const std::string& prefix) -> std::vector<std::filesystem::path>
