@@ -72,6 +72,7 @@ def get_files_pr(args):
     log("Checking at {}".format(url))
 
     r = requests.get(url)
+    r.raise_for_status()
 
     max_page = 1
     if 'link' in r.headers:
