@@ -8,6 +8,8 @@
 // discovery through to the user handler.
 
 #include <string>
+#include <thread>
+#include <vector>
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
@@ -33,6 +35,7 @@ struct CallbackData
         SilKit_Experimental_ServiceDiscoveryEvent_Type_Invalid};
     SilKit_Experimental_ServiceKind serviceKind{SilKit_Experimental_ServiceKind_Undefined};
     std::string participantName;
+    std::vector<bool> isSnapshot; // per call
 };
 
 void SilKitCALL CapturingHandler(void* context, SilKit_Experimental_ServiceDiscoveryEvent_Type type,
@@ -43,6 +46,18 @@ void SilKitCALL CapturingHandler(void* context, SilKit_Experimental_ServiceDisco
     data->lastType = type;
     data->serviceKind = serviceDescriptor->serviceKind;
     data->participantName = serviceDescriptor->participantName;
+    data->isSnapshot.push_back(serviceDescriptor->isSnapshot == SilKit_True);
+}
+
+auto MakeCanController(const std::string& participantName) -> ServiceDescriptor
+{
+    ServiceDescriptor descriptor;
+    descriptor.SetParticipantNameAndComputeId(participantName);
+    descriptor.SetServiceName("Can1");
+    descriptor.SetNetworkName("CAN1");
+    descriptor.SetServiceType(ServiceType::Controller);
+    descriptor.SetSupplementalDataItem(Discovery::controllerType, Discovery::controllerTypeCan);
+    return descriptor;
 }
 
 void SilKitCALL NoopHandler(void* /*context*/, SilKit_Experimental_ServiceDiscoveryEvent_Type /*type*/,
@@ -101,19 +116,50 @@ TEST_F(Test_CapiServiceDiscovery, wires_internal_events_to_user_handler)
               SilKit_ReturnCode_SUCCESS);
     ASSERT_TRUE(static_cast<bool>(internalHandler));
 
-    ServiceDescriptor descriptor;
-    descriptor.SetParticipantNameAndComputeId("ParticipantA");
-    descriptor.SetServiceName("Can1");
-    descriptor.SetNetworkName("CAN1");
-    descriptor.SetServiceType(ServiceType::Controller);
-    descriptor.SetSupplementalDataItem(Discovery::controllerType, Discovery::controllerTypeCan);
-
-    internalHandler(ServiceDiscoveryEvent::Type::ServiceCreated, descriptor);
+    internalHandler(ServiceDiscoveryEvent::Type::ServiceCreated, MakeCanController("ParticipantA"));
 
     EXPECT_EQ(data.callCount, 1);
     EXPECT_EQ(data.lastType, SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceCreated);
     EXPECT_EQ(data.serviceKind, SilKit_Experimental_ServiceKind_CanController);
     EXPECT_EQ(data.participantName, "ParticipantA");
+    ASSERT_EQ(data.isSnapshot.size(), 1u);
+    EXPECT_FALSE(data.isSnapshot[0]) << "an event after the registration returned is not part of the snapshot";
+}
+
+// Services replayed synchronously while the handler is registered are flagged as snapshot; events delivered
+// later, from another thread or from the registering thread after the call returned, are not.
+TEST_F(Test_CapiServiceDiscovery, marks_replayed_services_as_snapshot)
+{
+    SilKit::Core::Discovery::ServiceDiscoveryHandler internalHandler;
+    EXPECT_CALL(mockParticipant.mockServiceDiscovery, RegisterServiceDiscoveryHandler(testing::_))
+        .WillOnce([&internalHandler](SilKit::Core::Discovery::ServiceDiscoveryHandler handler) {
+        // Replay of the already known services, as the internal service discovery does.
+        handler(ServiceDiscoveryEvent::Type::ServiceCreated, MakeCanController("Known1"));
+        handler(ServiceDiscoveryEvent::Type::ServiceCreated, MakeCanController("Known2"));
+        internalHandler = std::move(handler);
+    });
+
+    SilKit_Experimental_ServiceDiscovery* serviceDiscovery = nullptr;
+    ASSERT_EQ(SilKit_Experimental_ServiceDiscovery_Create(&serviceDiscovery, (SilKit_Participant*)&mockParticipant),
+              SilKit_ReturnCode_SUCCESS);
+
+    CallbackData data;
+    ASSERT_EQ(SilKit_Experimental_ServiceDiscovery_SetServiceDiscoveryHandler(serviceDiscovery, &data,
+                                                                              &CapturingHandler),
+              SilKit_ReturnCode_SUCCESS);
+    ASSERT_EQ(data.isSnapshot.size(), 2u);
+    EXPECT_TRUE(data.isSnapshot[0]);
+    EXPECT_TRUE(data.isSnapshot[1]);
+
+    std::thread ioThread{[&] {
+        internalHandler(ServiceDiscoveryEvent::Type::ServiceCreated, MakeCanController("Live1"));
+    }};
+    ioThread.join();
+    internalHandler(ServiceDiscoveryEvent::Type::ServiceCreated, MakeCanController("Live2"));
+
+    ASSERT_EQ(data.isSnapshot.size(), 4u);
+    EXPECT_FALSE(data.isSnapshot[2]);
+    EXPECT_FALSE(data.isSnapshot[3]);
 }
 
 } // namespace

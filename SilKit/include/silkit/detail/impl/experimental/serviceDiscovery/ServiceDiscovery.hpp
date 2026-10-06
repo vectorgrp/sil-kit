@@ -95,8 +95,11 @@ void ServiceDiscovery::SetServiceDiscoveryHandler(
         SD::ServiceDescriptor serviceDescriptor{};
         serviceDescriptor.participantName = orEmpty(cServiceDescriptor->participantName);
         serviceDescriptor.serviceName = orEmpty(cServiceDescriptor->serviceName);
+        serviceDescriptor.serviceId = cServiceDescriptor->serviceId;
         serviceDescriptor.serviceKind = static_cast<SD::ServiceKind>(cServiceDescriptor->serviceKind);
         serviceDescriptor.primaryIdentifier = orEmpty(cServiceDescriptor->primaryIdentifier);
+        serviceDescriptor.networkType = static_cast<SilKit::Experimental::NetworkSimulation::SimulatedNetworkType>(
+            cServiceDescriptor->networkType);
         serviceDescriptor.mediaType = orEmpty(cServiceDescriptor->mediaType);
         serviceDescriptor.labels.reserve(cServiceDescriptor->labelList.numLabels);
         for (size_t i = 0; i < cServiceDescriptor->labelList.numLabels; ++i)
@@ -108,9 +111,13 @@ void ServiceDiscovery::SetServiceDiscoveryHandler(
             label.kind = static_cast<SilKit::Services::MatchingLabel::Kind>(cLabel.kind);
             serviceDescriptor.labels.emplace_back(std::move(label));
         }
-        serviceDescriptor.simulationName = orEmpty(cServiceDescriptor->simulationName);
+        serviceDescriptor.operationMode =
+            static_cast<SilKit::Services::Orchestration::OperationMode>(cServiceDescriptor->operationMode);
+        serviceDescriptor.timeSyncActive = cServiceDescriptor->timeSyncActive == SilKit_True;
         serviceDescriptor.connectedParticipantName = orEmpty(cServiceDescriptor->connectedParticipantName);
         serviceDescriptor.connectedServiceName = orEmpty(cServiceDescriptor->connectedServiceName);
+        serviceDescriptor.connectedServiceId = cServiceDescriptor->connectedServiceId;
+        serviceDescriptor.isSnapshot = cServiceDescriptor->isSnapshot == SilKit_True;
 
         auto* slot = static_cast<HandlerSlot*>(context);
         std::shared_ptr<const SD::ServiceDiscoveryHandler> userHandler;

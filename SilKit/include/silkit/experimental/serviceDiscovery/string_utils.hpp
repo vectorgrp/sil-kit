@@ -46,8 +46,16 @@ std::string to_string(ServiceKind serviceKind)
         return "RpcClient";
     case ServiceKind::RpcServer:
         return "RpcServer";
-    case ServiceKind::Link:
-        return "Link";
+    case ServiceKind::NetworkSimulatorLink:
+        return "NetworkSimulatorLink";
+    case ServiceKind::PubSubMatch:
+        return "PubSubMatch";
+    case ServiceKind::RpcMatch:
+        return "RpcMatch";
+    case ServiceKind::LifecycleService:
+        return "LifecycleService";
+    case ServiceKind::TimeSyncService:
+        return "TimeSyncService";
     }
 
     std::stringstream out;
