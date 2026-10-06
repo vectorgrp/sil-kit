@@ -2,6 +2,8 @@
 //
 // SPDX-License-Identifier: MIT
 
+#include <algorithm>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -556,6 +558,39 @@ TEST_F(Test_ServiceObserver, bus_controller_reported_independently_of_link)
     EXPECT_EQ(data.events[0].primaryIdentifier, "CAN1");
     EXPECT_EQ(data.events[1].serviceKind, SilKit_Experimental_ServiceKind_Link);
     EXPECT_EQ(data.events[1].primaryIdentifier, "CAN1"); // same network -> the controller is simulated
+}
+
+void SilKitCALL ThrowOnPublisherHandler(void* context, SilKit_Experimental_ServiceDiscoveryEvent_Type type,
+                                        const SilKit_Experimental_ServiceDescriptor* serviceDescriptor)
+{
+    CapturingHandler(context, type, serviceDescriptor);
+    if (serviceDescriptor->serviceKind == SilKit_Experimental_ServiceKind_DataPublisher)
+    {
+        throw std::runtime_error{"handler failure"};
+    }
+}
+
+// A throwing handler must not cost the links resolved by the same event.
+TEST(Test_ServiceObserverExceptions, throwing_handler_keeps_remaining_links)
+{
+    CallbackData data;
+    VSilKit::ServiceObserver observer{&ThrowOnPublisherHandler, &data};
+
+    const std::string uuid = "pub-uuid-throw";
+    for (SilKit::Core::EndpointId i = 0; i < 3; ++i)
+    {
+        observer.HandleEvent(ServiceDiscoveryEvent::Type::ServiceCreated, MakeUserSubscriber(100 + i, "T"));
+        observer.HandleEvent(ServiceDiscoveryEvent::Type::ServiceCreated,
+                             MakeInternalConnection(200 + i, 100 + i, uuid));
+    }
+
+    EXPECT_NO_THROW(observer.HandleEvent(ServiceDiscoveryEvent::Type::ServiceCreated,
+                                         MakeDataPublisher(uuid, "PubParticipant", "MyPub")));
+
+    const auto links = std::count_if(data.events.begin(), data.events.end(), [](const CapturedEvent& e) {
+        return e.serviceKind == SilKit_Experimental_ServiceKind_Link;
+    });
+    EXPECT_EQ(links, 3);
 }
 
 } // namespace

@@ -80,6 +80,8 @@ private:
     void EmitService(SilKit_Experimental_ServiceDiscoveryEvent_Type type,
                      const SilKit::Core::ServiceDescriptor& descriptor);
     void EmitLink(const LinkEmission& emission);
+    void Invoke(SilKit_Experimental_ServiceDiscoveryEvent_Type type,
+                const SilKit_Experimental_ServiceDescriptor& descriptor);
 
     static LinkEmission MakeLink(const SilKit::Core::ServiceDescriptor& parent,
                                  const SilKit::Core::ServiceDescriptor& peer);

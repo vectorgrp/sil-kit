@@ -468,4 +468,76 @@ TEST_F(ITest_CapiServiceDiscovery, late_observer_recovers_preexisting_link)
     SilKit_Participant_Destroy(lateObserver);
 }
 
+struct NestedRegistrationContext
+{
+    SilKit_Experimental_ServiceDiscovery* serviceDiscovery{nullptr};
+    std::mutex mutex;
+    std::condition_variable cv;
+    bool attempted{false};
+    SilKit_ReturnCode nestedResult{SilKit_ReturnCode_SUCCESS};
+    std::vector<std::string> canControllers;
+};
+
+// Tries to register another handler from within the handler on the first CAN controller.
+void SilKitCALL RegisteringHandler(void* context, SilKit_Experimental_ServiceDiscoveryEvent_Type eventType,
+                                   const SilKit_Experimental_ServiceDescriptor* descriptor)
+{
+    auto* ctx = static_cast<NestedRegistrationContext*>(context);
+    if (eventType != SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceCreated
+        || descriptor->serviceKind != SilKit_Experimental_ServiceKind_CanController)
+    {
+        return;
+    }
+
+    bool attempt{false};
+    {
+        std::lock_guard<std::mutex> lock{ctx->mutex};
+        attempt = !ctx->attempted;
+        ctx->attempted = true;
+    }
+    if (attempt)
+    {
+        const auto result = SilKit_Experimental_ServiceDiscovery_SetServiceDiscoveryHandler(ctx->serviceDiscovery, ctx,
+                                                                                            &RegisteringHandler);
+        std::lock_guard<std::mutex> lock{ctx->mutex};
+        ctx->nestedResult = result;
+    }
+    {
+        std::lock_guard<std::mutex> lock{ctx->mutex};
+        ctx->canControllers.emplace_back(descriptor->serviceName);
+    }
+    ctx->cv.notify_all();
+}
+
+TEST_F(ITest_CapiServiceDiscovery, set_handler_within_handler_is_rejected)
+{
+    NestedRegistrationContext ctx;
+
+    SilKit_ParticipantConfiguration* config{nullptr};
+    ASSERT_EQ(SilKit_ParticipantConfiguration_FromString(&config, ""), SilKit_ReturnCode_SUCCESS);
+    SilKit_Participant* observer{nullptr};
+    ASSERT_EQ(SilKit_Participant_Create(&observer, config, "NestedObserver", _registryUri.c_str()),
+              SilKit_ReturnCode_SUCCESS);
+    SilKit_ParticipantConfiguration_Destroy(config);
+    std::unique_ptr<SilKit_Participant, void (*)(SilKit_Participant*)> observerGuard{
+        observer, [](SilKit_Participant* participant) { SilKit_Participant_Destroy(participant); }};
+
+    ASSERT_EQ(SilKit_Experimental_ServiceDiscovery_Create(&ctx.serviceDiscovery, observer), SilKit_ReturnCode_SUCCESS);
+    ASSERT_EQ(SilKit_Experimental_ServiceDiscovery_SetServiceDiscoveryHandler(ctx.serviceDiscovery, &ctx,
+                                                                              &RegisteringHandler),
+              SilKit_ReturnCode_SUCCESS);
+
+    auto remote = CreateParticipant("NestedRemote");
+    remote->CreateCanController("Can1", "CAN1");
+    remote->CreateCanController("Can2", "CAN1");
+
+    std::unique_lock<std::mutex> lock{ctx.mutex};
+    const auto seenOnce = [&](const std::string& name) {
+        return std::count(ctx.canControllers.begin(), ctx.canControllers.end(), name) == 1;
+    };
+    EXPECT_TRUE(ctx.cv.wait_for(lock, kWaitTimeout, [&] { return seenOnce("Can1") && seenOnce("Can2"); }))
+        << "the handler must keep receiving events after the rejected registration";
+    EXPECT_EQ(ctx.nestedResult, SilKit_ReturnCode_WRONGSTATE);
+}
+
 } // namespace

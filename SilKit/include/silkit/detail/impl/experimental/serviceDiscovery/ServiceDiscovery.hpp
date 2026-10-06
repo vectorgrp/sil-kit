@@ -5,6 +5,7 @@
 #pragma once
 
 #include <memory>
+#include <mutex>
 
 #include "silkit/capi/SilKit.h"
 
@@ -34,13 +35,15 @@ public:
     inline auto Get() const -> SilKit_Experimental_ServiceDiscovery*;
 
 private:
+    struct HandlerSlot
+    {
+        std::mutex mutex;
+        std::shared_ptr<const SilKit::Experimental::ServiceDiscovery::ServiceDiscoveryHandler> handler;
+    };
+
     SilKit_Experimental_ServiceDiscovery* _serviceDiscovery{nullptr};
-    // The handler is stored in a slot whose address is passed to the C API as the callback context and
-    // must therefore remain stable for the lifetime of this object. Repeated calls to
-    // SetServiceDiscoveryHandler replace the stored std::function in place (never freeing the slot) and
-    // register the C trampoline exactly once, so the context can never dangle and events are not
-    // delivered twice. See SetServiceDiscoveryHandler below.
-    std::shared_ptr<SilKit::Experimental::ServiceDiscovery::ServiceDiscoveryHandler> _handler;
+    // C callback context; the trampoline invokes a copy of the current handler
+    std::unique_ptr<HandlerSlot> _slot{std::make_unique<HandlerSlot>()};
     bool _registered{false};
 };
 
@@ -70,19 +73,16 @@ ServiceDiscovery::ServiceDiscovery(SilKit_Participant* participant)
 void ServiceDiscovery::SetServiceDiscoveryHandler(
     SilKit::Experimental::ServiceDiscovery::ServiceDiscoveryHandler handler)
 {
-    // Store the handler in a slot with a stable address (used as the C callback context). On repeated
-    // calls we swap the std::function in place instead of freeing and re-registering, which would leave
-    // the previously registered C trampoline pointing at a destroyed std::function (use-after-free).
-    if (_handler == nullptr)
+    auto replaced =
+        std::make_shared<const SilKit::Experimental::ServiceDiscovery::ServiceDiscoveryHandler>(std::move(handler));
     {
-        _handler = std::make_shared<SilKit::Experimental::ServiceDiscovery::ServiceDiscoveryHandler>();
+        std::lock_guard<std::mutex> lock{_slot->mutex};
+        _slot->handler.swap(replaced);
     }
-    *_handler = std::move(handler);
+    // A running invocation keeps its own reference to the replaced handler
 
     if (_registered)
     {
-        // The trampoline reads the current value of *_handler on every invocation, so the replacement
-        // above already takes effect; registering again would duplicate event delivery.
         return;
     }
 
@@ -112,15 +112,20 @@ void ServiceDiscovery::SetServiceDiscoveryHandler(
         serviceDescriptor.connectedParticipantName = orEmpty(cServiceDescriptor->connectedParticipantName);
         serviceDescriptor.connectedServiceName = orEmpty(cServiceDescriptor->connectedServiceName);
 
-        auto& userHandler = *static_cast<SD::ServiceDiscoveryHandler*>(context);
-        if (userHandler)
+        auto* slot = static_cast<HandlerSlot*>(context);
+        std::shared_ptr<const SD::ServiceDiscoveryHandler> userHandler;
         {
-            userHandler(static_cast<SD::ServiceDiscoveryEventType>(eventType), serviceDescriptor);
+            std::lock_guard<std::mutex> lock{slot->mutex};
+            userHandler = slot->handler;
+        }
+        if (userHandler && *userHandler)
+        {
+            (*userHandler)(static_cast<SD::ServiceDiscoveryEventType>(eventType), serviceDescriptor);
         }
     };
 
     const auto returnCode =
-        SilKit_Experimental_ServiceDiscovery_SetServiceDiscoveryHandler(_serviceDiscovery, _handler.get(), cHandler);
+        SilKit_Experimental_ServiceDiscovery_SetServiceDiscoveryHandler(_serviceDiscovery, _slot.get(), cHandler);
     ThrowOnError(returnCode);
 
     _registered = true;

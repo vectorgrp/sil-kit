@@ -102,7 +102,7 @@ typedef struct
     const char* connectedServiceName;
 } SilKit_Experimental_ServiceDescriptor;
 
-/*! \brief Handler invoked when a user-facing service is created, updated, or removed in the simulation.
+/*! \brief Handler invoked when a user-facing service is created or removed in the simulation.
  *
  * The \p serviceDescriptor and all of its pointer members are only valid for the duration of the
  * handler invocation. Copy the data if it must outlive the call.
@@ -110,11 +110,11 @@ typedef struct
  * \note Threading: this handler may be invoked on an internal SIL Kit worker thread or on an
  *       application thread that creates or destroys a service; the invoking thread is unspecified.
  *       Invocations are serialized (the handler is never called concurrently with itself). The
- *       handler must not block and must not call back into the participant that owns the observer,
- *       as doing so may deadlock.
+ *       handler must not block and must not call back into the participant that owns the observer.
+ *       Registering a handler from within a handler fails with \ref SilKit_ReturnCode_WRONGSTATE.
  *
  * \param context The user context pointer passed to \ref SilKit_Experimental_ServiceDiscovery_SetServiceDiscoveryHandler.
- * \param eventType Whether the service was created, updated, or removed.
+ * \param eventType Whether the service was created or removed.
  * \param serviceDescriptor The affected service.
  */
 typedef void(SilKitFPTR* SilKit_Experimental_ServiceDiscoveryHandler_t)(
@@ -156,7 +156,7 @@ typedef SilKit_ReturnCode(SilKitFPTR* SilKit_Experimental_ServiceDiscovery_Creat
  *
  * \param serviceDiscovery The observer obtained via \ref SilKit_Experimental_ServiceDiscovery_Create.
  * \param context The user context pointer made available to the handler.
- * \param handler The handler to be called on service creation, update, and removal.
+ * \param handler The handler to be called on service creation and removal.
  */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Experimental_ServiceDiscovery_SetServiceDiscoveryHandler(
     SilKit_Experimental_ServiceDiscovery* serviceDiscovery, void* context,
