@@ -36,6 +36,11 @@ struct MockRawByteStream : IRawByteStream
     MOCK_METHOD(void, SetListener, (IRawByteStreamListener&), (override));
     MOCK_METHOD(void, AsyncReadSome, (MutableBufferSequence), (override));
     MOCK_METHOD(void, AsyncWriteSome, (ConstBufferSequence), (override));
+    // Always defer to AsyncWriteSome, so existing expectations on the asynchronous path still hold.
+    auto TryWriteSome(ConstBufferSequence) -> size_t override
+    {
+        return 0;
+    }
     MOCK_METHOD(void, Shutdown, (), (override));
 };
 

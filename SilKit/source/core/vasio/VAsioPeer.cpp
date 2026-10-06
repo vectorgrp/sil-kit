@@ -134,7 +134,12 @@ void VAsioPeer::SendSilKitMsgInternal(SendItem item)
 
         lock.unlock();
 
-        _ioContext->Dispatch([this] { StartAsyncWrite(); });
+        // Start the write directly on the calling thread instead of handing it off to the IO thread:
+        // the stream serializes socket access internally, and asio performs the send() speculatively
+        // on the calling thread, so only the completion is handled on the IO thread. Avoiding the
+        // hand-off saves one thread wake-up per message, which dominates latency on busy or
+        // virtualized hosts.
+        StartAsyncWrite();
     }
 }
 
@@ -184,23 +189,42 @@ void VAsioPeer::Flush()
 
 void VAsioPeer::StartAsyncWrite()
 {
-    if (_sending)
-        return;
-
+    // May run on any thread: ownership of the single in-flight write is decided under the lock.
     std::unique_lock<std::mutex> lock{_sendingQueueMutex};
-    if (_sendingQueue.empty())
+    if (_sending || _sendingQueue.empty())
     {
         return;
     }
 
     _sending = true;
 
-    _currentSendItem = std::move(_sendingQueue.front());
-    _sendingQueue.pop_front();
-    lock.unlock();
+    while (true)
+    {
+        _currentSendItem = std::move(_sendingQueue.front());
+        _sendingQueue.pop_front();
+        lock.unlock();
 
-    _currentSendingBuffer = ConstBuffer(_currentSendItem.data.data(), _currentSendItem.data.size());
-    WriteSomeAsync();
+        _currentSendingBuffer = ConstBuffer(_currentSendItem.data.data(), _currentSendItem.data.size());
+
+        // Common case: the kernel accepts the whole message right away, so no IO-thread round trip
+        // (neither to start the write nor to process its completion) is needed.
+        const auto written = _socket->TryWriteSome(ConstBufferSequence{&_currentSendingBuffer, 1});
+        if (written < _currentSendingBuffer.GetSize())
+        {
+            _currentSendingBuffer.SliceOff(written);
+            WriteSomeAsync();
+            return;
+        }
+
+        _currentSendItem.transmitReservation.reset();
+
+        lock.lock();
+        if (_sendingQueue.empty())
+        {
+            _sending = false;
+            return;
+        }
+    }
 }
 
 void VAsioPeer::WriteSomeAsync()
@@ -332,7 +356,10 @@ void VAsioPeer::OnAsyncWriteSomeDone(IRawByteStream& stream, size_t bytesTransfe
     }
 
     _currentSendItem.transmitReservation.reset();
-    _sending = false;
+    {
+        std::unique_lock<std::mutex> lock{_sendingQueueMutex};
+        _sending = false;
+    }
     StartAsyncWrite();
 }
 
