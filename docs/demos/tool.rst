@@ -5,7 +5,7 @@
 Tools
 =====
 
-Tools for performance analysis.
+Tools for performance analysis and introspection.
 
 .. contents::
     :depth: 1
@@ -137,3 +137,69 @@ Notes
     * The demo uses publish/subscribe controllers performing a message round trip (ping-pong) to calculate latency and throughput timings.
     * Note that the two participants must use the same parameters for valid measurement and one participant must use the ``--isReceiver`` flag.
 
+.. _sec:observer-demo:
+
+Observer Demo
+~~~~~~~~~~~~~
+
+Abstract
+    |DemoAbstractObserver|
+Sources
+    * :repo-link:`ObserverDemo.cpp <Demos/tools/Introspection/ObserverDemo.cpp>`
+    * :repo-link:`NetworkModel.hpp <Demos/tools/Introspection/NetworkModel.hpp>`
+    * :repo-link:`Dashboard.hpp <Demos/tools/Introspection/Dashboard.hpp>`
+Requirements
+    * :ref:`sil-kit-registry<sec:util-registry>`
+Optional Parameters
+    * ``--help``
+      Show the help message.
+    * ``--name``
+      The participant name of the observer. Default: SilKitObserver
+    * ``--registry-uri``
+      The registry URI to connect to. Default: silkit://localhost:8500
+    * ``--config``
+      Path to the participant configuration YAML or JSON file. Default: empty
+    * ``--plain``
+      Do not draw the dashboard, only print the event log line by line.
+    * ``--no-color``
+      Print the plain event log without colors.
+    * ``--sim-time``
+      Show the global simulation time. The observer then takes part in the virtual time synchronization.
+    * ``--sim-step``
+      Step size of the observer's time synchronization in milliseconds, i.e., the resolution of the shown simulation time. Default: 10
+System Examples
+    * Launch the observer, then start or stop any other demos and watch the topology change:
+
+      .. parsed-literal::
+
+         |DemoDir|/SilKitDemoObserver
+         |DemoDir|/SilKitDemoCanWriter --autonomous
+         |DemoDir|/SilKitDemoPublisher --autonomous
+         |DemoDir|/SilKitDemoSubscriber --autonomous
+
+    * Additionally show the global simulation time with a resolution of 1 ms:
+
+      .. parsed-literal::
+
+         |DemoDir|/SilKitDemoObserver --sim-time --sim-step 1
+
+    * Record the changes of a simulation into a file:
+
+      .. parsed-literal::
+
+         |DemoDir|/SilKitDemoObserver --plain --no-color > topology-changes.log
+Notes
+    * By default, the observer does not take part in the lifecycle and does not create any services of its own; it can join and leave a running simulation at any time.
+    * With ``--sim-time``, the observer runs an autonomous lifecycle with virtual time synchronization and shows the simulation time of its own steps, together with the speed relative to real time.
+      Because other participants wait for its steps, a larger ``--sim-step`` costs the simulation less.
+      To not influence the simulation, the observer only advances its time while another synchronized participant is present, and rejoins the time synchronization at time zero once all synchronized participants have left.
+    * Upon joining, all services that already exist are reported as a snapshot, so the dashboard shows the complete picture immediately; they are neither highlighted nor logged as changes.
+    * The operation mode (coordinated or autonomous) and the participation in the virtual time synchronization of a participant become known when it starts its lifecycle.
+      Until a participant starts its lifecycle, its operation mode and time synchronization are shown as ``UNKNOWN``; SIL Kit does not announce participants that have no lifecycle at all.
+    * The system state is derived from the required participants of the workflow configuration, which is set by a system controller.
+      Without one, the system state stays ``Invalid``.
+    * The dashboard is laid out side by side in terminals that are at least 150 columns wide, and stacked otherwise.
+      New elements are highlighted for a few seconds, removed elements stay visible struck through before they vanish.
+    * Links and matches are reported by the service discovery with kinds of their own: network-simulator links (with the bus type of the simulated network), and Publish/Subscribe and RPC matches.
+      Like all services, they are reported both when they are created and when they are removed; a match is removed before the first of its endpoints.
+    * If the output is not an interactive terminal, the observer falls back to printing the event log.

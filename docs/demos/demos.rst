@@ -65,10 +65,13 @@ These demos focus on a basic systems and single topic of the |ProductName| API:
 
 .. rubric:: 3. Tools
 
-Tools for performance analysis:
+Tools for performance analysis and introspection:
 
 :ref:`sec:benchmark-demo`
     |DemoAbstractBenchmark|
 
 :ref:`sec:latency-demo`
     |DemoAbstractLatency|
+
+:ref:`sec:observer-demo`
+    |DemoAbstractObserver|

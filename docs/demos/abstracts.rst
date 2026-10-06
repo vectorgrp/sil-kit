@@ -53,5 +53,9 @@
   A sender and a receiver application use the Publish/Subscribe services and measure the round trip time of the communication.
   This setup is useful to evaluate the performance of a SIL Kit setup running on different platforms.
   E.g., between a local host, a virtual machine, a remote network, etc.
+.. |DemoAbstractObserver| replace:: 
+  A passive participant that uses the experimental service discovery to draw a live terminal dashboard of the simulation.
+  It shows the system state, all participants with their services, operation mode and use of time synchronization, and the topology: bus networks, network simulators, and the matches of Publish/Subscribe and RPC services.
+  Every change is highlighted in place and recorded in a concise event log.
 
 

@@ -13,7 +13,9 @@
 #include "core/service/IServiceDiscovery.hpp"
 #include "core/internal/ServiceDescriptor.hpp"
 
+#include <atomic>
 #include <memory>
+#include <thread>
 
 namespace {
 
@@ -60,20 +62,27 @@ try
 
     auto observer = std::make_shared<VSilKit::ServiceObserver>(handler, context);
 
+    // The internal service discovery replays the already known services synchronously on this thread, inside
+    // RegisterServiceDiscoveryHandler and under its lock; later events come from other threads or after the call
+    // returned. So an invocation on this thread while registering is exactly a snapshot entry.
+    auto snapshotThread = std::make_shared<std::atomic<std::thread::id>>(std::this_thread::get_id());
+
     cppServiceDiscovery->RegisterServiceDiscoveryHandler(
-        [observer](Discovery::ServiceDiscoveryEvent::Type type,
-                   const SilKit::Core::ServiceDescriptor& serviceDescriptor) {
+        [observer, snapshotThread](Discovery::ServiceDiscoveryEvent::Type type,
+                                   const SilKit::Core::ServiceDescriptor& serviceDescriptor) {
         // Invoked by the internal service discovery with its lock held, serialized, on an unspecified
         // thread (an IO worker for remote events, or the caller's thread for locally created/removed
         // services). Exceptions must never propagate into SIL Kit internals.
         try
         {
-            observer->HandleEvent(type, serviceDescriptor);
+            const bool isSnapshot = std::this_thread::get_id() == snapshotThread->load();
+            observer->HandleEvent(type, serviceDescriptor, isSnapshot);
         }
         catch (...)
         {
         }
     });
+    snapshotThread->store(std::thread::id{});
 
     return SilKit_ReturnCode_SUCCESS;
 }

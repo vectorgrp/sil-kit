@@ -11,7 +11,8 @@ namespace Experimental {
 namespace ServiceDiscovery {
 
 /*! \brief Passively observes the user-facing services (bus controllers, publishers/subscribers,
- *         RPC clients/servers, network links) created by all participants in the simulation.
+ *         RPC clients/servers, network-simulator links, pub/sub and RPC matches, lifecycle and time
+ *         sync services) created by all participants in the simulation.
  *
  * \warning This interface is experimental and not part of the stable API and ABI of the SIL Kit. It
  *          may be removed or changed at any time without prior notice.
