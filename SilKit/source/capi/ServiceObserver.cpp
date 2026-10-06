@@ -221,7 +221,7 @@ void ServiceObserver::EmitService(SilKit_Experimental_ServiceDiscoveryEvent_Type
     {
         return;
     }
-    _handler(_context, type, &out);
+    Invoke(type, out);
 }
 
 void ServiceObserver::EmitLink(const LinkEmission& emission)
@@ -235,7 +235,20 @@ void ServiceObserver::EmitLink(const LinkEmission& emission)
     out.serviceKind = SilKit_Experimental_ServiceKind_Link;
     out.connectedParticipantName = emission.connectedParticipantName.c_str();
     out.connectedServiceName = emission.connectedServiceName.c_str();
-    _handler(_context, SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceCreated, &out);
+    Invoke(SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceCreated, out);
+}
+
+// A throwing handler must not cost the remaining emissions of the same event.
+void ServiceObserver::Invoke(SilKit_Experimental_ServiceDiscoveryEvent_Type type,
+                             const SilKit_Experimental_ServiceDescriptor& descriptor)
+{
+    try
+    {
+        _handler(_context, type, &descriptor);
+    }
+    catch (...)
+    {
+    }
 }
 
 void ServiceObserver::DrainResolvablePending(std::vector<LinkEmission>& emissions)

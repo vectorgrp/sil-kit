@@ -11,6 +11,7 @@
 #include "gmock/gmock.h"
 
 #include "core/service/ServiceDiscovery.hpp"
+#include "silkit/participant/exception.hpp"
 #include "core/internal/string_utils_internal.hpp"
 #include "util/Uuid.hpp"
 #include "core/mock/participant/MockParticipant.hpp"
@@ -196,5 +197,52 @@ TEST_F(Test_ServiceDiscovery, service_removal)
     event.type = ServiceDiscoveryEvent::Type::ServiceRemoved;
     EXPECT_CALL(callbacks, ServiceDiscoveryHandler(_, _)).Times(0);
     disco.ReceiveMsg(&otherParticipant, event);
+}
+
+auto MakeRemoteServiceCreated() -> ServiceDiscoveryEvent
+{
+    ServiceDiscoveryEvent event;
+    event.type = ServiceDiscoveryEvent::Type::ServiceCreated;
+    event.serviceDescriptor.SetParticipantNameAndComputeId("ParticipantOther");
+    event.serviceDescriptor.SetServiceName("TestService");
+    return event;
+}
+
+TEST_F(Test_ServiceDiscovery, register_handler_within_handler_throws)
+{
+    MockServiceEndpoint otherParticipant{"P1", "N1", "C1", 2};
+    ServiceDiscovery disco{&participant, "ParticipantA"};
+
+    bool threw{false};
+    disco.RegisterServiceDiscoveryHandler([&](auto, auto&&) {
+        EXPECT_THROW(disco.RegisterServiceDiscoveryHandler([](auto, auto&&) {}), SilKit::StateError);
+        threw = true;
+    });
+    disco.RegisterServiceDiscoveryHandler(
+        [this](auto type, auto&& descr) { callbacks.ServiceDiscoveryHandler(type, descr); });
+
+    const auto event = MakeRemoteServiceCreated();
+    EXPECT_CALL(callbacks, ServiceDiscoveryHandler(event.type, event.serviceDescriptor)).Times(1);
+    disco.ReceiveMsg(&otherParticipant, event);
+    EXPECT_TRUE(threw);
+
+    // Outside of a handler, registering works again
+    EXPECT_CALL(callbacks, ServiceDiscoveryHandler(event.type, event.serviceDescriptor)).Times(1);
+    EXPECT_NO_THROW(disco.RegisterServiceDiscoveryHandler(
+        [this](auto type, auto&& descr) { callbacks.ServiceDiscoveryHandler(type, descr); }));
+}
+
+TEST_F(Test_ServiceDiscovery, register_handler_within_replay_throws)
+{
+    MockServiceEndpoint otherParticipant{"P1", "N1", "C1", 2};
+    ServiceDiscovery disco{&participant, "ParticipantA"};
+    disco.ReceiveMsg(&otherParticipant, MakeRemoteServiceCreated());
+
+    bool threw{false};
+    disco.RegisterServiceDiscoveryHandler([&](auto, auto&&) {
+        EXPECT_THROW(disco.RegisterServiceDiscoveryHandler([](auto, auto&&) {}), SilKit::StateError);
+        threw = true;
+    });
+    EXPECT_TRUE(threw);
 }
 } // namespace

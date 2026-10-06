@@ -15,7 +15,10 @@
 
 #include "MockCapiTest.hpp"
 
+#include <atomic>
+#include <memory>
 #include <string>
+#include <thread>
 #include <vector>
 
 namespace {
@@ -187,6 +190,110 @@ TEST_F(Test_HourglassServiceDiscovery, set_handler_twice_replaces_and_registers_
     // Only the second (current) handler is invoked; the first was replaced, not left dangling.
     EXPECT_EQ(firstCalls, 0);
     EXPECT_EQ(secondCalls, 1);
+}
+
+auto MakeCanDescriptor() -> SilKit_Experimental_ServiceDescriptor
+{
+    SilKit_Experimental_ServiceDescriptor cDescriptor;
+    SilKit_Struct_Init(SilKit_Experimental_ServiceDescriptor, cDescriptor);
+    cDescriptor.participantName = "P";
+    cDescriptor.serviceName = "S";
+    cDescriptor.serviceKind = SilKit_Experimental_ServiceKind_CanController;
+    cDescriptor.primaryIdentifier = "CAN1";
+    cDescriptor.mediaType = "";
+    cDescriptor.labelList.numLabels = 0;
+    cDescriptor.labelList.labels = nullptr;
+    return cDescriptor;
+}
+
+// A handler replacing itself must not destroy its own running closure.
+TEST_F(Test_HourglassServiceDiscovery, handler_replacing_itself_is_safe)
+{
+    ServiceDiscoveryWrapper serviceDiscovery{mockParticipant};
+
+    void* capturedContext{nullptr};
+    SilKit_Experimental_ServiceDiscoveryHandler_t capturedHandler{nullptr};
+    EXPECT_CALL(capi, SilKit_Experimental_ServiceDiscovery_SetServiceDiscoveryHandler(mockServiceDiscovery, _, _))
+        .WillOnce(DoAll(SaveArg<1>(&capturedContext), SaveArg<2>(&capturedHandler), Return(SilKit_ReturnCode_SUCCESS)));
+
+    bool firstDestroyed{false};
+    bool firstAliveAfterReplace{false};
+    int secondCalls{0};
+    {
+        // Flags the destruction of the first handler's closure
+        std::shared_ptr<int> guard{new int{0}, [&firstDestroyed](int* p) {
+            firstDestroyed = true;
+            delete p;
+        }};
+        serviceDiscovery.SetServiceDiscoveryHandler(
+            [&serviceDiscovery, &secondCalls, destroyed = &firstDestroyed, aliveAfterReplace = &firstAliveAfterReplace,
+             guard](SD::ServiceDiscoveryEventType, const SD::ServiceDescriptor&) {
+            // Copied out of the closure under test
+            auto& sd = serviceDiscovery;
+            auto* const destroyedFlag = destroyed;
+            auto* const aliveFlag = aliveAfterReplace;
+            sd.SetServiceDiscoveryHandler(
+                [&secondCalls](SD::ServiceDiscoveryEventType, const SD::ServiceDescriptor&) { ++secondCalls; });
+            *aliveFlag = !*destroyedFlag;
+        });
+    }
+    ASSERT_NE(capturedHandler, nullptr);
+    ASSERT_FALSE(firstDestroyed);
+
+    const auto cDescriptor = MakeCanDescriptor();
+    capturedHandler(capturedContext, SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceCreated, &cDescriptor);
+
+    EXPECT_TRUE(firstAliveAfterReplace);
+    EXPECT_TRUE(firstDestroyed);
+    EXPECT_EQ(secondCalls, 0);
+
+    capturedHandler(capturedContext, SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceCreated, &cDescriptor);
+
+    EXPECT_EQ(secondCalls, 1);
+}
+
+// Smoke test (meaningful under a thread sanitizer): replace the handler while another thread invokes it.
+TEST_F(Test_HourglassServiceDiscovery, concurrent_set_and_invoke)
+{
+    ServiceDiscoveryWrapper serviceDiscovery{mockParticipant};
+
+    void* capturedContext{nullptr};
+    SilKit_Experimental_ServiceDiscoveryHandler_t capturedHandler{nullptr};
+    EXPECT_CALL(capi, SilKit_Experimental_ServiceDiscovery_SetServiceDiscoveryHandler(mockServiceDiscovery, _, _))
+        .WillOnce(DoAll(SaveArg<1>(&capturedContext), SaveArg<2>(&capturedHandler), Return(SilKit_ReturnCode_SUCCESS)));
+
+    std::atomic<size_t> payloadBytes{0};
+    const auto makeHandler = [&payloadBytes] {
+        auto payload = std::make_shared<std::string>("payload");
+        return [&payloadBytes, payload](SD::ServiceDiscoveryEventType, const SD::ServiceDescriptor&) {
+            payloadBytes += payload->size();
+        };
+    };
+
+    serviceDiscovery.SetServiceDiscoveryHandler(makeHandler());
+    ASSERT_NE(capturedHandler, nullptr);
+
+    const auto cDescriptor = MakeCanDescriptor();
+    std::atomic<bool> stop{false};
+    std::thread invoker{[&] {
+        while (!stop)
+        {
+            capturedHandler(capturedContext, SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceCreated,
+                            &cDescriptor);
+        }
+    }};
+    while (payloadBytes == 0)
+    {
+        std::this_thread::yield();
+    }
+
+    for (int i = 0; i < 1000; ++i)
+    {
+        serviceDiscovery.SetServiceDiscoveryHandler(makeHandler());
+    }
+
+    stop = true;
+    invoker.join();
 }
 
 TEST_F(Test_HourglassServiceDiscovery, to_string_maps_enums)
