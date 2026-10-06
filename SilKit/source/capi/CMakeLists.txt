@@ -8,6 +8,7 @@ add_library(O_SilKit_Capi OBJECT
     CapiEthernet.cpp
     CapiExceptions.hpp
     CapiFlexray.cpp
+    CapiImpl.cpp
     CapiImpl.hpp
     CapiLin.cpp
     CapiLogger.cpp

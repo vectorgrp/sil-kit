@@ -23,6 +23,8 @@ struct EscapedJsonString
     friend auto operator<<(std::ostream& ostream, const EscapedJsonString& self) -> std::ostream&;
 };
 
+void AppendEscapedJsonStringTo(std::string_view input, std::string& output);
+
 auto EscapeString(const std::string& input) -> std::string;
 
 auto CurrentTimestampString() -> std::string;
