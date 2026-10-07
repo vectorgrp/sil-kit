@@ -414,6 +414,31 @@ Experimental:
     EXPECT_EQ(configDefault.experimental.metrics.updateInterval, 1s);
 }
 
+TEST_F(Test_YamlParser, yaml_use_receive_buffer_pool)
+{
+    auto configDefault = Deserialize<ParticipantConfiguration>(R"(
+Experimental:
+  Metrics:
+    CollectFromRemote: true
+)");
+    EXPECT_TRUE(configDefault.experimental.useReceiveBufferPool);
+
+    auto config = Deserialize<ParticipantConfiguration>(R"(
+Experimental:
+  UseReceiveBufferPool: false
+)");
+    EXPECT_FALSE(config.experimental.useReceiveBufferPool);
+
+    auto config2 = Deserialize<ParticipantConfiguration>(Serialize(config));
+    EXPECT_FALSE(config2.experimental.useReceiveBufferPool);
+
+    auto configTrue = Deserialize<ParticipantConfiguration>(R"(
+Experimental:
+  UseReceiveBufferPool: true
+)");
+    EXPECT_TRUE(configTrue.experimental.useReceiveBufferPool);
+}
+
 TEST_F(Test_YamlParser, middleware_convert)
 {
     auto config = Deserialize<Middleware>(R"(
