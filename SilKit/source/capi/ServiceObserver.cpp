@@ -4,6 +4,7 @@
 
 #include "capi/ServiceObserver.hpp"
 
+#include "silkit/capi/Orchestration.h"
 #include "silkit/services/datatypes.hpp"
 
 #include "core/internal/ServiceConfigKeys.hpp"
@@ -38,11 +39,45 @@ struct LabelStorage
     std::vector<SilKit_Label> cLabels;
 };
 
+// The bus type of a controller or simulated network; pub/sub, RPC and internal services have none.
+auto ToSimulatedNetworkType(SilKit::Config::NetworkType networkType) -> SilKit_Experimental_SimulatedNetworkType
+{
+    using SilKit::Config::NetworkType;
+    switch (networkType)
+    {
+    case NetworkType::CAN:
+        return SilKit_NetworkType_CAN;
+    case NetworkType::Ethernet:
+        return SilKit_NetworkType_Ethernet;
+    case NetworkType::FlexRay:
+        return SilKit_NetworkType_FlexRay;
+    case NetworkType::LIN:
+        return SilKit_NetworkType_LIN;
+    default:
+        return SilKit_NetworkType_Undefined;
+    }
+}
+
+// The operation mode stored by the LifecycleService (its numeric SilKit_OperationMode value).
+auto ParseOperationMode(const char* value) -> SilKit_OperationMode
+{
+    const std::string text = value == nullptr ? "" : value;
+    if (text == std::to_string(SilKit_OperationMode_Coordinated))
+    {
+        return SilKit_OperationMode_Coordinated;
+    }
+    if (text == std::to_string(SilKit_OperationMode_Autonomous))
+    {
+        return SilKit_OperationMode_Autonomous;
+    }
+    return SilKit_OperationMode_Invalid;
+}
+
 // Maps the internal ServiceDescriptor to the public struct. Returns false if the service is not user-facing
-// (infrastructure / internal endpoints), in which case the handler must not be invoked. The connectedParticipantName
-// and connectedServiceName fields are initialised to empty strings here; the link path sets them (and overrides
-// serviceKind to Link) after this function returns.
-auto ClassifyAndFill(const SilKit::Core::ServiceDescriptor& serviceDescriptor,
+// (infrastructure / internal endpoints), in which case the handler must not be invoked. The connected... fields are
+// initialised to empty values here; the pub/sub and RPC match path sets them (and overrides serviceKind) after this
+// function returns.
+auto ClassifyAndFill(const SilKit::Core::ServiceDescriptor& serviceDescriptor, bool isSnapshot,
                      SilKit_Experimental_ServiceDescriptor& out, LabelStorage& storage) -> bool
 {
     const auto& supplementalData = serviceDescriptor.GetSupplementalDataRef();
@@ -55,17 +90,22 @@ auto ClassifyAndFill(const SilKit::Core::ServiceDescriptor& serviceDescriptor,
     SilKit_Struct_Init(SilKit_Experimental_ServiceDescriptor, out);
     out.participantName = serviceDescriptor.GetParticipantName().c_str();
     out.serviceName = serviceDescriptor.GetServiceName().c_str();
+    out.serviceId = serviceDescriptor.GetServiceId();
     out.primaryIdentifier = serviceDescriptor.GetNetworkName().c_str();
+    out.networkType = ToSimulatedNetworkType(serviceDescriptor.GetNetworkType());
     out.mediaType = "";
-    out.simulationName = serviceDescriptor.GetSimulationName().c_str();
+    out.operationMode = SilKit_OperationMode_Invalid;
+    out.timeSyncActive = SilKit_False;
     out.connectedParticipantName = "";
     out.connectedServiceName = "";
+    out.connectedServiceId = 0;
+    out.isSnapshot = isSnapshot ? SilKit_True : SilKit_False;
 
-    // Network-simulator links are user-facing: they are reported as a Link service whose primaryIdentifier is
-    // the simulated network name (matching the affected bus controllers' primaryIdentifier).
+    // Network-simulator links: primaryIdentifier and networkType are those of the simulated network, matching the
+    // affected bus controllers.
     if (serviceDescriptor.GetServiceType() == SilKit::Core::ServiceType::Link)
     {
-        out.serviceKind = SilKit_Experimental_ServiceKind_Link;
+        out.serviceKind = SilKit_Experimental_ServiceKind_NetworkSimulatorLink;
         return true;
     }
 
@@ -172,9 +212,23 @@ auto ClassifyAndFill(const SilKit::Core::ServiceDescriptor& serviceDescriptor,
         }
         decodeLabels(Discovery::supplKeyRpcServerLabels);
     }
+    else if (controllerType == Discovery::controllerTypeLifecycleService)
+    {
+        // Announced by StartLifecycle, after the operation mode has been stored in the descriptor.
+        out.serviceKind = SilKit_Experimental_ServiceKind_LifecycleService;
+        out.primaryIdentifier = "";
+        out.operationMode = ParseOperationMode(findValue(Discovery::lifecycleIsCoordinated));
+    }
+    else if (controllerType == Discovery::controllerTypeTimeSyncService)
+    {
+        out.serviceKind = SilKit_Experimental_ServiceKind_TimeSyncService;
+        out.primaryIdentifier = "";
+        const char* active = findValue(Discovery::timeSyncActive);
+        out.timeSyncActive = (active != nullptr && std::string{active} == "1") ? SilKit_True : SilKit_False;
+    }
     else
     {
-        // Infrastructure / internal controllers (ServiceDiscovery, SystemMonitor, lifecycle, metrics,
+        // Infrastructure / internal controllers (ServiceDiscovery, SystemMonitor, metrics,
         // DataSubscriberInternal, RpcServerInternal, ...) are not user-facing and are not reported.
         return false;
     }
@@ -206,10 +260,11 @@ ServiceObserver::ServiceObserver(SilKit_Experimental_ServiceDiscoveryHandler_t h
 {
 }
 
-auto ServiceObserver::MakeLink(const SilKit::Core::ServiceDescriptor& parent,
-                               const SilKit::Core::ServiceDescriptor& peer) -> LinkEmission
+auto ServiceObserver::MakeMatch(const SilKit::Core::ServiceDescriptor& parent,
+                               const SilKit::Core::ServiceDescriptor& peer, SilKit_Experimental_ServiceKind kind)
+    -> MatchEmission
 {
-    return LinkEmission{parent, peer.GetParticipantName(), peer.GetServiceName()};
+    return MatchEmission{parent, peer.GetParticipantName(), peer.GetServiceName(), peer.GetServiceId(), kind};
 }
 
 void ServiceObserver::EmitService(SilKit_Experimental_ServiceDiscoveryEvent_Type type,
@@ -217,25 +272,26 @@ void ServiceObserver::EmitService(SilKit_Experimental_ServiceDiscoveryEvent_Type
 {
     SilKit_Experimental_ServiceDescriptor out{};
     LabelStorage storage;
-    if (!ClassifyAndFill(descriptor, out, storage))
+    if (!ClassifyAndFill(descriptor, _isSnapshot, out, storage))
     {
         return;
     }
     Invoke(type, out);
 }
 
-void ServiceObserver::EmitLink(const LinkEmission& emission)
+void ServiceObserver::EmitMatch(SilKit_Experimental_ServiceDiscoveryEvent_Type type, const MatchEmission& emission)
 {
     SilKit_Experimental_ServiceDescriptor out{};
     LabelStorage storage;
-    if (!ClassifyAndFill(emission.parentDescriptor, out, storage))
+    if (!ClassifyAndFill(emission.parentDescriptor, _isSnapshot, out, storage))
     {
         return;
     }
-    out.serviceKind = SilKit_Experimental_ServiceKind_Link;
+    out.serviceKind = emission.kind;
     out.connectedParticipantName = emission.connectedParticipantName.c_str();
     out.connectedServiceName = emission.connectedServiceName.c_str();
-    Invoke(SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceCreated, out);
+    out.connectedServiceId = emission.connectedServiceId;
+    Invoke(type, out);
 }
 
 // A throwing handler must not cost the remaining emissions of the same event.
@@ -251,17 +307,51 @@ void ServiceObserver::Invoke(SilKit_Experimental_ServiceDiscoveryEvent_Type type
     }
 }
 
-void ServiceObserver::DrainResolvablePending(std::vector<LinkEmission>& emissions)
+void ServiceObserver::EmitAll(SilKit_Experimental_ServiceDiscoveryEvent_Type type,
+                              const std::vector<MatchEmission>& emissions)
+{
+    for (const auto& emission : emissions)
+    {
+        EmitMatch(type, emission);
+    }
+}
+
+auto ServiceObserver::TryResolve(const PendingMatch& match, std::vector<MatchEmission>& created) -> bool
+{
+    const auto parentIt = _parents.find(match.parentKey);
+    const auto peerIt = _peersByUuid.find(match.peerUuid);
+    if (parentIt == _parents.end() || peerIt == _peersByUuid.end())
+    {
+        return false;
+    }
+    const MatchKey key{match.parentKey, match.peerUuid};
+    if (_emitted.count(key) == 0)
+    {
+        auto emission = MakeMatch(parentIt->second, peerIt->second, match.kind);
+        _emitted.emplace(key, emission);
+        created.push_back(std::move(emission));
+    }
+    return true;
+}
+
+void ServiceObserver::DrainResolvablePending(std::vector<MatchEmission>& created)
 {
     auto it = _pending.begin();
     while (it != _pending.end())
     {
-        const auto parentIt = _parents.find(it->parentKey);
-        const auto peerIt = _peersByUuid.find(it->peerUuid);
-        if (parentIt != _parents.end() && peerIt != _peersByUuid.end())
+        it = TryResolve(*it, created) ? _pending.erase(it) : std::next(it);
+    }
+}
+
+template <typename Predicate>
+void ServiceObserver::TakeEmitted(Predicate predicate, std::vector<MatchEmission>& removed)
+{
+    for (auto it = _emitted.begin(); it != _emitted.end();)
+    {
+        if (predicate(it->first))
         {
-            emissions.push_back(MakeLink(parentIt->second, peerIt->second));
-            it = _pending.erase(it);
+            removed.push_back(std::move(it->second));
+            it = _emitted.erase(it);
         }
         else
         {
@@ -270,13 +360,13 @@ void ServiceObserver::DrainResolvablePending(std::vector<LinkEmission>& emission
     }
 }
 
-// An internal-match endpoint (DataSubscriberInternal / RpcServerInternal) appeared or disappeared. On creation it is
-// turned into a Link event once its parent (subscriber/server) and peer (publisher/client) are both known; if either
-// is still missing it is remembered in the pending list. No Link removal event is emitted: a match teardown always
-// coincides with a ServiceRemoved of one of its endpoints, from which the link's disappearance is inferred.
+// An internal-match endpoint (DataSubscriberInternal / RpcServerInternal) appeared or disappeared. On creation it
+// becomes a PubSubMatch / RpcMatch once its parent (subscriber/server) and peer (publisher/client) are both known;
+// until then it is remembered in the pending list. Its removal removes the match.
 void ServiceObserver::HandleInternalMatch(Discovery::ServiceDiscoveryEvent::Type type,
                                           const SilKit::Core::ServiceDescriptor& descriptor,
-                                          const std::string& parentIdKey, const std::string& peerUuid)
+                                          const std::string& parentIdKey, const std::string& peerUuid,
+                                          SilKit_Experimental_ServiceKind kind)
 {
     using EventType = Discovery::ServiceDiscoveryEvent::Type;
 
@@ -291,53 +381,49 @@ void ServiceObserver::HandleInternalMatch(Discovery::ServiceDiscoveryEvent::Type
         return;
     }
     const ServiceKey parentKey{descriptor.GetParticipantName(), parentServiceId};
+    const MatchKey matchKey{parentKey, peerUuid};
 
-    std::vector<LinkEmission> emissions;
+    std::vector<MatchEmission> created;
+    std::vector<MatchEmission> removed;
     {
         std::lock_guard<std::mutex> lock{_mutex};
+        const auto isThisMatch = [&](const PendingMatch& p) {
+            return p.parentKey == parentKey && p.peerUuid == peerUuid;
+        };
         if (type == EventType::ServiceCreated)
         {
-            const auto parentIt = _parents.find(parentKey);
-            const auto peerIt = _peersByUuid.find(peerUuid);
-            if (parentIt != _parents.end() && peerIt != _peersByUuid.end())
+            const PendingMatch match{parentKey, peerUuid, kind};
+            if (!TryResolve(match, created) && std::none_of(_pending.begin(), _pending.end(), isThisMatch))
             {
-                emissions.push_back(MakeLink(parentIt->second, peerIt->second));
-            }
-            else
-            {
-                _pending.push_back(PendingMatch{parentKey, peerUuid});
+                _pending.push_back(match);
             }
         }
         else if (type == EventType::ServiceRemoved)
         {
-            _pending.erase(std::remove_if(_pending.begin(), _pending.end(),
-                                          [&](const PendingMatch& p) {
-                return p.parentKey == parentKey && p.peerUuid == peerUuid;
-            }),
-                           _pending.end());
+            _pending.erase(std::remove_if(_pending.begin(), _pending.end(), isThisMatch), _pending.end());
+            TakeEmitted([&](const MatchKey& key) { return key == matchKey; }, removed);
         }
     }
-    for (const auto& e : emissions)
-    {
-        EmitLink(e);
-    }
+    EmitAll(SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceRemoved, removed);
+    EmitAll(SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceCreated, created);
 }
 
 // A peer (DataPublisher / RpcClient) appeared or disappeared. Its identity (keyed by its networkName / UUID) enables
-// resolving matches. The peer's own ServiceCreated/ServiceRemoved is always emitted.
+// resolving matches. Its matches are created after and removed before the peer's own ServiceCreated/ServiceRemoved.
 void ServiceObserver::HandlePeer(Discovery::ServiceDiscoveryEvent::Type type,
                                  const SilKit::Core::ServiceDescriptor& descriptor)
 {
     using EventType = Discovery::ServiceDiscoveryEvent::Type;
 
     const std::string peerUuid = descriptor.GetNetworkName();
-    std::vector<LinkEmission> emissions;
+    std::vector<MatchEmission> created;
+    std::vector<MatchEmission> removed;
     {
         std::lock_guard<std::mutex> lock{_mutex};
         if (type == EventType::ServiceCreated)
         {
             _peersByUuid[peerUuid] = descriptor;
-            DrainResolvablePending(emissions);
+            DrainResolvablePending(created);
         }
         else if (type == EventType::ServiceRemoved)
         {
@@ -345,30 +431,31 @@ void ServiceObserver::HandlePeer(Discovery::ServiceDiscoveryEvent::Type type,
             _pending.erase(std::remove_if(_pending.begin(), _pending.end(),
                                           [&](const PendingMatch& p) { return p.peerUuid == peerUuid; }),
                            _pending.end());
+            TakeEmitted([&](const MatchKey& key) { return key.second == peerUuid; }, removed);
         }
     }
+    EmitAll(SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceRemoved, removed);
     EmitService(ToC(type), descriptor);
-    for (const auto& e : emissions)
-    {
-        EmitLink(e);
-    }
+    EmitAll(SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceCreated, created);
 }
 
 // A parent (DataSubscriber / RpcServer) appeared or disappeared. Its identity (keyed by participant + serviceId)
-// enables resolving matches. The parent's own ServiceCreated/ServiceRemoved is always emitted.
+// enables resolving matches. Its matches are created after and removed before the parent's own
+// ServiceCreated/ServiceRemoved.
 void ServiceObserver::HandleParent(Discovery::ServiceDiscoveryEvent::Type type,
                                    const SilKit::Core::ServiceDescriptor& descriptor)
 {
     using EventType = Discovery::ServiceDiscoveryEvent::Type;
 
     const ServiceKey key{descriptor.GetParticipantName(), descriptor.GetServiceId()};
-    std::vector<LinkEmission> emissions;
+    std::vector<MatchEmission> created;
+    std::vector<MatchEmission> removed;
     {
         std::lock_guard<std::mutex> lock{_mutex};
         if (type == EventType::ServiceCreated)
         {
             _parents[key] = descriptor;
-            DrainResolvablePending(emissions);
+            DrainResolvablePending(created);
         }
         else if (type == EventType::ServiceRemoved)
         {
@@ -376,20 +463,21 @@ void ServiceObserver::HandleParent(Discovery::ServiceDiscoveryEvent::Type type,
             _pending.erase(std::remove_if(_pending.begin(), _pending.end(),
                                           [&](const PendingMatch& p) { return p.parentKey == key; }),
                            _pending.end());
+            TakeEmitted([&](const MatchKey& matchKey) { return matchKey.first == key; }, removed);
         }
     }
+    EmitAll(SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceRemoved, removed);
     EmitService(ToC(type), descriptor);
-    for (const auto& e : emissions)
-    {
-        EmitLink(e);
-    }
+    EmitAll(SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceCreated, created);
 }
 
 void ServiceObserver::HandleEvent(Discovery::ServiceDiscoveryEvent::Type type,
-                                  const SilKit::Core::ServiceDescriptor& descriptor)
+                                  const SilKit::Core::ServiceDescriptor& descriptor, bool isSnapshot)
 {
-    // Network-simulator links are reported directly as a Link service (created and removed: a detaching simulator
-    // leaves its controllers alive, so its removal is not otherwise observable).
+    // Everything emitted for this event (the service itself and matches it resolves) carries the flag.
+    _isSnapshot = isSnapshot;
+
+    // Network-simulator links are reported directly as a NetworkSimulatorLink service.
     if (descriptor.GetServiceType() == SilKit::Core::ServiceType::Link)
     {
         EmitService(ToC(type), descriptor);
@@ -399,18 +487,19 @@ void ServiceObserver::HandleEvent(Discovery::ServiceDiscoveryEvent::Type type,
     std::string controllerType;
     descriptor.GetSupplementalDataItem(Discovery::controllerType, controllerType);
 
-    // Internal-match endpoints: a confirmed pub/sub or RPC match, surfaced as a Link event.
+    // Internal-match endpoints: a confirmed pub/sub or RPC match, surfaced as a PubSubMatch / RpcMatch.
     if (controllerType == Discovery::controllerTypeDataSubscriberInternal)
     {
         HandleInternalMatch(type, descriptor, Discovery::supplKeyDataSubscriberInternalParentServiceID,
-                            descriptor.GetNetworkName());
+                            descriptor.GetNetworkName(), SilKit_Experimental_ServiceKind_PubSubMatch);
         return;
     }
     if (controllerType == Discovery::controllerTypeRpcServerInternal)
     {
         std::string clientUuid;
         descriptor.GetSupplementalDataItem(Discovery::supplKeyRpcServerInternalClientUUID, clientUuid);
-        HandleInternalMatch(type, descriptor, Discovery::supplKeyRpcServerInternalParentServiceID, clientUuid);
+        HandleInternalMatch(type, descriptor, Discovery::supplKeyRpcServerInternalParentServiceID, clientUuid,
+                            SilKit_Experimental_ServiceKind_RpcMatch);
         return;
     }
 

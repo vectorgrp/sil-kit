@@ -8,10 +8,9 @@
 //
 // Design: bus controllers, publishers/subscribers and RPC clients/servers are reported as their own
 // service kinds on ServiceCreated/ServiceRemoved. A confirmed pub/sub or RPC match is reported as a
-// SilKit_Experimental_ServiceKind_Link ServiceCreated event whose participantName/serviceName name
-// the receiving side (subscriber/server) and whose connectedParticipantName/connectedServiceName
-// name the peer (publisher/client). A match teardown emits no Link removal: it is inferred from the
-// ServiceRemoved of one of the endpoints.
+// SilKit_Experimental_ServiceKind_PubSubMatch / RpcMatch whose participantName/serviceName name the
+// receiving side (subscriber/server) and whose connectedParticipantName/connectedServiceName name the
+// peer (publisher/client). A match is removed before the first of its endpoints is removed.
 
 #include <algorithm>
 #include <atomic>
@@ -25,6 +24,7 @@
 #include "silkit/SilKit.hpp"
 #include "silkit/capi/SilKit.h"
 #include "silkit/config/IParticipantConfiguration.hpp"
+#include "silkit/services/orchestration/all.hpp"
 #include "silkit/services/pubsub/all.hpp"
 #include "silkit/services/rpc/all.hpp"
 #include "silkit/vendor/CreateSilKitRegistry.hpp"
@@ -58,11 +58,16 @@ struct ObservedEvent
     SilKit_Experimental_ServiceKind serviceKind;
     std::string participantName;
     std::string serviceName;
+    uint64_t serviceId;
     std::string primaryIdentifier;
     std::string mediaType;
     std::vector<ObservedLabel> labels;
+    SilKit_OperationMode operationMode;
+    bool timeSyncActive;
     std::string connectedParticipantName;
     std::string connectedServiceName;
+    uint64_t connectedServiceId;
+    bool isSnapshot;
 };
 
 // Shared state between the C callback thread and the test thread.
@@ -85,7 +90,12 @@ void SilKitCALL OnServiceDiscovery(void* context, SilKit_Experimental_ServiceDis
     event.serviceKind = descriptor->serviceKind;
     event.participantName = descriptor->participantName;
     event.serviceName = descriptor->serviceName;
+    event.serviceId = descriptor->serviceId;
     event.primaryIdentifier = descriptor->primaryIdentifier;
+    event.operationMode = descriptor->operationMode;
+    event.timeSyncActive = descriptor->timeSyncActive == SilKit_True;
+    event.connectedServiceId = descriptor->connectedServiceId;
+    event.isSnapshot = descriptor->isSnapshot == SilKit_True;
     event.mediaType = descriptor->mediaType;
     for (size_t i = 0; i < descriptor->labelList.numLabels; ++i)
     {
@@ -283,7 +293,7 @@ TEST_F(ITest_CapiServiceDiscovery, both_subscribers_receive_published_data)
 }
 
 // A subscriber with no matching publisher is reported immediately on creation (as its own kind, with
-// no link). The sentinel ensures in-order delivery (see below).
+// no match). The sentinel ensures in-order delivery (see below).
 //
 // The barrier is deterministic: the unmatched subscriber and a sentinel publisher are created, in
 // that order, on the SAME participant. All announcements from one participant reach the observer
@@ -316,16 +326,15 @@ TEST_F(ITest_CapiServiceDiscovery, subscriber_visible_immediately_without_matchi
               1u)
         << "a subscriber must be reported immediately on creation, even without a matching publisher";
 
-    // And no link exists for that topic (no publisher matched).
-    EXPECT_EQ(Count(SilKit_Experimental_ServiceKind_Link,
+    // And no match exists for that topic (no publisher matched).
+    EXPECT_EQ(Count(SilKit_Experimental_ServiceKind_PubSubMatch,
                     SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceCreated, lonelyTopic),
               0u);
 }
 
-// When a publisher matches a subscriber, a Link ServiceCreated event fires. When the publisher then
-// leaves, no Link removal is emitted; instead the publisher's own ServiceRemoved is observed, from
-// which the teardown of the link is inferred.
-TEST_F(ITest_CapiServiceDiscovery, link_created_and_publisher_removal_observed)
+// When a publisher matches a subscriber, a PubSubMatch ServiceCreated event fires. When the publisher
+// then leaves, the match is reported as removed before the publisher's own ServiceRemoved.
+TEST_F(ITest_CapiServiceDiscovery, match_created_and_publisher_removal_observed)
 {
     const std::string topic{"T"};
     const std::string mediaType{"M"};
@@ -336,12 +345,12 @@ TEST_F(ITest_CapiServiceDiscovery, link_created_and_publisher_removal_observed)
     publisher->CreateDataPublisher("PubCtrl", spec, 1);
     subscriber->CreateDataSubscriber("SubCtrl", spec, [](IDataSubscriber*, const DataMessageEvent&) {});
 
-    // Wait for the match to be reported as a Link before destroying the publisher.
+    // Wait for the match to be reported as a PubSubMatch before destroying the publisher.
     ASSERT_TRUE(WaitFor([&] {
-        return CountUnlocked(SilKit_Experimental_ServiceKind_Link,
+        return CountUnlocked(SilKit_Experimental_ServiceKind_PubSubMatch,
                              SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceCreated, topic)
                >= 1;
-    })) << "observer never saw the pub/sub match reported as a Link";
+    })) << "observer never saw the pub/sub match reported as a PubSubMatch";
 
     publisher.reset();
 
@@ -350,12 +359,29 @@ TEST_F(ITest_CapiServiceDiscovery, link_created_and_publisher_removal_observed)
                              SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceRemoved, topic)
                >= 1;
     })) << "observer should see the publisher's ServiceRemoved when it leaves";
+
+    std::lock_guard<std::mutex> lock{_ctx.mutex};
+    const auto isMatchRemoved = [&](const ObservedEvent& e) {
+        return e.serviceKind == SilKit_Experimental_ServiceKind_PubSubMatch
+               && e.eventType == SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceRemoved
+               && e.primaryIdentifier == topic && e.connectedParticipantName == "Pub";
+    };
+    const auto isPublisherRemoved = [&](const ObservedEvent& e) {
+        return e.serviceKind == SilKit_Experimental_ServiceKind_DataPublisher
+               && e.eventType == SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceRemoved;
+    };
+    const auto matchRemoved = std::find_if(_ctx.events.begin(), _ctx.events.end(), isMatchRemoved);
+    const auto publisherRemoved = std::find_if(_ctx.events.begin(), _ctx.events.end(), isPublisherRemoved);
+    ASSERT_NE(matchRemoved, _ctx.events.end()) << "the match must be reported as removed";
+    EXPECT_FALSE(matchRemoved->isSnapshot) << "live events are not part of the snapshot";
+    EXPECT_LT(matchRemoved - _ctx.events.begin(), publisherRemoved - _ctx.events.begin())
+        << "the match must be removed before its publisher";
 }
 
-// A pub/sub match Link must name both endpoints: participantName/serviceName the subscriber, and
+// A pub/sub match must name both endpoints: participantName/serviceName the subscriber, and
 // connectedParticipantName/connectedServiceName the publisher. This lets the observer build a
 // confirmed connection graph from service discovery data alone.
-TEST_F(ITest_CapiServiceDiscovery, pubsub_match_link_carries_peer_identity)
+TEST_F(ITest_CapiServiceDiscovery, pubsub_match_carries_peer_identity)
 {
     const std::string topic{"Sensor"};
     const std::string mediaType{"application/octet-stream"};
@@ -368,26 +394,26 @@ TEST_F(ITest_CapiServiceDiscovery, pubsub_match_link_carries_peer_identity)
 
     ASSERT_TRUE(WaitFor([&] {
         return std::any_of(_ctx.events.begin(), _ctx.events.end(), [&](const auto& e) {
-            return e.serviceKind == SilKit_Experimental_ServiceKind_Link
+            return e.serviceKind == SilKit_Experimental_ServiceKind_PubSubMatch
                    && e.eventType == SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceCreated
                    && e.primaryIdentifier == topic;
         });
-    })) << "the pub/sub match Link never arrived";
+    })) << "the pub/sub match never arrived";
 
     const auto ev = FindEventWhere([&](const ObservedEvent& e) {
-        return e.serviceKind == SilKit_Experimental_ServiceKind_Link
+        return e.serviceKind == SilKit_Experimental_ServiceKind_PubSubMatch
                && e.eventType == SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceCreated
                && e.primaryIdentifier == topic;
     });
-    EXPECT_EQ(ev.participantName, "SubscriberParticipant") << "Link must name the subscriber as the receiving side";
+    EXPECT_EQ(ev.participantName, "SubscriberParticipant") << "Match must name the subscriber as the receiving side";
     EXPECT_EQ(ev.serviceName, "SubscriberController");
-    EXPECT_EQ(ev.connectedParticipantName, "PublisherParticipant") << "Link must identify the publisher's participant";
-    EXPECT_EQ(ev.connectedServiceName, "PublisherController") << "Link must identify the publisher's controller name";
+    EXPECT_EQ(ev.connectedParticipantName, "PublisherParticipant") << "Match must identify the publisher's participant";
+    EXPECT_EQ(ev.connectedServiceName, "PublisherController") << "Match must identify the publisher's controller name";
 }
 
-// An RPC match Link must carry the matching client's participant name and controller name, letting
+// An RPC match must carry the matching client's participant name and controller name, letting
 // the observer resolve concrete RPC call edges.
-TEST_F(ITest_CapiServiceDiscovery, rpc_match_link_carries_peer_identity)
+TEST_F(ITest_CapiServiceDiscovery, rpc_match_carries_peer_identity)
 {
     const std::string functionName{"RemoteProc"};
     const std::string mediaType{"application/octet-stream"};
@@ -400,27 +426,27 @@ TEST_F(ITest_CapiServiceDiscovery, rpc_match_link_carries_peer_identity)
 
     ASSERT_TRUE(WaitFor([&] {
         return std::any_of(_ctx.events.begin(), _ctx.events.end(), [&](const auto& e) {
-            return e.serviceKind == SilKit_Experimental_ServiceKind_Link
+            return e.serviceKind == SilKit_Experimental_ServiceKind_RpcMatch
                    && e.eventType == SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceCreated
                    && e.primaryIdentifier == functionName;
         });
-    })) << "the RPC match Link never arrived";
+    })) << "the RPC match never arrived";
 
     const auto ev = FindEventWhere([&](const ObservedEvent& e) {
-        return e.serviceKind == SilKit_Experimental_ServiceKind_Link
+        return e.serviceKind == SilKit_Experimental_ServiceKind_RpcMatch
                && e.eventType == SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceCreated
                && e.primaryIdentifier == functionName;
     });
-    EXPECT_EQ(ev.participantName, "ServerParticipant") << "Link must name the server as the receiving side";
+    EXPECT_EQ(ev.participantName, "ServerParticipant") << "Match must name the server as the receiving side";
     EXPECT_EQ(ev.serviceName, "ServerController");
-    EXPECT_EQ(ev.connectedParticipantName, "ClientParticipant") << "Link must identify the RPC client's participant";
-    EXPECT_EQ(ev.connectedServiceName, "ClientController") << "Link must identify the RPC client's controller name";
+    EXPECT_EQ(ev.connectedParticipantName, "ClientParticipant") << "Match must identify the RPC client's participant";
+    EXPECT_EQ(ev.connectedServiceName, "ClientController") << "Match must identify the RPC client's controller name";
 }
 
 // Attaching an observer to an already-running simulation must recover the match, including the peer
 // identity, of connections that existed before the observer registered. This is the replay-ordering
 // case: the DataSubscriberInternal may be replayed before its parent/publisher.
-TEST_F(ITest_CapiServiceDiscovery, late_observer_recovers_preexisting_link)
+TEST_F(ITest_CapiServiceDiscovery, late_observer_recovers_preexisting_match)
 {
     const std::string topic{"LateTopic"};
     const std::string mediaType{"M"};
@@ -433,10 +459,10 @@ TEST_F(ITest_CapiServiceDiscovery, late_observer_recovers_preexisting_link)
 
     // Ensure the match is established (observed via the SetUp observer) before attaching a new one.
     ASSERT_TRUE(WaitFor([&] {
-        return CountUnlocked(SilKit_Experimental_ServiceKind_Link,
+        return CountUnlocked(SilKit_Experimental_ServiceKind_PubSubMatch,
                              SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceCreated, topic)
                >= 1;
-    })) << "the pub/sub link was never established";
+    })) << "the pub/sub match was never established";
 
     // Attach a brand-new observer that must replay the already-running simulation.
     SilKit_ParticipantConfiguration* config{nullptr};
@@ -456,14 +482,15 @@ TEST_F(ITest_CapiServiceDiscovery, late_observer_recovers_preexisting_link)
     std::unique_lock<std::mutex> lock{lateCtx.mutex};
     const bool recovered = lateCtx.cv.wait_for(lock, kWaitTimeout, [&] {
         return std::any_of(lateCtx.events.begin(), lateCtx.events.end(), [&](const auto& e) {
-            return e.serviceKind == SilKit_Experimental_ServiceKind_Link
+            return e.serviceKind == SilKit_Experimental_ServiceKind_PubSubMatch
                    && e.eventType == SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceCreated
                    && e.primaryIdentifier == topic && e.connectedParticipantName == "LatePub"
-                   && e.connectedServiceName == "LatePubCtrl";
+                   && e.connectedServiceName == "LatePubCtrl" && e.connectedServiceId != 0 && e.isSnapshot;
         });
     });
     lock.unlock();
-    EXPECT_TRUE(recovered) << "late observer must recover the pre-existing link and its peer identity";
+    EXPECT_TRUE(recovered) << "late observer must recover the pre-existing match, flagged as snapshot, with its "
+                              "peer identity";
 
     SilKit_Participant_Destroy(lateObserver);
 }
@@ -538,6 +565,47 @@ TEST_F(ITest_CapiServiceDiscovery, set_handler_within_handler_is_rejected)
     EXPECT_TRUE(ctx.cv.wait_for(lock, kWaitTimeout, [&] { return seenOnce("Can1") && seenOnce("Can2"); }))
         << "the handler must keep receiving events after the rejected registration";
     EXPECT_EQ(ctx.nestedResult, SilKit_ReturnCode_WRONGSTATE);
+}
+
+// The lifecycle and time sync services of each participant reveal its operation mode and whether it
+// takes part in the virtual time synchronization.
+TEST_F(ITest_CapiServiceDiscovery, lifecycle_and_time_sync_report_operation_mode)
+{
+    using namespace SilKit::Services::Orchestration;
+
+    auto autonomous = CreateParticipant("AutonomousSynced");
+    auto* autonomousLifecycle = autonomous->CreateLifecycleService({OperationMode::Autonomous});
+    autonomousLifecycle->CreateTimeSyncService()->SetSimulationStepHandler([](auto, auto) {}, 1ms);
+    auto autonomousDone = autonomousLifecycle->StartLifecycle();
+
+    auto coordinated = CreateParticipant("CoordinatedUnsynced");
+    auto* coordinatedLifecycle = coordinated->CreateLifecycleService({OperationMode::Coordinated});
+    coordinatedLifecycle->StartLifecycle();
+
+    const auto has = [this](const std::string& participant, SilKit_Experimental_ServiceKind kind,
+                            auto predicate) {
+        return std::any_of(_ctx.events.begin(), _ctx.events.end(), [&](const ObservedEvent& e) {
+            return e.participantName == participant && e.serviceKind == kind
+                   && e.eventType == SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceCreated && predicate(e);
+        });
+    };
+    const auto mode = [](SilKit_OperationMode expected) {
+        return [expected](const ObservedEvent& e) { return e.operationMode == expected; };
+    };
+    const auto timeSync = [](bool expected) {
+        return [expected](const ObservedEvent& e) { return e.timeSyncActive == expected; };
+    };
+    EXPECT_TRUE(WaitFor([&] {
+        return has("AutonomousSynced", SilKit_Experimental_ServiceKind_LifecycleService,
+                   mode(SilKit_OperationMode_Autonomous))
+               && has("AutonomousSynced", SilKit_Experimental_ServiceKind_TimeSyncService, timeSync(true))
+               && has("CoordinatedUnsynced", SilKit_Experimental_ServiceKind_LifecycleService,
+                      mode(SilKit_OperationMode_Coordinated))
+               && has("CoordinatedUnsynced", SilKit_Experimental_ServiceKind_TimeSyncService, timeSync(false));
+    })) << "operation mode and time synchronization of both participants must be reported";
+
+    autonomousLifecycle->Stop("done");
+    autonomousDone.wait_for(kWaitTimeout);
 }
 
 } // namespace

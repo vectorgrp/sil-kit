@@ -110,11 +110,13 @@ TEST_F(Test_HourglassServiceDiscovery, service_discovery_handler_round_trip)
     SilKit_Struct_Init(SilKit_Experimental_ServiceDescriptor, cDescriptor);
     cDescriptor.participantName = "ParticipantA";
     cDescriptor.serviceName = "MyPublisher";
+    cDescriptor.serviceId = 17;
     cDescriptor.serviceKind = SilKit_Experimental_ServiceKind_DataPublisher;
     cDescriptor.primaryIdentifier = "TopicA";
     cDescriptor.mediaType = "application/json";
     cDescriptor.labelList.numLabels = 2;
     cDescriptor.labelList.labels = cLabels;
+    cDescriptor.isSnapshot = SilKit_True;
 
     capturedHandler(capturedContext, SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceCreated, &cDescriptor);
 
@@ -122,8 +124,10 @@ TEST_F(Test_HourglassServiceDiscovery, service_discovery_handler_round_trip)
     EXPECT_EQ(receivedEvent, SD::ServiceDiscoveryEventType::ServiceCreated);
     EXPECT_EQ(received.participantName, "ParticipantA");
     EXPECT_EQ(received.serviceName, "MyPublisher");
+    EXPECT_EQ(received.serviceId, 17u);
     EXPECT_EQ(received.serviceKind, SD::ServiceKind::DataPublisher);
     EXPECT_EQ(received.primaryIdentifier, "TopicA");
+    EXPECT_TRUE(received.isSnapshot);
     EXPECT_EQ(received.mediaType, "application/json");
     ASSERT_EQ(received.labels.size(), 2u);
     EXPECT_EQ(received.labels[0].key, "kA");
@@ -139,6 +143,7 @@ TEST_F(Test_HourglassServiceDiscovery, service_discovery_handler_round_trip)
     cBusDescriptor.serviceName = "Can1";
     cBusDescriptor.serviceKind = SilKit_Experimental_ServiceKind_CanController;
     cBusDescriptor.primaryIdentifier = "CAN1";
+    cBusDescriptor.networkType = SilKit_NetworkType_CAN;
     cBusDescriptor.mediaType = "";
     cBusDescriptor.labelList.numLabels = 0;
     cBusDescriptor.labelList.labels = nullptr;
@@ -149,8 +154,35 @@ TEST_F(Test_HourglassServiceDiscovery, service_discovery_handler_round_trip)
     EXPECT_EQ(receivedEvent, SD::ServiceDiscoveryEventType::ServiceRemoved);
     EXPECT_EQ(received.serviceKind, SD::ServiceKind::CanController);
     EXPECT_EQ(received.primaryIdentifier, "CAN1");
+    EXPECT_EQ(received.networkType, SilKit::Experimental::NetworkSimulation::SimulatedNetworkType::CAN);
     EXPECT_TRUE(received.mediaType.empty());
     EXPECT_TRUE(received.labels.empty());
+    EXPECT_FALSE(received.isSnapshot);
+
+    // Case 3: a match and the orchestration fields.
+    SilKit_Experimental_ServiceDescriptor cMatchDescriptor;
+    SilKit_Struct_Init(SilKit_Experimental_ServiceDescriptor, cMatchDescriptor);
+    cMatchDescriptor.participantName = "SubParticipant";
+    cMatchDescriptor.serviceName = "Sub";
+    cMatchDescriptor.serviceId = 3;
+    cMatchDescriptor.serviceKind = SilKit_Experimental_ServiceKind_PubSubMatch;
+    cMatchDescriptor.primaryIdentifier = "TopicA";
+    cMatchDescriptor.connectedParticipantName = "ParticipantA";
+    cMatchDescriptor.connectedServiceName = "MyPublisher";
+    cMatchDescriptor.connectedServiceId = 17;
+    cMatchDescriptor.operationMode = SilKit_OperationMode_Autonomous;
+    cMatchDescriptor.timeSyncActive = SilKit_True;
+
+    capturedHandler(capturedContext, SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceCreated, &cMatchDescriptor);
+
+    EXPECT_EQ(callCount, 3);
+    EXPECT_EQ(received.serviceKind, SD::ServiceKind::PubSubMatch);
+    EXPECT_EQ(received.serviceId, 3u);
+    EXPECT_EQ(received.connectedParticipantName, "ParticipantA");
+    EXPECT_EQ(received.connectedServiceName, "MyPublisher");
+    EXPECT_EQ(received.connectedServiceId, 17u);
+    EXPECT_EQ(received.operationMode, SilKit::Services::Orchestration::OperationMode::Autonomous);
+    EXPECT_TRUE(received.timeSyncActive);
 }
 
 // Setting the handler twice must register the C trampoline exactly once (no duplicate delivery) and
@@ -300,7 +332,11 @@ TEST_F(Test_HourglassServiceDiscovery, to_string_maps_enums)
 {
     EXPECT_EQ(SD::to_string(SD::ServiceKind::DataSubscriber), "DataSubscriber");
     EXPECT_EQ(SD::to_string(SD::ServiceKind::RpcServer), "RpcServer");
-    EXPECT_EQ(SD::to_string(SD::ServiceKind::Link), "Link");
+    EXPECT_EQ(SD::to_string(SD::ServiceKind::NetworkSimulatorLink), "NetworkSimulatorLink");
+    EXPECT_EQ(SD::to_string(SD::ServiceKind::PubSubMatch), "PubSubMatch");
+    EXPECT_EQ(SD::to_string(SD::ServiceKind::RpcMatch), "RpcMatch");
+    EXPECT_EQ(SD::to_string(SD::ServiceKind::LifecycleService), "LifecycleService");
+    EXPECT_EQ(SD::to_string(SD::ServiceKind::TimeSyncService), "TimeSyncService");
     EXPECT_EQ(SD::to_string(SD::ServiceDiscoveryEventType::ServiceCreated), "ServiceCreated");
     EXPECT_EQ(SD::to_string(SD::ServiceDiscoveryEventType::ServiceRemoved), "ServiceRemoved");
 }

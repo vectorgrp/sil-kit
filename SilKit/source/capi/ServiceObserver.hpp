@@ -26,11 +26,13 @@ namespace VSilKit {
 //  - Bus controllers, publishers/subscribers and RPC clients/servers are forwarded as their own
 //    service kind on ServiceCreated / ServiceRemoved.
 //  - A confirmed pub/sub or RPC match (announced internally as a DataSubscriberInternal /
-//    RpcServerInternal endpoint) is surfaced as a SilKit_Experimental_ServiceKind_Link ServiceCreated
-//    event once both endpoints are known; no removal event is emitted for it (its teardown is implied
-//    by the ServiceRemoved of one of its endpoints).
-//  - A network-simulator link is surfaced as a SilKit_Experimental_ServiceKind_Link on both
+//    RpcServerInternal endpoint) is surfaced as a PubSubMatch / RpcMatch while both endpoints are
+//    known: created after both endpoints were reported, removed when the internal endpoint goes away
+//    or right before the ServiceRemoved of either endpoint, whichever comes first.
+//  - A network-simulator link is surfaced as a NetworkSimulatorLink (serviceName = bus type) on both
 //    ServiceCreated and ServiceRemoved.
+//  - A participant's lifecycle and time sync services are forwarded as their own service kind, with
+//    the operation mode / synchronization state as primaryIdentifier.
 //  - Infrastructure / internal services are suppressed.
 class ServiceObserver
 {
@@ -40,54 +42,69 @@ public:
     // Handle a single internal discovery event, emitting zero or more public events through the
     // handler. Invocations are expected to be serialized (never concurrent) but may originate from
     // different threads; the internal state is guarded by a mutex and the handler is always invoked
-    // outside that lock.
+    // outside that lock. isSnapshot marks the replay of already known services on registration.
     void HandleEvent(SilKit::Core::Discovery::ServiceDiscoveryEvent::Type type,
-                     const SilKit::Core::ServiceDescriptor& descriptor);
+                     const SilKit::Core::ServiceDescriptor& descriptor, bool isSnapshot = false);
 
 private:
     // Identifies a service on a participant: (participant name, service id).
     using ServiceKey = std::pair<std::string, SilKit::Core::EndpointId>;
 
+    // Identifies a match: (parent key, peer UUID).
+    using MatchKey = std::pair<ServiceKey, std::string>;
+
     // An internal-match endpoint whose parent (subscriber/server) or peer (publisher/client) is not
-    // yet known. Resolved into a Link event once both descriptors have been discovered.
+    // yet known. Resolved into a PubSubMatch / RpcMatch once both descriptors have been discovered.
     struct PendingMatch
     {
         ServiceKey parentKey;
         std::string peerUuid;
+        SilKit_Experimental_ServiceKind kind; // PubSubMatch or RpcMatch
     };
 
-    // A resolved link ready to be emitted (holds the backing storage for the emitted struct). The
-    // parent descriptor is the receiving side (DataSubscriber / RpcServer); the connected... fields
-    // name the peer (DataPublisher / RpcClient).
-    struct LinkEmission
+    // A match to be emitted (holds the backing storage for the emitted struct). The parent descriptor
+    // is the receiving side (DataSubscriber / RpcServer); the connected... fields name the peer
+    // (DataPublisher / RpcClient).
+    struct MatchEmission
     {
         SilKit::Core::ServiceDescriptor parentDescriptor;
         std::string connectedParticipantName;
         std::string connectedServiceName;
+        SilKit::Core::EndpointId connectedServiceId;
+        SilKit_Experimental_ServiceKind kind;
     };
 
     void HandleInternalMatch(SilKit::Core::Discovery::ServiceDiscoveryEvent::Type type,
                              const SilKit::Core::ServiceDescriptor& descriptor, const std::string& parentIdKey,
-                             const std::string& peerUuid);
+                             const std::string& peerUuid, SilKit_Experimental_ServiceKind kind);
     void HandlePeer(SilKit::Core::Discovery::ServiceDiscoveryEvent::Type type,
                     const SilKit::Core::ServiceDescriptor& descriptor);
     void HandleParent(SilKit::Core::Discovery::ServiceDiscoveryEvent::Type type,
                       const SilKit::Core::ServiceDescriptor& descriptor);
 
-    // Emits any pending match whose parent and peer are now both known. Called with _mutex held.
-    void DrainResolvablePending(std::vector<LinkEmission>& emissions);
+    // Records a match whose parent and peer are both known (once) and appends it to
+    // `created`. Returns false if parent or peer is still unknown. Called with _mutex held.
+    auto TryResolve(const PendingMatch& match, std::vector<MatchEmission>& created) -> bool;
+    // Resolves every pending match whose parent and peer are now both known. Called with _mutex held.
+    void DrainResolvablePending(std::vector<MatchEmission>& created);
+    // Moves the emitted matches whose MatchKey satisfies the predicate to `removed`. Called with _mutex held.
+    template <typename Predicate>
+    void TakeEmitted(Predicate predicate, std::vector<MatchEmission>& removed);
 
     void EmitService(SilKit_Experimental_ServiceDiscoveryEvent_Type type,
                      const SilKit::Core::ServiceDescriptor& descriptor);
-    void EmitLink(const LinkEmission& emission);
+    void EmitMatch(SilKit_Experimental_ServiceDiscoveryEvent_Type type, const MatchEmission& emission);
+    void EmitAll(SilKit_Experimental_ServiceDiscoveryEvent_Type type, const std::vector<MatchEmission>& emissions);
     void Invoke(SilKit_Experimental_ServiceDiscoveryEvent_Type type,
                 const SilKit_Experimental_ServiceDescriptor& descriptor);
 
-    static LinkEmission MakeLink(const SilKit::Core::ServiceDescriptor& parent,
-                                 const SilKit::Core::ServiceDescriptor& peer);
+    static MatchEmission MakeMatch(const SilKit::Core::ServiceDescriptor& parent,
+                                 const SilKit::Core::ServiceDescriptor& peer, SilKit_Experimental_ServiceKind kind);
 
     SilKit_Experimental_ServiceDiscoveryHandler_t _handler{};
     void* _context{nullptr};
+    // Snapshot flag of the event currently handled (HandleEvent calls are serialized).
+    bool _isSnapshot{false};
 
     std::mutex _mutex;
     // DataPublisher / RpcClient UUID (= their networkName) -> their descriptor. The UUID is globally
@@ -97,6 +114,8 @@ private:
     std::map<ServiceKey, SilKit::Core::ServiceDescriptor> _parents;
     // Internal-match endpoints awaiting resolution of their parent and/or peer.
     std::vector<PendingMatch> _pending;
+    // Matches reported as created and not yet as removed.
+    std::map<MatchKey, MatchEmission> _emitted;
 };
 
 } // namespace VSilKit

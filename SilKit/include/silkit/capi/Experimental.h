@@ -7,6 +7,8 @@
 #include "silkit/capi/SilKitMacros.h"
 #include "silkit/capi/Types.h"
 #include "silkit/capi/InterfaceIdentifiers.h"
+#include "silkit/capi/NetworkSimulator.h"
+#include "silkit/capi/Orchestration.h"
 
 #pragma pack(push)
 #pragma pack(8)
@@ -31,7 +33,7 @@ SILKIT_BEGIN_DECLS
 typedef uint32_t SilKit_Experimental_ServiceDiscoveryEvent_Type;
 /*! \brief An invalid / unknown service discovery event. */
 #define SilKit_Experimental_ServiceDiscoveryEvent_Type_Invalid ((SilKit_Experimental_ServiceDiscoveryEvent_Type)0)
-/*! \brief A service has been created (or was already present on registration). */
+/*! \brief A service has been created (or was already present on registration, see \p isSnapshot). */
 #define SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceCreated \
     ((SilKit_Experimental_ServiceDiscoveryEvent_Type)1)
 /*! \brief A service has been removed. */
@@ -49,57 +51,84 @@ typedef uint32_t SilKit_Experimental_ServiceKind;
 #define SilKit_Experimental_ServiceKind_DataSubscriber ((SilKit_Experimental_ServiceKind)6)
 #define SilKit_Experimental_ServiceKind_RpcClient ((SilKit_Experimental_ServiceKind)7)
 #define SilKit_Experimental_ServiceKind_RpcServer ((SilKit_Experimental_ServiceKind)8)
-/*! \brief A link between two services: a pub/sub or RPC match, or a network-simulator link. */
-#define SilKit_Experimental_ServiceKind_Link ((SilKit_Experimental_ServiceKind)9)
+/*! \brief A network simulator simulates a network. \p participantName is the simulating participant,
+ *         \p primaryIdentifier the simulated network name and \p networkType its bus type; both match
+ *         the \p primaryIdentifier and \p networkType of the affected bus controllers. */
+#define SilKit_Experimental_ServiceKind_NetworkSimulatorLink ((SilKit_Experimental_ServiceKind)9)
+/*! \brief A DataPublisher is matched with a DataSubscriber. \p participantName / \p serviceName name
+ *         the DataSubscriber, \p connectedParticipantName / \p connectedServiceName the DataPublisher,
+ *         and \p primaryIdentifier is the topic. */
+#define SilKit_Experimental_ServiceKind_PubSubMatch ((SilKit_Experimental_ServiceKind)10)
+/*! \brief An RpcClient is matched with an RpcServer. \p participantName / \p serviceName name the
+ *         RpcServer, \p connectedParticipantName / \p connectedServiceName the RpcClient, and
+ *         \p primaryIdentifier is the function name. */
+#define SilKit_Experimental_ServiceKind_RpcMatch ((SilKit_Experimental_ServiceKind)11)
+/*! \brief The lifecycle of a participant, reported once the participant starts its lifecycle.
+ *         \p operationMode is its operation mode. */
+#define SilKit_Experimental_ServiceKind_LifecycleService ((SilKit_Experimental_ServiceKind)12)
+/*! \brief The time synchronization of a participant, reported once the participant starts its
+ *         lifecycle. \p timeSyncActive tells whether the participant takes part in the distributed
+ *         virtual time synchronization. */
+#define SilKit_Experimental_ServiceKind_TimeSyncService ((SilKit_Experimental_ServiceKind)13)
 
 /*! \brief Describes a single discovered service, passed by value to a service discovery handler.
  *
  * All pointer members are borrowed and only valid for the duration of the handler invocation. Copy
- * any data that must outlive the call.
+ * any data that must outlive the call. Fields that do not apply to a kind are empty strings, zero,
+ * \ref SilKit_NetworkType_Undefined or \ref SilKit_OperationMode_Invalid.
  *
- * A \ref SilKit_Experimental_ServiceKind_Link describes a link between two services: a pub/sub or
- * RPC match, or a network-simulator link. For a pub/sub or RPC match \p participantName /
- * \p serviceName name the receiving side (the DataSubscriber or RpcServer) and
- * \p connectedParticipantName / \p connectedServiceName name the peer (the DataPublisher or
- * RpcClient); \p primaryIdentifier is the topic or function name. For a network-simulator link
- * \p participantName is the simulating participant, \p primaryIdentifier is the simulated network
- * name (which matches the \p primaryIdentifier of the affected bus controllers), and the
- * \p connected... fields are empty.
+ * A service is identified by \p participantName and \p serviceId; both are reported unchanged on
+ * \ref SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceCreated and
+ * \ref SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceRemoved.
  *
- * Links are reported as \ref SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceCreated.
- * Network-simulator links are additionally reported as
- * \ref SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceRemoved when the simulator detaches.
- * A pub/sub or RPC match link does not emit a removal event: its teardown always coincides with a
- * \ref SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceRemoved of one of its endpoints, from
- * which the disappearance of the link can be inferred.
- *
- * The \p connectedParticipantName and \p connectedServiceName fields are empty strings for all
- * kinds other than pub/sub and RPC \p SilKit_Experimental_ServiceKind_Link events.
+ * Network-simulator links and pub/sub and RPC matches have kinds of their own:
+ * \ref SilKit_Experimental_ServiceKind_NetworkSimulatorLink,
+ * \ref SilKit_Experimental_ServiceKind_PubSubMatch and \ref SilKit_Experimental_ServiceKind_RpcMatch.
+ * Like all services, they are reported when they are established and when they are gone. A pub/sub or
+ * RPC match is reported only while both of its endpoints are known: it is created after both endpoints,
+ * and removed before the first of them. Its \p participantName / \p serviceName / \p serviceId name
+ * the receiving side (DataSubscriber / RpcServer), its \p connected... fields the peer (DataPublisher /
+ * RpcClient).
  */
 typedef struct
 {
     SilKit_StructHeader structHeader;
-    //! Name of the participant providing the service. For a Link this is the receiving side
-    //! (subscriber/server) or, for a network-simulator link, the simulating participant.
+    //! Name of the participant providing the service. For a pub/sub or RPC match the receiving side
+    //! (subscriber/server), for a network-simulator link the simulating participant.
     const char* participantName;
     //! Name of the service (the controller / publisher / subscriber / client / server name).
     const char* serviceName;
+    //! Identifier of the service, unique within its participant.
+    uint64_t serviceId;
     //! The kind of service.
     SilKit_Experimental_ServiceKind serviceKind;
     //! The primary, user-facing identifier of the service: the network name for bus controllers and
-    //! network-simulator links, the topic for pub/sub, and the function name for RPC. Suitable as a
-    //! display / join key for visualization and tooling.
+    //! network-simulator links, the topic for pub/sub, and the function name for RPC; empty for
+    //! lifecycle and time sync services. Suitable as a display / join key for visualization and tooling.
     const char* primaryIdentifier;
+    //! Bus type of bus controllers and network-simulator links; \ref SilKit_NetworkType_Undefined
+    //! otherwise.
+    SilKit_Experimental_SimulatedNetworkType networkType;
     //! Media type for pub/sub and RPC services; empty string when not applicable.
     const char* mediaType;
     //! Decoded matching labels for pub/sub and RPC services; empty for bus controllers.
     SilKit_LabelList labelList;
-    //! Reserved for future system-level simulation detection. Currently always an empty string.
-    const char* simulationName;
-    //! Name of the peer participant; populated only in pub/sub and RPC Link events.
+    //! Operation mode of a \ref SilKit_Experimental_ServiceKind_LifecycleService;
+    //! \ref SilKit_OperationMode_Invalid otherwise.
+    SilKit_OperationMode operationMode;
+    //! For a \ref SilKit_Experimental_ServiceKind_TimeSyncService: whether the participant takes part in
+    //! the virtual time synchronization. SilKit_False otherwise.
+    SilKit_Bool timeSyncActive;
+    //! Name of the peer participant (publisher/client); populated only for pub/sub and RPC matches.
     const char* connectedParticipantName;
-    //! Name of the peer service; populated only in pub/sub and RPC Link events.
+    //! Name of the peer service (publisher/client); populated only for pub/sub and RPC matches.
     const char* connectedServiceName;
+    //! Identifier of the peer service (publisher/client) within its participant; populated only for
+    //! pub/sub and RPC matches.
+    uint64_t connectedServiceId;
+    //! SilKit_True if the service already existed when the handler was registered (see
+    //! \ref SilKit_Experimental_ServiceDiscovery_SetServiceDiscoveryHandler).
+    SilKit_Bool isSnapshot;
 } SilKit_Experimental_ServiceDescriptor;
 
 /*! \brief Handler invoked when a user-facing service is created or removed in the simulation.
@@ -142,10 +171,11 @@ typedef SilKit_ReturnCode(SilKitFPTR* SilKit_Experimental_ServiceDiscovery_Creat
 /*! \brief Register a handler that is called for every user-facing service in the simulation.
  *
  * Upon registration the handler is immediately invoked once for every service that is already known,
- * each reported as \ref SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceCreated. It is
- * subsequently invoked for every user-facing service created or removed. Infrastructure/internal
- * services are not reported. Pub/sub and RPC matches as well as network-simulator links are reported
- * as \ref SilKit_Experimental_ServiceKind_Link services (see \ref SilKit_Experimental_ServiceDescriptor).
+ * each reported as \ref SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceCreated with
+ * \p isSnapshot set. These snapshot invocations happen synchronously, before this function returns. The
+ * handler is subsequently invoked for every user-facing service created or removed. Infrastructure/internal
+ * services are not reported. Network-simulator links and pub/sub and RPC matches are reported as
+ * services of their own kinds (see \ref SilKit_Experimental_ServiceDescriptor).
  *
  * \note Each call registers an additional, independent handler; handlers cannot be removed and remain
  *       registered for the lifetime of the participant. To observe with a single handler, call this

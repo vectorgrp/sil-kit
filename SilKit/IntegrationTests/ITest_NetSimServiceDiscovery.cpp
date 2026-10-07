@@ -2,9 +2,10 @@
 //
 // SPDX-License-Identifier: MIT
 
-// Integration test: verify that the service-discovery C API reports a network simulator as a Link
-// service (SilKit_Experimental_ServiceKind_Link) whose primaryIdentifier is the simulated network
-// name and whose participantName is the simulating participant. A consumer joins that network name
+// Integration test: verify that the service-discovery C API reports a network simulator as a
+// SilKit_Experimental_ServiceKind_NetworkSimulatorLink whose primaryIdentifier is the simulated
+// network name, whose networkType is the bus type and whose participantName is the simulating
+// participant. A consumer joins that network name
 // against a bus controller's primaryIdentifier to learn the controller is simulated -- without any
 // dedicated cross-referencing being done inside the API.
 //
@@ -77,6 +78,7 @@ struct DiscoveryEvent
     SilKit_Experimental_ServiceKind serviceKind{};
     SilKit_Experimental_ServiceDiscoveryEvent_Type eventType{};
     std::string participantName;
+    SilKit_Experimental_SimulatedNetworkType networkType{SilKit_NetworkType_Undefined};
     std::string primaryIdentifier; // networkName for bus controllers and network-simulator links
 };
 
@@ -96,6 +98,7 @@ void SilKitCALL OnNetSimDiscovery(void* context, SilKit_Experimental_ServiceDisc
     ev.serviceKind = d->serviceKind;
     ev.eventType = eventType;
     ev.participantName = d->participantName ? d->participantName : "";
+    ev.networkType = d->networkType;
     ev.primaryIdentifier = d->primaryIdentifier ? d->primaryIdentifier : "";
 
     {
@@ -170,20 +173,21 @@ TEST_F(ITest_NetSimServiceDiscovery, netsim_reported_as_link_service)
     auto ok = _simTestHarness->Run(10s);
     ASSERT_TRUE(ok) << "simulation should complete without timeout";
 
-    // The Link service for the network simulator fires during the simulation. It is accumulated in
+    // The NetworkSimulatorLink fires during the simulation. It is accumulated in
     // ctx.events by the observer's IO thread. Allow a brief settle window after Run() returns for
     // any in-flight IO delivery.
     {
         std::unique_lock<std::mutex> lk{ctx.mutex};
         const bool found = ctx.cv.wait_for(lk, 5s, [&] {
             return std::any_of(ctx.events.begin(), ctx.events.end(), [&](const DiscoveryEvent& e) {
-                return e.serviceKind == SilKit_Experimental_ServiceKind_Link
+                return e.serviceKind == SilKit_Experimental_ServiceKind_NetworkSimulatorLink
                        && e.eventType == SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceCreated
-                       && e.primaryIdentifier == networkName && e.participantName == netSimName;
+                       && e.primaryIdentifier == networkName && e.participantName == netSimName
+                       && e.networkType == SilKit_NetworkType_CAN;
             });
         });
         ASSERT_TRUE(found)
-            << "no Link service with the network name and the network simulator participant was observed";
+            << "no NetworkSimulatorLink with the network name, bus type and simulator participant was observed";
 
         // The CAN controller is reported as its own kind on the same network; joining on
         // primaryIdentifier lets a consumer conclude the controller is simulated.
