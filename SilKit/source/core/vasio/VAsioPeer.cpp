@@ -103,31 +103,32 @@ void VAsioPeer::SendSilKitMsg(SerializedMessage buffer)
     _peerMetrics->TxBytes(buffer);
     _peerMetrics->TxPacket();
 
+    auto transmitReservation = buffer.ReleaseTransmitReservation();
     auto blob = buffer.ReleaseStorage();
 
     if (_useAggregation && buffer.GetAggregationKind() == MessageAggregationKind::UserDataMessage)
     {
-        Aggregate(blob);
+        Aggregate(blob, std::move(transmitReservation));
     }
     else if (_useAggregation && buffer.GetAggregationKind() == MessageAggregationKind::FlushAggregationMessage)
     {
-        Aggregate(blob); // don't forget to send (current) time sync message
+        Aggregate(blob, std::move(transmitReservation)); // don't forget to send (current) time sync message
         Flush();
     }
     else
     {
-        SendSilKitMsgInternal(std::move(blob));
+        SendSilKitMsgInternal(SendItem{std::move(blob), std::move(transmitReservation)});
     }
 }
 
-void VAsioPeer::SendSilKitMsgInternal(std::vector<uint8_t> blob)
+void VAsioPeer::SendSilKitMsgInternal(SendItem item)
 {
     // Prevent sending when shutting down
     if (!_isShuttingDown && _socket != nullptr)
     {
         std::unique_lock<std::mutex> lock{_sendingQueueMutex};
 
-        _sendingQueue.emplace_back(std::move(blob));
+        _sendingQueue.emplace_back(std::move(item));
 
         _peerMetrics->TxQueueSize(_sendingQueue.size());
 
@@ -137,7 +138,7 @@ void VAsioPeer::SendSilKitMsgInternal(std::vector<uint8_t> blob)
     }
 }
 
-void VAsioPeer::Aggregate(const std::vector<uint8_t>& blob)
+void VAsioPeer::Aggregate(const std::vector<uint8_t>& blob, std::shared_ptr<const void> transmitReservation)
 {
     // start initial timer
     // NB: resetting timer in every Aggregate() is costly
@@ -148,6 +149,10 @@ void VAsioPeer::Aggregate(const std::vector<uint8_t>& blob)
     }
 
     _aggregatedMessages.insert(_aggregatedMessages.end(), blob.begin(), blob.end());
+    if (transmitReservation)
+    {
+        _aggregatedTransmitReservations.push_back(std::move(transmitReservation));
+    }
 
     // ensure that the aggregation buffer does not exceed a certain size
     if (_aggregatedMessages.size() > _aggregationBufferThreshold)
@@ -163,9 +168,15 @@ void VAsioPeer::Aggregate(const std::vector<uint8_t>& blob)
 
 void VAsioPeer::Flush()
 {
-    decltype(_aggregatedMessages) blob;
-    blob.swap(_aggregatedMessages);
-    SendSilKitMsgInternal(std::move(blob));
+    SendItem item;
+    item.data.swap(_aggregatedMessages);
+    if (!_aggregatedTransmitReservations.empty())
+    {
+        auto reservations = std::make_shared<std::vector<std::shared_ptr<const void>>>();
+        reservations->swap(_aggregatedTransmitReservations);
+        item.transmitReservation = std::move(reservations);
+    }
+    SendSilKitMsgInternal(std::move(item));
 
     // reset timer when flush is triggered
     _flushTimer->AsyncWaitFor(_flushTimeout);
@@ -184,11 +195,11 @@ void VAsioPeer::StartAsyncWrite()
 
     _sending = true;
 
-    _currentSendingBufferData = std::move(_sendingQueue.front());
+    _currentSendItem = std::move(_sendingQueue.front());
     _sendingQueue.pop_front();
     lock.unlock();
 
-    _currentSendingBuffer = ConstBuffer(_currentSendingBufferData.data(), _currentSendingBufferData.size());
+    _currentSendingBuffer = ConstBuffer(_currentSendItem.data.data(), _currentSendItem.data.size());
     WriteSomeAsync();
 }
 
@@ -320,6 +331,7 @@ void VAsioPeer::OnAsyncWriteSomeDone(IRawByteStream& stream, size_t bytesTransfe
         return;
     }
 
+    _currentSendItem.transmitReservation.reset();
     _sending = false;
     StartAsyncWrite();
 }

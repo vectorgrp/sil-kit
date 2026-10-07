@@ -4,3 +4,4 @@ SchemaVersion: 1
 Middleware:
   TcpSendBufferSize: 3456
   TcpReceiveBufferSize: 3456
+  TcpNotSentLowWatermark: 16384

@@ -285,6 +285,7 @@ struct Middleware
     int connectAttempts{1};    //!<  Number of connection attempts to the registry a participant should perform.
     int tcpReceiveBufferSize{-1};
     int tcpSendBufferSize{-1};
+    int tcpNotSentLowWatermark{-1}; //!< TCP_NOTSENT_LOWAT, where supported by the platform.
     bool tcpNoDelay{
         true}; //!< Setting this option to true disables Nagle's algorithm on all TCP/IP sockets. Defaults to true for performance reasons.
     bool tcpQuickAck{false};        //!< Setting this Linux specific flag disables delayed TCP/IP acknowledgements.
@@ -326,6 +327,8 @@ struct Experimental
 {
     TimeSynchronization timeSynchronization;
     Metrics metrics;
+    //! Bytes per Ethernet controller that may wait for transmission before frames are dropped. 0 is unbounded.
+    size_t transmitQueueSize{0};
 };
 
 // ================================================================================

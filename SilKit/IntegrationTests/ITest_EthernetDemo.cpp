@@ -135,7 +135,7 @@ TEST_F(ITest_EthernetDemo, ethernet_demo)
             //Cause a queue overflow by sending too fast
             if (now == 51ms)
             {
-                for (auto i = 0; i < 33; i++) // keep this in sync with EthernetController mTxQueueLimit
+                for (auto i = 0; i < 33; i++)
                 {
                     ethernetController->SendFrame(frame, reinterpret_cast<void*>(sendFrameUserContext));
                 }

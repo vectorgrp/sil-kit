@@ -167,6 +167,10 @@ add_silkit_test_to_executable(SilKitIntegrationTests
     SOURCES ITest_ThreeEthController.cpp
 )
 
+add_silkit_test_to_executable(SilKitIntegrationTests
+    SOURCES ITest_EthernetTransmitQueue.cpp
+)
+
 add_silkit_test_to_executable(SilKitFunctionalTests
     SOURCES FTest_EthWithoutSync.cpp
 )

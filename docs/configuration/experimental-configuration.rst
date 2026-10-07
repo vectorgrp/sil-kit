@@ -89,6 +89,26 @@ TimeSynchronization
          In the case of option *On*, however, it is necessary to verify that the transmission of messages within a time step does not depend on incoming messages from other participants.
          In this case, the time step will not be terminated and the communication will block.
 
+TransmitQueueSize
+-----------------
+
+.. code-block:: yaml
+
+    Experimental:
+        TransmitQueueSize: 65536
+
+Limits the bytes of Ethernet frames per controller that have been sent but not yet written to the network.
+A frame that does not fit is dropped and acknowledged with ``EthernetTransmitStatus::Dropped``.
+The default ``0`` disables the limit.
+Only applies without a network simulator.
+Combine it with ``Middleware.TcpNotSentLowWatermark``, otherwise the backlog builds up in the operating system's socket buffers instead.
+``TcpNotSentLowWatermark`` does not apply to local domain sockets, set ``Middleware.EnableDomainSockets: false`` for participants on the same host.
+
+.. note::
+  The bytes of a frame are freed once it has been written to all receiving participants, so a single slow receiver causes drops for all.
+  Frames sent from a handler, including the simulation step handler, are not written before the handler returns, and with message aggregation not before the aggregation buffer is flushed.
+  In synchronized simulations, the limit therefore also caps the bytes a controller can send within one simulation step.
+
 Metrics for participants
 ------------------------
 Each participant supports collecting static attributes of a simulation and
