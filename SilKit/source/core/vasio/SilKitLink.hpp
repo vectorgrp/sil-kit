@@ -140,6 +140,8 @@ void SetTimestamp(MsgT& /*msg*/, std::chrono::nanoseconds /*value*/,
 }
 
 // Distribute incoming (= from remote) SilKitMessages to local receivers
+// NB: byte payloads in msg alias the received message blob. Receivers must copy them to retain them
+//     beyond the synchronous dispatch below.
 template <class MsgT>
 void SilKitLink<MsgT>::DistributeRemoteSilKitMessage(const IServiceEndpoint* from, MsgT&& msg)
 {

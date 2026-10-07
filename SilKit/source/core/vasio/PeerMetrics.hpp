@@ -18,8 +18,8 @@ public:
     void InitializeMetrics(VSilKit::IMetricsManager*, SilKit::Core::IVAsioPeer*) override;
     void RxPacket() override;
     void TxPacket() override;
-    void RxBytes(const SilKit::Core::SerializedMessage&) override;
-    void TxBytes(const SilKit::Core::SerializedMessage&) override;
+    void RxBytes(size_t) override;
+    void TxBytes(size_t) override;
     void TxQueueSize(size_t) override;
 };
 
@@ -41,8 +41,8 @@ public:
     void InitializeMetrics(VSilKit::IMetricsManager* manager, SilKit::Core::IVAsioPeer* peer) override;
     void RxPacket() override;
     void TxPacket() override;
-    void RxBytes(const SilKit::Core::SerializedMessage& msg) override;
-    void TxBytes(const SilKit::Core::SerializedMessage& msg) override;
+    void RxBytes(size_t numBytes) override;
+    void TxBytes(size_t numBytes) override;
     void TxQueueSize(size_t queueSize) override;
 };
 
