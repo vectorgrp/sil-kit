@@ -4,6 +4,28 @@
 
 #include "core/service/ServiceDiscovery.hpp"
 #include "silkit/services/logging/ILogger.hpp"
+#include "silkit/participant/exception.hpp"
+
+namespace {
+
+class DispatchScope
+{
+public:
+    explicit DispatchScope(int& depth)
+        : _depth{depth}
+    {
+        ++_depth;
+    }
+    ~DispatchScope()
+    {
+        --_depth;
+    }
+
+private:
+    int& _depth;
+};
+
+} // namespace
 
 namespace SilKit {
 namespace Core {
@@ -197,10 +219,10 @@ void ServiceDiscovery::OnServiceRemoval(const ServiceDescriptor& serviceDescript
     CallHandlers(ServiceDiscoveryEvent::Type::ServiceRemoved, serviceDescriptor);
 }
 
-void ServiceDiscovery::CallHandlers(ServiceDiscoveryEvent::Type eventType,
-                                    const ServiceDescriptor& serviceDescriptor) const
+void ServiceDiscovery::CallHandlers(ServiceDiscoveryEvent::Type eventType, const ServiceDescriptor& serviceDescriptor)
 {
     // CallHandlers must be used with a lock on _discoveryMx
+    DispatchScope dispatchScope{_dispatchDepth};
     for (auto&& handler : _handlers)
     {
         handler(eventType, serviceDescriptor);
@@ -232,11 +254,19 @@ void ServiceDiscovery::RegisterServiceDiscoveryHandler(ServiceDiscoveryHandler h
     // This must be one atomic operation, as in between calls of OnServiceAddition
     // in the IO-Worker thread leads to loss of ServiceDiscoveryEvents.
     std::unique_lock<decltype(_discoveryMx)> lock(_discoveryMx);
-    for (auto&& participantServices : _servicesByParticipant)
+    if (_dispatchDepth > 0)
     {
-        for (auto&& services : participantServices.second)
+        // Registering from within a handler would modify _handlers while it is being iterated
+        throw SilKit::StateError{"A service discovery handler must not be registered from within a handler"};
+    }
+    {
+        DispatchScope dispatchScope{_dispatchDepth};
+        for (auto&& participantServices : _servicesByParticipant)
         {
-            handler(ServiceDiscoveryEvent::Type::ServiceCreated, services.second);
+            for (auto&& services : participantServices.second)
+            {
+                handler(ServiceDiscoveryEvent::Type::ServiceCreated, services.second);
+            }
         }
     }
     _handlers.emplace_back(std::move(handler));
