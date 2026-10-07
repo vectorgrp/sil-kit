@@ -2,8 +2,10 @@ name: "CI for Pull Requests"
 
 on:
   pull_request:
-    branches: [ 'main' ]
-
+    branches: [ 'main', 'dev/**', 'dev_**' ]
+permissions:
+  contents: read
+  packages: read
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
