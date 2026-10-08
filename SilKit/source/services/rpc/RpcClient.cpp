@@ -2,6 +2,8 @@
 //
 // SPDX-License-Identifier: MIT
 
+#include <algorithm>
+
 #include "services/logging/ILoggerInternal.hpp"
 #include "services/logging/LoggerMessage.hpp"
 
@@ -79,29 +81,33 @@ void RpcClient::RegisterServiceDiscovery()
 
 void RpcClient::Call(Util::Span<const uint8_t> data, void* userContext)
 {
-    TriggerCall(std::move(data), false, {}, userContext);
+    TriggerCall(std::move(data), std::nullopt, userContext);
 }
 
 void RpcClient::CallWithTimeout(Util::Span<const uint8_t> data, std::chrono::nanoseconds timeout, void* userContext)
 {
-    TriggerCall(std::move(data), true, timeout, userContext);
+    TriggerCall(std::move(data), timeout, userContext);
 }
 
 
 void RpcClient::TimeHandler(std::chrono::nanoseconds now, std::chrono::nanoseconds duration)
 {
-    std::vector<TimeoutEntry> timeoutedEntries;
+    std::vector<void*> timedOutUserContexts;
 
     {
-        std::unique_lock<decltype(_timeoutQueueMx)> lockTimeout{_timeoutQueueMx};
+        std::unique_lock<decltype(_activeCallsMx)> lock{_activeCallsMx};
 
         for (auto it = _timeoutEntries.begin(); it != _timeoutEntries.end();)
         {
             it->timeLeft -= duration;
             if (it->timeLeft <= static_cast<std::chrono::nanoseconds>(0))
             {
-                timeoutedEntries.insert(timeoutedEntries.end(), std::make_move_iterator(it),
-                                        std::make_move_iterator(it + 1));
+                const auto call = _activeCalls.find(it->callUuid);
+                if (call != _activeCalls.end())
+                {
+                    timedOutUserContexts.push_back(call->second.GetUserContext());
+                    _activeCalls.erase(call);
+                }
                 it = _timeoutEntries.erase(it);
             }
             else
@@ -111,27 +117,17 @@ void RpcClient::TimeHandler(std::chrono::nanoseconds now, std::chrono::nanosecon
         }
     }
 
-    for (auto&& entry : timeoutedEntries)
+    if (_handler)
     {
-        auto uuid = entry.callUuid;
-
-        std::unique_lock<decltype(_activeCallsMx)> lock{_activeCallsMx};
-        auto it = _activeCalls.find(uuid);
-        auto userContext = it->second.GetUserContext();
-
-        if (it != _activeCalls.end())
+        for (auto* userContext : timedOutUserContexts)
         {
-            _activeCalls.erase(it);
-            lock.unlock();
-
             _handler(this, RpcCallResultEvent{now, userContext, RpcCallStatus::Timeout, {}});
         }
     }
-    timeoutedEntries.clear();
 }
 
 
-void RpcClient::TriggerCall(Util::Span<const uint8_t> data, bool hasTimeout, std::chrono::nanoseconds timeout,
+void RpcClient::TriggerCall(Util::Span<const uint8_t> data, std::optional<std::chrono::nanoseconds> timeout,
                             void* userContext)
 {
     if (_numCounterparts == 0)
@@ -149,27 +145,22 @@ void RpcClient::TriggerCall(Util::Span<const uint8_t> data, bool hasTimeout, std
         FunctionCall msg{_timeProvider->Now(), callUuid, Util::ToStdVector(data)};
 
         {
+            std::unique_lock<decltype(_activeCallsMx)> lock{_activeCallsMx};
+            _activeCalls.emplace(callUuid, RpcCallInfo{static_cast<int32_t>(_numCounterparts), userContext});
+            if (timeout)
             {
-                std::unique_lock<decltype(_activeCallsMx)> lock{_activeCallsMx};
-                _activeCalls.emplace(callUuid, RpcCallInfo{static_cast<int32_t>(_numCounterparts), userContext});
+                _timeoutEntries.push_back({*timeout, callUuid});
             }
+        }
 
-            if (hasTimeout)
-            {
-                {
-                    std::unique_lock<decltype(_timeoutQueueMx)> lockTimeout{_timeoutQueueMx};
-                    _timeoutEntries.push_back({timeout, callUuid});
-                }
-
-                if (!_isTimeoutHandlerSet)
-                {
-                    _timeoutHandlerId = _timeProvider->AddNextSimStepHandler(
-                        [this](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {
-                        this->TimeHandler(now, duration);
-                    });
-                    _isTimeoutHandlerSet = true;
-                }
-            }
+        // NB: The time provider invokes the handler while holding its own lock, which then takes _activeCallsMx.
+        //     Register outside of _activeCallsMx to keep that lock order.
+        if (timeout && !_isTimeoutHandlerSet.exchange(true))
+        {
+            _timeoutHandlerId = _timeProvider->AddNextSimStepHandler(
+                [this](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {
+                this->TimeHandler(now, duration);
+            });
         }
 
         _participant->SendMsg(this, std::move(msg));
@@ -188,11 +179,11 @@ void RpcClient::ReceiveMsg(const Core::IServiceEndpoint* /*from*/, const Functio
 
 void RpcClient::ReceiveMessage(const FunctionCallResponse& msg)
 {
-    std::map<SilKit::Util::Uuid, SilKit::Services::Rpc::RpcClient::RpcCallInfo>::iterator it;
+    void* userContext{nullptr};
     {
         std::unique_lock<decltype(_activeCallsMx)> lock{_activeCallsMx};
 
-        it = _activeCalls.find(msg.callUuid);
+        const auto it = _activeCalls.find(msg.callUuid);
 
         if (it == _activeCalls.end())
         {
@@ -202,20 +193,23 @@ void RpcClient::ReceiveMessage(const FunctionCallResponse& msg)
                 .Dispatch();
             return;
         }
-    };
+
+        userContext = it->second.GetUserContext();
+
+        // NB: If the call was made to multiple servers, multiple returns will be received. Only forget about the call
+        //     after all returns have been received.
+        if (it->second.DecrementRemainingReturnCount() <= 0)
+        {
+            _activeCalls.erase(it);
+            _timeoutEntries.erase(std::remove_if(_timeoutEntries.begin(), _timeoutEntries.end(),
+                                                 [&msg](const auto& entry) { return entry.callUuid == msg.callUuid; }),
+                                  _timeoutEntries.end());
+        }
+    }
 
     if (_handler)
     {
-        _handler(this,
-                 RpcCallResultEvent{msg.timestamp, it->second.GetUserContext(), ToRpcCallStatus(msg.status), msg.data});
-    }
-
-    // NB: If the call was made to multiple servers, multiple returns will be received. Only forget about the call
-    //     after all returns have been received.
-    if (it->second.DecrementRemainingReturnCount() <= 0)
-    {
-        std::unique_lock<decltype(_activeCallsMx)> lock{_activeCallsMx};
-        _activeCalls.erase(it);
+        _handler(this, RpcCallResultEvent{msg.timestamp, userContext, ToRpcCallStatus(msg.status), msg.data});
     }
 }
 

@@ -34,6 +34,10 @@ Add this note to the Release description.
 - Fix ITest_AsyncSimTask (test failed when run repeatedly)
 - Fix the `TimeSyncService` warning about an exceeded soft time limit, which showed a literal `{}` instead of the
   measured timeout in milliseconds
+- `IRpcClient::CallWithTimeout`: a call answered before its timeout no longer leaves the timeout pending, which
+  caused an invalid map access once it expired. Replies and expiring timeouts are now handled under one lock, so
+  they can no longer race when the timeout is driven by a separate timer thread (participants without time
+  synchronization).
 - The third party license notices were incomplete. They now also cover components that are vendored
   inside another dependency, such as c4core inside the rapidyaml sources, and the components that
   ship inside the HTML documentation. `ThirdParty/LICENSES.rst` is generated from a software bill of

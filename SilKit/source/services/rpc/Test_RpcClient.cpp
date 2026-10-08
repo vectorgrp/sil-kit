@@ -107,4 +107,71 @@ TEST_F(Test_RpcClient, rpc_client_call_receives_internal_server_error_when_serve
     iRpcClient->Call(sampleData, userContext);
 }
 
+// NB: Destroyed after RpcTestBase, because the RpcClient unregisters its timeout handler from it on destruction.
+struct TimeProviderHolder
+{
+    testing::NiceMock<SilKit::Core::Tests::MockTimeProvider> timeProvider;
+};
+
+class Test_RpcClientTimeout
+    : public TimeProviderHolder
+    , public RpcTestBase
+{
+protected:
+    void AdvanceTime(std::chrono::nanoseconds duration)
+    {
+        timeProvider.now += duration;
+        timeProvider._handlers.InvokeAll(timeProvider.now, duration);
+    }
+};
+
+TEST_F(Test_RpcClientTimeout, answered_call_does_not_time_out)
+{
+    using namespace std::chrono_literals;
+
+    // A server without call handler answers immediately with an internal server error
+    CreateRpcServer();
+    IRpcClient* iRpcClient = CreateRpcClient();
+    iRpcClient->SetCallResultHandler(SilKit::Util::bind_method(&callbacks, &Callbacks::CallResultHandler));
+    participant->GetSilKitConnection().Test_SetTimeProvider(&timeProvider);
+
+    EXPECT_CALL(callbacks, CallResultHandler(testing::Eq(iRpcClient),
+                                             testing::Field(&RpcCallResultEvent::callStatus,
+                                                            RpcCallStatus::InternalServerError)))
+        .Times(1);
+
+    iRpcClient->CallWithTimeout(sampleData, 10ms);
+    AdvanceTime(10ms);
+    AdvanceTime(10ms);
+}
+
+TEST_F(Test_RpcClientTimeout, call_times_out_once_and_late_reply_is_ignored)
+{
+    using namespace std::chrono_literals;
+
+    IRpcServer* iRpcServer = CreateRpcServer();
+    IRpcCallHandle* callHandle{nullptr};
+    iRpcServer->SetCallHandler([&callHandle](IRpcServer*, const RpcCallEvent& event) { callHandle = event.callHandle; });
+
+    IRpcClient* iRpcClient = CreateRpcClient();
+    iRpcClient->SetCallResultHandler(SilKit::Util::bind_method(&callbacks, &Callbacks::CallResultHandler));
+    participant->GetSilKitConnection().Test_SetTimeProvider(&timeProvider);
+
+    const auto userContext = reinterpret_cast<void*>(uintptr_t(12345));
+    EXPECT_CALL(callbacks, CallResultHandler(
+                               testing::Eq(iRpcClient),
+                               testing::AllOf(testing::Field(&RpcCallResultEvent::callStatus, RpcCallStatus::Timeout),
+                                              testing::Field(&RpcCallResultEvent::userContext, userContext))))
+        .Times(1);
+
+    iRpcClient->CallWithTimeout(sampleData, 10ms, userContext);
+    ASSERT_NE(callHandle, nullptr);
+
+    AdvanceTime(5ms);
+    AdvanceTime(5ms);
+    AdvanceTime(5ms);
+
+    iRpcServer->SubmitResult(callHandle, sampleData);
+}
+
 } // anonymous namespace

@@ -6,6 +6,7 @@
 
 #include <vector>
 #include <future>
+#include <optional>
 #include <queue>
 #include <set>
 
@@ -57,7 +58,7 @@ public:
     inline auto GetServiceDescriptor() const -> const Core::ServiceDescriptor& override;
 
 private:
-    void TriggerCall(Util::Span<const uint8_t> data, bool hasTimeout, std::chrono::nanoseconds timeout,
+    void TriggerCall(Util::Span<const uint8_t> data, std::optional<std::chrono::nanoseconds> timeout,
                      void* userContext);
     void TimeHandler(std::chrono::nanoseconds now, std::chrono::nanoseconds duration);
 
@@ -97,19 +98,17 @@ private:
     Services::Orchestration::ITimeProvider* _timeProvider{nullptr};
     Core::IParticipantInternal* _participant{nullptr};
 
-    std::mutex _activeCallsMx;
-    std::mutex _timeoutQueueMx;
-    std::map<Util::Uuid, RpcCallInfo> _activeCalls;
-
     struct TimeoutEntry
     {
         std::chrono::nanoseconds timeLeft;
         Util::Uuid callUuid;
     };
 
-
+    //! Guards _activeCalls and _timeoutEntries, which must be updated together.
+    std::mutex _activeCallsMx;
+    std::map<Util::Uuid, RpcCallInfo> _activeCalls;
     std::vector<TimeoutEntry> _timeoutEntries{};
-    std::function<void(std::chrono::nanoseconds now, std::chrono::nanoseconds duration)> _timeoutHandler{};
+
     Services::HandlerId _timeoutHandlerId{};
     std::atomic<bool> _isTimeoutHandlerSet{false};
 };
