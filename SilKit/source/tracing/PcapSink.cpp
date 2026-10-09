@@ -113,14 +113,15 @@ void PcapSink::Trace(SilKit::Services::TransmitDirection /*unused*/,
 
     std::unique_lock<decltype(_lock)> lock{_lock};
 
-    const auto tosec = 1000'000ull;
-    const auto usec = std::chrono::duration_cast<std::chrono::microseconds>(timestamp);
+    // The global header announces nanosecond resolution (Pcap::NativeMagic).
+    const auto nsPerSecond = 1'000'000'000ull;
+    const auto nsec = static_cast<uint64_t>(timestamp.count());
 
     Pcap::PacketHeader pcapPacketHeader;
     pcapPacketHeader.orig_len = static_cast<uint32_t>(message.raw.size());
     pcapPacketHeader.incl_len = pcapPacketHeader.orig_len;
-    pcapPacketHeader.ts_sec = static_cast<uint32_t>(usec.count() / tosec);
-    pcapPacketHeader.ts_usec = static_cast<uint32_t>(usec.count() % tosec);
+    pcapPacketHeader.ts_sec = static_cast<uint32_t>(nsec / nsPerSecond);
+    pcapPacketHeader.ts_fraction = static_cast<uint32_t>(nsec % nsPerSecond);
 
     bool ok = true;
     if (_file.is_open())

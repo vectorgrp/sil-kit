@@ -137,9 +137,14 @@ void PcapReader::ReadGlobalHeader()
         throw SilKitError("PCAP file cannot be opened: global header short read");
     }
     auto* hdr = reinterpret_cast<Pcap::GlobalHeader*>(buf.data());
-    if (hdr->magic_number != Pcap::NativeMagic)
+    switch (hdr->GetTimestampMode())
     {
-        throw SilKitError("PCAP file cannot be opened: invalid PCAP valid magic number");
+    case Pcap::TimestampMode::Nanoseconds:
+        _nsPerTimestampFraction = 1;
+        break;
+    case Pcap::TimestampMode::Microseconds:
+        _nsPerTimestampFraction = 1000;
+        break;
     }
     if ((hdr->version_major != Pcap::MajorVersion) && (hdr->version_minor != Pcap::MinorVersion))
     {
@@ -181,7 +186,8 @@ bool PcapReader::Seek(size_t messageNumber)
         }
         auto msg = std::make_shared<PcapMessage>();
         auto* hdr = reinterpret_cast<Pcap::PacketHeader*>(buf.data());
-        std::chrono::nanoseconds timeStamp{((uint64_t)hdr->ts_sec * 1000000000u) + ((uint64_t)hdr->ts_usec * 1000u)};
+        std::chrono::nanoseconds timeStamp{((uint64_t)hdr->ts_sec * 1000000000u)
+                                           + ((uint64_t)hdr->ts_fraction * _nsPerTimestampFraction)};
 
         std::vector<uint8_t> msgBuf{};
         msgBuf.resize(hdr->incl_len);
