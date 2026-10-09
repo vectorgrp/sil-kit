@@ -1,5 +1,5 @@
 #include <WINVER.H>
-#include "version_macros.hpp"
+#include "silkit/capi/SilKitVersionMacros.h"
 #pragma code_page(65001)  // UTF-8 for © symbol
 
 #define STRING_HELPER(x)          #x
