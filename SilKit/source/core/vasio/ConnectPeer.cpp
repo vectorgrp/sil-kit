@@ -130,12 +130,14 @@ void ConnectPeer::UpdateUris()
             _logger->MakeMessage(Log::Level::Warn, TopicOf(*this))
                 .SetMessage("Error occurred while processing acceptor URI '{}': {}", str, exception.what())
                 .Dispatch();
+            RecordFailure(str, exception.what());
         }
         catch (...)
         {
             _logger->MakeMessage(Log::Level::Warn, TopicOf(*this))
                 .SetMessage("Error occurred while processing acceptor URI '{}'", str)
                 .Dispatch();
+            RecordFailure(str, "unknown error while processing the URI");
         }
     }
 
@@ -213,6 +215,7 @@ void ConnectPeer::TryNextUri()
                 _logger->MakeMessage(SilKit::Services::Logging::Level::Debug, TopicOf(*this))
                     .SetMessage("Unable to connect via local-domain because it is disabled via configuration")
                     .Dispatch();
+                RecordFailure(uri.EncodedString(), "local-domain sockets are disabled via configuration");
             }
             else
             {
@@ -224,6 +227,7 @@ void ConnectPeer::TryNextUri()
             _logger->MakeMessage(SilKit::Services::Logging::Level::Warn, TopicOf(*this))
                 .SetMessage("Invalid uri type {}", static_cast<std::underlying_type_t<Uri::UriType>>(uri.Type()))
                 .Dispatch();
+            RecordFailure(uri.EncodedString(), "invalid URI type");
             break;
         }
 
@@ -239,6 +243,7 @@ void ConnectPeer::TryNextUri()
         _logger->MakeMessage(SilKit::Services::Logging::Level::Warn, TopicOf(*this))
             .SetMessage("Failed to start connecting to '{}': {}", uri.EncodedString(), exception.what())
             .Dispatch();
+        RecordFailure(uri.EncodedString(), exception.what());
     }
     catch (...)
     {
@@ -246,6 +251,7 @@ void ConnectPeer::TryNextUri()
          _logger->MakeMessage(SilKit::Services::Logging::Level::Warn, TopicOf(*this))
             .SetMessage("Failed to start connecting to '{}'", uri.EncodedString())
             .Dispatch();
+        RecordFailure(uri.EncodedString(), "unknown error while starting to connect");
     }
 
     if (_connector == nullptr)
@@ -269,7 +275,37 @@ void ConnectPeer::HandleFailure()
     SILKIT_TRACE_METHOD_(_logger, "()");
 
     _connector.reset();
-    _listener->OnConnectPeerFailure(*this, _peerInfo);
+
+    std::string reason;
+    for (const auto& failure : _failureReasons)
+    {
+        if (!reason.empty())
+        {
+            reason += '\n';
+        }
+        reason += failure.first + ": " + failure.second;
+    }
+    if (reason.empty())
+    {
+        reason = "no usable acceptor URIs";
+    }
+
+    _listener->OnConnectPeerFailure(*this, _peerInfo, reason);
+}
+
+
+void ConnectPeer::RecordFailure(const std::string& uri, std::string reason)
+{
+    auto it{std::find_if(_failureReasons.begin(), _failureReasons.end(),
+                         [&uri](const auto& failure) { return failure.first == uri; })};
+    if (it != _failureReasons.end())
+    {
+        it->second = std::move(reason);
+    }
+    else
+    {
+        _failureReasons.emplace_back(uri, std::move(reason));
+    }
 }
 
 
@@ -281,11 +317,18 @@ void ConnectPeer::OnAsyncConnectSuccess(IConnector&, std::unique_ptr<IRawByteStr
 }
 
 
-void ConnectPeer::OnAsyncConnectFailure(IConnector&)
+void ConnectPeer::OnAsyncConnectFailure(IConnector&, std::error_code errorCode)
 {
-    SILKIT_TRACE_METHOD_(_logger, "(...)");
+    SILKIT_TRACE_METHOD_(_logger, "(..., {})", errorCode.message());
 
     _connector.reset();
+
+    // _uriIndex has already been advanced past the URI that just failed
+    if (_uriIndex > 0 && _uriIndex <= _uris.size())
+    {
+        RecordFailure(_uris[_uriIndex - 1].EncodedString(), errorCode.message());
+    }
+
     TryNextUri();
 }
 

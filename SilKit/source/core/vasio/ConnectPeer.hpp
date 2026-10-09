@@ -14,6 +14,9 @@
 #include <chrono>
 #include <functional>
 #include <memory>
+#include <string>
+#include <utility>
+#include <vector>
 
 
 namespace SilKit {
@@ -52,6 +55,9 @@ class ConnectPeer
 
     std::unique_ptr<IConnector> _connector;
 
+    /// The most recent failure reason for each URI, in the order the URIs failed first
+    std::vector<std::pair<std::string, std::string>> _failureReasons;
+
 public:
     ConnectPeer(IIoContext* ioContext, SilKit::Services::Logging::ILoggerInternal* logger,
                 const SilKit::Core::VAsioPeerInfo& peerInfo, bool enableDomainSockets);
@@ -67,10 +73,11 @@ private:
     void TryNextUri();
     void HandleSuccess(std::unique_ptr<IRawByteStream> stream);
     void HandleFailure();
+    void RecordFailure(const std::string& uri, std::string reason);
 
 private: // IConnectorListener
     void OnAsyncConnectSuccess(IConnector&, std::unique_ptr<IRawByteStream> stream) override;
-    void OnAsyncConnectFailure(IConnector&) override;
+    void OnAsyncConnectFailure(IConnector&, std::error_code errorCode) override;
 };
 
 

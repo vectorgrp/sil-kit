@@ -12,6 +12,7 @@
 #include <cstddef>
 #include <chrono>
 #include <memory>
+#include <string>
 
 
 namespace VSilKit {
@@ -36,7 +37,8 @@ struct IConnectPeerListener
 
     virtual void OnConnectPeerSuccess(IConnectPeer&, SilKit::Core::VAsioPeerInfo peerInfo,
                                       std::unique_ptr<IRawByteStream> stream) = 0;
-    virtual void OnConnectPeerFailure(IConnectPeer&, SilKit::Core::VAsioPeerInfo peerInfo) = 0;
+    virtual void OnConnectPeerFailure(IConnectPeer&, SilKit::Core::VAsioPeerInfo peerInfo,
+                                      const std::string& reason) = 0;
 };
 
 

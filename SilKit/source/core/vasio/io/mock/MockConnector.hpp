@@ -25,7 +25,7 @@ struct MockConnector : IConnector
 struct MockConnectorListener : IConnectorListener
 {
     MOCK_METHOD(void, OnAsyncConnectSuccess, (IConnector&, std::unique_ptr<IRawByteStream>), (override));
-    MOCK_METHOD(void, OnAsyncConnectFailure, (IConnector&), (override));
+    MOCK_METHOD(void, OnAsyncConnectFailure, (IConnector&, std::error_code), (override));
 };
 
 
@@ -63,7 +63,7 @@ public:
             }
 
             _pending = false;
-            _listener->OnAsyncConnectFailure(*this);
+            _listener->OnAsyncConnectFailure(*this, std::make_error_code(std::errc::timed_out));
         });
     }
 
@@ -78,7 +78,7 @@ public:
             }
 
             _pending = false;
-            _listener->OnAsyncConnectFailure(*this);
+            _listener->OnAsyncConnectFailure(*this, std::make_error_code(std::errc::operation_canceled));
         });
     }
 
@@ -138,7 +138,7 @@ public:
             }
 
             _pending = false;
-            _listener->OnAsyncConnectFailure(*this);
+            _listener->OnAsyncConnectFailure(*this, std::make_error_code(std::errc::operation_canceled));
         });
     }
 

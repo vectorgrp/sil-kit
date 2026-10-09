@@ -47,7 +47,6 @@ class AsioConnector final : public IConnector
         IDLE,
         PENDING,
         CONNECTED,
-        TIMED_OUT,
     };
 
     class Op : public std::enable_shared_from_this<Op>
@@ -65,6 +64,7 @@ class AsioConnector final : public IConnector
 
         asio::steady_timer _timeoutTimer;
         asio::cancellation_signal _timeoutCancelSignal;
+        std::atomic<bool> _timedOut{false};
 
         SilKit::Services::Logging::ILoggerInternal* _logger{nullptr};
 
@@ -78,7 +78,7 @@ class AsioConnector final : public IConnector
 
     private:
         void HandleSuccess(std::unique_ptr<IRawByteStream> stream);
-        void HandleFailure();
+        void HandleFailure(std::error_code errorCode);
 
     private:
         void OnAsioAsyncConnectComplete(const asio::error_code& asioErrorCode);
@@ -184,7 +184,7 @@ void AsioConnector<T>::Op::Initiate(std::chrono::milliseconds timeout)
     if (errorCode)
     {
         SILKIT_TRACE_METHOD_(_logger, "failed to set socket options: {}", errorCode.message());
-        HandleFailure();
+        HandleFailure(errorCode);
         return;
     }
 
@@ -241,9 +241,9 @@ void AsioConnector<T>::Op::HandleSuccess(std::unique_ptr<IRawByteStream> stream)
 
 
 template <typename T>
-void AsioConnector<T>::Op::HandleFailure()
+void AsioConnector<T>::Op::HandleFailure(std::error_code errorCode)
 {
-    SILKIT_TRACE_METHOD_(_logger, "()");
+    SILKIT_TRACE_METHOD_(_logger, "({})", errorCode.message());
 
     auto* connector{_parent.load()};
     if (connector == nullptr)
@@ -251,7 +251,7 @@ void AsioConnector<T>::Op::HandleFailure()
         return;
     }
 
-    connector->_listener->OnAsyncConnectFailure(*connector);
+    connector->_listener->OnAsyncConnectFailure(*connector, errorCode);
 }
 
 
@@ -267,7 +267,8 @@ void AsioConnector<T>::Op::OnAsioAsyncConnectComplete(const asio::error_code& as
 
     if (asioErrorCode)
     {
-        HandleFailure();
+        // the connect operation is aborted by the timeout timer, report the timeout instead of the abort
+        HandleFailure(_timedOut ? std::make_error_code(std::errc::timed_out) : asioErrorCode);
         return;
     }
 
@@ -308,6 +309,7 @@ void AsioConnector<T>::Op::OnAsioAsyncWaitComplete(const asio::error_code& error
 
     if (_state.Get() == PENDING)
     {
+        _timedOut = true;
         _connectCancelSignal.emit(asio::cancellation_type::total);
     }
 }

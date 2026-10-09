@@ -508,14 +508,16 @@ void VAsioConnection::ConnectParticipantToRegistryAndStartIoWorker(const std::st
     struct ConnectRegistryCallbacks final : IConnectPeerListener
     {
         std::promise<std::unique_ptr<IRawByteStream>> promise;
+        std::string failureReason;
 
         void OnConnectPeerSuccess(IConnectPeer&, VAsioPeerInfo, std::unique_ptr<IRawByteStream> stream) override
         {
             promise.set_value(std::move(stream));
         }
 
-        void OnConnectPeerFailure(IConnectPeer&, VAsioPeerInfo) override
+        void OnConnectPeerFailure(IConnectPeer&, VAsioPeerInfo, const std::string& reason) override
         {
+            failureReason = reason;
             promise.set_value(nullptr);
         }
     };
@@ -532,8 +534,20 @@ void VAsioConnection::ConnectParticipantToRegistryAndStartIoWorker(const std::st
     auto registryStream{registryStreamFuture.get()};
     if (registryStream == nullptr)
     {
+        // one indented line per URI that was tried
+        std::string failureReasons{"  " + connectRegistryCallbacks.failureReason};
+        for (auto pos = failureReasons.find('\n'); pos != std::string::npos; pos = failureReasons.find('\n', pos + 3))
+        {
+            failureReasons.replace(pos, 1, "\n  ");
+        }
+
+        const auto errorMessage{fmt::format(
+            "Failed to connect to SIL Kit Registry at '{}' (participant '{}', {} attempt(s), timeout {}ms):\n{}",
+            connectUriString, _participantName, _config.middleware.connectAttempts,
+            GetRegistryConnectTimeout(_config).count(), failureReasons)};
+
         _logger->MakeMessage(Log::Level::Error, TopicOf(*this))
-            .SetMessage("Failed to connect to SIL Kit Registry at '{}'", connectUriString)
+            .SetMessage(errorMessage)
             .AddKeyValue(Log::Keys::connectAttempts, _config.middleware.connectAttempts)
             .Dispatch();
 
@@ -552,7 +566,7 @@ void VAsioConnection::ConnectParticipantToRegistryAndStartIoWorker(const std::st
             .Dispatch();
        lm.SetMessage("     INSTALL_DIR/bin/sil-kit-registry[.exe]").Dispatch();
 
-        throw SilKitError{"ERROR: Failed to connect to SIL Kit Registry at '" + connectUriString + "'"};
+        throw SilKitError{"ERROR: " + errorMessage};
     }
 
     _registry = MakeVAsioPeer(std::move(registryStream));

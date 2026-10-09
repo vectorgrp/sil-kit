@@ -49,7 +49,8 @@ private:
 private: // IConnectPeerListener
     void OnConnectPeerSuccess(IConnectPeer& connectPeer, VAsioPeerInfo peerInfo,
                               std::unique_ptr<IRawByteStream> stream) override;
-    void OnConnectPeerFailure(IConnectPeer& connectPeer, VAsioPeerInfo peerInfo) override;
+    void OnConnectPeerFailure(IConnectPeer& connectPeer, VAsioPeerInfo peerInfo,
+                              const std::string& reason) override;
 };
 
 

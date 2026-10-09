@@ -107,7 +107,7 @@ private:
     private: // IConnectPeerListener
         void OnConnectPeerSuccess(IConnectPeer&, VAsioPeerInfo peerInfo,
                                   std::unique_ptr<IRawByteStream> stream) override;
-        void OnConnectPeerFailure(IConnectPeer&, VAsioPeerInfo) override;
+        void OnConnectPeerFailure(IConnectPeer&, VAsioPeerInfo, const std::string& reason) override;
 
     private: // ITimerListener
         void OnTimerExpired(ITimer& timer) override;

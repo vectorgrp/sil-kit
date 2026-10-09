@@ -29,7 +29,7 @@ struct MockConnectPeerListener : IConnectPeerListener
 {
     MOCK_METHOD(void, OnConnectPeerSuccess, (IConnectPeer&, VAsioPeerInfo, std::unique_ptr<IRawByteStream>),
                 (override));
-    MOCK_METHOD(void, OnConnectPeerFailure, (IConnectPeer&, VAsioPeerInfo), (override));
+    MOCK_METHOD(void, OnConnectPeerFailure, (IConnectPeer&, VAsioPeerInfo, const std::string&), (override));
 };
 
 
@@ -77,7 +77,7 @@ public:
             _pending = false;
             if (_peerInfo.acceptorUris.empty())
             {
-                _listener->OnConnectPeerFailure(*this, _peerInfo);
+                _listener->OnConnectPeerFailure(*this, _peerInfo, "mock failure");
             }
             else
             {
@@ -97,7 +97,7 @@ public:
             }
 
             _pending = false;
-            _listener->OnConnectPeerFailure(*this, _peerInfo);
+            _listener->OnConnectPeerFailure(*this, _peerInfo, "mock failure");
         });
     }
 
@@ -147,7 +147,7 @@ public:
             }
 
             _pending = false;
-            _listener->OnConnectPeerFailure(*this, _peerInfo);
+            _listener->OnConnectPeerFailure(*this, _peerInfo, "mock failure");
         });
     }
 
@@ -162,7 +162,7 @@ public:
             }
 
             _pending = false;
-            _listener->OnConnectPeerFailure(*this, _peerInfo);
+            _listener->OnConnectPeerFailure(*this, _peerInfo, "mock failure");
         });
     }
 
