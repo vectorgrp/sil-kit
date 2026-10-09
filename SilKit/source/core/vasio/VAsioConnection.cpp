@@ -533,7 +533,7 @@ void VAsioConnection::ConnectParticipantToRegistryAndStartIoWorker(const std::st
     if (registryStream == nullptr)
     {
         _logger->MakeMessage(Log::Level::Error, TopicOf(*this))
-            .SetMessage("Failed to connect to SIL Kit Registry")
+            .SetMessage("Failed to connect to SIL Kit Registry at '{}'", connectUriString)
             .AddKeyValue(Log::Keys::connectAttempts, _config.middleware.connectAttempts)
             .Dispatch();
 
@@ -552,7 +552,7 @@ void VAsioConnection::ConnectParticipantToRegistryAndStartIoWorker(const std::st
             .Dispatch();
        lm.SetMessage("     INSTALL_DIR/bin/sil-kit-registry[.exe]").Dispatch();
 
-        throw SilKitError{"ERROR: Failed to connect to SIL Kit Registry"};
+        throw SilKitError{"ERROR: Failed to connect to SIL Kit Registry at '" + connectUriString + "'"};
     }
 
     _registry = MakeVAsioPeer(std::move(registryStream));
