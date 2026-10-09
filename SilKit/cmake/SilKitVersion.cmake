@@ -3,26 +3,29 @@
 # SPDX-License-Identifier: MIT
 
 # SIL Kit Versioning:
-# * Major, minor and patch release number are configured here. This is the source of truth: the generated public header
-#   SilKit/include/silkit/capi/SilKitVersionMacros.h is produced from these numbers and compiled into the library, so
-#   they are accessible from public headers at runtime.
-# * Do not edit the numbers below by hand. Run the sil-kit-generate-version tool, which keeps this file, the generated
-#   header and the changelog in sync. See docs/development/release.md.
-# * SILKIT_BUILD_NUMBER, SILKIT_BUILD_GIT_HASH and SILKIT_VERSION_SUFFIX describe a build, not the source tree. All
-#   three are build-time overrides passed to the sources as compile definitions; the generated header only carries
-#   the fallbacks. CI should pass the hash it actually built, so the library reports that commit rather than the
-#   parent of the version bump, and may set a suffix to mark a pre-release:
+# * Major, minor and patch are read from SilKit/include/silkit/capi/SilKitVersionMacros.h, the single source of truth.
+#   Bump with SilKit/ci/bump_version.py, see docs/development/release.md.
+# * SILKIT_BUILD_NUMBER, SILKIT_BUILD_GIT_HASH and SILKIT_VERSION_SUFFIX describe a build, not the source tree. They are
+#   passed to the sources as compile definitions and override the fallbacks in the header:
 #     cmake -DSILKIT_BUILD_GIT_HASH=<hash> -DSILKIT_BUILD_NUMBER=N -DSILKIT_VERSION_SUFFIX=rc1
-#   The suffix also flows into VERSION_STRING below, so CPack package names carry it too.
+#   An empty SILKIT_BUILD_GIT_HASH defaults to 'git rev-parse HEAD'. The suffix also flows into VERSION_STRING below,
+#   so CPack package names carry it too.
+set(_SILKIT_VERSION_MACROS_H "${CMAKE_CURRENT_LIST_DIR}/../include/silkit/capi/SilKitVersionMacros.h")
+
 macro(configure_silkit_version project_name)
-    set(SILKIT_VERSION_MAJOR 5)
-    set(SILKIT_VERSION_MINOR 0)
-    set(SILKIT_VERSION_PATCH 8)
+    foreach(_component MAJOR MINOR PATCH)
+        file(STRINGS "${_SILKIT_VERSION_MACROS_H}" _define REGEX "^#define SILKIT_VERSION_${_component} [0-9]+$")
+        if(NOT _define)
+            message(FATAL_ERROR "SIL Kit: no SILKIT_VERSION_${_component} in ${_SILKIT_VERSION_MACROS_H}")
+        endif()
+        string(REGEX REPLACE "^#define SILKIT_VERSION_${_component} " "" SILKIT_VERSION_${_component} "${_define}")
+    endforeach()
+    set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${_SILKIT_VERSION_MACROS_H}")
+
     set(SILKIT_BUILD_NUMBER 0 CACHE STRING "The build number")
     # Not named SILKIT_GIT_HASH: older build trees carry a stale INTERNAL cache
     # entry under that name, and set(... CACHE ...) would not overwrite it.
-    set(SILKIT_BUILD_GIT_HASH "" CACHE STRING
-        "Git hash of the built sources; empty keeps the one in SilKitVersionMacros.h")
+    set(SILKIT_BUILD_GIT_HASH "" CACHE STRING "Git hash of the built sources; empty uses 'git rev-parse HEAD'")
     set(SILKIT_VERSION_SUFFIX "" CACHE STRING "Pre-release suffix, e.g. rc1; empty for a normal build")
 
     set(VERSION_STRING "${SILKIT_VERSION_MAJOR}.${SILKIT_VERSION_MINOR}.${SILKIT_VERSION_PATCH}")

@@ -28,31 +28,11 @@ target_include_directories(I_SilKit
     INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}"
 )
 
-# The build number and git hash describe a build, not the source tree, so they
-# override the fallbacks in the generated SilKitVersionMacros.h. The build number
-# also reaches the .rc resource scripts, which put it in FILEVERSION; CMake passes
-# a target's compile definitions to the resource compiler.
+# Overrides the fallback in SilKitVersionMacros.h. Also reaches the .rc resource
+# scripts, which put it in FILEVERSION.
 target_compile_definitions(I_SilKit
     INTERFACE SILKIT_BUILD_NUMBER=${SILKIT_BUILD_NUMBER}
 )
-
-# Only the C++ sources read these, and quoted string defines are fragile in the
-# resource compiler, so keep them away from the .rc files.
-if(SILKIT_BUILD_GIT_HASH)
-    target_compile_definitions(I_SilKit
-        INTERFACE $<$<COMPILE_LANGUAGE:CXX>:SILKIT_GIT_HASH="${SILKIT_BUILD_GIT_HASH}">
-    )
-endif()
-
-# A pre-release suffix changes the version string too, and CMake is the only
-# place that knows how to compose it (VERSION_STRING in SilKitVersion.cmake).
-if(SILKIT_VERSION_SUFFIX)
-    target_compile_definitions(I_SilKit
-        INTERFACE
-            $<$<COMPILE_LANGUAGE:CXX>:SILKIT_VERSION_SUFFIX="${SILKIT_VERSION_SUFFIX}">
-            $<$<COMPILE_LANGUAGE:CXX>:SILKIT_VERSION_STRING="${VERSION_STRING}">
-    )
-endif()
 
 if (MSVC)
     target_compile_definitions(I_SilKit
@@ -134,6 +114,41 @@ add_library(O_SilKit_VersionImpl OBJECT
 target_link_libraries(O_SilKit_VersionImpl
     PRIVATE I_SilKit
 )
+
+# Only SilKitVersionImpl.cpp reads the git hash and suffix, so a new commit
+# rebuilds one file instead of everything linking I_SilKit.
+set(silkitGitHash "${SILKIT_BUILD_GIT_HASH}")
+if(NOT silkitGitHash AND EXISTS "${PROJECT_SOURCE_DIR}/../.git")
+    find_package(Git QUIET)
+    if(GIT_FOUND)
+        execute_process(
+            COMMAND "${GIT_EXECUTABLE}" rev-parse HEAD
+            WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
+            RESULT_VARIABLE gitResult
+            OUTPUT_VARIABLE gitOutput
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+            ERROR_QUIET
+        )
+        if(gitResult EQUAL 0)
+            set(silkitGitHash "${gitOutput}")
+        endif()
+    endif()
+endif()
+message(STATUS "SIL Kit git hash: ${silkitGitHash}")
+
+if(silkitGitHash)
+    target_compile_definitions(O_SilKit_VersionImpl
+        PRIVATE SILKIT_GIT_HASH="${silkitGitHash}"
+    )
+endif()
+
+if(SILKIT_VERSION_SUFFIX)
+    target_compile_definitions(O_SilKit_VersionImpl
+        PRIVATE
+            SILKIT_VERSION_SUFFIX="${SILKIT_VERSION_SUFFIX}"
+            SILKIT_VERSION_STRING="${VERSION_STRING}"
+    )
+endif()
 
 
 set(SilKitImplObjectLibraries "")
