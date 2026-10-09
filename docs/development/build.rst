@@ -135,6 +135,13 @@ Tests are selected by label::
 
     ctest --preset debug -L 'unit|integration'
 
+The integration tests using only the public API can also be built against a prebuilt SIL Kit package.
+``SILKIT_DIR`` points to the directory containing ``SilKitConfig.cmake``::
+
+    cmake -S SilKit/IntegrationTests -B _build/itests -D SILKIT_DIR=path/to/SilKit/lib/cmake/SilKit
+    cmake --build _build/itests
+    ctest --test-dir _build/itests -L 'unit|integration'
+
 Code coverage requires gcc and `gcovr`_.
 The ``coverage`` preset is a Debug build with ``SILKIT_ENABLE_COVERAGE`` enabled::
 

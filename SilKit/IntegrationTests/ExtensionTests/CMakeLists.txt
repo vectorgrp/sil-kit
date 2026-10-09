@@ -35,10 +35,13 @@ set_target_properties(WrongBuildSystem PROPERTIES
     ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"
 )
 
-add_silkit_test_to_executable(SilKitIntegrationTests SOURCES ITest_SilKitExtensions.cpp LIBS O_SilKit_Extensions O_SilKit_VersionImpl SilKit I_SilKit I_SilKit_Extensions)
+# Own executable: the extension loader is linked in directly, while the SIL Kit shared library must be loaded
+# in the process so that the extensions' dependency on it resolves (Windows loads them with an altered search path).
+add_silkit_test_executable(SilKitExtensionTests LABEL integration)
+add_silkit_test_to_executable(SilKitExtensionTests SOURCES ITest_SilKitExtensions.cpp LIBS O_SilKit_Extensions O_SilKit_VersionImpl SilKit I_SilKit I_SilKit_Extensions)
 
 if(${SILKIT_BUILD_TESTS})
-    add_dependencies(SilKitIntegrationTests
+    add_dependencies(SilKitExtensionTests
         DummyExtension
         WrongVersionExtension
         WrongBuildSystem

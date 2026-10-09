@@ -26,8 +26,23 @@ jobs:
         with:
           submodules: true
       - uses: ./.github/actions/build-cmake-preset
+        id: build
         with:
           preset-name: release
           cmake-args: "-DCMAKE_C_COMPILER=${{ matrix.toolchain.cc }} \
                        -DCMAKE_CXX_COMPILER=${{ matrix.toolchain.cxx }}"
           artifact-label: "${{ github.job }}-${{ matrix.toolchain.cc }}"
+      - name: Integration tests against the package
+        run: |
+          mkdir -p _pkg
+          cmake -E chdir _pkg cmake -E tar xf "$PWD/${{ steps.build.outputs.package-path }}"
+          silkit_dir=$(dirname "$(find "$PWD/_pkg" -name SilKitConfig.cmake | head -n 1)")
+          cmake -S SilKit/IntegrationTests -B _build/itests-package -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_COMPILER=${{ matrix.toolchain.cc }} \
+            -DCMAKE_CXX_COMPILER=${{ matrix.toolchain.cxx }} \
+            -DSILKIT_WARNINGS_AS_ERRORS=ON \
+            -DSILKIT_DIR="$silkit_dir"
+          cmake --build _build/itests-package
+          ctest --test-dir _build/itests-package --output-on-failure -L 'unit|integration'
+        shell: bash

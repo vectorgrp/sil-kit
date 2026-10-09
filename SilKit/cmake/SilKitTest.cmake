@@ -30,7 +30,7 @@ function(add_silkit_test_executable SILKIT_TEST_EXECUTABLE_NAME)
     )
 
     target_link_libraries("${SILKIT_TEST_EXECUTABLE_NAME}"
-        PRIVATE SilKitInterface
+        PRIVATE SilKit::SilKitInterface
         PRIVATE gtest
         PRIVATE gmock
     )

@@ -40,10 +40,6 @@ include(SilKitTest)
 include(CTest)
 
 add_silkit_test_executable(SilKitUnitTests LABEL unit)
-add_silkit_test_executable(SilKitIntegrationTests LABEL integration)
-add_silkit_test_executable(SilKitInternalIntegrationTests LABEL integration)
-add_silkit_test_executable(SilKitFunctionalTests LABEL functional)
-add_silkit_test_executable(SilKitInternalFunctionalTests LABEL functional)
 
 ################################################################################
 # Include of our repositories

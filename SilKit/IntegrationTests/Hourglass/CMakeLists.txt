@@ -16,12 +16,12 @@ target_include_directories(
 
 target_compile_definitions(
     S_Test_Hourglass
-    PRIVATE EXPORT_SilKitAPI
+    PUBLIC EXPORT_SilKitAPI
 )
 
 target_link_libraries(
     S_Test_Hourglass
-    PUBLIC SilKitInterface
+    PUBLIC SilKit::SilKitInterface
     PRIVATE gtest
     PRIVATE gmock
 )
