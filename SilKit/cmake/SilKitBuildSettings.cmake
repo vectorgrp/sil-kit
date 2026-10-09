@@ -12,8 +12,9 @@ function(silkit_enable_coverage isOn)
     else()
         message(STATUS "SIL Kit -- Enabling Coverage")
         #clang, gcc
-        add_compile_options(-fprofile-arcs -ftest-coverage)
-        add_link_options(-fprofile-arcs -ftest-coverage)
+        # atomic counter updates: the tests run participants on multiple threads
+        add_compile_options(-fprofile-arcs -ftest-coverage -fprofile-update=atomic)
+        add_link_options(-fprofile-arcs -ftest-coverage -fprofile-update=atomic)
     endif()
 endfunction()
 

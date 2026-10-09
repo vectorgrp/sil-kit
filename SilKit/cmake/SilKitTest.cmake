@@ -8,9 +8,16 @@
 
 set(_SilKitTest_BASE_DIR "${CMAKE_CURRENT_LIST_DIR}" CACHE INTERNAL "" FORCE)
 
+# LABEL is attached to every CTest entry of the executable; CI selects tests by label
+# ("unit", "integration", "functional").
 function(add_silkit_test_executable SILKIT_TEST_EXECUTABLE_NAME)
     if(NOT ${SILKIT_BUILD_TESTS})
         return()
+    endif()
+
+    cmake_parse_arguments(arg "" "LABEL" "" ${ARGN})
+    if(NOT arg_LABEL)
+        message(FATAL_ERROR "SIL Kit: add_silkit_test_executable(${SILKIT_TEST_EXECUTABLE_NAME}) requires a LABEL")
     endif()
 
     # If we can bump our required CMake version to 3.17 we can use
@@ -23,7 +30,7 @@ function(add_silkit_test_executable SILKIT_TEST_EXECUTABLE_NAME)
     )
 
     target_link_libraries("${SILKIT_TEST_EXECUTABLE_NAME}"
-        PRIVATE SilKitInterface
+        PRIVATE SilKit::SilKitInterface
         PRIVATE gtest
         PRIVATE gmock
     )
@@ -42,6 +49,7 @@ function(add_silkit_test_executable SILKIT_TEST_EXECUTABLE_NAME)
         LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"
         WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"
         SILKIT_TEST_CONFIGURATION_FILES "${dummyConfig}"
+        SILKIT_TEST_LABEL "${arg_LABEL}"
     )
 
     add_custom_command(
@@ -80,6 +88,8 @@ function(add_silkit_test_to_executable SILKIT_TEST_EXECUTABLE_NAME)
     if(NOT DEFINED arg_TIMEOUT)
         set(arg_TIMEOUT 600)
     endif()
+
+    get_target_property(testLabel "${SILKIT_TEST_EXECUTABLE_NAME}" SILKIT_TEST_LABEL)
 
     target_sources("${SILKIT_TEST_EXECUTABLE_NAME}" PRIVATE ${arg_SOURCES})
 
@@ -126,6 +136,6 @@ function(add_silkit_test_to_executable SILKIT_TEST_EXECUTABLE_NAME)
             WORKING_DIRECTORY $<TARGET_FILE_DIR:${SILKIT_TEST_EXECUTABLE_NAME}>
         )
 
-        set_tests_properties("${testSuite}" PROPERTIES TIMEOUT ${arg_TIMEOUT})
+        set_tests_properties("${testSuite}" PROPERTIES TIMEOUT ${arg_TIMEOUT} LABELS "${testLabel}")
     endforeach ()
 endfunction()

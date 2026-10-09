@@ -17,7 +17,7 @@ if(SILKIT_BUILD_DASHBOARD)
         endif ()
     endfunction()
 
-    add_silkit_test_executable(SilKitDashboardTests)
+    add_silkit_test_executable(SilKitDashboardTests LABEL unit)
     if (${SILKIT_BUILD_TESTS})
         silkit_dashboard_target_compile_flags(SilKitDashboardTests)
     endif ()
