@@ -185,7 +185,7 @@ void AsioConnector<T>::Op::Initiate(std::chrono::milliseconds timeout)
     if (errorCode)
     {
         SILKIT_TRACE_METHOD_(_logger, "failed to set socket options: {}", errorCode.message());
-        HandleFailure(errorCode);
+        HandleFailure(NormalizeErrorCode(errorCode));
         return;
     }
 
@@ -300,8 +300,9 @@ void AsioConnector<T>::Op::OnAsioAsyncConnectComplete(const asio::error_code& as
 template <typename T>
 auto AsioConnector<T>::Op::NormalizeErrorCode(const asio::error_code& asioErrorCode) const -> std::error_code
 {
-    // the connect operation is aborted by the timeout timer, report the timeout instead of the abort
-    if (_timedOut)
+    // the connect operation is aborted by the timeout timer, report the timeout instead of the abort (the timer may
+    // also expire after the connect has already failed, in which case the actual error is kept)
+    if (_timedOut && asioErrorCode == asio::error::operation_aborted)
     {
         return std::make_error_code(std::errc::timed_out);
     }

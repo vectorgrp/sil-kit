@@ -541,14 +541,17 @@ void VAsioConnection::ConnectParticipantToRegistryAndStartIoWorker(const std::st
             failureReasons.replace(pos, 1, "\n  ");
         }
 
+        // ConnectPeer makes at least one attempt
+        const auto connectAttempts{std::max(_config.middleware.connectAttempts, 1)};
+
         const auto errorMessage{fmt::format(
             "Failed to connect to SIL Kit Registry at '{}' (participant '{}', {} attempt(s), timeout {}ms):\n{}",
-            connectUriString, _participantName, _config.middleware.connectAttempts,
-            GetRegistryConnectTimeout(_config).count(), failureReasons)};
+            connectUriString, _participantName, connectAttempts, GetRegistryConnectTimeout(_config).count(),
+            failureReasons)};
 
         _logger->MakeMessage(Log::Level::Error, TopicOf(*this))
             .SetMessage(errorMessage)
-            .AddKeyValue(Log::Keys::connectAttempts, _config.middleware.connectAttempts)
+            .AddKeyValue(Log::Keys::connectAttempts, connectAttempts)
             .Dispatch();
 
 
@@ -558,9 +561,6 @@ void VAsioConnection::ConnectParticipantToRegistryAndStartIoWorker(const std::st
         lm.SetMessage("   If a registry is unable to open a listening socket it will only be reachable"
                       " via local domain sockets, which depend on the working directory"
                       " and the middleware configuration ('enableDomainSockets').")
-           .Dispatch();
-
-       lm.SetMessage("   Make sure that the hostname can be resolved and is reachable.")
            .Dispatch();
         lm.SetMessage("   The SIL Kit Registry executable can be found in your SIL Kit installation folder:")
             .Dispatch();
