@@ -40,6 +40,8 @@ The following options are available:
    - Build the documentation using Doxygen and Sphinx
  * - SILKIT_INSTALL_SOURCE
    - Installs the source-tree (used for packaging releases). Implies SILKIT_BUILD_DOCS.
+ * - SILKIT_ENABLE_COVERAGE
+   - Instrument the build for gcov based code coverage (gcc, clang)
 
 In general, the options can be combined and set using the CMake GUI, your IDE, or command line::
 
@@ -133,6 +135,18 @@ Tests are selected by label::
 
     ctest --preset debug -L 'unit|integration'
 
+Code coverage requires gcc and `gcovr`_.
+The ``coverage`` preset is a Debug build with ``SILKIT_ENABLE_COVERAGE`` enabled::
+
+    cmake --preset coverage
+    cmake --build --preset coverage
+    ctest --preset coverage -L 'unit|integration'
+    gcovr --root . --filter SilKit/source/ --html-nested _build/coverage/report/index.html
+
+The *Linux Coverage* GitHub workflow (``.github/workflows/coverage.yml``) runs weekly and on demand.
+It reports the line coverage per component for the unit tests alone and together with the integration tests,
+and excludes test sources, mocks and test utilities from the report.
+
 
 !!! Architecture
 ~~~~~~~~~~~~~~~~
@@ -144,5 +158,6 @@ Tests are selected by label::
 .. _CMake: https://cmake.org
 .. _Git: https://git-scm.org
 .. _Googletest: https://github.com/google/googletest/blob/master/googletest/docs/primer.md
+.. _gcovr: https://gcovr.com
 .. _Json11: https://github.com/dropbox/json11
 
