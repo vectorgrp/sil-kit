@@ -13,6 +13,11 @@ Add this note to the Release description.
 - The documentation now lists every third party dependency found in the source tree with its
   version and license on the Licenses page, followed by the full license text of each component
   that ships one.
+- `demos`: the `SilKit-Demos` folder of a release package now contains a `CMakePresets.json` with
+  presets for the architecture of the package only (`x64-release`/`x64-debug` or
+  `x86-release`/`x86-debug` on Windows, `release`/`debug` on Linux). Visual Studio ("Open Folder")
+  and VS Code therefore configure the demos for the architecture of the pre-built SIL Kit, instead
+  of possibly choosing a 32-bit build for a 64-bit package.
 
 ## Fixed
 
