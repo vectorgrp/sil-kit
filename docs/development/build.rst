@@ -115,6 +115,25 @@ Or by changing the ``find_package(SilKit ... PATHS path/to/SilKit)`` statement d
 in the ``SilKit-Demos/CMakeLists.txt`` directory.
 
 
+!!! Running the Tests
+~~~~~~~~~~~~~~~~~~~~~
+
+Every test suite is registered with CTest and labeled by its kind:
+
+.. list-table:: Test Labels
+
+ * - unit
+   - Tests of single components, using mocks where needed
+ * - integration
+   - Tests running a registry and several participants
+ * - functional
+   - Long-running functional and performance tests, not run in CI
+
+Tests are selected by label::
+
+    ctest --preset debug -L 'unit|integration'
+
+
 !!! Architecture
 ~~~~~~~~~~~~~~~~
 

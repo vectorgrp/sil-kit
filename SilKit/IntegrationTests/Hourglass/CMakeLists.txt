@@ -31,7 +31,7 @@ if (MSVC)
 endif ()
 
 
-add_silkit_test_executable(SilKitHourglassTests)
+add_silkit_test_executable(SilKitHourglassTests LABEL unit)
 
 target_compile_definitions(SilKitHourglassTests
     PRIVATE SIL_KIT_TEST_MAIN_DO_NOT_PRINT_VERSION

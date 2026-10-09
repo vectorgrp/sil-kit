@@ -65,11 +65,12 @@ runs:
       id: ctests
       run: |
         export PATH=${{ inputs.extra-path }}$PATH
-        ctest --preset ${{ inputs.preset-name }} --output-on-failure -R '^(I|T)' --timeout 300
+        ctest --preset ${{ inputs.preset-name }} --output-on-failure -L 'unit|integration'
 
       shell: ${{ inputs.shell }}
 
     - name: stash test reports ${{ inputs.preset-name }}
+      if: ${{ !cancelled() && inputs.run-tests == 'true' }}
       uses: actions/upload-artifact@v7
       with:
         name: "${{ inputs.artifact-label }}-test-results"
