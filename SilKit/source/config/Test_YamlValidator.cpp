@@ -111,6 +111,25 @@ Foobar: true
     EXPECT_THAT(warnings.str(), testing::HasSubstr("schema path \"/\""));
 }
 
+TEST_F(Test_YamlValidator, validate_unknown_element_ignores_its_children)
+{
+    // A misspelled element is ignored together with its children, even if they are keywords (e.g. "Sinks").
+    auto yamlString = R"yaml(schemaVersion: 1
+ParticipantName: P1
+Loging:
+  Sinks:
+    - Type: Stdout
+      Level: Info
+)yaml";
+
+    std::stringstream warnings;
+    bool yamlValid = ValidateWithSchema(yamlString, warnings);
+    EXPECT_TRUE(yamlValid) << "YamlValidator warnings: " << warnings.str();
+    EXPECT_THAT(warnings.str(), testing::HasSubstr("Loging"));
+    EXPECT_THAT(warnings.str(), testing::HasSubstr("is being ignored"));
+    EXPECT_THAT(warnings.str(), testing::Not(testing::HasSubstr("Sinks")));
+}
+
 TEST_F(Test_YamlValidator, validate_unknown_nested)
 {
     auto yamlString = R"yaml(

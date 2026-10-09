@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 #include <sstream>
+#include <utility>
 
 
 #include "config/Configuration.hpp"
@@ -34,7 +35,8 @@ bool visit_stacked(ryml::ConstNodeRef& node, VisitorRef& visitor, ryml::id_type 
     {
         return true;
     }
-    if (node.has_children())
+    const auto skipChildren = visitor.TakeSkipChildren();
+    if (node.has_children() && !skipChildren)
     {
         visitor.push(node, indentation_level);
         for (auto child : node.children())
@@ -470,6 +472,8 @@ struct ValidatingVisitor
     ryml::Parser& parser;
 
     bool ok{true};
+    // Set when the current node is ignored: its children are ignored with it, so they are not validated
+    bool skipChildren{false};
 
     ValidatingVisitor(ryml::Parser& parser, std::ostream& warnings)
         : warnings{warnings}
@@ -499,6 +503,11 @@ struct ValidatingVisitor
 
         s << "line " << location.line << " column " << location.col;
         return s.str();
+    }
+
+    bool TakeSkipChildren()
+    {
+        return std::exchange(skipChildren, false);
     }
 
     void push(ryml::ConstNodeRef node, ryml::id_type /* level */)
@@ -565,6 +574,7 @@ struct ValidatingVisitor
                 warnings << "At " << GetCurrentLocation(node) << ": Element \"" << nodeName << "\""
                          << " is being ignored. It is not a sub-element of schema path \"" << currentNodePath
                          << "\"\n";
+                skipChildren = true;
             }
         }
     }
