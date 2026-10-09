@@ -82,6 +82,7 @@ class AsioConnector final : public IConnector
 
     private:
         void OnAsioAsyncConnectComplete(const asio::error_code& asioErrorCode);
+        auto NormalizeErrorCode(const asio::error_code& asioErrorCode) const -> std::error_code;
         void OnAsioAsyncWaitComplete(const asio::error_code& asioErrorCode);
     };
 
@@ -267,8 +268,7 @@ void AsioConnector<T>::Op::OnAsioAsyncConnectComplete(const asio::error_code& as
 
     if (asioErrorCode)
     {
-        // the connect operation is aborted by the timeout timer, report the timeout instead of the abort
-        HandleFailure(_timedOut ? std::make_error_code(std::errc::timed_out) : asioErrorCode);
+        HandleFailure(NormalizeErrorCode(asioErrorCode));
         return;
     }
 
@@ -294,6 +294,38 @@ void AsioConnector<T>::Op::OnAsioAsyncConnectComplete(const asio::error_code& as
 
     _timeoutCancelSignal.emit(asio::cancellation_type::total);
     HandleSuccess(std::move(stream));
+}
+
+
+template <typename T>
+auto AsioConnector<T>::Op::NormalizeErrorCode(const asio::error_code& asioErrorCode) const -> std::error_code
+{
+    // the connect operation is aborted by the timeout timer, report the timeout instead of the abort
+    if (_timedOut)
+    {
+        return std::make_error_code(std::errc::timed_out);
+    }
+
+    // map the platform specific error codes (e.g., WSAECONNREFUSED on Windows) to portable ones, so listeners can
+    // react to them
+    if (asioErrorCode == asio::error::connection_refused)
+    {
+        return std::make_error_code(std::errc::connection_refused);
+    }
+    if (asioErrorCode == asio::error::timed_out)
+    {
+        return std::make_error_code(std::errc::timed_out);
+    }
+    if (asioErrorCode == asio::error::host_unreachable)
+    {
+        return std::make_error_code(std::errc::host_unreachable);
+    }
+    if (asioErrorCode == asio::error::network_unreachable)
+    {
+        return std::make_error_code(std::errc::network_unreachable);
+    }
+
+    return asioErrorCode;
 }
 
 

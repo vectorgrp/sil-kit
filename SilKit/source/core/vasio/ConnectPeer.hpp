@@ -74,6 +74,7 @@ private:
     void HandleSuccess(std::unique_ptr<IRawByteStream> stream);
     void HandleFailure();
     void RecordFailure(const std::string& uri, std::string reason);
+    auto DescribeFailure(const Uri& uri, std::error_code errorCode) const -> std::string;
 
 private: // IConnectorListener
     void OnAsyncConnectSuccess(IConnector&, std::unique_ptr<IRawByteStream> stream) override;

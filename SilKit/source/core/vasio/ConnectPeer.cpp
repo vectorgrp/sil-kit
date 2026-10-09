@@ -9,6 +9,7 @@
 #include "core/vasio/VAsioConnection.hpp"
 #include "core/vasio/VAsioPeerInfo.hpp"
 #include "core/vasio/VAsioPeer.hpp"
+#include "core/vasio/VAsioConstants.hpp"
 
 #include "util/Uri.hpp"
 
@@ -94,6 +95,8 @@ void ConnectPeer::UpdateUris()
 
     for (const auto& str : _peerInfo.acceptorUris)
     {
+        bool resolving{false};
+
         try
         {
             auto uri{Uri::Parse(str)};
@@ -102,6 +105,7 @@ void ConnectPeer::UpdateUris()
             {
                 // resolve the host part in tcp:// URIs
 
+                resolving = true;
                 for (std::string address : _ioContext->Resolve(uri.Host()))
                 {
                     if (IsIp6(address))
@@ -130,7 +134,9 @@ void ConnectPeer::UpdateUris()
             _logger->MakeMessage(Log::Level::Warn, TopicOf(*this))
                 .SetMessage("Error occurred while processing acceptor URI '{}': {}", str, exception.what())
                 .Dispatch();
-            RecordFailure(str, exception.what());
+            RecordFailure(str, resolving ? std::string{exception.what()}
+                                             + "\n  Check the host name and the DNS configuration of this machine."
+                                       : std::string{exception.what()});
         }
         catch (...)
         {
@@ -309,6 +315,46 @@ void ConnectPeer::RecordFailure(const std::string& uri, std::string reason)
 }
 
 
+auto ConnectPeer::DescribeFailure(const Uri& uri, std::error_code errorCode) const -> std::string
+{
+    const std::string peer{_peerInfo.participantName == SilKit::Core::REGISTRY_PARTICIPANT_NAME
+                               ? std::string{"the SIL Kit Registry"}
+                               : "participant '" + _peerInfo.participantName + "'"};
+
+    // add a hint on what to check, so the user knows what to do about the error
+    std::string hint;
+    if (uri.Type() == Uri::UriType::Local)
+    {
+        if (errorCode == std::errc::connection_refused || errorCode == std::errc::no_such_file_or_directory)
+        {
+            hint = "Nothing listens on this local-domain socket. This is expected if " + peer
+                   + " runs on another machine. Otherwise, check that it is running.";
+        }
+    }
+    else if (errorCode == std::errc::connection_refused)
+    {
+        hint = "The host was reached, but nothing listens on this port. Check that " + peer
+               + " is running and that the port is correct.";
+    }
+    else if (errorCode == std::errc::timed_out)
+    {
+        hint = "There was no answer within the connect timeout. Check that the address is correct and the host is up,"
+               " that the network is reachable (e.g., VPN connected), and that no firewall drops the connection.";
+    }
+    else if (errorCode == std::errc::host_unreachable || errorCode == std::errc::network_unreachable)
+    {
+        hint = "Check that the address is correct and that the network is reachable (e.g., VPN connected).";
+    }
+
+    auto reason{errorCode.message()};
+    if (!hint.empty())
+    {
+        reason += "\n  " + hint;
+    }
+    return reason;
+}
+
+
 void ConnectPeer::OnAsyncConnectSuccess(IConnector&, std::unique_ptr<IRawByteStream> stream)
 {
     SILKIT_TRACE_METHOD_(_logger, "(..., {})", static_cast<const void*>(stream.get()));
@@ -326,7 +372,8 @@ void ConnectPeer::OnAsyncConnectFailure(IConnector&, std::error_code errorCode)
     // _uriIndex has already been advanced past the URI that just failed
     if (_uriIndex > 0 && _uriIndex <= _uris.size())
     {
-        RecordFailure(_uris[_uriIndex - 1].EncodedString(), errorCode.message());
+        const auto& uri{_uris[_uriIndex - 1]};
+        RecordFailure(uri.EncodedString(), DescribeFailure(uri, errorCode));
     }
 
     TryNextUri();

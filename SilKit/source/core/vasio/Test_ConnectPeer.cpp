@@ -91,7 +91,8 @@ TEST_F(Test_ConnectPeer, tcp_hosts_are_resolved_and_tried_in_order_with_specifie
     EXPECT_CALL(connectPeerListener,
                 OnConnectPeerFailure(_, _,
                                      AllOf(HasSubstr("tcp://1.2.3.4:1234: " + timedOut),
-                                           HasSubstr("tcp://5.6.7.8:1234: " + timedOut))))
+                                           HasSubstr("tcp://5.6.7.8:1234: " + timedOut),
+                                           HasSubstr("no answer within the connect timeout"))))
         .Times(1)
         .InSequence(s1);
 
