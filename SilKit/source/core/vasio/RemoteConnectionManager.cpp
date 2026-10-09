@@ -83,11 +83,11 @@ void RemoteConnectionManager::OnConnectPeerSuccess(IConnectPeer& connectPeer, VA
 }
 
 void RemoteConnectionManager::OnConnectPeerFailure(IConnectPeer& connectPeer, VAsioPeerInfo peerInfo,
-                                                   const std::string& reason)
+                                                   const ConnectPeerFailures& failures)
 {
     _vAsioConnection->_logger->MakeMessage(Log::Level::Debug, TopicOf(*this))
-        .SetMessage("Failed to connect to {} after receiving a remote connect request:\n{}",
-                                     peerInfo.participantName, reason)
+        .SetMessage("Failed to connect to {} after receiving a remote connect request: {}",
+                                     peerInfo.participantName, FormatConnectPeerFailures(failures))
         .Dispatch();
 
     Remove(connectPeer);

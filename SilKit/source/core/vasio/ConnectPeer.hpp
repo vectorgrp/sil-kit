@@ -15,7 +15,6 @@
 #include <functional>
 #include <memory>
 #include <string>
-#include <utility>
 #include <vector>
 
 
@@ -55,8 +54,8 @@ class ConnectPeer
 
     std::unique_ptr<IConnector> _connector;
 
-    /// The most recent failure reason for each URI, in the order the URIs failed first
-    std::vector<std::pair<std::string, std::string>> _failureReasons;
+    /// The most recent failure for each URI, in the order the URIs failed first
+    ConnectPeerFailures _failures;
 
 public:
     ConnectPeer(IIoContext* ioContext, SilKit::Services::Logging::ILoggerInternal* logger,
@@ -73,8 +72,7 @@ private:
     void TryNextUri();
     void HandleSuccess(std::unique_ptr<IRawByteStream> stream);
     void HandleFailure();
-    void RecordFailure(const std::string& uri, std::string reason);
-    auto DescribeFailure(const Uri& uri, std::error_code errorCode) const -> std::string;
+    void RecordFailure(ConnectPeerFailure failure);
 
 private: // IConnectorListener
     void OnAsyncConnectSuccess(IConnector&, std::unique_ptr<IRawByteStream> stream) override;

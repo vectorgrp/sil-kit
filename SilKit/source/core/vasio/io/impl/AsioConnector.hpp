@@ -47,6 +47,7 @@ class AsioConnector final : public IConnector
         IDLE,
         PENDING,
         CONNECTED,
+        TIMED_OUT,
     };
 
     class Op : public std::enable_shared_from_this<Op>

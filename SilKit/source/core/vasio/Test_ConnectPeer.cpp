@@ -30,7 +30,8 @@ using ::testing::AllOf;
 using ::testing::AnyOf;
 using ::testing::Contains;
 using ::testing::Eq;
-using ::testing::HasSubstr;
+using ::testing::ElementsAre;
+using ::testing::Field;
 using ::testing::NiceMock;
 using ::testing::Sequence;
 using ::testing::Return;
@@ -83,16 +84,17 @@ TEST_F(Test_ConnectPeer, tcp_hosts_are_resolved_and_tried_in_order_with_specifie
     EXPECT_CALL(ioContext, MakeTcpConnector("1.2.3.4", 1234)).InSequence(s1).WillOnce(MakeConnector);
     EXPECT_CALL(ioContext, MakeTcpConnector("5.6.7.8", 1234)).InSequence(s1).WillOnce(MakeConnector);
 
-    // the failure reason names every URI that was tried, together with the error it failed with
-    const auto timedOut{std::make_error_code(std::errc::timed_out).message()};
+    // the failures name every URI that was tried, together with the error it failed with
+    const auto IsTimeout{[](const std::string& uri) {
+        return AllOf(Field(&ConnectPeerFailure::uri, uri), Field(&ConnectPeerFailure::isLocal, false),
+                     Field(&ConnectPeerFailure::stage, ConnectPeerFailure::Stage::Connect),
+                     Field(&ConnectPeerFailure::errorCode, std::make_error_code(std::errc::timed_out)));
+    }};
 
     MockConnectPeerListener connectPeerListener;
     EXPECT_CALL(connectPeerListener, OnConnectPeerSuccess).Times(0);
     EXPECT_CALL(connectPeerListener,
-                OnConnectPeerFailure(_, _,
-                                     AllOf(HasSubstr("tcp://1.2.3.4:1234: " + timedOut),
-                                           HasSubstr("tcp://5.6.7.8:1234: " + timedOut),
-                                           HasSubstr("no answer within the connect timeout"))))
+                OnConnectPeerFailure(_, _, ElementsAre(IsTimeout("tcp://1.2.3.4:1234"), IsTimeout("tcp://5.6.7.8:1234"))))
         .Times(1)
         .InSequence(s1);
 

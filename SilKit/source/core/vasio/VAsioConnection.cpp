@@ -28,6 +28,7 @@
 #include "util/StringHelpers.hpp"
 
 #include "core/vasio/ConnectPeer.hpp"
+#include "core/vasio/DescribeRegistryConnectFailure.hpp"
 #include "core/vasio/io/util/TracingMacros.hpp"
 
 #include "asio.hpp"
@@ -508,16 +509,16 @@ void VAsioConnection::ConnectParticipantToRegistryAndStartIoWorker(const std::st
     struct ConnectRegistryCallbacks final : IConnectPeerListener
     {
         std::promise<std::unique_ptr<IRawByteStream>> promise;
-        std::string failureReason;
+        ConnectPeerFailures failures;
 
         void OnConnectPeerSuccess(IConnectPeer&, VAsioPeerInfo, std::unique_ptr<IRawByteStream> stream) override
         {
             promise.set_value(std::move(stream));
         }
 
-        void OnConnectPeerFailure(IConnectPeer&, VAsioPeerInfo, const std::string& reason) override
+        void OnConnectPeerFailure(IConnectPeer&, VAsioPeerInfo, const ConnectPeerFailures& connectFailures) override
         {
-            failureReason = reason;
+            failures = connectFailures;
             promise.set_value(nullptr);
         }
     };
@@ -534,39 +535,38 @@ void VAsioConnection::ConnectParticipantToRegistryAndStartIoWorker(const std::st
     auto registryStream{registryStreamFuture.get()};
     if (registryStream == nullptr)
     {
-        // one indented line per URI that was tried
-        std::string failureReasons{"  " + connectRegistryCallbacks.failureReason};
-        for (auto pos = failureReasons.find('\n'); pos != std::string::npos; pos = failureReasons.find('\n', pos + 3))
-        {
-            failureReasons.replace(pos, 1, "\n  ");
-        }
+        const auto description{DescribeRegistryConnectFailure(connectUriString, connectRegistryCallbacks.failures,
+                                                              GetRegistryConnectTimeout(_config))};
 
         // ConnectPeer makes at least one attempt
         const auto connectAttempts{std::max(_config.middleware.connectAttempts, 1)};
 
-        const auto errorMessage{fmt::format(
-            "Failed to connect to SIL Kit Registry at '{}' (participant '{}', {} attempt(s), timeout {}ms):\n{}",
-            connectUriString, _participantName, connectAttempts, GetRegistryConnectTimeout(_config).count(),
-            failureReasons)};
-
         _logger->MakeMessage(Log::Level::Error, TopicOf(*this))
-            .SetMessage(errorMessage)
+            .SetMessage(description.message)
             .AddKeyValue(Log::Keys::connectAttempts, connectAttempts)
             .Dispatch();
 
-
-       auto lm = _logger->MakeMessage(Log::Level::Info, TopicOf(*this))
-            .SetMessage("   Make sure that the SIL Kit Registry is up and running and is listening on the following URIs: {}.",printUris(registryPeerInfo.acceptorUris))
+        for (const auto& failure : connectRegistryCallbacks.failures)
+        {
+            _logger->MakeMessage(Log::Level::Debug, TopicOf(*this))
+                .SetMessage("   Tried {}: {}", failure.uri, failure.message)
+                .Dispatch();
+        }
+        _logger->MakeMessage(Log::Level::Debug, TopicOf(*this))
+            .SetMessage("   If a registry is unable to open a listening socket it will only be reachable"
+                        " via local domain sockets, which depend on the working directory"
+                        " and the middleware configuration ('enableDomainSockets').")
             .Dispatch();
-        lm.SetMessage("   If a registry is unable to open a listening socket it will only be reachable"
-                      " via local domain sockets, which depend on the working directory"
-                      " and the middleware configuration ('enableDomainSockets').")
-           .Dispatch();
-        lm.SetMessage("   The SIL Kit Registry executable can be found in your SIL Kit installation folder:")
-            .Dispatch();
-       lm.SetMessage("     INSTALL_DIR/bin/sil-kit-registry[.exe]").Dispatch();
 
-        throw SilKitError{"ERROR: " + errorMessage};
+        if (description.connectionRefused)
+        {
+            _logger->MakeMessage(Log::Level::Info, TopicOf(*this))
+                .SetMessage("   The SIL Kit Registry executable can be found in your SIL Kit installation folder:"
+                            " INSTALL_DIR/bin/sil-kit-registry[.exe]")
+                .Dispatch();
+        }
+
+        throw SilKitError{"ERROR: " + description.message};
     }
 
     _registry = MakeVAsioPeer(std::move(registryStream));
