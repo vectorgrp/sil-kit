@@ -54,6 +54,8 @@ add_library(O_SilKit_Core_VAsio OBJECT
 
     ConnectPeer.cpp
     ConnectKnownParticipants.cpp
+    DescribeRegistryConnectFailure.hpp
+    DescribeRegistryConnectFailure.cpp
     RemoteConnectionManager.cpp
 
     RingBuffer.hpp
@@ -97,6 +99,7 @@ add_silkit_test_to_executable(SilKitUnitTests SOURCES io/util/Test_TracingMacros
 
 add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_ConnectPeer.cpp LIBS S_SilKitImpl I_SilKit)
 add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_ConnectKnownParticipants.cpp LIBS S_SilKitImpl I_SilKit)
+add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_DescribeRegistryConnectFailure.cpp LIBS S_SilKitImpl I_SilKit)
 
 # Testing interoperability between different protocol versions requires testing on a higher level:
 # We instantiate a complete Participant<VAsioConnection> with a specific version

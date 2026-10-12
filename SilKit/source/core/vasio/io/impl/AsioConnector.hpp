@@ -65,6 +65,7 @@ class AsioConnector final : public IConnector
 
         asio::steady_timer _timeoutTimer;
         asio::cancellation_signal _timeoutCancelSignal;
+        std::atomic<bool> _timedOut{false};
 
         SilKit::Services::Logging::ILoggerInternal* _logger{nullptr};
 
@@ -78,10 +79,11 @@ class AsioConnector final : public IConnector
 
     private:
         void HandleSuccess(std::unique_ptr<IRawByteStream> stream);
-        void HandleFailure();
+        void HandleFailure(std::error_code errorCode);
 
     private:
         void OnAsioAsyncConnectComplete(const asio::error_code& asioErrorCode);
+        auto NormalizeErrorCode(const asio::error_code& asioErrorCode) const -> std::error_code;
         void OnAsioAsyncWaitComplete(const asio::error_code& asioErrorCode);
     };
 
@@ -184,7 +186,7 @@ void AsioConnector<T>::Op::Initiate(std::chrono::milliseconds timeout)
     if (errorCode)
     {
         SILKIT_TRACE_METHOD_(_logger, "failed to set socket options: {}", errorCode.message());
-        HandleFailure();
+        HandleFailure(NormalizeErrorCode(errorCode));
         return;
     }
 
@@ -241,9 +243,9 @@ void AsioConnector<T>::Op::HandleSuccess(std::unique_ptr<IRawByteStream> stream)
 
 
 template <typename T>
-void AsioConnector<T>::Op::HandleFailure()
+void AsioConnector<T>::Op::HandleFailure(std::error_code errorCode)
 {
-    SILKIT_TRACE_METHOD_(_logger, "()");
+    SILKIT_TRACE_METHOD_(_logger, "({})", errorCode.message());
 
     auto* connector{_parent.load()};
     if (connector == nullptr)
@@ -251,7 +253,7 @@ void AsioConnector<T>::Op::HandleFailure()
         return;
     }
 
-    connector->_listener->OnAsyncConnectFailure(*connector);
+    connector->_listener->OnAsyncConnectFailure(*connector, errorCode);
 }
 
 
@@ -267,7 +269,7 @@ void AsioConnector<T>::Op::OnAsioAsyncConnectComplete(const asio::error_code& as
 
     if (asioErrorCode)
     {
-        HandleFailure();
+        HandleFailure(NormalizeErrorCode(asioErrorCode));
         return;
     }
 
@@ -297,6 +299,39 @@ void AsioConnector<T>::Op::OnAsioAsyncConnectComplete(const asio::error_code& as
 
 
 template <typename T>
+auto AsioConnector<T>::Op::NormalizeErrorCode(const asio::error_code& asioErrorCode) const -> std::error_code
+{
+    // the connect operation is aborted by the timeout timer, report the timeout instead of the abort (the timer may
+    // also expire after the connect has already failed, in which case the actual error is kept)
+    if (_timedOut && asioErrorCode == asio::error::operation_aborted)
+    {
+        return std::make_error_code(std::errc::timed_out);
+    }
+
+    // map the platform specific error codes (e.g., WSAECONNREFUSED on Windows) to portable ones, so listeners can
+    // react to them
+    if (asioErrorCode == asio::error::connection_refused)
+    {
+        return std::make_error_code(std::errc::connection_refused);
+    }
+    if (asioErrorCode == asio::error::timed_out)
+    {
+        return std::make_error_code(std::errc::timed_out);
+    }
+    if (asioErrorCode == asio::error::host_unreachable)
+    {
+        return std::make_error_code(std::errc::host_unreachable);
+    }
+    if (asioErrorCode == asio::error::network_unreachable)
+    {
+        return std::make_error_code(std::errc::network_unreachable);
+    }
+
+    return asioErrorCode;
+}
+
+
+template <typename T>
 void AsioConnector<T>::Op::OnAsioAsyncWaitComplete(const asio::error_code& errorCode)
 {
     SILKIT_TRACE_METHOD_(_logger, "({})", errorCode.message());
@@ -308,6 +343,7 @@ void AsioConnector<T>::Op::OnAsioAsyncWaitComplete(const asio::error_code& error
 
     if (_state.Get() == PENDING)
     {
+        _timedOut = true;
         _connectCancelSignal.emit(asio::cancellation_type::total);
     }
 }

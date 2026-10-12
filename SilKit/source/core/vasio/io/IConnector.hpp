@@ -9,6 +9,7 @@
 
 #include <chrono>
 #include <memory>
+#include <system_error>
 
 
 namespace VSilKit {
@@ -35,7 +36,7 @@ struct IConnectorListener
 
     virtual void OnAsyncConnectSuccess(IConnector& connector, std::unique_ptr<IRawByteStream> stream) = 0;
 
-    virtual void OnAsyncConnectFailure(IConnector& connector) = 0;
+    virtual void OnAsyncConnectFailure(IConnector& connector, std::error_code errorCode) = 0;
 };
 
 

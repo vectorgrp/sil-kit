@@ -407,9 +407,14 @@ void ConnectKnownParticipants::Peer::OnConnectPeerSuccess(IConnectPeer&, VAsioPe
     _manager->UpdateStage();
 }
 
-void ConnectKnownParticipants::Peer::OnConnectPeerFailure(IConnectPeer&, VAsioPeerInfo)
+void ConnectKnownParticipants::Peer::OnConnectPeerFailure(IConnectPeer&, VAsioPeerInfo,
+                                                          const ConnectPeerFailures& failures)
 {
-    SILKIT_TRACE_METHOD_(_manager->_logger, "(..., ...)");
+    SILKIT_TRACE_METHOD_(_manager->_logger, "(..., ..., ...)");
+
+    _manager->_logger->MakeMessage(Log::Level::Debug, TopicOf(*_manager))
+        .SetMessage("Direct connection to {} failed: {}", _info.participantName, FormatConnectPeerFailures(failures))
+        .Dispatch();
 
     // destroy the peer connection object
     _directConnectPeer.reset();
