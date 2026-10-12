@@ -41,6 +41,10 @@ Add this note to the Release description.
 
 ## Changed
 
+- `config`: elements in a participant configuration that are not part of the schema are now
+  rejected with an error. Previously, unknown elements were only reported with a warning and
+  ignored, so a misspelled element (e.g., `Loging:`) silently dropped its settings. The error names
+  the element and its location; its children are not reported as follow-up errors.
 - `third-party`: the dashboard client no longer depends on `oatpp`, and the `ThirdParty/oatpp`
   submodule has been removed. The dashboard payloads are now built with the already-bundled
   `rapidyaml`, and the REST requests are issued over the already-bundled standalone `asio`.

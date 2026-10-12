@@ -85,12 +85,10 @@ CanControllerss:
     std::stringstream warnings;
     bool yamlValid = ValidateWithSchema(yamlString, warnings);
     std::cout << "Yaml Validator warnings: " << warnings.str() << std::endl;
-    EXPECT_TRUE(yamlValid) << "We ignore non-keyword errors and typos, but generate warnings!";
-    EXPECT_GT(warnings.str().size(), 0u) << "Yaml Validator warnings: '" << warnings.str() << "'";
-    // The warning must be complete: it names the field and the schema path it is ignored under
+    EXPECT_FALSE(yamlValid) << "Typos in element names must be rejected";
+    // The error must be complete: it names the field and the schema path it is not valid under
     EXPECT_THAT(warnings.str(), testing::HasSubstr("CanControllerss"));
-    EXPECT_THAT(warnings.str(), testing::HasSubstr("is being ignored"));
-    EXPECT_THAT(warnings.str(), testing::HasSubstr("schema path \"/\""));
+    EXPECT_THAT(warnings.str(), testing::HasSubstr("is not a valid sub-element of schema path \"/\""));
 }
 
 TEST_F(Test_YamlValidator, validate_unknown_toplevel_arbitrary)
@@ -105,15 +103,14 @@ Foobar: true
     std::stringstream warnings;
     bool yamlValid = ValidateWithSchema(yamlString, warnings);
     std::cout << "Yaml Validator warnings: " << warnings.str() << std::endl;
-    EXPECT_TRUE(yamlValid) << "Unknown fields are warned about, not rejected";
+    EXPECT_FALSE(yamlValid) << "Unknown fields must be rejected";
     EXPECT_THAT(warnings.str(), testing::HasSubstr("Foobar"));
-    EXPECT_THAT(warnings.str(), testing::HasSubstr("is being ignored"));
-    EXPECT_THAT(warnings.str(), testing::HasSubstr("schema path \"/\""));
+    EXPECT_THAT(warnings.str(), testing::HasSubstr("is not a valid sub-element of schema path \"/\""));
 }
 
-TEST_F(Test_YamlValidator, validate_unknown_element_ignores_its_children)
+TEST_F(Test_YamlValidator, validate_unknown_element_reports_only_the_element)
 {
-    // A misspelled element is ignored together with its children, even if they are keywords (e.g. "Sinks").
+    // A misspelled element is reported once; its children (e.g. "Sinks") cause no follow-up errors.
     auto yamlString = R"yaml(schemaVersion: 1
 ParticipantName: P1
 Loging:
@@ -124,9 +121,9 @@ Loging:
 
     std::stringstream warnings;
     bool yamlValid = ValidateWithSchema(yamlString, warnings);
-    EXPECT_TRUE(yamlValid) << "YamlValidator warnings: " << warnings.str();
+    EXPECT_FALSE(yamlValid) << "Unknown elements must be rejected";
     EXPECT_THAT(warnings.str(), testing::HasSubstr("Loging"));
-    EXPECT_THAT(warnings.str(), testing::HasSubstr("is being ignored"));
+    EXPECT_THAT(warnings.str(), testing::HasSubstr("is not a valid sub-element of schema path \"/\""));
     EXPECT_THAT(warnings.str(), testing::Not(testing::HasSubstr("Sinks")));
 }
 
@@ -145,7 +142,7 @@ CanControllers:
     std::stringstream warnings;
     bool yamlValid = ValidateWithSchema(yamlString, warnings);
     std::cout << "Yaml Validator warnings: " << warnings.str() << std::endl;
-    EXPECT_TRUE(yamlValid) << "Unknown nested fields are warned about, not rejected";
+    EXPECT_FALSE(yamlValid) << "Unknown nested fields must be rejected";
     EXPECT_THAT(warnings.str(), testing::HasSubstr("Foobar"));
     EXPECT_THAT(warnings.str(), testing::HasSubstr("schema path \"/Middleware\""));
     EXPECT_THAT(warnings.str(), testing::HasSubstr("Foobaz"));

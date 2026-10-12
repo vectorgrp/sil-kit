@@ -155,16 +155,24 @@ FlushLevel: Info
     EXPECT_THROW(SilKit::Config::ParticipantConfigurationFromStringImpl(configString), SilKit::ConfigurationError);
 }
 
-TEST_F(Test_ParticipantConfiguration, participant_config_from_string_unknown_field_warns_but_loads)
+TEST_F(Test_ParticipantConfiguration, participant_config_from_string_unknown_field_is_rejected)
 {
-    // Unknown, non-reserved fields are warned about but must not prevent loading the config.
+    // Fields that are not part of the schema must prevent loading the config.
     const auto configString = R"raw(
 ---
 ParticipantName: P1
 Foobar: true
 )raw";
 
-    EXPECT_NO_THROW(SilKit::Config::ParticipantConfigurationFromStringImpl(configString));
+    try
+    {
+        SilKit::Config::ParticipantConfigurationFromStringImpl(configString);
+        FAIL() << "Expected SilKit::ConfigurationError";
+    }
+    catch (const SilKit::ConfigurationError& error)
+    {
+        EXPECT_THAT(error.what(), testing::HasSubstr("Foobar"));
+    }
 }
 
 TEST_F(Test_ParticipantConfiguration, participant_config_from_string_includes)

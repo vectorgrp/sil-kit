@@ -8,7 +8,6 @@
 #include <set>
 #include <deque>
 #include <string>
-#include <vector>
 #include <sstream>
 #include <utility>
 
@@ -50,23 +49,6 @@ bool visit_stacked(ryml::ConstNodeRef& node, VisitorRef& visitor, ryml::id_type 
         visitor.pop(node, indentation_level);
     }
     return false;
-}
-
-inline auto splitString(std::string s, std::string delimiter) -> std::vector<std::string>
-{
-    size_t pos_start = 0, pos_end, delim_len = delimiter.length();
-    std::string token;
-    std::vector<std::string> res;
-
-    while ((pos_end = s.find(delimiter, pos_start)) != std::string::npos)
-    {
-        token = s.substr(pos_start, pos_end - pos_start);
-        pos_start = pos_end + delim_len;
-        res.push_back(token);
-    }
-
-    res.push_back(s.substr(pos_start));
-    return res;
 }
 
 const std::string schemaSeparator{"/"};
@@ -388,8 +370,6 @@ const std::set<std::string> schemaPaths_v1 = {
 
 };
 
-std::set<std::string> reservedNames; // computed from schemaPaths
-
 auto DocumentRoot() -> std::string
 {
     return schemaSeparator;
@@ -413,16 +393,6 @@ auto ParentPath(const std::string& elementName) -> std::string
     }
 }
 
-auto ElementName(const std::string& elementName) -> std::string
-{
-    auto sep = elementName.rfind(schemaSeparator);
-    if (sep == elementName.npos || sep == elementName.size())
-    {
-        return elementName;
-    }
-    return elementName.substr(sep + 1, elementName.size());
-}
-
 auto MakePath(const std::string& parentEl, const std::string& elementName) -> std::string
 {
     if (elementName.empty())
@@ -437,24 +407,6 @@ auto MakePath(const std::string& parentEl, const std::string& elementName) -> st
     {
         return parentEl + schemaSeparator + elementName;
     }
-}
-
-bool IsReservedElementName(const std::string& queryElement)
-{
-    if (reservedNames.empty())
-    {
-        //build cache of reserved schema element names
-        for (auto&& path : schemaPaths_v1)
-        {
-            auto elements = splitString(path, schemaSeparator);
-            for (auto&& element : elements)
-            {
-                reservedNames.insert(element);
-            }
-        }
-    }
-    const auto elementName = ElementName(queryElement);
-    return reservedNames.count(elementName);
 }
 
 bool IsSchemaPath(const std::string& path)
@@ -472,7 +424,7 @@ struct ValidatingVisitor
     ryml::Parser& parser;
 
     bool ok{true};
-    // Set when the current node is ignored: its children are ignored with it, so they are not validated
+    // Set when the current node is invalid: it is reported once, its children are not validated (no follow-up errors)
     bool skipChildren{false};
 
     ValidatingVisitor(ryml::Parser& parser, std::ostream& warnings)
@@ -562,20 +514,10 @@ struct ValidatingVisitor
         auto valuePath = MakePath(currentNodePath, nodeName);
         if (!IsSchemaPath(valuePath))
         {
-            if (IsReservedElementName(valuePath))
-            {
-                warnings << "At " << GetCurrentLocation(node) << ": Element \"" << nodeName << "\""
-                         << " is not a valid sub-element of schema path \"" << currentNodePath << "\"\n";
-                ok &= false;
-            }
-            else
-            {
-                // Unknown, non-reserved elements are only warned about, not treated as errors
-                warnings << "At " << GetCurrentLocation(node) << ": Element \"" << nodeName << "\""
-                         << " is being ignored. It is not a sub-element of schema path \"" << currentNodePath
-                         << "\"\n";
-                skipChildren = true;
-            }
+            warnings << "At " << GetCurrentLocation(node) << ": Element \"" << nodeName << "\""
+                     << " is not a valid sub-element of schema path \"" << currentNodePath << "\"\n";
+            ok &= false;
+            skipChildren = true;
         }
     }
 
