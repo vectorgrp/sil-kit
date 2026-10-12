@@ -54,5 +54,13 @@ TEST(Test_VAsioRegistry, start_listening_on_invalid_address_throws)
     EXPECT_THROW(vAsioRegistry.StartListening("silkit://333.0.0.0:8501"), SilKit::ConfigurationError);
 }
 
+TEST(Test_VAsioRegistry, start_listening_on_ipv6_literal_does_not_throw)
+{
+    auto configuration{SilKit::Config::MakeEmptyParticipantConfigurationImpl()};
+
+    SilKit::Core::VAsioRegistry vAsioRegistry{configuration};
+    EXPECT_NO_THROW(vAsioRegistry.StartListening("silkit://[::1]:0"));
+}
+
 
 } // namespace

@@ -1271,30 +1271,27 @@ auto VAsioConnection::AcceptTcpConnectionsOn(const std::string& hostName,
 
     if (!hostName.empty())
     {
-        std::vector<asio::ip::tcp::endpoint> endpoints;
+        // asio expects IPv6 literals without the URI brackets
+        auto host{hostName};
+        if (host.size() > 2 && host.front() == '[' && host.back() == ']')
+        {
+            host = host.substr(1, host.size() - 2);
+        }
+
         try
         {
-            for (const auto& address : _ioContext->Resolve(hostName))
+            std::vector<asio::ip::tcp::endpoint> endpoints;
+            for (const auto& address : _ioContext->Resolve(host))
             {
                 endpoints.emplace_back(asio::ip::make_address(address), port);
             }
+            endpoint = selectBestEndpointFromResolverResults(endpoints);
         }
         catch (const std::exception& exception)
         {
             throw SilKit::ConfigurationError{
                 fmt::format("Invalid listen address \"{}\": {}", hostName, exception.what())};
         }
-
-        if (endpoints.empty())
-        {
-            _logger->MakeMessage(Log::Level::Error, TopicOf(*this))
-                .SetMessage("AcceptTcpConnectionsOn: Unable to resolve hostname\"{}:{}\"", hostName,
-                                     port)
-                .Dispatch();
-            throw SilKit::ConfigurationError{"Unable to resolve hostname and service."};
-        }
-
-        endpoint = selectBestEndpointFromResolverResults(endpoints);
 
         _logger->MakeMessage(Log::Level::Debug, TopicOf(*this))
             .SetMessage("Accepting connections at {}:{} @{}", endpoint.address().to_string(),

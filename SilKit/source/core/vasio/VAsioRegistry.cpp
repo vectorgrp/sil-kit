@@ -91,8 +91,7 @@ auto VAsioRegistry::StartListening(const std::string& listenUri) -> std::string
         // An unusable listen address is a user error. Falling back to domain sockets would leave a registry that no
         // participant can reach over TCP.
         GetLoggerInternal()->MakeMessage(Log::Level::Error, TopicOf(*this))
-            .SetMessage("SIL Kit Registry cannot listen on {} (uri: {}). Reason: {}", uri.Host(),
-                        uri.EncodedString(), e.what())
+            .SetMessage("SIL Kit Registry cannot listen on {}. Reason: {}", uri.EncodedString(), e.what())
             .Dispatch();
         throw;
     }
