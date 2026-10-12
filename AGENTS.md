@@ -151,7 +151,8 @@ real work, the definition of done applies from then on, not retroactively.
 Review a feature branch from each perspective in turn, not as one undifferentiated read. There is no
 CODEOWNERS file; see `.github/pull_request_template.md` for the process checklist. For a docs-, CI- or
 tooling-only branch, apply only the user perspective and the applicable gates, and report "nothing to add"
-for the other two. Every perspective checks against **Stability guarantees** above.
+for the other two. Every perspective checks against **Stability guarantees** above. Done when each
+perspective has findings citing `file:line`, or an explicit "nothing to add".
 
 **Security — distributed systems and deployment.** The threat model is a participant receiving
 attacker-controlled bytes, so the top surface is deserialization: every `serdes` reader bounds-checks and
@@ -190,10 +191,11 @@ a user rather than describing the patch? Are the docs where a user would look?
 - Quotes for project headers, angle brackets for stdlib; `"silkit/..."` for public API, bare filenames for
   internal headers. Include ordering is deliberately unenforced (`SortIncludes: false`) — keep existing order.
 - Public API doxygen: `/*!` blocks with `\brief`, `\param`, `\ref`, and `//!<` for fields.
-- Namespace `SilKit::Services::<BusName>` for service code.
+- Namespaces: internal code goes in `VSilKit` (see migrations below); public API in `SilKit/include` keeps
+  `SilKit::*`.
 - **Format the code you write, not the files you touch.** clang-format output varies between major versions
   (the check only requires >= 14; run `python3 SilKit/ci/check_formatting.py changes`), so reformatting
-  untouched code creates churn and merge conflicts. Formatting is not a merge gate. Where your clang-format
+  untouched code creates churn and merge conflicts. Where your clang-format
   disagrees with surrounding code, leave the surrounding code alone and match the house style by hand:
   120 columns, 4-space indent, Allman braces except after `namespace`, `PointerAlignment: Left`.
 
@@ -202,8 +204,7 @@ a user rather than describing the patch? Are the docs where a user would look?
 - C++17 is the limit for platform support; C++20 is a future goal.
 - Prefer composition over inheritance; templates and static dispatch over virtual dispatch, especially in
   performance-critical code.
-- Smart pointers for ownership. Aim for compile-time safety.
-- `auto` functions with trailing return type.
+- Smart pointers for ownership.
 - Interfaces only where they earn their place — testing and dependency injection count.
 - Comments only where the code cannot say it.
 - Header-only code declares first, then defines in a block after the declarations.
@@ -217,18 +218,16 @@ a user rather than describing the patch? Are the docs where a user would look?
 
 Apply to new and touched code only; mixed style in existing files is expected.
 
-- Trailing return types: ~25% of `SilKit/source`, ~35% of `SilKit/include` converted. Both forms coexist
+- Trailing return types (`auto f() -> T`): ~25% of `SilKit/source`, ~35% of `SilKit/include` converted. Both forms coexist
   within a single class.
 - `VSilKit` namespace: done in `services/metrics`, `core/vasio/io`, `config`, `dashboard` (~97 files); the
   rest is still `SilKit::Core` / `SilKit::Services::*`, and `VSilKit` code freely references
-  `SilKit::Core::*`. Public namespaces in `SilKit/include` remain as they are.
+  `SilKit::Core::*`.
 
 ## Where to look
 
 | Path | Topic |
 |---|---|
-| `README.rst` | Quick start |
 | `docs/development/build.rst` | CMake options, presets, docs build, packaging |
 | `docs/for-developers/developers.rst` | Architecture, platform support tiers, running a simulation |
-| `docs/for-developers/versioning.md` | Semver and API/ABI/protocol compatibility policy |
 | `docs/development/rst-help.rst` | Writing the reStructuredText docs |
