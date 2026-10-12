@@ -1,15 +1,34 @@
-# [5.0.8] - UNRELEASED
+# [5.0.8] - 2026-10-13
 
-## Special Note (reminder, delete before release)
+## Note on the SIL Kit MSI installer
 
-The SIL Kit MSI installer will now be installed **per-machine** by default.
-In versions up to (and including) 5.0.7 the installer performed a per-user installation if the property `ALLUSERS=1` was not set explicitly.
-This change unfortunately **requires** manual deinstallation of the previous SIL Kit installation.
-Add this note to the Release description.
+Up to and including SIL Kit 5.0.7, `SilKit-X.Y.Z.msi` installed **per-user** by default unless `ALLUSERS=1` was set explicitly. That was not intended. Starting with **SIL Kit 5.0.8**, the MSI installs **per-machine**.
+
+### What this means when you upgrade
+
+- The 5.0.8 (or later) MSI can't detect or remove an earlier per-user installation, so both will be on the system side by side.
+- Upgrading still works. The new installer:
+  - removes the previous `VectorSilKitRegistry` service and installs the `SilKitRegistry` system service of the new version,
+  - sets the `SilKit_InstallDir` environment variable to the new installation, and
+  - updates the CMake `find_package` lookup to find the new installation.
+- Uninstalling the old version is **optional** and only cleans up. To do it, open *Settings > Apps > Installed apps* (or *Programs and Features*) **as the user who originally installed it** and uninstall the old SIL Kit entry.
+
+### "Vector" branding removed
+
+| | Up to 5.0.7 | From 5.0.8 |
+|---|---|---|
+| Installation folder | `<ProgramFiles>\Vector SIL Kit <VERSION>` | `<ProgramFiles>\SIL Kit <VERSION>` |
+| Registry system service | `VectorSilKitRegistry` | `SilKitRegistry` |
+| Service config file | `<ProgramData>\Vector SIL Kit\silkit-registry.yaml` | `<ProgramData>\SIL Kit\silkit-registry.yaml` |
+
+The old `<ProgramData>\Vector SIL Kit` folder is not removed. If you customized `silkit-registry.yaml`, copy it to the new location.
 
 ## Added
 
 - Add Integration Test for Timestamp Behavior
+- Add Integration Test for Remote Logging
+- The documentation now explains the delineation between fast (trivial) and accurate (detailed,
+  network simulator based) simulation, including notes for LIN.
 - The documentation now lists every third party dependency found in the source tree with its
   version and license on the Licenses page, followed by the full license text of each component
   that ships one.
@@ -45,6 +64,16 @@ Add this note to the Release description.
 - Bracketed IPv6 addresses containing hexadecimal digits, e.g., `tcp://[2001:db8::1]:8500`, were
   passed to the system resolver, which rejects them. A participant configured to accept connections
   on such an address failed to join, and a peer advertising one was not connected to on it.
+- `ISilKitRegistry::GetLogger()` returned `nullptr`, and the C API
+  `SilKit_Vendor_Vector_SilKitRegistry_GetLogger` returned a pointer of the wrong internal type.
+  Both now return the registry's logger.
+- A participant in the `Running` or `Paused` state could miss the system-wide stop if its locally
+  computed system state went directly to `Stopped` without passing `Stopping`. The participant now
+  also stops in that case.
+- The PCAP trace sink did not actually take its lock when tracing Ethernet frames, and opening and
+  closing the sink were unsynchronized, allowing a data race.
+- PCAP trace files had wrong packet timestamps. Their header announces nanosecond resolution, but
+  the packet timestamps were written in microseconds. Packet timestamps are now written in nanoseconds.
 
 ## Changed
 
@@ -69,4 +98,6 @@ Add this note to the Release description.
   - Windows System Service Name changed from `VectorSilKitRegistry` to `SilKitRegistry`
   - SIL Kit Registry System Service config file installation path changed from `<ProgramDataFolder>\Vector SIL Kit\silkit-registry.yaml` to `<ProgramDataFolder>\SIL Kit\silkit-registry.yaml`
   - Note that the `<ProgramDataFolder>\Vector SIL Kit` is not removed by installing `SilKit-5.0.8.msi`.
+- PCAP replay now also reads PCAP files with microsecond resolution, e.g., as written by tcpdump or
+  Wireshark. Previously only nanosecond resolution files were accepted.
 - `TimeSyncService` now throws `LogicError{"TimeSyncPolicy is not set"}` if `CompleteSimulationStep` is used before `StartLifecyle`.
