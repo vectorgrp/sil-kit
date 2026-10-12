@@ -1,0 +1,78 @@
+name: 'ABI Compatibility'
+on:
+  workflow_call:
+    inputs:
+      run_build:
+        required: true
+        type: boolean
+
+jobs:
+  abi-compat:
+    name: ABI compatibility with ${{ matrix.baseline }}
+    strategy:
+      fail-fast: false
+      matrix:
+        baseline: [ 'v5.0.6', 'v5.0.7' ]
+    runs-on: ubuntu-24.04
+    if: inputs.run_build == true
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: false
+
+      - name: Download the package of this build
+        uses: actions/download-artifact@v8
+        with:
+          pattern: 'SilKit-*-ubuntu-release-clang-18'
+          path: _pkg-download
+          merge-multiple: true
+
+      - name: Unpack the package
+        run: |
+          mkdir -p _pkg
+          cmake -E chdir _pkg cmake -E tar xf "$(ls "$PWD"/_pkg-download/SilKit-*.zip)"
+          echo "NEW_LIB=$(find "$PWD/_pkg" -name libSilKit.so | head -n 1)" >> "$GITHUB_ENV"
+        shell: bash
+
+      # the baseline only changes with the tag, so its build is cached; it is saved before abi_check.py swaps the library
+      - name: Restore the ${{ matrix.baseline }} build
+        id: baseline-cache
+        uses: actions/cache/restore@v5
+        with:
+          path: baseline-build/Release
+          key: abi-${{ matrix.baseline }}-ubuntu-24.04-gcc-v1
+
+      - name: Check out ${{ matrix.baseline }}
+        if: steps.baseline-cache.outputs.cache-hit != 'true'
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ matrix.baseline }}
+          path: baseline
+          submodules: true
+
+      - name: Build the ${{ matrix.baseline }} integration tests
+        if: steps.baseline-cache.outputs.cache-hit != 'true'
+        run: |
+          cmake -S baseline -B baseline-build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DSILKIT_BUILD_DEMOS=OFF \
+            -DSILKIT_BUILD_UTILITIES=OFF \
+            -DSILKIT_WARNINGS_AS_ERRORS=OFF
+          cmake --build baseline-build --target SilKitIntegrationTests
+        shell: bash
+
+      - name: Save the ${{ matrix.baseline }} build
+        if: steps.baseline-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v5
+        with:
+          path: baseline-build/Release
+          key: ${{ steps.baseline-cache.outputs.cache-primary-key }}
+
+      - name: Run the ${{ matrix.baseline }} integration tests with this build's library
+        run: |
+          python3 ./SilKit/ci/abi_check.py \
+            --baseline-dir baseline-build/Release \
+            --new-lib "$NEW_LIB" \
+            --exclusions "SilKit/ci/abi_exclusions/${{ matrix.baseline }}.txt" \
+            --expect-git-hash "${{ github.sha }}"
+        shell: bash

@@ -142,6 +142,16 @@ The integration tests using only the public API can also be built against a preb
     cmake --build _build/itests
     ctest --test-dir _build/itests -L 'unit|integration'
 
+The *ABI Compatibility* check of pull requests runs the ``SilKitIntegrationTests`` of older releases
+with the ``libSilKit.so`` of the pull request (Linux).
+The tests of a release are built from its tag (target ``SilKitIntegrationTests``), then::
+
+    python3 SilKit/ci/abi_check.py --baseline-dir <tag build>/Release --new-lib path/to/libSilKit.so \
+        --exclusions SilKit/ci/abi_exclusions/<tag>.txt
+
+The check fails if a symbol exported by the release is missing or if a test fails.
+Tests that fail because of an intended behavior change are excluded per release, each with a reason.
+
 Code coverage requires gcc and `gcovr`_.
 The ``coverage`` preset is a Debug build with ``SILKIT_ENABLE_COVERAGE`` enabled::
 

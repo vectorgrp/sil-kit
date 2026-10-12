@@ -126,6 +126,12 @@ jobs:
     with:
       run_build: ${{ needs.check-run-builds.outputs.run_builds == 'true' }}
 
+  abi-compat:
+    uses: ./.github/workflows/abi-compat.yml
+    needs: [check-run-builds, ubuntu-release-builds]
+    with:
+      run_build: ${{ needs.check-run-builds.outputs.run_builds == 'true' }}
+
   ubuntu-arm-release-builds:
     uses: ./.github/workflows/build-linux-arm64.yml
     needs: [check-licenses, check-run-builds, check-formatting, check-dco-signed]

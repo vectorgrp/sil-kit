@@ -1,0 +1,2 @@
+# Tests of the v5.0.6 SilKitIntegrationTests not run by abi_check.py: <gtest pattern>  # <reason>
+ITest_SilKitExtensions.*  # links SIL Kit internals statically and needs the extension test libraries
