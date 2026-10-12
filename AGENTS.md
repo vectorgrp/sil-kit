@@ -74,17 +74,13 @@ or wrong value is as good a reproducer as a failing test.
 
 ## Reviewing
 
-Review from each perspective in turn; done when each has findings citing `file:line` or "nothing to add".
-Docs/CI/tooling-only branches get only the user perspective.
+Done when security, C++ and user perspectives each have findings citing `file:line` or "nothing to add";
+docs/CI/tooling-only branches get only the user perspective.
 
-- **Security**: a participant receives attacker-controlled bytes. Every `serdes` reader bounds-checks and
-  survives truncated frames; network-supplied lengths are capped before they size allocations; queues stay
-  bounded; negotiation degrades gracefully for older peers; default listen addresses stay no wider; logs stay free of
-  secrets and paths.
-- **C++ veteran**: ownership and handler lifetimes, const-correctness, copies, composition over inheritance,
-  the stability guarantees. Formatting is out of scope.
-- **User**: is the API discoverable from headers and doxygen alone, do errors say what to change, do defaults
-  work with no configuration, do old configs and peers still work, is the changelog written for a user?
+- **Security**: peers send attacker-controlled bytes — `serdes` readers bounds-check and survive truncated frames,
+  network-supplied lengths are capped before allocating, queues stay bounded, default listen addresses stay no wider.
+- **C++**: lifetime of registered handlers relative to their controller; everything in Style and Stability.
+- **User**: old configs and older peers keep working; defaults work with no configuration; changelog written for a user.
 
 ## Style
 
