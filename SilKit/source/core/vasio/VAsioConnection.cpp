@@ -28,6 +28,7 @@
 #include "util/StringHelpers.hpp"
 
 #include "core/vasio/ConnectPeer.hpp"
+#include "core/vasio/io/util/IpAddress.hpp"
 #include "core/vasio/io/util/TracingMacros.hpp"
 
 #include "asio.hpp"
@@ -1271,19 +1272,12 @@ auto VAsioConnection::AcceptTcpConnectionsOn(const std::string& hostName,
 
     if (!hostName.empty())
     {
-        // asio expects IPv6 literals without the URI brackets
-        auto host{hostName};
-        if (host.size() > 2 && host.front() == '[' && host.back() == ']')
-        {
-            host = host.substr(1, host.size() - 2);
-        }
-
         try
         {
             std::vector<asio::ip::tcp::endpoint> endpoints;
-            for (const auto& address : _ioContext->Resolve(host))
+            for (const auto& address : _ioContext->Resolve(hostName))
             {
-                endpoints.emplace_back(asio::ip::make_address(address), port);
+                endpoints.emplace_back(asio::ip::make_address(VSilKit::CleanIpAddress(address)), port);
             }
             endpoint = selectBestEndpointFromResolverResults(endpoints);
         }

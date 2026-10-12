@@ -36,6 +36,9 @@
   an invalid or unresolvable host. It now fails to start with a configuration error naming the host.
 - The SIL Kit Registry did not listen over TCP on bracketed IPv6 addresses, e.g., `silkit://[::1]:8500`,
   on platforms whose address parser rejects the brackets.
+- Bracketed IPv6 addresses containing hexadecimal digits, e.g., `tcp://[2001:db8::1]:8500`, were
+  passed to the system resolver, which rejects them. A participant configured to accept connections
+  on such an address failed to join, and a peer advertising one was not connected to on it.
 
 ## Changed
 
