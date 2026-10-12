@@ -232,5 +232,3 @@ Apply to new and touched code only; mixed style in existing files is expected.
 | `docs/for-developers/developers.rst` | Architecture, platform support tiers, running a simulation |
 | `docs/for-developers/versioning.md` | Semver and API/ABI/protocol compatibility policy |
 | `docs/development/rst-help.rst` | Writing the reStructuredText docs |
-| `CONTRIBUTING.md` | External pull requests are not currently accepted |
-| `.github/pull_request_template.md` | The de-facto PR checklist |
