@@ -39,11 +39,7 @@ include(SilKitInstall)
 include(SilKitTest)
 include(CTest)
 
-add_silkit_test_executable(SilKitUnitTests)
-add_silkit_test_executable(SilKitIntegrationTests)
-add_silkit_test_executable(SilKitInternalIntegrationTests)
-add_silkit_test_executable(SilKitFunctionalTests)
-add_silkit_test_executable(SilKitInternalFunctionalTests)
+add_silkit_test_executable(SilKitUnitTests LABEL unit)
 
 ################################################################################
 # Include of our repositories

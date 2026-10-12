@@ -1,0 +1,61 @@
+name: 'Linux Coverage'
+on:
+  schedule:
+    - cron: '0 3 * * 1'
+
+  workflow_dispatch:
+
+jobs:
+  gcc-coverage:
+    name: gcc coverage report
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: true
+
+      - name: Install gcovr
+        run: python3 -m pip install --quiet gcovr
+        shell: bash
+
+      - name: Build
+        run: |
+          cmake --preset coverage
+          cmake --build --preset coverage
+        shell: bash
+
+      # Test failures only produce a warning: this job reports coverage, PR builds gate the tests.
+      - name: Run tests and collect coverage
+        run: |
+          collect() {
+            gcovr --root . -j "$(nproc)" \
+              --filter 'SilKit/source/' --filter 'SilKit/include/' --filter 'Utilities/' \
+              --exclude '.*/Test_[^/]*' --exclude '.*/[Mm]ocks?/.*' --exclude '.*/(Mock|Fake)[^/]*' \
+              --exclude '.*TestUtil[^/]*' \
+              --json "$1"
+          }
+          ctest --preset coverage --output-on-failure -L unit || echo "::warning::unit tests failed"
+          collect _build/coverage/unit.json
+          ctest --preset coverage --output-on-failure -L integration || echo "::warning::integration tests failed"
+          collect _build/coverage/full.json
+        shell: bash
+
+      - name: Create reports
+        run: |
+          mkdir -p _build/coverage/report/unit _build/coverage/report/full
+          gcovr --root . --add-tracefile _build/coverage/unit.json \
+            --html-nested _build/coverage/report/unit/index.html \
+            --json-summary _build/coverage/unit-summary.json
+          gcovr --root . --add-tracefile _build/coverage/full.json \
+            --html-nested _build/coverage/report/full/index.html \
+            --cobertura _build/coverage/report/full/cobertura.xml \
+            --json-summary _build/coverage/full-summary.json
+          python3 ./SilKit/ci/coverage_summary.py _build/coverage/unit-summary.json _build/coverage/full-summary.json >> "$GITHUB_STEP_SUMMARY"
+        shell: bash
+
+      - name: Upload reports
+        uses: actions/upload-artifact@v7
+        with:
+          name: coverage-report
+          path: _build/coverage/report
+          retention-days: 14

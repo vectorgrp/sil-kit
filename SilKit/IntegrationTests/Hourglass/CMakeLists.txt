@@ -16,12 +16,12 @@ target_include_directories(
 
 target_compile_definitions(
     S_Test_Hourglass
-    PRIVATE EXPORT_SilKitAPI
+    PUBLIC EXPORT_SilKitAPI
 )
 
 target_link_libraries(
     S_Test_Hourglass
-    PUBLIC SilKitInterface
+    PUBLIC SilKit::SilKitInterface
     PRIVATE gtest
     PRIVATE gmock
 )
@@ -31,7 +31,7 @@ if (MSVC)
 endif ()
 
 
-add_silkit_test_executable(SilKitHourglassTests)
+add_silkit_test_executable(SilKitHourglassTests LABEL unit)
 
 target_compile_definitions(SilKitHourglassTests
     PRIVATE SIL_KIT_TEST_MAIN_DO_NOT_PRINT_VERSION

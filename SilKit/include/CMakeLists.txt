@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: MIT
 
 add_library(SilKitInterface INTERFACE)
+add_library(SilKit::SilKitInterface ALIAS SilKitInterface)
 
 # Use generator expression to have a different set of include paths when the target is built versus when the target is installed somewhere
 target_include_directories(SilKitInterface

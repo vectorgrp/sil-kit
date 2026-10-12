@@ -23,9 +23,7 @@
 #include "silkit/vendor/CreateSilKitRegistry.hpp"
 #include "silkit/services/all.hpp"
 #include "silkit/services/pubsub/PubSubSpec.hpp"
-
-#include "config/ConfigurationTestUtils.hpp"
-#include "util/functional.hpp"
+#include "silkit/services/logging/string_utils.hpp"
 #include "silkit/experimental/participant/ParticipantExtensions.hpp"
 
 using namespace std::chrono_literals;
@@ -50,6 +48,14 @@ static std::map<size_t, bool> participantIsSync{};
 const bool verbose = true;
 const bool logging = false;
 const Services::Logging::Level logLevel = Services::Logging::Level::Debug;
+
+static auto MakeParticipantConfigurationWithLogging(Services::Logging::Level level)
+    -> std::shared_ptr<SilKit::Config::IParticipantConfiguration>
+{
+    std::ostringstream ss;
+    ss << R"({"Logging": {"Sinks": [{"Type": "Stdout", "Level": ")" << level << R"("}]}})";
+    return SilKit::Config::ParticipantConfigurationFromString(ss.str());
+}
 
 enum class TimeMode
 {
@@ -330,18 +336,18 @@ protected:
         std::shared_ptr<SilKit::Config::IParticipantConfiguration> config{nullptr};
         if (logging)
         {
-            config = SilKit::Config::MakeParticipantConfigurationWithLogging(logLevel);
+            config = MakeParticipantConfigurationWithLogging(logLevel);
         }
         else
         {
-            config = SilKit::Config::MakeEmptyParticipantConfiguration();
+            config = SilKit::Config::ParticipantConfigurationFromString("");
         }
 
         testParticipant.participant = SilKit::CreateParticipant(config, testParticipant.name, _registryUri);
         testParticipant.lifecycleService =
             testParticipant.participant->CreateLifecycleService({testParticipant.lifeCycleOperationMode});
         testParticipant.lifecycleService->SetAbortHandler(
-            SilKit::Util::bind_method(&callbacks, &Callbacks::AbortHandler));
+            [this](ParticipantState state) { callbacks.AbortHandler(state); });
 
         auto systemMonitor = testParticipant.participant->CreateSystemMonitor();
         systemMonitor->AddParticipantStatusHandler([&testParticipant](ParticipantStatus status) {
@@ -417,11 +423,11 @@ protected:
         std::shared_ptr<SilKit::Config::IParticipantConfiguration> config{nullptr};
         if (logging)
         {
-            config = SilKit::Config::MakeParticipantConfigurationWithLogging(logLevel);
+            config = MakeParticipantConfigurationWithLogging(logLevel);
         }
         else
         {
-            config = SilKit::Config::MakeEmptyParticipantConfiguration();
+            config = SilKit::Config::ParticipantConfigurationFromString("");
         }
 
         testParticipant.participant = SilKit::CreateParticipant(config, testParticipant.name, _registryUri);
@@ -510,11 +516,11 @@ protected:
         std::shared_ptr<SilKit::Config::IParticipantConfiguration> config{nullptr};
         if (logging)
         {
-            config = SilKit::Config::MakeParticipantConfigurationWithLogging(logLevel);
+            config = MakeParticipantConfigurationWithLogging(logLevel);
         }
         else
         {
-            config = SilKit::Config::MakeEmptyParticipantConfiguration();
+            config = SilKit::Config::ParticipantConfigurationFromString("");
         }
 
         systemControllerParticipant.participant =
@@ -553,7 +559,7 @@ protected:
             {SilKit::Services::Orchestration::OperationMode::Coordinated});
 
         systemControllerParticipant.lifecycleService->SetAbortHandler(
-            SilKit::Util::bind_method(&callbacks, &Callbacks::AbortHandler));
+            [this](ParticipantState state) { callbacks.AbortHandler(state); });
         systemControllerParticipant.systemController->SetWorkflowConfiguration({required});
 
         systemControllerParticipant.systemMonitor->AddSystemStateHandler(
@@ -627,7 +633,7 @@ protected:
     void RunRegistry()
     {
         std::shared_ptr<SilKit::Config::IParticipantConfiguration> config{nullptr};
-        config = SilKit::Config::MakeEmptyParticipantConfiguration();
+        config = SilKit::Config::ParticipantConfigurationFromString("");
         _registry = SilKit::Vendor::Vector::CreateSilKitRegistry(config);
         _registryUri = _registry->StartListening("silkit://127.0.0.1:0");
     }

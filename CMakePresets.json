@@ -66,6 +66,16 @@
             }
         },
         {
+            "name": "coverage",
+            "description": "gcov instrumented Debug build (gcc)",
+            "inherits": [ "debug"],
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "gcc",
+                "CMAKE_CXX_COMPILER": "g++",
+                "SILKIT_ENABLE_COVERAGE": "ON"
+            }
+        },
+        {
             "name": "x86-debug",
             "inherits": ["debug"],
             "architecture": {
@@ -167,6 +177,10 @@
             "configurePreset": "relwithdebinfo"
         },
         {
+            "name": "coverage",
+            "configurePreset": "coverage"
+        },
+        {
             "name": "x86-debug",
             "configurePreset": "x86-debug"
         },
@@ -221,6 +235,10 @@
         {
             "name": "relwithdebinfo",
             "configurePreset": "relwithdebinfo"
+        },
+        {
+            "name": "coverage",
+            "configurePreset": "coverage"
         },
         {
             "name": "x86-debug",

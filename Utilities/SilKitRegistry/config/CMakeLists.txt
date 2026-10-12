@@ -15,7 +15,7 @@ target_link_libraries(O_SilKitRegistry_Config
 )
 
 
-add_silkit_test_executable(SilKitRegistryTests)
+add_silkit_test_executable(SilKitRegistryTests LABEL unit)
 
 if(TARGET SilKitRegistryTests)
     target_compile_definitions(SilKitRegistryTests
