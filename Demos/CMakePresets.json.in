@@ -1,0 +1,43 @@
+{
+    "version": 3,
+    "configurePresets": [
+        {
+            "name": "base",
+            "description": "Build the demos against the pre-built SIL Kit of this package (@SILKIT_DEMOS_PRESET_PLATFORM@)",
+            "hidden": true,
+            "generator": "@SILKIT_DEMOS_PRESET_GENERATOR@",
+            "binaryDir": "${sourceDir}/_build/${presetName}",@SILKIT_DEMOS_PRESET_ARCHITECTURE@
+            "vendor": {
+                "microsoft.com/VisualStudioSettings/CMake/1.0": {
+                    "hostOS": [ "@SILKIT_DEMOS_PRESET_HOST_OS@" ]
+                }
+            }
+        },
+        {
+            "name": "@SILKIT_DEMOS_PRESET_PREFIX@release",
+            "displayName": "@SILKIT_DEMOS_PRESET_PLATFORM@ Release",
+            "inherits": [ "base" ],
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        },
+        {
+            "name": "@SILKIT_DEMOS_PRESET_PREFIX@debug",
+            "displayName": "@SILKIT_DEMOS_PRESET_PLATFORM@ Debug",
+            "inherits": [ "base" ],
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "@SILKIT_DEMOS_PRESET_PREFIX@release",
+            "configurePreset": "@SILKIT_DEMOS_PRESET_PREFIX@release"
+        },
+        {
+            "name": "@SILKIT_DEMOS_PRESET_PREFIX@debug",
+            "configurePreset": "@SILKIT_DEMOS_PRESET_PREFIX@debug"
+        }
+    ]
+}
