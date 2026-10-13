@@ -10,12 +10,13 @@
 #include "core/vasio/io/impl/SetAsioSocketOptions.hpp"
 
 #include "core/vasio/io/util/Exceptions.hpp"
+#include "core/vasio/io/util/IpAddress.hpp"
 #include "core/vasio/io/util/TracingMacros.hpp"
 
 #include <atomic>
 #include <memory>
 #include <mutex>
-#include <regex> // IsIPv4 / IsIPv6
+#include <regex> // IsIPv4
 #include <unordered_set>
 
 #include "asio.hpp"
@@ -184,25 +185,6 @@ static auto IsIpV4(const std::string& string) -> bool
     return std::regex_match(string, regex);
 }
 
-
-static auto IsIpV6(const std::string& string) -> bool
-{
-    static std::regex regex{R"(^\[[0-9:]+\]$)", std::regex::optimize};
-    return std::regex_match(string, regex);
-}
-
-static auto CleanIpAddress(const std::string& string) -> std::string
-{
-    static std::regex regex{R"(^\[([0-9:]+)\]$)", std::regex::optimize};
-
-    std::smatch matches;
-    if (std::regex_match(string, matches, regex))
-    {
-        return matches[1].str();
-    }
-
-    return string;
-}
 
 template <typename AsioAcceptorType, typename AsioEndpointType>
 void OpenAcceptor(AsioAcceptorType& acceptor, AsioEndpointType endpoint, SilKit::Services::Logging::ILoggerInternal& logger)

@@ -38,6 +38,13 @@ Add this note to the Release description.
   inside another dependency, such as c4core inside the rapidyaml sources, and the components that
   ship inside the HTML documentation. `ThirdParty/LICENSES.rst` is generated from a software bill of
   materials and is the file the documentation shows, so the two can no longer disagree.
+- The SIL Kit Registry silently listened on local domain sockets only when its listen URI contained
+  an invalid or unresolvable host. It now fails to start with a configuration error naming the host.
+- The SIL Kit Registry did not listen over TCP on bracketed IPv6 addresses, e.g., `silkit://[::1]:8500`,
+  on platforms whose address parser rejects the brackets.
+- Bracketed IPv6 addresses containing hexadecimal digits, e.g., `tcp://[2001:db8::1]:8500`, were
+  passed to the system resolver, which rejects them. A participant configured to accept connections
+  on such an address failed to join, and a peer advertising one was not connected to on it.
 
 ## Changed
 

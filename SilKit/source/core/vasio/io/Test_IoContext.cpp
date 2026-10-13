@@ -157,6 +157,16 @@ TEST_F(Test_IoContext, resolve)
     EXPECT_THAT(resolveStrings, AnyOf(Contains("127.0.0.1"), Contains("::1")));
 }
 
+TEST_F(Test_IoContext, resolve_bracketed_ipv6_literal)
+{
+    auto ioContext = VSilKit::MakeAsioIoContext({});
+
+    for (const std::string literal : {"[::1]", "[2001:db8::1]", "[FE80::A]", "[::ffff:127.0.0.1]", "[fe80::1%lo]"})
+    {
+        EXPECT_EQ(ioContext->Resolve(literal), std::vector<std::string>{literal});
+    }
+}
+
 TEST_F(Test_IoContext, timers_execute_and_wait)
 {
     auto ioContext = VSilKit::MakeAsioIoContext({});

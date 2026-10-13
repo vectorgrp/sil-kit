@@ -28,6 +28,7 @@
 #include "util/StringHelpers.hpp"
 
 #include "core/vasio/ConnectPeer.hpp"
+#include "core/vasio/io/util/IpAddress.hpp"
 #include "core/vasio/io/util/TracingMacros.hpp"
 
 #include "asio.hpp"
@@ -1271,24 +1272,20 @@ auto VAsioConnection::AcceptTcpConnectionsOn(const std::string& hostName,
 
     if (!hostName.empty())
     {
-        auto resolverResults{_ioContext->Resolve(hostName)};
-
-        if (resolverResults.empty())
+        try
         {
-            _logger->MakeMessage(Log::Level::Error, TopicOf(*this))
-                .SetMessage("AcceptTcpConnectionsOn: Unable to resolve hostname\"{}:{}\"", hostName,
-                                     port)
-                .Dispatch();
-            throw SilKit::StateError{"Unable to resolve hostname and service."};
+            std::vector<asio::ip::tcp::endpoint> endpoints;
+            for (const auto& address : _ioContext->Resolve(hostName))
+            {
+                endpoints.emplace_back(asio::ip::make_address(VSilKit::CleanIpAddress(address)), port);
+            }
+            endpoint = selectBestEndpointFromResolverResults(endpoints);
         }
-
-        std::vector<asio::ip::tcp::endpoint> endpoints;
-        for (const auto& address : resolverResults)
+        catch (const std::exception& exception)
         {
-            endpoints.emplace_back(asio::ip::make_address(address), port);
+            throw SilKit::ConfigurationError{
+                fmt::format("Invalid listen address \"{}\": {}", hostName, exception.what())};
         }
-
-        endpoint = selectBestEndpointFromResolverResults(endpoints);
 
         _logger->MakeMessage(Log::Level::Debug, TopicOf(*this))
             .SetMessage("Accepting connections at {}:{} @{}", endpoint.address().to_string(),
