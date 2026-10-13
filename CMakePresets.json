@@ -21,6 +21,8 @@
             "generator": "Ninja",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release",
+                "SILKIT_BUILD_DEMOS": "ON",
+                "SILKIT_BUILD_DOCS": "ON",
                 "SILKIT_BUILD_TESTS": "ON",
                 "SILKIT_BUILD_UTILITIES": "ON",
                 "SILKIT_INSTALL_SOURCE": "ON",
