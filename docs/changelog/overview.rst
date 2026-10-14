@@ -9,6 +9,7 @@ versions page.
    :glob:
 
    versions/latest.md
+   versions/5.0.8.md
    versions/5.0.7.md
    versions/5.0.6.md
    versions/5.0.5.md
