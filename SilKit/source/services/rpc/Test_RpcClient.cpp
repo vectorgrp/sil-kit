@@ -107,4 +107,29 @@ TEST_F(Test_RpcClient, rpc_client_call_receives_internal_server_error_when_serve
     iRpcClient->Call(sampleData, userContext);
 }
 
+TEST_F(Test_RpcClient, rpc_client_ignores_the_timeout_of_a_completed_call)
+{
+    SilKit::Core::Tests::MockTimeProvider timeProvider;
+
+    CreateRpcServer();
+    IRpcClient* iRpcClient = CreateRpcClient();
+    iRpcClient->SetCallResultHandler(SilKit::Util::bind_method(&callbacks, &Callbacks::CallResultHandler));
+
+    // the server has no handler, so the call completes right away
+    EXPECT_CALL(callbacks,
+                CallResultHandler(testing::Eq(iRpcClient),
+                                  testing::Field(&RpcCallResultEvent::callStatus, RpcCallStatus::InternalServerError)))
+        .Times(1);
+
+    // HACK: Change the time provider for the captured services. Must happen _after_ the RpcServer and RpcClient (and
+    //       therefore the RpcServerInternal) have been created.
+    participant->GetSilKitConnection().Test_SetTimeProvider(&timeProvider);
+
+    iRpcClient->CallWithTimeout(sampleData, std::chrono::milliseconds{1});
+    timeProvider._handlers.InvokeAll(timeProvider.now, std::chrono::milliseconds{2});
+
+    // the client removes its timeout handler from timeProvider when destroyed
+    participant.reset();
+}
+
 } // anonymous namespace

@@ -28,6 +28,7 @@
 #include "util/StringHelpers.hpp"
 
 #include "core/vasio/ConnectPeer.hpp"
+#include "config/YamlParser.hpp"
 #include "core/vasio/io/util/IpAddress.hpp"
 #include "core/vasio/io/util/TracingMacros.hpp"
 
@@ -690,6 +691,11 @@ void VAsioConnection::SendParticipantAnnouncement(IVAsioPeer* peer)
     announcement.messageHeader = MakeRegistryMsgHeader(_version);
     announcement.peerInfo = std::move(myPeerInfo);
     announcement.simulationName = _simulationName;
+
+    if (peer == _registry.get() && _config.experimental.management.shareConfiguration)
+    {
+        announcement.configurationJson = SilKit::Config::SerializeAsJson(_config);
+    }
 
     _logger->MakeMessage(Log::Level::Debug, TopicOf(*this))
         .SetMessage("Sending participant announcement to '{}' ('{}')", peer->GetInfo().participantName,

@@ -68,6 +68,34 @@ TEST(Test_VAsioSerdes, vasio_participantAnouncement)
     EXPECT_EQ(in, out);
 }
 
+TEST(Test_VAsioSerdes, vasio_participantAnouncement_configurationJson)
+{
+    ParticipantAnnouncement in{};
+    in.messageHeader = RegistryMsgHeader{};
+    in.peerInfo = MakePeerInfo();
+    in.simulationName = "sim";
+
+    MessageBuffer withoutConfiguration;
+    Serialize(withoutConfiguration, in);
+
+    in.configurationJson = R"({"ParticipantName":"Test"})";
+    MessageBuffer withConfiguration;
+    Serialize(withConfiguration, in);
+
+    // the empty field is omitted, so the announcement is unchanged on the wire for older registries
+    EXPECT_GT(withConfiguration.RemainingBytesLeft(), withoutConfiguration.RemainingBytesLeft());
+
+    ParticipantAnnouncement out{};
+    Deserialize(withConfiguration, out);
+    EXPECT_EQ(out.simulationName, "sim");
+    EXPECT_EQ(out.configurationJson, in.configurationJson);
+
+    ParticipantAnnouncement outWithout{};
+    Deserialize(withoutConfiguration, outWithout);
+    EXPECT_EQ(outWithout.simulationName, "sim");
+    EXPECT_TRUE(outWithout.configurationJson.empty());
+}
+
 auto MakeSubscriber() -> VAsioMsgSubscriber
 {
     VAsioMsgSubscriber out;

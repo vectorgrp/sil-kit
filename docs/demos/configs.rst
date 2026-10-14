@@ -13,6 +13,10 @@ The following sample participant configurations are available:
 ``Stdout_Info.silkit.yaml``
 	Log to Stdout with ``Level: Info``.
 
+``ShareConfiguration.silkit.yaml``
+	Log to Stdout with ``Level: Info`` and share the configuration with the registry
+	(see :ref:`sec:cfg-experimental-management`).
+
 ``Trace_ToRemote.silkit.yaml``
 	Log to Remote with ``Level: Info``. 
 	Participants that specify ``LogFromRemotes: True`` will receive the log messages.

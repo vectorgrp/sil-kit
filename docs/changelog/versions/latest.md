@@ -1,5 +1,22 @@
 # [5.0.9] - UNRELEASED
 
+## Added
+
+- Experimental: a registry with `Experimental.Management.Enable` hosts a management participant in the well-known
+  simulation `.well-known/sil-kit/management`. Clients joining it learn the simulations on the registry, their
+  participants and required participants, and the configurations of participants that set
+  `Experimental.Management.ShareConfiguration`. See `silkit/experimental/management/ManagementDatatypes.hpp`, the
+  C++ client in `ManagementClient.hpp`, and the C API `SilKit_Experimental_ManagementClient_*` in
+  `silkit/capi/Management.h`. The demo `SilKitDemoManagementClient` prints the simulations on a registry.
+
+## Fixed
+
+- Without virtual time synchronization, the first `CallWithTimeout` of an RPC client could deadlock once another
+  RPC client had made a call with timeout. Making that first call from a handler invoked on a timeout aborted the
+  process.
+- An RPC client dereferenced an invalid iterator when the timeout of an already answered `CallWithTimeout` expired,
+  and a reply could race with the timeout of the same call.
+
 ## Changed
 
 - `SilKitVersionMacros.h` is now committed to the source tree instead of being generated at CMake configure time.

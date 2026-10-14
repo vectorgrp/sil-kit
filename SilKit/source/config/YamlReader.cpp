@@ -497,11 +497,18 @@ void YamlReader::Read(SilKit::Config::TimeSynchronization& obj)
     OptionalRead(obj.dynamicSimulationStep, "DynamicSimulationStep");
 }
 
+void YamlReader::Read(SilKit::Config::Management& obj)
+{
+    OptionalRead(obj.enable, "Enable");
+    OptionalRead(obj.shareConfiguration, "ShareConfiguration");
+}
+
 void YamlReader::Read(SilKit::Config::Experimental& obj)
 {
     OptionalRead(obj.timeSynchronization, "TimeSynchronization");
     OptionalRead(obj.metrics, "Metrics");
     OptionalRead(obj.useReceiveBufferPool, "UseReceiveBufferPool");
+    OptionalRead(obj.management, "Management");
 }
 
 void YamlReader::Read(SilKit::Config::ParticipantConfiguration& obj)
@@ -538,6 +545,7 @@ void YamlReader::Read(SilKit::Config::HealthCheck& obj)
 void YamlReader::Read(SilKitRegistry::Config::V1::Experimental& obj)
 {
     OptionalRead(obj.metrics, "Metrics");
+    OptionalRead(obj.management, "Management");
 
     for (auto&& sink : obj.metrics.sinks)
     {

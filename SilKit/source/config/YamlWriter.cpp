@@ -577,6 +577,15 @@ void YamlWriter::Write(const SilKit::Config::TimeSynchronization& obj)
 }
 
 
+void YamlWriter::Write(const SilKit::Config::Management& obj)
+{
+    static const SilKit::Config::Management defaultObj{};
+    MakeMap();
+    NonDefaultWrite(obj.enable, "Enable", defaultObj.enable);
+    NonDefaultWrite(obj.shareConfiguration, "ShareConfiguration", defaultObj.shareConfiguration);
+}
+
+
 void YamlWriter::Write(const SilKit::Config::Experimental& obj)
 {
     static const SilKit::Config::Experimental defaultObj{};
@@ -585,6 +594,7 @@ void YamlWriter::Write(const SilKit::Config::Experimental& obj)
     NonDefaultWrite(obj.timeSynchronization, "TimeSynchronization", defaultObj.timeSynchronization);
     NonDefaultWrite(obj.metrics, "Metrics", defaultObj.metrics);
     NonDefaultWrite(obj.useReceiveBufferPool, "UseReceiveBufferPool", defaultObj.useReceiveBufferPool);
+    NonDefaultWrite(obj.management, "Management", defaultObj.management);
 }
 
 
@@ -625,6 +635,7 @@ void YamlWriter::Write(const SilKitRegistry::Config::V1::Experimental& obj)
 {
     static const SilKitRegistry::Config::V1::Experimental defaultObject{};
     NonDefaultWrite(obj.metrics, "Metrics", defaultObject.metrics);
+    NonDefaultWrite(obj.management, "Management", defaultObject.management);
 }
 
 

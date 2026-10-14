@@ -20,6 +20,9 @@
     "Experimental": {
       "Metrics": {
         "CollectFromRemote": true
+      },
+      "Management": {
+        "Enable": true
       }
     }
   }

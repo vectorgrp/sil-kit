@@ -294,3 +294,38 @@ Refer to the documentation of the `SIL Kit Dashboard <https://vector.com/sil-kit
 
    * - CollectFromRemote
      - Collect metrics from all connected participants. Defaults to ``true``.
+
+.. _sec:cfg-experimental-management:
+
+Management
+----------
+
+A registry with ``Management.Enable`` hosts a management participant in the well-known simulation
+``.well-known/sil-kit/management`` (e.g., ``silkit://localhost:8500/.well-known/sil-kit/management``).
+Clients join this simulation and observe the simulations on the registry, their participants and required
+participants, and the configurations participants chose to share. Topics, functions and payloads are defined in
+``silkit/experimental/management/ManagementDatatypes.hpp``. A client is provided by
+``silkit/experimental/management/ManagementClient.hpp`` (C++) and ``silkit/capi/Management.h`` (C).
+The :ref:`management client demo<sec:management-client-demo>` shows its use.
+
+.. code-block:: yaml
+
+    Experimental:
+        Management:
+          Enable: true
+          ShareConfiguration: true
+
+.. list-table:: Management Configuration
+   :widths: 15 85
+   :header-rows: 1
+
+   * - Property Name
+     - Description
+
+   * - Enable
+     - Registry only: host the management participant in the management simulation. Can also be set in the registry
+       configuration. Defaults to ``false``.
+   * - ShareConfiguration
+     - Participant only: send the participant configuration to the registry when joining, so the management
+       participant can provide it to management clients. The configuration may contain host names and paths.
+       Defaults to ``false``.

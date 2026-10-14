@@ -21,6 +21,7 @@
 #include "silkit/capi/NetworkSimulator.h"
 #include "silkit/capi/EventProducer.h"
 #include "silkit/capi/ServiceDiscovery.h"
+#include "silkit/capi/Management.h"
 
 SILKIT_BEGIN_DECLS
 

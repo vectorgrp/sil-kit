@@ -343,6 +343,7 @@ public:
     void Read(SilKit::Config::Includes& obj);
     void Read(SilKit::Config::Aggregation& obj);
     void Read(SilKit::Config::TimeSynchronization& obj);
+    void Read(SilKit::Config::Management& obj);
     void Read(SilKit::Config::Experimental& obj);
     void Read(SilKit::Config::ParticipantConfiguration& obj);
     void Read(SilKit::Config::HealthCheck& obj);

@@ -113,19 +113,19 @@ void RpcClient::TimeHandler(std::chrono::nanoseconds now, std::chrono::nanosecon
 
     for (auto&& entry : timeoutedEntries)
     {
-        auto uuid = entry.callUuid;
-
         std::unique_lock<decltype(_activeCallsMx)> lock{_activeCallsMx};
-        auto it = _activeCalls.find(uuid);
-        auto userContext = it->second.GetUserContext();
-
-        if (it != _activeCalls.end())
+        auto it = _activeCalls.find(entry.callUuid);
+        if (it == _activeCalls.end())
         {
-            _activeCalls.erase(it);
-            lock.unlock();
-
-            _handler(this, RpcCallResultEvent{now, userContext, RpcCallStatus::Timeout, {}});
+            // the call completed before its timeout
+            continue;
         }
+
+        auto userContext = it->second.GetUserContext();
+        _activeCalls.erase(it);
+        lock.unlock();
+
+        _handler(this, RpcCallResultEvent{now, userContext, RpcCallStatus::Timeout, {}});
     }
     timeoutedEntries.clear();
 }
@@ -188,12 +188,12 @@ void RpcClient::ReceiveMsg(const Core::IServiceEndpoint* /*from*/, const Functio
 
 void RpcClient::ReceiveMessage(const FunctionCallResponse& msg)
 {
-    std::map<SilKit::Util::Uuid, SilKit::Services::Rpc::RpcClient::RpcCallInfo>::iterator it;
+    void* userContext{nullptr};
     {
+        // the timeout handler may erase the call concurrently
         std::unique_lock<decltype(_activeCallsMx)> lock{_activeCallsMx};
 
-        it = _activeCalls.find(msg.callUuid);
-
+        const auto it = _activeCalls.find(msg.callUuid);
         if (it == _activeCalls.end())
         {
             _logger->MakeMessage(Services::Logging::Level::Warn, TopicOf(*this))
@@ -202,20 +202,20 @@ void RpcClient::ReceiveMessage(const FunctionCallResponse& msg)
                 .Dispatch();
             return;
         }
-    };
+
+        userContext = it->second.GetUserContext();
+
+        // NB: If the call was made to multiple servers, multiple returns will be received. Only forget about the call
+        //     after all returns have been received.
+        if (it->second.DecrementRemainingReturnCount() <= 0)
+        {
+            _activeCalls.erase(it);
+        }
+    }
 
     if (_handler)
     {
-        _handler(this,
-                 RpcCallResultEvent{msg.timestamp, it->second.GetUserContext(), ToRpcCallStatus(msg.status), msg.data.AsSpan()});
-    }
-
-    // NB: If the call was made to multiple servers, multiple returns will be received. Only forget about the call
-    //     after all returns have been received.
-    if (it->second.DecrementRemainingReturnCount() <= 0)
-    {
-        std::unique_lock<decltype(_activeCallsMx)> lock{_activeCallsMx};
-        _activeCalls.erase(it);
+        _handler(this, RpcCallResultEvent{msg.timestamp, userContext, ToRpcCallStatus(msg.status), msg.data.AsSpan()});
     }
 }
 

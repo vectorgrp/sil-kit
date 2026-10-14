@@ -76,7 +76,11 @@ public:
 
     void OnHandlerAdded() final
     {
-        _timer.WithPeriod(_tickPeriod, [this](const auto& now) { NotifyListenerAboutTick(now, _tickPeriod); });
+        // restarting joins the timer thread, which may be waiting for the lock held by the caller
+        if (!_timer.IsActive())
+        {
+            _timer.WithPeriod(_tickPeriod, [this](const auto& now) { NotifyListenerAboutTick(now, _tickPeriod); });
+        }
     }
 
     auto Now() const -> std::chrono::nanoseconds override
@@ -103,7 +107,11 @@ public:
 
     void OnHandlerAdded() override
     {
-        _timer.WithPeriod(_tickPeriod, [this](const auto& now) { NotifyListenerAboutTick(now, _tickPeriod); });
+        // restarting joins the timer thread, which may be waiting for the lock held by the caller
+        if (!_timer.IsActive())
+        {
+            _timer.WithPeriod(_tickPeriod, [this](const auto& now) { NotifyListenerAboutTick(now, _tickPeriod); });
+        }
     }
 
     auto Now() const -> std::chrono::nanoseconds override

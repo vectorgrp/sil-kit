@@ -289,6 +289,10 @@
         }
       ]
     },
-    "UseReceiveBufferPool": false
+    "UseReceiveBufferPool": false,
+    "Management": {
+      "Enable": true,
+      "ShareConfiguration": true
+    }
   }
 }

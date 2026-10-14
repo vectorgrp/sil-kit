@@ -4,6 +4,7 @@
 
 #include <chrono>
 #include <functional>
+#include <future>
 #include <string>
 
 #include "gmock/gmock.h"
@@ -48,5 +49,34 @@ TEST(Test_TimeProvider, check_handlers)
 
     timeProvider.SetTime(2ms, 0ms); //implicitly invoke handler
     ASSERT_EQ(invocationCount, 1) << "Only the first SetTime should trigger the handler";
+}
+
+TEST(Test_TimeProvider, handlers_can_be_added_from_a_tick)
+{
+    std::promise<void> addedHandlerInvoked;
+    auto addedHandlerInvokedFuture = addedHandlerInvoked.get_future();
+
+    TimeProvider timeProvider{};
+    timeProvider.ConfigureTimeProvider(TimeProviderKind::NoSync);
+
+    // only accessed by the timer thread
+    bool isAdded{false};
+    bool isInvoked{false};
+    timeProvider.AddNextSimStepHandler([&](auto, auto) {
+        if (isAdded)
+        {
+            return;
+        }
+        isAdded = true;
+        timeProvider.AddNextSimStepHandler([&](auto, auto) {
+            if (!isInvoked)
+            {
+                isInvoked = true;
+                addedHandlerInvoked.set_value();
+            }
+        });
+    });
+
+    ASSERT_EQ(addedHandlerInvokedFuture.wait_for(5s), std::future_status::ready);
 }
 } // namespace

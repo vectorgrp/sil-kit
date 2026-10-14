@@ -73,11 +73,18 @@ struct MetricsCache
     std::optional<MetricsSink> remoteSink;
 };
 
+struct ManagementCache
+{
+    std::optional<bool> enable;
+    std::optional<bool> shareConfiguration;
+};
+
 struct ExperimentalCache
 {
     TimeSynchronizationCache timeSynchronizationCache;
     MetricsCache metricsCache;
     std::optional<bool> useReceiveBufferPool;
+    ManagementCache managementCache;
 };
 
 struct ConfigIncludeData
@@ -407,6 +414,14 @@ void Cache(const Metrics& root, MetricsCache& cache)
     }
 }
 
+void Cache(const Management& root, ManagementCache& cache)
+{
+    static const Management defaultObject;
+    CacheNonDefault(defaultObject.enable, root.enable, "Management.Enable", cache.enable);
+    CacheNonDefault(defaultObject.shareConfiguration, root.shareConfiguration, "Management.ShareConfiguration",
+                    cache.shareConfiguration);
+}
+
 void Cache(const Experimental& root, ExperimentalCache& cache)
 {
     static const Experimental defaultObject;
@@ -414,6 +429,7 @@ void Cache(const Experimental& root, ExperimentalCache& cache)
     Cache(root.metrics, cache.metricsCache);
     CacheNonDefault(defaultObject.useReceiveBufferPool, root.useReceiveBufferPool, "Experimental.UseReceiveBufferPool",
                     cache.useReceiveBufferPool);
+    Cache(root.management, cache.managementCache);
 }
 
 
@@ -557,11 +573,18 @@ void MergeMetricsCache(const MetricsCache& cache, Metrics& metrics)
     }
 }
 
+void MergeManagementCache(const ManagementCache& cache, Management& management)
+{
+    MergeCacheField(cache.enable, management.enable);
+    MergeCacheField(cache.shareConfiguration, management.shareConfiguration);
+}
+
 void MergeExperimentalCache(const ExperimentalCache& cache, Experimental& experimental)
 {
     MergeTimeSynchronizationCache(cache.timeSynchronizationCache, experimental.timeSynchronization);
     MergeMetricsCache(cache.metricsCache, experimental.metrics);
     MergeCacheField(cache.useReceiveBufferPool, experimental.useReceiveBufferPool);
+    MergeManagementCache(cache.managementCache, experimental.management);
 }
 
 

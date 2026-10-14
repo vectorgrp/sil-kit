@@ -10,6 +10,7 @@ add_library(O_SilKit_Capi OBJECT
     CapiFlexray.cpp
     CapiImpl.hpp
     CapiLin.cpp
+    CapiManagement.cpp
     CapiLogger.cpp
     CapiOrchestration.cpp
     CapiParticipant.cpp
@@ -34,6 +35,7 @@ add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_CapiEthernet.cpp LIBS
 add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_CapiFlexray.cpp LIBS S_SilKitImpl I_SilKit)
 add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_CapiData.cpp LIBS S_SilKitImpl I_SilKit)
 add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_CapiServiceDiscovery.cpp LIBS S_SilKitImpl I_SilKit)
+add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_CapiManagement.cpp LIBS S_SilKitImpl I_SilKit)
 add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_ServiceObserver.cpp LIBS S_SilKitImpl I_SilKit)
 add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_CapiRpc.cpp LIBS S_SilKitImpl I_SilKit)
 add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_CapiLogger.cpp LIBS S_SilKitImpl)

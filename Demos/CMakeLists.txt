@@ -159,6 +159,7 @@ add_subdirectory(tools/Benchmark)
 add_subdirectory(api/SimpleCan)
 add_subdirectory(api/NetworkSimulator)
 add_subdirectory(api/Orchestration)
+add_subdirectory(api/Management)
 
 #######################################################################################################################
 # VisualStudio specific setup

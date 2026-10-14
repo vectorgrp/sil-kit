@@ -58,6 +58,9 @@ struct ParticipantAnnouncement
     RegistryMsgHeader messageHeader;
     SilKit::Core::VAsioPeerInfo peerInfo;
     std::string simulationName;
+    /// Participant configuration as JSON, only sent to the registry and only if the participant opted in.
+    /// Optional trailing field: omitted on the wire when empty, ignored by older registries.
+    std::string configurationJson;
 };
 
 struct ParticipantAnnouncementReply

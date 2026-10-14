@@ -174,10 +174,15 @@ bool operator==(const TimeSynchronization& lhs, const TimeSynchronization& rhs)
            && lhs.dynamicSimulationStep == rhs.dynamicSimulationStep;
 }
 
+bool operator==(const Management& lhs, const Management& rhs)
+{
+    return lhs.enable == rhs.enable && lhs.shareConfiguration == rhs.shareConfiguration;
+}
+
 bool operator==(const Experimental& lhs, const Experimental& rhs)
 {
     return lhs.timeSynchronization == rhs.timeSynchronization && lhs.metrics == rhs.metrics
-           && lhs.useReceiveBufferPool == rhs.useReceiveBufferPool;
+           && lhs.useReceiveBufferPool == rhs.useReceiveBufferPool && lhs.management == rhs.management;
 }
 
 bool operator==(const Label& lhs, const Label& rhs)
@@ -229,7 +234,7 @@ namespace V1 {
 
 bool operator==(const Experimental& lhs, const Experimental& rhs)
 {
-    return lhs.metrics == rhs.metrics;
+    return lhs.metrics == rhs.metrics && lhs.management == rhs.management;
 }
 
 } // namespace V1

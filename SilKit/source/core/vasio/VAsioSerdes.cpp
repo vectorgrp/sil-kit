@@ -76,6 +76,11 @@ inline MessageBuffer& operator<<(MessageBuffer& buffer, const ParticipantAnnounc
     else
     {
         buffer << announcement.messageHeader << announcement.peerInfo << announcement.simulationName;
+
+        if (!announcement.configurationJson.empty())
+        {
+            buffer << announcement.configurationJson;
+        }
     }
 
     return buffer;
@@ -99,6 +104,13 @@ inline MessageBuffer& operator>>(MessageBuffer& buffer, ParticipantAnnouncement&
         }
 
         buffer >> announcement.simulationName;
+
+        if (buffer.RemainingBytesLeft() == 0)
+        {
+            return buffer;
+        }
+
+        buffer >> announcement.configurationJson;
     }
     return buffer;
 }

@@ -1,0 +1,8 @@
+Description: Log to Stdout with Level Info and share the configuration with a registry that enables management
+Logging:
+  Sinks:
+    - Level: Info
+      Type: Stdout
+Experimental:
+  Management:
+    ShareConfiguration: true

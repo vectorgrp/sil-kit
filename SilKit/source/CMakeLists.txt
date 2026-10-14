@@ -11,6 +11,7 @@ add_subdirectory(extensions)
 add_subdirectory(capi)
 add_subdirectory(experimental)
 add_subdirectory(dashboard)
+add_subdirectory(management)
 
 find_package(Threads REQUIRED)
 
@@ -161,6 +162,7 @@ list(APPEND SilKitImplObjectLibraries
     O_SilKit_Core_VAsio
     O_SilKit_Experimental
     O_SilKit_Extensions
+    O_SilKit_Management
     O_SilKit_Experimental_NetworkSimulatorInternals
     O_SilKit_Services_Can
     O_SilKit_Services_Ethernet

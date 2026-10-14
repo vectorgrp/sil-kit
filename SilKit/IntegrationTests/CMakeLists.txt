@@ -219,6 +219,10 @@ add_silkit_test_to_executable(SilKitIntegrationTests
     SOURCES ITest_NetSimServiceDiscovery.cpp
 )
 
+add_silkit_test_to_executable(SilKitIntegrationTests
+    SOURCES ITest_Management.cpp
+)
+
 
 # ============================================================
 #  Integration Tests based on Demo Applications

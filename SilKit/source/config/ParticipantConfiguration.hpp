@@ -318,6 +318,19 @@ struct TimeSynchronization
 };
 
 // ================================================================================
+//  Management
+// ================================================================================
+
+//! \brief Structure that contains experimental management settings
+struct Management
+{
+    //! Registry only: host the management participant in the well-known management simulation.
+    bool enable{false};
+    //! Participant only: send the participant configuration to the registry when joining.
+    bool shareConfiguration{false};
+};
+
+// ================================================================================
 //  Experimental
 // ================================================================================
 
@@ -330,6 +343,7 @@ struct Experimental
     //! buffer per received message, so a payload used after its handler returned is a detectable
     //! use-after-free instead of silently reading the bytes of a later message.
     bool useReceiveBufferPool{true};
+    Management management;
 };
 
 // ================================================================================
@@ -408,6 +422,7 @@ bool operator==(const Middleware& lhs, const Middleware& rhs);
 bool operator==(const Includes& lhs, const Includes& rhs);
 bool operator==(const ParticipantConfiguration& lhs, const ParticipantConfiguration& rhs);
 bool operator==(const TimeSynchronization& lhs, const TimeSynchronization& rhs);
+bool operator==(const Management& lhs, const Management& rhs);
 bool operator==(const Experimental& lhs, const Experimental& rhs);
 bool operator==(const Label& lhs, const Label& rhs);
 bool operator==(const SimulatedNetwork& lhs, const SimulatedNetwork& rhs);
@@ -434,6 +449,7 @@ constexpr inline auto GetSchemaVersion() -> const char*
 struct Experimental
 {
     SilKit::Config::V1::Metrics metrics;
+    SilKit::Config::V1::Management management;
 };
 
 struct RegistryConfiguration
