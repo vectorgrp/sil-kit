@@ -8,7 +8,7 @@ Up to and including SIL Kit 5.0.7, `SilKit-X.Y.Z.msi` installed **per-user** by 
 
 - The 5.0.8 (or later) MSI can't detect or remove an earlier per-user installation, so both will be on the system side by side.
 - Upgrading still works. The new installer:
-  - removes the previous `VectorSilKitRegistry` service and installs the `SilKitRegistry` system service of the new version,
+  - disables ~~removes~~ the previous `VectorSilKitRegistry` service and installs the `SilKitRegistry` system service of the new version,
   - sets the `SilKit_InstallDir` environment variable to the new installation, and
   - updates the CMake `find_package` lookup to find the new installation.
 - Uninstalling the old version is **optional** and only cleans up. To do it, open *Settings > Apps > Installed apps* (or *Programs and Features*) **as the user who originally installed it** and uninstall the old SIL Kit entry.
