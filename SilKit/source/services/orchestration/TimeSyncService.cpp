@@ -98,11 +98,15 @@ public:
         if (_controller.State() == ParticipantState::Running && !_controller.StopRequested()
             && !_controller.PauseRequested())
         {
-            if (_lastSentNextSimTask
-                != _configuration->NextSimStep().timePoint) // Prevent sending same step more than once
+            const auto nextSimStep = _configuration->NextSimStep();
+            // Prevent sending same step more than once. With wall clock coupling, peers may wait on the wall
+            // clock of this participant, so every step is announced regardless of the run-ahead.
+            if (_lastSentNextSimTask != nextSimStep.timePoint
+                && (_controller.IsCoupledToWallClock()
+                    || _configuration->ShouldAnnounceNextSimStep(_lastSentNextSimTask)))
             {
-                _lastSentNextSimTask = _configuration->NextSimStep().timePoint;
-                _controller.SendMsg(_configuration->NextSimStep());
+                _lastSentNextSimTask = nextSimStep.timePoint;
+                _controller.SendMsg(nextSimStep);
             }
             // Bootstrap checked execution, in case there is no other participant.
             // Else, checked execution is initiated when we receive their NextSimTask messages.
@@ -332,7 +336,20 @@ TimeSyncService::TimeSyncService(Core::IParticipantInternal* participant, ITimeP
 
     participant->GetServiceDiscovery()->RegisterServiceDiscoveryHandler(
         [&](auto discoveryEventType, const Core::ServiceDescriptor& descriptor) {
-        if (descriptor.GetServiceType() == Core::ServiceType::InternalController)
+        if (descriptor.GetServiceType() == Core::ServiceType::Controller
+            || descriptor.GetServiceType() == Core::ServiceType::SimulatedController)
+        {
+            // Exact mode: a peer's messages take the smallest latency of the networks it has services on
+            if (discoveryEventType == Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated
+                && descriptor.GetParticipantName() != _participant->GetParticipantName()
+                && _timeConfiguration.AddPeerNetwork(descriptor.GetParticipantName(), descriptor.GetNetworkName())
+                && _timeConfiguration.IsExactModeEnabled() && _timeConfiguration.CurrentSimStep().timePoint >= 0ns)
+            {
+                // A smaller latency can block us on a peer that waits for a step we have not announced yet
+                ResendTimeAnnouncement();
+            }
+        }
+        else if (descriptor.GetServiceType() == Core::ServiceType::InternalController)
         {
             std::string controllerType;
             descriptor.GetSupplementalDataItem(Core::Discovery::controllerType, controllerType);
@@ -395,21 +412,7 @@ TimeSyncService::TimeSyncService(Core::IParticipantInternal* participant, ITimeP
                             _logger->MakeMessage(Logging::Level::Debug, TopicOf(*this))
                                 .SetMessage("Participant is joining an already running simulation. Resending our NextSimTask.")
                                 .Dispatch();
-
-                            if (GetTimeSyncPolicy()->IsExecutingSimStep())
-                            {
-                                _logger->MakeMessage(Logging::Level::Debug, TopicOf(*this))
-                                    .SetMessage("Sending currently executing simulation step")
-                                    .Dispatch();
-                                SendMsg(_timeConfiguration.CurrentSimStep());
-                            }
-                            else
-                            {
-                                _logger->MakeMessage(Logging::Level::Debug, TopicOf(*this))
-                                    .SetMessage("Sending next simulation step")
-                                    .Dispatch();
-                                SendMsg(_timeConfiguration.NextSimStep());
-                            }
+                            ResendTimeAnnouncement();
                         }
                     }
                     else if (discoveryEventType == Core::Discovery::ServiceDiscoveryEvent::Type::ServiceRemoved)
@@ -438,6 +441,32 @@ TimeSyncService::TimeSyncService(Core::IParticipantInternal* participant, ITimeP
 TimeSyncService::~TimeSyncService()
 {
     StopWallClockCouplingThread();
+    if (_deliverySchedulerRegistered)
+    {
+        _timeProvider->SetDeliveryScheduler(nullptr);
+    }
+}
+
+void TimeSyncService::ResendTimeAnnouncement()
+{
+    if (!_timeSyncPolicy)
+    {
+        return;
+    }
+    if (GetTimeSyncPolicy()->IsExecutingSimStep())
+    {
+        _logger->MakeMessage(Logging::Level::Debug, TopicOf(*this))
+            .SetMessage("Sending currently executing simulation step")
+            .Dispatch();
+        SendMsg(_timeConfiguration.CurrentSimStep());
+    }
+    else
+    {
+        _logger->MakeMessage(Logging::Level::Debug, TopicOf(*this))
+            .SetMessage("Sending next simulation step")
+            .Dispatch();
+        SendMsg(_timeConfiguration.NextSimStep());
+    }
 }
 
 bool TimeSyncService::IsSynchronizingVirtualTime()
@@ -548,6 +577,8 @@ void TimeSyncService::ExecuteSimStep(std::chrono::nanoseconds timePoint, std::ch
     }
 
     _timeProvider->SetTime(timePoint, duration);
+    // Exact mode: everything due in this step; Now() already returns its start
+    _inbox.ReleaseBefore(timePoint + duration);
 
     _simStepHandlerExecTimeMonitor.StartMeasurement();
     _watchDog.Start();
@@ -699,6 +730,17 @@ void TimeSyncService::StartTime()
             {
                 _participant->GetSystemController()->AbortSimulation();
             }
+        }
+
+        if (_timeConfiguration.IsExactModeEnabled()
+            && 2 * _timeConfiguration.NextSimStep().duration > _timeConfiguration.MinimalLatency())
+        {
+            _logger->MakeMessage(Logging::Level::Warn, TopicOf(*this))
+                .SetMessage("Exact mode: a latency of {}ns is less than twice the step size of {}ns. Participants will "
+                            "advance nearly in lockstep; at a latency below the step size, steps need peers to be "
+                            "ahead.",
+                            _timeConfiguration.MinimalLatency().count(), _timeConfiguration.NextSimStep().duration.count())
+                .Dispatch();
         }
 
         // Start the distributed time algorithm by sending our NextSimStep
@@ -880,6 +922,71 @@ void TimeSyncService::ConfigureDynamicStepSize(std::optional<bool> configured)
         _dynamicStepConfig = configured;
     }
     RecomputeDynamicStepEnabled();
+}
+
+void TimeSyncService::ConfigureMaxRunAhead(std::chrono::nanoseconds maxRunAhead)
+{
+    _timeConfiguration.SetMaxRunAhead(maxRunAhead);
+    if (maxRunAhead > 0ns)
+    {
+        _logger->MakeMessage(Logging::Level::Info, TopicOf(*this))
+            .SetMessage("Experimental: this participant may run up to {}ns ahead of other synchronized participants. "
+                        "Messages from participants behind may arrive with timestamps in the past.",
+                        maxRunAhead.count())
+            .Dispatch();
+    }
+}
+
+void TimeSyncService::ConfigureLatencies(std::chrono::nanoseconds latency,
+                                         const std::vector<Config::NetworkLatency>& perNetwork)
+{
+    std::map<std::string, std::chrono::nanoseconds> latencies;
+    for (const auto& entry : perNetwork)
+    {
+        latencies[entry.network] = entry.latency;
+    }
+    _timeConfiguration.SetLatencies(latency, latencies);
+
+    if (_timeConfiguration.IsExactModeEnabled() && !_deliverySchedulerRegistered)
+    {
+        _timeProvider->SetDeliveryScheduler(this);
+        _deliverySchedulerRegistered = true;
+
+        std::string perNetworkText;
+        for (const auto& entry : latencies)
+        {
+            perNetworkText += " " + entry.first + "=" + std::to_string(entry.second.count()) + "ns";
+        }
+        _logger->MakeMessage(Logging::Level::Info, TopicOf(*this))
+            .SetMessage("Experimental exact mode: messages from other synchronized participants are delivered {}ns "
+                        "after they were sent (per network:{}).",
+                        latency.count(), perNetworkText.empty() ? std::string{" none"} : perNetworkText)
+            .Dispatch();
+    }
+}
+
+auto TimeSyncService::LatencyOf(const std::string& linkName) const -> std::chrono::nanoseconds
+{
+    return _timeConfiguration.LatencyOf(linkName);
+}
+
+void TimeSyncService::Schedule(std::chrono::nanoseconds sendTime, std::chrono::nanoseconds dueTime,
+                               const std::string& senderParticipant, const std::string& senderService,
+                               std::function<void()> deliver)
+{
+    _inbox.Schedule(dueTime, senderParticipant, senderService, std::move(deliver));
+    // The sender's progress may unblock our next step. The update reads the latest bounds, so one pending at a
+    // time covers every raise until it starts.
+    if (_timeConfiguration.RaiseSendTimeBound(senderParticipant, sendTime) && !_progressUpdatePending.exchange(true))
+    {
+        _participant->ExecuteDeferred([this] {
+            _progressUpdatePending = false;
+            if (_timeSyncPolicy)
+            {
+                GetTimeSyncPolicy()->ProcessSimulationTimeUpdate();
+            }
+        });
+    }
 }
 
 void TimeSyncService::RecomputeDynamicStepEnabled()

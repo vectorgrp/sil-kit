@@ -28,6 +28,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <iterator>
 #include <cmath>
 #include <fstream>
+#include <functional>
+#include <limits>
+#include <random>
 
 #include "silkit/SilKit.hpp"
 #include "silkit/SilKitVersion.hpp"
@@ -69,7 +72,20 @@ static void PrintUsage(const std::string& executableName)
         << "\t--number-simulation-runs\tSets the number of simulation runs to perform to NUM. Default: 4" << std::endl
         << "\t--simulation-step-size\tSets the simulation step size (virtual time) to MILLISECONDS. Default: 1ms"
         << std::endl
+        << "\t--simulation-step-size-us\tSets the simulation step size (virtual time) to MICROSECONDS instead."
+        << std::endl
         << "\t--simulation-duration\tSets the simulation duration (virtual time) to SECONDS. Default: 1s" << std::endl
+        << "\t--compute-us\tBusy-waits MICROSECONDS in every simulation step to emulate computation. Default: 0"
+        << std::endl
+        << "\t--compute-jitter-us\tAdds a random busy-wait of up to MICROSECONDS to every simulation step. Default: 0"
+        << std::endl
+        << "\t--quiet-participants\tThe last NUM participants send no messages. Default: 0" << std::endl
+        << "\t--sync-mode\tTime synchronization of all participants: lockstep (classic), max-run-ahead or exact."
+        << " Default: as in the configuration file" << std::endl
+        << "\t--latency\tWith --sync-mode exact: how long after sending messages are delivered, in (fractional)"
+        << " MILLISECONDS. Default: 5" << std::endl
+        << "\t--max-run-ahead\tWith --sync-mode max-run-ahead: how far participants may run ahead, in (fractional)"
+        << " MILLISECONDS. Default: 5" << std::endl
         << "\t--service\tSets the service type (pubsub, can or ethernet). Default: pubsub" << std::endl
         << "\t--configuration\tPath and filename of the participant configuration YAML or JSON file. Default: empty"
         << std::endl
@@ -81,6 +97,15 @@ enum class ServiceType
     PubSub,
     Can,
     Ethernet
+};
+
+//! The time synchronization algorithm all participants use
+enum class SyncMode
+{
+    AsConfigured, //!< whatever the configuration file says (lockstep by default)
+    Lockstep,     //!< classic: no participant starts a step before all others announced they reached it
+    MaxRunAhead,  //!< bounded run-ahead: participants may run up to MaxRunAhead ahead of the others
+    Exact         //!< exact mode: messages are delivered Latency after they were sent, participants run ahead by it
 };
 
 static std::ostream& operator<<(std::ostream& outStream, const ServiceType& service)
@@ -106,7 +131,7 @@ struct BenchmarkConfig
 {
     uint32_t numberOfSimulationRuns = 4;
     std::chrono::seconds simulationDuration = 1s;
-    std::chrono::milliseconds simulationStepSize = 1ms;
+    std::chrono::nanoseconds simulationStepSize = 1ms;
     uint32_t numberOfParticipants = 2;
     uint32_t messageCount = 50;
     uint32_t messageSizeInBytes = 1000;
@@ -114,6 +139,122 @@ struct BenchmarkConfig
     std::string silKitConfigPath = "";
     std::string writeCsv = "";
     ServiceType service = ServiceType::PubSub;
+    std::chrono::microseconds computeTime = 0us;
+    std::chrono::microseconds computeJitter = 0us;
+    uint32_t quietParticipants = 0;
+    SyncMode syncMode = SyncMode::AsConfigured;
+    double maxRunAheadMs = std::numeric_limits<double>::quiet_NaN(); // NaN: not given
+    double latencyMs = std::numeric_limits<double>::quiet_NaN();     // NaN: not given
+};
+
+//! The time synchronization settings the benchmark imposes on all participants
+struct TimeSyncSettings
+{
+    bool imposed{false}; //!< false: leave the configuration as it is
+    double maxRunAheadMs{0.0};
+    double latencyMs{0.0};
+};
+
+static auto ImposedTimeSync(const BenchmarkConfig& benchmark) -> TimeSyncSettings
+{
+    switch (benchmark.syncMode)
+    {
+    case SyncMode::Lockstep:
+        return {true, 0.0, 0.0};
+    case SyncMode::MaxRunAhead:
+        return {true, std::isnan(benchmark.maxRunAheadMs) ? 5.0 : benchmark.maxRunAheadMs, 0.0};
+    case SyncMode::Exact:
+        return {true, 0.0, std::isnan(benchmark.latencyMs) ? 5.0 : benchmark.latencyMs};
+    default:
+        return {};
+    }
+}
+
+static auto TimeSyncLabel(const TimeSyncSettings& settings) -> std::string
+{
+    std::ostringstream label;
+    if (!settings.imposed)
+    {
+        label << "as configured";
+    }
+    else if (settings.latencyMs > 0.0)
+    {
+        label << "exact (" << settings.latencyMs << "ms latency)";
+    }
+    else if (settings.maxRunAheadMs > 0.0)
+    {
+        label << "max-run-ahead (" << settings.maxRunAheadMs << "ms)";
+    }
+    else
+    {
+        label << "lockstep";
+    }
+    return label.str();
+}
+
+// Where the timestamp of a received message lies relative to the receiver's simulation step [now, now + step size]:
+// within it is on time, before it is late (the receiver ran ahead of the sender), beyond it is early (the sender
+// ran ahead of the receiver).
+struct ReceptionTiming
+{
+    uint64_t received{0};
+    uint64_t late{0};
+    uint64_t early{0};
+    std::chrono::nanoseconds sumLateness{0};
+    std::chrono::nanoseconds maxLateness{0};
+    std::chrono::nanoseconds maxEarliness{0};
+    // FNV-1a over (receiver time, timestamp, sender) in delivery order, up to a cutoff every participant reaches
+    // before the simulation stops: equal digests mean identical deliveries
+    uint64_t digest{14695981039346656037ull};
+    std::chrono::nanoseconds digestCutoff{std::chrono::nanoseconds::max()};
+
+    void Record(std::chrono::nanoseconds timestamp, std::chrono::nanoseconds now, std::chrono::nanoseconds stepSize,
+                uint8_t senderTag)
+    {
+        if (now < digestCutoff)
+        {
+            Mix(static_cast<uint64_t>(now.count()));
+            Mix(static_cast<uint64_t>(timestamp.count()));
+            Mix(senderTag);
+        }
+
+        if (now < 0ns)
+        {
+            // No step executed yet, the upcoming one starts at 0
+            now = -stepSize;
+        }
+        received++;
+        if (timestamp < now)
+        {
+            late++;
+            sumLateness += now - timestamp;
+            maxLateness = std::max(maxLateness, now - timestamp);
+        }
+        else if (timestamp > now + stepSize)
+        {
+            early++;
+            maxEarliness = std::max(maxEarliness, timestamp - (now + stepSize));
+        }
+    }
+
+    void Merge(const ReceptionTiming& other)
+    {
+        received += other.received;
+        late += other.late;
+        early += other.early;
+        sumLateness += other.sumLateness;
+        maxLateness = std::max(maxLateness, other.maxLateness);
+        maxEarliness = std::max(maxEarliness, other.maxEarliness);
+    }
+
+private:
+    void Mix(uint64_t value)
+    {
+        for (int i = 0; i < 8; ++i)
+        {
+            digest = (digest ^ ((value >> (8 * i)) & 0xff)) * 1099511628211ull;
+        }
+    }
 };
 
 static bool Parse(int argc, char** argv, BenchmarkConfig& config)
@@ -207,11 +348,29 @@ static bool Parse(int argc, char** argv, BenchmarkConfig& config)
     parseOptional("--message-count", config.messageCount, asNum);
     parseOptional("--number-participants", config.numberOfParticipants, asNum);
     parseOptional("--number-simulation-runs", config.numberOfSimulationRuns, asNum);
-    parseOptional("--simulation-step-size", config.simulationStepSize, asNum);
+    parseOptional("--simulation-step-size", config.simulationStepSize,
+                  [&asNum](const auto& a) { return std::chrono::milliseconds{asNum(a)}; });
+    parseOptional("--simulation-step-size-us", config.simulationStepSize,
+                  [&asNum](const auto& a) { return std::chrono::microseconds{asNum(a)}; });
     parseOptional("--simulation-duration", config.simulationDuration, asNum);
     parseOptional("--service", config.service, asServiceType);
     parseOptional("--configuration", config.silKitConfigPath, asStr);
     parseOptional("--write-csv", config.writeCsv, asStr);
+    parseOptional("--compute-us", config.computeTime, asNum);
+    parseOptional("--compute-jitter-us", config.computeJitter, asNum);
+    parseOptional("--quiet-participants", config.quietParticipants, asNum);
+    parseOptional("--sync-mode", config.syncMode, [](const auto& a) {
+        const auto mode = std::string{a};
+        if (mode == "lockstep")
+            return SyncMode::Lockstep;
+        if (mode == "max-run-ahead")
+            return SyncMode::MaxRunAhead;
+        if (mode == "exact")
+            return SyncMode::Exact;
+        throw std::runtime_error{"unknown sync mode \"" + mode + "\", expected lockstep, max-run-ahead or exact"};
+    });
+    parseOptional("--max-run-ahead", config.maxRunAheadMs, [](const auto& a) { return std::stod(std::string{a}); });
+    parseOptional("--latency", config.latencyMs, [](const auto& a) { return std::stod(std::string{a}); });
 
     //check unknown long options
     for (const auto& arg : args)
@@ -314,6 +473,38 @@ static bool Validate(const BenchmarkConfig& config)
         return false;
     }
 
+    if (!std::isnan(config.maxRunAheadMs) && config.syncMode != SyncMode::MaxRunAhead)
+    {
+        std::cout << "Invalid argument: --max-run-ahead requires --sync-mode max-run-ahead." << std::endl;
+        return false;
+    }
+
+    if (!std::isnan(config.maxRunAheadMs) && config.maxRunAheadMs <= 0.0)
+    {
+        std::cout << "Invalid argument: --max-run-ahead must be greater than 0; use --sync-mode lockstep instead."
+                  << std::endl;
+        return false;
+    }
+
+    if (!std::isnan(config.latencyMs) && config.syncMode != SyncMode::Exact)
+    {
+        std::cout << "Invalid argument: --latency requires --sync-mode exact." << std::endl;
+        return false;
+    }
+
+    if (!std::isnan(config.latencyMs) && config.latencyMs <= 0.0)
+    {
+        std::cout << "Invalid argument: --latency must be greater than 0; use --sync-mode lockstep instead."
+                  << std::endl;
+        return false;
+    }
+
+    if (config.quietParticipants >= config.numberOfParticipants)
+    {
+        std::cout << "Invalid argument: At least one participant must not be quiet." << std::endl;
+        return false;
+    }
+
     return true;
 }
 
@@ -338,27 +529,34 @@ static void CheckAndTruncateMessageSize(BenchmarkConfig& benchmark)
     }
 }
 
-static void PublishMessages(IDataPublisher* publisher, uint32_t messageCount, uint32_t messageSizeInBytes)
+static void PublishMessages(IDataPublisher* publisher, uint32_t messageCount, uint32_t messageSizeInBytes,
+                            uint8_t publisherTag)
 {
     std::vector<uint8_t> data(messageSizeInBytes, '*');
+    // Lets subscribers tell their own publications (self delivery) from those of other participants
+    data[0] = publisherTag;
     for (uint32_t i = 0; i < messageCount; i++)
     {
         publisher->Publish(SilKit::Util::ToSpan(data));
     }
 }
 
-static void SendEthernetFrames(IEthernetController* ethernetController, uint32_t messageCount, uint32_t messageSizeInBytes)
+static void SendEthernetFrames(IEthernetController* ethernetController, uint32_t messageCount, uint32_t messageSizeInBytes,
+                               uint8_t senderTag)
 {
     std::vector<uint8_t> frameData(messageSizeInBytes, '*');
+    frameData[0] = senderTag;
     for (uint32_t i = 0; i < messageCount; i++)
     {
         ethernetController->SendFrame(EthernetFrame{SilKit::Util::ToSpan(frameData)});
     }
 }
 
-static void SendCanFrames(ICanController* canController, uint32_t messageCount, uint32_t messageSizeInBytes)
+static void SendCanFrames(ICanController* canController, uint32_t messageCount, uint32_t messageSizeInBytes,
+                          uint8_t senderTag)
 {
     std::vector<uint8_t> frameData(messageSizeInBytes, '*');
+    frameData[0] = senderTag;
     for (uint32_t i = 0; i < messageCount; i++)
     {
         CanFrame canFrame{};
@@ -368,12 +566,28 @@ static void SendCanFrames(ICanController* canController, uint32_t messageCount, 
     }
 }
 
+static void BusyWait(std::chrono::nanoseconds duration)
+{
+    const auto until = std::chrono::steady_clock::now() + duration;
+    while (std::chrono::steady_clock::now() < until)
+    {
+    }
+}
+
 static void ParticipantsThread(std::shared_ptr<SilKit::Config::IParticipantConfiguration> config,
-                        const BenchmarkConfig& benchmark, const std::string& participantName, uint32_t participantIndex)
+                        const BenchmarkConfig& benchmark, const std::string& participantName, uint32_t participantIndex,
+                        ReceptionTiming* receptionTiming, std::chrono::nanoseconds* lastStep)
 {
     auto participant = SilKit::CreateParticipant(config, participantName, benchmark.registryUri);
     auto* lifecycleService = participant->CreateLifecycleService({OperationMode::Coordinated});
     auto* timeSyncService = lifecycleService->CreateTimeSyncService();
+
+    // Reception handlers and the simulation step handler all run on the participant's I/O thread
+    const auto recordTiming = [timeSyncService, receptionTiming, stepSize = benchmark.simulationStepSize](
+                                  std::chrono::nanoseconds timestamp, uint8_t senderTag) {
+        receptionTiming->Record(timestamp, timeSyncService->Now(), stepSize, senderTag);
+    };
+    const auto tagOf = [](const auto& bytes) { return bytes.size() > 0 ? static_cast<uint8_t>(bytes[0]) : uint8_t{0}; };
 
     IDataPublisher* publisher = nullptr;
     IEthernetController* ethernetController = nullptr;
@@ -386,20 +600,29 @@ static void ParticipantsThread(std::shared_ptr<SilKit::Config::IParticipantConfi
         SilKit::Services::PubSub::PubSubSpec dataSpec{"Topic", {}};
         SilKit::Services::PubSub::PubSubSpec matchingDataSpec{"Topic", {}};
         publisher = participant->CreateDataPublisher("PubCtrl1", dataSpec, 0);
-        participant->CreateDataSubscriber("SubCtrl1", matchingDataSpec, [](auto*, auto&) {});
+        const auto ownTag = static_cast<uint8_t>(participantIndex);
+        participant->CreateDataSubscriber("SubCtrl1", matchingDataSpec, [recordTiming, ownTag](auto*, const auto& event) {
+            if (event.data.size() > 0 && event.data[0] != ownTag)
+            {
+                recordTiming(event.timestamp, event.data[0]);
+            }
+        });
         break;
     }
     case ServiceType::Ethernet:
     {
         ethernetController = participant->CreateEthernetController("Eth1", "Eth1");
-        ethernetController->AddFrameHandler([](auto*, auto&) {});
+        ethernetController->AddFrameHandler(
+            [recordTiming, tagOf](auto*, const auto& event) { recordTiming(event.timestamp, tagOf(event.frame.raw)); });
         lifecycleService->SetCommunicationReadyHandler([ethernetController]() { ethernetController->Activate(); });
         break;
     }
     case ServiceType::Can:
     {
         canController = participant->CreateCanController("CAN1", "CAN1");
-        canController->AddFrameHandler([](auto*, auto&) {});
+        canController->AddFrameHandler([recordTiming, tagOf](auto*, const auto& event) {
+            recordTiming(event.timestamp, tagOf(event.frame.dataField));
+        });
         lifecycleService->SetCommunicationReadyHandler([canController]() {
             canController->SetBaudRate(10'000, 1'000'000, 2'000'000);
             canController->Start();
@@ -409,7 +632,12 @@ static void ParticipantsThread(std::shared_ptr<SilKit::Config::IParticipantConfi
     }
 
     const auto isVerbose = participantIndex == 0;
-    timeSyncService->SetSimulationStepHandler([=](std::chrono::nanoseconds now, const auto /*duration*/) {
+    const auto isQuiet = participantIndex >= benchmark.numberOfParticipants - benchmark.quietParticipants;
+    std::mt19937 random{participantIndex};
+    std::uniform_int_distribution<std::chrono::nanoseconds::rep> jitter{
+        0, std::chrono::nanoseconds{benchmark.computeJitter}.count()};
+    timeSyncService->SetSimulationStepHandler([=](std::chrono::nanoseconds now, const auto /*duration*/) mutable {
+        *lastStep = now;
         if (now == benchmark.simulationDuration)
         {
             lifecycleService->Stop("Simulation done");
@@ -428,21 +656,30 @@ static void ParticipantsThread(std::shared_ptr<SilKit::Config::IParticipantConfi
             }
         }
 
+        BusyWait(benchmark.computeTime + std::chrono::nanoseconds{jitter(random)});
+        if (isQuiet)
+        {
+            return;
+        }
+
         switch (benchmark.service)
         {
         case ServiceType::PubSub:
         {
-            PublishMessages(publisher, benchmark.messageCount, benchmark.messageSizeInBytes);
+            PublishMessages(publisher, benchmark.messageCount, benchmark.messageSizeInBytes,
+                            static_cast<uint8_t>(participantIndex));
             break;
         }
         case ServiceType::Ethernet:
         {
-            SendEthernetFrames(ethernetController, benchmark.messageCount, benchmark.messageSizeInBytes);
+            SendEthernetFrames(ethernetController, benchmark.messageCount, benchmark.messageSizeInBytes,
+                               static_cast<uint8_t>(participantIndex));
             break;
         }
         case ServiceType::Can:
         {
-            SendCanFrames(canController, benchmark.messageCount, benchmark.messageSizeInBytes);
+            SendCanFrames(canController, benchmark.messageCount, benchmark.messageSizeInBytes,
+                          static_cast<uint8_t>(participantIndex));
             break;
         }
         }
@@ -484,7 +721,12 @@ static void PrintParameters(BenchmarkConfig benchmark)
               << std::left << std::setw(39) << "- Message size (bytes): " << benchmark.messageSizeInBytes << std::endl
               << std::left << std::setw(39) << "- Registry URI: " << benchmark.registryUri << std::endl
               << std::left << std::setw(39) << "- Configuration: " << benchmark.silKitConfigPath << std::endl
-              << std::left << std::setw(39) << "- CSV output: " << benchmark.writeCsv << std::endl;
+              << std::left << std::setw(39) << "- CSV output: " << benchmark.writeCsv << std::endl
+              << std::left << std::setw(39) << "- Compute per step (busy wait): " << benchmark.computeTime.count()
+              << "us + up to " << benchmark.computeJitter.count() << "us jitter" << std::endl
+              << std::left << std::setw(39) << "- Quiet participants: " << benchmark.quietParticipants << std::endl
+              << std::left << std::setw(39) << "- Time synchronization: " << TimeSyncLabel(ImposedTimeSync(benchmark))
+              << std::endl;
 }
 
 template <typename T>
@@ -504,9 +746,300 @@ std::pair<T, T> mean_and_error(const std::vector<T>& vec)
     return std::make_pair(mean, std::sqrt(std::accumulate(vec.begin(), vec.end(), 0.0, variance_func)));
 }
 
+struct BenchmarkResult
+{
+    TimeSyncSettings timeSync;
+    std::vector<uint64_t> runDigests;
+    std::pair<double, double> duration;
+    std::pair<double, double> speedup;
+    std::pair<double, double> throughput;
+    std::pair<double, double> messageRate;
+    size_t numberMessages{0};
+    ReceptionTiming receptionTiming;
+    uint32_t incompleteRuns{0};
+
+    auto MeanLatenessUs() const -> double
+    {
+        return receptionTiming.late == 0 ? 0.0 : ToUs(receptionTiming.sumLateness) / receptionTiming.late;
+    }
+
+    static auto ToUs(std::chrono::nanoseconds d) -> double
+    {
+        return std::chrono::duration<double, std::micro>{d}.count();
+    }
+
+    bool DigestsIdentical() const
+    {
+        return std::adjacent_find(runDigests.begin(), runDigests.end(), std::not_equal_to<uint64_t>{})
+               == runDigests.end();
+    }
+};
+
+// --sync-mode is layered on top of --configuration via an include. The configuration file must not set
+// MaxRunAhead or Latency itself: the 0 of lockstep is the default value and would lose against the file.
+static auto MakeParticipantConfiguration(const BenchmarkConfig& benchmark, const TimeSyncSettings& timeSync)
+    -> std::shared_ptr<SilKit::Config::IParticipantConfiguration>
+{
+    if (!timeSync.imposed)
+    {
+        if (benchmark.silKitConfigPath.empty())
+        {
+            return SilKit::Config::ParticipantConfigurationFromString("{}");
+        }
+        return SilKit::Config::ParticipantConfigurationFromFile(benchmark.silKitConfigPath);
+    }
+
+    std::ostringstream yaml;
+    if (!benchmark.silKitConfigPath.empty())
+    {
+        std::ifstream file{benchmark.silKitConfigPath};
+        const std::string content{std::istreambuf_iterator<char>{file}, std::istreambuf_iterator<char>{}};
+        if (content.find("MaxRunAhead") != std::string::npos || content.find("Latency") != std::string::npos)
+        {
+            throw SilKit::ConfigurationError{"Set MaxRunAhead and Latency either in the configuration file or with "
+                                             "--sync-mode, not both."};
+        }
+
+        // Single-quoted YAML keeps Windows backslashes literal; quotes are escaped by doubling them
+        auto path = benchmark.silKitConfigPath;
+        for (auto pos = path.find('\''); pos != std::string::npos; pos = path.find('\'', pos + 2))
+        {
+            path.insert(pos, 1, '\'');
+        }
+        yaml << "Includes:\n  Files:\n    - '" << path << "'\n";
+    }
+    yaml << "Experimental:\n  TimeSynchronization:\n    MaxRunAhead: " << timeSync.maxRunAheadMs
+         << "\n    Latency: " << timeSync.latencyMs << "\n";
+    return SilKit::Config::ParticipantConfigurationFromString(yaml.str());
+}
+
+static auto RunSimulations(const BenchmarkConfig& benchmark,
+                           std::shared_ptr<SilKit::Config::IParticipantConfiguration> config,
+                           const TimeSyncSettings& timeSync) -> BenchmarkResult
+{
+    BenchmarkResult result;
+    result.timeSync = timeSync;
+    std::vector<std::chrono::nanoseconds> measuredRealDurations;
+
+    for (uint32_t simulationRun = 1; simulationRun <= benchmark.numberOfSimulationRuns; simulationRun++)
+    {
+        std::cout << "> Simulation " << simulationRun << ": ";
+        auto startTimestamp = std::chrono::high_resolution_clock::now();
+
+        std::vector<std::string> participantNames;
+        std::vector<std::thread> threads;
+        std::vector<ReceptionTiming> receptionTimings(benchmark.numberOfParticipants);
+        // The first participant to reach the end stops everyone, the others may still be a window behind
+        const auto window = std::chrono::duration_cast<std::chrono::nanoseconds>(
+            std::chrono::duration<double, std::milli>{std::max(timeSync.maxRunAheadMs, timeSync.latencyMs)});
+        for (auto& receptionTiming : receptionTimings)
+        {
+            receptionTiming.digestCutoff =
+                std::chrono::nanoseconds{benchmark.simulationDuration} - 2 * (window + benchmark.simulationStepSize);
+        }
+        std::vector<std::chrono::nanoseconds> lastSteps(benchmark.numberOfParticipants, -1ns);
+        for (uint32_t participantIndex = 0; participantIndex < benchmark.numberOfParticipants; participantIndex++)
+        {
+            std::string participantName = "Participant" + std::to_string(participantIndex);
+            participantNames.push_back(participantName);
+            threads.emplace_back(&ParticipantsThread, config, benchmark, participantName, participantIndex,
+                                 &receptionTimings[participantIndex], &lastSteps[participantIndex]);
+        }
+
+        const auto systemControllerName = "SystemController";
+        participantNames.push_back(systemControllerName);
+        auto systemControllerParticipant =
+            SilKit::CreateParticipant(config, systemControllerName, benchmark.registryUri);
+        auto systemController =
+            SilKit::Experimental::Participant::CreateSystemController(systemControllerParticipant.get());
+        systemController->SetWorkflowConfiguration({participantNames});
+        auto lifecycleService = systemControllerParticipant->CreateLifecycleService({OperationMode::Coordinated});
+        auto lifecycleFuture = lifecycleService->StartLifecycle();
+        lifecycleFuture.get();
+
+        for (auto&& thread : threads)
+        {
+            thread.join();
+        }
+        uint64_t runDigest = 0;
+        for (const auto& receptionTiming : receptionTimings)
+        {
+            result.receptionTiming.Merge(receptionTiming);
+            runDigest = (runDigest ^ receptionTiming.digest) * 1099511628211ull;
+        }
+        result.runDigests.push_back(runDigest);
+        // With run-ahead, the others may be behind when the first participant reaches the end and stops
+        // the simulation, but by much less than this
+        const auto slowestLastStep = *std::min_element(lastSteps.begin(), lastSteps.end());
+        const bool incomplete = slowestLastStep < std::chrono::nanoseconds{benchmark.simulationDuration} * 99 / 100;
+        if (incomplete)
+        {
+            result.incompleteRuns++;
+        }
+
+        systemControllerParticipant.reset();
+
+        auto endTimestamp = std::chrono::high_resolution_clock::now();
+        measuredRealDurations.emplace_back(endTimestamp - startTimestamp);
+        std::cout << "  " << measuredRealDurations.back() << "  digest " << std::hex << runDigest << std::dec;
+        if (incomplete)
+        {
+            std::cout << "  INCOMPLETE: the slowest participant only reached " << slowestLastStep;
+        }
+        std::cout << std::endl;
+    }
+
+    std::vector<double> measuredRealDurationsSeconds(measuredRealDurations.size());
+    std::transform(measuredRealDurations.begin(), measuredRealDurations.end(), measuredRealDurationsSeconds.begin(),
+                   [](auto d) { return static_cast<double>(d.count() / 1e9); });
+
+    result.duration = mean_and_error(measuredRealDurationsSeconds);
+
+    const auto numberSimulationSteps = static_cast<size_t>(benchmark.simulationDuration / benchmark.simulationStepSize);
+    // fully connected network topology
+    result.numberMessages = numberSimulationSteps * benchmark.messageCount
+                            * (benchmark.numberOfParticipants - benchmark.quietParticipants)
+                            * (benchmark.numberOfParticipants - 1);
+
+    // Reoccuring factor from error propagation
+    const auto sigmaDurOverDurSqr = result.duration.second / result.duration.first / result.duration.first;
+
+    // Byte throughput mean and error (Byte to Mebi and ns to s)
+    const auto throughputPrefac = result.numberMessages * benchmark.messageSizeInBytes / 1024.0 / 1024.0;
+    result.throughput =
+        std::make_pair(throughputPrefac / result.duration.first, throughputPrefac * sigmaDurOverDurSqr);
+
+    // Message rate mean and error
+    result.messageRate =
+        std::make_pair(result.numberMessages / result.duration.first, result.numberMessages * sigmaDurOverDurSqr);
+
+    // Speedup mean and error
+    result.speedup = std::make_pair(benchmark.simulationDuration.count() / result.duration.first,
+                                    benchmark.simulationDuration.count() * sigmaDurOverDurSqr);
+    return result;
+}
+
+static void PrintResult(const BenchmarkConfig& benchmark, const BenchmarkResult& result)
+{
+    if (benchmark.numberOfSimulationRuns > 1)
+    {
+        std::cout << std::endl << "Averages over all simulation runs:" << std::endl << std::endl;
+    }
+    else
+    {
+        std::cout << std::endl << "Result of the simulation run:" << std::endl << std::endl;
+    }
+
+    // Stream helper to combine value and unit to use it with std::setw as a whole
+    std::ostringstream averageDurationWithUnit;
+    averageDurationWithUnit.precision(3);
+    averageDurationWithUnit << result.duration.first << "s";
+
+    std::ostringstream averageThroughputWithUnit;
+    averageThroughputWithUnit.precision(3);
+    averageThroughputWithUnit << result.throughput.first << " MiB/s";
+
+    std::ostringstream averageMsgRateWithUnit;
+    averageMsgRateWithUnit << static_cast<int>(result.messageRate.first) << " 1/s";
+
+    const auto& timing = result.receptionTiming;
+    std::cout << std::setw(39) << "- Time synchronization: " << TimeSyncLabel(result.timeSync) << std::endl
+
+              << std::setw(39) << "- Realtime duration (runtime): " << std::setw(13) << averageDurationWithUnit.str()
+              << " +/- " << result.duration.second << "s" << std::endl
+
+              << std::setw(39) << "- Speedup (virtual time/runtime): " << std::setw(13) << result.speedup.first
+              << " +/- " << result.speedup.second << std::endl
+
+              << std::setw(39) << "- Throughput (data size/runtime): " << std::setw(13)
+              << averageThroughputWithUnit.str() << " +/- " << result.throughput.second << " MiB/s" << std::endl
+
+              << std::setw(39) << "- Message rate (count/runtime): " << std::setw(13) << averageMsgRateWithUnit.str()
+              << " +/- " << static_cast<int>(result.messageRate.second) << " 1/s" << std::endl
+
+              << std::left << std::setw(39) << "- Total number of messages: " << result.numberMessages << std::endl
+
+              << std::left << std::setw(39) << "- Received messages (all runs): " << timing.received << std::endl
+              << std::left << std::setw(39) << "- Late (before receiver's step): " << timing.late << ", mean "
+              << result.MeanLatenessUs() << "us, max " << BenchmarkResult::ToUs(timing.maxLateness) << "us"
+              << std::endl
+              << std::left << std::setw(39) << "- Early (beyond receiver's step): " << timing.early << ", max "
+              << BenchmarkResult::ToUs(timing.maxEarliness) << "us" << std::endl
+              << std::left << std::setw(39) << "- Incomplete runs: " << result.incompleteRuns << std::endl
+              << std::left << std::setw(39) << "- Delivery digests: "
+              << (result.DigestsIdentical() ? "identical in all runs" : "differ between runs") << std::endl
+              << std::endl
+              << std::endl;
+}
+
+static void WriteCsv(const BenchmarkConfig& benchmark, const BenchmarkResult& result)
+{
+    std::stringstream csvHeader;
+    csvHeader << "# SilKitBenchmarkDemo, SIL Kit Version " << SilKit::Version::String();
+    const auto csvColumns = "numRuns; participants; messageSize; messageCount; duration(virtual time, s); "
+                            "stepSize(virtual time, ms); "
+                            "numberMessageSent; runtime(s); runtime_err; throughput(MiB/s); "
+                            "throughput_err; speedup; speedup_err; messageRate(1/s); messageRate_err; "
+                            "compute(us); computeJitter(us); quietParticipants; received; late; "
+                            "meanLateness(us); maxLateness(us); early; maxEarliness(us); incompleteRuns; "
+                            "maxRunAhead(ms); service; latency(ms); digestsIdentical";
+    std::fstream csvFile;
+    csvFile.open(benchmark.writeCsv, std::ios_base::in | std::ios_base::out); // Try to open
+    bool csvValid{true};
+    if (!csvFile.is_open())
+    {
+        // File doesn't exist, create new file and write header
+        csvFile.open(benchmark.writeCsv, std::ios_base::in | std::ios_base::out | std::ios_base::trunc);
+        csvFile << csvHeader.str() << std::endl;
+        csvFile << csvColumns << std::endl;
+    }
+    else
+    {
+        // File is there, check if header is valid
+        std::string header;
+        std::getline(csvFile, header);
+        csvFile.clear();
+        if (header != csvHeader.str())
+        {
+            std::cerr << "Invalid header in file \"" << benchmark.writeCsv << "\"." << std::endl;
+            csvValid = false;
+        }
+    }
+    if (csvValid)
+    {
+        const auto& timing = result.receptionTiming;
+        // Append data
+        csvFile.seekp(0, std::ios_base::end);
+        csvFile << benchmark.numberOfSimulationRuns << ";" << benchmark.numberOfParticipants << ";"
+                << benchmark.messageSizeInBytes << ";" << benchmark.messageCount << ";"
+                << benchmark.simulationDuration.count() << ";"
+                << std::chrono::duration<double, std::milli>{benchmark.simulationStepSize}.count() << ";"
+                << result.numberMessages << ";" << result.duration.first << ";" << result.duration.second << ";"
+                << result.throughput.first << ";" << result.throughput.second << ";" << result.speedup.first << ";"
+                << result.speedup.second << ";" << result.messageRate.first << ";" << result.messageRate.second
+                << ";" << benchmark.computeTime.count() << ";" << benchmark.computeJitter.count() << ";"
+                << benchmark.quietParticipants << ";" << timing.received << ";" << timing.late << ";"
+                << result.MeanLatenessUs() << ";" << BenchmarkResult::ToUs(timing.maxLateness) << ";"
+                << timing.early << ";" << BenchmarkResult::ToUs(timing.maxEarliness) << ";"
+                << result.incompleteRuns << ";";
+        if (result.timeSync.imposed)
+        {
+            csvFile << result.timeSync.maxRunAheadMs;
+        }
+        csvFile << ";" << benchmark.service << ";";
+        if (result.timeSync.imposed)
+        {
+            csvFile << result.timeSync.latencyMs;
+        }
+        csvFile << ";" << (result.DigestsIdentical() ? 1 : 0) << std::endl;
+    }
+    csvFile.close();
+}
+
 /**************************************************************************************************
 * Main Function
 **************************************************************************************************/
+
 int main(int argc, char** argv)
 {
     std::cout.precision(3);
@@ -522,171 +1055,16 @@ int main(int argc, char** argv)
 
     try
     {
-        std::shared_ptr<SilKit::Config::IParticipantConfiguration> config;
-        if (benchmark.silKitConfigPath == "")
-        {
-            config = SilKit::Config::ParticipantConfigurationFromString("{}");
-        }
-        else
-        {
-            config = SilKit::Config::ParticipantConfigurationFromFile(benchmark.silKitConfigPath);
-        }
-
         std::unique_ptr<SilKit::Vendor::Vector::ISilKitRegistry> registry =
-            SilKit::Vendor::Vector::CreateSilKitRegistry(config);
+            SilKit::Vendor::Vector::CreateSilKitRegistry(MakeParticipantConfiguration(benchmark, TimeSyncSettings{}));
         benchmark.registryUri = registry->StartListening(benchmark.registryUri);
 
-        std::vector<std::chrono::nanoseconds> measuredRealDurations;
-
-        for (uint32_t simulationRun = 1; simulationRun <= benchmark.numberOfSimulationRuns; simulationRun++)
-        {
-            std::cout << "> Simulation " << simulationRun << ": ";
-            auto startTimestamp = std::chrono::high_resolution_clock::now();
-
-            std::vector<std::string> participantNames;
-            std::vector<std::thread> threads;
-            for (uint32_t participantIndex = 0; participantIndex < benchmark.numberOfParticipants; participantIndex++)
-            {
-                std::string participantName = "Participant" + std::to_string(participantIndex);
-                participantNames.push_back(participantName);
-                threads.emplace_back(&ParticipantsThread, config, benchmark, participantName, participantIndex);
-            }
-
-            const auto systemControllerName = "SystemController";
-            participantNames.push_back(systemControllerName);
-            auto systemControllerParticipant =
-                SilKit::CreateParticipant(config, systemControllerName, benchmark.registryUri);
-            auto systemController =
-                SilKit::Experimental::Participant::CreateSystemController(systemControllerParticipant.get());
-            systemController->SetWorkflowConfiguration({participantNames});
-            auto lifecycleService = systemControllerParticipant->CreateLifecycleService({OperationMode::Coordinated});
-            auto lifecycleFuture = lifecycleService->StartLifecycle();
-            lifecycleFuture.get();
-
-            for (auto&& thread : threads)
-            {
-                thread.join();
-            }
-
-            systemControllerParticipant.reset();
-
-            auto endTimestamp = std::chrono::high_resolution_clock::now();
-            measuredRealDurations.emplace_back(endTimestamp - startTimestamp);
-            std::cout << "  " << measuredRealDurations.back() << std::endl;
-        }
-
-        std::vector<double> measuredRealDurationsSeconds(measuredRealDurations.size());
-        std::transform(measuredRealDurations.begin(), measuredRealDurations.end(), measuredRealDurationsSeconds.begin(),
-                       [](auto d) { return static_cast<double>(d.count() / 1e9); });
-
-        const auto averageDuration = mean_and_error(measuredRealDurationsSeconds);
-
-        const auto virtualDurationMilliseconds =
-            std::chrono::duration_cast<std::chrono::milliseconds>(benchmark.simulationDuration);
-        const auto numberSimulationSteps =
-            static_cast<size_t>(virtualDurationMilliseconds.count() / benchmark.simulationStepSize.count());
-        // fully connected network topology
-        const size_t numberMessages = numberSimulationSteps * benchmark.messageCount * benchmark.numberOfParticipants
-                                      * (benchmark.numberOfParticipants - 1);
-
-        // Reoccuring factor from error propagation
-        const auto sigmaDurOverDurSqr = averageDuration.second / averageDuration.first / averageDuration.first;
-
-        // Byte throughput mean and error (Byte to Mebi and ns to s)
-        const auto throughputPrefac = numberMessages * benchmark.messageSizeInBytes / 1024.0 / 1024.0;
-        const auto averageThroughput =
-            std::make_pair(throughputPrefac / averageDuration.first, throughputPrefac * sigmaDurOverDurSqr);
-
-        // Message rate mean and error
-        const auto averageMsgRate =
-            std::make_pair(numberMessages / averageDuration.first, numberMessages * sigmaDurOverDurSqr);
-
-        // Speedup mean and error
-        const auto averageSpeedup = std::make_pair(benchmark.simulationDuration.count() / averageDuration.first,
-                                                   benchmark.simulationDuration.count() * sigmaDurOverDurSqr);
-
-        if (benchmark.numberOfSimulationRuns > 1)
-        {
-            std::cout << std::endl << "Averages over all simulation runs:" << std::endl << std::endl;
-        }
-        else
-        {
-            std::cout << std::endl << "Result of the simulation run:" << std::endl << std::endl;
-        }
-
-        // Stream helper to combine value and unit to use it with std::setw as a whole
-        std::ostringstream averageDurationWithUnit;
-        averageDurationWithUnit.precision(3);
-        averageDurationWithUnit << averageDuration.first << "s";
-
-        std::ostringstream averageThroughputWithUnit;
-        averageThroughputWithUnit.precision(3);
-        averageThroughputWithUnit << averageThroughput.first << " MiB/s";
-
-        std::ostringstream averageMsgRateWithUnit;
-        averageMsgRateWithUnit << static_cast<int>(averageMsgRate.first) << " 1/s";
-
-        std::cout << std::setw(39) << "- Realtime duration (runtime): " << std::setw(13)
-                  << averageDurationWithUnit.str() << " +/- " << averageDuration.second << "s" << std::endl
-
-                  << std::setw(39) << "- Speedup (virtual time/runtime): " << std::setw(13) << averageSpeedup.first
-                  << " +/- " << averageSpeedup.second << std::endl
-
-                  << std::setw(39) << "- Throughput (data size/runtime): " << std::setw(13)
-                  << averageThroughputWithUnit.str() << " +/- " << averageThroughput.second << " MiB/s" << std::endl
-
-                  << std::setw(39) << "- Message rate (count/runtime): " << std::setw(13)
-                  << averageMsgRateWithUnit.str() << " +/- " << static_cast<int>(averageMsgRate.second) << " 1/s"
-                  << std::endl
-
-                  << std::left << std::setw(39) << "- Total number of messages: " << numberMessages << std::endl
-
-                  << std::endl
-                  << std::endl;
-
+        const auto timeSync = ImposedTimeSync(benchmark);
+        const auto result = RunSimulations(benchmark, MakeParticipantConfiguration(benchmark, timeSync), timeSync);
+        PrintResult(benchmark, result);
         if (benchmark.writeCsv != "")
         {
-            std::stringstream csvHeader;
-            csvHeader << "# SilKitBenchmarkDemo, SIL Kit Version " << SilKit::Version::String();
-            const auto csvColumns = "numRuns; participants; messageSize; messageCount; duration(virtual time, s); "
-                                    "stepSize(virtual time, ms); "
-                                    "numberMessageSent; runtime(s); runtime_err; throughput(MiB/s); "
-                                    "throughput_err; speedup; speedup_err; messageRate(1/s); messageRate_err";
-            std::fstream csvFile;
-            csvFile.open(benchmark.writeCsv, std::ios_base::in | std::ios_base::out); // Try to open
-            bool csvValid{true};
-            if (!csvFile.is_open())
-            {
-                // File doesn't exist, create new file and write header
-                csvFile.open(benchmark.writeCsv, std::ios_base::in | std::ios_base::out | std::ios_base::trunc);
-                csvFile << csvHeader.str() << std::endl;
-                csvFile << csvColumns << std::endl;
-            }
-            else
-            {
-                // File is there, check if header is valid
-                std::string header;
-                std::getline(csvFile, header);
-                csvFile.clear();
-                if (header != csvHeader.str())
-                {
-                    std::cerr << "Invalid header in file \"" << benchmark.writeCsv << "\"." << std::endl;
-                    csvValid = false;
-                }
-            }
-            if (csvValid)
-            {
-                // Append data
-                csvFile.seekp(0, std::ios_base::end);
-                csvFile << benchmark.numberOfSimulationRuns << ";" << benchmark.numberOfParticipants << ";"
-                        << benchmark.messageSizeInBytes << ";" << benchmark.messageCount << ";"
-                        << benchmark.simulationDuration.count() << ";" << benchmark.simulationStepSize.count() << ";"
-                        << numberMessages << ";" << averageDuration.first << ";" << averageDuration.second << ";"
-                        << averageThroughput.first << ";" << averageThroughput.second << ";" << averageSpeedup.first
-                        << ";" << averageSpeedup.second << ";" << averageMsgRate.first << ";" << averageMsgRate.second
-                        << std::endl;
-            }
-            csvFile.close();
+            WriteCsv(benchmark, result);
         }
     }
     catch (const SilKit::ConfigurationError& error)

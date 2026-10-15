@@ -1127,6 +1127,40 @@
             "DynamicSimulationStep": {
               "type": "boolean",
               "description": "Controls dynamic simulation step sizes (aligning each simulation step to the minimal step among all synchronized participants). When true, the participant enables it locally and advertises to all peers that it should be used. When absent (the default), the participant follows the network and enables it if any peer requests it. When false, it is a hard opt-out that never enables it regardless of peers."
+            },
+            "MaxRunAhead": {
+              "type": "number",
+              "description": "Research prototype: how far (in milliseconds of virtual time) this participant may run ahead of the other synchronized participants. 0 (the default) is the classic lockstep. With a value greater than 0, messages from participants that are behind may arrive with timestamps in the past of this participant. Ignored while dynamic simulation step sizes are active.",
+              "minimum": 0.0,
+              "default": 0.0,
+              "examples": [0.5, 10]
+            },
+            "Latency": {
+              "type": "number",
+              "description": "Research prototype, exact mode: messages received from other synchronized participants are delivered this many milliseconds (virtual time) after they were sent, at the start of the step that contains that time, and with that time as their timestamp. The participant may run ahead of the others' announced progress by up to this latency. Should be at least twice the step size. 0 (the default) disables exact mode. Ignored while dynamic simulation step sizes are active.",
+              "minimum": 0.0,
+              "default": 0.0,
+              "examples": [2, 5]
+            },
+            "NetworkLatencies": {
+              "type": "array",
+              "description": "Research prototype, exact mode: latencies of individual networks, overriding Latency for the messages received on them.",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "Network": {
+                    "type": "string",
+                    "description": "Name of the network (link)"
+                  },
+                  "Latency": {
+                    "type": "number",
+                    "description": "Latency in milliseconds (virtual time)",
+                    "minimum": 0.0
+                  }
+                },
+                "required": ["Network", "Latency"],
+                "additionalProperties": false
+              }
             }
           },
           "additionalProperties": false

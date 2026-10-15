@@ -439,6 +439,9 @@ auto LifecycleService::CreateTimeSyncService() -> ITimeSyncService*
     const auto& participantConfiguration = _participant->GetParticipantConfiguration();
     _timeSyncService->ConfigureDynamicStepSize(
         participantConfiguration.experimental.timeSynchronization.dynamicSimulationStep);
+    _timeSyncService->ConfigureMaxRunAhead(participantConfiguration.experimental.timeSynchronization.maxRunAhead);
+    _timeSyncService->ConfigureLatencies(participantConfiguration.experimental.timeSynchronization.latency,
+                                         participantConfiguration.experimental.timeSynchronization.networkLatencies);
 
     return _timeSyncService;
 }

@@ -342,7 +342,10 @@ public:
     void Read(SilKit::Config::Middleware& obj);
     void Read(SilKit::Config::Includes& obj);
     void Read(SilKit::Config::Aggregation& obj);
+    void Read(SilKit::Config::NetworkLatency& obj);
     void Read(SilKit::Config::TimeSynchronization& obj);
+    //! Reads a non-negative duration given in (fractional) milliseconds, if the key is present
+    void OptionalReadMilliseconds(std::chrono::nanoseconds& obj, const std::string& name);
     void Read(SilKit::Config::Experimental& obj);
     void Read(SilKit::Config::ParticipantConfiguration& obj);
     void Read(SilKit::Config::HealthCheck& obj);

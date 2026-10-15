@@ -63,6 +63,9 @@ struct TimeSynchronizationCache
     std::optional<double> animationFactor;
     std::optional<Aggregation> enableMessageAggregation;
     std::optional<bool> dynamicSimulationStep;
+    std::optional<std::chrono::nanoseconds::rep> maxRunAheadNs;
+    std::optional<std::chrono::nanoseconds::rep> latencyNs;
+    std::optional<std::vector<NetworkLatency>> networkLatencies;
 };
 
 struct MetricsCache
@@ -355,6 +358,18 @@ void Cache(const TimeSynchronization& root, TimeSynchronizationCache& cache)
         CacheNonDefault(!root.dynamicSimulationStep.value(), root.dynamicSimulationStep.value(),
                         "TimeSynchronization.DynamicSimulationStep", cache.dynamicSimulationStep);
     }
+    CacheNonDefault(defaultObject.maxRunAhead.count(), root.maxRunAhead.count(), "TimeSynchronization.MaxRunAhead [ns]",
+                    cache.maxRunAheadNs);
+    CacheNonDefault(defaultObject.latency.count(), root.latency.count(), "TimeSynchronization.Latency [ns]",
+                    cache.latencyNs);
+    if (!root.networkLatencies.empty())
+    {
+        if (cache.networkLatencies.has_value() && cache.networkLatencies.value() != root.networkLatencies)
+        {
+            throw SilKit::ConfigurationError("Config element TimeSynchronization.NetworkLatencies is already set!");
+        }
+        cache.networkLatencies = root.networkLatencies;
+    }
 }
 
 void Cache(const Metrics& root, MetricsCache& cache)
@@ -530,6 +545,18 @@ void MergeTimeSynchronizationCache(const TimeSynchronizationCache& cache, TimeSy
     if (cache.dynamicSimulationStep.has_value())
     {
         timeSynchronization.dynamicSimulationStep = cache.dynamicSimulationStep.value();
+    }
+    if (cache.maxRunAheadNs.has_value())
+    {
+        timeSynchronization.maxRunAhead = std::chrono::nanoseconds{cache.maxRunAheadNs.value()};
+    }
+    if (cache.latencyNs.has_value())
+    {
+        timeSynchronization.latency = std::chrono::nanoseconds{cache.latencyNs.value()};
+    }
+    if (cache.networkLatencies.has_value())
+    {
+        timeSynchronization.networkLatencies = cache.networkLatencies.value();
     }
 }
 

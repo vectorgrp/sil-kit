@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <atomic>
 #include <chrono>
 #include <string>
 #include <memory>
@@ -61,6 +62,15 @@ public:
 
     void ConfigureTimeProvider(Orchestration::TimeProviderKind timeProviderKind) override;
 
+    auto GetDeliveryScheduler() const -> IDeliveryScheduler* override
+    {
+        return _deliveryScheduler;
+    }
+    void SetDeliveryScheduler(IDeliveryScheduler* scheduler) override
+    {
+        _deliveryScheduler = scheduler;
+    }
+
 private:
     void OnTick(std::chrono::nanoseconds now, std::chrono::nanoseconds duration) final;
 
@@ -69,6 +79,7 @@ private: //Members
     Util::Handlers<NextSimStepHandler> _handlers;
     bool _isSynchronizingVirtualTime{false};
     std::unique_ptr<ITimeProviderImpl> _currentProvider;
+    std::atomic<IDeliveryScheduler*> _deliveryScheduler{nullptr};
 };
 
 //////////////////////////////////////////////////////////////////////

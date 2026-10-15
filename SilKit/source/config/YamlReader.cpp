@@ -495,6 +495,34 @@ void YamlReader::Read(SilKit::Config::TimeSynchronization& obj)
     OptionalRead(obj.animationFactor, "AnimationFactor");
     OptionalRead(obj.enableMessageAggregation, "EnableMessageAggregation");
     OptionalRead(obj.dynamicSimulationStep, "DynamicSimulationStep");
+
+    OptionalReadMilliseconds(obj.maxRunAhead, "MaxRunAhead");
+    OptionalReadMilliseconds(obj.latency, "Latency");
+    OptionalRead(obj.networkLatencies, "NetworkLatencies");
+}
+
+void YamlReader::Read(SilKit::Config::NetworkLatency& obj)
+{
+    ReadKeyValue(obj.network, "Network");
+    if (!HasKey("Latency"))
+    {
+        throw MakeConfigurationError("missing key: Latency");
+    }
+    OptionalReadMilliseconds(obj.latency, "Latency");
+}
+
+void YamlReader::OptionalReadMilliseconds(std::chrono::nanoseconds& obj, const std::string& name)
+{
+    if (HasKey(name))
+    {
+        double milliseconds{};
+        OptionalRead(milliseconds, name);
+        if (milliseconds < 0.0)
+        {
+            throw MakeConfigurationError(name + " must not be negative");
+        }
+        obj = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::duration<double, std::milli>{milliseconds});
+    }
 }
 
 void YamlReader::Read(SilKit::Config::Experimental& obj)

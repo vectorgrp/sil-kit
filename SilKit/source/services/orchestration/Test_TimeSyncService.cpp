@@ -342,6 +342,186 @@ TEST_F(Test_TimeSyncService, dynamic_step_driver_enables_without_peers)
     EXPECT_TRUE(timeSyncService->GetTimeConfiguration()->IsDynamicStepSizeEnabled());
 }
 
+auto SentTimePoints(const std::vector<NextSimTask>& sent) -> std::vector<std::chrono::nanoseconds>
+{
+    std::vector<std::chrono::nanoseconds> timePoints;
+    for (const auto& task : sent)
+    {
+        timePoints.push_back(task.timePoint);
+    }
+    return timePoints;
+}
+
+TEST_F(Test_TimeSyncService, without_run_ahead_steps_in_lockstep)
+{
+    std::vector<std::chrono::nanoseconds> simulationStepNows;
+    timeSyncService->SetSimulationStepHandler([&](auto now, auto) { simulationStepNows.push_back(now); }, 1ms);
+
+    PrepareLifecycle();
+    timeSyncService->ReceiveMsg(&endpoint, {0ms});
+
+    EXPECT_THAT(simulationStepNows, ElementsAre(0ms));
+    EXPECT_THAT(SentTimePoints(sentNextSimTasks), ElementsAre(0ms, 1ms));
+}
+
+TEST_F(Test_TimeSyncService, run_ahead_waits_for_the_first_announcement_of_peers)
+{
+    std::vector<std::chrono::nanoseconds> simulationStepNows;
+    timeSyncService->SetSimulationStepHandler([&](auto now, auto) { simulationStepNows.push_back(now); }, 1ms);
+    timeSyncService->ConfigureMaxRunAhead(4ms);
+
+    PrepareLifecycle();
+
+    EXPECT_TRUE(simulationStepNows.empty());
+    EXPECT_THAT(SentTimePoints(sentNextSimTasks), ElementsAre(0ms));
+}
+
+TEST_F(Test_TimeSyncService, run_ahead_steps_up_to_the_window_and_thins_out_announcements)
+{
+    std::vector<std::chrono::nanoseconds> simulationStepNows;
+    timeSyncService->SetSimulationStepHandler([&](auto now, auto) { simulationStepNows.push_back(now); }, 1ms);
+    timeSyncService->ConfigureMaxRunAhead(4ms);
+
+    PrepareLifecycle();
+    timeSyncService->ReceiveMsg(&endpoint, {0ms});
+
+    // The peer is at 0ms, so steps up to 0ms + 4ms run without waiting for it
+    EXPECT_THAT(simulationStepNows, ElementsAre(0ms, 1ms, 2ms, 3ms, 4ms));
+    // Announced every 2ms (half the window), plus 5ms because we are about to block on the peer
+    EXPECT_THAT(SentTimePoints(sentNextSimTasks), ElementsAre(0ms, 2ms, 4ms, 5ms));
+
+    timeSyncService->ReceiveMsg(&endpoint, {3ms});
+    EXPECT_THAT(simulationStepNows, ElementsAre(0ms, 1ms, 2ms, 3ms, 4ms, 5ms, 6ms, 7ms));
+    EXPECT_THAT(SentTimePoints(sentNextSimTasks), ElementsAre(0ms, 2ms, 4ms, 5ms, 7ms, 8ms));
+}
+
+TEST_F(Test_TimeSyncService, run_ahead_of_a_peer_at_the_start_is_not_a_hop_on)
+{
+    std::vector<std::chrono::nanoseconds> simulationStepNows;
+    timeSyncService->SetSimulationStepHandler([&](auto now, auto) { simulationStepNows.push_back(now); }, 1ms);
+    timeSyncService->ConfigureMaxRunAhead(4ms);
+
+    PrepareLifecycle();
+    // The peer ran ahead within the window before we executed our first step
+    timeSyncService->ReceiveMsg(&endpoint, {4ms, 1ms});
+
+    ASSERT_FALSE(simulationStepNows.empty());
+    EXPECT_EQ(simulationStepNows.front(), 0ms);
+    EXPECT_FALSE(timeSyncService->GetTimeConfiguration()->HoppedOn());
+}
+
+auto MakeControllerDescriptor(const std::string& participantName, const std::string& network)
+    -> SilKit::Core::ServiceDescriptor
+{
+    SilKit::Core::ServiceDescriptor sd;
+    sd.SetServiceType(Core::ServiceType::Controller);
+    sd.SetParticipantNameAndComputeId(participantName);
+    sd.SetNetworkName(network);
+    sd.SetNetworkType(Config::NetworkType::CAN);
+    sd.SetServiceName("Controller");
+    sd.SetServiceId(42);
+    return sd;
+}
+
+TEST_F(Test_TimeSyncService, exact_mode_registers_as_delivery_scheduler)
+{
+    EXPECT_EQ(timeProvider.GetDeliveryScheduler(), nullptr);
+    timeSyncService->ConfigureLatencies(4ms, {});
+    EXPECT_EQ(timeProvider.GetDeliveryScheduler(), timeSyncService.get());
+    EXPECT_EQ(timeSyncService->LatencyOf("any"), 4ms);
+}
+
+TEST_F(Test_TimeSyncService, exact_mode_steps_until_the_step_end_reaches_peer_progress_plus_latency)
+{
+    std::vector<std::chrono::nanoseconds> simulationStepNows;
+    timeSyncService->SetSimulationStepHandler([&](auto now, auto) { simulationStepNows.push_back(now); }, 1ms);
+    timeSyncService->ConfigureLatencies(4ms, {});
+
+    PrepareLifecycle();
+    timeSyncService->ReceiveMsg(&endpoint, {0ms});
+
+    // Everything the peer sends from 0ms on is due at 4ms or later: steps [0,1) ... [3,4) are complete
+    EXPECT_THAT(simulationStepNows, ElementsAre(0ms, 1ms, 2ms, 3ms));
+    // Announced every 2ms (half the latency); 4ms is also where we block
+    EXPECT_THAT(SentTimePoints(sentNextSimTasks), ElementsAre(0ms, 2ms, 4ms));
+
+    timeSyncService->ReceiveMsg(&endpoint, {3ms});
+    EXPECT_THAT(simulationStepNows, ElementsAre(0ms, 1ms, 2ms, 3ms, 4ms, 5ms, 6ms));
+    EXPECT_THAT(SentTimePoints(sentNextSimTasks), ElementsAre(0ms, 2ms, 4ms, 6ms, 7ms));
+}
+
+TEST_F(Test_TimeSyncService, exact_mode_uses_the_smallest_latency_of_the_peers_networks)
+{
+    using SilKit::Core::Discovery::ServiceDiscoveryEvent;
+
+    std::vector<std::chrono::nanoseconds> simulationStepNows;
+    timeSyncService->SetSimulationStepHandler([&](auto now, auto) { simulationStepNows.push_back(now); }, 1ms);
+    timeSyncService->ConfigureLatencies(4ms, {{"CAN1", 2ms}});
+    EXPECT_EQ(timeSyncService->LatencyOf("CAN1"), 2ms);
+    EXPECT_EQ(timeSyncService->LatencyOf("ETH1"), 4ms);
+
+    serviceDiscoveryHandlers[0](ServiceDiscoveryEvent::Type::ServiceCreated, MakeControllerDescriptor("P1", "ETH1"));
+    serviceDiscoveryHandlers[0](ServiceDiscoveryEvent::Type::ServiceCreated, MakeControllerDescriptor("P1", "CAN1"));
+
+    PrepareLifecycle();
+    timeSyncService->ReceiveMsg(&endpoint, {0ms});
+
+    EXPECT_THAT(simulationStepNows, ElementsAre(0ms, 1ms));
+}
+
+TEST_F(Test_TimeSyncService, exact_mode_delivers_in_the_step_that_contains_the_due_time)
+{
+    std::vector<std::chrono::nanoseconds> simulationStepNows;
+    timeSyncService->SetSimulationStepHandler([&](auto now, auto) { simulationStepNows.push_back(now); }, 1ms);
+    timeSyncService->ConfigureLatencies(4ms, {});
+
+    PrepareLifecycle();
+    timeSyncService->ReceiveMsg(&endpoint, {0ms});
+    ASSERT_THAT(simulationStepNows, ElementsAre(0ms, 1ms, 2ms, 3ms));
+
+    // A message the peer sent at 2ms: its progress is at least 2ms, and the message is due at 6ms
+    std::vector<std::chrono::nanoseconds> deliveredAt;
+    timeSyncService->Schedule(2ms, 6ms, "P1", "Controller", [&] { deliveredAt.push_back(timeSyncService->Now()); });
+
+    EXPECT_THAT(simulationStepNows, ElementsAre(0ms, 1ms, 2ms, 3ms, 4ms, 5ms));
+    EXPECT_TRUE(deliveredAt.empty());
+
+    timeSyncService->ReceiveMsg(&endpoint, {4ms});
+    EXPECT_THAT(simulationStepNows, ElementsAre(0ms, 1ms, 2ms, 3ms, 4ms, 5ms, 6ms, 7ms));
+    EXPECT_THAT(deliveredAt, ElementsAre(6ms));
+}
+
+TEST_F(Test_TimeSyncService, exact_mode_run_ahead_of_a_peer_at_the_start_is_not_a_hop_on)
+{
+    std::vector<std::chrono::nanoseconds> simulationStepNows;
+    timeSyncService->SetSimulationStepHandler([&](auto now, auto) { simulationStepNows.push_back(now); }, 1ms);
+    timeSyncService->ConfigureLatencies(4ms, {});
+
+    PrepareLifecycle();
+    timeSyncService->ReceiveMsg(&endpoint, {4ms, 1ms});
+
+    ASSERT_FALSE(simulationStepNows.empty());
+    EXPECT_EQ(simulationStepNows.front(), 0ms);
+    EXPECT_FALSE(timeSyncService->GetTimeConfiguration()->HoppedOn());
+}
+
+TEST_F(Test_TimeSyncService, exact_mode_is_disabled_while_dynamic_step_sizes_are_active)
+{
+    timeSyncService->ConfigureLatencies(4ms, {{"CAN1", 2ms}});
+    timeSyncService->ConfigureDynamicStepSize(true);
+    EXPECT_EQ(timeSyncService->LatencyOf("CAN1"), 0ns);
+    EXPECT_FALSE(timeSyncService->GetTimeConfiguration()->IsExactModeEnabled());
+}
+
+TEST_F(Test_TimeSyncService, run_ahead_is_disabled_while_dynamic_step_sizes_are_active)
+{
+    timeSyncService->ConfigureMaxRunAhead(4ms);
+    EXPECT_EQ(timeSyncService->GetTimeConfiguration()->EffectiveMaxRunAhead(), 4ms);
+
+    timeSyncService->ConfigureDynamicStepSize(true);
+    EXPECT_EQ(timeSyncService->GetTimeConfiguration()->EffectiveMaxRunAhead(), 0ns);
+}
+
 TEST_F(Test_TimeSyncService, soft_time_limit_warning_reports_the_measured_timeout)
 {
     healthCheckConfig.softResponseTimeout = 10ms;

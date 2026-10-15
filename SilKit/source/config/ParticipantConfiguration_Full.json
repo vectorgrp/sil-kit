@@ -274,7 +274,15 @@
     "TimeSynchronization": {
       "AnimationFactor": 1.5,
       "EnableMessageAggregation": "Off",
-      "DynamicSimulationStep": true
+      "DynamicSimulationStep": true,
+      "MaxRunAhead": 0.5,
+      "Latency": 4,
+      "NetworkLatencies": [
+        {
+          "Network": "CAN1",
+          "Latency": 2
+        }
+      ]
     },
     "Metrics": {
       "CollectFromRemote": false,

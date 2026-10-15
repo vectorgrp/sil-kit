@@ -20,6 +20,7 @@
 #include "util/PerformanceMonitor.hpp"
 #include "services/orchestration/TimeProvider.hpp"
 #include "services/orchestration/TimeConfiguration.hpp"
+#include "services/orchestration/DeliveryInbox.hpp"
 #include "services/orchestration/WatchDog.hpp"
 #include "services/metrics/Metrics.hpp"
 #include "services/logging/LogFunctions.hpp"
@@ -38,6 +39,7 @@ class TimeSyncService
     : public ITimeSyncService
     , public IMsgForTimeSyncService
     , public Core::IServiceEndpoint
+    , public IDeliveryScheduler
 {
 public:
     // ----------------------------------------
@@ -107,6 +109,20 @@ public:
     //! std::nullopt (default) = follow the network (enable if any peer advertises the request).
     void ConfigureDynamicStepSize(std::optional<bool> configured);
 
+    //! Experimental.TimeSynchronization.MaxRunAhead, see TimeConfiguration::SetMaxRunAhead.
+    void ConfigureMaxRunAhead(std::chrono::nanoseconds maxRunAhead);
+
+    //! Experimental.TimeSynchronization.Latency and NetworkLatencies (exact mode), see
+    //! TimeConfiguration::SetLatencies. With a latency, this service schedules the deliveries of messages received
+    //! from other synchronized participants.
+    void ConfigureLatencies(std::chrono::nanoseconds latency, const std::vector<Config::NetworkLatency>& perNetwork);
+
+    // IDeliveryScheduler
+    auto LatencyOf(const std::string& linkName) const -> std::chrono::nanoseconds override;
+    void Schedule(std::chrono::nanoseconds sendTime, std::chrono::nanoseconds dueTime,
+                  const std::string& senderParticipant, const std::string& senderService,
+                  std::function<void()> deliver) override;
+
 private:
     // ----------------------------------------
     // private methods
@@ -125,6 +141,10 @@ private:
     void HybridWait(std::chrono::nanoseconds targetWaitDuration);
 
     void LogicalSimStepCompleted(std::chrono::duration<double, std::milli> logicalSimStepExecutionTimeMs);
+
+    //! Sends our current time point again, for peers whose view of it may be stale (a late joiner, or a change
+    //! that may block us before we announce the next step).
+    void ResendTimeAnnouncement();
 
 private:
     // ----------------------------------------
@@ -174,6 +194,12 @@ private:
     std::set<std::string> _dynamicStepPeers;
     // Ensures the "enabled by a remote participant" notice is logged only once.
     Services::Logging::LogOnceFlag _dynamicStepRemoteLogOnce;
+
+    // Exact mode: messages from other synchronized participants wait here until their step starts
+    DeliveryInbox _inbox;
+    bool _deliverySchedulerRegistered{false};
+    // Coalesces the time updates triggered by the send times of received messages into one at a time
+    std::atomic<bool> _progressUpdatePending{false};
 
 };
 

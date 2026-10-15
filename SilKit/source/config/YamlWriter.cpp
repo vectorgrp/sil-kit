@@ -574,6 +574,22 @@ void YamlWriter::Write(const SilKit::Config::TimeSynchronization& obj)
     {
         WriteKeyValue("DynamicSimulationStep", obj.dynamicSimulationStep.value());
     }
+    if (obj.maxRunAhead != defaultObj.maxRunAhead)
+    {
+        WriteKeyValue("MaxRunAhead", std::chrono::duration<double, std::milli>{obj.maxRunAhead}.count());
+    }
+    if (obj.latency != defaultObj.latency)
+    {
+        WriteKeyValue("Latency", std::chrono::duration<double, std::milli>{obj.latency}.count());
+    }
+    OptionalWrite(obj.networkLatencies, "NetworkLatencies");
+}
+
+void YamlWriter::Write(const SilKit::Config::NetworkLatency& obj)
+{
+    MakeMap();
+    WriteKeyValue("Network", obj.network);
+    WriteKeyValue("Latency", std::chrono::duration<double, std::milli>{obj.latency}.count());
 }
 
 

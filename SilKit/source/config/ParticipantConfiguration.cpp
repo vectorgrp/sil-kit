@@ -168,10 +168,16 @@ bool operator==(const ParticipantConfiguration& lhs, const ParticipantConfigurat
            && lhs.includes == rhs.includes;
 }
 
+bool operator==(const NetworkLatency& lhs, const NetworkLatency& rhs)
+{
+    return lhs.network == rhs.network && lhs.latency == rhs.latency;
+}
+
 bool operator==(const TimeSynchronization& lhs, const TimeSynchronization& rhs)
 {
     return lhs.animationFactor == rhs.animationFactor && lhs.enableMessageAggregation == rhs.enableMessageAggregation
-           && lhs.dynamicSimulationStep == rhs.dynamicSimulationStep;
+           && lhs.dynamicSimulationStep == rhs.dynamicSimulationStep && lhs.maxRunAhead == rhs.maxRunAhead
+           && lhs.latency == rhs.latency && lhs.networkLatencies == rhs.networkLatencies;
 }
 
 bool operator==(const Experimental& lhs, const Experimental& rhs)

@@ -11,6 +11,7 @@
 #include "core/mock/nullconnection/NullConnectionParticipant.hpp"
 #include "config/ParticipantConfiguration.hpp"
 #include "config/ParticipantConfigurationFromXImpl.hpp"
+#include "config/YamlParser.hpp"
 #include "silkit/services/all.hpp"
 #include "util/functional.hpp"
 
@@ -320,6 +321,77 @@ TEST_F(Test_ParticipantConfiguration, empty_yaml)
 {
     auto&& config = SilKit::Config::ParticipantConfigurationFromStringImpl("");
     CheckEmpty(config);
+}
+
+TEST_F(Test_ParticipantConfiguration, max_run_ahead_defaults_to_lockstep)
+{
+    auto&& config = SilKit::Config::ParticipantConfigurationFromStringImpl("");
+    auto c = *std::dynamic_pointer_cast<ParticipantConfiguration>(config);
+    EXPECT_EQ(c.experimental.timeSynchronization.maxRunAhead, 0ns);
+}
+
+TEST_F(Test_ParticipantConfiguration, max_run_ahead_is_read_in_fractional_milliseconds)
+{
+    constexpr auto configurationString = R"(
+Experimental:
+  TimeSynchronization:
+    MaxRunAhead: 0.25
+)";
+    auto&& config = SilKit::Config::ParticipantConfigurationFromStringImpl(configurationString);
+    auto c = *std::dynamic_pointer_cast<ParticipantConfiguration>(config);
+    EXPECT_EQ(c.experimental.timeSynchronization.maxRunAhead, 250us);
+
+    auto reread = SilKit::Config::ParticipantConfigurationFromStringImpl(SilKit::Config::Serialize(c));
+    EXPECT_TRUE(*std::dynamic_pointer_cast<ParticipantConfiguration>(reread) == c);
+}
+
+TEST_F(Test_ParticipantConfiguration, latencies_are_read_in_fractional_milliseconds)
+{
+    constexpr auto configurationString = R"(
+Experimental:
+  TimeSynchronization:
+    Latency: 2.5
+    NetworkLatencies:
+      - Network: CAN1
+        Latency: 1
+      - Network: ETH1
+        Latency: 0.25
+)";
+    auto&& config = SilKit::Config::ParticipantConfigurationFromStringImpl(configurationString);
+    auto c = *std::dynamic_pointer_cast<ParticipantConfiguration>(config);
+    const auto& timeSync = c.experimental.timeSynchronization;
+    EXPECT_EQ(timeSync.latency, 2500us);
+    ASSERT_EQ(timeSync.networkLatencies.size(), 2u);
+    EXPECT_EQ(timeSync.networkLatencies[0].network, "CAN1");
+    EXPECT_EQ(timeSync.networkLatencies[0].latency, 1ms);
+    EXPECT_EQ(timeSync.networkLatencies[1].network, "ETH1");
+    EXPECT_EQ(timeSync.networkLatencies[1].latency, 250us);
+
+    auto reread = SilKit::Config::ParticipantConfigurationFromStringImpl(SilKit::Config::Serialize(c));
+    EXPECT_TRUE(*std::dynamic_pointer_cast<ParticipantConfiguration>(reread) == c);
+}
+
+TEST_F(Test_ParticipantConfiguration, network_latencies_need_a_latency)
+{
+    constexpr auto configurationString = R"(
+Experimental:
+  TimeSynchronization:
+    NetworkLatencies:
+      - Network: CAN1
+)";
+    EXPECT_THROW(SilKit::Config::ParticipantConfigurationFromStringImpl(configurationString),
+                 SilKit::ConfigurationError);
+}
+
+TEST_F(Test_ParticipantConfiguration, max_run_ahead_rejects_negative_values)
+{
+    constexpr auto configurationString = R"(
+Experimental:
+  TimeSynchronization:
+    MaxRunAhead: -1
+)";
+    EXPECT_THROW(SilKit::Config::ParticipantConfigurationFromStringImpl(configurationString),
+                 SilKit::ConfigurationError);
 }
 
 } // anonymous namespace

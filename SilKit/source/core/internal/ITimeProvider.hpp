@@ -9,6 +9,7 @@
 #include <functional>
 
 #include "silkit/services/datatypes.hpp"
+#include "core/internal/IDeliveryScheduler.hpp"
 
 namespace SilKit {
 namespace Services {
@@ -51,6 +52,13 @@ public:
     virtual void ConfigureTimeProvider(Orchestration::TimeProviderKind timeProviderKind) = 0;
     virtual void SetSynchronizeVirtualTime(bool isSynchronizingVirtualTime) = 0;
     virtual bool IsSynchronizingVirtualTime() const = 0;
+
+    //! The scheduler for latency-based delivery (exact mode), or nullptr while messages are delivered on receipt.
+    virtual auto GetDeliveryScheduler() const -> IDeliveryScheduler*
+    {
+        return nullptr;
+    }
+    virtual void SetDeliveryScheduler(IDeliveryScheduler* /*scheduler*/) {}
 };
 
 

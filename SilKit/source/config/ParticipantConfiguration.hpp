@@ -304,6 +304,13 @@ struct Middleware
 //  TimeSynchronization
 // ================================================================================
 
+//! \brief Latency of the messages received on one network (exact mode)
+struct NetworkLatency
+{
+    std::string network;
+    std::chrono::nanoseconds latency{0};
+};
+
 //! \brief Structure that contains experimental TimeSynchronization settings
 struct TimeSynchronization
 {
@@ -315,6 +322,15 @@ struct TimeSynchronization
     //! the network: it enables dynamic stepping if any peer advertises it. When false, it is a hard
     //! opt-out that never enables dynamic stepping regardless of peers.
     std::optional<bool> dynamicSimulationStep;
+    //! How far this participant may run ahead of the other synchronized participants in virtual time.
+    //! Zero (the default) is the classic lockstep. Read from YAML in (fractional) milliseconds.
+    std::chrono::nanoseconds maxRunAhead{0};
+    //! Exact mode: messages received from other synchronized participants are delivered this long after they
+    //! were sent, and this participant may run ahead of their announced progress by up to this latency. Zero (the
+    //! default) disables it. Read from YAML in (fractional) milliseconds.
+    std::chrono::nanoseconds latency{0};
+    //! Exact mode: latencies of individual networks (link names), overriding latency for them.
+    std::vector<NetworkLatency> networkLatencies;
 };
 
 // ================================================================================
@@ -403,6 +419,7 @@ bool operator==(const Extensions& lhs, const Extensions& rhs);
 bool operator==(const Middleware& lhs, const Middleware& rhs);
 bool operator==(const Includes& lhs, const Includes& rhs);
 bool operator==(const ParticipantConfiguration& lhs, const ParticipantConfiguration& rhs);
+bool operator==(const NetworkLatency& lhs, const NetworkLatency& rhs);
 bool operator==(const TimeSynchronization& lhs, const TimeSynchronization& rhs);
 bool operator==(const Experimental& lhs, const Experimental& rhs);
 bool operator==(const Label& lhs, const Label& rhs);

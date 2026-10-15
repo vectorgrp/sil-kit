@@ -73,6 +73,7 @@ public:
     void Write(const SilKit::Config::Middleware& obj);
     void Write(const SilKit::Config::Includes& obj);
     void Write(const SilKit::Config::Aggregation& obj);
+    void Write(const SilKit::Config::NetworkLatency& obj);
     void Write(const SilKit::Config::TimeSynchronization& obj);
     void Write(const SilKit::Config::Experimental& obj);
     void Write(const SilKit::Config::ParticipantConfiguration& obj);
