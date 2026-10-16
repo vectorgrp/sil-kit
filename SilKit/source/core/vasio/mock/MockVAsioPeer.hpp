@@ -27,6 +27,7 @@ struct MockVAsioPeer : IVAsioPeer
     // IVAsioPeer
 
     MOCK_METHOD(void, SendSilKitMsg, (SerializedMessage), (override));
+    MOCK_METHOD(void, SendSilKitMsg, (const SharedSerializedMessage&, EndpointId), (override));
     MOCK_METHOD(void, Subscribe, (VAsioMsgSubscriber), (override));
     MOCK_METHOD(const VAsioPeerInfo&, GetInfo, (), (const, override));
     MOCK_METHOD(void, SetInfo, (VAsioPeerInfo), (override));

@@ -68,7 +68,7 @@ void RpcServerInternal::ReceiveMessage(const FunctionCall& msg)
     // NB: Explicitly _copy_ the call handle to keep the handle itself alive even if it gets removed from the map
     //     due to a call to SubmitResult in the handler.
     std::shared_ptr<RpcCallHandle> callHandle = result.first->second;
-    _handler(_parent, RpcCallEvent{msg.timestamp, callHandle.get(), msg.data});
+    _handler(_parent, RpcCallEvent{msg.timestamp, callHandle.get(), msg.data.AsSpan()});
 }
 
 bool RpcServerInternal::SubmitResult(IRpcCallHandle* callHandlePtr, Util::Span<const uint8_t> resultData)
@@ -83,7 +83,7 @@ bool RpcServerInternal::SubmitResult(IRpcCallHandle* callHandlePtr, Util::Span<c
     }
 
     _participant->SendMsg(
-        this, FunctionCallResponse{_timeProvider->Now(), callHandle.GetCallUuid(), Util::ToStdVector(resultData),
+        this, FunctionCallResponse{_timeProvider->Now(), callHandle.GetCallUuid(), resultData,
                                    FunctionCallResponse::Status::Success});
     _activeCalls.erase(it);
 
