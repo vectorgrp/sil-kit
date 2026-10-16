@@ -501,6 +501,7 @@ void YamlReader::Read(SilKit::Config::Experimental& obj)
 {
     OptionalRead(obj.timeSynchronization, "TimeSynchronization");
     OptionalRead(obj.metrics, "Metrics");
+    OptionalRead(obj.useReceiveBufferPool, "UseReceiveBufferPool");
 }
 
 void YamlReader::Read(SilKit::Config::ParticipantConfiguration& obj)
