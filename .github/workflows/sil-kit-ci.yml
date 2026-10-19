@@ -76,6 +76,7 @@ jobs:
   clang-tidy:
     name: Running clang-tidy
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     needs: [check-run-builds, check-dco-signed]
     steps:
       - uses: actions/checkout@v6
