@@ -86,7 +86,7 @@ TEST_F(ITest_ConfigPrecedence, api_registry_uri_is_used_if_configuration_has_non
 
 // The CAN controller of the writer is created on network "NetworkFromApi", but its configuration moves it to
 // "SharedNetwork", where the reader listens. The frame only arrives if the configured network is used.
-TEST(ITest_ConfigPrecedenceNetwork, controller_network_from_configuration_overrides_api_argument)
+TEST_F(ITest_ConfigPrecedence, controller_network_from_configuration_overrides_api_argument)
 {
     const auto writerConfig = R"(
 CanControllers:
