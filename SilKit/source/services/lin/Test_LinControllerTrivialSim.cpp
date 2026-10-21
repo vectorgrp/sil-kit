@@ -811,6 +811,186 @@ TEST_F(Test_LinControllerTrivialSim, add_remove_handler)
     master.ReceiveMsg(&slave1, transmission);
 }
 
+TEST_F(Test_LinControllerTrivialSim, receive_transmission_while_inactive_is_ignored)
+{
+    // No Init(): the controller is still inactive
+    master.AddFrameStatusHandler(frameStatusHandler);
+
+    LinTransmission transmission;
+    transmission.frame = MakeFrame(17, LinChecksumModel::Enhanced, 4, {1, 2, 3, 4, 0, 0, 0, 0});
+    transmission.status = LinFrameStatus::LIN_RX_OK;
+
+    EXPECT_CALL(callbacks, FrameStatusHandler(_, _, _)).Times(0);
+    master.ReceiveMsg(&slave1, transmission);
+}
+
+TEST_F(Test_LinControllerTrivialSim, receive_transmission_while_sleeping_is_ignored)
+{
+    LinControllerConfig config = MakeControllerConfig(LinControllerMode::Master);
+    LinFrameResponse response;
+    response.frame = MakeFrame(17, LinChecksumModel::Enhanced, 4);
+    response.responseMode = LinFrameResponseMode::Rx;
+    config.frameResponses.push_back(response);
+    master.Init(config);
+    master.AddFrameStatusHandler(frameStatusHandler);
+    master.GoToSleepInternal();
+
+    LinTransmission transmission;
+    transmission.frame = MakeFrame(17, LinChecksumModel::Enhanced, 4, {1, 2, 3, 4, 0, 0, 0, 0});
+    transmission.status = LinFrameStatus::LIN_RX_OK;
+
+    EXPECT_CALL(callbacks, FrameStatusHandler(_, _, _)).Times(0);
+    master.ReceiveMsg(&slave1, transmission);
+}
+
+TEST_F(Test_LinControllerTrivialSim, receive_transmission_with_invalid_datalength_is_ignored)
+{
+    master.Init(MakeControllerConfig(LinControllerMode::Master));
+    master.AddFrameStatusHandler(frameStatusHandler);
+
+    LinTransmission transmission;
+    transmission.frame = MakeFrame(17, LinChecksumModel::Enhanced, 9);
+    transmission.status = LinFrameStatus::LIN_RX_OK;
+
+    EXPECT_CALL(callbacks, FrameStatusHandler(_, _, _)).Times(0);
+    master.ReceiveMsg(&slave1, transmission);
+}
+
+TEST_F(Test_LinControllerTrivialSim, receive_transmission_with_invalid_id_is_ignored)
+{
+    master.Init(MakeControllerConfig(LinControllerMode::Master));
+    master.AddFrameStatusHandler(frameStatusHandler);
+
+    LinTransmission transmission;
+    transmission.frame = MakeFrame(64, LinChecksumModel::Enhanced, 4);
+    transmission.status = LinFrameStatus::LIN_RX_OK;
+
+    EXPECT_CALL(callbacks, FrameStatusHandler(_, _, _)).Times(0);
+    master.ReceiveMsg(&slave1, transmission);
+}
+
+TEST_F(Test_LinControllerTrivialSim, set_frame_response_ignores_invalid_requests)
+{
+    slave1.Init(MakeControllerConfig(LinControllerMode::Slave));
+
+    LinFrameResponse response;
+    response.frame = MakeFrame(17, LinChecksumModel::Enhanced, 4);
+    response.responseMode = LinFrameResponseMode::TxUnconditional;
+
+    // Only the first, valid configuration is distributed
+    EXPECT_CALL(participant, SendMsg(&slave1, A<const LinFrameResponseUpdate&>())).Times(1);
+    slave1.SetFrameResponse(response);
+
+    // Reconfiguration of an already configured ID
+    response.responseMode = LinFrameResponseMode::Rx;
+    slave1.SetFrameResponse(response);
+
+    // LinFrameResponseMode::Unused
+    response.frame.id = 18;
+    response.responseMode = LinFrameResponseMode::Unused;
+    slave1.SetFrameResponse(response);
+
+    // Invalid ID
+    response.frame.id = 64;
+    response.responseMode = LinFrameResponseMode::TxUnconditional;
+    slave1.SetFrameResponse(response);
+}
+
+TEST_F(Test_LinControllerTrivialSim, send_frame_slave_response_with_master_tx_is_ignored)
+{
+    const LinFrame frame = MakeFrame(20, LinChecksumModel::Enhanced, 2, {1, 2, 0, 0, 0, 0, 0, 0});
+
+    LinControllerConfig masterConfig = MakeControllerConfig(LinControllerMode::Master);
+    LinFrameResponse masterResponse;
+    masterResponse.frame = frame;
+    masterResponse.responseMode = LinFrameResponseMode::TxUnconditional;
+    masterConfig.frameResponses.push_back(masterResponse);
+    master.Init(masterConfig);
+    master.AddFrameStatusHandler(frameStatusHandler);
+
+    // A slave also responds on the same ID
+    LinControllerConfig slaveConfig = MakeControllerConfig(LinControllerMode::Slave);
+    slaveConfig.frameResponses.push_back(masterResponse);
+    master.ReceiveMsg(&slave1, ToWire(slaveConfig));
+
+    EXPECT_CALL(participant, SendMsg(&master, A<const LinTransmission&>())).Times(0);
+    EXPECT_CALL(callbacks, FrameStatusHandler(_, _, _)).Times(0);
+    master.SendFrame(frame, LinFrameResponseType::SlaveResponse);
+}
+
+TEST_F(Test_LinControllerTrivialSim, get_slave_configuration)
+{
+    master.Init(MakeControllerConfig(LinControllerMode::Master));
+    slave1.Init(MakeControllerConfig(LinControllerMode::Slave));
+
+    LinFrameResponse rxResponse;
+    rxResponse.frame = MakeFrame(17, LinChecksumModel::Enhanced);
+    rxResponse.responseMode = LinFrameResponseMode::Rx;
+    LinFrameResponse txResponse;
+    txResponse.frame = MakeFrame(19, LinChecksumModel::Classic);
+    txResponse.responseMode = LinFrameResponseMode::TxUnconditional;
+
+    LinControllerConfig slaveConfig = MakeControllerConfig(LinControllerMode::Slave);
+    slaveConfig.frameResponses.push_back(rxResponse);
+    slaveConfig.frameResponses.push_back(txResponse);
+    master.ReceiveMsg(&slave2, ToWire(slaveConfig));
+
+    EXPECT_THAT(master.GetSlaveConfiguration().respondingLinIds, ElementsAre(LinId{19}));
+    EXPECT_THROW(slave1.GetSlaveConfiguration(), SilKit::SilKitError);
+}
+
+TEST_F(Test_LinControllerTrivialSim, removed_handlers_are_not_called)
+{
+    master.Init(MakeControllerConfig(LinControllerMode::Master));
+    slave1.Init(MakeControllerConfig(LinControllerMode::Slave));
+
+    EXPECT_CALL(callbacks, GoToSleepHandler(_)).Times(0);
+    EXPECT_CALL(callbacks, WakeupHandler(_)).Times(0);
+    EXPECT_CALL(callbacks, LinSlaveConfigurationHandler(_)).Times(0);
+
+    const auto goToSleepHandlerId = slave1.AddGoToSleepHandler(goToSleepHandler);
+    slave1.RemoveGoToSleepHandler(goToSleepHandlerId);
+    LinTransmission goToSleepTransmission;
+    goToSleepTransmission.frame = GoToSleepFrame();
+    goToSleepTransmission.status = LinFrameStatus::LIN_RX_OK;
+    slave1.ReceiveMsg(&master, goToSleepTransmission);
+
+    const auto wakeupHandlerId = master.AddWakeupHandler(wakeupHandler);
+    master.RemoveWakeupHandler(wakeupHandlerId);
+    master.ReceiveMsg(&slave1, LinWakeupPulse{});
+
+    const auto slaveConfigurationHandlerId = master.AddLinSlaveConfigurationHandler(slaveConfigurationHandler);
+    master.RemoveLinSlaveConfigurationHandler(slaveConfigurationHandlerId);
+    master.ReceiveMsg(&slave2, ToWire(MakeControllerConfig(LinControllerMode::Slave)));
+
+    // Removing unknown handlers only warns
+    EXPECT_NO_THROW(slave1.RemoveGoToSleepHandler(goToSleepHandlerId));
+    EXPECT_NO_THROW(master.RemoveWakeupHandler(wakeupHandlerId));
+    EXPECT_NO_THROW(master.RemoveLinSlaveConfigurationHandler(slaveConfigurationHandlerId));
+}
+
+TEST_F(Test_LinControllerTrivialSim, removed_frame_header_handler_is_not_called)
+{
+    SilKit::Experimental::Services::Lin::LinControllerDynamicConfig config{};
+    config.controllerMode = LinControllerMode::Slave;
+    slave1.InitDynamic(config);
+
+    int numHeaderEvents = 0;
+    const auto handlerId = slave1.AddFrameHeaderHandler(
+        [&numHeaderEvents](ILinController*, const SilKit::Experimental::Services::Lin::LinFrameHeaderEvent&) {
+        ++numHeaderEvents;
+    });
+
+    slave1.ReceiveMsg(&master, LinSendFrameHeaderRequest{35s, 17});
+    EXPECT_EQ(numHeaderEvents, 1);
+
+    slave1.RemoveFrameHeaderHandler(handlerId);
+    slave1.ReceiveMsg(&master, LinSendFrameHeaderRequest{35s, 17});
+    EXPECT_EQ(numHeaderEvents, 1);
+
+    EXPECT_NO_THROW(slave1.RemoveFrameHeaderHandler(handlerId));
+}
+
 ////////////
 // Tracing
 ////////////
