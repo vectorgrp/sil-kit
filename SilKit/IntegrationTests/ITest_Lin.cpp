@@ -591,7 +591,7 @@ TEST_F(ITest_Lin, repeated_sleep_and_wakeup_cycles)
         switch (masterPhase)
         {
         case MasterPhase::SendData:
-            ASSERT_EQ(masterController->Status(), LinControllerStatus::Operational);
+            EXPECT_EQ(masterController->Status(), LinControllerStatus::Operational);
             masterPhase = MasterPhase::WaitForDataSent;
             masterController->SendFrame(MakeDataFrame(static_cast<uint8_t>(masterWakeups)),
                                         LinFrameResponseType::MasterResponse);
