@@ -115,7 +115,7 @@ protected:
     }
 };
 
-TEST_F(ITest_Logging, log_message_with_braces_is_not_parsed_as_format_striLogFilePrefixng)
+TEST_F(ITest_Logging, log_message_with_braces_is_not_parsed_as_format_string)
 {
     const auto bracedMessage = MakeBracedMessage();
     ASSERT_THAT(bracedMessage, testing::HasSubstr("{pattern=Wus, channel=A @ 12.796ms}"));
