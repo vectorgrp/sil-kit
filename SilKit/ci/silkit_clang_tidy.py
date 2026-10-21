@@ -10,6 +10,7 @@ import os
 import subprocess
 import sys
 
+from functools import partial
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
 
@@ -49,7 +50,7 @@ def run_clang_tidy(source_file: Path, outdir: Path):
                                 capture_output=True, encoding='utf-8')
 
     if clang_tidy.stdout != "" and "ThirdParty" not in clang_tidy.stdout:
-        warn(f"{source_file}:\n{clang_tidy.stdout}", flush=True)
+        warn("{}:\n{}", source_file, clang_tidy.stdout, flush=True)
 
 
 def main():
@@ -80,15 +81,15 @@ def main():
 
     print(f"Processing {len(source_files)} cpp files!")
 
-    global parallel_tidy
-
-    def parallel_tidy(source_file):
-        run_clang_tidy(Path(source_file), args.outdir)
+    # NB: Workers started via forkserver (Linux default since Python 3.14) or spawn re-import this script without
+    #     running main(), so the pool may only be handed module-level functions.
+    tidy_one = partial(run_clang_tidy, outdir=args.outdir)
+    source_paths = [Path(f) for f in source_files]
 
     num_cpus = cpu_count()
 
     with Pool(num_cpus) as p:
-        p.map(parallel_tidy, source_files)
+        p.map(tidy_one, source_paths)
 
 
 if __name__ == "__main__":
