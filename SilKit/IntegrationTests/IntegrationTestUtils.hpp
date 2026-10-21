@@ -17,12 +17,14 @@
 #include <sstream>
 #include <system_error>
 #include <vector>
+#include <cstdint>
 
 #if !defined(_WIN32)
 #include <errno.h>
 #include <string.h>
 #include <stdio.h>
-#include <unistd.h> // unlink
+#include <fcntl.h> // open
+#include <unistd.h> // unlink, read, close
 #endif
 
 #if defined(_WIN32)
@@ -88,102 +90,84 @@ struct Barrier
     }
 };
 
-struct Pipe
+// Reads everything written to a named pipe on a background thread, until the writer closes it. The reader waits up
+// to 10s for the pipe to be created, so it can be started before the writer.
+// On Windows, pipeName is the name below \\.\pipe\, elsewhere it is the path of the FIFO.
+class PipeReader
 {
-    using buffer_t = std::vector<char>;
-    Pipe() = delete;
-#ifdef _WIN32
-    HANDLE handle = INVALID_HANDLE_VALUE;
-
-    Pipe(const std::string& pipeName)
+public:
+    explicit PipeReader(std::string pipeName)
+        : _thread{[this, pipeName] { Read(pipeName); }}
     {
-        auto path = R"(\\.\pipe\)" + pipeName;
+    }
 
-        handle = CreateFileA(path.c_str(), GENERIC_READ, 0, nullptr, OPEN_EXISTING, 0, nullptr);
+    ~PipeReader()
+    {
+        _abort = true;
+        if (_thread.joinable())
+        {
+            _thread.join();
+        }
+    }
+
+    auto Join() -> std::vector<uint8_t>
+    {
+        _thread.join();
+        return _bytes;
+    }
+
+private:
+    void Read(const std::string& pipeName)
+    {
+        using namespace std::chrono_literals;
+        const auto deadline = std::chrono::steady_clock::now() + 10s;
+#if defined(_WIN32)
+        const auto path = R"(\\.\pipe\)" + pipeName;
+        HANDLE handle = INVALID_HANDLE_VALUE;
+        while (handle == INVALID_HANDLE_VALUE && !_abort && std::chrono::steady_clock::now() < deadline)
+        {
+            handle = CreateFileA(path.c_str(), GENERIC_READ, 0, nullptr, OPEN_EXISTING, 0, nullptr);
+            if (handle == INVALID_HANDLE_VALUE)
+            {
+                std::this_thread::sleep_for(10ms);
+            }
+        }
         if (handle == INVALID_HANDLE_VALUE)
         {
-            throw SilKit::SilKitError("Cannot open WIN32 pipe " + path);
+            return;
         }
-    }
-
-    ~Pipe()
-    {
-        if (handle != INVALID_HANDLE_VALUE)
+        // Reading ends with ERROR_BROKEN_PIPE when the writer closes the pipe.
+        char buffer[65536];
+        DWORD numRead = 0;
+        while (ReadFile(handle, buffer, sizeof(buffer), &numRead, nullptr) || GetLastError() == ERROR_MORE_DATA)
         {
-            CloseHandle(handle);
-            handle = INVALID_HANDLE_VALUE;
+            _bytes.insert(_bytes.end(), buffer, buffer + numRead);
+            numRead = 0;
         }
-    }
-
-    buffer_t Read(size_t size)
-    {
-        DWORD actualRead = 0;
-        buffer_t buf{};
-        buf.resize(size);
-        auto ok = ReadFile(handle, buf.data(), static_cast<DWORD>(buf.size()), &actualRead, nullptr);
-
-        if (!ok)
-        {
-            return buffer_t{};
-        }
-
-        if (actualRead < size)
-        {
-            buf.resize(actualRead);
-        }
-        return buf;
-    }
-
+        CloseHandle(handle);
 #else
-    //Linux impl
-    FILE* file{nullptr};
-
-    Pipe(const std::string& pipeName)
-    {
-        file = fopen(pipeName.c_str(), "r");
-        if (file == nullptr)
+        while (!std::filesystem::exists(pipeName) && !_abort && std::chrono::steady_clock::now() < deadline)
         {
-            throw SilKit::SilKitError("Cannot open linux pipe " + pipeName);
+            std::this_thread::sleep_for(10ms);
         }
-    }
-
-    ~Pipe()
-    {
-        if (file != nullptr)
+        const int fd = ::open(pipeName.c_str(), O_RDONLY);
+        if (fd < 0)
         {
-            auto ok = fclose(file);
-            if (ok != 0)
-            {
-                std::cout << "Fclose on linux pipe failed: " << strerror(errno) << std::endl;
-            }
-            file = nullptr;
+            return;
         }
-    }
-
-    buffer_t Read(size_t size)
-    {
-        buffer_t buf{};
-        buf.resize(size);
-        auto actual = fread(buf.data(), 1, buf.size(), file);
-        if (actual == 0)
+        char buffer[65536];
+        ssize_t numRead = 0;
+        while ((numRead = ::read(fd, buffer, sizeof(buffer))) > 0)
         {
-            if (feof(file) != 0)
-            {
-                return {};
-            }
-            else
-            {
-                throw SilKit::SilKitError("Read on linux pipe failed: " + std::to_string(ferror(file)));
-            }
+            _bytes.insert(_bytes.end(), buffer, buffer + numRead);
         }
-        if (actual < size)
-        {
-            buf.resize(actual);
-        }
-
-        return buf;
-    }
+        ::close(fd);
 #endif
+    }
+
+    std::atomic<bool> _abort{false};
+    std::vector<uint8_t> _bytes;
+    std::thread _thread;
 };
 
 inline size_t getFileSize(const std::string& name)

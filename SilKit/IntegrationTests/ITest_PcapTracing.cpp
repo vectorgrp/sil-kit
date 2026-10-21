@@ -5,37 +5,22 @@
 // PCAP tracing to a file and to a pipe: Ethernet frames of a controller with a PCAP trace sink end up in a valid PCAP
 // stream. The stream is parsed here without SIL Kit internals, the same way an external tool like Wireshark reads it.
 
-#include <atomic>
 #include <chrono>
 #include <cstdint>
 #include <cstring>
 #include <filesystem>
 #include <fstream>
 #include <string>
-#include <thread>
-#include <tuple>
 #include <vector>
 
 #include "silkit/services/all.hpp"
 
 #include "SimTestHarness.hpp"
 #include "EthernetHelpers.hpp"
+#include "IntegrationTestUtils.hpp"
 
-#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-#if defined(_WIN32)
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#ifndef NOMINMAX
-#define NOMINMAX // MinGW's libstdc++ already defines it
-#endif
-#include <windows.h>
-#else
-#include <fcntl.h>
-#include <unistd.h>
-#endif
 
 namespace {
 
@@ -46,7 +31,6 @@ using SilKit::IntegrationTests::EthernetEtherType;
 using SilKit::IntegrationTests::EthernetFrameHeaderSize;
 using SilKit::IntegrationTests::EthernetMac;
 
-constexpr uint32_t pcapMagicMicroseconds = 0xa1b2c3d4;
 constexpr uint32_t pcapMagicNanoseconds = 0xa1b23c4d;
 constexpr uint32_t linkTypeEthernet = 1;
 constexpr size_t numberOfFrames = 5;
@@ -146,7 +130,7 @@ Tracing:
 }
 
 // EthWriter sends one frame per millisecond, EthReader stops the simulation after receiving all of them.
-void RunEthernetSimulation(const std::string& writerConfig)
+auto RunEthernetSimulation(const std::string& writerConfig) -> std::vector<std::chrono::nanoseconds>
 {
     SilKit::Tests::SimTestHarnessArgs args;
     args.syncParticipantNames = {"EthWriter", "EthReader"};
@@ -158,17 +142,18 @@ void RunEthernetSimulation(const std::string& writerConfig)
     writer->GetOrCreateLifecycleService()->SetCommunicationReadyHandler(
         [writerController] { writerController->Activate(); });
 
-    size_t numSent = 0;
+    std::vector<std::chrono::nanoseconds> sendTimes;
     writer->GetOrCreateTimeSyncService()->SetSimulationStepHandler(
-        [writerController, &numSent](std::chrono::nanoseconds, std::chrono::nanoseconds) {
-        if (numSent < numberOfFrames)
+        [writerController, &sendTimes](std::chrono::nanoseconds now, std::chrono::nanoseconds) {
+        if (sendTimes.size() < numberOfFrames)
         {
             const EthernetMac destination{0x12, 0x23, 0x45, 0x67, 0x89, 0x9a};
             const EthernetMac source{0x9a, 0x89, 0x67, 0x45, 0x23, 0x12};
             const EthernetEtherType etherType{0x0800};
             writerController->SendFrame(
-                EthernetFrame{CreateEthernetFrameFromString(destination, source, etherType, MessageForFrame(numSent))});
-            numSent++;
+                EthernetFrame{CreateEthernetFrameFromString(destination, source, etherType,
+                                                            MessageForFrame(sendTimes.size()))});
+            sendTimes.push_back(now);
         }
     }, 1ms);
 
@@ -186,33 +171,32 @@ void RunEthernetSimulation(const std::string& writerConfig)
         }
     });
 
-    ASSERT_TRUE(testHarness.Run(10s));
+    EXPECT_TRUE(testHarness.Run(10s));
     EXPECT_EQ(numReceived, numberOfFrames);
     // Destroying the participants closes the trace sinks.
     testHarness.ResetParticipants();
+    return sendTimes;
 }
 
-void ExpectFramesInPcap(const PcapStream& pcap)
+void ExpectFramesInPcap(const PcapStream& pcap, const std::vector<std::chrono::nanoseconds>& sendTimes)
 {
-    EXPECT_THAT(pcap.magic, testing::AnyOf(pcapMagicMicroseconds, pcapMagicNanoseconds));
+    // The magic number announces the unit of the timestamp fraction. External tools like Wireshark rely on it.
+    ASSERT_EQ(pcap.magic, pcapMagicNanoseconds);
     EXPECT_EQ(pcap.versionMajor, 2u);
     EXPECT_EQ(pcap.versionMinor, 4u);
     EXPECT_EQ(pcap.linkType, linkTypeEthernet);
 
+    ASSERT_EQ(sendTimes.size(), numberOfFrames);
     ASSERT_EQ(pcap.packets.size(), numberOfFrames) << "Each sent frame must be traced exactly once";
     for (size_t i = 0; i < pcap.packets.size(); ++i)
     {
-        const auto& data = pcap.packets[i].data;
-        ASSERT_GE(data.size(), EthernetFrameHeaderSize);
-        const std::string payload(data.begin() + EthernetFrameHeaderSize, data.end());
+        const auto& packet = pcap.packets[i];
+        ASSERT_GE(packet.data.size(), EthernetFrameHeaderSize);
+        const std::string payload(packet.data.begin() + EthernetFrameHeaderSize, packet.data.end());
         EXPECT_EQ(payload, MessageForFrame(i));
-        if (i > 0)
-        {
-            const auto& previous = pcap.packets[i - 1];
-            EXPECT_TRUE(std::tie(previous.tsSec, previous.tsFraction)
-                        < std::tie(pcap.packets[i].tsSec, pcap.packets[i].tsFraction))
-                << "Frames are sent at increasing simulation times";
-        }
+
+        const auto timestamp = std::chrono::seconds{packet.tsSec} + std::chrono::nanoseconds{packet.tsFraction};
+        EXPECT_EQ(timestamp, sendTimes[i]) << "The packet timestamp must be the simulation time the frame was sent at";
     }
 }
 
@@ -222,93 +206,16 @@ TEST(ITest_PcapTracing, pcap_file_sink_contains_all_sent_frames)
                       / ("ITest_PcapTracing_" + std::to_string(std::chrono::steady_clock::now().time_since_epoch().count())
                          + ".pcap");
 
-    RunEthernetSimulation(MakeWriterConfig("PcapFile", path.generic_string()));
+    const auto sendTimes = RunEthernetSimulation(MakeWriterConfig("PcapFile", path.generic_string()));
 
     ASSERT_TRUE(std::filesystem::exists(path)) << "The PCAP file was not created";
-    ExpectFramesInPcap(ParsePcap(ReadBinaryFile(path)));
+    ExpectFramesInPcap(ParsePcap(ReadBinaryFile(path)), sendTimes);
 
     std::error_code ec;
     std::filesystem::remove(path, ec);
 }
 
-// Reads the whole PCAP stream from the named pipe the sink creates. The sink writes the first bytes when the first
-// frame is traced and blocks until a reader is connected.
-class PipeReader
-{
-public:
-    explicit PipeReader(std::string pipeName)
-        : _thread{[this, pipeName] { Read(pipeName); }}
-    {
-    }
-
-    ~PipeReader()
-    {
-        _abort = true;
-        if (_thread.joinable())
-        {
-            _thread.join();
-        }
-    }
-
-    auto Join() -> std::vector<uint8_t>
-    {
-        _thread.join();
-        return _bytes;
-    }
-
-private:
-    void Read(const std::string& pipeName)
-    {
-        const auto deadline = std::chrono::steady_clock::now() + 10s;
-#if defined(_WIN32)
-        const auto path = "\\\\.\\pipe\\" + pipeName;
-        HANDLE handle = INVALID_HANDLE_VALUE;
-        while (handle == INVALID_HANDLE_VALUE && !_abort && std::chrono::steady_clock::now() < deadline)
-        {
-            handle = CreateFileA(path.c_str(), GENERIC_READ, 0, nullptr, OPEN_EXISTING, 0, nullptr);
-            if (handle == INVALID_HANDLE_VALUE)
-            {
-                std::this_thread::sleep_for(10ms);
-            }
-        }
-        if (handle == INVALID_HANDLE_VALUE)
-        {
-            return;
-        }
-        // Reading ends with ERROR_BROKEN_PIPE when the sink closes the pipe.
-        char buffer[65536];
-        DWORD numRead = 0;
-        while (ReadFile(handle, buffer, sizeof(buffer), &numRead, nullptr) || GetLastError() == ERROR_MORE_DATA)
-        {
-            _bytes.insert(_bytes.end(), buffer, buffer + numRead);
-            numRead = 0;
-        }
-        CloseHandle(handle);
-#else
-        while (!std::filesystem::exists(pipeName) && !_abort && std::chrono::steady_clock::now() < deadline)
-        {
-            std::this_thread::sleep_for(10ms);
-        }
-        const int fd = ::open(pipeName.c_str(), O_RDONLY);
-        if (fd < 0)
-        {
-            return;
-        }
-        char buffer[65536];
-        ssize_t numRead = 0;
-        while ((numRead = ::read(fd, buffer, sizeof(buffer))) > 0)
-        {
-            _bytes.insert(_bytes.end(), buffer, buffer + numRead);
-        }
-        ::close(fd);
-#endif
-    }
-
-    std::atomic<bool> _abort{false};
-    std::vector<uint8_t> _bytes;
-    std::thread _thread;
-};
-
+// The sink writes the first bytes when the first frame is traced and blocks until a reader is connected.
 TEST(ITest_PcapTracing, pcap_pipe_sink_streams_all_sent_frames)
 {
     const auto uniqueName = "ITest_PcapPipe_" + std::to_string(std::chrono::steady_clock::now().time_since_epoch().count());
@@ -318,10 +225,10 @@ TEST(ITest_PcapTracing, pcap_pipe_sink_streams_all_sent_frames)
     const auto pipeName = (std::filesystem::temp_directory_path() / uniqueName).string();
 #endif
 
-    PipeReader pipeReader{pipeName};
-    RunEthernetSimulation(MakeWriterConfig("PcapPipe", pipeName));
+    IntegrationTestUtils::PipeReader pipeReader{pipeName};
+    const auto sendTimes = RunEthernetSimulation(MakeWriterConfig("PcapPipe", pipeName));
 
-    ExpectFramesInPcap(ParsePcap(pipeReader.Join()));
+    ExpectFramesInPcap(ParsePcap(pipeReader.Join()), sendTimes);
 }
 
 } // namespace
