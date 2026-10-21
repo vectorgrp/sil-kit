@@ -49,11 +49,6 @@ void State::ReadyToRun(std::string reason)
     InvalidStateTransition(__FUNCTION__, true, std::move(reason));
 }
 
-void State::RunSimulation(std::string reason)
-{
-    InvalidStateTransition(__FUNCTION__, true, std::move(reason));
-}
-
 void State::PauseSimulation(std::string reason)
 {
     InvalidStateTransition(__FUNCTION__, true, std::move(reason));
@@ -103,11 +98,6 @@ void State::InvalidStateTransition(std::string transitionName, bool triggerError
             .SetMessage(ss.str())
             .Dispatch();
     }
-}
-
-bool State::IsAnyOf(SystemState state, std::initializer_list<SystemState> stateList)
-{
-    return std::any_of(begin(stateList), end(stateList), [=](auto candidate) { return candidate == state; });
 }
 
 void State::ProcessAbortCommandInCallback()
