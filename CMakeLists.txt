@@ -54,6 +54,7 @@ endif()
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake ${CMAKE_CURRENT_LIST_DIR}/SilKit/cmake)
 include(SilKitInstall)
 include(SilKitVersion)
+include(SilKitDemoPresets)
 configure_silkit_version(${PROJECT_NAME})
 
 # Enable testing for this project
@@ -192,7 +193,10 @@ if(SILKIT_INSTALL_SOURCE)
             ${CMAKE_CURRENT_SOURCE_DIR}/Demos/
         DESTINATION ${INSTALL_DEMO_DIR}
         COMPONENT source
+        PATTERN CMakePresets.json.in EXCLUDE
     )
+
+    silkit_install_demo_presets(DESTINATION ${INSTALL_DEMO_DIR} COMPONENT source)
 
     install(
         DIRECTORY

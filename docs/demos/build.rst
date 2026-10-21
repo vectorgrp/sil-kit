@@ -44,8 +44,12 @@ Visual Studio
 
    a. For the git repository: open the root folder of the repository
    b. For a |ProductName| package: open the ``SilKit-Demos`` folder
-#. Opening the folder automatically starts the CMake configuration step. 
+#. Opening the folder automatically starts the CMake configuration step.
    You can also manually call this step under ``Project | Configure Cache``.
+
+   For a |ProductName| package, the ``SilKit-Demos`` folder contains CMake presets for the architecture of the
+   package only (e.g. ``x64-release`` and ``x64-debug`` for a 64-bit Windows package). Select one of them in the
+   configuration drop-down of the toolbar.
 #. Build the project with ``Build | Build All``
 #. Locate the binaries
 
@@ -66,6 +70,13 @@ From command line
    * ``cd build``
    * ``cmake ..``
    * ``cmake --build .``
+
+   For a |ProductName| package, you can use the CMake presets of the ``SilKit-Demos`` folder instead
+   (``cmake --list-presets`` shows them). On Windows, run them in a developer command prompt for the architecture of
+   the package, e.g. for a 64-bit package:
+
+   * ``cmake --preset x64-release``
+   * ``cmake --build --preset x64-release``
 #. Locate the binaries
 
    a. For the git repository: The binaries reside in ``build/<build config>/<build type, e.g. Debug, Release>/``
