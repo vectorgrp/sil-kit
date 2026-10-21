@@ -75,6 +75,10 @@ add_silkit_test_to_executable(SilKitIntegrationTests
 )
 
 add_silkit_test_to_executable(SilKitIntegrationTests
+    SOURCES ITest_Lifecycle.cpp
+)
+
+add_silkit_test_to_executable(SilKitIntegrationTests
     SOURCES ITest_CommunicationGuarantees.cpp
 )
 
