@@ -811,6 +811,16 @@ TEST_F(Test_LinControllerTrivialSim, add_remove_handler)
     master.ReceiveMsg(&slave1, transmission);
 }
 
+TEST_F(Test_LinControllerTrivialSim, send_dynamic_response_throws_if_not_dynamic)
+{
+    const auto frame = MakeFrame(17, LinChecksumModel::Enhanced, 4);
+
+    EXPECT_THROW(master.SendDynamicResponse(frame), SilKit::StateError);
+
+    master.Init(MakeControllerConfig(LinControllerMode::Master));
+    EXPECT_THROW(master.SendDynamicResponse(frame), SilKit::StateError);
+}
+
 ////////////
 // Tracing
 ////////////
