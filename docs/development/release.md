@@ -14,22 +14,23 @@ reads the numbers from it, and the library and the utilities' Windows resources 
 
 ## Bump the version
 
-```
+```sh
 python3 SilKit/ci/bump_version.py --dry-run 5.0.9
 python3 SilKit/ci/bump_version.py 5.0.9
 ```
 
-This sets the version in the header, archives `latest.md` as `5.0.8.md` with today's date
-(`--date YYYY-MM-DD` to override), lists it in `docs/changelog/overview.rst` and resets
-`latest.md` to an empty `# [5.0.9] - UNRELEASED` stub. Review with `git diff` and commit as
-`version: bump to X.Y.Z (#PR)`.
+This sets the version in the header, archives `latest.md` as `5.0.8.md`, lists it in
+`docs/changelog/overview.rst` and resets `latest.md` to an empty `# [5.0.9] - UNRELEASED` stub.
+The archived heading keeps the release date already in `latest.md`, or gets today's date if it
+still says `UNRELEASED` (`--date YYYY-MM-DD` overrides either). Review with `git diff`,
+commit as `version: bump to X.Y.Z`, and open a PR to merge the commit to main.
 
 ## Build identity
 
 The git hash, build number and pre-release suffix describe a *build*. The header only
 carries fallbacks, CMake supplies the real values:
 
-```
+```sh
 cmake -B <build-dir> -DSILKIT_BUILD_GIT_HASH=<hash> -DSILKIT_BUILD_NUMBER=42 -DSILKIT_VERSION_SUFFIX=rc1
 ```
 
