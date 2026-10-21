@@ -15,12 +15,12 @@ using namespace SilKit::Services::PubSub;
 using namespace SilKit::Services::Rpc;
 using namespace std::chrono_literals;
 
-struct ITest_LabelMatching : ITest_SimTestHarness
+struct ITest_LabelsMatching : ITest_SimTestHarness
 {
     using ITest_SimTestHarness::ITest_SimTestHarness;
 };
 
-TEST_F(ITest_LabelMatching, pubsub_multiple_controllers_same_topic_different_labels)
+TEST_F(ITest_LabelsMatching, pubsub_multiple_controllers_same_topic_different_labels)
 {
     SetupFromParticipantList({"Pub1", "Sub1"});
 
@@ -110,7 +110,7 @@ TEST_F(ITest_LabelMatching, pubsub_multiple_controllers_same_topic_different_lab
     EXPECT_EQ(numReceivedSubCtrl3, 1u);
 }
 
-TEST_F(ITest_LabelMatching, rpc_multiple_controllers_same_topic_different_labels)
+TEST_F(ITest_LabelsMatching, rpc_multiple_controllers_same_topic_different_labels)
 {
     // This test ensures that we do not regress on SILKIT-1691
 
