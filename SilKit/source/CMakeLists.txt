@@ -14,47 +14,6 @@ add_subdirectory(dashboard)
 
 find_package(Threads REQUIRED)
 
-# Encode the current GIT and version infos into version_macros.hpp
-# If this file is present in the current source directory we assume
-# that this source-tree is a non-git/packaged source tree and re-use
-# the file unmodified.
-set(GIT_DIR "${PROJECT_SOURCE_DIR}/../.git")
-set(GIT_HEAD_FILE "${GIT_DIR}/HEAD")
-set(VERSION_MACROS_HPP ${CMAKE_CURRENT_BINARY_DIR}/version_macros.hpp)
-if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/version_macros.hpp)
-    message(STATUS "SIL Kit: using deployed version_macros.hpp")
-    set(VERSION_MACROS_HPP ${CMAKE_CURRENT_LIST_DIR}/version_macros.hpp)
-elseif(EXISTS "${GIT_HEAD_FILE}")
-    configure_file(
-        "MakeVersionMacros.cmake.in"
-        ${CMAKE_CURRENT_BINARY_DIR}/MakeVersionMacros.cmake
-        @ONLY)
-    include(${CMAKE_CURRENT_BINARY_DIR}/MakeVersionMacros.cmake)
-    if(SILKIT_INSTALL_SOURCE)
-        install(FILES
-            ${CMAKE_CURRENT_BINARY_DIR}/version_macros.hpp
-            DESTINATION
-            ${INSTALL_SOURCE_DIR}/SilKit/source
-            COMPONENT source
-        )
-    endif()
-else()
-    message(STATUS "SIL Kit: Cannot determine hash of current git head! GIT_HEAD_HASH will be set to UNKNOWN")
-    set(GIT_HEAD_HASH "UNKNOWN")
-    configure_file(
-        version_macros.hpp.in
-        ${CMAKE_CURRENT_BINARY_DIR}/version_macros.hpp
-        @ONLY)
-endif()
-# now install the configured version_macros.hpp as a header into the `include/silkit/capi` directory.
-# NB please keep the version_macros.hpp C11 compatible!
-install(FILES
-    ${VERSION_MACROS_HPP}
-    DESTINATION ${INSTALL_INCLUDE_DIR}/silkit/capi
-    RENAME SilKitVersionMacros.h
-    COMPONENT dev
-)
-
 set(silkitLibType SHARED)
 if(SILKIT_BUILD_STATIC)
     set(silkitLibType STATIC)
@@ -67,6 +26,12 @@ add_library(I_SilKit INTERFACE)
 # so a single include root suffices for the whole internal build.
 target_include_directories(I_SilKit
     INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}"
+)
+
+# Overrides the fallback in SilKitVersionMacros.h. Also reaches the .rc resource
+# scripts, which put it in FILEVERSION.
+target_compile_definitions(I_SilKit
+    INTERFACE SILKIT_BUILD_NUMBER=${SILKIT_BUILD_NUMBER}
 )
 
 if (MSVC)
@@ -144,12 +109,46 @@ target_link_libraries(O_SilKit_CreateSilKitRegistryImpl
 add_library(O_SilKit_VersionImpl OBJECT
     SilKitVersionImpl.cpp
     SilKitVersionImpl.hpp
-    ${VERSION_MACROS_HPP}
 )
 
 target_link_libraries(O_SilKit_VersionImpl
     PRIVATE I_SilKit
 )
+
+# Only SilKitVersionImpl.cpp reads the git hash and suffix, so a new commit
+# rebuilds one file instead of everything linking I_SilKit.
+set(silkitGitHash "${SILKIT_BUILD_GIT_HASH}")
+if(NOT silkitGitHash AND EXISTS "${PROJECT_SOURCE_DIR}/../.git")
+    find_package(Git QUIET)
+    if(GIT_FOUND)
+        execute_process(
+            COMMAND "${GIT_EXECUTABLE}" rev-parse HEAD
+            WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
+            RESULT_VARIABLE gitResult
+            OUTPUT_VARIABLE gitOutput
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+            ERROR_QUIET
+        )
+        if(gitResult EQUAL 0)
+            set(silkitGitHash "${gitOutput}")
+        endif()
+    endif()
+endif()
+message(STATUS "SIL Kit git hash: ${silkitGitHash}")
+
+if(silkitGitHash)
+    target_compile_definitions(O_SilKit_VersionImpl
+        PRIVATE SILKIT_GIT_HASH="${silkitGitHash}"
+    )
+endif()
+
+if(SILKIT_VERSION_SUFFIX)
+    target_compile_definitions(O_SilKit_VersionImpl
+        PRIVATE
+            SILKIT_VERSION_SUFFIX="${SILKIT_VERSION_SUFFIX}"
+            SILKIT_VERSION_STRING="${VERSION_STRING}"
+    )
+endif()
 
 
 set(SilKitImplObjectLibraries "")
