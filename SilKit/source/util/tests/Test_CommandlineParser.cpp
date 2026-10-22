@@ -166,6 +166,7 @@ TEST(Test_CommandlineParser, test_missing_option_value)
     EXPECT_THROW(commandlineParser.ParseArguments(argc, argv), SilKitError);
 }
 
+// The usage info lists all arguments except hidden ones.
 TEST(Test_CommandlineParser, test_print_usage_info_skips_hidden_arguments)
 {
     SilKit::Util::CommandlineParser commandlineParser;
@@ -194,6 +195,7 @@ TEST(Test_CommandlineParser, test_print_usage_info_skips_hidden_arguments)
                          "<file1>, <file2>, ...: The files.\n");
 }
 
+// Hidden arguments are only omitted from the usage info, but are parsed.
 TEST(Test_CommandlineParser, test_hidden_arguments_are_parsed)
 {
     auto arguments = {"main", "-d", "--secret", "xyz"};
@@ -213,6 +215,7 @@ TEST(Test_CommandlineParser, test_hidden_arguments_are_parsed)
     EXPECT_EQ(commandlineParser.Get<SilKit::Util::CommandlineParser::Option>("secret").Value(), "xyz");
 }
 
+// A PositionalList collects all positional arguments after the regular positionals, also between options.
 TEST(Test_CommandlineParser, test_positional_list_collects_remaining_positionals)
 {
     auto arguments = {"main", "config.yaml", "a.txt", "--name=Xxxx", "b.txt"};
@@ -237,6 +240,7 @@ TEST(Test_CommandlineParser, test_positional_list_collects_remaining_positionals
               (std::vector<std::string>{"a.txt", "b.txt"}));
 }
 
+// Flags and options provide their short names and default values.
 TEST(Test_CommandlineParser, test_argument_accessors)
 {
     SilKit::Util::CommandlineParser commandlineParser;
@@ -252,6 +256,7 @@ TEST(Test_CommandlineParser, test_argument_accessors)
     EXPECT_EQ(option.DefaultValue(), "Default");
 }
 
+// Get throws for unknown names and for arguments of a different kind.
 TEST(Test_CommandlineParser, test_get_unknown_or_mismatched_argument)
 {
     SilKit::Util::CommandlineParser commandlineParser;
@@ -261,6 +266,7 @@ TEST(Test_CommandlineParser, test_get_unknown_or_mismatched_argument)
     EXPECT_THROW(commandlineParser.Get<SilKit::Util::CommandlineParser::Flag>("name"), SilKitError);
 }
 
+// Unexpected positionals, unknown arguments, flags with values and options without values are rejected.
 TEST(Test_CommandlineParser, test_parse_errors)
 {
     auto parse = [](std::vector<const char*> arguments) {

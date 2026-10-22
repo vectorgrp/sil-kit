@@ -338,6 +338,8 @@ TEST_F(ITest_Abort, test_Abort_Communication_Ready_Simulation_Sync)
     StopRegistry();
 }
 
+// Aborting while the system controller waits for its async CommunicationReadyHandler to be completed
+// shuts down all participants without errors.
 TEST_F(ITest_Abort, test_Abort_Pending_Async_Communication_Ready_Sync)
 {
     RunRegistry();

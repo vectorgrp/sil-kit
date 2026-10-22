@@ -811,6 +811,7 @@ TEST_F(Test_LinControllerTrivialSim, add_remove_handler)
     master.ReceiveMsg(&slave1, transmission);
 }
 
+// An inactive (not initialized) controller ignores received transmissions.
 TEST_F(Test_LinControllerTrivialSim, receive_transmission_while_inactive_is_ignored)
 {
     // No Init(): the controller is still inactive
@@ -824,6 +825,7 @@ TEST_F(Test_LinControllerTrivialSim, receive_transmission_while_inactive_is_igno
     master.ReceiveMsg(&slave1, transmission);
 }
 
+// A sleeping controller ignores received transmissions.
 TEST_F(Test_LinControllerTrivialSim, receive_transmission_while_sleeping_is_ignored)
 {
     LinControllerConfig config = MakeControllerConfig(LinControllerMode::Master);
@@ -843,6 +845,7 @@ TEST_F(Test_LinControllerTrivialSim, receive_transmission_while_sleeping_is_igno
     master.ReceiveMsg(&slave1, transmission);
 }
 
+// Received transmissions with a data length above 8 are ignored.
 TEST_F(Test_LinControllerTrivialSim, receive_transmission_with_invalid_datalength_is_ignored)
 {
     master.Init(MakeControllerConfig(LinControllerMode::Master));
@@ -856,6 +859,7 @@ TEST_F(Test_LinControllerTrivialSim, receive_transmission_with_invalid_datalengt
     master.ReceiveMsg(&slave1, transmission);
 }
 
+// Received transmissions with a LIN ID above 63 are ignored.
 TEST_F(Test_LinControllerTrivialSim, receive_transmission_with_invalid_id_is_ignored)
 {
     master.Init(MakeControllerConfig(LinControllerMode::Master));
@@ -869,6 +873,8 @@ TEST_F(Test_LinControllerTrivialSim, receive_transmission_with_invalid_id_is_ign
     master.ReceiveMsg(&slave1, transmission);
 }
 
+// SetFrameResponse ignores reconfigurations, LinFrameResponseMode::Unused and invalid IDs, so only the first,
+// valid response is distributed.
 TEST_F(Test_LinControllerTrivialSim, set_frame_response_ignores_invalid_requests)
 {
     slave1.Init(MakeControllerConfig(LinControllerMode::Slave));
@@ -896,6 +902,7 @@ TEST_F(Test_LinControllerTrivialSim, set_frame_response_ignores_invalid_requests
     slave1.SetFrameResponse(response);
 }
 
+// SendFrame with a slave response is ignored if the master itself already transmits on that ID.
 TEST_F(Test_LinControllerTrivialSim, send_frame_slave_response_with_master_tx_is_ignored)
 {
     const LinFrame frame = MakeFrame(20, LinChecksumModel::Enhanced, 2, {1, 2, 0, 0, 0, 0, 0, 0});
@@ -918,6 +925,7 @@ TEST_F(Test_LinControllerTrivialSim, send_frame_slave_response_with_master_tx_is
     master.SendFrame(frame, LinFrameResponseType::SlaveResponse);
 }
 
+// GetSlaveConfiguration lists the IDs on which slaves transmit, and may only be called on a master.
 TEST_F(Test_LinControllerTrivialSim, get_slave_configuration)
 {
     master.Init(MakeControllerConfig(LinControllerMode::Master));
@@ -939,6 +947,8 @@ TEST_F(Test_LinControllerTrivialSim, get_slave_configuration)
     EXPECT_THROW(slave1.GetSlaveConfiguration(), SilKit::SilKitError);
 }
 
+// Removed GoToSleep, Wakeup and SlaveConfiguration handlers are no longer called, and removing unknown handlers
+// does not throw.
 TEST_F(Test_LinControllerTrivialSim, removed_handlers_are_not_called)
 {
     master.Init(MakeControllerConfig(LinControllerMode::Master));
@@ -969,6 +979,8 @@ TEST_F(Test_LinControllerTrivialSim, removed_handlers_are_not_called)
     EXPECT_NO_THROW(master.RemoveLinSlaveConfigurationHandler(slaveConfigurationHandlerId));
 }
 
+// A removed FrameHeader handler of a dynamic controller is no longer called, and removing it again does not
+// throw.
 TEST_F(Test_LinControllerTrivialSim, removed_frame_header_handler_is_not_called)
 {
     SilKit::Experimental::Services::Lin::LinControllerDynamicConfig config{};

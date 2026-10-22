@@ -264,6 +264,9 @@ TEST_F(Test_EthControllerDetailedSim, trigger_callback_on_state_change)
     controller.ReceiveMsg(&controllerBusSim, newStatus);
 }
 
+/*! rief The controller routes frames to a network simulator of its network once it appears, and falls back to
+ *         the trivial simulation once it leaves.
+ */
 TEST_F(Test_EthControllerDetailedSim, network_simulator_discovery_switches_simulation_behavior)
 {
     SilKit::Core::Discovery::ServiceDiscoveryHandler discoveryHandler;
@@ -298,6 +301,9 @@ TEST_F(Test_EthControllerDetailedSim, network_simulator_discovery_switches_simul
     trivialController.SendFrame(EthernetFrame{});
 }
 
+/*! rief In the detailed simulation, status updates and acknowledgements from anyone but the network simulator
+ *         are dropped.
+ */
 TEST_F(Test_EthControllerDetailedSim, reject_messages_not_from_network_simulator)
 {
     EthController otherController{&participant, cfg, participant.GetTimeProvider()};
@@ -312,6 +318,8 @@ TEST_F(Test_EthControllerDetailedSim, reject_messages_not_from_network_simulator
     controller.ReceiveMsg(&otherController, EthernetStatus{0ns, EthernetState::LinkUp, 100});
 }
 
+/*! rief Removed handlers are no longer called, and removing unknown handlers does not throw.
+ */
 TEST_F(Test_EthControllerDetailedSim, removed_handlers_are_not_called)
 {
     EthController detailedController{&participant, cfg, participant.GetTimeProvider()};

@@ -20,6 +20,8 @@ class ITest_Lifecycle : public ITest_MultiThreadedParticipants
 {
 };
 
+// Stopping a paused simulation runs through the regular stop sequence for all participants, without errors
+// or aborts.
 TEST_F(ITest_Lifecycle, test_Stop_Paused_Simulation_Sync)
 {
     RunRegistry();
@@ -28,7 +30,6 @@ TEST_F(ITest_Lifecycle, test_Stop_Paused_Simulation_Sync)
     syncParticipants.push_back({"SyncParticipant1", TimeMode::Sync, OperationMode::Coordinated});
     syncParticipants.push_back({"SyncParticipant2", TimeMode::Sync, OperationMode::Coordinated});
 
-    // Stopping a paused simulation must run through the regular stop sequence, without errors or aborts.
     int size = static_cast<int>(syncParticipants.size() + 1); // include system controller
     EXPECT_CALL(callbacks, AbortHandler(_)).Times(0);
     EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Error)).Times(0);

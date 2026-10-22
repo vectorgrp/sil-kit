@@ -64,6 +64,7 @@ protected:
     LifecycleManagement mgmt{&participant, participant.GetLoggerInternal(), &lifecycleService};
 };
 
+// Invalid state transitions move the participant to the Error state.
 TEST_F(Test_LifecycleStates, invalid_transitions_lead_to_error_state)
 {
     using LM = LifecycleManagement;
@@ -86,6 +87,8 @@ TEST_F(Test_LifecycleStates, invalid_transitions_lead_to_error_state)
     });
 }
 
+// Transitions that are only warned about or ignored on purpose (e.g., due to races with SystemState updates)
+// leave the state unchanged.
 TEST_F(Test_LifecycleStates, tolerated_and_ignored_transitions_keep_state)
 {
     using LM = LifecycleManagement;
@@ -121,6 +124,7 @@ TEST_F(Test_LifecycleStates, tolerated_and_ignored_transitions_keep_state)
     });
 }
 
+// An abort during CommunicationInitializing calls the abort handler and ends in Shutdown.
 TEST_F(Test_LifecycleStates, abort_during_communication_initializing_shuts_down)
 {
     std::vector<ParticipantState> abortHandlerStates;
@@ -133,6 +137,7 @@ TEST_F(Test_LifecycleStates, abort_during_communication_initializing_shuts_down)
     EXPECT_THAT(abortHandlerStates, ElementsAre(ParticipantState::CommunicationInitializing));
 }
 
+// Stop in the Error state calls the shutdown handler and ends in Shutdown.
 TEST_F(Test_LifecycleStates, stop_in_error_state_shuts_down)
 {
     int shutdownHandlerCalls = 0;
@@ -145,6 +150,7 @@ TEST_F(Test_LifecycleStates, stop_in_error_state_shuts_down)
     EXPECT_EQ(shutdownHandlerCalls, 1);
 }
 
+// Restarting a participant is not supported and throws.
 TEST_F(Test_LifecycleStates, restart_is_not_supported)
 {
     mgmt.SetState(mgmt.GetStoppedState(), "Test setup");
@@ -154,6 +160,7 @@ TEST_F(Test_LifecycleStates, restart_is_not_supported)
     EXPECT_THROW(mgmt.Restart("Test transition"), SilKitError);
 }
 
+// Each lifecycle state has the expected name and ParticipantState.
 TEST_F(Test_LifecycleStates, state_names_match_participant_states)
 {
     struct NameCase

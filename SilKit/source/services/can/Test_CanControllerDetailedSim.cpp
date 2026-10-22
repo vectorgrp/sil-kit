@@ -239,6 +239,8 @@ TEST(Test_CanControllerDetailedSim, must_not_generate_ack)
     canController.ReceiveMsg(&canControllerFrom, msg);
 }
 
+// The controller routes frames to a network simulator of its network once it appears, and falls back to the
+// trivial simulation once it leaves.
 TEST(Test_CanControllerDetailedSim, network_simulator_discovery_switches_simulation_behavior)
 {
     MockParticipant mockParticipant;
@@ -276,6 +278,8 @@ TEST(Test_CanControllerDetailedSim, network_simulator_discovery_switches_simulat
     canController.SendFrame(frame);
 }
 
+// In the detailed simulation, status updates and acknowledgements from anyone but the network simulator are
+// dropped.
 TEST(Test_CanControllerDetailedSim, reject_messages_not_from_network_simulator)
 {
     using namespace std::placeholders;
@@ -303,6 +307,7 @@ TEST(Test_CanControllerDetailedSim, reject_messages_not_from_network_simulator)
     canController.ReceiveMsg(&otherController, CanFrameTransmitEvent{});
 }
 
+// Removed handlers are no longer called, and removing unknown handlers does not throw.
 TEST(Test_CanControllerDetailedSim, removed_handlers_are_not_called)
 {
     using namespace std::placeholders;

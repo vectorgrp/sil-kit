@@ -48,6 +48,8 @@ auto ToMs(Duration duration) -> double
     return std::chrono::duration<double, std::milli>(duration).count();
 }
 
+// A participant coupled to the wall clock slows down the whole simulation, including participants without
+// wall clock coupling.
 TEST(ITest_WallClockCoupling, coupled_participant_paces_the_whole_simulation)
 {
     const auto stepSize = 10ms;
@@ -101,10 +103,10 @@ TEST(ITest_WallClockCoupling, coupled_participant_paces_the_whole_simulation)
     EXPECT_GE(ToMs(uncoupledEnd - uncoupledStart), ToMs(minimumDuration));
 }
 
+// If async simulation steps complete later than the wall clock requires, the simulation catches up after each
+// completion without losing or repeating steps.
 TEST(ITest_WallClockCoupling, lagging_async_step_completion_catches_up)
 {
-    // Each step takes longer to complete than its share of the wall clock. The simulation must not lose steps or get
-    // stuck, but request the next step right after the completion.
     const auto stepSize = 10ms;
     const std::chrono::nanoseconds simDuration = 100ms;
     const auto completionDelay = 25ms;
