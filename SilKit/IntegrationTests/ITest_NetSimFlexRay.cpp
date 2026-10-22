@@ -17,7 +17,7 @@ using namespace SilKit::Experimental::NetworkSimulation;
 using namespace SilKit::Services::Flexray;
 using namespace SilKit::Experimental::NetworkSimulation::Flexray;
 
-struct ITest_NetSimFlexray : ITest_NetSim
+struct ITest_NetSimFlexRay : ITest_NetSim
 {
     void SetupFlexrayController(Orchestration::ILifecycleService* lifecycleService, IFlexrayController* controller,
                                 CallCountsSilKitHandlersFlexray& callCountsSilKitHandlersFlexray)
@@ -271,7 +271,7 @@ void MySimulatedFlexrayController::OnTxBufferUpdate(
 // - Correct routing of simulated FlexRay messages
 // - Network Simulator participant has FlexrayControllers itself
 
-TEST_F(ITest_NetSimFlexray, basic_networksimulation_flexray)
+TEST_F(ITest_NetSimFlexRay, basic_networksimulation_flexray)
 {
     {
         // ----------------------------
