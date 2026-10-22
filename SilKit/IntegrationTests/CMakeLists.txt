@@ -134,6 +134,10 @@ add_silkit_test_to_executable(SilKitIntegrationTests
     SOURCES ITest_DynStepSizes.cpp
 )
 
+add_silkit_test_to_executable(SilKitIntegrationTests
+    SOURCES ITest_WallClockCoupling.cpp
+)
+
 
 add_silkit_test_to_executable(SilKitFunctionalTests
     SOURCES FTest_WallClockCoupling.cpp
