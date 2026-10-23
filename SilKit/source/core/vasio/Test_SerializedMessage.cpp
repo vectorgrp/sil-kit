@@ -3,10 +3,15 @@
 // SPDX-License-Identifier: MIT
 
 #include "core/vasio/SerializedMessage.hpp"
+#include "wire/can/WireCanMessages.hpp"
+#include "wire/ethernet/WireEthernetMessages.hpp"
+#include "wire/flexray/WireFlexrayMessages.hpp"
 #include "wire/pubsub/WireDataMessages.hpp"
+#include "wire/rpc/WireRpcMessages.hpp"
 
 #include <cstddef>
 #include <cstdint>
+#include <cstring>
 #include <vector>
 #include <array>
 #include <string>
@@ -217,4 +222,186 @@ TEST(Test_SerializedMessage, a_shared_blob_buffer_rejects_writes)
     SerializedMessage receiving{SilKit::Util::MakeSharedSpan(blob, 0, blob->size())};
 
     ASSERT_THROW(receiving.ReleaseStorage(), SilKit::SilKitError);
+}
+
+namespace {
+
+auto MakeTestPayload(size_t size) -> std::vector<uint8_t>
+{
+    std::vector<uint8_t> payload(size);
+    for (size_t i = 0; i < size; ++i)
+    {
+        payload[i] = static_cast<uint8_t>(i * 31 + 7);
+    }
+    return payload;
+}
+
+template <typename T>
+void AppendRaw(std::vector<uint8_t>& bytes, const T& value)
+{
+    const auto* first = reinterpret_cast<const uint8_t*>(&value);
+    bytes.insert(bytes.end(), first, first + sizeof(value));
+}
+
+void AppendLengthPrefixed(std::vector<uint8_t>& bytes, const std::vector<uint8_t>& payload)
+{
+    AppendRaw(bytes, static_cast<uint32_t>(payload.size()));
+    bytes.insert(bytes.end(), payload.begin(), payload.end());
+}
+
+auto ShareBlob(SerializedMessage sending) -> std::shared_ptr<const std::vector<uint8_t>>
+{
+    return std::make_shared<const std::vector<uint8_t>>(sending.ReleaseStorage());
+}
+
+//! Round-trip msg through a shared blob and check that the payload selected by payloadOf aliases it.
+template <typename MsgT, typename PayloadOf>
+void ExpectPayloadAliasesTheBlob(const MsgT& msg, PayloadOf payloadOf)
+{
+    const auto blob = ShareBlob(SerializedMessage{msg, EndpointAddress{1, 2}, EndpointId{3}});
+
+    SerializedMessage receiving{SilKit::Util::MakeSharedSpan(blob, 0, blob->size())};
+    const auto received = receiving.Deserialize<MsgT>();
+    const auto& payload = payloadOf(received);
+    const auto view = payload.AsSpan();
+
+    EXPECT_GE(view.data(), blob->data());
+    EXPECT_LE(view.data() + view.size(), blob->data() + blob->size());
+    EXPECT_TRUE(SilKit::Util::ItemsAreEqual(view, payloadOf(msg).AsSpan()));
+}
+
+} // namespace
+
+TEST(Test_SerializedMessage, can_frame_payload_aliases_a_shared_blob)
+{
+    SilKit::Services::Can::WireCanFrameEvent event{};
+    event.frame.canId = 0x123;
+    event.frame.dataField = MakeTestPayload(64);
+
+    ExpectPayloadAliasesTheBlob(event, [](const auto& msg) -> const auto& { return msg.frame.dataField; });
+}
+
+TEST(Test_SerializedMessage, ethernet_frame_payload_aliases_a_shared_blob)
+{
+    SilKit::Services::Ethernet::WireEthernetFrameEvent event{};
+    event.frame.raw = MakeTestPayload(1500);
+
+    ExpectPayloadAliasesTheBlob(event, [](const auto& msg) -> const auto& { return msg.frame.raw; });
+}
+
+TEST(Test_SerializedMessage, flexray_frame_payload_aliases_a_shared_blob)
+{
+    SilKit::Services::Flexray::WireFlexrayFrameEvent event{};
+    event.channel = SilKit::Services::Flexray::FlexrayChannel::A;
+    event.frame.payload = MakeTestPayload(254);
+
+    ExpectPayloadAliasesTheBlob(event, [](const auto& msg) -> const auto& { return msg.frame.payload; });
+}
+
+TEST(Test_SerializedMessage, flexray_tx_buffer_update_payload_aliases_a_shared_blob)
+{
+    SilKit::Services::Flexray::WireFlexrayTxBufferUpdate update{};
+    update.txBufferIndex = 3;
+    update.payloadDataValid = true;
+    update.payload = MakeTestPayload(254);
+
+    ExpectPayloadAliasesTheBlob(update, [](const auto& msg) -> const auto& { return msg.payload; });
+}
+
+TEST(Test_SerializedMessage, rpc_payloads_alias_a_shared_blob)
+{
+    SilKit::Services::Rpc::FunctionCall call{std::chrono::nanoseconds{1}, SilKit::Util::Uuid{1, 2},
+                                             MakeTestPayload(300)};
+    ExpectPayloadAliasesTheBlob(call, [](const auto& msg) -> const auto& { return msg.data; });
+
+    SilKit::Services::Rpc::FunctionCallResponse response{
+        std::chrono::nanoseconds{2}, SilKit::Util::Uuid{3, 4}, MakeTestPayload(300),
+        SilKit::Services::Rpc::FunctionCallResponse::Status::Success};
+    ExpectPayloadAliasesTheBlob(response, [](const auto& msg) -> const auto& { return msg.data; });
+}
+
+TEST(Test_SerializedMessage, rpc_wire_format_is_unchanged)
+{
+    // The payload used to be a std::vector<uint8_t>, which was written as a uint32 length prefix
+    // followed by the bytes. The SharedSpan payload must produce the very same bytes.
+    using SilKit::Services::Rpc::FunctionCall;
+    using SilKit::Services::Rpc::FunctionCallResponse;
+
+    const auto payload = MakeTestPayload(17);
+    const FunctionCall call{std::chrono::nanoseconds{0x0102030405060708}, SilKit::Util::Uuid{0x1111, 0x2222},
+                            payload};
+    const FunctionCallResponse response{std::chrono::nanoseconds{-5}, SilKit::Util::Uuid{0x3333, 0x4444}, payload,
+                                        FunctionCallResponse::Status::InternalError};
+
+    std::vector<uint8_t> expectedCall;
+    AppendRaw(expectedCall, int64_t{0x0102030405060708});
+    AppendRaw(expectedCall, uint64_t{0x1111});
+    AppendRaw(expectedCall, uint64_t{0x2222});
+    AppendLengthPrefixed(expectedCall, payload);
+
+    std::vector<uint8_t> expectedResponse;
+    AppendRaw(expectedResponse, int64_t{-5});
+    AppendRaw(expectedResponse, uint64_t{0x3333});
+    AppendRaw(expectedResponse, uint64_t{0x4444});
+    AppendLengthPrefixed(expectedResponse, payload);
+    AppendRaw(expectedResponse, static_cast<uint32_t>(FunctionCallResponse::Status::InternalError));
+
+    MessageBuffer callBuffer;
+    Serialize(callBuffer, call);
+    EXPECT_EQ(callBuffer.ReleaseStorage(), expectedCall);
+
+    MessageBuffer responseBuffer;
+    Serialize(responseBuffer, response);
+    EXPECT_EQ(responseBuffer.ReleaseStorage(), expectedResponse);
+
+    // and bytes written by an older version are read back
+    MessageBuffer callReader{expectedCall};
+    FunctionCall readCall{};
+    Deserialize(callReader, readCall);
+    EXPECT_EQ(readCall, call);
+    EXPECT_EQ(readCall.timestamp, call.timestamp);
+
+    MessageBuffer responseReader{expectedResponse};
+    FunctionCallResponse readResponse{};
+    Deserialize(responseReader, readResponse);
+    EXPECT_EQ(readResponse, response);
+    EXPECT_EQ(readResponse.timestamp, response.timestamp);
+}
+
+TEST(Test_SerializedMessage, empty_payload_from_a_shared_blob)
+{
+    SilKit::Services::PubSub::WireDataMessageEvent event{std::chrono::nanoseconds{1}, std::vector<uint8_t>{}};
+    const auto blob = ShareBlob(SerializedMessage{event, EndpointAddress{1, 2}, EndpointId{3}});
+
+    SerializedMessage receiving{SilKit::Util::MakeSharedSpan(blob, 0, blob->size())};
+    SilKit::Services::PubSub::WireDataMessageEvent received{};
+    ASSERT_NO_THROW(received = receiving.Deserialize<SilKit::Services::PubSub::WireDataMessageEvent>());
+
+    EXPECT_TRUE(received.data.empty());
+    EXPECT_EQ(received.timestamp, event.timestamp);
+}
+
+TEST(Test_SerializedMessage, payload_ending_at_the_blob_end)
+{
+    // The payload is the last field of a FunctionCall, so its view ends exactly where the blob ends.
+    const SilKit::Services::Rpc::FunctionCall call{std::chrono::nanoseconds{1}, SilKit::Util::Uuid{1, 2},
+                                                   MakeTestPayload(40)};
+    const auto blob = ShareBlob(SerializedMessage{call, EndpointAddress{1, 2}, EndpointId{3}});
+
+    SerializedMessage receiving{SilKit::Util::MakeSharedSpan(blob, 0, blob->size())};
+    const auto received = receiving.Deserialize<SilKit::Services::Rpc::FunctionCall>();
+
+    EXPECT_EQ(received.data.AsSpan().data() + received.data.size(), blob->data() + blob->size());
+    EXPECT_TRUE(SilKit::Util::ItemsAreEqual(received.data.AsSpan(), call.data.AsSpan()));
+}
+
+TEST(Test_SerializedMessage, truncated_payload_throws_end_of_buffer)
+{
+    const SilKit::Services::Rpc::FunctionCall call{std::chrono::nanoseconds{1}, SilKit::Util::Uuid{1, 2},
+                                                   MakeTestPayload(40)};
+    const auto blob = ShareBlob(SerializedMessage{call, EndpointAddress{1, 2}, EndpointId{3}});
+
+    SerializedMessage receiving{SilKit::Util::MakeSharedSpan(blob, 0, blob->size() - 1)};
+
+    EXPECT_THROW(receiving.Deserialize<SilKit::Services::Rpc::FunctionCall>(), end_of_buffer);
 }

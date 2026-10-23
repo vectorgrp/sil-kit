@@ -42,6 +42,7 @@
 #include "util/Assert.hpp"
 #include "services/logging/LoggerMessage.hpp"
 #include "core/vasio/VAsioCapabilities.hpp"
+#include "core/vasio/ReceiveBlobPool.hpp"
 #include "wire/lin/WireLinMessages.hpp"
 #include "util/Uri.hpp"
 #include "services/metrics/Metrics.hpp"
@@ -494,6 +495,8 @@ private:
     // ----------------------------------------
     // private members
     SilKit::Config::ParticipantConfiguration _config;
+    // NB: declared early so that it outlives the peers, which read received messages into it.
+    ReceiveBlobPool _receiveBlobPool;
     std::string _participantName;
     ParticipantId _participantId{0};
     Services::Logging::ILoggerInternal* _logger{nullptr};
@@ -508,6 +511,10 @@ private:
     Util::tuple_tools::wrapped_tuple<SilKitLinkMap, SilKitMessageTypes> _links;
     //! \brief Lookup for links by name.
     Util::tuple_tools::wrapped_tuple<SilKitServiceToLinkMap, SilKitMessageTypes> _serviceToLinkMap;
+
+    //! Reused for every received message, to avoid reallocating the descriptor's strings and
+    //! supplemental data map each time. Only touched on the io thread, and dispatch is synchronous.
+    ServiceDescriptor _receiveServiceDescriptor;
 
     std::vector<std::unique_ptr<IVAsioReceiver>> _vasioReceivers;
     std::unordered_set<std::string> _vasioUniqueReceiverIds;

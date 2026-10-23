@@ -238,5 +238,72 @@ TEST(ITest_RequestRemoteParticipantConnect, test_fallback_to_proxy_if_registry_d
     (void)simTestHarness.GetParticipant("P2", tcpPCfgWithProxyAndRconn);
 }
 
+const std::string anyPCfgWithProxy = R"(
+Middleware:
+  RegistryAsFallbackProxy: true
+  ConnectAttempts: 1
+
+Logging:
+  Sinks:
+    - Type: Stdout
+      #Level: Trace
+)";
+
+TEST(ITest_RequestRemoteParticipantConnect, test_publish_to_a_direct_and_a_proxied_subscriber)
+{
+    // P1 only accepts local-domain connections and P2 does not use them, so P2 reaches P1 through the
+    // registry proxy. P3 connects to both directly. P1 then publishes to one direct and one proxied peer,
+    // with payloads large enough that the message body is shared between both.
+    SimTestHarnessArgs simTestHarnessArgs;
+    simTestHarnessArgs.syncParticipantNames = {"P1", "P2", "P3"};
+    simTestHarnessArgs.deferParticipantCreation = true;
+    simTestHarnessArgs.registry.participantConfiguration = registryConfigWithProxyNoRconn;
+
+    SimTestHarness testSetup{simTestHarnessArgs};
+
+    auto* publisherParticipant = testSetup.GetParticipant("P1", locPCfgWithProxyAndRconn);
+    auto* proxiedParticipant = testSetup.GetParticipant("P2", tcpPCfgWithProxyAndRconn);
+    auto* directParticipant = testSetup.GetParticipant("P3", anyPCfgWithProxy);
+
+    std::vector<uint8_t> payload(4096);
+    for (size_t i = 0; i < payload.size(); ++i)
+    {
+        payload[i] = static_cast<uint8_t>(i * 31 + 7);
+    }
+
+    const auto pubSubSpec = SilKit::Services::PubSub::PubSubSpec{};
+    uint64_t numReceivedProxied{};
+    uint64_t numReceivedDirect{};
+
+    proxiedParticipant->Participant()->CreateDataSubscriber("test", pubSubSpec, [&](auto&&, auto&& data) {
+        EXPECT_EQ(payload, ToStdVector(data.data));
+        std::unique_lock<decltype(mx)> lock{mx};
+        numReceivedProxied++;
+    });
+
+    directParticipant->Participant()->CreateDataSubscriber("test", pubSubSpec, [&](auto&&, auto&& data) {
+        EXPECT_EQ(payload, ToStdVector(data.data));
+        std::unique_lock<decltype(mx)> lock{mx};
+        numReceivedDirect++;
+    });
+
+    auto* publisher = publisherParticipant->Participant()->CreateDataPublisher("test", pubSubSpec);
+    publisherParticipant->GetOrCreateTimeSyncService()->SetSimulationStepHandler([&](auto&&, auto&&) {
+        std::unique_lock<decltype(mx)> lock{mx};
+        if (numReceivedProxied >= 1 && numReceivedDirect >= 1)
+        {
+            publisherParticipant->Stop();
+        }
+        else
+        {
+            publisher->Publish(payload);
+        }
+    }, 1ms);
+
+    ASSERT_TRUE(testSetup.Run(4s));
+    EXPECT_GE(numReceivedProxied, 1u);
+    EXPECT_GE(numReceivedDirect, 1u);
+}
+
 
 } // namespace
