@@ -424,7 +424,7 @@ static void ParticipantsThread(std::shared_ptr<SilKit::Config::IParticipantConfi
 
             if (now % durationOfOneSimulationPercentile < benchmark.simulationStepSize)
             {
-                std::cout << ".";
+                std::cout << "." << std::flush;
             }
         }
 

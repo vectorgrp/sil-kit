@@ -7,7 +7,7 @@
 #include "silkit/services/ethernet/EthernetDatatypes.hpp"
 #include "silkit/services/ethernet/string_utils.hpp"
 
-#include "wire/util/SharedVector.hpp"
+#include "util/SharedSpan.hpp"
 
 #include <chrono>
 #include <vector>
@@ -18,7 +18,7 @@ namespace Ethernet {
 
 struct WireEthernetFrame
 {
-    Util::SharedVector<uint8_t> raw; //!< The Ethernet raw frame without the frame check sequence
+    Util::SharedSpan<uint8_t> raw; //!< The Ethernet raw frame without the frame check sequence
 };
 
 inline auto ToEthernetFrame(const WireEthernetFrame& wireEthernetFrame) -> EthernetFrame;
@@ -79,7 +79,7 @@ auto ToEthernetFrame(const WireEthernetFrame& wireEthernetFrame) -> EthernetFram
 auto MakeWireEthernetFrame(const EthernetFrame& ethernetFrame) -> WireEthernetFrame
 {
     constexpr static const size_t minimumEthernetFrameSizeWithoutFcs = 60;
-    return {Util::SharedVector<uint8_t>{ethernetFrame.raw, minimumEthernetFrameSizeWithoutFcs}};
+    return {Util::SharedSpan<uint8_t>{ethernetFrame.raw, minimumEthernetFrameSizeWithoutFcs}};
 }
 
 auto ToEthernetFrameEvent(const WireEthernetFrameEvent& wireEthernetFrameEvent) -> EthernetFrameEvent

@@ -33,7 +33,7 @@ void RingBuffer::AdvanceRPos(size_t numBytes)
     SizeCheck();
 }
 
-bool RingBuffer::Peek(std::vector<uint8_t>& elem) const
+bool RingBuffer::Peek(SilKit::Util::Span<uint8_t> elem) const
 {
     // make sure, we only copy as many bytes as are contained in the buffer
     if (elem.size() > _size)
@@ -55,7 +55,7 @@ bool RingBuffer::Peek(std::vector<uint8_t>& elem) const
     return true;
 }
 
-bool RingBuffer::Read(std::vector<uint8_t>& elem)
+bool RingBuffer::Read(SilKit::Util::Span<uint8_t> elem)
 {
     if (!Peek(elem))
     {

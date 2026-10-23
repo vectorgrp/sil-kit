@@ -121,6 +121,11 @@ struct DummyVAsioPeerBase : IVAsioPeer
         throw MethodNotImplementedError{};
     }
 
+    void SendSilKitMsg(const SharedSerializedMessage&, EndpointId) final
+    {
+        throw MethodNotImplementedError{};
+    }
+
     void Subscribe(VAsioMsgSubscriber) final
     {
         throw MethodNotImplementedError{};
