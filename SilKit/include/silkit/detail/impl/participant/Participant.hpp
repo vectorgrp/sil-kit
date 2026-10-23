@@ -120,7 +120,7 @@ private:
     ControllerStorage<Services::Rpc::RpcClient> _rpcClients;
     ControllerStorage<Services::Rpc::RpcServer> _rpcServers;
 
-    ControllerStorage<Impl::Experimental::ServiceDiscovery::ServiceDiscovery> _serviceDiscoveries;
+    std::unique_ptr<Impl::Experimental::ServiceDiscovery::ServiceDiscovery> _serviceDiscovery;
 
     std::unique_ptr<Impl::Services::Orchestration::LifecycleService> _lifecycleService;
     std::unique_ptr<Services::Orchestration::SystemMonitor> _systemMonitor;
@@ -247,7 +247,12 @@ auto Participant::ExperimentalCreateNetworkSimulator() -> SilKit::Experimental::
 
 auto Participant::ExperimentalCreateServiceDiscovery() -> SilKit::Experimental::ServiceDiscovery::IServiceDiscovery*
 {
-    return _serviceDiscoveries.Create(_participant);
+    // The C API keeps a single handler per participant, so all callers share one observer
+    if (!_serviceDiscovery)
+    {
+        _serviceDiscovery = std::make_unique<Impl::Experimental::ServiceDiscovery::ServiceDiscovery>(_participant);
+    }
+    return _serviceDiscovery.get();
 }
 
 auto Participant::Get() const -> SilKit_Participant*

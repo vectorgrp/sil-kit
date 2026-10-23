@@ -4,8 +4,8 @@
 
 // Tests for the thin CAPI wrapper around the service-discovery observer. The event-translation logic
 // itself is covered by Test_ServiceObserver.cpp, which drives the VSilKit::ServiceObserver directly.
-// Here we only verify parameter validation and that the CAPI wires the participant's internal service
-// discovery through to the user handler.
+// Here we verify parameter validation, that the CAPI wires the participant's internal service discovery
+// through to the user handler, and the single-handler semantics of SetServiceDiscoveryHandler.
 
 #include <string>
 #include <thread>
@@ -35,7 +35,7 @@ struct CallbackData
         SilKit_Experimental_ServiceDiscoveryEvent_Type_Invalid};
     SilKit_Experimental_ServiceKind serviceKind{SilKit_Experimental_ServiceKind_Undefined};
     std::string participantName;
-    std::vector<bool> isSnapshot; // per call
+    std::vector<std::string> participantNames; // per call
 };
 
 void SilKitCALL CapturingHandler(void* context, SilKit_Experimental_ServiceDiscoveryEvent_Type type,
@@ -46,7 +46,7 @@ void SilKitCALL CapturingHandler(void* context, SilKit_Experimental_ServiceDisco
     data->lastType = type;
     data->serviceKind = serviceDescriptor->serviceKind;
     data->participantName = serviceDescriptor->participantName;
-    data->isSnapshot.push_back(serviceDescriptor->isSnapshot == SilKit_True);
+    data->participantNames.push_back(serviceDescriptor->participantName);
 }
 
 auto MakeCanController(const std::string& participantName) -> ServiceDescriptor
@@ -63,6 +63,23 @@ auto MakeCanController(const std::string& participantName) -> ServiceDescriptor
 void SilKitCALL NoopHandler(void* /*context*/, SilKit_Experimental_ServiceDiscoveryEvent_Type /*type*/,
                             const SilKit_Experimental_ServiceDescriptor* /*serviceDescriptor*/)
 {
+}
+
+struct NestedSetData
+{
+    SilKit_Experimental_ServiceDiscovery* serviceDiscovery{nullptr};
+    std::vector<std::string> participantNames;
+    std::vector<SilKit_ReturnCode> nestedResults;
+};
+
+// Records the event, then tries to set another handler from within the handler.
+void SilKitCALL NestedSettingHandler(void* context, SilKit_Experimental_ServiceDiscoveryEvent_Type /*type*/,
+                                     const SilKit_Experimental_ServiceDescriptor* serviceDescriptor)
+{
+    auto* data = static_cast<NestedSetData*>(context);
+    data->participantNames.push_back(serviceDescriptor->participantName);
+    data->nestedResults.push_back(
+        SilKit_Experimental_ServiceDiscovery_SetServiceDiscoveryHandler(data->serviceDiscovery, data, &NoopHandler));
 }
 
 class Test_CapiServiceDiscovery : public testing::Test
@@ -122,20 +139,23 @@ TEST_F(Test_CapiServiceDiscovery, wires_internal_events_to_user_handler)
     EXPECT_EQ(data.lastType, SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceCreated);
     EXPECT_EQ(data.serviceKind, SilKit_Experimental_ServiceKind_CanController);
     EXPECT_EQ(data.participantName, "ParticipantA");
-    ASSERT_EQ(data.isSnapshot.size(), 1u);
-    EXPECT_FALSE(data.isSnapshot[0]) << "an event after the registration returned is not part of the snapshot";
 }
 
-// Services replayed synchronously while the handler is registered are flagged as snapshot; events delivered
-// later, from another thread or from the registering thread after the call returned, are not.
-TEST_F(Test_CapiServiceDiscovery, marks_replayed_services_as_snapshot)
+// Services replayed by the internal service discovery during the registration reach the user handler before
+// SetServiceDiscoveryHandler returns; events delivered later, from another thread or from the registering thread
+// after the call returned, are forwarded as well.
+TEST_F(Test_CapiServiceDiscovery, replays_known_services_before_set_returns)
 {
+    CallbackData data;
+    size_t callsDuringRegistration{0};
+
     SilKit::Core::Discovery::ServiceDiscoveryHandler internalHandler;
     EXPECT_CALL(mockParticipant.mockServiceDiscovery, RegisterServiceDiscoveryHandler(testing::_))
-        .WillOnce([&internalHandler](SilKit::Core::Discovery::ServiceDiscoveryHandler handler) {
+        .WillOnce([&](SilKit::Core::Discovery::ServiceDiscoveryHandler handler) {
         // Replay of the already known services, as the internal service discovery does.
         handler(ServiceDiscoveryEvent::Type::ServiceCreated, MakeCanController("Known1"));
         handler(ServiceDiscoveryEvent::Type::ServiceCreated, MakeCanController("Known2"));
+        callsDuringRegistration = data.participantNames.size();
         internalHandler = std::move(handler);
     });
 
@@ -143,13 +163,10 @@ TEST_F(Test_CapiServiceDiscovery, marks_replayed_services_as_snapshot)
     ASSERT_EQ(SilKit_Experimental_ServiceDiscovery_Create(&serviceDiscovery, (SilKit_Participant*)&mockParticipant),
               SilKit_ReturnCode_SUCCESS);
 
-    CallbackData data;
     ASSERT_EQ(SilKit_Experimental_ServiceDiscovery_SetServiceDiscoveryHandler(serviceDiscovery, &data,
                                                                               &CapturingHandler),
               SilKit_ReturnCode_SUCCESS);
-    ASSERT_EQ(data.isSnapshot.size(), 2u);
-    EXPECT_TRUE(data.isSnapshot[0]);
-    EXPECT_TRUE(data.isSnapshot[1]);
+    EXPECT_EQ(callsDuringRegistration, 2u);
 
     std::thread ioThread{[&] {
         internalHandler(ServiceDiscoveryEvent::Type::ServiceCreated, MakeCanController("Live1"));
@@ -157,9 +174,85 @@ TEST_F(Test_CapiServiceDiscovery, marks_replayed_services_as_snapshot)
     ioThread.join();
     internalHandler(ServiceDiscoveryEvent::Type::ServiceCreated, MakeCanController("Live2"));
 
-    ASSERT_EQ(data.isSnapshot.size(), 4u);
-    EXPECT_FALSE(data.isSnapshot[2]);
-    EXPECT_FALSE(data.isSnapshot[3]);
+    EXPECT_THAT(data.participantNames, testing::ElementsAre("Known1", "Known2", "Live1", "Live2"));
+}
+
+// A participant has a single handler: a second call replaces handler and context without registering again and
+// without replaying the known services.
+TEST_F(Test_CapiServiceDiscovery, set_twice_replaces_handler_and_registers_once)
+{
+    SilKit::Core::Discovery::ServiceDiscoveryHandler internalHandler;
+    EXPECT_CALL(mockParticipant.mockServiceDiscovery, RegisterServiceDiscoveryHandler(testing::_))
+        .WillOnce([&internalHandler](SilKit::Core::Discovery::ServiceDiscoveryHandler handler) {
+        handler(ServiceDiscoveryEvent::Type::ServiceCreated, MakeCanController("Known1"));
+        internalHandler = std::move(handler);
+    });
+
+    SilKit_Experimental_ServiceDiscovery* serviceDiscovery = nullptr;
+    ASSERT_EQ(SilKit_Experimental_ServiceDiscovery_Create(&serviceDiscovery, (SilKit_Participant*)&mockParticipant),
+              SilKit_ReturnCode_SUCCESS);
+
+    CallbackData first;
+    CallbackData second;
+    ASSERT_EQ(SilKit_Experimental_ServiceDiscovery_SetServiceDiscoveryHandler(serviceDiscovery, &first,
+                                                                              &CapturingHandler),
+              SilKit_ReturnCode_SUCCESS);
+    ASSERT_EQ(SilKit_Experimental_ServiceDiscovery_SetServiceDiscoveryHandler(serviceDiscovery, &second,
+                                                                              &CapturingHandler),
+              SilKit_ReturnCode_SUCCESS);
+    EXPECT_TRUE(second.participantNames.empty()) << "replacing the handler must not replay the known services";
+
+    internalHandler(ServiceDiscoveryEvent::Type::ServiceCreated, MakeCanController("Live1"));
+
+    EXPECT_THAT(first.participantNames, testing::ElementsAre("Known1"));
+    EXPECT_THAT(second.participantNames, testing::ElementsAre("Live1"));
+}
+
+// Setting the handler from within the handler is not supported, also not while the known services are replayed.
+TEST_F(Test_CapiServiceDiscovery, set_within_replay_is_rejected)
+{
+    SilKit::Core::Discovery::ServiceDiscoveryHandler internalHandler;
+    EXPECT_CALL(mockParticipant.mockServiceDiscovery, RegisterServiceDiscoveryHandler(testing::_))
+        .WillOnce([&internalHandler](SilKit::Core::Discovery::ServiceDiscoveryHandler handler) {
+        handler(ServiceDiscoveryEvent::Type::ServiceCreated, MakeCanController("Known1"));
+        handler(ServiceDiscoveryEvent::Type::ServiceCreated, MakeCanController("Known2"));
+        internalHandler = std::move(handler);
+    });
+
+    NestedSetData data;
+    ASSERT_EQ(
+        SilKit_Experimental_ServiceDiscovery_Create(&data.serviceDiscovery, (SilKit_Participant*)&mockParticipant),
+        SilKit_ReturnCode_SUCCESS);
+    ASSERT_EQ(SilKit_Experimental_ServiceDiscovery_SetServiceDiscoveryHandler(data.serviceDiscovery, &data,
+                                                                              &NestedSettingHandler),
+              SilKit_ReturnCode_SUCCESS);
+
+    EXPECT_THAT(data.participantNames, testing::ElementsAre("Known1", "Known2"));
+    EXPECT_THAT(data.nestedResults,
+                testing::ElementsAre(SilKit_ReturnCode_WRONGSTATE, SilKit_ReturnCode_WRONGSTATE));
+}
+
+// Setting the handler from within the handler is not supported; the handler stays in place.
+TEST_F(Test_CapiServiceDiscovery, set_within_live_event_is_rejected)
+{
+    SilKit::Core::Discovery::ServiceDiscoveryHandler internalHandler;
+    EXPECT_CALL(mockParticipant.mockServiceDiscovery, RegisterServiceDiscoveryHandler(testing::_))
+        .WillOnce(testing::SaveArg<0>(&internalHandler));
+
+    NestedSetData data;
+    ASSERT_EQ(
+        SilKit_Experimental_ServiceDiscovery_Create(&data.serviceDiscovery, (SilKit_Participant*)&mockParticipant),
+        SilKit_ReturnCode_SUCCESS);
+    ASSERT_EQ(SilKit_Experimental_ServiceDiscovery_SetServiceDiscoveryHandler(data.serviceDiscovery, &data,
+                                                                              &NestedSettingHandler),
+              SilKit_ReturnCode_SUCCESS);
+
+    internalHandler(ServiceDiscoveryEvent::Type::ServiceCreated, MakeCanController("Live1"));
+    internalHandler(ServiceDiscoveryEvent::Type::ServiceCreated, MakeCanController("Live2"));
+
+    EXPECT_THAT(data.participantNames, testing::ElementsAre("Live1", "Live2"));
+    EXPECT_THAT(data.nestedResults,
+                testing::ElementsAre(SilKit_ReturnCode_WRONGSTATE, SilKit_ReturnCode_WRONGSTATE));
 }
 
 } // namespace

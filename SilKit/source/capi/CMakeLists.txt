@@ -7,7 +7,6 @@ add_library(O_SilKit_Capi OBJECT
     CapiDataPubSub.cpp
     CapiEthernet.cpp
     CapiExceptions.hpp
-    CapiExperimental.cpp
     CapiFlexray.cpp
     CapiImpl.hpp
     CapiLin.cpp
@@ -15,6 +14,7 @@ add_library(O_SilKit_Capi OBJECT
     CapiOrchestration.cpp
     CapiParticipant.cpp
     CapiRpc.cpp
+    CapiServiceDiscovery.cpp
     CapiUtils.cpp
     CapiVendor.cpp
     CapiVersion.cpp

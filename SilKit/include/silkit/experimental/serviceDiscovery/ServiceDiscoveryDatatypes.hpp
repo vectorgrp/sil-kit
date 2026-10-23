@@ -9,7 +9,7 @@
 #include <string>
 #include <vector>
 
-#include "silkit/capi/Experimental.h"
+#include "silkit/capi/ServiceDiscovery.h"
 #include "silkit/experimental/netsim/NetworkSimulatorDatatypes.hpp"
 #include "silkit/services/datatypes.hpp"
 #include "silkit/services/orchestration/OrchestrationDatatypes.hpp"
@@ -23,8 +23,7 @@ enum class ServiceDiscoveryEventType : SilKit_Experimental_ServiceDiscoveryEvent
 {
     //! An invalid / unknown service discovery event.
     Invalid = SilKit_Experimental_ServiceDiscoveryEvent_Type_Invalid,
-    //! A service has been created (or was already present on registration, see
-    //! \ref ServiceDescriptor::isSnapshot).
+    //! A service has been created (or was already known to this participant when the handler was first set).
     ServiceCreated = SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceCreated,
     //! A service has been removed.
     ServiceRemoved = SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceRemoved,
@@ -94,7 +93,7 @@ struct ServiceDescriptor
         SilKit::Experimental::NetworkSimulation::SimulatedNetworkType::Undefined};
     //! Media type for pub/sub and RPC services; empty string when not applicable.
     std::string mediaType;
-    //! Decoded matching labels for pub/sub and RPC services; empty for bus controllers.
+    //! Decoded matching labels for pub/sub and RPC services; empty otherwise, or if the labels cannot be decoded.
     std::vector<SilKit::Services::MatchingLabel> labels;
     //! Operation mode of a \ref ServiceKind::LifecycleService; Invalid otherwise.
     SilKit::Services::Orchestration::OperationMode operationMode{
@@ -108,8 +107,6 @@ struct ServiceDescriptor
     std::string connectedServiceName;
     //! Identifier of the peer service within its participant; populated only for pub/sub and RPC matches.
     uint64_t connectedServiceId{0};
-    //! True if the service already existed when the handler was registered.
-    bool isSnapshot{false};
 };
 
 /*! \brief Handler invoked when a user-facing service is created or removed in the simulation.

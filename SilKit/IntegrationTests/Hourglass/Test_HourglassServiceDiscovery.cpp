@@ -17,6 +17,7 @@
 
 #include <atomic>
 #include <memory>
+#include <stdexcept>
 #include <string>
 #include <thread>
 #include <vector>
@@ -25,6 +26,7 @@ namespace {
 
 using testing::_;
 using testing::DoAll;
+using testing::HasSubstr;
 using testing::Return;
 using testing::SaveArg;
 using testing::SetArgPointee;
@@ -40,11 +42,14 @@ public:
     SilKit_Participant* mockParticipant{reinterpret_cast<SilKit_Participant*>(uintptr_t(0x12345678))};
     SilKit_Experimental_ServiceDiscovery* mockServiceDiscovery{
         reinterpret_cast<SilKit_Experimental_ServiceDiscovery*>(uintptr_t(0x45362718))};
+    SilKit_Logger* mockLogger{reinterpret_cast<SilKit_Logger*>(uintptr_t(0x87654321))};
 
     Test_HourglassServiceDiscovery()
     {
         ON_CALL(capi, SilKit_Experimental_ServiceDiscovery_Create(_, _))
             .WillByDefault(DoAll(SetArgPointee<0>(mockServiceDiscovery), Return(SilKit_ReturnCode_SUCCESS)));
+        ON_CALL(capi, SilKit_Participant_GetLogger(_, _))
+            .WillByDefault(DoAll(SetArgPointee<0>(mockLogger), Return(SilKit_ReturnCode_SUCCESS)));
     }
 };
 
@@ -56,6 +61,19 @@ TEST_F(Test_HourglassServiceDiscovery, SilKit_Experimental_ServiceDiscovery_Crea
 
     auto* serviceDiscovery = Detail::Experimental::Participant::CreateServiceDiscovery(&participant);
     EXPECT_NE(serviceDiscovery, nullptr);
+}
+
+// A participant has a single observer, matching the single handler of the C API.
+TEST_F(Test_HourglassServiceDiscovery, create_service_discovery_returns_same_object)
+{
+    Detail::Impl::Participant participant{mockParticipant};
+
+    EXPECT_CALL(capi, SilKit_Experimental_ServiceDiscovery_Create(_, mockParticipant)).Times(1);
+
+    auto* first = Detail::Experimental::Participant::CreateServiceDiscovery(&participant);
+    auto* second = Detail::Experimental::Participant::CreateServiceDiscovery(&participant);
+    EXPECT_NE(first, nullptr);
+    EXPECT_EQ(first, second);
 }
 
 TEST_F(Test_HourglassServiceDiscovery, SilKit_Experimental_ServiceDiscovery_SetServiceDiscoveryHandler)
@@ -72,6 +90,74 @@ TEST_F(Test_HourglassServiceDiscovery, SilKit_Experimental_ServiceDiscovery_SetS
 
     EXPECT_NE(capturedContext, nullptr);
     EXPECT_NE(capturedHandler, nullptr);
+}
+
+// The C trampoline is called from inside the SIL Kit library, so an exception from the user's handler must not
+// leave it. A std::exception is logged as a warning through the participant logger.
+TEST_F(Test_HourglassServiceDiscovery, throwing_handler_does_not_unwind_through_c_trampoline)
+{
+    ServiceDiscoveryWrapper serviceDiscovery{mockParticipant};
+
+    void* capturedContext{nullptr};
+    SilKit_Experimental_ServiceDiscoveryHandler_t capturedHandler{nullptr};
+    EXPECT_CALL(capi, SilKit_Experimental_ServiceDiscovery_SetServiceDiscoveryHandler(mockServiceDiscovery, _, _))
+        .WillOnce(DoAll(SaveArg<1>(&capturedContext), SaveArg<2>(&capturedHandler),
+                        Return(SilKit_ReturnCode_SUCCESS)));
+
+    int callCount{0};
+    serviceDiscovery.SetServiceDiscoveryHandler([&](SD::ServiceDiscoveryEventType, const SD::ServiceDescriptor&) {
+        ++callCount;
+        throw std::runtime_error{"thrown by the user handler"};
+    });
+    ASSERT_NE(capturedHandler, nullptr);
+
+    SilKit_Experimental_ServiceDescriptor cDescriptor;
+    SilKit_Struct_Init(SilKit_Experimental_ServiceDescriptor, cDescriptor);
+    cDescriptor.participantName = "ParticipantA";
+    cDescriptor.serviceName = "Can1";
+    cDescriptor.serviceKind = SilKit_Experimental_ServiceKind_CanController;
+    cDescriptor.primaryIdentifier = "CAN1";
+    cDescriptor.mediaType = "";
+
+    EXPECT_CALL(capi, SilKit_Logger_Log(mockLogger, SilKit_LoggingLevel_Warn, HasSubstr("thrown by the user handler")))
+        .Times(1);
+
+    EXPECT_NO_THROW(
+        capturedHandler(capturedContext, SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceCreated, &cDescriptor));
+    EXPECT_EQ(callCount, 1);
+}
+
+// Anything that is not a std::exception carries no message; it is swallowed without logging.
+TEST_F(Test_HourglassServiceDiscovery, throwing_non_std_exception_is_swallowed)
+{
+    ServiceDiscoveryWrapper serviceDiscovery{mockParticipant};
+
+    void* capturedContext{nullptr};
+    SilKit_Experimental_ServiceDiscoveryHandler_t capturedHandler{nullptr};
+    EXPECT_CALL(capi, SilKit_Experimental_ServiceDiscovery_SetServiceDiscoveryHandler(mockServiceDiscovery, _, _))
+        .WillOnce(DoAll(SaveArg<1>(&capturedContext), SaveArg<2>(&capturedHandler),
+                        Return(SilKit_ReturnCode_SUCCESS)));
+
+    int callCount{0};
+    serviceDiscovery.SetServiceDiscoveryHandler([&](SD::ServiceDiscoveryEventType, const SD::ServiceDescriptor&) {
+        ++callCount;
+        throw 42;
+    });
+    ASSERT_NE(capturedHandler, nullptr);
+
+    SilKit_Experimental_ServiceDescriptor cDescriptor;
+    SilKit_Struct_Init(SilKit_Experimental_ServiceDescriptor, cDescriptor);
+    cDescriptor.participantName = "ParticipantA";
+    cDescriptor.serviceName = "Can1";
+    cDescriptor.serviceKind = SilKit_Experimental_ServiceKind_CanController;
+    cDescriptor.primaryIdentifier = "CAN1";
+    cDescriptor.mediaType = "";
+
+    EXPECT_CALL(capi, SilKit_Logger_Log(_, _, _)).Times(0);
+
+    EXPECT_NO_THROW(
+        capturedHandler(capturedContext, SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceCreated, &cDescriptor));
+    EXPECT_EQ(callCount, 1);
 }
 
 // The C trampoline installed by the wrapper must translate the borrowed C descriptor into an owned
@@ -116,7 +202,6 @@ TEST_F(Test_HourglassServiceDiscovery, service_discovery_handler_round_trip)
     cDescriptor.mediaType = "application/json";
     cDescriptor.labelList.numLabels = 2;
     cDescriptor.labelList.labels = cLabels;
-    cDescriptor.isSnapshot = SilKit_True;
 
     capturedHandler(capturedContext, SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceCreated, &cDescriptor);
 
@@ -127,7 +212,6 @@ TEST_F(Test_HourglassServiceDiscovery, service_discovery_handler_round_trip)
     EXPECT_EQ(received.serviceId, 17u);
     EXPECT_EQ(received.serviceKind, SD::ServiceKind::DataPublisher);
     EXPECT_EQ(received.primaryIdentifier, "TopicA");
-    EXPECT_TRUE(received.isSnapshot);
     EXPECT_EQ(received.mediaType, "application/json");
     ASSERT_EQ(received.labels.size(), 2u);
     EXPECT_EQ(received.labels[0].key, "kA");
@@ -157,7 +241,6 @@ TEST_F(Test_HourglassServiceDiscovery, service_discovery_handler_round_trip)
     EXPECT_EQ(received.networkType, SilKit::Experimental::NetworkSimulation::SimulatedNetworkType::CAN);
     EXPECT_TRUE(received.mediaType.empty());
     EXPECT_TRUE(received.labels.empty());
-    EXPECT_FALSE(received.isSnapshot);
 
     // Case 3: a match and the orchestration fields.
     SilKit_Experimental_ServiceDescriptor cMatchDescriptor;
@@ -238,8 +321,9 @@ auto MakeCanDescriptor() -> SilKit_Experimental_ServiceDescriptor
     return cDescriptor;
 }
 
-// A handler replacing itself must not destroy its own running closure.
-TEST_F(Test_HourglassServiceDiscovery, handler_replacing_itself_is_safe)
+// Setting the handler from within the handler is not supported: it throws StateError and the first handler stays
+// installed.
+TEST_F(Test_HourglassServiceDiscovery, handler_setting_handler_throws_state_error)
 {
     ServiceDiscoveryWrapper serviceDiscovery{mockParticipant};
 
@@ -248,40 +332,31 @@ TEST_F(Test_HourglassServiceDiscovery, handler_replacing_itself_is_safe)
     EXPECT_CALL(capi, SilKit_Experimental_ServiceDiscovery_SetServiceDiscoveryHandler(mockServiceDiscovery, _, _))
         .WillOnce(DoAll(SaveArg<1>(&capturedContext), SaveArg<2>(&capturedHandler), Return(SilKit_ReturnCode_SUCCESS)));
 
-    bool firstDestroyed{false};
-    bool firstAliveAfterReplace{false};
+    int firstCalls{0};
     int secondCalls{0};
-    {
-        // Flags the destruction of the first handler's closure
-        std::shared_ptr<int> guard{new int{0}, [&firstDestroyed](int* p) {
-            firstDestroyed = true;
-            delete p;
-        }};
-        serviceDiscovery.SetServiceDiscoveryHandler(
-            [&serviceDiscovery, &secondCalls, destroyed = &firstDestroyed, aliveAfterReplace = &firstAliveAfterReplace,
-             guard](SD::ServiceDiscoveryEventType, const SD::ServiceDescriptor&) {
-            // Copied out of the closure under test
-            auto& sd = serviceDiscovery;
-            auto* const destroyedFlag = destroyed;
-            auto* const aliveFlag = aliveAfterReplace;
-            sd.SetServiceDiscoveryHandler(
+    int stateErrors{0};
+    serviceDiscovery.SetServiceDiscoveryHandler(
+        [&](SD::ServiceDiscoveryEventType, const SD::ServiceDescriptor&) {
+        ++firstCalls;
+        try
+        {
+            serviceDiscovery.SetServiceDiscoveryHandler(
                 [&secondCalls](SD::ServiceDiscoveryEventType, const SD::ServiceDescriptor&) { ++secondCalls; });
-            *aliveFlag = !*destroyedFlag;
-        });
-    }
+        }
+        catch (const SilKit::StateError&)
+        {
+            ++stateErrors;
+        }
+    });
     ASSERT_NE(capturedHandler, nullptr);
-    ASSERT_FALSE(firstDestroyed);
 
     const auto cDescriptor = MakeCanDescriptor();
     capturedHandler(capturedContext, SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceCreated, &cDescriptor);
-
-    EXPECT_TRUE(firstAliveAfterReplace);
-    EXPECT_TRUE(firstDestroyed);
-    EXPECT_EQ(secondCalls, 0);
-
     capturedHandler(capturedContext, SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceCreated, &cDescriptor);
 
-    EXPECT_EQ(secondCalls, 1);
+    EXPECT_EQ(firstCalls, 2);
+    EXPECT_EQ(stateErrors, 2);
+    EXPECT_EQ(secondCalls, 0);
 }
 
 // Smoke test (meaningful under a thread sanitizer): replace the handler while another thread invokes it.

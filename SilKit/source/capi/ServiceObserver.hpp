@@ -4,14 +4,16 @@
 
 #pragma once
 
-#include "silkit/capi/Experimental.h"
+#include "silkit/capi/ServiceDiscovery.h"
 
 #include "core/internal/ServiceDescriptor.hpp"
 #include "core/service/ServiceDatatypes.hpp"
 
+#include <atomic>
 #include <map>
 #include <mutex>
 #include <string>
+#include <thread>
 #include <utility>
 #include <vector>
 
@@ -19,7 +21,7 @@ namespace VSilKit {
 
 // Translates the internal service-discovery events of a participant into the events of the
 // experimental public service-discovery C API. It is driven from a single internal service-discovery
-// handler (see CapiExperimental.cpp) and owns the small amount of state needed to correlate the raw
+// handler (see CapiServiceDiscovery.cpp) and owns the small amount of state needed to correlate the raw
 // internal announcements into fully-named public events.
 //
 // Reported events:
@@ -42,9 +44,16 @@ public:
     // Handle a single internal discovery event, emitting zero or more public events through the
     // handler. Invocations are expected to be serialized (never concurrent) but may originate from
     // different threads; the internal state is guarded by a mutex and the handler is always invoked
-    // outside that lock. isSnapshot marks the replay of already known services on registration.
+    // outside that lock.
     void HandleEvent(SilKit::Core::Discovery::ServiceDiscoveryEvent::Type type,
-                     const SilKit::Core::ServiceDescriptor& descriptor, bool isSnapshot = false);
+                     const SilKit::Core::ServiceDescriptor& descriptor);
+
+    // Replace the handler and its context. An invocation already running on another thread may still
+    // use the previous pair.
+    void SetHandler(SilKit_Experimental_ServiceDiscoveryHandler_t handler, void* context);
+
+    // True while HandleEvent runs on the calling thread, i.e. when called from within the handler.
+    auto IsDispatchingOnThisThread() const -> bool;
 
 private:
     // Identifies a service on a participant: (participant name, service id).
@@ -101,10 +110,12 @@ private:
     static MatchEmission MakeMatch(const SilKit::Core::ServiceDescriptor& parent,
                                  const SilKit::Core::ServiceDescriptor& peer, SilKit_Experimental_ServiceKind kind);
 
+    // Separate from _mutex, because the handler is invoked outside of it.
+    std::mutex _handlerMutex;
     SilKit_Experimental_ServiceDiscoveryHandler_t _handler{};
     void* _context{nullptr};
-    // Snapshot flag of the event currently handled (HandleEvent calls are serialized).
-    bool _isSnapshot{false};
+
+    std::atomic<std::thread::id> _dispatchingThread{};
 
     std::mutex _mutex;
     // DataPublisher / RpcClient UUID (= their networkName) -> their descriptor. The UUID is globally

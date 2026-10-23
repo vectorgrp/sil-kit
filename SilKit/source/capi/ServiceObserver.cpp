@@ -77,7 +77,7 @@ auto ParseOperationMode(const char* value) -> SilKit_OperationMode
 // (infrastructure / internal endpoints), in which case the handler must not be invoked. The connected... fields are
 // initialised to empty values here; the pub/sub and RPC match path sets them (and overrides serviceKind) after this
 // function returns.
-auto ClassifyAndFill(const SilKit::Core::ServiceDescriptor& serviceDescriptor, bool isSnapshot,
+auto ClassifyAndFill(const SilKit::Core::ServiceDescriptor& serviceDescriptor,
                      SilKit_Experimental_ServiceDescriptor& out, LabelStorage& storage) -> bool
 {
     const auto& supplementalData = serviceDescriptor.GetSupplementalDataRef();
@@ -99,7 +99,6 @@ auto ClassifyAndFill(const SilKit::Core::ServiceDescriptor& serviceDescriptor, b
     out.connectedParticipantName = "";
     out.connectedServiceName = "";
     out.connectedServiceId = 0;
-    out.isSnapshot = isSnapshot ? SilKit_True : SilKit_False;
 
     // Network-simulator links: primaryIdentifier and networkType are those of the simulated network, matching the
     // affected bus controllers.
@@ -260,6 +259,18 @@ ServiceObserver::ServiceObserver(SilKit_Experimental_ServiceDiscoveryHandler_t h
 {
 }
 
+void ServiceObserver::SetHandler(SilKit_Experimental_ServiceDiscoveryHandler_t handler, void* context)
+{
+    std::lock_guard<std::mutex> lock{_handlerMutex};
+    _handler = handler;
+    _context = context;
+}
+
+auto ServiceObserver::IsDispatchingOnThisThread() const -> bool
+{
+    return _dispatchingThread.load() == std::this_thread::get_id();
+}
+
 auto ServiceObserver::MakeMatch(const SilKit::Core::ServiceDescriptor& parent,
                                const SilKit::Core::ServiceDescriptor& peer, SilKit_Experimental_ServiceKind kind)
     -> MatchEmission
@@ -272,7 +283,7 @@ void ServiceObserver::EmitService(SilKit_Experimental_ServiceDiscoveryEvent_Type
 {
     SilKit_Experimental_ServiceDescriptor out{};
     LabelStorage storage;
-    if (!ClassifyAndFill(descriptor, _isSnapshot, out, storage))
+    if (!ClassifyAndFill(descriptor, out, storage))
     {
         return;
     }
@@ -283,7 +294,7 @@ void ServiceObserver::EmitMatch(SilKit_Experimental_ServiceDiscoveryEvent_Type t
 {
     SilKit_Experimental_ServiceDescriptor out{};
     LabelStorage storage;
-    if (!ClassifyAndFill(emission.parentDescriptor, _isSnapshot, out, storage))
+    if (!ClassifyAndFill(emission.parentDescriptor, out, storage))
     {
         return;
     }
@@ -298,9 +309,16 @@ void ServiceObserver::EmitMatch(SilKit_Experimental_ServiceDiscoveryEvent_Type t
 void ServiceObserver::Invoke(SilKit_Experimental_ServiceDiscoveryEvent_Type type,
                              const SilKit_Experimental_ServiceDescriptor& descriptor)
 {
+    SilKit_Experimental_ServiceDiscoveryHandler_t handler{};
+    void* context{nullptr};
+    {
+        std::lock_guard<std::mutex> lock{_handlerMutex};
+        handler = _handler;
+        context = _context;
+    }
     try
     {
-        _handler(_context, type, &descriptor);
+        handler(context, type, &descriptor);
     }
     catch (...)
     {
@@ -472,10 +490,17 @@ void ServiceObserver::HandleParent(Discovery::ServiceDiscoveryEvent::Type type,
 }
 
 void ServiceObserver::HandleEvent(Discovery::ServiceDiscoveryEvent::Type type,
-                                  const SilKit::Core::ServiceDescriptor& descriptor, bool isSnapshot)
+                                  const SilKit::Core::ServiceDescriptor& descriptor)
 {
-    // Everything emitted for this event (the service itself and matches it resolves) carries the flag.
-    _isSnapshot = isSnapshot;
+    struct DispatchScope
+    {
+        std::atomic<std::thread::id>& dispatchingThread;
+        std::thread::id previous;
+        ~DispatchScope()
+        {
+            dispatchingThread.store(previous);
+        }
+    } dispatchScope{_dispatchingThread, _dispatchingThread.exchange(std::this_thread::get_id())};
 
     // Network-simulator links are reported directly as a NetworkSimulatorLink service.
     if (descriptor.GetServiceType() == SilKit::Core::ServiceType::Link)

@@ -50,7 +50,6 @@ struct CapturedEvent
     std::string connectedParticipantName;
     std::string connectedServiceName;
     uint64_t connectedServiceId{0};
-    bool isSnapshot{false};
 };
 
 // Captures every event the public handler receives, plus the latest one for convenience.
@@ -90,7 +89,6 @@ void SilKitCALL CapturingHandler(void* context, SilKit_Experimental_ServiceDisco
     event.connectedParticipantName = serviceDescriptor->connectedParticipantName;
     event.connectedServiceName = serviceDescriptor->connectedServiceName;
     event.connectedServiceId = serviceDescriptor->connectedServiceId;
-    event.isSnapshot = serviceDescriptor->isSnapshot == SilKit_True;
 
     data->events.push_back(std::move(event));
 }
@@ -260,7 +258,6 @@ TEST_F(Test_ServiceObserver, reports_can_controller)
     EXPECT_EQ(data.last().connectedParticipantName, "");
     EXPECT_EQ(data.last().connectedServiceName, "");
     EXPECT_EQ(data.last().connectedServiceId, 0u);
-    EXPECT_FALSE(data.last().isSnapshot);
 }
 
 TEST_F(Test_ServiceObserver, reports_data_publisher_with_decoded_metadata)
@@ -777,33 +774,6 @@ TEST(Test_ServiceObserverExceptions, throwing_handler_keeps_remaining_matches)
         return e.serviceKind == SilKit_Experimental_ServiceKind_PubSubMatch;
     });
     EXPECT_EQ(matches, 3);
-}
-
-// --------------------------------------------------------------------------------------------------
-// Snapshot flag: carried by everything emitted for a snapshot event, including resolved matches.
-// --------------------------------------------------------------------------------------------------
-
-TEST_F(Test_ServiceObserver, snapshot_flag_is_carried_to_service_and_resolved_match)
-{
-    const std::string uuid = "pub-uuid-snapshot";
-    observer.HandleEvent(ServiceDiscoveryEvent::Type::ServiceCreated, MakeUserSubscriber(100, "T"), true);
-    observer.HandleEvent(ServiceDiscoveryEvent::Type::ServiceCreated, MakeInternalConnection(200, 100, uuid), true);
-    observer.HandleEvent(ServiceDiscoveryEvent::Type::ServiceCreated,
-                         MakeDataPublisher(uuid, "PubParticipant", "MyPub"), true);
-
-    ASSERT_EQ(data.callCount, 3); // subscriber, publisher, match
-    for (const auto& event : data.events)
-    {
-        EXPECT_TRUE(event.isSnapshot);
-    }
-    EXPECT_EQ(data.last().serviceKind, SilKit_Experimental_ServiceKind_PubSubMatch);
-
-    // A live event after the snapshot is not flagged.
-    observer.HandleEvent(ServiceDiscoveryEvent::Type::ServiceRemoved,
-                         MakeDataPublisher(uuid, "PubParticipant", "MyPub"));
-    ASSERT_EQ(data.callCount, 5); // match removed, publisher removed
-    EXPECT_FALSE(data.events[3].isSnapshot);
-    EXPECT_FALSE(data.events[4].isSnapshot);
 }
 
 } // namespace

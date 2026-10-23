@@ -29,9 +29,12 @@ DETAIL_SILKIT_CPP_API auto CreateSystemController(SilKit::IParticipant* particip
 DETAIL_SILKIT_CPP_API auto CreateNetworkSimulator(SilKit::IParticipant* participant)
     -> SilKit::Experimental::NetworkSimulation::INetworkSimulator*;
 
-/*! \brief Return the experimental service-discovery observer at a given SIL Kit participant.
+/*! \brief Return the experimental service-discovery observer of a given SIL Kit participant.
 *
-* \param participant The participant instance for which the observer is created.
+* The observer is owned by the participant. A participant has a single observer, so repeated calls return the
+* same object.
+*
+* \param participant The participant instance whose observer is returned.
 *
 * \throw SilKit::SilKitError The participant is invalid.
 */

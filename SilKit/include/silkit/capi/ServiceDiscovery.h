@@ -34,7 +34,7 @@ SILKIT_BEGIN_DECLS
 typedef uint32_t SilKit_Experimental_ServiceDiscoveryEvent_Type;
 /*! \brief An invalid / unknown service discovery event. */
 #define SilKit_Experimental_ServiceDiscoveryEvent_Type_Invalid ((SilKit_Experimental_ServiceDiscoveryEvent_Type)0)
-/*! \brief A service has been created (or was already present on registration, see \p isSnapshot). */
+/*! \brief A service has been created (or was already known to this participant when the handler was first set). */
 #define SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceCreated \
     ((SilKit_Experimental_ServiceDiscoveryEvent_Type)1)
 /*! \brief A service has been removed. */
@@ -72,7 +72,7 @@ typedef uint32_t SilKit_Experimental_ServiceKind;
  *         virtual time synchronization. */
 #define SilKit_Experimental_ServiceKind_TimeSyncService ((SilKit_Experimental_ServiceKind)13)
 
-/*! \brief Describes a single discovered service, passed by value to a service discovery handler.
+/*! \brief Describes a single discovered service, passed to a service discovery handler.
  *
  * All pointer members are borrowed and only valid for the duration of the handler invocation. Copy
  * any data that must outlive the call. Fields that do not apply to a kind are empty strings, zero,
@@ -117,7 +117,7 @@ typedef struct
     SilKit_Experimental_SimulatedNetworkType networkType;
     //! Media type for pub/sub and RPC services; empty string when not applicable.
     const char* mediaType;
-    //! Decoded matching labels for pub/sub and RPC services; empty for bus controllers.
+    //! Decoded matching labels for pub/sub and RPC services; empty otherwise, or if the labels cannot be decoded.
     SilKit_LabelList labelList;
     //! Operation mode of a \ref SilKit_Experimental_ServiceKind_LifecycleService;
     //! \ref SilKit_OperationMode_Invalid otherwise.
@@ -132,9 +132,6 @@ typedef struct
     //! Identifier of the peer service (publisher/client) within its participant; populated only for
     //! pub/sub and RPC matches.
     uint64_t connectedServiceId;
-    //! SilKit_True if the service already existed when the handler was registered (see
-    //! \ref SilKit_Experimental_ServiceDiscovery_SetServiceDiscoveryHandler).
-    SilKit_Bool isSnapshot;
 } SilKit_Experimental_ServiceDescriptor;
 
 /*! \brief Handler invoked when a user-facing service is created or removed in the simulation.
@@ -146,7 +143,7 @@ typedef struct
  *       application thread that creates or destroys a service; the invoking thread is unspecified.
  *       Invocations are serialized (the handler is never called concurrently with itself). The
  *       handler must not block and must not call back into the participant that owns the observer.
- *       Registering a handler from within a handler fails with \ref SilKit_ReturnCode_WRONGSTATE.
+ *       Setting the handler from within the handler fails with \ref SilKit_ReturnCode_WRONGSTATE.
  *
  * \param context The user context pointer passed to \ref SilKit_Experimental_ServiceDiscovery_SetServiceDiscoveryHandler.
  * \param eventType Whether the service was created or removed.
@@ -174,18 +171,25 @@ SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Experimental_ServiceDiscovery_Crea
 typedef SilKit_ReturnCode(SilKitFPTR* SilKit_Experimental_ServiceDiscovery_Create_t)(
     SilKit_Experimental_ServiceDiscovery** outServiceDiscovery, SilKit_Participant* participant);
 
-/*! \brief Register a handler that is called for every user-facing service in the simulation.
+/*! \brief Set the handler that is called for every user-facing service in the simulation.
  *
- * Upon registration the handler is immediately invoked once for every service that is already known,
- * each reported as \ref SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceCreated with
- * \p isSnapshot set. These snapshot invocations happen synchronously, before this function returns. The
+ * On the first call the handler is immediately invoked once for every service that this participant
+ * already knows, each reported as \ref SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceCreated. These
+ * snapshot invocations happen synchronously on the calling thread, before this function returns; a consumer
+ * that needs to tell them apart from live events can treat invocations on the calling thread during this
+ * call as the snapshot. A service of another participant can become known to this participant only after
+ * the handler was first set, even if it existed before, and is then reported as a live event. The
  * handler is subsequently invoked for every user-facing service created or removed. Infrastructure/internal
  * services are not reported. Network-simulator links and pub/sub and RPC matches are reported as
  * services of their own kinds (see \ref SilKit_Experimental_ServiceDescriptor).
  *
- * \note Each call registers an additional, independent handler; handlers cannot be removed and remain
- *       registered for the lifetime of the participant. To observe with a single handler, call this
- *       function once. See the handler typedef for the threading contract.
+ * If reporting the snapshot fails, an error code is returned and the handler is not set; it may already
+ * have received part of the snapshot.
+ *
+ * A participant has a single service discovery handler. Calling this function again replaces the handler and
+ * its context; the replacement does not re-deliver the snapshot of already known services. An invocation already
+ * running on another thread may still use the previous handler and context. Calling this function from within the
+ * handler fails with \ref SilKit_ReturnCode_WRONGSTATE. See the handler typedef for the threading contract.
  *
  * \warning This function is not part of the stable API and ABI of the SIL Kit. It may be removed at any time without
  *          prior notice.

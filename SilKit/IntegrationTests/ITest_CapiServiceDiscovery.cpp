@@ -67,7 +67,6 @@ struct ObservedEvent
     std::string connectedParticipantName;
     std::string connectedServiceName;
     uint64_t connectedServiceId;
-    bool isSnapshot;
 };
 
 // Shared state between the C callback thread and the test thread.
@@ -95,7 +94,6 @@ void SilKitCALL OnServiceDiscovery(void* context, SilKit_Experimental_ServiceDis
     event.operationMode = descriptor->operationMode;
     event.timeSyncActive = descriptor->timeSyncActive == SilKit_True;
     event.connectedServiceId = descriptor->connectedServiceId;
-    event.isSnapshot = descriptor->isSnapshot == SilKit_True;
     event.mediaType = descriptor->mediaType;
     for (size_t i = 0; i < descriptor->labelList.numLabels; ++i)
     {
@@ -373,7 +371,6 @@ TEST_F(ITest_CapiServiceDiscovery, match_created_and_publisher_removal_observed)
     const auto matchRemoved = std::find_if(_ctx.events.begin(), _ctx.events.end(), isMatchRemoved);
     const auto publisherRemoved = std::find_if(_ctx.events.begin(), _ctx.events.end(), isPublisherRemoved);
     ASSERT_NE(matchRemoved, _ctx.events.end()) << "the match must be reported as removed";
-    EXPECT_FALSE(matchRemoved->isSnapshot) << "live events are not part of the snapshot";
     EXPECT_LT(matchRemoved - _ctx.events.begin(), publisherRemoved - _ctx.events.begin())
         << "the match must be removed before its publisher";
 }
@@ -485,12 +482,11 @@ TEST_F(ITest_CapiServiceDiscovery, late_observer_recovers_preexisting_match)
             return e.serviceKind == SilKit_Experimental_ServiceKind_PubSubMatch
                    && e.eventType == SilKit_Experimental_ServiceDiscoveryEvent_Type_ServiceCreated
                    && e.primaryIdentifier == topic && e.connectedParticipantName == "LatePub"
-                   && e.connectedServiceName == "LatePubCtrl" && e.connectedServiceId != 0 && e.isSnapshot;
+                   && e.connectedServiceName == "LatePubCtrl" && e.connectedServiceId != 0;
         });
     });
     lock.unlock();
-    EXPECT_TRUE(recovered) << "late observer must recover the pre-existing match, flagged as snapshot, with its "
-                              "peer identity";
+    EXPECT_TRUE(recovered) << "late observer must recover the pre-existing match with its peer identity";
 
     SilKit_Participant_Destroy(lateObserver);
 }
@@ -505,7 +501,7 @@ struct NestedRegistrationContext
     std::vector<std::string> canControllers;
 };
 
-// Tries to register another handler from within the handler on the first CAN controller.
+// Tries to set the handler from within the handler on the first CAN controller.
 void SilKitCALL RegisteringHandler(void* context, SilKit_Experimental_ServiceDiscoveryEvent_Type eventType,
                                    const SilKit_Experimental_ServiceDescriptor* descriptor)
 {
@@ -563,7 +559,7 @@ TEST_F(ITest_CapiServiceDiscovery, set_handler_within_handler_is_rejected)
         return std::count(ctx.canControllers.begin(), ctx.canControllers.end(), name) == 1;
     };
     EXPECT_TRUE(ctx.cv.wait_for(lock, kWaitTimeout, [&] { return seenOnce("Can1") && seenOnce("Can2"); }))
-        << "the handler must keep receiving events after the rejected registration";
+        << "the handler must keep receiving events after the rejected call";
     EXPECT_EQ(ctx.nestedResult, SilKit_ReturnCode_WRONGSTATE);
 }
 
