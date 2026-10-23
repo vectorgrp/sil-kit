@@ -243,11 +243,6 @@ void LifecycleService::Stop(std::string reason)
     _participant->ExecuteDeferred([this, reason] { _lifecycleManager.Stop(reason); });
 }
 
-void LifecycleService::Restart(std::string /*reason*/)
-{
-    throw SilKitError("Restarting is currently not supported.");
-}
-
 void LifecycleService::SetLifecycleConfiguration(LifecycleConfiguration startConfiguration)
 {
     _operationMode = startConfiguration.operationMode;

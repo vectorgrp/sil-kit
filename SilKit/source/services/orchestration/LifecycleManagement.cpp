@@ -92,18 +92,6 @@ void LifecycleManagement::Stop(std::string reason)
     _currentState->StopSimulation(std::move(reason));
 }
 
-void LifecycleManagement::ResolveAbortSimulation(std::string reason)
-{
-    _currentState->ResolveAbortSimulation(reason);
-    ShutdownAfterAbort(std::move(reason));
-}
-
-void LifecycleManagement::RestartAfterStop(std::string reason)
-{
-    // for now, the participant will always shut down after stopping
-    _lifecycleService->Restart(std::move(reason));
-}
-
 void LifecycleManagement::ShutdownAfterAbort(std::string reason)
 {
     // for now, the participant will always shut down after stopping
