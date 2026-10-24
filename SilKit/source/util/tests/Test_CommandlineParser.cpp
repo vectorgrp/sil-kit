@@ -4,6 +4,7 @@
 
 #include <functional>
 #include <numeric>
+#include <sstream>
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
@@ -163,6 +164,132 @@ TEST(Test_CommandlineParser, test_missing_option_value)
     commandlineParser.Add<SilKit::Util::CommandlineParser::Option>("registryUri", "u", "", "", "");
 
     EXPECT_THROW(commandlineParser.ParseArguments(argc, argv), SilKitError);
+}
+
+// The usage info lists all arguments except hidden ones.
+TEST(Test_CommandlineParser, test_print_usage_info_skips_hidden_arguments)
+{
+    SilKit::Util::CommandlineParser commandlineParser;
+    commandlineParser.Add<SilKit::Util::CommandlineParser::Flag>("version", "v", "[--version]",
+                                                                 "-v, --version: Get version info.");
+    commandlineParser.Add<SilKit::Util::CommandlineParser::Flag>("debug", "d", "[--debug]", "-d, --debug: Hidden.",
+                                                                 SilKit::Util::CommandlineParser::Hidden);
+    commandlineParser.Add<SilKit::Util::CommandlineParser::Option>("name", "n", "Default", "[--name <name>]",
+                                                                   "-n, --name <name>: The name.");
+    commandlineParser.Add<SilKit::Util::CommandlineParser::Option>("secret", "s", "", "[--secret <secret>]",
+                                                                   "-s, --secret <secret>: Hidden.",
+                                                                   SilKit::Util::CommandlineParser::Hidden);
+    commandlineParser.Add<SilKit::Util::CommandlineParser::Positional>("configuration", "<configuration>",
+                                                                       "<configuration>: The configuration.");
+    commandlineParser.Add<SilKit::Util::CommandlineParser::PositionalList>("files", "<file1> [file2 ...]",
+                                                                           "<file1>, <file2>, ...: The files.");
+
+    std::ostringstream out;
+    commandlineParser.PrintUsageInfo(out, "main");
+
+    EXPECT_EQ(out.str(), "Usage: main [--version] [--name <name>] <configuration> <file1> [file2 ...]\n"
+                         "Arguments:\n"
+                         "-v, --version: Get version info.\n"
+                         "-n, --name <name>: The name.\n"
+                         "<configuration>: The configuration.\n"
+                         "<file1>, <file2>, ...: The files.\n");
+}
+
+// Hidden arguments are only omitted from the usage info, but are parsed.
+TEST(Test_CommandlineParser, test_hidden_arguments_are_parsed)
+{
+    auto arguments = {"main", "-d", "--secret", "xyz"};
+    auto args = BuildArguments(arguments);
+    auto argc = static_cast<int>(args.size()) - 1;
+    auto argv = args.data();
+
+    SilKit::Util::CommandlineParser commandlineParser;
+    commandlineParser.Add<SilKit::Util::CommandlineParser::Flag>("debug", "d", "", "",
+                                                                 SilKit::Util::CommandlineParser::Hidden);
+    commandlineParser.Add<SilKit::Util::CommandlineParser::Option>("secret", "s", "", "", "",
+                                                                   SilKit::Util::CommandlineParser::Hidden);
+
+    commandlineParser.ParseArguments(argc, argv);
+
+    EXPECT_EQ(commandlineParser.Get<SilKit::Util::CommandlineParser::Flag>("debug").Value(), true);
+    EXPECT_EQ(commandlineParser.Get<SilKit::Util::CommandlineParser::Option>("secret").Value(), "xyz");
+}
+
+// A PositionalList collects all positional arguments after the regular positionals, also between options.
+TEST(Test_CommandlineParser, test_positional_list_collects_remaining_positionals)
+{
+    auto arguments = {"main", "config.yaml", "a.txt", "--name=Xxxx", "b.txt"};
+    auto args = BuildArguments(arguments);
+    auto argc = static_cast<int>(args.size()) - 1;
+    auto argv = args.data();
+
+    SilKit::Util::CommandlineParser commandlineParser;
+    commandlineParser.Add<SilKit::Util::CommandlineParser::Option>("name", "n", "", "", "");
+    commandlineParser.Add<SilKit::Util::CommandlineParser::Positional>("configuration", "", "");
+    commandlineParser.Add<SilKit::Util::CommandlineParser::PositionalList>("files", "", "");
+
+    EXPECT_EQ(commandlineParser.Get<SilKit::Util::CommandlineParser::PositionalList>("files").HasValues(), false);
+
+    commandlineParser.ParseArguments(argc, argv);
+
+    EXPECT_EQ(commandlineParser.Get<SilKit::Util::CommandlineParser::Positional>("configuration").Value(),
+              "config.yaml");
+    EXPECT_EQ(commandlineParser.Get<SilKit::Util::CommandlineParser::Option>("name").Value(), "Xxxx");
+    EXPECT_EQ(commandlineParser.Get<SilKit::Util::CommandlineParser::PositionalList>("files").HasValues(), true);
+    EXPECT_EQ(commandlineParser.Get<SilKit::Util::CommandlineParser::PositionalList>("files").Values(),
+              (std::vector<std::string>{"a.txt", "b.txt"}));
+}
+
+// Flags and options provide their short names and default values.
+TEST(Test_CommandlineParser, test_argument_accessors)
+{
+    SilKit::Util::CommandlineParser commandlineParser;
+    commandlineParser.Add<SilKit::Util::CommandlineParser::Flag>("version", "v", "", "");
+    commandlineParser.Add<SilKit::Util::CommandlineParser::Option>("name", "n", "Default", "", "");
+
+    auto& flag = commandlineParser.Get<SilKit::Util::CommandlineParser::Flag>("version");
+    EXPECT_EQ(flag.ShortName(), "v");
+    EXPECT_EQ(flag.DefaultValue(), false);
+
+    auto& option = commandlineParser.Get<SilKit::Util::CommandlineParser::Option>("name");
+    EXPECT_EQ(option.ShortName(), "n");
+    EXPECT_EQ(option.DefaultValue(), "Default");
+}
+
+// Get throws for unknown names and for arguments of a different kind.
+TEST(Test_CommandlineParser, test_get_unknown_or_mismatched_argument)
+{
+    SilKit::Util::CommandlineParser commandlineParser;
+    commandlineParser.Add<SilKit::Util::CommandlineParser::Option>("name", "n", "", "", "");
+
+    EXPECT_THROW(commandlineParser.Get<SilKit::Util::CommandlineParser::Option>("unknown"), SilKitError);
+    EXPECT_THROW(commandlineParser.Get<SilKit::Util::CommandlineParser::Flag>("name"), SilKitError);
+}
+
+// Unexpected positionals, unknown arguments, flags with values and options without values are rejected.
+TEST(Test_CommandlineParser, test_parse_errors)
+{
+    auto parse = [](std::vector<const char*> arguments) {
+        auto args = BuildArguments(arguments);
+        auto argc = static_cast<int>(args.size()) - 1;
+
+        SilKit::Util::CommandlineParser commandlineParser;
+        commandlineParser.Add<SilKit::Util::CommandlineParser::Flag>("version", "v", "", "");
+        commandlineParser.Add<SilKit::Util::CommandlineParser::Option>("name", "n", "", "", "");
+        commandlineParser.ParseArguments(argc, args.data());
+    };
+
+    // No positional argument declared
+    EXPECT_THROW(parse({"main", "XYZ"}), SilKitError);
+    // Unknown flag, long and short form
+    EXPECT_THROW(parse({"main", "--unknown"}), SilKitError);
+    EXPECT_THROW(parse({"main", "-x"}), SilKitError);
+    // Unknown option with value
+    EXPECT_THROW(parse({"main", "--unknown=value"}), SilKitError);
+    // A flag does not take a value
+    EXPECT_THROW(parse({"main", "--version=true"}), SilKitError);
+    // Short option without value
+    EXPECT_THROW(parse({"main", "-n"}), SilKitError);
 }
 
 

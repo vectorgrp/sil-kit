@@ -239,4 +239,126 @@ TEST(Test_CanControllerDetailedSim, must_not_generate_ack)
     canController.ReceiveMsg(&canControllerFrom, msg);
 }
 
+// The controller routes frames to a network simulator of its network once it appears, and falls back to the
+// trivial simulation once it leaves.
+TEST(Test_CanControllerDetailedSim, network_simulator_discovery_switches_simulation_behavior)
+{
+    MockParticipant mockParticipant;
+    SilKit::Core::Discovery::ServiceDiscoveryHandler discoveryHandler;
+    EXPECT_CALL(mockParticipant.mockServiceDiscovery, RegisterServiceDiscoveryHandler(_))
+        .WillOnce(::testing::SaveArg<0>(&discoveryHandler));
+
+    CanController canController(&mockParticipant, {}, mockParticipant.GetTimeProvider());
+    canController.SetServiceDescriptor({"p1", "n1", "c1", 8});
+    canController.RegisterServiceDiscovery();
+    ASSERT_TRUE(discoveryHandler);
+
+    ServiceDescriptor netsimLink{netsimName, "n1", "n1", 9};
+    netsimLink.SetServiceType(ServiceType::Link);
+    ServiceDescriptor otherNetsimLink{netsimName, "n2", "n2", 10};
+    otherNetsimLink.SetServiceType(ServiceType::Link);
+
+    using EventType = SilKit::Core::Discovery::ServiceDiscoveryEvent::Type;
+    const auto frame = ToCanFrame(WireCanFrameEvent{}.frame);
+
+    // Only the send while the network simulator is present goes to the network simulator. In trivial mode, the
+    // stopped controller does not send at all.
+    EXPECT_CALL(mockParticipant, SendMsg(&canController, netsimName, A<const WireCanFrameEvent&>())).Times(1);
+
+    // A link on another network is ignored
+    discoveryHandler(EventType::ServiceCreated, otherNetsimLink);
+    canController.SendFrame(frame);
+
+    discoveryHandler(EventType::ServiceCreated, netsimLink);
+    canController.SendFrame(frame);
+
+    // The network simulator of another network leaving does not matter
+    discoveryHandler(EventType::ServiceRemoved, otherNetsimLink);
+    discoveryHandler(EventType::ServiceRemoved, netsimLink);
+    canController.SendFrame(frame);
+}
+
+// In the detailed simulation, status updates and acknowledgements from anyone but the network simulator are
+// dropped.
+TEST(Test_CanControllerDetailedSim, reject_messages_not_from_network_simulator)
+{
+    using namespace std::placeholders;
+
+    MockParticipant mockParticipant;
+    CanControllerCallbacks callbackProvider;
+
+    CanController canController(&mockParticipant, {}, mockParticipant.GetTimeProvider());
+    canController.SetDetailedBehavior({netsimName, "n1", "c1", 8});
+    canController.SetServiceDescriptor({"p1", "n1", "c1", 8});
+    canController.AddStateChangeHandler(
+        std::bind(&CanControllerCallbacks::StateChangeHandler, &callbackProvider, _1, _2));
+    canController.AddFrameTransmitHandler(
+        std::bind(&CanControllerCallbacks::FrameTransmitHandler, &callbackProvider, _1, _2));
+
+    EXPECT_CALL(callbackProvider, StateChangeHandler(_, _)).Times(0);
+    EXPECT_CALL(callbackProvider, FrameTransmitHandler(_, _)).Times(0);
+
+    CanController otherController(&mockParticipant, {}, mockParticipant.GetTimeProvider());
+    otherController.SetServiceDescriptor({"p2", "n1", "c1", 8});
+
+    CanControllerStatus controllerStatus{};
+    controllerStatus.controllerState = CanControllerState::Started;
+    canController.ReceiveMsg(&otherController, controllerStatus);
+    canController.ReceiveMsg(&otherController, CanFrameTransmitEvent{});
+}
+
+// Removed handlers are no longer called, and removing unknown handlers does not throw.
+TEST(Test_CanControllerDetailedSim, removed_handlers_are_not_called)
+{
+    using namespace std::placeholders;
+
+    ServiceDescriptor busSimAddress{netsimName, "n1", "c1", 8};
+
+    MockParticipant mockParticipant;
+    CanControllerCallbacks callbackProvider;
+
+    CanController canController(&mockParticipant, {}, mockParticipant.GetTimeProvider());
+    canController.SetDetailedBehavior(busSimAddress);
+    canController.SetServiceDescriptor({"p1", "n1", "c1", 8});
+
+    const auto frameHandlerId =
+        canController.AddFrameHandler(std::bind(&CanControllerCallbacks::FrameHandler, &callbackProvider, _1, _2));
+    const auto stateChangeHandlerId = canController.AddStateChangeHandler(
+        std::bind(&CanControllerCallbacks::StateChangeHandler, &callbackProvider, _1, _2));
+    const auto errorStateChangeHandlerId = canController.AddErrorStateChangeHandler(
+        std::bind(&CanControllerCallbacks::ErrorStateChangeHandler, &callbackProvider, _1, _2));
+    const auto frameTransmitHandlerId = canController.AddFrameTransmitHandler(
+        std::bind(&CanControllerCallbacks::FrameTransmitHandler, &callbackProvider, _1, _2));
+
+    canController.RemoveFrameHandler(frameHandlerId);
+    canController.RemoveStateChangeHandler(stateChangeHandlerId);
+    canController.RemoveErrorStateChangeHandler(errorStateChangeHandlerId);
+    canController.RemoveFrameTransmitHandler(frameTransmitHandlerId);
+
+    EXPECT_CALL(callbackProvider, FrameHandler(_, _)).Times(0);
+    EXPECT_CALL(callbackProvider, StateChangeHandler(_, _)).Times(0);
+    EXPECT_CALL(callbackProvider, ErrorStateChangeHandler(_, _)).Times(0);
+    EXPECT_CALL(callbackProvider, FrameTransmitHandler(_, _)).Times(0);
+
+    CanController canControllerFrom(&mockParticipant, {}, mockParticipant.GetTimeProvider());
+    canControllerFrom.SetServiceDescriptor(busSimAddress);
+
+    WireCanFrameEvent frameEvent{};
+    frameEvent.direction = SilKit::Services::TransmitDirection::RX;
+    canController.ReceiveMsg(&canControllerFrom, frameEvent);
+
+    CanControllerStatus controllerStatus{};
+    controllerStatus.controllerState = CanControllerState::Started;
+    controllerStatus.errorState = CanErrorState::ErrorActive;
+    canController.ReceiveMsg(&canControllerFrom, controllerStatus);
+
+    canController.ReceiveMsg(&canControllerFrom, CanFrameTransmitEvent{});
+
+    // Removing unknown handlers only warns
+    EXPECT_NO_THROW(canController.RemoveFrameHandler(frameHandlerId));
+    EXPECT_NO_THROW(canController.RemoveStateChangeHandler(stateChangeHandlerId));
+    EXPECT_NO_THROW(canController.RemoveErrorStateChangeHandler(errorStateChangeHandlerId));
+    EXPECT_NO_THROW(canController.RemoveFrameTransmitHandler(frameTransmitHandlerId));
+}
+
 } // anonymous namespace
