@@ -98,8 +98,8 @@ struct ServiceDescriptor
     //! Operation mode of a \ref ServiceKind::LifecycleService; Invalid otherwise.
     SilKit::Services::Orchestration::OperationMode operationMode{
         SilKit::Services::Orchestration::OperationMode::Invalid};
-    //! For a \ref ServiceKind::TimeSyncService: whether the participant takes part in the virtual time
-    //! synchronization.
+    //! Whether the participant takes part in the virtual time synchronization, for a
+    //! \ref ServiceKind::TimeSyncService; false otherwise.
     bool timeSyncActive{false};
     //! Name of the peer participant (publisher/client); populated only for pub/sub and RPC matches.
     std::string connectedParticipantName;

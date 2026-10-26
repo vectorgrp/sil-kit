@@ -122,8 +122,8 @@ typedef struct
     //! Operation mode of a \ref SilKit_Experimental_ServiceKind_LifecycleService;
     //! \ref SilKit_OperationMode_Invalid otherwise.
     SilKit_OperationMode operationMode;
-    //! For a \ref SilKit_Experimental_ServiceKind_TimeSyncService: whether the participant takes part in
-    //! the virtual time synchronization. SilKit_False otherwise.
+    //! Whether the participant takes part in the virtual time synchronization, for a
+    //! \ref SilKit_Experimental_ServiceKind_TimeSyncService; SilKit_False otherwise.
     SilKit_Bool timeSyncActive;
     //! Name of the peer participant (publisher/client); populated only for pub/sub and RPC matches.
     const char* connectedParticipantName;
