@@ -42,7 +42,7 @@ TEST_F(Test_RpcServer, rpc_server_call_response_sends_message_with_timestamp_and
         .WillOnce([this, &fixedTimeProvider](const SilKit::Core::IServiceEndpoint* /*from*/,
                                              const FunctionCallResponse& msg) {
         ASSERT_EQ(msg.timestamp, fixedTimeProvider.now);
-        ASSERT_EQ(msg.data, sampleData);
+        ASSERT_TRUE(SilKit::Util::ItemsAreEqual(msg.data.AsSpan(), SilKit::Util::ToSpan(sampleData)));
     });
 
     IRpcClient* iRpcClient = CreateRpcClient();
