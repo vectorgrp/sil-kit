@@ -9,6 +9,7 @@
 #include "silkit/services/all.hpp"
 
 #include "config/ConfigurationTestUtils.hpp"
+#include "config/ParticipantConfigurationFromXImpl.hpp"
 #include "core/internal/IParticipantInternal.hpp"
 #include "core/service/IServiceDiscovery.hpp"
 #include "core/service/ServiceDatatypes.hpp"
@@ -23,6 +24,17 @@ using namespace SilKit::Services::PubSub;
 
 const size_t defaultMsgSize = 3;
 const uint32_t defaultNumMsgToPublish = 3;
+
+//! Non-uniform, so that shifted, truncated or mixed up payload bytes are detected.
+inline auto MakeTestData(size_t size, uint8_t seed) -> std::vector<uint8_t>
+{
+    std::vector<uint8_t> data(size);
+    for (size_t i = 0; i < size; ++i)
+    {
+        data[i] = static_cast<uint8_t>(i * 31 + seed);
+    }
+    return data;
+}
 
 class ITest_Internals_DataPubSub : public testing::Test
 {
@@ -60,7 +72,7 @@ protected:
         {
             if (!allSent)
             {
-                auto data = std::vector<uint8_t>(messageSizeInBytes, static_cast<uint8_t>(publishMsgCounter));
+                auto data = MakeTestData(messageSizeInBytes, static_cast<uint8_t>(publishMsgCounter));
                 dataPublisher->Publish(data);
                 publishMsgCounter++;
                 if (publishMsgCounter >= numMsgToPublish)
@@ -126,8 +138,7 @@ protected:
             {
                 if (expectIncreasingData)
                 {
-                    auto expectedData =
-                        std::vector<uint8_t>(messageSizeInBytes, static_cast<uint8_t>(receiveMsgCounter));
+                    auto expectedData = MakeTestData(messageSizeInBytes, static_cast<uint8_t>(receiveMsgCounter));
                     EXPECT_TRUE(SilKit::Util::ItemsAreEqual(dataMessageEvent.data, SilKit::Util::ToSpan(expectedData)));
                 }
                 else
@@ -480,6 +491,34 @@ protected:
         StopSimOnAllSentAndReceived(pubsubs, true);
         JoinPubSubThreads();
         ShutdownSystem();
+    }
+
+    //! One publisher and numSubscribers subscriber participants on one topic, all using participantConfig.
+    void RunFanOutSyncTest(size_t numSubscribers, size_t messageSize, const std::string& participantConfig)
+    {
+        const uint32_t numMsgToPublish = defaultNumMsgToPublish;
+        const uint32_t numMsgToReceive = numMsgToPublish;
+
+        auto makeConfig = [&participantConfig]() -> std::shared_ptr<SilKit::Config::IParticipantConfiguration> {
+            if (participantConfig.empty())
+            {
+                return SilKit::Config::MakeEmptyParticipantConfigurationImpl();
+            }
+            return SilKit::Config::ParticipantConfigurationFromStringImpl(participantConfig);
+        };
+
+        std::vector<PubSubParticipant> pubsubs;
+        pubsubs.push_back(
+            {"Pub1", {{"PubCtrl1", "TopicA", {"A"}, {}, 0, messageSize, numMsgToPublish}}, {}, makeConfig()});
+        for (size_t i = 1; i <= numSubscribers; ++i)
+        {
+            pubsubs.push_back({"Sub" + std::to_string(i),
+                               {},
+                               {{"SubCtrl1", "TopicA", {"A"}, {}, messageSize, numMsgToReceive, 1}},
+                               makeConfig()});
+        }
+
+        RunSyncTest(pubsubs);
     }
 
     void RunAsyncTest(std::vector<PubSubParticipant>& publishers, std::vector<PubSubParticipant>& subscribers)

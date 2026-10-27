@@ -77,6 +77,7 @@ struct ExperimentalCache
 {
     TimeSynchronizationCache timeSynchronizationCache;
     MetricsCache metricsCache;
+    std::optional<bool> useReceiveBufferPool;
 };
 
 struct ConfigIncludeData
@@ -408,8 +409,11 @@ void Cache(const Metrics& root, MetricsCache& cache)
 
 void Cache(const Experimental& root, ExperimentalCache& cache)
 {
+    static const Experimental defaultObject;
     Cache(root.timeSynchronization, cache.timeSynchronizationCache);
     Cache(root.metrics, cache.metricsCache);
+    CacheNonDefault(defaultObject.useReceiveBufferPool, root.useReceiveBufferPool, "Experimental.UseReceiveBufferPool",
+                    cache.useReceiveBufferPool);
 }
 
 
@@ -557,6 +561,7 @@ void MergeExperimentalCache(const ExperimentalCache& cache, Experimental& experi
 {
     MergeTimeSynchronizationCache(cache.timeSynchronizationCache, experimental.timeSynchronization);
     MergeMetricsCache(cache.metricsCache, experimental.metrics);
+    MergeCacheField(cache.useReceiveBufferPool, experimental.useReceiveBufferPool);
 }
 
 
