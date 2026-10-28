@@ -23,7 +23,10 @@ public:
 public:
     /*! \brief Set the task to be executed with each grant / tick
      *
-     * Can be changed at runtime. Execution context depends on the run type.
+     * Can be changed at runtime.
+     * Switching between this and the asynchronous handler is only possible before the participant
+     * is running. Afterwards, a SilKit::StateError is thrown.
+     * Execution context depends on the run type.
      *
      * Throwing an error inside the handler will cause a call to
      * ReportError().
@@ -31,7 +34,10 @@ public:
     virtual void SetSimulationStepHandler(SimulationStepHandler task, std::chrono::nanoseconds initialStepSize) = 0;
     /*! \brief Set the task to be executed with each grant / tick
      *
-     * Can be changed at runtime. Execution context depends on the run type.
+     * Can be changed at runtime.
+     * Switching between this and the synchronous handler is only possible before the participant
+     * is running. Afterwards, a SilKit::StateError is thrown.
+     * Execution context depends on the run type.
      * Execution will perform one simulation step at a time.
      * CompleteSimulationStep is required to signal completion of the simulation step.
      *

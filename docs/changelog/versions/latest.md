@@ -9,3 +9,6 @@
   `-DSILKIT_BUILD_GIT_HASH=<hash>`, `-DSILKIT_VERSION_SUFFIX=rc1`). The git hash defaults to `git rev-parse HEAD`.
   The installed `SilKitVersionMacros.h` only carries fallbacks for these three; query them at runtime via
   `SilKit::Version` or the C API instead.
+- Switching between `SetSimulationStepHandler` and `SetSimulationStepHandlerAsync` is now rejected once the
+  participant reached the `Running` state (`SilKit::StateError`, `SilKit_ReturnCode_WRONGSTATE` in the C API).
+  Setting another handler of the same kind at runtime, e.g., to change the step size, remains possible.

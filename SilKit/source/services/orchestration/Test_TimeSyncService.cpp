@@ -167,6 +167,94 @@ TEST_F(Test_TimeSyncService, async_simtask_mismatching_number_of_complete_calls)
     ASSERT_EQ(numAsyncTaskCalled, 3) << "Calling too many CompleteSimulationStep() should not wreak havoc";
 }
 
+TEST_F(Test_TimeSyncService, switch_handler_kind_before_running_is_allowed)
+{
+    auto numSyncTaskCalled{0};
+    auto numAsyncTaskCalled{0};
+
+    // The last handler set before the participant is running determines the kind
+    timeSyncService->SetSimulationStepHandlerAsync([&](auto, auto) { numAsyncTaskCalled++; }, 1ms);
+    ASSERT_NO_THROW(timeSyncService->SetSimulationStepHandler([&](auto, auto) { numSyncTaskCalled++; }, 1ms));
+
+    PrepareLifecycle();
+
+    timeSyncService->ReceiveMsg(&endpoint, {0ms});
+    timeSyncService->ReceiveMsg(&endpoint, {1ms});
+    ASSERT_EQ(numSyncTaskCalled, 2);
+    ASSERT_EQ(numAsyncTaskCalled, 0);
+}
+
+TEST_F(Test_TimeSyncService, set_handler_of_same_kind_while_running_is_allowed)
+{
+    timeSyncService->SetSimulationStepHandler([](auto, auto) {}, 1ms);
+    PrepareLifecycle();
+    ASSERT_EQ(lifecycleService->State(), ParticipantState::Running);
+    EXPECT_NO_THROW(timeSyncService->SetSimulationStepHandler([](auto, auto) {}, 2ms));
+
+    CreateServices();
+    timeSyncService->SetSimulationStepHandlerAsync([](auto, auto) {}, 1ms);
+    PrepareLifecycle();
+    ASSERT_EQ(lifecycleService->State(), ParticipantState::Running);
+    EXPECT_NO_THROW(timeSyncService->SetSimulationStepHandlerAsync([](auto, auto) {}, 2ms));
+}
+
+TEST_F(Test_TimeSyncService, switch_from_sync_to_async_handler_at_runtime_is_rejected)
+{
+    constexpr auto numSteps = 3;
+
+    auto numSyncTaskCalled{0};
+    auto numAsyncTaskCalled{0};
+    auto numRejected{0};
+    timeSyncService->SetSimulationStepHandler([&](auto, auto) {
+        ++numSyncTaskCalled;
+        try
+        {
+            timeSyncService->SetSimulationStepHandlerAsync([&](auto, auto) { numAsyncTaskCalled++; }, 1ms);
+        }
+        catch (const SilKit::StateError&)
+        {
+            ++numRejected;
+        }
+    }, 1ms);
+
+    PrepareLifecycle();
+
+    for (auto i = 0; i < numSteps; ++i)
+    {
+        timeSyncService->ReceiveMsg(&endpoint, {i * 1ms});
+        ASSERT_EQ(numSyncTaskCalled, i + 1);
+        ASSERT_EQ(sentNextSimTasks.back().timePoint, (i + 1) * 1ms);
+    }
+    ASSERT_EQ(numRejected, numSteps);
+    ASSERT_EQ(numAsyncTaskCalled, 0);
+}
+
+TEST_F(Test_TimeSyncService, switch_from_async_to_sync_handler_at_runtime_is_rejected)
+{
+    auto numAsyncTaskCalled{0};
+    auto numSyncTaskCalled{0};
+
+    timeSyncService->SetSimulationStepHandlerAsync([&](auto, auto) { numAsyncTaskCalled++; }, 1ms);
+
+    PrepareLifecycle();
+
+    timeSyncService->ReceiveMsg(&endpoint, {0ms});
+    ASSERT_EQ(numAsyncTaskCalled, 1);
+
+    EXPECT_THROW(timeSyncService->SetSimulationStepHandler([&](auto, auto) { numSyncTaskCalled++; }, 1ms),
+                 SilKit::StateError);
+
+    // The async step is still open, so the next step must not start
+    timeSyncService->ReceiveMsg(&endpoint, {1ms});
+    EXPECT_EQ(numSyncTaskCalled, 0);
+    EXPECT_EQ(numAsyncTaskCalled, 1);
+
+    // The rejected switch left the async handler in place
+    timeSyncService->CompleteSimulationStep();
+    EXPECT_EQ(numSyncTaskCalled, 0);
+    EXPECT_EQ(numAsyncTaskCalled, 2);
+}
+
 auto MakeTimeSyncServiceDescriptor() -> SilKit::Core::ServiceDescriptor
 {
     SilKit::Core::ServiceDescriptor sd;

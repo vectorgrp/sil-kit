@@ -7,6 +7,7 @@
 #include <chrono>
 #include <iostream>
 #include <functional>
+#include <mutex>
 #include <vector>
 #include <optional>
 #include "ITestFixture.hpp"
@@ -44,6 +45,9 @@ struct ParticipantParams
     // Change step size at these time points
     std::map<std::chrono::nanoseconds /*changeTimePoint*/, std::chrono::nanoseconds /*newStepSize*/>
         changeStepSizeAtTimePoints{};
+
+    // Use SetSimulationStepHandlerAsync and re-register / complete the step from another thread
+    bool asyncStepHandler{false};
 
     // Result: recorded time points and durations
     std::vector<std::pair<std::chrono::nanoseconds, std::chrono::nanoseconds>> timePointsAndDurations{};
@@ -122,12 +126,30 @@ void ITest_DynStepSizes::RunTestSetup(std::vector<ParticipantParams>& participan
             // Vary the step size by re-registering the same handler with a new step size. This is the
             // supported mechanism for dynamic step sizes (the network simulator drives it the same way).
             // Must be the last statement: it replaces the currently executing handler.
-            if (changeStepSize)
+            if (participantParams.asyncStepHandler)
+            {
+                // The step is still open when the handler returns and is completed by the other thread
+                std::thread([=, &handler] {
+                    if (changeStepSize)
+                    {
+                        timeSyncService->SetSimulationStepHandlerAsync(handler, newStepSize);
+                    }
+                    timeSyncService->CompleteSimulationStep();
+                }).detach();
+            }
+            else if (changeStepSize)
             {
                 timeSyncService->SetSimulationStepHandler(handler, newStepSize);
             }
         };
-        timeSyncService->SetSimulationStepHandler(handler, participantParams.initialStepSize);
+        if (participantParams.asyncStepHandler)
+        {
+            timeSyncService->SetSimulationStepHandlerAsync(handler, participantParams.initialStepSize);
+        }
+        else
+        {
+            timeSyncService->SetSimulationStepHandler(handler, participantParams.initialStepSize);
+        }
     }
 
     auto ok = _simTestHarness->Run(5s);
@@ -353,6 +375,22 @@ TEST_F(ITest_DynStepSizes, two_participants_ByMinimalDuration_change_step_size)
 
     AssertAllStepsEqual({participantsParams[0], refData});
     AssertAllStepsEqual({participantsParams[0], participantsParams[1]});
+}
+
+TEST_F(ITest_DynStepSizes, one_participant_change_step_size_async)
+{
+    std::vector<ParticipantParams> participantsParams = {
+        {"P1", 1ms, false, {{9ms, 10ms}, {80ms, 2ms}}, /*asyncStepHandler=*/true}};
+    RunTestSetup(participantsParams);
+
+    ParticipantParams refData;
+    refData.name = "Reference";
+    refData.timePointsAndDurations = {
+        {0ms, 1ms},   {1ms, 1ms},   {2ms, 1ms},   {3ms, 1ms},   {4ms, 1ms},   {5ms, 1ms},   {6ms, 1ms},   {7ms, 1ms},
+        {8ms, 1ms},   {9ms, 1ms},   {10ms, 10ms}, {20ms, 10ms}, {30ms, 10ms}, {40ms, 10ms}, {50ms, 10ms}, {60ms, 10ms},
+        {70ms, 10ms}, {80ms, 10ms}, {90ms, 2ms},  {92ms, 2ms},  {94ms, 2ms},  {96ms, 2ms},  {98ms, 2ms}};
+
+    AssertAllStepsEqual({participantsParams[0], refData});
 }
 
 

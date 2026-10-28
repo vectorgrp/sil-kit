@@ -469,8 +469,39 @@ void TimeSyncService::RequestNextStep()
     _participant->ExecuteDeferred([this] { GetTimeSyncPolicy()->RequestNextStep(); });
 }
 
+void TimeSyncService::ThrowIfSimulationStepHandlerKindChangeIsNotAllowed(bool newHandlerIsBlocking) const
+{
+    // Re-registering a handler of the same kind is the supported way to change the step size at runtime.
+    if (newHandlerIsBlocking == IsBlocking())
+    {
+        return;
+    }
+
+    const auto state = State();
+    switch (state)
+    {
+    case ParticipantState::Invalid:
+    case ParticipantState::ServicesCreated:
+    case ParticipantState::CommunicationInitializing:
+    case ParticipantState::CommunicationInitialized:
+    case ParticipantState::ReadyToRun:
+        return;
+    default:
+        break;
+    }
+
+    const char* from = newHandlerIsBlocking ? "asynchronous" : "synchronous";
+    const char* to = newHandlerIsBlocking ? "synchronous" : "asynchronous";
+    throw SilKit::StateError{std::string{"Cannot switch from the "} + from + " to the " + to
+                             + " simulation step handler in participant state " + to_string(state)
+                             + ". The kind of the simulation step handler can only be changed before the participant "
+                               "is running."};
+}
+
 void TimeSyncService::SetSimulationStepHandler(SimulationStepHandler task, std::chrono::nanoseconds initialStepSize)
 {
+    ThrowIfSimulationStepHandlerKindChangeIsNotAllowed(true);
+
     _simTask = std::move(task);
     _timeConfiguration.SetBlockingMode(true);
     _timeConfiguration.SetStepDuration(initialStepSize);
@@ -479,6 +510,8 @@ void TimeSyncService::SetSimulationStepHandler(SimulationStepHandler task, std::
 void TimeSyncService::SetSimulationStepHandlerAsync(SimulationStepHandler task,
                                                     std::chrono::nanoseconds initialStepSize)
 {
+    ThrowIfSimulationStepHandlerKindChangeIsNotAllowed(false);
+
     _simTask = std::move(task);
     _timeConfiguration.SetBlockingMode(false);
     _timeConfiguration.SetStepDuration(initialStepSize);
