@@ -167,6 +167,78 @@ TEST_F(Test_TimeSyncService, async_simtask_mismatching_number_of_complete_calls)
     ASSERT_EQ(numAsyncTaskCalled, 3) << "Calling too many CompleteSimulationStep() should not wreak havoc";
 }
 
+TEST_F(Test_TimeSyncService, switch_from_sync_to_async_handler_during_simulation_step)
+{
+    constexpr auto numSteps = 10;
+
+    auto numSyncTaskCalled{0};
+    auto numAsyncTaskCalled{0};
+    timeSyncService->SetSimulationStepHandler(
+        [&](auto, auto) {
+        if (++numSyncTaskCalled == numSteps)
+        {
+            timeSyncService->SetSimulationStepHandlerAsync([&](auto, auto) { numAsyncTaskCalled++; }, 1ms);
+        }
+    },
+        1ms);
+
+    PrepareLifecycle();
+    ASSERT_EQ(sentNextSimTasks.size(), 1u);
+
+    for (auto i = 0; i < numSteps; ++i)
+    {
+        timeSyncService->ReceiveMsg(&endpoint, {i * 1ms});
+        ASSERT_EQ(numSyncTaskCalled, i + 1);
+        ASSERT_EQ(sentNextSimTasks.size(), static_cast<size_t>(i + 2));
+        ASSERT_EQ(sentNextSimTasks.back().timePoint, (i + 1) * 1ms);
+    }
+    ASSERT_EQ(numAsyncTaskCalled, 0);
+
+    // Subsequent steps are executed by the async handler, which requires CompleteSimulationStep()
+    for (auto i = numSteps; i < 2 * numSteps; ++i)
+    {
+        timeSyncService->ReceiveMsg(&endpoint, {i * 1ms});
+        ASSERT_EQ(numAsyncTaskCalled, i - numSteps + 1);
+        ASSERT_EQ(sentNextSimTasks.size(), static_cast<size_t>(i + 1));
+
+        timeSyncService->CompleteSimulationStep();
+        ASSERT_EQ(sentNextSimTasks.size(), static_cast<size_t>(i + 2));
+        ASSERT_EQ(sentNextSimTasks.back().timePoint, (i + 1) * 1ms);
+    }
+    ASSERT_EQ(numSyncTaskCalled, numSteps);
+    ASSERT_EQ(numAsyncTaskCalled, numSteps);
+}
+
+TEST_F(Test_TimeSyncService, switch_from_async_to_sync_handler_while_async_step_is_open)
+{
+    // The async step is still open: its handler returned, but CompleteSimulationStep() has not been called yet.
+    // A user thread switches to the sync handler in this window. A new simulation step must not start as long
+    // as the async step is open, otherwise two simulation steps are active at the same time.
+    auto asyncStepOpen{false};
+    auto numStepsStartedWhileAsyncStepOpen{0};
+
+    timeSyncService->SetSimulationStepHandlerAsync([&](auto, auto) { asyncStepOpen = true; }, 1ms);
+
+    PrepareLifecycle();
+
+    timeSyncService->ReceiveMsg(&endpoint, {0ms});
+    ASSERT_TRUE(asyncStepOpen);
+
+    timeSyncService->SetSimulationStepHandler(
+        [&](auto, auto) {
+        if (asyncStepOpen)
+        {
+            numStepsStartedWhileAsyncStepOpen++;
+        }
+    },
+        1ms);
+
+    timeSyncService->ReceiveMsg(&endpoint, {1ms});
+
+    EXPECT_EQ(numStepsStartedWhileAsyncStepOpen, 0)
+        << "A simulation step was started while the previous async step was not yet completed.";
+}
+
 auto MakeTimeSyncServiceDescriptor() -> SilKit::Core::ServiceDescriptor
 {
     SilKit::Core::ServiceDescriptor sd;

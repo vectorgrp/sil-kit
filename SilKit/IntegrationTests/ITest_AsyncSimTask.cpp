@@ -499,4 +499,57 @@ TEST(ITest_AsyncSimTask, test_timestamp_handling)
     ASSERT_TRUE(syncToSyncReceived.load());
 }
 
+// Switching from an async to a synchronous step handler while the async step is still open must not start a second
+// simulation step.
+//
+//   1. "Testee" executes its async step at 0ms and returns without completing it: the step is open.
+//   2. "Peer" is blocked in its own step at 0ms until then. It re-registers a synchronous handler on "Testee" and
+//      returns, which lets it announce NextSimTask{1ms}.
+//   3. Time advance is now possible for "Testee": its synchronous handler is invoked at 1ms, while the step at 0ms is
+//      still open.
+TEST(ITest_AsyncSimTask, test_switch_to_sync_handler_while_async_step_is_open)
+{
+    // Only meant to fire if the handshake is broken. It must stay well above the participants' start-up time.
+    constexpr auto handshakeTimeout = 20s;
+
+    std::promise<void> testeeStepStarted;
+    auto testeeStepStartedFuture = testeeStepStarted.get_future();
+    std::atomic<bool> testeeStepOpen{false};
+    std::atomic<bool> stepStartedWhileTesteeStepOpen{false};
+
+    SimTestHarness testHarness({"Peer", "Testee"}, "silkit://localhost:0");
+    auto* testee = testHarness.GetParticipant("Testee");
+    auto* testeeTimeSync = testee->GetOrCreateTimeSyncService();
+    auto* testeeLifecycle = testee->GetOrCreateLifecycleService();
+
+    testeeTimeSync->SetSimulationStepHandlerAsync([&](auto, auto) {
+        testeeStepOpen = true; // never completed
+        testeeStepStarted.set_value();
+    }, 1ms);
+
+    const auto testeeSyncHandler = [&](auto now, auto) {
+        if (testeeStepOpen)
+        {
+            stepStartedWhileTesteeStepOpen = true;
+        }
+        if (now >= 3ms)
+        {
+            testeeLifecycle->Stop("done");
+        }
+    };
+
+    testHarness.GetParticipant("Peer")->GetOrCreateTimeSyncService()->SetSimulationStepHandler([&](auto now, auto) {
+        if (now == 0ms)
+        {
+            ASSERT_EQ(testeeStepStartedFuture.wait_for(handshakeTimeout), std::future_status::ready);
+            testeeTimeSync->SetSimulationStepHandler(testeeSyncHandler, 1ms);
+        }
+    }, 1ms);
+
+    ASSERT_TRUE(testHarness.Run(2 * handshakeTimeout));
+
+    EXPECT_FALSE(stepStartedWhileTesteeStepOpen)
+        << "A simulation step was started while the previous async step was not yet completed.";
+}
+
 } // anonymous namespace
