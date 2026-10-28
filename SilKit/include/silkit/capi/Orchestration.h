@@ -465,7 +465,10 @@ typedef void(SilKitFPTR* SilKit_TimeSyncService_SimulationStepHandler_t)(void* c
                                                                          SilKit_NanosecondsTime duration);
 /*! \brief Set the task to be executed with each grant / tick
  *
- * Can be changed at runtime. Execution context depends on the run type.
+ * Can be changed at runtime.
+ * Switching between this and the asynchronous handler is only possible before the participant is
+ * running. Afterwards, SilKit_ReturnCode_WRONGSTATE is returned.
+ * Execution context depends on the run type.
  *
  * \param timeSyncService The time-sync service obtained via \ref SilKit_TimeSyncService_Create.
  * \param context A user provided context accessible in the handler
@@ -482,7 +485,10 @@ typedef SilKit_ReturnCode(SilKitFPTR* SilKit_TimeSyncService_SetSimulationStepHa
 
 /*! \brief Set the task to be executed with each grant / tick
  *
- * Can be changed at runtime. Execution context depends on the run type.
+ * Can be changed at runtime.
+ * Switching between this and the synchronous handler is only possible before the participant is
+ * running. Afterwards, SilKit_ReturnCode_WRONGSTATE is returned.
+ * Execution context depends on the run type.
  *
  * The difference to SetSimulationStepHandler is, that after execution of the simulation task
  * the advance in simulation time will NOT be signaled to other participants.

@@ -126,6 +126,11 @@ private:
 
     void LogicalSimStepCompleted(std::chrono::duration<double, std::milli> logicalSimStepExecutionTimeMs);
 
+    //! Switching between the synchronous and the asynchronous simulation step handler is only supported before the
+    //! participant reaches ParticipantState::Running. Afterwards, only a handler of the same kind may be set.
+    //! Throws a StateError otherwise.
+    void ThrowIfSimulationStepHandlerKindChangeIsNotAllowed(bool newHandlerIsBlocking) const;
+
 private:
     // ----------------------------------------
     // private members
