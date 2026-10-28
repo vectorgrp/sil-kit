@@ -97,8 +97,6 @@ public:
 
     bool IsTimeSyncActive() const;
 
-    void Restart(std::string reason);
-
     void SetLifecycleConfiguration(LifecycleConfiguration startConfiguration);
     void SetWorkflowConfiguration(const WorkflowConfiguration& msg);
 
