@@ -8,7 +8,7 @@
 #include "silkit/services/rpc/string_utils.hpp"
 #include "silkit/util/PrintableHexString.hpp"
 
-#include "wire/util/SharedVector.hpp"
+#include "util/SharedSpan.hpp"
 #include "util/Uuid.hpp"
 
 #include <chrono>
@@ -26,7 +26,7 @@ struct FunctionCall
 {
     std::chrono::nanoseconds timestamp;
     Util::Uuid callUuid;
-    std::vector<uint8_t> data;
+    Util::SharedSpan<uint8_t> data;
 };
 
 /*! \brief Rpc response with function return data
@@ -43,7 +43,7 @@ struct FunctionCallResponse
 
     std::chrono::nanoseconds timestamp;
     Util::Uuid callUuid;
-    std::vector<uint8_t> data;
+    Util::SharedSpan<uint8_t> data;
     Status status;
 };
 
@@ -65,12 +65,12 @@ inline std::ostream& operator<<(std::ostream& out, const FunctionCallResponse& m
 
 bool operator==(const FunctionCall& lhs, const FunctionCall& rhs)
 {
-    return lhs.callUuid == rhs.callUuid && lhs.data == rhs.data;
+    return lhs.callUuid == rhs.callUuid && Util::ItemsAreEqual(lhs.data, rhs.data);
 }
 
 bool operator==(const FunctionCallResponse& lhs, const FunctionCallResponse& rhs)
 {
-    return lhs.callUuid == rhs.callUuid && lhs.data == rhs.data && lhs.status == rhs.status;
+    return lhs.callUuid == rhs.callUuid && Util::ItemsAreEqual(lhs.data, rhs.data) && lhs.status == rhs.status;
 }
 
 std::string to_string(const FunctionCall& msg)
@@ -83,7 +83,7 @@ std::string to_string(const FunctionCall& msg)
 std::ostream& operator<<(std::ostream& out, const FunctionCall& msg)
 {
     return out << "rpc::FunctionCall{callUUID=" << msg.callUuid
-               << ", data=" << Util::AsHexString(msg.data).WithSeparator(" ").WithMaxLength(16)
+               << ", data=" << Util::AsHexString(msg.data.AsSpan()).WithSeparator(" ").WithMaxLength(16)
                << ", size=" << msg.data.size() << "}";
 }
 
@@ -118,7 +118,7 @@ std::string to_string(const FunctionCallResponse& msg)
 std::ostream& operator<<(std::ostream& out, const FunctionCallResponse& msg)
 {
     return out << "rpc::FunctionCallResponse{callUUID=" << msg.callUuid
-               << ", data=" << Util::AsHexString(msg.data).WithSeparator(" ").WithMaxLength(16)
+               << ", data=" << Util::AsHexString(msg.data.AsSpan()).WithSeparator(" ").WithMaxLength(16)
                << ", size=" << msg.data.size() << ", status=" << msg.status << "}";
 }
 
