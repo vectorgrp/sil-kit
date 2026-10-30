@@ -148,12 +148,10 @@ TEST(Test_SerializedMessage, deserialized_payload_aliases_a_shared_blob)
 
     SerializedMessage sending{event, EndpointAddress{1, 2}, EndpointId{3}};
     auto blobBytes = sending.ReleaseStorage();
+    const auto* blobStart = blobBytes.data();
+    const auto blobEnd = blobStart + blobBytes.size();
 
-    auto blob = std::make_shared<const std::vector<uint8_t>>(std::move(blobBytes));
-    const auto* blobStart = blob->data();
-    const auto blobEnd = blobStart + blob->size();
-
-    SerializedMessage receiving{SilKit::Util::MakeSharedSpan(blob, 0, blob->size())};
+    SerializedMessage receiving{SilKit::Util::SharedSpan<uint8_t>{std::move(blobBytes)}};
     auto received = receiving.Deserialize<SilKit::Services::PubSub::WireDataMessageEvent>();
 
     const auto* payloadData = received.data.AsSpan().data();
@@ -171,15 +169,15 @@ TEST(Test_SerializedMessage, aliased_payload_outlives_the_serialized_message)
     SilKit::Services::PubSub::WireDataMessageEvent event{std::chrono::nanoseconds{11}, payload};
 
     SerializedMessage sending{event, EndpointAddress{1, 2}, EndpointId{3}};
-    auto blob = std::make_shared<const std::vector<uint8_t>>(sending.ReleaseStorage());
+    auto blob = SilKit::Util::SharedSpan<uint8_t>{sending.ReleaseStorage()};
 
     SilKit::Services::PubSub::WireDataMessageEvent received{};
     {
-        SerializedMessage receiving{SilKit::Util::MakeSharedSpan(blob, 0, blob->size())};
+        SerializedMessage receiving{blob};
         received = receiving.Deserialize<SilKit::Services::PubSub::WireDataMessageEvent>();
     }
     // drop the last external handle; only the payload keeps the blob alive now
-    blob.reset();
+    blob = SilKit::Util::SharedSpan<uint8_t>{};
 
     ASSERT_EQ(received.data.size(), payload.size());
     ASSERT_TRUE(SilKit::Util::ItemsAreEqual(received.data.AsSpan(), SilKit::Util::ToSpan(payload)));
@@ -212,9 +210,7 @@ TEST(Test_SerializedMessage, a_shared_blob_buffer_rejects_writes)
     SilKit::Services::PubSub::WireDataMessageEvent event{std::chrono::nanoseconds{1}, payload};
 
     SerializedMessage sending{event, EndpointAddress{1, 2}, EndpointId{3}};
-    auto blob = std::make_shared<const std::vector<uint8_t>>(sending.ReleaseStorage());
-
-    SerializedMessage receiving{SilKit::Util::MakeSharedSpan(blob, 0, blob->size())};
+    SerializedMessage receiving{SilKit::Util::SharedSpan<uint8_t>{sending.ReleaseStorage()}};
 
     ASSERT_THROW(receiving.ReleaseStorage(), SilKit::SilKitError);
 }

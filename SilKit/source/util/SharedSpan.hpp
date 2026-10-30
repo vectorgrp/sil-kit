@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <memory>
 #include <type_traits>
+#include <utility>
 #include <vector>
 
 namespace SilKit {
@@ -30,20 +31,19 @@ class SharedSpan
 
 public:
     SharedSpan() = default;
+    SharedSpan(const SharedSpan&) = default;
+    // NB: moving resets the source's view, which would otherwise outlive its (moved) owner.
+    SharedSpan(SharedSpan&& other) noexcept;
+
+    auto operator=(const SharedSpan&) -> SharedSpan& = default;
+    auto operator=(SharedSpan&& other) noexcept -> SharedSpan&;
 
     // NB: implicit, so that SharedSpan is a drop-in for a payload field assigned from a Span or a
-    //     vector. These always allocate and copy.
+    //     vector. These always allocate. A vector passed as an rvalue is moved, everything else is
+    //     copied.
     SharedSpan(std::vector<T> vector);
     SharedSpan(std::initializer_list<T> initializerList);
     SharedSpan(Span<const T> span, size_t minimumSize = 0, T padValue = T{});
-
-    /*! \brief View elements whose storage is kept alive by owner.
-     *
-     * Precondition: view refers to elements inside the object owned by owner. Prefer Subspan() or
-     * MakeSharedSpan(), which range-check.
-     */
-    template <typename U>
-    SharedSpan(std::shared_ptr<U> owner, Span<const T> view);
 
     // NB: & -qualified so that a span cannot be taken from a temporary SharedSpan, which would
     //     drop the last reference to the owner and leave the span dangling.
@@ -63,13 +63,24 @@ private:
 template <typename T>
 bool ItemsAreEqual(const SharedSpan<T>& lhs, const SharedSpan<T>& rhs);
 
-//! \brief Range-checked construction of a view into a byte blob.
-inline auto MakeSharedSpan(std::shared_ptr<const std::vector<uint8_t>> blob, size_t offset, size_t count)
-    -> SharedSpan<uint8_t>;
-
 // ================================================================================
 //  Inline Implementations
 // ================================================================================
+
+template <typename T>
+SharedSpan<T>::SharedSpan(SharedSpan&& other) noexcept
+    : _owner{std::move(other._owner)}
+    , _view{std::exchange(other._view, {})}
+{
+}
+
+template <typename T>
+auto SharedSpan<T>::operator=(SharedSpan&& other) noexcept -> SharedSpan&
+{
+    _owner = std::move(other._owner);
+    _view = std::exchange(other._view, {});
+    return *this;
+}
 
 template <typename T>
 SharedSpan<T>::SharedSpan(std::vector<T> vector)
@@ -92,14 +103,6 @@ SharedSpan<T>::SharedSpan(const Span<const T> span, const size_t minimumSize, co
     owner->resize((std::max)(owner->size(), minimumSize), padValue);
     _view = Span<const T>{owner->data(), owner->size()};
     _owner = std::move(owner);
-}
-
-template <typename T>
-template <typename U>
-SharedSpan<T>::SharedSpan(std::shared_ptr<U> owner, Span<const T> view)
-    : _owner{std::move(owner)}
-    , _view{view}
-{
 }
 
 template <typename T>
@@ -138,27 +141,6 @@ template <typename T>
 bool ItemsAreEqual(const SharedSpan<T>& lhs, const SharedSpan<T>& rhs)
 {
     return ItemsAreEqual(lhs.AsSpan(), rhs.AsSpan());
-}
-
-auto MakeSharedSpan(std::shared_ptr<const std::vector<uint8_t>> blob, size_t offset, size_t count)
-    -> SharedSpan<uint8_t>
-{
-    if (blob == nullptr)
-    {
-        if (offset != 0 || count != 0)
-        {
-            throw OutOfRangeError("invalid MakeSharedSpan range for an empty blob");
-        }
-        return SharedSpan<uint8_t>{};
-    }
-
-    if (offset > blob->size() || count > blob->size() - offset)
-    {
-        throw OutOfRangeError("invalid MakeSharedSpan range");
-    }
-
-    const auto view = Span<const uint8_t>{blob->data() + offset, count};
-    return SharedSpan<uint8_t>{std::move(blob), view};
 }
 
 } // namespace Util

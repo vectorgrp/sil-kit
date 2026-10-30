@@ -370,16 +370,13 @@ void VAsioPeer::DispatchBuffer()
         else
         {
             // NB: linearised into a shared blob, so that deserialized payloads can alias it.
-            auto currentMsg = std::make_shared<std::vector<uint8_t>>(_currentMsgSize);
-            if (!_msgBuffer.Read(SilKit::Util::ToSpan(*currentMsg)))
+            std::vector<uint8_t> currentMsg(_currentMsgSize);
+            if (!_msgBuffer.Read(SilKit::Util::ToSpan(currentMsg)))
             {
                 throw SilKitError("Reading data from ring buffer failed.");
             }
 
-            const auto blobSize = currentMsg->size();
-            SerializedMessage message{
-                SilKit::Util::MakeSharedSpan(std::shared_ptr<const std::vector<uint8_t>>{std::move(currentMsg)}, 0,
-                                             blobSize)};
+            SerializedMessage message{SilKit::Util::SharedSpan<uint8_t>{std::move(currentMsg)}};
             message.SetProtocolVersion(GetProtocolVersion());
 
             _peerMetrics->RxBytes(message.GetStorageSize());

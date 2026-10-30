@@ -4,7 +4,6 @@
 
 #include "util/SharedSpan.hpp"
 
-#include <memory>
 #include <vector>
 
 #include "gtest/gtest.h"
@@ -74,22 +73,31 @@ TEST(Test_SharedSpan, minimum_size_does_not_truncate)
     EXPECT_EQ(shared.size(), 4u);
 }
 
-TEST(Test_SharedSpan, aliasing_keeps_the_owner_alive)
+TEST(Test_SharedSpan, takes_a_moved_vector_without_copying)
 {
-    auto blob = std::make_shared<std::vector<uint8_t>>(std::vector<uint8_t>{10, 20, 30, 40});
-    const auto* rawAddress = blob->data();
+    std::vector<uint8_t> data{1, 2, 3, 4};
+    const auto* rawAddress = data.data();
 
-    SharedSpan<uint8_t> shared{std::shared_ptr<const std::vector<uint8_t>>{blob},
-                               Span<const uint8_t>{blob->data() + 1, 2}};
+    SharedSpan<uint8_t> shared{std::move(data)};
 
-    // drop the original handle; the SharedSpan must keep the storage alive
-    blob.reset();
+    ASSERT_EQ(shared.size(), 4u);
+    EXPECT_EQ(shared.AsSpan().data(), rawAddress);
+}
 
-    ASSERT_EQ(shared.size(), 2u);
-    // truly aliasing, not a copy
-    EXPECT_EQ(shared.AsSpan().data(), rawAddress + 1);
-    EXPECT_EQ(shared.AsSpan()[0], 20);
-    EXPECT_EQ(shared.AsSpan()[1], 30);
+TEST(Test_SharedSpan, subspan_keeps_the_owner_alive)
+{
+    SharedSpan<uint8_t> shared{std::vector<uint8_t>{10, 20, 30, 40}};
+    const auto* rawAddress = shared.AsSpan().data();
+
+    auto sub = shared.Subspan(1, 2);
+
+    // drop the original handle; the subspan must keep the storage alive
+    shared = SharedSpan<uint8_t>{};
+
+    ASSERT_EQ(sub.size(), 2u);
+    EXPECT_EQ(sub.AsSpan().data(), rawAddress + 1);
+    EXPECT_EQ(sub.AsSpan()[0], 20);
+    EXPECT_EQ(sub.AsSpan()[1], 30);
 }
 
 TEST(Test_SharedSpan, subspan_aliases)
@@ -125,24 +133,6 @@ TEST(Test_SharedSpan, items_are_equal_compares_contents)
     EXPECT_FALSE(ItemsAreEqual(a, c));
 }
 
-TEST(Test_SharedSpan, make_shared_span_range_is_checked)
-{
-    auto blob = std::make_shared<const std::vector<uint8_t>>(std::vector<uint8_t>{1, 2, 3, 4});
-
-    auto view = MakeSharedSpan(blob, 1, 2);
-    ASSERT_EQ(view.size(), 2u);
-    EXPECT_EQ(view.AsSpan().data(), blob->data() + 1);
-
-    EXPECT_THROW(MakeSharedSpan(blob, 3, 2), SilKit::OutOfRangeError);
-    EXPECT_THROW(MakeSharedSpan(blob, 5, 0), SilKit::OutOfRangeError);
-}
-
-TEST(Test_SharedSpan, make_shared_span_handles_a_null_blob)
-{
-    EXPECT_TRUE(MakeSharedSpan(nullptr, 0, 0).empty());
-    EXPECT_THROW(MakeSharedSpan(nullptr, 0, 1), SilKit::OutOfRangeError);
-}
-
 TEST(Test_SharedSpan, copies_share_one_owner)
 {
     SharedSpan<uint8_t> original{std::vector<uint8_t>{1, 2, 3}};
@@ -154,6 +144,25 @@ TEST(Test_SharedSpan, copies_share_one_owner)
     ASSERT_EQ(copy.size(), 3u);
     EXPECT_EQ(copy.AsSpan().data(), base);
     EXPECT_EQ(copy.AsSpan()[1], 2);
+}
+
+TEST(Test_SharedSpan, moved_from_is_empty)
+{
+    SharedSpan<uint8_t> original{std::vector<uint8_t>{1, 2, 3}};
+    const auto* base = original.AsSpan().data();
+
+    SharedSpan<uint8_t> moved{std::move(original)};
+
+    EXPECT_TRUE(original.empty());
+    EXPECT_EQ(original.AsSpan().data(), nullptr);
+    EXPECT_EQ(moved.AsSpan().data(), base);
+
+    SharedSpan<uint8_t> assigned;
+    assigned = std::move(moved);
+
+    EXPECT_TRUE(moved.empty());
+    EXPECT_EQ(moved.AsSpan().data(), nullptr);
+    EXPECT_EQ(assigned.AsSpan().data(), base);
 }
 
 } // namespace
