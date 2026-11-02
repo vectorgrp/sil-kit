@@ -14,6 +14,12 @@ SerializedMessage::SerializedMessage(std::vector<uint8_t>&& blob)
     ReadNetworkHeaders();
 }
 
+SerializedMessage::SerializedMessage(Util::SharedSpan<uint8_t> blob)
+    : _buffer{std::move(blob)}
+{
+    ReadNetworkHeaders();
+}
+
 auto SerializedMessage::ReleaseStorage() -> std::vector<uint8_t>
 {
     auto buffer = _buffer.ReleaseStorage();
@@ -86,8 +92,10 @@ void SerializedMessage::WriteNetworkHeaders()
     }
     if (IsMwOrSim(_messageKind))
     {
+        _remoteIndexOffset = _buffer.WritePos();
         _buffer << _remoteIndex << _endpointAddress;
     }
+    _headerSize = _buffer.WritePos();
 }
 
 void SerializedMessage::ReadNetworkHeaders()

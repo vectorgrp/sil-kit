@@ -155,7 +155,7 @@ TEST_F(Test_EthControllerDetailedSim, send_eth_frame)
 TEST_F(Test_EthControllerDetailedSim, trigger_callback_on_receive_message)
 {
     WireEthernetFrameEvent msg{};
-    msg.frame.raw = SilKit::Util::SharedVector<uint8_t>{std::vector<uint8_t>(123)};
+    msg.frame.raw = SilKit::Util::SharedSpan<uint8_t>{std::vector<uint8_t>(123)};
     msg.direction = TransmitDirection::RX;
 
     EXPECT_CALL(callbacks, FrameHandler(&controller, ToEthernetFrameEvent(msg))).Times(1);

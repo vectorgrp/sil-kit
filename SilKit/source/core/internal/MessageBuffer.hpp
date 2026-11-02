@@ -19,7 +19,7 @@
 
 #include "util/Uuid.hpp"
 #include "core/internal/ProtocolVersion.hpp"
-#include "wire/util/SharedVector.hpp"
+#include "util/SharedSpan.hpp"
 
 namespace SilKit {
 namespace Core {
@@ -58,6 +58,8 @@ public:
     // Constructors and Destructor
     inline MessageBuffer() = default;
     inline MessageBuffer(std::vector<uint8_t> data);
+    //! \brief Read from a shared blob without copying it. The buffer is read-only in this state.
+    inline explicit MessageBuffer(Util::SharedSpan<uint8_t> blob);
 
     MessageBuffer(const MessageBuffer& other) = default;
     MessageBuffer(MessageBuffer&& other) = default;
@@ -75,6 +77,7 @@ public:
     // peek into raw data, e.g. for retrieving headers without modifying the buffer
     inline auto PeekData() const -> SilKit::Util::Span<const uint8_t>;
     inline auto ReadPos() const -> size_t;
+    inline auto WritePos() const -> size_t;
 
     //! Set the format version to use for ser/des.
     inline void SetProtocolVersion(ProtocolVersion version);
@@ -99,6 +102,7 @@ public:
     template <typename IntegerT, typename std::enable_if_t<std::is_integral_v<IntegerT>, int> = 0>
     inline MessageBuffer& operator<<(IntegerT t)
     {
+        AssertWritable();
         if (_wPos + sizeof(IntegerT) > _storage.size())
         {
             _storage.resize(_storage.size() + sizeof(IntegerT));
@@ -112,10 +116,10 @@ public:
     template <typename IntegerT, typename std::enable_if_t<std::is_integral_v<IntegerT>, int> = 0>
     inline MessageBuffer& operator>>(IntegerT& t)
     {
-        if (_rPos + sizeof(IntegerT) > _storage.size())
+        if (_rPos + sizeof(IntegerT) > Size())
             throw end_of_buffer{};
 
-        std::memcpy(&t, _storage.data() + _rPos, sizeof(IntegerT));
+        std::memcpy(&t, Data() + _rPos, sizeof(IntegerT));
         _rPos += sizeof(IntegerT);
 
         return *this;
@@ -129,6 +133,7 @@ public:
         static_assert(std::numeric_limits<double>::is_iec559,
                       "This compiler does not support IEEE 754 standard for floating points.");
 
+        AssertWritable();
         if (_wPos + sizeof(DoubleT) > _storage.size())
         {
             _storage.resize(_storage.size() + sizeof(DoubleT));
@@ -145,10 +150,10 @@ public:
         static_assert(std::numeric_limits<double>::is_iec559,
                       "This compiler does not support IEEE 754 standard for floating points.");
 
-        if (_rPos + sizeof(DoubleT) > _storage.size())
+        if (_rPos + sizeof(DoubleT) > Size())
             throw end_of_buffer{};
 
-        std::memcpy(&t, _storage.data() + _rPos, sizeof(DoubleT));
+        std::memcpy(&t, Data() + _rPos, sizeof(DoubleT));
         _rPos += sizeof(DoubleT);
 
         return *this;
@@ -187,11 +192,9 @@ public:
     template <typename ValueT>
     inline MessageBuffer& operator>>(std::vector<ValueT>& vector);
     // --------------------------------------------------------------------------------
-    // Util::SharedVector<T>
-    template <typename ValueT>
-    inline MessageBuffer& operator<<(const Util::SharedVector<ValueT>& sharedData);
-    template <typename ValueT>
-    inline MessageBuffer& operator>>(Util::SharedVector<ValueT>& sharedData);
+    // Util::SharedSpan<uint8_t>
+    inline MessageBuffer& operator<<(const Util::SharedSpan<uint8_t>& sharedData);
+    inline MessageBuffer& operator>>(Util::SharedSpan<uint8_t>& sharedData);
     // --------------------------------------------------------------------------------
     // Util::Span<T>
     inline MessageBuffer& operator<<(const Util::Span<const uint8_t>& sharedData);
@@ -252,10 +255,57 @@ public:
     }
 
 private:
+    inline auto Data() const -> const uint8_t*
+    {
+        return _readsFromSharedStorage ? _sharedStorage.AsSpan().data() : _storage.data();
+    }
+
+    inline auto Size() const -> size_t
+    {
+        return _readsFromSharedStorage ? _sharedStorage.size() : _storage.size();
+    }
+
+    inline void AssertWritable() const
+    {
+        if (_readsFromSharedStorage)
+        {
+            throw SilKitError{"MessageBuffer: attempt to write to a buffer backed by a shared blob"};
+        }
+    }
+
+    // NB: insert() when appending, which avoids the zero-fill of resize().
+    inline void AppendBytes(const uint8_t* first, size_t count)
+    {
+        AssertWritable();
+
+        if (count == 0)
+        {
+            return;
+        }
+
+        if (_wPos == _storage.size())
+        {
+            _storage.insert(_storage.end(), first, first + count);
+        }
+        else
+        {
+            if (_wPos + count > _storage.size())
+            {
+                _storage.resize(_wPos + count);
+            }
+            std::memcpy(_storage.data() + _wPos, first, count);
+        }
+
+        _wPos += count;
+    }
+
     // ----------------------------------------
     // private members
     ProtocolVersion _protocolVersion{CurrentProtocolVersion()};
     std::vector<uint8_t> _storage;
+    // Used instead of _storage when reading a shared blob, so that byte payloads can alias it.
+    Util::SharedSpan<uint8_t> _sharedStorage;
+    bool _readsFromSharedStorage{false};
     std::size_t _wPos{0u};
     std::size_t _rPos{0u};
 };
@@ -270,8 +320,15 @@ MessageBuffer::MessageBuffer(std::vector<uint8_t> data)
 {
 }
 
+inline MessageBuffer::MessageBuffer(Util::SharedSpan<uint8_t> blob)
+    : _sharedStorage{std::move(blob)}
+    , _readsFromSharedStorage{true}
+{
+}
+
 auto MessageBuffer::ReleaseStorage() -> std::vector<uint8_t>
 {
+    AssertWritable();
     _wPos = 0u;
     _rPos = 0u;
     return std::move(_storage);
@@ -279,7 +336,7 @@ auto MessageBuffer::ReleaseStorage() -> std::vector<uint8_t>
 
 inline auto MessageBuffer::RemainingBytesLeft() const noexcept -> size_t
 {
-    return (_rPos > _storage.size()) ? 0 : (_storage.size() - _rPos);
+    return (_rPos > Size()) ? 0 : (Size() - _rPos);
 }
 
 // --------------------------------------------------------------------------------
@@ -289,17 +346,9 @@ MessageBuffer& MessageBuffer::operator<<(const std::string& str)
     if (str.size() > std::numeric_limits<uint32_t>::max())
         throw end_of_buffer{};
 
-    IncreaseCapacity(sizeof(uint32_t) + str.size());
-
     *this << static_cast<uint32_t>(str.length());
 
-    if (_wPos + str.size() > _storage.size())
-    {
-        _storage.resize(_wPos + str.size());
-    }
-
-    std::copy(str.begin(), str.end(), _storage.begin() + static_cast<decltype(_storage)::difference_type>(_wPos));
-    _wPos += str.size();
+    AppendBytes(reinterpret_cast<const uint8_t*>(str.data()), str.size());
 
     return *this;
 }
@@ -308,10 +357,10 @@ MessageBuffer& MessageBuffer::operator>>(std::string& str)
     uint32_t strLength{0u};
     *this >> strLength;
 
-    if (_rPos + strLength > _storage.size())
+    if (_rPos + strLength > Size())
         throw end_of_buffer{};
 
-    str = std::string(_storage.begin() + static_cast<decltype(_storage)::difference_type>(_rPos), _storage.begin() + static_cast<decltype(_storage)::difference_type>(_rPos + strLength));
+    str = std::string(reinterpret_cast<const char*>(Data() + _rPos), strLength);
     _rPos += strLength;
 
     return *this;
@@ -329,12 +378,10 @@ MessageBuffer& MessageBuffer::operator>>(std::vector<uint8_t>& vector)
     uint32_t vectorSize{0u};
     *this >> vectorSize;
 
-    if (_rPos + vectorSize > _storage.size())
+    if (_rPos + vectorSize > Size())
         throw end_of_buffer{};
 
-    vector =
-        std::vector<uint8_t>(_storage.begin() + static_cast<decltype(_storage)::difference_type>(_rPos),
-                             _storage.begin() + static_cast<decltype(_storage)::difference_type>(_rPos + vectorSize));
+    vector = std::vector<uint8_t>(Data() + _rPos, Data() + _rPos + vectorSize);
     _rPos += vectorSize;
 
     return *this;
@@ -365,7 +412,7 @@ MessageBuffer& MessageBuffer::operator>>(std::vector<ValueT>& vector)
     uint32_t vectorSize{0u};
     *this >> vectorSize;
 
-    if (_rPos + vectorSize > _storage.size())
+    if (_rPos + vectorSize > Size())
         throw end_of_buffer{};
 
     vector.resize(vectorSize);
@@ -391,18 +438,10 @@ inline MessageBuffer& MessageBuffer::operator<<(const Util::Span<const uint8_t>&
     if (span.size() > std::numeric_limits<uint32_t>::max())
         throw end_of_buffer{};
 
-    IncreaseCapacity(sizeof(uint32_t) + span.size());
-
     *this << static_cast<uint32_t>(span.size());
 
+    AppendBytes(span.data(), span.size());
 
-    if (_wPos + span.size() > _storage.size())
-    {
-        _storage.resize(_wPos + span.size());
-    }
-
-    std::copy(span.begin(), span.end(), _storage.begin() + static_cast<decltype(_storage)::difference_type>(_wPos));
-    _wPos += span.size();
     return *this;
 }
 
@@ -425,21 +464,31 @@ inline MessageBuffer& MessageBuffer::operator<<(const Util::Span<ValueT>& span)
     return *this;
 }
 // --------------------------------------------------------------------------------
-// Util::SharedVector<T>
-template <typename ValueT>
-inline MessageBuffer& MessageBuffer::operator<<(const Util::SharedVector<ValueT>& sharedData)
+// Util::SharedSpan<uint8_t>
+inline MessageBuffer& MessageBuffer::operator<<(const Util::SharedSpan<uint8_t>& sharedData)
 {
     const auto span = sharedData.AsSpan();
     return *this << span;
 }
 
-template <typename ValueT>
-inline MessageBuffer& MessageBuffer::operator>>(Util::SharedVector<ValueT>& sharedData)
+inline MessageBuffer& MessageBuffer::operator>>(Util::SharedSpan<uint8_t>& sharedData)
 {
-    std::vector<ValueT> vector;
-    *this >> vector;
+    uint32_t payloadSize{0u};
+    *this >> payloadSize;
 
-    sharedData = Util::SharedVector<ValueT>{std::move(vector)};
+    if (_rPos + payloadSize > Size())
+        throw end_of_buffer{};
+
+    if (_readsFromSharedStorage)
+    {
+        sharedData = _sharedStorage.Subspan(_rPos, payloadSize);
+    }
+    else
+    {
+        sharedData = Util::SharedSpan<uint8_t>{std::vector<uint8_t>(Data() + _rPos, Data() + _rPos + payloadSize)};
+    }
+
+    _rPos += payloadSize;
 
     return *this;
 }
@@ -452,6 +501,7 @@ MessageBuffer& MessageBuffer::operator<<(const std::array<uint8_t, SIZE>& array)
     if (array.size() > std::numeric_limits<uint32_t>::max())
         throw end_of_buffer{};
 
+    AssertWritable();
     if (_wPos + array.size() > _storage.size())
     {
         _storage.resize(_wPos + array.size());
@@ -465,10 +515,10 @@ MessageBuffer& MessageBuffer::operator<<(const std::array<uint8_t, SIZE>& array)
 template <size_t SIZE>
 MessageBuffer& MessageBuffer::operator>>(std::array<uint8_t, SIZE>& array)
 {
-    if (_rPos + array.size() > _storage.size())
+    if (_rPos + array.size() > Size())
         throw end_of_buffer{};
 
-    std::copy(_storage.begin() + _rPos, _storage.begin() + _rPos + array.size(), array.begin());
+    std::copy(Data() + _rPos, Data() + _rPos + array.size(), array.begin());
     _rPos += array.size();
 
     return *this;
@@ -490,7 +540,7 @@ MessageBuffer& MessageBuffer::operator<<(const std::array<ValueT, SIZE>& array)
 template <typename ValueT, size_t SIZE>
 MessageBuffer& MessageBuffer::operator>>(std::array<ValueT, SIZE>& array)
 {
-    if (_rPos + array.size() > _storage.size())
+    if (_rPos + array.size() > Size())
         throw end_of_buffer{};
 
     for (auto&& value : array)
@@ -668,11 +718,16 @@ inline auto MessageBuffer::GetProtocolVersion() -> ProtocolVersion
 
 inline auto MessageBuffer::PeekData() const -> SilKit::Util::Span<const uint8_t>
 {
-    return _storage;
+    return _readsFromSharedStorage ? _sharedStorage.AsSpan() : SilKit::Util::ToSpan(_storage);
 }
 inline auto MessageBuffer::ReadPos() const -> size_t
 {
     return _rPos;
+}
+
+inline auto MessageBuffer::WritePos() const -> size_t
+{
+    return _wPos;
 }
 
 inline void MessageBuffer::SetReadPos(size_t newReadPos)

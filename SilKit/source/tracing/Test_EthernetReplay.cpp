@@ -127,7 +127,7 @@ struct MockEthFrame
         SetDestinationMac(rawData, EthernetMac{7, 8, 9, 0xa, 0xb, 0xc});
         _type = TraceMessageType::EthernetFrame;
 
-        static_cast<WireEthernetFrame*>(this)->raw = SilKit::Util::SharedVector<uint8_t>{rawData};
+        static_cast<WireEthernetFrame*>(this)->raw = SilKit::Util::SharedSpan<uint8_t>{rawData};
         static_cast<EthernetFrame*>(this)->raw = static_cast<WireEthernetFrame*>(this)->raw.AsSpan();
     }
 };

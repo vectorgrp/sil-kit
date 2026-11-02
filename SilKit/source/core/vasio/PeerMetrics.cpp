@@ -20,12 +20,12 @@ void NoMetrics::TxPacket()
     // no op
 }
 
-void NoMetrics::RxBytes(const SilKit::Core::SerializedMessage&)
+void NoMetrics::RxBytes(size_t)
 {
     // no op
 }
 
-void NoMetrics::TxBytes(const SilKit::Core::SerializedMessage&)
+void NoMetrics::TxBytes(size_t)
 {
     // no op
 }
@@ -78,24 +78,24 @@ void PeerMetrics::TxPacket()
     _txPackets->Add(1);
 }
 
-void PeerMetrics::RxBytes(const SilKit::Core::SerializedMessage& msg)
+void PeerMetrics::RxBytes(size_t numBytes)
 {
     if (!_initialized)
     {
         return;
     }
-    _rxBytes->Add(msg.GetStorageSize());
-    _rxBandwidth->Take(static_cast<double>(msg.GetStorageSize()));
+    _rxBytes->Add(numBytes);
+    _rxBandwidth->Take(static_cast<double>(numBytes));
 }
 
-void PeerMetrics::TxBytes(const SilKit::Core::SerializedMessage& msg)
+void PeerMetrics::TxBytes(size_t numBytes)
 {
     if (!_initialized)
     {
         return;
     }
-    _txBytes->Add(msg.GetStorageSize());
-    _txBandwidth->Take(static_cast<double>(msg.GetStorageSize()));
+    _txBytes->Add(numBytes);
+    _txBandwidth->Take(static_cast<double>(numBytes));
 }
 
 void PeerMetrics::TxQueueSize(size_t queueSize)

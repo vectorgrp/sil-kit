@@ -214,7 +214,7 @@ TEST_F(Test_CapiEthernet, ethernet_controller_function_mapping)
     EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 
     WireEthernetFrame referenceFrame{};
-    referenceFrame.raw = SilKit::Util::SharedVector<uint8_t>{SilKit::Util::MakeSpan(buffer)};
+    referenceFrame.raw = SilKit::Util::SharedSpan<uint8_t>{SilKit::Util::MakeSpan(buffer)};
 
     EXPECT_CALL(mockController, SendFrame(EthFrameMatcher(ToEthernetFrame(referenceFrame)), nullptr))
         .Times(testing::Exactly(1));

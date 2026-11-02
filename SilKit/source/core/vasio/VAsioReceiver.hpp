@@ -28,13 +28,15 @@ struct RemoteServiceEndpoint : IServiceEndpoint
         return _serviceDescriptor;
     }
 
+    // NB: referenced, not copied, to avoid a deep copy per received message. Instances only live
+    //     for the synchronous dispatch of one message.
     RemoteServiceEndpoint(const ServiceDescriptor& descriptor)
+        : _serviceDescriptor{descriptor}
     {
-        _serviceDescriptor = descriptor;
     }
 
 private:
-    ServiceDescriptor _serviceDescriptor;
+    const ServiceDescriptor& _serviceDescriptor;
 };
 
 class MessageBuffer;
