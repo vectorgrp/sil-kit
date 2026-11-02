@@ -45,6 +45,9 @@ public:
     SharedSpan(std::initializer_list<T> initializerList);
     SharedSpan(Span<const T> span, size_t minimumSize = 0, T padValue = T{});
 
+    //! \brief Views all of a vector, sharing its ownership instead of copying, e.g. a pooled receive blob.
+    explicit SharedSpan(std::shared_ptr<const std::vector<T>> owner);
+
     // NB: & -qualified so that a span cannot be taken from a temporary SharedSpan, which would
     //     drop the last reference to the owner and leave the span dangling.
     auto AsSpan() const& -> Span<const T>;
@@ -103,6 +106,16 @@ SharedSpan<T>::SharedSpan(const Span<const T> span, const size_t minimumSize, co
     owner->resize((std::max)(owner->size(), minimumSize), padValue);
     _view = Span<const T>{owner->data(), owner->size()};
     _owner = std::move(owner);
+}
+
+template <typename T>
+SharedSpan<T>::SharedSpan(std::shared_ptr<const std::vector<T>> owner)
+{
+    if (owner != nullptr)
+    {
+        _view = Span<const T>{owner->data(), owner->size()};
+        _owner = std::move(owner);
+    }
 }
 
 template <typename T>

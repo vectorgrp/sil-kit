@@ -256,7 +256,7 @@ void ExpectPayloadAliasesTheBlob(const MsgT& msg, PayloadOf payloadOf)
 {
     const auto blob = ShareBlob(SerializedMessage{msg, EndpointAddress{1, 2}, EndpointId{3}});
 
-    SerializedMessage receiving{SilKit::Util::MakeSharedSpan(blob, 0, blob->size())};
+    SerializedMessage receiving{SilKit::Util::SharedSpan<uint8_t>{blob}};
     const auto received = receiving.Deserialize<MsgT>();
     const auto& payload = payloadOf(received);
     const auto view = payload.AsSpan();
@@ -369,7 +369,7 @@ TEST(Test_SerializedMessage, empty_payload_from_a_shared_blob)
     SilKit::Services::PubSub::WireDataMessageEvent event{std::chrono::nanoseconds{1}, std::vector<uint8_t>{}};
     const auto blob = ShareBlob(SerializedMessage{event, EndpointAddress{1, 2}, EndpointId{3}});
 
-    SerializedMessage receiving{SilKit::Util::MakeSharedSpan(blob, 0, blob->size())};
+    SerializedMessage receiving{SilKit::Util::SharedSpan<uint8_t>{blob}};
     SilKit::Services::PubSub::WireDataMessageEvent received{};
     ASSERT_NO_THROW(received = receiving.Deserialize<SilKit::Services::PubSub::WireDataMessageEvent>());
 
@@ -384,7 +384,7 @@ TEST(Test_SerializedMessage, payload_ending_at_the_blob_end)
                                                    MakeTestPayload(40)};
     const auto blob = ShareBlob(SerializedMessage{call, EndpointAddress{1, 2}, EndpointId{3}});
 
-    SerializedMessage receiving{SilKit::Util::MakeSharedSpan(blob, 0, blob->size())};
+    SerializedMessage receiving{SilKit::Util::SharedSpan<uint8_t>{blob}};
     const auto received = receiving.Deserialize<SilKit::Services::Rpc::FunctionCall>();
 
     EXPECT_EQ(received.data.AsSpan().data() + received.data.size(), blob->data() + blob->size());
@@ -397,7 +397,7 @@ TEST(Test_SerializedMessage, truncated_payload_throws_end_of_buffer)
                                                    MakeTestPayload(40)};
     const auto blob = ShareBlob(SerializedMessage{call, EndpointAddress{1, 2}, EndpointId{3}});
 
-    SerializedMessage receiving{SilKit::Util::MakeSharedSpan(blob, 0, blob->size() - 1)};
+    SerializedMessage receiving{SilKit::Util::SharedSpan<uint8_t>{blob}.Subspan(0, blob->size() - 1)};
 
     EXPECT_THROW(receiving.Deserialize<SilKit::Services::Rpc::FunctionCall>(), end_of_buffer);
 }
