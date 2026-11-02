@@ -575,8 +575,8 @@ TEST_P(Test_VAsioPeerReceive, retained_payload_is_not_overwritten)
     p.Feed(Reference(kept, 3));
     retain = false;
 
-    // more messages than the pool holds, so every blob is up for reuse
-    for (uint8_t seed = 5; seed < 5 + 2 * ReceiveBlobPool::MaxEntries; ++seed)
+    // the retained payload pins its blob, so the following messages must not be read into it
+    for (uint8_t seed = 5; seed < 10; ++seed)
     {
         p.Feed(Reference(MakeEvent(200, seed), 3));
     }

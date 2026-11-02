@@ -12,10 +12,12 @@
 namespace SilKit {
 namespace Core {
 
-/*! \brief The blobs that received messages are linearised into.
+/*! \brief The blob that received messages are linearised into.
  *
- * Deserialized payloads alias their blob, so a blob is only reused once the pool holds the last
- * reference. A disabled pool allocates a fresh blob per message, see
+ * Deserialized payloads alias the blob, so it is only reused once the pool holds the last reference.
+ * Dispatch is synchronous, so by the next message that is the case unless a payload was retained. A
+ * retained payload keeps the whole blob, up to MaxBlobSize bytes, and the pool continues with a fresh
+ * one. A disabled pool allocates a fresh blob per message, see
  * Config::Experimental::useReceiveBufferPool.
  *
  * Not thread safe. The owning connection only uses it from its io thread.
@@ -23,13 +25,8 @@ namespace Core {
 class ReceiveBlobPool
 {
 public:
-    //! Maximum number of blobs held.
-    static constexpr size_t MaxEntries{8};
     //! Blobs for larger messages are not pooled. Large messages are rare; do not hoard memory for them.
     static constexpr size_t MaxBlobSize{64 * 1024};
-    //! A reused blob exceeds the requested size by at most this many bytes. A payload that is retained
-    //! past its handler keeps its whole blob alive, so this bounds the memory a small payload can pin.
-    static constexpr size_t MaxSlack{4 * 1024};
 
 public:
     explicit ReceiveBlobPool(bool enabled);
@@ -41,7 +38,7 @@ public:
 
 private:
     bool _enabled;
-    std::vector<std::shared_ptr<std::vector<uint8_t>>> _entries;
+    std::shared_ptr<std::vector<uint8_t>> _blob;
 };
 
 } // namespace Core

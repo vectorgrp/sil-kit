@@ -15,7 +15,6 @@ namespace {
 
 using SilKit::Core::ReceiveBlobPool;
 
-using Blob = std::shared_ptr<std::vector<uint8_t>>;
 using WeakBlob = std::weak_ptr<std::vector<uint8_t>>;
 
 constexpr size_t Small{100};
@@ -62,69 +61,43 @@ TEST(Test_ReceiveBlobPool, does_not_pool_blobs_above_the_limit)
     EXPECT_TRUE(large.expired());
 }
 
-TEST(Test_ReceiveBlobPool, bounds_the_slack_of_a_reused_blob)
+TEST(Test_ReceiveBlobPool, reuses_a_larger_blob_for_a_smaller_message)
 {
     ReceiveBlobPool pool{true};
 
     const auto* large = pool.Acquire(Large).get();
     const auto small = pool.Acquire(Small);
 
-    EXPECT_NE(small.get(), large);
-    EXPECT_LE(small->size(), Small + ReceiveBlobPool::MaxSlack);
+    EXPECT_EQ(small.get(), large);
+    EXPECT_GE(small->size(), Large);
 }
 
-TEST(Test_ReceiveBlobPool, mixed_sizes_settle_into_matching_blobs)
+TEST(Test_ReceiveBlobPool, mixed_sizes_share_one_blob)
 {
     ReceiveBlobPool pool{true};
 
-    // The first large message grows the only blob, so the pool settles in the second round.
-    pool.Acquire(Small);
-    pool.Acquire(Large);
-
-    const auto* small = pool.Acquire(Small).get();
-    const auto* large = pool.Acquire(Large).get();
-    EXPECT_NE(small, large);
+    const auto* blob = pool.Acquire(Large).get();
 
     for (int i = 0; i < 10; ++i)
     {
-        EXPECT_EQ(pool.Acquire(Small).get(), small);
-        EXPECT_EQ(pool.Acquire(Large).get(), large);
+        EXPECT_EQ(pool.Acquire(Small).get(), blob);
+        EXPECT_EQ(pool.Acquire(Large).get(), blob);
     }
 }
 
-TEST(Test_ReceiveBlobPool, full_pool_hands_out_unpooled_blobs)
+TEST(Test_ReceiveBlobPool, continues_with_a_fresh_blob_after_a_retained_one)
 {
     ReceiveBlobPool pool{true};
 
-    std::vector<Blob> retained;
-    for (size_t i = 0; i < ReceiveBlobPool::MaxEntries; ++i)
-    {
-        retained.push_back(pool.Acquire(Small));
-    }
+    auto retained = pool.Acquire(Small);
+    const WeakBlob weakRetained = retained;
+    const auto* fresh = pool.Acquire(Small).get();
 
-    const WeakBlob extra = pool.Acquire(Small);
+    retained.reset();
 
-    EXPECT_TRUE(extra.expired());
-}
-
-TEST(Test_ReceiveBlobPool, full_pool_replaces_an_oversized_blob)
-{
-    ReceiveBlobPool pool{true};
-
-    std::vector<WeakBlob> large;
-    {
-        std::vector<Blob> retained;
-        for (size_t i = 0; i < ReceiveBlobPool::MaxEntries; ++i)
-        {
-            retained.push_back(pool.Acquire(Large));
-            large.push_back(retained.back());
-        }
-    }
-
-    const WeakBlob small = pool.Acquire(Small);
-
-    EXPECT_FALSE(small.expired());
-    EXPECT_EQ(std::count_if(large.begin(), large.end(), [](const WeakBlob& blob) { return blob.expired(); }), 1);
+    // the pool holds no reference to the retained blob, and reuses the fresh one
+    EXPECT_TRUE(weakRetained.expired());
+    EXPECT_EQ(pool.Acquire(Small).get(), fresh);
 }
 
 TEST(Test_ReceiveBlobPool, disabled_pool_keeps_no_blobs)
