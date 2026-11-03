@@ -42,6 +42,7 @@
 #include "util/Assert.hpp"
 #include "services/logging/LoggerMessage.hpp"
 #include "core/vasio/VAsioCapabilities.hpp"
+#include "core/vasio/ReceiveBlobPool.hpp"
 #include "wire/lin/WireLinMessages.hpp"
 #include "util/Uri.hpp"
 #include "services/metrics/Metrics.hpp"
@@ -215,7 +216,7 @@ public:
     bool ParticipantHasCapability(const std::string& participantName, const std::string& capability) const;
 
 public: // IVAsioPeerListener
-    void OnSocketData(IVAsioPeer* from, SerializedMessage&& buffer) override;
+    void OnSocketData(IVAsioPeer* from, SerializedMessage& buffer) override;
     void OnPeerShutdown(IVAsioPeer* peer) override;
 
 private: // data types
@@ -252,25 +253,25 @@ private: // data types
 private:
     // ----------------------------------------
     // private methods
-    void ReceiveRawSilKitMessage(IVAsioPeer* from, SerializedMessage&& buffer);
-    void ReceiveSubscriptionAnnouncement(IVAsioPeer* from, SerializedMessage&& buffer);
-    void ReceiveSubscriptionAcknowledge(IVAsioPeer* from, SerializedMessage&& buffer);
-    void ReceiveRegistryMessage(IVAsioPeer* from, SerializedMessage&& buffer);
-    void ReceiveProxyMessage(IVAsioPeer* from, SerializedMessage&& buffer);
+    void ReceiveRawSilKitMessage(IVAsioPeer* from, SerializedMessage& buffer);
+    void ReceiveSubscriptionAnnouncement(IVAsioPeer* from, SerializedMessage& buffer);
+    void ReceiveSubscriptionAcknowledge(IVAsioPeer* from, SerializedMessage& buffer);
+    void ReceiveRegistryMessage(IVAsioPeer* from, SerializedMessage& buffer);
+    void ReceiveProxyMessage(IVAsioPeer* from, SerializedMessage& buffer);
 
     bool TryAddRemoteSubscriber(IVAsioPeer* from, const VAsioMsgSubscriber& subscriber);
 
     // Registry related send / receive methods
     void SendParticipantAnnouncement(IVAsioPeer* peer);
-    void ReceiveParticipantAnnouncement(IVAsioPeer* from, SerializedMessage&& buffer);
+    void ReceiveParticipantAnnouncement(IVAsioPeer* from, SerializedMessage& buffer);
 
     void SendParticipantAnnouncementReply(IVAsioPeer* peer);
     void SendFailedParticipantAnnouncementReply(IVAsioPeer* peer, ProtocolVersion version, std::string message);
-    void ReceiveParticipantAnnouncementReply(IVAsioPeer* from, SerializedMessage&& buffer);
+    void ReceiveParticipantAnnouncementReply(IVAsioPeer* from, SerializedMessage& buffer);
 
-    void ReceiveKnownParticpants(IVAsioPeer* peer, SerializedMessage&& buffer);
+    void ReceiveKnownParticpants(IVAsioPeer* peer, SerializedMessage& buffer);
 
-    void ReceiveRemoteParticipantConnectRequest(IVAsioPeer* peer, SerializedMessage&& buffer);
+    void ReceiveRemoteParticipantConnectRequest(IVAsioPeer* peer, SerializedMessage& buffer);
     void ReceiveRemoteParticipantConnectRequest_Registry(IVAsioPeer* peer, RemoteParticipantConnectRequest msg);
     void ReceiveRemoteParticipantConnectRequest_Participant(IVAsioPeer* peer, RemoteParticipantConnectRequest msg);
 
@@ -494,6 +495,8 @@ private:
     // ----------------------------------------
     // private members
     SilKit::Config::ParticipantConfiguration _config;
+    // NB: declared early so that it outlives the peers, which read received messages into it.
+    ReceiveBlobPool _receiveBlobPool;
     std::string _participantName;
     ParticipantId _participantId{0};
     Services::Logging::ILoggerInternal* _logger{nullptr};
@@ -508,6 +511,10 @@ private:
     Util::tuple_tools::wrapped_tuple<SilKitLinkMap, SilKitMessageTypes> _links;
     //! \brief Lookup for links by name.
     Util::tuple_tools::wrapped_tuple<SilKitServiceToLinkMap, SilKitMessageTypes> _serviceToLinkMap;
+
+    //! Reused for every received message, to avoid reallocating the descriptor's strings and
+    //! supplemental data map each time. Only touched on the io thread, and dispatch is synchronous.
+    ServiceDescriptor _receiveServiceDescriptor;
 
     std::vector<std::unique_ptr<IVAsioReceiver>> _vasioReceivers;
     std::unordered_set<std::string> _vasioUniqueReceiverIds;

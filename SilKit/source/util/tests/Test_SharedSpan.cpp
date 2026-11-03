@@ -4,6 +4,7 @@
 
 #include "util/SharedSpan.hpp"
 
+#include <memory>
 #include <vector>
 
 #include "gtest/gtest.h"
@@ -82,6 +83,29 @@ TEST(Test_SharedSpan, takes_a_moved_vector_without_copying)
 
     ASSERT_EQ(shared.size(), 4u);
     EXPECT_EQ(shared.AsSpan().data(), rawAddress);
+}
+
+TEST(Test_SharedSpan, shares_ownership_of_a_vector)
+{
+    auto blob = std::make_shared<std::vector<uint8_t>>(std::vector<uint8_t>{10, 20, 30, 40});
+    const auto* rawAddress = blob->data();
+
+    SharedSpan<uint8_t> shared{blob};
+    EXPECT_EQ(blob.use_count(), 2);
+
+    blob.reset();
+
+    ASSERT_EQ(shared.size(), 4u);
+    EXPECT_EQ(shared.AsSpan().data(), rawAddress);
+    EXPECT_EQ(shared.AsSpan()[3], 40);
+}
+
+TEST(Test_SharedSpan, sharing_a_null_vector_is_empty)
+{
+    SharedSpan<uint8_t> shared{std::shared_ptr<const std::vector<uint8_t>>{}};
+
+    EXPECT_TRUE(shared.empty());
+    EXPECT_EQ(shared.AsSpan().data(), nullptr);
 }
 
 TEST(Test_SharedSpan, subspan_keeps_the_owner_alive)

@@ -18,6 +18,7 @@
 #include "core/internal/EndpointAddress.hpp"
 #include "core/internal/MessageBuffer.hpp"
 #include "core/vasio/RingBuffer.hpp"
+#include "core/vasio/ReceiveBlobPool.hpp"
 #include "core/vasio/VAsioPeerInfo.hpp"
 #include "core/internal/ProtocolVersion.hpp"
 
@@ -39,6 +40,10 @@ public:
     // ----------------------------------------
     // Public Data Types
 
+    //! Limits for gathering queued messages into one write. A single larger message is written alone.
+    static constexpr size_t MaxItemsPerWrite{16};
+    static constexpr size_t MaxBytesPerWrite{64 * 1024};
+
 public:
     // ----------------------------------------
     // Constructors and Destructor
@@ -49,8 +54,10 @@ public:
     VAsioPeer& operator=(const VAsioPeer& other) = delete;
     VAsioPeer& operator=(VAsioPeer&& other) = delete; //implicitly deleted because of mutex
 
+    //! receiveBlobPool must outlive the peer and is only used on the io thread.
     VAsioPeer(IVAsioPeerListener* listener, IIoContext* ioContext, std::unique_ptr<IRawByteStream> stream,
-              Services::Logging::ILoggerInternal* logger, std::unique_ptr<VSilKit::IPeerMetrics> metrics);
+              Services::Logging::ILoggerInternal* logger, std::unique_ptr<VSilKit::IPeerMetrics> metrics,
+              ReceiveBlobPool* receiveBlobPool);
 
     ~VAsioPeer() override;
 
@@ -103,6 +110,8 @@ private:
         std::vector<uint8_t> ownedBody;
         //! Shared with the other peers this message was sent to.
         SilKit::Util::SharedSpan<uint8_t> sharedBody;
+
+        auto Size() const -> size_t;
     };
 
     void StartAsyncWrite();
@@ -142,13 +151,14 @@ private:
     std::atomic<uint32_t> _currentMsgSize{0u};
     RingBuffer _msgBuffer;
     std::vector<MutableBuffer> _currentReceivingBuffers;
+    ReceiveBlobPool* _receiveBlobPool{nullptr};
 
     // sending
     mutable std::mutex _sendingQueueMutex;
     std::deque<SendItem> _sendingQueue;
-    // NB: _currentSendingBuffers points into _currentSendItem, including its inline array, so move
-    //     the item into place before building the buffers.
-    SendItem _currentSendItem;
+    // NB: _currentSendingBuffers points into _currentSendItems, including their inline arrays, so
+    //     move all items into place before building the buffers.
+    std::vector<SendItem> _currentSendItems;
     std::vector<ConstBuffer> _currentSendingBuffers;
     std::vector<uint8_t> _aggregatedMessages;
 

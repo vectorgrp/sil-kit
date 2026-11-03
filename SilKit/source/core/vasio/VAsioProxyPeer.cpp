@@ -182,9 +182,9 @@ auto VAsioProxyPeer::GetServiceDescriptor() const -> const ServiceDescriptor&
 //  IVAsioPeerConnection
 // ================================================================================
 
-void VAsioProxyPeer::OnSocketData(IVAsioPeer* from, SerializedMessage&& buffer)
+void VAsioProxyPeer::OnSocketData(IVAsioPeer* from, SerializedMessage& buffer)
 {
-    _listener->OnSocketData(from, std::move(buffer));
+    _listener->OnSocketData(from, buffer);
 }
 
 void VAsioProxyPeer::OnPeerShutdown(IVAsioPeer* peer)
