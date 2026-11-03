@@ -59,7 +59,9 @@ struct IVAsioPeerListener
 {
     virtual ~IVAsioPeerListener() = default;
 
-    virtual void OnSocketData(IVAsioPeer* peer, SerializedMessage&& buffer) = 0;
+    //! buffer is borrowed for the duration of the call. Payloads deserialized from it alias the receive
+    //! blob, which is only reused once nothing references it, so keep neither beyond the call.
+    virtual void OnSocketData(IVAsioPeer* peer, SerializedMessage& buffer) = 0;
     virtual void OnPeerShutdown(IVAsioPeer* peer) = 0;
 };
 

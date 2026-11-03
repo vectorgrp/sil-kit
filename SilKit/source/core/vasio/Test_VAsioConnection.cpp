@@ -187,7 +187,7 @@ TEST_F(Test_VAsioConnection, unsupported_version_connect)
         return reply.status == ParticipantAnnouncementReply::Status::Failed;
     };
     EXPECT_CALL(_from, SendSilKitMsg(AnnouncementReplyMatcher(validator))).Times(1);
-    _connection.OnSocketData(&_from, std::move(message));
+    _connection.OnSocketData(&_from, message);
 }
 
 TEST_F(Test_VAsioConnection, unsupported_version_reply_from_registry_should_throw)
@@ -201,7 +201,7 @@ TEST_F(Test_VAsioConnection, unsupported_version_reply_from_registry_should_thro
     _from._peerInfo.participantId = REGISTRY_PARTICIPANT_ID;
 
     SerializedMessage message(reply);
-    EXPECT_THROW(_connection.OnSocketData(&_from, std::move(message)), SilKit::ProtocolError);
+    EXPECT_THROW(_connection.OnSocketData(&_from, message), SilKit::ProtocolError);
 }
 
 TEST_F(Test_VAsioConnection, supported_version_reply_from_registry_must_not_throw)
@@ -212,7 +212,7 @@ TEST_F(Test_VAsioConnection, supported_version_reply_from_registry_must_not_thro
     _from._peerInfo.participantId = REGISTRY_PARTICIPANT_ID;
 
     SerializedMessage message(reply);
-    EXPECT_NO_THROW(_connection.OnSocketData(&_from, std::move(message)));
+    EXPECT_NO_THROW(_connection.OnSocketData(&_from, message));
 }
 
 TEST_F(Test_VAsioConnection, current_version_connect)
@@ -227,7 +227,7 @@ TEST_F(Test_VAsioConnection, current_version_connect)
     };
     EXPECT_CALL(_from, SendSilKitMsg(AnnouncementReplyMatcher(validator))).Times(1);
 
-    _connection.OnSocketData(&_from, std::move(message));
+    _connection.OnSocketData(&_from, message);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -256,7 +256,7 @@ TEST_F(Test_VAsioConnection, DISABLED_versioned_send_testmessage)
     // ReceiveSubscriptionAnnouncement -> sets internal structures up
     auto subscriberBuffer = SerializedMessage(subscriber);
     EXPECT_CALL(_from, SendSilKitMsg(SubscriptionAcknowledgeMatcher(subscriber))).Times(1);
-    _connection.OnSocketData(&_from, std::move(subscriberBuffer));
+    _connection.OnSocketData(&_from, subscriberBuffer);
 
     // Create a receiver with index 0 and a different TestMessage _version_
     MockSilKitMessageReceiver mockReceiver;
@@ -265,7 +265,7 @@ TEST_F(Test_VAsioConnection, DISABLED_versioned_send_testmessage)
     // the actual message
     auto buffer = SerializedMessage(message, _from.GetServiceDescriptor().to_endpointAddress(), subscriber.receiverIdx);
 
-    _connection.OnSocketData(&_from, std::move(buffer));
+    _connection.OnSocketData(&_from, buffer);
 }
 
 //////////////////////////////////////////////////////////////////////

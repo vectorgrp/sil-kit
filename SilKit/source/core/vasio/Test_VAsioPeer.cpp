@@ -70,7 +70,7 @@ struct TestPeerListener : IVAsioPeerListener
 {
     std::function<void(SerializedMessage&)> onData;
 
-    void OnSocketData(IVAsioPeer*, SerializedMessage&& message) override
+    void OnSocketData(IVAsioPeer*, SerializedMessage& message) override
     {
         if (onData)
         {

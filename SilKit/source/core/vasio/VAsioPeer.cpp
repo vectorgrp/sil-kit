@@ -406,7 +406,7 @@ void VAsioPeer::DispatchBuffer()
             _peerMetrics->RxBytes(message.GetStorageSize());
             _peerMetrics->RxPacket();
 
-            _listener->OnSocketData(this, std::move(message));
+            _listener->OnSocketData(this, message);
 
             _currentMsgSize = 0u;
         }

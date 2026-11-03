@@ -52,7 +52,7 @@ public: // IVAsioPeer (IServiceEndpoint)
     auto GetServiceDescriptor() const -> const ServiceDescriptor& override;
 
 public: // IVAsioPeerListener
-    void OnSocketData(IVAsioPeer* from, SerializedMessage&& buffer) override;
+    void OnSocketData(IVAsioPeer* from, SerializedMessage& buffer) override;
     void OnPeerShutdown(IVAsioPeer* peer) override;
 
 public:

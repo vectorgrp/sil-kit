@@ -216,7 +216,7 @@ public:
     bool ParticipantHasCapability(const std::string& participantName, const std::string& capability) const;
 
 public: // IVAsioPeerListener
-    void OnSocketData(IVAsioPeer* from, SerializedMessage&& buffer) override;
+    void OnSocketData(IVAsioPeer* from, SerializedMessage& buffer) override;
     void OnPeerShutdown(IVAsioPeer* peer) override;
 
 private: // data types
@@ -253,25 +253,25 @@ private: // data types
 private:
     // ----------------------------------------
     // private methods
-    void ReceiveRawSilKitMessage(IVAsioPeer* from, SerializedMessage&& buffer);
-    void ReceiveSubscriptionAnnouncement(IVAsioPeer* from, SerializedMessage&& buffer);
-    void ReceiveSubscriptionAcknowledge(IVAsioPeer* from, SerializedMessage&& buffer);
-    void ReceiveRegistryMessage(IVAsioPeer* from, SerializedMessage&& buffer);
-    void ReceiveProxyMessage(IVAsioPeer* from, SerializedMessage&& buffer);
+    void ReceiveRawSilKitMessage(IVAsioPeer* from, SerializedMessage& buffer);
+    void ReceiveSubscriptionAnnouncement(IVAsioPeer* from, SerializedMessage& buffer);
+    void ReceiveSubscriptionAcknowledge(IVAsioPeer* from, SerializedMessage& buffer);
+    void ReceiveRegistryMessage(IVAsioPeer* from, SerializedMessage& buffer);
+    void ReceiveProxyMessage(IVAsioPeer* from, SerializedMessage& buffer);
 
     bool TryAddRemoteSubscriber(IVAsioPeer* from, const VAsioMsgSubscriber& subscriber);
 
     // Registry related send / receive methods
     void SendParticipantAnnouncement(IVAsioPeer* peer);
-    void ReceiveParticipantAnnouncement(IVAsioPeer* from, SerializedMessage&& buffer);
+    void ReceiveParticipantAnnouncement(IVAsioPeer* from, SerializedMessage& buffer);
 
     void SendParticipantAnnouncementReply(IVAsioPeer* peer);
     void SendFailedParticipantAnnouncementReply(IVAsioPeer* peer, ProtocolVersion version, std::string message);
-    void ReceiveParticipantAnnouncementReply(IVAsioPeer* from, SerializedMessage&& buffer);
+    void ReceiveParticipantAnnouncementReply(IVAsioPeer* from, SerializedMessage& buffer);
 
-    void ReceiveKnownParticpants(IVAsioPeer* peer, SerializedMessage&& buffer);
+    void ReceiveKnownParticpants(IVAsioPeer* peer, SerializedMessage& buffer);
 
-    void ReceiveRemoteParticipantConnectRequest(IVAsioPeer* peer, SerializedMessage&& buffer);
+    void ReceiveRemoteParticipantConnectRequest(IVAsioPeer* peer, SerializedMessage& buffer);
     void ReceiveRemoteParticipantConnectRequest_Registry(IVAsioPeer* peer, RemoteParticipantConnectRequest msg);
     void ReceiveRemoteParticipantConnectRequest_Participant(IVAsioPeer* peer, RemoteParticipantConnectRequest msg);
 

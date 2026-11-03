@@ -699,7 +699,7 @@ void VAsioConnection::SendParticipantAnnouncement(IVAsioPeer* peer)
     peer->SendSilKitMsg(SerializedMessage{announcement});
 }
 
-void VAsioConnection::ReceiveParticipantAnnouncement(IVAsioPeer* from, SerializedMessage&& buffer)
+void VAsioConnection::ReceiveParticipantAnnouncement(IVAsioPeer* from, SerializedMessage& buffer)
 {
     SILKIT_TRACE_METHOD_(_logger, "()");
 
@@ -829,7 +829,7 @@ void VAsioConnection::SendFailedParticipantAnnouncementReply(IVAsioPeer* peer, P
     peer->SendSilKitMsg(SerializedMessage{peer->GetProtocolVersion(), reply});
 }
 
-void VAsioConnection::ReceiveParticipantAnnouncementReply(IVAsioPeer* from, SerializedMessage&& buffer)
+void VAsioConnection::ReceiveParticipantAnnouncementReply(IVAsioPeer* from, SerializedMessage& buffer)
 {
     SILKIT_TRACE_METHOD_(_logger, "()");
 
@@ -897,7 +897,7 @@ void VAsioConnection::ReceiveParticipantAnnouncementReply(IVAsioPeer* from, Seri
     }
 }
 
-void VAsioConnection::ReceiveKnownParticpants(IVAsioPeer* peer, SerializedMessage&& buffer)
+void VAsioConnection::ReceiveKnownParticpants(IVAsioPeer* peer, SerializedMessage& buffer)
 {
     SILKIT_TRACE_METHOD_(_logger, "()");
 
@@ -931,7 +931,7 @@ void VAsioConnection::ReceiveKnownParticpants(IVAsioPeer* peer, SerializedMessag
 }
 
 
-void VAsioConnection::ReceiveRemoteParticipantConnectRequest(IVAsioPeer* peer, SerializedMessage&& buffer)
+void VAsioConnection::ReceiveRemoteParticipantConnectRequest(IVAsioPeer* peer, SerializedMessage& buffer)
 {
     SILKIT_TRACE_METHOD_(_logger, "(...)");
 
@@ -1479,7 +1479,7 @@ void VAsioConnection::EnableAggregation()
     _useAggregation = true;
 }
 
-void VAsioConnection::OnSocketData(IVAsioPeer* from, SerializedMessage&& buffer)
+void VAsioConnection::OnSocketData(IVAsioPeer* from, SerializedMessage& buffer)
 {
     auto messageKind = buffer.GetMessageKind();
     switch (messageKind)
@@ -1490,21 +1490,21 @@ void VAsioConnection::OnSocketData(IVAsioPeer* from, SerializedMessage&& buffer)
             .Dispatch();
         break;
     case VAsioMsgKind::SubscriptionAnnouncement:
-        return ReceiveSubscriptionAnnouncement(from, std::move(buffer));
+        return ReceiveSubscriptionAnnouncement(from, buffer);
     case VAsioMsgKind::SubscriptionAcknowledge:
-        return ReceiveSubscriptionAcknowledge(from, std::move(buffer));
+        return ReceiveSubscriptionAcknowledge(from, buffer);
     case VAsioMsgKind::SilKitMwMsg:
-        return ReceiveRawSilKitMessage(from, std::move(buffer));
+        return ReceiveRawSilKitMessage(from, buffer);
     case VAsioMsgKind::SilKitSimMsg:
-        return ReceiveRawSilKitMessage(from, std::move(buffer));
+        return ReceiveRawSilKitMessage(from, buffer);
     case VAsioMsgKind::SilKitRegistryMessage:
-        return ReceiveRegistryMessage(from, std::move(buffer));
+        return ReceiveRegistryMessage(from, buffer);
     case VAsioMsgKind::SilKitProxyMessage:
-        return ReceiveProxyMessage(from, std::move(buffer));
+        return ReceiveProxyMessage(from, buffer);
     }
 }
 
-void VAsioConnection::ReceiveProxyMessage(IVAsioPeer* from, SerializedMessage&& buffer)
+void VAsioConnection::ReceiveProxyMessage(IVAsioPeer* from, SerializedMessage& buffer)
 {
     const auto proxyMessageHeader = buffer.GetProxyMessageHeader();
     if (proxyMessageHeader.version != 0)
@@ -1608,14 +1608,15 @@ void VAsioConnection::ReceiveProxyMessage(IVAsioPeer* from, SerializedMessage&& 
         }
         else
         {
-            OnSocketData(peer, SerializedMessage{std::move(proxyMessage.payload)});
+            SerializedMessage proxiedMessage{std::move(proxyMessage.payload)};
+            OnSocketData(peer, proxiedMessage);
         }
 
         return;
     }
 }
 
-void VAsioConnection::ReceiveSubscriptionAnnouncement(IVAsioPeer* from, SerializedMessage&& buffer)
+void VAsioConnection::ReceiveSubscriptionAnnouncement(IVAsioPeer* from, SerializedMessage& buffer)
 {
     // Note: there may be multiple types that match the SerdesName
     // we try to find a version to match it, for backward compatibility.
@@ -1662,7 +1663,7 @@ void VAsioConnection::ReceiveSubscriptionAnnouncement(IVAsioPeer* from, Serializ
     from->SendSilKitMsg(SerializedMessage{from->GetProtocolVersion(), ack});
 }
 
-void VAsioConnection::ReceiveSubscriptionAcknowledge(IVAsioPeer* from, SerializedMessage&& buffer)
+void VAsioConnection::ReceiveSubscriptionAcknowledge(IVAsioPeer* from, SerializedMessage& buffer)
 {
     auto ack = buffer.Deserialize<SubscriptionAcknowledge>();
 
@@ -1775,7 +1776,7 @@ bool VAsioConnection::TryAddRemoteSubscriber(IVAsioPeer* from, const VAsioMsgSub
     return wasAdded;
 }
 
-void VAsioConnection::ReceiveRawSilKitMessage(IVAsioPeer* from, SerializedMessage&& buffer)
+void VAsioConnection::ReceiveRawSilKitMessage(IVAsioPeer* from, SerializedMessage& buffer)
 {
     auto receiverIdx = static_cast<size_t>(buffer.GetRemoteIndex()); //ExtractEndpointId(buffer);
     if (receiverIdx >= _vasioReceivers.size())
@@ -1791,7 +1792,7 @@ void VAsioConnection::ReceiveRawSilKitMessage(IVAsioPeer* from, SerializedMessag
     _receiveServiceDescriptor = from->GetServiceDescriptor();
     _receiveServiceDescriptor.SetServiceId(endpoint.endpoint);
 
-    _vasioReceivers[receiverIdx]->ReceiveRawMsg(from, _receiveServiceDescriptor, std::move(buffer));
+    _vasioReceivers[receiverIdx]->ReceiveRawMsg(from, _receiveServiceDescriptor, buffer);
 }
 
 void VAsioConnection::RegisterMessageReceiver(std::function<void(IVAsioPeer* peer, ParticipantAnnouncement)> callback)
@@ -1800,7 +1801,7 @@ void VAsioConnection::RegisterMessageReceiver(std::function<void(IVAsioPeer* pee
     _participantAnnouncementReceivers.emplace_back(std::move(callback));
 }
 
-void VAsioConnection::ReceiveRegistryMessage(IVAsioPeer* from, SerializedMessage&& buffer)
+void VAsioConnection::ReceiveRegistryMessage(IVAsioPeer* from, SerializedMessage& buffer)
 {
     const auto header = buffer.GetRegistryMessageHeader();
 
@@ -1845,13 +1846,13 @@ void VAsioConnection::ReceiveRegistryMessage(IVAsioPeer* from, SerializedMessage
             .Dispatch();
         return;
     case RegistryMessageKind::ParticipantAnnouncement:
-        return ReceiveParticipantAnnouncement(from, std::move(buffer));
+        return ReceiveParticipantAnnouncement(from, buffer);
     case RegistryMessageKind::ParticipantAnnouncementReply:
-        return ReceiveParticipantAnnouncementReply(from, std::move(buffer));
+        return ReceiveParticipantAnnouncementReply(from, buffer);
     case RegistryMessageKind::KnownParticipants:
-        return ReceiveKnownParticpants(from, std::move(buffer));
+        return ReceiveKnownParticpants(from, buffer);
     case RegistryMessageKind::RemoteParticipantConnectRequest:
-        return ReceiveRemoteParticipantConnectRequest(from, std::move(buffer));
+        return ReceiveRemoteParticipantConnectRequest(from, buffer);
     }
 }
 

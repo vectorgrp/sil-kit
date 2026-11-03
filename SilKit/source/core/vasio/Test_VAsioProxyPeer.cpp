@@ -23,7 +23,7 @@ using testing::NiceMock;
 
 struct NullPeerListener : IVAsioPeerListener
 {
-    void OnSocketData(IVAsioPeer*, SerializedMessage&&) override {}
+    void OnSocketData(IVAsioPeer*, SerializedMessage&) override {}
     void OnPeerShutdown(IVAsioPeer*) override {}
 };
 
