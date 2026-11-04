@@ -64,6 +64,9 @@ private:
         IVAsioPeer* peer;
         VAsioPeerInfo peerInfo;
     };
+    using ConnectedParticipants = std::unordered_map<std::string, ConnectedParticipantInfo>;
+    using Generations = std::unordered_map<uint64_t, ConnectedParticipants>;
+    using SimulationNames = std::unordered_map<std::string, Generations>;
 
 private:
     // ----------------------------------------
@@ -99,7 +102,7 @@ private:
     // private members
     std::unique_ptr<Services::Logging::ILoggerInternal> _logger;
     IRegistryEventListener* _registryEventListener{nullptr};
-    std::unordered_map<std::string, std::unordered_map<std::string, ConnectedParticipantInfo>> _connectedParticipants;
+    SimulationNames _simulationNames;
     std::function<void()> _onAllParticipantsConnected;
     std::function<void()> _onAllParticipantsDisconnected;
     std::shared_ptr<SilKit::Config::ParticipantConfiguration> _vasioConfig;

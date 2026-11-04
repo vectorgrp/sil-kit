@@ -24,6 +24,12 @@ namespace Log = SilKit::Services::Logging;
 namespace SilKit {
 namespace Core {
 
+namespace {
+
+// Generations are not yet tracked; all participants are registered under a single, fixed generation.
+constexpr uint64_t FIXED_GENERATION{1};
+
+} // namespace
 
 VAsioRegistry::VAsioRegistry(std::shared_ptr<SilKit::Config::IParticipantConfiguration> cfg, ProtocolVersion version)
     : VAsioRegistry(std::move(cfg), nullptr, version)
@@ -217,13 +223,21 @@ auto VAsioRegistry::GetLoggerInternal() -> Services::Logging::ILoggerInternal*
 auto VAsioRegistry::FindConnectedParticipant(const std::string& participantName,
                                              const std::string& simulationName) const -> const ConnectedParticipantInfo*
 {
-    const auto simulationIt{_connectedParticipants.find(simulationName)};
-    if (simulationIt == _connectedParticipants.end())
+    const auto simulationIt{_simulationNames.find(simulationName)};
+    if (simulationIt == _simulationNames.end())
     {
         return nullptr;
     }
 
-    const auto& simulationParticipants{simulationIt->second};
+    const auto& generations{simulationIt->second};
+
+    const auto generationIt{generations.find(FIXED_GENERATION)};
+    if (generationIt == generations.end())
+    {
+        return nullptr;
+    }
+
+    const auto& simulationParticipants{generationIt->second};
 
     const auto participantIt{simulationParticipants.find(participantName)};
     if (participantIt == simulationParticipants.end())
@@ -260,7 +274,7 @@ void VAsioRegistry::OnParticipantAnnouncement(IVAsioPeer* peer, const Participan
     ConnectedParticipantInfo participantInfo;
     participantInfo.peer = peer;
     participantInfo.peerInfo = peerInfo;
-    _connectedParticipants[announcement.simulationName][peerInfo.participantName] = participantInfo;
+    _simulationNames[announcement.simulationName][FIXED_GENERATION][peerInfo.participantName] = participantInfo;
 
     if (_registryEventListener != nullptr)
     {
@@ -288,7 +302,7 @@ void VAsioRegistry::SendKnownParticipants(IVAsioPeer* peer, const std::string& s
     KnownParticipants knownParticipantsMsg;
     knownParticipantsMsg.messageHeader = MakeRegistryMsgHeader(peer->GetProtocolVersion());
 
-    const auto& simulationParticipants{_connectedParticipants[simulationName]};
+    const auto& simulationParticipants{_simulationNames[simulationName][FIXED_GENERATION]};
 
     for (const auto& pPair : simulationParticipants)
     {
@@ -340,14 +354,20 @@ void VAsioRegistry::OnPeerShutdown(IVAsioPeer* peer)
         _registryEventListener->OnParticipantDisconnected(simulationName, participantName);
     }
 
-    _connectedParticipants[simulationName].erase(participantName);
+    auto& generations{_simulationNames[simulationName]};
+    generations[FIXED_GENERATION].erase(participantName);
 
-    if (_connectedParticipants[simulationName].empty())
+    if (generations[FIXED_GENERATION].empty())
     {
-        _connectedParticipants.erase(simulationName);
+        generations.erase(FIXED_GENERATION);
     }
 
-    if (_connectedParticipants.empty())
+    if (generations.empty())
+    {
+        _simulationNames.erase(simulationName);
+    }
+
+    if (_simulationNames.empty())
     {
         GetLoggerInternal()->MakeMessage(Log::Level::Info, TopicOf(*this))
             .SetMessage("All participants are shut down")
