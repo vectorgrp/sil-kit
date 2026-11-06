@@ -338,4 +338,81 @@ TEST_F(ITest_Abort, test_Abort_Communication_Ready_Simulation_Sync)
     StopRegistry();
 }
 
+// Aborting while the system controller waits for its async CommunicationReadyHandler to be completed
+// shuts down all participants without errors.
+TEST_F(ITest_Abort, test_Abort_Pending_Async_Communication_Ready_Sync)
+{
+    RunRegistry();
+
+    std::list<TestParticipant> syncParticipants;
+    syncParticipants.push_back({"SyncParticipant1", TimeMode::Sync, OperationMode::Coordinated});
+    syncParticipants.push_back({"SyncParticipant2", TimeMode::Sync, OperationMode::Coordinated});
+
+    // The system controller never completes its async CommunicationReadyHandler, so it is stuck in
+    // CommunicationInitialized (no handler executing) when the abort arrives. Everybody else is somewhere
+    // between CommunicationInitialized and ReadyToRun.
+    int size = static_cast<int>(syncParticipants.size() + 1); // include system controller
+    int requiredParticipantsSize = static_cast<int>(syncParticipants.size());
+    EXPECT_CALL(callbacks, AbortHandler(ParticipantState::CommunicationInitialized)).Times(Between(1, size));
+    EXPECT_CALL(callbacks, AbortHandler(ParticipantState::ReadyToRun)).Times(Between(0, requiredParticipantsSize));
+    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Shutdown)).Times(size);
+    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Error)).Times(0);
+    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Invalid)).Times(0);
+
+    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::ServicesCreated)).Times(size);
+    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::CommunicationInitializing)).Times(size);
+    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::CommunicationInitialized)).Times(size);
+    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::ReadyToRun))
+        .Times(Between(0, requiredParticipantsSize));
+    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Running)).Times(0);
+    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Aborting)).Times(size);
+    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Stopping)).Times(0);
+    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Stopped)).Times(0);
+    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::ShuttingDown)).Times(0);
+
+    std::list<TestParticipant> monitorParticipants;
+    monitorParticipants.push_back({"MonitorParticipant1", TimeMode::Async, OperationMode::Autonomous});
+    expectedReceptions = syncParticipants.size() + monitorParticipants.size();
+
+    // Start System Monitor
+    RunParticipants(monitorParticipants);
+    for (auto& p : monitorParticipants)
+    {
+        p.AwaitRunning();
+    }
+
+    // Start System Controller
+    std::vector<std::string> required{};
+    for (auto&& p : syncParticipants)
+    {
+        required.push_back(p.name);
+    }
+    auto setup = [this]() {
+        // Never call CompleteCommunicationReadyHandlerAsync
+        systemControllerParticipant.lifecycleService->SetCommunicationReadyHandlerAsync([]() {});
+    };
+    RunParticipants(syncParticipants);
+    RunSystemController(required, setup);
+
+    systemControllerParticipant.AwaitCommunicationInitialized();
+    AbortSystemController();
+
+    // Wait for coordinated to end
+    JoinParticipantThreads(_participantThreads_Sync_Coordinated);
+
+    monitorParticipants.front().i.stopRequested = true;
+    JoinParticipantThreads(_participantThreads_Async_Autonomous);
+
+    // Expect shutdown state, which should happen after the abort handlers are called.
+    for (const auto& participant : monitorParticipants.front().CopyMonitoredParticipantStates())
+    {
+        if (participant.first != "MonitorParticipant1")
+        {
+            EXPECT_EQ(participant.second, ParticipantState::Shutdown);
+        }
+    }
+
+    StopRegistry();
+}
+
 } // anonymous namespace
