@@ -201,6 +201,14 @@ void SimBehaviorTrivial::ProcessFrameHeaderRequest(const LinSendFrameHeaderReque
         _parentController->ThrowOnSendAttemptWithUndefinedDataLength(response.frame);
     }
 
+    // LIN diagnostic SlaveResp: answer only if a response is pending, and only once
+    if (_parentController->IsDiagnosticSlaveResponse(header.id)
+        && !_parentController->ConsumePendingDiagnosticResponse())
+    {
+        SendNoResponseOnDiagnosticHeader(response.frame);
+        return;
+    }
+
     // Dispatch the LIN transmission to all connected nodes
     LinTransmission transmission{_timeProvider->Now(), response.frame, LinFrameStatus::LIN_RX_OK};
     SendMsgImpl(transmission);
@@ -215,6 +223,26 @@ void SimBehaviorTrivial::ProcessFrameHeaderRequest(const LinSendFrameHeaderReque
     // Evoke the callbacks with LIN_TX_OK locally
     _parentController->CallLinFrameStatusEventHandler(
         LinFrameStatusEvent{transmission.timestamp, transmission.frame, LinFrameStatus::LIN_TX_OK});
+}
+
+void SimBehaviorTrivial::SendNoResponseOnDiagnosticHeader(LinFrame frame)
+{
+    if (_parentController->HasDynamicNode())
+    {
+        // A dynamic node may still answer the header, stay silent as before
+        return;
+    }
+
+    // The master only distributes the header if this node is the only responder, so it waits for this node.
+    // Report the missing response, as the master does if no node is configured to answer.
+    frame.data = {};
+    LinTransmission transmission{_timeProvider->Now(), frame, LinFrameStatus::LIN_RX_NO_RESPONSE};
+    SendMsgImpl(transmission);
+
+    _parentController->GetTracer()->Trace(ToTracingDir(transmission.status), transmission.timestamp,
+                                          transmission.frame);
+    _parentController->CallLinFrameStatusEventHandler(
+        LinFrameStatusEvent{transmission.timestamp, transmission.frame, transmission.status});
 }
 
 void SimBehaviorTrivial::UpdateTxBuffer(const LinFrame& /*frame*/)

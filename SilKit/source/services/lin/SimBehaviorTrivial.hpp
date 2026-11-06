@@ -47,6 +47,7 @@ private:
     void SendMsgImpl(MsgT&& msg);
 
     void SendErrorTransmissionOnHeaderRequest(int numResponses, LinFrame frame);
+    void SendNoResponseOnDiagnosticHeader(LinFrame frame);
 
     Core::IParticipantInternal* _participant{nullptr};
     LinController* _parentController{nullptr};

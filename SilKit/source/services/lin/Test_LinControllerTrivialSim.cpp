@@ -833,4 +833,166 @@ TEST_F(Test_LinControllerTrivialSim, DISABLED_send_with_tracing)
     master.SendFrame(frame, LinFrameResponseType::MasterResponse);
 }
 
+// ------------------------------------------------------------
+// LIN diagnostic SlaveResp (0x3D): a slave answers only if a response is pending, and only once
+// ------------------------------------------------------------
+
+class Test_LinControllerTrivialSimDiagResponse : public Test_LinControllerTrivialSim
+{
+protected:
+    static constexpr LinId diagId = 0x3D;
+
+    auto MakeDiagFrame(std::array<uint8_t, 8> data = {}) -> LinFrame
+    {
+        return MakeFrame(diagId, LinChecksumModel::Classic, 8, data);
+    }
+
+    void InitSlaveWithDiagResponse()
+    {
+        LinControllerConfig config = MakeControllerConfig(LinControllerMode::Slave);
+        LinFrameResponse response;
+        response.frame = MakeDiagFrame();
+        response.responseMode = LinFrameResponseMode::TxUnconditional;
+        config.frameResponses.push_back(response);
+        slave1.Init(config);
+        slave1.AddFrameStatusHandler(frameStatusHandler);
+    }
+
+    void ExpectResponse(const LinFrame& frame)
+    {
+        EXPECT_CALL(participant, SendMsg(&slave1, ATransmissionWith(frame, LinFrameStatus::LIN_RX_OK, 35s))).Times(1);
+        EXPECT_CALL(callbacks, FrameStatusHandler(&slave1, frame, LinFrameStatus::LIN_TX_OK)).Times(1);
+        slave1.ReceiveMsg(&master, LinSendFrameHeaderRequest{35s, diagId});
+        Mock::VerifyAndClearExpectations(&participant);
+        Mock::VerifyAndClearExpectations(&callbacks);
+    }
+
+    void ExpectNoResponse()
+    {
+        const auto noData = MakeDiagFrame();
+        EXPECT_CALL(participant, SendMsg(&slave1, ATransmissionWith(noData, LinFrameStatus::LIN_RX_NO_RESPONSE, 35s)))
+            .Times(1);
+        EXPECT_CALL(callbacks, FrameStatusHandler(&slave1, noData, LinFrameStatus::LIN_RX_NO_RESPONSE)).Times(1);
+        slave1.ReceiveMsg(&master, LinSendFrameHeaderRequest{35s, diagId});
+        Mock::VerifyAndClearExpectations(&participant);
+        Mock::VerifyAndClearExpectations(&callbacks);
+    }
+};
+
+TEST_F(Test_LinControllerTrivialSimDiagResponse, no_response_after_init)
+{
+    InitSlaveWithDiagResponse();
+    ExpectNoResponse();
+}
+
+TEST_F(Test_LinControllerTrivialSimDiagResponse, update_tx_buffer_answers_once)
+{
+    InitSlaveWithDiagResponse();
+
+    const auto frame = MakeDiagFrame({0x01, 0x06, 0xF2, 0x7F, 0x00, 0x01, 0x00, 0x01});
+    slave1.UpdateTxBuffer(frame);
+
+    ExpectResponse(frame);
+    ExpectNoResponse();
+}
+
+TEST_F(Test_LinControllerTrivialSimDiagResponse, last_update_replaces_pending_response)
+{
+    InitSlaveWithDiagResponse();
+
+    slave1.UpdateTxBuffer(MakeDiagFrame({0xA, 0xA, 0xA, 0xA, 0xA, 0xA, 0xA, 0xA}));
+    const auto frameB = MakeDiagFrame({0xB, 0xB, 0xB, 0xB, 0xB, 0xB, 0xB, 0xB});
+    slave1.UpdateTxBuffer(frameB);
+
+    ExpectResponse(frameB);
+    ExpectNoResponse();
+}
+
+TEST_F(Test_LinControllerTrivialSimDiagResponse, update_after_response_arms_again)
+{
+    InitSlaveWithDiagResponse();
+
+    const auto frame = MakeDiagFrame({1, 2, 3, 4, 5, 6, 7, 8});
+    slave1.UpdateTxBuffer(frame);
+    ExpectResponse(frame);
+
+    slave1.UpdateTxBuffer(frame);
+    ExpectResponse(frame);
+    ExpectNoResponse();
+}
+
+TEST_F(Test_LinControllerTrivialSimDiagResponse, set_frame_response_answers_once)
+{
+    slave1.Init(MakeControllerConfig(LinControllerMode::Slave));
+    slave1.AddFrameStatusHandler(frameStatusHandler);
+
+    LinFrameResponse response;
+    response.frame = MakeDiagFrame({1, 2, 3, 4, 5, 6, 7, 8});
+    response.responseMode = LinFrameResponseMode::TxUnconditional;
+    slave1.SetFrameResponse(response);
+
+    ExpectResponse(response.frame);
+    ExpectNoResponse();
+}
+
+TEST_F(Test_LinControllerTrivialSimDiagResponse, silent_with_dynamic_node)
+{
+    InitSlaveWithDiagResponse();
+
+    // A dynamic node announces itself
+    slave1.ReceiveMsg(&slave2, ToWire(MakeControllerConfig(LinControllerMode::Slave),
+                                      WireLinControllerConfig::SimulationMode::Dynamic));
+
+    EXPECT_CALL(participant, SendMsg(&slave1, A<const LinTransmission&>())).Times(0);
+    EXPECT_CALL(callbacks, FrameStatusHandler(&slave1, _, _)).Times(0);
+    slave1.ReceiveMsg(&master, LinSendFrameHeaderRequest{35s, diagId});
+}
+
+TEST_F(Test_LinControllerTrivialSimDiagResponse, other_ids_answer_every_header)
+{
+    LinControllerConfig config = MakeControllerConfig(LinControllerMode::Slave);
+    LinFrameResponse response;
+    response.frame = MakeFrame(17, LinChecksumModel::Enhanced, 8, {1, 2, 3, 4, 5, 6, 7, 8});
+    response.responseMode = LinFrameResponseMode::TxUnconditional;
+    config.frameResponses.push_back(response);
+    slave1.Init(config);
+    slave1.AddFrameStatusHandler(frameStatusHandler);
+
+    EXPECT_CALL(participant, SendMsg(&slave1, ATransmissionWith(response.frame, LinFrameStatus::LIN_RX_OK, 35s)))
+        .Times(2);
+    EXPECT_CALL(callbacks, FrameStatusHandler(&slave1, response.frame, LinFrameStatus::LIN_TX_OK)).Times(2);
+    slave1.ReceiveMsg(&master, LinSendFrameHeaderRequest{35s, response.frame.id});
+    slave1.ReceiveMsg(&master, LinSendFrameHeaderRequest{35s, response.frame.id});
+}
+
+TEST_F(Test_LinControllerTrivialSimDiagResponse, master_answers_every_header)
+{
+    // The special case applies to slaves only
+    LinControllerConfig config = MakeControllerConfig(LinControllerMode::Master);
+    LinFrameResponse response;
+    response.frame = MakeDiagFrame({1, 2, 3, 4, 5, 6, 7, 8});
+    response.responseMode = LinFrameResponseMode::TxUnconditional;
+    config.frameResponses.push_back(response);
+    master.Init(config);
+
+    EXPECT_CALL(participant, SendMsg(&master, ATransmissionWith(response.frame, LinFrameStatus::LIN_RX_OK, 35s)))
+        .Times(2);
+    master.ReceiveMsg(&slave1, LinSendFrameHeaderRequest{35s, diagId});
+    master.ReceiveMsg(&slave1, LinSendFrameHeaderRequest{35s, diagId});
+}
+
+TEST_F(Test_LinControllerTrivialSimDiagResponse, master_reports_no_response_from_slave)
+{
+    LinControllerConfig config = MakeControllerConfig(LinControllerMode::Master);
+    LinFrameResponse response;
+    response.frame = MakeDiagFrame();
+    response.responseMode = LinFrameResponseMode::Rx;
+    config.frameResponses.push_back(response);
+    master.Init(config);
+    master.AddFrameStatusHandler(frameStatusHandler);
+
+    EXPECT_CALL(callbacks, FrameStatusHandler(&master, response.frame, LinFrameStatus::LIN_RX_NO_RESPONSE)).Times(1);
+    master.ReceiveMsg(&slave1, LinTransmission{35s, response.frame, LinFrameStatus::LIN_RX_NO_RESPONSE});
+}
+
 } // anonymous namespace
