@@ -34,7 +34,6 @@ public:
     virtual void CommunicationInitialized(std::string reason) override;
     virtual void CompleteCommunicationReadyHandler(std::string reason) override;
     virtual void ReadyToRun(std::string reason) override;
-    virtual void RunSimulation(std::string reason) override;
     virtual void PauseSimulation(std::string reason) override;
     virtual void ContinueSimulation(std::string reason) override;
     virtual void StopSimulation(std::string reason) override;
@@ -44,7 +43,6 @@ public:
 
 protected:
     void InvalidStateTransition(std::string transitionName, bool triggerErrorState, std::string originalReason);
-    bool IsAnyOf(SystemState state, std::initializer_list<SystemState> stateList);
 
     void ProcessAbortCommandInCallback();
     void ProcessAbortCommand(std::string reason);

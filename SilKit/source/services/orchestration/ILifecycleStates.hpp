@@ -45,8 +45,6 @@ public:
     // ... trigger StartingHandler for participants without active timeSync; If completed, advance to ReadyToRun.
     virtual void ReadyToRun(std::string reason) = 0;
 
-    virtual void RunSimulation(std::string reason) = 0;
-
     virtual void PauseSimulation(std::string reason) = 0;
 
     virtual void ContinueSimulation(std::string reason) = 0;
