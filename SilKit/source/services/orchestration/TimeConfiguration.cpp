@@ -34,6 +34,7 @@ bool TimeConfiguration::IsDynamicStepSizeEnabled() const
 
 void TimeConfiguration::SetBlockingMode(bool blocking)
 {
+    Lock lock{_mx};
     _blocking = blocking;
 }
 
@@ -220,6 +221,7 @@ void TimeConfiguration::Initialize()
 
 bool TimeConfiguration::IsBlocking() const
 {
+    Lock lock{_mx};
     return _blocking;
 }
 
