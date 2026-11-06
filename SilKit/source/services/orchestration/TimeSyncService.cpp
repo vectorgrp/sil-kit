@@ -472,30 +472,13 @@ void TimeSyncService::RequestNextStep()
 void TimeSyncService::ThrowIfSimulationStepHandlerKindChangeIsNotAllowed(bool newHandlerIsBlocking) const
 {
     // Re-registering a handler of the same kind is the supported way to change the step size at runtime.
-    if (newHandlerIsBlocking == IsBlocking())
+    if (newHandlerIsBlocking != IsBlocking() && _lifecycleService && _lifecycleService->IsLifecycleStarted())
     {
-        return;
+        const char* from = newHandlerIsBlocking ? "asynchronous" : "synchronous";
+        const char* to = newHandlerIsBlocking ? "synchronous" : "asynchronous";
+        throw SilKit::StateError{std::string{"Cannot switch from the "} + from + " to the " + to
+                                 + " simulation step handler after LifecycleService::StartLifecycle() was called."};
     }
-
-    const auto state = State();
-    switch (state)
-    {
-    case ParticipantState::Invalid:
-    case ParticipantState::ServicesCreated:
-    case ParticipantState::CommunicationInitializing:
-    case ParticipantState::CommunicationInitialized:
-    case ParticipantState::ReadyToRun:
-        return;
-    default:
-        break;
-    }
-
-    const char* from = newHandlerIsBlocking ? "asynchronous" : "synchronous";
-    const char* to = newHandlerIsBlocking ? "synchronous" : "asynchronous";
-    throw SilKit::StateError{std::string{"Cannot switch from the "} + from + " to the " + to
-                             + " simulation step handler in participant state " + to_string(state)
-                             + ". The kind of the simulation step handler can only be changed before the participant "
-                               "is running."};
 }
 
 void TimeSyncService::SetSimulationStepHandler(SimulationStepHandler task, std::chrono::nanoseconds initialStepSize)

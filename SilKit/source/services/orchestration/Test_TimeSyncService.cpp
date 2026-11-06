@@ -184,6 +184,17 @@ TEST_F(Test_TimeSyncService, switch_handler_kind_before_running_is_allowed)
     ASSERT_EQ(numAsyncTaskCalled, 0);
 }
 
+TEST_F(Test_TimeSyncService, switch_handler_kind_after_start_lifecycle_is_rejected)
+{
+    timeSyncService->SetSimulationStepHandler([](auto, auto) {}, 1ms);
+    lifecycleService->SetTimeSyncActive(true);
+    (void)lifecycleService->StartLifecycle();
+
+    ASSERT_NE(lifecycleService->State(), ParticipantState::Running);
+    EXPECT_THROW(timeSyncService->SetSimulationStepHandlerAsync([](auto, auto) {}, 1ms), SilKit::StateError);
+    EXPECT_NO_THROW(timeSyncService->SetSimulationStepHandler([](auto, auto) {}, 2ms));
+}
+
 TEST_F(Test_TimeSyncService, set_handler_of_same_kind_while_running_is_allowed)
 {
     timeSyncService->SetSimulationStepHandler([](auto, auto) {}, 1ms);

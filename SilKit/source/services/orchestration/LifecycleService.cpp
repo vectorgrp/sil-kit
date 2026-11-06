@@ -602,9 +602,14 @@ void LifecycleService::SetTimeSyncActive(bool isTimeSyncActive)
     _timeSyncActive = isTimeSyncActive;
 }
 
-bool LifecycleService::IsTimeSyncActive() const
+bool LifecycleService::IsTimeSyncActive() const -> bool
 {
     return _timeSyncActive;
+}
+
+auto LifecycleService::IsLifecycleStarted() const -> bool
+{
+    return _isLifecycleStarted;
 }
 
 void LifecycleService::SetRequiredParticipantNames(const std::vector<std::string>& requiredParticipantNames)

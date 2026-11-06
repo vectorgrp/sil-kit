@@ -95,7 +95,8 @@ public:
     void NewSystemState(SystemState systemState);
     void NewParticipantStatus(const ParticipantStatus& participantStatus);
 
-    bool IsTimeSyncActive() const;
+    auto IsTimeSyncActive() const -> bool;
+    auto IsLifecycleStarted() const -> bool;
 
     void Restart(std::string reason);
 
