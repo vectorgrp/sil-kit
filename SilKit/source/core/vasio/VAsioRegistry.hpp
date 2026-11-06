@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <map>
+#include <optional>
 #include <unordered_map>
 
 #include "services/logging/ILoggerInternal.hpp"
@@ -65,17 +67,19 @@ private:
         VAsioPeerInfo peerInfo;
     };
     using ConnectedParticipants = std::unordered_map<std::string, ConnectedParticipantInfo>;
-    using Generations = std::unordered_map<uint64_t, ConnectedParticipants>;
+    using Generations = std::map<uint64_t, ConnectedParticipants>;
     using SimulationNames = std::unordered_map<std::string, Generations>;
 
 private:
     // ----------------------------------------
     // private methods
-    auto FindConnectedParticipant(const std::string& participantName,
-                                  const std::string& simulationName) const -> const ConnectedParticipantInfo*;
+    bool ShouldEnterGeneration(const std::string& participantName, const ConnectedParticipants& generation) const;
+    auto SelectGeneration(const std::string& simulationName, const std::string& participantName) const -> uint64_t;
+    auto FindGenerationOfPeer(const IVAsioPeer* peer, const std::string& simulationName,
+                              const std::string& participantName) const -> std::optional<uint64_t>;
 
     void OnParticipantAnnouncement(IVAsioPeer* peer, const ParticipantAnnouncement& announcement);
-    void SendKnownParticipants(IVAsioPeer* peer, const std::string& simulationName);
+    void SendKnownParticipants(IVAsioPeer* peer, const std::string& simulationName, uint64_t generation);
     void OnPeerShutdown(IVAsioPeer* peer);
 
     bool AllParticipantsAreConnected() const;

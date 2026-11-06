@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2022-2025 Vector Informatik GmbH
+/ SPDX-FileCopyrightText: 2022-2025 Vector Informatik GmbH
 //
 // SPDX-License-Identifier: MIT
 
@@ -26,8 +26,7 @@ namespace Core {
 
 namespace {
 
-// Generations are not yet tracked; all participants are registered under a single, fixed generation.
-constexpr uint64_t FIXED_GENERATION{1};
+constexpr uint64_t FIRST_GENERATION{1};
 
 } // namespace
 
@@ -220,32 +219,54 @@ auto VAsioRegistry::GetLoggerInternal() -> Services::Logging::ILoggerInternal*
     return _logger.get();
 }
 
-auto VAsioRegistry::FindConnectedParticipant(const std::string& participantName,
-                                             const std::string& simulationName) const -> const ConnectedParticipantInfo*
+bool VAsioRegistry::ShouldEnterGeneration(const std::string& participantName,
+                                          const ConnectedParticipants& generation) const
+{
+    return generation.find(participantName) == generation.end();
+}
+
+auto VAsioRegistry::SelectGeneration(const std::string& simulationName, const std::string& participantName) const
+    -> uint64_t
 {
     const auto simulationIt{_simulationNames.find(simulationName)};
     if (simulationIt == _simulationNames.end())
     {
-        return nullptr;
+        return FIRST_GENERATION;
     }
 
     const auto& generations{simulationIt->second};
 
-    const auto generationIt{generations.find(FIXED_GENERATION)};
-    if (generationIt == generations.end())
+    // std::map iterates in ascending generation order
+    for (const auto& generationPair : generations)
     {
-        return nullptr;
+        if (ShouldEnterGeneration(participantName, generationPair.second))
+        {
+            return generationPair.first;
+        }
     }
 
-    const auto& simulationParticipants{generationIt->second};
+    return generations.empty() ? FIRST_GENERATION : generations.rbegin()->first + 1;
+}
 
-    const auto participantIt{simulationParticipants.find(participantName)};
-    if (participantIt == simulationParticipants.end())
+auto VAsioRegistry::FindGenerationOfPeer(const IVAsioPeer* peer, const std::string& simulationName,
+                                         const std::string& participantName) const -> std::optional<uint64_t>
+{
+    const auto simulationIt{_simulationNames.find(simulationName)};
+    if (simulationIt == _simulationNames.end())
     {
-        return nullptr;
+        return std::nullopt;
     }
 
-    return std::addressof(participantIt->second);
+    for (const auto& generationPair : simulationIt->second)
+    {
+        const auto participantIt{generationPair.second.find(participantName)};
+        if (participantIt != generationPair.second.end() && participantIt->second.peer == peer)
+        {
+            return generationPair.first;
+        }
+    }
+
+    return std::nullopt;
 }
 
 void VAsioRegistry::OnParticipantAnnouncement(IVAsioPeer* peer, const ParticipantAnnouncement& announcement)
@@ -258,23 +279,19 @@ void VAsioRegistry::OnParticipantAnnouncement(IVAsioPeer* peer, const Participan
     // When the IVAsioPeer connects to us we see its actual endpoint address and need
     // to substitute it here.
 
-    // Do not allow multiple participants with identical names
-    if (FindConnectedParticipant(peerInfo.participantName, announcement.simulationName) != nullptr)
-    {
-        const auto message = fmt::format("A participant with the same name '{}' already exists in the simulation {}",
-                                         peerInfo.participantName, announcement.simulationName);
-        GetLoggerInternal()->MakeMessage(Log::Level::Warn, TopicOf(*this))
-            .SetMessage(message)
-            .Dispatch();
-        throw SilKitError{message};
-    }
+    const auto generation{SelectGeneration(announcement.simulationName, peerInfo.participantName)};
 
-    SendKnownParticipants(peer, announcement.simulationName);
+    GetLoggerInternal()->MakeMessage(Log::Level::Debug, TopicOf(*this))
+        .SetMessage("Participant '{}' in simulation '{}' is placed into generation {}", peerInfo.participantName,
+                    announcement.simulationName, generation)
+        .Dispatch();
+
+    SendKnownParticipants(peer, announcement.simulationName, generation);
 
     ConnectedParticipantInfo participantInfo;
     participantInfo.peer = peer;
     participantInfo.peerInfo = peerInfo;
-    _simulationNames[announcement.simulationName][FIXED_GENERATION][peerInfo.participantName] = participantInfo;
+    _simulationNames[announcement.simulationName][generation][peerInfo.participantName] = participantInfo;
 
     if (_registryEventListener != nullptr)
     {
@@ -291,7 +308,7 @@ void VAsioRegistry::OnParticipantAnnouncement(IVAsioPeer* peer, const Participan
     }
 }
 
-void VAsioRegistry::SendKnownParticipants(IVAsioPeer* peer, const std::string& simulationName)
+void VAsioRegistry::SendKnownParticipants(IVAsioPeer* peer, const std::string& simulationName, uint64_t generation)
 {
     GetLoggerInternal()->MakeMessage(Log::Level::Info, TopicOf(*this))
         .SetMessage("Sending known participant message to {}, protocol version {}.{}",
@@ -302,7 +319,7 @@ void VAsioRegistry::SendKnownParticipants(IVAsioPeer* peer, const std::string& s
     KnownParticipants knownParticipantsMsg;
     knownParticipantsMsg.messageHeader = MakeRegistryMsgHeader(peer->GetProtocolVersion());
 
-    const auto& simulationParticipants{_simulationNames[simulationName][FIXED_GENERATION]};
+    const auto& simulationParticipants{_simulationNames[simulationName][generation]};
 
     for (const auto& pPair : simulationParticipants)
     {
@@ -326,21 +343,12 @@ void VAsioRegistry::OnPeerShutdown(IVAsioPeer* peer)
     const auto& simulationName{peer->GetSimulationName()};
     const auto& participantName{peer->GetInfo().participantName};
 
-    const auto connectedParticipant = FindConnectedParticipant(participantName, simulationName);
+    const auto generation = FindGenerationOfPeer(peer, simulationName, participantName);
 
-    if (connectedParticipant == nullptr)
+    if (!generation.has_value())
     {
-        GetLoggerInternal()->MakeMessage(Log::Level::Debug, TopicOf(*this))
+        GetLoggerInternal()->MakeMessage(Log::Level::Error, TopicOf(*this))
             .SetMessage("Peer '{}' has shut down, which had no participant information", participantName)
-            .Dispatch();
-        return;
-    }
-
-    if (connectedParticipant->peer != peer)
-    {
-        GetLoggerInternal()->MakeMessage(Log::Level::Debug, TopicOf(*this))
-            .SetMessage("Duplicate peer '{}' has shut down, which had no participant information",
-                   participantName)
             .Dispatch();
         return;
     }
@@ -355,11 +363,12 @@ void VAsioRegistry::OnPeerShutdown(IVAsioPeer* peer)
     }
 
     auto& generations{_simulationNames[simulationName]};
-    generations[FIXED_GENERATION].erase(participantName);
+    auto& participants{generations[*generation]};
+    participants.erase(participantName);
 
-    if (generations[FIXED_GENERATION].empty())
+    if (participants.empty())
     {
-        generations.erase(FIXED_GENERATION);
+        generations.erase(*generation);
     }
 
     if (generations.empty())
