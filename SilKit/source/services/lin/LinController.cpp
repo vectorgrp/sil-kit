@@ -161,13 +161,13 @@ void LinController::ThrowIfDynamic(const std::string& callingMethodName) const
 
 void LinController::ThrowIfNotDynamic(const std::string& callingMethodName) const
 {
-    if (_useDynamicResponse)
+    if (!_useDynamicResponse)
     {
         std::string errorMsg = callingMethodName + " can only be called if the node was initialized using InitDynamic!";
         _logger->MakeMessage(Logging::Level::Error, TopicOf(*this))
             .SetMessage(errorMsg)
             .Dispatch();
-        throw SilKitError{errorMsg};
+        throw SilKit::StateError{errorMsg};
     }
 }
 
@@ -372,10 +372,7 @@ void LinController::InitDynamic(const SilKit::Experimental::Services::Lin::LinCo
 
 void LinController::SendDynamicResponse(const LinFrame& frame)
 {
-    if (!_useDynamicResponse)
-    {
-        ThrowIfNotDynamic(__FUNCTION__);
-    }
+    ThrowIfNotDynamic(__FUNCTION__);
 
     // prepare the response update
     LinFrameResponse response{};
