@@ -71,6 +71,11 @@
             "name": "coverage",
             "description": "gcov instrumented Debug build (gcc)",
             "inherits": [ "debug"],
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Linux"
+            },
             "cacheVariables": {
                 "CMAKE_C_COMPILER": "gcc",
                 "CMAKE_CXX_COMPILER": "g++",
