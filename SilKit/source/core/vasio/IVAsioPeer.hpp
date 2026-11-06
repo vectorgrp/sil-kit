@@ -13,6 +13,7 @@
 #include "core/vasio/VAsioProtocolVersion.hpp"
 
 #include "core/vasio/SerializedMessage.hpp"
+#include "core/vasio/SharedSerializedMessage.hpp"
 #include "services/metrics/IMetricsManager.hpp"
 
 namespace SilKit {
@@ -26,6 +27,8 @@ public:
 
 public:
     virtual void SendSilKitMsg(SerializedMessage buffer) = 0;
+    //! \brief Send a message that was serialized once for several peers, patching remoteIdx.
+    virtual void SendSilKitMsg(const SharedSerializedMessage& msg, EndpointId remoteIdx) = 0;
     virtual void Subscribe(VAsioMsgSubscriber subscriber) = 0;
 
     virtual auto GetInfo() const -> const VAsioPeerInfo& = 0;
@@ -56,7 +59,9 @@ struct IVAsioPeerListener
 {
     virtual ~IVAsioPeerListener() = default;
 
-    virtual void OnSocketData(IVAsioPeer* peer, SerializedMessage&& buffer) = 0;
+    //! buffer is borrowed for the duration of the call. Payloads deserialized from it alias the receive
+    //! blob, which is only reused once nothing references it, so keep neither beyond the call.
+    virtual void OnSocketData(IVAsioPeer* peer, SerializedMessage& buffer) = 0;
     virtual void OnPeerShutdown(IVAsioPeer* peer) = 0;
 };
 

@@ -748,6 +748,22 @@ extern "C"
                                                                                          workflowConfiguration);
     }
 
+    // ServiceDiscovery
+
+    SilKit_ReturnCode SilKitCALL SilKit_Experimental_ServiceDiscovery_Create(
+        SilKit_Experimental_ServiceDiscovery** outServiceDiscovery, SilKit_Participant* participant)
+    {
+        return globalCapi->SilKit_Experimental_ServiceDiscovery_Create(outServiceDiscovery, participant);
+    }
+
+    SilKit_ReturnCode SilKitCALL SilKit_Experimental_ServiceDiscovery_SetServiceDiscoveryHandler(
+        SilKit_Experimental_ServiceDiscovery* serviceDiscovery, void* context,
+        SilKit_Experimental_ServiceDiscoveryHandler_t handler)
+    {
+        return globalCapi->SilKit_Experimental_ServiceDiscovery_SetServiceDiscoveryHandler(serviceDiscovery, context,
+                                                                                           handler);
+    }
+
     // Participant
 
     SilKit_ReturnCode SilKitCALL SilKit_Participant_Create(SilKit_Participant** outParticipant,

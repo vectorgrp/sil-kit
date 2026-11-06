@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
+#include <algorithm>
 #include <memory>
 #include <thread>
 #include <string>
@@ -1061,6 +1062,16 @@ TEST_F(ITest_LinDynamicResponse, normal_master_two_dynamic_slave_collision)
     auto&& masterRecvFrames = linNodes.at(0)->_result.receivedFrames;
     auto&& slave1RecvFrames = linNodes.at(1)->_result.receivedFrames;
     auto&& slave2RecvFrames = linNodes.at(2)->_result.receivedFrames;
+
+    // A slave receives the response of the other slave and the frames of the master from two different senders.
+    // There is no ordering between the two, so the response to id 34 can overtake the frame with id 19.
+    // The frames are sent with ascending ids, so sorting by id restores the expected order.
+    const auto sortById = [](std::vector<LinFrame>& frames) {
+        std::stable_sort(frames.begin(), frames.end(),
+                         [](const LinFrame& lhs, const LinFrame& rhs) { return lhs.id < rhs.id; });
+    };
+    sortById(slave1RecvFrames[LinFrameStatus::LIN_RX_OK]);
+    sortById(slave2RecvFrames[LinFrameStatus::LIN_RX_OK]);
 
     // 2 frame states on master
     ASSERT_EQ(masterRecvFrames.size(), 2u);

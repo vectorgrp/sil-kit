@@ -31,6 +31,7 @@ public:
 
 public: // IVAsioPeer
     void SendSilKitMsg(SerializedMessage buffer) override;
+    void SendSilKitMsg(const SharedSerializedMessage& msg, EndpointId remoteIdx) override;
     void Subscribe(VAsioMsgSubscriber subscriber) override;
     auto GetInfo() const -> const VAsioPeerInfo& override;
     void SetInfo(VAsioPeerInfo info) override;
@@ -51,7 +52,7 @@ public: // IVAsioPeer (IServiceEndpoint)
     auto GetServiceDescriptor() const -> const ServiceDescriptor& override;
 
 public: // IVAsioPeerListener
-    void OnSocketData(IVAsioPeer* from, SerializedMessage&& buffer) override;
+    void OnSocketData(IVAsioPeer* from, SerializedMessage& buffer) override;
     void OnPeerShutdown(IVAsioPeer* peer) override;
 
 public:

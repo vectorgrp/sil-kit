@@ -146,7 +146,7 @@ void RpcClient::TriggerCall(Util::Span<const uint8_t> data, bool hasTimeout, std
     {
         const auto callUuid = Util::Uuid::GenerateRandom();
 
-        FunctionCall msg{_timeProvider->Now(), callUuid, Util::ToStdVector(data)};
+        FunctionCall msg{_timeProvider->Now(), callUuid, data};
 
         {
             {
@@ -207,7 +207,7 @@ void RpcClient::ReceiveMessage(const FunctionCallResponse& msg)
     if (_handler)
     {
         _handler(this,
-                 RpcCallResultEvent{msg.timestamp, it->second.GetUserContext(), ToRpcCallStatus(msg.status), msg.data});
+                 RpcCallResultEvent{msg.timestamp, it->second.GetUserContext(), ToRpcCallStatus(msg.status), msg.data.AsSpan()});
     }
 
     // NB: If the call was made to multiple servers, multiple returns will be received. Only forget about the call

@@ -186,8 +186,13 @@ add_silkit_test_to_executable(SilKitIntegrationTests
 
 # Pub/Sub
 
+
 add_silkit_test_to_executable(SilKitIntegrationTests
     SOURCES ITest_PubHistory.cpp
+)
+
+add_silkit_test_to_executable(SilKitIntegrationTests
+    SOURCES ITest_CapiServiceDiscovery.cpp
 )
 
 # ============================================================
@@ -208,6 +213,10 @@ add_silkit_test_to_executable(SilKitIntegrationTests
 
 add_silkit_test_to_executable(SilKitIntegrationTests
     SOURCES ITest_NetSimFlexRay.cpp
+)
+
+add_silkit_test_to_executable(SilKitIntegrationTests
+    SOURCES ITest_NetSimServiceDiscovery.cpp
 )
 
 
@@ -253,8 +262,24 @@ add_silkit_test_to_executable(SilKitIntegrationTests
     SOURCES ITest_Config.cpp
 )
 
+# ============================================================
+#  End-to-end integration tests
+# ============================================================
+
 add_silkit_test_to_executable(SilKitIntegrationTests
-    SOURCES ITest_RemoteLogging.cpp
+    SOURCES ITest_HealthCheck.cpp
+)
+
+add_silkit_test_to_executable(SilKitIntegrationTests
+    SOURCES ITest_PcapTracing.cpp
+)
+
+add_silkit_test_to_executable(SilKitIntegrationTests
+    SOURCES ITest_DomainSockets.cpp
+)
+
+add_silkit_test_to_executable(SilKitIntegrationTests
+    SOURCES ITest_ConfigPrecedence.cpp
 )
 
 # ============================================================

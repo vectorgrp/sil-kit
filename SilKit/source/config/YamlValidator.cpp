@@ -148,6 +148,7 @@ const std::set<std::string> schemaPaths_v1 = {
     "/Experimental/TimeSynchronization/AnimationFactor",
     "/Experimental/TimeSynchronization/DynamicSimulationStep",
     "/Experimental/TimeSynchronization/EnableMessageAggregation",
+    "/Experimental/UseReceiveBufferPool",
     "/Extensions",
     "/Extensions/SearchPathHints",
     "/FlexrayControllers",

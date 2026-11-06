@@ -28,13 +28,15 @@ struct RemoteServiceEndpoint : IServiceEndpoint
         return _serviceDescriptor;
     }
 
+    // NB: referenced, not copied, to avoid a deep copy per received message. Instances only live
+    //     for the synchronous dispatch of one message.
     RemoteServiceEndpoint(const ServiceDescriptor& descriptor)
+        : _serviceDescriptor{descriptor}
     {
-        _serviceDescriptor = descriptor;
     }
 
 private:
-    ServiceDescriptor _serviceDescriptor;
+    const ServiceDescriptor& _serviceDescriptor;
 };
 
 class MessageBuffer;
@@ -46,7 +48,8 @@ public:
     // Public interface methods
     virtual ~IVAsioReceiver() = default;
     virtual auto GetDescriptor() const -> const VAsioMsgSubscriber& = 0;
-    virtual void ReceiveRawMsg(IVAsioPeer* from, const ServiceDescriptor& descriptor, SerializedMessage&& buffer) = 0;
+    //! buffer is borrowed for the duration of the call, see IVAsioPeerListener::OnSocketData.
+    virtual void ReceiveRawMsg(IVAsioPeer* from, const ServiceDescriptor& descriptor, SerializedMessage& buffer) = 0;
 };
 
 template <class MsgT>
@@ -65,7 +68,7 @@ public:
     // ----------------------------------------
     // Public interface methods
     auto GetDescriptor() const -> const VAsioMsgSubscriber& override;
-    void ReceiveRawMsg(IVAsioPeer* from, const ServiceDescriptor& descriptor, SerializedMessage&& buffer) override;
+    void ReceiveRawMsg(IVAsioPeer* from, const ServiceDescriptor& descriptor, SerializedMessage& buffer) override;
     void SetServiceDescriptor(const ServiceDescriptor& serviceDescriptor) override
     {
         _serviceDescriptor = serviceDescriptor;
@@ -105,7 +108,7 @@ auto VAsioReceiver<MsgT>::GetDescriptor() const -> const VAsioMsgSubscriber&
 
 template <class MsgT>
 void VAsioReceiver<MsgT>::ReceiveRawMsg(IVAsioPeer* /*from*/, const ServiceDescriptor& descriptor,
-                                        SerializedMessage&& buffer)
+                                        SerializedMessage& buffer)
 {
     MsgT msg = buffer.Deserialize<MsgT>();
 

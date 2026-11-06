@@ -1,0 +1,47 @@
+name: 'Docs Build'
+on:
+  pull_request:
+    branches: [ 'main', 'dev/**', 'dev_**' ]
+    paths:
+      - 'docs/**'
+      - 'SilKit/include/silkit/**'
+      - 'ThirdParty/LICENSES.rst'
+      - 'SilKit/ci/docker/docs_requirements.txt'
+      - '.github/workflows/build-docs.yml'
+
+  push:
+    branches: [ 'main' ]
+    paths:
+      - 'docs/**'
+      - 'SilKit/include/silkit/**'
+      - 'ThirdParty/LICENSES.rst'
+      - 'SilKit/ci/docker/docs_requirements.txt'
+      - '.github/workflows/build-docs.yml'
+
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-docs:
+    name: Build docs with warnings as errors
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: true
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y doxygen
+          python3 -m pip install --quiet -r SilKit/ci/docker/docs_requirements.txt
+        shell: bash
+
+      - name: Build docs
+        run: |
+          cmake -S . -B _build/docs -D SILKIT_BUILD_DOCS=ON -D SILKIT_WARNINGS_AS_ERRORS=ON
+          cmake --build _build/docs --target Doxygen
+        shell: bash

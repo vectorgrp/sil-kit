@@ -59,6 +59,9 @@ add_library(O_SilKit_Core_VAsio OBJECT
     RingBuffer.hpp
     RingBuffer.cpp
 
+    ReceiveBlobPool.hpp
+    ReceiveBlobPool.cpp
+
     IPeerMetrics.hpp
     PeerMetrics.hpp
     PeerMetrics.cpp
@@ -86,10 +89,14 @@ add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_VAsioRegistry.cpp LIB
 
 add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_VAsioSerdes.cpp LIBS S_SilKitImpl)
 add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_SerializedMessage.cpp LIBS S_SilKitImpl)
+add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_VAsioTransmitter.cpp LIBS S_SilKitImpl I_SilKit)
 add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_TransformAcceptorUris.cpp LIBS S_SilKitImpl)
 add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_VAsioCapabilities.cpp LIBS S_SilKitImpl)
 
 add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_RingBuffer.cpp LIBS S_SilKitImpl)
+add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_ReceiveBlobPool.cpp LIBS S_SilKitImpl)
+add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_VAsioPeer.cpp LIBS S_SilKitImpl I_SilKit)
+add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_VAsioProxyPeer.cpp LIBS S_SilKitImpl I_SilKit)
 
 add_silkit_test_to_executable(SilKitUnitTests SOURCES io/Test_IoContext.cpp LIBS S_SilKitImpl)
 add_silkit_test_to_executable(SilKitUnitTests SOURCES io/Test_AsioIoContext.cpp LIBS S_SilKitImpl)

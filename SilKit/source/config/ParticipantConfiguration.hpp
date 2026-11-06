@@ -326,6 +326,10 @@ struct Experimental
 {
     TimeSynchronization timeSynchronization;
     Metrics metrics;
+    //! Reuse the buffers that received messages are read into. Disabling this allocates a fresh
+    //! buffer per received message, so a payload used after its handler returned is a detectable
+    //! use-after-free instead of silently reading the bytes of a later message.
+    bool useReceiveBufferPool{true};
 };
 
 // ================================================================================

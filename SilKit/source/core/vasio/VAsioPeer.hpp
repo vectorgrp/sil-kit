@@ -5,6 +5,8 @@
 #pragma once
 
 
+#include <array>
+#include <deque>
 #include <vector>
 #include <queue>
 #include <mutex>
@@ -16,6 +18,7 @@
 #include "core/internal/EndpointAddress.hpp"
 #include "core/internal/MessageBuffer.hpp"
 #include "core/vasio/RingBuffer.hpp"
+#include "core/vasio/ReceiveBlobPool.hpp"
 #include "core/vasio/VAsioPeerInfo.hpp"
 #include "core/internal/ProtocolVersion.hpp"
 
@@ -37,6 +40,10 @@ public:
     // ----------------------------------------
     // Public Data Types
 
+    //! Limits for gathering queued messages into one write. A single larger message is written alone.
+    static constexpr size_t MaxItemsPerWrite{16};
+    static constexpr size_t MaxBytesPerWrite{64 * 1024};
+
 public:
     // ----------------------------------------
     // Constructors and Destructor
@@ -47,8 +54,10 @@ public:
     VAsioPeer& operator=(const VAsioPeer& other) = delete;
     VAsioPeer& operator=(VAsioPeer&& other) = delete; //implicitly deleted because of mutex
 
+    //! receiveBlobPool must outlive the peer and is only used on the io thread.
     VAsioPeer(IVAsioPeerListener* listener, IIoContext* ioContext, std::unique_ptr<IRawByteStream> stream,
-              Services::Logging::ILoggerInternal* logger, std::unique_ptr<VSilKit::IPeerMetrics> metrics);
+              Services::Logging::ILoggerInternal* logger, std::unique_ptr<VSilKit::IPeerMetrics> metrics,
+              ReceiveBlobPool* receiveBlobPool);
 
     ~VAsioPeer() override;
 
@@ -56,6 +65,7 @@ public:
     // ----------------------------------------
     // Public Methods
     void SendSilKitMsg(SerializedMessage buffer) override;
+    void SendSilKitMsg(const SharedSerializedMessage& msg, EndpointId remoteIdx) override;
     void Subscribe(VAsioMsgSubscriber subscriber) override;
 
     auto GetInfo() const -> const VAsioPeerInfo& override;
@@ -85,12 +95,34 @@ public:
 private:
     // ----------------------------------------
     // Private Methods
+    //! \brief One queued write: inline bytes, followed by at most one of ownedBody or sharedBody.
+    struct SendItem
+    {
+        static constexpr size_t MaxHeaderSize{32};
+
+        //! Messages up to this size are inlined whole. Covers bus sized messages, CAN FD included.
+        static constexpr size_t MaxInlineSize{128};
+
+        //! Either the whole message, or just the network header when a body follows.
+        std::array<uint8_t, MaxInlineSize> inlineData{};
+        size_t inlineSize{0};
+
+        std::vector<uint8_t> ownedBody;
+        //! Shared with the other peers this message was sent to.
+        SilKit::Util::SharedSpan<uint8_t> sharedBody;
+
+        auto Size() const -> size_t;
+    };
+
     void StartAsyncWrite();
     void WriteSomeAsync();
     void ReadSomeAsync();
     void DispatchBuffer();
-    void SendSilKitMsgInternal(std::vector<uint8_t> blob);
-    void Aggregate(const std::vector<uint8_t>& blob);
+    void EnqueueSendItem(SendItem item);
+    static auto MakeSendItem(std::vector<uint8_t> blob) -> SendItem;
+    void DispatchSendItem(SendItem item, MessageAggregationKind aggregationKind);
+    void BuildCurrentSendingBuffers();
+    void Aggregate(const SendItem& item);
     void Flush();
 
 private: // IRawByteStreamListener
@@ -119,12 +151,15 @@ private:
     std::atomic<uint32_t> _currentMsgSize{0u};
     RingBuffer _msgBuffer;
     std::vector<MutableBuffer> _currentReceivingBuffers;
+    ReceiveBlobPool* _receiveBlobPool{nullptr};
 
     // sending
     mutable std::mutex _sendingQueueMutex;
-    std::deque<std::vector<uint8_t>> _sendingQueue;
-    ConstBuffer _currentSendingBuffer;
-    std::vector<uint8_t> _currentSendingBufferData;
+    std::deque<SendItem> _sendingQueue;
+    // NB: _currentSendingBuffers points into _currentSendItems, including their inline arrays, so
+    //     move all items into place before building the buffers.
+    std::vector<SendItem> _currentSendItems;
+    std::vector<ConstBuffer> _currentSendingBuffers;
     std::vector<uint8_t> _aggregatedMessages;
 
     std::atomic_bool _sending{false};

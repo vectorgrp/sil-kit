@@ -1,5 +1,5 @@
 [repositories.reference]
-version = "v4.0.52"
+version = "v5.0.7"
 
 [repositories.under_test]
 version = "main"
@@ -10,6 +10,8 @@ name = "latency"
 unit = "us"
 topic = "Latency"
 csv_output = "latency.csv"
+# lower latency is the improvement, so the regression threshold is the upper one
+higher_is_better = false
 
 [tests.kpis]
 mean = { label = "latency(us)" }
@@ -75,4 +77,51 @@ args = [
     "--message-count", "100",
     "--simulation-duration", "10",
     "--number-simulation-runs", "50",
+]
+
+
+# NB: the fan-out tests use 8 participants, which multiplies deliveries by 28, hence the short
+#     simulation duration. Do not lower the message count: the run must stay saturated (speedup
+#     below 1), otherwise the KPI measures the time step pacing instead of capacity.
+[[tests]]
+name = "throughput-fanout-large-msg"
+unit = "MiB/s"
+topic = "Throughput (large messages, fan-out of 8)"
+csv_output = "throughput-fanout-large-msg.csv"
+
+[tests.kpis]
+mean = { label = "throughput(MiB/s)" }
+err = { label = "throughput_err" }
+
+[[tests.demos]]
+executable = "SilKitDemoBenchmark"
+args = [
+    "--write-csv", "{run.csv_output}",
+    "--message-size", "65536",
+    "--message-count", "4",
+    "--simulation-duration", "2",
+    "--number-participants", "8",
+    "--number-simulation-runs", "20",
+]
+
+
+[[tests]]
+name = "throughput-fanout-small-msg"
+unit = "1/s"
+topic = "Message rate (small messages, fan-out of 8)"
+csv_output = "throughput-fanout-small-msg.csv"
+
+[tests.kpis]
+mean = { label = "messageRate(1/s)" }
+err = { label = "messageRate_err" }
+
+[[tests.demos]]
+executable = "SilKitDemoBenchmark"
+args = [
+    "--write-csv", "{run.csv_output}",
+    "--message-size", "16",
+    "--message-count", "50",
+    "--simulation-duration", "2",
+    "--number-participants", "8",
+    "--number-simulation-runs", "20",
 ]

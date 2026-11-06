@@ -72,7 +72,7 @@ private: // Methods
     void AnnounceLocalParticipantTo(const std::string& otherParticipant);
 
     //!< Inform about service changes
-    void CallHandlers(ServiceDiscoveryEvent::Type eventType, const ServiceDescriptor& serviceDescriptor) const;
+    void CallHandlers(ServiceDiscoveryEvent::Type eventType, const ServiceDescriptor& serviceDescriptor);
 
 private:
     IParticipantInternal* _participant{nullptr};
@@ -84,6 +84,8 @@ private:
     std::unordered_map<std::string /* participant name */, ServiceMap> _servicesByParticipant;
     SpecificDiscoveryStore _specificDiscoveryStore;
     mutable std::recursive_mutex _discoveryMx;
+    //!< Guarded by _discoveryMx, hence only non-zero for the thread that is currently calling handlers
+    int _dispatchDepth{0};
     std::atomic<bool> _shuttingDown{false};
 };
 

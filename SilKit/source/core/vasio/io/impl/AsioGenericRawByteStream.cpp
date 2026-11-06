@@ -119,14 +119,23 @@ void AsioGenericRawByteStream::AsyncReadSome(MutableBufferSequence bufferSequenc
             _reading = true;
         }
 
-        _readBufferSequence.resize(bufferSequence.size());
-        std::transform(bufferSequence.begin(), bufferSequence.end(), _readBufferSequence.begin(),
-                       [](const MutableBuffer& buffer) -> asio::mutable_buffer {
-            return asio::mutable_buffer{buffer.GetData(), buffer.GetSize()};
-        });
+        // NB: see AsyncWriteSome. Two buffers are only needed when the ring buffer wraps.
+        if (bufferSequence.size() == 1)
+        {
+            _socket.async_read_some(asio::mutable_buffer{bufferSequence[0].GetData(), bufferSequence[0].GetSize()},
+                                    [this](const auto& e, auto s) { OnAsioAsyncReadSomeComplete(e, s); });
+        }
+        else
+        {
+            _readBufferSequence.resize(bufferSequence.size());
+            std::transform(bufferSequence.begin(), bufferSequence.end(), _readBufferSequence.begin(),
+                           [](const MutableBuffer& buffer) -> asio::mutable_buffer {
+                return asio::mutable_buffer{buffer.GetData(), buffer.GetSize()};
+            });
 
-        _socket.async_read_some(_readBufferSequence,
-                                [this](const auto& e, auto s) { OnAsioAsyncReadSomeComplete(e, s); });
+            _socket.async_read_some(_readBufferSequence,
+                                    [this](const auto& e, auto s) { OnAsioAsyncReadSomeComplete(e, s); });
+        }
     }
 }
 
@@ -153,14 +162,24 @@ void AsioGenericRawByteStream::AsyncWriteSome(ConstBufferSequence bufferSequence
             _writing = true;
         }
 
-        _writeBufferSequence.resize(bufferSequence.size());
-        std::transform(bufferSequence.begin(), bufferSequence.end(), _writeBufferSequence.begin(),
-                       [](const ConstBuffer& buffer) -> asio::const_buffer {
-            return asio::const_buffer{buffer.GetData(), buffer.GetSize()};
-        });
+        // NB: asio allocates to copy a buffer sequence into the operation, but stores a single
+        //     buffer by value. A single buffer is the common case.
+        if (bufferSequence.size() == 1)
+        {
+            _socket.async_write_some(asio::const_buffer{bufferSequence[0].GetData(), bufferSequence[0].GetSize()},
+                                     [this](const auto& e, auto s) { OnAsioAsyncWriteSomeComplete(e, s); });
+        }
+        else
+        {
+            _writeBufferSequence.resize(bufferSequence.size());
+            std::transform(bufferSequence.begin(), bufferSequence.end(), _writeBufferSequence.begin(),
+                           [](const ConstBuffer& buffer) -> asio::const_buffer {
+                return asio::const_buffer{buffer.GetData(), buffer.GetSize()};
+            });
 
-        _socket.async_write_some(_writeBufferSequence,
-                                 [this](const auto& e, auto s) { OnAsioAsyncWriteSomeComplete(e, s); });
+            _socket.async_write_some(_writeBufferSequence,
+                                     [this](const auto& e, auto s) { OnAsioAsyncWriteSomeComplete(e, s); });
+        }
     }
 }
 
