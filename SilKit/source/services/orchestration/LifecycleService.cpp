@@ -602,7 +602,7 @@ void LifecycleService::SetTimeSyncActive(bool isTimeSyncActive)
     _timeSyncActive = isTimeSyncActive;
 }
 
-bool LifecycleService::IsTimeSyncActive() const -> bool
+auto LifecycleService::IsTimeSyncActive() const -> bool
 {
     return _timeSyncActive;
 }
