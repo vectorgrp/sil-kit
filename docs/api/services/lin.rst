@@ -204,6 +204,28 @@ and will configure itself for reception (|LinFrameResponseMode_Rx|).
         // Transmit the frame header, the response will be provided by the slave.
         master->SendFrameHeader(0x11);
 
+Diagnostic slave response (ID 0x3D)
+___________________________________
+
+For the diagnostic slave response (ID 0x3D), a LIN slave configured with |LinFrameResponseMode_Tx| answers a header
+only if a response is pending, and only once, as specified by the LIN protocol. Calling |SetFrameResponse| or
+|UpdateTxBuffer| for 0x3D makes a response pending, |Init| does not. A new call before the next header replaces the
+pending response. If no response is pending, the slave does not answer and the header is reported as
+``LIN_RX_NO_RESPONSE``::
+
+    // Slave: diagnostic request on 0x3C received, prepare the response
+    LinFrame diagResponse;
+    diagResponse.id = 0x3D;
+    diagResponse.dataLength = 8;
+    diagResponse.data = {0x01, 0x06, 0xF2, 0x7F, 0x00, 0x01, 0x00, 0x01};
+    diagResponse.checksumModel = LinChecksumModel::Classic;
+    slave->UpdateTxBuffer(diagResponse);
+
+    // Master: the first header gets the response, a second header gets LIN_RX_NO_RESPONSE
+    master->SendFrameHeader(0x3D);
+
+This applies to LIN slaves only. LIN masters and controllers in dynamic response mode answer as for any other ID.
+
 Transmission acknowledgment
 ___________________________
 

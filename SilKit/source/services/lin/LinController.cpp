@@ -341,6 +341,7 @@ void LinController::Init(LinControllerConfig config)
     node.UpdateResponses(config.frameResponses, _logger);
 
     _controllerMode = config.controllerMode;
+    _diagnosticResponsePending = false;
     _controllerStatus = LinControllerStatus::Operational;
 
     SendMsg(to_wire(config));
@@ -493,6 +494,10 @@ void LinController::UpdateTxBuffer(LinFrame frame)
 
     // Update the local payload
     GetThisLinNode().UpdateTxBuffer(frame.id, std::move(frame.data), _logger);
+    if (IsDiagnosticSlaveResponse(frame.id))
+    {
+        _diagnosticResponsePending = true;
+    }
 
     // Detailed: Send LinFrameResponseUpdate with updated payload to BusSim
     // Trivial: Nop
@@ -533,7 +538,23 @@ void LinController::SetFrameResponse(LinFrameResponse response)
         return;
     }
 
+    const bool armsDiagnosticResponse =
+        response.responseMode == LinFrameResponseMode::TxUnconditional && IsDiagnosticSlaveResponse(response.frame.id);
     UpdateFrameResponse(response);
+    if (armsDiagnosticResponse)
+    {
+        _diagnosticResponsePending = true;
+    }
+}
+
+bool LinController::IsDiagnosticSlaveResponse(LinId linId) const
+{
+    return linId == DiagnosticSlaveResponseId && _controllerMode == LinControllerMode::Slave && !_useDynamicResponse;
+}
+
+bool LinController::ConsumePendingDiagnosticResponse()
+{
+    return _diagnosticResponsePending.exchange(false);
 }
 
 void LinController::UpdateFrameResponse(LinFrameResponse response)
