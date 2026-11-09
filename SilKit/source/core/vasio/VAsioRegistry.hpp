@@ -70,13 +70,24 @@ private:
     using Generations = std::map<uint64_t, ConnectedParticipants>;
     using SimulationNames = std::unordered_map<std::string, Generations>;
 
+    // The location of a connected peer. Names are not unique across generations, so peers are identified by pointer.
+    struct PeerLocation
+    {
+        std::string simulationName;
+        uint64_t generation;
+    };
+    using PeerLocations = std::unordered_map<const IVAsioPeer*, PeerLocation>;
+
 private:
     // ----------------------------------------
     // private methods
     bool ShouldEnterGeneration(const std::string& participantName, const ConnectedParticipants& generation) const;
     auto SelectGeneration(const std::string& simulationName, const std::string& participantName) const -> uint64_t;
-    auto FindGenerationOfPeer(const IVAsioPeer* peer, const std::string& simulationName,
-                              const std::string& participantName) const -> std::optional<uint64_t>;
+    auto FindGenerationOfPeer(const IVAsioPeer* peer) const -> std::optional<uint64_t>;
+    //! The generation of the peer that sent a message received via ReceiveMsg.
+    auto FindGenerationOfSender(const IServiceEndpoint* from) const -> std::optional<uint64_t>;
+    //! The peer with the given name in the same simulation and generation as the requester.
+    auto FindPeerInGenerationOf(const IVAsioPeer* requester, const std::string& participantName) const -> IVAsioPeer*;
 
     void OnParticipantAnnouncement(IVAsioPeer* peer, const ParticipantAnnouncement& announcement);
     void SendKnownParticipants(IVAsioPeer* peer, const std::string& simulationName, uint64_t generation);
@@ -107,6 +118,7 @@ private:
     std::unique_ptr<Services::Logging::ILoggerInternal> _logger;
     IRegistryEventListener* _registryEventListener{nullptr};
     SimulationNames _simulationNames;
+    PeerLocations _peerLocations;
     std::function<void()> _onAllParticipantsConnected;
     std::function<void()> _onAllParticipantsDisconnected;
     std::shared_ptr<SilKit::Config::ParticipantConfiguration> _vasioConfig;
@@ -119,6 +131,8 @@ private:
     std::atomic<EndpointId> _localEndpointId{1};
 
     ServiceDescriptor _serviceDescriptor;
+
+    friend struct VAsioRegistryTestAccess;
 };
 
 } // namespace Core

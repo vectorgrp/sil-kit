@@ -5,6 +5,7 @@
 #pragma once
 
 #include <memory>
+#include <functional>
 #include <vector>
 #include <unordered_map>
 #include <unordered_set>
@@ -93,6 +94,12 @@ public:
     auto GetLoggerInternal() -> SilKit::Services::Logging::ILoggerInternal*;
 
     void JoinSimulation(std::string registryUri);
+
+    //! Resolves a participant name to a peer on behalf of a requesting peer (used when relaying messages between
+    //! peers, i.e. by the registry). If unset, the name is looked up within the simulation of the requester.
+    //! This allows the registry to resolve names within the scope of a generation.
+    using PeerResolver = std::function<IVAsioPeer*(const IVAsioPeer* requester, const std::string& participantName)>;
+    void SetPeerResolver(PeerResolver resolver);
 
 private: // JoinSimulation Helper Functions
     void OpenParticipantAcceptors(const std::string& connectUri);
@@ -280,6 +287,7 @@ private:
     void AssociateParticipantNameAndPeer(const std::string& simulationName, const std::string& participantName,
                                          IVAsioPeer* peer);
     auto FindPeerByName(const std::string& simulationName, const std::string& participantName) const -> IVAsioPeer*;
+    auto FindPeerForRequester(const IVAsioPeer* requester, const std::string& participantName) const -> IVAsioPeer*;
 
     // Subscriptions completed Helper
     void SyncSubscriptionsCompleted();
@@ -571,9 +579,11 @@ private:
     // Hold mapping from simulationName to mapping from participantName to peer
     std::unordered_map<std::string, std::unordered_map<std::string, IVAsioPeer*>> _participantNameToPeer;
 
-    // Hold mapping from proxy source to all proxy destinations (used by registry for shutdown information)
-    std::unordered_map<std::string, std::unordered_map<std::string, std::unordered_set<std::string>>>
-        _proxySourceToDestinations;
+    // Hold mapping from proxy source peer to the names of all proxy destinations (used by registry for shutdown
+    // information). Keyed by peer, since several peers with the same name can be connected to the registry.
+    std::unordered_map<const IVAsioPeer*, std::unordered_set<std::string>> _proxySourceToDestinations;
+
+    PeerResolver _peerResolver;
 
     // Hold mapping from proxied peer to all proxy peers being served via the key.
     std::unordered_map<IVAsioPeer*, std::unordered_set<IVAsioPeer*>> _peerToProxyPeers;

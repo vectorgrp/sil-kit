@@ -1016,7 +1016,7 @@ void VAsioConnection::ReceiveRemoteParticipantConnectRequest_Registry(IVAsioPeer
     switch (msg.status)
     {
     case RemoteParticipantConnectRequest::REQUEST:
-        destination = FindPeerByName(peer->GetSimulationName(), msg.requestTarget.participantName);
+        destination = FindPeerForRequester(peer, msg.requestTarget.participantName);
 
         if (destination != nullptr)
         {
@@ -1028,7 +1028,7 @@ void VAsioConnection::ReceiveRemoteParticipantConnectRequest_Registry(IVAsioPeer
         break;
     case RemoteParticipantConnectRequest::CONNECTING:
     case RemoteParticipantConnectRequest::FAILED_TO_CONNECT:
-        destination = FindPeerByName(peer->GetSimulationName(), msg.requestOrigin.participantName);
+        destination = FindPeerForRequester(peer, msg.requestOrigin.participantName);
         break;
 
     default:
@@ -1208,6 +1208,22 @@ auto VAsioConnection::FindPeerByName(const std::string& simulationName,
     }
 
     return participantIt->second;
+}
+
+auto VAsioConnection::FindPeerForRequester(const IVAsioPeer* requester,
+                                           const std::string& participantName) const -> IVAsioPeer*
+{
+    if (_peerResolver)
+    {
+        return _peerResolver(requester, participantName);
+    }
+
+    return FindPeerByName(requester->GetSimulationName(), participantName);
+}
+
+void VAsioConnection::SetPeerResolver(PeerResolver resolver)
+{
+    _peerResolver = std::move(resolver);
 }
 
 
@@ -1398,34 +1414,34 @@ void VAsioConnection::OnPeerShutdown(IVAsioPeer* peer)
 
 void VAsioConnection::SendProxyPeerShutdownNotification(IVAsioPeer* peer)
 {
-    const auto& sourceSimulationName = peer->GetSimulationName();
     const auto& sourceParticipantName = peer->GetInfo().participantName;
 
-    const auto simulationIt = _proxySourceToDestinations.find(sourceSimulationName);
-    if (simulationIt != _proxySourceToDestinations.end())
+    const auto proxyDestinationsIt = _proxySourceToDestinations.find(peer);
+    if (proxyDestinationsIt == _proxySourceToDestinations.end())
     {
-        const auto proxyDestinationsIt = simulationIt->second.find(sourceParticipantName);
-        if (proxyDestinationsIt != simulationIt->second.end())
-        {
-            for (const auto& destination : proxyDestinationsIt->second)
-            {
-                auto destinationPeer{FindPeerByName(sourceSimulationName, destination)};
-
-                // if a destination participant name has no associated peer, ignore it, it was already been disconnected
-                if (destinationPeer == nullptr)
-                {
-                    continue;
-                }
-
-                ProxyMessage msg{};
-                msg.source = sourceParticipantName;
-                msg.destination = destination;
-                msg.payload.clear();
-
-                destinationPeer->SendSilKitMsg(SerializedMessage{msg});
-            }
-        }
+        return;
     }
+
+    for (const auto& destination : proxyDestinationsIt->second)
+    {
+        auto destinationPeer{FindPeerForRequester(peer, destination)};
+
+        // if a destination participant name has no associated peer, ignore it, it was already been disconnected
+        if (destinationPeer == nullptr)
+        {
+            continue;
+        }
+
+        ProxyMessage msg{};
+        msg.source = sourceParticipantName;
+        msg.destination = destination;
+        msg.payload.clear();
+
+        destinationPeer->SendSilKitMsg(SerializedMessage{msg});
+    }
+
+    // The association must not outlive the peer, a new peer may be allocated at the same address.
+    _proxySourceToDestinations.erase(proxyDestinationsIt);
 }
 
 void VAsioConnection::RemovePeerFromLinks(IVAsioPeer* peer)
@@ -1449,7 +1465,12 @@ void VAsioConnection::RemovePeerFromConnection(IVAsioPeer* peer)
         auto simulationIt{_participantNameToPeer.find(peer->GetSimulationName())};
         if (simulationIt != _participantNameToPeer.end())
         {
-            simulationIt->second.erase(peer->GetInfo().participantName);
+            // Only remove the entry if it belongs to this peer. Another peer with the same name may be registered.
+            const auto participantIt{simulationIt->second.find(peer->GetInfo().participantName)};
+            if (participantIt != simulationIt->second.end() && participantIt->second == peer)
+            {
+                simulationIt->second.erase(participantIt);
+            }
         }
     }
 
@@ -1548,7 +1569,7 @@ void VAsioConnection::ReceiveProxyMessage(IVAsioPeer* from, SerializedMessage& b
     const bool fromIsSource = from->GetInfo().participantName == proxyMessage.source;
     if (fromIsSource)
     {
-        auto peer{FindPeerByName(fromSimulationName, proxyMessage.destination)};
+        auto peer{FindPeerForRequester(from, proxyMessage.destination)};
         if (peer == nullptr)
         {
             _logger->MakeMessage(Log::Level::Error, TopicOf(*this))
@@ -1565,8 +1586,7 @@ void VAsioConnection::ReceiveProxyMessage(IVAsioPeer* from, SerializedMessage& b
         // We are relaying a message from source to destination and acting as a proxy. Record the association between
         // source and destination. This is used during disconnects, where we create empty ProxyMessages on behalf of
         // the disconnected peer, to inform the destination that the source peer has disconnected.
-        auto [it, inserted] =
-            _proxySourceToDestinations[fromSimulationName][proxyMessage.source].insert(proxyMessage.destination);
+        auto [it, inserted] = _proxySourceToDestinations[from].insert(proxyMessage.destination);
         SILKIT_UNUSED_ARG(it);
 
         if (inserted)

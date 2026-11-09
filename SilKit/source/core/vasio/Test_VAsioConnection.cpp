@@ -130,6 +130,19 @@ MATCHER_P(SubscriptionAcknowledgeMatcher, subscriber,
     return reply.status == SubscriptionAcknowledge::Status::Success && reply.subscriber == subscriber;
 }
 
+MATCHER_P(ConnectRequestMatcher, status, "Deserialize the RemoteParticipantConnectRequest and check its status")
+{
+    SerializedMessage message = arg;
+    return message.Deserialize<RemoteParticipantConnectRequest>().status == status;
+}
+
+MATCHER_P(ProxyMessageMatcher, isShutdownNotification,
+          "Deserialize the ProxyMessage and check whether its payload is empty (shutdown notification)")
+{
+    SerializedMessage message = arg;
+    return message.Deserialize<ProxyMessage>().payload.empty() == isShutdownNotification;
+}
+
 } // namespace
 
 //////////////////////////////////////////////////////////////////////
@@ -165,6 +178,35 @@ protected:
     static auto ReceiveBlobPoolOf(const VAsioConnection& connection) -> const ReceiveBlobPool&
     {
         return connection._receiveBlobPool;
+    }
+
+    static void AssociateParticipantNameAndPeer(VAsioConnection& connection, const std::string& simulationName,
+                                                const std::string& participantName, IVAsioPeer* peer)
+    {
+        connection.AssociateParticipantNameAndPeer(simulationName, participantName, peer);
+    }
+
+    static auto FindPeerByName(const VAsioConnection& connection, const std::string& simulationName,
+                               const std::string& participantName) -> IVAsioPeer*
+    {
+        return connection.FindPeerByName(simulationName, participantName);
+    }
+
+    static void RemovePeerFromConnection(VAsioConnection& connection, IVAsioPeer* peer)
+    {
+        connection.RemovePeerFromConnection(peer);
+    }
+
+    auto MakeRegistryConnection() -> std::unique_ptr<VAsioConnection>
+    {
+        SilKit::Config::ParticipantConfiguration config;
+        config.middleware.registryAsFallbackProxy = true;
+        config.middleware.experimentalRemoteParticipantConnection = true;
+
+        auto connection = std::make_unique<VAsioConnection>(nullptr, &_dummyMetricsManager, config, "Registry",
+                                                            REGISTRY_PARTICIPANT_ID, &_timeProvider);
+        connection->SetLoggerInternal(&_dummyLogger);
+        return connection;
     }
 };
 
@@ -285,4 +327,89 @@ TEST_F(Test_VAsioConnection, receive_buffer_pool_follows_the_configuration)
     VAsioConnection connection{nullptr, &_dummyMetricsManager, config, "Test_VAsioConnection", 1, &_timeProvider};
 
     EXPECT_FALSE(ReceiveBlobPoolOf(connection).IsEnabled());
+}
+
+//////////////////////////////////////////////////////////////////////
+// Peers with identical names (registry with several generations)
+//////////////////////////////////////////////////////////////////////
+
+TEST_F(Test_VAsioConnection, removing_a_peer_keeps_the_entry_of_another_peer_with_the_same_name)
+{
+    MockVAsioPeer2 first;
+    MockVAsioPeer2 second;
+    first._simulationName = "Sim";
+    second._simulationName = "Sim";
+
+    AssociateParticipantNameAndPeer(_connection, "Sim", "MockVAsioPeer", &first);
+    AssociateParticipantNameAndPeer(_connection, "Sim", "MockVAsioPeer", &second);
+    ASSERT_EQ(FindPeerByName(_connection, "Sim", "MockVAsioPeer"), &first);
+
+    // the second peer was never registered under the name, so its removal must not affect the first
+    RemovePeerFromConnection(_connection, &second);
+    EXPECT_EQ(FindPeerByName(_connection, "Sim", "MockVAsioPeer"), &first);
+
+    RemovePeerFromConnection(_connection, &first);
+    EXPECT_EQ(FindPeerByName(_connection, "Sim", "MockVAsioPeer"), nullptr);
+}
+
+TEST_F(Test_VAsioConnection, registry_relays_connect_request_to_the_peer_chosen_by_the_resolver)
+{
+    auto registryConnection = MakeRegistryConnection();
+
+    MockVAsioPeer2 requester;
+    MockVAsioPeer2 targetOfOtherGeneration;
+    MockVAsioPeer2 target;
+    targetOfOtherGeneration._peerInfo.participantName = "Target";
+    target._peerInfo.participantName = "Target";
+
+    registryConnection->SetPeerResolver([&](const IVAsioPeer* resolvedFor, const std::string& name) -> IVAsioPeer* {
+        return (resolvedFor == &requester && name == "Target") ? &target : nullptr;
+    });
+
+    RemoteParticipantConnectRequest request{};
+    request.status = RemoteParticipantConnectRequest::CONNECTING;
+    request.requestOrigin = target.GetInfo();
+    request.requestTarget = requester.GetInfo();
+    SerializedMessage message(request);
+
+    EXPECT_CALL(target, SendSilKitMsg(ConnectRequestMatcher(RemoteParticipantConnectRequest::CONNECTING))).Times(1);
+    EXPECT_CALL(targetOfOtherGeneration, SendSilKitMsg(_)).Times(0);
+
+    registryConnection->OnSocketData(&requester, message);
+}
+
+TEST_F(Test_VAsioConnection, registry_proxy_shutdown_notifies_only_destinations_of_the_shutdown_peer)
+{
+    auto registryConnection = MakeRegistryConnection();
+
+    // two peers with the same name, e.g. from different generations
+    MockVAsioPeer2 sourceA;
+    MockVAsioPeer2 sourceB;
+    MockVAsioPeer2 destinationOfA;
+    MockVAsioPeer2 destinationOfB;
+    sourceA._peerInfo.participantName = "Source";
+    sourceB._peerInfo.participantName = "Source";
+    destinationOfA._peerInfo.participantName = "Destination";
+    destinationOfB._peerInfo.participantName = "Destination";
+
+    registryConnection->SetPeerResolver([&](const IVAsioPeer* resolvedFor, const std::string&) -> IVAsioPeer* {
+        return resolvedFor == &sourceA ? &destinationOfA : &destinationOfB;
+    });
+
+    ProxyMessage proxyMessage{};
+    proxyMessage.source = "Source";
+    proxyMessage.destination = "Destination";
+    proxyMessage.payload = {1, 2, 3};
+
+    // only sourceA proxies a message
+    EXPECT_CALL(destinationOfA, SendSilKitMsg(ProxyMessageMatcher(false))).Times(1);
+    SerializedMessage message(proxyMessage);
+    registryConnection->OnSocketData(&sourceA, message);
+
+    // sourceB never proxied anything, so its shutdown must not be reported to its resolved peer
+    EXPECT_CALL(destinationOfB, SendSilKitMsg(_)).Times(0);
+    registryConnection->OnPeerShutdown(&sourceB);
+
+    EXPECT_CALL(destinationOfA, SendSilKitMsg(ProxyMessageMatcher(true))).Times(1);
+    registryConnection->OnPeerShutdown(&sourceA);
 }

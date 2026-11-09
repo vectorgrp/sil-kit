@@ -1,4 +1,4 @@
-/ SPDX-FileCopyrightText: 2022-2025 Vector Informatik GmbH
+// SPDX-FileCopyrightText: 2022-2025 Vector Informatik GmbH
 //
 // SPDX-License-Identifier: MIT
 
@@ -66,6 +66,9 @@ VAsioRegistry::VAsioRegistry(std::shared_ptr<SilKit::Config::IParticipantConfigu
 
     _connection.RegisterPeerShutdownCallback([this](IVAsioPeer* peer) { OnPeerShutdown(peer); });
 
+    _connection.SetPeerResolver([this](const IVAsioPeer* requester, const std::string& participantName) {
+        return FindPeerInGenerationOf(requester, participantName);
+    });
     _serviceDescriptor.SetParticipantNameAndComputeId(REGISTRY_PARTICIPANT_NAME);
     _serviceDescriptor.SetParticipantId(REGISTRY_PARTICIPANT_ID);
     _serviceDescriptor.SetNetworkName("default");
@@ -248,25 +251,58 @@ auto VAsioRegistry::SelectGeneration(const std::string& simulationName, const st
     return generations.empty() ? FIRST_GENERATION : generations.rbegin()->first + 1;
 }
 
-auto VAsioRegistry::FindGenerationOfPeer(const IVAsioPeer* peer, const std::string& simulationName,
-                                         const std::string& participantName) const -> std::optional<uint64_t>
+auto VAsioRegistry::FindGenerationOfPeer(const IVAsioPeer* peer) const -> std::optional<uint64_t>
 {
-    const auto simulationIt{_simulationNames.find(simulationName)};
-    if (simulationIt == _simulationNames.end())
+    const auto it{_peerLocations.find(peer)};
+    if (it == _peerLocations.end())
     {
         return std::nullopt;
     }
 
-    for (const auto& generationPair : simulationIt->second)
+    return it->second.generation;
+}
+
+auto VAsioRegistry::FindGenerationOfSender(const IServiceEndpoint* from) const -> std::optional<uint64_t>
+{
+    const auto* const remoteEndpoint{dynamic_cast<const RemoteServiceEndpoint*>(from)};
+    if (remoteEndpoint == nullptr || remoteEndpoint->GetPeer() == nullptr)
     {
-        const auto participantIt{generationPair.second.find(participantName)};
-        if (participantIt != generationPair.second.end() && participantIt->second.peer == peer)
-        {
-            return generationPair.first;
-        }
+        return std::nullopt;
     }
 
-    return std::nullopt;
+    return FindGenerationOfPeer(remoteEndpoint->GetPeer());
+}
+
+auto VAsioRegistry::FindPeerInGenerationOf(const IVAsioPeer* requester,
+                                           const std::string& participantName) const -> IVAsioPeer*
+{
+    const auto locationIt{_peerLocations.find(requester)};
+    if (locationIt == _peerLocations.end())
+    {
+        return nullptr;
+    }
+
+    const auto& location{locationIt->second};
+
+    const auto simulationIt{_simulationNames.find(location.simulationName)};
+    if (simulationIt == _simulationNames.end())
+    {
+        return nullptr;
+    }
+
+    const auto generationIt{simulationIt->second.find(location.generation)};
+    if (generationIt == simulationIt->second.end())
+    {
+        return nullptr;
+    }
+
+    const auto participantIt{generationIt->second.find(participantName)};
+    if (participantIt == generationIt->second.end())
+    {
+        return nullptr;
+    }
+
+    return participantIt->second.peer;
 }
 
 void VAsioRegistry::OnParticipantAnnouncement(IVAsioPeer* peer, const ParticipantAnnouncement& announcement)
@@ -292,6 +328,7 @@ void VAsioRegistry::OnParticipantAnnouncement(IVAsioPeer* peer, const Participan
     participantInfo.peer = peer;
     participantInfo.peerInfo = peerInfo;
     _simulationNames[announcement.simulationName][generation][peerInfo.participantName] = participantInfo;
+    _peerLocations[peer] = PeerLocation{announcement.simulationName, generation};
 
     if (_registryEventListener != nullptr)
     {
@@ -343,7 +380,7 @@ void VAsioRegistry::OnPeerShutdown(IVAsioPeer* peer)
     const auto& simulationName{peer->GetSimulationName()};
     const auto& participantName{peer->GetInfo().participantName};
 
-    const auto generation = FindGenerationOfPeer(peer, simulationName, participantName);
+    const auto generation = FindGenerationOfPeer(peer);
 
     if (!generation.has_value())
     {
@@ -352,6 +389,8 @@ void VAsioRegistry::OnPeerShutdown(IVAsioPeer* peer)
             .Dispatch();
         return;
     }
+
+    _peerLocations.erase(peer);
 
     GetLoggerInternal()->MakeMessage(Log::Level::Debug, TopicOf(*this))
         .SetMessage("Peer '{}' has shut down", participantName)
