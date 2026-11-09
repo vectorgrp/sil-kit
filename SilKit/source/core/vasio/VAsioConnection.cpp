@@ -58,6 +58,14 @@ auto printUris(const std::vector<std::string>& uris)
     return fmt::format("{}", fmt::join(uris, ", "));
 }
 
+//! Peers that were not assigned a generation (everything but peers of the registry) are in generation 0.
+constexpr uint64_t NoGeneration{0};
+
+auto GenerationOf(const SilKit::Core::IVAsioPeer& peer) -> uint64_t
+{
+    return peer.GetServiceDescriptor().GetGeneration().value_or(NoGeneration);
+}
+
 //! Note that local ipc (unix domain) sockets have a path limit (108 characters, typically)
 // Using the current working directory as part of a domain socket path might result in
 // a runtime exception. We create a unique temporary file path, with a fixed length.
@@ -1172,7 +1180,7 @@ void VAsioConnection::AssociateParticipantNameAndPeer(const std::string& simulat
 {
     {
         std::lock_guard<decltype(_mutex)> lock{_mutex};
-        _participantNameToPeer[simulationName].insert({participantName, peer});
+        _participantNameToPeer[simulationName][GenerationOf(*peer)].insert({participantName, peer});
     }
 
     if (_config.experimental.metrics.sinks.empty())
@@ -1190,40 +1198,36 @@ void VAsioConnection::AssociateParticipantNameAndPeer(const std::string& simulat
     peer->InitializeMetrics(_metricsManager);
 }
 
-auto VAsioConnection::FindPeerByName(const std::string& simulationName,
-                                     const std::string& participantName) const -> IVAsioPeer*
+auto VAsioConnection::FindPeerForRequester(const IVAsioPeer* requester,
+                                           const std::string& participantName) const -> IVAsioPeer*
+{
+    return FindPeer(requester->GetSimulationName(), GenerationOf(*requester), participantName);
+}
+
+auto VAsioConnection::FindPeer(const std::string& simulationName, uint64_t generation,
+                               const std::string& participantName) const -> IVAsioPeer*
 {
     std::lock_guard<decltype(_mutex)> lock{_mutex};
 
-    auto simulationIt{_participantNameToPeer.find(simulationName)};
+    const auto simulationIt{_participantNameToPeer.find(simulationName)};
     if (simulationIt == _participantNameToPeer.end())
     {
         return nullptr;
     }
 
-    auto participantIt{simulationIt->second.find(participantName)};
-    if (participantIt == simulationIt->second.end())
+    const auto generationIt{simulationIt->second.find(generation)};
+    if (generationIt == simulationIt->second.end())
+    {
+        return nullptr;
+    }
+
+    const auto participantIt{generationIt->second.find(participantName)};
+    if (participantIt == generationIt->second.end())
     {
         return nullptr;
     }
 
     return participantIt->second;
-}
-
-auto VAsioConnection::FindPeerForRequester(const IVAsioPeer* requester,
-                                           const std::string& participantName) const -> IVAsioPeer*
-{
-    if (_peerResolver)
-    {
-        return _peerResolver(requester, participantName);
-    }
-
-    return FindPeerByName(requester->GetSimulationName(), participantName);
-}
-
-void VAsioConnection::SetPeerResolver(PeerResolver resolver)
-{
-    _peerResolver = std::move(resolver);
 }
 
 
@@ -1462,14 +1466,23 @@ void VAsioConnection::RemovePeerFromConnection(IVAsioPeer* peer)
     {
         std::lock_guard<decltype(_mutex)> lock{_mutex};
 
-        auto simulationIt{_participantNameToPeer.find(peer->GetSimulationName())};
+        const auto simulationIt{_participantNameToPeer.find(peer->GetSimulationName())};
         if (simulationIt != _participantNameToPeer.end())
         {
-            // Only remove the entry if it belongs to this peer. Another peer with the same name may be registered.
-            const auto participantIt{simulationIt->second.find(peer->GetInfo().participantName)};
-            if (participantIt != simulationIt->second.end() && participantIt->second == peer)
+            const auto generationIt{simulationIt->second.find(GenerationOf(*peer))};
+            if (generationIt != simulationIt->second.end())
             {
-                simulationIt->second.erase(participantIt);
+                // Only remove the entry if it belongs to this peer. Another peer with the same name may be registered.
+                const auto participantIt{generationIt->second.find(peer->GetInfo().participantName)};
+                if (participantIt != generationIt->second.end() && participantIt->second == peer)
+                {
+                    generationIt->second.erase(participantIt);
+                }
+
+                if (generationIt->second.empty())
+                {
+                    simulationIt->second.erase(generationIt);
+                }
             }
         }
     }
@@ -1606,7 +1619,7 @@ void VAsioConnection::ReceiveProxyMessage(IVAsioPeer* from, SerializedMessage& b
     const bool isDestination = _participantName == proxyMessage.destination;
     if (isDestination)
     {
-        auto peer{FindPeerByName(_simulationName, proxyMessage.source)};
+        auto peer{FindPeer(_simulationName, NoGeneration, proxyMessage.source)};
 
         if (peer == nullptr)
         {
@@ -1888,17 +1901,20 @@ void VAsioConnection::AddAsyncSubscriptionsCompletionHandler(std::function<void(
     }
 }
 
-std::vector<std::string> VAsioConnection::GetConnectedParticipantsNames()
+std::set<std::string> VAsioConnection::GetConnectedParticipantsNames()
 {
-    std::vector<std::string> participants;
+    std::set<std::string> participants;
 
     {
         std::unique_lock<decltype(_mutex)> lock{_mutex};
-        for (const auto& item : _participantNameToPeer)
+        for (const auto& simulation : _participantNameToPeer)
         {
-            for (const auto& peer : item.second)
+            for (const auto& generation : simulation.second)
             {
-                participants.push_back(peer.first);
+                for (const auto& peer : generation.second)
+                {
+                    participants.insert(peer.first);
+                }
             }
         }
     }
@@ -1976,7 +1992,7 @@ void VAsioConnection::AsyncSubscriptionsCompleted()
 
 bool VAsioConnection::ParticipantHasCapability(const std::string& participantName, const std::string& capability) const
 {
-    const auto peer{FindPeerByName(_simulationName, participantName)};
+    const auto peer{FindPeer(_simulationName, NoGeneration, participantName)};
     if (peer == nullptr)
     {
         _logger->MakeMessage(Log::Level::Warn, TopicOf(*this))

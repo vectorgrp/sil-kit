@@ -30,22 +30,13 @@ struct RemoteServiceEndpoint : IServiceEndpoint
 
     // NB: referenced, not copied, to avoid a deep copy per received message. Instances only live
     //     for the synchronous dispatch of one message.
-    RemoteServiceEndpoint(const ServiceDescriptor& descriptor, const IVAsioPeer* peer = nullptr)
+    RemoteServiceEndpoint(const ServiceDescriptor& descriptor)
         : _serviceDescriptor{descriptor}
-        , _peer{peer}
     {
-    }
-
-    //! The peer the message was received from. The service descriptor identifies a participant only by its name,
-    //! which is ambiguous if several peers with the same name are connected (e.g. in the registry).
-    auto GetPeer() const -> const IVAsioPeer*
-    {
-        return _peer;
     }
 
 private:
     const ServiceDescriptor& _serviceDescriptor;
-    const IVAsioPeer* _peer;
 };
 
 class MessageBuffer;
@@ -116,14 +107,14 @@ auto VAsioReceiver<MsgT>::GetDescriptor() const -> const VAsioMsgSubscriber&
 }
 
 template <class MsgT>
-void VAsioReceiver<MsgT>::ReceiveRawMsg(IVAsioPeer* from, const ServiceDescriptor& descriptor,
+void VAsioReceiver<MsgT>::ReceiveRawMsg(IVAsioPeer* /*from*/, const ServiceDescriptor& descriptor,
                                         SerializedMessage& buffer)
 {
     MsgT msg = buffer.Deserialize<MsgT>();
 
     Services::TraceRx(_logger, this, msg, descriptor);
 
-    auto remoteId = RemoteServiceEndpoint(descriptor, from);
+    auto remoteId = RemoteServiceEndpoint(descriptor);
     _link->DistributeRemoteSilKitMessage(&remoteId, std::move(msg));
 }
 

@@ -10,6 +10,7 @@ namespace Core {
 namespace Discovery {
 
 const std::string simulationName = "participant.simulationName";
+const std::string generation = "participant.generation";
 
 // controller-specific keys
 const std::string controllerType = "controller.type";

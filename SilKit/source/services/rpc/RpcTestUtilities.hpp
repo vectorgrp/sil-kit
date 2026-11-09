@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <set>
 #include <vector>
 #include <typeinfo>
 
@@ -132,10 +133,9 @@ struct MockConnection
         return 0;
     }
 
-    std::vector<std::string> GetConnectedParticipantsNames()
+    std::set<std::string> GetConnectedParticipantsNames()
     {
-        std::vector<std::string> tmp;
-        return tmp;
+        return {};
     }
 
     size_t GetNumberOfRemoteReceivers(const SilKit::Core::IServiceEndpoint* /*service*/,

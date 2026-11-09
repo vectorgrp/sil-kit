@@ -5,7 +5,6 @@
 #pragma once
 
 #include <memory>
-#include <functional>
 #include <vector>
 #include <unordered_map>
 #include <unordered_set>
@@ -94,12 +93,6 @@ public:
     auto GetLoggerInternal() -> SilKit::Services::Logging::ILoggerInternal*;
 
     void JoinSimulation(std::string registryUri);
-
-    //! Resolves a participant name to a peer on behalf of a requesting peer (used when relaying messages between
-    //! peers, i.e. by the registry). If unset, the name is looked up within the simulation of the requester.
-    //! This allows the registry to resolve names within the scope of a generation.
-    using PeerResolver = std::function<IVAsioPeer*(const IVAsioPeer* requester, const std::string& participantName)>;
-    void SetPeerResolver(PeerResolver resolver);
 
 private: // JoinSimulation Helper Functions
     void OpenParticipantAcceptors(const std::string& connectUri);
@@ -214,7 +207,7 @@ public:
         return _peers.size();
     };
 
-    std::vector<std::string> GetConnectedParticipantsNames();
+    std::set<std::string> GetConnectedParticipantsNames();
 
     auto GetNumberOfRemoteReceivers(const IServiceEndpoint* service, const std::string& msgTypeName) -> size_t;
     auto GetParticipantNamesOfRemoteReceivers(const IServiceEndpoint* service,
@@ -286,7 +279,9 @@ private:
 
     void AssociateParticipantNameAndPeer(const std::string& simulationName, const std::string& participantName,
                                          IVAsioPeer* peer);
-    auto FindPeerByName(const std::string& simulationName, const std::string& participantName) const -> IVAsioPeer*;
+    auto FindPeer(const std::string& simulationName, uint64_t generation,
+                  const std::string& participantName) const -> IVAsioPeer*;
+    //! Finds the peer with the given name in the same simulation and generation as the requester.
     auto FindPeerForRequester(const IVAsioPeer* requester, const std::string& participantName) const -> IVAsioPeer*;
 
     // Subscriptions completed Helper
@@ -576,14 +571,13 @@ private:
     //We violate the strict layering architecture, so that we can cleanly shutdown without false error messages.
     std::atomic_bool _isShuttingDown{false};
 
-    // Hold mapping from simulationName to mapping from participantName to peer
-    std::unordered_map<std::string, std::unordered_map<std::string, IVAsioPeer*>> _participantNameToPeer;
+    // Maps simulationName -> generation -> participantName -> peer
+    // Only the registry assigns generations, all other peers are in generation 0.
+    std::unordered_map<std::string, std::map<uint64_t, std::unordered_map<std::string, IVAsioPeer*>>>
+        _participantNameToPeer;
 
-    // Hold mapping from proxy source peer to the names of all proxy destinations (used by registry for shutdown
-    // information). Keyed by peer, since several peers with the same name can be connected to the registry.
+    // Hold mapping from proxy source to all proxy destinations (used by registry for shutdown information)
     std::unordered_map<const IVAsioPeer*, std::unordered_set<std::string>> _proxySourceToDestinations;
-
-    PeerResolver _peerResolver;
 
     // Hold mapping from proxied peer to all proxy peers being served via the key.
     std::unordered_map<IVAsioPeer*, std::unordered_set<IVAsioPeer*>> _peerToProxyPeers;

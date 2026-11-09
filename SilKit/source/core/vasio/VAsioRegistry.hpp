@@ -70,24 +70,16 @@ private:
     using Generations = std::map<uint64_t, ConnectedParticipants>;
     using SimulationNames = std::unordered_map<std::string, Generations>;
 
-    // The location of a connected peer. Names are not unique across generations, so peers are identified by pointer.
-    struct PeerLocation
-    {
-        std::string simulationName;
-        uint64_t generation;
-    };
-    using PeerLocations = std::unordered_map<const IVAsioPeer*, PeerLocation>;
-
 private:
     // ----------------------------------------
     // private methods
     bool ShouldEnterGeneration(const std::string& participantName, const ConnectedParticipants& generation) const;
     auto SelectGeneration(const std::string& simulationName, const std::string& participantName) const -> uint64_t;
-    auto FindGenerationOfPeer(const IVAsioPeer* peer) const -> std::optional<uint64_t>;
-    //! The generation of the peer that sent a message received via ReceiveMsg.
-    auto FindGenerationOfSender(const IServiceEndpoint* from) const -> std::optional<uint64_t>;
-    //! The peer with the given name in the same simulation and generation as the requester.
-    auto FindPeerInGenerationOf(const IVAsioPeer* requester, const std::string& participantName) const -> IVAsioPeer*;
+    //! Whether this peer, and not another one with the same name, is registered in its generation.
+    //! This is most likely only defensive and not a guard that is required: the generation stays stamped on a peer
+    //! after it was removed, but a peer is removed only once, on its shutdown. No path is known on which a peer that is
+    //! no longer registered is shut down again while another peer with the same name is registered.
+    bool IsPeerRegistered(const IVAsioPeer* peer) const;
 
     void OnParticipantAnnouncement(IVAsioPeer* peer, const ParticipantAnnouncement& announcement);
     void SendKnownParticipants(IVAsioPeer* peer, const std::string& simulationName, uint64_t generation);
@@ -118,7 +110,6 @@ private:
     std::unique_ptr<Services::Logging::ILoggerInternal> _logger;
     IRegistryEventListener* _registryEventListener{nullptr};
     SimulationNames _simulationNames;
-    PeerLocations _peerLocations;
     std::function<void()> _onAllParticipantsConnected;
     std::function<void()> _onAllParticipantsDisconnected;
     std::shared_ptr<SilKit::Config::ParticipantConfiguration> _vasioConfig;

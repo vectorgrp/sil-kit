@@ -186,10 +186,19 @@ protected:
         connection.AssociateParticipantNameAndPeer(simulationName, participantName, peer);
     }
 
-    static auto FindPeerByName(const VAsioConnection& connection, const std::string& simulationName,
-                               const std::string& participantName) -> IVAsioPeer*
+    // the generation of all peers that are not peers of a registry
+    static constexpr uint64_t NoGeneration{0};
+
+    static auto FindPeer(const VAsioConnection& connection, const std::string& simulationName, uint64_t generation,
+                         const std::string& participantName) -> IVAsioPeer*
     {
-        return connection.FindPeerByName(simulationName, participantName);
+        return connection.FindPeer(simulationName, generation, participantName);
+    }
+
+    static auto FindPeerForRequester(const VAsioConnection& connection, const IVAsioPeer* requester,
+                                     const std::string& participantName) -> IVAsioPeer*
+    {
+        return connection.FindPeerForRequester(requester, participantName);
     }
 
     static void RemovePeerFromConnection(VAsioConnection& connection, IVAsioPeer* peer)
@@ -342,29 +351,101 @@ TEST_F(Test_VAsioConnection, removing_a_peer_keeps_the_entry_of_another_peer_wit
 
     AssociateParticipantNameAndPeer(_connection, "Sim", "MockVAsioPeer", &first);
     AssociateParticipantNameAndPeer(_connection, "Sim", "MockVAsioPeer", &second);
-    ASSERT_EQ(FindPeerByName(_connection, "Sim", "MockVAsioPeer"), &first);
+    ASSERT_EQ(FindPeer(_connection, "Sim", NoGeneration, "MockVAsioPeer"), &first);
 
-    // the second peer was never registered under the name, so its removal must not affect the first
     RemovePeerFromConnection(_connection, &second);
-    EXPECT_EQ(FindPeerByName(_connection, "Sim", "MockVAsioPeer"), &first);
+    EXPECT_EQ(FindPeer(_connection, "Sim", NoGeneration, "MockVAsioPeer"), &first);
 
     RemovePeerFromConnection(_connection, &first);
-    EXPECT_EQ(FindPeerByName(_connection, "Sim", "MockVAsioPeer"), nullptr);
+    EXPECT_EQ(FindPeer(_connection, "Sim", NoGeneration, "MockVAsioPeer"), nullptr);
 }
 
-TEST_F(Test_VAsioConnection, registry_relays_connect_request_to_the_peer_chosen_by_the_resolver)
+TEST_F(Test_VAsioConnection, peers_with_the_same_name_in_different_generations_are_registered_separately)
+{
+    MockVAsioPeer2 requesterOfFirst;
+    MockVAsioPeer2 requesterOfSecond;
+    MockVAsioPeer2 first;
+    MockVAsioPeer2 second;
+    requesterOfFirst._serviceDescriptor.SetGeneration(1);
+    first._serviceDescriptor.SetGeneration(1);
+    requesterOfSecond._serviceDescriptor.SetGeneration(2);
+    second._serviceDescriptor.SetGeneration(2);
+
+    AssociateParticipantNameAndPeer(_connection, "", "MockVAsioPeer", &first);
+    AssociateParticipantNameAndPeer(_connection, "", "MockVAsioPeer", &second);
+
+    EXPECT_EQ(FindPeerForRequester(_connection, &requesterOfFirst, "MockVAsioPeer"), &first);
+    EXPECT_EQ(FindPeerForRequester(_connection, &requesterOfSecond, "MockVAsioPeer"), &second);
+
+    // peers without a generation, i.e. everything but the peers of a registry, are not found by generation
+    EXPECT_EQ(FindPeer(_connection, "", NoGeneration, "MockVAsioPeer"), nullptr);
+
+    RemovePeerFromConnection(_connection, &first);
+    EXPECT_EQ(FindPeerForRequester(_connection, &requesterOfFirst, "MockVAsioPeer"), nullptr);
+    EXPECT_EQ(FindPeerForRequester(_connection, &requesterOfSecond, "MockVAsioPeer"), &second);
+}
+
+TEST_F(Test_VAsioConnection, connected_participant_names_contain_each_name_once)
+{
+    MockVAsioPeer2 firstGeneration;
+    MockVAsioPeer2 secondGeneration;
+    MockVAsioPeer2 other;
+    other._peerInfo.participantName = "Other";
+    firstGeneration._serviceDescriptor.SetGeneration(1);
+    secondGeneration._serviceDescriptor.SetGeneration(2);
+
+    AssociateParticipantNameAndPeer(_connection, "Sim", "MockVAsioPeer", &firstGeneration);
+    AssociateParticipantNameAndPeer(_connection, "Sim", "MockVAsioPeer", &secondGeneration);
+    AssociateParticipantNameAndPeer(_connection, "Sim", "Other", &other);
+
+    EXPECT_THAT(_connection.GetConnectedParticipantsNames(), testing::ElementsAre("MockVAsioPeer", "Other"));
+}
+
+TEST_F(Test_VAsioConnection, generation_assigned_while_handling_the_announcement_is_used_for_the_name_lookup)
+{
+    // The registry assigns the generation in a handler of the announcement, which runs before the peer is
+    // associated with its name.
+    uint64_t generation{0};
+    _connection.RegisterMessageReceiver([&generation](IVAsioPeer* peer, ParticipantAnnouncement) {
+        dynamic_cast<MockVAsioPeer2*>(peer)->_serviceDescriptor.SetGeneration(generation);
+    });
+
+    ParticipantAnnouncement announcement{};
+    announcement.peerInfo = _from.GetInfo();
+    SerializedMessage message(announcement);
+
+    MockVAsioPeer2 second;
+    MockVAsioPeer2 requesterOfFirst;
+    MockVAsioPeer2 requesterOfSecond;
+    requesterOfFirst._serviceDescriptor.SetGeneration(1);
+    requesterOfSecond._serviceDescriptor.SetGeneration(2);
+
+    generation = 1;
+    _connection.OnSocketData(&_from, message);
+    generation = 2;
+    SerializedMessage secondMessage(announcement);
+    _connection.OnSocketData(&second, secondMessage);
+
+    EXPECT_EQ(FindPeerForRequester(_connection, &requesterOfFirst, "MockVAsioPeer"), &_from);
+    EXPECT_EQ(FindPeerForRequester(_connection, &requesterOfSecond, "MockVAsioPeer"), &second);
+}
+
+TEST_F(Test_VAsioConnection, registry_relays_connect_request_within_the_generation_of_the_requester)
 {
     auto registryConnection = MakeRegistryConnection();
 
     MockVAsioPeer2 requester;
-    MockVAsioPeer2 targetOfOtherGeneration;
     MockVAsioPeer2 target;
-    targetOfOtherGeneration._peerInfo.participantName = "Target";
+    MockVAsioPeer2 targetOfOtherGeneration;
+    requester._serviceDescriptor.SetGeneration(1);
     target._peerInfo.participantName = "Target";
+    target._serviceDescriptor.SetGeneration(1);
+    targetOfOtherGeneration._peerInfo.participantName = "Target";
+    targetOfOtherGeneration._serviceDescriptor.SetGeneration(2);
 
-    registryConnection->SetPeerResolver([&](const IVAsioPeer* resolvedFor, const std::string& name) -> IVAsioPeer* {
-        return (resolvedFor == &requester && name == "Target") ? &target : nullptr;
-    });
+    // the peer of the other generation is registered first, so that it would win if the generation was ignored
+    AssociateParticipantNameAndPeer(*registryConnection, "", "Target", &targetOfOtherGeneration);
+    AssociateParticipantNameAndPeer(*registryConnection, "", "Target", &target);
 
     RemoteParticipantConnectRequest request{};
     request.status = RemoteParticipantConnectRequest::CONNECTING;
@@ -382,7 +463,7 @@ TEST_F(Test_VAsioConnection, registry_proxy_shutdown_notifies_only_destinations_
 {
     auto registryConnection = MakeRegistryConnection();
 
-    // two peers with the same name, e.g. from different generations
+    // peers with the same names in two generations
     MockVAsioPeer2 sourceA;
     MockVAsioPeer2 sourceB;
     MockVAsioPeer2 destinationOfA;
@@ -391,23 +472,29 @@ TEST_F(Test_VAsioConnection, registry_proxy_shutdown_notifies_only_destinations_
     sourceB._peerInfo.participantName = "Source";
     destinationOfA._peerInfo.participantName = "Destination";
     destinationOfB._peerInfo.participantName = "Destination";
+    sourceA._serviceDescriptor.SetGeneration(1);
+    destinationOfA._serviceDescriptor.SetGeneration(1);
+    sourceB._serviceDescriptor.SetGeneration(2);
+    destinationOfB._serviceDescriptor.SetGeneration(2);
 
-    registryConnection->SetPeerResolver([&](const IVAsioPeer* resolvedFor, const std::string&) -> IVAsioPeer* {
-        return resolvedFor == &sourceA ? &destinationOfA : &destinationOfB;
-    });
+    // the peers of the second generation are registered first, so that they would win if the generation was ignored
+    AssociateParticipantNameAndPeer(*registryConnection, "", "Source", &sourceB);
+    AssociateParticipantNameAndPeer(*registryConnection, "", "Source", &sourceA);
+    AssociateParticipantNameAndPeer(*registryConnection, "", "Destination", &destinationOfB);
+    AssociateParticipantNameAndPeer(*registryConnection, "", "Destination", &destinationOfA);
 
     ProxyMessage proxyMessage{};
     proxyMessage.source = "Source";
     proxyMessage.destination = "Destination";
     proxyMessage.payload = {1, 2, 3};
 
-    // only sourceA proxies a message
+    // only sourceA proxies a message, and it is delivered to the destination of its own generation
     EXPECT_CALL(destinationOfA, SendSilKitMsg(ProxyMessageMatcher(false))).Times(1);
+    EXPECT_CALL(destinationOfB, SendSilKitMsg(_)).Times(0);
     SerializedMessage message(proxyMessage);
     registryConnection->OnSocketData(&sourceA, message);
 
-    // sourceB never proxied anything, so its shutdown must not be reported to its resolved peer
-    EXPECT_CALL(destinationOfB, SendSilKitMsg(_)).Times(0);
+    // sourceB never proxied anything, so its shutdown must not be reported to anyone
     registryConnection->OnPeerShutdown(&sourceB);
 
     EXPECT_CALL(destinationOfA, SendSilKitMsg(ProxyMessageMatcher(true))).Times(1);

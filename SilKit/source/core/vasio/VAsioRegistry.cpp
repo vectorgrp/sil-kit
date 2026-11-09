@@ -17,6 +17,17 @@
 
 #include "core/internal/traits/SilKitServiceConfigTraits.hpp"
 
+#include "silkit/services/orchestration/string_utils.hpp"
+#include "core/service/ServiceDatatypes.hpp"
+
+#include <atomic>
+#include <chrono>
+#include <cstdlib>
+#include <iostream>
+#include <sstream>
+#include <thread>
+#include <fmt/format.h>
+
 
 namespace Log = SilKit::Services::Logging;
 
@@ -27,6 +38,45 @@ namespace Core {
 namespace {
 
 constexpr uint64_t FIRST_GENERATION{1};
+
+// TEMPORARY TRACE INSTRUMENTATION (enabled by the environment variable SILKIT_REGISTRY_TRACE=1)
+// Prints everything the registry learns from ParticipantStatus, WorkflowConfiguration and ServiceDiscoveryEvent.
+auto TraceEnabled() -> bool
+{
+    static const bool enabled{[] {
+        const char* value = std::getenv("SILKIT_REGISTRY_TRACE");
+        return value != nullptr && std::string{value} != "0";
+    }()};
+    return enabled;
+}
+
+void TraceEmit(const char* kind, const IServiceEndpoint* from, const std::string& details)
+{
+    static std::atomic<uint64_t> sequence{0};
+
+    const auto now{std::chrono::duration_cast<std::chrono::microseconds>(
+        std::chrono::system_clock::now().time_since_epoch()).count()};
+
+    std::string senderInfo{"<null sender>"};
+    if (from != nullptr)
+    {
+        const auto& sd{from->GetServiceDescriptor()};
+        const auto generation{sd.GetGeneration()};
+        senderInfo = fmt::format("sender='{}' sim='{}' gen={} service='{}' (id={})", sd.GetParticipantName(),
+                                 sd.GetSimulationName(), generation ? std::to_string(*generation) : "none",
+                                 sd.GetServiceName(), sd.GetServiceId());
+    }
+
+    // single write, so that lines of concurrent registries do not interleave
+    std::cerr << fmt::format("[REGISTRY-TRACE #{} t={}us thread={}] {} | {} | {}\n", sequence++, now,
+                             std::hash<std::thread::id>{}(std::this_thread::get_id()) % 100000, kind, senderInfo,
+                             details);
+}
+
+auto TraceTimePoint(std::chrono::system_clock::time_point tp) -> int64_t
+{
+    return std::chrono::duration_cast<std::chrono::microseconds>(tp.time_since_epoch()).count();
+}
 
 } // namespace
 
@@ -66,9 +116,6 @@ VAsioRegistry::VAsioRegistry(std::shared_ptr<SilKit::Config::IParticipantConfigu
 
     _connection.RegisterPeerShutdownCallback([this](IVAsioPeer* peer) { OnPeerShutdown(peer); });
 
-    _connection.SetPeerResolver([this](const IVAsioPeer* requester, const std::string& participantName) {
-        return FindPeerInGenerationOf(requester, participantName);
-    });
     _serviceDescriptor.SetParticipantNameAndComputeId(REGISTRY_PARTICIPANT_NAME);
     _serviceDescriptor.SetParticipantId(REGISTRY_PARTICIPANT_ID);
     _serviceDescriptor.SetNetworkName("default");
@@ -251,58 +298,28 @@ auto VAsioRegistry::SelectGeneration(const std::string& simulationName, const st
     return generations.empty() ? FIRST_GENERATION : generations.rbegin()->first + 1;
 }
 
-auto VAsioRegistry::FindGenerationOfPeer(const IVAsioPeer* peer) const -> std::optional<uint64_t>
+bool VAsioRegistry::IsPeerRegistered(const IVAsioPeer* peer) const
 {
-    const auto it{_peerLocations.find(peer)};
-    if (it == _peerLocations.end())
+    const auto generation{peer->GetServiceDescriptor().GetGeneration()};
+    if (!generation.has_value())
     {
-        return std::nullopt;
+        return false;
     }
 
-    return it->second.generation;
-}
-
-auto VAsioRegistry::FindGenerationOfSender(const IServiceEndpoint* from) const -> std::optional<uint64_t>
-{
-    const auto* const remoteEndpoint{dynamic_cast<const RemoteServiceEndpoint*>(from)};
-    if (remoteEndpoint == nullptr || remoteEndpoint->GetPeer() == nullptr)
-    {
-        return std::nullopt;
-    }
-
-    return FindGenerationOfPeer(remoteEndpoint->GetPeer());
-}
-
-auto VAsioRegistry::FindPeerInGenerationOf(const IVAsioPeer* requester,
-                                           const std::string& participantName) const -> IVAsioPeer*
-{
-    const auto locationIt{_peerLocations.find(requester)};
-    if (locationIt == _peerLocations.end())
-    {
-        return nullptr;
-    }
-
-    const auto& location{locationIt->second};
-
-    const auto simulationIt{_simulationNames.find(location.simulationName)};
+    const auto simulationIt{_simulationNames.find(peer->GetSimulationName())};
     if (simulationIt == _simulationNames.end())
     {
-        return nullptr;
+        return false;
     }
 
-    const auto generationIt{simulationIt->second.find(location.generation)};
+    const auto generationIt{simulationIt->second.find(*generation)};
     if (generationIt == simulationIt->second.end())
     {
-        return nullptr;
+        return false;
     }
 
-    const auto participantIt{generationIt->second.find(participantName)};
-    if (participantIt == generationIt->second.end())
-    {
-        return nullptr;
-    }
-
-    return participantIt->second.peer;
+    const auto participantIt{generationIt->second.find(peer->GetInfo().participantName)};
+    return participantIt != generationIt->second.end() && participantIt->second.peer == peer;
 }
 
 void VAsioRegistry::OnParticipantAnnouncement(IVAsioPeer* peer, const ParticipantAnnouncement& announcement)
@@ -317,6 +334,42 @@ void VAsioRegistry::OnParticipantAnnouncement(IVAsioPeer* peer, const Participan
 
     const auto generation{SelectGeneration(announcement.simulationName, peerInfo.participantName)};
 
+    if (TraceEnabled())
+    {
+        // snapshot of the registry state before this participant is registered
+        std::string known;
+        const auto simulationIt{_simulationNames.find(announcement.simulationName)};
+        if (simulationIt != _simulationNames.end())
+        {
+            for (const auto& generationPair : simulationIt->second)
+            {
+                std::string names;
+                for (const auto& participantPair : generationPair.second)
+                {
+                    names += (names.empty() ? "" : ", ") + participantPair.first;
+                }
+                known += fmt::format("{}gen {}: [{}]", known.empty() ? "" : "; ", generationPair.first, names);
+            }
+        }
+
+        std::string uris;
+        for (const auto& uri : peerInfo.acceptorUris)
+        {
+            uris += (uris.empty() ? "'" : ", '") + uri + "'";
+        }
+
+        TraceEmit("ParticipantAnnouncement", nullptr,
+                  fmt::format("participant='{}' participantId={} simulationName='{}' protocol={}.{} "
+                              "announcementHeader={}.{} capabilities='{}' acceptorUris=[{}] remoteAddress='{}' "
+                              "localAddress='{}' peerSimulationName='{}' | selectedGeneration={} | "
+                              "registryStateBefore={{{}}}",
+                              peerInfo.participantName, peerInfo.participantId, announcement.simulationName,
+                              peer->GetProtocolVersion().major, peer->GetProtocolVersion().minor,
+                              announcement.messageHeader.versionHigh, announcement.messageHeader.versionLow,
+                              peerInfo.capabilities, uris, peer->GetRemoteAddress(), peer->GetLocalAddress(),
+                              peer->GetSimulationName(), generation, known));
+    }
+
     GetLoggerInternal()->MakeMessage(Log::Level::Debug, TopicOf(*this))
         .SetMessage("Participant '{}' in simulation '{}' is placed into generation {}", peerInfo.participantName,
                     announcement.simulationName, generation)
@@ -328,7 +381,13 @@ void VAsioRegistry::OnParticipantAnnouncement(IVAsioPeer* peer, const Participan
     participantInfo.peer = peer;
     participantInfo.peerInfo = peerInfo;
     _simulationNames[announcement.simulationName][generation][peerInfo.participantName] = participantInfo;
-    _peerLocations[peer] = PeerLocation{announcement.simulationName, generation};
+
+    // The generation is stamped on the service descriptor of the peer, like the simulation name, so that receivers of
+    // messages and the connection can read it from there. Names are not unique across generations, so peers are
+    // identified by pointer.
+    auto peerDescriptor{peer->GetServiceDescriptor()};
+    peerDescriptor.SetGeneration(generation);
+    peer->SetServiceDescriptor(peerDescriptor);
 
     if (_registryEventListener != nullptr)
     {
@@ -380,17 +439,25 @@ void VAsioRegistry::OnPeerShutdown(IVAsioPeer* peer)
     const auto& simulationName{peer->GetSimulationName()};
     const auto& participantName{peer->GetInfo().participantName};
 
-    const auto generation = FindGenerationOfPeer(peer);
+    const auto generation{peer->GetServiceDescriptor().GetGeneration()};
 
-    if (!generation.has_value())
+    if (TraceEnabled())
+    {
+        TraceEmit("PeerShutdown", peer,
+                  fmt::format("participant='{}' simulationName='{}' generation={} registered={}", participantName,
+                              simulationName, generation ? std::to_string(*generation) : "none",
+                              IsPeerRegistered(peer)));
+    }
+
+    // The generation is stamped on the peer and outlives its registration. Only a peer that is still registered
+    // under its name in its generation is removed, a different peer with the same name must not be affected.
+    if (!IsPeerRegistered(peer))
     {
         GetLoggerInternal()->MakeMessage(Log::Level::Error, TopicOf(*this))
             .SetMessage("Peer '{}' has shut down, which had no participant information", participantName)
             .Dispatch();
         return;
     }
-
-    _peerLocations.erase(peer);
 
     GetLoggerInternal()->MakeMessage(Log::Level::Debug, TopicOf(*this))
         .SetMessage("Peer '{}' has shut down", participantName)
@@ -467,6 +534,17 @@ void VAsioRegistry::SetupMetrics()
 void VAsioRegistry::ReceiveMsg(const SilKit::Core::IServiceEndpoint* from,
                                const SilKit::Services::Orchestration::ParticipantStatus& msg)
 {
+    if (TraceEnabled())
+    {
+        TraceEmit("ParticipantStatus", from,
+                  fmt::format("status.participantName='{}' state={} enterReason='{}' enterTime={}us refreshTime={}us "
+                              "senderMatchesStatusParticipant={}",
+                              msg.participantName, to_string(msg.state), msg.enterReason,
+                              TraceTimePoint(msg.enterTime), TraceTimePoint(msg.refreshTime),
+                              from != nullptr && from->GetServiceDescriptor().GetParticipantName()
+                                  == msg.participantName));
+    }
+
     if (_registryEventListener == nullptr)
     {
         return;
@@ -481,6 +559,17 @@ void VAsioRegistry::ReceiveMsg(const SilKit::Core::IServiceEndpoint* from,
 void VAsioRegistry::ReceiveMsg(const SilKit::Core::IServiceEndpoint* from,
                                const SilKit::Services::Orchestration::WorkflowConfiguration& msg)
 {
+    if (TraceEnabled())
+    {
+        std::string names;
+        for (const auto& name : msg.requiredParticipantNames)
+        {
+            names += (names.empty() ? "'" : ", '") + name + "'";
+        }
+        TraceEmit("WorkflowConfiguration", from,
+                  fmt::format("requiredParticipantNames=[{}] (count={})", names, msg.requiredParticipantNames.size()));
+    }
+
     if (_registryEventListener == nullptr)
     {
         return;
@@ -495,6 +584,37 @@ void VAsioRegistry::ReceiveMsg(const SilKit::Core::IServiceEndpoint* from,
 void VAsioRegistry::ReceiveMsg(const SilKit::Core::IServiceEndpoint* from,
                                const SilKit::Core::Discovery::ServiceDiscoveryEvent& msg)
 {
+    if (TraceEnabled())
+    {
+        const auto& sd{msg.serviceDescriptor};
+        const auto& supplemental{sd.GetSupplementalDataRef()};
+
+        std::string supplementalText;
+        for (const auto& kv : supplemental)
+        {
+            supplementalText += fmt::format("{}{}='{}'", supplementalText.empty() ? "" : ", ", kv.first, kv.second);
+        }
+
+        const auto valueOf = [&supplemental](const std::string& key) {
+            const auto it{supplemental.find(key)};
+            return it == supplemental.end() ? std::string{"<unset>"} : it->second;
+        };
+
+        std::ostringstream type;
+        type << msg.type;
+
+        TraceEmit("ServiceDiscoveryEvent", from,
+                  fmt::format("type={} descriptor.participant='{}' descriptor.sim='{}' descriptor.gen={} "
+                              "service='{}' (id={}) network='{}' controllerType={} lifecycleIsCoordinated={} "
+                              "timeSyncActive={} supplemental={{{}}}",
+                              type.str(), sd.GetParticipantName(), sd.GetSimulationName(),
+                              sd.GetGeneration() ? std::to_string(*sd.GetGeneration()) : "none", sd.GetServiceName(),
+                              sd.GetServiceId(), sd.GetNetworkName(),
+                              valueOf(SilKit::Core::Discovery::controllerType),
+                              valueOf(SilKit::Core::Discovery::lifecycleIsCoordinated),
+                              valueOf(SilKit::Core::Discovery::timeSyncActive), supplementalText));
+    }
+
     if (_registryEventListener == nullptr)
     {
         return;

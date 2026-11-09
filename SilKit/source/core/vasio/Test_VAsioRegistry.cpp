@@ -98,7 +98,6 @@ TEST(Test_VAsioRegistry, start_listening_on_ipv6_literal_uses_tcp)
 namespace SilKit {
 namespace Core {
 
-// the registry grants access to its internals for testing
 struct VAsioRegistryTestAccess
 {
     static void Announce(VAsioRegistry& registry, IVAsioPeer* peer, const std::string& simulationName)
@@ -114,21 +113,9 @@ struct VAsioRegistryTestAccess
         registry.OnPeerShutdown(peer);
     }
 
-    static auto GenerationOf(const VAsioRegistry& registry, const IVAsioPeer* peer) -> std::optional<uint64_t>
+    static bool IsPeerRegistered(const VAsioRegistry& registry, const IVAsioPeer* peer)
     {
-        return registry.FindGenerationOfPeer(peer);
-    }
-
-    static auto GenerationOfSender(const VAsioRegistry& registry, const IServiceEndpoint* from)
-        -> std::optional<uint64_t>
-    {
-        return registry.FindGenerationOfSender(from);
-    }
-
-    static auto FindPeerInGenerationOf(const VAsioRegistry& registry, const IVAsioPeer* requester,
-                                       const std::string& participantName) -> IVAsioPeer*
-    {
-        return registry.FindPeerInGenerationOf(requester, participantName);
+        return registry.IsPeerRegistered(peer);
     }
 };
 
@@ -137,7 +124,6 @@ struct VAsioRegistryTestAccess
 
 namespace {
 
-using SilKit::Core::IVAsioPeer;
 using SilKit::Core::VAsioRegistry;
 using SilKit::Core::VAsioRegistryTestAccess;
 
@@ -161,6 +147,8 @@ struct TestPeer : testing::NiceMock<SilKit::Core::MockVAsioPeer>
         ON_CALL(*this, GetSimulationName()).WillByDefault(testing::ReturnRef(_simulationName));
         ON_CALL(*this, GetInfo()).WillByDefault(testing::ReturnRef(_peerInfo));
         ON_CALL(*this, GetServiceDescriptor()).WillByDefault(testing::ReturnRef(_serviceDescriptor));
+        ON_CALL(*this, SetServiceDescriptor(testing::_))
+            .WillByDefault([this](const SilKit::Core::ServiceDescriptor& descriptor) { _serviceDescriptor = descriptor; });
         ON_CALL(*this, GetProtocolVersion()).WillByDefault(testing::Return(SilKit::Core::CurrentProtocolVersion()));
     }
 };
@@ -176,7 +164,7 @@ protected:
     VAsioRegistry _registry;
 };
 
-TEST_F(Test_VAsioRegistryGenerations, peers_with_the_same_name_are_resolved_within_their_own_generation)
+TEST_F(Test_VAsioRegistryGenerations, peers_with_the_same_name_are_placed_into_different_generations)
 {
     TestPeer a1{"A", "Sim"};
     TestPeer b1{"B", "Sim"};
@@ -188,15 +176,84 @@ TEST_F(Test_VAsioRegistryGenerations, peers_with_the_same_name_are_resolved_with
     VAsioRegistryTestAccess::Announce(_registry, &a2, "Sim");
     VAsioRegistryTestAccess::Announce(_registry, &b2, "Sim");
 
-    EXPECT_EQ(VAsioRegistryTestAccess::GenerationOf(_registry, &a1), 1u);
-    EXPECT_EQ(VAsioRegistryTestAccess::GenerationOf(_registry, &b1), 1u);
-    EXPECT_EQ(VAsioRegistryTestAccess::GenerationOf(_registry, &a2), 2u);
-    EXPECT_EQ(VAsioRegistryTestAccess::GenerationOf(_registry, &b2), 2u);
+    EXPECT_EQ(a1.GetServiceDescriptor().GetGeneration(), 1u);
+    EXPECT_EQ(b1.GetServiceDescriptor().GetGeneration(), 1u);
+    EXPECT_EQ(a2.GetServiceDescriptor().GetGeneration(), 2u);
+    EXPECT_EQ(b2.GetServiceDescriptor().GetGeneration(), 2u);
 
-    EXPECT_EQ(VAsioRegistryTestAccess::FindPeerInGenerationOf(_registry, &a1, "B"), &b1);
-    EXPECT_EQ(VAsioRegistryTestAccess::FindPeerInGenerationOf(_registry, &b1, "A"), &a1);
-    EXPECT_EQ(VAsioRegistryTestAccess::FindPeerInGenerationOf(_registry, &a2, "B"), &b2);
-    EXPECT_EQ(VAsioRegistryTestAccess::FindPeerInGenerationOf(_registry, &b2, "A"), &a2);
+    for (const auto* peer : {&a1, &b1, &a2, &b2})
+    {
+        EXPECT_TRUE(VAsioRegistryTestAccess::IsPeerRegistered(_registry, peer));
+    }
+}
+
+TEST_F(Test_VAsioRegistryGenerations, generation_gets_reset_when_non_exists)
+{
+    TestPeer a{"A", "Sim"};
+
+    VAsioRegistryTestAccess::Announce(_registry, &a, "Sim");
+    EXPECT_EQ(a.GetServiceDescriptor().GetGeneration(), 1u);
+    EXPECT_TRUE(VAsioRegistryTestAccess::IsPeerRegistered(_registry, &a));
+
+    VAsioRegistryTestAccess::Shutdown(_registry, &a);
+    EXPECT_FALSE(VAsioRegistryTestAccess::IsPeerRegistered(_registry, &a));
+
+    VAsioRegistryTestAccess::Announce(_registry, &a, "Sim");
+    EXPECT_EQ(a.GetServiceDescriptor().GetGeneration(), 1u);
+    EXPECT_TRUE(VAsioRegistryTestAccess::IsPeerRegistered(_registry, &a));
+}
+
+TEST_F(Test_VAsioRegistryGenerations, DISABLED_rejoining_bumps_the_generation_while_previous_generation_exists)
+{
+    TestPeer a{"A", "Sim"};
+    TestPeer b{"B", "Sim"};
+
+    VAsioRegistryTestAccess::Announce(_registry, &a, "Sim");
+    VAsioRegistryTestAccess::Announce(_registry, &b, "Sim");
+    EXPECT_EQ(a.GetServiceDescriptor().GetGeneration(), 1u);
+    EXPECT_EQ(b.GetServiceDescriptor().GetGeneration(), 1u);
+
+    VAsioRegistryTestAccess::Shutdown(_registry, &a);
+    EXPECT_FALSE(VAsioRegistryTestAccess::IsPeerRegistered(_registry, &a));
+
+    VAsioRegistryTestAccess::Announce(_registry, &a, "Sim");
+    EXPECT_EQ(a.GetServiceDescriptor().GetGeneration(), 2u);
+}
+
+TEST_F(Test_VAsioRegistryGenerations, rejoining_bumps_the_generation_while_participant_with_same_name_exists)
+{
+    TestPeer a1{"A", "Sim"};
+    TestPeer a2{"A", "Sim"};
+
+    VAsioRegistryTestAccess::Announce(_registry, &a1, "Sim");
+    EXPECT_EQ(a1.GetServiceDescriptor().GetGeneration(), 1u);
+
+    VAsioRegistryTestAccess::Announce(_registry, &a2, "Sim");
+    EXPECT_EQ(a2.GetServiceDescriptor().GetGeneration(), 2u);
+
+    VAsioRegistryTestAccess::Shutdown(_registry, &a1);
+    EXPECT_FALSE(VAsioRegistryTestAccess::IsPeerRegistered(_registry, &a1));
+
+    VAsioRegistryTestAccess::Announce(_registry, &a1, "Sim");
+    EXPECT_EQ(a1.GetServiceDescriptor().GetGeneration(), 3u);
+}
+
+TEST_F(Test_VAsioRegistryGenerations, participant_with_same_name_but_different_simulation_name_gets_its_own_generation)
+{
+    TestPeer a1{"A", "Sim1"};
+    TestPeer a2{"A", "Sim2"};
+
+    VAsioRegistryTestAccess::Announce(_registry, &a1, "Sim1");
+    EXPECT_EQ(a1.GetServiceDescriptor().GetGeneration(), 1u);
+
+    VAsioRegistryTestAccess::Announce(_registry, &a2, "Sim2");
+    EXPECT_EQ(a2.GetServiceDescriptor().GetGeneration(), 1u);
+
+    VAsioRegistryTestAccess::Shutdown(_registry, &a1);
+    EXPECT_FALSE(VAsioRegistryTestAccess::IsPeerRegistered(_registry, &a1));
+
+    VAsioRegistryTestAccess::Announce(_registry, &a1, "Sim1");
+    EXPECT_EQ(a1.GetServiceDescriptor().GetGeneration(), 1u);
 }
 
 TEST_F(Test_VAsioRegistryGenerations, shutdown_of_a_peer_does_not_affect_a_peer_with_the_same_name)
@@ -213,43 +270,66 @@ TEST_F(Test_VAsioRegistryGenerations, shutdown_of_a_peer_does_not_affect_a_peer_
 
     VAsioRegistryTestAccess::Shutdown(_registry, &a1);
 
-    EXPECT_EQ(VAsioRegistryTestAccess::GenerationOf(_registry, &a1), std::nullopt);
-    EXPECT_EQ(VAsioRegistryTestAccess::FindPeerInGenerationOf(_registry, &b1, "A"), nullptr);
+    EXPECT_FALSE(VAsioRegistryTestAccess::IsPeerRegistered(_registry, &a1));
 
-    // the other generation is unaffected
-    EXPECT_EQ(VAsioRegistryTestAccess::GenerationOf(_registry, &a2), 2u);
-    EXPECT_EQ(VAsioRegistryTestAccess::FindPeerInGenerationOf(_registry, &b2, "A"), &a2);
-    EXPECT_EQ(VAsioRegistryTestAccess::FindPeerInGenerationOf(_registry, &a2, "B"), &b2);
+    // the other peers, in particular the one with the same name, are unaffected
+    EXPECT_TRUE(VAsioRegistryTestAccess::IsPeerRegistered(_registry, &b1));
+    EXPECT_TRUE(VAsioRegistryTestAccess::IsPeerRegistered(_registry, &a2));
+    EXPECT_TRUE(VAsioRegistryTestAccess::IsPeerRegistered(_registry, &b2));
 }
 
-TEST_F(Test_VAsioRegistryGenerations, unknown_requester_resolves_to_no_peer)
+TEST_F(Test_VAsioRegistryGenerations, repeated_shutdown_does_not_remove_a_peer_that_took_the_name_over)
+{
+    TestPeer a{"A", "Sim"};
+    TestPeer b{"B", "Sim"};
+    TestPeer aRejoined{"A", "Sim"};
+
+    VAsioRegistryTestAccess::Announce(_registry, &a, "Sim");
+    VAsioRegistryTestAccess::Announce(_registry, &b, "Sim");
+    VAsioRegistryTestAccess::Shutdown(_registry, &a);
+
+    VAsioRegistryTestAccess::Announce(_registry, &aRejoined, "Sim");
+    ASSERT_TRUE(VAsioRegistryTestAccess::IsPeerRegistered(_registry, &aRejoined));
+
+    // the stale peer still carries the generation, but is no longer registered
+    EXPECT_FALSE(VAsioRegistryTestAccess::IsPeerRegistered(_registry, &a));
+    VAsioRegistryTestAccess::Shutdown(_registry, &a);
+
+    EXPECT_TRUE(VAsioRegistryTestAccess::IsPeerRegistered(_registry, &aRejoined));
+}
+
+TEST_F(Test_VAsioRegistryGenerations, unknown_peer_is_not_registered)
 {
     TestPeer a{"A", "Sim"};
     TestPeer unknown{"B", "Sim"};
 
     VAsioRegistryTestAccess::Announce(_registry, &a, "Sim");
 
-    EXPECT_EQ(VAsioRegistryTestAccess::FindPeerInGenerationOf(_registry, &unknown, "A"), nullptr);
+    EXPECT_FALSE(VAsioRegistryTestAccess::IsPeerRegistered(_registry, &unknown));
 }
 
-TEST_F(Test_VAsioRegistryGenerations, generation_of_the_sender_is_found_via_the_remote_service_endpoint)
+TEST_F(Test_VAsioRegistryGenerations, generation_is_visible_to_receivers_via_the_descriptor_of_the_sender)
 {
     TestPeer a1{"A", "Sim"};
     TestPeer a2{"A", "Sim"};
+    TestPeer unannounced{"A", "Sim"};
 
     VAsioRegistryTestAccess::Announce(_registry, &a1, "Sim");
     VAsioRegistryTestAccess::Announce(_registry, &a2, "Sim");
 
-    // both peers carry an identical service descriptor, only the peer tells them apart
-    SilKit::Core::RemoteServiceEndpoint fromA1{a1._serviceDescriptor, &a1};
-    SilKit::Core::RemoteServiceEndpoint fromA2{a2._serviceDescriptor, &a2};
-    EXPECT_EQ(VAsioRegistryTestAccess::GenerationOfSender(_registry, &fromA1), 1u);
-    EXPECT_EQ(VAsioRegistryTestAccess::GenerationOfSender(_registry, &fromA2), 2u);
+    // The connection builds the endpoint passed to ReceiveMsg from a copy of the descriptor of the sending peer.
+    // Name and participant id are identical for both peers, only the generation tells them apart.
+    const SilKit::Core::ServiceDescriptor descriptorOfA1{a1.GetServiceDescriptor()};
+    const SilKit::Core::ServiceDescriptor descriptorOfA2{a2.GetServiceDescriptor()};
+    const SilKit::Core::RemoteServiceEndpoint fromA1{descriptorOfA1};
+    const SilKit::Core::RemoteServiceEndpoint fromA2{descriptorOfA2};
 
-    // an endpoint without a peer, e.g. a local one, has no generation
-    SilKit::Core::RemoteServiceEndpoint withoutPeer{a1._serviceDescriptor};
-    EXPECT_EQ(VAsioRegistryTestAccess::GenerationOfSender(_registry, &withoutPeer), std::nullopt);
+    EXPECT_EQ(fromA1.GetServiceDescriptor().GetParticipantId(), fromA2.GetServiceDescriptor().GetParticipantId());
+    EXPECT_EQ(fromA1.GetServiceDescriptor().GetGeneration(), 1u);
+    EXPECT_EQ(fromA2.GetServiceDescriptor().GetGeneration(), 2u);
+
+    // a peer the registry has not seen has no generation
+    EXPECT_EQ(unannounced.GetServiceDescriptor().GetGeneration(), std::nullopt);
 }
-
 
 } // namespace

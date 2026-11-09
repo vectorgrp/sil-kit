@@ -3,6 +3,9 @@
 // SPDX-License-Identifier: MIT
 
 #pragma once
+#include <charconv>
+#include <cstdint>
+#include <optional>
 #include <string>
 #include <sstream>
 #include <map>
@@ -94,6 +97,8 @@ public:
     inline auto GetSimulationName() const -> const std::string&;
     inline void SetSimulationName(const std::string& simulationName);
 
+    inline auto GetGeneration() const -> std::optional<uint64_t>;
+    inline void SetGeneration(uint64_t generation);
 public: // CTor
     ServiceDescriptor() = default;
     ServiceDescriptor(ServiceDescriptor&&) noexcept = default;
@@ -256,6 +261,30 @@ auto ServiceDescriptor::GetSimulationName() const -> const std::string&
 void ServiceDescriptor::SetSimulationName(const std::string& simulationName)
 {
     _supplementalData[SilKit::Core::Discovery::simulationName] = simulationName;
+}
+
+auto ServiceDescriptor::GetGeneration() const -> std::optional<uint64_t>
+{
+    const auto it{_supplementalData.find(SilKit::Core::Discovery::generation)};
+    if (it == _supplementalData.end())
+    {
+        return std::nullopt;
+    }
+
+    const auto& text{it->second};
+    uint64_t generation{0};
+    const auto [end, errorCode] = std::from_chars(text.data(), text.data() + text.size(), generation);
+    if (errorCode != std::errc{} || end != text.data() + text.size())
+    {
+        return std::nullopt;
+    }
+
+    return generation;
+}
+
+void ServiceDescriptor::SetGeneration(uint64_t generation)
+{
+    _supplementalData[SilKit::Core::Discovery::generation] = std::to_string(generation);
 }
 
 //Ctors
