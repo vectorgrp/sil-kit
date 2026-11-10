@@ -117,6 +117,29 @@ struct VAsioRegistryTestAccess
     {
         return registry.IsPeerRegistered(peer);
     }
+
+    static void SendStatus(VAsioRegistry& registry, IVAsioPeer* peer,
+                           SilKit::Services::Orchestration::ParticipantState state)
+    {
+        SilKit::Services::Orchestration::ParticipantStatus status;
+        status.participantName = peer->GetInfo().participantName;
+        status.state = state;
+        registry.ReceiveMsg(peer, status);
+    }
+
+    static void SendWorkflowConfiguration(VAsioRegistry& registry, IVAsioPeer* peer,
+                                          std::vector<std::string> requiredParticipantNames)
+    {
+        SilKit::Services::Orchestration::WorkflowConfiguration configuration;
+        configuration.requiredParticipantNames = std::move(requiredParticipantNames);
+        registry.ReceiveMsg(peer, configuration);
+    }
+
+    static bool IsGenerationUsed(const VAsioRegistry& registry, const std::string& simulationName,
+                                 uint64_t generation)
+    {
+        return registry._simulationNames.at(simulationName).at(generation).used;
+    }
 };
 
 } // namespace Core
@@ -141,6 +164,7 @@ struct TestPeer : testing::NiceMock<SilKit::Core::MockVAsioPeer>
         _peerInfo.acceptorUris.push_back("tcp://127.0.0.1:1234");
 
         _serviceDescriptor.SetParticipantNameAndComputeId(participantName);
+        _serviceDescriptor.SetSimulationName(simulationName);
 
         ON_CALL(*this, GetLocalAddress()).WillByDefault(testing::Return("tcp://127.0.0.1:1234"));
         ON_CALL(*this, GetRemoteAddress()).WillByDefault(testing::Return("tcp://127.0.0.1:1234"));
@@ -162,6 +186,23 @@ protected:
     }
 
     VAsioRegistry _registry;
+
+    using ParticipantState = SilKit::Services::Orchestration::ParticipantState;
+
+    // Reports the participant states in the order of the lifecycle, up to and including the given state.
+    void AdvanceTo(TestPeer& peer, ParticipantState target)
+    {
+        for (const auto state : {ParticipantState::ServicesCreated, ParticipantState::CommunicationInitializing,
+                                 ParticipantState::CommunicationInitialized, ParticipantState::ReadyToRun,
+                                 ParticipantState::Running})
+        {
+            VAsioRegistryTestAccess::SendStatus(_registry, &peer, state);
+            if (state == target)
+            {
+                return;
+            }
+        }
+    }
 };
 
 TEST_F(Test_VAsioRegistryGenerations, peers_with_the_same_name_are_placed_into_different_generations)
@@ -187,7 +228,7 @@ TEST_F(Test_VAsioRegistryGenerations, peers_with_the_same_name_are_placed_into_d
     }
 }
 
-TEST_F(Test_VAsioRegistryGenerations, generation_gets_reset_when_non_exists)
+TEST_F(Test_VAsioRegistryGenerations, generation_gets_reset_when_none_exists)
 {
     TestPeer a{"A", "Sim"};
 
@@ -203,7 +244,7 @@ TEST_F(Test_VAsioRegistryGenerations, generation_gets_reset_when_non_exists)
     EXPECT_TRUE(VAsioRegistryTestAccess::IsPeerRegistered(_registry, &a));
 }
 
-TEST_F(Test_VAsioRegistryGenerations, DISABLED_rejoining_bumps_the_generation_while_previous_generation_exists)
+TEST_F(Test_VAsioRegistryGenerations, rejoining_bumps_the_generation_once_the_simulation_has_started)
 {
     TestPeer a{"A", "Sim"};
     TestPeer b{"B", "Sim"};
@@ -213,11 +254,138 @@ TEST_F(Test_VAsioRegistryGenerations, DISABLED_rejoining_bumps_the_generation_wh
     EXPECT_EQ(a.GetServiceDescriptor().GetGeneration(), 1u);
     EXPECT_EQ(b.GetServiceDescriptor().GetGeneration(), 1u);
 
+    VAsioRegistryTestAccess::SendWorkflowConfiguration(_registry, &a, {"A", "B"});
+    AdvanceTo(a, ParticipantState::ReadyToRun);
+    EXPECT_FALSE(VAsioRegistryTestAccess::IsGenerationUsed(_registry, "Sim", 1));
+    AdvanceTo(b, ParticipantState::ReadyToRun);
+    EXPECT_TRUE(VAsioRegistryTestAccess::IsGenerationUsed(_registry, "Sim", 1));
+
     VAsioRegistryTestAccess::Shutdown(_registry, &a);
     EXPECT_FALSE(VAsioRegistryTestAccess::IsPeerRegistered(_registry, &a));
 
     VAsioRegistryTestAccess::Announce(_registry, &a, "Sim");
     EXPECT_EQ(a.GetServiceDescriptor().GetGeneration(), 2u);
+}
+
+TEST_F(Test_VAsioRegistryGenerations, rejoining_reuses_the_generation_before_the_simulation_has_started)
+{
+    TestPeer a{"A", "Sim"};
+    TestPeer b{"B", "Sim"};
+
+    VAsioRegistryTestAccess::Announce(_registry, &a, "Sim");
+    VAsioRegistryTestAccess::Announce(_registry, &b, "Sim");
+
+    VAsioRegistryTestAccess::SendWorkflowConfiguration(_registry, &a, {"A", "B"});
+    AdvanceTo(a, ParticipantState::ReadyToRun);
+    AdvanceTo(b, ParticipantState::CommunicationInitialized);
+    EXPECT_FALSE(VAsioRegistryTestAccess::IsGenerationUsed(_registry, "Sim", 1));
+
+    VAsioRegistryTestAccess::Shutdown(_registry, &a);
+    VAsioRegistryTestAccess::Announce(_registry, &a, "Sim");
+    EXPECT_EQ(a.GetServiceDescriptor().GetGeneration(), 1u);
+    EXPECT_FALSE(VAsioRegistryTestAccess::IsGenerationUsed(_registry, "Sim", 1));
+
+    // the status of A was dropped on shutdown, so B reaching ReadyToRun is not enough to start the simulation
+    AdvanceTo(b, ParticipantState::ReadyToRun);
+    EXPECT_FALSE(VAsioRegistryTestAccess::IsGenerationUsed(_registry, "Sim", 1));
+
+    AdvanceTo(a, ParticipantState::ReadyToRun);
+    EXPECT_TRUE(VAsioRegistryTestAccess::IsGenerationUsed(_registry, "Sim", 1));
+}
+
+TEST_F(Test_VAsioRegistryGenerations, coordinated_participant_does_not_join_a_generation_that_has_started)
+{
+    TestPeer a{"A", "Sim"};
+    TestPeer b{"B", "Sim"};
+
+    VAsioRegistryTestAccess::Announce(_registry, &a, "Sim");
+    VAsioRegistryTestAccess::SendWorkflowConfiguration(_registry, &a, {"A", "B"});
+    AdvanceTo(a, ParticipantState::Running);
+    EXPECT_FALSE(VAsioRegistryTestAccess::IsGenerationUsed(_registry, "Sim", 1));
+
+    // B is required, but has not joined yet: it can still join, the simulation did not start without it
+    VAsioRegistryTestAccess::Announce(_registry, &b, "Sim");
+    EXPECT_EQ(b.GetServiceDescriptor().GetGeneration(), 1u);
+    AdvanceTo(b, ParticipantState::Running);
+    EXPECT_TRUE(VAsioRegistryTestAccess::IsGenerationUsed(_registry, "Sim", 1));
+
+    VAsioRegistryTestAccess::Shutdown(_registry, &b);
+    VAsioRegistryTestAccess::Announce(_registry, &b, "Sim");
+    EXPECT_EQ(b.GetServiceDescriptor().GetGeneration(), 2u);
+}
+
+TEST_F(Test_VAsioRegistryGenerations, participant_that_is_not_required_joins_a_generation_that_has_started)
+{
+    TestPeer a{"A", "Sim"};
+    TestPeer observer{"Observer", "Sim"};
+
+    VAsioRegistryTestAccess::Announce(_registry, &a, "Sim");
+    VAsioRegistryTestAccess::SendWorkflowConfiguration(_registry, &a, {"A"});
+    AdvanceTo(a, ParticipantState::Running);
+    EXPECT_TRUE(VAsioRegistryTestAccess::IsGenerationUsed(_registry, "Sim", 1));
+
+    VAsioRegistryTestAccess::Announce(_registry, &observer, "Sim");
+    EXPECT_EQ(observer.GetServiceDescriptor().GetGeneration(), 1u);
+
+    // hopping off and on again keeps it in the running simulation
+    VAsioRegistryTestAccess::Shutdown(_registry, &observer);
+    VAsioRegistryTestAccess::Announce(_registry, &observer, "Sim");
+    EXPECT_EQ(observer.GetServiceDescriptor().GetGeneration(), 1u);
+}
+
+TEST_F(Test_VAsioRegistryGenerations, status_updates_before_the_workflow_configuration_are_considered)
+{
+    TestPeer a{"A", "Sim"};
+    TestPeer b{"B", "Sim"};
+
+    VAsioRegistryTestAccess::Announce(_registry, &a, "Sim");
+    VAsioRegistryTestAccess::Announce(_registry, &b, "Sim");
+
+    AdvanceTo(a, ParticipantState::ReadyToRun);
+    AdvanceTo(b, ParticipantState::ReadyToRun);
+    EXPECT_FALSE(VAsioRegistryTestAccess::IsGenerationUsed(_registry, "Sim", 1));
+
+    VAsioRegistryTestAccess::SendWorkflowConfiguration(_registry, &a, {"A", "B"});
+    EXPECT_TRUE(VAsioRegistryTestAccess::IsGenerationUsed(_registry, "Sim", 1));
+}
+
+TEST_F(Test_VAsioRegistryGenerations, participants_that_are_not_required_do_not_start_the_simulation)
+{
+    TestPeer a{"A", "Sim"};
+    TestPeer observer{"Observer", "Sim"};
+
+    VAsioRegistryTestAccess::Announce(_registry, &a, "Sim");
+    VAsioRegistryTestAccess::Announce(_registry, &observer, "Sim");
+
+    VAsioRegistryTestAccess::SendWorkflowConfiguration(_registry, &a, {"A"});
+    AdvanceTo(observer, ParticipantState::Running);
+    EXPECT_FALSE(VAsioRegistryTestAccess::IsGenerationUsed(_registry, "Sim", 1));
+
+    AdvanceTo(a, ParticipantState::ReadyToRun);
+    EXPECT_TRUE(VAsioRegistryTestAccess::IsGenerationUsed(_registry, "Sim", 1));
+}
+
+TEST_F(Test_VAsioRegistryGenerations, generations_start_independently)
+{
+    TestPeer a1{"A", "Sim"};
+    TestPeer a2{"A", "Sim"};
+
+    VAsioRegistryTestAccess::Announce(_registry, &a1, "Sim");
+    VAsioRegistryTestAccess::Announce(_registry, &a2, "Sim");
+    EXPECT_EQ(a1.GetServiceDescriptor().GetGeneration(), 1u);
+    EXPECT_EQ(a2.GetServiceDescriptor().GetGeneration(), 2u);
+
+    VAsioRegistryTestAccess::SendWorkflowConfiguration(_registry, &a1, {"A"});
+    VAsioRegistryTestAccess::SendWorkflowConfiguration(_registry, &a2, {"A"});
+    AdvanceTo(a2, ParticipantState::Running);
+
+    EXPECT_FALSE(VAsioRegistryTestAccess::IsGenerationUsed(_registry, "Sim", 1));
+    EXPECT_TRUE(VAsioRegistryTestAccess::IsGenerationUsed(_registry, "Sim", 2));
+
+    // the first generation is still open: a participant that is not yet in it is placed there
+    TestPeer b{"B", "Sim"};
+    VAsioRegistryTestAccess::Announce(_registry, &b, "Sim");
+    EXPECT_EQ(b.GetServiceDescriptor().GetGeneration(), 1u);
 }
 
 TEST_F(Test_VAsioRegistryGenerations, rejoining_bumps_the_generation_while_participant_with_same_name_exists)

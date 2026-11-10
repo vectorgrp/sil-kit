@@ -269,10 +269,93 @@ auto VAsioRegistry::GetLoggerInternal() -> Services::Logging::ILoggerInternal*
     return _logger.get();
 }
 
-bool VAsioRegistry::ShouldEnterGeneration(const std::string& participantName,
-                                          const ConnectedParticipants& generation) const
+bool VAsioRegistry::ShouldEnterGeneration(const std::string& participantName, const Generation& generation) const
 {
-    return generation.find(participantName) == generation.end();
+    if (generation.participants.find(participantName) != generation.participants.end())
+    {
+        return false;
+    }
+
+    // Once the simulation of a generation has started, only participants that are not part of the coordinated
+    // simulation (e.g. autonomous participants that hop on) may still join it. The coordinated participants are the
+    // required participants of the workflow configuration, so a participant with such a name belongs to a new run.
+    return !(generation.used && generation.stateTracker.IsRequiredParticipant(participantName));
+}
+
+auto VAsioRegistry::GetOrCreateGeneration(const std::string& simulationName, uint64_t generation) -> Generation&
+{
+    auto& generations{_simulationNames[simulationName]};
+
+    const auto it{generations.find(generation)};
+    if (it != generations.end())
+    {
+        return it->second;
+    }
+
+    auto& created{generations[generation]};
+    created.stateTracker.SetLogger(GetLoggerInternal());
+    return created;
+}
+
+auto VAsioRegistry::FindGenerationOfSender(const IServiceEndpoint* from) -> Generation*
+{
+    if (from == nullptr)
+    {
+        return nullptr;
+    }
+
+    const auto& descriptor{from->GetServiceDescriptor()};
+    const auto generationNumber{descriptor.GetGeneration()};
+    if (!generationNumber.has_value())
+    {
+        return nullptr;
+    }
+
+    const auto simulationIt{_simulationNames.find(descriptor.GetSimulationName())};
+    if (simulationIt == _simulationNames.end())
+    {
+        return nullptr;
+    }
+
+    const auto generationIt{simulationIt->second.find(*generationNumber)};
+    return generationIt == simulationIt->second.end() ? nullptr : &generationIt->second;
+}
+
+void VAsioRegistry::UpdateGenerationUsage(const IServiceEndpoint* from, Generation& generation)
+{
+    if (generation.used)
+    {
+        return;
+    }
+
+    using SystemState = SilKit::Services::Orchestration::SystemState;
+
+    // The simulation starts when all required participants have reached ReadyToRun, and every following system state
+    // can only be reached after that. Error and Aborting are not treated as a start, the simulation might not have
+    // begun when they occur.
+    switch (generation.stateTracker.GetSystemState())
+    {
+    case SystemState::ReadyToRun:
+    case SystemState::Running:
+    case SystemState::Paused:
+    case SystemState::Stopping:
+    case SystemState::Stopped:
+    case SystemState::ShuttingDown:
+    case SystemState::Shutdown:
+        break;
+    default:
+        return;
+    }
+
+    generation.used = true;
+
+    const auto& descriptor{from->GetServiceDescriptor()};
+    GetLoggerInternal()->MakeMessage(Log::Level::Info, TopicOf(*this))
+        .SetMessage("The simulation '{}' in generation {} has started (system state {}), participants can no longer "
+                    "join this generation",
+                    descriptor.GetSimulationName(), descriptor.GetGeneration().value_or(0),
+                    to_string(generation.stateTracker.GetSystemState()))
+        .Dispatch();
 }
 
 auto VAsioRegistry::SelectGeneration(const std::string& simulationName, const std::string& participantName) const
@@ -318,8 +401,9 @@ bool VAsioRegistry::IsPeerRegistered(const IVAsioPeer* peer) const
         return false;
     }
 
-    const auto participantIt{generationIt->second.find(peer->GetInfo().participantName)};
-    return participantIt != generationIt->second.end() && participantIt->second.peer == peer;
+    const auto& participants{generationIt->second.participants};
+    const auto participantIt{participants.find(peer->GetInfo().participantName)};
+    return participantIt != participants.end() && participantIt->second.peer == peer;
 }
 
 void VAsioRegistry::OnParticipantAnnouncement(IVAsioPeer* peer, const ParticipantAnnouncement& announcement)
@@ -344,11 +428,12 @@ void VAsioRegistry::OnParticipantAnnouncement(IVAsioPeer* peer, const Participan
             for (const auto& generationPair : simulationIt->second)
             {
                 std::string names;
-                for (const auto& participantPair : generationPair.second)
+                for (const auto& participantPair : generationPair.second.participants)
                 {
                     names += (names.empty() ? "" : ", ") + participantPair.first;
                 }
-                known += fmt::format("{}gen {}: [{}]", known.empty() ? "" : "; ", generationPair.first, names);
+                known += fmt::format("{}gen {}{}: [{}]", known.empty() ? "" : "; ", generationPair.first,
+                                     generationPair.second.used ? " (used)" : "", names);
             }
         }
 
@@ -380,7 +465,8 @@ void VAsioRegistry::OnParticipantAnnouncement(IVAsioPeer* peer, const Participan
     ConnectedParticipantInfo participantInfo;
     participantInfo.peer = peer;
     participantInfo.peerInfo = peerInfo;
-    _simulationNames[announcement.simulationName][generation][peerInfo.participantName] = participantInfo;
+    GetOrCreateGeneration(announcement.simulationName, generation).participants[peerInfo.participantName] =
+        participantInfo;
 
     // The generation is stamped on the service descriptor of the peer, like the simulation name, so that receivers of
     // messages and the connection can read it from there. Names are not unique across generations, so peers are
@@ -415,7 +501,7 @@ void VAsioRegistry::SendKnownParticipants(IVAsioPeer* peer, const std::string& s
     KnownParticipants knownParticipantsMsg;
     knownParticipantsMsg.messageHeader = MakeRegistryMsgHeader(peer->GetProtocolVersion());
 
-    const auto& simulationParticipants{_simulationNames[simulationName][generation]};
+    const auto& simulationParticipants{GetOrCreateGeneration(simulationName, generation).participants};
 
     for (const auto& pPair : simulationParticipants)
     {
@@ -469,8 +555,10 @@ void VAsioRegistry::OnPeerShutdown(IVAsioPeer* peer)
     }
 
     auto& generations{_simulationNames[simulationName]};
-    auto& participants{generations[*generation]};
+    auto& generationData{generations[*generation]};
+    auto& participants{generationData.participants};
     participants.erase(participantName);
+    generationData.stateTracker.RemoveParticipant(participantName);
 
     if (participants.empty())
     {
@@ -545,6 +633,16 @@ void VAsioRegistry::ReceiveMsg(const SilKit::Core::IServiceEndpoint* from,
                                   == msg.participantName));
     }
 
+    if (auto* generation = FindGenerationOfSender(from))
+    {
+        // Late messages of a participant that has already left must not bring it back into the tracker.
+        if (generation->participants.count(msg.participantName) != 0)
+        {
+            generation->stateTracker.UpdateParticipantStatus(msg);
+            UpdateGenerationUsage(from, *generation);
+        }
+    }
+
     if (_registryEventListener == nullptr)
     {
         return;
@@ -568,6 +666,12 @@ void VAsioRegistry::ReceiveMsg(const SilKit::Core::IServiceEndpoint* from,
         }
         TraceEmit("WorkflowConfiguration", from,
                   fmt::format("requiredParticipantNames=[{}] (count={})", names, msg.requiredParticipantNames.size()));
+    }
+
+    if (auto* generation = FindGenerationOfSender(from))
+    {
+        generation->stateTracker.UpdateRequiredParticipants(msg.requiredParticipantNames);
+        UpdateGenerationUsage(from, *generation);
     }
 
     if (_registryEventListener == nullptr)

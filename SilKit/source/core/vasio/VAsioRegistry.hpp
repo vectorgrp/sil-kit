@@ -16,6 +16,7 @@
 #include "config/ParticipantConfiguration.hpp"
 #include "core/internal/ProtocolVersion.hpp"
 #include "services/orchestration/TimeProvider.hpp"
+#include "services/orchestration/SystemStateTracker.hpp"
 
 #include "services/metrics/MetricsReceiver.hpp"
 
@@ -67,19 +68,30 @@ private:
         VAsioPeerInfo peerInfo;
     };
     using ConnectedParticipants = std::unordered_map<std::string, ConnectedParticipantInfo>;
-    using Generations = std::map<uint64_t, ConnectedParticipants>;
+    struct Generation
+    {
+        ConnectedParticipants participants;
+        // Used to decide when `used` below should be set.
+        VSilKit::SystemStateTracker stateTracker;
+        bool used{false};
+    };
+    using Generations = std::map<uint64_t, Generation>;
     using SimulationNames = std::unordered_map<std::string, Generations>;
 
 private:
     // ----------------------------------------
     // private methods
-    bool ShouldEnterGeneration(const std::string& participantName, const ConnectedParticipants& generation) const;
+    bool ShouldEnterGeneration(const std::string& participantName, const Generation& generation) const;
     auto SelectGeneration(const std::string& simulationName, const std::string& participantName) const -> uint64_t;
     //! Whether this peer, and not another one with the same name, is registered in its generation.
     //! This is most likely only defensive and not a guard that is required: the generation stays stamped on a peer
     //! after it was removed, but a peer is removed only once, on its shutdown. No path is known on which a peer that is
     //! no longer registered is shut down again while another peer with the same name is registered.
     bool IsPeerRegistered(const IVAsioPeer* peer) const;
+
+    auto GetOrCreateGeneration(const std::string& simulationName, uint64_t generation) -> Generation&;
+    auto FindGenerationOfSender(const IServiceEndpoint* from) -> Generation*;
+    void UpdateGenerationUsage(const IServiceEndpoint* from, Generation& generation);
 
     void OnParticipantAnnouncement(IVAsioPeer* peer, const ParticipantAnnouncement& announcement);
     void SendKnownParticipants(IVAsioPeer* peer, const std::string& simulationName, uint64_t generation);
