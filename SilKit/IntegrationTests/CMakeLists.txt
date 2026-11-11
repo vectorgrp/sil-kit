@@ -75,6 +75,10 @@ add_silkit_test_to_executable(SilKitIntegrationTests
 )
 
 add_silkit_test_to_executable(SilKitIntegrationTests
+    SOURCES ITest_Lifecycle.cpp
+)
+
+add_silkit_test_to_executable(SilKitIntegrationTests
     SOURCES ITest_CommunicationGuarantees.cpp
 )
 
@@ -128,6 +132,10 @@ add_silkit_test_to_executable(SilKitIntegrationTests
 
 add_silkit_test_to_executable(SilKitIntegrationTests
     SOURCES ITest_DynStepSizes.cpp
+)
+
+add_silkit_test_to_executable(SilKitIntegrationTests
+    SOURCES ITest_WallClockCoupling.cpp
 )
 
 
