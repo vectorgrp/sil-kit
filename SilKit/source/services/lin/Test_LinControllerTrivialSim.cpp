@@ -811,6 +811,18 @@ TEST_F(Test_LinControllerTrivialSim, add_remove_handler)
     master.ReceiveMsg(&slave1, transmission);
 }
 
+// SendDynamicResponse throws a StateError if the controller was not initialized using InitDynamic, including when it
+// was not initialized at all.
+TEST_F(Test_LinControllerTrivialSim, send_dynamic_response_throws_if_not_dynamic)
+{
+    const auto frame = MakeFrame(17, LinChecksumModel::Enhanced, 4);
+
+    EXPECT_THROW(master.SendDynamicResponse(frame), SilKit::StateError);
+
+    master.Init(MakeControllerConfig(LinControllerMode::Master));
+    EXPECT_THROW(master.SendDynamicResponse(frame), SilKit::StateError);
+}
+
 ////////////
 // Tracing
 ////////////
