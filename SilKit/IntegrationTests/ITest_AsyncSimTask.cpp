@@ -463,9 +463,14 @@ TEST(ITest_AsyncSimTask, test_timestamp_handling)
         [syncLifecycleService, sync2LifecycleService, asyncLifecycleService, async2LifecycleService,
          syncPublisherToAsync,
          syncPublisherToSync, &syncSendTimeNs, &syncCurrentStepNs, &syncSent, &syncToAsyncReceived,
-         &asyncToSyncReceived, &asyncToAsyncReceived, &syncToSyncReceived](std::chrono::nanoseconds now,
-                                                                          std::chrono::nanoseconds /*duration*/) {
+         &asyncToSyncReceived, &asyncToAsyncReceived, &syncToSyncReceived,
+         stopIssued = false](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) mutable {
         syncCurrentStepNs = now.count();
+
+        if (stopIssued)
+        {
+            return;
+        }
 
         if (!syncSent && now >= 1ms)
         {
@@ -475,19 +480,31 @@ TEST(ITest_AsyncSimTask, test_timestamp_handling)
             syncSent = true;
         }
 
-        if (syncToAsyncReceived && asyncToSyncReceived && asyncToAsyncReceived && syncToSyncReceived)
+        const auto stopAll = [&](const std::string& reason) {
+            asyncLifecycleService->Stop(reason);
+            async2LifecycleService->Stop(reason);
+            sync2LifecycleService->Stop(reason);
+            syncLifecycleService->Stop(reason);
+            stopIssued = true;
+        };
+
+        // The async participants are autonomous and run their lifecycle independently of the sync participants.
+        // They can already receive messages while still initializing, but Stop() is only honored in the Running
+        // state (otherwise it's dropped as an invalid state transition). Wait until both are Running.
+        const bool asyncParticipantsRunning =
+            asyncLifecycleService->State() == SilKit::Services::Orchestration::ParticipantState::Running
+            && async2LifecycleService->State() == SilKit::Services::Orchestration::ParticipantState::Running;
+
+        const bool allReceived = syncToAsyncReceived && asyncToSyncReceived && asyncToAsyncReceived
+                                 && syncToSyncReceived;
+
+        if (allReceived && asyncParticipantsRunning)
         {
-            asyncLifecycleService->Stop("Timestamp handling verified");
-            async2LifecycleService->Stop("Timestamp handling verified");
-            sync2LifecycleService->Stop("Timestamp handling verified");
-            syncLifecycleService->Stop("Timestamp handling verified");
+            stopAll("Timestamp handling verified");
         }
-        else if (now >= 20ms)
+        else if (!allReceived && now >= 20ms)
         {
-            asyncLifecycleService->Stop("Timestamp handling timed out");
-            async2LifecycleService->Stop("Timestamp handling timed out");
-            sync2LifecycleService->Stop("Timestamp handling timed out");
-            syncLifecycleService->Stop("Timestamp handling timed out");
+            stopAll("Timestamp handling timed out");
         }
     },
         1ms);
