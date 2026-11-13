@@ -87,7 +87,13 @@ endif()
 
 
 add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_VAsioConnection.cpp LIBS S_SilKitImpl I_SilKit)
-add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_VAsioRegistry.cpp LIBS S_SilKitImpl)
+add_silkit_test_to_executable(SilKitUnitTests
+    SOURCES Test_VAsioRegistry.cpp
+    LIBS S_SilKitImpl
+    TESTSUITE_NAME
+        Test_VAsioRegistrySimulations
+        DisabledNames/Test_VAsioRegistryLegacy
+)
 add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_SessionPlacement.cpp LIBS S_SilKitImpl)
 
 add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_VAsioSerdes.cpp LIBS S_SilKitImpl)

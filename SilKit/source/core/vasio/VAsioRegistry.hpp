@@ -62,7 +62,7 @@ private:
 private:
     // ----------------------------------------
     // private methods
-    auto GetOrCreatePlacement(const std::string& simulationName) -> SessionPlacement&;
+    auto GetOrCreatePlacement(const std::string& simulationName) -> SessionPlacement*;
     auto FindPlacement(const std::string& simulationName) const -> SessionPlacement*;
     auto FindPlacementOfSender(const IServiceEndpoint* from) const -> SessionPlacement*;
 

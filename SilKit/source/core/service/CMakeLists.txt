@@ -23,7 +23,11 @@ add_silkit_test_to_executable(SilKitUnitTests
     LIBS S_SilKitImpl I_SilKit
 )
 
-add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_ServiceSerdes.cpp LIBS S_SilKitImpl)
+add_silkit_test_to_executable(SilKitUnitTests
+    SOURCES Test_ServiceSerdes.cpp
+    LIBS S_SilKitImpl
+    TESTSUITE_NAME Test_ServiceDescriptor
+)
 
 add_silkit_test_to_executable(SilKitUnitTests
     SOURCES Test_SpecificDiscoveryStore.cpp 

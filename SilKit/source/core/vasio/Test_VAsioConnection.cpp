@@ -477,13 +477,17 @@ TEST_F(Test_VAsioConnection, only_the_registered_peer_is_registered_and_not_one_
     stale._simulationName = "Sim";
 
     EXPECT_FALSE(_connection.GetPeerRegistration(&registered).registered);
+    EXPECT_FALSE(_connection.GetPeerRegistration(&stale).nameTakenByOther);
 
     AssociateParticipantNameAndPeer(_connection, "Sim", "MockVAsioPeer", &registered);
     EXPECT_TRUE(_connection.GetPeerRegistration(&registered).registered);
+    EXPECT_FALSE(_connection.GetPeerRegistration(&registered).nameTakenByOther);
     EXPECT_FALSE(_connection.GetPeerRegistration(&stale).registered);
+    EXPECT_TRUE(_connection.GetPeerRegistration(&stale).nameTakenByOther);
 
     RemovePeerFromConnection(_connection, &registered);
     EXPECT_FALSE(_connection.GetPeerRegistration(&registered).registered);
+    EXPECT_FALSE(_connection.GetPeerRegistration(&stale).nameTakenByOther);
 }
 
 TEST_F(Test_VAsioConnection, registration_counts_the_other_peers_by_generation_simulation_and_in_total)
@@ -510,6 +514,7 @@ TEST_F(Test_VAsioConnection, registration_counts_the_other_peers_by_generation_s
 
     const auto ofA1{_connection.GetPeerRegistration(&a1)};
     EXPECT_TRUE(ofA1.registered);
+    EXPECT_FALSE(ofA1.nameTakenByOther);
     EXPECT_EQ(ofA1.othersInGeneration, 1u);
     EXPECT_EQ(ofA1.othersInSimulation, 2u);
     EXPECT_EQ(ofA1.othersTotal, 3u);
@@ -529,8 +534,15 @@ TEST_F(Test_VAsioConnection, registration_counts_the_other_peers_by_generation_s
     stale._serviceDescriptor.SetGeneration(1);
     const auto ofStale{_connection.GetPeerRegistration(&stale)};
     EXPECT_FALSE(ofStale.registered);
+    EXPECT_TRUE(ofStale.nameTakenByOther);
     EXPECT_EQ(ofStale.othersInGeneration, 2u);
     EXPECT_EQ(ofStale.othersTotal, 4u);
+
+    stale._serviceDescriptor.SetGeneration(3);
+    EXPECT_FALSE(_connection.GetPeerRegistration(&stale).nameTakenByOther);
+    stale._simulationName = "Unknown";
+    stale._serviceDescriptor.SetGeneration(1);
+    EXPECT_FALSE(_connection.GetPeerRegistration(&stale).nameTakenByOther);
 }
 
 TEST_F(Test_VAsioConnection, generation_assigned_while_handling_the_announcement_is_used_for_the_name_lookup)

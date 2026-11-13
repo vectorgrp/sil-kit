@@ -200,7 +200,7 @@ TEST_F(Test_SessionPlacement, coordinated_participant_does_not_join_a_generation
     EXPECT_EQ(b.GetServiceDescriptor().GetGeneration(), 2u);
 }
 
-TEST_F(Test_SessionPlacement, participant_that_is_not_required_joins_a_generation_that_has_started)
+TEST_F(Test_SessionPlacement, autonomous_participant_joins_running_generation)
 {
     FakeVAsioPeer a{"A", "Sim"};
     FakeVAsioPeer observer{"Observer", "Sim"};
@@ -217,6 +217,176 @@ TEST_F(Test_SessionPlacement, participant_that_is_not_required_joins_a_generatio
     Leave(observer);
     Join(observer);
     EXPECT_EQ(observer.GetServiceDescriptor().GetGeneration(), 1u);
+}
+
+TEST_F(Test_SessionPlacement, autonomous_participant_joins_most_recent_live_generation)
+{
+    FakeVAsioPeer a1{"A", "Sim"};
+    FakeVAsioPeer b1{"B", "Sim"};
+    FakeVAsioPeer a2{"A", "Sim"};
+    FakeVAsioPeer b2{"B", "Sim"};
+    FakeVAsioPeer observer{"C", "Sim"};
+
+    Join(a1);
+    Join(b1);
+    SendWorkflowConfiguration(a1, {"A", "B"});
+    AdvanceTo(a1, ParticipantState::Running);
+    AdvanceTo(b1, ParticipantState::Running);
+    ASSERT_TRUE(IsGenerationUsed(1));
+
+    Join(a2);
+    Join(b2);
+    SendWorkflowConfiguration(a2, {"A", "B"});
+    AdvanceTo(a2, ParticipantState::Running);
+    AdvanceTo(b2, ParticipantState::Running);
+    ASSERT_TRUE(IsGenerationUsed(2));
+
+    Join(observer);
+    EXPECT_EQ(observer.GetServiceDescriptor().GetGeneration(), 2u);
+}
+
+TEST_F(Test_SessionPlacement, duplicate_autonomous_participant_spawns_new_generation)
+{
+    FakeVAsioPeer a1{"A", "Sim"};
+    FakeVAsioPeer b1{"B", "Sim"};
+    FakeVAsioPeer a2{"A", "Sim"};
+    FakeVAsioPeer b2{"B", "Sim"};
+    FakeVAsioPeer observer1{"C", "Sim"};
+    FakeVAsioPeer observer2{"C", "Sim"};
+
+    Join(a1);
+    Join(b1);
+    SendWorkflowConfiguration(a1, {"A", "B"});
+    AdvanceTo(a1, ParticipantState::Running);
+    AdvanceTo(b1, ParticipantState::Running);
+    ASSERT_TRUE(IsGenerationUsed(1));
+
+    Join(a2);
+    Join(b2);
+    SendWorkflowConfiguration(a2, {"A", "B"});
+    AdvanceTo(a2, ParticipantState::Running);
+    AdvanceTo(b2, ParticipantState::Running);
+    ASSERT_TRUE(IsGenerationUsed(2));
+
+    Join(observer1);
+    ASSERT_EQ(observer1.GetServiceDescriptor().GetGeneration(), 2u);
+    Join(observer2);
+    EXPECT_EQ(observer2.GetServiceDescriptor().GetGeneration(), 3u);
+    EXPECT_EQ(observer1.GetServiceDescriptor().GetGeneration(), 2u);
+}
+
+TEST_F(Test_SessionPlacement, rejoining_autonomous_system_controller_spawns_new_generation)
+{
+    FakeVAsioPeer a{"A", "Sim"};
+    FakeVAsioPeer b{"B", "Sim"};
+    FakeVAsioPeer controller{"Controller", "Sim"};
+
+    Join(a);
+    Join(b);
+    Join(controller);
+    SendWorkflowConfiguration(controller, {"A", "B"});
+    AdvanceTo(a, ParticipantState::Running);
+    AdvanceTo(b, ParticipantState::Running);
+    ASSERT_TRUE(IsGenerationUsed(1));
+
+    Leave(controller);
+    Join(controller);
+    EXPECT_EQ(controller.GetServiceDescriptor().GetGeneration(), 2u);
+}
+
+TEST_F(Test_SessionPlacement, changing_workflow_configuration_between_generations_is_rejected)
+{
+    using SilKit::Services::Logging::ALoggerMessageWith;
+    using SilKit::Services::Logging::Level;
+
+    for (const bool disconnectController : {false, true})
+    {
+        SCOPED_TRACE(disconnectController);
+        FakeVAsioPeer a1{"A", "Sim"};
+        FakeVAsioPeer b1{"B", "Sim"};
+        FakeVAsioPeer controller1{"Controller", "Sim"};
+        FakeVAsioPeer a2{"A", "Sim"};
+        FakeVAsioPeer controller2{"Controller", "Sim"};
+
+        Join(a1);
+        Join(b1);
+        Join(controller1);
+        SendWorkflowConfiguration(controller1, {"A", "B"});
+        AdvanceTo(a1, ParticipantState::Running);
+        AdvanceTo(b1, ParticipantState::Running);
+        ASSERT_TRUE(IsGenerationUsed(1));
+
+        if (disconnectController)
+        {
+            Leave(controller1);
+        }
+        Join(a2);
+        ASSERT_EQ(a2.GetServiceDescriptor().GetGeneration(), 2u);
+        Join(controller2);
+
+        EXPECT_CALL(_logger, ProcessLoggerMessage(testing::_)).Times(testing::AnyNumber());
+        EXPECT_CALL(_logger, ProcessLoggerMessage(ALoggerMessageWith(Level::Error))).Times(1);
+        SendWorkflowConfiguration(controller2, {"A"});
+        testing::Mock::VerifyAndClearExpectations(&_logger);
+
+        AdvanceTo(a2, ParticipantState::Running);
+        EXPECT_FALSE(IsGenerationUsed(2));
+
+        Leave(controller2);
+        Leave(a2);
+        if (!disconnectController)
+        {
+            Leave(controller1);
+        }
+        Leave(a1);
+        Leave(b1);
+    }
+}
+
+TEST_F(Test_SessionPlacement, changing_system_controller_name_between_generations_is_rejected)
+{
+    using SilKit::Services::Logging::ALoggerMessageWith;
+    using SilKit::Services::Logging::Level;
+
+    for (const bool disconnectController : {false, true})
+    {
+        SCOPED_TRACE(disconnectController);
+        FakeVAsioPeer a1{"A", "Sim"};
+        FakeVAsioPeer b1{"B", "Sim"};
+        FakeVAsioPeer controller1{"Controller", "Sim"};
+        FakeVAsioPeer a2{"A", "Sim"};
+        FakeVAsioPeer controller2{"Controller2", "Sim"};
+
+        Join(a1);
+        Join(b1);
+        Join(controller1);
+        SendWorkflowConfiguration(controller1, {"A", "B"});
+        AdvanceTo(a1, ParticipantState::Running);
+        AdvanceTo(b1, ParticipantState::Running);
+        ASSERT_TRUE(IsGenerationUsed(1));
+
+        if (disconnectController)
+        {
+            Leave(controller1);
+        }
+        Join(a2);
+        ASSERT_EQ(a2.GetServiceDescriptor().GetGeneration(), 2u);
+        Join(controller2);
+
+        EXPECT_CALL(_logger, ProcessLoggerMessage(testing::_)).Times(testing::AnyNumber());
+        EXPECT_CALL(_logger, ProcessLoggerMessage(ALoggerMessageWith(Level::Error))).Times(1);
+        SendWorkflowConfiguration(controller2, {"A", "B"});
+        testing::Mock::VerifyAndClearExpectations(&_logger);
+
+        Leave(controller2);
+        Leave(a2);
+        if (!disconnectController)
+        {
+            Leave(controller1);
+        }
+        Leave(a1);
+        Leave(b1);
+    }
 }
 
 TEST_F(Test_SessionPlacement, status_updates_before_the_workflow_configuration_are_considered)

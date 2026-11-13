@@ -1999,6 +1999,10 @@ auto VAsioConnection::GetPeerRegistration(const IVAsioPeer* peer) const -> PeerR
                 }
 
                 ++result.othersTotal;
+                if (sameGeneration && registeredName == participantName)
+                {
+                    result.nameTakenByOther = true;
+                }
                 result.othersInSimulation += sameSimulation ? 1 : 0;
                 result.othersInGeneration += sameGeneration ? 1 : 0;
             }

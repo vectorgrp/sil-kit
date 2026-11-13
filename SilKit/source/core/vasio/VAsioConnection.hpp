@@ -218,6 +218,7 @@ public:
     struct PeerRegistration
     {
         bool registered{false};
+        bool nameTakenByOther{false};
         size_t othersInGeneration{0};
         size_t othersInSimulation{0};
         size_t othersTotal{0};
