@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <atomic>
+
 #include <map>
 #include <set>
 
@@ -150,6 +152,13 @@ public:
     void ThrowOnSendAttemptWithUndefinedChecksum(const LinFrame& frame) const;
     void ThrowOnSendAttemptWithUndefinedDataLength(const LinFrame& frame) const;
 
+    // LIN diagnostic SlaveResp (0x3D): a slave answers only if a response is pending, and only once.
+    // SetFrameResponse() and UpdateTxBuffer() make a response pending, Init() does not.
+    static constexpr LinId DiagnosticSlaveResponseId = 0x3D;
+    bool IsDiagnosticSlaveResponse(LinId linId) const;
+    // Returns whether a diagnostic response was pending and clears it
+    bool ConsumePendingDiagnosticResponse();
+
     // for ITraceMessageSource
     inline auto GetTracer() -> Tracer*;
 
@@ -231,6 +240,7 @@ private:
 
     std::vector<LinNode> _linNodes;
     std::vector<LinId> _linIdsRespondedBySlaves{}; // Global view of LinIds with TxUnconditional configured on any node.
+    std::atomic<bool> _diagnosticResponsePending{false}; // see IsDiagnosticSlaveResponse()
     bool _triggerLinSlaveConfigurationHandlers{false};
     std::chrono::nanoseconds _receptionTimeLinSlaveConfiguration{};
 
