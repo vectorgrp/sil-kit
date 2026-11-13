@@ -71,6 +71,7 @@ struct TopicTraits<SilKit::Core::SilKitLink<MsgT>>
 
 DefineSilKitLoggingTrait_Topic(SilKit::Core::VAsioConnection, SilKit::Services::Logging::Topic::Asio);
 DefineSilKitLoggingTrait_Topic(SilKit::Core::VAsioRegistry, SilKit::Services::Logging::Topic::Asio);
+DefineSilKitLoggingTrait_Topic(SilKit::Core::SessionPlacement, SilKit::Services::Logging::Topic::Asio);
 DefineSilKitLoggingTrait_Topic(SilKit::Core::ConnectKnownParticipants, SilKit::Services::Logging::Topic::Asio);
 DefineSilKitLoggingTrait_Topic(SilKit::Core::RemoteConnectionManager, SilKit::Services::Logging::Topic::Asio);
 DefineSilKitLoggingTrait_Topic(SilKit::Core::VAsioPeer, SilKit::Services::Logging::Topic::Asio);

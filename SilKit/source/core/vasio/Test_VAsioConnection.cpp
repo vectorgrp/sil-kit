@@ -401,6 +401,138 @@ TEST_F(Test_VAsioConnection, connected_participant_names_contain_each_name_once)
     EXPECT_THAT(_connection.GetConnectedParticipantsNames(), testing::ElementsAre("MockVAsioPeer", "Other"));
 }
 
+TEST_F(Test_VAsioConnection, participants_are_listed_by_simulation_and_generation)
+{
+    MockVAsioPeer2 first;
+    MockVAsioPeer2 second;
+    MockVAsioPeer2 other;
+    MockVAsioPeer2 unstamped;
+    MockVAsioPeer2 otherSimulation;
+    for (auto* peer : {&first, &second, &other, &unstamped})
+    {
+        peer->_simulationName = "Sim";
+    }
+    otherSimulation._simulationName = "Else";
+    other._peerInfo.participantName = "Other";
+    unstamped._peerInfo.participantName = "Unstamped";
+    first._serviceDescriptor.SetGeneration(1);
+    second._serviceDescriptor.SetGeneration(2);
+    other._serviceDescriptor.SetGeneration(2);
+
+    AssociateParticipantNameAndPeer(_connection, "Sim", "MockVAsioPeer", &first);
+    AssociateParticipantNameAndPeer(_connection, "Sim", "MockVAsioPeer", &second);
+    AssociateParticipantNameAndPeer(_connection, "Sim", "Other", &other);
+    AssociateParticipantNameAndPeer(_connection, "Sim", "Unstamped", &unstamped);
+    AssociateParticipantNameAndPeer(_connection, "Else", "MockVAsioPeer", &otherSimulation);
+
+    const auto registered{_connection.ParticipantsByGeneration("Sim")};
+    EXPECT_THAT(registered, testing::ElementsAre(testing::Pair(NoGeneration, std::set<std::string>{"Unstamped"}),
+                                                 testing::Pair(1, std::set<std::string>{"MockVAsioPeer"}),
+                                                 testing::Pair(2, std::set<std::string>{"MockVAsioPeer", "Other"})));
+    EXPECT_TRUE(_connection.ParticipantsByGeneration("Unknown").empty());
+
+    RemovePeerFromConnection(_connection, &first);
+    EXPECT_EQ(_connection.ParticipantsByGeneration("Sim").count(1), 0u);
+}
+
+TEST_F(Test_VAsioConnection, peers_in_generation_of_a_peer_are_the_other_peers_of_its_simulation_and_generation)
+{
+    MockVAsioPeer2 a1;
+    MockVAsioPeer2 b1;
+    MockVAsioPeer2 a2;
+    MockVAsioPeer2 otherSimulation;
+    for (auto* peer : {&a1, &b1, &a2, &otherSimulation})
+    {
+        peer->_simulationName = "Sim";
+    }
+    otherSimulation._simulationName = "Else";
+    b1._peerInfo.participantName = "B";
+    a1._serviceDescriptor.SetGeneration(1);
+    b1._serviceDescriptor.SetGeneration(1);
+    a2._serviceDescriptor.SetGeneration(2);
+    otherSimulation._serviceDescriptor.SetGeneration(1);
+
+    AssociateParticipantNameAndPeer(_connection, "Sim", "MockVAsioPeer", &a1);
+    AssociateParticipantNameAndPeer(_connection, "Sim", "B", &b1);
+    AssociateParticipantNameAndPeer(_connection, "Sim", "MockVAsioPeer", &a2);
+    AssociateParticipantNameAndPeer(_connection, "Else", "MockVAsioPeer", &otherSimulation);
+
+    EXPECT_THAT(_connection.PeersInGenerationOf(&a1), testing::ElementsAre(&b1));
+    EXPECT_THAT(_connection.PeersInGenerationOf(&b1), testing::ElementsAre(&a1));
+    EXPECT_THAT(_connection.PeersInGenerationOf(&a2), testing::IsEmpty());
+
+    // a peer that is stamped but not registered yet gets the registered peers of its generation
+    MockVAsioPeer2 joining;
+    joining._simulationName = "Sim";
+    joining._peerInfo.participantName = "C";
+    joining._serviceDescriptor.SetGeneration(1);
+    EXPECT_THAT(_connection.PeersInGenerationOf(&joining), testing::UnorderedElementsAre(&a1, &b1));
+}
+
+TEST_F(Test_VAsioConnection, only_the_registered_peer_is_registered_and_not_one_with_the_same_name)
+{
+    MockVAsioPeer2 registered;
+    MockVAsioPeer2 stale;
+    registered._simulationName = "Sim";
+    stale._simulationName = "Sim";
+
+    EXPECT_FALSE(_connection.GetPeerRegistration(&registered).registered);
+
+    AssociateParticipantNameAndPeer(_connection, "Sim", "MockVAsioPeer", &registered);
+    EXPECT_TRUE(_connection.GetPeerRegistration(&registered).registered);
+    EXPECT_FALSE(_connection.GetPeerRegistration(&stale).registered);
+
+    RemovePeerFromConnection(_connection, &registered);
+    EXPECT_FALSE(_connection.GetPeerRegistration(&registered).registered);
+}
+
+TEST_F(Test_VAsioConnection, registration_counts_the_other_peers_by_generation_simulation_and_in_total)
+{
+    MockVAsioPeer2 a1;
+    MockVAsioPeer2 b1;
+    MockVAsioPeer2 a2;
+    MockVAsioPeer2 otherSimulation;
+    for (auto* peer : {&a1, &b1, &a2})
+    {
+        peer->_simulationName = "Sim";
+    }
+    otherSimulation._simulationName = "Else";
+    b1._peerInfo.participantName = "B";
+    a1._serviceDescriptor.SetGeneration(1);
+    b1._serviceDescriptor.SetGeneration(1);
+    a2._serviceDescriptor.SetGeneration(2);
+    otherSimulation._serviceDescriptor.SetGeneration(1);
+
+    AssociateParticipantNameAndPeer(_connection, "Sim", "MockVAsioPeer", &a1);
+    AssociateParticipantNameAndPeer(_connection, "Sim", "B", &b1);
+    AssociateParticipantNameAndPeer(_connection, "Sim", "MockVAsioPeer", &a2);
+    AssociateParticipantNameAndPeer(_connection, "Else", "MockVAsioPeer", &otherSimulation);
+
+    const auto ofA1{_connection.GetPeerRegistration(&a1)};
+    EXPECT_TRUE(ofA1.registered);
+    EXPECT_EQ(ofA1.othersInGeneration, 1u);
+    EXPECT_EQ(ofA1.othersInSimulation, 2u);
+    EXPECT_EQ(ofA1.othersTotal, 3u);
+
+    const auto ofA2{_connection.GetPeerRegistration(&a2)};
+    EXPECT_EQ(ofA2.othersInGeneration, 0u);
+    EXPECT_EQ(ofA2.othersInSimulation, 2u);
+
+    const auto ofOtherSimulation{_connection.GetPeerRegistration(&otherSimulation)};
+    EXPECT_EQ(ofOtherSimulation.othersInGeneration, 0u);
+    EXPECT_EQ(ofOtherSimulation.othersInSimulation, 0u);
+    EXPECT_EQ(ofOtherSimulation.othersTotal, 3u);
+
+    // a peer that is not registered counts all registered peers as others
+    MockVAsioPeer2 stale;
+    stale._simulationName = "Sim";
+    stale._serviceDescriptor.SetGeneration(1);
+    const auto ofStale{_connection.GetPeerRegistration(&stale)};
+    EXPECT_FALSE(ofStale.registered);
+    EXPECT_EQ(ofStale.othersInGeneration, 2u);
+    EXPECT_EQ(ofStale.othersTotal, 4u);
+}
+
 TEST_F(Test_VAsioConnection, generation_assigned_while_handling_the_announcement_is_used_for_the_name_lookup)
 {
     // The registry assigns the generation in a handler of the announcement, which runs before the peer is

@@ -209,6 +209,21 @@ public:
 
     std::set<std::string> GetConnectedParticipantsNames();
 
+    //! The names of the registered peers of the simulation by generation. Peers without a generation are in 0.
+    auto ParticipantsByGeneration(const std::string& simulationName) const
+        -> std::map<uint64_t, std::set<std::string>>;
+    //! The other registered peers that are in the same simulation and generation as the peer.
+    auto PeersInGenerationOf(const IVAsioPeer* peer) const -> std::vector<IVAsioPeer*>;
+
+    struct PeerRegistration
+    {
+        bool registered{false};
+        size_t othersInGeneration{0};
+        size_t othersInSimulation{0};
+        size_t othersTotal{0};
+    };
+    auto GetPeerRegistration(const IVAsioPeer* peer) const -> PeerRegistration;
+
     auto GetNumberOfRemoteReceivers(const IServiceEndpoint* service, const std::string& msgTypeName) -> size_t;
     auto GetParticipantNamesOfRemoteReceivers(const IServiceEndpoint* service,
                                               const std::string& msgTypeName) -> std::vector<std::string>;

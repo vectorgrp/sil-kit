@@ -1922,6 +1922,91 @@ std::set<std::string> VAsioConnection::GetConnectedParticipantsNames()
     return participants;
 }
 
+auto VAsioConnection::ParticipantsByGeneration(const std::string& simulationName) const
+    -> std::map<uint64_t, std::set<std::string>>
+{
+    std::map<uint64_t, std::set<std::string>> result;
+
+    std::lock_guard<decltype(_mutex)> lock{_mutex};
+
+    const auto simulationIt{_participantNameToPeer.find(simulationName)};
+    if (simulationIt == _participantNameToPeer.end())
+    {
+        return result;
+    }
+
+    for (const auto& [generation, peers] : simulationIt->second)
+    {
+        auto& names{result[generation]};
+        for (const auto& peerPair : peers)
+        {
+            names.insert(peerPair.first);
+        }
+    }
+    return result;
+}
+
+auto VAsioConnection::PeersInGenerationOf(const IVAsioPeer* peer) const -> std::vector<IVAsioPeer*>
+{
+    std::vector<IVAsioPeer*> result;
+
+    std::lock_guard<decltype(_mutex)> lock{_mutex};
+
+    const auto simulationIt{_participantNameToPeer.find(peer->GetSimulationName())};
+    if (simulationIt == _participantNameToPeer.end())
+    {
+        return result;
+    }
+
+    const auto generationIt{simulationIt->second.find(GenerationOf(*peer))};
+    if (generationIt == simulationIt->second.end())
+    {
+        return result;
+    }
+
+    for (const auto& peerPair : generationIt->second)
+    {
+        if (peerPair.second != peer)
+        {
+            result.push_back(peerPair.second);
+        }
+    }
+    return result;
+}
+
+auto VAsioConnection::GetPeerRegistration(const IVAsioPeer* peer) const -> PeerRegistration
+{
+    PeerRegistration result;
+
+    const auto& simulationName{peer->GetSimulationName()};
+    const auto generation{GenerationOf(*peer)};
+    const auto& participantName{peer->GetInfo().participantName};
+
+    std::lock_guard<decltype(_mutex)> lock{_mutex};
+    for (const auto& [registeredSimulationName, generations] : _participantNameToPeer)
+    {
+        const bool sameSimulation{registeredSimulationName == simulationName};
+        for (const auto& [registeredGeneration, peers] : generations)
+        {
+            const bool sameGeneration{sameSimulation && registeredGeneration == generation};
+            for (const auto& [registeredName, registeredPeer] : peers)
+            {
+                // pointer identity, like the guarded erase in RemovePeerFromConnection
+                if (sameGeneration && registeredName == participantName && registeredPeer == peer)
+                {
+                    result.registered = true;
+                    continue;
+                }
+
+                ++result.othersTotal;
+                result.othersInSimulation += sameSimulation ? 1 : 0;
+                result.othersInGeneration += sameGeneration ? 1 : 0;
+            }
+        }
+    }
+    return result;
+}
+
 auto VAsioConnection::GetNumberOfRemoteReceivers(const IServiceEndpoint* service,
                                                  const std::string& msgTypeName) -> size_t
 {

@@ -9,6 +9,8 @@ add_library(O_SilKit_Core_VAsio OBJECT
     VAsioConnection.cpp
 
     IRegistryEventListener.hpp
+    SessionPlacement.hpp
+    SessionPlacement.cpp
     VAsioRegistry.hpp
     VAsioRegistry.cpp
 
@@ -86,6 +88,7 @@ endif()
 
 add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_VAsioConnection.cpp LIBS S_SilKitImpl I_SilKit)
 add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_VAsioRegistry.cpp LIBS S_SilKitImpl)
+add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_SessionPlacement.cpp LIBS S_SilKitImpl)
 
 add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_VAsioSerdes.cpp LIBS S_SilKitImpl)
 add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_SerializedMessage.cpp LIBS S_SilKitImpl)
