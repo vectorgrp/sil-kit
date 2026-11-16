@@ -278,7 +278,8 @@ TEST_F(Test_VAsioRegistrySimulations, multiple_running_generations_coexist_and_a
     FakeVAsioPeer controller1{"Controller", "session/Sim"};
     FakeVAsioPeer controller2{"Controller", "session/Sim"};
 
-    for (auto* peer : {&a1, &a2, &b1, &b2, &controller1, &controller2})
+    // Newest-first admission fills generation 2 before generation 1.
+    for (auto* peer : {&a1, &a2, &b2, &b1, &controller2, &controller1})
     {
         VAsioRegistryTestAccess::Announce(_registry, peer, "session/Sim");
         ASSERT_TRUE(VAsioRegistryTestAccess::IsPeerRegistered(_registry, peer));

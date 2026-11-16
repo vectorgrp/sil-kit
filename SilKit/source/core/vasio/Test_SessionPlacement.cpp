@@ -131,6 +131,26 @@ TEST_F(Test_SessionPlacement, generation_gets_reset_when_none_exists)
     EXPECT_EQ(a.GetServiceDescriptor().GetGeneration(), 1u);
 }
 
+TEST_F(Test_SessionPlacement, joining_participant_follows_replacement_before_dangling_peer_leaves)
+{
+    FakeVAsioPeer danglingA{"A", "Sim"};
+    FakeVAsioPeer replacementA{"A", "Sim"};
+    FakeVAsioPeer b{"B", "Sim"};
+
+    Join(danglingA);
+    Join(replacementA);
+    Join(b);
+
+    EXPECT_EQ(danglingA.GetServiceDescriptor().GetGeneration(), 1u);
+    EXPECT_EQ(replacementA.GetServiceDescriptor().GetGeneration(), 2u);
+    EXPECT_EQ(b.GetServiceDescriptor().GetGeneration(), 2u);
+
+    Leave(danglingA);
+
+    EXPECT_EQ(_registered.count(1), 0u);
+    EXPECT_EQ(_registered.at(2), (std::set<std::string>{"A", "B"}));
+}
+
 TEST_F(Test_SessionPlacement, rejoining_bumps_the_generation_once_the_simulation_has_started)
 {
     FakeVAsioPeer a{"A", "Sim"};
@@ -449,9 +469,9 @@ TEST_F(Test_SessionPlacement, equivalent_workflows_are_accepted_independently_in
     FakeVAsioPeer controller2{"Controller", "Sim"};
     Join(a1);
     Join(b1);
+    Join(controller1);
     Join(a2);
     Join(b2);
-    Join(controller1);
     Join(controller2);
 
     AdvanceTo(a2, ParticipantState::ReadyToRun);
@@ -588,11 +608,11 @@ TEST_F(Test_SessionPlacement, autonomous_participant_joins_newest_generation_bef
     FakeVAsioPeer controller2{"Controller", "Sim"};
 
     Join(a1);
+    Join(controller1);
     Join(a2);
     EXPECT_EQ(a1.GetServiceDescriptor().GetGeneration(), 1u);
     EXPECT_EQ(a2.GetServiceDescriptor().GetGeneration(), 2u);
 
-    Join(controller1);
     Join(controller2);
     SendWorkflowConfiguration(controller1, {"A"});
     SendWorkflowConfiguration(controller2, {"A"});
@@ -620,24 +640,53 @@ TEST_F(Test_SessionPlacement, autonomous_participant_joins_newest_generation_bef
     EXPECT_EQ(observer.GetServiceDescriptor().GetGeneration(), 1u);
 }
 
-TEST_F(Test_SessionPlacement, required_participant_and_controller_join_oldest_eligible_unstarted_generation)
+TEST_F(Test_SessionPlacement, required_participant_and_controller_join_newest_eligible_unstarted_generation)
 {
     FakeVAsioPeer a1{"A", "Sim"};
     FakeVAsioPeer a2{"A", "Sim"};
     FakeVAsioPeer b{"B", "Sim"};
     FakeVAsioPeer controller{"Controller", "Sim"};
+    FakeVAsioPeer nextController{"Controller", "Sim"};
     Join(a1);
-    Join(a2);
     Join(controller);
     EXPECT_EQ(controller.GetServiceDescriptor().GetGeneration(), 1u);
     SendWorkflowConfiguration(controller, {"A", "B"});
-    Leave(controller);
 
-    Join(controller);
-    EXPECT_EQ(controller.GetServiceDescriptor().GetGeneration(), 2u);
+    Join(a2);
+    Join(nextController);
+    EXPECT_EQ(nextController.GetServiceDescriptor().GetGeneration(), 2u);
+    SendWorkflowConfiguration(nextController, {"A", "B"});
     Join(b);
-    EXPECT_EQ(b.GetServiceDescriptor().GetGeneration(), 1u);
+    EXPECT_EQ(b.GetServiceDescriptor().GetGeneration(), 2u);
     EXPECT_FALSE(IsGenerationUsed(2));
+}
+
+TEST_F(Test_SessionPlacement, required_participant_skips_newest_generation_if_it_has_started)
+{
+    FakeVAsioPeer a1{"A", "Sim"};
+    FakeVAsioPeer a2{"A", "Sim"};
+    FakeVAsioPeer b1{"B", "Sim"};
+    FakeVAsioPeer b2{"B", "Sim"};
+    FakeVAsioPeer controller1{"Controller", "Sim"};
+    FakeVAsioPeer controller2{"Controller", "Sim"};
+    Join(a1);
+    Join(b1);
+    Join(controller1);
+    SendWorkflowConfiguration(controller1, {"A", "B"});
+    Join(a2);
+    Join(b2);
+    Join(controller2);
+    SendWorkflowConfiguration(controller2, {"A", "B"});
+    AdvanceTo(a2, ParticipantState::ReadyToRun);
+    AdvanceTo(b2, ParticipantState::ReadyToRun);
+    ASSERT_TRUE(IsGenerationUsed(2));
+    ASSERT_FALSE(IsGenerationUsed(1));
+
+    Leave(b1);
+    Leave(b2);
+    Join(b1);
+
+    EXPECT_EQ(b1.GetServiceDescriptor().GetGeneration(), 1u);
 }
 
 TEST_F(Test_SessionPlacement, system_controller_cannot_join_same_generation_twice_before_start)
@@ -712,8 +761,8 @@ TEST_F(Test_SessionPlacement, learning_controller_tags_all_connected_generations
     FakeVAsioPeer controller2{"Controller", "Sim"};
     Join(a1);
     Join(a2);
-    Join(controller1);
     Join(controller2);
+    Join(controller1);
     AdvanceTo(a2, ParticipantState::ReadyToRun);
 
     SendWorkflowConfiguration(controller1, {"A"});
@@ -734,9 +783,9 @@ TEST_F(Test_SessionPlacement, assigning_known_controller_reserves_its_slot_witho
     FakeVAsioPeer controller{"Controller", "Sim"};
     FakeVAsioPeer nextController{"Controller", "Sim"};
     Join(a1);
-    Join(a2);
     Join(controller);
     SendWorkflowConfiguration(controller, {"A"});
+    Join(a2);
     Leave(controller);
 
     _placement.Admit(&controller, _registered);
@@ -758,7 +807,7 @@ TEST_F(Test_SessionPlacement, roles_remain_unknown_until_the_first_workflow)
     Join(a1);
     Join(a2);
     Join(observer);
-    EXPECT_EQ(observer.GetServiceDescriptor().GetGeneration(), 1u);
+    EXPECT_EQ(observer.GetServiceDescriptor().GetGeneration(), 2u);
     Leave(observer);
 
     Join(controller1);
@@ -807,8 +856,8 @@ TEST_F(Test_SessionPlacement, state_of_a_generation_is_dropped_with_its_last_pee
 
     Join(a1);
     Join(b1);
-    Join(a2);
     Join(controller1);
+    Join(a2);
     Join(controller2);
     SendWorkflowConfiguration(controller1, {"A"});
     SendWorkflowConfiguration(controller2, {"A"});

@@ -65,9 +65,9 @@ auto SessionPlacement::SelectGeneration(const std::string& participantName, cons
         return newest.second.count(participantName) == 0 ? newest.first : newest.first + 1;
     }
 
-    // std::map iterates in ascending generation order
-    for (const auto& generationPair : registered)
+    for (auto generationIt = registered.rbegin(); generationIt != registered.rend(); ++generationIt)
     {
+        const auto& generationPair = *generationIt;
         if (ShouldEnterGeneration(participantName, generationPair.first, generationPair.second))
         {
             return generationPair.first;
