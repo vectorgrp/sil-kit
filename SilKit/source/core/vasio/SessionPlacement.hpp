@@ -32,6 +32,9 @@ public:
 
     //! \brief Decides into which generation the joining peer is placed and stamps it on the service descriptor of the
     //! peer.
+    //! With a known workflow, autonomous participants join only the newest live generation; required participants
+    //! and the controller join the oldest eligible unstarted generation. Before that, roles are unknown and all
+    //! peers join the oldest generation without their name. A duplicate with no eligible generation creates a new one.
     void Admit(IVAsioPeer* peer, const Snapshot& registered);
 
     void OnStatus(const IServiceEndpoint* from, const Services::Orchestration::ParticipantStatus& msg,

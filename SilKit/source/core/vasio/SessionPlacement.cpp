@@ -44,16 +44,25 @@ bool SessionPlacement::ShouldEnterGeneration(const std::string& participantName,
         return true;
     }
 
-    // Once the simulation of a generation has started, only participants that are not part of the coordinated
-    // simulation (e.g. autonomous participants that hop on) may still join it. The coordinated participants are the
-    // required participants of the workflow configuration, so a participant with such a name belongs to a new run.
-    const auto& generation{generationIt->second};
-    return !(generation.used && generation.stateTracker.IsRequiredParticipant(participantName));
+    // Required participants and the controller cannot join a run that has already started.
+    return !generationIt->second.used;
 }
 
 auto SessionPlacement::SelectGeneration(const std::string& participantName, const Snapshot& registered) const
     -> uint64_t
 {
+    if (registered.empty())
+    {
+        return FIRST_GENERATION;
+    }
+
+    if (_workflowContract.has_value() && _workflowContract->controllerName != participantName
+        && _workflowContract->requiredParticipantNames.count(participantName) == 0)
+    {
+        const auto& newest{*registered.rbegin()};
+        return newest.second.count(participantName) == 0 ? newest.first : newest.first + 1;
+    }
+
     // std::map iterates in ascending generation order
     for (const auto& generationPair : registered)
     {
@@ -63,7 +72,7 @@ auto SessionPlacement::SelectGeneration(const std::string& participantName, cons
         }
     }
 
-    return registered.empty() ? FIRST_GENERATION : registered.rbegin()->first + 1;
+    return registered.rbegin()->first + 1;
 }
 
 void SessionPlacement::Admit(IVAsioPeer* peer, const Snapshot& registered)
@@ -217,8 +226,8 @@ void SessionPlacement::UpdateGenerationUsage(uint64_t generationNumber, Generati
     generation.used = true;
 
     _logger->MakeMessage(Log::Level::Info, TopicOf(*this))
-        .SetMessage("The simulation '{}' in generation {} has started (system state {}), participants can no longer "
-                    "join this generation",
+        .SetMessage("The simulation '{}' in generation {} has started (system state {}), required participants and "
+                    "the system controller can no longer join this generation",
                     _simulationName, generationNumber, to_string(generation.stateTracker.GetSystemState()))
         .Dispatch();
 }

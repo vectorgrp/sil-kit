@@ -525,7 +525,7 @@ TEST_F(Test_SessionPlacement, participants_that_are_not_required_do_not_start_th
     EXPECT_TRUE(IsGenerationUsed(1));
 }
 
-TEST_F(Test_SessionPlacement, generations_start_independently)
+TEST_F(Test_SessionPlacement, autonomous_participant_joins_newest_generation_before_and_after_it_starts)
 {
     FakeVAsioPeer a1{"A", "Sim"};
     FakeVAsioPeer a2{"A", "Sim"};
@@ -537,15 +537,64 @@ TEST_F(Test_SessionPlacement, generations_start_independently)
 
     SendWorkflowConfiguration(a1, {"A"});
     SendWorkflowConfiguration(a2, {"A"});
+    EXPECT_FALSE(IsGenerationUsed(1));
+    EXPECT_FALSE(IsGenerationUsed(2));
+
+    FakeVAsioPeer observer{"Observer", "Sim"};
+    Join(observer);
+    EXPECT_EQ(observer.GetServiceDescriptor().GetGeneration(), 2u);
+    Leave(observer);
+
     AdvanceTo(a2, ParticipantState::Running);
 
     EXPECT_FALSE(IsGenerationUsed(1));
     EXPECT_TRUE(IsGenerationUsed(2));
 
-    // the first generation is still open: a participant that is not yet in it is placed there
+    Join(observer);
+    EXPECT_EQ(observer.GetServiceDescriptor().GetGeneration(), 2u);
+    Leave(observer);
+    Leave(a2);
+
+    // Only live generations count, even if a newer generation ran previously.
+    Join(observer);
+    EXPECT_EQ(observer.GetServiceDescriptor().GetGeneration(), 1u);
+}
+
+TEST_F(Test_SessionPlacement, required_participant_and_controller_join_oldest_eligible_unstarted_generation)
+{
+    FakeVAsioPeer a1{"A", "Sim"};
+    FakeVAsioPeer a2{"A", "Sim"};
     FakeVAsioPeer b{"B", "Sim"};
+    FakeVAsioPeer controller{"Controller", "Sim"};
+    Join(a1);
+    Join(a2);
+    Join(controller);
+    SendWorkflowConfiguration(controller, {"A", "B"});
+    Leave(controller);
+
+    Join(controller);
+    EXPECT_EQ(controller.GetServiceDescriptor().GetGeneration(), 1u);
     Join(b);
+    // mfricke FIXME: should not re-join gen 1
     EXPECT_EQ(b.GetServiceDescriptor().GetGeneration(), 1u);
+    EXPECT_FALSE(SessionPlacementTestAccess::HasGenerationState(_placement, 2));
+}
+
+TEST_F(Test_SessionPlacement, roles_remain_unknown_until_the_first_workflow)
+{
+    FakeVAsioPeer a1{"A", "Sim"};
+    FakeVAsioPeer a2{"A", "Sim"};
+    FakeVAsioPeer observer{"Observer", "Sim"};
+    Join(a1);
+    Join(a2);
+    Join(observer);
+    EXPECT_EQ(observer.GetServiceDescriptor().GetGeneration(), 1u);
+    Leave(observer);
+
+    SendWorkflowConfiguration(a1, {"A"});
+    Join(observer);
+    EXPECT_EQ(observer.GetServiceDescriptor().GetGeneration(), 2u);
+    EXPECT_FALSE(SessionPlacementTestAccess::HasGenerationState(_placement, 2));
 }
 
 TEST_F(Test_SessionPlacement, rejoining_bumps_the_generation_while_participant_with_same_name_exists)
