@@ -6,6 +6,8 @@
 
 #include <utility>
 
+#include "fmt/ranges.h"
+
 #include "services/logging/LoggerMessage.hpp"
 #include "silkit/services/orchestration/string_utils.hpp"
 
@@ -126,14 +128,43 @@ void SessionPlacement::OnWorkflow(const IServiceEndpoint* from,
                                   const Services::Orchestration::WorkflowConfiguration& msg,
                                   const Snapshot& registered)
 {
-    const auto [generationNumber, generation] = GetOrCreateGeneration(from, registered);
-    if (generation == nullptr)
+    if (from == nullptr)
     {
         return;
     }
 
+    const auto& descriptor{from->GetServiceDescriptor()};
+    const auto generationNumber{descriptor.GetGeneration()};
+    if (!generationNumber.has_value() || registered.count(*generationNumber) == 0)
+    {
+        return;
+    }
+
+    const auto& controllerName{descriptor.GetParticipantName()};
+    std::set<std::string> requiredParticipantNames{msg.requiredParticipantNames.begin(),
+                                                 msg.requiredParticipantNames.end()};
+    if (_workflowContract.has_value()
+        && (_workflowContract->controllerName != controllerName
+            || _workflowContract->requiredParticipantNames != requiredParticipantNames))
+    {
+        _logger->MakeMessage(Log::Level::Error, TopicOf(*this))
+            .SetMessage("Rejected workflow for simulation '{}' in generation {}: expected controller '{}' with "
+                        "required participants [{}], received controller '{}' with required participants [{}]",
+                        _simulationName, *generationNumber, _workflowContract->controllerName,
+                        fmt::join(_workflowContract->requiredParticipantNames, ", "), controllerName,
+                        fmt::join(requiredParticipantNames, ", "))
+            .Dispatch();
+        return;
+    }
+
+    if (!_workflowContract.has_value())
+    {
+        _workflowContract = WorkflowContract{controllerName, std::move(requiredParticipantNames)};
+    }
+
+    const auto [number, generation] = GetOrCreateGeneration(from, registered);
     generation->stateTracker.UpdateRequiredParticipants(msg.requiredParticipantNames);
-    UpdateGenerationUsage(generationNumber, *generation);
+    UpdateGenerationUsage(number, *generation);
 }
 
 void SessionPlacement::OnPeerLeaving(const IVAsioPeer* peer, bool isLastInGeneration)

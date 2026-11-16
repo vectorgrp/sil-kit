@@ -6,6 +6,7 @@
 
 #include <cstdint>
 #include <map>
+#include <optional>
 #include <set>
 #include <string>
 
@@ -36,6 +37,8 @@ public:
     void OnStatus(const IServiceEndpoint* from, const Services::Orchestration::ParticipantStatus& msg,
                   const Snapshot& registered);
 
+    //! \brief Accepts workflows only from the first controller name and with the first required-name set,
+    //! until this placement is destroyed.
     void OnWorkflow(const IServiceEndpoint* from, const Services::Orchestration::WorkflowConfiguration& msg,
                     const Snapshot& registered);
 
@@ -44,6 +47,12 @@ public:
     void OnPeerLeaving(const IVAsioPeer* peer, bool isLastInGeneration);
 
 private:
+    struct WorkflowContract
+    {
+        std::string controllerName;
+        std::set<std::string> requiredParticipantNames;
+    };
+
     struct Generation
     {
         VSilKit::SystemStateTracker stateTracker;
@@ -64,6 +73,7 @@ private:
     std::string _simulationName;
     Services::Logging::ILoggerInternal* _logger;
     Generations _generations;
+    std::optional<WorkflowContract> _workflowContract;
 
     friend struct SessionPlacementTestAccess;
 };

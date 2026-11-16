@@ -334,6 +334,39 @@ TEST_F(Test_VAsioRegistrySimulations, multiple_running_generations_coexist_and_a
     VAsioRegistryTestAccess::Shutdown(_registry, &a1);
 }
 
+TEST_F(Test_VAsioRegistrySimulations, workflow_contract_survives_generation_removal_and_resets_with_simulation)
+{
+    using SilKit::Services::Logging::ALoggerMessageWith;
+    using SilKit::Services::Logging::Level;
+
+    auto& logger{VAsioRegistryTestAccess::UseMockLogger(_registry, _originalLogger)};
+    FakeVAsioPeer controller1{"Controller", "session/Sim"};
+    FakeVAsioPeer controller2{"Controller", "session/Sim"};
+    FakeVAsioPeer otherController{"OtherController", "session/Sim"};
+    VAsioRegistryTestAccess::Announce(_registry, &controller1, "session/Sim");
+    VAsioRegistryTestAccess::Announce(_registry, &controller2, "session/Sim");
+    VAsioRegistryTestAccess::SendWorkflowConfiguration(_registry, &controller1, {"A", "B"});
+    VAsioRegistryTestAccess::Shutdown(_registry, &controller1);
+    ASSERT_TRUE(VAsioRegistryTestAccess::HasPlacement(_registry, "session/Sim"));
+
+    // Removing the original generation must not allow a different required-name set.
+    EXPECT_CALL(logger, ProcessLoggerMessage(ALoggerMessageWith(Level::Error))).Times(1);
+    VAsioRegistryTestAccess::SendWorkflowConfiguration(_registry, &controller2, {"A"});
+    testing::Mock::VerifyAndClearExpectations(&logger);
+    EXPECT_CALL(logger, ProcessLoggerMessage(testing::_)).Times(testing::AnyNumber());
+    // Reordered names are equivalent. Keep this expectation through the fresh simulation below.
+    EXPECT_CALL(logger, ProcessLoggerMessage(ALoggerMessageWith(Level::Error))).Times(0);
+    VAsioRegistryTestAccess::SendWorkflowConfiguration(_registry, &controller2, {"B", "A"});
+    VAsioRegistryTestAccess::Shutdown(_registry, &controller2);
+    ASSERT_FALSE(VAsioRegistryTestAccess::HasPlacement(_registry, "session/Sim"));
+
+    // With no peers left, both the generation counter and workflow contract reset.
+    VAsioRegistryTestAccess::Announce(_registry, &otherController, "session/Sim");
+    EXPECT_EQ(otherController.GetServiceDescriptor().GetGeneration(), 1u);
+    VAsioRegistryTestAccess::SendWorkflowConfiguration(_registry, &otherController, {"C"});
+    VAsioRegistryTestAccess::Shutdown(_registry, &otherController);
+}
+
 TEST_F(Test_VAsioRegistrySimulations, state_of_a_generation_is_dropped_when_its_last_peer_shuts_down)
 {
     using ParticipantState = SilKit::Services::Orchestration::ParticipantState;

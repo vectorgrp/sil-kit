@@ -328,6 +328,7 @@ TEST_F(Test_SessionPlacement, changing_workflow_configuration_between_generation
         EXPECT_CALL(_logger, ProcessLoggerMessage(ALoggerMessageWith(Level::Error))).Times(1);
         SendWorkflowConfiguration(controller2, {"A"});
         testing::Mock::VerifyAndClearExpectations(&_logger);
+        EXPECT_FALSE(SessionPlacementTestAccess::HasGenerationState(_placement, 2));
 
         AdvanceTo(a2, ParticipantState::Running);
         EXPECT_FALSE(IsGenerationUsed(2));
@@ -387,6 +388,109 @@ TEST_F(Test_SessionPlacement, changing_system_controller_name_between_generation
         Leave(a1);
         Leave(b1);
     }
+}
+
+TEST_F(Test_SessionPlacement, equivalent_workflows_are_accepted_independently_in_each_generation)
+{
+    using SilKit::Services::Logging::ALoggerMessageWith;
+    using SilKit::Services::Logging::Level;
+
+    EXPECT_CALL(_logger, ProcessLoggerMessage(testing::_)).Times(testing::AnyNumber());
+    EXPECT_CALL(_logger, ProcessLoggerMessage(ALoggerMessageWith(Level::Error))).Times(0);
+    FakeVAsioPeer a1{"A", "Sim"};
+    FakeVAsioPeer b1{"B", "Sim"};
+    FakeVAsioPeer a2{"A", "Sim"};
+    FakeVAsioPeer b2{"B", "Sim"};
+    Join(a1);
+    Join(b1);
+    Join(a2);
+    Join(b2);
+
+    AdvanceTo(a2, ParticipantState::ReadyToRun);
+    AdvanceTo(b2, ParticipantState::ReadyToRun);
+    SendWorkflowConfiguration(a1, {"A", "B"});
+    EXPECT_FALSE(IsGenerationUsed(1));
+    EXPECT_FALSE(IsGenerationUsed(2));
+
+    SendWorkflowConfiguration(a2, {"B", "A", "A"});
+    EXPECT_FALSE(IsGenerationUsed(1));
+    EXPECT_TRUE(IsGenerationUsed(2));
+    SendWorkflowConfiguration(a2, {"A", "B"});
+
+    AdvanceTo(a1, ParticipantState::ReadyToRun);
+    AdvanceTo(b1, ParticipantState::ReadyToRun);
+    EXPECT_TRUE(IsGenerationUsed(1));
+}
+
+TEST_F(Test_SessionPlacement, rejected_workflows_preserve_the_contract_and_generation_state)
+{
+    using SilKit::Services::Logging::ALoggerMessageWith;
+    using SilKit::Services::Logging::Level;
+
+    FakeVAsioPeer a{"A", "Sim"};
+    FakeVAsioPeer b{"B", "Sim"};
+    FakeVAsioPeer controller{"Controller", "Sim"};
+    FakeVAsioPeer otherController{"OtherController", "Sim"};
+    Join(a);
+    Join(b);
+    Join(controller);
+    Join(otherController);
+    SendWorkflowConfiguration(controller, {"A", "B"});
+    AdvanceTo(a, ParticipantState::ReadyToRun);
+
+    EXPECT_CALL(_logger, ProcessLoggerMessage(testing::_)).Times(testing::AnyNumber());
+    EXPECT_CALL(_logger, ProcessLoggerMessage(ALoggerMessageWith(Level::Error))).Times(3);
+    SendWorkflowConfiguration(controller, {"A"});
+    SendWorkflowConfiguration(otherController, {"A", "B"});
+    SendWorkflowConfiguration(otherController, {"A"});
+    testing::Mock::VerifyAndClearExpectations(&_logger);
+    EXPECT_FALSE(IsGenerationUsed(1));
+
+    AdvanceTo(b, ParticipantState::ReadyToRun);
+    EXPECT_TRUE(IsGenerationUsed(1));
+    EXPECT_CALL(_logger, ProcessLoggerMessage(ALoggerMessageWith(Level::Error))).Times(0);
+    SendWorkflowConfiguration(controller, {"B", "A"});
+}
+
+TEST_F(Test_SessionPlacement, an_empty_workflow_still_establishes_a_contract)
+{
+    using SilKit::Services::Logging::ALoggerMessageWith;
+    using SilKit::Services::Logging::Level;
+
+    FakeVAsioPeer controller{"Controller", "Sim"};
+    Join(controller);
+    SendWorkflowConfiguration(controller, {});
+
+    EXPECT_CALL(_logger, ProcessLoggerMessage(testing::_)).Times(testing::AnyNumber());
+    EXPECT_CALL(_logger, ProcessLoggerMessage(ALoggerMessageWith(Level::Error))).Times(1);
+    SendWorkflowConfiguration(controller, {"A"});
+    testing::Mock::VerifyAndClearExpectations(&_logger);
+
+    EXPECT_CALL(_logger, ProcessLoggerMessage(ALoggerMessageWith(Level::Error))).Times(0);
+    SendWorkflowConfiguration(controller, {});
+}
+
+TEST_F(Test_SessionPlacement, invalid_workflow_senders_do_not_establish_a_contract)
+{
+    using SilKit::Services::Logging::ALoggerMessageWith;
+    using SilKit::Services::Logging::Level;
+
+    FakeVAsioPeer invalid{"Invalid", "Sim"};
+    SilKit::Services::Orchestration::WorkflowConfiguration configuration;
+    configuration.requiredParticipantNames = {"Invalid"};
+    _placement.OnWorkflow(nullptr, configuration, _registered);
+    _placement.OnWorkflow(&invalid, configuration, _registered);
+    _placement.Admit(&invalid, _registered);
+    _placement.OnWorkflow(&invalid, configuration, _registered);
+    EXPECT_FALSE(SessionPlacementTestAccess::HasGenerationState(_placement, 1));
+
+    FakeVAsioPeer a{"A", "Sim"};
+    Join(a);
+    EXPECT_CALL(_logger, ProcessLoggerMessage(testing::_)).Times(testing::AnyNumber());
+    EXPECT_CALL(_logger, ProcessLoggerMessage(ALoggerMessageWith(Level::Error))).Times(0);
+    SendWorkflowConfiguration(a, {"A"});
+    AdvanceTo(a, ParticipantState::ReadyToRun);
+    EXPECT_TRUE(IsGenerationUsed(1));
 }
 
 TEST_F(Test_SessionPlacement, status_updates_before_the_workflow_configuration_are_considered)
