@@ -19,8 +19,7 @@
 namespace SilKit {
 namespace Core {
 
-//! \brief Decides into which generation a joining peer of a simulation is placed, and tracks the system state of
-//! generations.
+//! \brief Assigns peers to simulation generations and tracks their lifecycle.
 class SessionPlacement
 {
 public:
@@ -30,23 +29,18 @@ public:
 public:
     SessionPlacement(std::string simulationName, Services::Logging::ILoggerInternal* logger);
 
-    //! \brief Decides into which generation the joining peer is placed and stamps it on the service descriptor of the
-    //! peer.
-    //! With a known workflow, autonomous participants join only the newest live generation; required participants
-    //! and the controller join the oldest eligible unstarted generation. Before that, roles are unknown and all
-    //! peers join the oldest generation without their name. A duplicate with no eligible generation creates a new one.
+    //! \brief Assigns a generation on the peer's service descriptor without registering the peer.
+    //! A known controller's assignment reserves its slot even if registration subsequently fails.
     void Admit(IVAsioPeer* peer, const Snapshot& registered);
 
     void OnStatus(const IServiceEndpoint* from, const Services::Orchestration::ParticipantStatus& msg,
                   const Snapshot& registered);
 
-    //! \brief Accepts workflows only from the first controller name and with the first required-name set,
-    //! until this placement is destroyed.
+    //! \brief Accepts only workflows matching the first accepted controller name and required-participant set.
     void OnWorkflow(const IServiceEndpoint* from, const Services::Orchestration::WorkflowConfiguration& msg,
                     const Snapshot& registered);
 
-    //! \brief Drops the state of the registered peer that is about to be removed, and the state of its generation if
-    //! it is the last peer of the generation.
+    //! \brief Removes a departing peer's state; discards the generation if this is its last peer.
     void OnPeerLeaving(const IVAsioPeer* peer, bool isLastInGeneration);
 
 private:
@@ -60,6 +54,7 @@ private:
     {
         VSilKit::SystemStateTracker stateTracker;
         bool used{false};
+        bool controllerAssigned{false};
     };
     using Generations = std::map<uint64_t, Generation>;
 
@@ -69,8 +64,9 @@ private:
     auto SelectGeneration(const std::string& participantName, const Snapshot& registered) const -> uint64_t;
 
     auto GetOrCreateGeneration(const IServiceEndpoint* from, const Snapshot& registered) -> std::pair<uint64_t, Generation*>;
+    auto GetOrCreateGeneration(uint64_t generationNumber) -> Generation&;
 
-    void UpdateGenerationUsage(uint64_t generationNumber, Generation& generation);
+    void UpdateGenerationState(uint64_t generationNumber, Generation& generation, bool systemStateChanged);
 
 private:
     std::string _simulationName;

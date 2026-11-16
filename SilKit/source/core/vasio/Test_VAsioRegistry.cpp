@@ -235,11 +235,13 @@ TEST_F(Test_VAsioRegistrySimulations, status_and_workflow_configuration_reach_th
 
     FakeVAsioPeer a{"A", "session/Sim"};
     FakeVAsioPeer b{"B", "session/Sim"};
+    FakeVAsioPeer controller{"Controller", "session/Sim"};
 
     VAsioRegistryTestAccess::Announce(_registry, &a, "session/Sim");
     VAsioRegistryTestAccess::Announce(_registry, &b, "session/Sim");
+    VAsioRegistryTestAccess::Announce(_registry, &controller, "session/Sim");
 
-    VAsioRegistryTestAccess::SendWorkflowConfiguration(_registry, &a, {"A", "B"});
+    VAsioRegistryTestAccess::SendWorkflowConfiguration(_registry, &controller, {"A", "B"});
     for (auto* peer : {&a, &b})
     {
         for (const auto state : {ParticipantState::ServicesCreated, ParticipantState::CommunicationInitializing,
@@ -375,6 +377,8 @@ TEST_F(Test_VAsioRegistrySimulations, state_of_a_generation_is_dropped_when_its_
     FakeVAsioPeer b1{"B", "session/Sim"};
     FakeVAsioPeer a2{"A", "session/Sim"};
     FakeVAsioPeer b2{"B", "session/Sim"};
+    FakeVAsioPeer controller1{"Controller", "session/Sim"};
+    FakeVAsioPeer controller2{"Controller", "session/Sim"};
 
     // generation 1 keeps the placement of the simulation alive
     VAsioRegistryTestAccess::Announce(_registry, &a1, "session/Sim");
@@ -382,8 +386,10 @@ TEST_F(Test_VAsioRegistrySimulations, state_of_a_generation_is_dropped_when_its_
 
     VAsioRegistryTestAccess::Announce(_registry, &a2, "session/Sim");
     VAsioRegistryTestAccess::Announce(_registry, &b2, "session/Sim");
+    VAsioRegistryTestAccess::Announce(_registry, &controller1, "session/Sim");
+    VAsioRegistryTestAccess::Announce(_registry, &controller2, "session/Sim");
     ASSERT_EQ(b2.GetServiceDescriptor().GetGeneration(), 2u);
-    VAsioRegistryTestAccess::SendWorkflowConfiguration(_registry, &a2, {"A", "B"});
+    VAsioRegistryTestAccess::SendWorkflowConfiguration(_registry, &controller2, {"A", "B"});
     for (auto* peer : {&a2, &b2})
     {
         for (const auto state : {ParticipantState::ServicesCreated, ParticipantState::CommunicationInitializing,
@@ -395,6 +401,7 @@ TEST_F(Test_VAsioRegistrySimulations, state_of_a_generation_is_dropped_when_its_
 
     VAsioRegistryTestAccess::Shutdown(_registry, &a2);
     VAsioRegistryTestAccess::Shutdown(_registry, &b2);
+    VAsioRegistryTestAccess::Shutdown(_registry, &controller2);
 
     // generation 2 is reused, and its started state must not keep the required participant B out
     VAsioRegistryTestAccess::Announce(_registry, &a2, "session/Sim");
@@ -524,8 +531,10 @@ TEST_P(Test_VAsioRegistryLegacy, status_and_workflow_do_not_create_a_placement)
 {
     const auto& simulationName{GetParam()};
     FakeVAsioPeer peer{"A", simulationName};
+    FakeVAsioPeer controller{"Controller", simulationName};
     VAsioRegistryTestAccess::Announce(_registry, &peer, simulationName);
-    VAsioRegistryTestAccess::SendWorkflowConfiguration(_registry, &peer, {"A"});
+    VAsioRegistryTestAccess::Announce(_registry, &controller, simulationName);
+    VAsioRegistryTestAccess::SendWorkflowConfiguration(_registry, &controller, {"A"});
     VAsioRegistryTestAccess::SendStatus(_registry, &peer,
                                       SilKit::Services::Orchestration::ParticipantState::ReadyToRun);
     EXPECT_FALSE(VAsioRegistryTestAccess::HasPlacement(_registry, simulationName));
