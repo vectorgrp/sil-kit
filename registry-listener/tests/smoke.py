@@ -84,10 +84,11 @@ class RegistryListenerSmoke(unittest.TestCase):
 
     def test_all_events_across_simulations(self):
         registry, uri = self.registry()
-        for simulation in ("alpha", "beta"):
+        for simulation in ("session/alpha", "session/beta"):
             client = self.start(PARTICIPANT, f"{uri}/{simulation}")
             self.wait_for(client, "READY")
             context = f'simulation="{simulation}" participant="Fixture"'
+            self.wait_for(registry, f'OnGenerationCreated simulation="{simulation}" generation=1')
             self.wait_for(registry, f"OnParticipantConnected {context}")
             self.wait_for(registry, f'OnRequiredParticipantsUpdate {context} required=\\["Fixture"\\]')
             self.wait_for(registry, f"OnParticipantStatusUpdate {context}.*State=Running")
@@ -101,6 +102,26 @@ class RegistryListenerSmoke(unittest.TestCase):
         registry[0].send_signal(signal.SIGINT)
         self.assertEqual(registry[0].wait(timeout=10), 0, registry[1].read_text())
 
+    def test_generation_created_once_per_generation(self):
+        registry, uri = self.registry()
+        clients = [self.start(PARTICIPANT, f"{uri}/session/generations") for _ in range(2)]
+        for client in clients:
+            self.wait_for(client, "READY")
+        for generation in (1, 2):
+            self.wait_for(
+                registry, f'OnGenerationCreated simulation="session/generations" generation={generation}'
+            )
+        for client in clients:
+            client[0].stdin.write("\n")
+            client[0].stdin.flush()
+            self.assertEqual(client[0].wait(timeout=10), 0, client[1].read_text())
+        registry[0].send_signal(signal.SIGTERM)
+        self.assertEqual(registry[0].wait(timeout=10), 0, registry[1].read_text())
+        self.assertEqual(
+            re.findall(r'OnGenerationCreated simulation="session/generations" generation=(\d+)', registry[1].read_text()),
+            ["1", "2"],
+        )
+
     def test_signal_shutdown_with_connected_participant(self):
         for sig in (signal.SIGINT, signal.SIGTERM):
             with self.subTest(signal=sig):
@@ -109,6 +130,7 @@ class RegistryListenerSmoke(unittest.TestCase):
                 self.wait_for(client, "READY")
                 registry[0].send_signal(sig)
                 self.assertEqual(registry[0].wait(timeout=10), 0, registry[1].read_text())
+                self.assertNotIn("OnGenerationCreated", registry[1].read_text())
                 client[0].terminate()
                 client[0].wait(timeout=10)
 

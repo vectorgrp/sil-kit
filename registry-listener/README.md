@@ -6,10 +6,10 @@ not the registry protocol. Existing participants connect normally.
 
 ## Dependencies and build
 
-This project consumes a **source checkout**, not the installed SDK. It currently
-targets the internal interfaces at SIL Kit revision `54e49561`. Private headers
-and targets are not a supported extension API; pin/revalidate the revision when
-using this elsewhere.
+This project consumes a **source checkout**, not the installed SDK. It requires
+this checkout's internal listener interface, including `OnGenerationCreated`.
+Private headers and targets are not a supported extension API; pin/revalidate
+the revision when using this elsewhere.
 
 The only direct SIL Kit link dependencies are:
 
@@ -87,9 +87,21 @@ Experimental:
 To disable domain-socket fallback, set `Middleware.EnableDomainSockets: false`.
 Configured SIL Kit stdout logging may appear alongside listener output.
 
+For simulation names starting with `session/`, the first participant in each
+new generation also produces a notification before its connection notification:
+
+```text
+OnGenerationCreated simulation="session/example" generation=1
+OnParticipantConnected simulation="session/example" participant="Example"
+```
+
+Joining an existing generation or initializing its lifecycle state does not
+repeat the event. Recreating an emptied generation (including reusing its
+number) does. Legacy simulation names do not produce generation notifications.
+
 ## Listener behavior and limitations
 
-- All eight callbacks are printed, including required participants, discovery
+- All nine callbacks are printed, including generation creation, required participants, discovery
   supplemental data, and the complete metrics update via SIL Kit's formatters.
   The output is diagnostic text, not a stable JSON/wire format.
 - Logger and URI callbacks run during construction/startup; the rest run on the
@@ -105,8 +117,9 @@ Configured SIL Kit stdout logging may appear alongside listener output.
 ## Smoke test
 
 The optional smoke test needs Python 3 and builds a small participant fixture.
-It checks every callback, two simulation names, disconnection, signal shutdown
-with a participant connected, startup errors, and a TCP port conflict.
+It checks every callback, concurrent generations, two simulation names,
+disconnection, signal shutdown with a participant connected, startup errors,
+and a TCP port conflict.
 
 ```sh
 cmake -S registry-listener -B build-registry-listener \

@@ -141,6 +141,14 @@ void DashboardInstance::OnRegistryUri(const std::string& registryUri)
     StartWorker();
 }
 
+void DashboardInstance::OnGenerationCreated(const std::string& simulationName, uint64_t generation)
+{
+    // The dashboard REST protocol has no generation-created event.
+    _logger->MakeMessage(Level::Trace, TopicOf(*this))
+        .SetMessage("DashboardInstance::OnGenerationCreated: simulationName={} generation={}", simulationName, generation)
+        .Dispatch();
+}
+
 void DashboardInstance::OnParticipantConnected(const std::string& simulationName, const std::string& participantName)
 {
     _logger->MakeMessage(Level::Trace, TopicOf(*this))

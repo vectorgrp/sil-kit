@@ -53,6 +53,13 @@ void RegistryEventListener::OnRegistryUri(const std::string& registryUri)
     Dump("OnRegistryUri", [&](auto& out) { out << " uri=" << std::quoted(registryUri); });
 }
 
+void RegistryEventListener::OnGenerationCreated(const std::string& simulationName, uint64_t generation)
+{
+    Dump("OnGenerationCreated", [&](auto& out) {
+        out << " simulation=" << std::quoted(simulationName) << " generation=" << generation;
+    });
+}
+
 void RegistryEventListener::OnParticipantConnected(const std::string& simulationName, const std::string& participantName)
 {
     Dump("OnParticipantConnected", [&](auto& out) { Context(out, simulationName, participantName); });

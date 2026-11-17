@@ -277,6 +277,11 @@ void VAsioRegistry::OnParticipantAnnouncement(IVAsioPeer* peer, const Participan
 
     if (_registryEventListener != nullptr)
     {
+        const auto generation{peer->GetServiceDescriptor().GetGeneration()};
+        if (generation.has_value() && registered.count(*generation) == 0)
+        {
+            _registryEventListener->OnGenerationCreated(announcement.simulationName, *generation);
+        }
         _registryEventListener->OnParticipantConnected(announcement.simulationName, peerInfo.participantName);
     }
 

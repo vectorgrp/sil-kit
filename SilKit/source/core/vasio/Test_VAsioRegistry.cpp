@@ -166,19 +166,97 @@ using SilKit::Core::FakeVAsioPeer;
 using SilKit::Core::VAsioRegistry;
 using SilKit::Core::VAsioRegistryTestAccess;
 
+class MockRegistryEventListener : public SilKit::Core::IRegistryEventListener
+{
+public:
+    MOCK_METHOD(void, OnLoggerCreated, (SilKit::Services::Logging::ILoggerInternal*), (override));
+    MOCK_METHOD(void, OnRegistryUri, (const std::string&), (override));
+    MOCK_METHOD(void, OnGenerationCreated, (const std::string&, uint64_t), (override));
+    MOCK_METHOD(void, OnParticipantConnected, (const std::string&, const std::string&), (override));
+    MOCK_METHOD(void, OnParticipantDisconnected, (const std::string&, const std::string&), (override));
+    MOCK_METHOD(void, OnRequiredParticipantsUpdate,
+                (const std::string&, const std::string&, SilKit::Util::Span<const std::string>), (override));
+    MOCK_METHOD(void, OnParticipantStatusUpdate,
+                (const std::string&, const std::string&,
+                 const SilKit::Services::Orchestration::ParticipantStatus&), (override));
+    MOCK_METHOD(void, OnServiceDiscoveryEvent,
+                (const std::string&, const std::string&, const SilKit::Core::Discovery::ServiceDiscoveryEvent&),
+                (override));
+    MOCK_METHOD(void, OnMetricsUpdate,
+                (const std::string&, const std::string&, const VSilKit::MetricsUpdate&), (override));
+};
+
 // The placement of peers into generations is covered by Test_SessionPlacement, these tests cover that the registry
 // keeps a placement per simulation name and reads the registered peers from the connection.
 class Test_VAsioRegistrySimulations : public testing::Test
 {
 protected:
     Test_VAsioRegistrySimulations()
-        : _registry{SilKit::Config::MakeEmptyParticipantConfigurationImpl()}
+        : _registry{SilKit::Config::MakeEmptyParticipantConfigurationImpl(), &_listener}
     {
     }
 
     std::unique_ptr<SilKit::Services::Logging::ILoggerInternal> _originalLogger;
+    testing::NiceMock<MockRegistryEventListener> _listener;
     VAsioRegistry _registry;
 };
+
+TEST_F(Test_VAsioRegistrySimulations, generation_creation_notifies_before_connection_and_not_for_lazy_lifecycle_state)
+{
+    FakeVAsioPeer a1{"A", "session/Sim"};
+    FakeVAsioPeer b{"B", "session/Sim"};
+    FakeVAsioPeer a2{"A", "session/Sim"};
+    testing::InSequence sequence;
+    EXPECT_CALL(_listener, OnGenerationCreated("session/Sim", 1));
+    EXPECT_CALL(_listener, OnParticipantConnected("session/Sim", "A"));
+    EXPECT_CALL(_listener, OnParticipantConnected("session/Sim", "B"));
+    EXPECT_CALL(_listener, OnGenerationCreated("session/Sim", 2));
+    EXPECT_CALL(_listener, OnParticipantConnected("session/Sim", "A"));
+
+    VAsioRegistryTestAccess::Announce(_registry, &a1, "session/Sim");
+    VAsioRegistryTestAccess::Announce(_registry, &b, "session/Sim");
+    VAsioRegistryTestAccess::SendStatus(_registry, &a1,
+                                      SilKit::Services::Orchestration::ParticipantState::ServicesCreated);
+    VAsioRegistryTestAccess::SendWorkflowConfiguration(_registry, &b, {"A", "B"});
+    VAsioRegistryTestAccess::SendWorkflowConfiguration(_registry, &b, {"B", "A"});
+    VAsioRegistryTestAccess::Announce(_registry, &a2, "session/Sim");
+}
+
+TEST_F(Test_VAsioRegistrySimulations, generation_creation_is_per_simulation_and_notifies_again_after_number_reuse)
+{
+    FakeVAsioPeer a1{"A", "session/Sim1"};
+    FakeVAsioPeer a2{"A", "session/Sim1"};
+    FakeVAsioPeer other{"A", "session/Sim2"};
+    testing::InSequence sequence;
+    EXPECT_CALL(_listener, OnGenerationCreated("session/Sim1", 1));
+    EXPECT_CALL(_listener, OnGenerationCreated("session/Sim2", 1));
+    EXPECT_CALL(_listener, OnGenerationCreated("session/Sim1", 2));
+    EXPECT_CALL(_listener, OnGenerationCreated("session/Sim1", 2));
+    EXPECT_CALL(_listener, OnGenerationCreated("session/Sim1", 1));
+
+    VAsioRegistryTestAccess::Announce(_registry, &a1, "session/Sim1");
+    VAsioRegistryTestAccess::Announce(_registry, &other, "session/Sim2");
+    VAsioRegistryTestAccess::Announce(_registry, &a2, "session/Sim1");
+    VAsioRegistryTestAccess::Shutdown(_registry, &a2);
+    VAsioRegistryTestAccess::Announce(_registry, &a2, "session/Sim1");
+    VAsioRegistryTestAccess::Shutdown(_registry, &a1);
+    VAsioRegistryTestAccess::Shutdown(_registry, &a2);
+    VAsioRegistryTestAccess::Announce(_registry, &a1, "session/Sim1");
+}
+
+TEST_F(Test_VAsioRegistrySimulations, legacy_simulations_do_not_notify_generation_creation)
+{
+    EXPECT_CALL(_listener, OnGenerationCreated(testing::_, testing::_)).Times(0);
+    for (const auto& simulationName : {"", "Sim", "session", "Session/x"})
+    {
+        FakeVAsioPeer peer{"A", simulationName};
+        VAsioRegistryTestAccess::Announce(_registry, &peer, simulationName);
+        VAsioRegistryTestAccess::SendWorkflowConfiguration(_registry, &peer, {"A"});
+        VAsioRegistryTestAccess::SendStatus(_registry, &peer,
+                                          SilKit::Services::Orchestration::ParticipantState::ServicesCreated);
+        VAsioRegistryTestAccess::Shutdown(_registry, &peer);
+    }
+}
 
 TEST_F(Test_VAsioRegistrySimulations, announcing_a_peer_sends_the_known_participants_and_registers_it)
 {
