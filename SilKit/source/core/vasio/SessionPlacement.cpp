@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 #include "core/vasio/SessionPlacement.hpp"
+#include "core/vasio/IRegistryEventListener.hpp"
 
 #include <utility>
 
@@ -24,9 +25,11 @@ constexpr uint64_t FIRST_GENERATION{1};
 
 } // namespace
 
-SessionPlacement::SessionPlacement(std::string simulationName, Services::Logging::ILoggerInternal* logger)
+SessionPlacement::SessionPlacement(std::string simulationName, Services::Logging::ILoggerInternal* logger,
+                                   IRegistryEventListener* registryEventListener)
     : _simulationName{std::move(simulationName)}
     , _logger{logger}
+    , _registryEventListener{registryEventListener}
 {
 }
 
@@ -212,19 +215,34 @@ void SessionPlacement::OnPeerLeaving(const IVAsioPeer* peer, bool isLastInGenera
     if (isLastInGeneration)
     {
         _generations.erase(*generationNumber);
+        if (_registryEventListener != nullptr)
+        {
+            _registryEventListener->OnGenerationRemoved(_simulationName, *generationNumber);
+        }
         return;
     }
 
     const auto generationIt{_generations.find(*generationNumber)};
     if (generationIt != _generations.end())
     {
-        generationIt->second.stateTracker.RemoveParticipant(participantName);
+        const auto result{generationIt->second.stateTracker.RemoveParticipant(participantName)};
+        if (result.systemStateChanged && _registryEventListener != nullptr)
+        {
+            _registryEventListener->OnGenerationStateChanged(
+                _simulationName, *generationNumber, generationIt->second.stateTracker.GetSystemState());
+        }
     }
 }
 
 void SessionPlacement::UpdateGenerationState(uint64_t generationNumber, Generation& generation, bool systemStateChanged)
 {
     using SystemState = SilKit::Services::Orchestration::SystemState;
+
+    if (systemStateChanged && _registryEventListener != nullptr)
+    {
+        _registryEventListener->OnGenerationStateChanged(_simulationName, generationNumber,
+                                                         generation.stateTracker.GetSystemState());
+    }
 
     if (systemStateChanged && generation.stateTracker.GetSystemState() == SystemState::Running)
     {

@@ -149,6 +149,22 @@ void DashboardInstance::OnGenerationCreated(const std::string& simulationName, u
         .Dispatch();
 }
 
+void DashboardInstance::OnGenerationStateChanged(const std::string& simulationName, uint64_t generation,
+                                                SilKit::Services::Orchestration::SystemState state)
+{
+    _logger->MakeMessage(Level::Trace, TopicOf(*this))
+        .SetMessage("DashboardInstance::OnGenerationStateChanged: simulationName={} generation={} state={}",
+                    simulationName, generation, state)
+        .Dispatch();
+}
+
+void DashboardInstance::OnGenerationRemoved(const std::string& simulationName, uint64_t generation)
+{
+    _logger->MakeMessage(Level::Trace, TopicOf(*this))
+        .SetMessage("DashboardInstance::OnGenerationRemoved: simulationName={} generation={}", simulationName, generation)
+        .Dispatch();
+}
+
 void DashboardInstance::OnParticipantConnected(const std::string& simulationName, const std::string& participantName)
 {
     _logger->MakeMessage(Level::Trace, TopicOf(*this))

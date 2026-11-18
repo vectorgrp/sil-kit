@@ -63,6 +63,9 @@ private: // SilKit::Core::IRegistryEventListener
     void OnLoggerCreated(SilKit::Services::Logging::ILoggerInternal* logger) override;
     void OnRegistryUri(const std::string& registryUri) override;
     void OnGenerationCreated(const std::string& simulationName, uint64_t generation) override;
+    void OnGenerationStateChanged(const std::string& simulationName, uint64_t generation,
+                                   SilKit::Services::Orchestration::SystemState state) override;
+    void OnGenerationRemoved(const std::string& simulationName, uint64_t generation) override;
     void OnParticipantConnected(const std::string& simulationName, const std::string& participantName) override;
     void OnParticipantDisconnected(const std::string& simulationName, const std::string& participantName) override;
     void OnRequiredParticipantsUpdate(const std::string& simulationName, const std::string& participantName,

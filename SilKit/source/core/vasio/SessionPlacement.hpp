@@ -19,6 +19,8 @@
 namespace SilKit {
 namespace Core {
 
+struct IRegistryEventListener;
+
 //! \brief Assigns peers to simulation generations and tracks their lifecycle.
 class SessionPlacement
 {
@@ -27,7 +29,8 @@ public:
     using Snapshot = std::map<uint64_t, std::set<std::string>>;
 
 public:
-    SessionPlacement(std::string simulationName, Services::Logging::ILoggerInternal* logger);
+    SessionPlacement(std::string simulationName, Services::Logging::ILoggerInternal* logger,
+                     IRegistryEventListener* registryEventListener = nullptr);
 
     //! \brief Assigns a generation on the peer's service descriptor without registering the peer.
     //! A known controller's assignment reserves its slot even if registration subsequently fails.
@@ -71,6 +74,7 @@ private:
 private:
     std::string _simulationName;
     Services::Logging::ILoggerInternal* _logger;
+    IRegistryEventListener* _registryEventListener;
     Generations _generations;
     std::optional<WorkflowContract> _workflowContract;
 

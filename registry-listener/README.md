@@ -99,9 +99,29 @@ Joining an existing generation or initializing its lifecycle state does not
 repeat the event. Recreating an emptied generation (including reusing its
 number) does. Legacy simulation names do not produce generation notifications.
 
+Generation lifecycle changes are reported separately:
+
+```text
+OnGenerationStateChanged simulation="session/example" generation=1 state=Running
+OnGenerationStateChanged simulation="session/example" generation=1 state=Shutdown
+OnParticipantDisconnected simulation="session/example" participant="Example"
+OnGenerationRemoved simulation="session/example" generation=1
+```
+
+`OnGenerationStateChanged` reports changes to the generation's aggregate SIL Kit
+system state, not individual participant states. Accepted workflow updates,
+participant status updates, and departures can change it. Repeated states and
+rejected workflows do not produce state-change events. Notifications continue
+after the generation starts, including its shutdown lifecycle.
+
+`OnGenerationRemoved` follows the last participant's disconnection, even when
+no workflow or participant status was reported. Removal discards the tracker;
+it does not synthesize a final state or imply that `Shutdown` was reached.
+Registry process teardown does not guarantee per-generation removal events.
+
 ## Listener behavior and limitations
 
-- All nine callbacks are printed, including generation creation, required participants, discovery
+- All eleven callbacks are printed, including generation lifecycle, required participants, discovery
   supplemental data, and the complete metrics update via SIL Kit's formatters.
   The output is diagnostic text, not a stable JSON/wire format.
 - Logger and URI callbacks run during construction/startup; the rest run on the
@@ -117,7 +137,7 @@ number) does. Legacy simulation names do not produce generation notifications.
 ## Smoke test
 
 The optional smoke test needs Python 3 and builds a small participant fixture.
-It checks every callback, concurrent generations, two simulation names,
+It checks every callback, concurrent generation lifecycles, two simulation names,
 disconnection, signal shutdown with a participant connected, startup errors,
 and a TCP port conflict.
 

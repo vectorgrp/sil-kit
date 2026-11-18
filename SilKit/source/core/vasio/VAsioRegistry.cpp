@@ -228,7 +228,7 @@ auto VAsioRegistry::GetOrCreatePlacement(const std::string& simulationName) -> S
     auto& placement{_placements[simulationName]};
     if (placement == nullptr)
     {
-        placement = std::make_unique<SessionPlacement>(simulationName, GetLoggerInternal());
+        placement = std::make_unique<SessionPlacement>(simulationName, GetLoggerInternal(), _registryEventListener);
     }
     return placement.get();
 }

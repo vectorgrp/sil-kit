@@ -60,6 +60,22 @@ void RegistryEventListener::OnGenerationCreated(const std::string& simulationNam
     });
 }
 
+void RegistryEventListener::OnGenerationStateChanged(const std::string& simulationName, uint64_t generation,
+                                                   SilKit::Services::Orchestration::SystemState state)
+{
+    Dump("OnGenerationStateChanged", [&](auto& out) {
+        out << " simulation=" << std::quoted(simulationName) << " generation=" << generation
+            << " state=" << SilKit::Services::Orchestration::to_string(state);
+    });
+}
+
+void RegistryEventListener::OnGenerationRemoved(const std::string& simulationName, uint64_t generation)
+{
+    Dump("OnGenerationRemoved", [&](auto& out) {
+        out << " simulation=" << std::quoted(simulationName) << " generation=" << generation;
+    });
+}
+
 void RegistryEventListener::OnParticipantConnected(const std::string& simulationName, const std::string& participantName)
 {
     Dump("OnParticipantConnected", [&](auto& out) { Context(out, simulationName, participantName); });

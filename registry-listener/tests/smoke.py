@@ -92,12 +92,19 @@ class RegistryListenerSmoke(unittest.TestCase):
             self.wait_for(registry, f"OnParticipantConnected {context}")
             self.wait_for(registry, f'OnRequiredParticipantsUpdate {context} required=\\["Fixture"\\]')
             self.wait_for(registry, f"OnParticipantStatusUpdate {context}.*State=Running")
+            self.wait_for(
+                registry, f'OnGenerationStateChanged simulation="{simulation}" generation=1 state=Running'
+            )
             self.wait_for(registry, f"OnServiceDiscoveryEvent {context}.*SmokeCan")
             self.wait_for(registry, f'OnMetricsUpdate simulation="{simulation}" origin="Fixture".*MetricData')
             client[0].stdin.write("\n")
             client[0].stdin.flush()
             self.assertEqual(client[0].wait(timeout=10), 0, client[1].read_text())
             self.wait_for(registry, f"OnParticipantDisconnected {context}")
+            self.wait_for(
+                registry, f'OnGenerationStateChanged simulation="{simulation}" generation=1 state=Shutdown'
+            )
+            self.wait_for(registry, f'OnGenerationRemoved simulation="{simulation}" generation=1')
         self.assertIn("OnLoggerCreated logger=", registry[1].read_text())
         registry[0].send_signal(signal.SIGINT)
         self.assertEqual(registry[0].wait(timeout=10), 0, registry[1].read_text())
@@ -111,10 +118,18 @@ class RegistryListenerSmoke(unittest.TestCase):
             self.wait_for(
                 registry, f'OnGenerationCreated simulation="session/generations" generation={generation}'
             )
+            self.wait_for(
+                registry,
+                f'OnGenerationStateChanged simulation="session/generations" generation={generation} state=Running',
+            )
         for client in clients:
             client[0].stdin.write("\n")
             client[0].stdin.flush()
             self.assertEqual(client[0].wait(timeout=10), 0, client[1].read_text())
+        for generation in (1, 2):
+            self.wait_for(
+                registry, f'OnGenerationRemoved simulation="session/generations" generation={generation}'
+            )
         registry[0].send_signal(signal.SIGTERM)
         self.assertEqual(registry[0].wait(timeout=10), 0, registry[1].read_text())
         self.assertEqual(
