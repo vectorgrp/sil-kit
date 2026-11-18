@@ -1,14 +1,45 @@
 #include "RegistryEventListener.hpp"
 
+#include <chrono>
 #include <cstdio>
 #include <exception>
-#include <iomanip>
 #include <iostream>
+#include <locale>
 #include <sstream>
+#include <string_view>
 
 #include "silkit/services/orchestration/string_utils.hpp"
 
 namespace {
+
+// The shared string escape helper does not cover every C0 control byte.
+struct JsonString
+{
+    std::string_view value;
+
+    friend auto operator<<(std::ostream& out, JsonString string) -> std::ostream&
+    {
+        constexpr char hex[] = "0123456789abcdef";
+        out.put('"');
+        for (const unsigned char ch : string.value)
+        {
+            if (ch == '"' || ch == '\\')
+            {
+                out.put('\\');
+                out.put(static_cast<char>(ch));
+            }
+            else if (ch < 0x20)
+            {
+                out << "\\u00" << hex[ch >> 4] << hex[ch & 0x0f];
+            }
+            else
+            {
+                out.put(static_cast<char>(ch));
+            }
+        }
+        return out.put('"');
+    }
+};
 
 template <typename Writer>
 void Dump(const char* event, Writer write) noexcept
@@ -16,9 +47,11 @@ void Dump(const char* event, Writer write) noexcept
     try
     {
         std::ostringstream line;
-        line << event;
+        line.imbue(std::locale::classic());
+        line << R"({"source":"silkit_registry","version":1,"type":)" << JsonString{event};
         write(line);
-        std::cout << line.str() << std::endl;
+        line << "}\n";
+        std::cout << line.str() << std::flush;
         if (!std::cout)
         {
             throw std::ios_base::failure{"stdout write failed"};
@@ -38,65 +71,65 @@ void Dump(const char* event, Writer write) noexcept
 
 auto Context(std::ostream& out, const std::string& simulationName, const std::string& participantName) -> std::ostream&
 {
-    return out << " simulation=" << std::quoted(simulationName) << " participant=" << std::quoted(participantName);
+    return out << R"(,"simulation":)" << JsonString{simulationName} << R"(,"name":)" << JsonString{participantName};
 }
 
 } // namespace
 
-void RegistryEventListener::OnLoggerCreated(SilKit::Services::Logging::ILoggerInternal* logger)
+void RegistryEventListener::OnLoggerCreated(SilKit::Services::Logging::ILoggerInternal*)
 {
-    Dump("OnLoggerCreated", [&](auto& out) { out << " logger=" << static_cast<const void*>(logger); });
+    Dump("logger_created", [](auto&) {});
 }
 
 void RegistryEventListener::OnRegistryUri(const std::string& registryUri)
 {
-    Dump("OnRegistryUri", [&](auto& out) { out << " uri=" << std::quoted(registryUri); });
+    Dump("registry_uri", [&](auto& out) { out << R"(,"uri":)" << JsonString{registryUri}; });
 }
 
 void RegistryEventListener::OnGenerationCreated(const std::string& simulationName, uint64_t generation)
 {
-    Dump("OnGenerationCreated", [&](auto& out) {
-        out << " simulation=" << std::quoted(simulationName) << " generation=" << generation;
+    Dump("generation_created", [&](auto& out) {
+        out << R"(,"simulation":)" << JsonString{simulationName} << R"(,"generation":)" << generation;
     });
 }
 
 void RegistryEventListener::OnGenerationStateChanged(const std::string& simulationName, uint64_t generation,
                                                    SilKit::Services::Orchestration::SystemState state)
 {
-    Dump("OnGenerationStateChanged", [&](auto& out) {
-        out << " simulation=" << std::quoted(simulationName) << " generation=" << generation
-            << " state=" << SilKit::Services::Orchestration::to_string(state);
+    Dump("generation_state_changed", [&](auto& out) {
+        out << R"(,"simulation":)" << JsonString{simulationName} << R"(,"generation":)" << generation
+            << R"(,"state":)" << JsonString{SilKit::Services::Orchestration::to_string(state)};
     });
 }
 
 void RegistryEventListener::OnGenerationRemoved(const std::string& simulationName, uint64_t generation)
 {
-    Dump("OnGenerationRemoved", [&](auto& out) {
-        out << " simulation=" << std::quoted(simulationName) << " generation=" << generation;
+    Dump("generation_removed", [&](auto& out) {
+        out << R"(,"simulation":)" << JsonString{simulationName} << R"(,"generation":)" << generation;
     });
 }
 
 void RegistryEventListener::OnParticipantConnected(const std::string& simulationName, const std::string& participantName)
 {
-    Dump("OnParticipantConnected", [&](auto& out) { Context(out, simulationName, participantName); });
+    Dump("participant_connected", [&](auto& out) { Context(out, simulationName, participantName); });
 }
 
 void RegistryEventListener::OnParticipantDisconnected(const std::string& simulationName, const std::string& participantName)
 {
-    Dump("OnParticipantDisconnected", [&](auto& out) { Context(out, simulationName, participantName); });
+    Dump("participant_disconnected", [&](auto& out) { Context(out, simulationName, participantName); });
 }
 
 void RegistryEventListener::OnRequiredParticipantsUpdate(
     const std::string& simulationName, const std::string& participantName,
     SilKit::Util::Span<const std::string> requiredParticipantNames)
 {
-    Dump("OnRequiredParticipantsUpdate", [&](auto& out) {
-        Context(out, simulationName, participantName) << " required=[";
+    Dump("required_participants", [&](auto& out) {
+        Context(out, simulationName, participantName) << R"(,"required":[)";
         const char* separator = "";
         for (const auto& name : requiredParticipantNames)
         {
-            out << separator << std::quoted(name);
-            separator = ", ";
+            out << separator << JsonString{name};
+            separator = ",";
         }
         out << ']';
     });
@@ -106,8 +139,14 @@ void RegistryEventListener::OnParticipantStatusUpdate(
     const std::string& simulationName, const std::string& participantName,
     const SilKit::Services::Orchestration::ParticipantStatus& participantStatus)
 {
-    Dump("OnParticipantStatusUpdate", [&](auto& out) {
-        Context(out, simulationName, participantName) << " status=" << participantStatus;
+    Dump("participant_status", [&](auto& out) {
+        Context(out, simulationName, participantName)
+            << R"(,"state":)" << JsonString{SilKit::Services::Orchestration::to_string(participantStatus.state)}
+            << R"(,"enter_reason":)" << JsonString{participantStatus.enterReason}
+            << R"(,"enter_time_ns":)"
+            << std::chrono::duration_cast<std::chrono::nanoseconds>(participantStatus.enterTime.time_since_epoch()).count()
+            << R"(,"refresh_time_ns":)"
+            << std::chrono::duration_cast<std::chrono::nanoseconds>(participantStatus.refreshTime.time_since_epoch()).count();
     });
 }
 
@@ -115,25 +154,41 @@ void RegistryEventListener::OnServiceDiscoveryEvent(
     const std::string& simulationName, const std::string& participantName,
     const SilKit::Core::Discovery::ServiceDiscoveryEvent& serviceDiscoveryEvent)
 {
-    Dump("OnServiceDiscoveryEvent", [&](auto& out) {
+    Dump("service_discovery", [&](auto& out) {
+        const auto& service = serviceDiscoveryEvent.serviceDescriptor;
         Context(out, simulationName, participantName)
-            << " event=" << serviceDiscoveryEvent
-            << " serviceId=" << serviceDiscoveryEvent.serviceDescriptor.GetServiceId() << " supplemental={";
+            << R"(,"event":)" << static_cast<int>(serviceDiscoveryEvent.type)
+            << R"(,"service":{"id":)" << service.GetServiceId()
+            << R"(,"name":)" << JsonString{service.GetServiceName()}
+            << R"(,"participant_name":)" << JsonString{service.GetParticipantName()}
+            << R"(,"participant_id":)" << service.GetParticipantId()
+            << R"(,"type":)" << static_cast<int>(service.GetServiceType())
+            << R"(,"network_name":)" << JsonString{service.GetNetworkName()}
+            << R"(,"network_type":)" << static_cast<int>(service.GetNetworkType())
+            << R"(,"supplemental":{)";
         const char* separator = "";
-        for (const auto& item : serviceDiscoveryEvent.serviceDescriptor.GetSupplementalDataRef())
+        for (const auto& item : service.GetSupplementalDataRef())
         {
-            out << separator << std::quoted(item.first) << ": " << std::quoted(item.second);
-            separator = ", ";
+            out << separator << JsonString{item.first} << ':' << JsonString{item.second};
+            separator = ",";
         }
-        out << '}';
+        out << "}}";
     });
 }
 
 void RegistryEventListener::OnMetricsUpdate(const std::string& simulationName, const std::string& origin,
                                           const VSilKit::MetricsUpdate& metricsUpdate)
 {
-    Dump("OnMetricsUpdate", [&](auto& out) {
-        out << " simulation=" << std::quoted(simulationName) << " origin=" << std::quoted(origin)
-            << " metrics=" << metricsUpdate;
+    Dump("metrics", [&](auto& out) {
+        out << R"(,"simulation":)" << JsonString{simulationName} << R"(,"origin":)" << JsonString{origin}
+            << R"(,"metrics":[)";
+        const char* separator = "";
+        for (const auto& metric : metricsUpdate.metrics)
+        {
+            out << separator << R"({"timestamp_ns":)" << metric.timestamp << R"(,"name":)" << JsonString{metric.name}
+                << R"(,"kind":)" << static_cast<int>(metric.kind) << R"(,"value":)" << JsonString{metric.value} << '}';
+            separator = ",";
+        }
+        out << ']';
     });
 }

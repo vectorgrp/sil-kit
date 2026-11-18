@@ -1,13 +1,13 @@
 # Registry listener proof of concept
 
 A standalone C++17 executable that embeds SIL Kit's registry and prints every
-`IRegistryEventListener` callback to stdout. It replaces the registry executable,
+`IRegistryEventListener` callback as a JSON event to stdout. It replaces the registry executable,
 not the registry protocol. Existing participants connect normally.
 
 ## Dependencies and build
 
 This project consumes a **source checkout**, not the installed SDK. It requires
-this checkout's internal listener interface, including `OnGenerationCreated`.
+this checkout's internal listener interface, including the generation lifecycle callbacks.
 Private headers and targets are not a supported extension API; pin/revalidate
 the revision when using this elsewhere.
 
@@ -53,16 +53,12 @@ The parent repository's CMake files and existing build directories are untouched
 ## Running and configuration
 
 `--help` lists the options. Stop with SIGINT (Ctrl+C) or SIGTERM.
-Port zero selects a free port; `OnRegistryUri` prints the actual bound URI:
+Port zero selects a free port; `registry_uri` reports the actual bound URI:
 
-```text
-OnLoggerCreated logger=0x...
-OnRegistryUri uri="silkit://localhost:..."
-OnParticipantConnected simulation="" participant="Example"
-OnParticipantStatusUpdate simulation="" participant="Example" status=...
-OnServiceDiscoveryEvent simulation="" participant="Example" event=... supplemental={...}
-OnMetricsUpdate simulation="" origin="Example" metrics=...
-OnParticipantDisconnected simulation="" participant="Example"
+```json
+{"source":"silkit_registry","version":1,"type":"logger_created"}
+{"source":"silkit_registry","version":1,"type":"registry_uri","uri":"silkit://localhost:8500"}
+{"source":"silkit_registry","version":1,"type":"participant_connected","simulation":"","name":"Example"}
 ```
 
 For example, point an existing demo at the URI printed by the listener:
@@ -85,14 +81,62 @@ Experimental:
 ```
 
 To disable domain-socket fallback, set `Middleware.EnableDomainSockets: false`.
-Configured SIL Kit stdout logging may appear alongside listener output.
+Configured SIL Kit stdout logging may appear alongside JSON events. Use a file
+logging sink if stdout must contain events only. Executable errors go to stderr.
+
+## JSON event contract (version 1)
+
+Each listener event is one complete, flushed JSON object followed by a newline.
+Every event has `source: "silkit_registry"`, integer `version: 1`, and a `type`.
+A consumer can parse complete lines and select objects by `source` and supported
+`version`, ignoring unrelated logging. Malformed lines identifying themselves
+as registry events should be reported as stream errors. Field order is not
+significant; consumers should ignore unknown fields and event types.
+
+| `type` | Additional fields |
+| --- | --- |
+| `logger_created` | None; the internal logger address is not exposed. |
+| `registry_uri` | `uri` string. |
+| `generation_created` | `simulation` string, `generation` unsigned 64-bit integer. |
+| `generation_state_changed` | `simulation`, `generation`, `state` string, e.g. `"Running"` or `"Shutdown"`. |
+| `generation_removed` | `simulation`, `generation`. |
+| `participant_connected`, `participant_disconnected` | `simulation`, participant `name` string. |
+| `required_participants` | `simulation`, sender `name`, `required` array of participant-name strings. |
+| `participant_status` | `simulation`, sender `name`, `state`, `enter_reason` string, `enter_time_ns` and `refresh_time_ns` signed integers. |
+| `service_discovery` | `simulation`, sender `name`, numeric `event`, structured `service` object. |
+| `metrics` | `simulation`, `origin` string, `metrics` array. |
+
+Strings preserve UTF-8, quotes, backslashes, and all control characters through
+JSON escaping. Empty strings, arrays, and objects retain their respective types.
+Status timestamps are nanoseconds since the system-clock epoch.
+
+`service_discovery.event` is the SIL Kit discovery enum: 0 = Invalid,
+1 = ServiceCreated, 2 = ServiceRemoved. Its `service` object contains `id`,
+`name`, `participant_name`, `participant_id`, `type`, `network_name`,
+`network_type`, and a string-to-string `supplemental` object. `type` and
+`network_type` are numeric SIL Kit enum values.
+
+Each metric contains `timestamp_ns`, `name`, numeric `kind`, and string `value`.
+Kinds are 0 = COUNTER, 1 = STATISTIC, 2 = STRING_LIST, 3 = ATTRIBUTE.
+`timestamp_ns` preserves the producer's nanosecond timestamp. `value` preserves
+SIL Kit's original string representation, including JSON-formatted values for
+non-attribute metrics; it is not embedded as raw JSON or coerced to a number.
+Use integer-aware decoders for 64-bit IDs, generation numbers, and timestamps.
+
+Participant, workflow, discovery, and metric callbacks currently lack a
+generation argument, so their JSON events intentionally omit `generation`.
+Do not infer it from the most recent `generation_created` event: concurrent
+generations can contain the same participant name. Completing that attribution
+and adapting csil are separate changes.
+
+### Generation lifecycle
 
 For simulation names starting with `session/`, the first participant in each
 new generation also produces a notification before its connection notification:
 
-```text
-OnGenerationCreated simulation="session/example" generation=1
-OnParticipantConnected simulation="session/example" participant="Example"
+```json
+{"source":"silkit_registry","version":1,"type":"generation_created","simulation":"session/example","generation":1}
+{"source":"silkit_registry","version":1,"type":"participant_connected","simulation":"session/example","name":"Example"}
 ```
 
 Joining an existing generation or initializing its lifecycle state does not
@@ -101,20 +145,20 @@ number) does. Legacy simulation names do not produce generation notifications.
 
 Generation lifecycle changes are reported separately:
 
-```text
-OnGenerationStateChanged simulation="session/example" generation=1 state=Running
-OnGenerationStateChanged simulation="session/example" generation=1 state=Shutdown
-OnParticipantDisconnected simulation="session/example" participant="Example"
-OnGenerationRemoved simulation="session/example" generation=1
+```json
+{"source":"silkit_registry","version":1,"type":"generation_state_changed","simulation":"session/example","generation":1,"state":"Running"}
+{"source":"silkit_registry","version":1,"type":"generation_state_changed","simulation":"session/example","generation":1,"state":"Shutdown"}
+{"source":"silkit_registry","version":1,"type":"participant_disconnected","simulation":"session/example","name":"Example"}
+{"source":"silkit_registry","version":1,"type":"generation_removed","simulation":"session/example","generation":1}
 ```
 
-`OnGenerationStateChanged` reports changes to the generation's aggregate SIL Kit
+`generation_state_changed` reports changes to the generation's aggregate SIL Kit
 system state, not individual participant states. Accepted workflow updates,
 participant status updates, and departures can change it. Repeated states and
 rejected workflows do not produce state-change events. Notifications continue
 after the generation starts, including its shutdown lifecycle.
 
-`OnGenerationRemoved` follows the last participant's disconnection, even when
+`generation_removed` follows the last participant's disconnection, even when
 no workflow or participant status was reported. Removal discards the tracker;
 it does not synthesize a final state or imply that `Shutdown` was reached.
 Registry process teardown does not guarantee per-generation removal events.
@@ -122,8 +166,8 @@ Registry process teardown does not guarantee per-generation removal events.
 ## Listener behavior and limitations
 
 - All eleven callbacks are printed, including generation lifecycle, required participants, discovery
-  supplemental data, and the complete metrics update via SIL Kit's formatters.
-  The output is diagnostic text, not a stable JSON/wire format.
+  supplemental data, and the complete metrics update as structured JSON.
+  The former diagnostic-text output format is no longer emitted.
 - Logger and URI callbacks run during construction/startup; the rest run on the
   registry I/O thread. No callback payload or logger pointer is retained.
 - Dumping is synchronous and flushes each event. Slow stdout can stall the
@@ -139,7 +183,9 @@ Registry process teardown does not guarantee per-generation removal events.
 The optional smoke test needs Python 3 and builds a small participant fixture.
 It checks every callback, concurrent generation lifecycles, two simulation names,
 disconnection, signal shutdown with a participant connected, startup errors,
-and a TCP port conflict.
+and a TCP port conflict. The participant fixture's `--emit-events` mode also
+checks JSON round-tripping of control characters and UTF-8, empty collections,
+64-bit integers, structured payloads, and locale-independent numeric output.
 
 ```sh
 cmake -S registry-listener -B build-registry-listener \
