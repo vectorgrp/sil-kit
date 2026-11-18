@@ -74,6 +74,16 @@ auto Context(std::ostream& out, const std::string& simulationName, const std::st
     return out << R"(,"simulation":)" << JsonString{simulationName} << R"(,"name":)" << JsonString{participantName};
 }
 
+auto Generation(std::ostream& out, std::optional<uint64_t> generation) -> std::ostream&
+{
+    out << R"(,"generation":)";
+    if (generation.has_value())
+    {
+        return out << *generation;
+    }
+    return out << "null";
+}
+
 } // namespace
 
 void RegistryEventListener::OnLoggerCreated(SilKit::Services::Logging::ILoggerInternal*)
@@ -109,22 +119,24 @@ void RegistryEventListener::OnGenerationRemoved(const std::string& simulationNam
     });
 }
 
-void RegistryEventListener::OnParticipantConnected(const std::string& simulationName, const std::string& participantName)
+void RegistryEventListener::OnParticipantConnected(const std::string& simulationName, const std::string& participantName,
+                                                  std::optional<uint64_t> generation)
 {
-    Dump("participant_connected", [&](auto& out) { Context(out, simulationName, participantName); });
+    Dump("participant_connected", [&](auto& out) { Generation(Context(out, simulationName, participantName), generation); });
 }
 
-void RegistryEventListener::OnParticipantDisconnected(const std::string& simulationName, const std::string& participantName)
+void RegistryEventListener::OnParticipantDisconnected(const std::string& simulationName, const std::string& participantName,
+                                                     std::optional<uint64_t> generation)
 {
-    Dump("participant_disconnected", [&](auto& out) { Context(out, simulationName, participantName); });
+    Dump("participant_disconnected", [&](auto& out) { Generation(Context(out, simulationName, participantName), generation); });
 }
 
 void RegistryEventListener::OnRequiredParticipantsUpdate(
     const std::string& simulationName, const std::string& participantName,
-    SilKit::Util::Span<const std::string> requiredParticipantNames)
+    SilKit::Util::Span<const std::string> requiredParticipantNames, std::optional<uint64_t> generation)
 {
     Dump("required_participants", [&](auto& out) {
-        Context(out, simulationName, participantName) << R"(,"required":[)";
+        Generation(Context(out, simulationName, participantName), generation) << R"(,"required":[)";
         const char* separator = "";
         for (const auto& name : requiredParticipantNames)
         {
@@ -137,10 +149,10 @@ void RegistryEventListener::OnRequiredParticipantsUpdate(
 
 void RegistryEventListener::OnParticipantStatusUpdate(
     const std::string& simulationName, const std::string& participantName,
-    const SilKit::Services::Orchestration::ParticipantStatus& participantStatus)
+    const SilKit::Services::Orchestration::ParticipantStatus& participantStatus, std::optional<uint64_t> generation)
 {
     Dump("participant_status", [&](auto& out) {
-        Context(out, simulationName, participantName)
+        Generation(Context(out, simulationName, participantName), generation)
             << R"(,"state":)" << JsonString{SilKit::Services::Orchestration::to_string(participantStatus.state)}
             << R"(,"enter_reason":)" << JsonString{participantStatus.enterReason}
             << R"(,"enter_time_ns":)"

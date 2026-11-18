@@ -282,7 +282,7 @@ void VAsioRegistry::OnParticipantAnnouncement(IVAsioPeer* peer, const Participan
         {
             _registryEventListener->OnGenerationCreated(announcement.simulationName, *generation);
         }
-        _registryEventListener->OnParticipantConnected(announcement.simulationName, peerInfo.participantName);
+        _registryEventListener->OnParticipantConnected(announcement.simulationName, peerInfo.participantName, generation);
     }
 
     if (AllParticipantsAreConnected())
@@ -342,7 +342,8 @@ void VAsioRegistry::OnPeerShutdown(IVAsioPeer* peer)
 
     if (_registryEventListener != nullptr)
     {
-        _registryEventListener->OnParticipantDisconnected(simulationName, participantName);
+        _registryEventListener->OnParticipantDisconnected(simulationName, participantName,
+                                                          peer->GetServiceDescriptor().GetGeneration());
     }
 
     if (auto* placement = FindPlacement(simulationName))
@@ -421,7 +422,8 @@ void VAsioRegistry::ReceiveMsg(const SilKit::Core::IServiceEndpoint* from,
     const auto& serviceDescriptor{from->GetServiceDescriptor()};
 
     _registryEventListener->OnParticipantStatusUpdate(serviceDescriptor.GetSimulationName(),
-                                                      serviceDescriptor.GetParticipantName(), msg);
+                                                      serviceDescriptor.GetParticipantName(), msg,
+                                                      serviceDescriptor.GetGeneration());
 }
 
 void VAsioRegistry::ReceiveMsg(const SilKit::Core::IServiceEndpoint* from,
@@ -441,7 +443,8 @@ void VAsioRegistry::ReceiveMsg(const SilKit::Core::IServiceEndpoint* from,
     const auto& serviceDescriptor{from->GetServiceDescriptor()};
 
     _registryEventListener->OnRequiredParticipantsUpdate(
-        serviceDescriptor.GetSimulationName(), serviceDescriptor.GetParticipantName(), msg.requiredParticipantNames);
+        serviceDescriptor.GetSimulationName(), serviceDescriptor.GetParticipantName(), msg.requiredParticipantNames,
+        serviceDescriptor.GetGeneration());
 }
 
 void VAsioRegistry::ReceiveMsg(const SilKit::Core::IServiceEndpoint* from,

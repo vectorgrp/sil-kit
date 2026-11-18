@@ -165,7 +165,8 @@ void DashboardInstance::OnGenerationRemoved(const std::string& simulationName, u
         .Dispatch();
 }
 
-void DashboardInstance::OnParticipantConnected(const std::string& simulationName, const std::string& participantName)
+void DashboardInstance::OnParticipantConnected(const std::string& simulationName, const std::string& participantName,
+                                               std::optional<uint64_t>)
 {
     _logger->MakeMessage(Level::Trace, TopicOf(*this))
         .SetMessage("DashboardInstance::OnParticipantConnected: simulationName={} participantName={}", simulationName,
@@ -186,7 +187,8 @@ void DashboardInstance::OnParticipantConnected(const std::string& simulationName
         simulationName, SilKit::Services::Orchestration::ParticipantConnectionInformation{participantName}});
 }
 
-void DashboardInstance::OnParticipantDisconnected(const std::string& simulationName, const std::string& participantName)
+void DashboardInstance::OnParticipantDisconnected(const std::string& simulationName, const std::string& participantName,
+                                                  std::optional<uint64_t>)
 {
     _logger->MakeMessage(Level::Debug, TopicOf(*this))
         .SetMessage("DashboardInstance::OnParticipantDisconnected: simulationName={} participantName={}",
@@ -216,7 +218,8 @@ void DashboardInstance::OnParticipantDisconnected(const std::string& simulationN
 
 void DashboardInstance::OnRequiredParticipantsUpdate(const std::string& simulationName,
                                                      const std::string& participantName,
-                                                     SilKit::Util::Span<const std::string> requiredParticipantNames)
+                                                     SilKit::Util::Span<const std::string> requiredParticipantNames,
+                                                     std::optional<uint64_t>)
 {
     _logger->MakeMessage(Level::Trace, TopicOf(*this))
         .SetMessage("DashboardInstance::OnRequiredParticipantsUpdate: simulationName={} participantName={} "
@@ -235,7 +238,7 @@ void DashboardInstance::OnRequiredParticipantsUpdate(const std::string& simulati
 
 void DashboardInstance::OnParticipantStatusUpdate(
     const std::string& simulationName, const std::string& participantName,
-    const SilKit::Services::Orchestration::ParticipantStatus& participantStatus)
+    const SilKit::Services::Orchestration::ParticipantStatus& participantStatus, std::optional<uint64_t>)
 {
     _logger->MakeMessage(Level::Trace, TopicOf(*this))
         .SetMessage("DashboardInstance::OnParticipantStatusUpdate: simulationName={} participantName={} "

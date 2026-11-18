@@ -178,13 +178,14 @@ public:
     MOCK_METHOD(void, OnGenerationStateChanged,
                 (const std::string&, uint64_t, SilKit::Services::Orchestration::SystemState), (override));
     MOCK_METHOD(void, OnGenerationRemoved, (const std::string&, uint64_t), (override));
-    MOCK_METHOD(void, OnParticipantConnected, (const std::string&, const std::string&), (override));
-    MOCK_METHOD(void, OnParticipantDisconnected, (const std::string&, const std::string&), (override));
+    MOCK_METHOD(void, OnParticipantConnected, (const std::string&, const std::string&, std::optional<uint64_t>), (override));
+    MOCK_METHOD(void, OnParticipantDisconnected, (const std::string&, const std::string&, std::optional<uint64_t>), (override));
     MOCK_METHOD(void, OnRequiredParticipantsUpdate,
-                (const std::string&, const std::string&, SilKit::Util::Span<const std::string>), (override));
+                (const std::string&, const std::string&, SilKit::Util::Span<const std::string>,
+                 std::optional<uint64_t>), (override));
     MOCK_METHOD(void, OnParticipantStatusUpdate,
                 (const std::string&, const std::string&,
-                 const SilKit::Services::Orchestration::ParticipantStatus&), (override));
+                 const SilKit::Services::Orchestration::ParticipantStatus&, std::optional<uint64_t>), (override));
     MOCK_METHOD(void, OnServiceDiscoveryEvent,
                 (const std::string&, const std::string&, const SilKit::Core::Discovery::ServiceDiscoveryEvent&),
                 (override));
@@ -214,10 +215,10 @@ TEST_F(Test_VAsioRegistrySimulations, generation_creation_notifies_before_connec
     FakeVAsioPeer a2{"A", "session/Sim"};
     testing::InSequence sequence;
     EXPECT_CALL(_listener, OnGenerationCreated("session/Sim", 1));
-    EXPECT_CALL(_listener, OnParticipantConnected("session/Sim", "A"));
-    EXPECT_CALL(_listener, OnParticipantConnected("session/Sim", "B"));
+    EXPECT_CALL(_listener, OnParticipantConnected("session/Sim", "A", std::optional<uint64_t>{1}));
+    EXPECT_CALL(_listener, OnParticipantConnected("session/Sim", "B", std::optional<uint64_t>{1}));
     EXPECT_CALL(_listener, OnGenerationCreated("session/Sim", 2));
-    EXPECT_CALL(_listener, OnParticipantConnected("session/Sim", "A"));
+    EXPECT_CALL(_listener, OnParticipantConnected("session/Sim", "A", std::optional<uint64_t>{2}));
 
     VAsioRegistryTestAccess::Announce(_registry, &a1, "session/Sim");
     VAsioRegistryTestAccess::Announce(_registry, &b, "session/Sim");
@@ -344,14 +345,41 @@ TEST_F(Test_VAsioRegistrySimulations, generation_departures_report_state_changes
 
     EXPECT_CALL(_listener, OnGenerationStateChanged(testing::_, testing::_, testing::_)).Times(0);
     testing::InSequence sequence;
-    EXPECT_CALL(_listener, OnParticipantDisconnected("session/Sim", "A"));
+    EXPECT_CALL(_listener, OnParticipantDisconnected("session/Sim", "A", std::optional<uint64_t>{1}));
     EXPECT_CALL(_listener, OnGenerationStateChanged("session/Sim", 1, SystemState::Invalid));
-    EXPECT_CALL(_listener, OnParticipantDisconnected("session/Sim", "Controller"));
+    EXPECT_CALL(_listener, OnParticipantDisconnected("session/Sim", "Controller", std::optional<uint64_t>{1}));
     EXPECT_CALL(_listener, OnGenerationRemoved("session/Sim", 1));
 
     VAsioRegistryTestAccess::Shutdown(_registry, &a);
     VAsioRegistryTestAccess::Shutdown(_registry, &a);
     VAsioRegistryTestAccess::Shutdown(_registry, &controller);
+}
+
+TEST_F(Test_VAsioRegistrySimulations, participant_events_keep_the_sending_peers_generation_when_names_overlap)
+{
+    using ParticipantState = SilKit::Services::Orchestration::ParticipantState;
+    FakeVAsioPeer a1{"A", "session/Sim"};
+    FakeVAsioPeer a2{"A", "session/Sim"};
+    testing::InSequence sequence;
+    EXPECT_CALL(_listener, OnParticipantConnected("session/Sim", "A", std::optional<uint64_t>{1}));
+    EXPECT_CALL(_listener, OnParticipantConnected("session/Sim", "A", std::optional<uint64_t>{2}));
+    EXPECT_CALL(_listener, OnParticipantStatusUpdate("session/Sim", "A", testing::_, std::optional<uint64_t>{2}));
+    EXPECT_CALL(_listener, OnParticipantStatusUpdate("session/Sim", "A", testing::_, std::optional<uint64_t>{1}));
+    EXPECT_CALL(_listener, OnRequiredParticipantsUpdate("session/Sim", "A", testing::_, std::optional<uint64_t>{1}));
+    EXPECT_CALL(_listener, OnRequiredParticipantsUpdate("session/Sim", "A", testing::_, std::optional<uint64_t>{2}));
+    EXPECT_CALL(_listener, OnParticipantDisconnected("session/Sim", "A", std::optional<uint64_t>{1}));
+    EXPECT_CALL(_listener, OnParticipantStatusUpdate("session/Sim", "A", testing::_, std::optional<uint64_t>{2}));
+    EXPECT_CALL(_listener, OnParticipantDisconnected("session/Sim", "A", std::optional<uint64_t>{2}));
+
+    VAsioRegistryTestAccess::Announce(_registry, &a1, "session/Sim");
+    VAsioRegistryTestAccess::Announce(_registry, &a2, "session/Sim");
+    VAsioRegistryTestAccess::SendStatus(_registry, &a2, ParticipantState::ServicesCreated);
+    VAsioRegistryTestAccess::SendStatus(_registry, &a1, ParticipantState::ServicesCreated);
+    VAsioRegistryTestAccess::SendWorkflowConfiguration(_registry, &a1, {"A"});
+    VAsioRegistryTestAccess::SendWorkflowConfiguration(_registry, &a2, {"A"});
+    VAsioRegistryTestAccess::Shutdown(_registry, &a1);
+    VAsioRegistryTestAccess::SendStatus(_registry, &a2, ParticipantState::CommunicationInitializing);
+    VAsioRegistryTestAccess::Shutdown(_registry, &a2);
 }
 
 TEST_F(Test_VAsioRegistrySimulations, legacy_simulations_do_not_notify_generation_events)
@@ -362,6 +390,10 @@ TEST_F(Test_VAsioRegistrySimulations, legacy_simulations_do_not_notify_generatio
     for (const auto& simulationName : {"", "Sim", "session", "Session/x"})
     {
         FakeVAsioPeer peer{"A", simulationName};
+        EXPECT_CALL(_listener, OnParticipantConnected(simulationName, "A", std::optional<uint64_t>{}));
+        EXPECT_CALL(_listener, OnParticipantDisconnected(simulationName, "A", std::optional<uint64_t>{}));
+        EXPECT_CALL(_listener, OnParticipantStatusUpdate(simulationName, "A", testing::_, std::optional<uint64_t>{}));
+        EXPECT_CALL(_listener, OnRequiredParticipantsUpdate(simulationName, "A", testing::_, std::optional<uint64_t>{}));
         VAsioRegistryTestAccess::Announce(_registry, &peer, simulationName);
         VAsioRegistryTestAccess::SendWorkflowConfiguration(_registry, &peer, {"A"});
         VAsioRegistryTestAccess::SendStatus(_registry, &peer,

@@ -58,7 +58,7 @@ Port zero selects a free port; `registry_uri` reports the actual bound URI:
 ```json
 {"source":"silkit_registry","version":1,"type":"logger_created"}
 {"source":"silkit_registry","version":1,"type":"registry_uri","uri":"silkit://localhost:8500"}
-{"source":"silkit_registry","version":1,"type":"participant_connected","simulation":"","name":"Example"}
+{"source":"silkit_registry","version":1,"type":"participant_connected","simulation":"","name":"Example","generation":null}
 ```
 
 For example, point an existing demo at the URI printed by the listener:
@@ -100,9 +100,9 @@ significant; consumers should ignore unknown fields and event types.
 | `generation_created` | `simulation` string, `generation` unsigned 64-bit integer. |
 | `generation_state_changed` | `simulation`, `generation`, `state` string, e.g. `"Running"` or `"Shutdown"`. |
 | `generation_removed` | `simulation`, `generation`. |
-| `participant_connected`, `participant_disconnected` | `simulation`, participant `name` string. |
-| `required_participants` | `simulation`, sender `name`, `required` array of participant-name strings. |
-| `participant_status` | `simulation`, sender `name`, `state`, `enter_reason` string, `enter_time_ns` and `refresh_time_ns` signed integers. |
+| `participant_connected`, `participant_disconnected` | `simulation`, participant `name` string, `generation` integer or null. |
+| `required_participants` | `simulation`, sender `name`, `generation`, `required` array of participant-name strings. |
+| `participant_status` | `simulation`, sender `name`, `generation`, `state`, `enter_reason` string, `enter_time_ns` and `refresh_time_ns` signed integers. |
 | `service_discovery` | `simulation`, sender `name`, numeric `event`, structured `service` object. |
 | `metrics` | `simulation`, `origin` string, `metrics` array. |
 
@@ -123,11 +123,14 @@ SIL Kit's original string representation, including JSON-formatted values for
 non-attribute metrics; it is not embedded as raw JSON or coerced to a number.
 Use integer-aware decoders for 64-bit IDs, generation numbers, and timestamps.
 
-Participant, workflow, discovery, and metric callbacks currently lack a
-generation argument, so their JSON events intentionally omit `generation`.
-Do not infer it from the most recent `generation_created` event: concurrent
-generations can contain the same participant name. Completing that attribution
-and adapting csil are separate changes.
+Participant connection, disconnection, status, and workflow events carry the
+generation assigned to the sending peer by the registry. This remains
+unambiguous when the same participant name exists in concurrent generations.
+Legacy simulations have no assigned generation and emit `"generation":null`,
+not zero. The new field is additive within version 1.
+Discovery and metric events still omit generation identity.
+Workflow events report the received configuration, not confirmation that the
+placement accepted it. Adapting csil remains a separate change.
 
 ### Generation lifecycle
 
@@ -136,7 +139,7 @@ new generation also produces a notification before its connection notification:
 
 ```json
 {"source":"silkit_registry","version":1,"type":"generation_created","simulation":"session/example","generation":1}
-{"source":"silkit_registry","version":1,"type":"participant_connected","simulation":"session/example","name":"Example"}
+{"source":"silkit_registry","version":1,"type":"participant_connected","simulation":"session/example","name":"Example","generation":1}
 ```
 
 Joining an existing generation or initializing its lifecycle state does not
@@ -148,7 +151,7 @@ Generation lifecycle changes are reported separately:
 ```json
 {"source":"silkit_registry","version":1,"type":"generation_state_changed","simulation":"session/example","generation":1,"state":"Running"}
 {"source":"silkit_registry","version":1,"type":"generation_state_changed","simulation":"session/example","generation":1,"state":"Shutdown"}
-{"source":"silkit_registry","version":1,"type":"participant_disconnected","simulation":"session/example","name":"Example"}
+{"source":"silkit_registry","version":1,"type":"participant_disconnected","simulation":"session/example","name":"Example","generation":1}
 {"source":"silkit_registry","version":1,"type":"generation_removed","simulation":"session/example","generation":1}
 ```
 

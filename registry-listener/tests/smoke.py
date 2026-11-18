@@ -119,9 +119,9 @@ class RegistryListenerSmoke(unittest.TestCase):
             self.wait_for(client, "READY")
             context = {"simulation": simulation, "name": "Fixture"}
             self.wait_event(registry, "generation_created", simulation=simulation, generation=1)
-            self.wait_event(registry, "participant_connected", **context)
-            self.wait_event(registry, "required_participants", required=["Fixture"], **context)
-            self.wait_event(registry, "participant_status", state="Running", **context)
+            self.wait_event(registry, "participant_connected", generation=1, **context)
+            self.wait_event(registry, "required_participants", generation=1, required=["Fixture"], **context)
+            self.wait_event(registry, "participant_status", generation=1, state="Running", **context)
             self.wait_event(
                 registry, "generation_state_changed", simulation=simulation, generation=1, state="Running"
             )
@@ -134,7 +134,7 @@ class RegistryListenerSmoke(unittest.TestCase):
             client[0].stdin.write("\n")
             client[0].stdin.flush()
             self.assertEqual(client[0].wait(timeout=10), 0, client[1].read_text())
-            self.wait_event(registry, "participant_disconnected", **context)
+            self.wait_event(registry, "participant_disconnected", generation=1, **context)
             self.wait_event(
                 registry, "generation_state_changed", simulation=simulation, generation=1, state="Shutdown"
             )
@@ -149,6 +149,10 @@ class RegistryListenerSmoke(unittest.TestCase):
         for client in clients:
             self.wait_for(client, "READY")
         for generation in (1, 2):
+            context = {"simulation": "session/generations", "name": "Fixture", "generation": generation}
+            self.wait_event(registry, "participant_connected", **context)
+            self.wait_event(registry, "required_participants", required=["Fixture"], **context)
+            self.wait_event(registry, "participant_status", state="Running", **context)
             self.wait_event(
                 registry, "generation_created", simulation="session/generations", generation=generation
             )
@@ -161,6 +165,10 @@ class RegistryListenerSmoke(unittest.TestCase):
             client[0].stdin.flush()
             self.assertEqual(client[0].wait(timeout=10), 0, client[1].read_text())
         for generation in (1, 2):
+            self.wait_event(
+                registry, "participant_disconnected", simulation="session/generations",
+                name="Fixture", generation=generation,
+            )
             self.wait_event(
                 registry, "generation_removed", simulation="session/generations", generation=generation
             )
@@ -178,6 +186,10 @@ class RegistryListenerSmoke(unittest.TestCase):
                 registry, uri = self.registry()
                 client = self.start(PARTICIPANT, uri)
                 self.wait_for(client, "READY")
+                for event_type in ("participant_connected", "required_participants", "participant_status"):
+                    event = self.wait_event(registry, event_type, simulation="", name="Fixture")
+                    self.assertIn("generation", event)
+                    self.assertIsNone(event["generation"])
                 registry[0].send_signal(sig)
                 self.assertEqual(registry[0].wait(timeout=10), 0, registry[1].read_text())
                 self.assertNotIn("generation_created",
@@ -231,12 +243,15 @@ class RegistryListenerSmoke(unittest.TestCase):
         self.assertEqual(by_type["participant_connected"][0]["simulation"], text)
         self.assertEqual(by_type["participant_connected"][0]["name"], text)
         self.assertEqual(by_type["participant_disconnected"][0]["name"], text)
-        for event_type in ("generation_created", "generation_state_changed", "generation_removed"):
+        for event_type in ("generation_created", "generation_state_changed", "generation_removed",
+                           "participant_connected", "participant_disconnected",
+                           "participant_status", "required_participants"):
             self.assertEqual(by_type[event_type][0]["simulation"], text)
             self.assertEqual(by_type[event_type][0]["generation"], 2**64 - 1)
         self.assertEqual(by_type["generation_state_changed"][0]["state"], "Running")
         self.assertEqual(by_type["required_participants"][0]["required"], [text, "", "123"])
         self.assertEqual(by_type["required_participants"][1]["required"], [])
+        self.assertIsNone(by_type["required_participants"][1]["generation"])
         status = by_type["participant_status"][0]
         self.assertEqual(status["state"], "Running")
         self.assertEqual(status["enter_reason"], text)

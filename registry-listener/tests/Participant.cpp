@@ -38,18 +38,18 @@ void EmitEvents()
     listener.OnGenerationCreated(text, generation);
     listener.OnGenerationStateChanged(text, generation, SilKit::Services::Orchestration::SystemState::Running);
     listener.OnGenerationRemoved(text, generation);
-    listener.OnParticipantConnected(text, text);
-    listener.OnParticipantDisconnected(text, text);
+    listener.OnParticipantConnected(text, text, generation);
+    listener.OnParticipantDisconnected(text, text, generation);
     const std::vector<std::string> required{text, "", "123"};
-    listener.OnRequiredParticipantsUpdate(text, text, required);
-    listener.OnRequiredParticipantsUpdate("", "", {});
+    listener.OnRequiredParticipantsUpdate(text, text, required, generation);
+    listener.OnRequiredParticipantsUpdate("", "", {}, std::nullopt);
 
     SilKit::Services::Orchestration::ParticipantStatus status;
     status.state = SilKit::Services::Orchestration::ParticipantState::Running;
     status.enterReason = text;
     status.enterTime = std::chrono::system_clock::time_point{std::chrono::milliseconds{-123}};
     status.refreshTime = std::chrono::system_clock::time_point{std::chrono::milliseconds{456}};
-    listener.OnParticipantStatusUpdate(text, text, status);
+    listener.OnParticipantStatusUpdate(text, text, status, generation);
 
     SilKit::Core::Discovery::ServiceDiscoveryEvent service;
     service.type = SilKit::Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated;
