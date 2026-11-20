@@ -36,11 +36,13 @@
 #include "core/mock/participant/MockParticipant.hpp" // for DummyLogger
 #include "core/vasio/VAsioSerdes.hpp"
 #include "core/vasio/SerializedMessage.hpp"
+#include "util/Uri.hpp"
 #include "services/orchestration/TimeProvider.hpp"
 
 #include "services/logging/LoggerMessage.hpp"
 
 #include <chrono>
+#include <filesystem>
 
 #include "core/vasio/mock/MockVAsioPeer.hpp"
 
@@ -178,6 +180,11 @@ protected:
     static auto ReceiveBlobPoolOf(const VAsioConnection& connection) -> const ReceiveBlobPool&
     {
         return connection._receiveBlobPool;
+    }
+
+    static auto PeerInfoOf(VAsioConnection& connection) -> VAsioPeerInfo
+    {
+        return connection.MakePeerInfo();
     }
 
     static void AssociateParticipantNameAndPeer(VAsioConnection& connection, const std::string& simulationName,
@@ -336,6 +343,44 @@ TEST_F(Test_VAsioConnection, receive_buffer_pool_follows_the_configuration)
     VAsioConnection connection{nullptr, &_dummyMetricsManager, config, "Test_VAsioConnection", 1, &_timeProvider};
 
     EXPECT_FALSE(ReceiveBlobPoolOf(connection).IsEnabled());
+}
+
+TEST_F(Test_VAsioConnection, generated_local_socket_collision_preserves_the_existing_listener)
+{
+    const auto uris = _connection.PrepareAcceptorEndpointUris("silkit://localhost:8500");
+    _connection.OpenLocalAcceptors(uris);
+    const auto firstInfo = PeerInfoOf(_connection);
+    ASSERT_EQ(firstInfo.acceptorUris.size(), 1u);
+    const auto firstPath = Uri::Parse(firstInfo.acceptorUris.front()).Path();
+
+    {
+        VAsioConnection other{nullptr, &_dummyMetricsManager, {}, "Test_VAsioConnection", 1, &_timeProvider};
+        other.SetLoggerInternal(&_dummyLogger);
+        // Reuse the already-bound URI to force a collision and retry with a fresh generated path.
+        other.OpenLocalAcceptors(uris);
+
+        const auto secondInfo = PeerInfoOf(other);
+        ASSERT_EQ(secondInfo.acceptorUris.size(), 1u);
+        EXPECT_NE(firstInfo.acceptorUris.front(), secondInfo.acceptorUris.front());
+        EXPECT_TRUE(std::filesystem::exists(firstPath));
+        EXPECT_TRUE(std::filesystem::exists(Uri::Parse(secondInfo.acceptorUris.front()).Path()));
+    }
+
+    // Destroying the second listener must not remove the first listener's socket path.
+    EXPECT_TRUE(std::filesystem::exists(firstPath));
+}
+
+TEST_F(Test_VAsioConnection, generated_local_socket_does_not_retry_unrelated_bind_errors)
+{
+    const auto uris = _connection.PrepareAcceptorEndpointUris("silkit://localhost:8500");
+    const auto missingParent = Uri::Parse(uris.back()).Path();
+    ASSERT_FALSE(std::filesystem::exists(missingParent));
+
+    // Use the uncreated socket path as a parent directory to cause "no such file or directory", not a collision.
+    _connection.OpenLocalAcceptors({"local://" + missingParent + "/socket"});
+
+    // Regenerating a valid temporary path for this unrelated error would incorrectly create a listener.
+    EXPECT_TRUE(PeerInfoOf(_connection).acceptorUris.empty());
 }
 
 //////////////////////////////////////////////////////////////////////

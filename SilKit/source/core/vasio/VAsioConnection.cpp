@@ -26,6 +26,7 @@
 #include "util/Assert.hpp"
 #include "core/vasio/TransformAcceptorUris.hpp"
 #include "util/StringHelpers.hpp"
+#include "util/Uuid.hpp"
 
 #include "core/vasio/ConnectPeer.hpp"
 #include "core/vasio/io/util/IpAddress.hpp"
@@ -321,7 +322,9 @@ auto VAsioConnection::PrepareAcceptorEndpointUris(const std::string& connectUri)
         acceptorEndpointUris.emplace_back("tcp://[::]:0");
 
         // Create the default local-domain socket path.
-        auto localEndpoint = makeLocalEndpoint(_participantName, _participantId, connectUri);
+        auto localEndpoint =
+            makeLocalEndpoint(_participantName, _participantId,
+                              connectUri + SilKit::Util::to_string(SilKit::Util::Uuid::GenerateRandom()));
         acceptorEndpointUris.emplace_back("local://" + localEndpoint.path());
     }
 
@@ -399,7 +402,7 @@ void VAsioConnection::OpenLocalAcceptors(const std::vector<std::string>& accepto
 
     for (const auto& uriString : acceptorEndpointUris)
     {
-        const auto uri = Uri::Parse(uriString);
+        auto uri = Uri::Parse(uriString);
 
         if (uri.Type() == Uri::UriType::Local && uri.Scheme() == "local")
         {
@@ -409,18 +412,52 @@ void VAsioConnection::OpenLocalAcceptors(const std::vector<std::string>& accepto
                 .AddKeyValue(Log::Keys::uriPath, uri.Path())
                 .Dispatch();
 
-            // file must not exist before we bind/listen on it
-            (void)fs::remove(uri.Path());
+            const auto generatedPath = _config.middleware.acceptorUris.empty();
+            if (!generatedPath)
+            {
+                (void)fs::remove(uri.Path());
+            }
 
             try
             {
-                auto acceptor{_ioContext->MakeLocalAcceptor(uri.Path())};
-                acceptor->SetListener(*this);
-                acceptor->AsyncAccept({});
-
+                constexpr size_t maxBindAttempts{3};
+                for (size_t attempt = 0; attempt < maxBindAttempts; ++attempt)
                 {
-                    std::unique_lock<decltype(_acceptorsMutex)> lock{_acceptorsMutex};
-                    _acceptors.emplace_back(std::move(acceptor));
+                    std::unique_ptr<IAcceptor> acceptor;
+                    try
+                    {
+                        acceptor = _ioContext->MakeLocalAcceptor(uri.Path());
+                    }
+                    catch (const asio::system_error& exception)
+                    {
+                        if (!generatedPath || exception.code() != asio::error::address_in_use
+                            || attempt + 1 == maxBindAttempts)
+                        {
+                            throw;
+                        }
+
+                        _logger->MakeMessage(Log::Level::Warn, TopicOf(*this))
+                            .SetMessage("Local domain socket path is already in use; generating a new path")
+                            .AddKeyValue(Log::Keys::uriPath, uri.Path())
+                            .Dispatch();
+
+                        auto localEndpoint = makeLocalEndpoint(
+                            _participantName, _participantId,
+                            uriString + SilKit::Util::to_string(SilKit::Util::Uuid::GenerateRandom()));
+                        uri = Uri::Parse("local://" + localEndpoint.path());
+                        continue;
+                    }
+
+                    acceptor->SetListener(*this);
+                    acceptor->AsyncAccept({});
+
+                    {
+                        std::unique_lock<decltype(_acceptorsMutex)> lock{_acceptorsMutex};
+                        _acceptors.emplace_back(std::move(acceptor));
+                    }
+
+                    metric->Add(uri.Path());
+                    break;
                 }
             }
             catch (const std::exception& exception)
@@ -431,8 +468,6 @@ void VAsioConnection::OpenLocalAcceptors(const std::vector<std::string>& accepto
                     .AddKeyValue(Log::Keys::exception, exception.what())
                     .Dispatch();
             }
-
-            metric->Add(fmt::format("{}", uri.Path()));
         }
         else if (uri.Type() == Uri::UriType::Tcp && uri.Scheme() == "tcp")
         {
