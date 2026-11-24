@@ -103,15 +103,18 @@ TEST(ITest_WallClockCoupling, coupled_participant_paces_the_whole_simulation)
     EXPECT_GE(ToMs(uncoupledEnd - uncoupledStart), ToMs(minimumDuration));
 }
 
-// If async simulation steps complete later than the wall clock requires, the simulation catches up after each
-// completion without losing or repeating steps.
-TEST(ITest_WallClockCoupling, lagging_async_step_completion_catches_up)
+struct AsyncRunResult
 {
-    const auto stepSize = 10ms;
-    const std::chrono::nanoseconds simDuration = 100ms;
-    const auto completionDelay = 25ms;
-    const auto numSteps = static_cast<int>(simDuration / stepSize) + 1; // including the step at 0ns
+    bool ok{false};
+    std::vector<std::chrono::nanoseconds> stepTimes;
+    Clock::duration elapsed{};
+};
 
+// Runs a single participant coupled to the wall clock (animation factor 1) with an async simulation step handler.
+// A separate thread completes each step after the given delay.
+auto RunCoupledAsyncSimulation(std::chrono::nanoseconds stepSize, std::chrono::nanoseconds simDuration,
+                               std::chrono::nanoseconds completionDelay) -> AsyncRunResult
+{
     SimTestHarnessArgs args;
     args.syncParticipantNames = {"Coupled"};
     args.deferParticipantCreation = true;
@@ -126,7 +129,7 @@ TEST(ITest_WallClockCoupling, lagging_async_step_completion_catches_up)
     int pendingCompletions = 0;
     bool done = false;
 
-    std::vector<std::chrono::nanoseconds> stepTimes;
+    AsyncRunResult result;
     Clock::time_point start{};
     Clock::time_point end{};
 
@@ -135,7 +138,7 @@ TEST(ITest_WallClockCoupling, lagging_async_step_completion_catches_up)
         {
             start = Clock::now();
         }
-        stepTimes.push_back(now);
+        result.stepTimes.push_back(now);
         if (now == simDuration)
         {
             end = Clock::now();
@@ -165,7 +168,7 @@ TEST(ITest_WallClockCoupling, lagging_async_step_completion_catches_up)
         }
     }};
 
-    const auto ok = testHarness.Run(harnessTimeout);
+    result.ok = testHarness.Run(harnessTimeout);
 
     {
         std::lock_guard<std::mutex> lock{mutex};
@@ -174,18 +177,57 @@ TEST(ITest_WallClockCoupling, lagging_async_step_completion_catches_up)
     }
     completer.join();
 
-    ASSERT_TRUE(ok) << "SimTestHarness should terminate without timeout";
+    result.elapsed = end - start;
+    return result;
+}
+
+auto ExpectedStepTimes(std::chrono::nanoseconds stepSize,
+                       std::chrono::nanoseconds simDuration) -> std::vector<std::chrono::nanoseconds>
+{
+    std::vector<std::chrono::nanoseconds> stepTimes;
+    for (auto now = 0ns; now <= simDuration; now += stepSize)
+    {
+        stepTimes.push_back(now);
+    }
+    return stepTimes;
+}
+
+// If async simulation steps complete later than the wall clock requires, the simulation catches up after each
+// completion without losing or repeating steps.
+TEST(ITest_WallClockCoupling, lagging_async_step_completion_catches_up)
+{
+    const auto stepSize = 10ms;
+    const std::chrono::nanoseconds simDuration = 100ms;
+    const auto completionDelay = 25ms;
+
+    const auto result = RunCoupledAsyncSimulation(stepSize, simDuration, completionDelay);
+    ASSERT_TRUE(result.ok) << "SimTestHarness should terminate without timeout";
 
     // No step was skipped or repeated
-    std::vector<std::chrono::nanoseconds> expectedStepTimes;
-    for (int i = 0; i < numSteps; ++i)
-    {
-        expectedStepTimes.push_back(i * stepSize);
-    }
-    EXPECT_EQ(stepTimes, expectedStepTimes);
+    const auto expectedStepTimes = ExpectedStepTimes(stepSize, simDuration);
+    EXPECT_EQ(result.stepTimes, expectedStepTimes);
 
     // The completion delay, not the wall clock, determines the pace
-    EXPECT_GE(ToMs(end - start), ToMs((numSteps - 1) * completionDelay));
+    const auto numSteps = static_cast<int>(expectedStepTimes.size());
+    EXPECT_GE(ToMs(result.elapsed), ToMs((numSteps - 1) * completionDelay));
+}
+
+// If async simulation steps complete before the wall clock reaches the next step, the completion does not request
+// the next step on its own. The simulation waits for the wall clock instead.
+TEST(ITest_WallClockCoupling, timely_async_step_completion_waits_for_wall_clock)
+{
+    const auto stepSize = 10ms;
+    const std::chrono::nanoseconds simDuration = 100ms;
+    const auto completionDelay = 2ms;
+
+    const auto result = RunCoupledAsyncSimulation(stepSize, simDuration, completionDelay);
+    ASSERT_TRUE(result.ok) << "SimTestHarness should terminate without timeout";
+
+    // No step was skipped or repeated
+    EXPECT_EQ(result.stepTimes, ExpectedStepTimes(stepSize, simDuration));
+
+    // The wall clock, not the completion delay, determines the pace
+    EXPECT_GE(ToMs(result.elapsed), ToMs(MinimumWallClockDuration(simDuration, stepSize, 1.0)));
 }
 
 } // anonymous namespace

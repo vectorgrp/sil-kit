@@ -811,7 +811,7 @@ TEST_F(Test_LinControllerTrivialSim, add_remove_handler)
     master.ReceiveMsg(&slave1, transmission);
 }
 
-// An inactive (not initialized) controller ignores received transmissions.
+// An inactive (not initialized) controller ignores received transmissions, only warned.
 TEST_F(Test_LinControllerTrivialSim, receive_transmission_while_inactive_is_ignored)
 {
     // No Init(): the controller is still inactive
@@ -825,7 +825,7 @@ TEST_F(Test_LinControllerTrivialSim, receive_transmission_while_inactive_is_igno
     master.ReceiveMsg(&slave1, transmission);
 }
 
-// A sleeping controller ignores received transmissions.
+// A sleeping controller ignores received transmissions, only warned.
 TEST_F(Test_LinControllerTrivialSim, receive_transmission_while_sleeping_is_ignored)
 {
     LinControllerConfig config = MakeControllerConfig(LinControllerMode::Master);
@@ -845,10 +845,17 @@ TEST_F(Test_LinControllerTrivialSim, receive_transmission_while_sleeping_is_igno
     master.ReceiveMsg(&slave1, transmission);
 }
 
-// Received transmissions with a data length above 8 are ignored.
+// Received transmissions with a data length above 8 are ignored, only warned.
 TEST_F(Test_LinControllerTrivialSim, receive_transmission_with_invalid_datalength_is_ignored)
 {
-    master.Init(MakeControllerConfig(LinControllerMode::Master));
+    // Configure reception on the ID with an unknown data length. Without the data length check, the transmission
+    // would be accepted and the handler would be called.
+    LinControllerConfig config = MakeControllerConfig(LinControllerMode::Master);
+    LinFrameResponse response;
+    response.frame = MakeFrame(17, LinChecksumModel::Enhanced, LinDataLengthUnknown);
+    response.responseMode = LinFrameResponseMode::Rx;
+    config.frameResponses.push_back(response);
+    master.Init(config);
     master.AddFrameStatusHandler(frameStatusHandler);
 
     LinTransmission transmission;
@@ -859,7 +866,7 @@ TEST_F(Test_LinControllerTrivialSim, receive_transmission_with_invalid_datalengt
     master.ReceiveMsg(&slave1, transmission);
 }
 
-// Received transmissions with a LIN ID above 63 are ignored.
+// Received transmissions with a LIN ID above 63 are ignored, only warned.
 TEST_F(Test_LinControllerTrivialSim, receive_transmission_with_invalid_id_is_ignored)
 {
     master.Init(MakeControllerConfig(LinControllerMode::Master));
@@ -873,8 +880,8 @@ TEST_F(Test_LinControllerTrivialSim, receive_transmission_with_invalid_id_is_ign
     master.ReceiveMsg(&slave1, transmission);
 }
 
-// SetFrameResponse ignores reconfigurations, LinFrameResponseMode::Unused and invalid IDs, so only the first,
-// valid response is distributed.
+// SetFrameResponse ignores reconfigurations, LinFrameResponseMode::Unused and invalid IDs, only warned. Only the
+// first, valid response is applied and distributed.
 TEST_F(Test_LinControllerTrivialSim, set_frame_response_ignores_invalid_requests)
 {
     slave1.Init(MakeControllerConfig(LinControllerMode::Slave));
@@ -900,9 +907,13 @@ TEST_F(Test_LinControllerTrivialSim, set_frame_response_ignores_invalid_requests
     response.frame.id = 64;
     response.responseMode = LinFrameResponseMode::TxUnconditional;
     slave1.SetFrameResponse(response);
+
+    // The local configuration is unchanged
+    EXPECT_EQ(slave1.GetThisLinNode().responses[17].responseMode, LinFrameResponseMode::TxUnconditional);
+    EXPECT_EQ(slave1.GetThisLinNode().responses[18].responseMode, LinFrameResponseMode::Unused);
 }
 
-// SendFrame with a slave response is ignored if the master itself already transmits on that ID.
+// SendFrame with a slave response is ignored, only warned, if the master itself already transmits on that ID.
 TEST_F(Test_LinControllerTrivialSim, send_frame_slave_response_with_master_tx_is_ignored)
 {
     const LinFrame frame = MakeFrame(20, LinChecksumModel::Enhanced, 2, {1, 2, 0, 0, 0, 0, 0, 0});
@@ -948,7 +959,8 @@ TEST_F(Test_LinControllerTrivialSim, get_slave_configuration)
 }
 
 // Removed GoToSleep, Wakeup and SlaveConfiguration handlers are no longer called, and removing unknown handlers
-// does not throw.
+// (including FrameStatus handlers) does not throw. The removal of FrameStatus handlers is covered by
+// add_remove_handler.
 TEST_F(Test_LinControllerTrivialSim, removed_handlers_are_not_called)
 {
     master.Init(MakeControllerConfig(LinControllerMode::Master));
@@ -973,7 +985,11 @@ TEST_F(Test_LinControllerTrivialSim, removed_handlers_are_not_called)
     master.RemoveLinSlaveConfigurationHandler(slaveConfigurationHandlerId);
     master.ReceiveMsg(&slave2, ToWire(MakeControllerConfig(LinControllerMode::Slave)));
 
+    const auto frameStatusHandlerId = master.AddFrameStatusHandler(frameStatusHandler);
+    master.RemoveFrameStatusHandler(frameStatusHandlerId);
+
     // Removing unknown handlers only warns
+    EXPECT_NO_THROW(master.RemoveFrameStatusHandler(frameStatusHandlerId));
     EXPECT_NO_THROW(slave1.RemoveGoToSleepHandler(goToSleepHandlerId));
     EXPECT_NO_THROW(master.RemoveWakeupHandler(wakeupHandlerId));
     EXPECT_NO_THROW(master.RemoveLinSlaveConfigurationHandler(slaveConfigurationHandlerId));

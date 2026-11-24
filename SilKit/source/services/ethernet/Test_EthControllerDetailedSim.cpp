@@ -44,6 +44,7 @@ auto AnEthMessageWith(std::chrono::nanoseconds timestamp) -> testing::Matcher<co
 class MockParticipant : public DummyParticipant
 {
 public:
+    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint*, const WireEthernetFrameEvent&), (override));
     MOCK_METHOD(void, SendMsg, (const IServiceEndpoint*, const std::string&, const WireEthernetFrameEvent&),
                 (override));
     MOCK_METHOD(void, SendMsg, (const IServiceEndpoint*, const std::string&, const EthernetFrameTransmitEvent&),
@@ -264,10 +265,10 @@ TEST_F(Test_EthControllerDetailedSim, trigger_callback_on_state_change)
     controller.ReceiveMsg(&controllerBusSim, newStatus);
 }
 
-/*! \brief The controller routes frames to a network simulator of its network once it appears, and falls back to
- *         the trivial simulation once it leaves.
+/*! \brief The controller switches to the detailed simulation once a network simulator of its own network appears,
+ *         and falls back to the trivial simulation once it leaves. Network simulators of other networks are ignored.
  */
-TEST_F(Test_EthControllerDetailedSim, network_simulator_discovery_switches_simulation_behavior)
+TEST_F(Test_EthControllerDetailedSim, network_simulator_of_own_network_toggles_detailed_and_trivial_simulation)
 {
     SilKit::Core::Discovery::ServiceDiscoveryHandler discoveryHandler;
     EXPECT_CALL(participant.mockServiceDiscovery, RegisterServiceDiscoveryHandler(_))
@@ -278,27 +279,48 @@ TEST_F(Test_EthControllerDetailedSim, network_simulator_discovery_switches_simul
     trivialController.RegisterServiceDiscovery();
     ASSERT_TRUE(discoveryHandler);
 
+    // Only the trivial simulation acknowledges frames on its own
+    std::vector<EthernetTransmitStatus> ackStatuses;
+    trivialController.AddFrameTransmitHandler(
+        [&ackStatuses](auto*, const EthernetFrameTransmitEvent& ack) { ackStatuses.push_back(ack.status); });
+
+    // Activated in the trivial simulation, so the link is up while no network simulator is present
+    trivialController.Activate();
+
     ServiceDescriptor netsimLink{netsimName, "n1", "n1", 9};
     netsimLink.SetServiceType(ServiceType::Link);
     ServiceDescriptor otherNetsimLink{netsimName, "n2", "n2", 10};
     otherNetsimLink.SetServiceType(ServiceType::Link);
 
     using EventType = SilKit::Core::Discovery::ServiceDiscoveryEvent::Type;
+    const std::vector<uint8_t> rawFrame(60, 0);
+    const EthernetFrame frame{rawFrame};
 
-    // Only the send while the network simulator is present goes to the network simulator
-    EXPECT_CALL(participant, SendMsg(&trivialController, netsimName, A<const WireEthernetFrameEvent&>())).Times(1);
+    {
+        InSequence seq;
 
-    // A link on another network is ignored
+        // Trivial: a network simulator of another network is ignored
+        EXPECT_CALL(participant, SendMsg(&trivialController, A<const WireEthernetFrameEvent&>())).Times(1);
+        // Detailed: the frame goes to the network simulator
+        EXPECT_CALL(participant, SendMsg(&trivialController, netsimName, A<const WireEthernetFrameEvent&>())).Times(1);
+        // Trivial again: the controller broadcasts the frame
+        EXPECT_CALL(participant, SendMsg(&trivialController, A<const WireEthernetFrameEvent&>())).Times(1);
+    }
+
     discoveryHandler(EventType::ServiceCreated, otherNetsimLink);
-    trivialController.SendFrame(EthernetFrame{});
+    trivialController.SendFrame(frame);
 
     discoveryHandler(EventType::ServiceCreated, netsimLink);
-    trivialController.SendFrame(EthernetFrame{});
+    trivialController.SendFrame(frame);
 
     // The network simulator of another network leaving does not matter
     discoveryHandler(EventType::ServiceRemoved, otherNetsimLink);
     discoveryHandler(EventType::ServiceRemoved, netsimLink);
-    trivialController.SendFrame(EthernetFrame{});
+    trivialController.SendFrame(frame);
+
+    // One acknowledgement per trivial send, none for the send to the network simulator
+    EXPECT_THAT(ackStatuses,
+                testing::ElementsAre(EthernetTransmitStatus::Transmitted, EthernetTransmitStatus::Transmitted));
 }
 
 /*! \brief In the detailed simulation, status updates and acknowledgements from anyone but the network simulator

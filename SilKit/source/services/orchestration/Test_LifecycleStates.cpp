@@ -37,12 +37,32 @@ struct TransitionCase
     StateGetter expected;
 };
 
+// Records the ParticipantStates published by the lifecycle service, i.e., the sequence of entered states.
+class RecordingParticipant : public DummyParticipant
+{
+public:
+    using DummyParticipant::SendMsg;
+    void SendMsg(const SilKit::Core::IServiceEndpoint* /*from*/, const ParticipantStatus& msg) override
+    {
+        enteredStates.push_back(msg.state);
+    }
+
+    std::vector<ParticipantState> enteredStates;
+};
+
 class Test_LifecycleStates : public testing::Test
 {
 protected:
     Test_LifecycleStates()
     {
         lifecycleService.SetLifecycleConfiguration({OperationMode::Coordinated});
+    }
+
+    // Enter the given state and forget the states entered so far
+    void SetUpState(ILifecycleState* state)
+    {
+        mgmt.SetState(state, "Test setup");
+        participant.enteredStates.clear();
     }
 
     void RunTransitionCases(const std::vector<TransitionCase>& cases)
@@ -59,12 +79,14 @@ protected:
     }
 
 protected:
-    NiceMock<DummyParticipant> participant;
+    NiceMock<RecordingParticipant> participant;
     LifecycleService lifecycleService{&participant};
     LifecycleManagement mgmt{&participant, participant.GetLoggerInternal(), &lifecycleService};
 };
 
-// Invalid state transitions move the participant to the Error state.
+// Selected invalid state transitions move the participant to the Error state. This is not the full matrix of
+// invalid transitions: the cases cover transitions that are not reached via the public API or other tests. See
+// restart_transitions for one transition checked in every state.
 TEST_F(Test_LifecycleStates, invalid_transitions_lead_to_error_state)
 {
     using LM = LifecycleManagement;
@@ -130,11 +152,13 @@ TEST_F(Test_LifecycleStates, abort_during_communication_initializing_shuts_down)
     std::vector<ParticipantState> abortHandlerStates;
     lifecycleService.SetAbortHandler([&abortHandlerStates](auto state) { abortHandlerStates.push_back(state); });
 
-    mgmt.SetState(mgmt.GetCommunicationInitializingState(), "Test setup");
+    SetUpState(mgmt.GetCommunicationInitializingState());
     mgmt.AbortSimulation("Test transition");
 
     EXPECT_EQ(mgmt.GetCurrentState(), mgmt.GetShutdownState());
     EXPECT_THAT(abortHandlerStates, ElementsAre(ParticipantState::CommunicationInitializing));
+    // Skips ShuttingDown, Stopping and Stopped
+    EXPECT_THAT(participant.enteredStates, ElementsAre(ParticipantState::Aborting, ParticipantState::Shutdown));
 }
 
 // Stop in the Error state calls the shutdown handler and ends in Shutdown.
@@ -143,21 +167,53 @@ TEST_F(Test_LifecycleStates, stop_in_error_state_shuts_down)
     int shutdownHandlerCalls = 0;
     lifecycleService.SetShutdownHandler([&shutdownHandlerCalls] { ++shutdownHandlerCalls; });
 
-    mgmt.SetState(mgmt.GetErrorState(), "Test setup");
+    SetUpState(mgmt.GetErrorState());
     mgmt.Stop("Test transition");
 
     EXPECT_EQ(mgmt.GetCurrentState(), mgmt.GetShutdownState());
     EXPECT_EQ(shutdownHandlerCalls, 1);
+    // Skips Stopping and Stopped
+    EXPECT_THAT(participant.enteredStates, ElementsAre(ParticipantState::ShuttingDown, ParticipantState::Shutdown));
 }
 
-// Restarting a participant is not supported and throws.
-TEST_F(Test_LifecycleStates, restart_is_not_supported)
+// Restarting a participant is not supported: it throws in Stopped and Error, where a restart would be valid. In all
+// other states, it is an invalid transition to Error, except for Shutdown, which ignores errors.
+TEST_F(Test_LifecycleStates, restart_transitions)
 {
-    mgmt.SetState(mgmt.GetStoppedState(), "Test setup");
-    EXPECT_THROW(mgmt.Restart("Test transition"), SilKitError);
+    using LM = LifecycleManagement;
+    const std::vector<StateGetter> toErrorStates{
+        &LM::GetInvalidState,
+        &LM::GetServicesCreatedState,
+        &LM::GetCommunicationInitializingState,
+        &LM::GetCommunicationInitializedState,
+        &LM::GetReadyToRunState,
+        &LM::GetRunningState,
+        &LM::GetPausedState,
+        &LM::GetStoppingState,
+        &LM::GetShuttingDownState,
+        &LM::GetAbortingState,
+    };
+    for (const auto& getState : toErrorStates)
+    {
+        auto* state = (mgmt.*getState)();
+        SCOPED_TRACE(state->toString());
+        SetUpState(state);
+        mgmt.Restart("Test transition");
+        EXPECT_EQ(mgmt.GetCurrentState(), mgmt.GetErrorState());
+    }
 
-    mgmt.SetState(mgmt.GetErrorState(), "Test setup");
-    EXPECT_THROW(mgmt.Restart("Test transition"), SilKitError);
+    SetUpState(mgmt.GetShutdownState());
+    mgmt.Restart("Test transition");
+    EXPECT_EQ(mgmt.GetCurrentState(), mgmt.GetShutdownState());
+
+    for (const auto& getState : {&LM::GetStoppedState, &LM::GetErrorState})
+    {
+        auto* state = (mgmt.*getState)();
+        SCOPED_TRACE(state->toString());
+        SetUpState(state);
+        EXPECT_THROW(mgmt.Restart("Test transition"), SilKitError);
+        EXPECT_EQ(mgmt.GetCurrentState(), state);
+    }
 }
 
 // Each lifecycle state has the expected name and ParticipantState.

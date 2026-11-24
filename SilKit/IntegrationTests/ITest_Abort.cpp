@@ -4,6 +4,7 @@
 
 #include "ITest_MultiThreadedParticipants.hpp"
 
+#include <atomic>
 #include <list>
 #include <vector>
 
@@ -353,8 +354,15 @@ TEST_F(ITest_Abort, test_Abort_Pending_Async_Communication_Ready_Sync)
     // between CommunicationInitialized and ReadyToRun.
     int size = static_cast<int>(syncParticipants.size() + 1); // include system controller
     int requiredParticipantsSize = static_cast<int>(syncParticipants.size());
-    EXPECT_CALL(callbacks, AbortHandler(ParticipantState::CommunicationInitialized)).Times(Between(1, size));
-    EXPECT_CALL(callbacks, AbortHandler(ParticipantState::ReadyToRun)).Times(Between(0, requiredParticipantsSize));
+    // Each participant aborts exactly once, in either of the states
+    std::atomic<int> numAbortHandlerCalls{0};
+    const auto countAbortHandlerCall = [&numAbortHandlerCalls](ParticipantState) { ++numAbortHandlerCalls; };
+    EXPECT_CALL(callbacks, AbortHandler(ParticipantState::CommunicationInitialized))
+        .Times(Between(1, size))
+        .WillRepeatedly(countAbortHandlerCall);
+    EXPECT_CALL(callbacks, AbortHandler(ParticipantState::ReadyToRun))
+        .Times(Between(0, requiredParticipantsSize))
+        .WillRepeatedly(countAbortHandlerCall);
     EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Shutdown)).Times(size);
     EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Error)).Times(0);
     EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Invalid)).Times(0);
@@ -402,6 +410,8 @@ TEST_F(ITest_Abort, test_Abort_Pending_Async_Communication_Ready_Sync)
 
     monitorParticipants.front().i.stopRequested = true;
     JoinParticipantThreads(_participantThreads_Async_Autonomous);
+
+    EXPECT_EQ(numAbortHandlerCalls, size);
 
     // Expect shutdown state, which should happen after the abort handlers are called.
     for (const auto& participant : monitorParticipants.front().CopyMonitoredParticipantStates())

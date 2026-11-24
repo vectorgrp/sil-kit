@@ -34,6 +34,7 @@ using ::SilKit::Core::Tests::DummyParticipant;
 class MockParticipant : public DummyParticipant
 {
 public:
+    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint*, const WireCanFrameEvent&), (override));
     MOCK_METHOD(void, SendMsg, (const IServiceEndpoint*, const std::string&, const WireCanFrameEvent&), (override));
     MOCK_METHOD(void, SendMsg, (const IServiceEndpoint*, const std::string&, const CanFrameTransmitEvent&), (override));
     MOCK_METHOD(void, SendMsg, (const IServiceEndpoint*, const std::string&, const CanConfigureBaudrate&), (override));
@@ -239,11 +240,14 @@ TEST(Test_CanControllerDetailedSim, must_not_generate_ack)
     canController.ReceiveMsg(&canControllerFrom, msg);
 }
 
-// The controller routes frames to a network simulator of its network once it appears, and falls back to the
-// trivial simulation once it leaves.
-TEST(Test_CanControllerDetailedSim, network_simulator_discovery_switches_simulation_behavior)
+// The controller switches to the detailed simulation once a network simulator of its own network appears, and falls
+// back to the trivial simulation once it leaves. Network simulators of other networks are ignored.
+TEST(Test_CanControllerDetailedSim, network_simulator_of_own_network_toggles_detailed_and_trivial_simulation)
 {
+    using namespace std::placeholders;
+
     MockParticipant mockParticipant;
+    CanControllerCallbacks callbackProvider;
     SilKit::Core::Discovery::ServiceDiscoveryHandler discoveryHandler;
     EXPECT_CALL(mockParticipant.mockServiceDiscovery, RegisterServiceDiscoveryHandler(_))
         .WillOnce(::testing::SaveArg<0>(&discoveryHandler));
@@ -252,6 +256,11 @@ TEST(Test_CanControllerDetailedSim, network_simulator_discovery_switches_simulat
     canController.SetServiceDescriptor({"p1", "n1", "c1", 8});
     canController.RegisterServiceDiscovery();
     ASSERT_TRUE(discoveryHandler);
+    canController.AddFrameTransmitHandler(
+        std::bind(&CanControllerCallbacks::FrameTransmitHandler, &callbackProvider, _1, _2));
+
+    // Started in the trivial simulation, so the controller sends on its own while no network simulator is present
+    canController.Start();
 
     ServiceDescriptor netsimLink{netsimName, "n1", "n1", 9};
     netsimLink.SetServiceType(ServiceType::Link);
@@ -261,11 +270,19 @@ TEST(Test_CanControllerDetailedSim, network_simulator_discovery_switches_simulat
     using EventType = SilKit::Core::Discovery::ServiceDiscoveryEvent::Type;
     const auto frame = ToCanFrame(WireCanFrameEvent{}.frame);
 
-    // Only the send while the network simulator is present goes to the network simulator. In trivial mode, the
-    // stopped controller does not send at all.
-    EXPECT_CALL(mockParticipant, SendMsg(&canController, netsimName, A<const WireCanFrameEvent&>())).Times(1);
+    {
+        InSequence seq;
 
-    // A link on another network is ignored
+        // Trivial: a network simulator of another network is ignored
+        EXPECT_CALL(mockParticipant, SendMsg(&canController, A<const WireCanFrameEvent&>())).Times(1);
+        EXPECT_CALL(callbackProvider, FrameTransmitHandler(&canController, _)).Times(1);
+        // Detailed: the frame goes to the network simulator, which is responsible for the acknowledgement
+        EXPECT_CALL(mockParticipant, SendMsg(&canController, netsimName, A<const WireCanFrameEvent&>())).Times(1);
+        // Trivial again: the controller broadcasts the frame and acknowledges it on its own
+        EXPECT_CALL(mockParticipant, SendMsg(&canController, A<const WireCanFrameEvent&>())).Times(1);
+        EXPECT_CALL(callbackProvider, FrameTransmitHandler(&canController, _)).Times(1);
+    }
+
     discoveryHandler(EventType::ServiceCreated, otherNetsimLink);
     canController.SendFrame(frame);
 
