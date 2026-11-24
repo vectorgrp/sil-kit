@@ -55,3 +55,7 @@
   E.g., between a local host, a virtual machine, a remote network, etc.
 
 
+.. |DemoAbstractManagementClient| replace:: 
+  Experimental: watches the simulations on a registry with ``Experimental.Management.Enable`` and prints them as a
+  text table on every change. It can also print the configuration a participant shared with the registry.
+

@@ -247,4 +247,53 @@ Notes
         |DemoDir|/SilKitDemoSimpleCan CanWriter
 
         # System Controller:
-        |SystemController| CanReader CanWriter 
+        |SystemController| CanReader CanWriter
+
+
+.. _sec:management-client-demo:
+
+Management client (experimental)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Abstract
+    |DemoAbstractManagementClient|
+Executables
+    * ``SilKitDemoManagementClient`` (built with the demos, not part of the distribution package)
+Sources
+    * :repo-link:`ManagementClientDemo.cpp <Demos/api/Management/ManagementClientDemo.cpp>`
+Requirements
+    * :ref:`sil-kit-registry<sec:util-registry>` with ``Experimental.Management.Enable``
+      (see :ref:`sec:cfg-experimental-management`)
+Parameters
+    * ``-u, --registry-uri <uri>``
+      The registry URI to connect to; a simulation path is ignored. Defaults to ``silkit://localhost:8500``.
+    * ``-l, --log <level>``
+      Log to stdout with the given level. Defaults to ``off``.
+    * ``-g, --get-config <simulation>/<participant>``
+      Print the configuration the participant shared and exit. Use ``/<participant>`` for the default simulation,
+      which the client lists as ``(default)``.
+System Example
+    Run the following commands in separate terminals:
+
+    .. parsed-literal::
+
+        # Registry with a registry configuration containing 'Experimental: Management: Enable: true':
+        |Registry| -c registry.yaml
+
+        # Management client:
+        |DemoDir|/SilKitDemoManagementClient
+
+        # Can Reader and Can Writer in the simulation 'can', the writer shares its configuration:
+        |DemoDir|/SilKitDemoCanReader -u silkit://localhost:8500/can
+        |DemoDir|/SilKitDemoCanWriter -u silkit://localhost:8500/can -c ShareConfiguration.silkit.yaml
+
+        # System Controller:
+        |SystemController| -u silkit://localhost:8500/can CanReader CanWriter
+
+        # Configuration shared by the Can Writer:
+        |DemoDir|/SilKitDemoManagementClient -g can/CanWriter
+Notes
+    * On every change, the client prints the simulations with their participants and required participants.
+      Required participants that are not connected are listed in parentheses.
+    * The ``sil-kit-system-controller`` sets the required participants once all of them are connected.
+    * ``ShareConfiguration.silkit.yaml`` is one of the :doc:`sample participant configurations<configs>`.

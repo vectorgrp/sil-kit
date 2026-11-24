@@ -18,6 +18,7 @@
 #include "services/metrics/MetricsReceiver.hpp"
 
 #include "core/vasio/IRegistryEventListener.hpp"
+#include "management/IRegistryManagementParticipant.hpp"
 
 namespace SilKit {
 namespace Core {
@@ -44,6 +45,7 @@ public: // CTor
                   ProtocolVersion version = CurrentProtocolVersion());
     VAsioRegistry(std::shared_ptr<SilKit::Config::IParticipantConfiguration> cfg,
                   IRegistryEventListener* registryEventListener, ProtocolVersion version = CurrentProtocolVersion());
+    ~VAsioRegistry() override;
 
 public: // methods
     auto StartListening(const std::string& listenUri) -> std::string override;
@@ -79,6 +81,10 @@ private:
 
     void SetupMetrics();
 
+    //! Calls the registry event listener (not for well-known simulations) and the management participant.
+    template <typename CallableT>
+    void NotifyListeners(const std::string& simulationName, CallableT&& callable);
+
 private: // IReceiver<...>
     void ReceiveMsg(const IServiceEndpoint* from,
                     const SilKit::Services::Orchestration::ParticipantStatus& msg) override;
@@ -107,6 +113,8 @@ private:
     std::unique_ptr<IMsgForMetricsReceiver> _metricsReceiver;
     std::unique_ptr<IMetricsProcessor> _metricsProcessor;
     std::unique_ptr<IMetricsManager> _metricsManager;
+    // declared before _connection: the management participant must outlive the I/O thread which calls into it
+    std::unique_ptr<VSilKit::IRegistryManagementParticipant> _managementParticipant;
     VAsioConnection _connection;
 
     std::atomic<EndpointId> _localEndpointId{1};

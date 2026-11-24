@@ -241,6 +241,10 @@ typedef struct
 #define SilKit_WorkflowConfiguration_DATATYPE_ID 3
 #define SilKit_ParticipantConnectionInformation_DATATYPE_ID 4
 #define SilKit_Experimental_ServiceDescriptor_DATATYPE_ID 5
+#define SilKit_Experimental_ManagementRegistryInfo_DATATYPE_ID 6
+#define SilKit_Experimental_ManagementSimulation_DATATYPE_ID 7
+#define SilKit_Experimental_ManagementSimulationsEvent_DATATYPE_ID 8
+#define SilKit_Experimental_ManagementParticipantConfigurationReply_DATATYPE_ID 9
 
 // Participant data type Versions
 #define SilKit_ParticipantStatus_VERSION 1
@@ -248,6 +252,10 @@ typedef struct
 #define SilKit_WorkflowConfiguration_VERSION 3
 #define SilKit_ParticipantConnectionInformation_VERSION 1
 #define SilKit_Experimental_ServiceDescriptor_VERSION 1
+#define SilKit_Experimental_ManagementRegistryInfo_VERSION 1
+#define SilKit_Experimental_ManagementSimulation_VERSION 1
+#define SilKit_Experimental_ManagementSimulationsEvent_VERSION 1
+#define SilKit_Experimental_ManagementParticipantConfigurationReply_VERSION 1
 
 // Participant public API IDs
 #define SilKit_ParticipantStatus_STRUCT_VERSION SK_ID_MAKE(Participant, SilKit_ParticipantStatus)
@@ -257,6 +265,14 @@ typedef struct
     SK_ID_MAKE(Participant, SilKit_ParticipantConnectionInformation)
 #define SilKit_Experimental_ServiceDescriptor_STRUCT_VERSION \
     SK_ID_MAKE(Participant, SilKit_Experimental_ServiceDescriptor)
+#define SilKit_Experimental_ManagementRegistryInfo_STRUCT_VERSION \
+    SK_ID_MAKE(Participant, SilKit_Experimental_ManagementRegistryInfo)
+#define SilKit_Experimental_ManagementSimulation_STRUCT_VERSION \
+    SK_ID_MAKE(Participant, SilKit_Experimental_ManagementSimulation)
+#define SilKit_Experimental_ManagementSimulationsEvent_STRUCT_VERSION \
+    SK_ID_MAKE(Participant, SilKit_Experimental_ManagementSimulationsEvent)
+#define SilKit_Experimental_ManagementParticipantConfigurationReply_STRUCT_VERSION \
+    SK_ID_MAKE(Participant, SilKit_Experimental_ManagementParticipantConfigurationReply)
 
 // NetworkSimulator
 

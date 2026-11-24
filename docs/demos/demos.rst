@@ -62,6 +62,9 @@ These demos focus on a basic systems and single topic of the |ProductName| API:
 :ref:`sec:netsim-demo`
     |DemoAbstractNetSim|
 
+:ref:`sec:management-client-demo`
+    |DemoAbstractManagementClient|
+
 
 .. rubric:: 3. Tools
 

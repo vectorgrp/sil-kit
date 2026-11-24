@@ -131,6 +131,11 @@ TEST(Test_CapiSymbols, DISABLED_link_all_public_symbols)
                                                                nullptr);
     (void)SilKit_Experimental_ServiceDiscovery_Create(nullptr, nullptr);
     (void)SilKit_Experimental_ServiceDiscovery_SetServiceDiscoveryHandler(nullptr, nullptr, nullptr);
+    (void)SilKit_Experimental_ManagementClient_Create(nullptr, nullptr, "");
+    (void)SilKit_Experimental_ManagementClient_Destroy(nullptr);
+    (void)SilKit_Experimental_ManagementClient_SetRegistryInfoHandler(nullptr, nullptr, nullptr);
+    (void)SilKit_Experimental_ManagementClient_SetSimulationsHandler(nullptr, nullptr, nullptr);
+    (void)SilKit_Experimental_ManagementClient_GetParticipantConfiguration(nullptr, "", "", 0, nullptr, nullptr);
 }
 
 } // namespace

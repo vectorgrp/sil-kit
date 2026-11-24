@@ -18,3 +18,5 @@ DashboardUri: http://dashboard.example.com:1234
 Experimental:
   Metrics:
     CollectFromRemote: true
+  Management:
+    Enable: true

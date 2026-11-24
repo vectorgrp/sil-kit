@@ -74,6 +74,7 @@ public:
     void Write(const SilKit::Config::Includes& obj);
     void Write(const SilKit::Config::Aggregation& obj);
     void Write(const SilKit::Config::TimeSynchronization& obj);
+    void Write(const SilKit::Config::Management& obj);
     void Write(const SilKit::Config::Experimental& obj);
     void Write(const SilKit::Config::ParticipantConfiguration& obj);
     void Write(const SilKit::Config::HealthCheck& obj);

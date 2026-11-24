@@ -207,3 +207,6 @@ Experimental:
       - Type: Remote
         Name: MyRemoteMetricsSink
   UseReceiveBufferPool: false
+  Management:
+    Enable: true
+    ShareConfiguration: true

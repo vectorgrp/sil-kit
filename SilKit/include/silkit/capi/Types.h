@@ -30,6 +30,12 @@ typedef struct SilKit_Experimental_SystemController SilKit_Experimental_SystemCo
  */
 typedef struct SilKit_Experimental_ServiceDiscovery SilKit_Experimental_ServiceDiscovery;
 
+/*! \brief Opaque type. Used in functions prefixed with SilKit_Experimental_ManagementClient_....
+ *
+ * \warning This type is not part of the stable API of the SIL Kit. It may be removed at any time without prior notice.
+ */
+typedef struct SilKit_Experimental_ManagementClient SilKit_Experimental_ManagementClient;
+
 typedef int32_t SilKit_ReturnCode;
 
 #define SilKit_ReturnCode_SUCCESS ((SilKit_ReturnCode)0)

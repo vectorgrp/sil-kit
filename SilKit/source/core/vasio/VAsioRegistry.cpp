@@ -4,6 +4,8 @@
 
 #include "core/vasio/VAsioRegistry.hpp"
 
+#include <algorithm>
+
 #include "services/logging/Logger.hpp"
 #include "util/Uri.hpp"
 #include "services/logging/LoggerMessage.hpp"
@@ -67,6 +69,29 @@ VAsioRegistry::VAsioRegistry(std::shared_ptr<SilKit::Config::IParticipantConfigu
     _serviceDescriptor.SetServiceId(_localEndpointId++);
 
     SetupMetrics();
+}
+
+VAsioRegistry::~VAsioRegistry()
+{
+    if (_managementParticipant != nullptr)
+    {
+        // the management participant disconnects while the registry I/O thread is still running
+        _managementParticipant->Stop();
+    }
+}
+
+template <typename CallableT>
+void VAsioRegistry::NotifyListeners(const std::string& simulationName, CallableT&& callable)
+{
+    if (_registryEventListener != nullptr && !VSilKit::IsWellKnownSimulation(simulationName))
+    {
+        callable(*_registryEventListener);
+    }
+
+    if (_managementParticipant != nullptr)
+    {
+        callable(*_managementParticipant);
+    }
 }
 
 auto VAsioRegistry::StartListening(const std::string& listenUri) -> std::string
@@ -184,12 +209,22 @@ auto VAsioRegistry::StartListening(const std::string& listenUri) -> std::string
         _registryEventListener->OnRegistryUri(uri.EncodedString());
     }
 
+    if (_vasioConfig->experimental.management.enable)
+    {
+        _managementParticipant = VSilKit::CreateRegistryManagementParticipant(_logger.get(), *_vasioConfig);
+    }
+
     _connection.StartIoWorker();
 
     _connection.RegisterSilKitService(this);
     if (_vasioConfig->experimental.metrics.collectFromRemote.value_or(false))
     {
         _connection.RegisterSilKitService(_metricsReceiver.get());
+    }
+
+    if (_managementParticipant != nullptr)
+    {
+        _managementParticipant->Start(uri.EncodedString());
     }
 
     return uri.EncodedString();
@@ -262,10 +297,15 @@ void VAsioRegistry::OnParticipantAnnouncement(IVAsioPeer* peer, const Participan
     participantInfo.peerInfo = peerInfo;
     _connectedParticipants[announcement.simulationName][peerInfo.participantName] = participantInfo;
 
-    if (_registryEventListener != nullptr)
+    if (_managementParticipant != nullptr && !announcement.configurationJson.empty())
     {
-        _registryEventListener->OnParticipantConnected(announcement.simulationName, peerInfo.participantName);
+        _managementParticipant->OnParticipantConfiguration(announcement.simulationName, peerInfo.participantName,
+                                                           announcement.configurationJson);
     }
+
+    NotifyListeners(announcement.simulationName, [&announcement, &peerInfo](IRegistryEventListener& listener) {
+        listener.OnParticipantConnected(announcement.simulationName, peerInfo.participantName);
+    });
 
     if (AllParticipantsAreConnected())
     {
@@ -335,10 +375,9 @@ void VAsioRegistry::OnPeerShutdown(IVAsioPeer* peer)
         .SetMessage("Peer '{}' has shut down", participantName)
         .Dispatch();
 
-    if (_registryEventListener != nullptr)
-    {
-        _registryEventListener->OnParticipantDisconnected(simulationName, participantName);
-    }
+    NotifyListeners(simulationName, [&simulationName, &participantName](IRegistryEventListener& listener) {
+        listener.OnParticipantDisconnected(simulationName, participantName);
+    });
 
     _connectedParticipants[simulationName].erase(participantName);
 
@@ -347,7 +386,12 @@ void VAsioRegistry::OnPeerShutdown(IVAsioPeer* peer)
         _connectedParticipants.erase(simulationName);
     }
 
-    if (_connectedParticipants.empty())
+    // participants of well-known simulations (e.g. the management participant) do not keep the registry occupied
+    const auto onlyWellKnownSimulationsLeft =
+        std::all_of(_connectedParticipants.begin(), _connectedParticipants.end(),
+                    [](const auto& simulation) { return VSilKit::IsWellKnownSimulation(simulation.first); });
+
+    if (!VSilKit::IsWellKnownSimulation(simulationName) && onlyWellKnownSimulationsLeft)
     {
         GetLoggerInternal()->MakeMessage(Log::Level::Info, TopicOf(*this))
             .SetMessage("All participants are shut down")
@@ -399,43 +443,37 @@ void VAsioRegistry::SetupMetrics()
 void VAsioRegistry::ReceiveMsg(const SilKit::Core::IServiceEndpoint* from,
                                const SilKit::Services::Orchestration::ParticipantStatus& msg)
 {
-    if (_registryEventListener == nullptr)
-    {
-        return;
-    }
-
     const auto& serviceDescriptor{from->GetServiceDescriptor()};
 
-    _registryEventListener->OnParticipantStatusUpdate(serviceDescriptor.GetSimulationName(),
-                                                      serviceDescriptor.GetParticipantName(), msg);
+    NotifyListeners(serviceDescriptor.GetSimulationName(),
+                    [&serviceDescriptor, &msg](IRegistryEventListener& listener) {
+        listener.OnParticipantStatusUpdate(serviceDescriptor.GetSimulationName(),
+                                           serviceDescriptor.GetParticipantName(), msg);
+    });
 }
 
 void VAsioRegistry::ReceiveMsg(const SilKit::Core::IServiceEndpoint* from,
                                const SilKit::Services::Orchestration::WorkflowConfiguration& msg)
 {
-    if (_registryEventListener == nullptr)
-    {
-        return;
-    }
-
     const auto& serviceDescriptor{from->GetServiceDescriptor()};
 
-    _registryEventListener->OnRequiredParticipantsUpdate(
-        serviceDescriptor.GetSimulationName(), serviceDescriptor.GetParticipantName(), msg.requiredParticipantNames);
+    NotifyListeners(serviceDescriptor.GetSimulationName(),
+                    [&serviceDescriptor, &msg](IRegistryEventListener& listener) {
+        listener.OnRequiredParticipantsUpdate(serviceDescriptor.GetSimulationName(),
+                                              serviceDescriptor.GetParticipantName(), msg.requiredParticipantNames);
+    });
 }
 
 void VAsioRegistry::ReceiveMsg(const SilKit::Core::IServiceEndpoint* from,
                                const SilKit::Core::Discovery::ServiceDiscoveryEvent& msg)
 {
-    if (_registryEventListener == nullptr)
-    {
-        return;
-    }
-
     const auto& serviceDescriptor{from->GetServiceDescriptor()};
 
-    _registryEventListener->OnServiceDiscoveryEvent(serviceDescriptor.GetSimulationName(),
-                                                    serviceDescriptor.GetParticipantName(), msg);
+    NotifyListeners(serviceDescriptor.GetSimulationName(),
+                    [&serviceDescriptor, &msg](IRegistryEventListener& listener) {
+        listener.OnServiceDiscoveryEvent(serviceDescriptor.GetSimulationName(), serviceDescriptor.GetParticipantName(),
+                                         msg);
+    });
 }
 
 void VAsioRegistry::SetServiceDescriptor(const ServiceDescriptor& serviceDescriptor)
@@ -467,10 +505,10 @@ void VAsioRegistry::OnMetricsUpdate(const std::string& simulationName, const std
     dynamic_cast<VSilKit::MetricsProcessor&>(*_metricsProcessor)
         .OnMetricsUpdate(simulationName, participantName, metricsUpdate);
 
-    if (_registryEventListener != nullptr)
-    {
-        _registryEventListener->OnMetricsUpdate(simulationName, participantName, metricsUpdate);
-    }
+    NotifyListeners(simulationName,
+                    [&simulationName, &participantName, &metricsUpdate](IRegistryEventListener& listener) {
+        listener.OnMetricsUpdate(simulationName, participantName, metricsUpdate);
+    });
 }
 
 

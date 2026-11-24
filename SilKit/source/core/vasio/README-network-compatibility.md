@@ -53,6 +53,10 @@ Compatiblity Use Cases:
   These new fields are ignored by legacy peers and as such should have a sane default value, which is substituted by the 
   transparent Ser/Des compat layer.
 
+  Example: `ParticipantAnnouncement::configurationJson` is appended after `simulationName`. It is only written when
+  non-empty (only towards the registry, and only if `Experimental.Management.ShareConfiguration` is set), so the
+  announcement is unchanged on the wire otherwise. Readers treat a missing field as empty.
+
 - Changing the C++ name of a service data type does not affect its msgTypeName for service subscriptions.
 
 - Modifying a service data type, e.g. by changing size of fields, modifying order of fields, etc.
