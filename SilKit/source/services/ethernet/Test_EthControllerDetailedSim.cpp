@@ -44,6 +44,7 @@ auto AnEthMessageWith(std::chrono::nanoseconds timestamp) -> testing::Matcher<co
 class MockParticipant : public DummyParticipant
 {
 public:
+    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint*, const WireEthernetFrameEvent&), (override));
     MOCK_METHOD(void, SendMsg, (const IServiceEndpoint*, const std::string&, const WireEthernetFrameEvent&),
                 (override));
     MOCK_METHOD(void, SendMsg, (const IServiceEndpoint*, const std::string&, const EthernetFrameTransmitEvent&),
@@ -262,6 +263,112 @@ TEST_F(Test_EthControllerDetailedSim, trigger_callback_on_state_change)
 
     newStatus.state = EthernetState::Inactive;
     controller.ReceiveMsg(&controllerBusSim, newStatus);
+}
+
+/*! \brief The controller switches to the detailed simulation once a network simulator of its own network appears,
+ *         and falls back to the trivial simulation once it leaves. Network simulators of other networks are ignored.
+ */
+TEST_F(Test_EthControllerDetailedSim, network_simulator_of_own_network_toggles_detailed_and_trivial_simulation)
+{
+    SilKit::Core::Discovery::ServiceDiscoveryHandler discoveryHandler;
+    EXPECT_CALL(participant.mockServiceDiscovery, RegisterServiceDiscoveryHandler(_))
+        .WillOnce(testing::SaveArg<0>(&discoveryHandler));
+
+    EthController trivialController{&participant, cfg, participant.GetTimeProvider()};
+    trivialController.SetServiceDescriptor(controllerAddress);
+    trivialController.RegisterServiceDiscovery();
+    ASSERT_TRUE(discoveryHandler);
+
+    // Only the trivial simulation acknowledges frames on its own
+    std::vector<EthernetTransmitStatus> ackStatuses;
+    trivialController.AddFrameTransmitHandler(
+        [&ackStatuses](auto*, const EthernetFrameTransmitEvent& ack) { ackStatuses.push_back(ack.status); });
+
+    // Activated in the trivial simulation, so the link is up while no network simulator is present
+    trivialController.Activate();
+
+    ServiceDescriptor netsimLink{netsimName, "n1", "n1", 9};
+    netsimLink.SetServiceType(ServiceType::Link);
+    ServiceDescriptor otherNetsimLink{netsimName, "n2", "n2", 10};
+    otherNetsimLink.SetServiceType(ServiceType::Link);
+
+    using EventType = SilKit::Core::Discovery::ServiceDiscoveryEvent::Type;
+    const std::vector<uint8_t> rawFrame(60, 0);
+    const EthernetFrame frame{rawFrame};
+
+    {
+        InSequence seq;
+
+        // Trivial: a network simulator of another network is ignored
+        EXPECT_CALL(participant, SendMsg(&trivialController, A<const WireEthernetFrameEvent&>())).Times(1);
+        // Detailed: the frame goes to the network simulator
+        EXPECT_CALL(participant, SendMsg(&trivialController, netsimName, A<const WireEthernetFrameEvent&>())).Times(1);
+        // Trivial again: the controller broadcasts the frame
+        EXPECT_CALL(participant, SendMsg(&trivialController, A<const WireEthernetFrameEvent&>())).Times(1);
+    }
+
+    discoveryHandler(EventType::ServiceCreated, otherNetsimLink);
+    trivialController.SendFrame(frame);
+
+    discoveryHandler(EventType::ServiceCreated, netsimLink);
+    trivialController.SendFrame(frame);
+
+    // The network simulator of another network leaving does not matter
+    discoveryHandler(EventType::ServiceRemoved, otherNetsimLink);
+    discoveryHandler(EventType::ServiceRemoved, netsimLink);
+    trivialController.SendFrame(frame);
+
+    // One acknowledgement per trivial send, none for the send to the network simulator
+    EXPECT_THAT(ackStatuses,
+                testing::ElementsAre(EthernetTransmitStatus::Transmitted, EthernetTransmitStatus::Transmitted));
+}
+
+/*! \brief In the detailed simulation, status updates and acknowledgements from anyone but the network simulator
+ *         are dropped.
+ */
+TEST_F(Test_EthControllerDetailedSim, reject_messages_not_from_network_simulator)
+{
+    EthController otherController{&participant, cfg, participant.GetTimeProvider()};
+    otherController.SetServiceDescriptor({"other", "n1", "c1", 8});
+
+    EXPECT_CALL(callbacks, FrameTransmitHandler(_, _)).Times(0);
+    EXPECT_CALL(callbacks, StateChangeHandler(_, _)).Times(0);
+    EXPECT_CALL(callbacks, BitrateChangedHandler(_, _)).Times(0);
+
+    controller.ReceiveMsg(&otherController,
+                          EthernetFrameTransmitEvent{0ns, EthernetTransmitStatus::Transmitted, nullptr});
+    controller.ReceiveMsg(&otherController, EthernetStatus{0ns, EthernetState::LinkUp, 100});
+}
+
+/*! \brief Removed handlers are no longer called, and removing unknown handlers does not throw.
+ */
+TEST_F(Test_EthControllerDetailedSim, removed_handlers_are_not_called)
+{
+    EthController detailedController{&participant, cfg, participant.GetTimeProvider()};
+    detailedController.SetDetailedBehavior(busSimAddress);
+    detailedController.SetServiceDescriptor(controllerAddress);
+
+    int numCalls = 0;
+    const auto frameTransmitHandlerId =
+        detailedController.AddFrameTransmitHandler([&numCalls](auto*, const auto&) { ++numCalls; });
+    const auto stateChangeHandlerId =
+        detailedController.AddStateChangeHandler([&numCalls](auto*, const auto&) { ++numCalls; });
+    const auto bitrateChangeHandlerId =
+        detailedController.AddBitrateChangeHandler([&numCalls](auto*, const auto&) { ++numCalls; });
+
+    detailedController.RemoveFrameTransmitHandler(frameTransmitHandlerId);
+    detailedController.RemoveStateChangeHandler(stateChangeHandlerId);
+    detailedController.RemoveBitrateChangeHandler(bitrateChangeHandlerId);
+
+    detailedController.ReceiveMsg(&controllerBusSim,
+                                  EthernetFrameTransmitEvent{0ns, EthernetTransmitStatus::Transmitted, nullptr});
+    detailedController.ReceiveMsg(&controllerBusSim, EthernetStatus{0ns, EthernetState::LinkUp, 100});
+    EXPECT_EQ(numCalls, 0);
+
+    // Removing unknown handlers only warns
+    EXPECT_NO_THROW(detailedController.RemoveFrameTransmitHandler(frameTransmitHandlerId));
+    EXPECT_NO_THROW(detailedController.RemoveStateChangeHandler(stateChangeHandlerId));
+    EXPECT_NO_THROW(detailedController.RemoveBitrateChangeHandler(bitrateChangeHandlerId));
 }
 
 
