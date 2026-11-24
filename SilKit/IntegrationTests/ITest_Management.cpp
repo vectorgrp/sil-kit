@@ -498,8 +498,8 @@ TEST(ITest_Management, c_api_destroy_completes_pending_requests)
     ASSERT_EQ(SilKit_ParticipantConfiguration_Destroy(configuration), SilKit_ReturnCode_SUCCESS);
     std::unique_ptr<SilKit_Experimental_ManagementClient, ClientDestroyer> clientGuard{client};
 
-    const auto timeout = static_cast<SilKit_NanosecondsTime>(std::chrono::nanoseconds{60s}.count());
-    ASSERT_TRUE(requests.SendUntilServerCalled([client, timeout, &requests] {
+    ASSERT_TRUE(requests.SendUntilServerCalled([client, &requests] {
+        const auto timeout = static_cast<SilKit_NanosecondsTime>(std::chrono::nanoseconds{60s}.count());
         EXPECT_EQ(SilKit_Experimental_ManagementClient_GetParticipantConfiguration(
                       client, "a", "A1", timeout, &requests, &OnCUnansweredParticipantConfiguration),
                   SilKit_ReturnCode_SUCCESS);

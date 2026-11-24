@@ -161,7 +161,12 @@ typedef SilKit_ReturnCode(SilKitFPTR* SilKit_Experimental_ManagementClient_SetSi
  * \p handler is invoked exactly once, with a call status other than \ref SilKit_RpcCallStatus_Success if the request
  * failed, e.g. on timeout or if the management participant is not reachable.
  *
+ * \param client The management client.
+ * \param simulationName Name of the simulation the participant joined.
+ * \param participantName Name of the participant.
  * \param timeout Timeout of the request in nanoseconds.
+ * \param context User context passed to \p handler.
+ * \param handler Invoked with the result of the request.
  */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Experimental_ManagementClient_GetParticipantConfiguration(
     SilKit_Experimental_ManagementClient* client, const char* simulationName, const char* participantName,

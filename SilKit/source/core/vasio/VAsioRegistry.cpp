@@ -300,7 +300,7 @@ void VAsioRegistry::OnParticipantAnnouncement(IVAsioPeer* peer, const Participan
     if (_managementParticipant != nullptr && !announcement.configurationJson.empty())
     {
         _managementParticipant->OnParticipantConfiguration(announcement.simulationName, peerInfo.participantName,
-                                                     announcement.configurationJson);
+                                                           announcement.configurationJson);
     }
 
     NotifyListeners(announcement.simulationName, [&announcement, &peerInfo](IRegistryEventListener& listener) {

@@ -15,13 +15,15 @@
  * \brief Experimental: names and payloads of the SIL Kit management simulation.
  *
  * A registry with `Experimental.Management.Enable` hosts a management participant in the simulation
- * \ref SimulationName (e.g. `silkit://localhost:8500/.well-known/sil-kit/management`). It publishes registry
- * information on the topics below and serves the functions below via RPC. All payloads use the SIL Kit
- * Adaptive Binary (SAB) serialization of \ref SilKit::Util::SerDes.
+ * \ref SilKit::Experimental::Management::SimulationName (e.g.
+ * `silkit://localhost:8500/.well-known/sil-kit/management`). It publishes registry information on the topics
+ * below and serves the functions below via RPC. All payloads use the SIL Kit Adaptive Binary (SAB) serialization
+ * of \ref SilKit::Util::SerDes.
  *
  * Versioning: the major version is part of every topic and function name. Minor versions only add topics
- * and functions; the payloads of an existing name do not change. \ref RegistryInfo reports the versions
- * and features offered by the management participant.
+ * and functions; the payloads of an existing name do not change.
+ * \ref SilKit::Experimental::Management::RegistryInfo reports the versions and features offered by the
+ * management participant.
  *
  * \warning Experimental: names, payloads and behavior may change or be removed without notice.
  */
