@@ -38,37 +38,37 @@ void TimeConfiguration::SetBlockingMode(bool blocking)
     _blocking = blocking;
 }
 
-void TimeConfiguration::SetCoordinator(const std::string& coordinatorName)
+void TimeConfiguration::SetTimeCoordinator(const std::string& timeCoordinatorName)
 {
     Lock lock{_mx};
-    _coordinatorName = coordinatorName;
+    _timeCoordinatorName = timeCoordinatorName;
 
     for (auto it = _otherNextTasks.begin(); it != _otherNextTasks.end();)
     {
-        it = (it->first == coordinatorName) ? std::next(it) : _otherNextTasks.erase(it);
+        it = (it->first == timeCoordinatorName) ? std::next(it) : _otherNextTasks.erase(it);
     }
 
-    if (_otherNextTasks.find(coordinatorName) == _otherNextTasks.end())
+    if (_otherNextTasks.find(timeCoordinatorName) == _otherNextTasks.end())
     {
         NextSimTask task;
         task.timePoint = -1ns;
         task.duration = 0ns;
-        _otherNextTasks.emplace(coordinatorName, task);
+        _otherNextTasks.emplace(timeCoordinatorName, task);
     }
 }
 
-bool TimeConfiguration::IsCoordinated() const
+bool TimeConfiguration::IsFollowingTimeCoordinator() const
 {
     Lock lock{_mx};
-    return !_coordinatorName.empty();
+    return !_timeCoordinatorName.empty();
 }
 
 void TimeConfiguration::AddSynchronizedParticipant(const std::string& otherParticipantName)
 {
     Lock lock{_mx};
-    if (!_coordinatorName.empty() && otherParticipantName != _coordinatorName)
+    if (!_timeCoordinatorName.empty() && otherParticipantName != _timeCoordinatorName)
     {
-        // coordinated: only the coordinator's grant is relevant
+        // following a time coordinator: only its grant is relevant
         return;
     }
     if (_otherNextTasks.find(otherParticipantName) != _otherNextTasks.end())
@@ -109,9 +109,9 @@ void TimeConfiguration::OnReceiveNextSimStep(const std::string& participantName,
 {
     Lock lock{_mx};
 
-    if (!_coordinatorName.empty() && participantName != _coordinatorName)
+    if (!_timeCoordinatorName.empty() && participantName != _timeCoordinatorName)
     {
-        // A peer that has not yet switched to coordinated mode still broadcasts its NextSimTask.
+        // A peer that does not follow the time coordinator yet still broadcasts its NextSimTask.
         _logger->MakeMessage(Logging::Level::Trace, TopicOf(*this))
             .SetMessage("Ignoring NextSimTask from participant {}, time is granted by the time coordinator",
                         participantName)
@@ -274,10 +274,10 @@ bool TimeConfiguration::IsHopOn()
 {
     Lock lock{_mx};
 
-    if (_currentTask.timePoint == -1ns && !_coordinatorName.empty()) // On initial time, coordinated
+    if (_currentTask.timePoint == -1ns && !_timeCoordinatorName.empty()) // On initial time, following a time coordinator
     {
-        // The coordinator's grant is the current simulation time. Granted beyond our initial next step -> HopOn
-        const auto& grant = _otherNextTasks.at(_coordinatorName);
+        // The time coordinator's grant is the current simulation time. Granted beyond our initial next step -> HopOn
+        const auto& grant = _otherNextTasks.at(_timeCoordinatorName);
         if (grant.timePoint > _myNextTask.timePoint)
         {
             _hoppedOn = true;

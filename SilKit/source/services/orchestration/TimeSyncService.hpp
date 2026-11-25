@@ -113,8 +113,8 @@ public:
     void ConfigureTimeCoordinator(bool isTimeCoordinator);
     bool IsTimeCoordinator() const;
 
-    //! Send our next simulation step: broadcast (distributed), to the time coordinator only (coordinated), or into
-    //! the local time coordinator (if this participant is the coordinator).
+    //! Send our next simulation step: broadcast (P2P), to the time coordinator only, or into the local time
+    //! coordinator (if this participant is the time coordinator).
     void SendNextSimTask(const NextSimTask& task);
 
 private:
@@ -135,8 +135,8 @@ private:
 
     //! Sends a grant of the local time coordinator to its recipients. The grant for ourselves is applied locally.
     void DispatchGrant(std::optional<TimeCoordinator::GrantDispatch> dispatch);
-    void OnTimeCoordinatorCreated(const std::string& coordinatorName);
-    void OnTimeCoordinatorRemoved(const std::string& coordinatorName);
+    void OnTimeCoordinatorCreated(const std::string& timeCoordinatorName);
+    void OnTimeCoordinatorRemoved(const std::string& timeCoordinatorName);
     bool ParticipantHasTimeCoordinationCapability(const std::string& participantName) const;
 
     void StopWallClockCouplingThread();
@@ -198,13 +198,13 @@ private:
     // Ensures the "enabled by a remote participant" notice is logged only once.
     Services::Logging::LogOnceFlag _dynamicStepRemoteLogOnce;
 
-    // Central time coordination. If this participant is the coordinator, _timeCoordinator holds the next steps of
-    // all synchronized participants (including our own) and issues the grants. Otherwise, _coordinatorName is the
-    // coordinator we follow (empty: distributed synchronization). Guarded by _coordinatorMx.
+    // Time coordinator. If this participant is the time coordinator, _timeCoordinator holds the next steps of
+    // all synchronized participants (including our own) and issues the grants. Otherwise, _timeCoordinatorName is the
+    // time coordinator we follow (empty: P2P synchronization). Guarded by _timeCoordinatorMx.
     std::atomic<bool> _isTimeCoordinator{false};
     TimeCoordinator _timeCoordinator;
-    mutable std::mutex _coordinatorMx;
-    std::string _coordinatorName;
+    mutable std::mutex _timeCoordinatorMx;
+    std::string _timeCoordinatorName;
     std::optional<NextSimTask> _lastSentNextSimTask;
 
 };

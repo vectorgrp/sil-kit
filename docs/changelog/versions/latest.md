@@ -4,9 +4,9 @@
 
 - Central time coordinator for virtual time synchronization: set `Experimental.TimeSynchronization.TimeCoordinator`
   to `true` on one synchronized participant. All synchronized participants then report their next simulation step to
-  the coordinator only, which grants the time advances. This reduces the synchronization traffic from O(N²) to O(N)
+  the time coordinator only, which grants the time advances. This reduces the synchronization traffic from O(N²) to O(N)
   messages per simulation step. The API is unchanged. Participants announce support with the new `time-coordination`
-  capability; an older participant in a simulation with a coordinator aborts the simulation.
+  capability; an older participant in a simulation with a time coordinator aborts the simulation.
 
 ## Changed
 

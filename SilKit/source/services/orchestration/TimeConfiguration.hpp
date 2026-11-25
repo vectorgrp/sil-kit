@@ -44,10 +44,10 @@ public: //Methods
     void SetDynamicStepSizeEnabled(bool enabled);
     bool IsDynamicStepSizeEnabled() const;
 
-    //! Switches to coordinated time synchronization: the time coordinator's grant becomes the only entry this
+    //! Follow a time coordinator: the time coordinator's grant becomes the only entry this
     //! participant waits for. Entries of other synchronized participants are dropped and ignored from now on.
-    void SetCoordinator(const std::string& coordinatorName);
-    bool IsCoordinated() const;
+    void SetTimeCoordinator(const std::string& timeCoordinatorName);
+    bool IsFollowingTimeCoordinator() const;
 
 private: //Methods
     // Computes the minimal step duration that keeps this participant aligned with the earliest next
@@ -63,8 +63,8 @@ private: //Members
     std::map<std::string, NextSimTask> _otherNextTasks;
     bool _blocking;
 
-    // Name of the time coordinator whose grants this participant follows (empty: distributed synchronization).
-    std::string _coordinatorName;
+    // Name of the time coordinator whose grants this participant follows (empty: P2P synchronization).
+    std::string _timeCoordinatorName;
 
     bool _hoppedOn = false;
     Logging::ILoggerInternal* _logger;

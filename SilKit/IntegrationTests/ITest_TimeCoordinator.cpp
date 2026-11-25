@@ -198,43 +198,43 @@ struct ITest_TimeCoordinator : ITest_SimTestHarness
     CausalityChecker causality;
 };
 
-auto MixedStepSizeParticipants(std::optional<std::string> coordinatorName) -> std::vector<ParticipantParams>
+auto MixedStepSizeParticipants(std::optional<std::string> timeCoordinatorName) -> std::vector<ParticipantParams>
 {
     std::vector<ParticipantParams> participants{
         {"P1", 1ms}, {"P2", 2ms}, {"P3", 3ms}, {"P4", 5ms}, {"P5", 7ms},
     };
     for (auto& p : participants)
     {
-        p.isTimeCoordinator = (coordinatorName == p.name);
+        p.isTimeCoordinator = (timeCoordinatorName == p.name);
     }
     return participants;
 }
 
-// The coordinated synchronization must execute exactly the same simulation steps as the distributed one
-TEST_F(ITest_TimeCoordinator, coordinated_steps_match_distributed_steps)
+// With a time coordinator, exactly the same simulation steps must be executed as with P2P synchronization
+TEST_F(ITest_TimeCoordinator, time_coordinator_steps_match_p2p_steps)
 {
     const auto stopAt = 50ms;
 
-    auto distributed = MixedStepSizeParticipants(std::nullopt);
-    RunTestSetup(distributed, stopAt);
+    auto p2p = MixedStepSizeParticipants(std::nullopt);
+    RunTestSetup(p2p, stopAt);
     ExpectNoCausalityViolations();
 
     // Fresh checker and harness for the second run
     causality.Reset();
 
-    auto coordinated = MixedStepSizeParticipants("P3");
-    RunTestSetup(coordinated, stopAt);
+    auto withTimeCoordinator = MixedStepSizeParticipants("P3");
+    RunTestSetup(withTimeCoordinator, stopAt);
     ExpectNoCausalityViolations();
 
-    ASSERT_EQ(distributed.size(), coordinated.size());
-    for (size_t i = 0; i < distributed.size(); ++i)
+    ASSERT_EQ(p2p.size(), withTimeCoordinator.size());
+    for (size_t i = 0; i < p2p.size(); ++i)
     {
-        ExpectContiguousSteps(coordinated[i], stopAt);
-        EXPECT_EQ(distributed[i].steps, coordinated[i].steps) << coordinated[i].name;
+        ExpectContiguousSteps(withTimeCoordinator[i], stopAt);
+        EXPECT_EQ(p2p[i].steps, withTimeCoordinator[i].steps) << withTimeCoordinator[i].name;
     }
 }
 
-TEST_F(ITest_TimeCoordinator, coordinator_with_async_step_handlers)
+TEST_F(ITest_TimeCoordinator, time_coordinator_with_async_step_handlers)
 {
     const auto stopAt = 50ms;
     auto participants = MixedStepSizeParticipants("P1");
@@ -250,8 +250,8 @@ TEST_F(ITest_TimeCoordinator, coordinator_with_async_step_handlers)
     }
 }
 
-// Dynamic step sizes: every step is aligned to the minimal step among all participants, also when coordinated
-TEST_F(ITest_TimeCoordinator, coordinator_with_dynamic_step_sizes)
+// Dynamic step sizes: every step is aligned to the minimal step among all participants, also with a time coordinator
+TEST_F(ITest_TimeCoordinator, time_coordinator_with_dynamic_step_sizes)
 {
     const auto stopAt = 30ms;
     std::vector<ParticipantParams> participants{{"P1", 1ms}, {"P2", 2ms}, {"P3", 3ms}};
@@ -273,7 +273,7 @@ TEST_F(ITest_TimeCoordinator, coordinator_with_dynamic_step_sizes)
     }
 }
 
-// An autonomous participant hops on into a coordinated simulation, runs some steps and hops off again
+// An autonomous participant hops on into a simulation with a time coordinator, runs some steps and hops off again
 TEST_F(ITest_TimeCoordinator, autonomous_hop_on_hop_off)
 {
     const auto stopAt = 200ms;
@@ -281,12 +281,12 @@ TEST_F(ITest_TimeCoordinator, autonomous_hop_on_hop_off)
     const auto hopOffAt = 100ms;
     const auto stepSize = 10ms;
 
-    std::vector<ParticipantParams> participants{{"Coordinator", stepSize, true, true}, {"P2", stepSize}};
+    std::vector<ParticipantParams> participants{{"TimeCoordinator", stepSize, true, true}, {"P2", stepSize}};
     for (auto& p : participants)
     {
         causality.Register(p.name);
     }
-    SetupFromParticipantList({"Coordinator", "P2"}, /*enableInternalSystemMonitorTimeSync=*/false);
+    SetupFromParticipantList({"TimeCoordinator", "P2"}, /*enableInternalSystemMonitorTimeSync=*/false);
 
     std::mutex mx;
     std::condition_variable cv;
@@ -342,7 +342,7 @@ TEST_F(ITest_TimeCoordinator, autonomous_hop_on_hop_off)
                 return;
             }
 
-            // The coordinator holds the time at hopOnAt until the joiner has executed its hop-on step
+            // The time coordinator holds the time at hopOnAt until the joiner has executed its hop-on step
             std::thread{[&, now, duration, timeSyncService] {
                 if (now == hopOnAt)
                 {

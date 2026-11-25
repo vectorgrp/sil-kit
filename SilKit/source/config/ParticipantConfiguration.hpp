@@ -316,7 +316,7 @@ struct TimeSynchronization
     //! opt-out that never enables dynamic stepping regardless of peers.
     std::optional<bool> dynamicSimulationStep;
     //! When true, this participant acts as the central time coordinator of the simulation. All synchronized
-    //! participants then send their next simulation step to the coordinator only, which grants time advances.
+    //! participants then send their next simulation step to the time coordinator only, which grants time advances.
     //! This reduces the time synchronization traffic from O(N^2) to O(N) messages per step.
     //! At most one participant in a simulation may be the time coordinator.
     bool timeCoordinator{false};

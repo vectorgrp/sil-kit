@@ -595,17 +595,17 @@ int main(int argc, char** argv)
             config = SilKit::Config::ParticipantConfigurationFromFile(benchmark.silKitConfigPath);
         }
 
-        // With --time-coordinator, Participant0 coordinates the virtual time of all participants
-        auto coordinatorConfig = config;
+        // With --time-coordinator, Participant0 is the time coordinator of all participants
+        auto timeCoordinatorConfig = config;
         if (benchmark.timeCoordinator)
         {
-            std::string coordinatorConfigString;
+            std::string timeCoordinatorConfigString;
             if (benchmark.silKitConfigPath != "")
             {
-                coordinatorConfigString += "Includes:\n  Files:\n    - '" + benchmark.silKitConfigPath + "'\n";
+                timeCoordinatorConfigString += "Includes:\n  Files:\n    - '" + benchmark.silKitConfigPath + "'\n";
             }
-            coordinatorConfigString += "Experimental:\n  TimeSynchronization:\n    TimeCoordinator: true\n";
-            coordinatorConfig = SilKit::Config::ParticipantConfigurationFromString(coordinatorConfigString);
+            timeCoordinatorConfigString += "Experimental:\n  TimeSynchronization:\n    TimeCoordinator: true\n";
+            timeCoordinatorConfig = SilKit::Config::ParticipantConfigurationFromString(timeCoordinatorConfigString);
         }
 
         std::unique_ptr<SilKit::Vendor::Vector::ISilKitRegistry> registry =
@@ -625,7 +625,7 @@ int main(int argc, char** argv)
             {
                 std::string participantName = "Participant" + std::to_string(participantIndex);
                 participantNames.push_back(participantName);
-                threads.emplace_back(&ParticipantsThread, participantIndex == 0 ? coordinatorConfig : config,
+                threads.emplace_back(&ParticipantsThread, participantIndex == 0 ? timeCoordinatorConfig : config,
                                      benchmark, participantName, participantIndex);
             }
 

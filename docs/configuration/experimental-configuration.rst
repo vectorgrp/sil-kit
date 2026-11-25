@@ -70,21 +70,21 @@ TimeSynchronization
 
    * - TimeCoordinator
      - Makes this participant the *time coordinator* of the simulation (default: ``false``).
-       Without a coordinator, every synchronized participant sends its next simulation step to every other
+       Without a time coordinator, every synchronized participant sends its next simulation step to every other
        synchronized participant, which costs O(N\ :sup:`2`) messages per simulation step for N participants.
-       With a coordinator, every participant reports its next simulation step to the coordinator only, and the
-       coordinator grants the time advance to the participants whose turn it is. This costs O(N) messages per step.
+       With a time coordinator, every participant reports its next simulation step to the time coordinator only, and the
+       time coordinator grants the time advance to the participants whose turn it is. This costs O(N) messages per step.
 
-       The coordinator is an ordinary participant with a time synchronization service and a simulation step handler;
+       The time coordinator is an ordinary participant with a time synchronization service and a simulation step handler;
        the API does not change. It announces its role in the service discovery, and all other synchronized participants
-       switch to coordinated time synchronization automatically. The order of simulation steps is the same as without
-       a coordinator, including dynamic simulation step sizes and hop-on / hop-off of autonomous participants.
+       follow the time coordinator automatically. The order of simulation steps is the same as without
+       a time coordinator, including dynamic simulation step sizes and hop-on / hop-off of autonomous participants.
 
        .. note::
          - At most one participant may be the time coordinator. A second one aborts the simulation.
-         - The coordinator must join before the virtual time starts. It must not leave while the simulation is
+         - The time coordinator must join before the virtual time starts. It must not leave while the simulation is
            running: the virtual time of the other participants cannot advance without it.
-         - All synchronized participants must support coordinated time synchronization. A participant built with an
+         - All synchronized participants must support the time coordinator. A participant built with an
            older |ProductName| version aborts the simulation.
 
    * - AnimationFactor

@@ -77,8 +77,8 @@ const std::string timeSyncActive = "TimeSyncActive";
 // (e.g. a network simulator). Peers that are not a hard opt-out enable dynamic stepping when they see it.
 const std::string timeSyncDynamicStepSize = "TimeSyncDynamicStepSize";
 // Set to "1" by the (single) participant acting as central time coordinator. Synchronized participants that see it
-// send their NextSimTask to the coordinator only and advance time on the coordinator's grants.
-const std::string timeSyncCoordinator = "TimeSyncCoordinator";
+// send their NextSimTask to the time coordinator only and advance time on its grants.
+const std::string timeSyncIsTimeCoordinator = "TimeSyncIsTimeCoordinator";
 
 } // namespace Discovery
 } // namespace Core

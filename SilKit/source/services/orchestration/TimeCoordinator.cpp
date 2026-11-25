@@ -64,7 +64,7 @@ auto TimeCoordinator::UpdateNextSimTask(const std::string& participantName, cons
     }
 
     // No advance: the reporter may still be eligible under the current grant (late joiner, or a participant that
-    // switched to coordinated mode and resent its next step). Send it the current grant again.
+    // started following the time coordinator and resent its next step). Send it the current grant again.
     if (_currentGrant && EffectiveStart(task) <= _currentGrant->timePoint)
     {
         return GrantDispatch{*_currentGrant, {participantName}};

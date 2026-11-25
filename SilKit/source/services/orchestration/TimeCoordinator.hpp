@@ -17,7 +17,7 @@ namespace SilKit {
 namespace Services {
 namespace Orchestration {
 
-//! \brief Central time coordination: collects the NextSimTask of every synchronized participant and grants time
+//! \brief Time coordinator: collects the NextSimTask of every synchronized participant and grants time
 //!        advances.
 //!
 //! The grant is a NextSimTask with timePoint = T_min (the minimum next time point of all participants) and
