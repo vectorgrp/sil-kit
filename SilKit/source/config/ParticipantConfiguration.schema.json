@@ -1127,6 +1127,11 @@
             "DynamicSimulationStep": {
               "type": "boolean",
               "description": "Controls dynamic simulation step sizes (aligning each simulation step to the minimal step among all synchronized participants). When true, the participant enables it locally and advertises to all peers that it should be used. When absent (the default), the participant follows the network and enables it if any peer requests it. When false, it is a hard opt-out that never enables it regardless of peers."
+            },
+            "TimeCoordinator": {
+              "type": "boolean",
+              "description": "When true, this participant is the central time coordinator of the simulation. All synchronized participants send their next simulation step to the coordinator only, which grants time advances. This reduces the synchronization traffic from O(N^2) to O(N) messages per simulation step. At most one participant may be the time coordinator, and it must join before the virtual time starts.",
+              "default": false
             }
           },
           "additionalProperties": false

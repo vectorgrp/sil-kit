@@ -38,9 +38,39 @@ void TimeConfiguration::SetBlockingMode(bool blocking)
     _blocking = blocking;
 }
 
+void TimeConfiguration::SetCoordinator(const std::string& coordinatorName)
+{
+    Lock lock{_mx};
+    _coordinatorName = coordinatorName;
+
+    for (auto it = _otherNextTasks.begin(); it != _otherNextTasks.end();)
+    {
+        it = (it->first == coordinatorName) ? std::next(it) : _otherNextTasks.erase(it);
+    }
+
+    if (_otherNextTasks.find(coordinatorName) == _otherNextTasks.end())
+    {
+        NextSimTask task;
+        task.timePoint = -1ns;
+        task.duration = 0ns;
+        _otherNextTasks.emplace(coordinatorName, task);
+    }
+}
+
+bool TimeConfiguration::IsCoordinated() const
+{
+    Lock lock{_mx};
+    return !_coordinatorName.empty();
+}
+
 void TimeConfiguration::AddSynchronizedParticipant(const std::string& otherParticipantName)
 {
     Lock lock{_mx};
+    if (!_coordinatorName.empty() && otherParticipantName != _coordinatorName)
+    {
+        // coordinated: only the coordinator's grant is relevant
+        return;
+    }
     if (_otherNextTasks.find(otherParticipantName) != _otherNextTasks.end())
     {
         // ignore already known participants
@@ -78,6 +108,16 @@ auto TimeConfiguration::GetSynchronizedParticipantNames() -> std::vector<std::st
 void TimeConfiguration::OnReceiveNextSimStep(const std::string& participantName, NextSimTask nextStep)
 {
     Lock lock{_mx};
+
+    if (!_coordinatorName.empty() && participantName != _coordinatorName)
+    {
+        // A peer that has not yet switched to coordinated mode still broadcasts its NextSimTask.
+        _logger->MakeMessage(Logging::Level::Trace, TopicOf(*this))
+            .SetMessage("Ignoring NextSimTask from participant {}, time is granted by the time coordinator",
+                        participantName)
+            .Dispatch();
+        return;
+    }
 
     auto&& itOtherNextTask = _otherNextTasks.find(participantName);
     if (itOtherNextTask == _otherNextTasks.end())
@@ -234,7 +274,21 @@ bool TimeConfiguration::IsHopOn()
 {
     Lock lock{_mx};
 
-    if (_currentTask.timePoint == -1ns) // On initial time
+    if (_currentTask.timePoint == -1ns && !_coordinatorName.empty()) // On initial time, coordinated
+    {
+        // The coordinator's grant is the current simulation time. Granted beyond our initial next step -> HopOn
+        const auto& grant = _otherNextTasks.at(_coordinatorName);
+        if (grant.timePoint > _myNextTask.timePoint)
+        {
+            _hoppedOn = true;
+            _myNextTask.timePoint = grant.timePoint;
+            _logger->MakeMessage(Logging::Level::Debug, TopicOf(*this))
+                .SetMessage("Simulation time already advanced. Starting at {}ns", _myNextTask.timePoint.count())
+                .Dispatch();
+            return true;
+        }
+    }
+    else if (_currentTask.timePoint == -1ns) // On initial time
     {
         std::chrono::nanoseconds minimalOtherTime = std::chrono::nanoseconds::max();
         for (const auto& otherTask : _otherNextTasks)

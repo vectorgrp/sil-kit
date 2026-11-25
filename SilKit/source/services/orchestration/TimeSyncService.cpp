@@ -44,7 +44,7 @@ public:
     virtual void RequestNextStep() = 0;
     virtual void SetSimStepCompleted() = 0;
     virtual auto IsExecutingSimStep() -> bool = 0;
-    virtual void ReceiveNextSimTask(const Core::IServiceEndpoint* from, const NextSimTask& task) = 0;
+    virtual void ReceiveNextSimTask(const std::string& fromParticipantName, const NextSimTask& task) = 0;
     virtual void ProcessSimulationTimeUpdate() = 0;
 };
 
@@ -60,7 +60,7 @@ public:
     {
         return false;
     }
-    void ReceiveNextSimTask(const Core::IServiceEndpoint* /*from*/, const NextSimTask& /*task*/) override {}
+    void ReceiveNextSimTask(const std::string& /*fromParticipantName*/, const NextSimTask& /*task*/) override {}
     void ProcessSimulationTimeUpdate() override {};
 };
 
@@ -102,7 +102,7 @@ public:
                 != _configuration->NextSimStep().timePoint) // Prevent sending same step more than once
             {
                 _lastSentNextSimTask = _configuration->NextSimStep().timePoint;
-                _controller.SendMsg(_configuration->NextSimStep());
+                _controller.SendNextSimTask(_configuration->NextSimStep());
             }
             // Bootstrap checked execution, in case there is no other participant.
             // Else, checked execution is initiated when we receive their NextSimTask messages.
@@ -110,9 +110,9 @@ public:
         }
     }
 
-    void ReceiveNextSimTask(const Core::IServiceEndpoint* from, const NextSimTask& task) override
+    void ReceiveNextSimTask(const std::string& fromParticipantName, const NextSimTask& task) override
     {
-        _configuration->OnReceiveNextSimStep(from->GetServiceDescriptor().GetParticipantName(), task);
+        _configuration->OnReceiveNextSimStep(fromParticipantName, task);
 
         switch (_controller.State())
         {
@@ -368,6 +368,9 @@ TimeSyncService::TimeSyncService(Core::IParticipantInternal* participant, ITimeP
 
                 if (timeSyncActive == "1")
                 {
+                    std::string peerIsTimeCoordinator;
+                    descriptor.GetSupplementalDataItem(Core::Discovery::timeSyncCoordinator, peerIsTimeCoordinator);
+
                     if (discoveryEventType == Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated)
                     {
                         // Check capabilities of newly discovered participants.
@@ -376,6 +379,36 @@ TimeSyncService::TimeSyncService(Core::IParticipantInternal* participant, ITimeP
                         if (!ParticipantHasAutonomousSynchronousCapability(descriptorParticipantName))
                         {
                             _participant->GetSystemController()->AbortSimulation();
+                            return;
+                        }
+
+                        if (peerIsTimeCoordinator == "1")
+                        {
+                            OnTimeCoordinatorCreated(descriptorParticipantName);
+                            return;
+                        }
+
+                        if (IsTimeCoordinator())
+                        {
+                            if (!ParticipantHasTimeCoordinationCapability(descriptorParticipantName))
+                            {
+                                _participant->GetSystemController()->AbortSimulation();
+                                return;
+                            }
+
+                            _logger->MakeMessage(Logging::Level::Debug, TopicOf(*this))
+                                .SetMessage("Participant is added to the coordinated time synchronization")
+                                .AddKeyValue(Logging::Keys::participantName, descriptorParticipantName)
+                                .Dispatch();
+
+                            // A late joiner receives the current grant to start at the current simulation time.
+                            DispatchGrant(_timeCoordinator.AddParticipant(descriptorParticipantName));
+                            return;
+                        }
+
+                        if (_timeConfiguration.IsCoordinated())
+                        {
+                            // The time coordinator grants our time advances, other peers are irrelevant
                             return;
                         }
 
@@ -414,6 +447,29 @@ TimeSyncService::TimeSyncService(Core::IParticipantInternal* participant, ITimeP
                     }
                     else if (discoveryEventType == Core::Discovery::ServiceDiscoveryEvent::Type::ServiceRemoved)
                     {
+                        if (peerIsTimeCoordinator == "1")
+                        {
+                            OnTimeCoordinatorRemoved(descriptorParticipantName);
+                            return;
+                        }
+
+                        if (IsTimeCoordinator())
+                        {
+                            _logger->MakeMessage(Logging::Level::Debug, TopicOf(*this))
+                                .SetMessage("Participant is no longer part of the coordinated time synchronization")
+                                .AddKeyValue(Logging::Keys::participantName, descriptorParticipantName)
+                                .Dispatch();
+
+                            // The removed participant might have been the one holding back the time
+                            DispatchGrant(_timeCoordinator.RemoveParticipant(descriptorParticipantName));
+                            return;
+                        }
+
+                        if (_timeConfiguration.IsCoordinated())
+                        {
+                            return;
+                        }
+
                         // Other participant hopped off
                         if (_timeConfiguration.RemoveSynchronizedParticipant(descriptorParticipantName))
                         {
@@ -524,15 +580,30 @@ bool TimeSyncService::SetupTimeSyncPolicy(bool isSynchronizingVirtualTime)
 
 void TimeSyncService::ReceiveMsg(const IServiceEndpoint* from, const NextSimTask& task)
 {
-    const auto timeSyncPolicy = GetTimeSyncPolicy();
+    const auto& participantName = from->GetServiceDescriptor().GetParticipantName();
+
+    if (IsTimeCoordinator())
+    {
+        // As coordinator, a received NextSimTask is a participant's report, not a constraint for our own step.
+        if (!_timeCoordinator.HasParticipant(participantName))
+        {
+            _logger->MakeMessage(Logging::Level::Error, TopicOf(*this))
+                .SetMessage("Time coordinator received NextSimTask from unknown participant {}", participantName)
+                .AddKeyValue(Logging::Keys::participantName, participantName)
+                .Dispatch();
+            return;
+        }
+        DispatchGrant(_timeCoordinator.UpdateNextSimTask(participantName, task));
+        return;
+    }
+
+    const auto timeSyncPolicy = TryGetTimeSyncPolicy();
     if (timeSyncPolicy != nullptr)
     {
-        timeSyncPolicy->ReceiveNextSimTask(from, task);
+        timeSyncPolicy->ReceiveNextSimTask(participantName, task);
     }
     else
     {
-        const auto& participantName = from->GetServiceDescriptor().GetParticipantName();
-
         _logger->MakeMessage(Logging::Level::Trace, TopicOf(*this))
             .SetMessage("Received NextSimTask from participant \'{}\' but TimeSyncPolicy is not yet configured",
                         participantName)
@@ -673,6 +744,17 @@ void TimeSyncService::InitializeTimeSyncPolicy(bool isSynchronizingVirtualTime)
         }
         _serviceDescriptor.SetSupplementalDataItem(SilKit::Core::Discovery::timeSyncDynamicStepSize,
                                                    advertiseDynamicStep ? "1" : "0");
+
+        if (IsTimeCoordinator() && !isSynchronizingVirtualTime)
+        {
+            _logger->MakeMessage(Logging::Level::Warn, TopicOf(*this))
+                .SetMessage("Experimental.TimeSynchronization.TimeCoordinator is ignored because this participant "
+                            "does not synchronize its virtual time.")
+                .Dispatch();
+            _isTimeCoordinator = false;
+        }
+        _serviceDescriptor.SetSupplementalDataItem(SilKit::Core::Discovery::timeSyncCoordinator,
+                                                   IsTimeCoordinator() ? "1" : "0");
         ResetTime();
     }
     catch (const std::exception& e)
@@ -704,11 +786,27 @@ void TimeSyncService::StartTime()
         {
             // Check if all synchronous participants have the necessary capabilities
             bool missingCapability = false;
-            for (auto&& participantName : _timeConfiguration.GetSynchronizedParticipantNames())
+            if (IsTimeCoordinator())
             {
-                if (!ParticipantHasAutonomousSynchronousCapability(participantName))
+                // Our TimeConfiguration only holds our own grant, the participants are known to the coordinator
+                for (auto&& participantName : _timeCoordinator.GetParticipantNames())
                 {
-                    missingCapability = true;
+                    if (participantName != _participant->GetParticipantName()
+                        && (!ParticipantHasAutonomousSynchronousCapability(participantName)
+                            || !ParticipantHasTimeCoordinationCapability(participantName)))
+                    {
+                        missingCapability = true;
+                    }
+                }
+            }
+            else
+            {
+                for (auto&& participantName : _timeConfiguration.GetSynchronizedParticipantNames())
+                {
+                    if (!ParticipantHasAutonomousSynchronousCapability(participantName))
+                    {
+                        missingCapability = true;
+                    }
                 }
             }
             if (missingCapability)
@@ -925,6 +1023,191 @@ void TimeSyncService::RecomputeDynamicStepEnabled()
     }
 }
 
+
+void TimeSyncService::ConfigureTimeCoordinator(bool isTimeCoordinator)
+{
+    if (!isTimeCoordinator)
+    {
+        return;
+    }
+
+    const auto& ownName = _participant->GetParticipantName();
+
+    _logger->MakeMessage(Logging::Level::Info, TopicOf(*this))
+        .SetMessage("This participant is the time coordinator of the simulation")
+        .Dispatch();
+
+    // Peers discovered so far were added to the distributed time synchronization, hand them to the coordinator
+    for (auto&& participantName : _timeConfiguration.GetSynchronizedParticipantNames())
+    {
+        _timeCoordinator.AddParticipant(participantName);
+    }
+    _timeCoordinator.AddParticipant(ownName);
+
+    {
+        std::lock_guard<std::mutex> lock{_coordinatorMx};
+        _coordinatorName = ownName;
+    }
+    // Our own simulation steps follow the grants of our own coordinator
+    _timeConfiguration.SetCoordinator(ownName);
+    _isTimeCoordinator = true;
+}
+
+bool TimeSyncService::IsTimeCoordinator() const
+{
+    return _isTimeCoordinator;
+}
+
+void TimeSyncService::SendNextSimTask(const NextSimTask& task)
+{
+    std::string coordinatorName;
+    {
+        std::lock_guard<std::mutex> lock{_coordinatorMx};
+        _lastSentNextSimTask = task;
+        coordinatorName = _coordinatorName;
+    }
+
+    if (IsTimeCoordinator())
+    {
+        DispatchGrant(_timeCoordinator.UpdateNextSimTask(_participant->GetParticipantName(), task));
+    }
+    else if (!coordinatorName.empty())
+    {
+        _participant->SendMsg(this, coordinatorName, task);
+    }
+    else
+    {
+        SendMsg(task);
+    }
+}
+
+auto TimeSyncService::TryGetTimeSyncPolicy() const -> ITimeSyncPolicy*
+{
+    std::unique_lock<decltype(_timeSyncPolicyMx)> lock{_timeSyncPolicyMx};
+    return _timeSyncPolicy.get();
+}
+
+void TimeSyncService::DispatchGrant(std::optional<TimeCoordinator::GrantDispatch> dispatch)
+{
+    if (!dispatch)
+    {
+        return;
+    }
+
+    const auto& ownName = _participant->GetParticipantName();
+    for (auto&& recipient : dispatch->recipients)
+    {
+        if (recipient == ownName)
+        {
+            // Deferred to avoid re-entering the simulation step from within RequestNextStep
+            _participant->ExecuteDeferred([this, grant = dispatch->grant, ownName] {
+                if (auto* timeSyncPolicy = TryGetTimeSyncPolicy())
+                {
+                    timeSyncPolicy->ReceiveNextSimTask(ownName, grant);
+                }
+            });
+        }
+        else
+        {
+            _participant->SendMsg(this, recipient, dispatch->grant);
+        }
+    }
+}
+
+void TimeSyncService::OnTimeCoordinatorCreated(const std::string& coordinatorName)
+{
+    if (IsTimeCoordinator())
+    {
+        _logger->MakeMessage(Logging::Level::Error, TopicOf(*this))
+            .SetMessage("Participant \'{}\' is also configured as time coordinator, but only one time coordinator is "
+                        "allowed in a simulation. Aborting simulation...",
+                        coordinatorName)
+            .AddKeyValue(Logging::Keys::participantName, coordinatorName)
+            .Dispatch();
+        _participant->GetSystemController()->AbortSimulation();
+        return;
+    }
+
+    std::optional<NextSimTask> lastSentNextSimTask;
+    {
+        std::lock_guard<std::mutex> lock{_coordinatorMx};
+        if (_coordinatorName == coordinatorName)
+        {
+            return;
+        }
+        if (!_coordinatorName.empty())
+        {
+            _logger->MakeMessage(Logging::Level::Error, TopicOf(*this))
+                .SetMessage("Participants \'{}\' and \'{}\' are both configured as time coordinator, but only one "
+                            "time coordinator is allowed in a simulation. Aborting simulation...",
+                            _coordinatorName, coordinatorName)
+                .Dispatch();
+            _participant->GetSystemController()->AbortSimulation();
+            return;
+        }
+        if (_timeConfiguration.CurrentSimStep().timePoint >= 0ns)
+        {
+            _logger->MakeMessage(Logging::Level::Error, TopicOf(*this))
+                .SetMessage("Time coordinator \'{}\' joined after the virtual time has started. The time coordinator "
+                            "must join before the virtual time starts. Aborting simulation...",
+                            coordinatorName)
+                .AddKeyValue(Logging::Keys::participantName, coordinatorName)
+                .Dispatch();
+            _participant->GetSystemController()->AbortSimulation();
+            return;
+        }
+        _coordinatorName = coordinatorName;
+        lastSentNextSimTask = _lastSentNextSimTask;
+    }
+
+    _timeConfiguration.SetCoordinator(coordinatorName);
+
+    _logger->MakeMessage(Logging::Level::Debug, TopicOf(*this))
+        .SetMessage("Virtual time is granted by the time coordinator")
+        .AddKeyValue(Logging::Keys::participantName, coordinatorName)
+        .Dispatch();
+
+    // Our earlier broadcast might have been sent before the coordinator knew us, report again
+    if (lastSentNextSimTask)
+    {
+        _participant->SendMsg(this, coordinatorName, *lastSentNextSimTask);
+    }
+}
+
+void TimeSyncService::OnTimeCoordinatorRemoved(const std::string& coordinatorName)
+{
+    {
+        std::lock_guard<std::mutex> lock{_coordinatorMx};
+        if (_coordinatorName != coordinatorName)
+        {
+            return;
+        }
+    }
+
+    // We keep the coordinator's last grant, so our virtual time stops here.
+    const auto state = State();
+    const auto level = (state == ParticipantState::Running || state == ParticipantState::Paused)
+                           ? Logging::Level::Error
+                           : Logging::Level::Debug;
+    _logger->MakeMessage(level, TopicOf(*this))
+        .SetMessage("The time coordinator left the simulation. The virtual time cannot advance anymore.")
+        .AddKeyValue(Logging::Keys::participantName, coordinatorName)
+        .Dispatch();
+}
+
+bool TimeSyncService::ParticipantHasTimeCoordinationCapability(const std::string& participantName) const
+{
+    if (!_participant->ParticipantHasCapability(participantName, SilKit::Core::Capabilities::TimeCoordination))
+    {
+        _logger->MakeMessage(Logging::Level::Error, TopicOf(*this))
+            .SetMessage("This participant does not support the coordinated time synchronization of the time "
+                        "coordinator. Please consider upgrading the participant. Aborting simulation...")
+            .AddKeyValue(Logging::Keys::participantName, participantName)
+            .Dispatch();
+        return false;
+    }
+    return true;
+}
 
 } // namespace Orchestration
 } // namespace Services

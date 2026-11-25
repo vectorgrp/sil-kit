@@ -434,6 +434,8 @@ auto LifecycleService::CreateTimeSyncService() -> ITimeSyncService*
     const auto& participantConfiguration = _participant->GetParticipantConfiguration();
     _timeSyncService->ConfigureDynamicStepSize(
         participantConfiguration.experimental.timeSynchronization.dynamicSimulationStep);
+    _timeSyncService->ConfigureTimeCoordinator(
+        participantConfiguration.experimental.timeSynchronization.timeCoordinator);
 
     return _timeSyncService;
 }

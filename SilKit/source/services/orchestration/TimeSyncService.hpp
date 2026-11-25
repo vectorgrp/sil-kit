@@ -20,6 +20,7 @@
 #include "util/PerformanceMonitor.hpp"
 #include "services/orchestration/TimeProvider.hpp"
 #include "services/orchestration/TimeConfiguration.hpp"
+#include "services/orchestration/TimeCoordinator.hpp"
 #include "services/orchestration/WatchDog.hpp"
 #include "services/metrics/Metrics.hpp"
 #include "services/logging/LogFunctions.hpp"
@@ -107,6 +108,15 @@ public:
     //! std::nullopt (default) = follow the network (enable if any peer advertises the request).
     void ConfigureDynamicStepSize(std::optional<bool> configured);
 
+    //! Configure this participant as the central time coordinator (Experimental.TimeSynchronization.TimeCoordinator).
+    //! Must be called before the lifecycle is started.
+    void ConfigureTimeCoordinator(bool isTimeCoordinator);
+    bool IsTimeCoordinator() const;
+
+    //! Send our next simulation step: broadcast (distributed), to the time coordinator only (coordinated), or into
+    //! the local time coordinator (if this participant is the coordinator).
+    void SendNextSimTask(const NextSimTask& task);
+
 private:
     // ----------------------------------------
     // private methods
@@ -120,6 +130,14 @@ private:
     bool SetupTimeSyncPolicy(bool isSynchronizingVirtualTime);
 
     inline auto GetTimeSyncPolicy() const -> ITimeSyncPolicy*;
+    //! Like GetTimeSyncPolicy, but returns nullptr instead of throwing if the policy is not set yet.
+    auto TryGetTimeSyncPolicy() const -> ITimeSyncPolicy*;
+
+    //! Sends a grant of the local time coordinator to its recipients. The grant for ourselves is applied locally.
+    void DispatchGrant(std::optional<TimeCoordinator::GrantDispatch> dispatch);
+    void OnTimeCoordinatorCreated(const std::string& coordinatorName);
+    void OnTimeCoordinatorRemoved(const std::string& coordinatorName);
+    bool ParticipantHasTimeCoordinationCapability(const std::string& participantName) const;
 
     void StopWallClockCouplingThread();
     void HybridWait(std::chrono::nanoseconds targetWaitDuration);
@@ -179,6 +197,15 @@ private:
     std::set<std::string> _dynamicStepPeers;
     // Ensures the "enabled by a remote participant" notice is logged only once.
     Services::Logging::LogOnceFlag _dynamicStepRemoteLogOnce;
+
+    // Central time coordination. If this participant is the coordinator, _timeCoordinator holds the next steps of
+    // all synchronized participants (including our own) and issues the grants. Otherwise, _coordinatorName is the
+    // coordinator we follow (empty: distributed synchronization). Guarded by _coordinatorMx.
+    std::atomic<bool> _isTimeCoordinator{false};
+    TimeCoordinator _timeCoordinator;
+    mutable std::mutex _coordinatorMx;
+    std::string _coordinatorName;
+    std::optional<NextSimTask> _lastSentNextSimTask;
 
 };
 
