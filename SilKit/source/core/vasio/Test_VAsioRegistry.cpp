@@ -103,11 +103,18 @@ namespace Core {
 
 struct VAsioRegistryTestAccess
 {
-    static void Announce(VAsioRegistry& registry, IVAsioPeer* peer, const std::string& simulationName)
+    static void Announce(VAsioRegistry& registry, IVAsioPeer* peer, const std::string& simulationName,
+                         bool supportsRegistrySessions = true)
     {
         ParticipantAnnouncement announcement{};
         announcement.peerInfo = peer->GetInfo();
         announcement.simulationName = simulationName;
+        if (supportsRegistrySessions)
+        {
+            VAsioCapabilities capabilities;
+            capabilities.AddCapability(Capabilities::RegistrySessions);
+            announcement.peerInfo.capabilities = capabilities.ToCapabilitiesString();
+        }
         SerializedMessage message{announcement};
         registry._connection.OnSocketData(peer, message);
     }
@@ -207,6 +214,51 @@ protected:
     testing::NiceMock<MockRegistryEventListener> _listener;
     VAsioRegistry _registry;
 };
+
+TEST_F(Test_VAsioRegistrySimulations, session_rejects_legacy_participant_before_admission)
+{
+    using namespace SilKit::Core;
+
+    FakeVAsioPeer peer{"A", "session/Sim"};
+    EXPECT_CALL(_listener, OnParticipantConnected(testing::_, testing::_, testing::_)).Times(0);
+    EXPECT_CALL(peer, SendSilKitMsg(testing::An<SerializedMessage>())).WillOnce([](SerializedMessage message) {
+        ASSERT_EQ(message.GetRegistryKind(), RegistryMessageKind::ParticipantAnnouncementReply);
+        const auto reply{message.Deserialize<ParticipantAnnouncementReply>()};
+        EXPECT_EQ(reply.status, ParticipantAnnouncementReply::Status::Failed);
+        EXPECT_THAT(reply.diagnostic, testing::HasSubstr("'session/Sim' requires registry-sessions support"));
+        EXPECT_THAT(reply.diagnostic, testing::HasSubstr("participant 'A'"));
+    });
+
+    VAsioRegistryTestAccess::Announce(_registry, &peer, "session/Sim", false);
+    EXPECT_FALSE(VAsioRegistryTestAccess::HasPlacement(_registry, "session/Sim"));
+    EXPECT_FALSE(VAsioRegistryTestAccess::IsPeerRegistered(_registry, &peer));
+}
+
+TEST_F(Test_VAsioRegistrySimulations, registry_confirms_session_support_only_for_session_joins)
+{
+    using namespace SilKit::Core;
+
+    FakeVAsioPeer sessionPeer{"A", "session/Sim"};
+    FakeVAsioPeer legacyPeer{"A", "Sim"};
+    const auto expectSuccessfulJoin = [](FakeVAsioPeer& peer, bool expectConfirmation) {
+        EXPECT_CALL(peer, SendSilKitMsg(testing::An<SerializedMessage>()))
+            .WillOnce([](SerializedMessage message) {
+                EXPECT_EQ(message.GetRegistryKind(), RegistryMessageKind::KnownParticipants);
+            })
+            .WillOnce([expectConfirmation](SerializedMessage message) {
+                ASSERT_EQ(message.GetRegistryKind(), RegistryMessageKind::ParticipantAnnouncementReply);
+                const auto reply{message.Deserialize<ParticipantAnnouncementReply>()};
+                EXPECT_EQ(reply.status, ParticipantAnnouncementReply::Status::Success);
+                EXPECT_EQ(VAsioCapabilities{reply.confirmedCapability}.HasCapability(Capabilities::RegistrySessions),
+                          expectConfirmation);
+            });
+    };
+    expectSuccessfulJoin(sessionPeer, true);
+    expectSuccessfulJoin(legacyPeer, false);
+
+    VAsioRegistryTestAccess::Announce(_registry, &sessionPeer, "session/Sim");
+    VAsioRegistryTestAccess::Announce(_registry, &legacyPeer, "Sim", false);
+}
 
 TEST_F(Test_VAsioRegistrySimulations, generation_creation_notifies_before_connection_and_not_for_lazy_lifecycle_state)
 {

@@ -187,6 +187,16 @@ protected:
         return connection.MakePeerInfo();
     }
 
+    void SetSimulationName(const std::string& simulationName)
+    {
+        _connection._simulationName = simulationName;
+    }
+
+    void WaitForRegistryHandshake()
+    {
+        _connection.WaitForRegistryHandshakeToComplete(0ms);
+    }
+
     static void AssociateParticipantNameAndPeer(VAsioConnection& connection, const std::string& simulationName,
                                                 const std::string& participantName, IVAsioPeer* peer)
     {
@@ -271,6 +281,38 @@ TEST_F(Test_VAsioConnection, supported_version_reply_from_registry_must_not_thro
 
     SerializedMessage message(reply);
     EXPECT_NO_THROW(_connection.OnSocketData(&_from, message));
+}
+
+TEST_F(Test_VAsioConnection, session_join_fails_when_registry_does_not_confirm_support)
+{
+    SetSimulationName("session/Sim");
+    _from._peerInfo.participantId = REGISTRY_PARTICIPANT_ID;
+    ParticipantAnnouncementReply reply{};
+    reply.status = ParticipantAnnouncementReply::Status::Success;
+    SerializedMessage message(reply);
+
+    EXPECT_THROW(_connection.OnSocketData(&_from, message), SilKit::ProtocolError);
+    EXPECT_THAT([this] { WaitForRegistryHandshake(); },
+                testing::ThrowsMessage<SilKit::ProtocolError>(
+                    testing::HasSubstr("Registry did not confirm registry-sessions support for simulation 'session/Sim'")));
+}
+
+TEST_F(Test_VAsioConnection, session_join_succeeds_when_registry_confirms_support)
+{
+    SetSimulationName("session/Sim");
+    _from._peerInfo.participantId = REGISTRY_PARTICIPANT_ID;
+    const auto peerInfo = PeerInfoOf(_connection);
+    EXPECT_TRUE(VAsioCapabilities{peerInfo.capabilities}.HasCapability(Capabilities::RegistrySessions));
+
+    VAsioCapabilities capabilities;
+    capabilities.AddCapability(Capabilities::RegistrySessions);
+    ParticipantAnnouncementReply reply{};
+    reply.status = ParticipantAnnouncementReply::Status::Success;
+    reply.confirmedCapability = capabilities.ToCapabilitiesString();
+    SerializedMessage message(reply);
+
+    EXPECT_NO_THROW(_connection.OnSocketData(&_from, message));
+    EXPECT_NO_THROW(WaitForRegistryHandshake());
 }
 
 TEST_F(Test_VAsioConnection, current_version_connect)

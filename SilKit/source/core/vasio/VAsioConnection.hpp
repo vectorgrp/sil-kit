@@ -58,6 +58,10 @@
 namespace SilKit {
 namespace Core {
 
+inline bool IsRegistrySessionName(const std::string& simulationName)
+{
+    return simulationName.compare(0, 8, "session/") == 0;
+}
 
 class VAsioConnection
     : public IVAsioPeerListener

@@ -127,4 +127,20 @@ TEST(Test_VAsioSerdes, vasio_knownParticipants)
     EXPECT_EQ(in, out);
 }
 
+TEST(Test_VAsioSerdes, v31_reply_keeps_the_capabilities_slot_when_empty)
+{
+    MessageBuffer emptyCapabilities;
+    MessageBuffer withCapabilities;
+    emptyCapabilities.SetProtocolVersion(ProtocolVersion{3, 1});
+    withCapabilities.SetProtocolVersion(ProtocolVersion{3, 1});
+
+    ParticipantAnnouncementReply reply{};
+    Serialize(emptyCapabilities, reply);
+    reply.confirmedCapability = R"([{"name":"registry-sessions"}])";
+    Serialize(withCapabilities, reply);
+
+    EXPECT_EQ(withCapabilities.RemainingBytesLeft(),
+              emptyCapabilities.RemainingBytesLeft() + reply.confirmedCapability.size());
+}
+
 } // namespace

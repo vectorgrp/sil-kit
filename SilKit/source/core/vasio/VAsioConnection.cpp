@@ -154,6 +154,7 @@ auto MakeCapabilitiesFromConfiguration(const SilKit::Config::ParticipantConfigur
     SilKit::Core::VAsioCapabilities capabilities;
 
     capabilities.AddCapability(SilKit::Core::Capabilities::AutonomousSynchronous);
+    capabilities.AddCapability(SilKit::Core::Capabilities::RegistrySessions);
 
     if (participantConfiguration.middleware.registryAsFallbackProxy)
     {
@@ -832,6 +833,12 @@ void VAsioConnection::SendParticipantAnnouncementReply(IVAsioPeer* peer)
     // tell the remote peer what *our* protocol version is that we can accept for this peer
     reply.remoteHeader = MakeRegistryMsgHeader(peer->GetProtocolVersion());
     reply.status = ParticipantAnnouncementReply::Status::Success;
+    if (_participantId == REGISTRY_PARTICIPANT_ID && peer->GetServiceDescriptor().GetGeneration().has_value())
+    {
+        VAsioCapabilities capabilities;
+        capabilities.AddCapability(Capabilities::RegistrySessions);
+        reply.confirmedCapability = capabilities.ToCapabilitiesString();
+    }
     // fill in the service descriptors we want to subscribe to
     std::transform(_vasioReceivers.begin(), _vasioReceivers.end(), std::back_inserter(reply.subscribers),
                    [](const auto& subscriber) { return subscriber->GetDescriptor(); });
@@ -878,26 +885,49 @@ void VAsioConnection::ReceiveParticipantAnnouncementReply(IVAsioPeer* from, Seri
 
     auto reply = buffer.Deserialize<ParticipantAnnouncementReply>();
     const auto& remoteVersion = ExtractProtocolVersion(reply.remoteHeader);
+    const bool fromRegistry = from->GetInfo().participantId == REGISTRY_PARTICIPANT_ID;
 
+    std::string failure;
     if (reply.status == ParticipantAnnouncementReply::Status::Failed)
     {
-        const auto message = fmt::format(
+        failure = fmt::format(
             "SIL Kit Connection Handshake: Received failed ParticipantAnnouncementReply from '{}' ('{}') with "
             "diagnostic message: {}",
             from->GetInfo().participantName, from->GetSimulationName(),
             // provide a non-empty default string for the diagnostic message
             reply.diagnostic.empty() ? "(no diagnostic message was delivered)" : reply.diagnostic.c_str());
+    }
+    else if (fromRegistry && IsRegistrySessionName(_simulationName))
+    {
+        try
+        {
+            const VAsioCapabilities capabilities{reply.confirmedCapability};
+            if (!capabilities.HasCapability(Capabilities::RegistrySessions))
+            {
+                failure = fmt::format("Registry did not confirm registry-sessions support for simulation '{}'. "
+                                      "Use a registry that supports Registry Sessions.",
+                                      _simulationName);
+            }
+        }
+        catch (const TypeConversionError& error)
+        {
+            failure = fmt::format("Invalid registry-sessions confirmation for simulation '{}': {}", _simulationName,
+                                  error.what());
+        }
+    }
 
-            _logger->MakeMessage(Log::Level::Warn, TopicOf(*this))
-                .SetMessage(message)
-                .AddKeyValue(Log::Keys::protocolVersion, ExtractProtocolVersion(reply.remoteHeader)) // extract the version delivered in the reply 
-                .Dispatch();
+    if (!failure.empty())
+    {
+        _logger->MakeMessage(Log::Level::Warn, TopicOf(*this))
+            .SetMessage(failure)
+            .AddKeyValue(Log::Keys::protocolVersion, remoteVersion)
+            .Dispatch();
 
         // tear down the participant if we are talking to the registry
-        if (from->GetInfo().participantId == REGISTRY_PARTICIPANT_ID)
+        if (fromRegistry)
         {
             // handshake with SIL Kit Registry failed, we need to abort.
-            auto error = ProtocolError(message);
+            auto error = ProtocolError(failure);
 
             // propagate the error to the main thread
             _registryHandshakeComplete.set_exception(std::make_exception_ptr(error));
@@ -921,7 +951,7 @@ void VAsioConnection::ReceiveParticipantAnnouncementReply(IVAsioPeer* from, Seri
         .AddKeyValue(Log::Keys::protocolVersion, remoteVersion)
         .Dispatch();
 
-    if (from->GetInfo().participantId == REGISTRY_PARTICIPANT_ID)
+    if (fromRegistry)
     {
         _registryHandshakeComplete.set_value();
     }

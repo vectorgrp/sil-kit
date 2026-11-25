@@ -34,6 +34,7 @@ namespace Capabilities {
 const auto ProxyMessage = CapabilityLiteral{"proxy-message"};
 const auto AutonomousSynchronous = CapabilityLiteral{"autonomous-synchronous"};
 const auto RequestParticipantConnection = CapabilityLiteral{"request-participant-connection-v2"};
+const auto RegistrySessions = CapabilityLiteral{"registry-sessions"};
 } // namespace Capabilities
 
 

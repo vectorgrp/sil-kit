@@ -220,11 +220,6 @@ auto VAsioRegistry::GetLoggerInternal() -> Services::Logging::ILoggerInternal*
 
 auto VAsioRegistry::GetOrCreatePlacement(const std::string& simulationName) -> SessionPlacement*
 {
-    if (simulationName.compare(0, 8, "session/") != 0)
-    {
-        return nullptr;
-    }
-
     auto& placement{_placements[simulationName]};
     if (placement == nullptr)
     {
@@ -255,9 +250,16 @@ void VAsioRegistry::OnParticipantAnnouncement(IVAsioPeer* peer, const Participan
 
     const auto registered{_connection.ParticipantsByGeneration(announcement.simulationName)};
 
-    if (auto* placement = GetOrCreatePlacement(announcement.simulationName))
+    if (IsRegistrySessionName(announcement.simulationName))
     {
-        placement->Admit(peer, registered);
+        const VAsioCapabilities capabilities{peerInfo.capabilities};
+        if (!capabilities.HasCapability(Capabilities::RegistrySessions))
+        {
+            throw SilKitError{fmt::format("Simulation '{}' requires registry-sessions support; participant '{}' "
+                                         "does not advertise it. Upgrade the participant.",
+                                         announcement.simulationName, peerInfo.participantName)};
+        }
+        GetOrCreatePlacement(announcement.simulationName)->Admit(peer, registered);
     }
     else
     {
