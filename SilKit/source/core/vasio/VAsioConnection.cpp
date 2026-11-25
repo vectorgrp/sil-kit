@@ -515,6 +515,32 @@ void VAsioConnection::OpenParticipantAcceptors(const std::string& connectUri)
 {
     const auto acceptorEndpointUris = PrepareAcceptorEndpointUris(connectUri);
 
+    if (IsRegistrySessionName(_simulationName))
+    {
+        std::vector<std::string> fixedAcceptorUris;
+        for (const auto& uriString : _config.middleware.acceptorUris)
+        {
+            const auto uri = Uri::Parse(uriString);
+            const auto fixedTcp = uri.Type() == Uri::UriType::Tcp && uri.Scheme() == "tcp" && uri.Port() != 0;
+            const auto fixedLocal =
+                _config.middleware.enableDomainSockets && uri.Type() == Uri::UriType::Local && uri.Scheme() == "local";
+            if (fixedTcp || fixedLocal)
+            {
+                fixedAcceptorUris.emplace_back(uriString);
+            }
+        }
+
+        if (!fixedAcceptorUris.empty())
+        {
+            _logger->MakeMessage(Log::Level::Warn, TopicOf(*this))
+                .SetMessage("Participant '{}' is joining registry session '{}' with fixed acceptor endpoints: {}. "
+                            "Overlapping instances may conflict. Leave Middleware.AcceptorUris unset to use "
+                            "per-instance endpoints, or configure unique endpoints for each instance.",
+                            _participantName, _simulationName, printUris(fixedAcceptorUris))
+                .Dispatch();
+        }
+    }
+
     if (_config.middleware.enableDomainSockets)
     {
         OpenLocalAcceptors(acceptorEndpointUris);

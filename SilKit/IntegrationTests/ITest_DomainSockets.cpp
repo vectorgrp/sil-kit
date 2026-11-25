@@ -87,6 +87,54 @@ Middleware:
     EXPECT_THAT(log, testing::Not(testing::HasSubstr("New connection from [local=local://")));
 }
 
+auto JoinWithAcceptorUris(bool session, bool enableDomainSockets, bool fixedTcpPort) -> std::string
+{
+    ScopedLogFiles logs{MakeUniqueLogName("FixedAcceptors")};
+    auto registry = SilKit::Vendor::Vector::CreateSilKitRegistry(SilKit::Config::ParticipantConfigurationFromString(""));
+    const auto registryUri = registry->StartListening("silkit://127.0.0.1:0");
+    const auto localUri = "local://" + logs.Prefix() + ".sock";
+    auto middleware = std::string{"\nMiddleware:\n  EnableDomainSockets: "} + (enableDomainSockets ? "true" : "false")
+                      + "\n  AcceptorUris:\n  - tcp://127.0.0.1:0\n  - " + localUri + "\n";
+    if (fixedTcpPort)
+    {
+        // Use the registry's port to exercise a known bind collision without reserving a hard-coded port.
+        middleware += "  - tcp://127.0.0.1" + registryUri.substr(registryUri.rfind(':')) + "\n";
+    }
+    const auto config = SilKit::Config::ParticipantConfigurationFromString(MakeConfig(logs.Prefix(), middleware));
+    {
+        auto participant = SilKit::CreateParticipant(config, "TestParticipant",
+                                                     registryUri + (session ? "/session/fixed" : "/fixed"));
+    }
+    return logs.ReadAll();
+}
+
+TEST(ITest_DomainSockets, registry_session_warns_once_about_fixed_acceptors_before_binding)
+{
+    const auto log = JoinWithAcceptorUris(true, true, true);
+    const auto warning = log.find("with fixed acceptor endpoints: ");
+    ASSERT_NE(warning, std::string::npos) << log;
+    const auto warningText = log.substr(warning, log.find('\n', warning) - warning);
+    EXPECT_THAT(warningText, testing::HasSubstr("local://FixedAcceptors"));
+    EXPECT_THAT(warningText, testing::HasSubstr("tcp://127.0.0.1:"));
+    EXPECT_THAT(warningText, testing::Not(testing::HasSubstr("tcp://127.0.0.1:0")));
+    EXPECT_EQ(log.find("with fixed acceptor endpoints: ", warning + 1), std::string::npos);
+    const auto bindError = log.find("Unable to accept TCP connections on");
+    ASSERT_NE(bindError, std::string::npos) << log;
+    EXPECT_LT(warning, bindError);
+}
+
+TEST(ITest_DomainSockets, registry_session_does_not_warn_for_dynamic_tcp_or_disabled_domain_sockets)
+{
+    EXPECT_THAT(JoinWithAcceptorUris(true, false, false),
+                testing::Not(testing::HasSubstr("with fixed acceptor endpoints: ")));
+}
+
+TEST(ITest_DomainSockets, non_session_does_not_warn_about_fixed_acceptors)
+{
+    EXPECT_THAT(JoinWithAcceptorUris(false, true, true),
+                testing::Not(testing::HasSubstr("with fixed acceptor endpoints: ")));
+}
+
 struct ReceivedData
 {
     void Add(const SilKit::Services::PubSub::DataMessageEvent& event)
