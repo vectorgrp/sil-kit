@@ -155,6 +155,8 @@ void ServicesCreatedState::ServicesCreated(std::string reason)
     // subscriptions have been received.
     _lifecycleManager->GetParticipant()->GetParticipantRepliesProcedure()->CallAfterAllParticipantsReplied(
         [reason, this]() {
+        // The TimeSyncService descriptors of all participants have arrived: choose the time coordinator
+        _lifecycleManager->GetService()->ResolveTimeCoordinator();
         // If done, move forward to CommunicationInitializingState and call ServicesCreated
         _lifecycleManager->SetStateAndForwardIntent(_lifecycleManager->GetCommunicationInitializingState(),
                                                     &ILifecycleState::ServicesCreated, reason);

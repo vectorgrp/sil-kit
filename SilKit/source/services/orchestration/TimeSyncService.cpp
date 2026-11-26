@@ -384,8 +384,15 @@ TimeSyncService::TimeSyncService(Core::IParticipantInternal* participant, ITimeP
 
                         if (peerIsTimeCoordinator == "1")
                         {
-                            OnTimeCoordinatorCreated(descriptorParticipantName);
-                            return;
+                            std::string peerLifecycleIsCoordinated;
+                            descriptor.GetSupplementalDataItem(Core::Discovery::timeSyncLifecycleIsCoordinated,
+                                                               peerLifecycleIsCoordinated);
+                            if (!OnTimeCoordinatorCandidateCreated(descriptorParticipantName,
+                                                                   peerLifecycleIsCoordinated == "1"))
+                            {
+                                return;
+                            }
+                            // A candidate is also a synchronized participant, continue below
                         }
 
                         if (IsTimeCoordinator())
@@ -449,8 +456,15 @@ TimeSyncService::TimeSyncService(Core::IParticipantInternal* participant, ITimeP
                     {
                         if (peerIsTimeCoordinator == "1")
                         {
-                            OnTimeCoordinatorRemoved(descriptorParticipantName);
-                            return;
+                            {
+                                std::lock_guard<std::mutex> lock{_timeCoordinatorMx};
+                                _timeCoordinatorCandidates.erase(descriptorParticipantName);
+                            }
+                            if (OnTimeCoordinatorRemoved(descriptorParticipantName))
+                            {
+                                return;
+                            }
+                            // A candidate that was not chosen leaves like any other synchronized participant
                         }
 
                         if (IsTimeCoordinator())
@@ -745,16 +759,24 @@ void TimeSyncService::InitializeTimeSyncPolicy(bool isSynchronizingVirtualTime)
         _serviceDescriptor.SetSupplementalDataItem(SilKit::Core::Discovery::timeSyncDynamicStepSize,
                                                    advertiseDynamicStep ? "1" : "0");
 
-        if (IsTimeCoordinator() && !isSynchronizingVirtualTime)
+        if (_isTimeCoordinatorCandidate && !isSynchronizingVirtualTime)
         {
             _logger->MakeMessage(Logging::Level::Warn, TopicOf(*this))
                 .SetMessage("Experimental.TimeSynchronization.TimeCoordinator is ignored because this participant "
                             "does not synchronize its virtual time.")
                 .Dispatch();
-            _isTimeCoordinator = false;
+            _isTimeCoordinatorCandidate = false;
+        }
+        const bool coordinatedLifecycle =
+            _lifecycleService && _lifecycleService->GetOperationMode() == OperationMode::Coordinated;
+        {
+            std::lock_guard<std::mutex> lock{_timeCoordinatorMx};
+            _ownLifecycleIsCoordinated = coordinatedLifecycle;
         }
         _serviceDescriptor.SetSupplementalDataItem(SilKit::Core::Discovery::timeSyncIsTimeCoordinator,
-                                                   IsTimeCoordinator() ? "1" : "0");
+                                                   _isTimeCoordinatorCandidate ? "1" : "0");
+        _serviceDescriptor.SetSupplementalDataItem(SilKit::Core::Discovery::timeSyncLifecycleIsCoordinated,
+                                                   coordinatedLifecycle ? "1" : "0");
         ResetTime();
     }
     catch (const std::exception& e)
@@ -782,6 +804,9 @@ void TimeSyncService::StartTime()
     {
         const auto timeSyncPolicy = GetTimeSyncPolicy();
         SILKIT_ASSERT(timeSyncPolicy);
+        // Normally done when all participants replied after ServicesCreated, a no-op then
+        ResolveTimeCoordinator();
+
         if (_isSynchronizingVirtualTime)
         {
             // Check if all synchronous participants have the necessary capabilities
@@ -1024,13 +1049,145 @@ void TimeSyncService::RecomputeDynamicStepEnabled()
 }
 
 
-void TimeSyncService::ConfigureTimeCoordinator(bool isTimeCoordinator)
+void TimeSyncService::ConfigureTimeCoordinatorCandidate(bool isCandidate)
 {
-    if (!isTimeCoordinator)
+    _isTimeCoordinatorCandidate = isCandidate;
+}
+
+auto TimeSyncService::ChooseTimeCoordinator(const std::map<std::string, bool>& candidates)
+    -> std::optional<std::string>
+{
+    // std::map is ordered by name: the first coordinated candidate has the smallest name
+    for (auto&& candidate : candidates)
     {
+        if (candidate.second)
+        {
+            return candidate.first;
+        }
+    }
+    if (candidates.size() > 1)
+    {
+        return std::nullopt;
+    }
+    return candidates.empty() ? std::string{} : candidates.begin()->first;
+}
+
+auto TimeSyncService::AllTimeCoordinatorCandidates() const -> std::map<std::string, bool>
+{
+    std::lock_guard<std::mutex> lock{_timeCoordinatorMx};
+    auto candidates = _timeCoordinatorCandidates;
+    if (_isTimeCoordinatorCandidate)
+    {
+        candidates[_participant->GetParticipantName()] = _ownLifecycleIsCoordinated;
+    }
+    return candidates;
+}
+
+namespace {
+auto JoinNames(const std::map<std::string, bool>& candidates) -> std::string
+{
+    std::string names;
+    for (auto&& candidate : candidates)
+    {
+        names += (names.empty() ? "'" : ", '") + candidate.first + "'";
+    }
+    return names;
+}
+} // namespace
+
+void TimeSyncService::ResolveTimeCoordinator()
+{
+    {
+        std::lock_guard<std::mutex> lock{_timeCoordinatorMx};
+        if (_timeCoordinatorResolved)
+        {
+            return;
+        }
+        _timeCoordinatorResolved = true;
+    }
+
+    const auto candidates = AllTimeCoordinatorCandidates();
+    const auto choice = ChooseTimeCoordinator(candidates);
+    if (!choice)
+    {
+        _logger->MakeMessage(Logging::Level::Error, TopicOf(*this))
+            .SetMessage("Participants {} are configured as time coordinator, but none of them uses the coordinated "
+                        "lifecycle. Among autonomous participants, only one may be configured as time coordinator. "
+                        "Aborting simulation...",
+                        JoinNames(candidates))
+            .Dispatch();
+        _participant->GetSystemController()->AbortSimulation();
+        return;
+    }
+    if (choice->empty())
+    {
+        return; // No candidate: P2P synchronization
+    }
+
+    if (*choice == _participant->GetParticipantName())
+    {
+        BecomeTimeCoordinator();
         return;
     }
 
+    if (_isTimeCoordinatorCandidate)
+    {
+        _logger->MakeMessage(Logging::Level::Info, TopicOf(*this))
+            .SetMessage("Experimental.TimeSynchronization.TimeCoordinator is set on participants {}; participant "
+                        "'{}' was chosen as time coordinator",
+                        JoinNames(candidates), *choice)
+            .Dispatch();
+    }
+    OnTimeCoordinatorCreated(*choice);
+}
+
+bool TimeSyncService::OnTimeCoordinatorCandidateCreated(const std::string& participantName,
+                                                        bool coordinatedLifecycle)
+{
+    std::string chosenName;
+    {
+        std::lock_guard<std::mutex> lock{_timeCoordinatorMx};
+        _timeCoordinatorCandidates[participantName] = coordinatedLifecycle;
+        if (!_timeCoordinatorResolved)
+        {
+            // Chosen when all participants have replied after ServicesCreated
+            return true;
+        }
+        chosenName = _timeCoordinatorName;
+    }
+
+    if (chosenName.empty())
+    {
+        // No candidate was known when choosing. Adopt this one, as long as our virtual time has not started.
+        OnTimeCoordinatorCreated(participantName);
+        return true;
+    }
+
+    const auto choice = ChooseTimeCoordinator(AllTimeCoordinatorCandidates());
+    if (choice && *choice == chosenName)
+    {
+        _logger->MakeMessage(Logging::Level::Info, TopicOf(*this))
+            .SetMessage("Participant '{}' is also configured as time coordinator; participant '{}' stays the time "
+                        "coordinator",
+                        participantName, chosenName)
+            .AddKeyValue(Logging::Keys::participantName, participantName)
+            .Dispatch();
+        return true;
+    }
+
+    _logger->MakeMessage(Logging::Level::Error, TopicOf(*this))
+        .SetMessage("Participant '{}' is configured as time coordinator, but joined after participant '{}' was chosen "
+                    "as time coordinator. Only coordinated participants, or a single autonomous participant, can be "
+                    "chosen robustly. Aborting simulation...",
+                    participantName, chosenName)
+        .AddKeyValue(Logging::Keys::participantName, participantName)
+        .Dispatch();
+    _participant->GetSystemController()->AbortSimulation();
+    return false;
+}
+
+void TimeSyncService::BecomeTimeCoordinator()
+{
     const auto& ownName = _participant->GetParticipantName();
 
     _logger->MakeMessage(Logging::Level::Info, TopicOf(*this))
@@ -1116,18 +1273,6 @@ void TimeSyncService::DispatchGrant(std::optional<TimeCoordinator::GrantDispatch
 
 void TimeSyncService::OnTimeCoordinatorCreated(const std::string& timeCoordinatorName)
 {
-    if (IsTimeCoordinator())
-    {
-        _logger->MakeMessage(Logging::Level::Error, TopicOf(*this))
-            .SetMessage("Participant \'{}\' is also configured as time coordinator, but only one time coordinator is "
-                        "allowed in a simulation. Aborting simulation...",
-                        timeCoordinatorName)
-            .AddKeyValue(Logging::Keys::participantName, timeCoordinatorName)
-            .Dispatch();
-        _participant->GetSystemController()->AbortSimulation();
-        return;
-    }
-
     std::optional<NextSimTask> lastSentNextSimTask;
     {
         std::lock_guard<std::mutex> lock{_timeCoordinatorMx};
@@ -1174,13 +1319,13 @@ void TimeSyncService::OnTimeCoordinatorCreated(const std::string& timeCoordinato
     }
 }
 
-void TimeSyncService::OnTimeCoordinatorRemoved(const std::string& timeCoordinatorName)
+bool TimeSyncService::OnTimeCoordinatorRemoved(const std::string& timeCoordinatorName)
 {
     {
         std::lock_guard<std::mutex> lock{_timeCoordinatorMx};
         if (_timeCoordinatorName != timeCoordinatorName)
         {
-            return;
+            return false;
         }
     }
 
@@ -1193,6 +1338,7 @@ void TimeSyncService::OnTimeCoordinatorRemoved(const std::string& timeCoordinato
         .SetMessage("The time coordinator left the simulation. The virtual time cannot advance anymore.")
         .AddKeyValue(Logging::Keys::participantName, timeCoordinatorName)
         .Dispatch();
+    return true;
 }
 
 bool TimeSyncService::ParticipantHasTimeCoordinationCapability(const std::string& participantName) const

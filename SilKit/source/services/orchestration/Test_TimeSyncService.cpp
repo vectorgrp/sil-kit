@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 #include <chrono>
+#include <set>
 #include <condition_variable>
 #include <functional>
 #include <mutex>
@@ -506,8 +507,8 @@ TEST_F(Test_TimeSyncService, soft_time_limit_warning_reports_the_measured_timeou
 // Central time coordination
 // ----------------------------------------
 
-auto MakeSynchronizedDescriptor(const std::string& participantName, bool isTimeCoordinator)
-    -> SilKit::Core::ServiceDescriptor
+auto MakeSynchronizedDescriptor(const std::string& participantName, bool isTimeCoordinator,
+                                bool coordinatedLifecycle = true) -> SilKit::Core::ServiceDescriptor
 {
     SilKit::Core::ServiceDescriptor sd;
     sd.SetServiceType(Core::ServiceType::InternalController);
@@ -519,6 +520,8 @@ auto MakeSynchronizedDescriptor(const std::string& participantName, bool isTimeC
     sd.SetSupplementalDataItem(SilKit::Core::Discovery::controllerType, "TimeSyncService");
     sd.SetSupplementalDataItem(SilKit::Core::Discovery::timeSyncActive, "1");
     sd.SetSupplementalDataItem(SilKit::Core::Discovery::timeSyncIsTimeCoordinator, isTimeCoordinator ? "1" : "0");
+    sd.SetSupplementalDataItem(SilKit::Core::Discovery::timeSyncLifecycleIsCoordinated,
+                               coordinatedLifecycle ? "1" : "0");
     return sd;
 }
 
@@ -546,13 +549,39 @@ protected:
 
     void Discover(const std::string& participantName, bool isTimeCoordinator,
                   SilKit::Core::Discovery::ServiceDiscoveryEvent::Type type =
-                      SilKit::Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated)
+                      SilKit::Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated,
+                  bool coordinatedLifecycle = true)
     {
         for (auto&& handler : serviceDiscoveryHandlers)
         {
-            handler(type, MakeSynchronizedDescriptor(participantName, isTimeCoordinator));
+            handler(type, MakeSynchronizedDescriptor(participantName, isTimeCoordinator, coordinatedLifecycle));
         }
     }
+
+    void DiscoverAutonomousCandidate(const std::string& participantName)
+    {
+        Discover(participantName, true, SilKit::Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated, false);
+    }
+
+    void Remove(const std::string& participantName, bool isTimeCoordinator)
+    {
+        Discover(participantName, isTimeCoordinator,
+                 SilKit::Core::Discovery::ServiceDiscoveryEvent::Type::ServiceRemoved);
+    }
+
+    // Collects the messages of all error log entries
+    void CaptureErrors()
+    {
+        ON_CALL(participant.logger, ProcessLoggerMessage(_))
+            .WillByDefault([this](const Services::Logging::LoggerMessage& msg) {
+            if (msg.GetLevel() == Services::Logging::Level::Error)
+            {
+                errors.push_back(msg.GetMsgString());
+            }
+        });
+    }
+
+    std::vector<std::string> errors;
 
     NiceMock<MockServiceEndpoint> timeCoordinatorEndpoint{"TimeCoordinator", "N1", "C1"};
     NiceMock<MockServiceEndpoint> otherEndpoint{"Other", "N1", "C1"};
@@ -565,9 +594,11 @@ TEST_F(Test_TimeSyncServiceTimeCoordinator, participant_reports_to_time_coordina
 
     Discover("Other", false);
     Discover("TimeCoordinator", true);
-    ASSERT_TRUE(timeSyncService->GetTimeConfiguration()->IsFollowingTimeCoordinator());
+    // Chosen when all participants replied after ServicesCreated, not on discovery
+    EXPECT_FALSE(timeSyncService->GetTimeConfiguration()->IsFollowingTimeCoordinator());
 
     StartRunning();
+    ASSERT_TRUE(timeSyncService->GetTimeConfiguration()->IsFollowingTimeCoordinator());
 
     // The initial NextSimTask goes to the time coordinator, not to everybody
     EXPECT_TRUE(sentNextSimTasks.empty());
@@ -623,7 +654,7 @@ TEST_F(Test_TimeSyncServiceTimeCoordinator, time_coordinator_joining_after_time_
 TEST_F(Test_TimeSyncServiceTimeCoordinator, time_coordinator_grants_time_to_participants)
 {
     std::vector<std::chrono::nanoseconds> nows;
-    timeSyncService->ConfigureTimeCoordinator(true);
+    timeSyncService->ConfigureTimeCoordinatorCandidate(true);
     timeSyncService->SetSimulationStepHandler([&](auto now, auto) { nows.push_back(now); }, 1ms);
     Discover("Other", false);
 
@@ -652,7 +683,7 @@ TEST_F(Test_TimeSyncServiceTimeCoordinator, time_coordinator_grants_time_to_part
 TEST_F(Test_TimeSyncServiceTimeCoordinator, time_coordinator_continues_when_participant_leaves)
 {
     std::vector<std::chrono::nanoseconds> nows;
-    timeSyncService->ConfigureTimeCoordinator(true);
+    timeSyncService->ConfigureTimeCoordinatorCandidate(true);
     timeSyncService->SetSimulationStepHandlerAsync([&](auto now, auto) { nows.push_back(now); }, 1ms);
     Discover("Other", false);
 
@@ -668,7 +699,7 @@ TEST_F(Test_TimeSyncServiceTimeCoordinator, time_coordinator_continues_when_part
 TEST_F(Test_TimeSyncServiceTimeCoordinator, autonomous_time_coordinator_does_not_check_its_own_capabilities)
 {
     lifecycleService->SetLifecycleConfiguration(LifecycleConfiguration{OperationMode::Autonomous});
-    timeSyncService->ConfigureTimeCoordinator(true);
+    timeSyncService->ConfigureTimeCoordinatorCandidate(true);
     auto numSteps{0};
     timeSyncService->SetSimulationStepHandlerAsync([&](auto, auto) { ++numSteps; }, 1ms);
 
@@ -682,19 +713,127 @@ TEST_F(Test_TimeSyncServiceTimeCoordinator, autonomous_time_coordinator_does_not
     EXPECT_EQ(numSteps, 1) << "a time coordinator without other participants grants itself";
 }
 
-TEST_F(Test_TimeSyncServiceTimeCoordinator, second_time_coordinator_aborts)
-{
-    timeSyncService->ConfigureTimeCoordinator(true);
-    EXPECT_CALL(participant.mockSystemController, AbortSimulation()).Times(1);
-    Discover("TimeCoordinator", true);
-}
-
 TEST_F(Test_TimeSyncServiceTimeCoordinator, time_coordinator_aborts_on_participant_without_capability)
 {
-    timeSyncService->ConfigureTimeCoordinator(true);
+    timeSyncService->ConfigureTimeCoordinatorCandidate(true);
+    timeSyncService->SetSimulationStepHandler([](auto, auto) {}, 1ms);
     ON_CALL(participant, ParticipantHasCapability("Old", _)).WillByDefault(Return(false));
     EXPECT_CALL(participant.mockSystemController, AbortSimulation()).Times(AtLeast(1));
     Discover("Old", false);
+    StartRunning();
+}
+
+TEST_F(Test_TimeSyncServiceTimeCoordinator, choose_time_coordinator)
+{
+    using Choice = std::optional<std::string>;
+    EXPECT_EQ(TimeSyncService::ChooseTimeCoordinator({}), Choice{""});
+    EXPECT_EQ(TimeSyncService::ChooseTimeCoordinator({{"B", true}, {"A", true}, {"C", true}}), Choice{"A"});
+    // Coordinated candidates are preferred, autonomous ones are not known to everybody at the barrier
+    EXPECT_EQ(TimeSyncService::ChooseTimeCoordinator({{"A", false}, {"B", true}}), Choice{"B"});
+    EXPECT_EQ(TimeSyncService::ChooseTimeCoordinator({{"A", false}}), Choice{"A"});
+    EXPECT_EQ(TimeSyncService::ChooseTimeCoordinator({{"A", false}, {"B", false}}), std::nullopt);
+}
+
+TEST_F(Test_TimeSyncServiceTimeCoordinator, candidate_with_smallest_name_is_chosen)
+{
+    CaptureErrors();
+    timeSyncService->ConfigureTimeCoordinatorCandidate(true); // "MockParticipant"
+    timeSyncService->SetSimulationStepHandler([](auto, auto) {}, 1ms);
+    EXPECT_CALL(participant.mockSystemController, AbortSimulation()).Times(0);
+    Discover("Zulu", true);
+    Discover("Alpha", true);
+
+    StartRunning();
+
+    EXPECT_FALSE(timeSyncService->IsTimeCoordinator());
+    ASSERT_TRUE(timeSyncService->GetTimeConfiguration()->IsFollowingTimeCoordinator());
+    EXPECT_TRUE(sentNextSimTasks.empty());
+    ASSERT_EQ(sentTargetedNextSimTasks.size(), 1u);
+    EXPECT_EQ(sentTargetedNextSimTasks[0].first, "Alpha");
+    EXPECT_TRUE(errors.empty()) << errors.front();
+}
+
+TEST_F(Test_TimeSyncServiceTimeCoordinator, own_participant_with_smallest_name_becomes_time_coordinator)
+{
+    std::vector<std::chrono::nanoseconds> nows;
+    timeSyncService->ConfigureTimeCoordinatorCandidate(true); // "MockParticipant"
+    timeSyncService->SetSimulationStepHandler([&](auto now, auto) { nows.push_back(now); }, 1ms);
+    NiceMock<MockServiceEndpoint> zuluEndpoint{"Zulu", "N1", "C1"};
+    EXPECT_CALL(participant.mockSystemController, AbortSimulation()).Times(0);
+    Discover("Zulu", true);
+    Discover("Other", false);
+
+    StartRunning();
+    ASSERT_TRUE(timeSyncService->IsTimeCoordinator());
+    EXPECT_TRUE(sentNextSimTasks.empty());
+    EXPECT_TRUE(sentTargetedNextSimTasks.empty());
+
+    // Both peers found before the choice are participants of our time coordinator
+    timeSyncService->ReceiveMsg(&zuluEndpoint, Task(0ms, 1ms));
+    EXPECT_TRUE(nows.empty());
+    timeSyncService->ReceiveMsg(&otherEndpoint, Task(0ms, 1ms));
+    ASSERT_EQ(nows.size(), 1u);
+    std::set<std::string> granted;
+    for (auto&& sent : sentTargetedNextSimTasks)
+    {
+        granted.insert(sent.first);
+    }
+    EXPECT_EQ(granted, (std::set<std::string>{"Other", "Zulu"}));
+}
+
+TEST_F(Test_TimeSyncServiceTimeCoordinator, coordinated_candidate_is_preferred_over_autonomous_candidate)
+{
+    timeSyncService->SetSimulationStepHandler([](auto, auto) {}, 1ms);
+    EXPECT_CALL(participant.mockSystemController, AbortSimulation()).Times(0);
+    DiscoverAutonomousCandidate("Alpha");
+    Discover("Zulu", true);
+
+    StartRunning();
+    ASSERT_EQ(sentTargetedNextSimTasks.size(), 1u);
+    EXPECT_EQ(sentTargetedNextSimTasks[0].first, "Zulu");
+}
+
+TEST_F(Test_TimeSyncServiceTimeCoordinator, several_autonomous_candidates_abort)
+{
+    timeSyncService->SetSimulationStepHandler([](auto, auto) {}, 1ms);
+    EXPECT_CALL(participant.mockSystemController, AbortSimulation()).Times(AtLeast(1));
+    DiscoverAutonomousCandidate("Alpha");
+    DiscoverAutonomousCandidate("Zulu");
+    StartRunning();
+}
+
+TEST_F(Test_TimeSyncServiceTimeCoordinator, candidate_that_was_not_chosen_leaves_without_error)
+{
+    CaptureErrors();
+    timeSyncService->SetSimulationStepHandler([](auto, auto) {}, 1ms);
+    Discover("Alpha", true);
+    Discover("Zulu", true);
+    StartRunning();
+
+    Remove("Zulu", true);
+    EXPECT_TRUE(errors.empty()) << errors.front();
+    EXPECT_TRUE(timeSyncService->GetTimeConfiguration()->IsFollowingTimeCoordinator());
+
+    // The chosen one leaving is reported (as Debug before Running, so no error here either)
+    Remove("Alpha", true);
+}
+
+TEST_F(Test_TimeSyncServiceTimeCoordinator, late_candidate_does_not_change_the_choice)
+{
+    timeSyncService->SetSimulationStepHandler([](auto, auto) {}, 1ms);
+    Discover("Bravo", true);
+    StartRunning();
+    ASSERT_EQ(sentTargetedNextSimTasks.size(), 1u);
+    EXPECT_EQ(sentTargetedNextSimTasks[0].first, "Bravo");
+
+    // A larger name does not change the choice
+    {
+        EXPECT_CALL(participant.mockSystemController, AbortSimulation()).Times(0);
+        Discover("Zulu", true);
+    }
+    // A smaller name would have been chosen: the participants disagree now, abort
+    EXPECT_CALL(participant.mockSystemController, AbortSimulation()).Times(1);
+    Discover("Alpha", true);
 }
 
 } // namespace

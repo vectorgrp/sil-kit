@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
+#include <algorithm>
 #include <atomic>
 #include <chrono>
 #include <condition_variable>
@@ -195,6 +196,10 @@ struct ITest_TimeCoordinator : ITest_SimTestHarness
         }
     }
 
+    //! An autonomous participant hops on into a simulation with a time coordinator, runs some steps and hops off.
+    //! With secondCandidate, P2 is also configured as time coordinator and is chosen (smaller name).
+    void RunHopOnHopOff(bool secondCandidate);
+
     CausalityChecker causality;
 };
 
@@ -273,15 +278,15 @@ TEST_F(ITest_TimeCoordinator, time_coordinator_with_dynamic_step_sizes)
     }
 }
 
-// An autonomous participant hops on into a simulation with a time coordinator, runs some steps and hops off again
-TEST_F(ITest_TimeCoordinator, autonomous_hop_on_hop_off)
+void ITest_TimeCoordinator::RunHopOnHopOff(bool secondCandidate)
 {
     const auto stopAt = 200ms;
     const auto hopOnAt = 50ms;
     const auto hopOffAt = 100ms;
     const auto stepSize = 10ms;
 
-    std::vector<ParticipantParams> participants{{"TimeCoordinator", stepSize, true, true}, {"P2", stepSize}};
+    std::vector<ParticipantParams> participants{{"TimeCoordinator", stepSize, true, true},
+                                                {"P2", stepSize, secondCandidate}};
     for (auto& p : participants)
     {
         causality.Register(p.name);
@@ -386,6 +391,49 @@ TEST_F(ITest_TimeCoordinator, autonomous_hop_on_hop_off)
         expectedNow += stepSize;
     }
     EXPECT_EQ(expectedNow, hopOffAt);
+}
+
+TEST_F(ITest_TimeCoordinator, autonomous_hop_on_hop_off)
+{
+    RunHopOnHopOff(false);
+}
+
+// The joiner must follow the chosen time coordinator, not just any participant that is configured as one
+TEST_F(ITest_TimeCoordinator, autonomous_hop_on_hop_off_with_two_candidates)
+{
+    RunHopOnHopOff(true);
+}
+
+// Several participants are configured as time coordinator: exactly one is chosen, the steps are the same as with P2P
+TEST_F(ITest_TimeCoordinator, several_candidates_choose_one_time_coordinator)
+{
+    const auto stopAt = 50ms;
+
+    auto p2p = MixedStepSizeParticipants(std::nullopt);
+    RunTestSetup(p2p, stopAt);
+    ExpectNoCausalityViolations();
+    causality.Reset();
+
+    // P2 has the smallest name of the candidates, but is not created first
+    auto withCandidates = MixedStepSizeParticipants(std::nullopt);
+    for (auto& p : withCandidates)
+    {
+        p.isTimeCoordinator = (p.name == "P2" || p.name == "P4" || p.name == "P5");
+    }
+    std::reverse(withCandidates.begin(), withCandidates.end());
+    RunTestSetup(withCandidates, stopAt);
+    ExpectNoCausalityViolations();
+
+    std::map<std::string, Steps> p2pSteps;
+    for (const auto& p : p2p)
+    {
+        p2pSteps[p.name] = p.steps;
+    }
+    for (const auto& p : withCandidates)
+    {
+        ExpectContiguousSteps(p, stopAt);
+        EXPECT_EQ(p2pSteps[p.name], p.steps) << p.name;
+    }
 }
 
 } // namespace

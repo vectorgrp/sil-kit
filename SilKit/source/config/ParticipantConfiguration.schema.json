@@ -1130,7 +1130,7 @@
             },
             "TimeCoordinator": {
               "type": "boolean",
-              "description": "When true, this participant is the central time coordinator of the simulation. All synchronized participants send their next simulation step to the time coordinator only, which grants time advances. This reduces the synchronization traffic from O(N^2) to O(N) messages per simulation step. At most one participant may be the time coordinator, and it must join before the virtual time starts.",
+              "description": "When true, this participant is a candidate for the central time coordinator of the simulation. Exactly one candidate is chosen: the one with the smallest name among the candidates with a coordinated lifecycle. All synchronized participants send their next simulation step to the time coordinator only, which grants time advances. This reduces the synchronization traffic from O(N^2) to O(N) messages per simulation step. The time coordinator must join before the virtual time starts.",
               "default": false
             }
           },
