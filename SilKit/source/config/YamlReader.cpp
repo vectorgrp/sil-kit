@@ -495,6 +495,7 @@ void YamlReader::Read(SilKit::Config::TimeSynchronization& obj)
     OptionalRead(obj.animationFactor, "AnimationFactor");
     OptionalRead(obj.enableMessageAggregation, "EnableMessageAggregation");
     OptionalRead(obj.dynamicSimulationStep, "DynamicSimulationStep");
+    OptionalRead(obj.timeCoordinator, "TimeCoordinator");
 }
 
 void YamlReader::Read(SilKit::Config::Experimental& obj)

@@ -76,6 +76,13 @@ const std::string timeSyncActive = "TimeSyncActive";
 // Set to "1" by a participant that requests dynamic simulation step sizes for the whole simulation
 // (e.g. a network simulator). Peers that are not a hard opt-out enable dynamic stepping when they see it.
 const std::string timeSyncDynamicStepSize = "TimeSyncDynamicStepSize";
+// Set to "1" by participants that are candidates for the central time coordinator. One of them is chosen after
+// ServicesCreated. Synchronized participants send their NextSimTask to the chosen time coordinator only and advance
+// time on its grants.
+const std::string timeSyncIsTimeCoordinator = "TimeSyncIsTimeCoordinator";
+// Set to "1" if the participant uses the coordinated lifecycle. Coordinated candidates are preferred as time
+// coordinator, because they are known to every participant when the time coordinator is chosen.
+const std::string timeSyncLifecycleIsCoordinated = "TimeSyncLifecycleIsCoordinated";
 
 } // namespace Discovery
 } // namespace Core

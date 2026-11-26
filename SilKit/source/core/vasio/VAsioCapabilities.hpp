@@ -34,6 +34,8 @@ namespace Capabilities {
 const auto ProxyMessage = CapabilityLiteral{"proxy-message"};
 const auto AutonomousSynchronous = CapabilityLiteral{"autonomous-synchronous"};
 const auto RequestParticipantConnection = CapabilityLiteral{"request-participant-connection-v2"};
+//! The participant supports virtual time synchronization via a central time coordinator.
+const auto TimeCoordination = CapabilityLiteral{"time-coordination"};
 } // namespace Capabilities
 
 

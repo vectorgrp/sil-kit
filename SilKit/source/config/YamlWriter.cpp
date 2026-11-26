@@ -574,6 +574,7 @@ void YamlWriter::Write(const SilKit::Config::TimeSynchronization& obj)
     {
         WriteKeyValue("DynamicSimulationStep", obj.dynamicSimulationStep.value());
     }
+    NonDefaultWrite(obj.timeCoordinator, "TimeCoordinator", defaultObj.timeCoordinator);
 }
 
 

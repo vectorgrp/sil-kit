@@ -44,6 +44,11 @@ public: //Methods
     void SetDynamicStepSizeEnabled(bool enabled);
     bool IsDynamicStepSizeEnabled() const;
 
+    //! Follow a time coordinator: the time coordinator's grant becomes the only entry this
+    //! participant waits for. Entries of other synchronized participants are dropped and ignored from now on.
+    void SetTimeCoordinator(const std::string& timeCoordinatorName);
+    bool IsFollowingTimeCoordinator() const;
+
 private: //Methods
     // Computes the minimal step duration that keeps this participant aligned with the earliest next
     // timepoint among all other synchronized participants. The caller must already hold _mx (this is
@@ -57,6 +62,9 @@ private: //Members
     NextSimTask _myNextTask;
     std::map<std::string, NextSimTask> _otherNextTasks;
     bool _blocking;
+
+    // Name of the time coordinator whose grants this participant follows (empty: P2P synchronization).
+    std::string _timeCoordinatorName;
 
     bool _hoppedOn = false;
     Logging::ILoggerInternal* _logger;

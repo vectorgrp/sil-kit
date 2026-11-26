@@ -33,6 +33,9 @@ add_library(O_SilKit_Services_Orchestration OBJECT
     TimeConfiguration.hpp
     TimeConfiguration.cpp
 
+    TimeCoordinator.hpp
+    TimeCoordinator.cpp
+
     SystemStateTracker.cpp
 )
 
@@ -59,3 +62,4 @@ add_silkit_test_to_executable(SilKitUnitTests
 add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_SyncSerdes.cpp LIBS S_SilKitImpl I_SilKit)
 add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_TimeProvider.cpp LIBS S_SilKitImpl I_SilKit)
 add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_TimeSyncService.cpp LIBS S_SilKitImpl I_SilKit)
+add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_TimeCoordinator.cpp LIBS S_SilKitImpl I_SilKit)

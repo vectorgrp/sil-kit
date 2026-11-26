@@ -407,6 +407,14 @@ auto LifecycleService::Status() const -> const ParticipantStatus&
     return _returnValueForStatus;
 }
 
+void LifecycleService::ResolveTimeCoordinator()
+{
+    if (_timeSyncService)
+    {
+        _timeSyncService->ResolveTimeCoordinator();
+    }
+}
+
 void LifecycleService::AddAsyncSubscriptionsCompletionHandler(std::function<void()> handler)
 {
     _participant->AddAsyncSubscriptionsCompletionHandler(std::move(handler));
@@ -434,6 +442,8 @@ auto LifecycleService::CreateTimeSyncService() -> ITimeSyncService*
     const auto& participantConfiguration = _participant->GetParticipantConfiguration();
     _timeSyncService->ConfigureDynamicStepSize(
         participantConfiguration.experimental.timeSynchronization.dynamicSimulationStep);
+    _timeSyncService->ConfigureTimeCoordinatorCandidate(
+        participantConfiguration.experimental.timeSynchronization.timeCoordinator);
 
     return _timeSyncService;
 }

@@ -29,6 +29,40 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <cmath>
 #include <fstream>
 
+#ifdef _WIN32
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
+#else
+#include <time.h>
+#endif
+
+// CPU time consumed by all threads of this process
+static std::chrono::nanoseconds ProcessCpuTime()
+{
+#ifdef _WIN32
+    FILETIME creation, exit, kernel, user;
+    ::GetProcessTimes(::GetCurrentProcess(), &creation, &exit, &kernel, &user);
+    auto toNs = [](const FILETIME& ft) {
+        ULARGE_INTEGER v;
+        v.LowPart = ft.dwLowDateTime;
+        v.HighPart = ft.dwHighDateTime;
+        return std::chrono::nanoseconds{static_cast<int64_t>(v.QuadPart) * 100};
+    };
+    return toNs(kernel) + toNs(user);
+#else
+    timespec ts{};
+    ::clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &ts);
+    return std::chrono::seconds{ts.tv_sec} + std::chrono::nanoseconds{ts.tv_nsec};
+#endif
+}
+
+// Steady-state measurement window: skip the first steps (warm-up), then measure a fixed number of steps.
+// This excludes participant creation, connection setup and service discovery from the measurement.
+constexpr uint32_t measurementWarmupSteps = 100;
+constexpr uint32_t measurementSteps = 1000;
+
 #include "silkit/SilKit.hpp"
 #include "silkit/SilKitVersion.hpp"
 #include "silkit/services/all.hpp"
@@ -73,7 +107,8 @@ static void PrintUsage(const std::string& executableName)
         << "\t--service\tSets the service type (pubsub, can or ethernet). Default: pubsub" << std::endl
         << "\t--configuration\tPath and filename of the participant configuration YAML or JSON file. Default: empty"
         << std::endl
-        << "\t--write-csv\tPath and filename of csv file with benchmark results. Default: empty" << std::endl;
+        << "\t--write-csv\tPath and filename of csv file with benchmark results. Default: empty" << std::endl
+        << "\t--time-coordinator\tMake Participant0 the central time coordinator. Default: off" << std::endl;
 }
 
 enum class ServiceType
@@ -114,6 +149,7 @@ struct BenchmarkConfig
     std::string silKitConfigPath = "";
     std::string writeCsv = "";
     ServiceType service = ServiceType::PubSub;
+    bool timeCoordinator = false;
 };
 
 static bool Parse(int argc, char** argv, BenchmarkConfig& config)
@@ -161,6 +197,7 @@ static bool Parse(int argc, char** argv, BenchmarkConfig& config)
         PrintUsage(argv[0]);
         return false;
     }
+    config.timeCoordinator = consumeFlag("--time-coordinator");
 
     // Some more human-readable shortcuts for the options.
     // Consume a named option and return its argument,
@@ -409,11 +446,35 @@ static void ParticipantsThread(std::shared_ptr<SilKit::Config::IParticipantConfi
     }
 
     const auto isVerbose = participantIndex == 0;
+    struct MeasurementWindow
+    {
+        std::chrono::steady_clock::time_point wallStart;
+        std::chrono::nanoseconds cpuStart{};
+    };
+    auto window = std::make_shared<MeasurementWindow>();
     timeSyncService->SetSimulationStepHandler([=](std::chrono::nanoseconds now, const auto /*duration*/) {
         if (now == benchmark.simulationDuration)
         {
             lifecycleService->Stop("Simulation done");
             return;
+        }
+
+        if (isVerbose)
+        {
+            if (now == measurementWarmupSteps * benchmark.simulationStepSize)
+            {
+                window->wallStart = std::chrono::steady_clock::now();
+                window->cpuStart = ProcessCpuTime();
+            }
+            else if (now == (measurementWarmupSteps + measurementSteps) * benchmark.simulationStepSize)
+            {
+                const auto wall = std::chrono::steady_clock::now() - window->wallStart;
+                const auto cpu = ProcessCpuTime() - window->cpuStart;
+                std::cout << " [window steps=" << measurementSteps << " wall_us="
+                          << std::chrono::duration_cast<std::chrono::microseconds>(wall).count()
+                          << " cpu_us=" << std::chrono::duration_cast<std::chrono::microseconds>(cpu).count() << "]"
+                          << std::flush;
+            }
         }
 
         if (isVerbose)
@@ -484,7 +545,9 @@ static void PrintParameters(BenchmarkConfig benchmark)
               << std::left << std::setw(39) << "- Message size (bytes): " << benchmark.messageSizeInBytes << std::endl
               << std::left << std::setw(39) << "- Registry URI: " << benchmark.registryUri << std::endl
               << std::left << std::setw(39) << "- Configuration: " << benchmark.silKitConfigPath << std::endl
-              << std::left << std::setw(39) << "- CSV output: " << benchmark.writeCsv << std::endl;
+              << std::left << std::setw(39) << "- CSV output: " << benchmark.writeCsv << std::endl
+              << std::left << std::setw(39) << "- Time coordinator: " << (benchmark.timeCoordinator ? "on" : "off")
+              << std::endl;
 }
 
 template <typename T>
@@ -532,6 +595,19 @@ int main(int argc, char** argv)
             config = SilKit::Config::ParticipantConfigurationFromFile(benchmark.silKitConfigPath);
         }
 
+        // With --time-coordinator, Participant0 is the time coordinator of all participants
+        auto timeCoordinatorConfig = config;
+        if (benchmark.timeCoordinator)
+        {
+            std::string timeCoordinatorConfigString;
+            if (benchmark.silKitConfigPath != "")
+            {
+                timeCoordinatorConfigString += "Includes:\n  Files:\n    - '" + benchmark.silKitConfigPath + "'\n";
+            }
+            timeCoordinatorConfigString += "Experimental:\n  TimeSynchronization:\n    TimeCoordinator: true\n";
+            timeCoordinatorConfig = SilKit::Config::ParticipantConfigurationFromString(timeCoordinatorConfigString);
+        }
+
         std::unique_ptr<SilKit::Vendor::Vector::ISilKitRegistry> registry =
             SilKit::Vendor::Vector::CreateSilKitRegistry(config);
         benchmark.registryUri = registry->StartListening(benchmark.registryUri);
@@ -549,7 +625,8 @@ int main(int argc, char** argv)
             {
                 std::string participantName = "Participant" + std::to_string(participantIndex);
                 participantNames.push_back(participantName);
-                threads.emplace_back(&ParticipantsThread, config, benchmark, participantName, participantIndex);
+                threads.emplace_back(&ParticipantsThread, participantIndex == 0 ? timeCoordinatorConfig : config,
+                                     benchmark, participantName, participantIndex);
             }
 
             const auto systemControllerName = "SystemController";

@@ -145,6 +145,7 @@ auto MakeCapabilitiesFromConfiguration(const SilKit::Config::ParticipantConfigur
     SilKit::Core::VAsioCapabilities capabilities;
 
     capabilities.AddCapability(SilKit::Core::Capabilities::AutonomousSynchronous);
+    capabilities.AddCapability(SilKit::Core::Capabilities::TimeCoordination);
 
     if (participantConfiguration.middleware.registryAsFallbackProxy)
     {

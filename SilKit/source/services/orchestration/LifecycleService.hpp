@@ -101,6 +101,8 @@ public:
     void SetLifecycleConfiguration(LifecycleConfiguration startConfiguration);
     void SetWorkflowConfiguration(const WorkflowConfiguration& msg);
 
+    //! Choose the time coordinator among the candidates, see TimeSyncService::ResolveTimeCoordinator.
+    void ResolveTimeCoordinator();
     void AddAsyncSubscriptionsCompletionHandler(std::function<void()> handler);
     OperationMode GetOperationMode() const;
 

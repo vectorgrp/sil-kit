@@ -20,6 +20,7 @@
 #include "util/PerformanceMonitor.hpp"
 #include "services/orchestration/TimeProvider.hpp"
 #include "services/orchestration/TimeConfiguration.hpp"
+#include "services/orchestration/TimeCoordinator.hpp"
 #include "services/orchestration/WatchDog.hpp"
 #include "services/metrics/Metrics.hpp"
 #include "services/logging/LogFunctions.hpp"
@@ -107,6 +108,26 @@ public:
     //! std::nullopt (default) = follow the network (enable if any peer advertises the request).
     void ConfigureDynamicStepSize(std::optional<bool> configured);
 
+    //! Configure this participant as a candidate for the central time coordinator
+    //! (Experimental.TimeSynchronization.TimeCoordinator). Must be called before the lifecycle is started.
+    void ConfigureTimeCoordinatorCandidate(bool isCandidate);
+    //! True if this participant was chosen as the time coordinator.
+    bool IsTimeCoordinator() const;
+
+    //! Choose the time coordinator among all known candidates. Called when all participants have replied after
+    //! ServicesCreated: then the TimeSyncService descriptors of all coordinated participants are known, so every
+    //! participant chooses the same one. Calling it again has no effect.
+    void ResolveTimeCoordinator();
+
+    //! The time coordinator among the candidates (participant name -> uses the coordinated lifecycle):
+    //! the smallest name among the coordinated candidates; otherwise a single autonomous candidate.
+    //! Empty if there is no candidate. std::nullopt if there are several autonomous candidates only (no robust choice).
+    static auto ChooseTimeCoordinator(const std::map<std::string, bool>& candidates) -> std::optional<std::string>;
+
+    //! Send our next simulation step: broadcast (P2P), to the time coordinator only, or into the local time
+    //! coordinator (if this participant is the time coordinator).
+    void SendNextSimTask(const NextSimTask& task);
+
 private:
     // ----------------------------------------
     // private methods
@@ -120,6 +141,20 @@ private:
     bool SetupTimeSyncPolicy(bool isSynchronizingVirtualTime);
 
     inline auto GetTimeSyncPolicy() const -> ITimeSyncPolicy*;
+    //! Like GetTimeSyncPolicy, but returns nullptr instead of throwing if the policy is not set yet.
+    auto TryGetTimeSyncPolicy() const -> ITimeSyncPolicy*;
+
+    //! Sends a grant of the local time coordinator to its recipients. The grant for ourselves is applied locally.
+    void DispatchGrant(std::optional<TimeCoordinator::GrantDispatch> dispatch);
+    void BecomeTimeCoordinator();
+    void OnTimeCoordinatorCreated(const std::string& timeCoordinatorName);
+    //! A candidate was discovered. Before the time coordinator is chosen, it is only recorded. Afterwards, it is
+    //! adopted if there is no time coordinator yet, or it must not change the choice. Returns false if aborted.
+    bool OnTimeCoordinatorCandidateCreated(const std::string& participantName, bool coordinatedLifecycle);
+    auto AllTimeCoordinatorCandidates() const -> std::map<std::string, bool>;
+    //! Returns true if the removed participant was the chosen time coordinator.
+    bool OnTimeCoordinatorRemoved(const std::string& timeCoordinatorName);
+    bool ParticipantHasTimeCoordinationCapability(const std::string& participantName) const;
 
     void StopWallClockCouplingThread();
     void HybridWait(std::chrono::nanoseconds targetWaitDuration);
@@ -179,6 +214,21 @@ private:
     std::set<std::string> _dynamicStepPeers;
     // Ensures the "enabled by a remote participant" notice is logged only once.
     Services::Logging::LogOnceFlag _dynamicStepRemoteLogOnce;
+
+    // Time coordinator. If this participant is the time coordinator, _timeCoordinator holds the next steps of
+    // all synchronized participants (including our own) and issues the grants. Otherwise, _timeCoordinatorName is the
+    // time coordinator we follow (empty: P2P synchronization). Guarded by _timeCoordinatorMx.
+    std::atomic<bool> _isTimeCoordinator{false};
+    TimeCoordinator _timeCoordinator;
+    mutable std::mutex _timeCoordinatorMx;
+    std::string _timeCoordinatorName;
+    // Candidates: participants that set Experimental.TimeSynchronization.TimeCoordinator. Peers map to whether they
+    // use the coordinated lifecycle. Guarded by _timeCoordinatorMx.
+    std::atomic<bool> _isTimeCoordinatorCandidate{false};
+    bool _ownLifecycleIsCoordinated{false};
+    std::map<std::string, bool> _timeCoordinatorCandidates;
+    bool _timeCoordinatorResolved{false};
+    std::optional<NextSimTask> _lastSentNextSimTask;
 
 };
 

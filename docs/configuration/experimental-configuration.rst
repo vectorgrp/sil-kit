@@ -27,6 +27,7 @@ TimeSynchronization
             AnimationFactor: 1.0
             EnableMessageAggregation: Off
             DynamicSimulationStep: true
+            TimeCoordinator: false
 
 .. list-table:: TimeSynchronization Configuration
    :widths: 15 85
@@ -66,6 +67,32 @@ TimeSynchronization
          leaves the key unset on all others, so they follow automatically. When a participant is enabled
          this way by a remote request, it emits an ``Info`` log message stating that dynamic stepping was
          enabled remotely and how to opt out (set ``DynamicSimulationStep`` to ``false``).
+
+   * - TimeCoordinator
+     - Makes this participant a candidate for the *time coordinator* of the simulation (default: ``false``).
+       Without a time coordinator, every synchronized participant sends its next simulation step to every other
+       synchronized participant, which costs O(N\ :sup:`2`) messages per simulation step for N participants.
+       With a time coordinator, every participant reports its next simulation step to the time coordinator only, and the
+       time coordinator grants the time advance to the participants whose turn it is. This costs O(N) messages per step.
+
+       The time coordinator is an ordinary participant with a time synchronization service and a simulation step handler;
+       the API does not change. Candidates announce themselves in the service discovery. Several participants may be
+       candidates, for example because they share a configuration file; exactly one of them becomes the time coordinator,
+       and all other synchronized participants follow it automatically. The order of simulation steps is the same as without
+       a time coordinator, including dynamic simulation step sizes and hop-on / hop-off of autonomous participants.
+
+       .. note::
+         - The time coordinator is chosen when all participants have reached ``ServicesCreated`` and replied to each
+           other. Then every participant knows the same candidates and chooses the same one: the candidate with the
+           smallest participant name among the candidates with a coordinated lifecycle.
+           Without such a candidate, a single autonomous candidate is the time coordinator; several autonomous
+           candidates abort the simulation, because they cannot be chosen robustly.
+         - A candidate that joins after the choice does not change it. If it would have been chosen, the participants
+           would disagree, and the simulation is aborted.
+         - The time coordinator must join before the virtual time starts. It must not leave while the simulation is
+           running: the virtual time of the other participants cannot advance without it.
+         - All synchronized participants must support the time coordinator. A participant built with an
+           older |ProductName| version aborts the simulation.
 
    * - AnimationFactor
      - This value affects |ProductName| simulations where a time synchronization service is used. 
