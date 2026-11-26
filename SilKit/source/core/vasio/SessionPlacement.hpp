@@ -34,7 +34,8 @@ public:
 
     //! \brief Assigns a generation on the peer's service descriptor without registering the peer.
     //! A known controller's assignment reserves its slot even if registration subsequently fails.
-    void Admit(IVAsioPeer* peer, const Snapshot& registered);
+    //! Returns false for a duplicate non-required participant other than the controller.
+    [[nodiscard]] bool Admit(IVAsioPeer* peer, const Snapshot& registered);
 
     void OnStatus(const IServiceEndpoint* from, const Services::Orchestration::ParticipantStatus& msg,
                   const Snapshot& registered);
@@ -62,9 +63,8 @@ private:
     using Generations = std::map<uint64_t, Generation>;
 
 private:
-    bool ShouldEnterGeneration(const std::string& participantName, uint64_t generationNumber,
-                               const std::set<std::string>& participants) const;
-    auto SelectGeneration(const std::string& participantName, const Snapshot& registered) const -> uint64_t;
+    auto SelectGeneration(const std::string& participantName, const Snapshot& registered) const
+        -> std::optional<uint64_t>;
 
     auto GetOrCreateGeneration(const IServiceEndpoint* from, const Snapshot& registered) -> std::pair<uint64_t, Generation*>;
     auto GetOrCreateGeneration(uint64_t generationNumber) -> Generation&;
@@ -76,6 +76,7 @@ private:
     Services::Logging::ILoggerInternal* _logger;
     IRegistryEventListener* _registryEventListener;
     Generations _generations;
+    uint64_t _latestGeneration{0};
     std::optional<WorkflowContract> _workflowContract;
 
     friend struct SessionPlacementTestAccess;

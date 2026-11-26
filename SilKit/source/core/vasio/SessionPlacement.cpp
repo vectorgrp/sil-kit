@@ -33,58 +33,69 @@ SessionPlacement::SessionPlacement(std::string simulationName, Services::Logging
 {
 }
 
-bool SessionPlacement::ShouldEnterGeneration(const std::string& participantName, uint64_t generationNumber,
-                                             const std::set<std::string>& participants) const
-{
-    if (participants.count(participantName) != 0)
-    {
-        return false;
-    }
-
-    const auto generationIt{_generations.find(generationNumber)};
-    if (generationIt == _generations.end())
-    {
-        return true;
-    }
-
-    const auto& generation{generationIt->second};
-    return !generation.used
-           && !(generation.controllerAssigned && _workflowContract.has_value()
-                && _workflowContract->controllerName == participantName);
-}
-
 auto SessionPlacement::SelectGeneration(const std::string& participantName, const Snapshot& registered) const
-    -> uint64_t
+    -> std::optional<uint64_t>
 {
     if (registered.empty())
     {
         return FIRST_GENERATION;
     }
 
-    if (_workflowContract.has_value() && _workflowContract->controllerName != participantName
-        && _workflowContract->requiredParticipantNames.count(participantName) == 0)
+    const auto newest{registered.find(_latestGeneration)};
+    if (newest == registered.end())
     {
-        const auto& newest{*registered.rbegin()};
-        return newest.second.count(participantName) == 0 ? newest.first : newest.first + 1;
+        return _latestGeneration + 1;
     }
 
-    for (auto generationIt = registered.rbegin(); generationIt != registered.rend(); ++generationIt)
+    const bool isController{_workflowContract.has_value() && _workflowContract->controllerName == participantName};
+    if (_workflowContract.has_value() && !isController
+        && _workflowContract->requiredParticipantNames.count(participantName) == 0)
     {
-        const auto& generationPair = *generationIt;
-        if (ShouldEnterGeneration(participantName, generationPair.first, generationPair.second))
+        if (newest->second.count(participantName) != 0)
         {
-            return generationPair.first;
+            return std::nullopt;
+        }
+        return _latestGeneration;
+    }
+
+    if (newest->second.count(participantName) == 0)
+    {
+        const auto state{_generations.find(_latestGeneration)};
+        if (state == _generations.end() || (!state->second.used && !(isController && state->second.controllerAssigned)))
+        {
+            return _latestGeneration;
         }
     }
 
-    return registered.rbegin()->first + 1;
+    return _latestGeneration + 1;
 }
 
-void SessionPlacement::Admit(IVAsioPeer* peer, const Snapshot& registered)
+bool SessionPlacement::Admit(IVAsioPeer* peer, const Snapshot& registered)
 {
     const auto& participantName{peer->GetInfo().participantName};
 
-    const auto generation{SelectGeneration(participantName, registered)};
+    const auto selected{SelectGeneration(participantName, registered)};
+    if (!selected)
+    {
+        return false;
+    }
+
+    // Diagnostic
+    const auto generation{*selected};
+    if (generation != _latestGeneration && registered.count(_latestGeneration) != 0)
+    {
+        const auto previous{_generations.find(_latestGeneration)};
+        if (previous == _generations.end() || !previous->second.used)
+        {
+            _logger->MakeMessage(Log::Level::Warn, TopicOf(*this))
+                .SetMessage("Generation {} in simulation '{}' supersedes generation {} before it started",
+                            generation, _simulationName, _latestGeneration)
+                .Dispatch();
+        }
+    }
+
+    // Keep the latest number even if that generation drains before the superseded ones.
+    _latestGeneration = generation;
 
     _logger->MakeMessage(Log::Level::Debug, TopicOf(*this))
         .SetMessage("Participant '{}' in simulation '{}' is placed into generation {}", participantName,
@@ -102,6 +113,7 @@ void SessionPlacement::Admit(IVAsioPeer* peer, const Snapshot& registered)
     {
         GetOrCreateGeneration(generation).controllerAssigned = true;
     }
+    return true;
 }
 
 auto SessionPlacement::GetOrCreateGeneration(const IServiceEndpoint* from, const Snapshot& registered)

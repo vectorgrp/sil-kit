@@ -249,6 +249,7 @@ void VAsioRegistry::OnParticipantAnnouncement(IVAsioPeer* peer, const Participan
     const auto& peerInfo = announcement.peerInfo;
 
     const auto registered{_connection.ParticipantsByGeneration(announcement.simulationName)};
+    bool duplicate{false};
 
     if (IsRegistrySessionName(announcement.simulationName))
     {
@@ -259,20 +260,20 @@ void VAsioRegistry::OnParticipantAnnouncement(IVAsioPeer* peer, const Participan
                                          "does not advertise it. Upgrade the participant.",
                                          announcement.simulationName, peerInfo.participantName)};
         }
-        GetOrCreatePlacement(announcement.simulationName)->Admit(peer, registered);
+        duplicate = !GetOrCreatePlacement(announcement.simulationName)->Admit(peer, registered);
     }
     else
     {
         const auto generationIt{registered.find(0)};
-        if (generationIt != registered.end() && generationIt->second.count(peerInfo.participantName) != 0)
-        {
-            const auto message = fmt::format("A participant with the same name '{}' already exists in the simulation {}",
-                                             peerInfo.participantName, announcement.simulationName);
-            GetLoggerInternal()->MakeMessage(Log::Level::Warn, TopicOf(*this))
-                .SetMessage(message)
-                .Dispatch();
-            throw SilKitError{message};
-        }
+        duplicate = generationIt != registered.end() && generationIt->second.count(peerInfo.participantName) != 0;
+    }
+
+    if (duplicate)
+    {
+        const auto message = fmt::format("A participant with the same name '{}' already exists in the simulation {}",
+                                         peerInfo.participantName, announcement.simulationName);
+        GetLoggerInternal()->MakeMessage(Log::Level::Warn, TopicOf(*this)).SetMessage(message).Dispatch();
+        throw SilKitError{message};
     }
 
     SendKnownParticipants(peer);
