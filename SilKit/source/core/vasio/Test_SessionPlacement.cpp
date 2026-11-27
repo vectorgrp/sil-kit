@@ -20,9 +20,10 @@ namespace Core {
 
 struct SessionPlacementTestAccess
 {
-    static bool IsGenerationUsed(const SessionPlacement& placement, uint64_t generation)
+    static bool GenerationHasStarted(const SessionPlacement& placement, uint64_t generation)
     {
-        return placement._generations.at(generation).used;
+        const auto it{placement._generations.find(generation)};
+        return it != placement._generations.end() && it->second.hasStarted;
     }
 
     static bool HasGenerationState(const SessionPlacement& placement, uint64_t generation)
@@ -94,9 +95,9 @@ protected:
         }
     }
 
-    bool IsGenerationUsed(uint64_t generation) const
+    bool GenerationHasStarted(uint64_t generation) const
     {
-        return SessionPlacementTestAccess::IsGenerationUsed(_placement, generation);
+        return SessionPlacementTestAccess::GenerationHasStarted(_placement, generation);
     }
 };
 
@@ -165,9 +166,9 @@ TEST_F(Test_SessionPlacement, rejoining_bumps_the_generation_once_the_simulation
     Join(controller);
     SendWorkflowConfiguration(controller, {"A", "B"});
     AdvanceTo(a, ParticipantState::ReadyToRun);
-    EXPECT_FALSE(IsGenerationUsed(1));
+    EXPECT_FALSE(GenerationHasStarted(1));
     AdvanceTo(b, ParticipantState::ReadyToRun);
-    EXPECT_TRUE(IsGenerationUsed(1));
+    EXPECT_TRUE(GenerationHasStarted(1));
 
     Leave(a);
 
@@ -188,19 +189,19 @@ TEST_F(Test_SessionPlacement, rejoining_reuses_the_generation_before_the_simulat
     SendWorkflowConfiguration(controller, {"A", "B"});
     AdvanceTo(a, ParticipantState::ReadyToRun);
     AdvanceTo(b, ParticipantState::CommunicationInitialized);
-    EXPECT_FALSE(IsGenerationUsed(1));
+    EXPECT_FALSE(GenerationHasStarted(1));
 
     Leave(a);
     Join(a);
     EXPECT_EQ(a.GetServiceDescriptor().GetGeneration(), 1u);
-    EXPECT_FALSE(IsGenerationUsed(1));
+    EXPECT_FALSE(GenerationHasStarted(1));
 
     // the status of A was dropped on shutdown, so B reaching ReadyToRun is not enough to start the simulation
     AdvanceTo(b, ParticipantState::ReadyToRun);
-    EXPECT_FALSE(IsGenerationUsed(1));
+    EXPECT_FALSE(GenerationHasStarted(1));
 
     AdvanceTo(a, ParticipantState::ReadyToRun);
-    EXPECT_TRUE(IsGenerationUsed(1));
+    EXPECT_TRUE(GenerationHasStarted(1));
 }
 
 TEST_F(Test_SessionPlacement, coordinated_participant_does_not_join_a_generation_that_has_started)
@@ -213,13 +214,13 @@ TEST_F(Test_SessionPlacement, coordinated_participant_does_not_join_a_generation
     Join(controller);
     SendWorkflowConfiguration(controller, {"A", "B"});
     AdvanceTo(a, ParticipantState::Running);
-    EXPECT_FALSE(IsGenerationUsed(1));
+    EXPECT_FALSE(GenerationHasStarted(1));
 
     // B is required, but has not joined yet: it can still join, the simulation did not start without it
     Join(b);
     EXPECT_EQ(b.GetServiceDescriptor().GetGeneration(), 1u);
     AdvanceTo(b, ParticipantState::Running);
-    EXPECT_TRUE(IsGenerationUsed(1));
+    EXPECT_TRUE(GenerationHasStarted(1));
 
     Leave(b);
     Join(b);
@@ -236,7 +237,7 @@ TEST_F(Test_SessionPlacement, autonomous_participant_joins_running_generation)
     Join(controller);
     SendWorkflowConfiguration(controller, {"A"});
     AdvanceTo(a, ParticipantState::Running);
-    EXPECT_TRUE(IsGenerationUsed(1));
+    EXPECT_TRUE(GenerationHasStarted(1));
 
     Join(observer);
     EXPECT_EQ(observer.GetServiceDescriptor().GetGeneration(), 1u);
@@ -263,7 +264,7 @@ TEST_F(Test_SessionPlacement, autonomous_participant_joins_most_recent_live_gene
     SendWorkflowConfiguration(controller1, {"A", "B"});
     AdvanceTo(a1, ParticipantState::Running);
     AdvanceTo(b1, ParticipantState::Running);
-    ASSERT_TRUE(IsGenerationUsed(1));
+    ASSERT_TRUE(GenerationHasStarted(1));
 
     Join(a2);
     Join(b2);
@@ -271,7 +272,7 @@ TEST_F(Test_SessionPlacement, autonomous_participant_joins_most_recent_live_gene
     SendWorkflowConfiguration(controller2, {"A", "B"});
     AdvanceTo(a2, ParticipantState::Running);
     AdvanceTo(b2, ParticipantState::Running);
-    ASSERT_TRUE(IsGenerationUsed(2));
+    ASSERT_TRUE(GenerationHasStarted(2));
 
     Join(observer);
     EXPECT_EQ(observer.GetServiceDescriptor().GetGeneration(), 2u);
@@ -294,7 +295,7 @@ TEST_F(Test_SessionPlacement, autonomous_duplicate_check_only_considers_the_acti
     SendWorkflowConfiguration(controller1, {"A", "B"});
     AdvanceTo(a1, ParticipantState::Running);
     AdvanceTo(b1, ParticipantState::Running);
-    ASSERT_TRUE(IsGenerationUsed(1));
+    ASSERT_TRUE(GenerationHasStarted(1));
     Join(observer1);
     ASSERT_EQ(observer1.GetServiceDescriptor().GetGeneration(), 1u);
 
@@ -304,7 +305,7 @@ TEST_F(Test_SessionPlacement, autonomous_duplicate_check_only_considers_the_acti
     SendWorkflowConfiguration(controller2, {"A", "B"});
     AdvanceTo(a2, ParticipantState::Running);
     AdvanceTo(b2, ParticipantState::Running);
-    ASSERT_TRUE(IsGenerationUsed(2));
+    ASSERT_TRUE(GenerationHasStarted(2));
 
     Join(observer2);
     EXPECT_EQ(observer2.GetServiceDescriptor().GetGeneration(), 2u);
@@ -322,7 +323,7 @@ TEST_F(Test_SessionPlacement, rejoining_autonomous_system_controller_spawns_new_
     SendWorkflowConfiguration(controller, {"A", "B"});
     AdvanceTo(a, ParticipantState::Running);
     AdvanceTo(b, ParticipantState::Running);
-    ASSERT_TRUE(IsGenerationUsed(1));
+    ASSERT_TRUE(GenerationHasStarted(1));
 
     Leave(controller);
     Join(controller);
@@ -350,7 +351,7 @@ TEST_F(Test_SessionPlacement, changing_workflow_configuration_between_generation
         SendWorkflowConfiguration(controller1, {"A", "B"});
         AdvanceTo(a1, ParticipantState::Running);
         AdvanceTo(b1, ParticipantState::Running);
-        ASSERT_TRUE(IsGenerationUsed(1));
+        ASSERT_TRUE(GenerationHasStarted(1));
 
         if (disconnectController)
         {
@@ -364,18 +365,22 @@ TEST_F(Test_SessionPlacement, changing_workflow_configuration_between_generation
         EXPECT_CALL(_logger, ProcessLoggerMessage(ALoggerMessageWith(Level::Error))).Times(1);
         SendWorkflowConfiguration(controller2, {"A"});
         testing::Mock::VerifyAndClearExpectations(&_logger);
-        EXPECT_FALSE(IsGenerationUsed(2));
+        EXPECT_FALSE(GenerationHasStarted(2));
+
+        Leave(controller2);
+        Join(controller2);
+        ASSERT_EQ(controller2.GetServiceDescriptor().GetGeneration(), 2u);
 
         AdvanceTo(a2, ParticipantState::Running);
-        EXPECT_FALSE(IsGenerationUsed(2));
+        EXPECT_FALSE(GenerationHasStarted(2));
 
         EXPECT_CALL(_logger, ProcessLoggerMessage(testing::_)).Times(testing::AnyNumber());
         EXPECT_CALL(_logger, ProcessLoggerMessage(ALoggerMessageWith(Level::Error))).Times(0);
         SendWorkflowConfiguration(controller2, {"B", "A"});
-        EXPECT_FALSE(IsGenerationUsed(2));
+        EXPECT_FALSE(GenerationHasStarted(2));
         Join(b2);
         AdvanceTo(b2, ParticipantState::ReadyToRun);
-        EXPECT_TRUE(IsGenerationUsed(2));
+        EXPECT_TRUE(GenerationHasStarted(2));
         testing::Mock::VerifyAndClearExpectations(&_logger);
 
         Leave(controller2);
@@ -412,7 +417,7 @@ TEST_F(Test_SessionPlacement, changing_system_controller_name_between_generation
         SendWorkflowConfiguration(controller1, {"A", "B"});
         AdvanceTo(a1, ParticipantState::Running);
         AdvanceTo(b1, ParticipantState::Running);
-        ASSERT_TRUE(IsGenerationUsed(1));
+        ASSERT_TRUE(GenerationHasStarted(1));
 
         if (disconnectController)
         {
@@ -430,13 +435,13 @@ TEST_F(Test_SessionPlacement, changing_system_controller_name_between_generation
         AdvanceTo(a2, ParticipantState::ReadyToRun);
         Join(b2);
         AdvanceTo(b2, ParticipantState::ReadyToRun);
-        EXPECT_FALSE(IsGenerationUsed(2));
+        EXPECT_FALSE(GenerationHasStarted(2));
         Join(validController);
         EXPECT_EQ(validController.GetServiceDescriptor().GetGeneration(), 2u);
         EXPECT_CALL(_logger, ProcessLoggerMessage(testing::_)).Times(testing::AnyNumber());
         EXPECT_CALL(_logger, ProcessLoggerMessage(ALoggerMessageWith(Level::Error))).Times(0);
         SendWorkflowConfiguration(validController, {"B", "A"});
-        EXPECT_TRUE(IsGenerationUsed(2));
+        EXPECT_TRUE(GenerationHasStarted(2));
         testing::Mock::VerifyAndClearExpectations(&_logger);
 
         Leave(validController);
@@ -475,17 +480,17 @@ TEST_F(Test_SessionPlacement, equivalent_workflows_are_accepted_independently_in
     AdvanceTo(a2, ParticipantState::ReadyToRun);
     AdvanceTo(b2, ParticipantState::ReadyToRun);
     SendWorkflowConfiguration(controller1, {"A", "B"});
-    EXPECT_FALSE(IsGenerationUsed(1));
-    EXPECT_FALSE(IsGenerationUsed(2));
+    EXPECT_FALSE(GenerationHasStarted(1));
+    EXPECT_FALSE(GenerationHasStarted(2));
 
     SendWorkflowConfiguration(controller2, {"B", "A", "A"});
-    EXPECT_FALSE(IsGenerationUsed(1));
-    EXPECT_TRUE(IsGenerationUsed(2));
+    EXPECT_FALSE(GenerationHasStarted(1));
+    EXPECT_TRUE(GenerationHasStarted(2));
     SendWorkflowConfiguration(controller2, {"A", "B"});
 
     AdvanceTo(a1, ParticipantState::ReadyToRun);
     AdvanceTo(b1, ParticipantState::ReadyToRun);
-    EXPECT_TRUE(IsGenerationUsed(1));
+    EXPECT_TRUE(GenerationHasStarted(1));
 }
 
 TEST_F(Test_SessionPlacement, rejected_workflows_preserve_the_contract_and_generation_state)
@@ -510,10 +515,10 @@ TEST_F(Test_SessionPlacement, rejected_workflows_preserve_the_contract_and_gener
     SendWorkflowConfiguration(otherController, {"A", "B"});
     SendWorkflowConfiguration(otherController, {"A"});
     testing::Mock::VerifyAndClearExpectations(&_logger);
-    EXPECT_FALSE(IsGenerationUsed(1));
+    EXPECT_FALSE(GenerationHasStarted(1));
 
     AdvanceTo(b, ParticipantState::ReadyToRun);
-    EXPECT_TRUE(IsGenerationUsed(1));
+    EXPECT_TRUE(GenerationHasStarted(1));
     EXPECT_CALL(_logger, ProcessLoggerMessage(ALoggerMessageWith(Level::Error))).Times(0);
     SendWorkflowConfiguration(controller, {"B", "A"});
 }
@@ -559,7 +564,7 @@ TEST_F(Test_SessionPlacement, invalid_workflow_senders_do_not_establish_a_contra
     EXPECT_CALL(_logger, ProcessLoggerMessage(ALoggerMessageWith(Level::Error))).Times(0);
     SendWorkflowConfiguration(controller, {"A"});
     AdvanceTo(a, ParticipantState::ReadyToRun);
-    EXPECT_TRUE(IsGenerationUsed(1));
+    EXPECT_TRUE(GenerationHasStarted(1));
 }
 
 TEST_F(Test_SessionPlacement, status_updates_before_the_workflow_configuration_are_considered)
@@ -574,10 +579,10 @@ TEST_F(Test_SessionPlacement, status_updates_before_the_workflow_configuration_a
 
     AdvanceTo(a, ParticipantState::ReadyToRun);
     AdvanceTo(b, ParticipantState::ReadyToRun);
-    EXPECT_FALSE(IsGenerationUsed(1));
+    EXPECT_FALSE(GenerationHasStarted(1));
 
     SendWorkflowConfiguration(controller, {"A", "B"});
-    EXPECT_TRUE(IsGenerationUsed(1));
+    EXPECT_TRUE(GenerationHasStarted(1));
 }
 
 TEST_F(Test_SessionPlacement, participants_that_are_not_required_do_not_start_the_simulation)
@@ -592,10 +597,10 @@ TEST_F(Test_SessionPlacement, participants_that_are_not_required_do_not_start_th
 
     SendWorkflowConfiguration(controller, {"A"});
     AdvanceTo(observer, ParticipantState::Running);
-    EXPECT_FALSE(IsGenerationUsed(1));
+    EXPECT_FALSE(GenerationHasStarted(1));
 
     AdvanceTo(a, ParticipantState::ReadyToRun);
-    EXPECT_TRUE(IsGenerationUsed(1));
+    EXPECT_TRUE(GenerationHasStarted(1));
 }
 
 TEST_F(Test_SessionPlacement, autonomous_participant_joins_newest_generation_before_and_after_it_starts)
@@ -614,8 +619,8 @@ TEST_F(Test_SessionPlacement, autonomous_participant_joins_newest_generation_bef
     Join(controller2);
     SendWorkflowConfiguration(controller1, {"A"});
     SendWorkflowConfiguration(controller2, {"A"});
-    EXPECT_FALSE(IsGenerationUsed(1));
-    EXPECT_FALSE(IsGenerationUsed(2));
+    EXPECT_FALSE(GenerationHasStarted(1));
+    EXPECT_FALSE(GenerationHasStarted(2));
 
     FakeVAsioPeer observer{"Observer", "Sim"};
     Join(observer);
@@ -624,8 +629,8 @@ TEST_F(Test_SessionPlacement, autonomous_participant_joins_newest_generation_bef
 
     AdvanceTo(a2, ParticipantState::Running);
 
-    EXPECT_FALSE(IsGenerationUsed(1));
-    EXPECT_TRUE(IsGenerationUsed(2));
+    EXPECT_FALSE(GenerationHasStarted(1));
+    EXPECT_TRUE(GenerationHasStarted(2));
 
     Join(observer);
     EXPECT_EQ(observer.GetServiceDescriptor().GetGeneration(), 2u);
@@ -662,7 +667,7 @@ TEST_F(Test_SessionPlacement, required_participant_and_controller_join_the_activ
     SendWorkflowConfiguration(nextController, {"A", "B"});
     Join(b);
     EXPECT_EQ(b.GetServiceDescriptor().GetGeneration(), 2u);
-    EXPECT_FALSE(IsGenerationUsed(2));
+    EXPECT_FALSE(GenerationHasStarted(2));
 }
 
 TEST_F(Test_SessionPlacement, required_participant_cannot_go_back_to_an_unstarted_generation)
@@ -690,8 +695,8 @@ TEST_F(Test_SessionPlacement, required_participant_cannot_go_back_to_an_unstarte
     SendWorkflowConfiguration(controller2, {"A", "B"});
     AdvanceTo(a2, ParticipantState::ReadyToRun);
     AdvanceTo(b2, ParticipantState::ReadyToRun);
-    ASSERT_TRUE(IsGenerationUsed(2));
-    ASSERT_FALSE(IsGenerationUsed(1));
+    ASSERT_TRUE(GenerationHasStarted(2));
+    ASSERT_FALSE(GenerationHasStarted(1));
 
     EXPECT_CALL(_logger, ProcessLoggerMessage(ALoggerMessageWith(
                             Level::Warn, "Generation 3 in simulation 'Sim' supersedes generation 2 before it started")))
@@ -703,7 +708,7 @@ TEST_F(Test_SessionPlacement, required_participant_cannot_go_back_to_an_unstarte
     EXPECT_EQ(b1.GetServiceDescriptor().GetGeneration(), 3u);
 }
 
-TEST_F(Test_SessionPlacement, system_controller_cannot_join_same_generation_twice_before_start)
+TEST_F(Test_SessionPlacement, system_controller_rejoin_after_workflow_acceptance_creates_a_new_generation)
 {
     FakeVAsioPeer a{"A", "Sim"};
     FakeVAsioPeer b{"B", "Sim"};
@@ -713,22 +718,23 @@ TEST_F(Test_SessionPlacement, system_controller_cannot_join_same_generation_twic
     Join(b);
     Join(controller);
     SendWorkflowConfiguration(controller, {"A", "B"});
-    ASSERT_FALSE(IsGenerationUsed(1));
+    ASSERT_FALSE(GenerationHasStarted(1));
 
     Leave(controller);
     Join(controller);
     EXPECT_EQ(controller.GetServiceDescriptor().GetGeneration(), 2u);
-    EXPECT_FALSE(IsGenerationUsed(1));
+    EXPECT_FALSE(GenerationHasStarted(1));
 
     Join(b2);
     EXPECT_EQ(b2.GetServiceDescriptor().GetGeneration(), 2u);
-    EXPECT_FALSE(IsGenerationUsed(2));
+    SendWorkflowConfiguration(controller, {"A", "B"});
+    EXPECT_FALSE(GenerationHasStarted(2));
     Leave(controller);
     Join(controller);
     EXPECT_EQ(controller.GetServiceDescriptor().GetGeneration(), 3u);
-    EXPECT_FALSE(IsGenerationUsed(1));
-    EXPECT_FALSE(IsGenerationUsed(2));
-    EXPECT_FALSE(IsGenerationUsed(3));
+    EXPECT_FALSE(GenerationHasStarted(1));
+    EXPECT_FALSE(GenerationHasStarted(2));
+    EXPECT_FALSE(GenerationHasStarted(3));
 }
 
 TEST_F(Test_SessionPlacement, controller_creates_the_next_generation_after_the_active_generation_drains)
@@ -760,14 +766,14 @@ TEST_F(Test_SessionPlacement, controller_creates_the_next_generation_after_the_a
         // Generation 1 still has peers, so numbering must not reset or reuse generation 2.
         Join(controller);
         EXPECT_EQ(controller.GetServiceDescriptor().GetGeneration(), 3u);
-        EXPECT_FALSE(IsGenerationUsed(3));
+        EXPECT_FALSE(GenerationHasStarted(3));
         Leave(controller);
         Leave(a);
         Leave(b);
     }
 }
 
-TEST_F(Test_SessionPlacement, learning_controller_tags_all_connected_generations_without_activating_their_workflows)
+TEST_F(Test_SessionPlacement, learning_controller_does_not_activate_other_generations_workflows)
 {
     FakeVAsioPeer a1{"A", "Sim"};
     FakeVAsioPeer a2{"A", "Sim"};
@@ -780,17 +786,37 @@ TEST_F(Test_SessionPlacement, learning_controller_tags_all_connected_generations
     AdvanceTo(a2, ParticipantState::ReadyToRun);
 
     SendWorkflowConfiguration(controller1, {"A"});
-    EXPECT_FALSE(IsGenerationUsed(1));
-    EXPECT_FALSE(IsGenerationUsed(2));
+    EXPECT_FALSE(GenerationHasStarted(1));
+    EXPECT_FALSE(GenerationHasStarted(2));
     SendWorkflowConfiguration(controller2, {"A"});
-    EXPECT_TRUE(IsGenerationUsed(2));
+    EXPECT_TRUE(GenerationHasStarted(2));
 
     Leave(controller1);
     Join(controller1);
     EXPECT_EQ(controller1.GetServiceDescriptor().GetGeneration(), 3u);
 }
 
-TEST_F(Test_SessionPlacement, assigning_known_controller_reserves_its_slot_without_registering_it)
+TEST_F(Test_SessionPlacement, workflow_accepted_in_older_generation_does_not_block_controller_rejoin)
+{
+    FakeVAsioPeer a1{"A", "Sim"};
+    FakeVAsioPeer a2{"A", "Sim"};
+    FakeVAsioPeer controller1{"Controller", "Sim"};
+    FakeVAsioPeer controller2{"Controller", "Sim"};
+    Join(a1);
+    Join(controller1);
+    Join(a2);
+    Join(controller2);
+    ASSERT_EQ(controller2.GetServiceDescriptor().GetGeneration(), 2u);
+
+    SendWorkflowConfiguration(controller1, {"A"});
+    EXPECT_FALSE(SessionPlacementTestAccess::HasGenerationState(_placement, 2));
+
+    Leave(controller2);
+    Join(controller2);
+    EXPECT_EQ(controller2.GetServiceDescriptor().GetGeneration(), 2u);
+}
+
+TEST_F(Test_SessionPlacement, assigning_known_controller_without_registering_it_allows_retry)
 {
     FakeVAsioPeer a1{"A", "Sim"};
     FakeVAsioPeer a2{"A", "Sim"};
@@ -805,10 +831,10 @@ TEST_F(Test_SessionPlacement, assigning_known_controller_reserves_its_slot_witho
     ASSERT_TRUE(_placement.Admit(&controller, _registered));
     EXPECT_EQ(controller.GetServiceDescriptor().GetGeneration(), 2u);
     EXPECT_EQ(_registered.at(2).count("Controller"), 0u);
-    EXPECT_FALSE(IsGenerationUsed(2));
+    EXPECT_FALSE(GenerationHasStarted(2));
 
     ASSERT_TRUE(_placement.Admit(&nextController, _registered));
-    EXPECT_EQ(nextController.GetServiceDescriptor().GetGeneration(), 3u);
+    EXPECT_EQ(nextController.GetServiceDescriptor().GetGeneration(), 2u);
 }
 
 TEST_F(Test_SessionPlacement, roles_remain_unknown_until_the_first_workflow)
@@ -829,7 +855,7 @@ TEST_F(Test_SessionPlacement, roles_remain_unknown_until_the_first_workflow)
     SendWorkflowConfiguration(controller1, {"A"});
     Join(observer);
     EXPECT_EQ(observer.GetServiceDescriptor().GetGeneration(), 2u);
-    EXPECT_FALSE(IsGenerationUsed(2));
+    EXPECT_FALSE(GenerationHasStarted(2));
 }
 
 TEST_F(Test_SessionPlacement, rejoining_bumps_the_generation_while_participant_with_same_name_exists)
@@ -904,12 +930,12 @@ TEST_F(Test_SessionPlacement, late_status_of_a_participant_that_left_is_ignored)
     // the status of the participant that left must not bring it back into the tracker
     AdvanceTo(b, ParticipantState::ReadyToRun);
     AdvanceTo(a, ParticipantState::ReadyToRun);
-    EXPECT_FALSE(IsGenerationUsed(1));
+    EXPECT_FALSE(GenerationHasStarted(1));
 
     Join(a);
     EXPECT_EQ(a.GetServiceDescriptor().GetGeneration(), 1u);
     AdvanceTo(a, ParticipantState::ReadyToRun);
-    EXPECT_TRUE(IsGenerationUsed(1));
+    EXPECT_TRUE(GenerationHasStarted(1));
 }
 
 } // namespace

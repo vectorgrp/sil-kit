@@ -33,7 +33,7 @@ public:
                      IRegistryEventListener* registryEventListener = nullptr);
 
     //! \brief Assigns a generation on the peer's service descriptor without registering the peer.
-    //! A known controller's assignment reserves its slot even if registration subsequently fails.
+    //! A controller can rejoin an unstarted generation until that generation accepts its workflow.
     //! Returns false for a duplicate non-required participant other than the controller.
     [[nodiscard]] bool Admit(IVAsioPeer* peer, const Snapshot& registered);
 
@@ -57,8 +57,8 @@ private:
     struct Generation
     {
         VSilKit::SystemStateTracker stateTracker;
-        bool used{false};
-        bool controllerAssigned{false};
+        bool hasStarted{false};
+        bool workflowAccepted{false};
     };
     using Generations = std::map<uint64_t, Generation>;
 

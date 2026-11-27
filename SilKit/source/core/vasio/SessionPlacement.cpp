@@ -61,7 +61,8 @@ auto SessionPlacement::SelectGeneration(const std::string& participantName, cons
     if (newest->second.count(participantName) == 0)
     {
         const auto state{_generations.find(_latestGeneration)};
-        if (state == _generations.end() || (!state->second.used && !(isController && state->second.controllerAssigned)))
+        if (state == _generations.end()
+            || (!state->second.hasStarted && !(isController && state->second.workflowAccepted)))
         {
             return _latestGeneration;
         }
@@ -85,7 +86,7 @@ bool SessionPlacement::Admit(IVAsioPeer* peer, const Snapshot& registered)
     if (generation != _latestGeneration && registered.count(_latestGeneration) != 0)
     {
         const auto previous{_generations.find(_latestGeneration)};
-        if (previous == _generations.end() || !previous->second.used)
+        if (previous == _generations.end() || !previous->second.hasStarted)
         {
             _logger->MakeMessage(Log::Level::Warn, TopicOf(*this))
                 .SetMessage("Generation {} in simulation '{}' supersedes generation {} before it started",
@@ -95,7 +96,10 @@ bool SessionPlacement::Admit(IVAsioPeer* peer, const Snapshot& registered)
     }
 
     // Keep the latest number even if that generation drains before the superseded ones.
-    _latestGeneration = generation;
+    if (generation != _latestGeneration)
+    {
+        _latestGeneration = generation;
+    }
 
     _logger->MakeMessage(Log::Level::Debug, TopicOf(*this))
         .SetMessage("Participant '{}' in simulation '{}' is placed into generation {}", participantName,
@@ -109,10 +113,6 @@ bool SessionPlacement::Admit(IVAsioPeer* peer, const Snapshot& registered)
     peerDescriptor.SetGeneration(generation);
     peer->SetServiceDescriptor(peerDescriptor);
 
-    if (_workflowContract.has_value() && _workflowContract->controllerName == participantName)
-    {
-        GetOrCreateGeneration(generation).controllerAssigned = true;
-    }
     return true;
 }
 
@@ -196,16 +196,10 @@ void SessionPlacement::OnWorkflow(const IServiceEndpoint* from,
     if (!_workflowContract.has_value())
     {
         _workflowContract = WorkflowContract{controllerName, std::move(requiredParticipantNames)};
-        for (const auto& entry : registered)
-        {
-            if (entry.second.count(controllerName) != 0)
-            {
-                GetOrCreateGeneration(entry.first).controllerAssigned = true;
-            }
-        }
     }
 
     const auto [number, generation] = GetOrCreateGeneration(from, registered);
+    generation->workflowAccepted = true;
     const auto result{generation->stateTracker.UpdateRequiredParticipants(msg.requiredParticipantNames)};
     UpdateGenerationState(number, *generation, result.systemStateChanged);
 }
@@ -263,7 +257,7 @@ void SessionPlacement::UpdateGenerationState(uint64_t generationNumber, Generati
             .Dispatch();
     }
 
-    if (generation.used)
+    if (generation.hasStarted)
     {
         return;
     }
@@ -282,7 +276,7 @@ void SessionPlacement::UpdateGenerationState(uint64_t generationNumber, Generati
         return;
     }
 
-    generation.used = true;
+    generation.hasStarted = true;
 
     _logger->MakeMessage(Log::Level::Info, TopicOf(*this))
         .SetMessage("The simulation '{}' in generation {} has started (system state {}), required participants and "
