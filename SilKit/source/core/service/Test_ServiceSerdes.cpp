@@ -41,3 +41,44 @@ TEST(Test_ServiceSerdes, Mw_Service)
     std::string dummy;
     EXPECT_EQ(out.services.at(9).GetSupplementalDataItem("Second", dummy), true);
 }
+
+TEST(Test_ServiceDescriptor, generation_is_unset_by_default)
+{
+    SilKit::Core::ServiceDescriptor descriptor;
+    EXPECT_EQ(descriptor.GetGeneration(), std::nullopt);
+}
+
+TEST(Test_ServiceDescriptor, get_set_generation)
+{
+    SilKit::Core::ServiceDescriptor descriptor;
+    descriptor.SetSimulationName("Sim");
+    descriptor.SetGeneration(42);
+
+    EXPECT_EQ(descriptor.GetGeneration(), 42u);
+    EXPECT_EQ(descriptor.GetSimulationName(), "Sim");
+
+    descriptor.SetGeneration(43);
+    EXPECT_EQ(descriptor.GetGeneration(), 43u);
+    EXPECT_EQ(descriptor.GetSupplementalData().size(), 2u);
+}
+
+TEST(Test_ServiceDescriptor, malformed_generation_is_treated_as_unset)
+{
+    SilKit::Core::ServiceDescriptor descriptor;
+
+    for (const auto* malformed : {"", "abc", "-1", "1x", " 1"})
+    {
+        descriptor.SetSupplementalDataItem(SilKit::Core::Discovery::generation, malformed);
+        EXPECT_EQ(descriptor.GetGeneration(), std::nullopt) << "value: '" << malformed << "'";
+    }
+}
+
+TEST(Test_ServiceDescriptor, generation_does_not_affect_equality)
+{
+    SilKit::Core::ServiceDescriptor first;
+    first.SetGeneration(23);
+    SilKit::Core::ServiceDescriptor second{first};
+    second.SetGeneration(42);
+
+    EXPECT_EQ(first, second);
+}

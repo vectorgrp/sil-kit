@@ -115,7 +115,8 @@ inline MessageBuffer& operator<<(MessageBuffer& buffer, const ParticipantAnnounc
         buffer << reply.remoteHeader << reply.status
                << reply.subscribers
                // Added in 4.0.8.
-               << reply.diagnostic;
+               << reply.diagnostic
+               << reply.confirmedCapability;
     }
     return buffer;
 }
@@ -134,6 +135,10 @@ inline MessageBuffer& operator>>(MessageBuffer& buffer, ParticipantAnnouncementR
         if (buffer.RemainingBytesLeft() > 0)
         {
             buffer >> reply.diagnostic;
+        }
+        if (buffer.RemainingBytesLeft() > 0)
+        {
+            buffer >> reply.confirmedCapability;
         }
     }
     return buffer;

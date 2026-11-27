@@ -105,7 +105,7 @@ TEST_F(ITest_SystemMonitor, discover_services)
     SilKit::Services::Orchestration::ISystemMonitor* secondSystemMonitor = nullptr;
     SilKit::Services::Orchestration::ISystemMonitor* thirdSystemMonitor = nullptr;
 
-    testing::Sequence sequence, secondSequence, thirdSequence;
+    testing::Sequence sequence, secondSequence;
 
     std::promise<void> thirdParticipantDisconnectedPromiseA, thirdParticipantDisconnectedPromiseB;
     auto thirdParticipantDisconnectedFutureA = thirdParticipantDisconnectedPromiseA.get_future();
@@ -122,9 +122,9 @@ TEST_F(ITest_SystemMonitor, discover_services)
             .InSequence(secondSequence);
     }
 
-    EXPECT_CALL(sequencePoints, A_BeforeCreateThirdParticipant())
-        .Times(1)
-        .InSequence(sequence, secondSequence, thirdSequence);
+    testing::Expectation beforeCreateThird = EXPECT_CALL(sequencePoints, A_BeforeCreateThirdParticipant())
+                                                 .Times(1)
+                                                 .InSequence(sequence, secondSequence);
     {
         EXPECT_CALL(callbacks, ParticipantConnectedHandler(IsParticipant(thirdParticipantConnection)))
             .Times(1)
@@ -134,12 +134,13 @@ TEST_F(ITest_SystemMonitor, discover_services)
             .InSequence(secondSequence);
     }
     {
+        // The order in which the already connected participants are reported to the new participant is unspecified.
         EXPECT_CALL(thirdCallbacks, ParticipantConnectedHandler(IsParticipant(firstParticipantConnection)))
             .Times(1)
-            .InSequence(thirdSequence);
+            .After(beforeCreateThird);
         EXPECT_CALL(thirdCallbacks, ParticipantConnectedHandler(IsParticipant(secondParticipantConnection)))
             .Times(1)
-            .InSequence(thirdSequence);
+            .After(beforeCreateThird);
     }
     EXPECT_CALL(sequencePoints, B_AfterCreateThirdParticipant()).Times(1).InSequence(sequence, secondSequence);
     {

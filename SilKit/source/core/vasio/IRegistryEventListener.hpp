@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <cstdint>
+#include <optional>
 #include <string>
 
 #include "silkit/services/orchestration/OrchestrationDatatypes.hpp"
@@ -31,13 +33,21 @@ struct IRegistryEventListener
 
     virtual void OnLoggerCreated(SilKit::Services::Logging::ILoggerInternal* logger) = 0;
     virtual void OnRegistryUri(const std::string& registryUri) = 0;
-    virtual void OnParticipantConnected(const std::string& simulationName, const std::string& participantName) = 0;
-    virtual void OnParticipantDisconnected(const std::string& simulationName, const std::string& participantName) = 0;
+    virtual void OnGenerationCreated(const std::string& simulationName, uint64_t generation) = 0;
+    virtual void OnGenerationStateChanged(const std::string& simulationName, uint64_t generation,
+                                          SilKit::Services::Orchestration::SystemState state) = 0;
+    virtual void OnGenerationRemoved(const std::string& simulationName, uint64_t generation) = 0;
+    virtual void OnParticipantConnected(const std::string& simulationName, const std::string& participantName,
+                                         std::optional<uint64_t> generation) = 0;
+    virtual void OnParticipantDisconnected(const std::string& simulationName, const std::string& participantName,
+                                            std::optional<uint64_t> generation) = 0;
     virtual void OnRequiredParticipantsUpdate(const std::string& simulationName, const std::string& participantName,
-                                              SilKit::Util::Span<const std::string> requiredParticipantNames) = 0;
+                                              SilKit::Util::Span<const std::string> requiredParticipantNames,
+                                              std::optional<uint64_t> generation) = 0;
     virtual void OnParticipantStatusUpdate(
         const std::string& simulationName, const std::string& participantName,
-        const SilKit::Services::Orchestration::ParticipantStatus& participantStatus) = 0;
+        const SilKit::Services::Orchestration::ParticipantStatus& participantStatus,
+        std::optional<uint64_t> generation) = 0;
     virtual void OnServiceDiscoveryEvent(
         const std::string& simulationName, const std::string& participantName,
         const SilKit::Core::Discovery::ServiceDiscoveryEvent& serviceDiscoveryEvent) = 0;

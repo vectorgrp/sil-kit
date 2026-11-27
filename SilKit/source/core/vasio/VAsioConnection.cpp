@@ -26,6 +26,7 @@
 #include "util/Assert.hpp"
 #include "core/vasio/TransformAcceptorUris.hpp"
 #include "util/StringHelpers.hpp"
+#include "util/Uuid.hpp"
 
 #include "core/vasio/ConnectPeer.hpp"
 #include "core/vasio/io/util/IpAddress.hpp"
@@ -56,6 +57,14 @@ namespace {
 auto printUris(const std::vector<std::string>& uris)
 {
     return fmt::format("{}", fmt::join(uris, ", "));
+}
+
+//! Peers that were not assigned a generation (everything but peers of the registry) are in generation 0.
+constexpr uint64_t NoGeneration{0};
+
+auto GenerationOf(const SilKit::Core::IVAsioPeer& peer) -> uint64_t
+{
+    return peer.GetServiceDescriptor().GetGeneration().value_or(NoGeneration);
 }
 
 //! Note that local ipc (unix domain) sockets have a path limit (108 characters, typically)
@@ -145,6 +154,7 @@ auto MakeCapabilitiesFromConfiguration(const SilKit::Config::ParticipantConfigur
     SilKit::Core::VAsioCapabilities capabilities;
 
     capabilities.AddCapability(SilKit::Core::Capabilities::AutonomousSynchronous);
+    capabilities.AddCapability(SilKit::Core::Capabilities::RegistrySessions);
 
     if (participantConfiguration.middleware.registryAsFallbackProxy)
     {
@@ -313,7 +323,9 @@ auto VAsioConnection::PrepareAcceptorEndpointUris(const std::string& connectUri)
         acceptorEndpointUris.emplace_back("tcp://[::]:0");
 
         // Create the default local-domain socket path.
-        auto localEndpoint = makeLocalEndpoint(_participantName, _participantId, connectUri);
+        auto localEndpoint =
+            makeLocalEndpoint(_participantName, _participantId,
+                              connectUri + SilKit::Util::to_string(SilKit::Util::Uuid::GenerateRandom()));
         acceptorEndpointUris.emplace_back("local://" + localEndpoint.path());
     }
 
@@ -391,7 +403,7 @@ void VAsioConnection::OpenLocalAcceptors(const std::vector<std::string>& accepto
 
     for (const auto& uriString : acceptorEndpointUris)
     {
-        const auto uri = Uri::Parse(uriString);
+        auto uri = Uri::Parse(uriString);
 
         if (uri.Type() == Uri::UriType::Local && uri.Scheme() == "local")
         {
@@ -401,18 +413,52 @@ void VAsioConnection::OpenLocalAcceptors(const std::vector<std::string>& accepto
                 .AddKeyValue(Log::Keys::uriPath, uri.Path())
                 .Dispatch();
 
-            // file must not exist before we bind/listen on it
-            (void)fs::remove(uri.Path());
+            const auto generatedPath = _config.middleware.acceptorUris.empty();
+            if (!generatedPath)
+            {
+                (void)fs::remove(uri.Path());
+            }
 
             try
             {
-                auto acceptor{_ioContext->MakeLocalAcceptor(uri.Path())};
-                acceptor->SetListener(*this);
-                acceptor->AsyncAccept({});
-
+                constexpr size_t maxBindAttempts{3};
+                for (size_t attempt = 0; attempt < maxBindAttempts; ++attempt)
                 {
-                    std::unique_lock<decltype(_acceptorsMutex)> lock{_acceptorsMutex};
-                    _acceptors.emplace_back(std::move(acceptor));
+                    std::unique_ptr<IAcceptor> acceptor;
+                    try
+                    {
+                        acceptor = _ioContext->MakeLocalAcceptor(uri.Path());
+                    }
+                    catch (const asio::system_error& exception)
+                    {
+                        if (!generatedPath || exception.code() != asio::error::address_in_use
+                            || attempt + 1 == maxBindAttempts)
+                        {
+                            throw;
+                        }
+
+                        _logger->MakeMessage(Log::Level::Warn, TopicOf(*this))
+                            .SetMessage("Local domain socket path is already in use; generating a new path")
+                            .AddKeyValue(Log::Keys::uriPath, uri.Path())
+                            .Dispatch();
+
+                        auto localEndpoint = makeLocalEndpoint(
+                            _participantName, _participantId,
+                            uriString + SilKit::Util::to_string(SilKit::Util::Uuid::GenerateRandom()));
+                        uri = Uri::Parse("local://" + localEndpoint.path());
+                        continue;
+                    }
+
+                    acceptor->SetListener(*this);
+                    acceptor->AsyncAccept({});
+
+                    {
+                        std::unique_lock<decltype(_acceptorsMutex)> lock{_acceptorsMutex};
+                        _acceptors.emplace_back(std::move(acceptor));
+                    }
+
+                    metric->Add(uri.Path());
+                    break;
                 }
             }
             catch (const std::exception& exception)
@@ -423,8 +469,6 @@ void VAsioConnection::OpenLocalAcceptors(const std::vector<std::string>& accepto
                     .AddKeyValue(Log::Keys::exception, exception.what())
                     .Dispatch();
             }
-
-            metric->Add(fmt::format("{}", uri.Path()));
         }
         else if (uri.Type() == Uri::UriType::Tcp && uri.Scheme() == "tcp")
         {
@@ -470,6 +514,32 @@ void VAsioConnection::JoinSimulation(std::string connectUri)
 void VAsioConnection::OpenParticipantAcceptors(const std::string& connectUri)
 {
     const auto acceptorEndpointUris = PrepareAcceptorEndpointUris(connectUri);
+
+    if (IsRegistrySessionName(_simulationName))
+    {
+        std::vector<std::string> fixedAcceptorUris;
+        for (const auto& uriString : _config.middleware.acceptorUris)
+        {
+            const auto uri = Uri::Parse(uriString);
+            const auto fixedTcp = uri.Type() == Uri::UriType::Tcp && uri.Scheme() == "tcp" && uri.Port() != 0;
+            const auto fixedLocal =
+                _config.middleware.enableDomainSockets && uri.Type() == Uri::UriType::Local && uri.Scheme() == "local";
+            if (fixedTcp || fixedLocal)
+            {
+                fixedAcceptorUris.emplace_back(uriString);
+            }
+        }
+
+        if (!fixedAcceptorUris.empty())
+        {
+            _logger->MakeMessage(Log::Level::Warn, TopicOf(*this))
+                .SetMessage("Participant '{}' is joining registry session '{}' with fixed acceptor endpoints: {}. "
+                            "Overlapping instances may conflict. Leave Middleware.AcceptorUris unset to use "
+                            "per-instance endpoints, or configure unique endpoints for each instance.",
+                            _participantName, _simulationName, printUris(fixedAcceptorUris))
+                .Dispatch();
+        }
+    }
 
     if (_config.middleware.enableDomainSockets)
     {
@@ -789,6 +859,12 @@ void VAsioConnection::SendParticipantAnnouncementReply(IVAsioPeer* peer)
     // tell the remote peer what *our* protocol version is that we can accept for this peer
     reply.remoteHeader = MakeRegistryMsgHeader(peer->GetProtocolVersion());
     reply.status = ParticipantAnnouncementReply::Status::Success;
+    if (_participantId == REGISTRY_PARTICIPANT_ID && peer->GetServiceDescriptor().GetGeneration().has_value())
+    {
+        VAsioCapabilities capabilities;
+        capabilities.AddCapability(Capabilities::RegistrySessions);
+        reply.confirmedCapability = capabilities.ToCapabilitiesString();
+    }
     // fill in the service descriptors we want to subscribe to
     std::transform(_vasioReceivers.begin(), _vasioReceivers.end(), std::back_inserter(reply.subscribers),
                    [](const auto& subscriber) { return subscriber->GetDescriptor(); });
@@ -835,26 +911,49 @@ void VAsioConnection::ReceiveParticipantAnnouncementReply(IVAsioPeer* from, Seri
 
     auto reply = buffer.Deserialize<ParticipantAnnouncementReply>();
     const auto& remoteVersion = ExtractProtocolVersion(reply.remoteHeader);
+    const bool fromRegistry = from->GetInfo().participantId == REGISTRY_PARTICIPANT_ID;
 
+    std::string failure;
     if (reply.status == ParticipantAnnouncementReply::Status::Failed)
     {
-        const auto message = fmt::format(
+        failure = fmt::format(
             "SIL Kit Connection Handshake: Received failed ParticipantAnnouncementReply from '{}' ('{}') with "
             "diagnostic message: {}",
             from->GetInfo().participantName, from->GetSimulationName(),
             // provide a non-empty default string for the diagnostic message
             reply.diagnostic.empty() ? "(no diagnostic message was delivered)" : reply.diagnostic.c_str());
+    }
+    else if (fromRegistry && IsRegistrySessionName(_simulationName))
+    {
+        try
+        {
+            const VAsioCapabilities capabilities{reply.confirmedCapability};
+            if (!capabilities.HasCapability(Capabilities::RegistrySessions))
+            {
+                failure = fmt::format("Registry did not confirm registry-sessions support for simulation '{}'. "
+                                      "Use a registry that supports Registry Sessions.",
+                                      _simulationName);
+            }
+        }
+        catch (const TypeConversionError& error)
+        {
+            failure = fmt::format("Invalid registry-sessions confirmation for simulation '{}': {}", _simulationName,
+                                  error.what());
+        }
+    }
 
-            _logger->MakeMessage(Log::Level::Warn, TopicOf(*this))
-                .SetMessage(message)
-                .AddKeyValue(Log::Keys::protocolVersion, ExtractProtocolVersion(reply.remoteHeader)) // extract the version delivered in the reply 
-                .Dispatch();
+    if (!failure.empty())
+    {
+        _logger->MakeMessage(Log::Level::Warn, TopicOf(*this))
+            .SetMessage(failure)
+            .AddKeyValue(Log::Keys::protocolVersion, remoteVersion)
+            .Dispatch();
 
         // tear down the participant if we are talking to the registry
-        if (from->GetInfo().participantId == REGISTRY_PARTICIPANT_ID)
+        if (fromRegistry)
         {
             // handshake with SIL Kit Registry failed, we need to abort.
-            auto error = ProtocolError(message);
+            auto error = ProtocolError(failure);
 
             // propagate the error to the main thread
             _registryHandshakeComplete.set_exception(std::make_exception_ptr(error));
@@ -878,7 +977,7 @@ void VAsioConnection::ReceiveParticipantAnnouncementReply(IVAsioPeer* from, Seri
         .AddKeyValue(Log::Keys::protocolVersion, remoteVersion)
         .Dispatch();
 
-    if (from->GetInfo().participantId == REGISTRY_PARTICIPANT_ID)
+    if (fromRegistry)
     {
         _registryHandshakeComplete.set_value();
     }
@@ -1016,7 +1115,7 @@ void VAsioConnection::ReceiveRemoteParticipantConnectRequest_Registry(IVAsioPeer
     switch (msg.status)
     {
     case RemoteParticipantConnectRequest::REQUEST:
-        destination = FindPeerByName(peer->GetSimulationName(), msg.requestTarget.participantName);
+        destination = FindPeerForRequester(peer, msg.requestTarget.participantName);
 
         if (destination != nullptr)
         {
@@ -1028,7 +1127,7 @@ void VAsioConnection::ReceiveRemoteParticipantConnectRequest_Registry(IVAsioPeer
         break;
     case RemoteParticipantConnectRequest::CONNECTING:
     case RemoteParticipantConnectRequest::FAILED_TO_CONNECT:
-        destination = FindPeerByName(peer->GetSimulationName(), msg.requestOrigin.participantName);
+        destination = FindPeerForRequester(peer, msg.requestOrigin.participantName);
         break;
 
     default:
@@ -1172,7 +1271,7 @@ void VAsioConnection::AssociateParticipantNameAndPeer(const std::string& simulat
 {
     {
         std::lock_guard<decltype(_mutex)> lock{_mutex};
-        _participantNameToPeer[simulationName].insert({participantName, peer});
+        _participantNameToPeer[simulationName][GenerationOf(*peer)].insert({participantName, peer});
     }
 
     if (_config.experimental.metrics.sinks.empty())
@@ -1190,19 +1289,31 @@ void VAsioConnection::AssociateParticipantNameAndPeer(const std::string& simulat
     peer->InitializeMetrics(_metricsManager);
 }
 
-auto VAsioConnection::FindPeerByName(const std::string& simulationName,
-                                     const std::string& participantName) const -> IVAsioPeer*
+auto VAsioConnection::FindPeerForRequester(const IVAsioPeer* requester,
+                                           const std::string& participantName) const -> IVAsioPeer*
+{
+    return FindPeer(requester->GetSimulationName(), GenerationOf(*requester), participantName);
+}
+
+auto VAsioConnection::FindPeer(const std::string& simulationName, uint64_t generation,
+                               const std::string& participantName) const -> IVAsioPeer*
 {
     std::lock_guard<decltype(_mutex)> lock{_mutex};
 
-    auto simulationIt{_participantNameToPeer.find(simulationName)};
+    const auto simulationIt{_participantNameToPeer.find(simulationName)};
     if (simulationIt == _participantNameToPeer.end())
     {
         return nullptr;
     }
 
-    auto participantIt{simulationIt->second.find(participantName)};
-    if (participantIt == simulationIt->second.end())
+    const auto generationIt{simulationIt->second.find(generation)};
+    if (generationIt == simulationIt->second.end())
+    {
+        return nullptr;
+    }
+
+    const auto participantIt{generationIt->second.find(participantName)};
+    if (participantIt == generationIt->second.end())
     {
         return nullptr;
     }
@@ -1398,34 +1509,34 @@ void VAsioConnection::OnPeerShutdown(IVAsioPeer* peer)
 
 void VAsioConnection::SendProxyPeerShutdownNotification(IVAsioPeer* peer)
 {
-    const auto& sourceSimulationName = peer->GetSimulationName();
     const auto& sourceParticipantName = peer->GetInfo().participantName;
 
-    const auto simulationIt = _proxySourceToDestinations.find(sourceSimulationName);
-    if (simulationIt != _proxySourceToDestinations.end())
+    const auto proxyDestinationsIt = _proxySourceToDestinations.find(peer);
+    if (proxyDestinationsIt == _proxySourceToDestinations.end())
     {
-        const auto proxyDestinationsIt = simulationIt->second.find(sourceParticipantName);
-        if (proxyDestinationsIt != simulationIt->second.end())
-        {
-            for (const auto& destination : proxyDestinationsIt->second)
-            {
-                auto destinationPeer{FindPeerByName(sourceSimulationName, destination)};
-
-                // if a destination participant name has no associated peer, ignore it, it was already been disconnected
-                if (destinationPeer == nullptr)
-                {
-                    continue;
-                }
-
-                ProxyMessage msg{};
-                msg.source = sourceParticipantName;
-                msg.destination = destination;
-                msg.payload.clear();
-
-                destinationPeer->SendSilKitMsg(SerializedMessage{msg});
-            }
-        }
+        return;
     }
+
+    for (const auto& destination : proxyDestinationsIt->second)
+    {
+        auto destinationPeer{FindPeerForRequester(peer, destination)};
+
+        // if a destination participant name has no associated peer, ignore it, it was already been disconnected
+        if (destinationPeer == nullptr)
+        {
+            continue;
+        }
+
+        ProxyMessage msg{};
+        msg.source = sourceParticipantName;
+        msg.destination = destination;
+        msg.payload.clear();
+
+        destinationPeer->SendSilKitMsg(SerializedMessage{msg});
+    }
+
+    // The association must not outlive the peer, a new peer may be allocated at the same address.
+    _proxySourceToDestinations.erase(proxyDestinationsIt);
 }
 
 void VAsioConnection::RemovePeerFromLinks(IVAsioPeer* peer)
@@ -1446,10 +1557,24 @@ void VAsioConnection::RemovePeerFromConnection(IVAsioPeer* peer)
     {
         std::lock_guard<decltype(_mutex)> lock{_mutex};
 
-        auto simulationIt{_participantNameToPeer.find(peer->GetSimulationName())};
+        const auto simulationIt{_participantNameToPeer.find(peer->GetSimulationName())};
         if (simulationIt != _participantNameToPeer.end())
         {
-            simulationIt->second.erase(peer->GetInfo().participantName);
+            const auto generationIt{simulationIt->second.find(GenerationOf(*peer))};
+            if (generationIt != simulationIt->second.end())
+            {
+                // Only remove the entry if it belongs to this peer. Another peer with the same name may be registered.
+                const auto participantIt{generationIt->second.find(peer->GetInfo().participantName)};
+                if (participantIt != generationIt->second.end() && participantIt->second == peer)
+                {
+                    generationIt->second.erase(participantIt);
+                }
+
+                if (generationIt->second.empty())
+                {
+                    simulationIt->second.erase(generationIt);
+                }
+            }
         }
     }
 
@@ -1548,7 +1673,7 @@ void VAsioConnection::ReceiveProxyMessage(IVAsioPeer* from, SerializedMessage& b
     const bool fromIsSource = from->GetInfo().participantName == proxyMessage.source;
     if (fromIsSource)
     {
-        auto peer{FindPeerByName(fromSimulationName, proxyMessage.destination)};
+        auto peer{FindPeerForRequester(from, proxyMessage.destination)};
         if (peer == nullptr)
         {
             _logger->MakeMessage(Log::Level::Error, TopicOf(*this))
@@ -1565,8 +1690,7 @@ void VAsioConnection::ReceiveProxyMessage(IVAsioPeer* from, SerializedMessage& b
         // We are relaying a message from source to destination and acting as a proxy. Record the association between
         // source and destination. This is used during disconnects, where we create empty ProxyMessages on behalf of
         // the disconnected peer, to inform the destination that the source peer has disconnected.
-        auto [it, inserted] =
-            _proxySourceToDestinations[fromSimulationName][proxyMessage.source].insert(proxyMessage.destination);
+        auto [it, inserted] = _proxySourceToDestinations[from].insert(proxyMessage.destination);
         SILKIT_UNUSED_ARG(it);
 
         if (inserted)
@@ -1586,7 +1710,7 @@ void VAsioConnection::ReceiveProxyMessage(IVAsioPeer* from, SerializedMessage& b
     const bool isDestination = _participantName == proxyMessage.destination;
     if (isDestination)
     {
-        auto peer{FindPeerByName(_simulationName, proxyMessage.source)};
+        auto peer{FindPeer(_simulationName, NoGeneration, proxyMessage.source)};
 
         if (peer == nullptr)
         {
@@ -1868,22 +1992,114 @@ void VAsioConnection::AddAsyncSubscriptionsCompletionHandler(std::function<void(
     }
 }
 
-std::vector<std::string> VAsioConnection::GetConnectedParticipantsNames()
+std::set<std::string> VAsioConnection::GetConnectedParticipantsNames()
 {
-    std::vector<std::string> participants;
+    std::set<std::string> participants;
 
     {
         std::unique_lock<decltype(_mutex)> lock{_mutex};
-        for (const auto& item : _participantNameToPeer)
+        for (const auto& simulation : _participantNameToPeer)
         {
-            for (const auto& peer : item.second)
+            for (const auto& generation : simulation.second)
             {
-                participants.push_back(peer.first);
+                for (const auto& peer : generation.second)
+                {
+                    participants.insert(peer.first);
+                }
             }
         }
     }
 
     return participants;
+}
+
+auto VAsioConnection::ParticipantsByGeneration(const std::string& simulationName) const
+    -> std::map<uint64_t, std::set<std::string>>
+{
+    std::map<uint64_t, std::set<std::string>> result;
+
+    std::lock_guard<decltype(_mutex)> lock{_mutex};
+
+    const auto simulationIt{_participantNameToPeer.find(simulationName)};
+    if (simulationIt == _participantNameToPeer.end())
+    {
+        return result;
+    }
+
+    for (const auto& [generation, peers] : simulationIt->second)
+    {
+        auto& names{result[generation]};
+        for (const auto& peerPair : peers)
+        {
+            names.insert(peerPair.first);
+        }
+    }
+    return result;
+}
+
+auto VAsioConnection::PeersInGenerationOf(const IVAsioPeer* peer) const -> std::vector<IVAsioPeer*>
+{
+    std::vector<IVAsioPeer*> result;
+
+    std::lock_guard<decltype(_mutex)> lock{_mutex};
+
+    const auto simulationIt{_participantNameToPeer.find(peer->GetSimulationName())};
+    if (simulationIt == _participantNameToPeer.end())
+    {
+        return result;
+    }
+
+    const auto generationIt{simulationIt->second.find(GenerationOf(*peer))};
+    if (generationIt == simulationIt->second.end())
+    {
+        return result;
+    }
+
+    for (const auto& peerPair : generationIt->second)
+    {
+        if (peerPair.second != peer)
+        {
+            result.push_back(peerPair.second);
+        }
+    }
+    return result;
+}
+
+auto VAsioConnection::GetPeerRegistration(const IVAsioPeer* peer) const -> PeerRegistration
+{
+    PeerRegistration result;
+
+    const auto& simulationName{peer->GetSimulationName()};
+    const auto generation{GenerationOf(*peer)};
+    const auto& participantName{peer->GetInfo().participantName};
+
+    std::lock_guard<decltype(_mutex)> lock{_mutex};
+    for (const auto& [registeredSimulationName, generations] : _participantNameToPeer)
+    {
+        const bool sameSimulation{registeredSimulationName == simulationName};
+        for (const auto& [registeredGeneration, peers] : generations)
+        {
+            const bool sameGeneration{sameSimulation && registeredGeneration == generation};
+            for (const auto& [registeredName, registeredPeer] : peers)
+            {
+                // pointer identity, like the guarded erase in RemovePeerFromConnection
+                if (sameGeneration && registeredName == participantName && registeredPeer == peer)
+                {
+                    result.registered = true;
+                    continue;
+                }
+
+                ++result.othersTotal;
+                if (sameGeneration && registeredName == participantName)
+                {
+                    result.nameTakenByOther = true;
+                }
+                result.othersInSimulation += sameSimulation ? 1 : 0;
+                result.othersInGeneration += sameGeneration ? 1 : 0;
+            }
+        }
+    }
+    return result;
 }
 
 auto VAsioConnection::GetNumberOfRemoteReceivers(const IServiceEndpoint* service,
@@ -1956,7 +2172,7 @@ void VAsioConnection::AsyncSubscriptionsCompleted()
 
 bool VAsioConnection::ParticipantHasCapability(const std::string& participantName, const std::string& capability) const
 {
-    const auto peer{FindPeerByName(_simulationName, participantName)};
+    const auto peer{FindPeer(_simulationName, NoGeneration, participantName)};
     if (peer == nullptr)
     {
         _logger->MakeMessage(Log::Level::Warn, TopicOf(*this))

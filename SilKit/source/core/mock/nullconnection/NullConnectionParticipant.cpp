@@ -4,6 +4,8 @@
 
 #include "silkit/services/logging/ILogger.hpp"
 
+#include <set>
+
 #include "core/mock/nullconnection/NullConnectionParticipant.hpp"
 #include "core/participant/Participant.hpp"
 #include "core/participant/Participant_impl.hpp"
@@ -63,10 +65,9 @@ struct NullConnection
         return 0;
     }
 
-    std::vector<std::string> GetConnectedParticipantsNames()
+    std::set<std::string> GetConnectedParticipantsNames()
     {
-        std::vector<std::string> tmp;
-        return tmp;
+        return {};
     }
 
     size_t GetNumberOfRemoteReceivers(const IServiceEndpoint* /*service*/, const std::string& /*msgTypeName*/)

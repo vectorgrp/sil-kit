@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <memory>
+#include <string>
 #include <unordered_map>
 
 #include "services/logging/ILoggerInternal.hpp"
@@ -18,6 +20,7 @@
 #include "services/metrics/MetricsReceiver.hpp"
 
 #include "core/vasio/IRegistryEventListener.hpp"
+#include "core/vasio/SessionPlacement.hpp"
 
 namespace SilKit {
 namespace Core {
@@ -58,21 +61,13 @@ private:
 
 private:
     // ----------------------------------------
-    // private data types
-    struct ConnectedParticipantInfo
-    {
-        IVAsioPeer* peer;
-        VAsioPeerInfo peerInfo;
-    };
-
-private:
-    // ----------------------------------------
     // private methods
-    auto FindConnectedParticipant(const std::string& participantName,
-                                  const std::string& simulationName) const -> const ConnectedParticipantInfo*;
+    auto GetOrCreatePlacement(const std::string& simulationName) -> SessionPlacement*;
+    auto FindPlacement(const std::string& simulationName) const -> SessionPlacement*;
+    auto FindPlacementOfSender(const IServiceEndpoint* from) const -> SessionPlacement*;
 
     void OnParticipantAnnouncement(IVAsioPeer* peer, const ParticipantAnnouncement& announcement);
-    void SendKnownParticipants(IVAsioPeer* peer, const std::string& simulationName);
+    void SendKnownParticipants(IVAsioPeer* peer);
     void OnPeerShutdown(IVAsioPeer* peer);
 
     bool AllParticipantsAreConnected() const;
@@ -99,7 +94,7 @@ private:
     // private members
     std::unique_ptr<Services::Logging::ILoggerInternal> _logger;
     IRegistryEventListener* _registryEventListener{nullptr};
-    std::unordered_map<std::string, std::unordered_map<std::string, ConnectedParticipantInfo>> _connectedParticipants;
+    std::unordered_map<std::string, std::unique_ptr<SessionPlacement>> _placements;
     std::function<void()> _onAllParticipantsConnected;
     std::function<void()> _onAllParticipantsDisconnected;
     std::shared_ptr<SilKit::Config::ParticipantConfiguration> _vasioConfig;
@@ -112,6 +107,8 @@ private:
     std::atomic<EndpointId> _localEndpointId{1};
 
     ServiceDescriptor _serviceDescriptor;
+
+    friend struct VAsioRegistryTestAccess;
 };
 
 } // namespace Core

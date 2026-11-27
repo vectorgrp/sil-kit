@@ -1,0 +1,289 @@
+// SPDX-FileCopyrightText: 2026 Vector Informatik GmbH
+//
+// SPDX-License-Identifier: MIT
+
+#include "core/vasio/SessionPlacement.hpp"
+#include "core/vasio/IRegistryEventListener.hpp"
+
+#include <utility>
+
+#include "fmt/ranges.h"
+
+#include "services/logging/LoggerMessage.hpp"
+#include "silkit/services/orchestration/string_utils.hpp"
+
+#include "core/internal/traits/SilKitLoggingTraits.hpp"
+
+namespace Log = SilKit::Services::Logging;
+
+namespace SilKit {
+namespace Core {
+
+namespace {
+
+constexpr uint64_t FIRST_GENERATION{1};
+
+} // namespace
+
+SessionPlacement::SessionPlacement(std::string simulationName, Services::Logging::ILoggerInternal* logger,
+                                   IRegistryEventListener* registryEventListener)
+    : _simulationName{std::move(simulationName)}
+    , _logger{logger}
+    , _registryEventListener{registryEventListener}
+{
+}
+
+auto SessionPlacement::SelectGeneration(const std::string& participantName, const Snapshot& registered) const
+    -> std::optional<uint64_t>
+{
+    if (registered.empty())
+    {
+        return FIRST_GENERATION;
+    }
+
+    const auto newest{registered.find(_latestGeneration)};
+    if (newest == registered.end())
+    {
+        return _latestGeneration + 1;
+    }
+
+    const bool isController{_workflowContract.has_value() && _workflowContract->controllerName == participantName};
+    if (_workflowContract.has_value() && !isController
+        && _workflowContract->requiredParticipantNames.count(participantName) == 0)
+    {
+        if (newest->second.count(participantName) != 0)
+        {
+            return std::nullopt;
+        }
+        return _latestGeneration;
+    }
+
+    if (newest->second.count(participantName) == 0)
+    {
+        const auto state{_generations.find(_latestGeneration)};
+        if (state == _generations.end()
+            || (!state->second.hasStarted && !(isController && state->second.workflowAccepted)))
+        {
+            return _latestGeneration;
+        }
+    }
+
+    return _latestGeneration + 1;
+}
+
+bool SessionPlacement::Admit(IVAsioPeer* peer, const Snapshot& registered)
+{
+    const auto& participantName{peer->GetInfo().participantName};
+
+    const auto selected{SelectGeneration(participantName, registered)};
+    if (!selected)
+    {
+        return false;
+    }
+
+    // Diagnostic
+    const auto generation{*selected};
+    if (generation != _latestGeneration && registered.count(_latestGeneration) != 0)
+    {
+        const auto previous{_generations.find(_latestGeneration)};
+        if (previous == _generations.end() || !previous->second.hasStarted)
+        {
+            _logger->MakeMessage(Log::Level::Warn, TopicOf(*this))
+                .SetMessage("Generation {} in simulation '{}' supersedes generation {} before it started",
+                            generation, _simulationName, _latestGeneration)
+                .Dispatch();
+        }
+    }
+
+    // Keep the latest number even if that generation drains before the superseded ones.
+    if (generation != _latestGeneration)
+    {
+        _latestGeneration = generation;
+    }
+
+    _logger->MakeMessage(Log::Level::Debug, TopicOf(*this))
+        .SetMessage("Participant '{}' in simulation '{}' is placed into generation {}", participantName,
+                    _simulationName, generation)
+        .Dispatch();
+
+    // The generation is stamped on the service descriptor of the peer, like the simulation name, so that receivers of
+    // messages and the connection can read it from there. Names are not unique across generations, so peers are
+    // identified by pointer.
+    auto peerDescriptor{peer->GetServiceDescriptor()};
+    peerDescriptor.SetGeneration(generation);
+    peer->SetServiceDescriptor(peerDescriptor);
+
+    return true;
+}
+
+auto SessionPlacement::GetOrCreateGeneration(const IServiceEndpoint* from, const Snapshot& registered)
+    -> std::pair<uint64_t, Generation*>
+{
+    if (from == nullptr)
+    {
+        return {0, nullptr};
+    }
+
+    const auto generationNumber{from->GetServiceDescriptor().GetGeneration()};
+    if (!generationNumber.has_value() || registered.count(*generationNumber) == 0)
+    {
+        return {0, nullptr};
+    }
+
+    return {*generationNumber, &GetOrCreateGeneration(*generationNumber)};
+}
+
+auto SessionPlacement::GetOrCreateGeneration(uint64_t generationNumber) -> Generation&
+{
+    const auto [generationIt, created] = _generations.try_emplace(generationNumber);
+    if (created)
+    {
+        generationIt->second.stateTracker.SetLogger(_logger);
+    }
+    return generationIt->second;
+}
+
+void SessionPlacement::OnStatus(const IServiceEndpoint* from, const Services::Orchestration::ParticipantStatus& msg,
+                                const Snapshot& registered)
+{
+    const auto [generationNumber, generation] = GetOrCreateGeneration(from, registered);
+    if (generation == nullptr)
+    {
+        return;
+    }
+
+    // Late messages of a participant that has already left must not bring it back into the tracker.
+    if (registered.at(generationNumber).count(msg.participantName) != 0)
+    {
+        const auto result{generation->stateTracker.UpdateParticipantStatus(msg)};
+        UpdateGenerationState(generationNumber, *generation, result.systemStateChanged);
+    }
+}
+
+void SessionPlacement::OnWorkflow(const IServiceEndpoint* from,
+                                  const Services::Orchestration::WorkflowConfiguration& msg,
+                                  const Snapshot& registered)
+{
+    if (from == nullptr)
+    {
+        return;
+    }
+
+    const auto& descriptor{from->GetServiceDescriptor()};
+    const auto generationNumber{descriptor.GetGeneration()};
+    if (!generationNumber.has_value() || registered.count(*generationNumber) == 0)
+    {
+        return;
+    }
+
+    const auto& controllerName{descriptor.GetParticipantName()};
+    std::set<std::string> requiredParticipantNames{msg.requiredParticipantNames.begin(),
+                                                 msg.requiredParticipantNames.end()};
+    if (_workflowContract.has_value()
+        && (_workflowContract->controllerName != controllerName
+            || _workflowContract->requiredParticipantNames != requiredParticipantNames))
+    {
+        _logger->MakeMessage(Log::Level::Error, TopicOf(*this))
+            .SetMessage("Rejected workflow for simulation '{}' in generation {}: expected controller '{}' with "
+                        "required participants [{}], received controller '{}' with required participants [{}]",
+                        _simulationName, *generationNumber, _workflowContract->controllerName,
+                        fmt::join(_workflowContract->requiredParticipantNames, ", "), controllerName,
+                        fmt::join(requiredParticipantNames, ", "))
+            .Dispatch();
+        return;
+    }
+
+    if (!_workflowContract.has_value())
+    {
+        _workflowContract = WorkflowContract{controllerName, std::move(requiredParticipantNames)};
+    }
+
+    const auto [number, generation] = GetOrCreateGeneration(from, registered);
+    generation->workflowAccepted = true;
+    const auto result{generation->stateTracker.UpdateRequiredParticipants(msg.requiredParticipantNames)};
+    UpdateGenerationState(number, *generation, result.systemStateChanged);
+}
+
+void SessionPlacement::OnPeerLeaving(const IVAsioPeer* peer, bool isLastInGeneration)
+{
+    const auto generationNumber{peer->GetServiceDescriptor().GetGeneration()};
+    if (!generationNumber.has_value())
+    {
+        return;
+    }
+
+    const auto& participantName{peer->GetInfo().participantName};
+    _logger->MakeMessage(Log::Level::Debug, TopicOf(*this))
+        .SetMessage("Participant '{}' in simulation '{}' has dropped from generation {}", participantName,
+                    _simulationName, *generationNumber)
+        .Dispatch();
+
+    if (isLastInGeneration)
+    {
+        _generations.erase(*generationNumber);
+        if (_registryEventListener != nullptr)
+        {
+            _registryEventListener->OnGenerationRemoved(_simulationName, *generationNumber);
+        }
+        return;
+    }
+
+    const auto generationIt{_generations.find(*generationNumber)};
+    if (generationIt != _generations.end())
+    {
+        const auto result{generationIt->second.stateTracker.RemoveParticipant(participantName)};
+        if (result.systemStateChanged && _registryEventListener != nullptr)
+        {
+            _registryEventListener->OnGenerationStateChanged(
+                _simulationName, *generationNumber, generationIt->second.stateTracker.GetSystemState());
+        }
+    }
+}
+
+void SessionPlacement::UpdateGenerationState(uint64_t generationNumber, Generation& generation, bool systemStateChanged)
+{
+    using SystemState = SilKit::Services::Orchestration::SystemState;
+
+    if (systemStateChanged && _registryEventListener != nullptr)
+    {
+        _registryEventListener->OnGenerationStateChanged(_simulationName, generationNumber,
+                                                         generation.stateTracker.GetSystemState());
+    }
+
+    if (systemStateChanged && generation.stateTracker.GetSystemState() == SystemState::Running)
+    {
+        _logger->MakeMessage(Log::Level::Debug, TopicOf(*this))
+            .SetMessage("The simulation '{}' in generation {} is now running", _simulationName, generationNumber)
+            .Dispatch();
+    }
+
+    if (generation.hasStarted)
+    {
+        return;
+    }
+
+    switch (generation.stateTracker.GetSystemState())
+    {
+    case SystemState::ReadyToRun:
+    case SystemState::Running:
+    case SystemState::Paused:
+    case SystemState::Stopping:
+    case SystemState::Stopped:
+    case SystemState::ShuttingDown:
+    case SystemState::Shutdown:
+        break;
+    default:
+        return;
+    }
+
+    generation.hasStarted = true;
+
+    _logger->MakeMessage(Log::Level::Info, TopicOf(*this))
+        .SetMessage("The simulation '{}' in generation {} has started (system state {}), required participants and "
+                    "the system controller can no longer join this generation",
+                    _simulationName, generationNumber, to_string(generation.stateTracker.GetSystemState()))
+        .Dispatch();
+}
+
+} // namespace Core
+} // namespace SilKit

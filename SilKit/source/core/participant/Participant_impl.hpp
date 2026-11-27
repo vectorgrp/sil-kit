@@ -897,7 +897,7 @@ auto Participant<SilKitConnectionT>::GetSystemMonitor() -> Services::Orchestrati
         });
 
         // Get Participant which joined the Simulation earlier
-        std::vector<std::string> knownNames = _connection.GetConnectedParticipantsNames();
+        const auto knownNames = _connection.GetConnectedParticipantsNames();
         for (const auto& name : knownNames)
         {
             controller->OnParticipantConnected(Services::Orchestration::ParticipantConnectionInformation{name});

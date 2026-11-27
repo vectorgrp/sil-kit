@@ -80,6 +80,7 @@ class ConnectKnownParticipants;
 class RemoteConnectionManager;
 class VAsioConnection;
 class VAsioRegistry;
+class SessionPlacement;
 class VAsioPeer;
 template <class SilKitConnectionT>
 class Participant;

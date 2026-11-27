@@ -99,6 +99,11 @@ running on 'localhost' listening on port 8500. These values can be changed via t
        and address.
        This field expects a list of strings.
 
+       A nonempty list replaces all default listening endpoints. If this field is
+       omitted or empty, the participant listens on OS-selected TCP ports and,
+       when domain sockets are enabled, a randomly generated, per-instance
+       local-domain socket path.
+
        Each string identifies a socket endpoint used to listen for incoming connections, for TCP or local domain sockets.
 
        * ``tcp://<ip>:<port>``, e.g.,
@@ -109,5 +114,15 @@ running on 'localhost' listening on port 8500. These values can be changed via t
        * ``local://<path>``, e.g.,
 
          * ``local:///tmp/my.socket`` to listen on a local domain socket identified by the path ``/tmp/my.socket``
+
+       .. warning::
+
+          Explicitly configured local-domain socket paths are used as supplied
+          and must be unique for participant instances that may coexist,
+          including concurrent or overlapping simulation runs.
+
+          Explicitly configured TCP listening ports must likewise be available
+          and cannot be shared by concurrent instances on the same address.
+          Use port ``0`` to let the operating system select an available port.
 
        |NormalOperationNotice|

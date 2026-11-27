@@ -73,6 +73,9 @@ struct ParticipantAnnouncementReply
 
     /// Diagnostic message (for Status::Failed). Added in 4.0.8.
     std::string diagnostic;
+
+    /// Capabilities confirmed by the sender for this handshake.
+    std::string confirmedCapability;
 };
 
 struct KnownParticipants

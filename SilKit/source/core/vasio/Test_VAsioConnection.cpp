@@ -36,11 +36,13 @@
 #include "core/mock/participant/MockParticipant.hpp" // for DummyLogger
 #include "core/vasio/VAsioSerdes.hpp"
 #include "core/vasio/SerializedMessage.hpp"
+#include "util/Uri.hpp"
 #include "services/orchestration/TimeProvider.hpp"
 
 #include "services/logging/LoggerMessage.hpp"
 
 #include <chrono>
+#include <filesystem>
 
 #include "core/vasio/mock/MockVAsioPeer.hpp"
 
@@ -130,6 +132,19 @@ MATCHER_P(SubscriptionAcknowledgeMatcher, subscriber,
     return reply.status == SubscriptionAcknowledge::Status::Success && reply.subscriber == subscriber;
 }
 
+MATCHER_P(ConnectRequestMatcher, status, "Deserialize the RemoteParticipantConnectRequest and check its status")
+{
+    SerializedMessage message = arg;
+    return message.Deserialize<RemoteParticipantConnectRequest>().status == status;
+}
+
+MATCHER_P(ProxyMessageMatcher, isShutdownNotification,
+          "Deserialize the ProxyMessage and check whether its payload is empty (shutdown notification)")
+{
+    SerializedMessage message = arg;
+    return message.Deserialize<ProxyMessage>().payload.empty() == isShutdownNotification;
+}
+
 } // namespace
 
 //////////////////////////////////////////////////////////////////////
@@ -165,6 +180,59 @@ protected:
     static auto ReceiveBlobPoolOf(const VAsioConnection& connection) -> const ReceiveBlobPool&
     {
         return connection._receiveBlobPool;
+    }
+
+    static auto PeerInfoOf(VAsioConnection& connection) -> VAsioPeerInfo
+    {
+        return connection.MakePeerInfo();
+    }
+
+    void SetSimulationName(const std::string& simulationName)
+    {
+        _connection._simulationName = simulationName;
+    }
+
+    void WaitForRegistryHandshake()
+    {
+        _connection.WaitForRegistryHandshakeToComplete(0ms);
+    }
+
+    static void AssociateParticipantNameAndPeer(VAsioConnection& connection, const std::string& simulationName,
+                                                const std::string& participantName, IVAsioPeer* peer)
+    {
+        connection.AssociateParticipantNameAndPeer(simulationName, participantName, peer);
+    }
+
+    // the generation of all peers that are not peers of a registry
+    static constexpr uint64_t NoGeneration{0};
+
+    static auto FindPeer(const VAsioConnection& connection, const std::string& simulationName, uint64_t generation,
+                         const std::string& participantName) -> IVAsioPeer*
+    {
+        return connection.FindPeer(simulationName, generation, participantName);
+    }
+
+    static auto FindPeerForRequester(const VAsioConnection& connection, const IVAsioPeer* requester,
+                                     const std::string& participantName) -> IVAsioPeer*
+    {
+        return connection.FindPeerForRequester(requester, participantName);
+    }
+
+    static void RemovePeerFromConnection(VAsioConnection& connection, IVAsioPeer* peer)
+    {
+        connection.RemovePeerFromConnection(peer);
+    }
+
+    auto MakeRegistryConnection() -> std::unique_ptr<VAsioConnection>
+    {
+        SilKit::Config::ParticipantConfiguration config;
+        config.middleware.registryAsFallbackProxy = true;
+        config.middleware.experimentalRemoteParticipantConnection = true;
+
+        auto connection = std::make_unique<VAsioConnection>(nullptr, &_dummyMetricsManager, config, "Registry",
+                                                            REGISTRY_PARTICIPANT_ID, &_timeProvider);
+        connection->SetLoggerInternal(&_dummyLogger);
+        return connection;
     }
 };
 
@@ -213,6 +281,38 @@ TEST_F(Test_VAsioConnection, supported_version_reply_from_registry_must_not_thro
 
     SerializedMessage message(reply);
     EXPECT_NO_THROW(_connection.OnSocketData(&_from, message));
+}
+
+TEST_F(Test_VAsioConnection, session_join_fails_when_registry_does_not_confirm_support)
+{
+    SetSimulationName("session/Sim");
+    _from._peerInfo.participantId = REGISTRY_PARTICIPANT_ID;
+    ParticipantAnnouncementReply reply{};
+    reply.status = ParticipantAnnouncementReply::Status::Success;
+    SerializedMessage message(reply);
+
+    EXPECT_THROW(_connection.OnSocketData(&_from, message), SilKit::ProtocolError);
+    EXPECT_THAT([this] { WaitForRegistryHandshake(); },
+                testing::ThrowsMessage<SilKit::ProtocolError>(
+                    testing::HasSubstr("Registry did not confirm registry-sessions support for simulation 'session/Sim'")));
+}
+
+TEST_F(Test_VAsioConnection, session_join_succeeds_when_registry_confirms_support)
+{
+    SetSimulationName("session/Sim");
+    _from._peerInfo.participantId = REGISTRY_PARTICIPANT_ID;
+    const auto peerInfo = PeerInfoOf(_connection);
+    EXPECT_TRUE(VAsioCapabilities{peerInfo.capabilities}.HasCapability(Capabilities::RegistrySessions));
+
+    VAsioCapabilities capabilities;
+    capabilities.AddCapability(Capabilities::RegistrySessions);
+    ParticipantAnnouncementReply reply{};
+    reply.status = ParticipantAnnouncementReply::Status::Success;
+    reply.confirmedCapability = capabilities.ToCapabilitiesString();
+    SerializedMessage message(reply);
+
+    EXPECT_NO_THROW(_connection.OnSocketData(&_from, message));
+    EXPECT_NO_THROW(WaitForRegistryHandshake());
 }
 
 TEST_F(Test_VAsioConnection, current_version_connect)
@@ -285,4 +385,349 @@ TEST_F(Test_VAsioConnection, receive_buffer_pool_follows_the_configuration)
     VAsioConnection connection{nullptr, &_dummyMetricsManager, config, "Test_VAsioConnection", 1, &_timeProvider};
 
     EXPECT_FALSE(ReceiveBlobPoolOf(connection).IsEnabled());
+}
+
+TEST_F(Test_VAsioConnection, generated_local_socket_collision_preserves_the_existing_listener)
+{
+    const auto uris = _connection.PrepareAcceptorEndpointUris("silkit://localhost:8500");
+    _connection.OpenLocalAcceptors(uris);
+    const auto firstInfo = PeerInfoOf(_connection);
+    ASSERT_EQ(firstInfo.acceptorUris.size(), 1u);
+    const auto firstPath = Uri::Parse(firstInfo.acceptorUris.front()).Path();
+
+    {
+        VAsioConnection other{nullptr, &_dummyMetricsManager, {}, "Test_VAsioConnection", 1, &_timeProvider};
+        other.SetLoggerInternal(&_dummyLogger);
+        // Reuse the already-bound URI to force a collision and retry with a fresh generated path.
+        other.OpenLocalAcceptors(uris);
+
+        const auto secondInfo = PeerInfoOf(other);
+        ASSERT_EQ(secondInfo.acceptorUris.size(), 1u);
+        EXPECT_NE(firstInfo.acceptorUris.front(), secondInfo.acceptorUris.front());
+        EXPECT_TRUE(std::filesystem::exists(firstPath));
+        EXPECT_TRUE(std::filesystem::exists(Uri::Parse(secondInfo.acceptorUris.front()).Path()));
+    }
+
+    // Destroying the second listener must not remove the first listener's socket path.
+    EXPECT_TRUE(std::filesystem::exists(firstPath));
+}
+
+TEST_F(Test_VAsioConnection, generated_local_socket_does_not_retry_unrelated_bind_errors)
+{
+    const auto uris = _connection.PrepareAcceptorEndpointUris("silkit://localhost:8500");
+    const auto missingParent = Uri::Parse(uris.back()).Path();
+    ASSERT_FALSE(std::filesystem::exists(missingParent));
+
+    // Use the uncreated socket path as a parent directory to cause "no such file or directory", not a collision.
+    _connection.OpenLocalAcceptors({"local://" + missingParent + "/socket"});
+
+    // Regenerating a valid temporary path for this unrelated error would incorrectly create a listener.
+    EXPECT_TRUE(PeerInfoOf(_connection).acceptorUris.empty());
+}
+
+//////////////////////////////////////////////////////////////////////
+// Peers with identical names (registry with several generations)
+//////////////////////////////////////////////////////////////////////
+
+TEST_F(Test_VAsioConnection, removing_a_peer_keeps_the_entry_of_another_peer_with_the_same_name)
+{
+    MockVAsioPeer2 first;
+    MockVAsioPeer2 second;
+    first._simulationName = "Sim";
+    second._simulationName = "Sim";
+
+    AssociateParticipantNameAndPeer(_connection, "Sim", "MockVAsioPeer", &first);
+    AssociateParticipantNameAndPeer(_connection, "Sim", "MockVAsioPeer", &second);
+    ASSERT_EQ(FindPeer(_connection, "Sim", NoGeneration, "MockVAsioPeer"), &first);
+
+    RemovePeerFromConnection(_connection, &second);
+    EXPECT_EQ(FindPeer(_connection, "Sim", NoGeneration, "MockVAsioPeer"), &first);
+
+    RemovePeerFromConnection(_connection, &first);
+    EXPECT_EQ(FindPeer(_connection, "Sim", NoGeneration, "MockVAsioPeer"), nullptr);
+}
+
+TEST_F(Test_VAsioConnection, peers_with_the_same_name_in_different_generations_are_registered_separately)
+{
+    MockVAsioPeer2 requesterOfFirst;
+    MockVAsioPeer2 requesterOfSecond;
+    MockVAsioPeer2 first;
+    MockVAsioPeer2 second;
+    requesterOfFirst._serviceDescriptor.SetGeneration(1);
+    first._serviceDescriptor.SetGeneration(1);
+    requesterOfSecond._serviceDescriptor.SetGeneration(2);
+    second._serviceDescriptor.SetGeneration(2);
+
+    AssociateParticipantNameAndPeer(_connection, "", "MockVAsioPeer", &first);
+    AssociateParticipantNameAndPeer(_connection, "", "MockVAsioPeer", &second);
+
+    EXPECT_EQ(FindPeerForRequester(_connection, &requesterOfFirst, "MockVAsioPeer"), &first);
+    EXPECT_EQ(FindPeerForRequester(_connection, &requesterOfSecond, "MockVAsioPeer"), &second);
+
+    // peers without a generation, i.e. everything but the peers of a registry, are not found by generation
+    EXPECT_EQ(FindPeer(_connection, "", NoGeneration, "MockVAsioPeer"), nullptr);
+
+    RemovePeerFromConnection(_connection, &first);
+    EXPECT_EQ(FindPeerForRequester(_connection, &requesterOfFirst, "MockVAsioPeer"), nullptr);
+    EXPECT_EQ(FindPeerForRequester(_connection, &requesterOfSecond, "MockVAsioPeer"), &second);
+}
+
+TEST_F(Test_VAsioConnection, connected_participant_names_contain_each_name_once)
+{
+    MockVAsioPeer2 firstGeneration;
+    MockVAsioPeer2 secondGeneration;
+    MockVAsioPeer2 other;
+    other._peerInfo.participantName = "Other";
+    firstGeneration._serviceDescriptor.SetGeneration(1);
+    secondGeneration._serviceDescriptor.SetGeneration(2);
+
+    AssociateParticipantNameAndPeer(_connection, "Sim", "MockVAsioPeer", &firstGeneration);
+    AssociateParticipantNameAndPeer(_connection, "Sim", "MockVAsioPeer", &secondGeneration);
+    AssociateParticipantNameAndPeer(_connection, "Sim", "Other", &other);
+
+    EXPECT_THAT(_connection.GetConnectedParticipantsNames(), testing::ElementsAre("MockVAsioPeer", "Other"));
+}
+
+TEST_F(Test_VAsioConnection, participants_are_listed_by_simulation_and_generation)
+{
+    MockVAsioPeer2 first;
+    MockVAsioPeer2 second;
+    MockVAsioPeer2 other;
+    MockVAsioPeer2 unstamped;
+    MockVAsioPeer2 otherSimulation;
+    for (auto* peer : {&first, &second, &other, &unstamped})
+    {
+        peer->_simulationName = "Sim";
+    }
+    otherSimulation._simulationName = "Else";
+    other._peerInfo.participantName = "Other";
+    unstamped._peerInfo.participantName = "Unstamped";
+    first._serviceDescriptor.SetGeneration(1);
+    second._serviceDescriptor.SetGeneration(2);
+    other._serviceDescriptor.SetGeneration(2);
+
+    AssociateParticipantNameAndPeer(_connection, "Sim", "MockVAsioPeer", &first);
+    AssociateParticipantNameAndPeer(_connection, "Sim", "MockVAsioPeer", &second);
+    AssociateParticipantNameAndPeer(_connection, "Sim", "Other", &other);
+    AssociateParticipantNameAndPeer(_connection, "Sim", "Unstamped", &unstamped);
+    AssociateParticipantNameAndPeer(_connection, "Else", "MockVAsioPeer", &otherSimulation);
+
+    const auto registered{_connection.ParticipantsByGeneration("Sim")};
+    EXPECT_THAT(registered, testing::ElementsAre(testing::Pair(NoGeneration, std::set<std::string>{"Unstamped"}),
+                                                 testing::Pair(1, std::set<std::string>{"MockVAsioPeer"}),
+                                                 testing::Pair(2, std::set<std::string>{"MockVAsioPeer", "Other"})));
+    EXPECT_TRUE(_connection.ParticipantsByGeneration("Unknown").empty());
+
+    RemovePeerFromConnection(_connection, &first);
+    EXPECT_EQ(_connection.ParticipantsByGeneration("Sim").count(1), 0u);
+}
+
+TEST_F(Test_VAsioConnection, peers_in_generation_of_a_peer_are_the_other_peers_of_its_simulation_and_generation)
+{
+    MockVAsioPeer2 a1;
+    MockVAsioPeer2 b1;
+    MockVAsioPeer2 a2;
+    MockVAsioPeer2 otherSimulation;
+    for (auto* peer : {&a1, &b1, &a2, &otherSimulation})
+    {
+        peer->_simulationName = "Sim";
+    }
+    otherSimulation._simulationName = "Else";
+    b1._peerInfo.participantName = "B";
+    a1._serviceDescriptor.SetGeneration(1);
+    b1._serviceDescriptor.SetGeneration(1);
+    a2._serviceDescriptor.SetGeneration(2);
+    otherSimulation._serviceDescriptor.SetGeneration(1);
+
+    AssociateParticipantNameAndPeer(_connection, "Sim", "MockVAsioPeer", &a1);
+    AssociateParticipantNameAndPeer(_connection, "Sim", "B", &b1);
+    AssociateParticipantNameAndPeer(_connection, "Sim", "MockVAsioPeer", &a2);
+    AssociateParticipantNameAndPeer(_connection, "Else", "MockVAsioPeer", &otherSimulation);
+
+    EXPECT_THAT(_connection.PeersInGenerationOf(&a1), testing::ElementsAre(&b1));
+    EXPECT_THAT(_connection.PeersInGenerationOf(&b1), testing::ElementsAre(&a1));
+    EXPECT_THAT(_connection.PeersInGenerationOf(&a2), testing::IsEmpty());
+
+    // a peer that is stamped but not registered yet gets the registered peers of its generation
+    MockVAsioPeer2 joining;
+    joining._simulationName = "Sim";
+    joining._peerInfo.participantName = "C";
+    joining._serviceDescriptor.SetGeneration(1);
+    EXPECT_THAT(_connection.PeersInGenerationOf(&joining), testing::UnorderedElementsAre(&a1, &b1));
+}
+
+TEST_F(Test_VAsioConnection, only_the_registered_peer_is_registered_and_not_one_with_the_same_name)
+{
+    MockVAsioPeer2 registered;
+    MockVAsioPeer2 stale;
+    registered._simulationName = "Sim";
+    stale._simulationName = "Sim";
+
+    EXPECT_FALSE(_connection.GetPeerRegistration(&registered).registered);
+    EXPECT_FALSE(_connection.GetPeerRegistration(&stale).nameTakenByOther);
+
+    AssociateParticipantNameAndPeer(_connection, "Sim", "MockVAsioPeer", &registered);
+    EXPECT_TRUE(_connection.GetPeerRegistration(&registered).registered);
+    EXPECT_FALSE(_connection.GetPeerRegistration(&registered).nameTakenByOther);
+    EXPECT_FALSE(_connection.GetPeerRegistration(&stale).registered);
+    EXPECT_TRUE(_connection.GetPeerRegistration(&stale).nameTakenByOther);
+
+    RemovePeerFromConnection(_connection, &registered);
+    EXPECT_FALSE(_connection.GetPeerRegistration(&registered).registered);
+    EXPECT_FALSE(_connection.GetPeerRegistration(&stale).nameTakenByOther);
+}
+
+TEST_F(Test_VAsioConnection, registration_counts_the_other_peers_by_generation_simulation_and_in_total)
+{
+    MockVAsioPeer2 a1;
+    MockVAsioPeer2 b1;
+    MockVAsioPeer2 a2;
+    MockVAsioPeer2 otherSimulation;
+    for (auto* peer : {&a1, &b1, &a2})
+    {
+        peer->_simulationName = "Sim";
+    }
+    otherSimulation._simulationName = "Else";
+    b1._peerInfo.participantName = "B";
+    a1._serviceDescriptor.SetGeneration(1);
+    b1._serviceDescriptor.SetGeneration(1);
+    a2._serviceDescriptor.SetGeneration(2);
+    otherSimulation._serviceDescriptor.SetGeneration(1);
+
+    AssociateParticipantNameAndPeer(_connection, "Sim", "MockVAsioPeer", &a1);
+    AssociateParticipantNameAndPeer(_connection, "Sim", "B", &b1);
+    AssociateParticipantNameAndPeer(_connection, "Sim", "MockVAsioPeer", &a2);
+    AssociateParticipantNameAndPeer(_connection, "Else", "MockVAsioPeer", &otherSimulation);
+
+    const auto ofA1{_connection.GetPeerRegistration(&a1)};
+    EXPECT_TRUE(ofA1.registered);
+    EXPECT_FALSE(ofA1.nameTakenByOther);
+    EXPECT_EQ(ofA1.othersInGeneration, 1u);
+    EXPECT_EQ(ofA1.othersInSimulation, 2u);
+    EXPECT_EQ(ofA1.othersTotal, 3u);
+
+    const auto ofA2{_connection.GetPeerRegistration(&a2)};
+    EXPECT_EQ(ofA2.othersInGeneration, 0u);
+    EXPECT_EQ(ofA2.othersInSimulation, 2u);
+
+    const auto ofOtherSimulation{_connection.GetPeerRegistration(&otherSimulation)};
+    EXPECT_EQ(ofOtherSimulation.othersInGeneration, 0u);
+    EXPECT_EQ(ofOtherSimulation.othersInSimulation, 0u);
+    EXPECT_EQ(ofOtherSimulation.othersTotal, 3u);
+
+    // a peer that is not registered counts all registered peers as others
+    MockVAsioPeer2 stale;
+    stale._simulationName = "Sim";
+    stale._serviceDescriptor.SetGeneration(1);
+    const auto ofStale{_connection.GetPeerRegistration(&stale)};
+    EXPECT_FALSE(ofStale.registered);
+    EXPECT_TRUE(ofStale.nameTakenByOther);
+    EXPECT_EQ(ofStale.othersInGeneration, 2u);
+    EXPECT_EQ(ofStale.othersTotal, 4u);
+
+    stale._serviceDescriptor.SetGeneration(3);
+    EXPECT_FALSE(_connection.GetPeerRegistration(&stale).nameTakenByOther);
+    stale._simulationName = "Unknown";
+    stale._serviceDescriptor.SetGeneration(1);
+    EXPECT_FALSE(_connection.GetPeerRegistration(&stale).nameTakenByOther);
+}
+
+TEST_F(Test_VAsioConnection, generation_assigned_while_handling_the_announcement_is_used_for_the_name_lookup)
+{
+    // The registry assigns the generation in a handler of the announcement, which runs before the peer is
+    // associated with its name.
+    uint64_t generation{0};
+    _connection.RegisterMessageReceiver([&generation](IVAsioPeer* peer, ParticipantAnnouncement) {
+        dynamic_cast<MockVAsioPeer2*>(peer)->_serviceDescriptor.SetGeneration(generation);
+    });
+
+    ParticipantAnnouncement announcement{};
+    announcement.peerInfo = _from.GetInfo();
+    SerializedMessage message(announcement);
+
+    MockVAsioPeer2 second;
+    MockVAsioPeer2 requesterOfFirst;
+    MockVAsioPeer2 requesterOfSecond;
+    requesterOfFirst._serviceDescriptor.SetGeneration(1);
+    requesterOfSecond._serviceDescriptor.SetGeneration(2);
+
+    generation = 1;
+    _connection.OnSocketData(&_from, message);
+    generation = 2;
+    SerializedMessage secondMessage(announcement);
+    _connection.OnSocketData(&second, secondMessage);
+
+    EXPECT_EQ(FindPeerForRequester(_connection, &requesterOfFirst, "MockVAsioPeer"), &_from);
+    EXPECT_EQ(FindPeerForRequester(_connection, &requesterOfSecond, "MockVAsioPeer"), &second);
+}
+
+TEST_F(Test_VAsioConnection, registry_relays_connect_request_within_the_generation_of_the_requester)
+{
+    auto registryConnection = MakeRegistryConnection();
+
+    MockVAsioPeer2 requester;
+    MockVAsioPeer2 target;
+    MockVAsioPeer2 targetOfOtherGeneration;
+    requester._serviceDescriptor.SetGeneration(1);
+    target._peerInfo.participantName = "Target";
+    target._serviceDescriptor.SetGeneration(1);
+    targetOfOtherGeneration._peerInfo.participantName = "Target";
+    targetOfOtherGeneration._serviceDescriptor.SetGeneration(2);
+
+    // the peer of the other generation is registered first, so that it would win if the generation was ignored
+    AssociateParticipantNameAndPeer(*registryConnection, "", "Target", &targetOfOtherGeneration);
+    AssociateParticipantNameAndPeer(*registryConnection, "", "Target", &target);
+
+    RemoteParticipantConnectRequest request{};
+    request.status = RemoteParticipantConnectRequest::CONNECTING;
+    request.requestOrigin = target.GetInfo();
+    request.requestTarget = requester.GetInfo();
+    SerializedMessage message(request);
+
+    EXPECT_CALL(target, SendSilKitMsg(ConnectRequestMatcher(RemoteParticipantConnectRequest::CONNECTING))).Times(1);
+    EXPECT_CALL(targetOfOtherGeneration, SendSilKitMsg(_)).Times(0);
+
+    registryConnection->OnSocketData(&requester, message);
+}
+
+TEST_F(Test_VAsioConnection, registry_proxy_shutdown_notifies_only_destinations_of_the_shutdown_peer)
+{
+    auto registryConnection = MakeRegistryConnection();
+
+    // peers with the same names in two generations
+    MockVAsioPeer2 sourceA;
+    MockVAsioPeer2 sourceB;
+    MockVAsioPeer2 destinationOfA;
+    MockVAsioPeer2 destinationOfB;
+    sourceA._peerInfo.participantName = "Source";
+    sourceB._peerInfo.participantName = "Source";
+    destinationOfA._peerInfo.participantName = "Destination";
+    destinationOfB._peerInfo.participantName = "Destination";
+    sourceA._serviceDescriptor.SetGeneration(1);
+    destinationOfA._serviceDescriptor.SetGeneration(1);
+    sourceB._serviceDescriptor.SetGeneration(2);
+    destinationOfB._serviceDescriptor.SetGeneration(2);
+
+    // the peers of the second generation are registered first, so that they would win if the generation was ignored
+    AssociateParticipantNameAndPeer(*registryConnection, "", "Source", &sourceB);
+    AssociateParticipantNameAndPeer(*registryConnection, "", "Source", &sourceA);
+    AssociateParticipantNameAndPeer(*registryConnection, "", "Destination", &destinationOfB);
+    AssociateParticipantNameAndPeer(*registryConnection, "", "Destination", &destinationOfA);
+
+    ProxyMessage proxyMessage{};
+    proxyMessage.source = "Source";
+    proxyMessage.destination = "Destination";
+    proxyMessage.payload = {1, 2, 3};
+
+    // only sourceA proxies a message, and it is delivered to the destination of its own generation
+    EXPECT_CALL(destinationOfA, SendSilKitMsg(ProxyMessageMatcher(false))).Times(1);
+    EXPECT_CALL(destinationOfB, SendSilKitMsg(_)).Times(0);
+    SerializedMessage message(proxyMessage);
+    registryConnection->OnSocketData(&sourceA, message);
+
+    // sourceB never proxied anything, so its shutdown must not be reported to anyone
+    registryConnection->OnPeerShutdown(&sourceB);
+
+    EXPECT_CALL(destinationOfA, SendSilKitMsg(ProxyMessageMatcher(true))).Times(1);
+    registryConnection->OnPeerShutdown(&sourceA);
 }

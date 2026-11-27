@@ -8,6 +8,7 @@
 #include "util/Uri.hpp"
 #include "services/logging/LoggerMessage.hpp"
 #include "core/vasio/TransformAcceptorUris.hpp"
+#include "core/vasio/VAsioProtocolVersion.hpp"
 #include "core/vasio/VAsioConstants.hpp"
 
 #include "services/metrics/MetricsReceiver.hpp"
@@ -17,13 +18,16 @@
 
 #include "core/internal/traits/SilKitServiceConfigTraits.hpp"
 
+#include "core/service/ServiceDatatypes.hpp"
+
+#include <fmt/format.h>
+
 
 namespace Log = SilKit::Services::Logging;
 
 
 namespace SilKit {
 namespace Core {
-
 
 VAsioRegistry::VAsioRegistry(std::shared_ptr<SilKit::Config::IParticipantConfiguration> cfg, ProtocolVersion version)
     : VAsioRegistry(std::move(cfg), nullptr, version)
@@ -214,57 +218,74 @@ auto VAsioRegistry::GetLoggerInternal() -> Services::Logging::ILoggerInternal*
     return _logger.get();
 }
 
-auto VAsioRegistry::FindConnectedParticipant(const std::string& participantName,
-                                             const std::string& simulationName) const -> const ConnectedParticipantInfo*
+auto VAsioRegistry::GetOrCreatePlacement(const std::string& simulationName) -> SessionPlacement*
 {
-    const auto simulationIt{_connectedParticipants.find(simulationName)};
-    if (simulationIt == _connectedParticipants.end())
+    auto& placement{_placements[simulationName]};
+    if (placement == nullptr)
+    {
+        placement = std::make_unique<SessionPlacement>(simulationName, GetLoggerInternal(), _registryEventListener);
+    }
+    return placement.get();
+}
+
+auto VAsioRegistry::FindPlacement(const std::string& simulationName) const -> SessionPlacement*
+{
+    const auto placementIt{_placements.find(simulationName)};
+    return placementIt == _placements.end() ? nullptr : placementIt->second.get();
+}
+
+auto VAsioRegistry::FindPlacementOfSender(const IServiceEndpoint* from) const -> SessionPlacement*
+{
+    if (from == nullptr)
     {
         return nullptr;
     }
 
-    const auto& simulationParticipants{simulationIt->second};
-
-    const auto participantIt{simulationParticipants.find(participantName)};
-    if (participantIt == simulationParticipants.end())
-    {
-        return nullptr;
-    }
-
-    return std::addressof(participantIt->second);
+    return FindPlacement(from->GetServiceDescriptor().GetSimulationName());
 }
 
 void VAsioRegistry::OnParticipantAnnouncement(IVAsioPeer* peer, const ParticipantAnnouncement& announcement)
 {
     const auto& peerInfo = announcement.peerInfo;
 
-    // NB When we have a remote client we might need to patch its acceptor name (host or ip address).
-    // In a distributed simulation the participants will listen on an IPADDRANY address
-    // without explicitly specifying on which network interface they are listening.
-    // When the IVAsioPeer connects to us we see its actual endpoint address and need
-    // to substitute it here.
+    const auto registered{_connection.ParticipantsByGeneration(announcement.simulationName)};
+    bool duplicate{false};
 
-    // Do not allow multiple participants with identical names
-    if (FindConnectedParticipant(peerInfo.participantName, announcement.simulationName) != nullptr)
+    if (IsRegistrySessionName(announcement.simulationName))
+    {
+        const VAsioCapabilities capabilities{peerInfo.capabilities};
+        if (!capabilities.HasCapability(Capabilities::RegistrySessions))
+        {
+            throw SilKitError{fmt::format("Simulation '{}' requires registry-sessions support; participant '{}' "
+                                         "does not advertise it. Upgrade the participant.",
+                                         announcement.simulationName, peerInfo.participantName)};
+        }
+        duplicate = !GetOrCreatePlacement(announcement.simulationName)->Admit(peer, registered);
+    }
+    else
+    {
+        const auto generationIt{registered.find(0)};
+        duplicate = generationIt != registered.end() && generationIt->second.count(peerInfo.participantName) != 0;
+    }
+
+    if (duplicate)
     {
         const auto message = fmt::format("A participant with the same name '{}' already exists in the simulation {}",
                                          peerInfo.participantName, announcement.simulationName);
-        GetLoggerInternal()->MakeMessage(Log::Level::Warn, TopicOf(*this))
-            .SetMessage(message)
-            .Dispatch();
+        GetLoggerInternal()->MakeMessage(Log::Level::Warn, TopicOf(*this)).SetMessage(message).Dispatch();
         throw SilKitError{message};
     }
 
-    SendKnownParticipants(peer, announcement.simulationName);
-
-    ConnectedParticipantInfo participantInfo;
-    participantInfo.peer = peer;
-    participantInfo.peerInfo = peerInfo;
-    _connectedParticipants[announcement.simulationName][peerInfo.participantName] = participantInfo;
+    SendKnownParticipants(peer);
 
     if (_registryEventListener != nullptr)
     {
-        _registryEventListener->OnParticipantConnected(announcement.simulationName, peerInfo.participantName);
+        const auto generation{peer->GetServiceDescriptor().GetGeneration()};
+        if (generation.has_value() && registered.count(*generation) == 0)
+        {
+            _registryEventListener->OnGenerationCreated(announcement.simulationName, *generation);
+        }
+        _registryEventListener->OnParticipantConnected(announcement.simulationName, peerInfo.participantName, generation);
     }
 
     if (AllParticipantsAreConnected())
@@ -277,7 +298,7 @@ void VAsioRegistry::OnParticipantAnnouncement(IVAsioPeer* peer, const Participan
     }
 }
 
-void VAsioRegistry::SendKnownParticipants(IVAsioPeer* peer, const std::string& simulationName)
+void VAsioRegistry::SendKnownParticipants(IVAsioPeer* peer)
 {
     GetLoggerInternal()->MakeMessage(Log::Level::Info, TopicOf(*this))
         .SetMessage("Sending known participant message to {}, protocol version {}.{}",
@@ -288,20 +309,13 @@ void VAsioRegistry::SendKnownParticipants(IVAsioPeer* peer, const std::string& s
     KnownParticipants knownParticipantsMsg;
     knownParticipantsMsg.messageHeader = MakeRegistryMsgHeader(peer->GetProtocolVersion());
 
-    const auto& simulationParticipants{_connectedParticipants[simulationName]};
-
-    for (const auto& pPair : simulationParticipants)
+    for (auto* knownPeer : _connection.PeersInGenerationOf(peer))
     {
-        const auto& connectedParticipant{pPair.second};
+        auto peerInfo = knownPeer->GetInfo();
+        // Replace wildcard acceptor hosts with the address observed by the registry.
+        peerInfo.acceptorUris = TransformAcceptorUris(GetLoggerInternal(), knownPeer, peer);
 
-        // don't advertise the peer to itself
-        if (connectedParticipant.peer == peer)
-            continue;
-
-        auto peerInfo = connectedParticipant.peerInfo;
-        peerInfo.acceptorUris = TransformAcceptorUris(GetLoggerInternal(), connectedParticipant.peer, peer);
-
-        knownParticipantsMsg.peerInfos.push_back(peerInfo);
+        knownParticipantsMsg.peerInfos.push_back(std::move(peerInfo));
     }
 
     peer->SendSilKitMsg(SerializedMessage{peer->GetProtocolVersion(), knownParticipantsMsg});
@@ -312,21 +326,15 @@ void VAsioRegistry::OnPeerShutdown(IVAsioPeer* peer)
     const auto& simulationName{peer->GetSimulationName()};
     const auto& participantName{peer->GetInfo().participantName};
 
-    const auto connectedParticipant = FindConnectedParticipant(participantName, simulationName);
+    const auto registration{_connection.GetPeerRegistration(peer)};
 
-    if (connectedParticipant == nullptr)
+    if (!registration.registered)
     {
         GetLoggerInternal()->MakeMessage(Log::Level::Debug, TopicOf(*this))
-            .SetMessage("Peer '{}' has shut down, which had no participant information", participantName)
-            .Dispatch();
-        return;
-    }
-
-    if (connectedParticipant->peer != peer)
-    {
-        GetLoggerInternal()->MakeMessage(Log::Level::Debug, TopicOf(*this))
-            .SetMessage("Duplicate peer '{}' has shut down, which had no participant information",
-                   participantName)
+            .SetMessage(registration.nameTakenByOther
+                            ? "Duplicate peer '{}' has shut down, which had no participant information"
+                            : "Peer '{}' has shut down, which had no participant information",
+                        participantName)
             .Dispatch();
         return;
     }
@@ -337,17 +345,21 @@ void VAsioRegistry::OnPeerShutdown(IVAsioPeer* peer)
 
     if (_registryEventListener != nullptr)
     {
-        _registryEventListener->OnParticipantDisconnected(simulationName, participantName);
+        _registryEventListener->OnParticipantDisconnected(simulationName, participantName,
+                                                          peer->GetServiceDescriptor().GetGeneration());
     }
 
-    _connectedParticipants[simulationName].erase(participantName);
-
-    if (_connectedParticipants[simulationName].empty())
+    if (auto* placement = FindPlacement(simulationName))
     {
-        _connectedParticipants.erase(simulationName);
+        placement->OnPeerLeaving(peer, registration.othersInGeneration == 0);
     }
 
-    if (_connectedParticipants.empty())
+    if (registration.othersInSimulation == 0)
+    {
+        _placements.erase(simulationName);
+    }
+
+    if (registration.othersTotal == 0)
     {
         GetLoggerInternal()->MakeMessage(Log::Level::Info, TopicOf(*this))
             .SetMessage("All participants are shut down")
@@ -399,6 +411,12 @@ void VAsioRegistry::SetupMetrics()
 void VAsioRegistry::ReceiveMsg(const SilKit::Core::IServiceEndpoint* from,
                                const SilKit::Services::Orchestration::ParticipantStatus& msg)
 {
+    if (auto* placement = FindPlacementOfSender(from))
+    {
+        placement->OnStatus(from, msg,
+                            _connection.ParticipantsByGeneration(from->GetServiceDescriptor().GetSimulationName()));
+    }
+
     if (_registryEventListener == nullptr)
     {
         return;
@@ -407,12 +425,19 @@ void VAsioRegistry::ReceiveMsg(const SilKit::Core::IServiceEndpoint* from,
     const auto& serviceDescriptor{from->GetServiceDescriptor()};
 
     _registryEventListener->OnParticipantStatusUpdate(serviceDescriptor.GetSimulationName(),
-                                                      serviceDescriptor.GetParticipantName(), msg);
+                                                      serviceDescriptor.GetParticipantName(), msg,
+                                                      serviceDescriptor.GetGeneration());
 }
 
 void VAsioRegistry::ReceiveMsg(const SilKit::Core::IServiceEndpoint* from,
                                const SilKit::Services::Orchestration::WorkflowConfiguration& msg)
 {
+    if (auto* placement = FindPlacementOfSender(from))
+    {
+        placement->OnWorkflow(from, msg,
+                              _connection.ParticipantsByGeneration(from->GetServiceDescriptor().GetSimulationName()));
+    }
+
     if (_registryEventListener == nullptr)
     {
         return;
@@ -421,7 +446,8 @@ void VAsioRegistry::ReceiveMsg(const SilKit::Core::IServiceEndpoint* from,
     const auto& serviceDescriptor{from->GetServiceDescriptor()};
 
     _registryEventListener->OnRequiredParticipantsUpdate(
-        serviceDescriptor.GetSimulationName(), serviceDescriptor.GetParticipantName(), msg.requiredParticipantNames);
+        serviceDescriptor.GetSimulationName(), serviceDescriptor.GetParticipantName(), msg.requiredParticipantNames,
+        serviceDescriptor.GetGeneration());
 }
 
 void VAsioRegistry::ReceiveMsg(const SilKit::Core::IServiceEndpoint* from,
