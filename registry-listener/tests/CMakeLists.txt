@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Vector Informatik GmbH
+#
+# SPDX-License-Identifier: MIT
+
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
 
 add_executable(registry-listener-test-participant Participant.cpp ../src/RegistryEventListener.cpp)

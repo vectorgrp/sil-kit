@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Vector Informatik GmbH
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "core/vasio/IRegistryEventListener.hpp"

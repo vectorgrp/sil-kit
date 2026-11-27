@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Vector Informatik GmbH
+#
+# SPDX-License-Identifier: MIT
+
 cmake_minimum_required(VERSION 3.16)
 project(RegistryListener LANGUAGES C CXX)
 
