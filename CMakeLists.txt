@@ -21,6 +21,7 @@ option(SILKIT_WARNINGS_AS_ERRORS "Treat compiler warnings as errors" OFF)
 option(SILKIT_PACKAGE_SYMBOLS "Add a post-build step to create PDB/Symbol archives" OFF)
 option(SILKIT_BUILD_DASHBOARD "Build the SIL Kit Dashboard client." ON)
 option(SILKIT_ENABLE_TRACING_INSTRUMENTATION "Enable tracing instrumentation (_SILKIT_TRACE_CLASS_NAMES)." OFF)
+option(SILKIT_ENABLE_API_TRACING_INSTRUMENTATION "Enable API tracing instrumentation." ON)
 option(SILKIT_LINK_LLD "Use the lld linker for SIL KIT" OFF)
 option(SILKIT_USE_SYSTEM_LIBRARIES "Use the libraries installed on the system for third party dependencies" OFF)
 option(SILKIT_BUILD_REPRODUCIBLE "Creates a reproducible build by omitting timestamps/unique build ids" ON)
@@ -68,6 +69,10 @@ endif()
 
 if(SILKIT_ENABLE_TRACING_INSTRUMENTATION)
     add_compile_definitions(SILKIT_ENABLE_TRACING_INSTRUMENTATION=1)
+endif()
+
+if(SILKIT_ENABLE_API_TRACING_INSTRUMENTATION)
+    add_compile_definitions(SILKIT_ENABLE_API_TRACING_INSTRUMENTATION=1)
 endif()
 
 # Configure build settings like warning and sanitizers
