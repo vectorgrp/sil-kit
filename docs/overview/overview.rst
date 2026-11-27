@@ -162,6 +162,9 @@ The |ProductName| ecosystem comprises the following turn-key solutions:
 * The `SIL Kit Adapter veIPC <https://github.com/vectorgrp/sil-kit-adapters-veipc>`_
   allows attaching SIL Kit to a socket provided by the Vector MICROSAR Adaptive veIPC (Vector Module for Interprocessor Communication) component.
 
+* The `SIL Kit Android Bridge <https://github.com/vectorgrp/sil-kit-android-bridge>`_
+  lets SIL Kit participants read and write vehicle properties of an Android Automotive system.
+
 Related Applications
 ~~~~~~~~~~~~~~~~~~~~
 

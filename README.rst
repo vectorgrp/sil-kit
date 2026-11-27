@@ -70,6 +70,11 @@ The SIL Kit ecosystem comprises the following turn-key solutions:
 * The `SIL Kit Adapter veIPC <https://github.com/vectorgrp/sil-kit-adapters-veipc>`_
   allows attaching SIL Kit to a socket provided by the Vector MICROSAR Adaptive veIPC (Vector Module for Interprocessor Communication) component.
 
+* The `SIL Kit Android Bridge <https://github.com/vectorgrp/sil-kit-android-bridge>`_
+  connects the Vehicle HAL of an Android Automotive system, such as a Cuttlefish
+  virtual device, to SIL Kit, so CANoe and other participants can read and write
+  vehicle properties.
+
 Related Applications
 --------------------
 
